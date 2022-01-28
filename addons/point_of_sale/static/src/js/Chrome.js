@@ -14,10 +14,18 @@ odoo.define('point_of_sale.Chrome', function(require) {
     const { odooExceptionTitleMap } = require("@web/core/errors/error_dialogs");
     const { ConnectionLostError, ConnectionAbortedError, RPCError } = require('@web/core/network/rpc_service');
     const { useBus } = require("@web/core/utils/hooks");
-    const reactivity = require("@point_of_sale/js/reactivity");
     const { debounce } = require("@web/core/utils/timing");
 
-    const { useExternalListener, useRef, useState, useSubEnv } = owl;
+    const {
+        onError,
+        onMounted,
+        onWillDestroy,
+        onWillUnmount,
+        useExternalListener,
+        useRef,
+        useState,
+        useSubEnv,
+    } = owl;
 
     /**
      * Chrome is the root component of the PoS App.
@@ -65,7 +73,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
 
             this.previous_touch_y_coordinate = -1;
 
-            useSubEnv({ pos: reactivity.useState(this.env.pos) });
+            useSubEnv({ pos: useState(this.env.pos) });
 
             onMounted(() => {
                 // remove default webclient handlers that induce click delay

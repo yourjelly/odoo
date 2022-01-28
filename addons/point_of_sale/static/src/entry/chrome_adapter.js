@@ -5,27 +5,22 @@ import { useService } from "@web/core/utils/hooks";
 import Chrome from "point_of_sale.Chrome";
 import ProductScreen from "point_of_sale.ProductScreen";
 import Registries from "point_of_sale.Registries";
-import { reactive, batched, markRaw } from "@point_of_sale/js/reactivity";
 import { PosGlobalState } from "point_of_sale.models";
 import { configureGui } from "point_of_sale.Gui";
-import { useBus } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 import env from "point_of_sale.env";
 import { debounce } from "@web/core/utils/timing";
 
-const { Component, useSubEnv, xml } = owl;
-
-function setupResponsivePlugin(env) {
-    const isMobile = () => window.innerWidth <= 768;
-    env.isMobile = isMobile();
-    const updateEnv = debounce(() => {
-        if (env.isMobile !== isMobile()) {
-            env.isMobile = !env.isMobile;
-            env.qweb.forceUpdate(); // NXOWL no more qweb accessible in env
-        }
-    }, 15);
-    window.addEventListener("resize", updateEnv);
-}
+const {
+    Component,
+    reactive,
+    batched,
+    markRaw,
+    useExternalListener,
+    useSubEnv,
+    onWillUnmount,
+    xml,
+} = owl;
 
 export class ChromeAdapter extends Component {
     setup() {
@@ -37,10 +32,10 @@ export class ChromeAdapter extends Component {
         // (or class overloads) is taken into consideration.
         const pos = PosGlobalState.create({ env: markRaw(env) });
 
-        const batchedCustomerDisplayRender = batched(() => {
+        this.batchedCustomerDisplayRender = batched(() => {
             reactivePos.send_current_order_to_customer_facing_display();
         });
-        const reactivePos = reactive(pos, batchedCustomerDisplayRender);
+        const reactivePos = reactive(pos, this.batchedCustomerDisplayRender);
         env.pos = reactivePos;
         env.legacyActionManager = legacyActionManager;
 
@@ -51,9 +46,22 @@ export class ChromeAdapter extends Component {
         // Expose only the reactive version of `pos` when in debug mode.
         window.posmodel = pos.debug ? reactivePos : pos;
 
-        useSubEnv(env);
-        // useBus(this.env.qweb, "update", () => this.render()); // NXOWL ?
-        setupResponsivePlugin(this.env);
+        this.env = env;
+        this.__owl__.childEnv = env;
+        useSubEnv({
+            get isMobile() {
+                return window.innerWidth <= 768;
+            },
+        });
+        let currentIsMobile = this.env.isMobile;
+        const updateUI = debounce(() => {
+            if (this.env.isMobile !== currentIsMobile) {
+                currentIsMobile = this.env.isMobile;
+                this.render();
+            }
+        }, 15);
+        useExternalListener(window, "resize", updateUI);
+        onWillUnmount(updateUI.cancel);
     }
 
     async configureAndStart(chrome) {
@@ -76,7 +84,7 @@ export class ChromeAdapter extends Component {
         registry.category("main_components").add("BlockUI", BlockUiFromRegistry);
 
         // Subscribe to the changes in the models.
-        batchedCustomerDisplayRender();
+        this.batchedCustomerDisplayRender();
     }
 }
-ChromeAdapter.template = xml`<t t-component="PosChrome" setupIsDone="configureAndStart"/>`;
+ChromeAdapter.template = xml`<t t-component="PosChrome" setupIsDone.bind="configureAndStart"/>`;

@@ -5035,6 +5035,7 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
     exports.EventBus = EventBus;
     exports.Memo = Memo;
     exports.__info__ = __info__;
+    exports.batched = batched;
     exports.blockDom = blockDom;
     exports.loadFile = loadFile;
     exports.markRaw = markRaw;
