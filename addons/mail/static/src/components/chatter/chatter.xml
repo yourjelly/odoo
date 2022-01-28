@@ -41,7 +41,6 @@
                             hasScrollAdjust="chatter.hasMessageListScrollAdjust"
                             localId="chatter.threadView.localId"
                         />
-                            <!-- NXOWL t-ref="thread" -->
                     </t>
                 </div>
             </t>

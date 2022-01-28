@@ -9,7 +9,6 @@
                     className="'o_Dialog_component'"
                     t-props="{ localId: dialog.record.localId }"
                 />
-                    <!-- NXOWL t-ref="component" -->
             </t>
         </div>
     </t>
