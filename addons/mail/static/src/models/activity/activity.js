@@ -226,7 +226,7 @@ registerModel({
          */
         _computeNote() {
             // valueOf because note is a markup object
-            if (this.note.valueOf() === '<p><br></p>') {
+            if (this.note && this.note.valueOf() === '<p><br></p>') {
                 return clear();
             }
             return this.note;
