@@ -7,7 +7,7 @@ odoo.define('point_of_sale.ReceiptScreen', function (require) {
     const Registries = require('point_of_sale.Registries');
     const AbstractReceiptScreen = require('point_of_sale.AbstractReceiptScreen');
 
-    const { onMounted, useRef } = owl;
+    const { onMounted, useRef, status } = owl;
 
     const ReceiptScreen = (AbstractReceiptScreen) => {
         class ReceiptScreen extends AbstractReceiptScreen {
@@ -27,11 +27,13 @@ odoo.define('point_of_sale.ReceiptScreen', function (require) {
                     // displayed regardless of what happen to the handleAutoPrint
                     // call.
                     setTimeout(async () => {
-                        let images = this.orderReceipt.el.getElementsByTagName('img');
-                        for(let image of images) {
-                            await image.decode();
+                        if (status(this) === "mounted") {
+                            let images = this.orderReceipt.el.getElementsByTagName('img');
+                            for (let image of images) {
+                                await image.decode();
+                            }
+                            await this.handleAutoPrint();
                         }
-                        await this.handleAutoPrint();
                     }, 0);
                 });
             }
