@@ -15,9 +15,8 @@
                     <div class="button print" t-on-click="tryReprint">
                         <i class="fa fa-print"></i> Print Receipt
                     </div>
-                    <div class="pos-receipt-container">
+                    <div class="pos-receipt-container" t-ref="order-receipt">
                         <OrderReceipt order="props.order"/>
-                         <!-- NXOWL t-ref="order-receipt"  -->
                     </div>
                 </div>
             </div>

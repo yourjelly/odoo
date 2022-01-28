@@ -25,9 +25,8 @@
                         <span> </span>
                         <span>Print</span>
                     </div>
-                    <div class="pos-receipt-container">
+                    <div class="pos-receipt-container" t-ref="order-receipt">
                         <OrderReceipt order="currentOrder" isBill="true"/>
-                         <!-- NXOWL t-ref="order-receipt" -->
                     </div>
                 </div>
             </div>
