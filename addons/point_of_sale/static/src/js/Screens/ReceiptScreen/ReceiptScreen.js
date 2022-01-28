@@ -7,7 +7,8 @@ odoo.define('point_of_sale.ReceiptScreen', function (require) {
     const Registries = require('point_of_sale.Registries');
     const AbstractReceiptScreen = require('point_of_sale.AbstractReceiptScreen');
 
-    const { useRef } = owl;
+    const { onMounted, useRef } = owl;
+
     const ReceiptScreen = (AbstractReceiptScreen) => {
         class ReceiptScreen extends AbstractReceiptScreen {
             setup() {
