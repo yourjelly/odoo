@@ -5,11 +5,11 @@ odoo.define('point_of_sale.ProductConfiguratorPopup', function(require) {
     const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
     const Registries = require('point_of_sale.Registries');
 
-    const { useState, useChildSubEnv } = owl;
+    const { useState, useSubEnv } = owl;
 
     class ProductConfiguratorPopup extends AbstractAwaitablePopup {
         setup() {
-            useChildSubEnv({ attribute_components: [] });
+            useSubEnv({ attribute_components: [] });
         }
 
         getPayload() {

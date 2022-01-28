@@ -52,7 +52,7 @@
                             <div class="subwindow-container collapsed">
                                 <div t-if="state.detailIsShown" class="client-details-contents subwindow-container-fix">
                                     <ClientDetailsEdit t-props="state.editModeProps" />
-                                    <!-- NXOWL t-on-cancel-edit="cancelEdit" -->
+                                    <!-- NXOWL seems unused t-on-cancel-edit="cancelEdit" -->
                                 </div>
                             </div>
                         </section>
@@ -75,8 +75,8 @@
                                                t-key="partner.id">
                                                 <ClientLine partner="partner"
                                                             selectedClient="state.selectedClient"
-                                                            detailIsShown="state.detailIsShown" />
-                                                            <!-- NXOWL t-on-click-client="clickClient" -->
+                                                            detailIsShown="state.detailIsShown"
+                                                            onClickClient.bind="clickClient"/>
                                             </t>
                                         </tbody>
                                     </table>

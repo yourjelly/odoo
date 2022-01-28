@@ -109,8 +109,7 @@ odoo.define('point_of_sale.ClientListScreen', function(require) {
                 this.render();
             }
         }
-        clickClient(event) {
-            let partner = event.detail.client;
+        clickClient(partner) {
             if (this.state.selectedClient === partner) {
                 this.state.selectedClient = null;
             } else {
@@ -141,16 +140,17 @@ odoo.define('point_of_sale.ClientListScreen', function(require) {
             }
             this.render();
         }
-        deactivateEditMode() {
-            this.state.isEditMode = false;
-            this.state.editModeProps = {
-                partner: {
-                    country_id: this.env.pos.company.country_id,
-                    state_id: this.env.pos.company.state_id,
-                },
-            };
-            this.render();
-        }
+        // NXOWL seems unused
+        // deactivateEditMode() {
+        //     this.state.isEditMode = false;
+        //     this.state.editModeProps = {
+        //         partner: {
+        //             country_id: this.env.pos.company.country_id,
+        //             state_id: this.env.pos.company.state_id,
+        //         },
+        //     };
+        //     this.render();
+        // }
         async saveChanges(event) {
             try {
                 let partnerId = await this.rpc({
@@ -173,9 +173,10 @@ odoo.define('point_of_sale.ClientListScreen', function(require) {
                 }
             }
         }
-        cancelEdit() {
-            this.deactivateEditMode();
-        }
+        // NXOWL seems unused
+        // cancelEdit() {
+        //     this.deactivateEditMode();
+        // }
         async searchClient() {
             let result = await this.getNewClient();
             this.env.pos.db.add_partners(result);

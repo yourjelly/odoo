@@ -40,9 +40,8 @@
                             </div>
                         </div>
                     </div>
-                    <div class="pos-receipt-container">
+                    <div class="pos-receipt-container" t-ref="order-receipt">
                         <OrderReceipt order="currentOrder"/>
-                         <!-- NXOWL t-ref="order-receipt"  -->
                     </div>
                 </div>
             </div>

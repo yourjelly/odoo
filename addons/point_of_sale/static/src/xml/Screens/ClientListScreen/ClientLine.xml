@@ -3,7 +3,7 @@
 
     <t t-name="ClientLine" owl="1">
         <tr t-attf-class="client-line {{highlight}}" t-att-data-id="props.partner.id"
-            t-on-click="() => this.trigger('click-client', {client: props.partner})">
+            t-on-click="() => this.props.onClickClient(props.partner)">
             <td>
                 <t t-esc="props.partner.name or ''" />
                 <span t-if="highlight">
