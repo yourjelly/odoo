@@ -145,8 +145,8 @@ QUnit.module("utils", () => {
             assert.verifySteps(["click"]);
 
             comp.flag = false;
-            await comp.render();
-            await nextTick(); // NXOWL: why?
+            comp.render();
+            await nextTick();
             await click(comp.el.querySelector("button span"));
             assert.verifySteps(["click"]);
         });
