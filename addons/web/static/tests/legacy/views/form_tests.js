@@ -8,6 +8,7 @@ var concurrency = require('web.concurrency');
 var core = require('web.core');
 var fieldRegistry = require('web.field_registry');
 const fieldRegistryOwl = require('web.field_registry_owl');
+const { FieldBoolean } = require("web.basic_fields_owl");
 const FormRenderer = require('web.FormRenderer');
 var FormView = require('web.FormView');
 var mixins = require('web.mixins');
@@ -10163,7 +10164,7 @@ QUnit.module('Views', {
     QUnit.test('do not call mounted twice on children', async function (assert) {
         assert.expect(3);
 
-        class CustomFieldComponent extends fieldRegistryOwl.get('boolean') {
+        class CustomFieldComponent extends FieldBoolean {
             setup() {
                 onMounted(() => {
                     assert.step('mounted');
