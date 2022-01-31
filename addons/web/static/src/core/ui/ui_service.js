@@ -25,11 +25,13 @@ export function useActiveElement(refName = null) {
     const uiService = useService("ui");
     const owner = refName ? useRef(refName) : Component.current;
     useEffect(
-        () => {
-            uiService.activateElement(owner.el);
-            return () => uiService.deactivateElement(owner.el);
+        (el) => {
+            if (el) {
+                uiService.activateElement(el);
+                return () => uiService.deactivateElement(el);
+            }
         },
-        () => []
+        () => [owner.el]
     );
 }
 

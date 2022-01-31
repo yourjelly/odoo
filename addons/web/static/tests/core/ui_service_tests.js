@@ -88,12 +88,13 @@ QUnit.test("a component can be the  UI active element: with t-ref delegation", a
     class MyComponent extends Component {
         setup() {
             useActiveElement("delegatedRef");
+            this.hasRef = true;
         }
     }
     MyComponent.template = xml`
     <div>
       <h1>My Component</h1>
-      <div id="owner" t-ref="delegatedRef"/>
+      <div t-if="hasRef" id="owner" t-ref="delegatedRef"/>
     </div>
   `;
 
@@ -103,7 +104,9 @@ QUnit.test("a component can be the  UI active element: with t-ref delegation", a
 
     const comp = await mount(MyComponent, { env, target });
     assert.deepEqual(ui.activeElement, comp.el.querySelector("div#owner"));
+    comp.hasRef = false;
+    comp.render();
+    await nextTick();
 
-    destroy(comp); // NXOWL
     assert.deepEqual(ui.activeElement, document);
 });

@@ -406,7 +406,6 @@ export async function createPublicRoot(RootWidget) {
     const adapter = await app.mount(document.body);
     const publicRoot = new RootWidget(adapter);
     await Promise.all([
-        // NXOWL check with DAM
         mount(MainComponentsContainer, document.body, {
             env: wowlEnv,
             templates: window.__ODOO_TEMPLATES__,
