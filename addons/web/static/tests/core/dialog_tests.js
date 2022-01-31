@@ -39,6 +39,7 @@ class SimpleDialog extends Dialog {
     }
 }
 SimpleDialog.bodyTemplate = xml`<t t-slot="default"/>`;
+SimpleDialog.defaultProps = { close: () => {} };
 
 QUnit.module("Components", (hooks) => {
     hooks.beforeEach(async () => {
@@ -165,6 +166,7 @@ QUnit.module("Components", (hooks) => {
     QUnit.test("render custom footer buttons is possible", async function (assert) {
         assert.expect(2);
         class SimpleButtonsDialog extends Dialog {}
+        SimpleButtonsDialog.defaultProps = { close: () => {} };
         SimpleButtonsDialog.footerTemplate = xml`
             <div>
                 <button class="btn btn-primary">The First Button</button>
@@ -172,8 +174,8 @@ QUnit.module("Components", (hooks) => {
             </div>
           `;
         class Parent extends Component {
-            constructor() {
-                super(...arguments);
+            setup() {
+                super.setup();
                 this.state = useState({
                     displayDialog: true,
                 });
