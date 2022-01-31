@@ -441,39 +441,38 @@ class TestAccountMove(AccountTestInvoicingCommon):
         credit_line_1          |           | 1200      |               |
         '''
 
-        self.included_percent_tax = self.env['account.tax'].create({
+        included_percent_tax = self.env['account.tax'].create({
             'name': 'included_tax_line',
             'amount_type': 'percent',
             'amount': 20,
             'price_include': True,
             'include_base_amount': False,
         })
-        self.account = self.company_data['default_account_revenue']
 
         move_form = Form(self.env['account.move'].with_context(default_move_type='entry'))
 
         # Create a new account.move.line with debit amount.
         with move_form.line_ids.new() as debit_line:
             debit_line.name = 'debit_line_1'
-            debit_line.account_id = self.account
+            debit_line.account_id = self.company_data['default_account_revenue']
             debit_line.debit = 1000
             debit_line.tax_ids.clear()
-            debit_line.tax_ids.add(self.included_percent_tax)
+            debit_line.tax_ids.add(included_percent_tax)
 
             self.assertTrue(debit_line.recompute_tax_line)
 
         # Create a third account.move.line with credit amount.
         with move_form.line_ids.new() as credit_line:
             credit_line.name = 'credit_line_1'
-            credit_line.account_id = self.account
+            credit_line.account_id = self.company_data['default_account_revenue']
             credit_line.credit = 1200
 
         move = move_form.save()
 
         self.assertRecordValues(move.line_ids, [
-            {'name': 'debit_line_1',             'debit': 1000.0,    'credit': 0.0,      'tax_ids': [self.included_percent_tax.id],      'tax_line_id': False},
-            {'name': 'included_tax_line',        'debit': 200.0,     'credit': 0.0,      'tax_ids': [],                                  'tax_line_id': self.included_percent_tax.id},
-            {'name': 'credit_line_1',            'debit': 0.0,       'credit': 1200.0,   'tax_ids': [],                                  'tax_line_id': False},
+            {'name': 'debit_line_1',             'debit': 1000.0,    'credit': 0.0,      'tax_ids': included_percent_tax.ids,   'tax_line_id': False},
+            {'name': 'included_tax_line',        'debit': 200.0,     'credit': 0.0,      'tax_ids': [],                         'tax_line_id': included_percent_tax.id},
+            {'name': 'credit_line_1',            'debit': 0.0,       'credit': 1200.0,   'tax_ids': [],                         'tax_line_id': False},
         ])
 
     def test_misc_prevent_unlink_posted_items(self):
