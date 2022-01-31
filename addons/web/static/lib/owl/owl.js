@@ -1305,8 +1305,10 @@
      * visit recursively the props and all the children to check if they are valid.
      * This is why it is only done in 'dev' mode.
      */
-    const validateProps = function (name, props, parent) {
-        const ComponentClass = (typeof name !== "string" ? name : parent.constructor.components[name]);
+    function validateProps(name, props, parent) {
+        const ComponentClass = typeof name !== "string"
+            ? name
+            : parent.constructor.components[name];
         if (!ComponentClass) {
             // this is an error, wrong component. We silently return here instead so the
             // error is triggered by the usual path ('component' function)
@@ -1346,7 +1348,7 @@
                 }
             }
         }
-    };
+    }
     /**
      * Check if an invidual prop value matches its (static) prop definition
      */
@@ -1425,6 +1427,14 @@
                 called = false;
             }
         };
+    }
+    function validateTarget(target) {
+        if (!(target instanceof HTMLElement)) {
+            throw new Error("Cannot mount component: the target is not a valid DOM element");
+        }
+        if (!document.body.contains(target)) {
+            throw new Error("Cannot mount a component on a detached dom node");
+        }
     }
     class EventBus extends EventTarget {
         trigger(name, payload) {
@@ -1873,6 +1883,7 @@
         complete() {
             let current = this;
             try {
+                validateTarget(this.target);
                 const node = this.node;
                 if (node.bdom) {
                     // this is a complicated situation: if we mount a fiber with an existing
@@ -1913,6 +1924,9 @@
 
     let currentNode = null;
     function getCurrent() {
+        if (!currentNode) {
+            throw new Error("No active component (a hook function should only be called in 'setup')");
+        }
         return currentNode;
     }
     function useComponent() {
@@ -1980,6 +1994,7 @@
             this.component = new C(props, env, this);
             this.renderFn = app.getTemplate(C.template).bind(this.component, this.component, this);
             this.component.setup();
+            currentNode = null;
         }
         mountComponent(target, options) {
             const fiber = new MountFiber(this, target, options);
@@ -4414,9 +4429,6 @@
     }
     xml.nextId = 1;
 
-    // -----------------------------------------------------------------------------
-    //  Component Class
-    // -----------------------------------------------------------------------------
     class Component {
         constructor(props, env, node) {
             this.props = props;
@@ -4569,7 +4581,10 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
             this.scheduler = new Scheduler();
             this.root = null;
             this.Root = Root;
-            if (config.dev) {
+            if (config.test) {
+                this.dev = true;
+            }
+            if (this.dev && !config.test) {
                 console.info(DEV_MSG);
             }
             const descrs = Object.getOwnPropertyDescriptors(config.env || {});
@@ -4577,19 +4592,11 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
             this.props = config.props || {};
         }
         mount(target, options) {
-            this.checkTarget(target);
+            validateTarget(target);
             const node = this.makeNode(this.Root, this.props);
             const prom = this.mountNode(node, target, options);
             this.root = node;
             return prom;
-        }
-        checkTarget(target) {
-            if (!(target instanceof HTMLElement)) {
-                throw new Error("Cannot mount component: the target is not a valid DOM element");
-            }
-            if (!document.body.contains(target)) {
-                throw new Error("Cannot mount a component on a detached dom node");
-            }
         }
         makeNode(Component, props) {
             return new ComponentNode(Component, props, this);
@@ -4945,9 +4952,8 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
      */
     function useSubEnv(envExtension) {
         const node = getCurrent();
-        const newEnv = extendEnv(node.component.env, envExtension);
         node.component.env = extendEnv(node.component.env, envExtension);
-        node.childEnv = newEnv;
+        useChildSubEnv(envExtension);
     }
     function useChildSubEnv(envExtension) {
         const node = getCurrent();
@@ -5035,7 +5041,6 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
     exports.EventBus = EventBus;
     exports.Memo = Memo;
     exports.__info__ = __info__;
-    exports.batched = batched;
     exports.blockDom = blockDom;
     exports.loadFile = loadFile;
     exports.markRaw = markRaw;
@@ -5069,8 +5074,8 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
 
 
     __info__.version = '2.0.0-alpha1';
-    __info__.date = '2022-01-27T13:42:23.913Z';
-    __info__.hash = '4b88787';
+    __info__.date = '2022-01-31T16:02:34.789Z';
+    __info__.hash = 'fa7a393';
     __info__.url = 'https://github.com/odoo/owl';
 
 
