@@ -99,7 +99,6 @@ odoo.define('web.test_env', async function (require) {
      */
     QUnit.on('OdooBeforeTestHook', function () {
         Component.env = makeTestEnvironment();
-        // NXOWL
     });
 
     return makeTestEnvironment;
