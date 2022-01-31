@@ -15,7 +15,7 @@
                     t-if="element.type == 'item'"
                     onSelected="element.callback"
                     href="element.href"
-                    >
+                >
                     <t t-esc="element.description"/>
                 </DropdownItem>
                 <div t-if="element.type == 'separator'" role="separator" class="dropdown-divider"/>

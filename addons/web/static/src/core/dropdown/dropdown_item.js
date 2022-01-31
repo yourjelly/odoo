@@ -12,19 +12,6 @@ const ParentClosingMode = {
     AllParents: "all",
 };
 
-/**
- * @typedef DropdownItemSelectedEventDetail
- * @property {*} payload
- * @property {Object} dropdownClosingRequest
- * @property {boolean} dropdownClosingRequest.isFresh
- * @property {ParentClosingMode} dropdownClosingRequest.mode
- *
- * @typedef {CustomEvent<DropdownItemSelectedEventDetail>} DropdownItemSelectedEvent
- */
-
-/**
- * @extends Component
- */
 export class DropdownItem extends Component {
     /**
      * Tells the parent dropdown that an item was selected and closes the
@@ -33,12 +20,9 @@ export class DropdownItem extends Component {
      * @param {MouseEvent} ev
      */
     onClick(ev) {
-        const { href, onClicked, onSelected, parentClosingMode } = this.props;
+        const { href, onSelected, parentClosingMode } = this.props;
         if (href) {
             ev.preventDefault();
-        }
-        if (onClicked) {
-            onClicked();
         }
         if (onSelected) {
             onSelected();
