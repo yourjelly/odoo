@@ -118,76 +118,6 @@
             ]"/>
         </record>
 
-        <!-- VAT charged at a rate of 0% -->
-        <record id="l10n_si_vat_0_sale" model="account.tax.template">
-            <field name="name">DDV 0%</field>
-            <field name="description">Obračunani DDV o stopnji 0%</field>
-            <field name="amount">0</field>
-            <field name="amount_type">percent</field>
-            <field name="type_tax_use">sale</field>
-            <field name="chart_template_id" ref="l10n_si_chart_template"/>
-            <field name="tax_group_id" ref="tax_group_vat_0"/>
-            <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'base',
-                    'plus_report_line_ids': [ref('tax_report_11')],
-                }),
-
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'tax',
-                }),
-            ]"/>
-            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'base',
-                    'minus_report_line_ids': [ref('tax_report_11')],
-                }),
-
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'tax',
-                }),
-            ]"/>
-        </record>
-
-        <!-- VAT charged at a rate of 0% without deduction -->
-        <record id="l10n_si_vat_0_sale_no_deduction" model="account.tax.template">
-            <field name="name">DDV 0% brez odbitka</field>
-            <field name="description">Obračunani DDV po stopnji 0% brez odbitka</field>
-            <field name="amount">0</field>
-            <field name="amount_type">percent</field>
-            <field name="type_tax_use">sale</field>
-            <field name="chart_template_id" ref="l10n_si_chart_template"/>
-            <field name="tax_group_id" ref="tax_group_vat_0"/>
-            <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'base',
-                    'plus_report_line_ids': [ref('tax_report_15')],
-                }),
-
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'tax',
-                }),
-            ]"/>
-            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'base',
-                    'minus_report_line_ids': [ref('tax_report_15')],
-                }),
-
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'tax',
-                }),
-            ]"/>
-        </record>
-
         <!-- VAT charged by the recipient at a rate of 22%-->
         <record id="l10n_si_vat_recipient_22_sale" model="account.tax.template">
             <field name="name">DDV prejemnik 22%</field>
@@ -195,6 +125,7 @@
             <field name="amount">22</field>
             <field name="amount_type">percent</field>
             <field name="type_tax_use">sale</field>
+            <field name="active" eval="False"/>
             <field name="chart_template_id" ref="l10n_si_chart_template"/>
             <field name="tax_group_id" ref="tax_group_vat_22"/>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -234,6 +165,7 @@
             <field name="amount">9.5</field>
             <field name="amount_type">percent</field>
             <field name="type_tax_use">sale</field>
+            <field name="active" eval="False"/>
             <field name="chart_template_id" ref="l10n_si_chart_template"/>
             <field name="tax_group_id" ref="tax_group_vat_9"/>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -273,6 +205,7 @@
             <field name="amount">5</field>
             <field name="amount_type">percent</field>
             <field name="type_tax_use">sale</field>
+            <field name="active" eval="False"/>
             <field name="chart_template_id" ref="l10n_si_chart_template"/>
             <field name="tax_group_id" ref="tax_group_vat_5"/>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -305,396 +238,10 @@
             ]"/>
         </record>
 
-        <!-- VAT charged from acquisitions of goods from other EU Member States at a rate of 22% -->
-        <record id="l10n_si_vat_22_sale_goods_eu" model="account.tax.template">
-            <field name="name">DDV blaga EU 22%</field>
-            <field name="description">Obračunani DDV od pridobitev blaga iz drugih držav članic EU po stopnji 22%</field>
-            <field name="amount">22</field>
-            <field name="amount_type">percent</field>
-            <field name="type_tax_use">sale</field>
-            <field name="chart_template_id" ref="l10n_si_chart_template"/>
-            <field name="tax_group_id" ref="tax_group_vat_22"/>
-            <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'base',
-                    'plus_report_line_ids': [ref('tax_report_12')],
-                }),
-
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'tax',
-                    'account_id': ref('l10n_si_260'),
-                    'plus_report_line_ids': [ref('tax_report_23')],
-                }),
-            ]"/>
-            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'base',
-                    'minus_report_line_ids': [ref('tax_report_12')],
-                }),
-
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'tax',
-                    'account_id': ref('l10n_si_260'),
-                    'minus_report_line_ids': [ref('tax_report_23')],
-                }),
-            ]"/>
-        </record>
-
-        <!-- VAT charged from services received from other EU Member States at a rate of 22% -->
-        <record id="l10n_si_vat_22_sale_services_eu" model="account.tax.template">
-            <field name="name">DDV storitev EU 22%</field>
-            <field name="description">Obračunani DDV od prejetih storitev iz drugih držav članic EU po stopnji 22 %</field>
-            <field name="amount">22</field>
-            <field name="amount_type">percent</field>
-            <field name="type_tax_use">sale</field>
-            <field name="chart_template_id" ref="l10n_si_chart_template"/>
-            <field name="tax_group_id" ref="tax_group_vat_22"/>
-            <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'base',
-                    'plus_report_line_ids': [ref('tax_report_12')],
-                }),
-
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'tax',
-                    'account_id': ref('l10n_si_260'),
-                    'plus_report_line_ids': [ref('tax_report_23a')],
-                }),
-            ]"/>
-            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'base',
-                    'minus_report_line_ids': [ref('tax_report_12')],
-                }),
-
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'tax',
-                    'account_id': ref('l10n_si_260'),
-                    'minus_report_line_ids': [ref('tax_report_23a')],
-                }),
-            ]"/>
-        </record>
-
-        <!-- VAT charged from assembly and installation of goods in other member states at a rate of 22% -->
-        <record id="l10n_si_vat_22_sale_installation_eu" model="account.tax.template">
-            <field name="name">DDV montaža EU 22%</field>
-            <field name="description">Obračunani DDV od montaža in instaliranje blaga v drugi državi članici po stopnji 22%</field>
-            <field name="amount">22</field>
-            <field name="amount_type">percent</field>
-            <field name="type_tax_use">sale</field>
-            <field name="chart_template_id" ref="l10n_si_chart_template"/>
-            <field name="tax_group_id" ref="tax_group_vat_22"/>
-            <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'base',
-                    'plus_report_line_ids': [ref('tax_report_14')],
-                }),
-
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'tax',
-                    'account_id': ref('l10n_si_260'),
-                    'plus_report_line_ids': [ref('tax_report_23')],
-                }),
-            ]"/>
-            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'base',
-                    'minus_report_line_ids': [ref('tax_report_14')],
-                }),
-
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'tax',
-                    'account_id': ref('l10n_si_260'),
-                    'minus_report_line_ids': [ref('tax_report_23')],
-                }),
-            ]"/>
-        </record>
-
-        <!-- VAT charged from acquisitions of goods from other EU Member States at the rate of 9.5% -->
-        <record id="l10n_si_vat_9_sale_goods_eu" model="account.tax.template">
-            <field name="name">DDV blaga EU 9.5%</field>
-            <field name="description">Obračunani DDV od pridobitev blaga iz drugih držav članic EU po stopnji 9.5%</field>
-            <field name="amount">9.5</field>
-            <field name="amount_type">percent</field>
-            <field name="type_tax_use">sale</field>
-            <field name="chart_template_id" ref="l10n_si_chart_template"/>
-            <field name="tax_group_id" ref="tax_group_vat_9"/>
-            <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'base',
-                    'plus_report_line_ids': [ref('tax_report_12')],
-                }),
-
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'tax',
-                    'account_id': ref('l10n_si_260'),
-                    'plus_report_line_ids': [ref('tax_report_24')],
-                }),
-            ]"/>
-            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'base',
-                    'minus_report_line_ids': [ref('tax_report_12')],
-                }),
-
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'tax',
-                    'account_id': ref('l10n_si_260'),
-                    'minus_report_line_ids': [ref('tax_report_24')],
-                }),
-            ]"/>
-        </record>
-
-        <!-- VAT charged from services received from other EU Member States at a rate of 9.5% -->
-        <record id="l10n_si_vat_9_sale_services_eu" model="account.tax.template">
-            <field name="name">DDV storitev EU 9.5%</field>
-            <field name="description">Obračunani DDV od prejetih storitev iz drugih držav članic EU po stopnji 9.5%</field>
-            <field name="amount">9.5</field>
-            <field name="amount_type">percent</field>
-            <field name="type_tax_use">sale</field>
-            <field name="chart_template_id" ref="l10n_si_chart_template"/>
-            <field name="tax_group_id" ref="tax_group_vat_9"/>
-            <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'base',
-                    'plus_report_line_ids': [ref('tax_report_12')],
-                }),
-
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'tax',
-                    'account_id': ref('l10n_si_260'),
-                    'plus_report_line_ids': [ref('tax_report_24a')],
-                }),
-            ]"/>
-            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'base',
-                    'minus_report_line_ids': [ref('tax_report_12')],
-                }),
-
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'tax',
-                    'account_id': ref('l10n_si_260'),
-                    'minus_report_line_ids': [ref('tax_report_24a')],
-                }),
-            ]"/>
-        </record>
-
-        <!-- VAT charged from assembly and installation of goods in other member states at a rate of 9.5% -->
-        <record id="l10n_si_vat_9_sale_installation_eu" model="account.tax.template">
-            <field name="name">DDV montaža EU 9.5%</field>
-            <field name="description">Obračunani DDV od montaža in instaliranje blaga v drugi državi članici po stopnji 9.5%</field>
-            <field name="amount">9.5</field>
-            <field name="amount_type">percent</field>
-            <field name="type_tax_use">sale</field>
-            <field name="chart_template_id" ref="l10n_si_chart_template"/>
-            <field name="tax_group_id" ref="tax_group_vat_9"/>
-            <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'base',
-                    'plus_report_line_ids': [ref('tax_report_14')],
-                }),
-
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'tax',
-                    'account_id': ref('l10n_si_260'),
-                    'plus_report_line_ids': [ref('tax_report_24')],
-                }),
-            ]"/>
-            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'base',
-                    'minus_report_line_ids': [ref('tax_report_14')],
-                }),
-
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'tax',
-                    'account_id': ref('l10n_si_260'),
-                    'minus_report_line_ids': [ref('tax_report_24')],
-                }),
-            ]"/>
-        </record>
-
-        <!-- VAT charged from acquisitions of goods from other EU Member States at a rate of 5% -->
-        <record id="l10n_si_vat_5_sale_goods_eu" model="account.tax.template">
-            <field name="name">DDV blaga EU 5%</field>
-            <field name="description">Obračunani DDV od pridobitev blaga iz drugih držav članic EU po stopnji 5%</field>
-            <field name="amount">5</field>
-            <field name="amount_type">percent</field>
-            <field name="type_tax_use">sale</field>
-            <field name="chart_template_id" ref="l10n_si_chart_template"/>
-            <field name="tax_group_id" ref="tax_group_vat_5"/>
-            <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'base',
-                    'plus_report_line_ids': [ref('tax_report_12')],
-                }),
-
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'tax',
-                    'account_id': ref('l10n_si_260'),
-                    'plus_report_line_ids': [ref('tax_report_24b')],
-                }),
-            ]"/>
-            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'base',
-                    'minus_report_line_ids': [ref('tax_report_12')],
-                }),
-
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'tax',
-                    'account_id': ref('l10n_si_260'),
-                    'minus_report_line_ids': [ref('tax_report_24b')],
-                }),
-            ]"/>
-        </record>
-
-        <!-- VAT charged from services received from other EU Member States at a rate of 5% -->
-        <record id="l10n_si_vat_5_sale_services_eu" model="account.tax.template">
-            <field name="name">DDV storitev EU 5%</field>
-            <field name="description">Obračunani DDV od prejetih storitev iz drugih držav članic EU po stopnji 5%</field>
-            <field name="amount">5</field>
-            <field name="amount_type">percent</field>
-            <field name="type_tax_use">sale</field>
-            <field name="chart_template_id" ref="l10n_si_chart_template"/>
-            <field name="tax_group_id" ref="tax_group_vat_5"/>
-            <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'base',
-                    'plus_report_line_ids': [ref('tax_report_12')],
-                }),
-
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'tax',
-                    'account_id': ref('l10n_si_260'),
-                    'plus_report_line_ids': [ref('tax_report_24c')],
-                }),
-            ]"/>
-            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'base',
-                    'minus_report_line_ids': [ref('tax_report_12')],
-                }),
-
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'tax',
-                    'account_id': ref('l10n_si_260'),
-                    'minus_report_line_ids': [ref('tax_report_24c')],
-                }),
-            ]"/>
-        </record>
-
-        <!-- VAT charged from assembly and installation of goods in other member states at a rate of 5% -->
-        <record id="l10n_si_vat_5_sale_installation_eu" model="account.tax.template">
-            <field name="name">DDV montaža EU 5%</field>
-            <field name="description">Obračunani DDV od montaža in instaliranje blaga v drugi državi članici po stopnji 5%</field>
-            <field name="amount">5</field>
-            <field name="amount_type">percent</field>
-            <field name="type_tax_use">sale</field>
-            <field name="chart_template_id" ref="l10n_si_chart_template"/>
-            <field name="tax_group_id" ref="tax_group_vat_5"/>
-            <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'base',
-                    'plus_report_line_ids': [ref('tax_report_14')],
-                }),
-
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'tax',
-                    'account_id': ref('l10n_si_260'),
-                    'plus_report_line_ids': [ref('tax_report_24b')],
-                }),
-            ]"/>
-            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'base',
-                    'minus_report_line_ids': [ref('tax_report_14')],
-                }),
-
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'tax',
-                    'account_id': ref('l10n_si_260'),
-                    'minus_report_line_ids': [ref('tax_report_24b')],
-                }),
-            ]"/>
-        </record>
-
-        <!-- VAT charged from acquisitions of goods from other EU Member States at a rate of 0% -->
-        <record id="l10n_si_vat_0_sale_goods_eu" model="account.tax.template">
-            <field name="name">DDV blaga EU 0%</field>
-            <field name="description">Obračunani DDV od pridobitev blaga iz drugih držav članic EU po stopnji 0%</field>
-            <field name="amount">0</field>
-            <field name="amount_type">percent</field>
-            <field name="type_tax_use">sale</field>
-            <field name="chart_template_id" ref="l10n_si_chart_template"/>
-            <field name="tax_group_id" ref="tax_group_vat_0"/>
-            <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'base',
-                    'plus_report_line_ids': [ref('tax_report_12')],
-                }),
-
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'tax',
-                }),
-            ]"/>
-            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'base',
-                    'minus_report_line_ids': [ref('tax_report_12')],
-                }),
-
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'tax',
-                }),
-            ]"/>
-        </record>
-
-        <!-- VAT charged from services received from other EU Member States at a rate of 0% -->
-        <record id="l10n_si_vat_0_sale_services_eu" model="account.tax.template">
-            <field name="name">DDV storitev EU 0%</field>
-            <field name="description">Obračunani DDV od prejetih storitev iz drugih držav članic EU po stopnji 0%</field>
+        <!-- VAT charged from acquisitions of goods and services from other EU Member States at a rate of 0% -->
+        <record id="l10n_si_vat_0_sale_eu" model="account.tax.template">
+            <field name="name">DDV EU 0%</field>
+            <field name="description">Obračunani DDV od pridobitev blaga in storitev iz drugih držav članic EU po stopnji 0%</field>
             <field name="amount">0</field>
             <field name="amount_type">percent</field>
             <field name="type_tax_use">sale</field>
@@ -733,6 +280,7 @@
             <field name="amount">22</field>
             <field name="amount_type">percent</field>
             <field name="type_tax_use">sale</field>
+            <field name="active" eval="False"/>
             <field name="chart_template_id" ref="l10n_si_chart_template"/>
             <field name="tax_group_id" ref="tax_group_vat_22"/>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -772,6 +320,7 @@
             <field name="amount">9.5</field>
             <field name="amount_type">percent</field>
             <field name="type_tax_use">sale</field>
+            <field name="active" eval="False"/>
             <field name="chart_template_id" ref="l10n_si_chart_template"/>
             <field name="tax_group_id" ref="tax_group_vat_9"/>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -811,6 +360,7 @@
             <field name="amount">5</field>
             <field name="amount_type">percent</field>
             <field name="type_tax_use">sale</field>
+            <field name="active" eval="False"/>
             <field name="chart_template_id" ref="l10n_si_chart_template"/>
             <field name="tax_group_id" ref="tax_group_vat_5"/>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -843,6 +393,162 @@
             ]"/>
         </record>
 
+         <!-- VAT charged from assembly and installation of goods in other EU Member States at a rate of 22% -->
+        <record id="l10n_si_vat_22_sale_installation_eu" model="account.tax.template">
+            <field name="name">DDV montaža EU 22%</field>
+            <field name="description">Obračunani DDV od montaža in instaliranje blaga v drugih držav članic EU po stopnji 22%</field>
+            <field name="amount">22</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">sale</field>
+            <field name="active" eval="False"/>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_22"/>
+            <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'plus_report_line_ids': [ref('tax_report_14')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'plus_report_line_ids': [ref('tax_report_23')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_14')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_23')],
+                }),
+            ]"/>
+        </record>
+
+        <!-- VAT charged from assembly and installation of goods in other EU Member States at a rate of 9.5% -->
+        <record id="l10n_si_vat_9_sale_installation_eu" model="account.tax.template">
+            <field name="name">DDV montaža EU 9.5%</field>
+            <field name="description">Obračunani DDV od montaža in instaliranje blaga v drugih držav članic EU po stopnji 9.5%</field>
+            <field name="amount">9.5</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">sale</field>
+            <field name="active" eval="False"/>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_9"/>
+            <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'plus_report_line_ids': [ref('tax_report_14')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'plus_report_line_ids': [ref('tax_report_24')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_14')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_24')],
+                }),
+            ]"/>
+        </record>
+
+        <!-- VAT charged from assembly and installation of goods in other EU Member States at a rate of 5% -->
+        <record id="l10n_si_vat_5_sale_installation_eu" model="account.tax.template">
+            <field name="name">DDV montaža EU 5%</field>
+            <field name="description">Obračunani DDV od montaža in instaliranje blaga v drugih držav članic EU po stopnji 5%</field>
+            <field name="amount">5</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">sale</field>
+            <field name="active" eval="False"/>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_5"/>
+            <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'plus_report_line_ids': [ref('tax_report_14')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'plus_report_line_ids': [ref('tax_report_24b')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_14')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_24b')],
+                }),
+            ]"/>
+        </record>
+
+        <!-- VAT charged at a rate of 0% without deduction -->
+        <record id="l10n_si_vat_0_sale_no_deduction" model="account.tax.template">
+            <field name="name">DDV 0% brez odbitka</field>
+            <field name="description">Obračunani DDV po stopnji 0% brez odbitka</field>
+            <field name="amount">0</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">sale</field>
+            <field name="active" eval="False"/>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_0"/>
+            <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'plus_report_line_ids': [ref('tax_report_15')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_15')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                }),
+            ]"/>
+        </record>
+
         <!-- VAT charged on the basis of self-assessment as a recipient of goods and services at a rate of 22% -->
         <record id="l10n_si_vat_self_22_sale" model="account.tax.template">
             <field name="name">DDV samoobdavčitve 22%</field>
@@ -850,6 +556,7 @@
             <field name="amount">22</field>
             <field name="amount_type">percent</field>
             <field name="type_tax_use">sale</field>
+            <field name="active" eval="False"/>
             <field name="chart_template_id" ref="l10n_si_chart_template"/>
             <field name="tax_group_id" ref="tax_group_vat_22"/>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -871,45 +578,6 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                     'minus_report_line_ids': [ref('tax_report_31')],
-                }),
-
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'tax',
-                    'account_id': ref('l10n_si_260'),
-                    'minus_report_line_ids': [ref('tax_report_25')],
-                }),
-            ]"/>
-        </record>
-
-        <!-- VAT charged on the basis of self-assessment as a recipient of goods and services specified in Article 76.a at a rate of 22% -->
-        <record id="l10n_si_vat_self_22_sale_76a" model="account.tax.template">
-            <field name="name">DDV samoobdavčitve iz 76.a člena 22%</field>
-            <field name="description">Obračunani DDV na podlagi samoobdavčitve kot prejemnik blaga in storitev iz 76.a člena po stopnji 22%</field>
-            <field name="amount">22</field>
-            <field name="amount_type">percent</field>
-            <field name="type_tax_use">sale</field>
-            <field name="chart_template_id" ref="l10n_si_chart_template"/>
-            <field name="tax_group_id" ref="tax_group_vat_22"/>
-            <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'base',
-                    'plus_report_line_ids': [ref('tax_report_31a')],
-                }),
-
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'tax',
-                    'account_id': ref('l10n_si_260'),
-                    'plus_report_line_ids': [ref('tax_report_25')],
-                }),
-            ]"/>
-            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'base',
-                    'minus_report_line_ids': [ref('tax_report_31a')],
                 }),
 
                 (0,0, {
@@ -928,6 +596,7 @@
             <field name="amount">9.5</field>
             <field name="amount_type">percent</field>
             <field name="type_tax_use">sale</field>
+            <field name="active" eval="False"/>
             <field name="chart_template_id" ref="l10n_si_chart_template"/>
             <field name="tax_group_id" ref="tax_group_vat_9"/>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -960,45 +629,6 @@
             ]"/>
         </record>
 
-        <!-- VAT charged on the basis of self-assessment as a recipient of goods and services specified in Article 76.a at a rate of 9.5% -->
-        <record id="l10n_si_vat_self_9_sale_76a" model="account.tax.template">
-            <field name="name">DDV samoobdavčitve iz 76.a člena 9%</field>
-            <field name="description">Obračunani DDV na podlagi samoobdavčitve kot prejemnik blaga in storitev iz 76.a člena po stopnji 9.5%</field>
-            <field name="amount">9.5</field>
-            <field name="amount_type">percent</field>
-            <field name="type_tax_use">sale</field>
-            <field name="chart_template_id" ref="l10n_si_chart_template"/>
-            <field name="tax_group_id" ref="tax_group_vat_9"/>
-            <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'base',
-                    'plus_report_line_ids': [ref('tax_report_31a')],
-                }),
-
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'tax',
-                    'account_id': ref('l10n_si_260'),
-                    'plus_report_line_ids': [ref('tax_report_25a')],
-                }),
-            ]"/>
-            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'base',
-                    'minus_report_line_ids': [ref('tax_report_31a')],
-                }),
-
-                (0,0, {
-                    'factor_percent': 100,
-                    'repartition_type': 'tax',
-                    'account_id': ref('l10n_si_260'),
-                    'minus_report_line_ids': [ref('tax_report_25a')],
-                }),
-            ]"/>
-        </record>
-
         <!-- VAT charged on the basis of self-assessment as a recipient of goods and services at a rate of 5% -->
         <record id="l10n_si_vat_self_5_sale" model="account.tax.template">
             <field name="name">DDV samoobdavčitve 5%</field>
@@ -1006,6 +636,7 @@
             <field name="amount">5</field>
             <field name="amount_type">percent</field>
             <field name="type_tax_use">sale</field>
+            <field name="active" eval="False"/>
             <field name="chart_template_id" ref="l10n_si_chart_template"/>
             <field name="tax_group_id" ref="tax_group_vat_5"/>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -1038,6 +669,86 @@
             ]"/>
         </record>
 
+        <!-- VAT charged on the basis of self-assessment as a recipient of goods and services specified in Article 76.a at a rate of 22% -->
+        <record id="l10n_si_vat_self_22_sale_76a" model="account.tax.template">
+            <field name="name">DDV samoobdavčitve iz 76.a člena 22%</field>
+            <field name="description">Obračunani DDV na podlagi samoobdavčitve kot prejemnik blaga in storitev iz 76.a člena po stopnji 22%</field>
+            <field name="amount">22</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">sale</field>
+            <field name="active" eval="False"/>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_22"/>
+            <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'plus_report_line_ids': [ref('tax_report_31a')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'plus_report_line_ids': [ref('tax_report_25')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_31a')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_25')],
+                }),
+            ]"/>
+        </record>
+
+        <!-- VAT charged on the basis of self-assessment as a recipient of goods and services specified in Article 76.a at a rate of 9.5% -->
+        <record id="l10n_si_vat_self_9_sale_76a" model="account.tax.template">
+            <field name="name">DDV samoobdavčitve iz 76.a člena 9%</field>
+            <field name="description">Obračunani DDV na podlagi samoobdavčitve kot prejemnik blaga in storitev iz 76.a člena po stopnji 9.5%</field>
+            <field name="amount">9.5</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">sale</field>
+            <field name="active" eval="False"/>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_9"/>
+            <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'plus_report_line_ids': [ref('tax_report_31a')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'plus_report_line_ids': [ref('tax_report_25a')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_31a')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_25a')],
+                }),
+            ]"/>
+        </record>
+
         <!-- VAT charged on the basis of self-assessment of imports at a rate of 22% -->
         <record id="l10n_si_vat_self_22_sale_imports" model="account.tax.template">
             <field name="name">DDV samoobdavčitve uvoza 22%</field>
@@ -1045,6 +756,7 @@
             <field name="amount">22</field>
             <field name="amount_type">percent</field>
             <field name="type_tax_use">sale</field>
+            <field name="active" eval="False"/>
             <field name="chart_template_id" ref="l10n_si_chart_template"/>
             <field name="tax_group_id" ref="tax_group_vat_22"/>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -1084,6 +796,7 @@
             <field name="amount">9.5</field>
             <field name="amount_type">percent</field>
             <field name="type_tax_use">sale</field>
+            <field name="active" eval="False"/>
             <field name="chart_template_id" ref="l10n_si_chart_template"/>
             <field name="tax_group_id" ref="tax_group_vat_9"/>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -1123,6 +836,7 @@
             <field name="amount">5</field>
             <field name="amount_type">percent</field>
             <field name="type_tax_use">sale</field>
+            <field name="active" eval="False"/>
             <field name="chart_template_id" ref="l10n_si_chart_template"/>
             <field name="tax_group_id" ref="tax_group_vat_5"/>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -1294,7 +1008,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_160'),
-                    'plus_report_line_ids': [ref('tax_report_41')],
+                    'plus_report_line_ids': [ref('tax_report_23'), ref('tax_report_41')],
                 }),
             ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -1308,7 +1022,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_160'),
-                    'minus_report_line_ids': [ref('tax_report_41')],
+                    'minus_report_line_ids': [ref('tax_report_23'), ref('tax_report_41')],
                 }),
             ]"/>
         </record>
@@ -1333,7 +1047,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_160'),
-                    'plus_report_line_ids': [ref('tax_report_42')],
+                    'plus_report_line_ids': [ref('tax_report_24'), ref('tax_report_42')],
                 }),
             ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -1347,7 +1061,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_160'),
-                    'minus_report_line_ids': [ref('tax_report_42')],
+                    'minus_report_line_ids': [ref('tax_report_24'), ref('tax_report_42')],
                 }),
             ]"/>
         </record>
@@ -1372,7 +1086,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_160'),
-                    'plus_report_line_ids': [ref('tax_report_42a')],
+                    'plus_report_line_ids': [ref('tax_report_24b'), ref('tax_report_42a')],
                 }),
             ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -1386,7 +1100,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_160'),
-                    'minus_report_line_ids': [ref('tax_report_42a')],
+                    'minus_report_line_ids': [ref('tax_report_24b'), ref('tax_report_42a')],
                 }),
             ]"/>
         </record>
@@ -1411,7 +1125,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_160'),
-                    'plus_report_line_ids': [ref('tax_report_41')],
+                    'plus_report_line_ids': [ref('tax_report_23a'), ref('tax_report_41')],
                 }),
             ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -1425,7 +1139,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_160'),
-                    'minus_report_line_ids': [ref('tax_report_41')],
+                    'minus_report_line_ids': [ref('tax_report_23a'), ref('tax_report_41')],
                 }),
             ]"/>
         </record>
@@ -1450,7 +1164,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_160'),
-                    'plus_report_line_ids': [ref('tax_report_42')],
+                    'plus_report_line_ids': [ref('tax_report_24a'), ref('tax_report_42')],
                 }),
             ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -1464,7 +1178,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_160'),
-                    'minus_report_line_ids': [ref('tax_report_42')],
+                    'minus_report_line_ids': [ref('tax_report_24a'), ref('tax_report_42')],
                 }),
             ]"/>
         </record>
@@ -1489,7 +1203,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_160'),
-                    'plus_report_line_ids': [ref('tax_report_42a')],
+                    'plus_report_line_ids': [ref('tax_report_24c'), ref('tax_report_42a')],
                 }),
             ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -1503,7 +1217,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_160'),
-                    'minus_report_line_ids': [ref('tax_report_42a')],
+                    'minus_report_line_ids': [ref('tax_report_24c'), ref('tax_report_42a')],
                 }),
             ]"/>
         </record>
@@ -1550,13 +1264,14 @@
             <field name="amount">22</field>
             <field name="amount_type">percent</field>
             <field name="type_tax_use">purchase</field>
+            <field name="active" eval="False"/>
             <field name="chart_template_id" ref="l10n_si_chart_template"/>
             <field name="tax_group_id" ref="tax_group_vat_22"/>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'base',
-                    'plus_report_line_ids': [ref('tax_report_34')],
+                    'plus_report_line_ids': [ref('tax_report_31'), ref('tax_report_34')],
                 }),
 
                 (0,0, {
@@ -1570,7 +1285,7 @@
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'base',
-                    'minus_report_line_ids': [ref('tax_report_34')],
+                    'minus_report_line_ids': [ref('tax_report_31'), ref('tax_report_34')],
                 }),
 
                 (0,0, {
@@ -1589,13 +1304,14 @@
             <field name="amount">9.5</field>
             <field name="amount_type">percent</field>
             <field name="type_tax_use">purchase</field>
+            <field name="active" eval="False"/>
             <field name="chart_template_id" ref="l10n_si_chart_template"/>
             <field name="tax_group_id" ref="tax_group_vat_9"/>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'base',
-                    'plus_report_line_ids': [ref('tax_report_34')],
+                    'plus_report_line_ids': [ref('tax_report_31'), ref('tax_report_34')],
                 }),
 
                 (0,0, {
@@ -1609,7 +1325,7 @@
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'base',
-                    'minus_report_line_ids': [ref('tax_report_34')],
+                    'minus_report_line_ids': [ref('tax_report_31'), ref('tax_report_34')],
                 }),
 
                 (0,0, {
@@ -1628,13 +1344,14 @@
             <field name="amount">5</field>
             <field name="amount_type">percent</field>
             <field name="type_tax_use">purchase</field>
+            <field name="active" eval="False"/>
             <field name="chart_template_id" ref="l10n_si_chart_template"/>
             <field name="tax_group_id" ref="tax_group_vat_5"/>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'base',
-                    'plus_report_line_ids': [ref('tax_report_34')],
+                    'plus_report_line_ids': [ref('tax_report_31'), ref('tax_report_34')],
                 }),
 
                 (0,0, {
@@ -1648,7 +1365,127 @@
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'base',
-                    'minus_report_line_ids': [ref('tax_report_34')],
+                    'minus_report_line_ids': [ref('tax_report_31'), ref('tax_report_34')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_160'),
+                    'minus_report_line_ids': [ref('tax_report_42a')],
+                }),
+            ]"/>
+        </record>
+
+        <!-- VAT deduction from the purchase of real estate specified in Article 76.a at a rate of 22% -->
+        <record id="l10n_si_vat_22_purchase_estate_76a" model="account.tax.template">
+            <field name="name">DDV nepremičnin iz 76.a člena 22%</field>
+            <field name="description">Odbitek DDV od nabavna vrednost nepremičnin iz 76.a člena po stopnji 22%</field>
+            <field name="amount">22</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">purchase</field>
+            <field name="active" eval="False"/>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_22"/>
+            <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'plus_report_line_ids': [ref('tax_report_31a'), ref('tax_report_34')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_160'),
+                    'plus_report_line_ids': [ref('tax_report_41')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_31a'), ref('tax_report_34')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_160'),
+                    'minus_report_line_ids': [ref('tax_report_41')],
+                }),
+            ]"/>
+        </record>
+
+        <!-- VAT deduction from the purchase of real estate specified in Article 76.a at a rate of 9.5% -->
+        <record id="l10n_si_vat_9_purchase_estate_76a" model="account.tax.template">
+            <field name="name">DDV nepremičnin iz 76.a člena 9.5%</field>
+            <field name="description">Odbitek DDV od nabavna vrednost nepremičnin iz 76.a člena po stopnji 9.5%</field>
+            <field name="amount">9.5</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">purchase</field>
+            <field name="active" eval="False"/>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_9"/>
+            <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'plus_report_line_ids': [ref('tax_report_31a'), ref('tax_report_34')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_160'),
+                    'plus_report_line_ids': [ref('tax_report_42')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_31a'), ref('tax_report_34')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_160'),
+                    'minus_report_line_ids': [ref('tax_report_42')],
+                }),
+            ]"/>
+        </record>
+
+        <!-- VAT deduction from the purchase of real estate specified in Article 76.a at a rate of 5% -->
+        <record id="l10n_si_vat_5_purchase_estate_76a" model="account.tax.template">
+            <field name="name">DDV nepremičnin iz 76.a člena 5%</field>
+            <field name="description">Odbitek DDV od nabavna vrednost nepremičnin iz 76.a člena po stopnji 5%</field>
+            <field name="amount">5</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">purchase</field>
+            <field name="active" eval="False"/>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_5"/>
+            <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'plus_report_line_ids': [ref('tax_report_31a'), ref('tax_report_34')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_160'),
+                    'plus_report_line_ids': [ref('tax_report_42a')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_31a'), ref('tax_report_34')],
                 }),
 
                 (0,0, {
@@ -1667,13 +1504,14 @@
             <field name="amount">22</field>
             <field name="amount_type">percent</field>
             <field name="type_tax_use">purchase</field>
+            <field name="active" eval="False"/>
             <field name="chart_template_id" ref="l10n_si_chart_template"/>
             <field name="tax_group_id" ref="tax_group_vat_22"/>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'base',
-                    'plus_report_line_ids': [ref('tax_report_35')],
+                    'plus_report_line_ids': [ref('tax_report_31'), ref('tax_report_35')],
                 }),
 
                 (0,0, {
@@ -1687,7 +1525,7 @@
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'base',
-                    'minus_report_line_ids': [ref('tax_report_35')],
+                    'minus_report_line_ids': [ref('tax_report_31'), ref('tax_report_35')],
                 }),
 
                 (0,0, {
@@ -1706,13 +1544,14 @@
             <field name="amount">9.5</field>
             <field name="amount_type">percent</field>
             <field name="type_tax_use">purchase</field>
+            <field name="active" eval="False"/>
             <field name="chart_template_id" ref="l10n_si_chart_template"/>
             <field name="tax_group_id" ref="tax_group_vat_9"/>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'base',
-                    'plus_report_line_ids': [ref('tax_report_35')],
+                    'plus_report_line_ids': [ref('tax_report_31'), ref('tax_report_35')],
                 }),
 
                 (0,0, {
@@ -1726,7 +1565,7 @@
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'base',
-                    'minus_report_line_ids': [ref('tax_report_35')],
+                    'minus_report_line_ids': [ref('tax_report_31'), ref('tax_report_35')],
                 }),
 
                 (0,0, {
@@ -1745,13 +1584,14 @@
             <field name="amount">5</field>
             <field name="amount_type">percent</field>
             <field name="type_tax_use">purchase</field>
+            <field name="active" eval="False"/>
             <field name="chart_template_id" ref="l10n_si_chart_template"/>
             <field name="tax_group_id" ref="tax_group_vat_5"/>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'base',
-                    'plus_report_line_ids': [ref('tax_report_35')],
+                    'plus_report_line_ids': [ref('tax_report_31'), ref('tax_report_35')],
                 }),
 
                 (0,0, {
@@ -1765,7 +1605,163 @@
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'base',
-                    'minus_report_line_ids': [ref('tax_report_35')],
+                    'minus_report_line_ids': [ref('tax_report_31'), ref('tax_report_35')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_160'),
+                    'minus_report_line_ids': [ref('tax_report_42a')],
+                }),
+            ]"/>
+        </record>
+
+        <!-- VAT deduction from the purchase of other fixed assets at the rate of 0% -->
+        <record id="l10n_si_vat_0_purchase_fixed" model="account.tax.template">
+            <field name="name">DDV drugih osnovnih sredstev 0%</field>
+            <field name="description">Odbitek DDV od nabavna vrednost drugih osnovnih sredstev po stopnji 0%</field>
+            <field name="amount">0</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">purchase</field>
+            <field name="active" eval="False"/>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_0"/>
+            <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'plus_report_line_ids': [ref('tax_report_33'), ref('tax_report_35')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_33'), ref('tax_report_35')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                }),
+            ]"/>
+        </record>
+
+        <!-- VAT deduction from the purchase of other fixed assets from other EU Member States at the rate of 22% -->
+        <record id="l10n_si_vat_22_purchase_fixed_eu" model="account.tax.template">
+            <field name="name">DDV drugih osnovnih sredstev EU 22%</field>
+            <field name="description">Odbitek DDV od nabavna vrednost drugih osnovnih sredstev iz drugih držav članic EU po stopnji 22%</field>
+            <field name="amount">22</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">purchase</field>
+            <field name="active" eval="False"/>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_22"/>
+            <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'plus_report_line_ids': [ref('tax_report_32'), ref('tax_report_35')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_160'),
+                    'plus_report_line_ids': [ref('tax_report_41')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_32'), ref('tax_report_35')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_160'),
+                    'minus_report_line_ids': [ref('tax_report_41')],
+                }),
+            ]"/>
+        </record>
+
+        <!-- VAT deduction from the purchase of other fixed assets from other EU Member States at the rate of 9.5% -->
+        <record id="l10n_si_vat_9_purchase_fixed_eu" model="account.tax.template">
+            <field name="name">DDV drugih osnovnih sredstev EU 9.5%</field>
+            <field name="description">Odbitek DDV od nabavna vrednost drugih osnovnih sredstev iz drugih držav članic EU po stopnji 9.5%</field>
+            <field name="amount">9.5</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">purchase</field>
+            <field name="active" eval="False"/>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_9"/>
+            <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'plus_report_line_ids': [ref('tax_report_32'), ref('tax_report_35')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_160'),
+                    'plus_report_line_ids': [ref('tax_report_42')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_32'), ref('tax_report_35')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_160'),
+                    'minus_report_line_ids': [ref('tax_report_42')],
+                }),
+            ]"/>
+        </record>
+
+        <!-- VAT deduction from the purchase of other fixed assets from other EU Member States at the rate of 5% -->
+        <record id="l10n_si_vat_5_purchase_fixed_eu" model="account.tax.template">
+            <field name="name">DDV drugih osnovnih sredstev EU 5%</field>
+            <field name="description">Odbitek DDV od nabavna vrednost drugih osnovnih sredstev iz drugih držav članic EU po stopnji 5%</field>
+            <field name="amount">5</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">purchase</field>
+            <field name="active" eval="False"/>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_5"/>
+            <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'plus_report_line_ids': [ref('tax_report_32'), ref('tax_report_35')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_160'),
+                    'plus_report_line_ids': [ref('tax_report_42a')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_32'), ref('tax_report_35')],
                 }),
 
                 (0,0, {

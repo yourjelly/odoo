@@ -4,7 +4,7 @@
 
     <!-- Chart Template -->
     <record id="l10n_si_chart_template" model="account.chart.template">
-        <field name="name">Kontni načrt za gospodarske družbe</field>
+        <field name="name">Enotni kontni načrt za gospodarske družbe</field>
         <field name="bank_account_code_prefix">110</field>
         <field name="cash_account_code_prefix">100</field>
         <field name="transfer_account_code_prefix">109</field>
