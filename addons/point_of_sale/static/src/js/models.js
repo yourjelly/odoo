@@ -9,6 +9,7 @@ var field_utils = require('web.field_utils');
 var time = require('web.time');
 var utils = require('web.utils');
 var { Gui } = require('point_of_sale.Gui');
+const { batched } = require("point_of_sale.utils");
 
 var QWeb = core.qweb;
 var _t = core._t;
@@ -16,7 +17,7 @@ var round_di = utils.round_decimals;
 var round_pr = utils.round_precision;
 
 const Registries = require('point_of_sale.Registries');
-const { batched, markRaw, reactive } = owl;
+const { markRaw, reactive } = owl;
 
 // Container of the product images fetched during rendering
 // of customer display. There is no need to observe it, thus,

@@ -10,11 +10,11 @@ import { configureGui } from "point_of_sale.Gui";
 import { registry } from "@web/core/registry";
 import env from "point_of_sale.env";
 import { debounce } from "@web/core/utils/timing";
+import { batched } from "point_of_sale.utils";
 
 const {
     Component,
     reactive,
-    batched,
     markRaw,
     useExternalListener,
     useSubEnv,
