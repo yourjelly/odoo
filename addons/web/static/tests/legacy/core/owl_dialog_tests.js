@@ -23,7 +23,7 @@ odoo.define('web.owl_dialog_tests', function (require) {
         QUnit.module('OwlDialog');
 
         QUnit.test("Rendering of all props", async function (assert) {
-            assert.expect(35);
+            assert.expect(36);
 
             class SubComponent extends Component {
                 // Handlers
@@ -60,7 +60,7 @@ odoo.define('web.owl_dialog_tests', function (require) {
                     onClosed="_onDialogClosed"
                     >
                     <SubComponent text="state.textContent"/>
-                    <t t-set="buttons">
+                    <t t-set-slot="buttons">
                         <button class="btn btn-primary" t-on-click="_onButtonClicked">The Button</button>
                     </t>
                 </Dialog>`;
@@ -152,6 +152,7 @@ odoo.define('web.owl_dialog_tests', function (require) {
 
             // Reactivity of buttons
             await testUtils.dom.click(dialog.querySelector('.modal-footer .btn-primary'));
+            assert.verifySteps(["button_clicked"]);
 
             // Render footer (default: true)
             await changeProps('renderFooter', false);
@@ -167,13 +168,7 @@ odoo.define('web.owl_dialog_tests', function (require) {
                 "Subcomponent should match with its given text");
             await testUtils.dom.click(dialog.querySelector('.o_subcomponent'));
 
-            // NXOWL Not sure of this, before when clicking on the subcomponent button,
-            // the Dialog _onButtonClicked function was also called, and the close dialog function wasn't
-            // Now, only the subcomponent button function is called, and the close dialog function also.
-            // Not sure if this is better but it seems more logical.
-            // Maybe add a test when we click on the button of the dialog and no the one of the subComponent
-
-            assert.verifySteps(['dialog_closed', 'subcomponent_clicked']);
+            assert.verifySteps(["subcomponent_clicked"]);
         });
 
         QUnit.test("Interactions between multiple dialogs", async function (assert) {
