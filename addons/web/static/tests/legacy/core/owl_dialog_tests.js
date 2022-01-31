@@ -414,7 +414,6 @@ odoo.define('web.owl_dialog_tests', function (require) {
             destroy(parent2);
         });
 
-        //NXOWL: This tests must be on the wowl dialog tests --- Not here.(legacy and wowl dialogs)
         QUnit.test("remove tabindex on inactive dialog", async (assert) => {
             const serverData = {
                 actions: {
