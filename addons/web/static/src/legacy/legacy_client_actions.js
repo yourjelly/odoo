@@ -50,8 +50,8 @@ function registerClientAction(name, action) {
                 this.onReverseBreadcrumb =
                     this.props.state && this.props.state.__on_reverse_breadcrumb__;
                 useSetupAction({
-                    beforeLeave: () => legacyRefs.widget && legacyRefs.widget.canBeRemoved(),
-                    getLocalState: () => legacyRefs.component && legacyRefs.component.exportState(),
+                    beforeLeave: () => legacyRefs.widget.canBeRemoved(),
+                    getLocalState: () => legacyRefs.component.exportState(),
                 });
             }
         }
