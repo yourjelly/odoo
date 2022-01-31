@@ -92,9 +92,11 @@ function registerView(name, LegacyView) {
             this.onReverseBreadcrumb =
                 this.props.state && this.props.state.__on_reverse_breadcrumb__;
             useSetupAction({
-                beforeLeave: () => legacyRefs.widget.canBeRemoved(),
-                getGlobalState: () => getGlobalState(legacyRefs.component.exportState()),
-                getLocalState: () => getLocalState(legacyRefs.component.exportState()),
+                beforeLeave: () => legacyRefs.widget && legacyRefs.widget.canBeRemoved(),
+                getGlobalState: () =>
+                    legacyRefs.component && getGlobalState(legacyRefs.component.exportState()),
+                getLocalState: () =>
+                    legacyRefs.component && getLocalState(legacyRefs.component.exportState()),
             });
             this.onScrollTo = (ev) => {
                 setScrollPosition(this, { left: ev.detail.left, top: ev.detail.top });
