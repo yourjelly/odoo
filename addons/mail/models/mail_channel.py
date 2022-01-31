@@ -286,7 +286,7 @@ class Channel(models.Model):
         if partner not in self.with_context(active_test=False).channel_partner_ids:
             return True
         channel_info = self.channel_info()[0]  # must be computed before leaving the channel (access rights)
-        result = self.write({'channel_partner_ids': [Command.unlink(partner.id)]})
+        result = self.sudo().write({'channel_partner_ids': [Command.unlink(partner.id)]})
         # side effect of unsubscribe that wasn't taken into account because
         # channel_info is called before actually unpinning the channel
         channel_info['is_pinned'] = False
