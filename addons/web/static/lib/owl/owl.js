@@ -5069,6 +5069,7 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
     exports.useSubEnv = useSubEnv;
     exports.whenReady = whenReady;
     exports.xml = xml;
+    exports.batched = batched;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 
