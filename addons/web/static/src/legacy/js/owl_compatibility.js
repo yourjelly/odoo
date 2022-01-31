@@ -393,13 +393,16 @@ odoo.define('web.OwlCompatibility', function (require) {
     function prepareForFinish(node) {
         const fiber = node.fiber;
         const complete = fiber.complete;
+        const bodyContains = document.body.contains;
         fiber.complete = function() {
             // if target is not in dom
             // just trigger mounted hooks on the Proxy, not on any other node
             if (!document.contains(this.target)) {
+                document.body.contains = () => true;
                 this.mounted = [this];
             }
             complete.call(this);
+            document.body.contains = bodyContains;
         };
     }
 
