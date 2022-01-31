@@ -48,7 +48,7 @@ Dialog.title = "Odoo";
 Dialog.bodyTemplate = xml`<div/>`;
 Dialog.footerTemplate = "web.DialogFooterDefault";
 Dialog.props = {
-    close: { type: Function, optional: true },
+    close: Function,
     isActive: { optional: true },
     "*": true,
 };
