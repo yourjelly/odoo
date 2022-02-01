@@ -138,8 +138,6 @@
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
-                    'account_id': ref('l10n_si_260'),
-                    'plus_report_line_ids': [ref('tax_report_21')],
                 }),
             ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -152,8 +150,6 @@
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
-                    'account_id': ref('l10n_si_260'),
-                    'minus_report_line_ids': [ref('tax_report_21')],
                 }),
             ]"/>
         </record>
@@ -178,8 +174,6 @@
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
-                    'account_id': ref('l10n_si_260'),
-                    'plus_report_line_ids': [ref('tax_report_22')],
                 }),
             ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -192,8 +186,6 @@
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
-                    'account_id': ref('l10n_si_260'),
-                    'minus_report_line_ids': [ref('tax_report_22')],
                 }),
             ]"/>
         </record>
@@ -218,8 +210,6 @@
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
-                    'account_id': ref('l10n_si_260'),
-                    'plus_report_line_ids': [ref('tax_report_22a')],
                 }),
             ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -232,8 +222,6 @@
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
-                    'account_id': ref('l10n_si_260'),
-                    'minus_report_line_ids': [ref('tax_report_22a')],
                 }),
             ]"/>
         </record>
