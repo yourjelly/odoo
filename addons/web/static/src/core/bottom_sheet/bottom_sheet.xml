@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.BottomSheet" owl="1">
+        <div class="o-bottom-sheet bottom-0 start-0 end-0"
+             t-on-click="_onClickBackdrop"
+             t-att-class="{
+                'd-block': state.display,
+                'opacity-0': !state.display,
+                'position-absolute': !state.display,
+                'position-fixed': state.display,
+                'opacity-100': state.display,
+                'top-0': state.display,
+            }"
+        >
+            <div class="o-bottom-sheet-body bg-white position-fixed w-100 bottom-0 shadow"
+                 t-att-class="{
+                    'top-0': props.allowFullscreen and state.fullscreen,
+                 }"
+                 t-on-touchstart="onLock"
+                 t-on-mousedown="onLock"
+                 t-on-touchend="onMove"
+                 t-on-mouseup="onMove"
+            >
+                <div t-if="props.allowFullscreen and state.fullscreen" class="o-bottom-sheet-header">
+                   <i class="fa fa-chevron-down" aria-label="Close" t-on-click="state.fullscreen = false" />
+                </div>
+                <t t-out="props.body" />
+            </div>
+        </div>
+    </t>
+
+</templates>
