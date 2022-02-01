@@ -8,6 +8,7 @@ const { Component, onWillStart, useEffect, useRef } = owl;
 export class WebsitePreview extends Component {
     setup() {
         this.websiteService = useService('website');
+        this.title = useService('title');
 
         this.iframeFallbackUrl = '/website/iframefallback';
 
@@ -30,17 +31,11 @@ export class WebsitePreview extends Component {
                 // This replaces the browser url (/web#action=website...) with
                 // the iframe's url (it is clearer for the user).
                 this.currentUrl = this.iframe.el.contentDocument.location.href;
-                history.pushState({}, this.props.action.display_name, this.currentUrl);
+                this.currentTitle = this.iframe.el.contentDocument.title;
+                history.pushState({}, this.currentTitle, this.currentUrl);
+                this.title.setParts({ action: this.currentTitle });
 
-                const { object, id, isPublished, canPublish, editableInBackend } = this.iframe.el.contentDocument.documentElement.dataset;
-                this.websiteService.currentMetadata = {
-                    path: this.currentUrl,
-                    object,
-                    id: parseInt(id, 10),
-                    isPublished: isPublished === 'True',
-                    canPublish: canPublish === 'True',
-                    editableInBackend: editableInBackend === 'True',
-                };
+                this.websiteService.pageDocument = this.iframe.el.contentDocument;
 
                 // Before leaving the iframe, its content is replicated on an
                 // underlying iframe, to avoid for white flashes (visible on
