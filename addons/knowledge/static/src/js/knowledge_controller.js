@@ -21,6 +21,18 @@ const KnowledgeFormController = FormController.extend({
 
     // Listeners:
 
+    /**
+     * @override
+     * The user will not be allowed to edit the article if it is locked.
+     */
+    _onQuickEdit: function () {
+        const { data } = this.model.get(this.handle);
+        if (data.is_locked) {
+            return;
+        }
+        this._super.apply(this, arguments);
+    },
+
     _onRename: async function (e) {
         const { id } = this.getState();
         if (typeof id === 'undefined') {
@@ -156,18 +168,12 @@ const KnowledgeFormController = FormController.extend({
     /**
      * @param {Event} event
      */
-    _onLock: function (event) {
-        const $target = $(event.target);
-        const $icon = $target.find('i');
-        if ($icon.hasClass('fa-lock')) {
-            $icon.removeClass('fa-lock');
-            $icon.addClass('fa-unlock');
-            this._setMode('edit');
-        } else {
-            $icon.removeClass('fa-unlock');
-            $icon.addClass('fa-lock');
-            this._setMode('readonly');
+    _onLock: async function (event) {
+        const { id } = this.getState();
+        if (typeof id === 'undefined') {
+            return;
         }
+        await this._lock(id);
     },
     /**
      * @param {Event} event
@@ -274,12 +280,43 @@ const KnowledgeFormController = FormController.extend({
         }
     },
 
+    /**
+     * @param {integer} id - Target id
+     * @returns {Promise}
+     */
+    _lock: async function (id) {
+        const { data } = this.model.get(this.handle);
+        const result = await this._rpc({
+            route: `/knowledge/article/${id}/lock`,
+            params: {
+                is_locked: !data.is_locked
+            }
+        });
+        if (result) {
+            if (data.is_locked) {
+                await this.reload();
+            } else {
+                await this._setMode('readonly');
+            }
+        }
+    },
+
     // Helpers:
 
     /**
      * @override
      */
-    _setMode: function () {
+    _setMode: function (mode, recordID) {
+        return this._super.apply(this, arguments).then(() => {
+            this.reload();
+        });
+    },
+
+    /**
+     * @override
+     * @returns {Promise}
+     */
+    reload: function () {
         return this._super.apply(this, arguments).then(() => {
             this.renderer.initTree();
         });

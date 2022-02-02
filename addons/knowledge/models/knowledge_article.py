@@ -36,6 +36,7 @@ class Article(models.Model):
     body = fields.Html(string="Article Body")
     icon = fields.Char(string='Article Icon', default='fa-file')
     author_ids = fields.Many2many("res.users", string="Authors", default=lambda self: self.env.user)
+    is_locked = fields.Boolean(string='Locked', default=False)
 
     # Hierarchy and sequence
     parent_id = fields.Many2one("knowledge.article", string="Parent Article")
@@ -338,6 +339,10 @@ class Article(models.Model):
         action = self.env['ir.actions.act_window']._for_xml_id('knowledge.knowledge_article_dashboard_action')
         action['res_id'] = self.env.context.get('res_id', self.search([('parent_id', '=', False), ('internal_permission', '=', 'none')], limit=1, order='sequence').id)
         return action
+
+    def action_set_lock(self, is_locked):
+        for article in self:
+            article.is_locked = is_locked
 
     ############################
     # Tools and business methods
