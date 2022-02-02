@@ -3,6 +3,7 @@ odoo.define('board.AddToBoardMenu', function (require) {
 
     const Context = require('web.Context');
     const Domain = require('web.Domain');
+    const { Dropdown } = require('@web/core/dropdown/dropdown');
     const FavoriteMenu = require('web.FavoriteMenu');
     const { sprintf } = require('web.utils');
     const { useAutofocus } = require('web.custom_hooks');
@@ -22,9 +23,7 @@ odoo.define('board.AddToBoardMenu', function (require) {
      * This component is only available in actions of type 'ir.actions.act_window'.
      */
     class AddToBoardMenu extends Component {
-        constructor() {
-            super(...arguments);
-
+        setup() {
             this.interactive = true;
             this.state = useState({
                 name: this.env.action.name || "",
@@ -143,6 +142,7 @@ odoo.define('board.AddToBoardMenu', function (require) {
 
     AddToBoardMenu.props = {};
     AddToBoardMenu.template = 'board.AddToBoard';
+    AddToBoardMenu.components = { Dropdown };
 
     FavoriteMenu.registry.add('add-to-board-menu', AddToBoardMenu, 10);
 

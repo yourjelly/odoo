@@ -56,8 +56,9 @@
                         <TaxGroupComponent
                             taxGroup="taxGroup"
                             record="record"
+                            mode="mode"
                             allowTaxEdition="totals.value.allow_tax_edition"
-                            t-on-change-tax-group="_onChangeTaxValueByTaxGroup"
+                            onChangeTaxGroup.bind="_onChangeTaxValueByTaxGroup"
                         />
                     </t>
                 </t>
