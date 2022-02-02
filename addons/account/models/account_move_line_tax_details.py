@@ -396,17 +396,25 @@ class AccountMoveLine(models.Model):
                     ) AS tax_exigible,
                     base_line.account_id AS base_account_id,
 
+                    /* TODO: Make sure the exact tax amount computation is correct (or compute it in Python and hardcode it into the SQL query) */
+
                     sub.base_amount,
-                    CASE WHEN tax.amount_type = 'fixed'
+                    (CASE WHEN tax.amount_type = 'fixed'
                     THEN CASE WHEN base_line.balance < 0 THEN -1 ELSE 1 END * ABS(COALESCE(base_line.quantity, 1.0) * tax.amount)
                     ELSE (tax.amount * sub.base_amount / 100)
-                    END AS exact_tax_amount,
+                    END)
+                    * tax_line.balance 
+                    / (SUM(tax_line.balance) over (PARTITION BY sub.base_line_id, sub.src_line_id, tax_line.tax_line_id)) 
+                    AS exact_tax_amount,
                     
                     sub.base_amount_currency,
-                    CASE WHEN tax.amount_type = 'fixed'
+                    (CASE WHEN tax.amount_type = 'fixed'
                     THEN CASE WHEN base_line.amount_currency < 0 THEN -1 ELSE 1 END * ABS(COALESCE(base_line.quantity, 1.0) * tax.amount)
-                    ELSE (tax.amount * sub.base_amount / 100)
-                    END AS exact_tax_amount_currency
+                    ELSE (tax.amount * sub.base_amount_currency / 100)
+                    END)
+                    * tax_line.amount_currency 
+                    / (SUM(tax_line.amount_currency) over (PARTITION BY sub.base_line_id, sub.src_line_id, tax_line.tax_line_id))
+                    AS exact_tax_amount_currency
                     
                 FROM base_tax_matching_base_amounts sub
                 JOIN account_move_line tax_line ON
@@ -464,9 +472,24 @@ class AccountMoveLine(models.Model):
                     sub.comp_curr_prec
                 ) as alpha_i_rounded_down,
                 SUM(ROUND(exact_tax_amount, sub.comp_curr_prec)) OVER (PARTITION BY sub.tax_line_id) AS sum_n,
-                tax_line.balance - SUM(ROUND(exact_tax_amount, sub.comp_curr_prec)) OVER (PARTITION BY sub.tax_line_id) as delta
+                tax_line.balance - SUM(ROUND(exact_tax_amount, sub.comp_curr_prec)) OVER (PARTITION BY sub.tax_line_id) as delta,
                 
-                /* TODO: when formulae are correct, also do them in amount_currency*/
+                sub.base_amount_currency,
+                sub.exact_tax_amount_currency,
+                ROUND(sub.exact_tax_amount_currency, sub.curr_prec) as n_i_currency,
+                sub.exact_tax_amount_currency - ROUND(sub.exact_tax_amount_currency, sub.curr_prec) as alpha_i_currency,
+                ROUND(
+                    exact_tax_amount_currency - ROUND(exact_tax_amount_currency, sub.curr_prec)
+                                              + 0.499 * POWER(0.1, sub.curr_prec),
+                    sub.curr_prec
+                ) as alpha_i_rounded_up_currency,
+                ROUND(
+                    exact_tax_amount_currency - ROUND(exact_tax_amount_currency, sub.curr_prec)
+                                              - 0.499 * POWER(0.1, sub.curr_prec),
+                    sub.curr_prec
+                ) as alpha_i_rounded_down_currency,
+                SUM(ROUND(exact_tax_amount_currency, sub.curr_prec)) OVER (PARTITION BY sub.tax_line_id) AS sum_n_currency,
+                tax_line.amount_currency - SUM(ROUND(exact_tax_amount_currency, sub.curr_prec)) OVER (PARTITION BY sub.tax_line_id) as delta_currency
 
             FROM base_tax_matching_exact_tax_amounts sub
             JOIN account_move_line tax_line ON
@@ -503,11 +526,23 @@ class AccountMoveLine(models.Model):
                 sub.delta,
                 
                 SUM(sub.alpha_i_rounded_up) OVER (PARTITION BY sub.tax_line_id) AS sum_alpha_i_rounded_up,
-                SUM(sub.alpha_i_rounded_up) OVER (PARTITION BY sub.tax_line_id ORDER BY sub.tax_line_id, sub.base_line_id, sub.src_line_id) as cumul_alpha_i_rounded_up,
-                SUM(sub.alpha_i_rounded_down) over (PARTITION BY sub.tax_line_id) AS sum_alpha_i_rounded_down,
-                SUM(sub.alpha_i_rounded_down) OVER (PARTITION BY sub.tax_line_id ORDER BY sub.tax_line_id, sub.base_line_id, sub.src_line_id) as cumul_alpha_i_rounded_down
+                SUM(sub.alpha_i_rounded_up) OVER (PARTITION BY sub.tax_line_id ORDER BY sub.tax_line_id, sub.base_line_id, sub.src_line_id) AS cumul_alpha_i_rounded_up,
+                SUM(sub.alpha_i_rounded_down) OVER (PARTITION BY sub.tax_line_id) AS sum_alpha_i_rounded_down,
+                SUM(sub.alpha_i_rounded_down) OVER (PARTITION BY sub.tax_line_id ORDER BY sub.tax_line_id, sub.base_line_id, sub.src_line_id) AS cumul_alpha_i_rounded_down,
                 
-                /* TODO: when formulae are correct, also do them in amount_currency*/
+                sub.base_amount_currency,
+                sub.exact_tax_amount_currency,
+                sub.n_i_currency,
+                sub.alpha_i_currency,
+                sub.alpha_i_rounded_up_currency,
+                sub.alpha_i_rounded_down_currency,
+                sub.sum_n_currency,
+                sub.delta_currency,
+                
+                SUM(sub.alpha_i_rounded_up_currency) OVER (PARTITION BY sub.tax_line_id) AS sum_alpha_i_rounded_up_currency,
+                SUM(sub.alpha_i_rounded_up_currency) OVER (PARTITION BY sub.tax_line_id ORDER BY sub.tax_line_id, sub.base_line_id, sub.src_line_id) AS cumul_alpha_i_rounded_up_currency,
+                SUM(sub.alpha_i_rounded_down_currency) OVER (PARTITION BY sub.tax_line_id) AS sum_alpha_i_rounded_down_currency,
+                SUM(sub.alpha_i_rounded_down_currency) OVER (PARTITION BY sub.tax_line_id ORDER BY sub.tax_line_id, sub.base_line_id, sub.src_line_id) AS cumul_alpha_i_rounded_down_currency
 
             FROM base_tax_matching_rounded_values_and_decimal_parts sub)
 
@@ -539,21 +574,35 @@ class AccountMoveLine(models.Model):
 
                 sub.base_amount,
                 
-                case when sub.cumul_alpha_i_rounded_up <= sub.delta then sub.n_i + sub.alpha_i_rounded_up
-                else case when sub.cumul_alpha_i_rounded_down >= sub.delta then sub.n_i + sub.alpha_i_rounded_down
-                     else sub.n_i
-                     end
-                end
+                CASE WHEN sub.cumul_alpha_i_rounded_up <= sub.delta THEN sub.n_i + sub.alpha_i_rounded_up
+                ELSE CASE WHEN sub.cumul_alpha_i_rounded_down >= sub.delta THEN sub.n_i + sub.alpha_i_rounded_down
+                    ELSE sub.n_i
+                    END
+                END
                 AS tax_amount,
                 
-                /* TODO: when formulae are correct, also do them in amount_currency*/
-                
-                case when sub.sum_alpha_i_rounded_up < sub.delta then true
-                else case when sub.sum_alpha_i_rounded_down > sub.delta then true 
-                     else false 
-                     end
-                end
-                as is_error
+                CASE WHEN sub.sum_alpha_i_rounded_up < sub.delta THEN true
+                ELSE CASE WHEN sub.sum_alpha_i_rounded_down > sub.delta THEN true 
+                    ELSE false 
+                    END
+                END
+                AS is_error,
+
+                sub.base_amount_currency,
+
+                CASE WHEN sub.cumul_alpha_i_rounded_up_currency <= sub.delta_currency THEN sub.n_i_currency + sub.alpha_i_rounded_up_currency
+                ELSE CASE WHEN sub.cumul_alpha_i_rounded_down_currency >= sub.delta_currency THEN sub.n_i_currency + sub.alpha_i_rounded_down_currency
+                    ELSE sub.n_i_currency
+                    END
+                END
+                AS tax_amount_currency,
+
+                CASE WHEN sub.sum_alpha_i_rounded_up_currency < sub.delta_currency THEN true
+                ELSE CASE WHEN sub.sum_alpha_i_rounded_down_currency > sub.delta_currency THEN true 
+                    ELSE FALSE 
+                    END
+                END
+                AS is_error_currency
 
             FROM base_tax_matching_cumulated_rounded_decimal_parts sub
         ''', group_taxes_params + where_params + where_params + where_params + fallback_params
