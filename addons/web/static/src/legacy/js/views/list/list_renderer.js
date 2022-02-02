@@ -823,10 +823,13 @@ var ListRenderer = BasicRenderer.extend({
         if (!this._shouldRenderPager(currentMinimum, limit, size)) {
             return;
         }
-        const pager = new ComponentWrapper(this, Pager, { currentMinimum, limit, size });
+        const pager = new ComponentWrapper(this, Pager, {
+            currentMinimum,
+            limit,
+            size,
+            onPagerChanged: this._onPagerChanged.bind(this, group),
+        });
         const pagerMounting = pager.mount(target).then(() => {
-            // Event binding is done here to get the related group and wrapper.
-            pager.el.addEventListener('pager-changed', ev => this._onPagerChanged(ev, group));
             // Prevent pager clicks to toggle the group.
             pager.el.addEventListener('click', ev => ev.stopPropagation());
         });
@@ -1402,9 +1405,7 @@ var ListRenderer = BasicRenderer.extend({
      * @param {OwlEvent} ev
      * @param {Object} group
      */
-    _onPagerChanged: async function (ev, group) {
-        ev.stopPropagation();
-        const { currentMinimum, limit } = ev.detail;
+    _onPagerChanged: async function (group, { currentMinimum, limit }) {
         this.trigger_up('load', {
             id: group.id,
             limit: limit,
