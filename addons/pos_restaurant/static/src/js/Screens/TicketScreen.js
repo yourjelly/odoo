@@ -138,8 +138,8 @@ odoo.define('pos_restaurant.TicketScreen', function (require) {
     Registries.Component.extend(TicketScreen, PosResTicketScreen);
 
     class TipCell extends PosComponent {
-        constructor() {
-            super(...arguments);
+        setup() {
+            super.setup();
             this.state = useState({ isEditing: false });
             this.orderUiState = this.props.order.uiState.TipScreen;
             useAutofocus({ selector: 'input' });

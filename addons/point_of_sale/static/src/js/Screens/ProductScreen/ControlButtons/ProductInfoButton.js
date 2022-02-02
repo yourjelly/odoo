@@ -7,8 +7,8 @@ odoo.define('point_of_sale.ProductInfoButton', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class ProductInfoButton extends PosComponent {
-        constructor() {
-            super(...arguments);
+        setup() {
+            super.setup();
             useListener('click', this.onClick);
         }
         onClick() {
