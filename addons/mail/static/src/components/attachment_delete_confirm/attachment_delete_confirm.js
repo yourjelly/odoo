@@ -2,17 +2,18 @@
 
 import { registerMessagingComponent } from '@mail/utils/messaging_component';
 import { useComponentToModel } from '@mail/component_hooks/use_component_to_model/use_component_to_model';
+import { escape } from '@web/core/utils/strings';
 
 const { Component } = owl;
 
 export class AttachmentDeleteConfirm extends Component {
-
-    /**
-     * @override
-     */
     setup() {
-        super.setup();
+        this.dialogAPI = {};
         useComponentToModel({ fieldName: 'component', modelName: 'AttachmentDeleteConfirmView' });
+    }
+
+    _onClickCancel() {
+        this.dialogAPI.close();
     }
 
     /**
