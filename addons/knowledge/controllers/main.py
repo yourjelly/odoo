@@ -109,6 +109,14 @@ class KnowledgeDataSet(DataSet):
 
         return article.id
 
+    @http.route('/knowledge/article/<int:article_id>/lock', type='json', auth='user')
+    def article_lock(self, article_id, is_locked):
+        article = request.env['knowledge.article'].browse(article_id)
+        if not article.exists():
+            return False
+        article.action_set_lock(is_locked)
+        return True
+
     # ------------------------
     # Articles tree generation
     # ------------------------

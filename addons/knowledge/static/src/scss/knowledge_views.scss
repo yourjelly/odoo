@@ -17,7 +17,10 @@
     }
     .note-editable {
         border: none;
-        border-top: 1px solid $o-gray-300;
+    }
+    .oe_form_field,
+    .note-editable {
+        padding: 1rem !important;
     }
     .oe_form_field:not(.o_user_select_none) .note-editable {
         position: absolute;

@@ -47,6 +47,7 @@
         <field name="type">form</field>
         <field name="arch" type="xml">
             <form class="o_knowledge_form_view" js_class="knowledge_view_form">
+                <field name="is_locked" invisible="1" readonly="1"/>
                 <sheet>
                     <div class="container-fluid h-100">
                         <div class="row h-100">
@@ -80,7 +81,10 @@
                                                     <field class="o_breadcrumb_article_name" name="name"/>
                                                 </li>
                                             </ol>
-                                            <field name="is_user_favourite" class="m-0" widget="boolean_favorite" nolabel="1" force_save="1"/>
+                                            <field name="is_user_favourite" class="m-0 pr-2" widget="boolean_favorite" nolabel="1" force_save="1"/>
+                                            <div class="pr-2" attrs="{'invisible': [('is_locked', '=', False)]}">
+                                                <i class="fa fa-lock" title="locked"/>
+                                            </div>
                                         </div>
                                         <!-- Buttons -->
                                         <div>
@@ -99,8 +103,13 @@
                                                         <a class="dropdown-item btn-move" href="#" role="button">
                                                             <i class="fa fa-angle-double-right"/> Move To
                                                         </a>
-                                                        <a class="dropdown-item btn-lock" href="#" role="button">
+                                                        <a class="dropdown-item btn-lock" href="#" role="button"
+                                                            attrs="{'invisible': [('is_locked', '=', True)]}">
                                                             <i class="fa fa-lock"/> Lock
+                                                        </a>
+                                                        <a class="dropdown-item btn-lock" href="#" role="button"
+                                                            attrs="{'invisible': [('is_locked', '=', False)]}">
+                                                            <i class="fa fa-unlock"/> Unlock
                                                         </a>
                                                         <a class="dropdown-item btn-duplicate" href="#" role="button">
                                                             <i class="fa fa-copy"/> Duplicate
