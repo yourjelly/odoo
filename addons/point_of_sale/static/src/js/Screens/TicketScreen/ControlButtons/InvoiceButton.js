@@ -7,8 +7,8 @@ odoo.define('point_of_sale.InvoiceButton', function (require) {
     const Registries = require('point_of_sale.Registries');
 
     class InvoiceButton extends PosComponent {
-        constructor() {
-            super(...arguments);
+        setup() {
+            super.setup();
             useListener('click', this._onClick);
         }
         get isAlreadyInvoiced() {

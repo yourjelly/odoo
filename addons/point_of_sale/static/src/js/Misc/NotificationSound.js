@@ -6,8 +6,8 @@ odoo.define('point_of_sale.NotificationSound', function (require) {
     const Registries = require('point_of_sale.Registries');
 
     class NotificationSound extends PosComponent {
-        constructor() {
-            super(...arguments);
+        setup() {
+            super.setup();
             useListener('ended', () => (this.props.sound.src = null));
         }
     }
