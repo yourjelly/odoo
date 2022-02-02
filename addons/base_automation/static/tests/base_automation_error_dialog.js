@@ -15,10 +15,11 @@ import { RPCError } from "@web/core/network/rpc_service";
 import { BaseAutomationErrorDialog } from "../src/js/base_automation_error_dialog";
 import { patchWithCleanup } from "@web/../tests/helpers/utils";
 import { DialogContainer } from "@web/core/dialog/dialog_container";
-import { getFixture } from "@web/../tests/helpers/utils";
+import { getFixture, mount } from "@web/../tests/helpers/utils";
 import { nextTick } from "@web/../tests/helpers/utils";
 
-const { mount } = owl;
+const { onMounted } = owl;
+
 const serviceRegistry = registry.category("services");
 
 QUnit.module("base_automation", {}, function () {
@@ -107,9 +108,9 @@ QUnit.module("base_automation", {}, function () {
         });
 
         patchWithCleanup(DialogContainer.prototype, {
-            mounted() {
+            setup() {
                 this._super();
-                this.el.classList.add("o_dialog_container");
+                onMounted(() => this.el.classList.add("o_dialog_container"));
             }
         });
 
