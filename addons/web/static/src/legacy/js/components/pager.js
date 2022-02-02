@@ -1,9 +1,9 @@
 odoo.define('web.Pager', function (require) {
     "use strict";
 
-    const { useAutofocus } = require('web.custom_hooks');
+    const { useAutofocus } = require("@web/core/utils/hooks");
 
-    const { Component, useState } = owl;
+    const { Component, onWillUpdateProps, useState } = owl;
 
     /**
      * Pager
@@ -30,18 +30,18 @@ odoo.define('web.Pager', function (require) {
          * @param {boolean} [props.withAccessKey] can be disabled, for example,
          *   for x2m widgets
          */
-        constructor() {
-            super(...arguments);
-
+        setup() {
             this.state = useState({
                 disabled: false,
                 editing: false,
             });
 
             useAutofocus();
+
+            onWillUpdateProps(this.onWillUpdateProps);
         }
 
-        async willUpdateProps() {
+        async onWillUpdateProps() {
             this.state.editing = false;
             this.state.disabled = false;
         }
@@ -154,7 +154,7 @@ odoo.define('web.Pager', function (require) {
                 // have to disable the edition manually here.
                 this.state.editing = false;
             }
-            this.trigger('pager-changed', { currentMinimum, limit });
+            this.props.onPagerChanged({ currentMinimum, limit });
         }
 
         //---------------------------------------------------------------------
@@ -217,6 +217,7 @@ odoo.define('web.Pager', function (require) {
         size: { type: Number, optional: 1 },
         validate: Function,
         withAccessKey: Boolean,
+        onPagerChanged: Function,
     };
     Pager.template = 'web.legacy.Pager';
 
