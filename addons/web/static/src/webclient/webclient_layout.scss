@@ -67,13 +67,6 @@ html {
       }
     }
   }
-
-  .o_loading > span {
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    z-index: $zindex-modal + 1;
-  }
 }
 
 @media print {

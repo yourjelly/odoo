@@ -15,6 +15,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
     const { ConnectionLostError, ConnectionAbortedError, RPCError } = require('@web/core/network/rpc_service');
     const { useBus } = require("@web/core/utils/hooks");
     const { debounce } = require("@web/core/utils/timing");
+    const { Transition } = require("@web/core/transition");
 
     const {
         onError,
@@ -373,7 +374,6 @@ odoo.define('point_of_sale.Chrome', function(require) {
         }
         _onCloseNotification() {
             this.state.notification.isShown = false;
-            this.state.notification.message = '';
         }
         /**
          * Save `env.pos.toRefundLines` in localStorage on beforeunload - closing the
@@ -546,6 +546,11 @@ odoo.define('point_of_sale.Chrome', function(require) {
         }
     }
     Chrome.template = 'Chrome';
+    Object.defineProperty(Chrome, "components", {
+        get () {
+            return Object.assign({ Transition }, PosComponent.components);
+        }
+    })
 
     Registries.Component.add(Chrome);
 

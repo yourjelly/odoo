@@ -438,8 +438,6 @@
 
 <div t-name="EmptyComponent"/>
 
-<div t-name="Loading" class="o_loading"/>
-
 <t t-name="WidgetLabel.tooltip">
     <div class="oe_tooltip_string" t-if="widget.string" role="tooltip">
         <t t-esc="widget.string"/> <t t-if="debug and widget.nolabel">(nolabel)</t>

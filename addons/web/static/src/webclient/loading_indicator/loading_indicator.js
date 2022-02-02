@@ -3,6 +3,7 @@
 import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
+import { Transition } from "@web/core/transition";
 
 const { Component, onWillDestroy, useState } = owl;
 
@@ -60,6 +61,7 @@ export class LoadingIndicator extends Component {
 }
 
 LoadingIndicator.template = "web.LoadingIndicator";
+LoadingIndicator.components = { Transition };
 
 registry.category("main_components").add("LoadingIndicator", {
     Component: LoadingIndicator,

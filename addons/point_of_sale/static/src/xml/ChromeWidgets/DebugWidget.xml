@@ -3,7 +3,7 @@
 
     <t t-name="DebugWidget" owl="1">
         <Draggable limitArea="'.pos'">
-            <div class="debug-widget">
+            <div class="debug-widget" t-att-class="props.className">
                 <header class="drag-handle">
                     <h1>Debug Window</h1>
                 </header>

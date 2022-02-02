@@ -4,7 +4,7 @@ import { browser } from "../browser/browser";
 import { registry } from "../registry";
 import { NotificationContainer } from "./notification_container";
 
-const { EventBus } = owl;
+const { reactive } = owl;
 
 const AUTOCLOSE_DELAY = 4000;
 
@@ -27,12 +27,11 @@ const AUTOCLOSE_DELAY = 4000;
 export const notificationService = {
     start() {
         let notifId = 0;
-        let notifications = [];
-        const bus = new EventBus();
+        const notifications = reactive({});
 
         registry.category("main_components").add("NotificationContainer", {
             Component: NotificationContainer,
-            props: { bus, notifications },
+            props: { notifications },
         });
 
         /**
@@ -51,8 +50,7 @@ export const notificationService = {
                 props,
                 onClose: options.onClose,
             };
-            notifications.push(notification);
-            bus.trigger("UPDATE");
+            notifications[id] = notification;
             if (!sticky) {
                 browser.setTimeout(closeFn, AUTOCLOSE_DELAY);
             }
@@ -60,13 +58,12 @@ export const notificationService = {
         }
 
         function close(id) {
-            const index = notifications.findIndex((n) => n.id === id);
-            if (index > -1) {
-                if (notifications[index].onClose) {
-                    notifications[index].onClose();
+            if (notifications[id]) {
+                const notification = notifications[id];
+                if (notification.onClose) {
+                    notification.onClose();
                 }
-                notifications.splice(index, 1);
-                bus.trigger("UPDATE");
+                delete notifications[id];
             }
         }
 

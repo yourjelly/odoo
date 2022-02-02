@@ -101,6 +101,7 @@ Help your customers with this chat, and analyse their feedback.
             'web/static/src/core/notifications/notification_container.js',
             'web/static/src/core/notifications/notification_service.js',
             'web/static/src/core/registry.js',
+            'web/static/src/core/transition.js',
             'web/static/src/core/ui/block_ui.js',
             'web/static/src/core/ui/ui_service.js',
             'web/static/src/core/user_service.js',

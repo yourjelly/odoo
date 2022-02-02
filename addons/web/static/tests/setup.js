@@ -10,6 +10,9 @@ import { registerCleanup } from "./helpers/cleanup";
 import { prepareRegistriesWithCleanup } from "./helpers/mock_env";
 import { session as sessionInfo } from "@web/session";
 import { prepareLegacyRegistriesWithCleanup } from "./helpers/legacy_env_utils";
+import { config as transitionConfig } from "@web/core/transition";
+
+transitionConfig.disabled = true;
 
 import { patch } from "@web/core/utils/patch";
 import { processTemplates } from "@web/core/assets";
