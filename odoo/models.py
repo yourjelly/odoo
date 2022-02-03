@@ -5550,7 +5550,7 @@ Fields:
                     elif comparator == '>=':
                         ok = any(map(lambda x: x is not None and x >= value, data))
                     elif comparator in ('!=', '<>'):
-                        ok = value not in data
+                        ok = data and value not in data
                     elif comparator == 'not in':
                         ok = all(map(lambda x: x not in data, value))
                     elif comparator == 'not ilike':
