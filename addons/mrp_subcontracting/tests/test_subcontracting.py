@@ -598,7 +598,8 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
                 wizard = Form(self.env[action['res_model']].with_context(action['context'])).save()
                 wizard.process()
 
-        resupply_route = self.env['stock.route'].search([('name', '=', 'Resupply Subcontractor on Order')])
+        resupply_route = self.env.ref('mrp_subcontracting.route_resupply_subcontractor_mto')
+
         finished, component = self.env['product.product'].create([{
             'name': 'Finished Product',
             'type': 'product',
