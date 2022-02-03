@@ -1842,6 +1842,8 @@ var BasicModel = AbstractModel.extend({
                 record._changes[name] = list.id;
                 list._changes = list._changes || [];
 
+                const canDiscardNoChanges = (val.length === 1 && list._changes.length === 0);
+
                 // save it in case of a [5] which will remove the _changes
                 var oldChanges = list._changes;
                 _.each(val, function (command) {
@@ -1900,8 +1902,10 @@ var BasicModel = AbstractModel.extend({
                         // LINK TO
                         linkRecord(list, command[1]);
                     } else if (command[0] === 5) {
-                        // DELETE ALL
-                        list._changes = [{operation: 'REMOVE_ALL'}];
+                        if (!canDiscardNoChanges || list.res_ids.length !== 0) {
+                            // DELETE ALL
+                            list._changes = [{operation: 'REMOVE_ALL'}];
+                        }
                     } else if (command[0] === 6) {
                         list._changes = [{operation: 'REMOVE_ALL'}];
                         _.each(command[2], function (resID) {
@@ -3248,7 +3252,13 @@ var BasicModel = AbstractModel.extend({
             if (type === 'one2many' || type === 'many2many') {
                 if (!changesOnly || (commands[fieldName] && commands[fieldName].length)) { // replace localId by commands
                     changes[fieldName] = commands[fieldName];
-                } else { // no command -> no change for that field
+                } else if (record.isNew()) { // no command -> no change for that field
+                    // new record, the value is provided to avoid useless recomputations
+                    // NB: empty array is considered a "no change" value for x2m fields
+                    // in the orm logic (it won't remove/reset/... the fields but keep the existing value)
+                    changes[fieldName] = [];
+                } else {
+                    // existing record, no change to the field, value mustn't be provided to write call
                     delete changes[fieldName];
                 }
             } else if (type === 'many2one' && fieldName in changes) {
