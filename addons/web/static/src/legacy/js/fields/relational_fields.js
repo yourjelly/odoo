@@ -149,6 +149,10 @@ var FieldMany2One = AbstractField.extend({
         // is pending quick create operation
         this.dp = new concurrency.DropPrevious();
         this.createDef = undefined;
+
+        if (this.nodeOptions.search_more_domain && this.nodeOptions.search_more_domain instanceof Array) {
+            this.searchMoreDomain = this.nodeOptions.search_more_domain;
+        }
     },
     start: function () {
         // booleean indicating that the content of the input isn't synchronized
@@ -438,6 +442,65 @@ var FieldMany2One = AbstractField.extend({
             },
         };
     },
+    _getSearchMoreDomain(domain) {
+        if (!this.searchMoreDomain) {
+            return domain;
+        }
+        const searchMoreDomain = this.searchMoreDomain;
+        const newDomain = [];
+        for (const item of searchMoreDomain) {
+            if (item instanceof Array && item.length === 3) {
+                let [fieldName, operator, value] = item;
+                if (typeof value === 'string' && value in this.record.fields) {
+                    if (!(value in this.recordData)) {
+                        console.warn(`Impossible to apply the domain defined in the "search_more_domain" option of this field because the ${value} is not defined into the view.`);
+                        return domain;
+                    }
+                    const field = this.record.fields[value];
+                    const data = this.recordData[value];
+                    newDomain.push([fieldName, operator, field.type == 'many2one' ? data.res_id : data]);  // TODO: manage other type fields.
+                }
+            } else {
+                newDomain.push(item);
+            }
+        }
+
+        return newDomain;
+    },
+    _getSearchMoreItem(search_val, domain, context) {
+        const searchMoreDomain = this._getSearchMoreDomain(domain);
+        return {
+            label: _t("Search More..."),
+            action: () => {
+                var prom;
+                if (search_val !== '') {
+                    prom = this._rpc({
+                        model: this.field.relation,
+                        method: 'name_search',
+                        kwargs: {
+                            name: search_val,
+                            args: searchMoreDomain,
+                            operator: "ilike",
+                            limit: this.SEARCH_MORE_LIMIT,
+                            context: context,
+                        },
+                    });
+                }
+                Promise.resolve(prom).then((results) => {
+                    var dynamicFilters;
+                    if (results) {
+                        var ids = results.map((x) => x[0]);
+                        dynamicFilters = [{
+                            description: _.str.sprintf(_t('Quick search: %s'), search_val),
+                            domain: [['id', 'in', ids]],
+                        }];
+                    }
+                    this._searchCreatePopup("search", false, {}, dynamicFilters);
+                });
+            },
+            classname: 'o_m2o_dropdown_option',
+        };
+    },
     /**
      * @private
      * @param {Object} values
@@ -447,41 +510,8 @@ var FieldMany2One = AbstractField.extend({
      * @returns {Object}
      */
     _manageSearchMore: function (values, search_val, domain, context) {
-        var self = this;
         values = values.slice(0, this.limit);
-        values.push({
-            label: _t("Search More..."),
-            action: function () {
-                var prom;
-                if (search_val !== '') {
-                    prom = self._rpc({
-                        model: self.field.relation,
-                        method: 'name_search',
-                        kwargs: {
-                            name: search_val,
-                            args: domain,
-                            operator: "ilike",
-                            limit: self.SEARCH_MORE_LIMIT,
-                            context: context,
-                        },
-                    });
-                }
-                Promise.resolve(prom).then(function (results) {
-                    var dynamicFilters;
-                    if (results) {
-                        var ids = _.map(results, function (x) {
-                            return x[0];
-                        });
-                        dynamicFilters = [{
-                            description: _.str.sprintf(_t('Quick search: %s'), search_val),
-                            domain: [['id', 'in', ids]],
-                        }];
-                    }
-                    self._searchCreatePopup("search", false, {}, dynamicFilters);
-                });
-            },
-            classname: 'o_m2o_dropdown_option',
-        });
+        values.push(this._getSearchMoreItem(search_val, domain, context));
         return values;
     },
     /**
@@ -603,6 +633,21 @@ var FieldMany2One = AbstractField.extend({
         this.floating = false;
         this.m2o_value = this._formatValue(this.value);
     },
+    _getSearchDomain() {
+        const domain = this.record.getDomain(this.recordParams);
+        // Exclude black-listed ids from the domain
+        const blackListedIds = this._getSearchBlacklist();
+        if (blackListedIds.length) {
+            domain.push(['id', 'not in', blackListedIds]);
+        }
+        return domain;
+    },
+    _getSearchContext() {
+        return Object.assign(
+            this.record.getContext(this.recordParams),
+            this.additionalContext,
+        );
+    },
     /**
      * Executes a 'name_search' and returns a list of formatted objects meant to
      * be displayed in the autocomplete widget dropdown. These items are either:
@@ -622,17 +667,8 @@ var FieldMany2One = AbstractField.extend({
      */
     _search: async function (searchValue = "") {
         const value = searchValue.trim();
-        const domain = this.record.getDomain(this.recordParams);
-        const context = Object.assign(
-            this.record.getContext(this.recordParams),
-            this.additionalContext
-        );
-
-        // Exclude black-listed ids from the domain
-        const blackListedIds = this._getSearchBlacklist();
-        if (blackListedIds.length) {
-            domain.push(['id', 'not in', blackListedIds]);
-        }
+        const domain = this._getSearchDomain();
+        const context = this._getSearchContext();
 
         const nameSearch = this._rpc({
             model: this.field.relation,
@@ -1359,7 +1395,7 @@ var FieldX2Many = AbstractField.extend(WidgetAdapterMixin, {
             if (extraInfo.subFieldName) {
                 parts.push(`[name="${extraInfo.subFieldName}"]`);
             }
-    
+
             if (parts.length) {
                 const el = this.el.querySelector(parts.join(' '));
                 if (el) {
@@ -2014,7 +2050,7 @@ var FieldOne2Many = FieldX2Many.extend({
 
     /**
      * @private
-     * @param {*} data 
+     * @param {*} data
      */
     _addCreateRecordRow(data) {
         const self = this;
@@ -2663,6 +2699,9 @@ var FieldMany2ManyTags = AbstractField.extend({
             ids: [record.id],
         });
     },
+    _getMany2OneWidget() {
+        return FieldMany2One;
+    },
     /**
      * @private
      */
@@ -2672,7 +2711,8 @@ var FieldMany2ManyTags = AbstractField.extend({
         if (this.many2one) {
             this.many2one.destroy();
         }
-        this.many2one = new FieldMany2One(this, this.name, this.record, {
+        const Many2OneClass = this._getMany2OneWidget();
+        this.many2one = new Many2OneClass(this, this.name, this.record, {
             mode: 'edit',
             noOpen: true,
             noCreate: !this.canCreate,
@@ -2690,7 +2730,7 @@ var FieldMany2ManyTags = AbstractField.extend({
         var _getSearchCreatePopupOptions = this.many2one._getSearchCreatePopupOptions;
         this.many2one._getSearchCreatePopupOptions = function (view, ids, context, dynamicFilters) {
             var options = _getSearchCreatePopupOptions.apply(this, arguments);
-            var domain = this.record.getDomain({fieldName: this.name});
+            var domain = self.many2one._getSearchMoreDomain(this.record.getDomain({fieldName: this.name}));
             var m2mRecords = [];
             return _.extend({}, options, {
                 domain: domain.concat(["!", ["id", "in", self.value.res_ids]]),

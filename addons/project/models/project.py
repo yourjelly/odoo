@@ -931,7 +931,7 @@ class Task(models.Model):
         store=True, readonly=False, ondelete='restrict', tracking=True, index=True,
         default=_get_default_stage_id, group_expand='_read_group_stage_ids',
         domain="[('project_ids', '=', project_id)]", copy=False, task_dependency_tracking=True)
-    tag_ids = fields.Many2many('project.tags', string='Tags')
+    tag_ids = fields.Many2many('project.tags', string='Tags', domain="['|', '|', ('project_ids', 'in', project_id), ('task_ids.project_id', '=', project_id), ('task_ids', 'in', id)]")
     kanban_state = fields.Selection([
         ('normal', 'In Progress'),
         ('done', 'Ready'),
@@ -2232,17 +2232,6 @@ class ProjectTags(models.Model):
     _sql_constraints = [
         ('name_uniq', 'unique (name)', "Tag name already exists!"),
     ]
-
-    @api.model
-    def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None):
-        domain = args
-        if 'project_id' in self.env.context:
-            project_id = self.env.context.get('project_id')
-            domain = AND([
-                domain,
-                ['|', ('task_ids.project_id', '=', project_id), ('project_ids', 'in', project_id)]
-            ])
-        return super()._name_search(name, domain, operator, limit, name_get_uid)
 
     @api.model
     def name_create(self, name):
