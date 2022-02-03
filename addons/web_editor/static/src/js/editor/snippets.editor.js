@@ -463,15 +463,24 @@ var SnippetEditor = Widget.extend({
         // check if this has always been like this or not and this should be
         // unit tested.
         let parent = this.$target[0].parentElement;
-        const nextSibling = this.$target[0].nextElementSibling;
-        const previousSibling = this.$target[0].previousElementSibling;
+        let nextSibling = this.$target[0].nextElementSibling;
+        while (nextSibling && nextSibling.matches('.o_snippet_invisible')) {
+            nextSibling = nextSibling.nextElementSibling;
+        }
+        let previousSibling = this.$target[0].previousElementSibling;
+        while (previousSibling && previousSibling.matches('.o_snippet_invisible')) {
+            previousSibling = previousSibling.previousElementSibling;
+        }
         if ($(parent).is('.o_editable:not(body)')) {
             // If we target the editable, we want to reset the selection to the
             // body. If the editable has options, we do not want to show them.
             parent = $(parent).closest('body');
         }
-        this.trigger_up('activate_snippet', {
-            $snippet: $(previousSibling || nextSibling || parent)
+        const activateSnippetProm = new Promise(resolve => {
+            this.trigger_up('activate_snippet', {
+                $snippet: $(previousSibling || nextSibling || parent),
+                onSuccess: resolve,
+            });
         });
 
         // Actually remove the snippet and its option UI.
@@ -523,7 +532,11 @@ var SnippetEditor = Widget.extend({
         this.$body.find('.o_table_handler').remove();
 
         this.trigger_up('snippet_removed');
-        this.destroy();
+        // FIXME that whole Promise should be awaited before the DOM removal etc
+        // as explained above where it is defined. However, it is critical to at
+        // least await it before destroying the snippet editor instance
+        // otherwise the logic of activateSnippet gets messed up.
+        activateSnippetProm.then(() => this.destroy());
         $parent.trigger('content_changed');
 
         // TODO Page content changed, some elements may need to be adapted
@@ -1934,14 +1947,15 @@ var SnippetsMenu = Widget.extend({
      *        If no element is given, all the editors are destroyed.
      */
     _destroyEditors: async function ($el) {
-        const proms = _.map(this.snippetEditors, async function (snippetEditor) {
-            if ($el && !$el.has(snippetEditor.$target).length) {
-                return;
-            }
-            await snippetEditor.cleanForSave();
-            snippetEditor.destroy();
+        const aliveEditors = this.snippetEditors.filter((snippetEditor) => {
+            return !$el || $el.has(snippetEditor.$target).length;
         });
-        await Promise.all(proms);
+        const cleanForSavePromises = aliveEditors.map((snippetEditor) => snippetEditor.cleanForSave());
+        await Promise.all(cleanForSavePromises);
+
+        for (const snippetEditor of aliveEditors) {
+            snippetEditor.destroy();
+        }
         this.snippetEditors.splice(0);
     },
     /**
@@ -2627,6 +2641,11 @@ var SnippetsMenu = Widget.extend({
      * @return {Promise}
      */
     async _scrollToSnippet($el, $scrollable) {
+        // Don't scroll if $el is added to a visible popup that does not fill
+        // the page (otherwise the page would scroll to a random location).
+        if ($el.closest('div.modal:not(.s_popup_overflow_page)').length) {
+            return;
+        }
         return dom.scrollTo($el[0], {extraOffset: 50, $scrollable: $scrollable});
     },
     /**

@@ -802,12 +802,15 @@ class StockMove(models.Model):
 
     @api.model
     def _prepare_merge_moves_distinct_fields(self):
-        return [
+        fields = [
             'product_id', 'price_unit', 'procure_method', 'location_id', 'location_dest_id',
             'product_uom', 'restrict_partner_id', 'scrapped', 'origin_returned_move_id',
             'package_level_id', 'propagate_cancel', 'description_picking', 'date_deadline',
             'product_packaging_id',
         ]
+        if self.env['ir.config_parameter'].sudo().get_param('stock.merge_only_same_date'):
+            fields.append('date')
+        return fields
 
     @api.model
     def _prepare_merge_negative_moves_excluded_distinct_fields(self):
@@ -1424,7 +1427,8 @@ class StockMove(models.Model):
                 grouped_move_lines_out[k] = sum(self.env['stock.move.line'].concat(*list(g)).mapped('product_qty'))
             available_move_lines = {key: grouped_move_lines_in[key] - grouped_move_lines_out.get(key, 0) for key in grouped_move_lines_in}
             # pop key if the quantity available amount to 0
-            return dict((k, v) for k, v in available_move_lines.items() if v)
+            rounding = move.product_id.uom_id.rounding
+            return dict((k, v) for k, v in available_move_lines.items() if float_compare(v, 0, precision_rounding=rounding) > 0)
 
         StockMove = self.env['stock.move']
         assigned_moves_ids = OrderedSet()
