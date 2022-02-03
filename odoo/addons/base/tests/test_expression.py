@@ -346,8 +346,11 @@ class TestExpression(SavepointCaseWithUserDemo):
         # check that multi-level expressions with negative op work
         all_partners = self._search(Partner, [('company_id', '!=', False)])
 
+        # check multi-level negative expressions with magic columns
+        partners = self._search(Partner, [('company_id.active', '!=', False)])
+
         # FP Note: filtered_domain differs
-        res_partners = Partner.search([('company_id.partner_id', 'not in', [])])
+        res_partners = Partner._search([('company_id.partner_id', 'not in', [])])
         self.assertEqual(all_partners, res_partners, "not in [] fails")
 
         # Test the '(not) like/in' behavior. res.partner and its parent_id
