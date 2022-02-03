@@ -3,8 +3,7 @@
 
 from collections import defaultdict
 
-from odoo import _, fields, models
-from odoo import Command
+from odoo import _, fields, models, Command
 
 
 class StockMoveLine(models.Model):
@@ -32,7 +31,7 @@ class StockMoveLine(models.Model):
         """ Detach lines (and corresponding stock move from a picking to another). If wave is
         passed, attach new picking into it. If not attach line to their original picking.
 
-        :param int wave: id of the wave picking on which to put the move lines. """
+        :param wave: optional wave picking record on which to put the move lines. """
 
         if not wave:
             wave = self.env['stock.picking.batch'].create({
@@ -41,8 +40,6 @@ class StockMoveLine(models.Model):
             })
         line_by_picking = defaultdict(lambda: self.env['stock.move.line'])
         for line in self:
-            # if not wave and line.orig_picking_id.is_wave:
-                # continue
             line_by_picking[line.picking_id] |= line
         picking_to_wave_vals_list = []
         for picking, lines in line_by_picking.items():

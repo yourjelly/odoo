@@ -33,7 +33,6 @@ class StockPickingToWave(models.TransientModel):
     mode = fields.Selection([('existing', 'an existing wave transfer'), ('new', 'a new wave transfer')], default='existing')
     user_id = fields.Many2one('res.users', string='Responsible', help='Person responsible for this wave transfer')
 
-
     def attach_pickings(self):
         self.ensure_one()
 

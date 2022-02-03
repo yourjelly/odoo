@@ -245,7 +245,6 @@ class StockPickingBatch(models.Model):
                 res['context']['pickings_to_detach'] = list(empty_pickings)
             return res
 
-
     def action_assign(self):
         self.ensure_one()
         self.picking_ids.action_assign()
