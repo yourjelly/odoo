@@ -40,88 +40,91 @@
         <field name="model">knowledge.article</field>
         <field name="type">form</field>
         <field name="arch" type="xml">
-            <form class="o_knowledge_form_view" js_class="knowledge_view_form">
-                <sheet>
-                    <div class="container-fluid h-100">
-                        <div class="row h-100">
-                            <div class="col-sm-3 p-0 border-right overflow-auto">
-                                <div class="d-flex flex-column h-100">
-                                    <!-- Search bar -->
-                                    <div class="p-3" id="knowledge_search_bar">
-                                        <input type="text" class="form-control" placeholder="Search an Article..." disabled="True"/>
-                                    </div>
-                                    <!-- File explorer -->
-                                    <div class="flex-grow-1 position-relative">
-                                        <div class="o_scroll_view px-3">
-                                            <aside class="o_sidebar">
-                                                <i class="fa fa-refresh fa-spin" title="loader"/>
-                                            </aside>
-                                        </div>
+            <form class="h-100" js_class="knowledge_view_form">
+                <div class="container-fluid h-100">
+                    <div class="row h-100">
+                        <div class="col-sm-3 p-0 border-right overflow-auto">
+                            <div class="o_knowledge_aside d-flex flex-column h-100">
+                                <!-- Search bar -->
+                                <div class="p-3" id="knowledge_search_bar">
+                                    <input type="text" class="form-control" placeholder="Search an Article..." disabled="True"/>
+                                </div>
+                                <!-- File explorer -->
+                                <div class="flex-grow-1 position-relative">
+                                    <div class="o_scroll_view px-3">
+                                        <aside class="o_sidebar">
+                                            <i class="fa fa-refresh fa-spin" title="loader"/>
+                                        </aside>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-sm-9 p-0 o_knowledge_form_right_panel">
-                                <div class="d-flex flex-column h-100">
-                                    <!-- Article header -->
-                                    <div class="d-sm-flex flex-row justify-content-between">
-                                        <div class="d-flex align-items-center">
-                                            <!-- Breadcrumbs -->
-                                            <ol class="breadcrumb p-3" role="navigation">
-                                                <li class="breadcrumb-item">
-                                                    <a href="#">Articles</a>
-                                                </li>
-                                                <li class="breadcrumb-item d-flex">
-                                                    <field class="o_breadcrumb_article_name" name="name"/>
-                                                </li>
-                                            </ol>
-                                            <field name="is_user_favourite" class="m-0" widget="boolean_favorite" nolabel="1" force_save="1"/>
-                                        </div>
-                                        <!-- Buttons -->
-                                        <div>
-                                            <a type="button" role="button" class="btn btn-secondary btn-create">
-                                                <i class="fa fa-plus-circle"/> Create
-                                            </a>
-                                            <a type="button" role="button" class="btn btn-secondary btn-share">
-                                                <i class="fa fa-share-alt"/> Share
-                                            </a>
-                                            <div class="btn-group" role="toolbar" aria-label="options">
-                                                <div class="o-dropdown dropdown o-dropdown--no-caret">
-                                                    <a type="button" role="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                        <i class="fa fa-ellipsis-v"/>
+                        </div>
+                        <div class="col-sm-9 p-0 overflow-auto">
+                            <div class="d-flex flex-column h-100">
+                                <!-- Article header -->
+                                <div class="o_knowledge_header d-sm-flex flex-row justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <!-- Breadcrumbs -->
+                                        <ol class="breadcrumb p-3" role="navigation">
+                                            <li class="breadcrumb-item">
+                                                <a href="#">Articles</a>
+                                            </li>
+                                            <li class="breadcrumb-item d-flex">
+                                                <field class="o_breadcrumb_article_name" name="name"/>
+                                            </li>
+                                        </ol>
+                                        <field name="is_user_favourite" class="m-0" widget="boolean_favorite" nolabel="1" force_save="1"/>
+                                    </div>
+                                    <!-- Buttons -->
+                                    <div>
+                                        <a type="button" role="button" class="btn btn-secondary btn-create">
+                                            <i class="fa fa-plus-circle"/> Create
+                                        </a>
+                                        <a type="button" role="button" class="btn btn-secondary btn-share">
+                                            <i class="fa fa-share-alt"/> Share
+                                        </a>
+                                        <div class="btn-group" role="toolbar" aria-label="options">
+                                            <div class="o-dropdown dropdown o-dropdown--no-caret">
+                                                <a type="button" role="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fa fa-ellipsis-v"/>
+                                                </a>
+                                                <div class="dropdown-menu" role="menu">
+                                                    <a class="dropdown-item btn-move" href="#" role="button">
+                                                        <i class="fa fa-angle-double-right"/> Move To
                                                     </a>
-                                                    <div class="dropdown-menu" role="menu">
-                                                        <a class="dropdown-item btn-move" href="#" role="button">
-                                                            <i class="fa fa-angle-double-right"/> Move To
-                                                        </a>
-                                                        <a class="dropdown-item btn-lock" href="#" role="button">
-                                                            <i class="fa fa-lock"/> Lock
-                                                        </a>
-                                                        <a class="dropdown-item btn-duplicate" href="#" role="button">
-                                                            <i class="fa fa-copy"/> Duplicate
-                                                        </a>
-                                                        <a class="dropdown-item btn-delete" href="#" role="button">
-                                                            <i class="fa fa-trash"/> Delete
-                                                        </a>
-                                                    </div>
+                                                    <a class="dropdown-item btn-lock" href="#" role="button">
+                                                        <i class="fa fa-lock"/> Lock
+                                                    </a>
+                                                    <a class="dropdown-item btn-duplicate" href="#" role="button">
+                                                        <i class="fa fa-copy"/> Duplicate
+                                                    </a>
+                                                    <a class="dropdown-item btn-delete" href="#" role="button">
+                                                        <i class="fa fa-trash"/> Delete
+                                                    </a>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <!-- Article body -->
-                                    <div class="flex-grow-1 position-relative">
-                                        <field name="body" widget="html" no_label="1"/>
-                                    </div>
                                 </div>
-                                <div class="o_knowledge_chatter_container">
-                                    <div class="oe_chatter">
-                                        <field name="message_follower_ids" groups="base.group_user"/>
-                                        <field name="message_ids"/>
+                                <div class="flex-grow-1 position-relative">
+                                    <div class="o_scroll_view">
+                                        <!-- Article body -->
+                                        <div class="o_knowledge_editor d-flex">
+                                            <field name="body" widget="html" no_label="1"/>
+                                        </div>
+                                        <!-- Chatter -->
+                                        <div class="o_knowledge_chatter_container">
+                                            <div class="oe_chatter">
+                                                <field name="message_follower_ids" groups="base.group_user"/>
+                                                <field name="message_ids"/>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </sheet>
+                </div>
             </form>
         </field>
     </record>
