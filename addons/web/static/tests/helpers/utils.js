@@ -360,10 +360,7 @@ export async function mount(Comp, { props, target, env }) {
 }
 
 export function destroy(comp) {
-    if (comp.__owl__ !== comp.__owl__.app.root) {
-        throw new Error("This method should only be called on root component");
-    }
-    comp.__owl__.destroy();
+    comp.__owl__.app.destroy();
 }
 
 // partial replacement of t-ref on component

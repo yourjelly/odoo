@@ -1,41 +1,7 @@
 (function () {
-    const { Component, useComponent, onWillDestroy } = owl;
-    const capitalize = (s) => (s ? s[0].toUpperCase() + s.slice(1) : "");
-    const oldLifecycleMethods = [
-        "mounted",
-        "willStart",
-        "willUnmount",
-        "willPatch",
-        "patched",
-        "willUpdateProps",
-    ];
-
     const hasOwnProperty = Object.prototype.hasOwnProperty;
 
-    owl.Component = class extends Component {
-        constructor(...args) {
-            super(...args);
-            for (const methodName of oldLifecycleMethods) {
-                const hookName = "on" + capitalize(methodName);
-                const method = this[methodName];
-                if (typeof method === "function") {
-                    owl[hookName](method.bind(this));
-                }
-            }
-            if (this.catchError) {
-                owl.onError((error) => {
-                    this.catchError(error);
-                });
-            }
-            onWillDestroy(this.destroy.bind(this));
-        }
-
-        destroy() {}
-
-        static get current() {
-            return useComponent();
-        }
-
+    owl.Component = class extends owl.Component {
         get el() {
             const bdom = this.__owl__.bdom;
             if (!bdom) {

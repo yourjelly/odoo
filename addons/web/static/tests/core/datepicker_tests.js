@@ -461,6 +461,5 @@ QUnit.module("Components", () => {
         await click(valueInput);
         await editSelect(valueInput, "05/05/2005");
         await applyFilter(cfi);
-        cfi.destroy();
     });
 });
