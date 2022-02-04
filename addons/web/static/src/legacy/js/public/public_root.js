@@ -417,7 +417,7 @@ export async function createPublicRoot(RootWidget) {
         env: legacyEnv,
         props: { Component: RootParent },
         dev: env.debug,
-        translatableAttributes: ["label", "title", "placeholder", "alt", "data-tooltip"],
+        translatableAttributes: ["data-tooltip"],
         translateFn: _t,
     });
 

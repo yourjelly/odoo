@@ -43,7 +43,7 @@ export async function startWebClient(Webclient) {
         env,
         dev: env.debug,
         templates: window.__ODOO_TEMPLATES__,
-        translatableAttributes: ["label", "title", "placeholder", "alt", "data-tooltip"],
+        translatableAttributes: ["data-tooltip"],
         translateFn: env._t,
     });
     renderToString.app = app;

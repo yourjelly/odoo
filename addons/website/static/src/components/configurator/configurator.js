@@ -728,7 +728,7 @@ async function setup() {
             env,
             dev: env.debug,
             templates,
-            translatableAttributes: ['data-tooltip'],
+            translatableAttributes: ["data-tooltip"],
             translateFn: _t,
         });
         const loaderTemplate = await (await fetch('/website/static/src/xml/theme_preview.xml')).text();

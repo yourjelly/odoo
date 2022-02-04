@@ -535,7 +535,7 @@ odoo.define('web.OwlCompatibility', function (require) {
                 env,
                 templates: window.__ODOO_TEMPLATES__,
                 dev: env.isDebug(),
-                translatableAttributes: ["label", "title", "placeholder", "alt", "data-tooltip"],
+                translatableAttributes: ["data-tooltip"],
                 translateFn: env._t,
             };
             const app = new App(null, appConfig);
