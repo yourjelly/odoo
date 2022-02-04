@@ -1,12 +1,11 @@
 odoo.define("web.Model", function (require) {
     "use strict";
 
-    const { groupBy } = require("web.utils");
+    const { groupBy  } = require("web.utils");
     const Registry = require("web.Registry");
     const { useBus } = require("@web/core/utils/hooks");
 
-
-    const { EventBus, useComponent, onWillDestroy, onWillRender } = owl;
+    const { EventBus, onWillRender, useComponent } = owl;
     const isNotNull = (val) => val !== null && val !== undefined;
 
     /**
@@ -234,7 +233,7 @@ odoo.define("web.Model", function (require) {
             this.dispatching = false;
             this.extensions = [];
             this.externalState = {};
-            this.mapping = {};
+            this.mapping = new WeakMap();
             this.rev = 1;
 
             const { name, registry } = this.constructor;
@@ -312,7 +311,7 @@ odoo.define("web.Model", function (require) {
                 // Notifies subscribed components
                 // Purpose: re-render components bound by 'useModel'
                 if (rev === this.rev) {
-                    this._notifyComponents(rev);
+                    this._notifyComponents();
                 }
             });
         }
@@ -428,17 +427,14 @@ odoo.define("web.Model", function (require) {
          * @see Context.__notifyComponents() in owl.js for explanation
          * @private
          */
-        _notifyComponents(rev) {
-            const event = new Event("update");
-            event.rev = rev;
-            this.dispatchEvent(event);
+        _notifyComponents() {
+            const rev = ++this.rev;
+            this.trigger("update", { rev });
         }
     }
 
     Model.Extension = ModelExtension;
 
-    let nextId = 1;
-    const componentIds = new WeakMap();
     /**
      * This is more or less the hook 'useContextWithCB' from owl only slightly
      * simplified.
@@ -450,36 +446,29 @@ odoo.define("web.Model", function (require) {
         const component = useComponent();
         const model = component.env[modelName];
         if (!(model instanceof Model)) {
-            throw new Error(`No Model found when connecting '${
-                component.constructor.name
-                }'`);
+            throw new Error(`No Model found when connecting '${component.constructor.name}'`);
         }
 
-        const mapping = model.mapping;
-        if (!componentIds.has(component)) {
-            componentIds.set(component, nextId++);
-        }
-        const componentId = componentIds.get(component);
-        const currentCB = component.render.bind(component);
+        model.mapping.set(component, 0);
+        const __render = component.render.bind(component);
         component.render = function () {
-            if (model.rev > mapping[componentId]) {
+            if (model.rev > model.mapping.get(component)) {
                 return;
             }
-            currentCB();
+            __render();
         };
-        mapping[componentId] = 0;
+
         onWillRender(() => {
-            mapping[componentId] = model.rev;
+            model.mapping.set(component, model.rev);
         });
 
-        const onUpdate = async (ev) => {
-            // if (mapping[componentId] < ev.rev) {
-                mapping[componentId] = ev.rev;
-                await component.render();
-            // }
-        };
-
-        useBus(model, "update", onUpdate);
+        useBus(model, "update", (ev) => {
+            const { rev } = ev.detail;
+            if (model.mapping.get(component) < rev) {
+                model.mapping.set(component, rev);
+                component.render();
+            }
+        });
 
         return model;
     }
