@@ -6,7 +6,7 @@ const Link = require('wysiwyg.widgets.Link');
 
 
 // This widget is there only to extend Link and be instantiated by LinkDialog.
-const _DialogLinkWidget = Link.extend({
+const DialogLinkWidget = Link.extend({
     template: 'wysiwyg.widgets.link',
     events: _.extend({}, Link.prototype.events || {}, {
         'change [name="link_style_color"]': '_onTypeChange',
@@ -197,7 +197,7 @@ const LinkDialog = Dialog.extend({
      * @param {...any} args
      */
     getLinkWidget: function (...args) {
-        return new _DialogLinkWidget(this, ...args);
+        return new DialogLinkWidget(this, ...args);
     },
 
     /**
@@ -213,5 +213,8 @@ const LinkDialog = Dialog.extend({
     },
 });
 
-return LinkDialog;
+return {
+    LinkDialog: LinkDialog,
+    DialogLinkWidget: DialogLinkWidget
+};
 });

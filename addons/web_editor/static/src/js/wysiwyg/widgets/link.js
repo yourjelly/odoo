@@ -257,6 +257,13 @@ const Link = Widget.extend({
         urlInput.select();
     },
 
+    /**
+     * @returns {Promise}
+     */
+    save: function () {
+        return Promise.resolve();
+    },
+
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
@@ -298,8 +305,8 @@ const Link = Widget.extend({
      */
     _getData: function () {
         var $url = this.$('input[name="url"]');
-        var url = $url.val();
-        var content = this.$('input[name="label"]').val() || url;
+        var url = this._getLinkURL();
+        var content = this._getLinkContent();
 
         if (!this.isButton && $url.prop('required') && (!url || !$url[0].checkValidity())) {
             return null;
@@ -361,6 +368,12 @@ const Link = Widget.extend({
         return nodes;
     },
     /**
+     * @returns {String}
+     */
+    _getLinkContent: function () {
+        return this.$('input[name="label"]').val() || this._getLinkURL();
+    },
+    /**
      * Abstract method: return a JQuery object containing the UI elements
      * holding the styling options of the link (eg: color, size, shape).
      *
@@ -394,6 +407,13 @@ const Link = Widget.extend({
      * @returns {string}
      */
     _getLinkType: function () {},
+    /**
+     * Returns the link url.
+     * @returns {String}
+     */
+    _getLinkURL: function () {
+        return this.$('input[name="url"]').val();
+    },
     /**
      * Returns the custom text color for custom type.
      *

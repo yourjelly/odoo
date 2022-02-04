@@ -2,7 +2,7 @@
 odoo.define('mass_mailing.fix.LinkDialog', function (require) {
 'use strict';
 
-const LinkDialog = require('wysiwyg.widgets.LinkDialog');
+const { LinkDialog } = require('wysiwyg.widgets.LinkDialog');
 
 /**
  * Primary and link buttons are "hacked" by mailing themes scss. We thus

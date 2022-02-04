@@ -1987,9 +1987,10 @@ return Wysiwyg;
 });
 odoo.define('web_editor.widget', function (require) {
 'use strict';
+    const { LinkDialog } = require('wysiwyg.widgets.LinkDialog')
     return {
         Dialog: require('wysiwyg.widgets.Dialog'),
         MediaDialog: require('wysiwyg.widgets.MediaDialog'),
-        LinkDialog: require('wysiwyg.widgets.LinkDialog'),
+        LinkDialog: LinkDialog,
     };
 });

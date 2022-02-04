@@ -4,7 +4,7 @@ odoo.define('wysiwyg.widgets', function (require) {
 var Dialog = require('wysiwyg.widgets.Dialog');
 var AltDialog = require('wysiwyg.widgets.AltDialog');
 var MediaDialog = require('wysiwyg.widgets.MediaDialog');
-var LinkDialog = require('wysiwyg.widgets.LinkDialog');
+var { LinkDialog } = require('wysiwyg.widgets.LinkDialog');
 var LinkTools = require('wysiwyg.widgets.LinkTools');
 var ImageCropWidget = require('wysiwyg.widgets.ImageCropWidget');
 const LinkPopoverWidget = require('@web_editor/js/wysiwyg/widgets/link_popover_widget')[Symbol.for("default")];

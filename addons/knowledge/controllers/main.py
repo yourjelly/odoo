@@ -149,6 +149,15 @@ class KnowledgeDataSet(DataSet):
             limit=int(limit)
         ))
 
+    @http.route('/knowledge/get_article/<int:article_id>', type='json', auth='user')
+    def get_article(self, article_id):
+        article = request.env['knowledge.article'].search_read(
+            domain=[('id', '=', article_id)],
+            fields=['id', 'icon', 'name'],
+            limit=1
+        )
+        return article[0] if article else []
+
     # -----
     # Tools
     # -----
@@ -160,3 +169,4 @@ class KnowledgeDataSet(DataSet):
             limit=1
         )
         return max_sequence_article.sequence + 1 if max_sequence_article else 0
+
