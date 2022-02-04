@@ -35,4 +35,4 @@ UserMenu.components = { DropdownItem };
 export const systrayItem = {
     Component: UserMenu,
 };
-registry.category("systray").add("web.user_menu", systrayItem, { sequence: 0 });
+// registry.category("systray").add("web.user_menu", systrayItem, { sequence: 0 });
