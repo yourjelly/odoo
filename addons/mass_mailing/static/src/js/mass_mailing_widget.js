@@ -44,7 +44,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
 
     willStart: async function () {
         const getFavoritesPromise = this._rpc({
-            model: 'mailing.mailing',
+            model: 'mailing.favorite',
             method: 'get_favorites',
         }).then(result => {
             // Templates taken from old mailings

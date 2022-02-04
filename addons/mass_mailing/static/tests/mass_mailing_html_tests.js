@@ -86,7 +86,7 @@ QUnit.test('save arch and html', async function (assert) {
             '</form>',
         res_id: 1,
         mockRPC: function (route, args) {
-            if (route.indexOf('/web/dataset/call_kw/mailing.mailing/get_favorites') >= 0) {
+            if (route.indexOf('/web/dataset/call_kw/mailing.favorite/get_favorites') >= 0) {
                 return Promise.resolve([]);
             }
             return this._super(...arguments);

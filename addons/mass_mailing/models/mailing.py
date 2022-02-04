@@ -74,8 +74,7 @@ class MassMailing(models.Model):
              'Keep it empty if you prefer the first characters of your email content to appear instead.')
     email_from = fields.Char(string='Send From', required=True, store=True, readonly=False, compute='_compute_email_from',
                              default=lambda self: self.env.user.email_formatted)
-    favorite = fields.Boolean('Favorite', copy=False)
-    favorite_date = fields.Datetime('Favorite Date', help='When this mailing was added in the favorites', copy=False)
+    is_favorite = fields.Boolean('Favorite', compute='_compute_is_favorite')
     sent_date = fields.Datetime(string='Sent Date', copy=False)
 
     schedule_type = fields.Selection([('now', 'Send now'), ('scheduled', 'Send on')], string='Schedule',
@@ -212,6 +211,16 @@ class MassMailing(models.Model):
                 mailing.email_from = notification_email
             else:
                 mailing.email_from = mailing.email_from or user_email
+
+    @api.depends_context('uid')
+    def _compute_is_favorite(self):
+        values_list = self.env['mailing.favorite'].search_read([
+            ('mailing_id', 'in', self.ids),
+            ('user_id', '=', self.env.user.id),
+        ], fields=['mailing_id'])
+        favorites = {values['mailing_id'][0] for values in values_list}
+        for mailing in self:
+            mailing.is_favorite = mailing.id in favorites
 
     def _compute_total(self):
         for mass_mailing in self:
@@ -468,6 +477,8 @@ class MassMailing(models.Model):
     def action_add_favorite(self):
         """Add the current mailing in the favorites list."""
         self.ensure_one()
+        if self.is_favorite:
+            raise UserError(_('This mailing is already in your favorites list.'))
 
         if self.is_body_empty:
             return {
@@ -481,10 +492,8 @@ class MassMailing(models.Model):
                 }
             }
 
-        self.write({
-            'favorite': True,
-            'favorite_date': fields.Datetime.now(),
-        })
+        self.env['mailing.favorite'].create({'mailing_id': self.id})
+
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
@@ -499,10 +508,14 @@ class MassMailing(models.Model):
     def action_remove_favorite(self):
         """Remove the current mailing from the favorites list."""
         self.ensure_one()
-        self.write({
-            'favorite': False,
-            'favorite_date': False,
-        })
+        if not self.is_favorite:
+            raise UserError(_('This mailing is not in your favorites list.'))
+
+        self.env['mailing.favorite'].search([
+            ('mailing_id', '=', self.id),
+            ('user_id', '=', self.env.user.id),
+        ]).unlink()
+
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
@@ -1250,21 +1263,3 @@ class MassMailing(models.Model):
             return lxml.html.tostring(root)
 
         return body_html
-
-    @api.model
-    def get_favorites(self):
-        """Return all mailing set as favorite and skip mailing with empty body."""
-        values_list = self.search_read(
-            domain=[
-                ('body_arch', '!=', False),
-                ('body_html', '!=', False),
-                ('favorite', '=', True),
-            ],
-            fields=['id', 'subject', 'body_arch'],
-            order='favorite_date DESC',
-        )
-
-        return [
-            values for values in values_list
-            if not tools.is_html_empty(values['body_arch'])
-        ]

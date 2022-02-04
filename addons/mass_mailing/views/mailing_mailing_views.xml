@@ -174,16 +174,16 @@
                                 <field class="o_text_overflow" name="subject" string="Subject"
                                     attrs="{'readonly': [('state', 'in', ('sending', 'done'))]}"
                                     widget="char_emojis" placeholder="e.g. New Sale on all T-shirts"/>
-                                <field name="favorite" invisible="1"/>
+                                <field name="is_favorite" invisible="1"/>
                                 <button type="object" name="action_add_favorite"
                                     class="o_mass_mailing_favorite p-0"
                                     icon="fa-star-o"
-                                    attrs="{'invisible': [('favorite', '=', True)]}"
+                                    attrs="{'invisible': [('is_favorite', '=', True)]}"
                                     title="Add to templates"/>
                                 <button type="object" name="action_remove_favorite"
                                     class="o_mass_mailing_favorite p-0"
                                     icon="fa-star"
-                                    attrs="{'invisible': [('favorite', '=', False)]}"
+                                    attrs="{'invisible': [('is_favorite', '=', False)]}"
                                     title="Remove from templates"/>
                             </div>
                             <label for="mailing_model_id" string="Recipients"/>

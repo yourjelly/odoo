@@ -4,6 +4,7 @@
 from . import ir_model
 from . import link_tracker
 from . import mailing_contact
+from . import mailing_favorite
 from . import mailing_list
 from . import mailing_trace
 from . import mailing
