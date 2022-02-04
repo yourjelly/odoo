@@ -12,10 +12,6 @@ export class AttachmentDeleteConfirm extends Component {
         useComponentToModel({ fieldName: 'component', modelName: 'AttachmentDeleteConfirmView' });
     }
 
-    _onClickCancel() {
-        this.dialogAPI.close();
-    }
-
     /**
      * @returns {AttachmentDeleteConfirmView}
      */
