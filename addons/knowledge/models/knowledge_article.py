@@ -1,31 +1,68 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models, api
+from odoo import fields, models, api, _
+from odoo.exceptions import AccessError
 from odoo.osv import expression
+
+
+class ArticleMembers(models.Model):
+    _name = 'knowledge.article.member'
+    _description = 'Article Members'
+    _table = 'knowledge_article_member_rel'
+
+    article_id = fields.Many2one('knowledge.article', 'Article', ondelete='cascade', required=True)
+    partner_id = fields.Many2one('res.partner', index=True, ondelete='cascade', required=True)
+    permission = fields.Selection([
+        ('none', 'None'),
+        ('read', 'Read'),
+        ('write', 'Write'),
+    ], required=True, default='read')
+    # used to highlight the current user in the share wizard.
+    is_current_user = fields.Boolean(string="Is Me ?", compute="_compute_is_current_user")
+
+    def _compute_is_current_user(self):
+        for member in self:
+            member.is_current_user = member.partner_id.user_id == self.env.user
 
 
 class Article(models.Model):
     _name = "knowledge.article"
-    _description = "Contains the knowledge of a specific subject."
+    _description = "Knowledge Articles"
     _inherit = ['mail.thread']
     _order = "favourite_count, create_date desc"
 
     name = fields.Char(string="Title", default="New Article")
     body = fields.Html(string="Article Body")
     icon = fields.Char(string='Article Icon', default='fa-file')
+    author_ids = fields.Many2many("res.users", string="Authors", default=lambda self: self.env.user)
 
+    # Hierarchy and sequence
     parent_id = fields.Many2one("knowledge.article", string="Parent Article")
     child_ids = fields.One2many("knowledge.article", "parent_id", string="Child Articles")
     # Set default=0 to avoid false values and messed up sequence order inside same parent
     sequence = fields.Integer(string="Article Sequence", default=0,
                               help="The sequence is computed only among the articles that have the same parent.")
 
-    author_ids = fields.Many2many("res.users", string="Authors", default=lambda self: self.env.user)
-
-    # TODO DBE: add authorised_user to allow users to read private article of other users. (+ access_token)
-    authorised_user_ids = fields.Many2many("res.users", "knowledge_authorised_user_rel", string="Authorised Users",
-                                           help="Authorised users are users that can read the article even if it's private.")
+    # Access rules and members + implied category
+    internal_permission = fields.Selection([
+        ('none', 'None'),
+        ('read', 'Read'),
+        ('write', 'Write'),
+    ], required=True, default='write')
+    partner_ids = fields.Many2many("res.partner", "knowledge_article_member_rel", 'article_id', 'partner_id', string="Article Members", copy=False, depends=['article_member_ids'],
+        help="Article members are the partners that have specific access rules on the related article.")
+    article_member_ids = fields.One2many('knowledge.article.member', 'article_id', string='Members Information', depends=['partner_ids'])  # groups ?
+    user_has_access = fields.Boolean(string='Has Access', compute="_compute_user_access")
+    user_can_write = fields.Boolean(string='Can Write', compute="_compute_user_access")
+    category = fields.Selection([
+        ('workspace', 'Workspace'),
+        ('private', 'Private'),
+        ('shared', 'Shared'),
+    ], compute="_compute_category", store=True)
+    # If Private, who is the owner ?
+    owner_id = fields.Many2one("res.users", string="Current Owner", compute="_compute_owner_id", search="_search_owner_id",
+                               help="When an article has an owner, it means this article is private for that owner.")
 
     # Same as write_uid/_date but limited to the body
     last_edition_id = fields.Many2one("res.users", string="Last Edited by")
@@ -39,13 +76,65 @@ class Article(models.Model):
     # Set default=0 to avoid false values and messed up order
     favourite_count = fields.Integer(string="#Is Favourite", copy=False, default=0)
 
-    # Published
-    website_published = fields.Boolean(string="Website Published")
+    # TODO DBE: Add constraints
+    # -> at least one member with write access if internal_permission != 'write'
 
-    # Private ?
-    owner_id = fields.Many2one("res.users", string="Current Owner",
-                               help="When an article has an owner, it means this article is private for that owner.")
-    is_private = fields.Boolean(string="Private", compute="_compute_is_private", inverse="_inverse_is_private")
+    ##############################
+    # Computes, Searches, Inverses
+    ##############################
+
+    @api.depends_context('uid')
+    @api.depends('internal_permission', 'article_member_ids.partner_id', 'article_member_ids.permission')
+    def _compute_user_access(self):
+        for article in self:
+            # You cannot have only one member per article.
+            user_member = article.article_member_ids.filtered(
+                lambda member: self.env.user in member.partner_id.user_ids)
+            article.user_has_access = user_member.permission != "none" if user_member \
+                else article.internal_permission != 'none'
+            article.user_can_write = user_member.permission == "write" if user_member \
+                else article.internal_permission == 'write'
+
+    @api.depends('internal_permission', 'article_member_ids.permission', 'article_member_ids.partner_id')
+    def _compute_category(self):
+        for article in self:
+            if article.internal_permission != 'none':
+                article.category = 'workspace'
+            elif len(article.partner_ids) > 1:
+                article.category = 'shared'
+            elif len(article.partner_ids) == 1 and article.article_member_ids.permission == 'write':
+                article.category = 'private'
+            else:  # should never happen. If an article has no category, there is an error in it's access rules.
+                article.category = False
+
+    @api.depends_context('uid')
+    @api.depends('internal_permission', 'article_member_ids.partner_id', 'article_member_ids.permission')
+    def _compute_owner_id(self):
+        for article in self:
+            members = article.article_member_ids
+            if article.internal_permission != 'none':
+                article.owner_id = False
+            elif len(members) == 1 and members.permission == 'write' and not members.partner_id.partner_share:
+                article.owner_id = next(user for user in members.partner_id.user_ids if not user.share)
+            else:
+                article.owner_id = False
+
+    def _search_owner_id(self, operator, value):
+        # get the user_id from name
+        if type(value) == str:
+            value = self.env['res.users'].search([('name', operator, value)]).ids
+            if not value:
+                return expression.FALSE_DOMAIN
+            operator = '='  # now we will search for articles that match the retrieved users.
+        # Assumes operator is '=' and value is a user_id or False
+        elif operator not in ('=', '!='):
+            raise NotImplementedError()
+
+        # if value = False and operator = '!=' -> We look for all the private articles.
+        domain = [('category', '=' if value or operator == '!=' else '!=', 'private')]
+        if value:
+            domain = expression.AND([domain, [('partner_ids.user_ids', 'in' if operator == '=' else 'not in', value)]])
+        return domain
 
     def _compute_is_user_favourite(self):
         for article in self:
@@ -75,67 +164,6 @@ class Article(models.Model):
             return [('favourite_user_ids', 'in', [self.env.user.id])]
         else:
             return [('favourite_user_ids', 'not in', [self.env.user.id])]
-
-    @api.depends("owner_id")
-    def _compute_is_private(self):
-        for article in self:
-            article.is_private = article.owner_id == self.env.user
-
-    def _inverse_is_private(self):
-        private_articles = public_articles = self.env['knowledge.article']
-        # changing the privacy of a parent impact all his children.
-        for article in self:
-            def get_all_children(a):
-                if a.child_ids:
-                    return a.child_ids | get_all_children(a.child_ids)
-                else:
-                    return self.env['knowledge.article']
-            children = get_all_children(article)
-
-            if self.env.user == article.owner_id:
-                public_articles |= article | children
-            else:
-                private_articles |= article | children
-
-        private_articles.write({'owner_id': self.env.uid})
-        public_articles.write({'owner_id': False})
-
-    @api.model_create_multi
-    def create(self, vals_list):
-        for vals in vals_list:
-            vals['last_edition_id'] = self._uid
-            vals['last_edition_date'] = fields.Datetime.now()
-        articles = super(Article, self).create(vals_list)
-        for article, vals in zip(articles, vals_list):
-            if any(field in ['parent_id', 'sequence'] for field in vals) and not self.env.context.get('resequencing_articles'):
-                article.with_context(resequencing_articles=True)._resequence()
-        return articles
-
-    def write(self, vals):
-        """ Add editor as author. Edition means writing on the body. """
-        if 'body' in vals:
-            vals.update({
-                "author_ids": [(4, self._uid)],  # add editor as author.
-                "last_edition_id": self._uid,
-                "last_edition_date": fields.Datetime.now(),
-            })
-
-        result = super(Article, self).write(vals)
-
-        # use context key to stop reordering loop as "_resequence" calls write method.
-        if any(field in ['parent_id', 'sequence'] for field in vals) and not self.env.context.get('resequencing_articles'):
-            self.with_context(resequencing_articles=True)._resequence()
-
-        return result
-
-    def unlink(self):
-        for article in self:
-            # Make all the article's children be adopted by the parent's parent.
-            # Otherwise, we will have to manage an orphan house.
-            parent = article.parent_id
-            if parent:
-                article.child_ids.write({"parent_id": parent.id})
-        return super(Article, self).unlink()
 
     @api.model
     def search(self, args, offset=0, limit=None, order=None, count=False):
@@ -201,6 +229,120 @@ class Article(models.Model):
         else:
             return self.browse(my_articles_ids_keep) + other_article_res
 
+    ##########
+    #  CRUD  #
+    ##########
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            vals['last_edition_id'] = self._uid
+            vals['last_edition_date'] = fields.Datetime.now()
+            if vals.get('parent_id'):
+                # copy members from parent
+                parent = self.browse(vals['parent_id'])
+                if not parent.user_can_write:
+                    raise AccessError(_("You cannot create articles under an article you can't write on"))
+                vals['internal_permission'] = parent.internal_permission
+                if parent.article_member_ids:
+                    # At creation, always take the membership of the parent
+                    vals['article_member_ids'] = [(0, 0, {
+                        'partner_id': member.partner_id.id,
+                        'permission': member.permission
+                    }) for member in parent.article_member_ids]
+
+        articles = super(Article, self).create(vals_list)
+        for article, vals in zip(articles, vals_list):
+            if any(field in ['parent_id', 'sequence'] for field in vals) and not self.env.context.get('resequencing_articles'):
+                article.with_context(resequencing_articles=True)._resequence()
+        return articles
+
+    def write(self, vals):
+        """ Add editor as author. Edition means writing on the body. """
+        if 'body' in vals:
+            vals.update({
+                "author_ids": [(4, self._uid)],  # add editor as author.
+                "last_edition_id": self._uid,
+                "last_edition_date": fields.Datetime.now(),
+            })
+
+        membership_changed = False
+        wrote_articles = self.env['knowledge.article']
+        if vals.get('parent_id'):
+            # copy members from parent
+            parent = self.browse(vals['parent_id'])
+            if not parent.user_can_write:
+                raise AccessError(_("You cannot move articles under an article you can't write on"))
+            vals['internal_permission'] = parent.internal_permission
+            for article in self:  # need to do it one by one as each article has their own set of members
+                if parent.article_member_ids:
+                    # In case of conflict, give priority to the article's members, not parent's ones
+                    article_vals = vals.copy()
+                    article_vals['article_member_ids'] = [(0, 0, {
+                        'partner_id': member.partner_id.id,
+                        'permission': member.permission
+                    }) for member in parent.article_member_ids if member.partner_id not in article.partner_ids]
+                    super(Article, article).write(article_vals)
+                    membership_changed = True
+                    wrote_articles |= article
+
+        result = super(Article, self - wrote_articles).write(vals)
+
+        # Propagate access rules to children
+        # TODO: /!\ What happen if you can write on parent article but not on one of the children ?
+        if self.child_ids:
+            children_values = {}
+            if 'internal_permission' in vals:
+                # Propagate permission to children
+                children_values = {
+                    'internal_permission': vals['internal_permission']
+                }
+
+            wrote_children = self.env['knowledge.article']
+            if 'article_member_ids' in vals or membership_changed:
+                # propagate members to children: need to do it one by one as each article has their own set of members
+                for article in self:
+                    for child in article.child_ids:
+                        # In case of conflict, give priority to the article's members, not parent's ones
+                        child_values = children_values.copy()
+                        child_values['article_member_ids'] = [(0, 0, {
+                            'partner_id': member.partner_id.id,
+                            'permission': member.permission
+                        }) for member in article.article_member_ids if member.partner_id not in child.partner_ids]
+                        child.write(child_values)
+                        wrote_children |= child
+
+            if children_values:
+                (self.child_ids - wrote_children).write(children_values)
+
+        # use context key to stop reordering loop as "_resequence" calls write method.
+        if any(field in ['parent_id', 'sequence'] for field in vals) and not self.env.context.get('resequencing_articles'):
+            self.with_context(resequencing_articles=True)._resequence()
+
+        return result
+
+    def unlink(self):
+        for article in self:
+            # Make all the article's children be adopted by the parent's parent.
+            # Otherwise, we will have to manage an orphan house.
+            parent = article.parent_id
+            if parent:
+                article.child_ids.write({"parent_id": parent.id})
+        return super(Article, self).unlink()
+
+    #########
+    # Actions
+    #########
+
+    def action_show_articles(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('knowledge.knowledge_article_dashboard_action')
+        action['res_id'] = self.env.context.get('res_id', self.search([('parent_id', '=', False), ('internal_permission', '=', 'none')], limit=1, order='sequence').id)
+        return action
+
+    ############################
+    # Tools and business methods
+    ############################
+
     def _get_highest_parent(self):
         self.ensure_one()
         if self.parent_id:
@@ -248,7 +390,30 @@ class Article(models.Model):
             else:
                 write_vals_by_sequence[i + start_sequence] |= child
 
-    def show_article(self):
-        action = self.env['ir.actions.act_window']._for_xml_id('knowledge.knowledge_article_dashboard_action')
-        action['res_id'] = self.env.context.get('res_id', self.search([('parent_id', '=', False), ('owner_id', '=', False)], limit=1, order='sequence').id)
-        return action
+    # TODO: Check if still needed or if we will use it later.
+    def _set_private(self, parent_id=False):
+        self.ensure_one()
+        self.internal_permission = 'none'
+        self.parent_id = parent_id
+
+        self.article_member_ids.filtered(lambda member: member.partner_id != self.env.user.partner_id).unlink()
+
+        # update the member or add it to member with write access.
+        if self.article_member_ids:
+            self.article_member_ids.permission = 'write'
+        else:
+            self.article_member_ids = [(0, 0, {
+                'article_id': self.id,
+                'partner_id': self.env.user.partner_id,
+                'permission': 'write'
+            })]
+
+    def _invite_partners(self, partner_ids, access_rule):
+        self.ensure_one()
+        # add member
+        self.article_member_ids.write([(0, 0, {
+            'article_id': self.id,
+            'partner_id': partner.id,
+            'permission': access_rule
+        }) for partner in partner_ids])
+        # TODO: send mail
