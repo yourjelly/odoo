@@ -25,7 +25,13 @@
                         </group>
                         <group>
                             <field name="author_ids" widget="many2many_avatar_user"/>
-                            <field name="authorised_user_ids" widget="many2many_avatar_user"/>
+                            <field name="article_member_ids">
+                                    <tree>
+                                        <field name="partner_id"/>
+                                        <field name="permission"/>
+                                    </tree>
+                            </field>
+                            <field name="internal_permission"/>
                         </group>
                     </group>
                     <label for="body"/>
@@ -134,9 +140,7 @@
                 <field name="last_edition_id" widget="many2one_avatar_user"/>
                 <field name="last_edition_date"/>
 
-                <field name="website_published" widget="boolean_toggle" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
                 <field name="owner_id" widget="many2one_avatar_user" groups="base.group_system"/>
-                <field name="is_private" widget="boolean_toggle" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
             </tree>
         </field>
     </record>
@@ -150,11 +154,13 @@
                 <field name="parent_id"/>
                 <field name="author_ids"/>
                 <field name="last_edition_id"/>
-                <field name="owner_id"/>
 
                 <filter name="favourites" string="My Favourites" domain="[('is_user_favourite', '=', True)]"/>
                 <filter name="own_articles" string="My Articles" domain="[('owner_id', '=', uid)]"/>
-                <filter name="shared_articles" string="My Shared Articles" domain="['|', ('authorised_user_ids', 'in', uid), '&amp;', ('owner_id', '=', uid), ('authorised_user_ids', '!=', False)]"/>
+                <filter name="shared_articles" string="My Shared Articles" domain="[('category', '=', 'shared')]"/>
+                <!--TODO FABA: Apply record rules to avoid users that are not in partner_ids to access the records in category 'shared'.
+                        + all the other record rules of course :)
+                -->
 
                 <group expand="0" string="Group By">
                   <filter string="Authors" name="author_ids" domain="[]" context="{'group_by':'author_ids'}"/>
@@ -188,7 +194,7 @@
         <field name="name">Articles</field>
         <field name="model_id" ref="model_knowledge_article"/>
         <field name="state">code</field>
-        <field name="code">action = model.show_article()</field>
+        <field name="code">action = model.action_show_articles()</field>
     </record>
 
     <menuitem

@@ -3,6 +3,7 @@
 
 import json
 from odoo import http, _
+from odoo.exceptions import UserError
 from odoo.http import request
 
 from odoo.addons.web.controllers.main import DataSet
@@ -30,9 +31,6 @@ class KnowledgeDataSet(DataSet):
         if before_article_id and not before_article:
             return "missing article"  # The article before which you want to move your article does not exist anymore
 
-        if parent and parent.is_private:
-            private = True
-
         if before_article:
             sequence = before_article.sequence
         else:
@@ -41,11 +39,24 @@ class KnowledgeDataSet(DataSet):
 
         values = {
             'parent_id': target_parent_id,
-            'owner_id': request.env.user.id if private else False,
             'sequence': sequence
         }
+        if not target_parent_id:
+            # If parent_id, the write method will set the internal_permission based on the parent.
+            # If moved from workspace to private -> set none. If moved from private to workspace -> set write
+            values['internal_permission'] = 'none' if private else 'write'
 
-        Article.browse(article_id).write(values)
+        article = Article.browse(article_id)
+        if not parent and private:  # If set private without parent, remove all members except current user.
+            article.article_member_ids.unlink()
+            values.update({
+                'article_member_ids': [(0, 0, {
+                    'partner_id': request.env.user.partner_id.id,
+                    'permission': 'write'
+                })]
+            })
+
+        article.write(values)
         return True
 
     @http.route('/knowledge/article/<int:article_id>/delete', type='json', auth="user")
@@ -74,19 +85,26 @@ class KnowledgeDataSet(DataSet):
         parent = Article.browse(target_parent_id) if target_parent_id else False
         if target_parent_id and not parent:
             return "missing parent"  # The parent in which you want to create your article does not exist anymore
-        if parent and parent.is_private:
-            private = True
 
         values = {
+            'internal_permission': 'none' if private else 'write',  # you cannot create an article without parent in shared directly.,
             'parent_id': target_parent_id,
-            'owner_id': request.env.user.id if private else False,
             'sequence': self._get_max_sequence_inside_parent(target_parent_id)
         }
+        if not parent and private:
+            # To be private, the article need at least one member with write access.
+            values.update({
+                'article_member_ids': [(0, 0, {
+                    'partner_id': request.env.user.partner_id.id,
+                    'permission': 'write'
+                })]
+            })
         if title:
             values.update({
                 'name': title,
                 'body': title
             })
+
         article = Article.create(values)
 
         return article.id
@@ -100,15 +118,17 @@ class KnowledgeDataSet(DataSet):
         # get favourite
         favourites = Article.search([("favourite_user_ids", "in", [request.env.user.id])])
 
-        # get public articles
-        public_articles = Article.search([("owner_id", "=", False), ("parent_id", "=", False)])
+        main_articles = Article.search([("parent_id", "=", False)])
 
-        # get private articles
-        private_articles = Article.search([("owner_id", "=", request.env.user.id), ("parent_id", "=", False)])
+        # keep only articles
+        public_articles = main_articles.filtered(lambda article: article.category == 'workspace')
+        shared_articles = main_articles.filtered(lambda article: article.category == 'shared')
+        private_articles = main_articles.filtered(lambda article: article.owner_id == request.env.user)
 
         return {
             "favourites": favourites,
             "public_articles": public_articles,
+            "shared_articles": shared_articles,
             "private_articles": private_articles
         }
 
