@@ -74,9 +74,6 @@
                                         <div class="d-flex align-items-center">
                                             <!-- Breadcrumbs -->
                                             <ol class="breadcrumb p-3" role="navigation">
-                                                <li class="breadcrumb-item">
-                                                    <a href="#">Articles</a>
-                                                </li>
                                                 <li class="breadcrumb-item d-flex">
                                                     <field class="o_breadcrumb_article_name" name="name"/>
                                                 </li>
@@ -213,7 +210,6 @@
         <field name="name">Articles</field>
         <field name="res_model">knowledge.article</field>
         <field name="view_mode">form</field>
-        <field name="target">inline</field>
         <field name="view_id" ref="knowledge.knowledge_article_view_dashboard"/>
     </record>
 

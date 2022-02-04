@@ -12,6 +12,14 @@ const KnowledgeFormRenderer = FormRenderer.extend({
 
     /**
      * @override
+     */
+    init: function (parent, state, params) {
+        this._super(...arguments);
+        this.breadcrumbs = params.breadcrumbs;
+    },
+
+    /**
+     * @override
      * @returns {Promise}
      */
     start: function () {
@@ -185,6 +193,31 @@ const KnowledgeFormRenderer = FormRenderer.extend({
                 // todo
             }
         });
+    },
+
+    /**
+     * @override
+     * @returns {Promise}
+     */
+    _renderView: async function () {
+        const result = await this._super.apply(this, arguments);
+        this._renderBreadcrumb();
+        return result;
+    },
+
+    _renderBreadcrumb: function () {
+        const items = this.breadcrumbs.map(payload => {
+            const $a = $('<a href="#"/>');
+            $a.text(payload.title);
+            $a.click(() => {
+                this.trigger_up('breadcrumb_clicked', payload);
+            });
+            const $li = $('<li class="breadcrumb-item"/>');
+            $li.append($a);
+            return $li;
+        });
+        const $container = this.$el.find('.breadcrumb');
+        $container.prepend(items);
     },
 
     /**
