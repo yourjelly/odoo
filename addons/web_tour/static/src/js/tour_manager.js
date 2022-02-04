@@ -14,6 +14,7 @@ var Tip = require('web_tour.Tip');
 const {Markup} = require('web.utils');
 
 var _t = core._t;
+const { markup } = owl;
 
 var RUNNING_TOUR_TIMEOUT = 10000;
 
@@ -430,12 +431,12 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
             if (message) {
                 message = typeof message === 'function' ? message() : message;
             } else {
-                message = _t('<strong><b>Good job!</b> You went through all steps of this tour.</strong>');
+                message = markup(_t('<strong><b>Good job!</b> You went through all steps of this tour.</strong>'));
             }
             const fadeout = this.tours[tour_name].fadeout;
             core.bus.trigger('show-effect', {
                 type: "rainbow_man",
-                message: owl.markup(message),
+                message,
                 fadeout,
             });
         }
