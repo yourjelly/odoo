@@ -84,20 +84,31 @@ const KnowledgeFormController = FormController.extend({
                         results: records.map(record => {
                             return {
                                 id: record.id,
-                                text: record.name
+                                icon: record.icon,
+                                text: record.name,
                             };
                         })
                     };
                 }
             },
             /**
+             * When the user enters a search term, the function will
+             * highlight the part of the string matching with the
+             * search term. (e.g: when the user types 'hello', the
+             * string 'hello world' will be formatted as '<u>hello</u> world').
+             * That way, the user can figure out why a search result appears.
              * @param {Object} result
              * @param {integer} result.id
-             * @param {string} result.text
+             * @param {String} result.icon
+             * @param {String} result.text
              * @returns {String}
              */
-            formatResult: result => {
-                return '<span class="fa fa-file"></span> ' + _.escape(result.text);
+            formatResult: (result, _target, { term }) => {
+                const { icon, text } = result;
+                const pattern = new RegExp(`(${term})`, 'gi');
+                return `<span class="fa ${icon}"></span> ` + (
+                    term.length > 0 ? text.replaceAll(pattern, '<u>$1</u>') : text
+                );
             },
         });
         const dialog = new Dialog(this, {

@@ -145,7 +145,7 @@ class KnowledgeDataSet(DataSet):
         Article = request.env['knowledge.article']
         return json.dumps(Article.search_read(
             domain=[('name', '=ilike', '%' + query + '%')],
-            fields=['id', 'name'],
+            fields=['id', 'icon', 'name'],
             limit=int(limit)
         ))
 
