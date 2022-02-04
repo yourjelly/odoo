@@ -137,8 +137,9 @@ odoo.define('web.OwlCompatibility', function (require) {
             onPatched(() => {
                 if (widgetIsAttached) {
                     this.renderWidget();
+                } else {
+                    insertWidget();
                 }
-                insertWidget();
             });
 
             onWillDestroy(() => this.__destroy(this.__owl__.parent.component));
