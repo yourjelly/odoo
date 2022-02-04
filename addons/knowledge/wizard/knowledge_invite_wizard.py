@@ -21,4 +21,11 @@ class KnowledgeInviteWizard(models.TransientModel):
     def _action_invite_users(self):
         # TODO: Invite users
         print('Inviting users...')
-        pass
+        email_values = {}
+        template = self.env.ref('knowledge.mail_template_user_invite')
+        if template:
+            template.send_mail(
+                self.env.user.id,
+                email_layout_xmlid='mail.mail_notification_light',
+                email_values=email_values
+            )

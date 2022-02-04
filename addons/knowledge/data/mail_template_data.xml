@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="mail_template_user_invite" model="mail.template">
+            <field name="name">Knowledge: Invite user</field>
+            <field name="model_id" ref="knowledge.model_knowledge_article"/>
+            <field name="subject">Knowledge: Invitation</field>
+            <field name="email_from">md@oilcompany.fr</field>
+            <field name="email_to">md@oilcompany.fr</field>
+            <field name="body_html" type="html">
+<div style="margin: 0px; padding: 0px;">
+    Hello world
+    <div style="padding: 16px 8px 16px 8px; text-align: center;">
+        <a href="/" style="background-color: #875a7b; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px;">
+            Access article
+        </a>
+    </div>
+</div>
+            </field>
+            <!-- <field name="lang">{{ object.partner_id.lang }}</field> -->
+            <field name="auto_delete" eval="True"/>
+        </record>
+    </data>
+</odoo>
