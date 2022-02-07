@@ -24,7 +24,7 @@ import {
 } from '@web/legacy/utils';
 import * as legacySession from 'web.session';
 
-const { App, Component, mount, whenReady } = owl;
+const { Component, mount, whenReady } = owl;
 
 Component.env = legacyEnv;
 
@@ -59,7 +59,7 @@ Component.env = legacyEnv;
             autofetchPartnerImStatus: false,
         },
     }));
-    await mount(MainComponentsContainer, document.body, { env, templates });
+    await mount(MainComponentsContainer, document.body, { env, templates, dev: env.debug });
     createAndMountDiscussPublicView();
 })();
 
@@ -70,6 +70,7 @@ async function createAndMountDiscussPublicView() {
     await mount(DialogManager, document.body, {
         templates: legacySession.owlTemplates,
         env: Component.env,
+        dev: Component.env.isDebug(),
     });
     messaging.models['Thread'].insert(messaging.models['Thread'].convertData(data.channelData));
     const discussPublicView = messaging.models['DiscussPublicView'].create(data.discussPublicViewData);
@@ -82,6 +83,7 @@ async function createAndMountDiscussPublicView() {
     await mount(DiscussPublicView, document.body, {
         templates: legacySession.owlTemplates,
         env: Component.env,
+        dev: Component.env.isDebug(),
         props: {
             localId: discussPublicView.localId,
         },
