@@ -4,6 +4,8 @@ import fonts from 'wysiwyg.fonts';
 import {generateHTMLId} from 'web_editor.utils';
 import options from 'web_editor.snippets.options';
 
+let dbSocialValues;
+
 options.registry.SocialMedia = options.Class.extend({
     /**
      * @override
@@ -14,20 +16,22 @@ options.registry.SocialMedia = options.Class.extend({
             .forEach(el => this.links.push({id: generateHTMLId(), el: el}));
 
         await this._super(...arguments);
-        let websiteId;
-        this.trigger_up('context_get', {
-            callback: function (ctx) {
-                websiteId = ctx['website_id'];
-            },
-        });
-        // Fetch URLs for db links.
-        [this.dbSocialValues] = await this._rpc({
-            model: 'website',
-            method: 'read',
-            args: [websiteId, ['social_facebook', 'social_twitter', 'social_youtube',
-                'social_instagram', 'social_linkedin', 'social_github']],
-        });
-        delete this.dbSocialValues.id;
+        if (!dbSocialValues) {
+            let websiteId;
+            this.trigger_up('context_get', {
+                callback: function (ctx) {
+                    websiteId = ctx['website_id'];
+                },
+            });
+            // Fetch URLs for db links.
+            [dbSocialValues] = await this._rpc({
+                model: 'website',
+                method: 'read',
+                args: [websiteId, ['social_facebook', 'social_twitter', 'social_youtube',
+                    'social_instagram', 'social_linkedin', 'social_github']],
+            });
+            delete dbSocialValues.id;
+        }
     },
     /**
      * @override
@@ -43,7 +47,7 @@ options.registry.SocialMedia = options.Class.extend({
         await this._rpc({
             model: 'website',
             method: 'write',
-            args: [[websiteId], this.dbSocialValues],
+            args: [[websiteId], dbSocialValues],
         });
         // Clean the DOM.
         this.$target[0].querySelectorAll(':scope > a.d-none').forEach(el => el.remove());
@@ -92,7 +96,7 @@ options.registry.SocialMedia = options.Class.extend({
             const dbField = anchorEl.href.split('/website/social/')[1];
             if (dbField) {
                 // Handle URL change for DB links.
-                this.dbSocialValues['social_' + dbField] = entry.display_name;
+                dbSocialValues['social_' + dbField] = entry.display_name;
             } else {
                 // Handle URL change for custom links.
                 const href = anchorEl.getAttribute('href');
@@ -131,7 +135,7 @@ options.registry.SocialMedia = options.Class.extend({
             return this._super(methodName, params);
         }
         const listEntries = [];
-        for (const socialMedia of Object.keys(this.dbSocialValues)) {
+        for (const socialMedia of Object.keys(dbSocialValues)) {
             const mediaName = socialMedia.split('social_')[1];
             const dbEl = this.$target[0].querySelector(`a[href="/website/social/${mediaName}"]`);
             if (!dbEl) {
@@ -143,7 +147,7 @@ options.registry.SocialMedia = options.Class.extend({
                 anchorEl.querySelector('i').classList.add(`fa-${mediaName}`);
                 this.$target[0].appendChild(anchorEl);
                 this.links.push({id: generateHTMLId(), el: anchorEl});
-            } else if (this.dbSocialValues[socialMedia] === '') {
+            } else if (dbSocialValues[socialMedia] === '') {
                 // Hide existing <a> if there is no url in DB.
                 dbEl.classList.add('d-none');
             }
@@ -153,7 +157,8 @@ options.registry.SocialMedia = options.Class.extend({
             const entry = {
                 id: this.links.find(linkEl => linkEl.el === anchorEl).id,
                 selected: !anchorEl.classList.contains('d-none'),
-                display_name: dbField ? this.dbSocialValues['social_' + dbField] : anchorEl.getAttribute('href'),
+                display_name: dbField ?
+                    dbSocialValues['social_' + dbField] : anchorEl.getAttribute('href'),
                 undeletable: Boolean(dbField),
                 placeholder: `https://${dbField || 'example'}.com/yourPage`,
             };
