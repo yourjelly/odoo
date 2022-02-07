@@ -14,10 +14,6 @@ export class SnailmailError extends Component {
         useComponentToModel({ fieldName: 'component', modelName: 'SnailmailErrorView' });
     }
 
-    _onClickClose() {
-        this.dialogAPI.close();
-    }
-
     /**
      * @returns {SnailmailErrorView}
      */
