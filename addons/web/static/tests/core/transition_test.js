@@ -23,7 +23,7 @@ QUnit.test("useTransition hook", async (assert) => {
     const execRegisteredTimeouts = mockTimeout();
 
     const target = getFixture();
-    const parent = await mount(Parent, { target });
+    const parent = await mount(Parent, target);
     // Mounted with -enter but not -enter-active
     assert.containsOnce(target, ".test.test-enter:not(.test-enter-active)");
     await nextTick();
@@ -61,7 +61,7 @@ QUnit.test("Transition HOC", async (assert) => {
     const execRegisteredTimeouts = mockTimeout();
 
     const target = getFixture();
-    const parent = await mount(Parent, { target });
+    const parent = await mount(Parent, target);
     // Mounted with -enter but not -enter-active
     assert.containsOnce(target, ".test.test-enter:not(.test-enter-active)");
     await nextTick();
