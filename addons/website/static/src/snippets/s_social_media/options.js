@@ -5,6 +5,8 @@ import {generateHTMLId} from 'web_editor.utils';
 import options from 'web_editor.snippets.options';
 import {_t} from 'web.core';
 
+let dbSocialValues;
+
 options.registry.SocialMedia = options.Class.extend({
     /**
      * @override
@@ -17,22 +19,24 @@ options.registry.SocialMedia = options.Class.extend({
             return [generateHTMLId(), el];
         }));
         await this._super(...arguments);
-        let websiteId;
-        this.trigger_up('context_get', {
-            callback: function (ctx) {
-                websiteId = ctx['website_id'];
-            },
-        });
-        // Fetch URLs for db links.
-        [this.dbSocialValues] = await this._rpc({
-            model: 'website',
-            method: 'read',
-            args: [websiteId, ['social_facebook', 'social_twitter', 'social_youtube',
-                'social_instagram', 'social_linkedin', 'social_github']],
-        });
-        delete this.dbSocialValues.id;
+        if (!dbSocialValues) {
+            let websiteId;
+            this.trigger_up('context_get', {
+                callback: function (ctx) {
+                    websiteId = ctx['website_id'];
+                },
+            });
+            // Fetch URLs for db links.
+            [dbSocialValues] = await this._rpc({
+                model: 'website',
+                method: 'read',
+                args: [websiteId, ['social_facebook', 'social_twitter', 'social_youtube',
+                    'social_instagram', 'social_linkedin', 'social_github']],
+            });
+            delete dbSocialValues.id;
+        }
         // Adds the DB social media links that are not in the DOM.
-        for (const socialMedia of Object.keys(this.dbSocialValues)) {
+        for (const socialMedia of Object.keys(dbSocialValues)) {
             const mediaName = socialMedia.split('social_').pop();
             if (!this.$target[0].querySelector(`:scope > a[href="/website/social/${mediaName}"]`)) {
                 const otherAnchorEl = this.$target[0].querySelector(':scope > a');
@@ -61,7 +65,7 @@ options.registry.SocialMedia = options.Class.extend({
             const media = el.href.split('/website/social/')[1];
             const visible = !el.classList.contains('d-none');
             const display_name = media ?
-                this.dbSocialValues[`social_${media}`] : el.getAttribute('href');
+                dbSocialValues[`social_${media}`] : el.getAttribute('href');
             const forceSelected = Boolean(media) && !display_name && visible;
             const entry = {
                 id,
@@ -95,7 +99,7 @@ options.registry.SocialMedia = options.Class.extend({
     onBuilt() {
         for (const anchorEl of this.$target[0].querySelectorAll(':scope > a')) {
             const mediaName = anchorEl.href.split('/website/social/').pop();
-            if (mediaName && !this.dbSocialValues[`social_${mediaName}`]) {
+            if (mediaName && !dbSocialValues[`social_${mediaName}`]) {
                 // Hide social media without value in DB.
                 anchorEl.classList.add('d-none');
             }
@@ -119,7 +123,7 @@ options.registry.SocialMedia = options.Class.extend({
         await this._rpc({
             model: 'website',
             method: 'write',
-            args: [[websiteId], this.dbSocialValues],
+            args: [[websiteId], dbSocialValues],
         });
         // Clean the DOM.
         this.$target[0].querySelectorAll(':scope > a.d-none').forEach(el => el.remove());
@@ -163,7 +167,7 @@ options.registry.SocialMedia = options.Class.extend({
             const dbField = anchorEl.href.split('/website/social/')[1];
             if (dbField) {
                 // Handle URL change for DB links.
-                this.dbSocialValues['social_' + dbField] = entry.display_name;
+                dbSocialValues['social_' + dbField] = entry.display_name;
             } else {
                 // Handle URL change for custom links.
                 const href = anchorEl.getAttribute('href');
