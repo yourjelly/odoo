@@ -416,7 +416,7 @@ export async function createPublicRoot(RootWidget) {
         templates: window.__ODOO_TEMPLATES__,
         env: legacyEnv,
         props: { Component: RootParent },
-        dev: env.debug,
+        dev: legacyEnv.isDebug(),
         translatableAttributes: ["data-tooltip"],
         translateFn: _t,
     });
@@ -429,6 +429,7 @@ export async function createPublicRoot(RootWidget) {
     await Promise.all([
         mount(MainComponentsContainer, document.body, {
             env: wowlEnv,
+            dev: wowlEnv.debug,
             templates: window.__ODOO_TEMPLATES__,
         }),
         publicRoot.attachTo(document.body),
