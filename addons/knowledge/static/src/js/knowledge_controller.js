@@ -34,7 +34,12 @@ const KnowledgeFormController = FormController.extend({
         if (typeof id === 'undefined') {
             return;
         }
-        await this._delete(id);
+        const message = _t("Are you sure you want to delete this record?");
+        let dialog;
+        const confirmCallback = () => {
+            this._delete(id).guardedCatch(() => dialog.destroy());
+        };
+        dialog = Dialog.confirm(this, message, { confirm_callback: confirmCallback });
     },
 
     _onDuplicate: async function () {
