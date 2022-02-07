@@ -72,13 +72,7 @@ odoo.define('web.GroupByMenu', function (require) {
     }
 
     GroupByMenu.components = { CustomGroupByItem, Dropdown, DropdownItem };
-    GroupByMenu.defaultProps = {
-        class: "",
-    };
-    GroupByMenu.props = {
-        fields: Object,
-        class: { String, optional: true },
-    };
+    GroupByMenu.props = { fields: Object };
     GroupByMenu.template = "web.GroupByMenu";
 
     return GroupByMenu;

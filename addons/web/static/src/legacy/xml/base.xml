@@ -58,19 +58,13 @@
                     >
                     <t t-if="props.withSearchBar">
                         <FilterMenu t-if="props.searchMenuTypes.includes('filter')"
-                            class="o_filter_menu"
                             fields="fields"
                         />
                         <GroupByMenu t-if="props.searchMenuTypes.includes('groupBy')"
-                            class="o_group_by_menu"
                             fields="fields"
                         />
-                        <ComparisonMenu t-if="props.searchMenuTypes.includes('comparison') and model.get('filters', f => f.type === 'comparison').length"
-                            class="o_comparison_menu"
-                        />
-                        <FavoriteMenu t-if="props.searchMenuTypes.includes('favorite')"
-                            class="o_favorite_menu"
-                        />
+                        <ComparisonMenu t-if="props.searchMenuTypes.includes('comparison') and model.get('filters', f => f.type === 'comparison').length"/>
+                        <FavoriteMenu t-if="props.searchMenuTypes.includes('favorite')"/>
                     </t>
                 </div>
                 <div class="o_cp_pager" role="search" t-ref="pager">

@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="web.GroupByMenu" owl="1">
-        <Dropdown class="'o_group_by_menu btn-group ' + props.class"
+        <Dropdown class="'o_group_by_menu btn-group'"
             togglerClass="'btn btn-light'"
             t-props="dropdownProps"
         >
