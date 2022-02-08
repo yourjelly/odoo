@@ -19,9 +19,6 @@ import { processTemplates } from "@web/core/assets";
 const { App, whenReady, loadFile } = owl;
 
 patch(App.prototype, "TestOwlApp", {
-    setup() {
-        this.dev = true;
-    },
     destroy() {
         if (!this.destroyed) {
             this._super(...arguments);
