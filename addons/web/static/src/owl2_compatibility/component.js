@@ -11,6 +11,11 @@
             if (hasOwnProperty.call(bdom, "component")) {
                 return bdom.component.el;
             } else {
+                if (bdom.constructor.name === "VMulti") {
+                    if (bdom.children.filter((c) => c !== undefined).length > 1) {
+                        throw new Error("Component has multiple root elements");
+                    }
+                }
                 return bdom.firstNode();
             }
         }
