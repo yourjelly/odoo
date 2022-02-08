@@ -348,7 +348,7 @@ export async function mount(Comp, target, config = {}) {
     env = env || {};
     const configuration = {
         env,
-        templates: window.__ODOO_TEMPLATES__,
+        templates: window.__OWL_TEMPLATES__,
         test: true,
         props,
     };

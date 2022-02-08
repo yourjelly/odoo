@@ -63,7 +63,7 @@ async function makeParent(Child, options = {}) {
     const app = new App(Parent, {
         env,
         target,
-        templates: window.__ODOO_TEMPLATES__,
+        templates: window.__OWL_TEMPLATES__,
         test: true,
     });
     registerCleanup(() => app.destroy());

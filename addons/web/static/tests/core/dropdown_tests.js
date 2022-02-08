@@ -375,7 +375,7 @@ QUnit.module("Components", ({ beforeEach }) => {
         env = await makeTestEnv();
         const app = new App(Parent, {
             env,
-            templates: window.__ODOO_TEMPLATES__,
+            templates: window.__OWL_TEMPLATES__,
             test: true,
         });
         registerCleanup(() => app.destroy());

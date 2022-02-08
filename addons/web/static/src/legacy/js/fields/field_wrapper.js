@@ -127,7 +127,7 @@ odoo.define('web.FieldWrapper', function (require) {
             // (only the wrapper is instantiated), so we instantiate one
             // with the same props, get its 'isSet' status, and destroy it.
             const app = new App(null, {
-                templates: window.__ODOO_TEMPLATES__,
+                templates: window.__OWL_TEMPLATES__,
                 env: this.env,
                 dev: this.env.isDebug(),
                 translateFn: owl.Component.env._t,
@@ -147,7 +147,7 @@ odoo.define('web.FieldWrapper', function (require) {
             // (only the wrapper is instantiated), so we instantiate one
             // with the same props, get its 'isValid' status, and destroy it.
             const app = new App(null, {
-                templates: window.__ODOO_TEMPLATES__,
+                templates: window.__OWL_TEMPLATES__,
                 env: this.env,
                 dev: this.env.isDebug(),
                 translateFn: owl.Component.env._t,

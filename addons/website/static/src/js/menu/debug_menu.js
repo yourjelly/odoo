@@ -14,7 +14,7 @@ const debugMenuService = {
                 mount(DebugMenuBasic, systray, {
                     position: 'first-child',
                     env,
-                    templates: window.__ODOO_TEMPLATES__,
+                    templates: window.__OWL_TEMPLATES__,
                 });
             }
         }

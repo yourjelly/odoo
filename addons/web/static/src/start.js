@@ -36,13 +36,13 @@ export async function startWebClient(Webclient) {
 
     // start web client
     await whenReady();
-    window.__ODOO_TEMPLATES__ = templates;
+    window.__OWL_TEMPLATES__ = templates;
     const legacyEnv = await legacySetupProm;
     mapLegacyEnvToWowlEnv(legacyEnv, env);
     const app = new App(Webclient, {
         env,
         dev: env.debug,
-        templates: window.__ODOO_TEMPLATES__,
+        templates: window.__OWL_TEMPLATES__,
         translatableAttributes: ["data-tooltip"],
         translateFn: env._t,
     });

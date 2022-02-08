@@ -53,7 +53,7 @@ export const DialogService = AbstractService.extend({
         }
         const DialogManagerComponent = getMessagingComponent("DialogManager");
         this.app = new App(DialogManagerComponent, {
-            templates: window.__ODOO_TEMPLATES__,
+            templates: window.__OWL_TEMPLATES__,
             env: owl.Component.env,
             dev: owl.Component.env.isDebug(),
             translateFn: owl.Component.env._t,

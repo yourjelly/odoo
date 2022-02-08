@@ -290,7 +290,7 @@ odoo.define('web.OwlCompatibility', function (require) {
     function standaloneAdapter(props) {
         const env = owl.Component.env;
         const app = new App(null, {
-            templates: window.__ODOO_TEMPLATES__,
+            templates: window.__OWL_TEMPLATES__,
             env,
             dev: env.isDebug(),
             translatableAttributes: ["data-tooltip"],
@@ -540,7 +540,7 @@ odoo.define('web.OwlCompatibility', function (require) {
             const env = owl.Component.env;
             const appConfig = {
                 env,
-                templates: window.__ODOO_TEMPLATES__,
+                templates: window.__OWL_TEMPLATES__,
                 dev: env.isDebug(),
                 translatableAttributes: ["data-tooltip"],
                 translateFn: env._t,

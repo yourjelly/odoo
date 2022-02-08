@@ -407,7 +407,7 @@ export async function createPublicRoot(RootWidget) {
     const wowlEnv = makeEnv();
 
     const templates = await loadBundleTemplates("web.assets_frontend");
-    window.__ODOO_TEMPLATES__ = templates;
+    window.__OWL_TEMPLATES__ = templates;
     await startServices(wowlEnv);
     mapLegacyEnvToWowlEnv(legacyEnv, wowlEnv);
     // The root widget's parent is a standalone adapter so that it has _trigger_up
@@ -416,7 +416,7 @@ export async function createPublicRoot(RootWidget) {
         new App(MainComponentsContainer, {
             env: wowlEnv,
             dev: wowlEnv.debug,
-            templates: window.__ODOO_TEMPLATES__,
+            templates: window.__OWL_TEMPLATES__,
             translateFn: _t,
             translatableAttributes: ["data-tooltip"],
         }).mount(document.body),

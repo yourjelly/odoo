@@ -221,6 +221,6 @@ export async function setupTests() {
 
     const templatesUrl = `/web/webclient/qweb/${new Date().getTime()}?bundle=web.assets_qweb`;
     const templates = await loadFile(templatesUrl);
-    window.__ODOO_TEMPLATES__ = processTemplates(templates);
+    window.__OWL_TEMPLATES__ = processTemplates(templates);
     await Promise.all([whenReady(), legacyProm]);
 }

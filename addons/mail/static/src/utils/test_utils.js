@@ -326,7 +326,7 @@ function getAfterEvent({ messagingBus }) {
 async function createRootComponent(self, Component, { props = {}, target }) {
     const app = new App(Component, {
         props,
-        templates: window.__ODOO_TEMPLATES__,
+        templates: window.__OWL_TEMPLATES__,
         env: self.env,
         test: true,
     });
