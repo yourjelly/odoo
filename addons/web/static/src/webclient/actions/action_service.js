@@ -153,13 +153,19 @@ function makeActionManager(env) {
                 active_model: context.active_model,
             };
             const key = `${JSON.stringify(actionRequest)},${JSON.stringify(additional_context)}`;
+            let action;
             if (!actionCache[key]) {
                 actionCache[key] = env.services.rpc("/web/action/load", {
                     action_id: actionRequest,
                     additional_context,
                 });
+                action = await actionCache[key];
+                if (action.help) {
+                    action.help = markup(action.help);
+                }
+            } else {
+                action = await actionCache[key];
             }
-            const action = await actionCache[key];
             if (!action) {
                 return {
                     type: "ir.actions.client",
@@ -194,9 +200,7 @@ function makeActionManager(env) {
         if (action.help) {
             const htmlHelp = document.createElement("div");
             htmlHelp.innerHTML = action.help;
-            if (htmlHelp.innerText.trim()) {
-                action.help = markup(action.help);
-            } else {
+            if (!htmlHelp.innerText.trim()) {
                 delete action.help;
             }
         }

@@ -4371,7 +4371,7 @@ QUnit.module('Views', {
             },
             viewOptions: {
                 action: {
-                    help: markup("No content helper"),
+                    help: "No content helper",
                 },
             },
         });
@@ -4541,7 +4541,7 @@ QUnit.module('Views', {
             },
             viewOptions: {
                 action: {
-                    help: markup("No content helper"),
+                    help: "No content helper",
                 },
             },
         });
@@ -4571,7 +4571,7 @@ QUnit.module('Views', {
             groupBy: ['product_id'],
             viewOptions: {
                 action: {
-                    help: markup("No content helper"),
+                    help: "No content helper",
                 },
             },
         });
@@ -4604,7 +4604,7 @@ QUnit.module('Views', {
             groupBy: ['product_id'],
             viewOptions: {
                 action: {
-                    help: markup("No content helper"),
+                    help: "No content helper",
                 },
             },
         });
@@ -4660,7 +4660,7 @@ QUnit.module('Views', {
             },
             viewOptions: {
                 action: {
-                    help: markup("No content helper"),
+                    help: "No content helper",
                 },
             },
         });
@@ -4705,7 +4705,7 @@ QUnit.module('Views', {
             },
             viewOptions: {
                 action: {
-                    help: markup("No content helper"),
+                    help: "No content helper",
                 },
             },
         });
@@ -4753,7 +4753,7 @@ QUnit.module('Views', {
             },
             viewOptions: {
                 action: {
-                    help: markup("No content helper"),
+                    help: "No content helper",
                 },
             },
         });
@@ -4800,7 +4800,7 @@ QUnit.module('Views', {
             },
             viewOptions: {
                 action: {
-                    help: markup("No content helper"),
+                    help: "No content helper",
                 },
             },
         });
@@ -4833,7 +4833,7 @@ QUnit.module('Views', {
             groupBy: ['product_id'],
             viewOptions: {
                 action: {
-                    help: markup("No content helper"),
+                    help: "No content helper",
                 },
             },
         });
@@ -4870,7 +4870,7 @@ QUnit.module('Views', {
             View: KanbanView,
             viewOptions: {
                 action: {
-                    help: markup("No content helper"),
+                    help: "No content helper",
                 },
             },
         });
@@ -4913,7 +4913,7 @@ QUnit.module('Views', {
             },
             viewOptions: {
                 action: {
-                    help: markup("No content helper"),
+                    help: "No content helper",
                 },
             },
         });
@@ -4972,7 +4972,7 @@ QUnit.module('Views', {
             },
             viewOptions: {
                 action: {
-                    help: markup("No content helper"),
+                    help: "No content helper",
                 },
             },
         });
@@ -5066,7 +5066,7 @@ QUnit.module('Views', {
                 </kanban>`,
             viewOptions: {
                 action: {
-                    help: markup("No content helper"),
+                    help: "No content helper",
                 },
             },
         });
@@ -5192,7 +5192,7 @@ QUnit.module('Views', {
                 </kanban>`,
             viewOptions: {
                 action: {
-                    help: markup("No content helper"),
+                    help: "No content helper",
                 },
             },
         });
