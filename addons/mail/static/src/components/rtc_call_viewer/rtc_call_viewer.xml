@@ -50,22 +50,12 @@
             </t>
 
             <!-- Dialogs -->
-            <t t-if="messaging.userSetting.rtcConfigurationMenu.isOpen">
-                <Dialog size="'small'" title="rtcCallViewer.settingsTitle" onClosed="rtcCallViewer.onRtcSettingsDialogClosed">
-                    <RtcConfigurationMenu/>
-                    <t t-set-slot="buttons">
-                        <!-- Explicit No buttons -->
-                    </t>
-                </Dialog>
-            </t>
-            <t t-if="rtcCallViewer and rtcCallViewer.rtcLayoutMenu">
-                <Dialog size="'small'" title="rtcCallViewer.layoutSettingsTitle" onClosed="rtcCallViewer.onLayoutSettingsDialogClosed">
-                    <RtcLayoutMenu localId="rtcCallViewer.rtcLayoutMenu.localId"/>
-                    <t t-set-slot="buttons">
-                        <!-- Explicit No buttons -->
-                    </t>
-                </Dialog>
-            </t>
+            <Dialog size="'small'" title="rtcCallViewer.settingsTitle">
+                <RtcConfigurationMenu/>
+            </Dialog>
+            <Dialog size="'small'" title="rtcCallViewer.layoutSettingsTitle">
+                <RtcLayoutMenu localId="rtcCallViewer.rtcLayoutMenu.localId"/>
+            </Dialog>
         </t>
     </div>
 </t>

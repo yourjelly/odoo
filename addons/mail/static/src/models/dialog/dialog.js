@@ -12,6 +12,8 @@ registerModel({
         'attachmentListOwnerAsAttachmentView',
         'followerOwnerAsSubtypeList',
         'messageActionListOwnerAsDeleteConfirm',
+        'rtcCallViewerOwnerAsMenuLayout',
+        'rtcCallViewerOwnerAsMenuSettings',
     ]],
     recordMethods: {
         /**
@@ -34,6 +36,18 @@ registerModel({
             }
             return clear();
         },
+        _computeRtcMenuLayoutView() {
+            if (this.rtcCallViewerOwnerAsMenuLayout) {
+                return insertAndReplace();
+            }
+            return clear();
+        }
+        _computeRtcMenuSettingsView() {
+            if (this.rtcCallViewerOwnerAsMenuSettings) {
+                return insertAndReplace();
+            }
+            return clear();
+        }
         /**
          * @private
          * @returns {FieldCommand}
@@ -221,6 +235,14 @@ registerModel({
             isCausal: true,
             readonly: true,
             required: true,
+        }),
+        rtcCallViewerOwnerAsMenuLayout: one('RtcCallViewer', {
+            inverse: 'menuLayoutDialog',
+            readonly: true,
+        }),
+        rtcCallViewerOwnerAsMenuSettings: one('RtcCallViewer', {
+            inverse: 'menuSettingsDialog',
+            readonly: true,
         }),
         style: attr({
             compute: '_computeStyle',

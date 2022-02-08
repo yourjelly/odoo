@@ -2,6 +2,7 @@
 
 import { registerModel } from '@mail/model/model_core';
 import { attr, one } from '@mail/model/model_field';
+import { insertAndReplace } from '@mail/model/model_field_command';
 
 registerModel({
     name: 'RtcOptionList',
@@ -45,14 +46,14 @@ registerModel({
          * @param {MouseEvent} ev
          */
         onClickLayout(ev) {
-            this.rtcController.callViewer.toggleLayoutMenu();
+            this.rtcController.callViewer.update({ menuLayoutDialog: insertAndReplace() });
             this.component.trigger('o-popover-close');
         },
         /**
          * @param {MouseEvent} ev
          */
         onClickOptions(ev) {
-            this.messaging.userSetting.rtcConfigurationMenu.toggle();
+            this.rtcController.callViewer.update({ menuSettingsDialog: insertAndReplace() });
             this.component.trigger('o-popover-close');
         },
     },

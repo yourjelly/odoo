@@ -32,12 +32,6 @@ registerModel({
         /**
          * @param {MouseEvent} ev
          */
-        onLayoutSettingsDialogClosed(ev) {
-            this.toggleLayoutMenu();
-        },
-        /**
-         * @param {MouseEvent} ev
-         */
         onMouseMove(ev) {
             if (!this.exists()) {
                 return;
@@ -59,12 +53,6 @@ registerModel({
                 showOverlay: true,
             });
             browser.clearTimeout(this._timeoutId);
-        },
-        /**
-         * @param {MouseEvent} ev
-         */
-        onRtcSettingsDialogClosed(ev) {
-            this.messaging.userSetting.rtcConfigurationMenu.toggle();
         },
         async activateFullScreen() {
             const el = document.body;
@@ -103,13 +91,6 @@ registerModel({
             if (this.exists()) {
                 this.update({ isFullScreen: false });
             }
-        },
-        toggleLayoutMenu() {
-            if (!this.rtcLayoutMenu) {
-                this.update({ rtcLayoutMenu: insertAndReplace() });
-                return;
-            }
-            this.update({ rtcLayoutMenu: unlink() });
         },
         //----------------------------------------------------------------------
         // Private
@@ -354,19 +335,20 @@ registerModel({
             compute: '_computeMainParticipantCard',
             inverse: 'rtcCallViewerOfMainCard',
         }),
+        menuLayoutDialog: one('Dialog', {
+            inverse: 'rtcCallViewerOwnerAsMenuLayout',
+            isCausal: true,
+        }),
+        menuSettingsDialog: one('Dialog', {
+            inverse: 'rtcCallViewerOwnerAsMenuSettings',
+            isCausal: true,
+        }),
         /**
          * The model for the controller (buttons).
          */
         rtcController: one('RtcController', {
             default: insertAndReplace(),
             readonly: true,
-            inverse: 'callViewer',
-            isCausal: true,
-        }),
-        /**
-         * The model for the menu to control the layout of the viewer.
-         */
-        rtcLayoutMenu: one('RtcLayoutMenu', {
             inverse: 'callViewer',
             isCausal: true,
         }),

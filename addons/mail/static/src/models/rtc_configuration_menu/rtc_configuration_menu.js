@@ -50,9 +50,6 @@ registerModel({
                 isRegisteringKey: !this.isRegisteringKey,
             });
         },
-        toggle() {
-            this.update({ isOpen: !this.isOpen });
-        },
         _onKeyDown(ev) {
             if (!this.isRegisteringKey) {
                 return;
@@ -73,9 +70,6 @@ registerModel({
         },
     },
     fields: {
-        isOpen: attr({
-            default: false,
-        }),
         /**
          * true if listening to keyboard input to register the push to talk key.
          */
