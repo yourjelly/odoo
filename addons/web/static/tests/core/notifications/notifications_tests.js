@@ -6,6 +6,8 @@ import { registry } from "@web/core/registry";
 import { makeTestEnv } from "../../helpers/mock_env";
 import { click, getFixture, mount, nextTick, patchWithCleanup } from "../../helpers/utils";
 
+const { markup } = owl;
+
 let target;
 const serviceRegistry = registry.category("services");
 
@@ -55,6 +57,24 @@ QUnit.test("title and message are escaped by default", async (assert) => {
     assert.strictEqual(
         notif.querySelector(".o_notification_content").textContent,
         "<i>Some message</i>"
+    );
+});
+
+QUnit.test("can display a notification with markup content", async (assert) => {
+    const env = await makeTestEnv({ serviceRegistry });
+    const { Component: NotificationContainer, props } = registry
+        .category("main_components")
+        .get("NotificationContainer");
+    const notifService = env.services.notification;
+    await mount(NotificationContainer, target, { env, props });
+
+    notifService.add(markup("<b>I'm a <i>markup</i> notification</b>"));
+    await nextTick();
+    assert.containsOnce(target, ".o_notification");
+    const notif = target.querySelector(".o_notification");
+    assert.strictEqual(
+        notif.querySelector(".o_notification_content").innerHTML,
+        "<b>I'm a <i>markup</i> notification</b>"
     );
 });
 
