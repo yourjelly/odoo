@@ -492,6 +492,16 @@ function getCreateThreadViewComponent({ afterEvent, apps, env, widget }) {
 function getOpenDiscuss({ afterNextRender, discussWidget }) {
     return async function openDiscuss() {
         await afterNextRender(() => discussWidget.on_attach_callback());
+        // Some changes in the models are made on mount, but these changes don't
+        // cause a rerender directly, they cause the model to fetch more data
+        // but we cannot wait for that data to come back as the model manager
+        // doesn't expose it. This means that in the following microticks, the
+        // data will come back from the server and cause a render. The following
+        // is a way for us to catch the render cascade caused by the data coming
+        // back and wait for it.
+        await afterNextRender(() => {
+            discussWidget.app.root.render();
+        });
     };
 }
 

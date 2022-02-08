@@ -42,7 +42,6 @@
         }
         setup() {}
     };
-    owl.App.validateTarget = () => {};
     owl.App.sharedTemplates = sharedTemplates;
     owl.App.validateTarget = () => {};
     /**
