@@ -62,6 +62,7 @@ export const commandService = {
         const registeredCommands = new Map();
         let nextToken = 0;
         let isPaletteOpened = false;
+        let closeCommandPalette;
 
         hotkeyService.add("control+k", openMainPalette, {
             global: true,
@@ -69,9 +70,10 @@ export const commandService = {
 
         /**
          * @param {CommandPaletteConfig} config command palette config merged with default config
-         * @returns the actual command palette config if the command palette is already open
+         * @param {boolean} reload if true, close the command pallet  and reopen it
+         * @returns the actual command palette config if the command palette is already open and reload is false
          */
-        function openMainPalette(config = {}) {
+        function openMainPalette(config = {}, reload) {
             const categoriesByNamespace = {};
             commandCategoryRegistry.getEntries().forEach(([category, el]) => {
                 const namespace = el.namespace ? el.namespace : "default";
@@ -98,21 +100,26 @@ export const commandService = {
                 },
                 config
             );
-            return openPalette(config);
+            return openPalette(config, reload);
         }
 
         /**
          * @param {CommandPaletteConfig} config
-         * @returns config if the command palette is already open
+         * @param {boolean} reload if true, close the command pallet  and reopen it
+         * @returns config if the command palette is already open and reload is false
          */
-        function openPalette(config) {
+        function openPalette(config, reload) {
             if (isPaletteOpened) {
-                return config;
+                if (reload) {
+                    closeCommandPalette();
+                } else {
+                    return config;
+                }
             }
 
             // Open Command Palette dialog
             isPaletteOpened = true;
-            dialog.add(
+            closeCommandPalette = dialog.add(
                 CommandPaletteDialog,
                 {
                     config,
