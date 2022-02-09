@@ -33,16 +33,16 @@ const KnowledgeFormRenderer = FormRenderer.extend({
     },
 
     initTree: function () {
-        const aside = this.$el.find('.o_sidebar');
+        const $container = this.$el.find('.o_knowledge_tree');
         return this._rpc({
             route: '/knowledge/get_tree',
             params: {}
         }).then(res => {
-            aside.empty();
-            aside.append(res);
+            $container.empty();
+            $container.append(res);
             this.createTree();
         }).catch(error => {
-            aside.empty();
+            $container.empty();
         });
     },
 
@@ -203,6 +203,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
     _renderView: async function () {
         const result = await this._super.apply(this, arguments);
         this._renderBreadcrumb();
+        this._setResizeListener();
         return result;
     },
 
@@ -219,6 +220,28 @@ const KnowledgeFormRenderer = FormRenderer.extend({
         });
         const $container = this.$el.find('.breadcrumb');
         $container.prepend(items);
+    },
+
+    _setResizeListener: function () {
+        /**
+         * @param {PointerEvent} event
+         */
+        const onPointerMove = event => {
+            event.preventDefault();
+            this.el.style.setProperty('--default-sidebar-size', `${event.pageX}px`);
+        };
+        /**
+         * @param {PointerEvent} event
+         */
+        const onPointerUp = event => {
+            $(document).off('pointermove', onPointerMove);
+        };
+        const $resizer = this.$el.find('.o_knowledge_resizer');
+        $resizer.on('pointerdown', _.throttle(event => {
+            event.preventDefault();
+            $(document).on('pointermove', onPointerMove);
+            $(document).one('pointerup', onPointerUp);
+        }, 100));
     },
 
     /**
