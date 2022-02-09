@@ -79,6 +79,14 @@
             }
         }
     }
+
+    .dropdown-menu.o_knowledge_more_options_panel {
+        min-width: 225px;
+        width: 225px;
+        .o_m2o_avatar span {
+            overflow-wrap: break-word;
+        }
+    }
 }
 
 // Media queries:

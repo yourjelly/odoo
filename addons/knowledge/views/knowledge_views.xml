@@ -95,7 +95,7 @@
                                                     <a type="button" role="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                         <i class="fa fa-ellipsis-v"/>
                                                     </a>
-                                                    <div class="dropdown-menu" role="menu">
+                                                    <div class="o_knowledge_more_options_panel dropdown-menu" role="menu">
                                                         <a class="dropdown-item btn-move" href="#" role="button">
                                                             <i class="fa fa-angle-double-right"/> Move To
                                                         </a>
@@ -108,6 +108,18 @@
                                                         <a class="dropdown-item btn-delete" href="#" role="button">
                                                             <i class="fa fa-trash"/> Delete
                                                         </a>
+                                                        <div class="dropdown-divider"
+                                                            attrs="{'invisible': ['&amp;', ('last_edition_id', '=', False), ('last_edition_date', '=', False)]}"/>
+                                                        <div class="d-flex flex-column px-3"
+                                                            attrs="{'invisible': [('last_edition_id', '=', False)]}">
+                                                            <label for="last_edition_id"/>
+                                                            <field name="last_edition_id" widget="many2one_avatar_user" readonly="1"/>
+                                                        </div>
+                                                        <div class="d-flex flex-column px-3"
+                                                            attrs="{'invisible': [('last_edition_date', '=', False)]}">
+                                                            <label for="last_edition_date"/>
+                                                            <field name="last_edition_date" widget="date" readonly="1"/>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
