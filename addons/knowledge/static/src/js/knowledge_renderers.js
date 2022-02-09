@@ -4,6 +4,7 @@ import core from 'web.core';
 import FormRenderer from 'web.FormRenderer';
 
 const KnowledgeFormRenderer = FormRenderer.extend({
+    className: 'o_knowledge_form_view',
     events: _.extend({}, FormRenderer.prototype.events, {
         'click .o_article_caret': '_onFold',
         'click .o_article_dropdown i': '_onIconClick',
