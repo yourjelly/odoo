@@ -9,7 +9,10 @@ options.registry.SocialMedia = options.Class.extend({
      * @override
      */
     async willStart() {
-        this.$target[0].querySelectorAll(':scope > a').forEach(el => el.setAttribute('id', generateHTMLId()));
+        this.links = [];
+        this.$target[0].querySelectorAll(':scope > a')
+            .forEach(el => this.links.push({id: generateHTMLId(), el: el}));
+
         await this._super(...arguments);
         let websiteId;
         this.trigger_up('context_get', {
@@ -30,7 +33,6 @@ options.registry.SocialMedia = options.Class.extend({
      * @override
      */
     async cleanForSave() {
-        this.$target[0].querySelectorAll(':scope > a').forEach(el => el.removeAttribute('id'));
         // Update the DB links.
         let websiteId;
         this.trigger_up('context_get', {
@@ -43,6 +45,8 @@ options.registry.SocialMedia = options.Class.extend({
             method: 'write',
             args: [[websiteId], this.dbSocialValues],
         });
+        // Clean the DOM.
+        this.$target[0].querySelectorAll(':scope > a.d-none').forEach(el => el.remove());
     },
 
     //--------------------------------------------------------------------------
@@ -59,17 +63,21 @@ options.registry.SocialMedia = options.Class.extend({
         // Handle element deletation.
         const entriesIds = entries.map(entry => entry.id);
         const anchorsEls = this.$target[0].querySelectorAll(':scope > a');
-        const deletedEl = Array.from(anchorsEls).find(aEl => !entriesIds.includes(aEl.id));
+        const deletedEl = Array.from(anchorsEls)
+            .find(aEl => !entriesIds.includes(this.links.find(linkEl => linkEl.el === aEl).id));
         if (deletedEl) {
             deletedEl.remove();
         }
         for (const entry of entries) {
-            let anchorEl = this.$target[0].querySelector(`#${entry.id}`);
-            if (!anchorEl) {
+            let anchorEl;
+            let link = this.links.find(linkEl => linkEl.id === entry.id);
+            if (!link) {
                 // It's a new social media.
                 anchorEl = this.$target[0].querySelector(':scope > a').cloneNode(true);
                 anchorEl.href = '#';
-                anchorEl.setAttribute('id', entry.id);
+                this.links.push({id: entry.id, el: anchorEl});
+            } else {
+                anchorEl = link.el;
             }
             // Handle visibility of the link
             anchorEl.classList.toggle('d-none', !entry.selected);
@@ -93,15 +101,9 @@ options.registry.SocialMedia = options.Class.extend({
                         // Propose an icon only for valid URLs (no mailto).
                         const socialMedia = this._findRelevantSocialMedia(entry.display_name);
 
-                        // Remove social media social media classes
-                        let regx = new RegExp('\\b' + "s_social_media_" + '[^1-9][^ ]*[ ]?\\b', 'g');
-                        anchorEl.className = anchorEl.className.replace(regx, '');
+                        this._removeSocialMediaClasses(anchorEl);
 
-                        // Remove every fa classes except fa-x sizes
                         const iEl = anchorEl.querySelector('i');
-                        regx = new RegExp('\\b' + "fa-" + '[^1-9][^ ]*[ ]?\\b', 'g');
-                        iEl.className = iEl.className.replace(regx, '');
-
                         if (socialMedia) {
                             anchorEl.classList.add(`s_social_media_${socialMedia}`);
                             iEl.classList.add(`fa-${socialMedia}`);
@@ -129,10 +131,27 @@ options.registry.SocialMedia = options.Class.extend({
             return this._super(methodName, params);
         }
         const listEntries = [];
+        for (const socialMedia of Object.keys(this.dbSocialValues)) {
+            const mediaName = socialMedia.split('social_')[1];
+            const dbEl = this.$target[0].querySelector(`a[href="/website/social/${mediaName}"]`);
+            if (!dbEl) {
+                // If a social media exists in DB but not in target, create it.
+                const anchorEl = this.$target[0].querySelector(':scope > a').cloneNode(true);
+                anchorEl.href = `/website/social/${mediaName}`;
+                this._removeSocialMediaClasses(anchorEl);
+                anchorEl.classList.add(`s_social_media_${mediaName}`, 'd-none');
+                anchorEl.querySelector('i').classList.add(`fa-${mediaName}`);
+                this.$target[0].appendChild(anchorEl);
+                this.links.push({id: generateHTMLId(), el: anchorEl});
+            } else if (this.dbSocialValues[socialMedia] === '') {
+                // Hide existing <a> if there is no url in DB.
+                dbEl.classList.add('d-none');
+            }
+        }
         for (const anchorEl of this.$target[0].querySelectorAll(':scope > a')) {
             const dbField = anchorEl.href.split('/website/social/')[1];
             const entry = {
-                id: anchorEl.id,
+                id: this.links.find(linkEl => linkEl.el === anchorEl).id,
                 selected: !anchorEl.classList.contains('d-none'),
                 display_name: dbField ? this.dbSocialValues['social_' + dbField] : anchorEl.getAttribute('href'),
                 undeletable: Boolean(dbField),
@@ -145,7 +164,7 @@ options.registry.SocialMedia = options.Class.extend({
     /**
      * Finds the social network for the given url.
      *
-     * @param  {String} url
+     * @param {String} url
      * @return {String} The social network to which the url leads to.
      */
     _findRelevantSocialMedia(url) {
@@ -186,12 +205,26 @@ options.registry.SocialMedia = options.Class.extend({
         return true;
     },
     /**
+     * Removes social media classes from the given element.
+     *
+     * @param  {HTMLElement} anchorEl
+     */
+    _removeSocialMediaClasses(anchorEl) {
+        // Remove social media social media classes
+        let regx = new RegExp('\\b' + 's_social_media_' + '[^1-9][^ ]*[ ]?\\b', 'g');
+        anchorEl.className = anchorEl.className.replace(regx, '');
+        // Remove every fa classes except fa-x sizes
+        const iEl = anchorEl.querySelector('i');
+        regx = new RegExp('\\b' + 'fa-' + '[^1-9][^ ]*[ ]?\\b', 'g');
+        iEl.className = iEl.className.replace(regx, '');
+    },
+    /**
      * @override
      */
     _renderCustomXML(uiFragment) {
         const anchorEls = this.$target[0].querySelectorAll(':scope > a:not(.d-none)');
         uiFragment.querySelector('we-list').dataset.defaults = JSON.stringify(
-            Array.from(anchorEls).map(el => el.id)
+            Array.from(anchorEls).map(el => this.links.find(linkEl => linkEl.el === el).id)
         );
     }
 });
