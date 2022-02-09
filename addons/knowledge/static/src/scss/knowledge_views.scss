@@ -1,42 +1,35 @@
 .o_knowledge_form_view {
-    .o_form_sheet {
-        max-width: none !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        border: none !important;
+    .o_knowledge_header,
+    .o_knowledge_aside,
+    .o_knowledge_editor {
+        background: white;
     }
 
-    .oe_form_field,
-    .o_wysiwyg_wrapper {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        margin: 0 !important;
-    }
-    .note-editable {
-        border: none;
-    }
-    .oe_form_field,
-    .note-editable {
-        padding: 1rem !important;
-    }
-    .oe_form_field:not(.o_user_select_none) .note-editable {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0px;
-        bottom: 0;
-        height: auto !important;
-        /* Hide pad scrollbar */
-        -ms-overflow-style: none;  /* IE and Edge */
-        scrollbar-width: none;  /* Firefox */
-    }
-
-    /* Hide pad scrollbar for Chrome, Safari and Opera */
-    .oe_form_field:not(.o_user_select_none) .note-editable::-webkit-scrollbar {
-      display: none;
+    .o_knowledge_editor {
+        min-height: 100%;
+        .o_readonly {
+            padding: 5px 10px;
+        }
+        .o_wysiwyg_wrapper {
+            margin: 0 !important;
+        }
+        .o_wysiwyg_resizer {
+            display: none;
+        }
+        .oe_form_field,
+        .odoo-editor {
+            display: flex;
+            flex-direction: column;
+        }
+        .oe_form_field,
+        .odoo-editor,
+        .note-editable {
+            flex-grow: 1;
+        }
+        .note-editable {
+            border: none;
+            height: auto !important;
+        }
     }
 
     aside {
@@ -63,22 +56,17 @@
         }
     }
 
-    .o_knowledge_form_right_panel {
-        overflow-y: auto;
-        overflow-x: hidden;
-
-        .o_knowledge_chatter_container {
-            border-top: 1px solid $o-gray-300;
-            li.nav-item {
-                display: none;
-            }
-            .o_FormRenderer_chatterContainer {
-                max-width: unset;
-                &.o-aside {
-                    width: auto;
-                    padding: 1rem;
-                    border-left: 0px;
-                }
+    .o_knowledge_chatter_container {
+        border-top: 1px solid $o-gray-300;
+        li.nav-item {
+            display: none;
+        }
+        .o_FormRenderer_chatterContainer {
+            max-width: unset;
+            &.o-aside {
+                width: auto;
+                padding: 1rem;
+                border-left: 0px;
             }
         }
     }
@@ -94,15 +82,8 @@
 
 // Media queries:
 
-@include media-breakpoint-up(md) {
+@include media-breakpoint-up(sm) {
     .o_knowledge_form_view {
-        .o_form_sheet {
-            position: absolute !important;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-        }
         .o_scroll_view {
             position: absolute;
             top: 0;
@@ -112,5 +93,13 @@
             overflow-y: auto;
             overflow-x: hidden;
         }
+    }
+}
+
+@media print {
+    .o_knowledge_header,
+    .o_knowledge_aside,
+    .o_knowledge_resizer {
+        display: none !important;
     }
 }
