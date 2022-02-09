@@ -1,6 +1,5 @@
 /** @odoo-module */
 
-import core from 'web.core';
 import FormRenderer from 'web.FormRenderer';
 
 const KnowledgeFormRenderer = FormRenderer.extend({
@@ -24,9 +23,6 @@ const KnowledgeFormRenderer = FormRenderer.extend({
      * @returns {Promise}
      */
     start: function () {
-        core.bus.on('DOM_updated', this, () => {
-            console.log('dom update');
-        });
         return this._super.apply(this, arguments).then(() => {
             return this.initTree();
         });
