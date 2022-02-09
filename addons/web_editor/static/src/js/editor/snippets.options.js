@@ -2028,6 +2028,7 @@ const ListUserValueWidget = UserValueWidget.extend({
             draggableTdEl.appendChild(draggableEl);
             trEl.appendChild(draggableTdEl);
         }
+        let forceSelected = true;
         const inputEl = document.createElement('input');
         inputEl.type = this.el.dataset.inputType || 'text';
         if (value) {
@@ -2037,6 +2038,7 @@ const ListUserValueWidget = UserValueWidget.extend({
             inputEl.name = id;
         }
         if (recordData) {
+            forceSelected = recordData.selected;
             if (recordData.placeholder) {
                 inputEl.placeholder = recordData.placeholder;
             }
@@ -2052,12 +2054,10 @@ const ListUserValueWidget = UserValueWidget.extend({
         if (this.hasDefault) {
             const checkboxEl = document.createElement('we-button');
             checkboxEl.classList.add('o_we_user_value_widget', 'o_we_checkbox_wrapper');
-            if (this.selected.includes(id) && value) {
+            if (this.selected.includes(id) && forceSelected) {
                 checkboxEl.classList.add('active');
             }
-            if (!value) {
-                checkboxEl.disabled = true;
-            }
+            checkboxEl.disabled = !value && !forceSelected;
             const div = document.createElement('div');
             const checkbox = document.createElement('we-checkbox');
             div.appendChild(checkbox);
@@ -2067,7 +2067,7 @@ const ListUserValueWidget = UserValueWidget.extend({
             checkboxTdEl.appendChild(checkboxEl);
             trEl.appendChild(checkboxTdEl);
         }
-        if (!recordData || !recordData.undeletable) {
+        if (!recordData || !recordData.undeletable || recordData.undeletable === 'false') {
             const buttonTdEl = document.createElement('td');
             const buttonEl = document.createElement('we-button');
             buttonEl.classList.add('o_we_select_remove_option', 'o_we_link', 'o_we_text_danger', 'fa', 'fa-fw', 'fa-minus');
@@ -2109,6 +2109,7 @@ const ListUserValueWidget = UserValueWidget.extend({
                 id: isNaN(idInt) ? id : idInt,
                 name: el.value,
                 display_name: el.value,
+                undeletable: !el.closest('tr').querySelector('.o_we_select_remove_option'),
             }, el.dataset);
         });
         if (this.hasDefault) {
