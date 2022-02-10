@@ -45,12 +45,14 @@ export function useAutofocus(refName = "autofocus") {
     let forceFocusCount = 0;
     useEffect(
         (el) => {
-            if (el) {
-                el.focus();
-                if (["INPUT", "TEXTAREA"].includes(el.tagName)) {
-                    el.selectionStart = el.selectionEnd = el.value.length;
+            Promise.resolve(() => {
+                if (el) {
+                    el.focus();
+                    if (["INPUT", "TEXTAREA"].includes(el.tagName)) {
+                        el.selectionStart = el.selectionEnd = el.value.length;
+                    }
                 }
-            }
+            });
         },
         () => [ref.el, forceFocusCount]
     );
