@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const {pathname, search} = window.location;
         const params = new URLSearchParams(search).toString();
 
-        const autoredirectToBackendAction = false;
+        const autoredirectToBackendAction = !!odoo.debug;
         if (autoredirectToBackendAction) {
             document.body.innerHTML = '';
             window.location.replace(`/web#action=website.website_editor&path=${encodeURIComponent(params ? `${pathname}?${params}` : pathname)}&website_id=${websiteId}`);
