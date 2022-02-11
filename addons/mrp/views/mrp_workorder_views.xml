@@ -382,32 +382,38 @@
                 <field name="workcenter_id"/>
                 <field name="product_id"/>
                 <field name="qty_production"/>
+                <field name="date_planned_start"/>
+                <field name="production_date"/>
                 <field name="production_source_ids"/>
                 <field name="product_uom_id" force_save="1"/>
                 <templates>
                     <t t-name="kanban-box">
                         <div class="oe_kanban_global_click">
-                            <div class="o_kanban_card_header o_kanban_record_top">
-                                <div class="o_kanban_record_headings o_kanban_card_header_title">
-                                    <strong class="o_primary">
+                            <div class="o_kanban_card_header o_kanban_record_top row">
+                                <div class="col-4">
+                                    <h4 class="o_primary">
                                         <span><t t-esc="record.production_id.value"/></span> - <span><t t-esc="record.name.value"/></span>
-                                    </strong>
+                                    </h4>
                                     <div class="o_kanban_record_bottom">
                                         <h5 class="oe_kanban_bottom_left">
                                             <span><t t-esc="record.product_id.value"/>, </span> <span><t t-esc="record.qty_production.value"/> <t t-esc="record.product_uom_id.value"/></span>
                                         </h5>
                                     </div>
                                 </div>
-                                <div name="source_mos" class="o_kanban_record_headings o_kanban_ungrouped">
-                                    <span>Source MOs :</span>
+                                <div class="col-2">
+                                    <h5><span class="o_kanban_card_header_title">Scheduled date</span></h5>
+                                    <span class="d-flex" t-esc="record.date_planned_start.value or record.production_date.value"/>
+                                </div>
+                                <div name="source_mos" class="col">
+                                    <h5><span class="o_kanban_card_header_title">Source MOs :</span></h5>
                                     <t t-foreach="record.production_source_ids.raw_value" t-as="mo">
                                         <div class="d-flex">
                                             <span t-esc="mo.name"/>
                                         </div>
                                     </t>
                                 </div>
-                                <div class="o_kanban_manage_button_section">
-                                    <h2 class="ml8">
+                                <div class="col-3">
+                                    <h2 class="ml8 o_kanban_record_bottom">
                                         <span t-attf-class="badge #{['pending', 'waiting'].indexOf(record.state.raw_value) > -1 ? 'badge-warning' :['progress'].indexOf(record.state.raw_value) > -1 ? 'badge-secondary' : ['ready'].indexOf(record.state.raw_value) > -1 ? 'badge-primary' : ['done'].indexOf(record.state.raw_value) > -1 ? 'badge-success' : ['cancel'].indexOf(record.state.raw_value) > -1 ? 'badge-muted' : 'badge-danger'}">
                                             <t t-esc="record.state.value"/>
                                         </span>
