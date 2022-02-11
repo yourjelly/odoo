@@ -29,7 +29,7 @@ class StockPackageLevel(models.Model):
         ('new', 'New'),
         ('done', 'Done'),
         ('cancel', 'Cancelled'),
-    ],string='State', compute='_compute_state')
+    ], string='State', compute='_compute_state')
     is_fresh_package = fields.Boolean(compute='_compute_fresh_pack')
 
     picking_type_code = fields.Selection(related='picking_id.picking_type_code')
@@ -99,7 +99,7 @@ class StockPackageLevel(models.Model):
                     package_level.state = 'assigned'
                 else:
                     package_level.state = 'confirmed'
-            elif package_level.move_line_ids.filtered(lambda ml: ml.state =='done'):
+            elif package_level.move_line_ids.filtered(lambda ml: ml.state == 'done'):
                 package_level.state = 'done'
             elif package_level.move_line_ids.filtered(lambda ml: ml.state == 'cancel') or package_level.move_ids.filtered(lambda m: m.state == 'cancel'):
                 package_level.state = 'cancel'

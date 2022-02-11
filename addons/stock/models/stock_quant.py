@@ -1003,12 +1003,12 @@ class StockQuant(models.Model):
             if quants:
                 if not source_location_id:
                     # trying to assign an already existing SN
-                    message =  _('The Serial Number (%s) is already used in these location(s): %s.\n\n'
-                                 'Is this expected? For example this can occur if a delivery operation is validated '
-                                 'before its corresponding receipt operation is validated. In this case the issue will be solved '
-                                 'automatically once all steps are completed. Otherwise, the serial number should be corrected to '
-                                 'prevent inconsistent data.',
-                                 lot_id.name, ', '.join(sn_locations.mapped('display_name')))
+                    message = _('The Serial Number (%s) is already used in these location(s): %s.\n\n'
+                                'Is this expected? For example this can occur if a delivery operation is validated '
+                                'before its corresponding receipt operation is validated. In this case the issue will be solved '
+                                'automatically once all steps are completed. Otherwise, the serial number should be corrected to '
+                                'prevent inconsistent data.',
+                                lot_id.name, ', '.join(sn_locations.mapped('display_name')))
 
                 elif source_location_id and source_location_id not in sn_locations:
                     # using an existing SN in the wrong location

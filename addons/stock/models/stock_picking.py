@@ -4,7 +4,7 @@
 import json
 import time
 from ast import literal_eval
-from datetime import date, timedelta
+from datetime import date
 from collections import defaultdict
 
 from odoo import SUPERUSER_ID, _, api, fields, models
@@ -354,7 +354,7 @@ class Picking(models.Model):
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
         default=lambda self: self.env.user)
     move_line_ids = fields.One2many('stock.move.line', 'picking_id', 'Operations')
-    move_line_ids_without_package = fields.One2many('stock.move.line', 'picking_id', 'Operations without package', domain=['|',('package_level_id', '=', False), ('picking_type_entire_packs', '=', False)])
+    move_line_ids_without_package = fields.One2many('stock.move.line', 'picking_id', 'Operations without package', domain=['|', ('package_level_id', '=', False), ('picking_type_entire_packs', '=', False)])
     move_line_nosuggest_ids = fields.One2many(
         'stock.move.line', 'picking_id',
         domain=['|', ('reserved_qty', '=', 0.0), '&', ('reserved_qty', '!=', 0.0), ('qty_done', '!=', 0.0)])
@@ -1167,7 +1167,7 @@ class Picking(models.Model):
                     body=_('The backorder <a href=# data-oe-model=stock.picking data-oe-id=%d>%s</a> has been created.') % (
                         backorder_picking.id, backorder_picking.name))
                 moves_to_backorder.write({'picking_id': backorder_picking.id})
-                moves_to_backorder.move_line_ids.package_level_id.write({'picking_id':backorder_picking.id})
+                moves_to_backorder.move_line_ids.package_level_id.write({'picking_id': backorder_picking.id})
                 moves_to_backorder.mapped('move_line_ids').write({'picking_id': backorder_picking.id})
                 backorders |= backorder_picking
                 if backorder_picking.picking_type_id.reservation_method == 'at_confirm':
@@ -1401,7 +1401,7 @@ class Picking(models.Model):
                 'result_package_id': package.id,
             })
             if create_package_level:
-                package_level = self.env['stock.package_level'].create({
+                self.env['stock.package_level'].create({
                     'package_id': package.id,
                     'picking_id': pick.id,
                     'location_id': False,
