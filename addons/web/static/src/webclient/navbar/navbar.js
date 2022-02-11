@@ -84,6 +84,8 @@ export class NavBar extends Component {
         );
     }
 
+    set currentAppSections(_) {}
+
     get systrayItems() {
         return systrayRegistry
             .getEntries()
