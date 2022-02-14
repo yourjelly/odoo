@@ -69,8 +69,54 @@ Wysiwyg.include({
                     noDocuments: false
                 });
             }
+        }, {
+            groupName: 'Widgets',
+            title: 'Table Of Content',
+            description: 'Add a table of content.',
+            fontawesome: 'fa-bookmark',
+            callback: () => {
+                this.addTableOfContent();
+            }
         });
         return commands;
+    },
+    /**
+     * @param {Jquery} $document
+     * @returns {HTMLElement}
+     */
+    buildTableOfContent: function ($document) {
+        const stack = [];
+        const $titles = $document.find('h1, h2, h3, h4, h5, h6');
+        $titles.each((_index, title) => {
+            const level = ~~title.tagName.substring(1);
+            while (level > stack.length) {
+                const $ol = $('<ol/>');
+                if (stack.length > 0) {
+                    const $li = $('<li/>');
+                    $li.append($ol);
+                    stack[stack.length - 1].append($li);
+                }
+                stack.push($ol);
+            }
+            while (level < stack.length) {
+                stack.pop();
+            }
+            const $title = $(title);
+            const $a = $('<a href="#"/>');
+            $a.text($title.text());
+            const $li = $('<li/>');
+            $li.append($a);
+            stack[stack.length - 1].append($li);
+        });
+        return stack[0].get(0);
+    },
+    /**
+     * Adds a table of content
+     */
+    addTableOfContent: function () {
+        const $document = $(this.odooEditor.editable);
+        const element = this.buildTableOfContent($document);
+        this.odooEditor.execCommand('insertHTML', element.outerHTML);
     }
 });
 
