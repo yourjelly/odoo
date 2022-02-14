@@ -8,6 +8,7 @@ import base64
 from collections import OrderedDict
 from datetime import date, datetime, time
 import io
+import logging
 from PIL import Image
 import psycopg2
 
@@ -18,6 +19,8 @@ from odoo.tests import common
 from odoo.tools import mute_logger, float_repr
 from odoo.tools.date_utils import add, subtract, start_of, end_of
 from odoo.tools.image import image_data_uri
+
+_logger = logging.getLogger(__name__)
 
 
 class TestFields(TransactionCaseWithUserDemo):
@@ -3854,3 +3857,20 @@ class TestPrecompute(common.TransactionCase):
         ]
         with self.assertQueries(QUERIES):
             model.create({})
+
+
+@common.tagged('-at_install', 'post_install')
+class TestRelatedMulti(common.TransactionCase):
+    def test_related(self):
+        for _mname, Model in sorted(self.registry.items()):
+            for _fname, field in sorted(Model._fields.items()):
+                if not field.related:
+                    continue
+                cur_model_name = Model._name
+                fpath = []
+                for name in field.related.split('.'):
+                    cur_field = self.registry[cur_model_name]._fields[name]
+                    fpath.append(cur_field)
+                    cur_model_name = cur_field.comodel_name
+                if any(f.type.endswith('2many') for f in fpath[:-1]):
+                    _logger.warning("Related field traversing x2many %s: %s", field, field.related)
