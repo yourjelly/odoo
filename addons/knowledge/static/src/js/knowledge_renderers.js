@@ -2,6 +2,7 @@
 
 import EmojiPickerWidget from './widgets/knowledge_emoji_picker.js';
 import FormRenderer from 'web.FormRenderer';
+import { qweb as QWeb } from 'web.core';
 
 const KnowledgeFormRenderer = FormRenderer.extend({
     className: 'o_knowledge_form_view',
@@ -133,6 +134,12 @@ const KnowledgeFormRenderer = FormRenderer.extend({
      * @returns {Promise}
      */
     _renderView: async function () {
+        const { data } = this.state
+        if (Object.keys(data).length === 1) {
+            const $error = $(QWeb.render('knowledge.knowledge_article_not_found'));
+            this._updateView($error.contents());
+            return Promise.resolve();
+        }
         const result = await this._super.apply(this, arguments);
         this._renderBreadcrumb();
         this._renderEmojiPicker();

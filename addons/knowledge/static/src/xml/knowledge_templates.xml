@@ -15,4 +15,17 @@
         <i t-elif="icon" t-attf-class="fa fa-w #{ icon } mr-1"/>
         <span class="label" t-esc="text"/>
     </div>
+    <div t-name="knowledge.knowledge_article_not_found">
+        <div class="jumbotron jumbotron-fluid">
+            <div class="container">
+                <h1 class="display-4">Error :(</h1>
+                <p class="lead">
+                    The article doesn't exist or you aren't allowed to access the article.
+                </p>
+                <button class="btn btn-primary">
+                    <i class="fa fa-arrow-left"/> Go back to the editor
+                </button>
+            </div>
+        </div>
+    </div>
 </templates>
