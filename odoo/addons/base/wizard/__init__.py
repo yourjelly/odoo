@@ -10,4 +10,5 @@ from . import base_module_upgrade
 from . import base_partner_merge
 from . import base_update_translations
 from . import change_password
+from . import res_config
 from . import res_users_identitycheck
