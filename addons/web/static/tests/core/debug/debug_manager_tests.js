@@ -287,7 +287,7 @@ QUnit.module("DebugMenu", (hooks) => {
         assert.verifySteps(["ir.attachment/search", "ir.attachment/unlink", "reloadPage"]);
     });
 
-    QUnit.skip("can open a view", async (assert) => {
+    QUnit.skipWOWL("can open a view", async (assert) => {
         assert.expect(3);
 
         const mockRPC = async (route, args) => {
@@ -340,7 +340,7 @@ QUnit.module("DebugMenu", (hooks) => {
         assert.containsOnce(target, ".some_view");
     });
 
-    QUnit.skip("can edit a pivot view", async (assert) => {
+    QUnit.skipWOWL("can edit a pivot view", async (assert) => {
         const mockRPC = async (route, args) => {
             if (args.method === "check_access_rights") {
                 return Promise.resolve(true);
@@ -383,7 +383,7 @@ QUnit.module("DebugMenu", (hooks) => {
         );
     });
 
-    QUnit.skip("can edit a search view", async (assert) => {
+    QUnit.skipWOWL("can edit a search view", async (assert) => {
         const mockRPC = async (route, args) => {
             if (args.method === "check_access_rights") {
                 return Promise.resolve(true);
@@ -419,7 +419,7 @@ QUnit.module("DebugMenu", (hooks) => {
         );
     });
 
-    QUnit.skip("edit search view on action without search_view_id", async (assert) => {
+    QUnit.skipWOWL("edit search view on action without search_view_id", async (assert) => {
         // When the kanban view will be converted to Owl, this test could be simplified by
         // removing the toy view and using the kanban view directly
         prepareRegistriesWithCleanup();
