@@ -8,6 +8,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
         'click .o_article_caret': '_onFold',
         'click .o_article_dropdown i': '_onIconClick',
         'click .o_article_name': '_onOpen',
+        'click .o_article_create': '_onArticleCreate',
     }),
 
     /**
@@ -131,6 +132,10 @@ const KnowledgeFormRenderer = FormRenderer.extend({
                 $icon.addClass(`fa fa-fw ${name}`);
             });
         }
+    },
+
+    _onArticleCreate: function () {
+        console.log('Creating an article');
     },
 
     /**

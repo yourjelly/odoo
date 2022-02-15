@@ -37,6 +37,9 @@
 
     .o_knowledge_aside {
         width: var(--sidebar-size);
+        .btn-link:hover {
+            background-color: #CECECE;
+        }
         ul {
             padding-left: 15px; /* indentation space */
         }
@@ -46,10 +49,9 @@
                 border-left: 2px solid #eee;
             }
         }
-        .o_article {
-            &:not(:hover) .o_article_create {
-                visibility: hidden;
-            }
+        .o_section_header:not(:hover) .o_section_create,
+        .o_article:not(:hover) .o_article_create {
+            visibility: hidden;
         }
         .o_article_name,
         .o_article_dropdown i {

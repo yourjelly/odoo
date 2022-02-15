@@ -25,7 +25,12 @@
         </section>
 
         <section class="mb-3">
-            <div class="h4 mb-1">Workspace</div>
+            <div class="o_section_header d-flex h4 mb-1">
+                <div class="o_section_name flex-grow-1 text-truncate">Workspace</div>
+                <button class="o_section_create btn btn-link text-secondary rounded p-0" type="button">
+                    <i class="fa fa-fw fa-plus"/>
+                </button>
+            </div>
             <ul t-if="len(public_articles) > 0" class="o_tree m-0 p-0" data-section="workspace">
                 <t t-foreach="public_articles.sorted('sequence')" t-as="child">
                     <t t-if="child.user_has_access" t-call="knowledge.article_template">
@@ -40,7 +45,12 @@
         </section>
 
         <section class="mb-3">
-            <div class="h4 mb-1">Shared</div>
+            <div class="o_section_header d-flex h4 mb-1">
+                <div class="o_section_name flex-grow-1 text-truncate">Shared</div>
+                <button class="o_section_create btn btn-link text-secondary rounded p-0" type="button">
+                    <i class="fa fa-fw fa-plus"/>
+                </button>
+            </div>
             <ul t-if="len(shared_articles) > 0" class="o_tree m-0 p-0" data-section="shared">
                 <t t-foreach="shared_articles.sorted('sequence')" t-as="child">
                     <t t-if="child.user_has_access" t-call="knowledge.article_template">
@@ -52,7 +62,12 @@
         </section>
 
         <section class="mb-3">
-            <div class="h4 mb-1">Private</div>
+            <div class="o_section_header d-flex h4 mb-1">
+                <div class="o_section_name flex-grow-1 text-truncate">Private</div>
+                <button class="o_section_create btn btn-link text-secondary rounded p-0" type="button">
+                    <i class="fa fa-fw fa-plus"/>
+                </button>
+            </div>
             <ul t-if="len(private_articles) > 0" class="o_tree m-0 p-0" data-section="private">
                 <t t-foreach="private_articles.sorted('sequence')" t-as="child">
                     <t t-if="child.user_has_access" t-call="knowledge.article_template">
