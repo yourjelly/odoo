@@ -171,6 +171,38 @@
         </field>
     </record>
 
+    <record id="knowledge_article_view_kanban" model="ir.ui.view">
+        <field name="name">knowledge.article.view.kanban</field>
+        <field name="model">knowledge.article</field>
+        <field name="arch" type="xml">
+            <kanban class="o_knowledge_kanban_view">
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_knowledge_kanban_card d-flex flex-column">
+                                <div class="d-flex align-items-center">
+                                    <field name="icon"/>
+                                    <div class="flex-grow-1 lead text-truncate px-2">
+                                        <field name="name"/>
+                                    </div>
+                                    <field name="is_user_favourite" class="m-0" widget="boolean_favorite" nolabel="1" force_save="1"/>
+                                </div>
+                                <div class="flex-grow-1 text-muted">
+                                    <!-- TODO: Add a computed field to get the section name -->
+                                    Workspace
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <i class="fa fa-clock-o" title="last-editor"/>
+                                    <i class="fa fa-link" title="link"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
     <record id="knowledge_article_view_search" model="ir.ui.view">
         <field name="name">knowledge.article.view.search</field>
         <field name="model">knowledge.article</field>
@@ -198,7 +230,7 @@
     <record model="ir.actions.act_window" id="knowledge_article_action">
         <field name="name">Articles</field>
         <field name="res_model">knowledge.article</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">tree,kanban,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create an article
