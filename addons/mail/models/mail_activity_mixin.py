@@ -64,15 +64,15 @@ class MailActivityMixin(models.AbstractModel):
              'Today: Activity date is today\nPlanned: Future activities.')
     activity_user_id = fields.Many2one(
         'res.users', 'Responsible User',
-        related='activity_ids.user_id', readonly=False,
+        compute='_compute_activity_user_id', inverse='_inverse_activity_user_id',
         search='_search_activity_user_id',
         groups="base.group_user")
     activity_type_id = fields.Many2one(
         'mail.activity.type', 'Next Activity Type',
-        related='activity_ids.activity_type_id', readonly=False,
+        compute='_compute_activity_type_id', inverse='_inverse_activity_type_id',
         search='_search_activity_type_id',
         groups="base.group_user")
-    activity_type_icon = fields.Char('Activity Type Icon', related='activity_ids.icon')
+    activity_type_icon = fields.Char('Activity Type Icon', compute='_compute_activity_type_icon')
     activity_date_deadline = fields.Date(
         'Next Activity Deadline',
         compute='_compute_activity_date_deadline', search='_search_activity_date_deadline',
@@ -84,7 +84,7 @@ class MailActivityMixin(models.AbstractModel):
         compute_sudo=False, readonly=True, groups="base.group_user")
     activity_summary = fields.Char(
         'Next Activity Summary',
-        related='activity_ids.summary', readonly=False,
+        compute='_compute_activity_summary', inverse='_inverse_activity_summary',
         search='_search_activity_summary',
         groups="base.group_user",)
     activity_exception_decoration = fields.Selection([
@@ -196,6 +196,7 @@ class MailActivityMixin(models.AbstractModel):
 
     @api.depends('activity_ids.date_deadline')
     def _compute_activity_date_deadline(self):
+        self.activity_ids.mapped('date_deadline')   # prefetch data
         for record in self:
             record.activity_date_deadline = record.activity_ids[:1].date_deadline
 
@@ -204,13 +205,49 @@ class MailActivityMixin(models.AbstractModel):
             return [('activity_ids', '=', False)]
         return [('activity_ids.date_deadline', operator, operand)]
 
+    @api.depends('activity_ids.user_id')
+    def _compute_activity_user_id(self):
+        self.activity_ids.user_id               # prefetch data
+        for record in self:
+            record.activity_user_id = record.activity_ids[:1].user_id
+
+    def _inverse_activity_user_id(self):
+        for record in self:
+            record.activity_ids[0].user_id = record.activity_user_id
+
     @api.model
     def _search_activity_user_id(self, operator, operand):
         return [('activity_ids.user_id', operator, operand)]
 
+    @api.depends('activity_ids.activity_type_id')
+    def _compute_activity_type_id(self):
+        self.activity_ids.activity_type_id      # prefetch data
+        for record in self:
+            record.activity_type_id = record.activity_ids[:1].activity_type_id
+
+    def _inverse_activity_type_id(self):
+        for record in self:
+            record.activity_ids[0].activity_type_id = record.activity_type_id
+
     @api.model
     def _search_activity_type_id(self, operator, operand):
         return [('activity_ids.activity_type_id', operator, operand)]
+
+    @api.depends('activity_ids.icon')
+    def _compute_activity_type_icon(self):
+        self.activity_ids.mapped('icon')        # prefetch data
+        for record in self:
+            record.activity_type_icon = record.activity_ids[:1].icon
+
+    @api.depends('activity_ids.summary')
+    def _compute_activity_summary(self):
+        self.activity_ids.mapped('summary')     # prefetch data
+        for record in self:
+            record.activity_summary = record.activity_ids[:1].summary
+
+    def _inverse_activity_summary(self):
+        for record in self:
+            record.activity_ids[0].summary = record.activity_summary
 
     @api.model
     def _search_activity_summary(self, operator, operand):
