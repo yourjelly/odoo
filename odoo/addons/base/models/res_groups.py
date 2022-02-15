@@ -11,6 +11,8 @@ from odoo.addons.base.models.ir_model import MODULE_UNINSTALL_FLAG
 from odoo.exceptions import UserError
 from odoo.osv import expression
 
+VIEW_DEPS = ('category_id', 'implied_ids')
+
 #
 # Functions for manipulating boolean and selection pseudo-fields
 #
@@ -36,7 +38,7 @@ def get_selection_groups(name):
     return [int(v) for v in name[11:].split('_')]
 
 
-class Groups(models.Model):
+class ResGroups(models.Model):
     _name = "res.groups"
     _description = "Access Groups"
     _rec_name = 'full_name'
@@ -55,13 +57,16 @@ class Groups(models.Model):
     full_name = fields.Char(compute='_compute_full_name', string='Group Name', search='_search_full_name')
     share = fields.Boolean(string='Share Group', help="Group created to set access rights for sharing data with some users.")
 
+    implied_ids = fields.Many2many('res.groups', 'res_groups_implied_rel', 'gid', 'hid',
+        string='Inherits', help='Users of this group automatically inherit those groups')
+    trans_implied_ids = fields.Many2many('res.groups', string='Transitively inherits',
+        compute='_compute_trans_implied', recursive=True)
+
     _sql_constraints = [
         ('name_uniq', 'unique (category_id, name)', 'The name of the group must be unique within an application!')
     ]
 
-    @api.constrains('users')
-    def _check_one_user_type(self):
-        self.users._check_one_user_type()
+    #=== COMPUTE METHODS ===#
 
     @api.depends('category_id.name', 'name')
     def _compute_full_name(self):
@@ -102,43 +107,6 @@ class Groups(models.Model):
                 where = expression.OR([where, sub_where])
         return where
 
-    @api.model
-    def _search(self, args, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
-        # add explicit ordering if search is sorted on full_name
-        if order and order.startswith('full_name'):
-            groups = super(Groups, self).search(args)
-            groups = groups.sorted('full_name', reverse=order.endswith('DESC'))
-            groups = groups[offset:offset+limit] if limit else groups[offset:]
-            return len(groups) if count else groups.ids
-        return super(Groups, self)._search(args, offset=offset, limit=limit, order=order, count=count, access_rights_uid=access_rights_uid)
-
-    def copy(self, default=None):
-        self.ensure_one()
-        chosen_name = default.get('name') if default else ''
-        default_name = chosen_name or _('%s (copy)', self.name)
-        default = dict(default or {}, name=default_name)
-        return super(Groups, self).copy(default)
-
-    def write(self, vals):
-        if 'name' in vals:
-            if vals['name'].startswith('-'):
-                raise UserError(_('The name of the group can not start with "-"'))
-        # invalidate caches before updating groups, since the recomputation of
-        # field 'share' depends on method has_group()
-        # DLE P139
-        if self.ids:
-            self.env['ir.model.access'].call_cache_clearing_methods()
-            self.env['res.users'].has_group.clear_cache(self.env['res.users'])
-        return super(Groups, self).write(vals)
-
-class GroupsImplied(models.Model):
-    _inherit = 'res.groups'
-
-    implied_ids = fields.Many2many('res.groups', 'res_groups_implied_rel', 'gid', 'hid',
-        string='Inherits', help='Users of this group automatically inherit those groups')
-    trans_implied_ids = fields.Many2many('res.groups', string='Transitively inherits',
-        compute='_compute_trans_implied', recursive=True)
-
     @api.depends('implied_ids.trans_implied_ids')
     def _compute_trans_implied(self):
         # Compute the transitive closure recursively. Note that the performance
@@ -147,43 +115,101 @@ class GroupsImplied(models.Model):
         for g in self:
             g.trans_implied_ids = g.implied_ids | g.implied_ids.trans_implied_ids
 
+    #=== CONSTRAINT METHODS ===#
+
+    @api.constrains('users')
+    def _check_one_user_type(self):
+        self.users._check_one_user_type()
+
+    #=== CRUD METHODS ===#
+
     @api.model_create_multi
     def create(self, vals_list):
         user_ids_list = [vals.pop('users', None) for vals in vals_list]
-        groups = super(GroupsImplied, self).create(vals_list)
+        groups = super().create(vals_list)
         for group, user_ids in zip(groups, user_ids_list):
             if user_ids:
                 # delegate addition of users to add implied groups
                 group.write({'users': user_ids})
+        self._update_user_groups_view()
+        # actions.get_bindings() depends on action records
+        self.env['ir.actions.actions'].clear_caches()
         return groups
 
+    def copy(self, default=None):
+        self.ensure_one()
+        chosen_name = default.get('name') if default else ''
+        default_name = chosen_name or _('%s (copy)', self.name)
+        default = dict(default or {}, name=default_name)
+        return super().copy(default)
+
     def write(self, values):
-        res = super(GroupsImplied, self).write(values)
+        if 'name' in values:
+            if values['name'].startswith('-'):
+                raise UserError(_('The name of the group can not start with "-"'))
+        # determine which values the "user groups view" depends on
+        view_values0 = [g[name] for name in VIEW_DEPS if name in values for g in self]
+        # invalidate caches before updating groups, since the recomputation of
+        # field 'share' depends on method has_group()
+        # DLE P139
+        if self.ids:
+            self.env['ir.model.access'].call_cache_clearing_methods()
+            self.env['res.users'].has_group.clear_cache(self.env['res.users'])
+        super().write(values)
         if values.get('users') or values.get('implied_ids'):
-            # add all implied groups (to all users of each group)
-            for group in self:
-                self._cr.execute("""
-                    WITH RECURSIVE group_imply(gid, hid) AS (
-                        SELECT gid, hid
-                          FROM res_groups_implied_rel
-                         UNION
-                        SELECT i.gid, r.hid
-                          FROM res_groups_implied_rel r
-                          JOIN group_imply i ON (i.hid = r.gid)
-                    )
-                    INSERT INTO res_groups_users_rel (gid, uid)
-                         SELECT i.hid, r.uid
-                           FROM group_imply i, res_groups_users_rel r
-                          WHERE r.gid = i.gid
-                            AND i.gid = %(gid)s
-                         EXCEPT
-                         SELECT r.gid, r.uid
-                           FROM res_groups_users_rel r
-                           JOIN group_imply i ON (r.gid = i.hid)
-                          WHERE i.gid = %(gid)s
-                """, dict(gid=group.id))
-            self._check_one_user_type()
+            self._add_implied_groups()
+        # update the "user groups view" only if necessary
+        view_values1 = [g[name] for name in VIEW_DEPS if name in values for g in self]
+        if view_values0 != view_values1:
+            self._update_user_groups_view()
+        # actions.get_bindings() depends on action records
+        self.env['ir.actions.actions'].clear_caches()
+
+    def _add_implied_groups(self):
+        # add all implied groups (to all users of each group)
+        for group in self:
+            self._cr.execute("""
+                WITH RECURSIVE group_imply(gid, hid) AS (
+                    SELECT gid, hid
+                        FROM res_groups_implied_rel
+                        UNION
+                    SELECT i.gid, r.hid
+                        FROM res_groups_implied_rel r
+                        JOIN group_imply i ON (i.hid = r.gid)
+                )
+                INSERT INTO res_groups_users_rel (gid, uid)
+                        SELECT i.hid, r.uid
+                        FROM group_imply i, res_groups_users_rel r
+                        WHERE r.gid = i.gid
+                        AND i.gid = %(gid)s
+                        EXCEPT
+                        SELECT r.gid, r.uid
+                        FROM res_groups_users_rel r
+                        JOIN group_imply i ON (r.gid = i.hid)
+                        WHERE i.gid = %(gid)s
+            """, dict(gid=group.id))
+        self._check_one_user_type()
+
+    def unlink(self):
+        res = super().unlink()
+        self._update_user_groups_view()
+        # actions.get_bindings() depends on action records
+        self.env['ir.actions.actions'].clear_caches()
         return res
+
+    #=== ORM OVERRIDES ===#
+
+    @api.model
+    def _search(self, args, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
+        # add explicit ordering if search is sorted on full_name
+        if order and order.startswith('full_name'):
+            groups = super().search(args)
+            groups = groups.sorted('full_name', reverse=order.endswith('DESC'))
+            groups = groups[offset:offset+limit] if limit else groups[offset:]
+            return len(groups) if count else groups.ids
+        return super()._search(args, offset=offset, limit=limit, order=order, count=count, access_rights_uid=access_rights_uid)
+
+    #=== BUSINESS METHODS ===#
 
     def _apply_group(self, implied_group):
         """ Add the given group to the groups implied by the current group
@@ -199,40 +225,6 @@ class GroupsImplied(models.Model):
         if implied_group in self.implied_ids:
             self.write({'implied_ids': [Command.unlink(implied_group.id)]})
             implied_group.write({'users': [Command.unlink(user.id) for user in self.users]})
-
-class GroupsView(models.Model):
-    _inherit = 'res.groups'
-
-    @api.model_create_multi
-    def create(self, vals_list):
-        groups = super().create(vals_list)
-        self._update_user_groups_view()
-        # actions.get_bindings() depends on action records
-        self.env['ir.actions.actions'].clear_caches()
-        return groups
-
-    def write(self, values):
-        # determine which values the "user groups view" depends on
-        VIEW_DEPS = ('category_id', 'implied_ids')
-        view_values0 = [g[name] for name in VIEW_DEPS if name in values for g in self]
-        res = super(GroupsView, self).write(values)
-        # update the "user groups view" only if necessary
-        view_values1 = [g[name] for name in VIEW_DEPS if name in values for g in self]
-        if view_values0 != view_values1:
-            self._update_user_groups_view()
-        # actions.get_bindings() depends on action records
-        self.env['ir.actions.actions'].clear_caches()
-        return res
-
-    def unlink(self):
-        res = super(GroupsView, self).unlink()
-        self._update_user_groups_view()
-        # actions.get_bindings() depends on action records
-        self.env['ir.actions.actions'].clear_caches()
-        return res
-
-    def _get_hidden_extra_categories(self):
-        return ['base.module_category_hidden', 'base.module_category_extra', 'base.module_category_usability']
 
     @api.model
     def _update_user_groups_view(self):
@@ -328,6 +320,9 @@ class GroupsView(models.Model):
             new_context.pop('install_filename', None)  # don't set arch_fs for this computed view
             new_context['lang'] = None
             view.with_context(new_context).write({'arch': xml_content})
+
+    def _get_hidden_extra_categories(self):
+        return ['base.module_category_hidden', 'base.module_category_extra', 'base.module_category_usability']
 
     def get_application_groups(self, domain):
         """ Return the non-share groups that satisfy ``domain``. """
