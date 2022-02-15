@@ -651,7 +651,7 @@ class ProductTemplate(models.Model):
             variants_to_unlink += all_variants - current_variants_to_activate
 
         if variants_to_activate:
-            variants_to_activate.write({'active': True})
+            variants_to_activate.action_unarchive()
         if variants_to_create:
             Product.create(variants_to_create)
         if variants_to_unlink:

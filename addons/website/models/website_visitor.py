@@ -290,7 +290,7 @@ class WebsiteVisitor(models.Model):
         delay_days = int(self.env['ir.config_parameter'].sudo().get_param('website.visitor.live.days', 30))
         deadline = datetime.now() - timedelta(days=delay_days)
         visitors_to_archive = self.env['website.visitor'].sudo().search([('last_connection_datetime', '<', deadline)])
-        visitors_to_archive.write({'active': False})
+        visitors_to_archive.action_archive()
 
     def _update_visitor_timezone(self, timezone):
         """ We need to do this part here to avoid concurrent updates error. """

@@ -721,7 +721,7 @@ class Website(Home):
 
         if enable:
             records = self._get_customize_data(enable, is_view_data)
-            records.filtered(lambda x: not x.active).write({'active': True})
+            records.action_unarchive()
 
     @http.route(['/website/theme_customize_bundle_reload'], type='json', auth='user', website=True)
     def theme_customize_bundle_reload(self):

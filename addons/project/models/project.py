@@ -132,7 +132,7 @@ class ProjectTaskType(models.Model):
 
     def write(self, vals):
         if 'active' in vals and not vals['active']:
-            self.env['project.task'].search([('stage_id', 'in', self.ids)]).write({'active': False})
+            self.env['project.task'].search([('stage_id', 'in', self.ids)]).action_archive()
         return super(ProjectTaskType, self).write(vals)
 
     @api.depends('project_ids', 'project_ids.rating_active')

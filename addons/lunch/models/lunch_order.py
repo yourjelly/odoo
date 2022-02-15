@@ -156,7 +156,7 @@ class LunchOrder(models.Model):
                 if matching_lines:
                     lines_to_deactivate |= line
                     matching_lines.update_quantity(line.quantity)
-            lines_to_deactivate.write({'active': False})
+            lines_to_deactivate.action_archive()
             return super(LunchOrder, self - lines_to_deactivate).write(values)
         return super().write(values)
 

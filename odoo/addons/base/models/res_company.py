@@ -241,7 +241,7 @@ class Company(models.Model):
             })
 
         # Make sure that the selected currencies are enabled
-        companies.currency_id.sudo().filtered(lambda c: not c.active).active = True
+        companies.currency_id.sudo().action_unarchive()
 
         return companies
 
@@ -249,9 +249,9 @@ class Company(models.Model):
         self.clear_caches()
         # Make sure that the selected currency is enabled
         if values.get('currency_id'):
-            currency = self.env['res.currency'].browse(values['currency_id'])
-            if not currency.active:
-                currency.write({'active': True})
+            # FIXME VFE why is the currency activation pre write and post-create ?
+            # can't it be consistently before/after ?
+            self.env['res.currency'].browse(values['currency_id']).action_unarchive()
 
         res = super(Company, self).write(values)
 

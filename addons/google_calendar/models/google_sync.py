@@ -97,7 +97,7 @@ class GoogleSync(models.AbstractModel):
         synced = self.filtered('google_id')
         # LUL TODO find a way to get rid of this context key
         if self.env.context.get('archive_on_error') and self._active_name:
-            synced.write({self._active_name: False})
+            synced.action_archive()
             self = self - synced
         elif synced:
             # Since we can not delete such an event (see method comment), we archive it.

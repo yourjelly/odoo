@@ -5116,13 +5116,17 @@ Fields:
         """Sets :attr:`active` to ``False`` on a recordset, by calling
          :meth:`toggle_active` on its currently active records.
         """
-        return self.filtered(lambda record: record[self._active_name]).toggle_active()
+        if not self:
+            return
+        self.filtered(lambda record: record[self._active_name]).toggle_active()
 
     def action_unarchive(self):
         """Sets :attr:`active` to ``True`` on a recordset, by calling
         :meth:`toggle_active` on its currently inactive records.
         """
-        return self.filtered(lambda record: not record[self._active_name]).toggle_active()
+        if not self:
+            return
+        self.filtered(lambda record: not record[self._active_name]).toggle_active()
 
     def _register_hook(self):
         """ stuff to do right after the registry is built """

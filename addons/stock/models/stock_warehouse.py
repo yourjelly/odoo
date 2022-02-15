@@ -437,7 +437,7 @@ class Warehouse(models.Model):
                 route = self[route_field]
                 if 'route_update_values' in route_data:
                     route.write(route_data['route_update_values'])
-                route.rule_ids.write({'active': False})
+                route.rule_ids.action_archive()
             # Create the route
             else:
                 if 'route_update_values' in route_data:
@@ -575,7 +575,7 @@ class Warehouse(models.Model):
     def _find_existing_rule_or_create(self, rules_list):
         """ This method will find existing rules or create new one. """
         for rule_vals in rules_list:
-            existing_rule = self.env['stock.rule'].search([
+            existing_rules = self.env['stock.rule'].search([
                 ('picking_type_id', '=', rule_vals['picking_type_id']),
                 ('location_src_id', '=', rule_vals['location_src_id']),
                 ('location_dest_id', '=', rule_vals['location_dest_id']),
@@ -583,10 +583,10 @@ class Warehouse(models.Model):
                 ('action', '=', rule_vals['action']),
                 ('active', '=', False),
             ])
-            if not existing_rule:
+            if not existing_rules:
                 self.env['stock.rule'].create(rule_vals)
             else:
-                existing_rule.write({'active': True})
+                existing_rules.action_unarchive()
 
     def _get_locations_values(self, vals, code=False):
         """ Update the warehouse locations. """
@@ -848,7 +848,7 @@ class Warehouse(models.Model):
                 '&', ('route_id', '=', self._find_global_route('stock.route_warehouse0_mto', _('Make To Order')).id),
                 ('location_dest_id.usage', '=', 'transit'),
                 ('action', '!=', 'push'),
-                ('location_src_id', '=', self.lot_stock_id.id)]).write({'active': False})
+                ('location_src_id', '=', self.lot_stock_id.id)]).action_archive()
 
     def _check_reception_resupply(self, new_location):
         """ Check routes being delivered by the warehouses (resupply routes) and

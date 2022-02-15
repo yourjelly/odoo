@@ -307,7 +307,7 @@ class HrEmployeePrivate(models.Model):
             if account_id:
                 self.env['res.partner.bank'].browse(account_id).partner_id = vals['address_home_id']
         if vals.get('user_id'):
-            # Update the profile pictures with user, except if provided 
+            # Update the profile pictures with user, except if provided
             vals.update(self._sync_user(self.env['res.users'].browse(vals['user_id']),
                                         (bool(self.image_1920))))
         if 'work_permit_expiration_date' in vals:
@@ -340,8 +340,7 @@ class HrEmployeePrivate(models.Model):
             'departure_description': False,
             'departure_date': False
         })
-        archived_addresses = unarchived_employees.mapped('address_home_id').filtered(lambda addr: not addr.active)
-        archived_addresses.toggle_active()
+        unarchived_employees.address_home_id.action_unarchive()
 
         archived_employees = self.filtered(lambda e: not e.active)
         if archived_employees:
@@ -460,4 +459,3 @@ class HrEmployeePrivate(models.Model):
 
     def _sms_get_number_fields(self):
         return ['mobile_phone']
-

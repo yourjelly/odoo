@@ -43,8 +43,8 @@ class ProjectTaskTypeDelete(models.TransientModel):
 
     def action_confirm(self):
         tasks = self.with_context(active_test=False).env['project.task'].search([('stage_id', 'in', self.stage_ids.ids)])
-        tasks.write({'active': False})
-        self.stage_ids.write({'active': False})
+        tasks.action_archive()
+        self.stage_ids.action_archive()
         return self._get_action()
 
     def action_unlink(self):

@@ -60,7 +60,7 @@ class ResCompany(models.Model):
                     'active': False,
                     'image_1920': base64.b64encode(open(default_image_path, 'rb').read())
                 })
-                product.product_tmpl_id.write({'active': False})
+                product.product_tmpl_id.action_archive()
             self.env['sale.order.line'].create({
                 'name': _('Sample Order Line'),
                 'product_id': product.id,

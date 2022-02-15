@@ -100,7 +100,7 @@ class TestProjectCommon(TransactionCase):
             self.project_pigs.unlink()
 
         # click on the archive button
-        self.project_pigs.write({'active': False})
+        self.project_pigs.action_archive()
 
         with self.assertRaises(UserError):
             self.project_pigs.unlink()

@@ -425,7 +425,7 @@ class ProductProduct(models.Model):
                     # Note: this can still fail if something is preventing
                     # from archiving.
                     # This is the case from existing stock reordering rules.
-                    self.write({'active': False})
+                    self.action_archive()
 
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
@@ -726,12 +726,12 @@ class ProductProduct(models.Model):
         (and vice versa, unarchiving the related product template if there is now an active product.product) """
         result = super().toggle_active()
         # We deactivate product templates which are active with no active variants.
-        tmpl_to_deactivate = self.filtered(lambda product: (product.product_tmpl_id.active
-                                                            and not product.product_tmpl_id.product_variant_ids)).mapped('product_tmpl_id')
-        # We activate product templates which are inactive with active variants.
-        tmpl_to_activate = self.filtered(lambda product: (not product.product_tmpl_id.active
-                                                          and product.product_tmpl_id.product_variant_ids)).mapped('product_tmpl_id')
-        (tmpl_to_deactivate + tmpl_to_activate).toggle_active()
+        activated_products = self.filtered('active')
+        deactivated_products = self - activated_products
+        # Activate templates of activated products
+        activated_products.product_tmpl_id.action_unarchive() # will unarchive archived templates
+        # Deactivate templates without active variants.
+        deactivated_products.product_tmpl_id.filtered(lambda pt: not pt.product_variant_ids).action_archive()
         return result
 
     def _get_contextual_price(self):

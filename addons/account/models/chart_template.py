@@ -268,7 +268,7 @@ class AccountChartTemplate(models.Model):
         })
 
         #set the coa currency to active
-        self.currency_id.write({'active': True})
+        self.currency_id.action_unarchive()
 
         # When we install the CoA of first company, set the currency to price types and pricelists
         if company.id == 1:

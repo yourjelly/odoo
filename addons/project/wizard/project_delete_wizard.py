@@ -20,8 +20,8 @@ class ProjectDelete(models.TransientModel):
         for wizard in self:
             wizard.task_count = sum(wizard.with_context(active_test=False).project_ids.mapped('task_count'))
 
-    def action_archive(self):
-        self.project_ids.write({'active': False})
+    def action_archive_projects(self):
+        self.project_ids.action_archive()
 
     def confirm_delete(self):
         self.with_context(active_test=False).project_ids.unlink()
