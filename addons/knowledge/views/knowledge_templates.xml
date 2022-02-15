@@ -90,7 +90,7 @@
                         type="button"
                         data-toggle="dropdown"
                         aria-expanded="true" />
-                        <div class="o_knowledge_emoji_panel dropdown-menu p-0" role="menu"
+                        <div class="o_knowledge_emoji_panel dropdown-menu rounded bg-light p-0" role="menu"
                             t-attf-aria-labelledby="o_article_dropdown_#{article.id}"/>
                 </div>
                 <div class="o_article_name flex-grow-1 text-truncate px-1">

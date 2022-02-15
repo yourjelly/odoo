@@ -43,6 +43,7 @@
         ],
         'web.assets_qweb': [
             'knowledge/static/src/xml/knowledge_editor.xml',
+            'knowledge/static/src/xml/knowledge_emoji_picker.xml',
             'knowledge/static/src/xml/knowledge_templates.xml',
             'knowledge/static/src/xml/chatter_topbar.xml',
         ],

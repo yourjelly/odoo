@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <div t-name="knowledge.knowledge_emoji_panel">
+        <div class="p-2">
+            <input class="form-control" type="text" placeholder="Search..."/>
+        </div>
+        <div class="d-flex">
+            <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                <a class="nav-link active" id="v-pills-home-tab" data-toggle="pill" href="#v-pills-home" role="tab" aria-controls="v-pills-home" aria-selected="true">
+                    🏈
+                </a>
+                <a class="nav-link" id="v-pills-profile-tab" data-toggle="pill" href="#v-pills-profile" role="tab" aria-controls="v-pills-profile" aria-selected="false">
+                    😇
+                </a>
+            </div>
+            <div class="bg-white">
+                <div class="tab-pane fade show active d-flex flex-wrap justify-content-between p-1" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">
+                    <t t-foreach="emojis" t-as="emoji">
+                        <span class="o_emoji px-1 rounded"
+                            t-out="emoji.unicode"
+                            t-att-data="emoji"/>
+                    </t>
+                </div>
+            </div>
+        </div>
+    </div>
+</templates>
