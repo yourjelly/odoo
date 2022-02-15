@@ -16,8 +16,8 @@ VIEW_DEPS = ('category_id', 'implied_ids')
 #
 # Functions for manipulating boolean and selection pseudo-fields
 #
-def name_boolean_group(id):
-    return 'in_group_' + str(id)
+def name_boolean_group(group_id):
+    return 'in_group_' + str(group_id)
 
 def name_selection_groups(ids):
     return 'sel_groups_' + '_'.join(str(it) for it in sorted(ids))
@@ -372,5 +372,5 @@ class ResGroups(models.Model):
                 res.append(linearize(app, gs, (100, 'Other')))
 
         if others:
-            res.append((self.env['ir.module.category'], 'boolean', others, (100,'Other')))
+            res.append((self.env['ir.module.category'], 'boolean', others, (100, 'Other')))
         return res
