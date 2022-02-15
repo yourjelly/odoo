@@ -1018,23 +1018,6 @@ class UsersImplied(models.Model):
 # - selection field 'sel_groups_ID1_..._IDk' is ID iff
 #       ID is in 'groups_id' and ID is maximal in the set {ID1, ..., IDk}
 #
-
-
-class ModuleCategory(models.Model):
-    _inherit = "ir.module.category"
-
-    def write(self, values):
-        res = super().write(values)
-        if "name" in values:
-            self.env["res.groups"]._update_user_groups_view()
-        return res
-
-    def unlink(self):
-        res = super().unlink()
-        self.env["res.groups"]._update_user_groups_view()
-        return res
-
-
 class UsersView(models.Model):
     _inherit = 'res.users'
 
