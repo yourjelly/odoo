@@ -15,8 +15,7 @@ class EinvoiceIntegration(http.Controller):
     @http.route('/l10n_eg_invoice/get_invoice/<int:invoice_id>', auth='user', type='json', methods=['GET'], cors='*')
     def get_invoice(self, invoice_id, **kwargs):
         try:
-            invoice_id = request.env['account.move'].browse(invoice_id)
-            if invoice_id:
+            if invoice_id := request.env['account.move'].browse(invoice_id):
                 eta_invoice = request.env['account.edit.format']._l10n_eg_eta_prepare_eta_invoice(invoice_id)
                 eta_invoice.pop('signatures', None)
                 return {'data': eta_invoice}
@@ -32,8 +31,7 @@ class EinvoiceIntegration(http.Controller):
             return {'errors': _('Signatures Is Mandatory !')}
 
         try:
-            invoice_id = request.env['account.move'].browse(invoice_id)
-            if invoice_id:
+            if invoice_id := request.env['account.move'].browse(invoice_id):
                 signature = signatures[0]
                 invoice_id.write({
                     'l10n_eg_signature_type': str(signature.get('signatureType')),

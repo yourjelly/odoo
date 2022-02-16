@@ -6,14 +6,10 @@
         """,
     'description': """
        This module integrate with the ETA Portal to automatically sign and send your invoices to the tax Authority.
+       Thanks to Mario Roshdy <marioroshdyn@gmail.com> and Karim Jaber <kareem@plementus.com> for help in developing this module.
     """,
     'author': 'odoo',
     'website': 'https://www.odoo.com',
-
-    'contributors': [
-        'Mario Roshdy <marioroshdyn@gmail.com>',
-        'Karim Jaber <kareem@plementus.com>'
-    ],
     'category': 'account',
     'version': '0.1',
     'license': 'LGPL-3',
@@ -23,7 +19,7 @@
         'data/account_edi_data.xml',
         'data/l10n_eg_edi.activity.type.csv',
         'data/l10n_eg_edi.uom.code.csv',
-        'data/uom_data.xml',
+        'data/uom.uom.csv',
 
         'security/ir.model.access.csv',
 
@@ -32,6 +28,7 @@
         'views/res_partner_view.xml',
         'views/uom_uom_view.xml',
         'views/account_move_view.xml',
+        'views/account_journal_view.xml',
     ],
     'assets': {
         'web.assets_backend': [

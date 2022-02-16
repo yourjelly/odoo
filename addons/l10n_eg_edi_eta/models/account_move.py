@@ -19,7 +19,7 @@ class AccountMove(models.Model):
 
     l10n_eg_invoice_signed = fields.Boolean('Document Signed', copy=False, tracking=True)
 
-    l10n_eg_branch_id = fields.Many2one('res.partner', string='Branch', copy=False)
+    l10n_eg_branch_id = fields.Many2one('res.partner', related='journal_id.l10n_eg_branch_id')
 
     l10n_eg_long_id = fields.Char('ETA Long ID', copy=False)
     l10n_eg_internal_id = fields.Char('ETA Internal ID', copy=False)
@@ -33,75 +33,6 @@ class AccountMove(models.Model):
     l10n_eg_posted_datetime = fields.Datetime('Posted Date', copy=False)
 
     l10n_eg_pdf = fields.Binary(string='ETA PDF Document', copy=False)
-    l10n_eg_amount_by_group = fields.Binary(string="Tax amount by group",
-                                            compute='_compute_invoice_taxes_by_group_l10n_eg',
-                                            help='Edit Tax amounts if you encounter rounding issues.')
-
-    l10n_eg_total_discount = fields.Monetary(compute='_compute_amount_discounts')
-    l10n_eg_total_without_discount = fields.Monetary(compute='_compute_amount_discounts')
-
-    @api.depends('invoice_line_ids.quantity', 'invoice_line_ids.price_unit', 'amount_untaxed')
-    def _compute_amount_discounts(self):
-        for move in self:
-            total = sum([line.quantity * line.price_unit for line in move.invoice_line_ids])
-            move.l10n_eg_total_without_discount = total
-            move.l10n_eg_total_discount = total - move.amount_untaxed
-
-    @api.depends('line_ids.price_subtotal', 'line_ids.tax_base_amount', 'line_ids.tax_line_id', 'partner_id', 'currency_id')
-    def _compute_invoice_taxes_by_group_l10n_eg(self):
-        for move in self:
-
-            # Not working on something else than invoices.
-            if not move.is_invoice(include_receipts=True):
-                move.l10n_eg_amount_by_group = []
-                continue
-
-            lang_env = move.with_context(lang=move.partner_id.lang).env
-            balance_multiplicator = -1 if move.is_inbound() else 1
-
-            tax_lines = move.line_ids.filtered('tax_line_id')
-            base_lines = move.line_ids.filtered('tax_ids')
-
-            tax_group_mapping = defaultdict(lambda: {
-                'base_lines': set(),
-                'base_amount': 0.0,
-                'tax_amount': 0.0,
-            })
-
-            # Compute base amounts.
-            for base_line in base_lines:
-                base_amount = balance_multiplicator * (base_line.amount_currency if base_line.currency_id else base_line.balance)
-
-                for tax in base_line.tax_ids.flatten_taxes_hierarchy():
-
-                    if base_line.tax_line_id.tax_group_id == tax.tax_group_id:
-                        continue
-
-                    tax_group_vals = tax_group_mapping[tax.tax_group_id]
-                    if base_line not in tax_group_vals['base_lines']:
-                        tax_group_vals['base_amount'] += base_amount
-                        tax_group_vals['base_lines'].add(base_line)
-
-            # Compute tax amounts.
-            for tax_line in tax_lines:
-                tax_amount = balance_multiplicator * (tax_line.amount_currency if tax_line.currency_id else tax_line.balance)
-                tax_group_vals = tax_group_mapping[tax_line.tax_line_id.tax_group_id]
-                tax_group_vals['tax_amount'] += tax_amount
-
-            tax_groups = sorted(tax_group_mapping.keys(), key=lambda x: x.sequence)
-            l10n_eg_amount_by_group = []
-            for tax_group in tax_groups:
-                tax_group_vals = tax_group_mapping[tax_group]
-                l10n_eg_amount_by_group.append((
-                    tax_group.name,
-                    tax_group_vals['tax_amount'],
-                    tax_group_vals['base_amount'],
-                    formatLang(lang_env, tax_group_vals['tax_amount'], currency_obj=move.currency_id),
-                    formatLang(lang_env, tax_group_vals['base_amount'], currency_obj=move.currency_id),
-                    len(tax_group_mapping),
-                    tax_group.id
-                ))
-            move.l10n_eg_amount_by_group = l10n_eg_amount_by_group
 
     def action_post(self):
         res = super().action_post()
@@ -128,17 +59,17 @@ class AccountMove(models.Model):
             }
         }
 
-    def action_get_eta_invoice_pdf(self, token=False, uuid=False):
+    def action_get_eta_invoice_pdf(self, uuid=False):
         self.ensure_one()
         if not uuid:
             uuid = self.l10n_eg_uuid
-        invoice = self.env['account.edi.format']._l10n_eg_get_eta_invoice_pdf(uuid, token)
+        invoice = self.env['account.edi.format']._l10n_eg_get_eta_invoice_pdf(uuid,self)
         if isinstance(invoice, dict) and invoice.get('error', False):
             _logger.warning('PDF Content Error:  %s.' % invoice.get('error'))
         else:
             pdf = base64.b64encode(invoice)
             self.l10n_eg_pdf = pdf
-            self.l10n_eg_document_name = "%s.pdf" % self.name.replace('/', '_')
+            # self.l10n_eg_document_name = "%s.pdf" % self.name.replace('/', '_')
 
     def _get_amount_main_currency(self, amount):
         from_currency = self.currency_id

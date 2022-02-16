@@ -9,6 +9,7 @@ class ResPartner(models.Model):
     _inherit = 'res.partner'
 
     l10n_eg_national_identifier = fields.Char(string='National ID', copy=False)
+    l10n_eg_company_registration_id = fields.Char(string='Company Registration', copy=False)
     l10n_eg_activity_type_id = fields.Many2one('l10n_eg_edi.activity.type', 'ETA Activity Code', copy=False,
                                                help='This is the activity type of partner according to egyptian tax authority')
     l10n_eg_branch_identifier = fields.Char('ETA Branch ID', copy=False)
@@ -17,3 +18,4 @@ class ResPartner(models.Model):
     l10n_eg_room = fields.Char('Room')
     l10n_eg_landmark = fields.Char('Landmark')
     l10n_eg_additional_information = fields.Char('Additional Information')
+    

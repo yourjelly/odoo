@@ -10,3 +10,4 @@ class ResCompany(models.Model):
 
     l10n_eg_client_identifier = fields.Char('ETA Client ID')
     l10n_eg_client_secret_1 = fields.Char('ETA Secret 1')
+    l10n_eg_production = fields.Boolean('In Production Enviroment')
