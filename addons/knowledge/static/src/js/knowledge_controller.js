@@ -182,27 +182,6 @@ const KnowledgeFormController = FormController.extend({
         dialog.open();
     },
 
-    _onShare: function () {
-        const $content = $(QWeb.render('knowledge.knowledge_share_an_article_modal'));
-        const dialog = new Dialog(this, {
-            title: _t('Share a Link'),
-            $content: $content,
-            buttons: [{
-                text: _t('Save'),
-                classes: 'btn-primary',
-                click: async () => {
-                    console.log('sharing the article...');
-                }
-            }, {
-                text: _t('Discard'),
-                click: async () => {
-                    dialog.close();
-                }
-            }]
-        });
-        dialog.open();
-    },
-
     /**
      * @param {Event} event
      */

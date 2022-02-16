@@ -14,6 +14,7 @@
     ],
     'data': [
         'data/knowledge_data.xml',
+        'wizard/knowledge_invite_wizard.xml',
         'views/knowledge_views.xml',
         'views/knowledge_templates.xml',
         'security/ir.model.access.csv',

@@ -89,9 +89,37 @@
                                     <a type="button" role="button" class="btn btn-secondary btn-create">
                                         <i class="fa fa-plus-circle"/> Create
                                     </a>
-                                    <a type="button" role="button" class="btn btn-secondary btn-share">
-                                        <i class="fa fa-share-alt"/> Share
-                                    </a>
+                                    <div class="btn-group" role="toolbar" aria-label="options">
+                                        <div class="o-dropdown dropdown o-dropdown--no-caret">
+                                            <a type="button" role="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <i class="fa fa-share-alt"/> SHARE
+                                            </a>
+                                            <div class="o_knowledge_share_panel dropdown-menu" role="menu">
+                                                <div class="d-flex px-3">
+                                                    <div class="o_knowledge_share_panel_icon align-self-center">
+                                                        <i class="fa fa-globe align-self-center"/>
+                                                    </div>
+                                                    <div class="flex-grow-1 px-3">
+                                                        <div class="lead">Share to web</div>
+                                                        <p>Anyone with the link can view</p>
+                                                    </div>
+                                                </div>
+                                                <div class="dropdown-divider"></div>
+                                                <div class="px-3">
+                                                    <field name="share_link" widget="CopyClipboardChar" readonly="1"/>
+                                                </div>
+                                                <div class="px-3">
+                                                    <button type="object" name="action_open_invite_wizard" class="btn btn-primary">
+                                                        <i class="fa fa-plus"/> Invite
+                                                    </button>
+                                                </div>
+                                                <div class="dropdown-divider"></div>
+                                                <a class="dropdown-item" href="#" role="button">
+                                                    <i class="fa fa-link"/> Copy link
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="btn-group" role="toolbar" aria-label="options">
                                         <div class="o-dropdown dropdown o-dropdown--no-caret">
                                             <a type="button" role="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

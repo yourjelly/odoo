@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from werkzeug import urls
+
 from odoo import fields, models, api, _
 from odoo.exceptions import AccessError
 from odoo.osv import expression
+
+from odoo.addons.http_routing.models.ir_http import slug
 
 
 class ArticleMembers(models.Model):
@@ -74,6 +78,8 @@ class Article(models.Model):
     last_edition_id = fields.Many2one("res.users", string="Last Edited by")
     last_edition_date = fields.Datetime(string="Last Edited on")
 
+    share_link = fields.Char('Link', compute='_compute_share_link', store=False, readonly=True)
+
     # Favourite
     is_user_favourite = fields.Boolean(string="Favourite?", compute="_compute_is_user_favourite",
                                        inverse="_inverse_is_user_favourite", search="_search_is_user_favourite")
@@ -116,6 +122,10 @@ class Article(models.Model):
                 article.category = 'private'
             else:  # should never happen. If an article has no category, there is an error in it's access rules.
                 article.category = False
+
+    def _compute_share_link(self):
+        for article in self:
+            article.share_link = urls.url_join(self.get_base_url(), 'article/%s' % slug(self))
 
     @api.depends_context('uid')
     @api.depends('internal_permission', 'article_member_ids.partner_id', 'article_member_ids.permission')
@@ -347,6 +357,22 @@ class Article(models.Model):
     #########
     # Actions
     #########
+
+    def action_open_invite_wizard(self):
+        self.ensure_one()
+        context = dict(
+            default_article_id=self.id
+        )
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Invite people'),
+            'view_mode': 'form',
+            'res_model': 'knowledge.invite.wizard',
+            'views': [(False, 'form')],
+            'view_id': False,
+            'target': 'new',
+            'context': context
+        }
 
     def action_show_articles(self):
         action = self.env['ir.actions.act_window']._for_xml_id('knowledge.knowledge_article_dashboard_action')

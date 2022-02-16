@@ -123,6 +123,13 @@
         min-width: 225px;
         width: 225px;
     }
+    .dropdown-menu.o_knowledge_share_panel {
+        min-width: 320px;
+        width: 320px;
+        .o_knowledge_share_panel_icon {
+            font-size: 2rem;
+        }
+    }
 }
 
 .knowledge_select2_search_result {
