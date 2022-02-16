@@ -19,8 +19,7 @@ _logger = logging.getLogger(__name__)
 class AccountEdiFormat(models.Model):
     _name = 'account.edi.format'
     _description = 'EDI format'
-azeazazeazeazaeazezeazeae
-    name = fields.Char()
+aze    name = fields.Char()
     code = fields.Char(required=True)
 
     _sql_constraints = [
