@@ -1,0 +1,8 @@
+<odoo>
+    <data>
+        <function model="uom.uom" name="write">
+            <value model="uom.uom" eval="obj().search([('id', '=', ref('uom.product_uom_unit'))]).id"/>
+            <value eval="{'l10n_eg_unit_code_id': ref('l10n_eg_edi_eta.l10n_eg_edi_uom_code_C62')}"/>
+        </function>
+    </data>
+</odoo>
