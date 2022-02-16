@@ -96,21 +96,34 @@ class RatingMixin(models.AbstractModel):
 
     rating_ids = fields.One2many('rating.rating', 'res_id', string='Rating', groups='base.group_user', domain=lambda self: [('res_model', '=', self._name)], auto_join=True)
     rating_last_value = fields.Float('Rating Last Value', groups='base.group_user', compute='_compute_rating_last_value', compute_sudo=True, store=True)
-    rating_last_feedback = fields.Text('Rating Last Feedback', groups='base.group_user', related='rating_ids.feedback')
-    rating_last_image = fields.Binary('Rating Last Image', groups='base.group_user', related='rating_ids.rating_image')
+    rating_last_feedback = fields.Text('Rating Last Feedback', groups='base.group_user', compute='_compute_rating_last_feedback', compute_sudo=True)
+    rating_last_image = fields.Binary('Rating Last Image', groups='base.group_user', compute='_compute_rating_last_image', compute_sudo=True)
     rating_count = fields.Integer('Rating count', compute="_compute_rating_stats", compute_sudo=True)
     rating_avg = fields.Float("Average Rating", groups='base.group_user',
         compute='_compute_rating_stats', compute_sudo=True, search='_search_rating_avg')
     rating_avg_text = fields.Selection(RATING_TEXT, groups='base.group_user',
         compute='_compute_rating_avg_text', compute_sudo=True)
     rating_percentage_satisfaction = fields.Float("Rating Satisfaction", compute='_compute_rating_satisfaction', compute_sudo=True)
-    rating_last_text = fields.Selection(string="Rating Text", groups='base.group_user', related="rating_ids.rating_text")
+    rating_last_text = fields.Selection(RATING_TEXT, string="Rating Text", groups='base.group_user', compute='_compute_rating_last_image', compute_sudo=True)
 
     @api.depends('rating_ids.rating', 'rating_ids.consumed')
     def _compute_rating_last_value(self):
         for record in self:
-            ratings = self.env['rating.rating'].search([('res_model', '=', self._name), ('res_id', '=', record.id), ('consumed', '=', True)], limit=1)
-            record.rating_last_value = ratings and ratings.rating or 0
+            record.rating_last_value = next(
+                (rating.rating for rating in record.rating_ids if rating.consumed), 0,
+            )
+
+    @api.depends('rating_ids.feedback')
+    def _compute_rating_last_feedback(self):
+        self.rating_ids.mapped('feedback')      # prefetch data
+        for record in self:
+            record.rating_last_feedback = record.rating_ids[:1].feedback
+
+    @api.depends('rating_ids.rating_image')
+    def _compute_rating_last_image(self):
+        self.rating_ids.mapped('rating_image')  # prefetch data
+        for record in self:
+            record.rating_last_image = record.rating_ids[:1].rating_image
 
     @api.depends('rating_ids.res_id', 'rating_ids.rating')
     def _compute_rating_stats(self):
@@ -169,6 +182,12 @@ class RatingMixin(models.AbstractModel):
             grade_repartition = grades_per_record.get(record.id, default_grades)
             grade_count = sum(grade_repartition.values())
             record.rating_percentage_satisfaction = grade_repartition['great'] * 100 / grade_count if grade_count else -1
+
+    @api.depends('rating_ids.rating_text')
+    def _compute_rating_last_text(self):
+        self.rating_ids.mapped('rating_text')  # prefetch data
+        for record in self:
+            record.rating_last_text = record.rating_ids[:1].rating_text
 
     def write(self, values):
         """ If the rated ressource name is modified, we should update the rating res_name too.
