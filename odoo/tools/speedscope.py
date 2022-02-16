@@ -8,7 +8,8 @@ shorten = shortener.repr
 
 
 class Speedscope:
-    def __init__(self, name='Speedscope', init_stack_trace=None):
+    def __init__(self, name='Speedscope', init_stack_trace=None, use_caller_line=False):
+        self.use_caller_line = use_caller_line
         self.init_stack_trace = init_stack_trace or []
         self.init_stack_trace_level = len(self.init_stack_trace)
         self.caller_frame = None
@@ -38,9 +39,12 @@ class Speedscope:
             method = frame[2]
             line = ''
             number = ''
-            if self.caller_frame and len(self.caller_frame) == 4:
-                line = f"called at {self.caller_frame[0]} ({self.caller_frame[3].strip()})"
-                number = self.caller_frame[1]
+            line_frame = self.caller_frame if self.use_caller_line else frame
+            if line_frame and len(line_frame) == 4:
+                line = f"{line_frame[0]} ({line_frame[3].strip()})"
+                if self.use_caller_line:
+                    line = f"called at {line}"
+                number = line_frame[1]
             stack[index] = (method, line, number,)
             self.caller_frame = frame
 

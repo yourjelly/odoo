@@ -11,6 +11,8 @@ from odoo.tools.misc import mute_logger
 
 ADMIN_USER_ID = common.ADMIN_USER_ID
 
+_logger = logging.getLogger(__name__)
+
 def registry():
     return odoo.registry(common.get_db_name())
 
@@ -190,3 +192,36 @@ class TestCursorHooks(common.TransactionCase):
         self.prepare_hooks(cr)
         cr.close()
         self.assertEqual(self.log, ['preR', 'postR'])
+
+
+class TestSqlDbPerformances(common.TransactionCase):
+
+    def test_cursor_performances(self):
+        with self.profile(collectors=[odoo.tools.profiler.PeriodicCollector(0.001)]):
+            for _ in range(100):
+                cursors = []
+                for _ in range(60):
+                    cursors.append(self.env.registry.cursor())
+                for cr in cursors:
+                    cr.close()
+
+    def test_cursor_performances_concurrent(self):
+        import threading
+        import time
+
+        for nb_threads in (1, 2, 3, 10, 60):
+            def run(nb_threads):
+                for _ in range(int(30000/nb_threads)):
+                    cr = self.env.registry.cursor()
+                    cr.close()
+
+            threads = []
+            for i in range(nb_threads):
+                threads.append(threading.Thread(target=run, args=(nb_threads,)))
+            start = time.time()
+            for thread in threads:
+                thread.start()
+            for thread in threads:
+                thread.join()
+            duration = time.time()-start
+            _logger.info('For %s threads, took, %s', nb_threads, duration)

@@ -658,8 +658,22 @@ class ConnectionPool(object):
     def _debug(self, msg, *args):
         _logger_conn.debug(('%r ' + msg), self, *args)
 
-    @locked
     def borrow(self, connection_info):
+        for i in range(self._maxconn):
+            cnx, is_new = self._borrow(connection_info)
+            if is_new:
+                return cnx
+            try:
+                cnx.reset()
+                return cnx
+            except psycopg2.OperationalError:
+                self._debug('Cannot reset connection at iteration %d: %r', i, cnx.dsn)
+                # psycopg2 2.4.4 and earlier do not allow closing a closed connection
+                if not cnx.closed:
+                    cnx.close()
+
+    @locked
+    def _borrow(self, connection_info):
         """
         :param dict connection_info: dict of psql connection keywords
         :rtype: PsycoConnection
@@ -678,19 +692,10 @@ class ConnectionPool(object):
 
         for i, (cnx, used) in enumerate(self._connections):
             if not used and cnx._original_dsn == connection_info:
-                try:
-                    cnx.reset()
-                except psycopg2.OperationalError:
-                    self._debug('Cannot reset connection at index %d: %r', i, cnx.dsn)
-                    # psycopg2 2.4.4 and earlier do not allow closing a closed connection
-                    if not cnx.closed:
-                        cnx.close()
-                    continue
                 self._connections.pop(i)
                 self._connections.append((cnx, True))
                 self._debug('Borrow existing connection to %r at index %d', cnx.dsn, i)
-
-                return cnx
+                return cnx, False
 
         if len(self._connections) >= self._maxconn:
             # try to remove the oldest connection not used
@@ -715,7 +720,7 @@ class ConnectionPool(object):
         result._original_dsn = connection_info
         self._connections.append((result, True))
         self._debug('Create new connection backend PID %d', result.get_backend_pid())
-        return result
+        return result, True
 
     @locked
     def give_back(self, connection, keep_in_pool=True):
