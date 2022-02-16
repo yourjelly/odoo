@@ -6,7 +6,9 @@
         <section>
             <div class="h4 mb-0">Favourites</div>
             <ul t-if="favourites" class="o_tree_favourite m-0 px-0 py-2">
-                <li t-if="favourite.user_has_access" t-foreach="favourites" t-as="favourite" t-att-data-article-id="favourite.id">
+                <li t-if="favourite.user_has_access" t-foreach="favourites" t-as="favourite"
+                    t-attf-class="#{ 'bg-light font-weight-bold' if favourite.id == active_article_id else '' }"
+                    t-att-data-article-id="favourite.id">
                     <div class="d-flex">
                         <button class="o_article_icon btn btn-link text-secondary p-0" type="button">
                             <i t-attf-class="fa fa-fw #{favourite.icon}"/>
@@ -58,7 +60,7 @@
 
     <template id="article_template">
         <li t-attf-id="article_#{article.id}" t-att-data-article-id="article.id">
-            <div class="o_article d-flex">
+            <div t-attf-class="o_article d-flex #{ 'bg-light font-weight-bold' if article.id == active_article_id else '' }">
                 <button class="o_article_caret btn btn-link text-secondary p-0" type="button">
                     <i class="fa fa-fw fa-caret-down align-self-center"/>
                 </button>

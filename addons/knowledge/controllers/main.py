@@ -117,33 +117,6 @@ class KnowledgeDataSet(DataSet):
         article.action_set_lock(is_locked)
         return True
 
-    # ------------------------
-    # Articles tree generation
-    # ------------------------
-
-    def get_tree_values(self):
-        Article = request.env["knowledge.article"]
-        # get favourite
-        favourites = Article.search([("favourite_user_ids", "in", [request.env.user.id])])
-
-        main_articles = Article.search([("parent_id", "=", False)])
-
-        # keep only articles
-        public_articles = main_articles.filtered(lambda article: article.category == 'workspace')
-        shared_articles = main_articles.filtered(lambda article: article.category == 'shared')
-        private_articles = main_articles.filtered(lambda article: article.owner_id == request.env.user)
-
-        return {
-            "favourites": favourites,
-            "public_articles": public_articles,
-            "shared_articles": shared_articles,
-            "private_articles": private_articles
-        }
-
-    @http.route('/knowledge/get_tree', type='json', auth='user')
-    def display_tree(self):
-        return request.env.ref('knowledge.knowledge_article_tree_template')._render(self.get_tree_values())
-
     # ------
     # Others
     # ------

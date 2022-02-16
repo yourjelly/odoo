@@ -18,31 +18,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
         this.breadcrumbs = params.breadcrumbs;
     },
 
-    /**
-     * @override
-     * @returns {Promise}
-     */
-    start: function () {
-        return this._super.apply(this, arguments).then(() => {
-            return this.initTree();
-        });
-    },
-
-    initTree: function () {
-        const $container = this.$el.find('.o_knowledge_tree');
-        return this._rpc({
-            route: '/knowledge/get_tree',
-            params: {}
-        }).then(res => {
-            $container.empty();
-            $container.append(res);
-            this.createTree();
-        }).catch(error => {
-            $container.empty();
-        });
-    },
-
-    createTree: function () {
+    _setTreeListener: function () {
         this.$el.find('.o_tree').nestedSortable({
             axis: 'y',
             handle: 'div',
@@ -74,15 +50,6 @@ const KnowledgeFormRenderer = FormRenderer.extend({
             'connectWith',
             '.o_tree.o_tree_workspace'
         );
-
-        // Highlight the active record:
-
-        const $div = this.$el.find(`[data-article-id="${this.state.res_id}"] > div`);
-        if ($div.length === 0) {
-            return
-        }
-        $div.addClass('font-weight-bold');
-        $div.addClass('bg-light');
     },
 
     /**
@@ -199,6 +166,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
     _renderView: async function () {
         const result = await this._super.apply(this, arguments);
         this._renderBreadcrumb();
+        this._setTreeListener();
         this._setResizeListener();
         return result;
     },

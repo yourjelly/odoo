@@ -58,9 +58,7 @@
                             <!-- File explorer -->
                             <div class="flex-grow-1 position-relative">
                                 <div class="o_scroll_view px-3">
-                                    <div class="o_knowledge_tree">
-                                        <i class="fa fa-refresh fa-spin" title="loader"/>
-                                    </div>
+                                    <field name="tree" widget="html" class="o_knowledge_tree" readonly="1"/>
                                 </div>
                             </div>
                         </div>

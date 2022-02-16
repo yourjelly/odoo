@@ -311,16 +311,6 @@ const KnowledgeFormController = FormController.extend({
             this.reload();
         });
     },
-
-    /**
-     * @override
-     * @returns {Promise}
-     */
-    reload: function () {
-        return this._super.apply(this, arguments).then(() => {
-            this.renderer.initTree();
-        });
-    },
 });
 
 export {

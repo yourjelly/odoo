@@ -37,6 +37,11 @@ class Article(models.Model):
     icon = fields.Char(string='Article Icon', default='fa-file')
     author_ids = fields.Many2many("res.users", string="Authors", default=lambda self: self.env.user)
     is_locked = fields.Boolean(string='Locked', default=False)
+    tree = fields.Html(string='Tree',
+        compute='_compute_tree',
+        default=lambda self: self.generate_html_tree(),
+        sanitize=False
+    )
 
     # Hierarchy and sequence
     parent_id = fields.Many2one("knowledge.article", string="Parent Article")
@@ -165,6 +170,10 @@ class Article(models.Model):
             return [('favourite_user_ids', 'in', [self.env.user.id])]
         else:
             return [('favourite_user_ids', 'not in', [self.env.user.id])]
+
+    def _compute_tree(self):
+        for article in self:
+            article.tree = article.generate_html_tree()
 
     @api.model
     def search(self, args, offset=0, limit=None, order=None, count=False):
@@ -347,6 +356,23 @@ class Article(models.Model):
     ############################
     # Tools and business methods
     ############################
+
+    def generate_html_tree(self):
+        favourites = self.search([("favourite_user_ids", "in", [self.env.user.id])])
+        main_articles = self.search([("parent_id", "=", False)])
+
+        # keep only articles
+        public_articles = main_articles.filtered(lambda article: article.category == 'workspace')
+        shared_articles = main_articles.filtered(lambda article: article.category == 'shared')
+        private_articles = main_articles.filtered(lambda article: article.owner_id == self.env.user)
+
+        return self.env.ref('knowledge.knowledge_article_tree_template')._render({
+            "active_article_id": self.id,
+            "favourites": favourites,
+            "public_articles": public_articles,
+            "shared_articles": shared_articles,
+            "private_articles": private_articles
+        })
 
     def _get_highest_parent(self):
         self.ensure_one()
