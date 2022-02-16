@@ -23,6 +23,7 @@ const KnowledgeFormController = FormController.extend({
 
     custom_events: Object.assign({}, FormController.prototype.custom_events, {
         move: '_onMove',
+        emoji_picked: '_onIconChange',
     }),
 
     // Listeners:
@@ -343,6 +344,24 @@ const KnowledgeFormController = FormController.extend({
                 await this._setMode('readonly');
             }
             await this.reload();
+        }
+    },
+
+    /**
+     * @param {Event} event
+     */
+    _onIconChange: async function (event) {
+        const { article_id, unicode } = event.data;
+        const result = await this._rpc({
+            model: 'knowledge.article',
+            method: 'write',
+            args: [[article_id], { icon: unicode }],
+        });
+        if (result) {
+            this.$el.find(`[data-article-id="${article_id}"]`).each(function() {
+                const $icon = $(this).find('.o_article_icon:first');
+                $icon.text(unicode);
+            });
         }
     },
 });

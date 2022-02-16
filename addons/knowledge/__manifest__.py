@@ -31,6 +31,8 @@
             'knowledge/static/src/js/knowledge_model.js',
             'knowledge/static/src/js/knowledge_renderers.js',
             'knowledge/static/src/js/knowledge_views.js',
+            'knowledge/static/src/js/widgets/knowledge_html_field.js',
+            'knowledge/static/src/js/widgets/knowledge_emoji_picker.js',
             'knowledge/static/src/webclient/commands/*.js',
             'knowledge/static/src/models/*/*.js',
         ],

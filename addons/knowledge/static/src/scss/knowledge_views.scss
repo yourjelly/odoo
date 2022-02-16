@@ -56,8 +56,7 @@
         .o_article:not(:hover) .o_article_create {
             visibility: hidden;
         }
-        .o_article_name,
-        .o_article_dropdown i {
+        .o_article_name {
             cursor: pointer;
         }
         .o_placeholder {
@@ -112,6 +111,14 @@
         }
     }
 
+    .dropdown-menu.o_knowledge_emoji_panel {
+        min-width: 225px;
+        width: 225px;
+        span:hover {
+            cursor: pointer;
+            background: #eee;
+        }
+    }
     .dropdown-menu.o_knowledge_more_options_panel {
         min-width: 225px;
         width: 225px;

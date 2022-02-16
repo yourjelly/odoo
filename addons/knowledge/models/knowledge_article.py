@@ -85,6 +85,10 @@ class Article(models.Model):
     # TODO DBE: Add constraints
     # -> at least one member with write access if internal_permission != 'write'
 
+    def name_get(self):
+        """Override the `name_get` function to add the article icon"""
+        return [(rec.id, "%s %s" % (rec.icon, rec.name)) for rec in self]
+
     ##############################
     # Computes, Searches, Inverses
     ##############################

@@ -1,5 +1,6 @@
 /** @odoo-module */
 
+import EmojiPickerWidget from './widgets/knowledge_emoji_picker.js';
 import FormRenderer from 'web.FormRenderer';
 
 const KnowledgeFormRenderer = FormRenderer.extend({
@@ -110,30 +111,6 @@ const KnowledgeFormRenderer = FormRenderer.extend({
         }
     },
 
-    /**
-     * When the user clicks on a new icon
-     * @param {Event} event
-     */
-    _onIconClick: async function (event) {
-        event.stopPropagation();
-        const $target = $(event.target);
-        const $li = $target.closest('li');
-        const id = $li.data('article-id');
-        const name = $target.data('icon-name');
-        const result = await this._rpc({
-            model: 'knowledge.article',
-            method: 'write',
-            args: [[id], { icon: name }],
-        });
-        if (result) {
-            this.$el.find(`[data-article-id="${id}"]`).each(function() {
-                const $icon = $(this).find('.o_article_icon:first i');
-                $icon.removeClass();
-                $icon.addClass(`fa fa-fw ${name}`);
-            });
-        }
-    },
-
     _onArticleCreate: function () {
         console.log('Creating an article');
     },
@@ -173,6 +150,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
     _renderView: async function () {
         const result = await this._super.apply(this, arguments);
         this._renderBreadcrumb();
+        this._renderEmojiPicker();
         this._setTreeListener();
         this._setResizeListener();
         return result;
@@ -191,6 +169,13 @@ const KnowledgeFormRenderer = FormRenderer.extend({
         });
         const $container = this.$el.find('.breadcrumb');
         $container.prepend(items);
+    },
+
+    _renderEmojiPicker: function () {
+        this.$el.find('.o_article_dropdown').each((_index, $dropdown) => {
+            const $picker = new EmojiPickerWidget(this, {});
+            $picker.attachTo($dropdown);
+        });
     },
 
     _setResizeListener: function () {

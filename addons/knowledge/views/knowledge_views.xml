@@ -24,6 +24,7 @@
                             <field name="sequence"/>
                         </group>
                         <group>
+                            <field name="icon" widget="char_emojis"/>
                             <field name="author_ids" widget="many2many_avatar_user"/>
                             <field name="article_member_ids">
                                     <tree>
