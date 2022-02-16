@@ -21,8 +21,8 @@
             <t t-call="website.layout">
                 <div id="wrap" class="oe_structure">
 
-                    <section class="s_text_image pt200 pb200" data-oe-shape-data="{'shape':'website_module/hexagon/01','flip':[]}">
-                        <div class="o_we_shape o_website_module_hexagon_01"/>
+                    <section class="s_text_image pt200 pb200" data-oe-shape-data="{'shape':'illustration/hexagon/01','flip':[]}">
+                        <div class="o_we_shape o_illustration_hexagon_01"/>
                         <div class="container">
                             <div class="row">
                                 <div class="col-lg-6">

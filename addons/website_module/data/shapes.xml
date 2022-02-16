@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<record id="shape_hexagon_01" model="ir.attachment">
+    <field name="name">01.svg</field>
+    <field name="datas" type="base64" file="website_module/static/shapes/hexagon/01.svg"/>
+    <field name="url">/web_editor/shape/illustration/hexagon/01.svg</field>
+    <field name="public">True</field>
+</record>
+<record id="shape_hexagon_02" model="ir.attachment">
+    <field name="name">02.svg</field>
+    <field name="datas" type="base64" file="website_module/static/shapes/hexagon/02.svg"/>
+    <field name="url">/web_editor/shape/illustration/hexagon/02.svg</field>
+    <field name="public">True</field>
+</record>
+<record id="shape_hexagon_03" model="ir.attachment">
+    <field name="name">03.svg</field>
+    <field name="datas" type="base64" file="website_module/static/shapes/hexagon/03.svg"/>
+    <field name="url">/web_editor/shape/illustration/hexagon/03.svg</field>
+    <field name="public">True</field>
+</record>
+<record id="shape_hexagon_04" model="ir.attachment">
+    <field name="name">04.svg</field>
+    <field name="datas" type="base64" file="website_module/static/shapes/hexagon/04.svg"/>
+    <field name="url">/web_editor/shape/illustration/hexagon/04.svg</field>
+    <field name="public">True</field>
+</record>
+<record id="shape_hexagon_05" model="ir.attachment">
+    <field name="name">05.svg</field>
+    <field name="datas" type="base64" file="website_module/static/shapes/hexagon/05.svg"/>
+    <field name="url">/web_editor/shape/illustration/hexagon/05.svg</field>
+    <field name="public">True</field>
+</record>
+<record id="shape_hexagon_06" model="ir.attachment">
+    <field name="name">06.svg</field>
+    <field name="datas" type="base64" file="website_module/static/shapes/hexagon/06.svg"/>
+    <field name="url">/web_editor/shape/illustration/hexagon/06.svg</field>
+    <field name="public">True</field>
+</record>
+<record id="shape_hexagon_07" model="ir.attachment">
+    <field name="name">07.svg</field>
+    <field name="datas" type="base64" file="website_module/static/shapes/hexagon/07.svg"/>
+    <field name="url">/web_editor/shape/illustration/hexagon/07.svg</field>
+    <field name="public">True</field>
+</record>
+<record id="shape_hexagon_08" model="ir.attachment">
+    <field name="name">08.svg</field>
+    <field name="datas" type="base64" file="website_module/static/shapes/hexagon/08.svg"/>
+    <field name="url">/web_editor/shape/illustration/hexagon/08.svg</field>
+    <field name="public">True</field>
+</record>
+<record id="shape_hexagon_09" model="ir.attachment">
+    <field name="name">09.svg</field>
+    <field name="datas" type="base64" file="website_module/static/shapes/hexagon/09.svg"/>
+    <field name="url">/web_editor/shape/illustration/hexagon/09.svg</field>
+    <field name="public">True</field>
+</record>
+
+<record id="shape_notched_01" model="ir.attachment">
+    <field name="name">01.svg</field>
+    <field name="datas" type="base64" file="website_module/static/shapes/notched/01.svg"/>
+    <field name="url">/web_editor/shape/illustration/notched/01.svg</field>
+    <field name="public">True</field>
+</record>
+<record id="shape_notched_02" model="ir.attachment">
+    <field name="name">02.svg</field>
+    <field name="datas" type="base64" file="website_module/static/shapes/notched/02.svg"/>
+    <field name="url">/web_editor/shape/illustration/notched/02.svg</field>
+    <field name="public">True</field>
+</record>
+
+</odoo>

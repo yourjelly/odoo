@@ -1,17 +1,20 @@
 $o-bg-shapes: map-merge($o-bg-shapes,
     (
-        'website_module': (
-            'hexagon/01': ('position': right top, 'size': auto 100%, 'colors': (1), 'repeat-y': false),
-            // 'hexagon/02': ('position': center center, 'size': 100% auto, 'colors': (2), 'repeat-y': false),
-            // 'hexagon/03': ('position': left center, 'size': auto 100%, 'colors': (1), 'repeat-y': false),
-            // 'hexagon/04': ('position': left bottom, 'size': auto 100%, 'colors': (3), 'repeat-y': false),
-            // 'hexagon/05': ('position': right bottom, 'size': auto 100%, 'colors': (3), 'repeat-y': false),
-            // 'hexagon/06': ('position': center top, 'size': auto 100%, 'colors': (3), 'repeat-y': false),
-            // 'hexagon/07': ('position': left bottom, 'size': 100% auto, 'colors': (3), 'repeat-y': false),
-            // 'hexagon/08': ('position': center top, 'size': 100% auto, 'colors': (3), 'repeat-y': false),
-            // 'hexagon/09': ('position': center center, 'size': 100% auto, 'colors': (3), 'repeat-y': false),
-            // 'notched/01': ('position': left top, 'size': auto 100%, 'colors': (3), 'repeat-y': false),
-            // 'notched/02': ('position': left bottom, 'size': auto 100%, 'colors': (3), 'repeat-y': false),
+        'illustration': map-merge(
+            map-get($o-bg-shapes, 'illustration') or (),
+            (
+                'hexagon/01': ('position': right top, 'size': auto 100%, 'colors': (1), 'repeat-y': false),
+                'hexagon/02': ('position': center center, 'size': 100% auto, 'colors': (2), 'repeat-y': false),
+                'hexagon/03': ('position': left center, 'size': auto 100%, 'colors': (1), 'repeat-y': false),
+                'hexagon/04': ('position': left bottom, 'size': auto 100%, 'colors': (3), 'repeat-y': false),
+                'hexagon/05': ('position': right bottom, 'size': auto 100%, 'colors': (3), 'repeat-y': false),
+                'hexagon/06': ('position': center top, 'size': auto 100%, 'colors': (3), 'repeat-y': false),
+                'hexagon/07': ('position': left bottom, 'size': 100% auto, 'colors': (3), 'repeat-y': false),
+                'hexagon/08': ('position': center top, 'size': 100% auto, 'colors': (3), 'repeat-y': false),
+                'hexagon/09': ('position': center center, 'size': 100% auto, 'colors': (3), 'repeat-y': false),
+                'notched/01': ('position': left top, 'size': auto 100%, 'colors': (3), 'repeat-y': false),
+                'notched/02': ('position': left bottom, 'size': auto 100%, 'colors': (3), 'repeat-y': false),
+            ),
         ),
-    )
+    ),
 );
