@@ -19,7 +19,7 @@ _logger = logging.getLogger(__name__)
 class AccountEdiFormat(models.Model):
     _name = 'account.edi.format'
     _description = 'EDI format'
-azezazeza
+azezazezazaeza
     name = fields.Char()
     code = fields.Char(required=True)
 
