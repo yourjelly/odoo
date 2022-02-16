@@ -293,23 +293,11 @@ const KnowledgeFormController = FormController.extend({
             }
         });
         if (result) {
-            if (data.is_locked) {
-                await this.reload();
-            } else {
+            if (!data.is_locked) {
                 await this._setMode('readonly');
             }
+            await this.reload();
         }
-    },
-
-    // Helpers:
-
-    /**
-     * @override
-     */
-    _setMode: function (mode, recordID) {
-        return this._super.apply(this, arguments).then(() => {
-            this.reload();
-        });
     },
 });
 
