@@ -17,7 +17,7 @@ const KnowledgeFormController = FormController.extend({
         'click .btn-move': '_onOpenMoveToModal',
         'click .btn-share': '_onShare',
         'click .o_article_create': '_onCreate',
-        'click #knowledge_search_bar': '_onSearch',
+        'click .o_search_bar': '_onSearch',
         'change .o_breadcrumb_article_name': '_onRename',
     }),
 
