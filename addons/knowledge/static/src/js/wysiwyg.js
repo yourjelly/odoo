@@ -163,7 +163,7 @@ DialogLinkWidget.include({
         }
         const $input = this._getInputSelector();
         const { id } = $input.select2('data');
-        return `${window.location.origin}/web#id=${id}&action=knowledge.action_show_article&view_type=form`;
+        return `${window.location.origin}/article/${id}`;
     },
 
     /**

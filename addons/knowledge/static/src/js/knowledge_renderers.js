@@ -8,7 +8,6 @@ const KnowledgeFormRenderer = FormRenderer.extend({
     events: _.extend({}, FormRenderer.prototype.events, {
         'click .o_article_caret': '_onFold',
         'click .o_article_dropdown i': '_onIconClick',
-        'click .o_article_name': '_onOpen',
         'click .o_article_create': '_onArticleCreate',
     }),
 
@@ -113,20 +112,6 @@ const KnowledgeFormRenderer = FormRenderer.extend({
 
     _onArticleCreate: function () {
         console.log('Creating an article');
-    },
-
-    /**
-     * Opens the selected record.
-     * @param {Event} event
-     */
-    _onOpen: async function (event) {
-        event.stopPropagation();
-        const $li = $(event.target).closest('li');
-        this.do_action('knowledge.action_show_article', {
-            additional_context: {
-                res_id: $li.data('article-id')
-            }
-        });
     },
 
     /**

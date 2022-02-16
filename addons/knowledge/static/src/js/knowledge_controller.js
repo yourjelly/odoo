@@ -17,11 +17,13 @@ const KnowledgeFormController = FormController.extend({
         'click .btn-move': '_onOpenMoveToModal',
         'click .btn-share': '_onShare',
         'click .o_article_create': '_onCreate',
+        'click .o_article_name': '_onOpen',
         'click .o_search_bar': '_onSearch',
         'change .o_breadcrumb_article_name': '_onRename',
     }),
 
     custom_events: Object.assign({}, FormController.prototype.custom_events, {
+        open: '_onOpen',
         move: '_onMove',
         emoji_picked: '_onIconChange',
     }),
@@ -211,6 +213,23 @@ const KnowledgeFormController = FormController.extend({
         }
         await this._lock(id);
     },
+
+    /**
+     * Opens the selected record.
+     * @param {Event} event
+     */
+    _onOpen: async function (event) {
+        if (event instanceof $.Event) {
+            event.stopPropagation();
+            const $li = $(event.target).closest('li');
+            const id = $li.data('article-id');
+            await this._open(id);
+        } else {
+            const { id } = event.data;
+            await this._open(id);
+        }
+    },
+
     /**
      * @param {Event} event
      */
@@ -345,6 +364,17 @@ const KnowledgeFormController = FormController.extend({
             }
             await this.reload();
         }
+    },
+
+    /**
+     * @param {integer} id - Target id
+     */
+    _open: async function (id) {
+        await this.do_action('knowledge.action_show_article', {
+            additional_context: {
+                res_id: id
+            }
+        });
     },
 
     /**

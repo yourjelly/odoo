@@ -136,7 +136,7 @@
                                 <div class="o_scroll_view">
                                     <!-- Article body -->
                                     <div class="o_knowledge_editor d-flex">
-                                        <field name="body" widget="html" no_label="1"/>
+                                        <field name="body" widget="knowledge_html" no_label="1"/>
                                     </div>
                                     <!-- Chatter -->
                                     <div class="o_knowledge_chatter_container">
