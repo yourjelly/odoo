@@ -123,11 +123,28 @@ class KnowledgeDataSet(DataSet):
 
     @http.route('/knowledge/get_articles', type='http', auth="public", methods=['GET'], website=True, sitemap=False)
     def get_articles(self, query='', limit=25, **post):
+        query = query.lower()
+        records = [record for record in [{
+            'id': 'private',
+            'icon': False,
+            'name': _('Private')
+        }, {
+            'id': 'workspace',
+            'icon': False,
+            'name': _('Workspace')
+        }, {
+            'id': 'shared',
+            'icon': False,
+            'name': _('Shared')
+        }] if record.get('name').lower().find(query) != -1]
         Article = request.env['knowledge.article']
-        return json.dumps(Article.search_read(
-            domain=[('name', '=ilike', '%' + query + '%')],
+        domain = [
+            ('name', '=ilike', '%' + query + '%')
+        ]
+        return json.dumps(records + Article.search_read(
+            domain=domain,
             fields=['id', 'icon', 'name'],
-            limit=int(limit)
+            limit=max(0, int(limit) - len(records))
         ))
 
     @http.route('/knowledge/get_article/<int:article_id>', type='json', auth='user')

@@ -1,6 +1,8 @@
 /** @odoo-module */
 
 import { qweb as QWeb, _t } from 'web.core';
+import { browser } from '@web/core/browser/browser';
+import { escapeRegExp } from '@web/core/utils/strings';
 import Dialog from 'web.Dialog';
 import FormController from 'web.FormController';
 
@@ -12,11 +14,15 @@ const KnowledgeFormController = FormController.extend({
         'click .btn-duplicate': '_onDuplicate',
         'click .btn-create': '_onCreate',
         'click .btn-lock': '_onLock',
-        'click .btn-move': '_onMove',
+        'click .btn-move': '_onOpenMoveToModal',
         'click .btn-share': '_onShare',
         'click .o_article_create': '_onCreate',
         'click #knowledge_search_bar': '_onSearch',
         'change .o_breadcrumb_article_name': '_onRename',
+    }),
+
+    custom_events: Object.assign({}, FormController.prototype.custom_events, {
+        move: '_onMove',
     }),
 
     // Listeners:
@@ -71,10 +77,21 @@ const KnowledgeFormController = FormController.extend({
         }
     },
 
-    _onMove: function () {
-        // TODO: Add (prepend) 'Workspace' and 'Private' to the dropdown list.
-        // So the article can be moved to the root of workspace or private, without any particular parent.
-        const $content = $(QWeb.render('knowledge.knowledge_move_article_to_modal'));
+    /**
+     * @param {Event} event
+     */
+    _onMove: async function (event) {
+        await this._move(event.data);
+    },
+
+    /**
+     * Opens the "Move To" modal
+     */
+    _onOpenMoveToModal: function () {
+        const { data } = this.model.get(this.handle);
+        const $content = $(QWeb.render('knowledge.knowledge_move_article_to_modal', {
+            display_name: data.display_name
+        }));
         const $input = $content.find('input');
         $input.select2({
             ajax: {
@@ -116,28 +133,46 @@ const KnowledgeFormController = FormController.extend({
              * @returns {String}
              */
             formatResult: (result, _target, { term }) => {
-                const { icon, text } = result;
+                if (result.id === 'private') {
+                    const { origin } = browser.location
+                    const { context } = this.initialState;
+                    result.src = `${origin}/web/image?model=res.users&field=avatar_128&id=${context.uid}`;
+                }
+                const $template = $(QWeb.render('knowledge.knowledge_search_result', result));
+                // Highlight the matching term:
+                term = escapeRegExp(_.escape(term));
                 const pattern = new RegExp(`(${term})`, 'gi');
-                return `<span class="fa ${icon}"></span> ` + (
-                    term.length > 0 ? text.replaceAll(pattern, '<u>$1</u>') : text
-                );
+                const text = _.escape(result.text);
+                const $label = $template.find('.label');
+                $label.html(text.replaceAll(pattern, '<u>$1</u>'));
+                return $template;
             },
         });
         const dialog = new Dialog(this, {
-            title: _t('Move Article Under'),
+            title: _t('Move Article'),
             $content: $content,
             buttons: [{
-                text: _t('Save'),
+                text: _t('OK'),
                 classes: 'btn-primary',
                 click: async () => {
                     const state = this.getState();
-                    const src = state.id;
-                    const dst = parseInt($input.val());
-                    await this._move(src, dst);
-                    dialog.close();
+                    const value = $input.val();
+                    const article_id = state.id;
+                    const target_parent_id = isNaN(value) ? value : parseInt(value);
+                    await this._move({
+                        article_id,
+                        target_parent_id,
+                        onSuccess: () => {
+                            this.renderer.moveArticleUnder(article_id, target_parent_id);
+                            dialog.close();
+                        },
+                        onReject: () => {
+                            dialog.close();
+                        }
+                    });
                 }
             }, {
-                text: _t('Discard'),
+                text: _t('Cancel'),
                 close: true
             }]
         });
@@ -258,25 +293,36 @@ const KnowledgeFormController = FormController.extend({
     },
 
     /**
-     * @param {integer} src
-     * @param {integer} dst
+     * @param {Object} data
+     * @param {integer} data.article_id
+     * @param {(integer|String)} data.target_parent_id
+     * @param {integer} [data.before_article_id]
+     * @param {Function} data.onSuccess
+     * @param {Function} data.onReject
      */
-    _move: async function (src, dst) {
+    _move: async function (data) {
+        const params = { article_id: data.article_id };
+        if (data.target_parent_id === 'shared') {
+            // TODO: What should happen when the user drags an article in 'shared' ?
+            data.onReject();
+            return;
+        }
+        if (['workspace', 'private'].includes(data.target_parent_id)) {
+            params.private = data.target_parent_id === 'private';
+        } else {
+            params.target_parent_id = data.target_parent_id;
+            if (data.before_article_id) {
+                params.before_article_id = data.before_article_id;
+            }
+        }
         const result = await this._rpc({
-            route: `/knowledge/article/${src}/move`,
-            params: {
-                target_parent_id: dst
-            }
+            route: `/knowledge/article/${data.article_id}/move`,
+            params
         });
-        const $parent = this.$el.find(`.o_tree [data-article-id="${dst}"]`);
-        if (result && $parent.length !== 0) {
-            let $li = this.$el.find(`.o_tree [data-article-id="${src}"]`);
-            let $ul = $parent.find('ul:first');
-            if ($ul.length === 0) {
-                $ul = $('<ul>');
-                $parent.append($ul);
-            }
-            $ul.append($li);
+        if (result) {
+            data.onSuccess();
+        } else {
+            data.onReject();
         }
     },
 

@@ -2,7 +2,10 @@
 <templates>
     <t t-name="knowledge.knowledge_move_article_to_modal">
         <form class="container">
-            <div class="form-group">
+            <div class="mb-3">
+                Move "<span t-esc="display_name" class="font-weight-bold"/>" under:
+            </div>
+            <div class="form-group m-0">
                 <input class="form-control" type="hidden" placeholder="Search an Article to use as Parent"/>
             </div>
         </form>
@@ -51,4 +54,9 @@
             </div>
         </form>
     </t>
+    <div t-name="knowledge.knowledge_search_result" class="knowledge_select2_search_result">
+        <img t-if="id === 'private'" t-att-src="src" class="rounded-circle mr-1"/>
+        <i t-elif="icon" t-attf-class="fa fa-w #{ icon } mr-1"/>
+        <span class="label" t-esc="text"/>
+    </div>
 </templates>

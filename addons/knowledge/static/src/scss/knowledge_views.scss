@@ -58,6 +58,15 @@
         .o_placeholder {
             background-color: #eee;
         }
+        &.dragging {
+            .o_tree:empty {
+                border: 1px solid #EEE;
+                &::after {
+                    content: ".";
+                    visibility: hidden;
+                }
+            }
+        }
     }
 
     .o_knowledge_resizer {
@@ -101,6 +110,14 @@
     .dropdown-menu.o_knowledge_more_options_panel {
         min-width: 225px;
         width: 225px;
+    }
+}
+
+.knowledge_select2_search_result {
+    img {
+        width: 100%;
+        max-width: 20px;
+        max-height: 20px;
     }
 }
 

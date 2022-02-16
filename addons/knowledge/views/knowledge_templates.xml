@@ -3,8 +3,8 @@
 <data>
     <!-- Article Tree layout -->
     <template id="knowledge_article_tree_template" name="Article Tree">
-        <section>
-            <div class="h4 mb-0">Favourites</div>
+        <section class="mb-3">
+            <div class="h4 mb-1">Favourites</div>
             <ul t-if="favourites" class="o_tree_favourite m-0 px-0 py-2">
                 <li t-if="favourite.user_has_access" t-foreach="favourites" t-as="favourite"
                     t-attf-class="#{ 'bg-light font-weight-bold' if favourite.id == active_article_id else '' }"
@@ -24,37 +24,43 @@
             </div>
         </section>
 
-        <section>
-            <div class="h4 mb-0">Workspace</div>
-            <ul class="o_tree o_tree_workspace m-0 px-0 py-2">
+        <section class="mb-3">
+            <div class="h4 mb-1">Workspace</div>
+            <ul t-if="len(public_articles) > 0" class="o_tree m-0 p-0" data-section="workspace">
                 <t t-foreach="public_articles.sorted('sequence')" t-as="child">
                     <t t-if="child.user_has_access" t-call="knowledge.article_template">
                         <t t-set="article" t-value="child"/>
                     </t>
                 </t>
             </ul>
+            <ul t-else="" class="o_tree m-0 p-0" data-section="workspace"/>
+            <!-- For the `:empty` css selector to be applied, the `ul` element shouldn't
+                 contain any whitespace. Here, the `t-else` will ensure that the `ul`
+                 element will be empty -->
         </section>
 
-        <section>
-            <div class="h4 mb-0">Shared</div>
-            <ul class="o_tree o_tree_workspace m-0 px-0 py-2">
+        <section class="mb-3">
+            <div class="h4 mb-1">Shared</div>
+            <ul t-if="len(shared_articles) > 0" class="o_tree m-0 p-0" data-section="shared">
                 <t t-foreach="shared_articles.sorted('sequence')" t-as="child">
                     <t t-if="child.user_has_access" t-call="knowledge.article_template">
                         <t t-set="article" t-value="child"/>
                     </t>
                 </t>
             </ul>
+            <ul t-else="" class="o_tree m-0 p-0" data-section="shared"/>
         </section>
 
-        <section>
-            <div class="h4 mb-0">Private</div>
-            <ul class="o_tree o_tree_private m-0 px-0 py-2">
+        <section class="mb-3">
+            <div class="h4 mb-1">Private</div>
+            <ul t-if="len(private_articles) > 0" class="o_tree m-0 p-0" data-section="private">
                 <t t-foreach="private_articles.sorted('sequence')" t-as="child">
                     <t t-if="child.user_has_access" t-call="knowledge.article_template">
                         <t t-set="article" t-value="child"/>
                     </t>
                 </t>
             </ul>
+            <ul t-else="" class="o_tree m-0 p-0" data-section="private"/>
         </section>
     </template>
 
