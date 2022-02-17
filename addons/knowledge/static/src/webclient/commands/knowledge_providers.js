@@ -6,8 +6,7 @@ import { registry } from "@web/core/registry";
 import { HotkeyCommandItem } from "@web/core/commands/default_providers";
 import { splitCommandName } from "@web/core/commands/command_palette";
 
-const { Component } = owl;
-const { xml } = owl.tags;
+const { Component, xml } = owl;
 
 // Articles command
 class KnowledgeCommand extends Component {}
@@ -45,7 +44,7 @@ KnowledgeExtraCommand.template = xml`
             <t t-esc="props.name" />
         </span>
         <span>
-            <t t-foreach="getKeysToPress(props)" t-as="key">
+            <t t-foreach="getKeysToPress(props)" t-as="key" t-key="key_index">
                 <kbd t-esc="key" />
                 <span t-if="!key_last"> + </span>
             </t>
@@ -55,12 +54,14 @@ KnowledgeExtraCommand.template = xml`
 
 const commandSetupRegistry = registry.category("command_setup");
 commandSetupRegistry.add("?", {
+    debounceDelay: 200,
     emptyMessage: _lt("No article found."),
     name: _lt("articles"),
 });
 
 const commandProviderRegistry = registry.category("command_provider");
 commandProviderRegistry.add("knowledge", {
+    debounceDelay: 200,
     namespace: "?",
     async provide(env, options) {
         // search article's name and parent name
