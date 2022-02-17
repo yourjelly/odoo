@@ -85,6 +85,7 @@ class AccountJournal(models.Model):
                              ('user_type_id.type', 'not in', ('receivable', 'payable')), \
                              ('user_type_id', '=', %s)]" % self.env.ref('account.data_account_type_current_liabilities').id)
     restrict_mode_hash_table = fields.Boolean(string="Lock Posted Entries with Hash",
+        compute="_compute_restrict_mode_hash_table",
         help="If ticked, the accounting entry or invoice receives a hash as soon as it is posted and cannot be modified anymore.")
     sequence = fields.Integer(help='Used to order Journals in the dashboard view', default=10)
 
@@ -326,6 +327,10 @@ class AccountJournal(models.Model):
     @api.depends('name')
     def _compute_alias_domain(self):
         self.alias_domain = self.env["ir.config_parameter"].sudo().get_param("mail.catchall.domain")
+
+    def _compute_restrict_mode_hash_table(self):
+        for move in self:
+            move.restrict_mode_hash_table = False
 
     @api.constrains('type_control_ids')
     def _constrains_type_control_ids(self):
