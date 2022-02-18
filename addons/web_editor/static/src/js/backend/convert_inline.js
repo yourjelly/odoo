@@ -434,6 +434,7 @@ function toInline($editable, cssRules, $iframe) {
 
     attachmentThumbnailToLinkImg($editable);
     fontToImg($editable);
+    svgToImage($editable);
     classToStyle($editable, cssRules);
     bootstrapToTable($editable);
     cardToTable($editable);
@@ -775,6 +776,46 @@ function normalizeRem($editable, rootFontSize=16) {
             const pxValue = Math.round(remValue * rootFontSize * 100) / 100;
             node.setAttribute('style', node.getAttribute('style').replace(rem, pxValue + 'px'));
         }
+    }
+}
+
+function svgToImage($editable) {
+    for (const svg of $editable.find('img[src$=".svg"]')) {
+        const image = document.createElement('img');
+
+        const canvas = document.createElement('CANVAS');
+
+        const width = _getWidth(svg);
+        const height = _getHeight(svg);
+        canvas.setAttribute('width', width);
+        canvas.setAttribute('height', height);
+        canvas.getContext('2d').drawImage(svg, 0, 0, width, height);
+
+        image.setAttribute('src', canvas.toDataURL('png'));
+        image.setAttribute('width', width);
+        image.setAttribute('height', height);
+
+        svg.before(image);
+        svg.remove();
+    }
+    // The following is untested yet:
+    for (const svg of $editable.find('svg')) {
+        const image = document.createElement('img');
+        const svgString = new XMLSerializer().serializeToString(svg);
+        image.setAttribute('src', `data:image/svg+xml;base64,${window.btoa(svgString)}`);
+
+        const canvas = document.createElement("canvas");
+
+        const width = _getWidth(svg);
+        const height = _getHeight(svg);
+        canvas.setAttribute('width', width);
+        canvas.setAttribute('height', height);
+        canvas.getContext('2d').drawImage(image, 0, 0, width, height);
+        image.setAttribute('width', width);
+        image.setAttribute('height', height);
+
+        svg.before(image);
+        svg.remove();
     }
 }
 
