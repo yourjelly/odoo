@@ -226,7 +226,7 @@ export function addLegacyMockEnvironment(env, legacyParams = {}) {
  *
  * @param {*} params
  */
-export async function createWebClient(params) {
+export async function stubCommunityWebClient(params) {
     setupWebClientRegistries();
 
     // With the compatibility layer, the action manager keeps legacy alive if they
@@ -288,6 +288,10 @@ export async function createWebClient(params) {
     await nextTick();
     return wc;
 }
+
+registry.category("test_helpers").add("createUniversalWebClient", stubCommunityWebClient);
+
+export const createWebClient = registry.category("test_helpers").get("createUniversalWebClient");
 
 export async function doAction(env, ...args) {
     if (env instanceof Component) {
