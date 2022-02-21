@@ -145,17 +145,15 @@ class StockPickingBatch(models.Model):
                 vals['name'] = self.env['ir.sequence'].next_by_code('picking.wave') or '/'
             else:
                 vals['name'] = self.env['ir.sequence'].next_by_code('picking.batch') or '/'
-        return super().create(vals)
+        batch = super().create(vals)
+        batch._assign_picking_type_id()
+        return batch
 
     def write(self, vals):
         res = super().write(vals)
         if vals.get('picking_type_id'):
             self._sanity_check()
-        if vals.get('picking_ids'):
-            batch_without_picking_type = self.filtered(lambda batch: not batch.picking_type_id)
-            if batch_without_picking_type:
-                picking = self.picking_ids and self.picking_ids[0]
-                batch_without_picking_type.picking_type_id = picking.picking_type_id.id
+        self._assign_picking_type_id()
         return res
 
     @api.ondelete(at_uninstall=False)
@@ -280,6 +278,15 @@ class StockPickingBatch(models.Model):
     # -------------------------------------------------------------------------
     # Miscellaneous
     # -------------------------------------------------------------------------
+
+    def _assign_picking_type_id(self):
+        """ Should be a computed field -> Master"""
+        for batch in self:
+            if batch.picking_type_id or not batch.picking_ids:
+                continue
+            else:
+                batch.picking_type_id = batch.picking_ids[0].picking_type_id.id
+
     def _sanity_check(self):
         for batch in self:
             if not batch.picking_ids <= batch.allowed_picking_ids:

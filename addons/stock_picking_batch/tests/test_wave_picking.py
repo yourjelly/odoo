@@ -216,6 +216,7 @@ class TestBatchPicking(TransactionCase):
         self.assertTrue(wave)
 
         # Original picking lost a stock move
+        self.assertEqual(wave.picking_type_id, self.picking_client_1.picking_type_id)
         self.assertTrue(move.picking_id)
         self.assertFalse(move.picking_id == self.picking_client_1)
         self.assertTrue(self.picking_client_1.move_lines)
