@@ -154,7 +154,7 @@ class AccountAnalyticAccount(models.Model):
         return res
 
     @api.model
-    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
+    def _name_search(self, name, domain=None, operator='ilike', limit=100, name_get_uid=None):
         if operator not in ('ilike', 'like', '=', '=like', '=ilike', 'not ilike'):
             return super(AccountAnalyticAccount, self)._name_search(name, args, operator, limit, name_get_uid=name_get_uid)
         args = args or []

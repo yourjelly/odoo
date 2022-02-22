@@ -2973,7 +2973,7 @@ var BasicModel = AbstractModel.extend({
         return this._rpc({
                 model: field.relation,
                 method: 'name_search',
-                args: ["", domain],
+                domain: ["", domain],
                 context: context
             });
     },

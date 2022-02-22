@@ -6897,7 +6897,7 @@ QUnit.module('Views', {
             },
             mockRPC: function (route, args) {
                 if (args.method === 'name_search') {
-                    assert.deepEqual(args.kwargs.args[0], ['id', 'in', [45,46,47]],
+                    assert.deepEqual(args.kwargs.domain[0], ['id', 'in', [45,46,47]],
                         "domain should be properly evaluated");
                 }
                 return this._super.apply(this, arguments);
@@ -9246,7 +9246,7 @@ QUnit.module('Views', {
                     });
                 }
                 if (args.method === 'name_search') {
-                    assert.deepEqual(args.kwargs.args, expectedDomain);
+                    assert.deepEqual(args.kwargs.domain, expectedDomain);
                 }
                 return this._super.apply(this, arguments);
             },

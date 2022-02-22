@@ -546,7 +546,7 @@ var DataSet =  Class.extend(mixins.PropertiesMixin, {
     name_search: function (name, domain, operator, limit) {
         return this._model.call('name_search', {
             name: name || '',
-            args: domain || false,
+            domain: domain || false,
             operator: operator || 'ilike',
             context: this._model.context(),
             limit: limit || 0

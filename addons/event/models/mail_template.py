@@ -9,7 +9,7 @@ class MailTemplate(models.Model):
     _inherit = 'mail.template'
 
     @api.model
-    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
+    def _name_search(self, name, domain=None, operator='ilike', limit=100, name_get_uid=None):
         """Context-based hack to filter reference field in a m2o search box to emulate a domain the ORM currently does not support.
 
         As we can not specify a domain on a reference field, we added a context

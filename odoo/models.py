@@ -1885,12 +1885,12 @@ class BaseModel(metaclass=MetaModel):
             return False
 
     @api.model
-    def name_search(self, name='', args=None, operator='ilike', limit=100):
-        """ name_search(name='', args=None, operator='ilike', limit=100) -> records
+    def name_search(self, name='', domain=None, operator='ilike', limit=100):
+        """ name_search(name='', domain=None, operator='ilike', limit=100) -> records
 
         Search for records that have a display name matching the given
         ``name`` pattern when compared with the given ``operator``, while also
-        matching the optional search domain (``args``).
+        matching the optional search domain (``domain``).
 
         This is used for example to provide suggestions based on a partial
         value for a relational field. Should usually behave as the reverse of
@@ -1901,7 +1901,7 @@ class BaseModel(metaclass=MetaModel):
         result of the search.
 
         :param str name: the name pattern to match
-        :param list args: optional search domain (see :meth:`~.search` for
+        :param list domain: optional search domain (see :meth:`~.search` for
                           syntax), specifying further restrictions
         :param str operator: domain operator for matching ``name``, such as
                              ``'like'`` or ``'='``.
@@ -1909,23 +1909,23 @@ class BaseModel(metaclass=MetaModel):
         :rtype: list
         :return: list of pairs ``(id, text_repr)`` for all matching records.
         """
-        ids = self._name_search(name, args, operator, limit=limit)
+        ids = self._name_search(name, domain, operator, limit=limit)
         return self.browse(ids).sudo().name_get()
 
     @api.model
-    def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None):
-        """ _name_search(name='', args=None, operator='ilike', limit=100, name_get_uid=None) -> ids
+    def _name_search(self, name='', domain=None, operator='ilike', limit=100, name_get_uid=None):
+        """ _name_search(name='', domain=None, operator='ilike', limit=100, name_get_uid=None) -> ids
 
         Private implementation of name_search, allows passing a dedicated user
         for the name_get part to solve some access rights issues.
         """
-        args = list(args or [])
+        domain = domain or []
         # optimize out the default criterion of ``ilike ''`` that matches everything
         if not self._rec_name:
             _logger.warning("Cannot execute name_search, no _rec_name defined on %s", self._name)
         elif not (name == '' and operator == 'ilike'):
-            args += [(self._rec_name, operator, name)]
-        return self._search(args, limit=limit, access_rights_uid=name_get_uid)
+            domain += [(self._rec_name, operator, name)]
+        return self._search(domain, limit=limit, access_rights_uid=name_get_uid)
 
     @api.model
     def _add_missing_default_values(self, values):

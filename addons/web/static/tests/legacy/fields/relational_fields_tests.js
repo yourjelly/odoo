@@ -1297,7 +1297,7 @@ QUnit.module('relational_fields', {
                     });
                 }
                 if (args.method === 'name_search') {
-                    assert.deepEqual(args.args[1], domain,
+                    assert.deepEqual(args.domain[1], domain,
                         "sent domain should be correct");
                 }
                 return this._super(route, args);
@@ -1559,7 +1559,7 @@ QUnit.module('relational_fields', {
             res_id: 1,
             mockRPC: function (route, args) {
                 if (args.method === 'name_search') {
-                    assert.deepEqual(args.kwargs.args, [['id', '<', 50], ['id', 'not in', [12]]],
+                    assert.deepEqual(args.kwargs.domain, [['id', '<', 50], ['id', 'not in', [12]]],
                         "domain sent to name_search should be correct");
                     return Promise.resolve([[14, 'silver']]);
                 }

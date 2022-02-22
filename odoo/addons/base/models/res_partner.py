@@ -110,7 +110,7 @@ class PartnerCategory(models.Model):
         return res
 
     @api.model
-    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
+    def _name_search(self, name, domain=None, operator='ilike', limit=100, name_get_uid=None):
         args = args or []
         if name:
             # Be sure name_search is symetric to name_get
@@ -831,7 +831,7 @@ class Partner(models.Model):
         return ''
 
     @api.model
-    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
+    def _name_search(self, name, domain=None, operator='ilike', limit=100, name_get_uid=None):
         self = self.with_user(name_get_uid or self.env.uid)
         # as the implementation is in SQL, we force the recompute of fields if necessary
         self.recompute(['display_name'])

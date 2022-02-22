@@ -167,7 +167,7 @@ export const Many2OneAvatarUser = Many2OneAvatar.extend(M2XAvatarMixin, {
             method: "name_search",
             kwargs: {
                 name: value,
-                args: domain,
+                domain: domain,
                 operator: "ilike",
                 limit: limit + 1,
                 context,

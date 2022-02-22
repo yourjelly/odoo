@@ -464,11 +464,11 @@ class ProductTemplate(models.Model):
                 for template in self]
 
     @api.model
-    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
+    def _name_search(self, name, domain=None, operator='ilike', limit=100, name_get_uid=None):
         # Only use the product.product heuristics if there is a search term and the domain
         # does not specify a match on `product.template` IDs.
         if not name or any(term[0] == 'id' for term in (args or [])):
-            return super(ProductTemplate, self)._name_search(name=name, args=args, operator=operator, limit=limit, name_get_uid=name_get_uid)
+            return super(ProductTemplate, self)._name_search(name=name, domain=args, operator=operator, limit=limit, name_get_uid=name_get_uid)
 
         Product = self.env['product.product']
         templates = self.browse([])
@@ -490,7 +490,7 @@ class ProductTemplate(models.Model):
             current_round_templates = self.browse([])
             if not products:
                 domain_template = args + domain_no_variant + (templates and [('id', 'not in', templates.ids)] or [])
-                template_ids = super(ProductTemplate, self)._name_search(name=name, args=domain_template, operator=operator, limit=limit, name_get_uid=name_get_uid)
+                template_ids = super(ProductTemplate, self)._name_search(name=name, domain=domain_template, operator=operator, limit=limit, name_get_uid=name_get_uid)
                 current_round_templates |= self.browse(template_ids)
                 templates |= current_round_templates
             if (not products and not current_round_templates) or (limit and (len(templates) > limit)):

@@ -196,7 +196,7 @@ class MrpBom(models.Model):
             raise UserError(_('You can not delete a Bill of Material with running manufacturing orders.\nPlease close or cancel it first.'))
 
     @api.model
-    def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None):
+    def _name_search(self, name='', domain=None, operator='ilike', limit=100, name_get_uid=None):
         args = args or []
         domain = []
         if (name or '').strip():

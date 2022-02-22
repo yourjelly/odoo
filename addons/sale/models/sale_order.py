@@ -617,7 +617,7 @@ class SaleOrder(models.Model):
         return super(SaleOrder, self).name_get()
 
     @api.model
-    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
+    def _name_search(self, name, domain=None, operator='ilike', limit=100, name_get_uid=None):
         if self._context.get('sale_show_partner_name'):
             if operator == 'ilike' and not (name or '').strip():
                 domain = []
@@ -627,7 +627,7 @@ class SaleOrder(models.Model):
                     ['|', ('name', operator, name), ('partner_id.name', operator, name)]
                 ])
                 return self._search(domain, limit=limit, access_rights_uid=name_get_uid)
-        return super(SaleOrder, self)._name_search(name, args=args, operator=operator, limit=limit, name_get_uid=name_get_uid)
+        return super(SaleOrder, self)._name_search(name, domain=args, operator=operator, limit=limit, name_get_uid=name_get_uid)
 
     def _create_upsell_activity(self):
         if self:

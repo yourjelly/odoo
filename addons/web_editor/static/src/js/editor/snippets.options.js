@@ -2593,7 +2593,7 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
             method: 'name_search',
             kwargs: {
                 name: needle,
-                args: this.options.domain,
+                domain: this.options.domain,
                 operator: "ilike",
                 limit: this.options.limit + 1,
             },

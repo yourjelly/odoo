@@ -2218,7 +2218,7 @@ QUnit.module('fields', {}, function () {
                 },
                 mockRPC: function (route, args) {
                     if (args.method === 'name_search') {
-                        assert.deepEqual(args.kwargs.args, [], "should not have a domain");
+                        assert.deepEqual(args.kwargs.domain, [], "should not have a domain");
                     }
                     return this._super(route, args);
                 }
@@ -2244,7 +2244,7 @@ QUnit.module('fields', {}, function () {
                 res_id: 2,
                 mockRPC: function (route, args) {
                     if (args.method === 'name_search') {
-                        assert.deepEqual(args.kwargs.args, [["bar", "=", true]], "should not have a domain");
+                        assert.deepEqual(args.kwargs.domain, [["bar", "=", true]], "should not have a domain");
                     }
                     return this._super(route, args);
                 },
@@ -2336,7 +2336,7 @@ QUnit.module('fields', {}, function () {
                 mockRPC: function (route, args) {
                     if (args.method === 'name_search' && args.model === 'product') {
                         assert.deepEqual(
-                            args.kwargs.args,
+                            args.kwargs.domain,
                             [['foo', '=', 'bar'], ['foo', '=', 'yop']],
                             'the field attr domain should have been used for the RPC (and evaluated)');
                         assert.deepEqual(
@@ -2347,7 +2347,7 @@ QUnit.module('fields', {}, function () {
                         return Promise.resolve([]);
                     }
                     if (args.method === 'name_search' && args.model === 'partner') {
-                        assert.deepEqual(args.kwargs.args, [['id', 'in', [12]]],
+                        assert.deepEqual(args.kwargs.domain, [['id', 'in', [12]]],
                             'the field attr domain should have been used for the RPC (and evaluated)');
                         assert.deepEqual(args.kwargs.context, { hey: 'ho', timmy: [[6, false, [12]]] },
                             'the field attr context should have been used for the RPC (and evaluated)');
@@ -2997,7 +2997,7 @@ QUnit.module('fields', {}, function () {
                         });
                     }
                     if (args.method === 'name_search') {
-                        assert.deepEqual(args.kwargs.args, domain,
+                        assert.deepEqual(args.kwargs.domain, domain,
                             "sent domain should be correct");
                     }
                     return this._super(route, args);
@@ -3049,7 +3049,7 @@ QUnit.module('fields', {}, function () {
                         });
                     }
                     if (args.method === 'name_search') {
-                        assert.deepEqual(args.kwargs.args, domain,
+                        assert.deepEqual(args.kwargs.domain, domain,
                             "sent domain should be correct");
                     }
                     return this._super(route, args);

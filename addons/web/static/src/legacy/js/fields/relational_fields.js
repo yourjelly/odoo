@@ -458,7 +458,7 @@ var FieldMany2One = AbstractField.extend({
                         method: 'name_search',
                         kwargs: {
                             name: search_val,
-                            args: domain,
+                            domain: domain,
                             operator: "ilike",
                             limit: self.SEARCH_MORE_LIMIT,
                             context: context,
@@ -638,7 +638,7 @@ var FieldMany2One = AbstractField.extend({
             method: "name_search",
             kwargs: {
                 name: value,
-                args: domain,
+                domain: domain,
                 operator: "ilike",
                 limit: this.limit + 1,
                 context,

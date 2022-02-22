@@ -299,7 +299,7 @@ QUnit.module('fields', {}, function () {
                         // We are going to pass twice here
                         // First time, we really have nothing
                         // Second time, a virtual_id has been created
-                        assert.deepEqual(args.kwargs.args, [['id', 'in', []]]);
+                        assert.deepEqual(args.kwargs.domain, [['id', 'in', []]]);
                     }
                     return this._super(route, args);
                 },

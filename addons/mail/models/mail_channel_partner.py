@@ -34,7 +34,7 @@ class ChannelPartner(models.Model):
     def name_get(self):
         return [(record.id, record.partner_id.name or record.guest_id.name) for record in self]
 
-    def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None):
+    def _name_search(self, name='', domain=None, operator='ilike', limit=100, name_get_uid=None):
         domain = [[('partner_id', operator, name)], [('guest_id', operator, name)]]
         if '!' in operator or 'not' in operator:
             domain = expression.AND(domain)

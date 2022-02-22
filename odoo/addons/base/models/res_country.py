@@ -81,7 +81,7 @@ class Country(models.Model):
             'The code of the country must be unique !')
     ]
 
-    def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None):
+    def _name_search(self, name='', domain=None, operator='ilike', limit=100, name_get_uid=None):
         if args is None:
             args = []
 
@@ -164,7 +164,7 @@ class CountryState(models.Model):
     ]
 
     @api.model
-    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
+    def _name_search(self, name, domain=None, operator='ilike', limit=100, name_get_uid=None):
         args = args or []
         if self.env.context.get('country_id'):
             args = expression.AND([args, [('country_id', '=', self.env.context.get('country_id'))]])

@@ -168,7 +168,7 @@ class PurchaseOrder(models.Model):
             order.date_calendar_start = order.date_approve if (order.state in ['purchase', 'done']) else order.date_order
 
     @api.model
-    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
+    def _name_search(self, name, domain=None, operator='ilike', limit=100, name_get_uid=None):
         args = args or []
         domain = []
         if name:

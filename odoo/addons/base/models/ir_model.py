@@ -251,7 +251,7 @@ class IrModel(models.Model):
     # overridden to allow searching both on model name (field 'model') and model
     # description (field 'name')
     @api.model
-    def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None):
+    def _name_search(self, name='', domain=None, operator='ilike', limit=100, name_get_uid=None):
         if args is None:
             args = []
         domain = args + ['|', ('model', operator, name), ('name', operator, name)]

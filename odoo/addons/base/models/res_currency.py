@@ -145,7 +145,7 @@ class Currency(models.Model):
             currency.date = currency.rate_ids[:1].name
 
     @api.model
-    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
+    def _name_search(self, name, domain=None, operator='ilike', limit=100, name_get_uid=None):
         results = super(Currency, self)._name_search(name, args, operator=operator, limit=limit, name_get_uid=name_get_uid)
         if not results:
             name_match = CURRENCY_DISPLAY_PATTERN.match(name)
@@ -418,7 +418,7 @@ class CurrencyRate(models.Model):
                 }
 
     @api.model
-    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
+    def _name_search(self, name, domain=None, operator='ilike', limit=100, name_get_uid=None):
         if operator in ['=', '!=']:
             try:
                 date_format = '%Y-%m-%d'
@@ -434,7 +434,7 @@ class CurrencyRate(models.Model):
                     return []
                 name = ''
                 operator = 'ilike'
-        return super(CurrencyRate, self)._name_search(name, args=args, operator=operator, limit=limit, name_get_uid=name_get_uid)
+        return super(CurrencyRate, self)._name_search(name, domain=args, operator=operator, limit=limit, name_get_uid=name_get_uid)
 
     @api.model
     def _fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):

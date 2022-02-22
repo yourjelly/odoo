@@ -158,10 +158,10 @@ class ViewCustom(models.Model):
         return [(rec.id, rec.user_id.name) for rec in self]
 
     @api.model
-    def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None):
+    def _name_search(self, name='', domain=None, operator='ilike', limit=100, name_get_uid=None):
         if name:
             return self._search([('user_id', operator, name)] + (args or []), limit=limit, access_rights_uid=name_get_uid)
-        return super(ViewCustom, self)._name_search(name, args=args, operator=operator, limit=limit, name_get_uid=name_get_uid)
+        return super(ViewCustom, self)._name_search(name, domain=args, operator=operator, limit=limit, name_get_uid=name_get_uid)
 
     def _auto_init(self):
         res = super(ViewCustom, self)._auto_init()

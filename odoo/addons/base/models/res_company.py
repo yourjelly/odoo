@@ -173,7 +173,7 @@ class Company(models.Model):
             self.currency_id = self.country_id.currency_id
 
     @api.model
-    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
+    def _name_search(self, name, domain=None, operator='ilike', limit=100, name_get_uid=None):
         context = dict(self.env.context)
         newself = self
         if context.pop('user_preference', None):
@@ -184,7 +184,7 @@ class Company(models.Model):
             companies = self.env.user.company_ids
             args = (args or []) + [('id', 'in', companies.ids)]
             newself = newself.sudo()
-        return super(Company, newself.with_context(context))._name_search(name=name, args=args, operator=operator, limit=limit, name_get_uid=name_get_uid)
+        return super(Company, newself.with_context(context))._name_search(name=name, domain=args, operator=operator, limit=limit, name_get_uid=name_get_uid)
 
     @api.model
     @api.returns('self', lambda value: value.id)
