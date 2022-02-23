@@ -101,7 +101,7 @@ const KnowledgeFormController = FormController.extend({
      * @param {Event} event
      */
     _onMove: async function (event) {
-        await this._move(event.data);
+        await this._confirmMove(event.data);
     },
 
     /**
@@ -123,9 +123,10 @@ const KnowledgeFormController = FormController.extend({
                 if (typeof value === 'number') {
                     params.target_parent_id = value;
                 } else {
-                    params.category = value;
+                    params.newCategory = value;
+                    params.oldCategory = state.data.category;
                 }
-                await this._move({...params,
+                await this._confirmMove({...params,
                     onSuccess: () => {
                         dialog.close();
                         this.reload();
@@ -248,33 +249,75 @@ const KnowledgeFormController = FormController.extend({
     /**
      * @param {Object} data
      * @param {integer} data.article_id
-     * @param {String} data.category
+     * @param {String} data.oldCategory
+     * @param {String} data.newCategory
      * @param {integer} [data.target_parent_id]
      * @param {integer} [data.before_article_id]
      * @param {Function} data.onSuccess
      * @param {Function} data.onReject
      */
-    _move: async function (data) {
-        const params = {
-            private: data.category === 'private'
+    _confirmMove: async function (data) {
+        data['params'] = {
+            private: data.newCategory === 'private'
         };
         if (typeof data.target_parent_id !== 'undefined') {
-            params.parent_id = data.target_parent_id;
+            data['params'].parent_id = data.target_parent_id;
         }
         if (typeof data.before_article_id !== 'undefined') {
-            params.before_article_id = data.before_article_id;
+            data['params'].before_article_id = data.before_article_id;
         }
-        const result = await this._rpc({
+        if (data.newCategory == data.oldCategory) {
+            await this._move(data);
+        } else {
+            let message, confirmation_message;
+            if (data.newCategory == 'workspace') {
+                message = _t("Are you sure you want to move this to workspace? It will be accessible by everyone in the company.");
+                confirmation_message = _t("Move to Workspace");
+            }
+            else if (data.newCategory == 'private') {
+                message = _t("Are you sure you want to move this to private? Only you will be able to access it.");
+                confirmation_message = _t("Set as Private");
+            }
+            Dialog.confirm(this, message, {
+                buttons: [{
+                            text: confirmation_message,
+                            classes: 'btn-primary',
+                            close: true,
+                            click: async () => {
+                                await this._move(data);
+                            }
+                        }, {
+                            text: _t("Discard"),
+                            close: true,
+                            click: data.onReject,
+                        }],
+            });
+        }
+
+    },
+
+    /**
+     * @param {Object} data
+     * @param {integer} data.article_id
+     * @param {Function} data.onSuccess
+     * @param {Function} data.onReject
+     * @param {Object} data.params
+     */
+    _move: async function (data) {
+        return this._rpc({
             model: 'knowledge.article',
             method: 'move_to',
             args: [data.article_id],
-            kwargs: params
-        });
-        if (result) {
-            data.onSuccess();
-        } else {
+            kwargs: data.params
+        }).then(result => {
+            if (result) {
+                data.onSuccess();
+            } else {
+                data.onReject();
+            }
+        }).catch(error => {
             data.onReject();
-        }
+        })
     },
 
     _toggleFavourite: async function (articleId) {

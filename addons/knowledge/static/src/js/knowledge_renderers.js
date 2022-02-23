@@ -4,6 +4,7 @@ import EmojiPickerWidget from './widgets/knowledge_emoji_picker.js';
 import FormRenderer from 'web.FormRenderer';
 import localStorage from 'web.local_storage';
 
+
 const KnowledgeFormRenderer = FormRenderer.extend({
     className: 'o_knowledge_form_view',
     events: _.extend({}, FormRenderer.prototype.events, {
@@ -75,7 +76,8 @@ const KnowledgeFormRenderer = FormRenderer.extend({
 
                 const data = {
                     article_id: $li.data('article-id'),
-                    category: $section.data('section')
+                    oldCategory: $li.data('category'),
+                    newCategory: $section.data('section')
                 };
 
                 if ($parent.length > 0) {
@@ -88,6 +90,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
 
                 this.trigger_up('move', {...data,
                     onSuccess: () => {
+                        $li.data('category', data.newCategory);
                         $sortable.sortable('enable');
                     },
                     onReject: () => {

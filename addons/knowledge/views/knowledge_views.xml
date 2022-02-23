@@ -51,6 +51,7 @@
         <field name="type">form</field>
         <field name="arch" type="xml">
             <form class="h-100" js_class="knowledge_view_form">
+                <field name="category" invisible="1"/>
                 <field name="is_locked" invisible="1" readonly="1"/>
                 <field name="user_can_write" invisible="1"/>
                 <div class="d-sm-flex h-100">
