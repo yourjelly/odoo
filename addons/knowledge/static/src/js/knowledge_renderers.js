@@ -4,6 +4,7 @@ import EmojiPickerWidget from './widgets/knowledge_emoji_picker.js';
 import FormRenderer from 'web.FormRenderer';
 import localStorage from 'web.local_storage';
 
+
 const KnowledgeFormRenderer = FormRenderer.extend({
     className: 'o_knowledge_form_view',
     events: _.extend({}, FormRenderer.prototype.events, {
@@ -15,12 +16,12 @@ const KnowledgeFormRenderer = FormRenderer.extend({
     /**
      * @override
      */
-    init: function (parent, state, params) {
+    init: function(parent, state, params) {
         this._super(...arguments);
         this.breadcrumbs = params.breadcrumbs;
     },
 
-    _renderTree: async function () {
+    _renderTree: async function() {
         const $container = this.$el.find('.o_knowledge_tree');
         let unfoldedArticles = localStorage.getItem('unfoldedArticles');
         unfoldedArticles = unfoldedArticles ? unfoldedArticles.split(";").map(Number) : false;
@@ -43,7 +44,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
         });
     },
 
-    _setTreeListener: function () {
+    _setTreeListener: function() {
         const $sortable = this.$el.find('.o_tree');
         $sortable.nestedSortable({
             axis: 'y',
@@ -74,7 +75,8 @@ const KnowledgeFormRenderer = FormRenderer.extend({
 
                 const data = {
                     article_id: $li.data('article-id'),
-                    category: $section.data('section')
+                    oldCategory: $li.data('category'),
+                    newCategory: $section.data('section')
                 };
 
                 if ($parent.length > 0) {
@@ -87,6 +89,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
 
                 this.trigger_up('move', {...data,
                     onSuccess: () => {
+                        $li.data('category', data.newCategory);
                         $sortable.sortable('enable');
                     },
                     onReject: () => {
@@ -119,7 +122,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
      * When the user clicks on the caret to hide and show some files
      * @param {Event} event
      */
-    _onFold: async function (event) {
+    _onFold: async function(event) {
         event.stopPropagation();
         const $button = $(event.currentTarget);
         const $icon = $button.find('i');
@@ -158,7 +161,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
     /**
      * @param {Event} event
      */
-    _onCreate: function (event) {
+    _onCreate: function(event) {
         const $target = $(event.currentTarget);
         if ($target.hasClass('o_section_create')) {
             const $section = $target.closest('.o_section');
@@ -177,7 +180,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
      * Opens the selected record.
      * @param {Event} event
      */
-    _onOpen: async function (event) {
+    _onOpen: async function(event) {
         event.stopPropagation();
         const $li = $(event.target).closest('li');
         this.do_action('knowledge.action_home_page', {
@@ -191,7 +194,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
      * Refresh the icons
      * @param {jQuery} $tree
      */
-    _refreshIcons: function ($tree) {
+    _refreshIcons: function($tree) {
         this._traverse($tree, $li => {
             if ($li.has('ol').length > 0) {
                 // todo
@@ -205,7 +208,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
      * @override
      * @returns {Promise}
      */
-    _renderView: async function () {
+    _renderView: async function() {
         const result = await this._super.apply(this, arguments);
         this._renderBreadcrumb();
         await this._renderTree();
@@ -213,7 +216,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
         return result;
     },
 
-    _renderBreadcrumb: function () {
+    _renderBreadcrumb: function() {
         const items = this.breadcrumbs.map(payload => {
             const $a = $('<a href="#"/>');
             $a.text(payload.title);
@@ -231,7 +234,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
     /**
      * Renders the emoji picker
      */
-    _renderEmojiPicker: function () {
+    _renderEmojiPicker: function() {
         this.$el.find('.o_article_dropdown').one('click', event => {
             const $dropdown = $(event.currentTarget);
             const $article = $dropdown.closest('.o_article');
@@ -248,7 +251,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
      * to the document. The listener will be removed as soon as the user releases
      * the resizer to free some resources.
      */
-    _setResizeListener: function () {
+    _setResizeListener: function() {
         /**
          * @param {PointerEvent} event
          */
@@ -275,7 +278,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
      * @param {jQuery} $tree
      * @param {Function} callback
      */
-    _traverse: function ($tree, callback) {
+    _traverse: function($tree, callback) {
         const stack = $tree.children('li').toArray();
         while (stack.length > 0) {
             const $li = $(stack.shift());

@@ -146,7 +146,8 @@ const KnowledgeFormController = FormController.extend({
                 if (typeof value === 'number') {
                     params.target_parent_id = value;
                 } else {
-                    params.category = value;
+                    params.newCategory = value;
+                    params.oldCategory = state.category;
                 }
                 await this._move({...params,
                     onSuccess: () => {
@@ -263,7 +264,8 @@ const KnowledgeFormController = FormController.extend({
     /**
      * @param {Object} data
      * @param {integer} data.article_id
-     * @param {String} data.category
+     * @param {String} data.oldCategory
+     * @param {String} data.newCategory
      * @param {integer} [data.target_parent_id]
      * @param {integer} [data.before_article_id]
      * @param {Function} data.onSuccess
@@ -271,7 +273,7 @@ const KnowledgeFormController = FormController.extend({
      */
     _move: async function (data) {
         const params = {
-            private: data.category === 'private'
+            private: data.newCategory === 'private'
         };
         if (typeof data.target_parent_id !== 'undefined') {
             params.parent_id = data.target_parent_id;
@@ -279,16 +281,48 @@ const KnowledgeFormController = FormController.extend({
         if (typeof data.before_article_id !== 'undefined') {
             params.before_article_id = data.before_article_id;
         }
-        const result = await this._rpc({
-            model: 'knowledge.article',
-            method: 'move_to',
-            args: [data.article_id],
-            kwargs: params
-        });
-        if (result) {
-            data.onSuccess();
+        const moveArticle = () => {
+            const result = this._rpc({
+                model: 'knowledge.article',
+                method: 'move_to',
+                args: [data.article_id],
+                kwargs: params
+            }).then(result => {
+                if (result) {
+                    data.onSuccess();
+                } else {
+                    data.onReject();
+                }
+            }).catch(error => {
+                data.onReject();
+            })
+        };
+        if (data.newCategory == data.oldCategory || data.newCategory == 'shared') {
+            moveArticle();
         } else {
-            data.onReject();
+            let message, confirmation_message;
+            if (data.newCategory == 'workspace') {
+                message = _t("Are you sure you want to move this to workspace? It will be accessible by everyone in the company.");
+                confirmation_message = _t("Move to Workspace");
+            }
+            if (data.newCategory == 'private') {
+                message = _t("Are you sure you want to move this to private? Only you will be able to access it.");
+                confirmation_message = _t("Set as Private");
+            }
+            Dialog.confirm(this, message, {
+                buttons: [
+                    {
+                        text: confirmation_message,
+                        classes: 'btn-primary',
+                        close: true,
+                        click: moveArticle
+                    }, {
+                        text: _t("Discard"),
+                        close: true,
+                        click: data.onReject,
+                    }
+                ],
+            });
         }
     },
 });
