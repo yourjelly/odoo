@@ -54,6 +54,7 @@ class Article(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = "favourite_count, create_date desc"
 
+    active = fields.Boolean(default=True)
     name = fields.Char(string="Title", default="New Article")
     body = fields.Html(string="Article Body")
     icon = fields.Char(string='Article Icon', default='fa-file')
@@ -66,6 +67,8 @@ class Article(models.Model):
     # Set default=0 to avoid false values and messed up sequence order inside same parent
     sequence = fields.Integer(string="Article Sequence", default=0,
                               help="The sequence is computed only among the articles that have the same parent.")
+    main_article_id = fields.Many2one('knowledge.article', string="Subject", compute="_compute_main_article_id",
+                                        search="_search_main_article_id", recursive=True)
 
     # Access rules and members + implied category
     internal_permission = fields.Selection([
@@ -178,6 +181,11 @@ class Article(models.Model):
             else:
                 article.owner_id = False
 
+    @api.depends('parent_id')
+    def _compute_main_article_id(self):
+        for article in self:
+            article.main_article_id = article._get_highest_parent()
+
     def _search_user_has_access(self, operator, value):
         if operator not in ('=', '!=') or not isinstance(value, bool):
             raise ValueError("unsupported search operator")
@@ -275,6 +283,20 @@ class Article(models.Model):
             return [('favourite_user_ids', 'in', [self.env.user.id])]
         else:
             return [('favourite_user_ids', 'not in', [self.env.user.id])]
+
+    def _search_main_article_id(self, operator, value):
+        if isinstance(value, str):
+            value = self.search([('name', operator, value)]).ids
+            if not value:
+                return expression.FALSE_DOMAIN
+            operator = '='  # now we will search for articles that match the retrieved users.
+        elif operator not in ('=', '!='):
+            raise NotImplementedError()
+        articles = self
+        for article in self.search([('id', 'in' if operator == '=' else 'not in', value)]):
+            articles |= article._get_descendants()
+            articles |= article
+        return [('id', 'in', articles.ids)]
 
     @api.model
     def search(self, args, offset=0, limit=None, order=None, count=False):
@@ -406,24 +428,34 @@ class Article(models.Model):
         for article in self:
             article.is_locked = False
 
+    def action_archive(self):
+        return super(Article, self | self._get_descendants()).action_archive()
+
     #####################
     #  Business methods
     #####################
 
     def move_to(self, parent_id=False, before_article_id=False, private=False):
         self.ensure_one()
+        if not self.user_can_write:
+            raise AccessError(_('You are not allowed to move this article.'))
         parent = self.browse(parent_id) if parent_id else False
         if parent_id and not parent:
             raise UserError(_("The parent in which you want to move your article does not exist"))
+        elif parent and not parent.user_can_write:
+            raise AccessError(_('You are not allowed to move this article under this parent.'))
         before_article = self.browse(before_article_id) if before_article_id else False
         if before_article_id and not before_article:
             raise UserError(_("The article before which you want to move your article does not exist"))
+
+        # as base user doesn't have access to members, use sudo to allow access it.
+        article_sudo = self.sudo()
 
         if before_article:
             sequence = before_article.sequence
         else:
             # get max sequence among articles with the same parent
-            sequence = self._get_max_sequence_inside_parent(parent_id)
+            sequence = article_sudo._get_max_sequence_inside_parent(parent_id)
 
         values = {
             'parent_id': parent_id,
@@ -435,7 +467,7 @@ class Article(models.Model):
             values['internal_permission'] = 'none' if private else 'write'
 
         if not parent and private:  # If set private without parent, remove all members except current user.
-            self.article_member_ids.unlink()
+            article_sudo.article_member_ids.unlink()
             values.update({
                 'article_member_ids': [(0, 0, {
                     'partner_id': self.env.user.partner_id.id,
@@ -443,32 +475,34 @@ class Article(models.Model):
                 })]
             })
         elif parent:
-            values.update(self._get_access_values_from_parent(parent))
+            values.update(article_sudo._get_access_values_from_parent(parent))
 
-        self.write(values)
+        article_sudo.sudo().write(values)
 
-        if self.child_ids:
-            self._propagate_access_to_children()
+        if article_sudo.child_ids:
+            article_sudo._propagate_access_to_children()
 
         return True
 
     def article_create(self, title=False, parent_id=False, private=False):
-        Article = self.env['knowledge.article']
-        parent = Article.browse(parent_id) if parent_id else False
+        parent = self.browse(parent_id) if parent_id else False
         if parent_id and not parent:
             raise UserError(_("The parent in which you want to move your article does not exist"))
 
-        if parent and private:
-            if not parent.owner_id == self.env.user:
-                raise UserError(_("Cannot write under a non-owned private article"))
+        if parent:
+            if not parent.user_can_write:
+                raise AccessError(_("Cannot create an article under a parent article you can't write on"))
+            if private and not parent.owner_id == self.env.user:
+                raise AccessError(_("Cannot create an article under a non-owned private article"))
         values = {
             'internal_permission': 'none' if private else 'write',  # you cannot create an article without parent in shared directly.,
             'parent_id': parent_id,
             'sequence': self._get_max_sequence_inside_parent(parent_id)
         }
-        # User cannot write on members, sudo is needed to allow to create a private article.
-        if private and self.env.user.has_group('base.group_user'):
-            Article = Article.sudo()
+        # User cannot write on members, sudo is needed to allow to create a private article or create under a parent user can write on.
+        # for article without parent or not in private, access to members is not required to create an article
+        if (private or parent) and self.env.user.has_group('base.group_user'):
+            self = self.sudo()
         if not parent and private:
             # To be private, the article need at least one member with write access.
             values.update({
@@ -486,7 +520,7 @@ class Article(models.Model):
                 'body': title
             })
 
-        article = Article.create(values)
+        article = self.create(values)
 
         return article.id
 
@@ -632,6 +666,14 @@ class Article(models.Model):
             return self.parent_id._get_highest_parent()
         else:
             return self
+
+    def _get_descendants(self):
+        """ Returns the descendants recordset of the current article. """
+        descendants = self.env['knowledge.article']
+        for child in self.child_ids:
+            descendants |= child
+            descendants |= child._get_descendants()
+        return descendants
 
     def _resequence(self):
         """ This method re-order the children of the same parent (brotherhood) if needed.
