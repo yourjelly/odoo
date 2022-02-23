@@ -81,8 +81,11 @@ var BasicView = AbstractView.extend({
     _getFieldWidgetClass: function (viewType, field, attrs) {
         var FieldWidget;
         if (attrs.widget) {
-            FieldWidget = fieldRegistryOwl.getAny([viewType + "." + attrs.widget, attrs.widget]) ||
-                fieldRegistry.getAny([viewType + "." + attrs.widget, attrs.widget]);
+            // https://runbot.odoo.com/runbot/batch/717372/build/13102423
+            // also https://runbot.odoo.com/web#id=2158&action=573&model=runbot.build.error&view_type=form&cids=1&menu_id=405  ?
+            // and https://runbot.odoo.com/web#id=3232&action=573&model=runbot.build.error&view_type=form&cids=1&menu_id=405
+            FieldWidget = fieldRegistry.getAny([viewType + "." + attrs.widget, attrs.widget]) ||
+                fieldRegistryOwl.getAny([viewType + "." + attrs.widget, attrs.widget]);
             if (!FieldWidget) {
                 console.warn("Missing widget: ", attrs.widget, " for field", attrs.name, "of type", field.type);
             }
@@ -92,8 +95,8 @@ var BasicView = AbstractView.extend({
             FieldWidget = fieldRegistry.get('kanban.many2many_tags');
         }
         return FieldWidget ||
-            fieldRegistryOwl.getAny([viewType + "." + field.type, field.type, "abstract"]) ||
-            fieldRegistry.getAny([viewType + "." + field.type, field.type, "abstract"]);
+            fieldRegistry.getAny([viewType + "." + field.type, field.type, "abstract"]) ||
+            fieldRegistryOwl.getAny([viewType + "." + field.type, field.type, "abstract"]);
     },
     /**
      * In some cases, we already have a preloaded record
