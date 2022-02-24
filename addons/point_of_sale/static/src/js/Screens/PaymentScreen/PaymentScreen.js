@@ -84,7 +84,7 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
             const payment_terminal = this.selectedPaymentLine.payment_method.payment_terminal;
             if (
                 payment_terminal &&
-                !['pending', 'retry'].includes(this.selectedPaymentLine.get_payment_status())
+                !['pending', 'retry', ''].includes(this.selectedPaymentLine.get_payment_status())
             ) {
                 return;
             }
