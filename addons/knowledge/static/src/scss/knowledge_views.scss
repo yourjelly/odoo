@@ -10,34 +10,31 @@
 
     .o_knowledge_editor {
         min-height: 100%;
-        .o_readonly {
-            padding: 5px 10px;
-        }
-        .o_wysiwyg_wrapper {
-            margin: 0 !important;
-        }
-        .o_wysiwyg_resizer {
-            display: none;
-        }
-        .oe_form_field,
-        .odoo-editor {
+        .oe_form_field {
             display: flex;
             flex-direction: column;
-        }
-        .oe_form_field,
-        .odoo-editor,
-        .note-editable {
-            flex-grow: 1;
+            width: 100%;
         }
         .note-editable {
             border: none;
             height: auto !important;
+        }
+        .note-editable,
+        .o_readonly {
+            flex-grow: 1;
+            padding: 1rem !important;
         }
     }
 
     .o_knowledge_aside {
         width: var(--sidebar-size);
         transition: width 0.15s linear;
+        .btn-link:hover {
+            background-color: #CECECE;
+        }
+        #knowledge_search_bar:hover {
+            cursor: pointer;
+        }
         ul {
             padding-left: 15px; /* indentation space */
         }
@@ -47,10 +44,9 @@
                 border-left: 2px solid #eee;
             }
         }
-        .o_article {
-            &:not(:hover) .o_article_create {
-                visibility: hidden;
-            }
+        .o_section_header:not(:hover) .o_section_create,
+        .o_article:not(:hover) .o_article_create {
+            visibility: hidden;
         }
         .o_article_name,
         .o_article_dropdown i {
@@ -85,7 +81,6 @@
     }
 
     .o_knowledge_chatter_container {
-        border-top: 1px solid $o-gray-300;
         li.nav-item {
             display: none;
         }
