@@ -53,9 +53,7 @@ class AccountEdiFormat(models.Model):
             errors.append(_("%s must have a country", seller.display_name))
 
         # <1.1.1.2>
-        if not seller.vat:
-            errors.append(_("%s must have a VAT number", seller.display_name))
-        elif len(seller.vat) > 30:
+        if seller.vat and len(seller.vat) > 30:
             errors.append(_("The maximum length for VAT number is 30. %s have a VAT number too long: %s.", seller.display_name, seller.vat))
 
         # <1.2.1.2>
@@ -81,22 +79,6 @@ class AccountEdiFormat(models.Model):
         if seller.l10n_it_has_tax_representative and not seller.l10n_it_tax_representative_partner_id.vat:
             errors.append(_("Tax representative partner %s of %s must have a tax number.", seller.l10n_it_tax_representative_partner_id.display_name, seller.display_name))
 
-        # <1.4.1>
-        if not buyer.vat and not buyer.l10n_it_codice_fiscale and buyer.country_id.code == 'IT':
-            errors.append(_("The buyer, %s, or his company must have either a VAT number either a tax code (Codice Fiscale).", buyer.display_name))
-
-        # <1.4.2>
-        if not buyer.street and not buyer.street2:
-            errors.append(_("%s must have a street.", buyer.display_name))
-        if not buyer.zip:
-            errors.append(_("%s must have a post code.", buyer.display_name))
-        elif len(buyer.zip) != 5 and buyer.country_id.code == 'IT':
-            errors.append(_("%s must have a post code of length 5.", buyer.display_name))
-        if not buyer.city:
-            errors.append(_("%s must have a city.", buyer.display_name))
-        if not buyer.country_id:
-            errors.append(_("%s must have a country.", buyer.display_name))
-
         # <2.2.1>
         for invoice_line in invoice.invoice_line_ids:
             if not invoice_line.display_type and len(invoice_line.tax_ids) != 1:
@@ -105,9 +87,6 @@ class AccountEdiFormat(models.Model):
         for tax_line in invoice.line_ids.filtered(lambda line: line.tax_line_id):
             if not tax_line.tax_line_id.l10n_it_kind_exoneration and tax_line.tax_line_id.amount == 0:
                 errors.append(_("%s has an amount of 0.0, you must indicate the kind of exoneration.", tax_line.name))
-
-        if not invoice.partner_bank_id:
-            errors.append(_("The seller must have a bank account."))
 
         return errors
 
