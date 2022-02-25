@@ -3,6 +3,7 @@ odoo.define('web.AbstractFieldOwl', function (require) {
 
     const field_utils = require('web.field_utils');
     const { useListener } = require("@web/core/utils/hooks");
+    const { LegacyComponent } = require("@web/legacy/legacy_component");
 
     const { Component, onWillUpdateProps, useEffect } = owl;
 
