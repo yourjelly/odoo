@@ -5,6 +5,7 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { makeTestEnv } from "../helpers/mock_env";
 import { getFixture, mount } from "../helpers/utils";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, xml } = owl;
 const serviceRegistry = registry.category("services");
@@ -263,7 +264,7 @@ QUnit.test("useModel is specialized for component", async (assert) => {
     serviceRegistry.add("rpc", rpc);
     const env = await makeTestEnv();
 
-    class MyComponent extends Component {
+    class MyComponent extends LegacyComponent {
         setup() {
             this.rpc = useService("rpc");
             this.orm = useService("orm");

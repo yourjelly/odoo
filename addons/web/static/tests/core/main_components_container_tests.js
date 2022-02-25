@@ -4,6 +4,7 @@ import { registry } from "@web/core/registry";
 import { clearRegistryWithCleanup, makeTestEnv } from "../helpers/mock_env";
 import { patch, unpatch } from "@web/core/utils/patch";
 import { getFixture, mount, nextTick } from "../helpers/utils";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, useState, xml } = owl;
 const mainComponentsRegistry = registry.category("main_components");
@@ -21,10 +22,10 @@ QUnit.module("Components", (hooks) => {
     QUnit.test("simple rendering", async function (assert) {
         const env = await makeTestEnv();
 
-        class MainComponentA extends Component {}
+        class MainComponentA extends LegacyComponent {}
         MainComponentA.template = xml`<span>MainComponentA</span>`;
 
-        class MainComponentB extends Component {}
+        class MainComponentB extends LegacyComponent {}
         MainComponentB.template = xml`<span>MainComponentB</span>`;
 
         mainComponentsRegistry.add("MainComponentA", { Component: MainComponentA, props: {} });
@@ -40,7 +41,7 @@ QUnit.module("Components", (hooks) => {
         const env = await makeTestEnv();
 
         let compA;
-        class MainComponentA extends Component {
+        class MainComponentA extends LegacyComponent {
             setup() {
                 compA = this;
                 this.state = useState({ shouldThrow: false });
@@ -51,7 +52,7 @@ QUnit.module("Components", (hooks) => {
         }
         MainComponentA.template = xml`<span><t t-if="state.shouldThrow" t-esc="error"/>MainComponentA</span>`;
 
-        class MainComponentB extends Component {}
+        class MainComponentB extends LegacyComponent {}
         MainComponentB.template = xml`<span>MainComponentB</span>`;
 
         mainComponentsRegistry.add("MainComponentA", { Component: MainComponentA, props: {} });
@@ -84,11 +85,11 @@ QUnit.module("Components", (hooks) => {
     QUnit.test("unmounts erroring main component: variation", async function (assert) {
         const env = await makeTestEnv();
 
-        class MainComponentA extends Component {}
+        class MainComponentA extends LegacyComponent {}
         MainComponentA.template = xml`<span>MainComponentA</span>`;
 
         let compB;
-        class MainComponentB extends Component {
+        class MainComponentB extends LegacyComponent {
             setup() {
                 compB = this;
                 this.state = useState({ shouldThrow: false });

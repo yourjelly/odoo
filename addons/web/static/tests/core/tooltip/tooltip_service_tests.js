@@ -8,6 +8,7 @@ import { registry } from "@web/core/registry";
 import { clearRegistryWithCleanup, makeTestEnv } from "../../helpers/mock_env";
 import { getFixture, nextTick, patchWithCleanup, triggerEvent } from "../../helpers/utils";
 import { registerCleanup } from "../../helpers/cleanup";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { App, Component, useState, xml } = owl;
 
@@ -45,7 +46,7 @@ async function makeParent(Child, options = {}) {
     registry.category("services").add("tooltip", tooltipService);
     const env = await makeTestEnv();
 
-    class Parent extends Component {
+    class Parent extends LegacyComponent {
         setup() {
             this.Components = mainComponents.getEntries();
         }
@@ -82,7 +83,7 @@ QUnit.module("Tooltip service", (hooks) => {
     });
 
     QUnit.test("basic rendering", async (assert) => {
-        class MyComponent extends Component {}
+        class MyComponent extends LegacyComponent {}
         MyComponent.template = xml`<button data-tooltip="hello">Action</button>`;
         let simulateTimeout;
         const mockSetTimeout = (fn) => {
@@ -125,7 +126,7 @@ QUnit.module("Tooltip service", (hooks) => {
     });
 
     QUnit.test("basic rendering 2", async (assert) => {
-        class MyComponent extends Component {}
+        class MyComponent extends LegacyComponent {}
         MyComponent.template = xml`<span data-tooltip="hello" class="our_span"><span class="our_span">Action</span></span>`;
         let simulateTimeout;
         const mockSetTimeout = (fn) => {
@@ -171,7 +172,7 @@ QUnit.module("Tooltip service", (hooks) => {
 
     QUnit.test("remove element with opened tooltip", async (assert) => {
         let compState;
-        class MyComponent extends Component {
+        class MyComponent extends LegacyComponent {
             setup() {
                 this.state = useState({ visible: true });
                 compState = this.state;
@@ -202,7 +203,7 @@ QUnit.module("Tooltip service", (hooks) => {
     });
 
     QUnit.test("rendering with several tooltips", async (assert) => {
-        class MyComponent extends Component {}
+        class MyComponent extends LegacyComponent {}
         MyComponent.template = xml`
             <div>
                 <button class="button_1" data-tooltip="tooltip 1">Action 1</button>
@@ -223,7 +224,7 @@ QUnit.module("Tooltip service", (hooks) => {
     });
 
     QUnit.test("positionning", async (assert) => {
-        class MyComponent extends Component {}
+        class MyComponent extends LegacyComponent {}
         MyComponent.template = xml`
             <div style="height: 400px; padding: 40px">
                 <button class="default" data-tooltip="default">Default</button>
@@ -271,7 +272,7 @@ QUnit.module("Tooltip service", (hooks) => {
     });
 
     QUnit.test("tooltip with a template, no info", async (assert) => {
-        class MyComponent extends Component {}
+        class MyComponent extends LegacyComponent {}
         MyComponent.template = xml`
             <button data-tooltip-template="my_tooltip_template">Action</button>
         `;
@@ -289,7 +290,7 @@ QUnit.module("Tooltip service", (hooks) => {
     });
 
     QUnit.test("tooltip with a template and info", async (assert) => {
-        class MyComponent extends Component {
+        class MyComponent extends LegacyComponent {
             get info() {
                 return JSON.stringify({ x: 3, y: "abc" });
             }

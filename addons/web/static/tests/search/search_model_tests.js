@@ -2,10 +2,11 @@
 
 import { patchDate, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { makeWithSearch, setupControlPanelServiceRegistry } from "./helpers";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, xml } = owl;
 
-class TestComponent extends Component {}
+class TestComponent extends LegacyComponent {}
 TestComponent.template = xml`<div class="o_test_component"/>`;
 
 async function makeSearchModel(params) {

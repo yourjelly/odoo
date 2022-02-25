@@ -15,6 +15,7 @@ import { registry } from "@web/core/registry";
 import { OnboardingBanner } from "@web/views/onboarding_banner";
 import { View } from "@web/views/view";
 import { actionService } from "@web/webclient/actions/action_service";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, useState, xml } = owl;
 
@@ -71,7 +72,7 @@ QUnit.module("Views", (hooks) => {
             },
         };
 
-        class ToyView extends Component {
+        class ToyView extends LegacyComponent {
             setup() {
                 this.class = "o_toy_view";
                 this.template = xml`${this.props.arch}`;
@@ -1205,7 +1206,7 @@ QUnit.module("Views", (hooks) => {
         async function (assert) {
             assert.expect(3);
 
-            class ToyView2 extends Component {}
+            class ToyView2 extends LegacyComponent {}
             ToyView2.template = xml`<div class="o_toy_view_2"/>`;
             ToyView2.type = "toy";
             viewRegistry.add("toy_2", ToyView2);
@@ -1233,7 +1234,7 @@ QUnit.module("Views", (hooks) => {
         async function (assert) {
             assert.expect(1);
 
-            class ToyView2 extends Component {}
+            class ToyView2 extends LegacyComponent {}
             ToyView2.template = xml`<div class="o_toy_view_2"/>`;
             ToyView2.type = "toy";
             viewRegistry.add("toy_2", ToyView2);
@@ -1337,7 +1338,7 @@ QUnit.module("Views", (hooks) => {
         async function (assert) {
             assert.expect(4);
 
-            class ToyView extends Component {
+            class ToyView extends LegacyComponent {
                 setup() {
                     const { context, domain, groupBy, orderBy } = this.props;
                     assert.deepEqual(context, {
@@ -1371,7 +1372,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("non empty prop 'noContentHelp'", async function (assert) {
         assert.expect(1);
 
-        class ToyView extends Component {
+        class ToyView extends LegacyComponent {
             setup() {
                 assert.strictEqual(this.props.info.noContentHelp, "<div>Help</div>");
             }
@@ -1391,7 +1392,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("useSampleModel false by default", async function (assert) {
         assert.expect(1);
 
-        class ToyView extends Component {
+        class ToyView extends LegacyComponent {
             setup() {
                 assert.strictEqual(this.props.useSampleModel, false);
             }
@@ -1406,7 +1407,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("sample='1' on arch", async function (assert) {
         assert.expect(1);
 
-        class ToyView extends Component {
+        class ToyView extends LegacyComponent {
             setup() {
                 assert.strictEqual(this.props.useSampleModel, true);
             }
@@ -1427,7 +1428,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("sample='0' on arch and useSampleModel=true", async function (assert) {
         assert.expect(1);
 
-        class ToyView extends Component {
+        class ToyView extends LegacyComponent {
             setup() {
                 assert.strictEqual(this.props.useSampleModel, true);
             }
@@ -1449,7 +1450,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("sample='1' on arch and useSampleModel=false", async function (assert) {
         assert.expect(1);
 
-        class ToyView extends Component {
+        class ToyView extends LegacyComponent {
             setup() {
                 assert.strictEqual(this.props.useSampleModel, false);
             }
@@ -1471,7 +1472,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("useSampleModel=true", async function (assert) {
         assert.expect(1);
 
-        class ToyView extends Component {
+        class ToyView extends LegacyComponent {
             setup() {
                 assert.strictEqual(this.props.useSampleModel, true);
             }
@@ -1486,7 +1487,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("rendering with given prop", async function (assert) {
         assert.expect(1);
 
-        class ToyView extends Component {
+        class ToyView extends LegacyComponent {
             setup() {
                 assert.strictEqual(this.props.specificProp, "specificProp");
             }
@@ -1508,7 +1509,7 @@ QUnit.module("Views", (hooks) => {
         async function (assert) {
             assert.expect(4);
 
-            class ToyView extends Component {
+            class ToyView extends LegacyComponent {
                 setup() {
                     const { context, domain, groupBy, orderBy } = this.props;
                     assert.deepEqual(context, {
@@ -1545,7 +1546,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("react to prop 'domain' changes", async function (assert) {
         assert.expect(2);
 
-        class ToyView extends Component {
+        class ToyView extends LegacyComponent {
             setup() {
                 owl.onWillStart(() => {
                     assert.deepEqual(this.props.domain, [["type", "=", "carnivorous"]]);
@@ -1561,7 +1562,7 @@ QUnit.module("Views", (hooks) => {
 
         const env = await makeTestEnv({ serverData });
 
-        class Parent extends Component {
+        class Parent extends LegacyComponent {
             setup() {
                 this.state = useState({
                     type: "toy",

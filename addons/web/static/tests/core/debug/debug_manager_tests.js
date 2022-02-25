@@ -27,10 +27,11 @@ import {
 import { createWebClient, doAction, getActionManagerServerData } from "../../webclient/helpers";
 import { openViewItem } from "@web/webclient/debug_items";
 import { editSearchView, editView } from "@web/views/debug_items";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, xml } = owl;
 
-export class DebugMenuParent extends Component {
+export class DebugMenuParent extends LegacyComponent {
     setup() {
         useOwnDebugContext({ categories: ["default", "custom"] });
     }
@@ -416,7 +417,7 @@ QUnit.module("DebugMenu", (hooks) => {
         // removing the toy view and using the kanban view directly
         prepareRegistriesWithCleanup();
 
-        class ToyView extends Component {
+        class ToyView extends LegacyComponent {
             setup() {
                 useSetupView();
             }

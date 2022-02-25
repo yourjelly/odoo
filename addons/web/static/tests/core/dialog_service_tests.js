@@ -19,6 +19,7 @@ import {
     patchWithCleanup,
 } from "../helpers/utils";
 import { Dialog } from "../../src/core/dialog/dialog";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, onMounted, xml } = owl;
 
@@ -27,7 +28,7 @@ let target;
 const serviceRegistry = registry.category("services");
 const mainComponentRegistry = registry.category("main_components");
 
-class PseudoWebClient extends Component {
+class PseudoWebClient extends LegacyComponent {
     setup() {
         this.Components = mainComponentRegistry.getEntries();
     }

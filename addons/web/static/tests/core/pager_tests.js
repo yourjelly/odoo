@@ -13,12 +13,13 @@ import {
 } from "../helpers/utils";
 import { registry } from "@web/core/registry";
 import { uiService } from "@web/core/ui/ui_service";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, useState, xml } = owl;
 
 const serviceRegistry = registry.category("services");
 
-class PagerController extends Component {
+class PagerController extends LegacyComponent {
     setup() {
         this.state = useState({ ...this.props });
     }

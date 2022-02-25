@@ -26,6 +26,7 @@ var createView = testUtils.createView;
 
 const { getFixture, click, legacyExtraNextTick } = require("@web/../tests/helpers/utils");
 const { createWebClient, doAction, loadState } = require('@web/../tests/webclient/helpers');
+const { LegacyComponent } = require("@web/legacy/legacy_component");
 
 const { _t } = core;
 const { Component, markup, onMounted, onWillUnmount, xml } = owl;
@@ -9309,7 +9310,7 @@ QUnit.module('Views', {
     QUnit.test('basic support for widgets (being Owl Components)', async function (assert) {
         assert.expect(1);
 
-        class MyComponent extends Component {
+        class MyComponent extends LegacyComponent {
             get value() {
                 return JSON.stringify(this.props.record.data);
             }

@@ -17,6 +17,7 @@ import {
     toggleGroupByMenu,
     toggleMenuItem,
 } from "./helpers";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, onWillUpdateProps, onWillStart, useState, xml } = owl;
 
@@ -64,7 +65,7 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("simple rendering", async function (assert) {
         assert.expect(2);
 
-        class TestComponent extends Component {}
+        class TestComponent extends LegacyComponent {}
         TestComponent.template = xml`<div class="o_test_component">Test component content</div>`;
 
         const component = await makeWithSearch({
@@ -79,7 +80,7 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("search model in sub env", async function (assert) {
         assert.expect(1);
 
-        class TestComponent extends Component {}
+        class TestComponent extends LegacyComponent {}
         TestComponent.template = xml`<div class="o_test_component">Test component content</div>`;
 
         const component = await makeWithSearch({
@@ -95,7 +96,7 @@ QUnit.module("Search", (hooks) => {
         async function (assert) {
             assert.expect(4);
 
-            class TestComponent extends Component {
+            class TestComponent extends LegacyComponent {
                 setup() {
                     const { context, domain, groupBy, orderBy } = this.props;
                     assert.deepEqual(context, {
@@ -126,7 +127,7 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("do not load search view description by default", async function (assert) {
         assert.expect(1);
 
-        class TestComponent extends Component {}
+        class TestComponent extends LegacyComponent {}
         TestComponent.template = xml`<div class="o_test_component">Test component content</div>`;
 
         await makeWithSearch({
@@ -148,7 +149,7 @@ QUnit.module("Search", (hooks) => {
         async function (assert) {
             assert.expect(1);
 
-            class TestComponent extends Component {}
+            class TestComponent extends LegacyComponent {}
             TestComponent.template = xml`<div class="o_test_component">Test component content</div>`;
 
             await makeWithSearch({
@@ -182,7 +183,7 @@ QUnit.module("Search", (hooks) => {
         async function (assert) {
             assert.expect(1);
 
-            class TestComponent extends Component {}
+            class TestComponent extends LegacyComponent {}
             TestComponent.template = xml`<div class="o_test_component">Test component content</div>`;
 
             await makeWithSearch({
@@ -207,7 +208,7 @@ QUnit.module("Search", (hooks) => {
         async function (assert) {
             assert.expect(1);
 
-            class TestComponent extends Component {}
+            class TestComponent extends LegacyComponent {}
             TestComponent.template = xml`<div class="o_test_component">Test component content</div>`;
 
             await makeWithSearch({
@@ -236,7 +237,7 @@ QUnit.module("Search", (hooks) => {
         async function (assert) {
             assert.expect(3);
 
-            class TestComponent extends Component {}
+            class TestComponent extends LegacyComponent {}
             TestComponent.components = { FilterMenu, GroupByMenu };
             TestComponent.template = xml`
                 <div class="o_test_component">
@@ -269,7 +270,7 @@ QUnit.module("Search", (hooks) => {
         async function (assert) {
             assert.expect(2);
 
-            class TestComponent extends Component {
+            class TestComponent extends LegacyComponent {
                 setup() {
                     owl.onWillStart(() => {
                         assert.deepEqual(this.props.domain, []);
@@ -300,7 +301,7 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("react to prop 'domain' changes", async function (assert) {
         assert.expect(2);
 
-        class TestComponent extends Component {
+        class TestComponent extends LegacyComponent {
             setup() {
                 onWillStart(() => {
                     assert.deepEqual(this.props.domain, [["type", "=", "carnivorous"]]);
@@ -315,7 +316,7 @@ QUnit.module("Search", (hooks) => {
         const env = await makeTestEnv(serverData);
         const target = getFixture();
 
-        class Parent extends Component {
+        class Parent extends LegacyComponent {
             setup() {
                 this.state = useState({
                     resModel: "animal",

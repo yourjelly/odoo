@@ -12,6 +12,7 @@ import { makeTestEnv } from "../helpers/mock_env";
 import { makeFakeLocalizationService } from "../helpers/mock_services";
 import { click, destroy, getFixture, mount, triggerEvent } from "../helpers/utils";
 import { applyFilter, toggleMenu } from "@web/../tests/search/helpers";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, xml } = owl;
 const { DateTime } = luxon;
@@ -34,7 +35,7 @@ const mountPicker = async (Picker, props) => {
         )
         .add("ui", uiService);
 
-    class Parent extends Component {}
+    class Parent extends LegacyComponent {}
     Parent.template = xml/* xml */ `
         <t t-component="props.Picker" t-props="props.props"/>
     `;

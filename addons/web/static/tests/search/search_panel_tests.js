@@ -20,6 +20,7 @@ import { registry } from "@web/core/registry";
 import { FilterMenu } from "@web/search/filter_menu/filter_menu";
 import { GroupByMenu } from "@web/search/group_by_menu/group_by_menu";
 import { SearchPanel } from "@web/search/search_panel/search_panel";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, xml } = owl;
 
@@ -88,7 +89,7 @@ const getCounters = (v) => (isNaN(v[1]) ? null : Number(v[1]));
 
 const makeTestComponent = ({ onWillStart, onWillUpdateProps } = {}) => {
     let domain;
-    class TestComponent extends Component {
+    class TestComponent extends LegacyComponent {
         setup() {
             owl.onWillStart(async () => {
                 if (onWillStart) {

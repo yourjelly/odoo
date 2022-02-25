@@ -18,6 +18,7 @@ import {
     toggleFavoriteMenu,
     toggleMenuItem,
 } from "./helpers";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, onWillUpdateProps, xml } = owl;
 const serviceRegistry = registry.category("services");
@@ -132,7 +133,7 @@ QUnit.module("Search", (hooks) => {
         async function (assert) {
             assert.expect(7);
 
-            class ToyView extends Component {
+            class ToyView extends LegacyComponent {
                 setup() {
                     assert.deepEqual(this.props.domain, [["foo", "=", "qsdf"]]);
                     onWillUpdateProps((nextProps) => {

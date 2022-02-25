@@ -19,6 +19,7 @@ import {
     patchWithCleanup,
     triggerHotkey,
 } from "../helpers/utils";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { App, Component, xml } = owl;
 const serviceRegistry = registry.category("services");
@@ -41,7 +42,7 @@ QUnit.module("Components", ({ beforeEach }) => {
     QUnit.module("Dropdown");
 
     QUnit.test("can be rendered", async (assert) => {
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`<Dropdown/>`;
         Parent.components = { Dropdown };
         env = await makeTestEnv();
@@ -55,7 +56,7 @@ QUnit.module("Components", ({ beforeEach }) => {
     });
 
     QUnit.test("DropdownItem can be rendered as <span/>", async (assert) => {
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`<DropdownItem>coucou</DropdownItem>`;
         Parent.components = { DropdownItem };
         env = await makeTestEnv();
@@ -64,7 +65,7 @@ QUnit.module("Components", ({ beforeEach }) => {
     });
 
     QUnit.test("DropdownItem (with href prop) can be rendered as <a/>", async (assert) => {
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`<DropdownItem href="'#'">coucou</DropdownItem>`;
         Parent.components = { DropdownItem };
         env = await makeTestEnv();
@@ -85,7 +86,7 @@ QUnit.module("Components", ({ beforeEach }) => {
                 assert.ok(href !== null ? ev.defaultPrevented : !ev.defaultPrevented);
             },
         });
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`
             <Dropdown>
                 <DropdownItem class="'link'" href="'#'"/>
@@ -105,7 +106,7 @@ QUnit.module("Components", ({ beforeEach }) => {
     });
 
     QUnit.test("can be styled", async (assert) => {
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`
         <Dropdown class="'one'" togglerClass="'two'" menuClass="'three'">
             <DropdownItem class="'four'" />
@@ -126,7 +127,7 @@ QUnit.module("Components", ({ beforeEach }) => {
     QUnit.test("menu can be toggled", async (assert) => {
         assert.expect(5);
         const beforeOpenProm = makeDeferred();
-        class Parent extends Component {
+        class Parent extends LegacyComponent {
             constructor() {
                 super(...arguments);
                 this.beforeOpen = () => {
@@ -151,7 +152,7 @@ QUnit.module("Components", ({ beforeEach }) => {
 
     QUnit.test("initial open state can be true", async (assert) => {
         assert.expect(3);
-        class Parent extends Component {
+        class Parent extends LegacyComponent {
             constructor() {
                 super(...arguments);
                 this.beforeOpen = () => {
@@ -168,7 +169,7 @@ QUnit.module("Components", ({ beforeEach }) => {
     });
 
     QUnit.test("close on outside click", async (assert) => {
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`
         <div>
           <div class="outside">outside</div>
@@ -185,7 +186,7 @@ QUnit.module("Components", ({ beforeEach }) => {
     });
 
     QUnit.test("close on item selection", async (assert) => {
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`
         <Dropdown>
             <DropdownItem/>
@@ -200,7 +201,7 @@ QUnit.module("Components", ({ beforeEach }) => {
     });
 
     QUnit.test("payload received on item selection", async (assert) => {
-        class Parent extends Component {
+        class Parent extends LegacyComponent {
             onItemSelected(value) {
                 assert.equal(value, 42);
             }
@@ -218,7 +219,7 @@ QUnit.module("Components", ({ beforeEach }) => {
     });
 
     QUnit.test("multi-level dropdown: can be rendered and toggled", async (assert) => {
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`
         <Dropdown>
             <Dropdown>
@@ -236,7 +237,7 @@ QUnit.module("Components", ({ beforeEach }) => {
     });
 
     QUnit.test("multi-level dropdown: initial open state can be true", async (assert) => {
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`
         <Dropdown startOpen="true">
             <Dropdown startOpen="true">
@@ -251,7 +252,7 @@ QUnit.module("Components", ({ beforeEach }) => {
     });
 
     QUnit.test("multi-level dropdown: close on outside click", async (assert) => {
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`
         <div>
           <div class="outside">outside</div>
@@ -274,7 +275,7 @@ QUnit.module("Components", ({ beforeEach }) => {
     });
 
     QUnit.test("multi-level dropdown: close on item selection", async (assert) => {
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`
         <Dropdown>
             <Dropdown>
@@ -299,7 +300,7 @@ QUnit.module("Components", ({ beforeEach }) => {
     });
 
     QUnit.test("multi-level dropdown: parent closing modes on item selection", async (assert) => {
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`
         <Dropdown>
             <Dropdown>
@@ -339,7 +340,7 @@ QUnit.module("Components", ({ beforeEach }) => {
     });
 
     QUnit.test("multi-level dropdown: recursive template can be rendered", async (assert) => {
-        class Parent extends Component {
+        class Parent extends LegacyComponent {
             setup() {
                 this.name = "foo";
                 this.items = [
@@ -427,7 +428,7 @@ QUnit.module("Components", ({ beforeEach }) => {
         async (assert) => {
             assert.expect(13);
             const beforeOpenProm = makeDeferred();
-            class Parent extends Component {
+            class Parent extends LegacyComponent {
                 constructor() {
                     super(...arguments);
                     this.beforeOpen = () => {
@@ -485,7 +486,7 @@ QUnit.module("Components", ({ beforeEach }) => {
     QUnit.test(
         "siblings dropdowns: when non-sibling is open, other must not be toggled on mouse-enter",
         async (assert) => {
-            class Parent extends Component {}
+            class Parent extends LegacyComponent {}
             Parent.template = xml`
         <div>
           <div><Dropdown class="'foo'" /></div>
@@ -511,7 +512,7 @@ QUnit.module("Components", ({ beforeEach }) => {
     QUnit.test(
         "siblings dropdowns: when one is open, then non-sibling toggled, siblings must not be toggled on mouse-enter",
         async (assert) => {
-            class Parent extends Component {}
+            class Parent extends LegacyComponent {}
             Parent.template = xml`
         <div>
           <div><Dropdown class="'foo'" /></div>
@@ -539,7 +540,7 @@ QUnit.module("Components", ({ beforeEach }) => {
 
     QUnit.test("siblings dropdowns with manualOnly props", async (assert) => {
         assert.expect(7);
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`
         <div>
           <Dropdown class="'one'" manualOnly="true"/>
@@ -573,7 +574,7 @@ QUnit.module("Components", ({ beforeEach }) => {
 
     QUnit.test("dropdowns keynav", async (assert) => {
         assert.expect(26);
-        class Parent extends Component {
+        class Parent extends LegacyComponent {
             onItemSelected(value) {
                 assert.step(value.toString());
             }
@@ -666,7 +667,7 @@ QUnit.module("Components", ({ beforeEach }) => {
     });
 
     QUnit.test("dropdowns keynav is not impacted by bootstrap", async (assert) => {
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.components = { Dropdown };
         Parent.template = xml`
             <Dropdown startOpen="true">
@@ -697,7 +698,7 @@ QUnit.module("Components", ({ beforeEach }) => {
     });
 
     QUnit.test("props toggler='parent'", async (assert) => {
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`
             <div>
                 <div class="my_custom_toggler">
@@ -722,7 +723,7 @@ QUnit.module("Components", ({ beforeEach }) => {
 
     QUnit.test("multi-level dropdown: keynav", async (assert) => {
         assert.expect(125);
-        class Parent extends Component {
+        class Parent extends LegacyComponent {
             onItemSelected(value) {
                 assert.step(value);
             }
@@ -822,7 +823,7 @@ QUnit.module("Components", ({ beforeEach }) => {
 
     QUnit.test("multi-level dropdown: keynav when rtl direction", async (assert) => {
         assert.expect(10);
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`
             <Dropdown class="'first'" hotkey="'1'">
                 <DropdownItem class="'first-first'">O</DropdownItem>
@@ -869,7 +870,7 @@ QUnit.module("Components", ({ beforeEach }) => {
         "multi-level dropdown: mouseentering a dropdown item should close any subdropdown",
         async (assert) => {
             assert.expect(4);
-            class Parent extends Component {}
+            class Parent extends LegacyComponent {}
             Parent.template = xml`
                 <Dropdown togglerClass="'main'">
                     <Dropdown togglerClass="'sub'" />
@@ -897,7 +898,7 @@ QUnit.module("Components", ({ beforeEach }) => {
 
     QUnit.test("multi-level dropdown: unsubscribe all keynav when root close", async (assert) => {
         assert.expect(14);
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`
             <Dropdown togglerClass="'first'">
                 <Dropdown togglerClass="'second'">
@@ -960,7 +961,7 @@ QUnit.module("Components", ({ beforeEach }) => {
     QUnit.test("Dropdown with a tooltip", async (assert) => {
         assert.expect(1);
 
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`<Dropdown tooltip="'My tooltip'"></Dropdown>`;
         Parent.components = { Dropdown };
 

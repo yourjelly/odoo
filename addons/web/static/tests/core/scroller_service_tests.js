@@ -6,6 +6,7 @@ import { scrollTo } from "@web/core/utils/scrolling";
 import { registerCleanup } from "../helpers/cleanup";
 import { makeTestEnv } from "../helpers/mock_env";
 import { click, getFixture, mount, nextTick } from "../helpers/utils";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, xml } = owl;
 const serviceRegistry = registry.category("services");
@@ -24,7 +25,7 @@ QUnit.module("ScrollerService", {
 QUnit.test("Ignore empty hrefs", async (assert) => {
     assert.expect(1);
 
-    class MyComponent extends Component {}
+    class MyComponent extends LegacyComponent {}
     MyComponent.template = xml/* xml */ `
         <div class="my_component">
             <a href="#" class="inactive_link">This link does nothing</a>
@@ -64,7 +65,7 @@ QUnit.test("Simple rendering with a scroll", async (assert) => {
     scrollableParent.style.width = "400px";
     target.append(scrollableParent);
 
-    class MyComponent extends Component {}
+    class MyComponent extends LegacyComponent {}
     MyComponent.template = xml/* xml */ `
         <div class="o_content">
             <a href="#scrollToHere"  class="btn btn-primary">sroll to ...</a>
@@ -118,7 +119,7 @@ QUnit.test("Rendering with multiple anchors and scrolls", async (assert) => {
     scrollableParent.style.width = "400px";
     target.append(scrollableParent);
 
-    class MyComponent extends Component {}
+    class MyComponent extends LegacyComponent {}
     MyComponent.template = xml/* xml */ `
         <div class="o_content">
             <h2 id="anchor3">ANCHOR 3</h2>
@@ -192,7 +193,7 @@ QUnit.test("clicking anchor when no scrollable", async (assert) => {
     scrollableParent.style.width = "400px";
     target.append(scrollableParent);
 
-    class MyComponent extends Component {}
+    class MyComponent extends LegacyComponent {}
     MyComponent.template = xml/* xml */ `
         <div class="o_content">
             <a href="#scrollToHere"  class="btn btn-primary">scroll to ...</a>
@@ -230,7 +231,7 @@ QUnit.test("clicking anchor when multi levels scrollables", async (assert) => {
     scrollableParent.style.width = "400px";
     target.append(scrollableParent);
 
-    class MyComponent extends Component {}
+    class MyComponent extends LegacyComponent {}
     MyComponent.template = xml/* xml */ `
         <div class="o_content scrollable-1">
             <a href="#scroll1"  class="btn1 btn btn-primary">go to level 2 anchor</a>
@@ -325,7 +326,7 @@ QUnit.test("Simple scroll to HTML elements", async (assert) => {
     scrollableParent.style.width = "400px";
     target.append(scrollableParent);
 
-    class MyComponent extends Component {}
+    class MyComponent extends LegacyComponent {}
     MyComponent.template = xml/* xml */ `
         <div class="o_content">
             <p>

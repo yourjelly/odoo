@@ -19,6 +19,7 @@ import {
     toggleSaveFavorite,
     validateSearch,
 } from "./helpers";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, xml } = owl;
 const serviceRegistry = registry.category("services");
@@ -160,7 +161,7 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("save filter", async function (assert) {
         assert.expect(1);
 
-        class TestComponent extends Component {
+        class TestComponent extends LegacyComponent {
             setup() {
                 useSetupAction({
                     getContext: () => {

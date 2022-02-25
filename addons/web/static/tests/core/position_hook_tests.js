@@ -12,6 +12,7 @@ import {
     patchWithCleanup,
     triggerEvent,
 } from "../helpers/utils";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, xml } = owl;
 let container;
@@ -39,7 +40,7 @@ function isWellPositioned(popper, position = "bottom") {
     return hasCorrectClass && correctLeft && correctTop;
 }
 
-class TestComp extends Component {
+class TestComp extends LegacyComponent {
     setup() {
         usePosition(reference, this.constructor.popperOptions);
     }

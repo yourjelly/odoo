@@ -3,6 +3,7 @@
 import { NotUpdatable, ErrorHandler } from "@web/core/utils/components";
 import { makeTestEnv } from "../../helpers/mock_env";
 import { getFixture, mount } from "../../helpers/utils";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, onMounted, onWillUpdateProps, xml } = owl;
 
@@ -10,7 +11,7 @@ QUnit.module("utils", () => {
     QUnit.module("components");
 
     QUnit.test("NotUpdatable component", async function (assert) {
-        class Child extends Component {
+        class Child extends LegacyComponent {
             setup() {
                 onMounted(() => {
                     assert.step("mounted");
@@ -21,7 +22,7 @@ QUnit.module("utils", () => {
             }
         }
         Child.template = xml`<div>hey</div>`;
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`
           <div>
             <Child/>
@@ -38,10 +39,10 @@ QUnit.module("utils", () => {
     });
 
     QUnit.test("ErrorHandler component", async function (assert) {
-        class Boom extends Component {}
+        class Boom extends LegacyComponent {}
         Boom.template = xml`<div><t t-esc="this.will.throw"/></div>`;
 
-        class Parent extends Component {
+        class Parent extends LegacyComponent {
             setup() {
                 this.flag = true;
             }

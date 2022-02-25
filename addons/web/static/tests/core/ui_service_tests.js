@@ -5,6 +5,7 @@ import { uiService, useActiveElement } from "@web/core/ui/ui_service";
 import { makeTestEnv } from "../helpers/mock_env";
 import { makeFakeLocalizationService } from "../helpers/mock_services";
 import { destroy, getFixture, mount, nextTick } from "../helpers/utils";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, xml } = owl;
 const serviceRegistry = registry.category("services");
@@ -66,7 +67,7 @@ QUnit.test("use block and unblock several times to block ui with ui service", as
 });
 
 QUnit.test("a component can be the active element", async (assert) => {
-    class MyComponent extends Component {
+    class MyComponent extends LegacyComponent {
         setup() {
             useActiveElement();
         }
@@ -85,7 +86,7 @@ QUnit.test("a component can be the active element", async (assert) => {
 });
 
 QUnit.test("a component can be the  UI active element: with t-ref delegation", async (assert) => {
-    class MyComponent extends Component {
+    class MyComponent extends LegacyComponent {
         setup() {
             useActiveElement("delegatedRef");
             this.hasRef = true;

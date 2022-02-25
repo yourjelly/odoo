@@ -7,6 +7,7 @@ import { registry } from "@web/core/registry";
 import { Layout } from "@web/views/layout";
 import { getDefaultConfig } from "@web/views/view";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, xml, useChildSubEnv } = owl;
 
@@ -50,7 +51,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("Simple rendering", async (assert) => {
         assert.expect(5);
 
-        class ToyComponent extends Component {}
+        class ToyComponent extends LegacyComponent {}
         ToyComponent.template = xml`
             <Layout viewType="'toy'" useSampleModel="true">
                 <div class="toy_content" />
@@ -70,7 +71,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("Simple rendering: with search", async (assert) => {
         assert.expect(6);
 
-        class ToyComponent extends Component {}
+        class ToyComponent extends LegacyComponent {}
         ToyComponent.template = xml`
             <Layout viewType="'toy'">
                 <t t-set-slot="control-panel-top-right">
@@ -100,7 +101,7 @@ QUnit.module("Views", (hooks) => {
 
         // Component C: bottom (no control panel)
 
-        class ToyC extends Component {
+        class ToyC extends LegacyComponent {
             setup() {
                 useChildSubEnv({
                     searchModel: {
@@ -120,10 +121,10 @@ QUnit.module("Views", (hooks) => {
 
         // Component B: center (with custom search panel)
 
-        class SearchPanel extends Component {}
+        class SearchPanel extends LegacyComponent {}
         SearchPanel.template = xml`<div class="o_toy_search_panel" />`;
 
-        class ToyB extends Component {
+        class ToyB extends LegacyComponent {
             setup() {
                 useChildSubEnv({
                     config: {
@@ -144,7 +145,7 @@ QUnit.module("Views", (hooks) => {
 
         // Component A: top
 
-        class ToyA extends Component {}
+        class ToyA extends LegacyComponent {}
         ToyA.template = xml`
             <Layout viewType="'toy_a'">
                 <t t-set-slot="control-panel-top-right">
@@ -176,14 +177,14 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("Custom control panel", async (assert) => {
         assert.expect(3);
 
-        class ToyComponent extends Component {}
+        class ToyComponent extends LegacyComponent {}
         ToyComponent.template = xml`
             <Layout>
                 <div class="o_toy_content" />
             </Layout>`;
         ToyComponent.components = { Layout };
 
-        class ControlPanel extends Component {}
+        class ControlPanel extends LegacyComponent {}
         ControlPanel.template = xml`<div class="o_toy_search_panel" />`;
 
         const root = await makeWithSearch({
@@ -202,14 +203,14 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("Custom search panel", async (assert) => {
         assert.expect(3);
 
-        class ToyComponent extends Component {}
+        class ToyComponent extends LegacyComponent {}
         ToyComponent.template = xml`
             <Layout>
                 <div class="o_toy_content" />
             </Layout>`;
         ToyComponent.components = { Layout };
 
-        class SearchPanel extends Component {}
+        class SearchPanel extends LegacyComponent {}
         SearchPanel.template = xml`<div class="o_toy_search_panel" />`;
 
         const root = await makeWithSearch({
@@ -228,14 +229,14 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("Custom banner: no bannerRoute in env", async (assert) => {
         assert.expect(2);
 
-        class ToyComponent extends Component {}
+        class ToyComponent extends LegacyComponent {}
         ToyComponent.template = xml`
             <Layout>
                 <div class="o_toy_content" />
             </Layout>`;
         ToyComponent.components = { Layout };
 
-        class Banner extends Component {}
+        class Banner extends LegacyComponent {}
         Banner.template = xml`<div class="o_toy_banner" />`;
 
         const root = await makeWithSearch({
@@ -253,14 +254,14 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("Custom banner: with bannerRoute in env", async (assert) => {
         assert.expect(2);
 
-        class ToyComponent extends Component {}
+        class ToyComponent extends LegacyComponent {}
         ToyComponent.template = xml`
             <Layout>
                 <div class="o_toy_content" />
             </Layout>`;
         ToyComponent.components = { Layout };
 
-        class Banner extends Component {}
+        class Banner extends LegacyComponent {}
         Banner.template = xml`<div class="o_toy_banner" />`;
 
         const root = await makeWithSearch({

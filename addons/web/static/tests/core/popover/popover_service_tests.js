@@ -5,6 +5,7 @@ import { registry } from "@web/core/registry";
 import { registerCleanup } from "../../helpers/cleanup";
 import { clearRegistryWithCleanup, makeTestEnv } from "../../helpers/mock_env";
 import { click, getFixture, mount, nextTick } from "../../helpers/utils";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, xml } = owl;
 
@@ -15,7 +16,7 @@ let popoverTarget;
 
 const mainComponents = registry.category("main_components");
 
-class PseudoWebClient extends Component {
+class PseudoWebClient extends LegacyComponent {
     setup() {
         this.Components = mainComponents.getEntries();
     }
@@ -49,7 +50,7 @@ QUnit.module("Popover service", {
 QUnit.test("simple use", async (assert) => {
     assert.containsOnce(fixture, ".o_popover_container");
 
-    class Comp extends Component {}
+    class Comp extends LegacyComponent {}
     Comp.template = xml`<div id="comp">in popover</div>`;
 
     assert.containsNone(fixture, ".o_popover");
@@ -70,7 +71,7 @@ QUnit.test("simple use", async (assert) => {
 QUnit.test("close on click away", async (assert) => {
     assert.containsOnce(fixture, ".o_popover_container");
 
-    class Comp extends Component {}
+    class Comp extends LegacyComponent {}
     Comp.template = xml`<div id="comp">in popover</div>`;
 
     popovers.add(popoverTarget, Comp, {});
@@ -88,7 +89,7 @@ QUnit.test("close on click away", async (assert) => {
 QUnit.test("do not close on click away", async (assert) => {
     assert.containsOnce(fixture, ".o_popover_container");
 
-    class Comp extends Component {}
+    class Comp extends LegacyComponent {}
     Comp.template = xml`<div id="comp">in popover</div>`;
 
     const remove = popovers.add(popoverTarget, Comp, {}, { closeOnClickAway: false });
@@ -114,7 +115,7 @@ QUnit.test("close callback", async (assert) => {
 
     assert.containsOnce(fixture, ".o_popover_container");
 
-    class Comp extends Component {}
+    class Comp extends LegacyComponent {}
     Comp.template = xml`<div id="comp">in popover</div>`;
 
     function onClose() {
@@ -132,7 +133,7 @@ QUnit.test("close callback", async (assert) => {
 QUnit.test("sub component triggers close", async (assert) => {
     assert.containsOnce(fixture, ".o_popover_container");
 
-    class Comp extends Component {}
+    class Comp extends LegacyComponent {}
     Comp.template = xml`<div id="comp" t-on-click="() => this.trigger('popover-closed')">in popover</div>`;
 
     popovers.add(popoverTarget, Comp, {});
@@ -150,7 +151,7 @@ QUnit.test("sub component triggers close", async (assert) => {
 QUnit.test("close popover if target is removed", async (assert) => {
     assert.containsOnce(fixture, ".o_popover_container");
 
-    class Comp extends Component {}
+    class Comp extends LegacyComponent {}
     Comp.template = xml`<div id="comp">in popover</div>`;
 
     popovers.add(popoverTarget, Comp, {});
@@ -169,7 +170,7 @@ QUnit.test("close popover if target is removed", async (assert) => {
 QUnit.test("keep popover if target sibling is removed", async (assert) => {
     assert.containsOnce(fixture, ".o_popover_container");
 
-    class Comp extends Component {}
+    class Comp extends LegacyComponent {}
     Comp.template = xml`<div id="comp">in popover</div>`;
 
     popovers.add(popoverTarget, Comp, {});
