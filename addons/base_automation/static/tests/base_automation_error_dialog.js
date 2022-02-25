@@ -20,6 +20,8 @@ const { onMounted } = owl;
 
 const serviceRegistry = registry.category("services");
 
+let target;
+
 QUnit.module("base_automation", {}, function () {
 
     let unhandledRejectionCb;
@@ -46,6 +48,7 @@ QUnit.module("base_automation", {}, function () {
             registerCleanup(() => {
                 browser.addEventListener = windowAddEventListener;
             });
+            target = getFixture();
         },
     });
 
@@ -79,7 +82,7 @@ QUnit.module("base_automation", {}, function () {
 
         const env = await makeTestEnv();
         const { Component: Container, props } = registry.category("main_components").get("DialogContainer");
-        const dialogContainer = await mount(Container, getFixture(), { env, props });
+        await mount(Container, target, { env, props });
 
         const errorEvent = new PromiseRejectionEvent("error", { reason: {
             message: error,
@@ -88,9 +91,9 @@ QUnit.module("base_automation", {}, function () {
         }, promise: null });
         await unhandledRejectionCb(errorEvent);
         await nextTick();
-        assert.containsOnce(dialogContainer, '.modal .fa-clipboard');
-        assert.containsOnce(dialogContainer, '.modal .o_disable_action_button');
-        assert.containsOnce(dialogContainer, '.modal .o_edit_action_button');
+        assert.containsOnce(target, '.modal .fa-clipboard');
+        assert.containsOnce(target, '.modal .o_disable_action_button');
+        assert.containsOnce(target, '.modal .o_edit_action_button');
     });
 
     QUnit.test("Error not due to an automated action", async function (assert) {
@@ -105,16 +108,9 @@ QUnit.module("base_automation", {}, function () {
             },
         });
 
-        patchWithCleanup(DialogContainer.prototype, {
-            setup() {
-                this._super();
-                onMounted(() => this.el.classList.add("o_dialog_container"));
-            }
-        });
-
         const env = await makeTestEnv();
         const { Component: Container, props } = registry.category("main_components").get("DialogContainer");
-        const dialogContainer = await mount(Container, getFixture(), { env, props });
+        await mount(Container, target, { env, props });
 
         const errorEvent = new PromiseRejectionEvent("error", { reason: {
             message: error,
@@ -123,9 +119,9 @@ QUnit.module("base_automation", {}, function () {
         }, promise: null });
         await unhandledRejectionCb(errorEvent);
         await nextTick();
-        assert.containsOnce(dialogContainer, '.modal .fa-clipboard');
-        assert.containsNone(dialogContainer, '.modal .o_disable_action_button');
-        assert.containsNone(dialogContainer, '.modal .o_edit_action_button');
+        assert.containsOnce(target, '.modal .fa-clipboard');
+        assert.containsNone(target, '.modal .o_disable_action_button');
+        assert.containsNone(target, '.modal .o_edit_action_button');
     });
 
 });
