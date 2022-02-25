@@ -45,7 +45,7 @@ odoo.define('web.AbstractFieldOwl', function (require) {
      *
      * @module web.AbstractFieldOwl
      */
-    class AbstractField extends Component {
+    class AbstractField extends LegacyComponent {
         /**
          * Abstract field class
          *

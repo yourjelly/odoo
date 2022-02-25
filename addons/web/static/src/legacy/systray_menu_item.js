@@ -3,6 +3,7 @@
 import { ComponentAdapter } from "web.OwlCompatibility";
 import * as legacySystrayMenu from "web.SystrayMenu";
 import { registry } from "../core/registry";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, xml } = owl;
 const systrayRegistry = registry.category("systray");
@@ -25,7 +26,7 @@ const legacySystrayItemTemplate = xml`<SystrayItemAdapter Component="Widget" />`
 function addSystrayItem(Widget) {
     const name = `_legacy_systray_item_${id++}`;
 
-    class SystrayItem extends Component {
+    class SystrayItem extends LegacyComponent {
         constructor() {
             super(...arguments);
             this.Widget = Widget;

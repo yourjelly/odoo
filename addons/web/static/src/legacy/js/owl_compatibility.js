@@ -9,6 +9,7 @@ odoo.define('web.OwlCompatibility', function (require) {
      *  2) A legacy widget has to instantiate Owl components
      */
 
+    const { LegacyComponent } = require("@web/legacy/legacy_component");
     const {
         App,
         Component,
@@ -84,7 +85,7 @@ odoo.define('web.OwlCompatibility', function (require) {
      *         }
      *     }
      */
-    class ComponentAdapter extends Component {
+    class ComponentAdapter extends LegacyComponent {
         /**
          * Creates the template on-the-fly, depending on the type of Component
          * (legacy widget or Owl component).
@@ -325,7 +326,7 @@ odoo.define('web.OwlCompatibility', function (require) {
      * custom events (trigger_up) on the parent legacy widget.
 
      * For example:
-     *      class MyComponent extends Component {}
+     *      class MyComponent extends LegacyComponent {}
      *      MyComponent.template = xml`<div>Owl component with value <t t-esc="props.value"/></div>`;
      *      const MyWidget = Widget.extend(WidgetAdapterMixin, {
      *          start() {
@@ -479,7 +480,7 @@ odoo.define('web.OwlCompatibility', function (require) {
     /**
      * The component class that will be instanciated between a legacy and an OWL 2 layer.
      */
-    class ProxyComponent extends Component {
+    class ProxyComponent extends LegacyComponent {
         setup() {
             onMounted(() => {
                 this.props.mounted();
