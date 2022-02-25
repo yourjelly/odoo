@@ -6,6 +6,7 @@ import { registry } from "@web/core/registry";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 import { makeFakeLocalizationService } from "@web/../tests/helpers/mock_services";
 import { click, getFixture, patchWithCleanup, mount } from "@web/../tests/helpers/utils";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, xml } = owl;
 const serviceRegistry = registry.category("services");
@@ -30,20 +31,23 @@ QUnit.module("Components", (hooks) => {
         serviceRegistry.add("localization", makeFakeLocalizationService());
         const env = await makeTestEnv();
 
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`<CheckBox>ragabadabadaba</CheckBox>`;
         Parent.components = { CheckBox };
 
-        const parent = await mount(Parent, target, { env });
+        await mount(Parent, target, { env });
         assert.containsOnce(target, "div.custom-checkbox");
-        assert.strictEqual(parent.el.innerText, "rugubudubudubu");
+        assert.strictEqual(
+            target.querySelector("div.custom-checkbox").textContent,
+            "rugubudubudubu"
+        );
     });
 
     QUnit.test("call onChange prop when some change occurs", async (assert) => {
         const env = await makeTestEnv();
 
         let value = false;
-        class Parent extends Component {
+        class Parent extends LegacyComponent {
             onChange(checked) {
                 value = checked;
             }

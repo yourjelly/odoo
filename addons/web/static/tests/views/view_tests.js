@@ -15,6 +15,7 @@ import { registry } from "@web/core/registry";
 import { OnboardingBanner } from "@web/views/onboarding_banner";
 import { View } from "@web/views/view";
 import { actionService } from "@web/webclient/actions/action_service";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, useState, xml } = owl;
 
@@ -22,6 +23,7 @@ const serviceRegistry = registry.category("services");
 const viewRegistry = registry.category("views");
 
 let serverData;
+let target;
 
 QUnit.module("Views", (hooks) => {
     hooks.beforeEach(async () => {
@@ -71,7 +73,7 @@ QUnit.module("Views", (hooks) => {
             },
         };
 
-        class ToyView extends Component {
+        class ToyView extends LegacyComponent {
             setup() {
                 this.class = "o_toy_view";
                 this.template = xml`${this.props.arch}`;
@@ -102,6 +104,8 @@ QUnit.module("Views", (hooks) => {
             },
         };
         serviceRegistry.add("action", fakeActionService, { force: true });
+
+        target = getFixture();
     });
 
     QUnit.module("View component");
@@ -126,7 +130,7 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-        const view = await makeView({
+        await makeView({
             serverData,
             mockRPC: (_, args) => {
                 assert.strictEqual(args.model, "animal");
@@ -141,8 +145,11 @@ QUnit.module("Views", (hooks) => {
             resModel: "animal",
             type: "toy",
         });
-        assert.hasClass(view.el, "o_toy_view");
-        assert.strictEqual(view.el.innerHTML, serverData.views["animal,false,toy"]);
+        assert.containsOnce(target, ".o_toy_view");
+        assert.strictEqual(
+            target.querySelector(".o_toy_view").innerHTML,
+            serverData.views["animal,false,toy"]
+        );
     });
 
     QUnit.test("rendering with given viewId", async function (assert) {
@@ -160,7 +167,7 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-        const view = await makeView({
+        await makeView({
             serverData,
             mockRPC: (_, args) => {
                 assert.deepEqual(args.kwargs.views, [[1, "toy"]]);
@@ -174,8 +181,11 @@ QUnit.module("Views", (hooks) => {
             type: "toy",
             viewId: 1,
         });
-        assert.hasClass(view.el, "o_toy_view");
-        assert.strictEqual(view.el.innerHTML, serverData.views["animal,1,toy"]);
+        assert.containsOnce(target, ".o_toy_view");
+        assert.strictEqual(
+            target.querySelector(".o_toy_view").innerHTML,
+            serverData.views["animal,1,toy"]
+        );
     });
 
     QUnit.test("rendering with given 'views' param", async function (assert) {
@@ -193,7 +203,7 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-        const view = await makeView({
+        await makeView({
             serverData,
             mockRPC: (_, args) => {
                 console.log(_);
@@ -210,8 +220,11 @@ QUnit.module("Views", (hooks) => {
                 views: [[1, "toy"]],
             },
         });
-        assert.hasClass(view.el, "o_toy_view");
-        assert.strictEqual(view.el.innerHTML, serverData.views["animal,1,toy"]);
+        assert.containsOnce(target, ".o_toy_view");
+        assert.strictEqual(
+            target.querySelector(".o_toy_view").innerHTML,
+            serverData.views["animal,1,toy"]
+        );
     });
 
     QUnit.test(
@@ -231,7 +244,7 @@ QUnit.module("Views", (hooks) => {
                 },
             });
 
-            const view = await makeView({
+            await makeView({
                 serverData,
                 mockRPC: (_, args) => {
                     assert.deepEqual(args.kwargs.views, [
@@ -250,8 +263,11 @@ QUnit.module("Views", (hooks) => {
                     views: [[false, "other"]],
                 },
             });
-            assert.hasClass(view.el, "o_toy_view");
-            assert.strictEqual(view.el.innerHTML, serverData.views["animal,false,toy"]);
+            assert.containsOnce(target, ".o_toy_view");
+            assert.strictEqual(
+                target.querySelector(".o_toy_view").innerHTML,
+                serverData.views["animal,false,toy"]
+            );
         }
     );
 
@@ -270,7 +286,7 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-        const view = await makeView({
+        await makeView({
             serverData,
             mockRPC: (_, args) => {
                 assert.deepEqual(args.kwargs.views, [
@@ -293,8 +309,11 @@ QUnit.module("Views", (hooks) => {
                 ],
             },
         });
-        assert.hasClass(view.el, "o_toy_view");
-        assert.strictEqual(view.el.innerHTML, serverData.views["animal,1,toy"]);
+        assert.containsOnce(target, ".o_toy_view");
+        assert.strictEqual(
+            target.querySelector(".o_toy_view").innerHTML,
+            serverData.views["animal,1,toy"]
+        );
     });
 
     QUnit.test("rendering with given arch and fields", async function (assert) {
@@ -312,7 +331,7 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-        const view = await makeView({
+        await makeView({
             serverData,
             mockRPC: () => {
                 throw new Error("no RPC expected");
@@ -322,8 +341,11 @@ QUnit.module("Views", (hooks) => {
             arch: `<toy>Specific arch content</toy>`,
             fields: {},
         });
-        assert.hasClass(view.el, "o_toy_view");
-        assert.strictEqual(view.el.innerHTML, `<toy>Specific arch content</toy>`);
+        assert.containsOnce(target, ".o_toy_view");
+        assert.strictEqual(
+            target.querySelector(".o_toy_view").innerHTML,
+            `<toy>Specific arch content</toy>`
+        );
     });
 
     QUnit.test("rendering with loadActionMenus='true'", async function (assert) {
@@ -341,7 +363,7 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-        const view = await makeView({
+        await makeView({
             serverData,
             mockRPC: (_, args) => {
                 // the rpc is done for fields
@@ -356,8 +378,11 @@ QUnit.module("Views", (hooks) => {
             type: "toy",
             loadActionMenus: true,
         });
-        assert.hasClass(view.el, "o_toy_view");
-        assert.strictEqual(view.el.innerHTML, serverData.views["animal,false,toy"]);
+        assert.containsOnce(target, ".o_toy_view");
+        assert.strictEqual(
+            target.querySelector(".o_toy_view").innerHTML,
+            serverData.views["animal,false,toy"]
+        );
     });
 
     QUnit.test(
@@ -377,7 +402,7 @@ QUnit.module("Views", (hooks) => {
                 },
             });
 
-            const view = await makeView({
+            await makeView({
                 serverData,
                 mockRPC: (_, args) => {
                     // the rpc is done for fields
@@ -394,8 +419,11 @@ QUnit.module("Views", (hooks) => {
                 fields: {},
                 loadActionMenus: true,
             });
-            assert.hasClass(view.el, "o_toy_view");
-            assert.strictEqual(view.el.innerHTML, `<toy>Specific arch content</toy>`);
+            assert.containsOnce(target, ".o_toy_view");
+            assert.strictEqual(
+                target.querySelector(".o_toy_view").innerHTML,
+                `<toy>Specific arch content</toy>`
+            );
         }
     );
 
@@ -416,7 +444,7 @@ QUnit.module("Views", (hooks) => {
                 },
             });
 
-            const view = await makeView({
+            await makeView({
                 serverData,
                 mockRPC: () => {
                     throw new Error("no RPC expected");
@@ -430,8 +458,11 @@ QUnit.module("Views", (hooks) => {
                 },
                 loadActionMenus: true,
             });
-            assert.hasClass(view.el, "o_toy_view");
-            assert.strictEqual(view.el.innerHTML, `<toy>Specific arch content</toy>`);
+            assert.containsOnce(target, ".o_toy_view");
+            assert.strictEqual(
+                target.querySelector(".o_toy_view").innerHTML,
+                `<toy>Specific arch content</toy>`
+            );
         }
     );
 
@@ -455,7 +486,7 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-        const view = await makeView({
+        await makeView({
             serverData,
             mockRPC: (_, args) => {
                 // the rpc is done for fields
@@ -473,8 +504,11 @@ QUnit.module("Views", (hooks) => {
             type: "toy",
             searchViewId: false,
         });
-        assert.hasClass(view.el, "o_toy_view");
-        assert.strictEqual(view.el.innerText, "Arch content (id=false)");
+        assert.containsOnce(target, ".o_toy_view");
+        assert.strictEqual(
+            target.querySelector(".o_toy_view").innerText,
+            "Arch content (id=false)"
+        );
     });
 
     QUnit.test(
@@ -512,8 +546,11 @@ QUnit.module("Views", (hooks) => {
                 searchViewArch: `<search/>`,
                 searchViewFields: {},
             });
-            assert.hasClass(view.el, "o_toy_view");
-            assert.strictEqual(view.el.innerText, "Specific arch content");
+            assert.containsOnce(target, ".o_toy_view");
+            assert.strictEqual(
+                target.querySelector(".o_toy_view").innerText,
+                "Specific arch content"
+            );
         }
     );
 
@@ -539,7 +576,7 @@ QUnit.module("Views", (hooks) => {
                 },
             });
 
-            const view = await makeView({
+            await makeView({
                 serverData,
                 mockRPC: () => {
                     throw new Error("no RPC expected");
@@ -551,8 +588,11 @@ QUnit.module("Views", (hooks) => {
                 searchViewArch: `<search/>`,
                 searchViewFields: {},
             });
-            assert.hasClass(view.el, "o_toy_view");
-            assert.strictEqual(view.el.innerText, "Specific arch content");
+            assert.containsOnce(target, ".o_toy_view");
+            assert.strictEqual(
+                target.querySelector(".o_toy_view").innerText,
+                "Specific arch content"
+            );
         }
     );
 
@@ -578,7 +618,7 @@ QUnit.module("Views", (hooks) => {
                 },
             });
 
-            const view = await makeView({
+            await makeView({
                 serverData,
                 mockRPC: (_, args) => {
                     // the rpc is done for fields
@@ -601,8 +641,11 @@ QUnit.module("Views", (hooks) => {
                 searchViewFields: {},
                 loadIrFilters: true,
             });
-            assert.hasClass(view.el, "o_toy_view");
-            assert.strictEqual(view.el.innerText, "Specific arch content");
+            assert.containsOnce(target, ".o_toy_view");
+            assert.strictEqual(
+                target.querySelector(".o_toy_view").innerText,
+                "Specific arch content"
+            );
         }
     );
 
@@ -639,7 +682,7 @@ QUnit.module("Views", (hooks) => {
                 },
             });
 
-            const view = await makeView({
+            await makeView({
                 serverData,
                 mockRPC: () => {
                     throw new Error("no RPC expected");
@@ -653,8 +696,11 @@ QUnit.module("Views", (hooks) => {
                 loadIrFilters: true,
                 irFilters,
             });
-            assert.hasClass(view.el, "o_toy_view");
-            assert.strictEqual(view.el.innerText, "Specific arch content");
+            assert.containsOnce(target, ".o_toy_view");
+            assert.strictEqual(
+                target.querySelector(".o_toy_view").innerText,
+                "Specific arch content"
+            );
         }
     );
 
@@ -698,7 +744,7 @@ QUnit.module("Views", (hooks) => {
             }
         };
 
-        const toy = await makeView({
+        await makeView({
             serverData,
             mockRPC,
             resModel: "animal",
@@ -708,8 +754,8 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-        assert.containsOnce(toy, "a");
-        await click(toy.el.querySelector("a"));
+        assert.containsOnce(target, "a");
+        await click(target.querySelector("a"));
         assert.verifySteps(["/web/dataset/call_kw/animal/setTheControl"]);
     });
 
@@ -744,7 +790,7 @@ QUnit.module("Views", (hooks) => {
                 <a type="action" name="myLittleAction" data-context="{ &quot;somekey&quot;: &quot;somevalue&quot; }"/>
             </toy>`;
 
-        const toy = await makeView({
+        await makeView({
             serverData,
             resModel: "animal",
             type: "toy",
@@ -753,8 +799,8 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-        assert.containsOnce(toy, "a");
-        await click(toy.el.querySelector("a"));
+        assert.containsOnce(target, "a");
+        await click(target.querySelector("a"));
     });
 
     QUnit.test("can click on action-bound links -- 3", async (assert) => {
@@ -796,7 +842,7 @@ QUnit.module("Views", (hooks) => {
                 <a type="action" title="myTitle" data-model="animal" data-resId="66" data-views="[[55, 'toy']]" data-domain="[['field', '=', 'val']]" data-context="{ &quot;somekey&quot;: &quot;somevalue&quot; }"/>
             </toy>`;
 
-        const toy = await makeView({
+        await makeView({
             serverData,
             resModel: "animal",
             type: "toy",
@@ -805,8 +851,8 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-        assert.containsOnce(toy, "a");
-        await click(toy.el.querySelector("a"));
+        assert.containsOnce(target, "a");
+        await click(target.querySelector("a"));
     });
 
     QUnit.test("renders banner_route", async (assert) => {
@@ -823,7 +869,7 @@ QUnit.module("Views", (hooks) => {
             }
         };
 
-        const toy = await makeView({
+        await makeView({
             serverData,
             mockRPC,
             resModel: "animal",
@@ -834,7 +880,7 @@ QUnit.module("Views", (hooks) => {
         });
 
         assert.verifySteps(["/mybody/isacage"]);
-        assert.containsOnce(toy, ".setmybodyfree");
+        assert.containsOnce(target, ".setmybodyfree");
     });
 
     QUnit.test("renders banner_route with js and css assets", async (assert) => {
@@ -885,7 +931,7 @@ QUnit.module("Views", (hooks) => {
 
         patchWithCleanup(document, { createElement });
 
-        const toy = await makeView({
+        await makeView({
             serverData,
             mockRPC,
             resModel: "animal",
@@ -896,9 +942,9 @@ QUnit.module("Views", (hooks) => {
         });
 
         assert.verifySteps(["/mybody/isacage", "js loaded", "css loaded"]);
-        assert.containsOnce(toy, ".setmybodyfree");
-        assert.containsNone(toy, "script");
-        assert.containsNone(toy, "link");
+        assert.containsOnce(target, ".setmybodyfree");
+        assert.containsNone(target, "script");
+        assert.containsNone(target, "link");
     });
 
     QUnit.test("banner can re-render with new HTML", async (assert) => {
@@ -932,7 +978,7 @@ QUnit.module("Views", (hooks) => {
             }
         };
 
-        const toy = await makeView({
+        await makeView({
             serverData,
             mockRPC,
             resModel: "animal",
@@ -943,12 +989,12 @@ QUnit.module("Views", (hooks) => {
         });
 
         assert.verifySteps(["/mybody/isacage"]);
-        assert.containsOnce(toy, ".banner1");
-        assert.containsNone(toy, ".banner2");
-        await click(toy.el.querySelector("a"));
+        assert.containsOnce(target, ".banner1");
+        assert.containsNone(target, ".banner2");
+        await click(target.querySelector("a"));
         assert.verifySteps(["/mybody/isacage"]);
-        assert.containsNone(toy, ".banner1");
-        assert.containsOnce(toy, ".banner2");
+        assert.containsNone(target, ".banner1");
+        assert.containsOnce(target, ".banner2");
     });
 
     QUnit.test("banner does not reload on render", async (assert) => {
@@ -981,11 +1027,11 @@ QUnit.module("Views", (hooks) => {
         });
 
         assert.verifySteps(["/mybody/isacage"]);
-        assert.containsOnce(toy, ".setmybodyfree");
+        assert.containsOnce(target, ".setmybodyfree");
         await toy.render();
         await nextTick();
         assert.verifySteps([]);
-        assert.containsOnce(toy, ".setmybodyfree");
+        assert.containsOnce(target, ".setmybodyfree");
     });
 
     QUnit.test("click on action-bound links in banner (concurrency)", async (assert) => {
@@ -1038,7 +1084,7 @@ QUnit.module("Views", (hooks) => {
             }
         };
 
-        const toy = await makeView({
+        await makeView({
             mockRPC,
             serverData,
             resModel: "animal",
@@ -1048,8 +1094,8 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-        await click(toy.el.querySelector("a[data-method='setTheControl']"));
-        click(toy.el.querySelector("a[data-method='heartOfTheSun']"));
+        await click(target.querySelector("a[data-method='setTheControl']"));
+        click(target.querySelector("a[data-method='heartOfTheSun']"));
         prom.resolve();
         await nextTick();
     });
@@ -1104,7 +1150,7 @@ QUnit.module("Views", (hooks) => {
             }
         };
 
-        const toy = await makeView({
+        await makeView({
             serverData,
             mockRPC,
             resModel: "animal",
@@ -1122,23 +1168,23 @@ QUnit.module("Views", (hooks) => {
             };
             // We need to handle both events, because the transition is not
             // always executed
-            toy.el.addEventListener("transitionend", complete);
-            toy.el.addEventListener("transitioncancel", complete);
+            target.addEventListener("transitionend", complete);
+            target.addEventListener("transitioncancel", complete);
         });
 
         assert.verifySteps(["/mybody/isacage"]);
-        assert.isNotVisible(toy.el.querySelector(".modal"));
-        assert.hasClass(toy.el.querySelector(".o_onboarding_container"), "collapse show");
+        assert.isNotVisible(target.querySelector(".modal"));
+        assert.hasClass(target.querySelector(".o_onboarding_container"), "collapse show");
 
-        await click(toy.el.querySelector("#closeOnboarding"));
-        assert.isVisible(toy.el.querySelector(".modal"));
+        await click(target.querySelector("#closeOnboarding"));
+        assert.isVisible(target.querySelector(".modal"));
 
-        await click(toy.el.querySelector(".modal a[type='action']"));
+        await click(target.querySelector(".modal a[type='action']"));
         assert.verifySteps(["mah_method"]);
         await prom;
-        assert.doesNotHaveClass(toy.el.querySelector(".o_onboarding_container"), "show");
-        assert.hasClass(toy.el.querySelector(".o_onboarding_container"), "collapse");
-        assert.isNotVisible(toy.el.querySelector(".modal"));
+        assert.doesNotHaveClass(target.querySelector(".o_onboarding_container"), "show");
+        assert.hasClass(target.querySelector(".o_onboarding_container"), "collapse");
+        assert.isNotVisible(target.querySelector(".modal"));
     });
 
     ////////////////////////////////////////////////////////////////////////////
@@ -1147,7 +1193,7 @@ QUnit.module("Views", (hooks) => {
 
     QUnit.test("rendering with given jsClass", async function (assert) {
         assert.expect(4);
-        const view = await makeView({
+        await makeView({
             serverData,
             mockRPC: (_, args) => {
                 assert.deepEqual(args.kwargs.views, [[false, "toy"]]);
@@ -1160,13 +1206,16 @@ QUnit.module("Views", (hooks) => {
             resModel: "animal",
             type: "toy_imp",
         });
-        assert.hasClass(view.el, "o_toy_view_imp");
-        assert.strictEqual(view.el.innerText, "Arch content (id=false)");
+        assert.containsOnce(target, ".o_toy_view_imp");
+        assert.strictEqual(
+            target.querySelector(".o_toy_view_imp").innerText,
+            "Arch content (id=false)"
+        );
     });
 
     QUnit.test("rendering with loaded arch attribute 'js_class'", async function (assert) {
         assert.expect(4);
-        const view = await makeView({
+        await makeView({
             serverData,
             mockRPC: (_, args) => {
                 assert.deepEqual(args.kwargs.views, [[2, "toy"]]);
@@ -1180,13 +1229,16 @@ QUnit.module("Views", (hooks) => {
             type: "toy",
             viewId: 2,
         });
-        assert.hasClass(view.el, "o_toy_view_imp");
-        assert.strictEqual(view.el.innerText, "Arch content (id=2)");
+        assert.containsOnce(target, ".o_toy_view_imp");
+        assert.strictEqual(
+            target.querySelector(".o_toy_view_imp").innerText,
+            "Arch content (id=2)"
+        );
     });
 
     QUnit.test("rendering with given arch attribute 'js_class'", async function (assert) {
         assert.expect(2);
-        const view = await makeView({
+        await makeView({
             serverData,
             mockRPC: () => {
                 throw new Error("no RPC expected");
@@ -1196,8 +1248,11 @@ QUnit.module("Views", (hooks) => {
             arch: `<toy js_class="toy_imp">Specific arch content for specific class</toy>`,
             fields: {},
         });
-        assert.hasClass(view.el, "o_toy_view_imp");
-        assert.strictEqual(view.el.innerText, "Specific arch content for specific class");
+        assert.containsOnce(target, ".o_toy_view_imp");
+        assert.strictEqual(
+            target.querySelector(".o_toy_view_imp").innerText,
+            "Specific arch content for specific class"
+        );
     });
 
     QUnit.test(
@@ -1205,12 +1260,12 @@ QUnit.module("Views", (hooks) => {
         async function (assert) {
             assert.expect(3);
 
-            class ToyView2 extends Component {}
+            class ToyView2 extends LegacyComponent {}
             ToyView2.template = xml`<div class="o_toy_view_2"/>`;
             ToyView2.type = "toy";
             viewRegistry.add("toy_2", ToyView2);
 
-            const view = await makeView({
+            await makeView({
                 serverData,
                 mockRPC: (_, args) => {
                     assert.deepEqual(args.kwargs.views, [[2, "toy"]]);
@@ -1224,7 +1279,7 @@ QUnit.module("Views", (hooks) => {
                 type: "toy_2",
                 viewId: 2,
             });
-            assert.hasClass(view.el, "o_toy_view_imp", "jsClass from arch prefered");
+            assert.containsOnce(target, ".o_toy_view_imp", "jsClass from arch prefered");
         }
     );
 
@@ -1233,12 +1288,12 @@ QUnit.module("Views", (hooks) => {
         async function (assert) {
             assert.expect(1);
 
-            class ToyView2 extends Component {}
+            class ToyView2 extends LegacyComponent {}
             ToyView2.template = xml`<div class="o_toy_view_2"/>`;
             ToyView2.type = "toy";
             viewRegistry.add("toy_2", ToyView2);
 
-            const view = await makeView({
+            await makeView({
                 serverData,
                 mockRPC: () => {
                     throw new Error("no RPC expected");
@@ -1248,7 +1303,7 @@ QUnit.module("Views", (hooks) => {
                 arch: `<toy js_class="toy_imp"/>`,
                 fields: {},
             });
-            assert.hasClass(view.el, "o_toy_view_imp", "jsClass from arch prefered");
+            assert.containsOnce(target, ".o_toy_view_imp", "jsClass from arch prefered");
         }
     );
 
@@ -1337,7 +1392,7 @@ QUnit.module("Views", (hooks) => {
         async function (assert) {
             assert.expect(4);
 
-            class ToyView extends Component {
+            class ToyView extends LegacyComponent {
                 setup() {
                     const { context, domain, groupBy, orderBy } = this.props;
                     assert.deepEqual(context, {
@@ -1371,7 +1426,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("non empty prop 'noContentHelp'", async function (assert) {
         assert.expect(1);
 
-        class ToyView extends Component {
+        class ToyView extends LegacyComponent {
             setup() {
                 assert.strictEqual(this.props.info.noContentHelp, "<div>Help</div>");
             }
@@ -1391,7 +1446,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("useSampleModel false by default", async function (assert) {
         assert.expect(1);
 
-        class ToyView extends Component {
+        class ToyView extends LegacyComponent {
             setup() {
                 assert.strictEqual(this.props.useSampleModel, false);
             }
@@ -1406,7 +1461,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("sample='1' on arch", async function (assert) {
         assert.expect(1);
 
-        class ToyView extends Component {
+        class ToyView extends LegacyComponent {
             setup() {
                 assert.strictEqual(this.props.useSampleModel, true);
             }
@@ -1427,7 +1482,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("sample='0' on arch and useSampleModel=true", async function (assert) {
         assert.expect(1);
 
-        class ToyView extends Component {
+        class ToyView extends LegacyComponent {
             setup() {
                 assert.strictEqual(this.props.useSampleModel, true);
             }
@@ -1449,7 +1504,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("sample='1' on arch and useSampleModel=false", async function (assert) {
         assert.expect(1);
 
-        class ToyView extends Component {
+        class ToyView extends LegacyComponent {
             setup() {
                 assert.strictEqual(this.props.useSampleModel, false);
             }
@@ -1471,7 +1526,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("useSampleModel=true", async function (assert) {
         assert.expect(1);
 
-        class ToyView extends Component {
+        class ToyView extends LegacyComponent {
             setup() {
                 assert.strictEqual(this.props.useSampleModel, true);
             }
@@ -1486,7 +1541,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("rendering with given prop", async function (assert) {
         assert.expect(1);
 
-        class ToyView extends Component {
+        class ToyView extends LegacyComponent {
             setup() {
                 assert.strictEqual(this.props.specificProp, "specificProp");
             }
@@ -1508,7 +1563,7 @@ QUnit.module("Views", (hooks) => {
         async function (assert) {
             assert.expect(4);
 
-            class ToyView extends Component {
+            class ToyView extends LegacyComponent {
                 setup() {
                     const { context, domain, groupBy, orderBy } = this.props;
                     assert.deepEqual(context, {
@@ -1545,7 +1600,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("react to prop 'domain' changes", async function (assert) {
         assert.expect(2);
 
-        class ToyView extends Component {
+        class ToyView extends LegacyComponent {
             setup() {
                 owl.onWillStart(() => {
                     assert.deepEqual(this.props.domain, [["type", "=", "carnivorous"]]);
@@ -1561,7 +1616,7 @@ QUnit.module("Views", (hooks) => {
 
         const env = await makeTestEnv({ serverData });
 
-        class Parent extends Component {
+        class Parent extends LegacyComponent {
             setup() {
                 this.state = useState({
                     type: "toy",

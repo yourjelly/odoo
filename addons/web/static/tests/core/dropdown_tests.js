@@ -19,12 +19,12 @@ import {
     patchWithCleanup,
     triggerHotkey,
 } from "../helpers/utils";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { App, Component, xml } = owl;
 const serviceRegistry = registry.category("services");
 
 let env;
-let parent;
 let target;
 
 QUnit.module("Components", ({ beforeEach }) => {
@@ -41,35 +41,41 @@ QUnit.module("Components", ({ beforeEach }) => {
     QUnit.module("Dropdown");
 
     QUnit.test("can be rendered", async (assert) => {
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`<Dropdown/>`;
         Parent.components = { Dropdown };
         env = await makeTestEnv();
-        parent = await mount(Parent, target, { env });
+        await mount(Parent, target, { env });
         assert.strictEqual(
-            parent.el.outerHTML,
+            target.querySelector(".dropdown").outerHTML,
             '<div class="o-dropdown dropdown o-dropdown--no-caret"><button class="dropdown-toggle"></button></div>'
         );
-        assert.containsOnce(parent.el, "button.dropdown-toggle");
-        assert.containsNone(parent.el, ".dropdown-menu");
+        assert.containsOnce(target, "button.dropdown-toggle");
+        assert.containsNone(target, ".dropdown-menu");
     });
 
     QUnit.test("DropdownItem can be rendered as <span/>", async (assert) => {
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`<DropdownItem>coucou</DropdownItem>`;
         Parent.components = { DropdownItem };
         env = await makeTestEnv();
-        parent = await mount(Parent, target, { env });
-        assert.strictEqual(parent.el.outerHTML, '<span class="dropdown-item">coucou</span>');
+        await mount(Parent, target, { env });
+        assert.strictEqual(
+            target.querySelector(".dropdown-item").outerHTML,
+            '<span class="dropdown-item">coucou</span>'
+        );
     });
 
     QUnit.test("DropdownItem (with href prop) can be rendered as <a/>", async (assert) => {
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`<DropdownItem href="'#'">coucou</DropdownItem>`;
         Parent.components = { DropdownItem };
         env = await makeTestEnv();
-        parent = await mount(Parent, target, { env });
-        assert.strictEqual(parent.el.outerHTML, '<a class="dropdown-item" href="#">coucou</a>');
+        await mount(Parent, target, { env });
+        assert.strictEqual(
+            target.querySelector(".dropdown-item").outerHTML,
+            '<a class="dropdown-item" href="#">coucou</a>'
+        );
     });
 
     QUnit.test("DropdownItem: prevents click default with href", async (assert) => {
@@ -85,7 +91,7 @@ QUnit.module("Components", ({ beforeEach }) => {
                 assert.ok(href !== null ? ev.defaultPrevented : !ev.defaultPrevented);
             },
         });
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`
             <Dropdown>
                 <DropdownItem class="'link'" href="'#'"/>
@@ -93,40 +99,40 @@ QUnit.module("Components", ({ beforeEach }) => {
             </Dropdown>`;
         Parent.components = { Dropdown, DropdownItem };
         env = await makeTestEnv();
-        parent = await mount(Parent, target, { env });
+        await mount(Parent, target, { env });
         // The item containing the link class contains an href prop,
         // which will turn it into <a href=> So it must be defaultPrevented
         // The other one not contain any href props, it must not be defaultPrevented,
         // so as not to prevent the background change flow for example
-        await click(parent.el, "button.dropdown-toggle");
-        await click(parent.el, ".link");
-        await click(parent.el, "button.dropdown-toggle");
-        await click(parent.el, ".nolink");
+        await click(target, "button.dropdown-toggle");
+        await click(target, ".link");
+        await click(target, "button.dropdown-toggle");
+        await click(target, ".nolink");
     });
 
     QUnit.test("can be styled", async (assert) => {
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`
         <Dropdown class="'one'" togglerClass="'two'" menuClass="'three'">
             <DropdownItem class="'four'" />
         </Dropdown>`;
         Parent.components = { Dropdown, DropdownItem };
         env = await makeTestEnv();
-        parent = await mount(Parent, target, { env });
-        await click(parent.el, "button.dropdown-toggle");
-        assert.hasClass(parent.el, "dropdown one");
-        const toggler = parent.el.querySelector(".dropdown-toggle");
+        await mount(Parent, target, { env });
+        await click(target, "button.dropdown-toggle");
+        assert.hasClass(target.querySelector(".o-dropdown"), "dropdown one");
+        const toggler = target.querySelector(".dropdown-toggle");
         assert.hasClass(toggler, "two");
-        const menu = parent.el.querySelector(".dropdown-menu");
+        const menu = target.querySelector(".dropdown-menu");
         assert.hasClass(menu, "three");
-        const item = parent.el.querySelector(".dropdown-item");
+        const item = target.querySelector(".dropdown-item");
         assert.hasClass(item, "four");
     });
 
     QUnit.test("menu can be toggled", async (assert) => {
         assert.expect(5);
         const beforeOpenProm = makeDeferred();
-        class Parent extends Component {
+        class Parent extends LegacyComponent {
             constructor() {
                 super(...arguments);
                 this.beforeOpen = () => {
@@ -138,20 +144,20 @@ QUnit.module("Components", ({ beforeEach }) => {
         Parent.template = xml`<Dropdown beforeOpen="beforeOpen"/>`;
         Parent.components = { Dropdown };
         env = await makeTestEnv();
-        parent = await mount(Parent, target, { env });
-        await click(parent.el, "button.dropdown-toggle");
+        await mount(Parent, target, { env });
+        await click(target, "button.dropdown-toggle");
         assert.verifySteps(["beforeOpen"]);
-        assert.containsNone(parent.el, ".dropdown-menu");
+        assert.containsNone(target, ".dropdown-menu");
         beforeOpenProm.resolve();
         await nextTick();
-        assert.containsOnce(parent.el, ".dropdown-menu");
-        await click(parent.el, "button.dropdown-toggle");
-        assert.containsNone(parent.el, ".dropdown-menu");
+        assert.containsOnce(target, ".dropdown-menu");
+        await click(target, "button.dropdown-toggle");
+        assert.containsNone(target, ".dropdown-menu");
     });
 
     QUnit.test("initial open state can be true", async (assert) => {
         assert.expect(3);
-        class Parent extends Component {
+        class Parent extends LegacyComponent {
             constructor() {
                 super(...arguments);
                 this.beforeOpen = () => {
@@ -162,13 +168,13 @@ QUnit.module("Components", ({ beforeEach }) => {
         Parent.template = xml`<Dropdown startOpen="true" beforeOpen="beforeOpen"/>`;
         Parent.components = { Dropdown };
         env = await makeTestEnv();
-        parent = await mount(Parent, target, { env });
+        await mount(Parent, target, { env });
         assert.verifySteps(["beforeOpen"]);
-        assert.containsOnce(parent.el, ".dropdown-menu");
+        assert.containsOnce(target, ".dropdown-menu");
     });
 
     QUnit.test("close on outside click", async (assert) => {
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`
         <div>
           <div class="outside">outside</div>
@@ -177,15 +183,15 @@ QUnit.module("Components", ({ beforeEach }) => {
       `;
         Parent.components = { Dropdown };
         env = await makeTestEnv();
-        parent = await mount(Parent, target, { env });
-        await click(parent.el, "button.dropdown-toggle");
-        assert.containsOnce(parent.el, ".dropdown-menu");
-        await click(parent.el, "div.outside");
-        assert.containsNone(parent.el, ".dropdown-menu");
+        await mount(Parent, target, { env });
+        await click(target, "button.dropdown-toggle");
+        assert.containsOnce(target, ".dropdown-menu");
+        await click(target, "div.outside");
+        assert.containsNone(target, ".dropdown-menu");
     });
 
     QUnit.test("close on item selection", async (assert) => {
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`
         <Dropdown>
             <DropdownItem/>
@@ -193,14 +199,14 @@ QUnit.module("Components", ({ beforeEach }) => {
       `;
         Parent.components = { Dropdown, DropdownItem };
         env = await makeTestEnv();
-        parent = await mount(Parent, target, { env });
-        await click(parent.el, "button.dropdown-toggle");
-        await click(parent.el, ".dropdown-menu .dropdown-item");
-        assert.containsNone(parent.el, ".dropdown-menu");
+        await mount(Parent, target, { env });
+        await click(target, "button.dropdown-toggle");
+        await click(target, ".dropdown-menu .dropdown-item");
+        assert.containsNone(target, ".dropdown-menu");
     });
 
     QUnit.test("payload received on item selection", async (assert) => {
-        class Parent extends Component {
+        class Parent extends LegacyComponent {
             onItemSelected(value) {
                 assert.equal(value, 42);
             }
@@ -212,13 +218,13 @@ QUnit.module("Components", ({ beforeEach }) => {
       `;
         Parent.components = { Dropdown, DropdownItem };
         env = await makeTestEnv();
-        parent = await mount(Parent, target, { env });
-        await click(parent.el, "button.dropdown-toggle");
-        await click(parent.el, ".dropdown-menu .dropdown-item");
+        await mount(Parent, target, { env });
+        await click(target, "button.dropdown-toggle");
+        await click(target, ".dropdown-menu .dropdown-item");
     });
 
     QUnit.test("multi-level dropdown: can be rendered and toggled", async (assert) => {
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`
         <Dropdown>
             <Dropdown>
@@ -228,15 +234,15 @@ QUnit.module("Components", ({ beforeEach }) => {
       `;
         Parent.components = { Dropdown };
         env = await makeTestEnv();
-        parent = await mount(Parent, target, { env });
-        await click(parent.el, "button.dropdown-toggle:last-child");
-        await mouseEnter(parent.el, "button.dropdown-toggle:last-child");
-        await mouseEnter(parent.el, "button.dropdown-toggle:last-child");
-        assert.containsN(parent.el, ".dropdown-menu", 3);
+        await mount(Parent, target, { env });
+        await click(target, "button.dropdown-toggle:last-child");
+        await mouseEnter(target, "button.dropdown-toggle:last-child");
+        await mouseEnter(target, "button.dropdown-toggle:last-child");
+        assert.containsN(target, ".dropdown-menu", 3);
     });
 
     QUnit.test("multi-level dropdown: initial open state can be true", async (assert) => {
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`
         <Dropdown startOpen="true">
             <Dropdown startOpen="true">
@@ -246,12 +252,12 @@ QUnit.module("Components", ({ beforeEach }) => {
       `;
         Parent.components = { Dropdown };
         env = await makeTestEnv();
-        parent = await mount(Parent, target, { env });
-        assert.containsN(parent.el, ".dropdown-menu", 3);
+        await mount(Parent, target, { env });
+        assert.containsN(target, ".dropdown-menu", 3);
     });
 
     QUnit.test("multi-level dropdown: close on outside click", async (assert) => {
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`
         <div>
           <div class="outside">outside</div>
@@ -264,17 +270,17 @@ QUnit.module("Components", ({ beforeEach }) => {
       `;
         Parent.components = { Dropdown };
         env = await makeTestEnv();
-        parent = await mount(Parent, target, { env });
-        await click(parent.el, "button.dropdown-toggle:last-child");
-        await mouseEnter(parent.el, "button.dropdown-toggle:last-child");
-        await mouseEnter(parent.el, "button.dropdown-toggle:last-child");
-        assert.containsN(parent.el, ".dropdown-menu", 3);
-        await click(parent.el, "div.outside");
-        assert.containsNone(parent.el, ".dropdown-menu");
+        await mount(Parent, target, { env });
+        await click(target, "button.dropdown-toggle:last-child");
+        await mouseEnter(target, "button.dropdown-toggle:last-child");
+        await mouseEnter(target, "button.dropdown-toggle:last-child");
+        assert.containsN(target, ".dropdown-menu", 3);
+        await click(target, "div.outside");
+        assert.containsNone(target, ".dropdown-menu");
     });
 
     QUnit.test("multi-level dropdown: close on item selection", async (assert) => {
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`
         <Dropdown>
             <Dropdown>
@@ -284,22 +290,19 @@ QUnit.module("Components", ({ beforeEach }) => {
       `;
         Parent.components = { Dropdown, DropdownItem };
         env = await makeTestEnv();
-        parent = await mount(Parent, target, { env });
-        await click(parent.el, "button.dropdown-toggle:last-child");
-        await mouseEnter(parent.el, "button.dropdown-toggle:last-child");
-        assert.containsN(parent.el, ".dropdown-menu", 2);
-        assert.containsN(parent.el, ".dropdown-item", 2);
-        assert.containsOnce(
-            parent.el,
-            ".dropdown-menu > .dropdown > .dropdown-toggle.dropdown-item"
-        );
-        assert.containsOnce(parent.el, ".dropdown-menu > .dropdown-item");
-        await click(parent.el, ".dropdown-menu > .dropdown-item");
-        assert.containsNone(parent.el, ".dropdown-menu");
+        await mount(Parent, target, { env });
+        await click(target, "button.dropdown-toggle:last-child");
+        await mouseEnter(target, "button.dropdown-toggle:last-child");
+        assert.containsN(target, ".dropdown-menu", 2);
+        assert.containsN(target, ".dropdown-item", 2);
+        assert.containsOnce(target, ".dropdown-menu > .dropdown > .dropdown-toggle.dropdown-item");
+        assert.containsOnce(target, ".dropdown-menu > .dropdown-item");
+        await click(target, ".dropdown-menu > .dropdown-item");
+        assert.containsNone(target, ".dropdown-menu");
     });
 
     QUnit.test("multi-level dropdown: parent closing modes on item selection", async (assert) => {
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`
         <Dropdown>
             <Dropdown>
@@ -312,34 +315,34 @@ QUnit.module("Components", ({ beforeEach }) => {
       `;
         Parent.components = { Dropdown, DropdownItem };
         env = await makeTestEnv();
-        parent = await mount(Parent, target, { env });
+        await mount(Parent, target, { env });
         // Open the 2-level dropdowns
-        await click(parent.el, "button.dropdown-toggle:last-child");
-        await mouseEnter(parent.el, "button.dropdown-toggle:last-child");
-        assert.containsN(parent.el, ".dropdown-menu", 2);
+        await click(target, "button.dropdown-toggle:last-child");
+        await mouseEnter(target, "button.dropdown-toggle:last-child");
+        assert.containsN(target, ".dropdown-menu", 2);
         // Select item (parentClosingMode=none)
-        await click(parent.el, ".item1");
-        assert.containsN(parent.el, ".dropdown-menu", 2);
+        await click(target, ".item1");
+        assert.containsN(target, ".dropdown-menu", 2);
         // Select item (parentClosingMode=closest)
-        await click(parent.el, ".item2");
-        assert.containsN(parent.el, ".dropdown-menu", 1);
+        await click(target, ".item2");
+        assert.containsN(target, ".dropdown-menu", 1);
         // Reopen second level dropdown
-        await mouseEnter(parent.el, "button.dropdown-toggle:last-child");
-        assert.containsN(parent.el, ".dropdown-menu", 2);
+        await mouseEnter(target, "button.dropdown-toggle:last-child");
+        assert.containsN(target, ".dropdown-menu", 2);
         // Select item (parentClosingMode=all)
-        await click(parent.el, ".item3");
-        assert.containsNone(parent.el, ".dropdown-menu");
+        await click(target, ".item3");
+        assert.containsNone(target, ".dropdown-menu");
         // Reopen the 2-level dropdowns
-        await click(parent.el, "button.dropdown-toggle:last-child");
-        await mouseEnter(parent.el, "button.dropdown-toggle:last-child");
-        assert.containsN(parent.el, ".dropdown-menu", 2);
+        await click(target, "button.dropdown-toggle:last-child");
+        await mouseEnter(target, "button.dropdown-toggle:last-child");
+        assert.containsN(target, ".dropdown-menu", 2);
         // Select item (default should be parentClosingMode=all)
-        await click(parent.el, ".item4");
-        assert.containsNone(parent.el, ".dropdown-menu");
+        await click(target, ".item4");
+        assert.containsNone(target, ".dropdown-menu");
     });
 
     QUnit.test("multi-level dropdown: recursive template can be rendered", async (assert) => {
-        class Parent extends Component {
+        class Parent extends LegacyComponent {
             setup() {
                 this.name = "foo";
                 this.items = [
@@ -399,9 +402,9 @@ QUnit.module("Components", ({ beforeEach }) => {
                 </t>
             </Dropdown>`
         );
-        parent = await app.mount(target);
+        await app.mount(target);
         assert.deepEqual(
-            [...parent.el.querySelectorAll("button,.dropdown-menu > .dropdown-item")].map(
+            [...target.querySelectorAll("button,.dropdown-menu > .dropdown-item")].map(
                 (el) => el.textContent
             ),
             [
@@ -427,7 +430,7 @@ QUnit.module("Components", ({ beforeEach }) => {
         async (assert) => {
             assert.expect(13);
             const beforeOpenProm = makeDeferred();
-            class Parent extends Component {
+            class Parent extends LegacyComponent {
                 constructor() {
                     super(...arguments);
                     this.beforeOpen = () => {
@@ -446,46 +449,46 @@ QUnit.module("Components", ({ beforeEach }) => {
       `;
             Parent.components = { Dropdown };
             env = await makeTestEnv();
-            parent = await mount(Parent, target, { env });
+            await mount(Parent, target, { env });
             // Click on ONE
-            const one = parent.el.querySelector(".one");
+            const one = target.querySelector(".one");
             await click(one, "button");
             assert.verifySteps([]);
-            assert.containsOnce(parent.el, ".dropdown-menu");
+            assert.containsOnce(target, ".dropdown-menu");
             assert.containsOnce(one, ".dropdown-menu");
             // Hover on TWO
-            const two = parent.el.querySelector(".two");
+            const two = target.querySelector(".two");
             two.querySelector("button").dispatchEvent(new MouseEvent("mouseenter"));
             assert.verifySteps(["beforeOpen"]);
             await nextTick();
-            assert.containsOnce(parent.el, ".dropdown-menu");
+            assert.containsOnce(target, ".dropdown-menu");
             assert.containsNone(two, ".dropdown-menu");
             beforeOpenProm.resolve();
             await nextTick();
-            assert.containsOnce(parent.el, ".dropdown-menu");
+            assert.containsOnce(target, ".dropdown-menu");
             assert.containsOnce(two, ".dropdown-menu");
             // Hover on THREE
-            const three = parent.el.querySelector(".three");
+            const three = target.querySelector(".three");
             three.querySelector("button").dispatchEvent(new MouseEvent("mouseenter"));
             await nextTick();
-            assert.containsOnce(parent.el, ".dropdown-menu");
+            assert.containsOnce(target, ".dropdown-menu");
             assert.containsOnce(three, ".dropdown-menu");
             // Click on OUTSIDE
-            await click(parent.el, "div.outside");
-            assert.containsNone(parent.el, ".dropdown-menu");
+            await click(target, "div.outside");
+            assert.containsNone(target, ".dropdown-menu");
             // Hover on ONE, TWO, THREE
             one.querySelector("button").dispatchEvent(new MouseEvent("mouseenter"));
             two.querySelector("button").dispatchEvent(new MouseEvent("mouseenter"));
             three.querySelector("button").dispatchEvent(new MouseEvent("mouseenter"));
             await nextTick();
-            assert.containsNone(parent.el, ".dropdown-menu");
+            assert.containsNone(target, ".dropdown-menu");
         }
     );
 
     QUnit.test(
         "siblings dropdowns: when non-sibling is open, other must not be toggled on mouse-enter",
         async (assert) => {
-            class Parent extends Component {}
+            class Parent extends LegacyComponent {}
             Parent.template = xml`
         <div>
           <div><Dropdown class="'foo'" /></div>
@@ -495,15 +498,15 @@ QUnit.module("Components", ({ beforeEach }) => {
       `;
             Parent.components = { Dropdown };
             env = await makeTestEnv();
-            parent = await mount(Parent, target, { env });
+            await mount(Parent, target, { env });
             // Click on FOO
-            await click(parent.el, ".foo button");
-            assert.containsOnce(parent.el, ".dropdown-menu");
+            await click(target, ".foo button");
+            assert.containsOnce(target, ".dropdown-menu");
             // Hover on BAR1
-            const bar1 = parent.el.querySelector(".bar1");
+            const bar1 = target.querySelector(".bar1");
             bar1.querySelector("button").dispatchEvent(new MouseEvent("mouseenter"));
             await nextTick();
-            assert.containsOnce(parent.el, ".dropdown-menu");
+            assert.containsOnce(target, ".dropdown-menu");
             assert.containsNone(bar1, ".dropdown-menu");
         }
     );
@@ -511,7 +514,7 @@ QUnit.module("Components", ({ beforeEach }) => {
     QUnit.test(
         "siblings dropdowns: when one is open, then non-sibling toggled, siblings must not be toggled on mouse-enter",
         async (assert) => {
-            class Parent extends Component {}
+            class Parent extends LegacyComponent {}
             Parent.template = xml`
         <div>
           <div><Dropdown class="'foo'" /></div>
@@ -521,25 +524,25 @@ QUnit.module("Components", ({ beforeEach }) => {
       `;
             Parent.components = { Dropdown };
             env = await makeTestEnv();
-            parent = await mount(Parent, target, { env });
+            await mount(Parent, target, { env });
             // Click on BAR1
-            await click(parent.el, ".bar1 button");
-            assert.containsOnce(parent.el, ".dropdown-menu");
+            await click(target, ".bar1 button");
+            assert.containsOnce(target, ".dropdown-menu");
             // Click on FOO
-            await click(parent.el, ".foo button");
-            assert.containsOnce(parent.el, ".dropdown-menu");
+            await click(target, ".foo button");
+            assert.containsOnce(target, ".dropdown-menu");
             // Hover on BAR1
-            const bar1 = parent.el.querySelector(".bar1");
+            const bar1 = target.querySelector(".bar1");
             bar1.querySelector("button").dispatchEvent(new MouseEvent("mouseenter"));
             await nextTick();
-            assert.containsOnce(parent.el, ".dropdown-menu");
+            assert.containsOnce(target, ".dropdown-menu");
             assert.containsNone(bar1, ".dropdown-menu");
         }
     );
 
     QUnit.test("siblings dropdowns with manualOnly props", async (assert) => {
         assert.expect(7);
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`
         <div>
           <Dropdown class="'one'" manualOnly="true"/>
@@ -549,31 +552,31 @@ QUnit.module("Components", ({ beforeEach }) => {
       `;
         Parent.components = { Dropdown };
         env = await makeTestEnv();
-        parent = await mount(Parent, target, { env });
+        await mount(Parent, target, { env });
         // Click on one
-        await click(parent.el, ".one button");
-        assert.containsOnce(parent.el, ".dropdown-menu");
+        await click(target, ".one button");
+        assert.containsOnce(target, ".dropdown-menu");
         // Click on two
-        await click(parent.el, ".two button");
-        assert.containsN(parent.el, ".dropdown-menu", 2);
+        await click(target, ".two button");
+        assert.containsN(target, ".dropdown-menu", 2);
         // Click on one again
-        await click(parent.el, ".one button");
-        assert.containsOnce(parent.el, ".dropdown-menu");
-        assert.containsNone(parent.el.querySelector(".one"), ".dropdown-menu");
+        await click(target, ".one button");
+        assert.containsOnce(target, ".dropdown-menu");
+        assert.containsNone(target.querySelector(".one"), ".dropdown-menu");
         // Hover on one
-        const one = parent.el.querySelector(".one");
+        const one = target.querySelector(".one");
         one.querySelector("button").dispatchEvent(new MouseEvent("mouseenter"));
         await nextTick();
-        assert.containsOnce(parent.el, ".dropdown-menu");
-        assert.containsNone(parent.el.querySelector(".one"), ".dropdown-menu");
+        assert.containsOnce(target, ".dropdown-menu");
+        assert.containsNone(target.querySelector(".one"), ".dropdown-menu");
         // Click outside
-        await click(parent.el, "div.outside");
-        assert.containsOnce(parent.el, ".dropdown-menu");
+        await click(target, "div.outside");
+        assert.containsOnce(target, ".dropdown-menu");
     });
 
     QUnit.test("dropdowns keynav", async (assert) => {
         assert.expect(26);
-        class Parent extends Component {
+        class Parent extends LegacyComponent {
             onItemSelected(value) {
                 assert.step(value.toString());
             }
@@ -587,20 +590,20 @@ QUnit.module("Components", ({ beforeEach }) => {
       `;
         Parent.components = { Dropdown, DropdownItem };
         env = await makeTestEnv();
-        parent = await mount(Parent, target, { env });
-        assert.containsNone(parent.el, ".dropdown-menu", "menu is closed at start");
+        await mount(Parent, target, { env });
+        assert.containsNone(target, ".dropdown-menu", "menu is closed at start");
 
         triggerHotkey("m", true);
         await nextTick();
         assert.containsOnce(
-            parent.el,
+            target,
             ".dropdown-menu",
             "menu is opened after pressing the toggler hotkey"
         );
 
         // Navigate with arrows
         assert.containsNone(
-            parent.el,
+            target,
             ".dropdown-menu > .focus",
             "menu should not have any active items"
         );
@@ -626,19 +629,19 @@ QUnit.module("Components", ({ beforeEach }) => {
         for (const step of scenarioSteps) {
             triggerHotkey(step.hotkey);
             await nextTick();
-            assert.hasClass(parent.el.querySelector(".dropdown-menu > .focus"), step.expected);
+            assert.hasClass(target.querySelector(".dropdown-menu > .focus"), step.expected);
         }
 
         // Select last one activated in previous scenario (item1)
         triggerHotkey("enter");
         await nextTick();
-        assert.containsNone(parent.el, ".dropdown-menu", "menu is closed after item selection");
+        assert.containsNone(target, ".dropdown-menu", "menu is closed after item selection");
 
         // Reopen dropdown
         triggerHotkey("m", true);
         await nextTick();
         assert.containsOnce(
-            parent.el,
+            target,
             ".dropdown-menu",
             "menu is opened after pressing the toggler hotkey"
         );
@@ -646,13 +649,13 @@ QUnit.module("Components", ({ beforeEach }) => {
         // Select second item through data-hotkey attribute
         triggerHotkey("2", true);
         await nextTick();
-        assert.containsNone(parent.el, ".dropdown-menu", "menu is closed after item selection");
+        assert.containsNone(target, ".dropdown-menu", "menu is closed after item selection");
 
         // Reopen dropdown
         triggerHotkey("m", true);
         await nextTick();
         assert.containsOnce(
-            parent.el,
+            target,
             ".dropdown-menu",
             "menu is opened after pressing the toggler hotkey"
         );
@@ -660,13 +663,13 @@ QUnit.module("Components", ({ beforeEach }) => {
         // Close dropdown with keynav
         triggerHotkey("escape");
         await nextTick();
-        assert.containsNone(parent.el, ".dropdown-menu", "menu is closed after item selection");
+        assert.containsNone(target, ".dropdown-menu", "menu is closed after item selection");
 
         assert.verifySteps(["1", "2"], "items should have been selected in this order");
     });
 
     QUnit.test("dropdowns keynav is not impacted by bootstrap", async (assert) => {
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.components = { Dropdown };
         Parent.template = xml`
             <Dropdown startOpen="true">
@@ -697,7 +700,7 @@ QUnit.module("Components", ({ beforeEach }) => {
     });
 
     QUnit.test("props toggler='parent'", async (assert) => {
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`
             <div>
                 <div class="my_custom_toggler">
@@ -711,18 +714,18 @@ QUnit.module("Components", ({ beforeEach }) => {
 
         Parent.components = { Dropdown, DropdownItem };
         env = await makeTestEnv();
-        parent = await mount(Parent, target, { env });
-        assert.containsOnce(parent, ".dropdown");
-        assert.containsNone(parent, ".dropdown .dropdown-menu");
-        assert.containsNone(parent, ".dropdown button.dropdown-toggle");
-        await click(parent.el, ".my_custom_toggler");
-        assert.containsOnce(parent, ".dropdown .dropdown-menu");
-        assert.containsN(parent, ".dropdown .dropdown-menu .dropdown-item", 2);
+        await mount(Parent, target, { env });
+        assert.containsOnce(target, ".dropdown");
+        assert.containsNone(target, ".dropdown .dropdown-menu");
+        assert.containsNone(target, ".dropdown button.dropdown-toggle");
+        await click(target, ".my_custom_toggler");
+        assert.containsOnce(target, ".dropdown .dropdown-menu");
+        assert.containsN(target, ".dropdown .dropdown-menu .dropdown-item", 2);
     });
 
     QUnit.test("multi-level dropdown: keynav", async (assert) => {
         assert.expect(125);
-        class Parent extends Component {
+        class Parent extends LegacyComponent {
             onItemSelected(value) {
                 assert.step(value);
             }
@@ -743,8 +746,8 @@ QUnit.module("Components", ({ beforeEach }) => {
         `;
         Parent.components = { Dropdown, DropdownItem };
         env = await makeTestEnv();
-        parent = await mount(Parent, target, { env });
-        assert.containsNone(parent.el, ".dropdown-menu", "menus are closed at start");
+        await mount(Parent, target, { env });
+        assert.containsNone(target, ".dropdown-menu", "menus are closed at start");
 
         // Highlighting and selecting items
         const scenarioSteps = [
@@ -802,7 +805,7 @@ QUnit.module("Components", ({ beforeEach }) => {
             await nextTick();
             if (step.highlighted !== undefined) {
                 let index = 0;
-                const activeElements = [...parent.el.querySelectorAll(".focus")].map((el) =>
+                const activeElements = [...target.querySelectorAll(".focus")].map((el) =>
                     el.classList.contains("dropdown-toggle") ? el.parentElement : el
                 );
                 assert.ok(
@@ -822,7 +825,7 @@ QUnit.module("Components", ({ beforeEach }) => {
 
     QUnit.test("multi-level dropdown: keynav when rtl direction", async (assert) => {
         assert.expect(10);
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`
             <Dropdown class="'first'" hotkey="'1'">
                 <DropdownItem class="'first-first'">O</DropdownItem>
@@ -834,8 +837,8 @@ QUnit.module("Components", ({ beforeEach }) => {
         Parent.components = { Dropdown, DropdownItem };
         serviceRegistry.add("localization", makeFakeLocalizationService({ direction: "rtl" }));
         env = await makeTestEnv();
-        parent = await mount(Parent, target, { env });
-        assert.containsNone(parent.el, ".dropdown-menu", "menus are closed at start");
+        await mount(Parent, target, { env });
+        assert.containsNone(target, ".dropdown-menu", "menus are closed at start");
 
         // Highlighting and selecting items
         const scenarioSteps = [
@@ -851,7 +854,7 @@ QUnit.module("Components", ({ beforeEach }) => {
             await nextTick();
             if (step.highlighted !== undefined) {
                 let index = 0;
-                const activeElements = [...parent.el.querySelectorAll(".focus")].map((el) =>
+                const activeElements = [...target.querySelectorAll(".focus")].map((el) =>
                     el.classList.contains("dropdown-toggle") ? el.parentElement : el
                 );
                 assert.ok(
@@ -869,7 +872,7 @@ QUnit.module("Components", ({ beforeEach }) => {
         "multi-level dropdown: mouseentering a dropdown item should close any subdropdown",
         async (assert) => {
             assert.expect(4);
-            class Parent extends Component {}
+            class Parent extends LegacyComponent {}
             Parent.template = xml`
                 <Dropdown togglerClass="'main'">
                     <Dropdown togglerClass="'sub'" />
@@ -878,26 +881,26 @@ QUnit.module("Components", ({ beforeEach }) => {
             `;
             Parent.components = { Dropdown, DropdownItem };
             env = await makeTestEnv();
-            parent = await mount(Parent, target, { env });
-            assert.containsNone(parent.el, ".dropdown-menu", "menus are closed at start");
+            await mount(Parent, target, { env });
+            assert.containsNone(target, ".dropdown-menu", "menus are closed at start");
 
             // Open main dropdown
-            await click(parent.el, ".main");
-            assert.containsOnce(parent.el, ".dropdown-menu", "1st menu is opened");
+            await click(target, ".main");
+            assert.containsOnce(target, ".dropdown-menu", "1st menu is opened");
 
             // Mouse enter sub dropdown
-            await mouseEnter(parent.el, ".sub");
-            assert.containsN(parent.el, ".dropdown-menu", 2, "all menus are opened");
+            await mouseEnter(target, ".sub");
+            assert.containsN(target, ".dropdown-menu", 2, "all menus are opened");
 
             // Mouse enter the adjacent dropdown item
-            await mouseEnter(parent.el, ".item");
-            assert.containsOnce(parent.el, ".dropdown-menu", "only 1st menu is opened");
+            await mouseEnter(target, ".item");
+            assert.containsOnce(target, ".dropdown-menu", "only 1st menu is opened");
         }
     );
 
     QUnit.test("multi-level dropdown: unsubscribe all keynav when root close", async (assert) => {
         assert.expect(14);
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`
             <Dropdown togglerClass="'first'">
                 <Dropdown togglerClass="'second'">
@@ -918,32 +921,32 @@ QUnit.module("Components", ({ beforeEach }) => {
                 };
             },
         });
-        parent = await mount(Parent, target, { env });
-        assert.containsNone(parent.el, ".dropdown-menu", "menus are closed at start");
+        await mount(Parent, target, { env });
+        assert.containsNone(target, ".dropdown-menu", "menus are closed at start");
         assert.strictEqual(hotkeyRegistrationsCount, 0, "no hotkey registered");
 
         // Open dropdowns one by one
-        await click(parent.el, ".first");
-        assert.containsOnce(parent.el, ".dropdown-menu", "1st menu is opened");
+        await click(target, ".first");
+        assert.containsOnce(target, ".dropdown-menu", "1st menu is opened");
         assert.strictEqual(hotkeyRegistrationsCount, 10, "1st menu hotkeys registered");
 
-        await mouseEnter(parent.el, ".second");
-        assert.containsN(parent.el, ".dropdown-menu", 2, "2nd menu is also opened");
+        await mouseEnter(target, ".second");
+        assert.containsN(target, ".dropdown-menu", 2, "2nd menu is also opened");
         assert.strictEqual(hotkeyRegistrationsCount, 20, "2nd menu hotkeys also registered");
 
-        await mouseEnter(parent.el, ".third");
-        assert.containsN(parent.el, ".dropdown-menu", 3, "3rd menu is also opened");
+        await mouseEnter(target, ".third");
+        assert.containsN(target, ".dropdown-menu", 3, "3rd menu is also opened");
         assert.strictEqual(hotkeyRegistrationsCount, 30, "3rd menu hotkeys also registered");
 
         // Close third
         triggerHotkey("escape");
         await nextTick();
-        assert.containsN(parent.el, ".dropdown-menu", 2, "two menus still opened");
+        assert.containsN(target, ".dropdown-menu", 2, "two menus still opened");
         assert.strictEqual(hotkeyRegistrationsCount, 20, "two menus hotkeys registered");
 
         // Reopen second
-        await mouseEnter(parent.el, ".third");
-        assert.containsN(parent.el, ".dropdown-menu", 3, "3rd menu is also opened");
+        await mouseEnter(target, ".third");
+        assert.containsN(target, ".dropdown-menu", 3, "3rd menu is also opened");
         assert.strictEqual(hotkeyRegistrationsCount, 30, "3rd menu hotkeys also registered");
 
         // Close third, second and first
@@ -953,21 +956,21 @@ QUnit.module("Components", ({ beforeEach }) => {
         await nextTick();
         triggerHotkey("escape");
         await nextTick();
-        assert.containsNone(parent.el, ".dropdown-menu", "all menus are now closed");
+        assert.containsNone(target, ".dropdown-menu", "all menus are now closed");
         assert.strictEqual(hotkeyRegistrationsCount, 0, "no hotkey registration left");
     });
 
     QUnit.test("Dropdown with a tooltip", async (assert) => {
         assert.expect(1);
 
-        class Parent extends Component {}
+        class Parent extends LegacyComponent {}
         Parent.template = xml`<Dropdown tooltip="'My tooltip'"></Dropdown>`;
         Parent.components = { Dropdown };
 
         env = await makeTestEnv();
-        parent = await mount(Parent, target, { env });
+        await mount(Parent, target, { env });
         assert.strictEqual(
-            parent.el.querySelector("button.dropdown-toggle").dataset.tooltip,
+            target.querySelector("button.dropdown-toggle").dataset.tooltip,
             "My tooltip"
         );
     });

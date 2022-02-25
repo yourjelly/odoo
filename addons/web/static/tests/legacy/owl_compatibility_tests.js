@@ -12,12 +12,14 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
     } = require('web.OwlCompatibility');
     const testUtils = require('web.test_utils');
     const Widget = require('web.Widget');
+    const { LegacyComponent } = require("@web/legacy/legacy_component");
 
     const makeTestPromise = testUtils.makeTestPromise;
     const nextTick = testUtils.nextTick;
     const addMockEnvironmentOwl = testUtils.mock.addMockEnvironmentOwl;
 
     const { mount, useLogLifeCycle, destroy } = require("@web/../tests/helpers/utils");
+    const { LegacyComponent } = require("@web/legacy/legacy_component");
 
     const {
         Component,
@@ -52,7 +54,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
                     this.$el.text('Hello World!');
                 }
             });
-            class Parent extends Component {
+            class Parent extends LegacyComponent {
                 constructor() {
                     super(...arguments);
                     this.MyWidget = MyWidget;
@@ -82,7 +84,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
                     this.$el.text(`Hello ${this.name}!`);
                 }
             });
-            class Parent extends Component {
+            class Parent extends LegacyComponent {
                 constructor() {
                     super(...arguments);
                     this.MyWidget = MyWidget;
@@ -113,7 +115,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
                     this.$el.text(`${this.a1} ${this.a2}!`);
                 }
             });
-            class Parent extends Component {
+            class Parent extends LegacyComponent {
                 setup() {
                     this.MyWidget = MyWidget;
                     this.error = false;
@@ -157,7 +159,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
                     return [this.props.a1, this.props.a2];
                 }
             }
-            class Parent extends Component {
+            class Parent extends LegacyComponent {
                 constructor() {
                     super(...arguments);
                     this.MyWidget = MyWidget;
@@ -188,7 +190,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
                     this.$el.text(`${this.a1} ${this.a2}!`);
                 }
             });
-            class Parent extends Component {
+            class Parent extends LegacyComponent {
                 constructor() {
                     super(...arguments);
                     this.MyWidget = MyWidget;
@@ -232,7 +234,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
                     this.widget.render();
                 }
             }
-            class Parent extends Component {
+            class Parent extends LegacyComponent {
                 constructor() {
                     super(...arguments);
                     this.MyWidget = MyWidget;
@@ -287,13 +289,13 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
                     this.widget.render();
                 }
             }
-            class AsyncComponent extends Component {
+            class AsyncComponent extends LegacyComponent {
                 setup() {
                     onWillUpdateProps(() => prom);
                 }
             }
             AsyncComponent.template = xml`<div>Hi <t t-esc="props.name"/>!</div>`;
-            class Parent extends Component {
+            class Parent extends LegacyComponent {
                 constructor() {
                     super(...arguments);
                     this.MyWidget = MyWidget;
@@ -342,7 +344,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
                     this._super.apply(this, arguments);
                 },
             });
-            class Parent extends Component {
+            class Parent extends LegacyComponent {
                 constructor() {
                     super(...arguments);
                     this.MyWidget = MyWidget;
@@ -372,9 +374,9 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
                     this.$el.text('widget');
                 },
             });
-            class MyComponent extends Component {}
+            class MyComponent extends LegacyComponent {}
             MyComponent.template = xml`<div>component</div>`;
-            class Parent extends Component {
+            class Parent extends LegacyComponent {
                 constructor() {
                     super(...arguments);
                     this.Children = [MyWidget, MyComponent];
@@ -402,7 +404,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
                     widget = this;
                 },
             });
-            class Parent extends Component {
+            class Parent extends LegacyComponent {
                 constructor() {
                     super(...arguments);
                     this.MyWidget = MyWidget;
@@ -435,7 +437,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
                     return this._rpc({ route: 'some/route', params: { val: 2 } });
                 },
             });
-            class Parent extends Component {
+            class Parent extends LegacyComponent {
                 constructor() {
                     super(...arguments);
                     this.MyWidget = MyWidget;
@@ -478,7 +480,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
                     assert.strictEqual(result, 3);
                 },
             });
-            class Parent extends Component {
+            class Parent extends LegacyComponent {
                 constructor() {
                     super(...arguments);
                     this.MyWidget = MyWidget;
@@ -510,7 +512,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
                     assert.strictEqual(this.getSession().key, 'value');
                 },
             });
-            class Parent extends Component {
+            class Parent extends LegacyComponent {
                 constructor() {
                     super(...arguments);
                     this.MyWidget = MyWidget;
@@ -538,7 +540,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
                     return this.loadViews('some_model', { x: 2 }, [[false, 'list']]);
                 },
             });
-            class Parent extends Component {
+            class Parent extends LegacyComponent {
                 constructor() {
                     super(...arguments);
                     this.MyWidget = MyWidget;
@@ -579,7 +581,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
                     this.$el.text('Hello');
                 },
             });
-            class Parent extends Component {
+            class Parent extends LegacyComponent {
                 constructor() {
                     super(...arguments);
                     this.MyWidget1 = MyWidget1;
@@ -622,7 +624,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
                     this.$el.text('Hi');
                 },
             });
-            class Parent extends Component {
+            class Parent extends LegacyComponent {
                 constructor() {
                     super(...arguments);
                     this.MyWidget = MyWidget;
@@ -695,7 +697,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
                     this.widget.render();
                 }
             }
-            class Parent extends Component {
+            class Parent extends LegacyComponent {
                 constructor() {
                     super(...arguments);
                     this.MyWidget = MyWidget;
@@ -766,7 +768,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
                     this.widget.render();
                 }
             }
-            class Parent extends Component {
+            class Parent extends LegacyComponent {
                 constructor() {
                     super(...arguments);
                     this.MyWidget = MyWidget;
@@ -812,7 +814,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
 
             let component;
             let wrapper;
-            class MyComponent extends Component {
+            class MyComponent extends LegacyComponent {
                 setup() {
                     component = this;
                 }
@@ -838,7 +840,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
         QUnit.test("sub component hooks are correctly called", async function (assert) {
             assert.expect(13);
 
-            class MyComponent extends Component {
+            class MyComponent extends LegacyComponent {
                 setup() {
                     assert.step("setup");
                     onWillStart(() => {
@@ -889,7 +891,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
         QUnit.test("lifecycle with several sub components", async function (assert) {
             assert.expect(21);
 
-            class MyComponent extends Component {
+            class MyComponent extends LegacyComponent {
                 setup() {
                     useLogLifeCycle(assert.step.bind(assert), this.props.id);
                 }
@@ -945,13 +947,13 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
         QUnit.test("lifecycle with several levels of sub components", async function (assert) {
             assert.expect(21);
 
-            class MyChildComponent extends Component {
+            class MyChildComponent extends LegacyComponent {
                 setup() {
                     useLogLifeCycle(assert.step.bind(assert));
                 }
             }
             MyChildComponent.template = xml`<div>child</div>`;
-            class MyComponent extends Component {
+            class MyComponent extends LegacyComponent {
                 setup() {
                     useLogLifeCycle(assert.step.bind(assert));
                 }
@@ -1007,13 +1009,13 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
         QUnit.test("lifecycle mount in fragment", async function (assert) {
             assert.expect(17);
 
-            class MyChildComponent extends Component {
+            class MyChildComponent extends LegacyComponent {
                 setup() {
                     useLogLifeCycle(assert.step.bind(assert));
                 }
             }
             MyChildComponent.template = xml`<div>child</div>`;
-            class MyComponent extends Component {
+            class MyComponent extends LegacyComponent {
                 setup() {
                     useLogLifeCycle(assert.step.bind(assert));
                 }
@@ -1064,13 +1066,13 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
         QUnit.test("lifecycle mount/unmount", async function (assert) {
             assert.expect(37);
 
-            class MyChildComponent extends Component {
+            class MyChildComponent extends LegacyComponent {
                 setup() {
                     useLogLifeCycle(assert.step.bind(assert));
                 }
             }
             MyChildComponent.template = xml`<div>child</div>`;
-            class MyComponent extends Component {
+            class MyComponent extends LegacyComponent {
                 setup() {
                     useLogLifeCycle(assert.step.bind(assert));
                 }
@@ -1139,13 +1141,13 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
         QUnit.test("lifecycle mount/unmount/update", async function (assert) {
             assert.expect(24);
 
-            class MyChildComponent extends Component {
+            class MyChildComponent extends LegacyComponent {
                 setup() {
                     useLogLifeCycle(assert.step.bind(assert));
                 }
             }
             MyChildComponent.template = xml`<div>child <t t-esc="props.text" /></div>`;
-            class MyComponent extends Component {
+            class MyComponent extends LegacyComponent {
                 setup() {
                     useLogLifeCycle(assert.step.bind(assert));
                 }
@@ -1198,13 +1200,13 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
         QUnit.test("lifecycle mount/unmount/update/render", async function (assert) {
             assert.expect(36);
 
-            class MyChildComponent extends Component {
+            class MyChildComponent extends LegacyComponent {
                 setup() {
                     useLogLifeCycle(assert.step.bind(assert));
                 }
             }
             MyChildComponent.template = xml`<div>child <t t-esc="props.text" /></div>`;
-            class MyComponent extends Component {
+            class MyComponent extends LegacyComponent {
                 setup() {
                     useLogLifeCycle(assert.step.bind(assert));
                 }
@@ -1272,7 +1274,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
         QUnit.test("sub component can be updated (in DOM)", async function (assert) {
             assert.expect(2);
 
-            class MyComponent extends Component {}
+            class MyComponent extends LegacyComponent {}
             MyComponent.template = xml`<div>Component <t t-esc="props.val"/></div>`;
             const MyWidget = WidgetAdapter.extend({
                 start() {
@@ -1300,7 +1302,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
         QUnit.test("sub component can be updated (not in DOM)", async function (assert) {
             assert.expect(18);
 
-            class MyComponent extends Component {
+            class MyComponent extends LegacyComponent {
                 setup() {
                     useLogLifeCycle((log) => assert.step(log));
                 }
@@ -1361,7 +1363,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
         QUnit.test("update a destroyed sub component", async function (assert) {
             assert.expect(1);
 
-            class MyComponent extends Component {}
+            class MyComponent extends LegacyComponent {}
             MyComponent.template = xml`<div>Component <t t-esc="props.val"/></div>`;
             const MyWidget = WidgetAdapter.extend({
                 start() {
@@ -1387,7 +1389,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
         QUnit.test("sub component that triggers events", async function (assert) {
             assert.expect(3);
 
-            class WidgetComponent extends Component {}
+            class WidgetComponent extends LegacyComponent {}
             WidgetComponent.template = xml`<div>Component</div>`;
 
             const MyWidget = WidgetAdapter.extend({
@@ -1420,7 +1422,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             let myComponent;
             let widget1;
             let widget2;
-            class WidgetComponent extends Component {}
+            class WidgetComponent extends LegacyComponent {}
             WidgetComponent.template = xml`<div>Component</div>`;
             const MyWidget = WidgetAdapter.extend({
                 custom_events: _.extend({}, Widget.custom_events, {
@@ -1479,7 +1481,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             assert.expect(7);
 
             let leafComponent;
-            class MyComponent extends Component {}
+            class MyComponent extends LegacyComponent {}
             MyComponent.template = xml`<span>Component</span>`;
             const MyWidget = WidgetAdapter.extend({
                 custom_events: {
@@ -1498,7 +1500,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
                     return leafComponent.mount(this.el);
                 },
             });
-            class Parent extends Component {
+            class Parent extends LegacyComponent {
                 constructor() {
                     super(...arguments);
                     this.MyWidget = MyWidget;
@@ -1546,7 +1548,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
                     this.$el.text('Widget');
                 }
             });
-            class MyComponent extends Component {
+            class MyComponent extends LegacyComponent {
                 constructor() {
                     super(...arguments);
                     this.MyWidget = MyWidget;
@@ -1620,7 +1622,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             });
             fieldRegistry.add('pad_like', PadLikeWidget);
 
-            class WidgetComponent extends Component {}
+            class WidgetComponent extends LegacyComponent {}
             WidgetComponent.template = xml`<div>Widget</div>`;
             widgetRegistry.add("widget_comp", WidgetComponent);
 

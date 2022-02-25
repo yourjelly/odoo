@@ -25,7 +25,7 @@ export class MainComponentsContainer extends Component {
 }
 
 MainComponentsContainer.template = xml`
-<div>
+<div class="o-main-components-container">
     <t t-foreach="Components" t-as="C" t-key="C[0]">
         <NotUpdatable>
             <ErrorHandler onError="error => this.handleComponentError(error, C)">

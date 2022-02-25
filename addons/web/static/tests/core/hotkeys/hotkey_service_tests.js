@@ -14,6 +14,7 @@ import {
     patchWithCleanup,
     triggerHotkey,
 } from "../../helpers/utils";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, xml } = owl;
 const serviceRegistry = registry.category("services");
@@ -55,7 +56,7 @@ QUnit.test("register / unregister", async (assert) => {
 QUnit.test("data-hotkey", async (assert) => {
     assert.expect(2);
 
-    class MyComponent extends Component {
+    class MyComponent extends LegacyComponent {
         onClick() {
             assert.step("click");
         }
@@ -86,7 +87,7 @@ QUnit.test("data-hotkey", async (assert) => {
 QUnit.test("invisible data-hotkeys are not enabled. ", async (assert) => {
     assert.expect(3);
 
-    class MyComponent extends Component {
+    class MyComponent extends LegacyComponent {
         onClick() {
             assert.step("click");
         }
@@ -101,13 +102,13 @@ QUnit.test("invisible data-hotkeys are not enabled. ", async (assert) => {
     triggerHotkey(key, true);
     await nextTick();
 
-    const comp = await mount(MyComponent, target, { env });
+    await mount(MyComponent, target, { env });
 
     triggerHotkey(key, true);
     await nextTick();
     assert.verifySteps(["click"]);
 
-    comp.el.querySelector(".myButton").disabled = true;
+    target.querySelector(".myButton").disabled = true;
     triggerHotkey(key, true);
     await nextTick();
     assert.verifySteps([], "shouldn't trigger the hotkey of an invisible button");
@@ -115,7 +116,7 @@ QUnit.test("invisible data-hotkeys are not enabled. ", async (assert) => {
 
 QUnit.test("hook", async (assert) => {
     const key = "q";
-    class TestComponent extends Component {
+    class TestComponent extends LegacyComponent {
         setup() {
             useHotkey(key, () => assert.step(key));
         }
@@ -183,7 +184,7 @@ QUnit.test("the overlay of hotkeys is correctly displayed", async (assert) => {
     const displayHotkeysOverlay = () =>
         window.dispatchEvent(new KeyboardEvent("keydown", { key: "alt", altKey: true }));
 
-    class MyComponent extends Component {
+    class MyComponent extends LegacyComponent {
         onClick(ev) {
             assert.step(`click ${ev.target.dataset.hotkey}`);
         }
@@ -194,9 +195,9 @@ QUnit.test("the overlay of hotkeys is correctly displayed", async (assert) => {
         <button t-on-click="onClick" data-hotkey="c"/>
         </div>
     `;
-    const comp = await mount(MyComponent, target, { env });
+    await mount(MyComponent, target, { env });
     const getOverlays = () =>
-        [...comp.el.querySelectorAll(".o_web_hotkey_overlay")].map((el) => el.innerText);
+        [...target.querySelectorAll(".o_web_hotkey_overlay")].map((el) => el.innerText);
 
     displayHotkeysOverlay();
     assert.deepEqual(getOverlays(), ["B", "C"], "should display the overlay");
@@ -229,7 +230,7 @@ QUnit.test("the overlay of hotkeys is correctly displayed on MacOs", async (asse
     const displayHotkeysOverlay = () =>
         window.dispatchEvent(new KeyboardEvent("keydown", { key: "control", ctrlKey: true }));
 
-    class MyComponent extends Component {
+    class MyComponent extends LegacyComponent {
         onClick(ev) {
             assert.step(`click ${ev.target.dataset.hotkey}`);
         }
@@ -240,9 +241,9 @@ QUnit.test("the overlay of hotkeys is correctly displayed on MacOs", async (asse
         <button t-on-click="onClick" data-hotkey="c"/>
         </div>
     `;
-    const comp = await mount(MyComponent, target, { env });
+    await mount(MyComponent, target, { env });
     const getOverlays = () =>
-        [...comp.el.querySelectorAll(".o_web_hotkey_overlay")].map((el) => el.innerText);
+        [...target.querySelectorAll(".o_web_hotkey_overlay")].map((el) => el.innerText);
 
     displayHotkeysOverlay();
     assert.deepEqual(getOverlays(), ["B", "C"], "should display the overlay");
@@ -310,14 +311,14 @@ QUnit.test("MacOS usability", async (assert) => {
 
 QUnit.test("[data-hotkey] alt is required", async (assert) => {
     const key = "a";
-    class TestComponent extends Component {
+    class TestComponent extends LegacyComponent {
         onClick() {
             assert.step(key);
         }
     }
     TestComponent.template = xml`<div><button t-on-click="onClick" data-hotkey="${key}"/></div>`;
 
-    const comp = await mount(TestComponent, target, { env });
+    await mount(TestComponent, target, { env });
 
     triggerHotkey(key, true);
     await nextTick();
@@ -364,14 +365,14 @@ QUnit.test("registration allows repeat if specified", async (assert) => {
 QUnit.test("[data-hotkey] never allow repeat", async (assert) => {
     assert.expect(3);
     const key = "a";
-    class TestComponent extends Component {
+    class TestComponent extends LegacyComponent {
         onClick() {
             assert.step(key);
         }
     }
     TestComponent.template = xml`<div><button t-on-click="onClick" data-hotkey="${key}"/></div>`;
 
-    const comp = await mount(TestComponent, target, { env });
+    await mount(TestComponent, target, { env });
 
     triggerHotkey(key, true);
     await nextTick();
@@ -416,7 +417,7 @@ QUnit.test("hotkeys evil 👹", async (assert) => {
 QUnit.test("component can register many hotkeys", async (assert) => {
     assert.expect(4);
 
-    class MyComponent extends Component {
+    class MyComponent extends LegacyComponent {
         setup() {
             useHotkey("a", () => assert.step("callback:a"));
             useHotkey("b", () => assert.step("callback:b"));
@@ -439,7 +440,7 @@ QUnit.test("component can register many hotkeys", async (assert) => {
 QUnit.test("many components can register same hotkeys (call order matters)", async (assert) => {
     assert.expect(13);
     const getComp = (name) => {
-        const Comp = class extends Component {
+        const Comp = class extends LegacyComponent {
             setup() {
                 useHotkey("a", () => assert.step(`${name}:a`));
                 useHotkey("b", () => assert.step(`${name}:b`));
@@ -500,7 +501,7 @@ QUnit.test("many components can register same hotkeys (call order matters)", asy
 
 QUnit.test("registrations and elements belong to the correct UI owner", async (assert) => {
     assert.expect(7);
-    class MyComponent1 extends Component {
+    class MyComponent1 extends LegacyComponent {
         setup() {
             useHotkey("a", () => assert.step("MyComponent1 subscription"));
         }
@@ -510,16 +511,16 @@ QUnit.test("registrations and elements belong to the correct UI owner", async (a
     }
     MyComponent1.template = xml`<div><button data-hotkey="b" t-on-click="onClick"/></div>`;
 
-    class MyComponent2 extends Component {
+    class MyComponent2 extends LegacyComponent {
         setup() {
             useHotkey("a", () => assert.step("MyComponent2 subscription"));
-            useActiveElement();
+            useActiveElement("active");
         }
         onClick() {
             assert.step("MyComponent2 [data-hotkey]");
         }
     }
-    MyComponent2.template = xml`<div><button data-hotkey="b" t-on-click="onClick"/></div>`;
+    MyComponent2.template = xml`<div t-ref="active"><button data-hotkey="b" t-on-click="onClick"/></div>`;
 
     await mount(MyComponent1, target, { env });
     triggerHotkey("a");
@@ -554,7 +555,7 @@ QUnit.test("replace the overlayModifier for non-MacOs", async (assert) => {
         overlayModifier: "alt+shift",
     });
 
-    class MyComponent extends Component {
+    class MyComponent extends LegacyComponent {
         onClick() {
             assert.step("click");
         }
@@ -592,7 +593,7 @@ QUnit.test("replace the overlayModifier for MacOs", async (assert) => {
         overlayModifier: "alt+shift",
     });
 
-    class MyComponent extends Component {
+    class MyComponent extends LegacyComponent {
         onClick() {
             assert.step("click");
         }
@@ -618,7 +619,7 @@ QUnit.test("replace the overlayModifier for MacOs", async (assert) => {
 
 QUnit.test("protects editable elements", async (assert) => {
     assert.expect(4);
-    class Comp extends Component {
+    class Comp extends LegacyComponent {
         setup() {
             useHotkey("arrowleft", () => assert.step("called"));
         }
@@ -642,7 +643,7 @@ QUnit.test("protects editable elements", async (assert) => {
 
 QUnit.test("protects editable elements: can bypassEditableProtection", async (assert) => {
     assert.expect(5);
-    class Comp extends Component {
+    class Comp extends LegacyComponent {
         setup() {
             useHotkey("arrowleft", () => assert.step("called"), { bypassEditableProtection: true });
         }

@@ -2,11 +2,13 @@
 
 import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { usePager } from "@web/search/pager_hook";
-import { click } from "../helpers/utils";
+import { click, getFixture } from "../helpers/utils";
 import { makeWithSearch, setupControlPanelServiceRegistry } from "./helpers";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, useState, xml } = owl;
 
+let target;
 let serverData;
 QUnit.module("Search", (hooks) => {
     hooks.beforeEach(async () => {
@@ -21,12 +23,13 @@ QUnit.module("Search", (hooks) => {
             },
         };
         setupControlPanelServiceRegistry();
+        target = getFixture();
     });
 
     QUnit.module("usePager");
 
     QUnit.test("pager is correctly displayed", async (assert) => {
-        class TestComponent extends Component {
+        class TestComponent extends LegacyComponent {
             setup() {
                 usePager(() => ({
                     offset: 0,
@@ -46,19 +49,19 @@ QUnit.module("Search", (hooks) => {
             searchMenuTypes: [],
         });
 
-        assert.containsOnce(comp, ".o_pager");
+        assert.containsOnce(target, ".o_pager");
         assert.strictEqual(
-            comp.el.querySelector(`.o_pager_counter .o_pager_value`).textContent.trim(),
+            target.querySelector(`.o_pager_counter .o_pager_value`).textContent.trim(),
             "1-10"
         );
         assert.strictEqual(
-            comp.el.querySelector(`.o_pager_counter span.o_pager_limit`).textContent.trim(),
+            target.querySelector(`.o_pager_counter span.o_pager_limit`).textContent.trim(),
             "50"
         );
     });
 
     QUnit.test("pager is correctly updated", async (assert) => {
-        class TestComponent extends Component {
+        class TestComponent extends LegacyComponent {
             setup() {
                 this.state = useState({ offset: 0, limit: 10 });
                 usePager(() => ({
@@ -81,13 +84,13 @@ QUnit.module("Search", (hooks) => {
             searchMenuTypes: [],
         });
 
-        assert.containsOnce(comp, ".o_pager");
+        assert.containsOnce(target, ".o_pager");
         assert.strictEqual(
-            comp.el.querySelector(`.o_pager_counter .o_pager_value`).textContent.trim(),
+            target.querySelector(`.o_pager_counter .o_pager_value`).textContent.trim(),
             "1-10"
         );
         assert.strictEqual(
-            comp.el.querySelector(`.o_pager_counter span.o_pager_limit`).textContent.trim(),
+            target.querySelector(`.o_pager_counter span.o_pager_limit`).textContent.trim(),
             "50"
         );
         assert.deepEqual(comp.state, {
@@ -95,15 +98,15 @@ QUnit.module("Search", (hooks) => {
             limit: 10,
         });
 
-        await click(comp.el.querySelector(`.o_pager button.o_pager_next`));
+        await click(target.querySelector(`.o_pager button.o_pager_next`));
 
-        assert.containsOnce(comp, ".o_pager");
+        assert.containsOnce(target, ".o_pager");
         assert.strictEqual(
-            comp.el.querySelector(`.o_pager_counter .o_pager_value`).textContent.trim(),
+            target.querySelector(`.o_pager_counter .o_pager_value`).textContent.trim(),
             "11-20"
         );
         assert.strictEqual(
-            comp.el.querySelector(`.o_pager_counter span.o_pager_limit`).textContent.trim(),
+            target.querySelector(`.o_pager_counter span.o_pager_limit`).textContent.trim(),
             "50"
         );
         assert.deepEqual(comp.state, {
