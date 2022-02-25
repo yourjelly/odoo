@@ -1,10 +1,11 @@
 /** @odoo-module **/
 
 import { usePosition } from "../position/position_hook";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component } = owl;
 
-export class Popover extends Component {
+export class Popover extends LegacyComponent {
     setup() {
         usePosition(this.props.target, {
             margin: 16,

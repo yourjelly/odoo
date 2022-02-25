@@ -6,10 +6,11 @@ import { CustomGroupByItem } from "./custom_group_by_item";
 import { FACET_ICONS, GROUPABLE_TYPES } from "../utils/misc";
 import { sortBy } from "@web/core/utils/arrays";
 import { useBus } from "@web/core/utils/hooks";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component } = owl;
 
-export class GroupByMenu extends Component {
+export class GroupByMenu extends LegacyComponent {
     setup() {
         this.icon = FACET_ICONS.groupBy;
         this.dropdownProps = Object.keys(this.props)

@@ -6,11 +6,12 @@ import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_d
 import { FACET_ICONS } from "../utils/misc";
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component } = owl;
 const favoriteMenuRegistry = registry.category("favoriteMenu");
 
-export class FavoriteMenu extends Component {
+export class FavoriteMenu extends LegacyComponent {
     setup() {
         this.icon = FACET_ICONS.favorite;
         this.dialogService = useService("dialog");

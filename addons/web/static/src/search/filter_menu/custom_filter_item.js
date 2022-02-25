@@ -6,6 +6,7 @@ import { Domain } from "@web/core/domain";
 import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";
 import { _lt } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
+import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, useState } = owl;
 
@@ -104,7 +105,7 @@ const formatField = (field, value, opts = {}) => {
     return format(value, { field, ...opts });
 };
 
-export class CustomFilterItem extends Component {
+export class CustomFilterItem extends LegacyComponent {
     setup() {
         this.conditions = useState([]);
         // Format, filter and sort the fields props

@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { LegacyComponent } from "@web/legacy/legacy_component";
 const { Component, onMounted, onWillStart, onWillUpdateProps, useState } = owl;
 
 /**
@@ -11,7 +12,7 @@ const { Component, onMounted, onWillStart, onWillUpdateProps, useState } = owl;
  * values (categories or ungrouped filters) or groups of values (grouped filters).
  * Its state is directly affected by its model (@see SearchModel).
  */
-export class SearchPanel extends Component {
+export class SearchPanel extends LegacyComponent {
     setup() {
         this.state = useState({
             active: {},
