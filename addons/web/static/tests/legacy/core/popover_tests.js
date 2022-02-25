@@ -5,7 +5,6 @@ odoo.define('web.popover_tests', function (require) {
     const Popover = require('web.Popover');
     const testUtils = require('web.test_utils');
     const { click, mount } = require("@web/../tests/helpers/utils");
-    const { LegacyComponent } = require("@web/legacy/legacy_component");
 
     const { Component, useState, xml } = owl;
 
@@ -15,12 +14,12 @@ odoo.define('web.popover_tests', function (require) {
         QUnit.test('Basic rendering & props', async function (assert) {
             assert.expect(11);
 
-            class SubComponent extends LegacyComponent {}
+            class SubComponent extends Component {}
             SubComponent.template = xml`
                 <div class="o_subcomponent" style="width: 280px;" t-esc="props.text"/>
             `;
 
-            class Parent extends LegacyComponent {
+            class Parent extends Component {
                 constructor() {
                     super(...arguments);
                     this.state = useState({
@@ -144,7 +143,7 @@ odoo.define('web.popover_tests', function (require) {
         QUnit.test('Multiple popovers', async function (assert) {
             assert.expect(9);
 
-            class Parent extends LegacyComponent {}
+            class Parent extends Component {}
             Parent.components = { Popover };
             Parent.template = xml`
                 <div>
@@ -192,7 +191,7 @@ odoo.define('web.popover_tests', function (require) {
         QUnit.test('toggle', async function (assert) {
             assert.expect(4);
 
-            class Parent extends LegacyComponent {}
+            class Parent extends Component {}
             Parent.template = xml`
                 <div>
                     <Popover>
@@ -225,7 +224,7 @@ odoo.define('web.popover_tests', function (require) {
             assert.expect(7);
 
             // Needed to trigger the event from inside the Popover slot.
-            class Content extends LegacyComponent {
+            class Content extends Component {
                 onClick() {
                     this.trigger("o-popover-close");
                 }
@@ -236,7 +235,7 @@ odoo.define('web.popover_tests', function (require) {
                 </button>
             `;
 
-            class Parent extends LegacyComponent {}
+            class Parent extends Component {}
             Parent.components = { Content, Popover };
             Parent.template = xml`
                 <div>

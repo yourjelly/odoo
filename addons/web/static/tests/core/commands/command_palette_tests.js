@@ -18,7 +18,6 @@ import {
     triggerHotkey,
 } from "../../helpers/utils";
 import { editSearchBar } from "./command_service_tests";
-import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, xml } = owl;
 
@@ -27,10 +26,10 @@ let target;
 let testComponent;
 const serviceRegistry = registry.category("services");
 
-class FooterComponent extends LegacyComponent {}
+class FooterComponent extends Component {}
 FooterComponent.template = xml`<span>My footer</span>`;
 
-class TestComponent extends LegacyComponent {
+class TestComponent extends Component {
     get DialogContainer() {
         return registry.category("main_components").get("DialogContainer");
     }
@@ -219,7 +218,7 @@ QUnit.test("add a footer", async (assert) => {
 });
 
 QUnit.test("command with a Custom Component", async (assert) => {
-    class CustomComponent extends LegacyComponent {}
+    class CustomComponent extends Component {}
     CustomComponent.template = xml`
         <div class="o_command_custom">
             <span t-esc="props.name"/>

@@ -4,7 +4,6 @@ import { registry } from "@web/core/registry";
 import { clearRegistryWithCleanup, makeTestEnv } from "../helpers/mock_env";
 import { patch, unpatch } from "@web/core/utils/patch";
 import { getFixture, mount, nextTick } from "../helpers/utils";
-import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, useState, xml } = owl;
 const mainComponentsRegistry = registry.category("main_components");
@@ -22,19 +21,18 @@ QUnit.module("Components", (hooks) => {
     QUnit.test("simple rendering", async function (assert) {
         const env = await makeTestEnv();
 
-        class MainComponentA extends LegacyComponent {}
+        class MainComponentA extends Component {}
         MainComponentA.template = xml`<span>MainComponentA</span>`;
 
-        class MainComponentB extends LegacyComponent {}
+        class MainComponentB extends Component {}
         MainComponentB.template = xml`<span>MainComponentB</span>`;
 
         mainComponentsRegistry.add("MainComponentA", { Component: MainComponentA, props: {} });
         mainComponentsRegistry.add("MainComponentB", { Component: MainComponentB, props: {} });
-        await mount(MainComponentsContainer, target, { env, props: {} });
-        assert.containsOnce(target, "div.o-main-components-container");
+        const container = await mount(MainComponentsContainer, target, { env, props: {} });
         assert.equal(
-            target.querySelector(".o-main-components-container").innerHTML,
-            "<span>MainComponentA</span><span>MainComponentB</span>"
+            container.el.outerHTML,
+            "<div><span>MainComponentA</span><span>MainComponentB</span></div>"
         );
     });
 
@@ -42,7 +40,7 @@ QUnit.module("Components", (hooks) => {
         const env = await makeTestEnv();
 
         let compA;
-        class MainComponentA extends LegacyComponent {
+        class MainComponentA extends Component {
             setup() {
                 compA = this;
                 this.state = useState({ shouldThrow: false });
@@ -53,16 +51,15 @@ QUnit.module("Components", (hooks) => {
         }
         MainComponentA.template = xml`<span><t t-if="state.shouldThrow" t-esc="error"/>MainComponentA</span>`;
 
-        class MainComponentB extends LegacyComponent {}
+        class MainComponentB extends Component {}
         MainComponentB.template = xml`<span>MainComponentB</span>`;
 
         mainComponentsRegistry.add("MainComponentA", { Component: MainComponentA, props: {} });
         mainComponentsRegistry.add("MainComponentB", { Component: MainComponentB, props: {} });
-        await mount(MainComponentsContainer, target, { env, props: {} });
-        assert.containsOnce(target, "div.o-main-components-container");
+        const container = await mount(MainComponentsContainer, target, { env, props: {} });
         assert.equal(
-            target.querySelector(".o-main-components-container").innerHTML,
-            "<span>MainComponentA</span><span>MainComponentB</span>"
+            container.el.outerHTML,
+            "<div><span>MainComponentA</span><span>MainComponentB</span></div>"
         );
 
         const handler = (ev) => {
@@ -81,20 +78,17 @@ QUnit.module("Components", (hooks) => {
         unpatch(QUnit, "MainComponentsContainer QUnit patch");
         assert.verifySteps(["BOOM"]);
 
-        assert.equal(
-            target.querySelector(".o-main-components-container").innerHTML,
-            "<span>MainComponentB</span>"
-        );
+        assert.equal(container.el.outerHTML, "<div><span>MainComponentB</span></div>");
     });
 
     QUnit.test("unmounts erroring main component: variation", async function (assert) {
         const env = await makeTestEnv();
 
-        class MainComponentA extends LegacyComponent {}
+        class MainComponentA extends Component {}
         MainComponentA.template = xml`<span>MainComponentA</span>`;
 
         let compB;
-        class MainComponentB extends LegacyComponent {
+        class MainComponentB extends Component {
             setup() {
                 compB = this;
                 this.state = useState({ shouldThrow: false });
@@ -107,11 +101,10 @@ QUnit.module("Components", (hooks) => {
 
         mainComponentsRegistry.add("MainComponentA", { Component: MainComponentA, props: {} });
         mainComponentsRegistry.add("MainComponentB", { Component: MainComponentB, props: {} });
-        await mount(MainComponentsContainer, target, { env, props: {} });
-        assert.containsOnce(target, "div.o-main-components-container");
+        const container = await mount(MainComponentsContainer, target, { env, props: {} });
         assert.equal(
-            target.querySelector(".o-main-components-container").innerHTML,
-            "<span>MainComponentA</span><span>MainComponentB</span>"
+            container.el.outerHTML,
+            "<div><span>MainComponentA</span><span>MainComponentB</span></div>"
         );
 
         const handler = (ev) => {
@@ -130,9 +123,6 @@ QUnit.module("Components", (hooks) => {
         unpatch(QUnit, "MainComponentsContainer QUnit patch");
         assert.verifySteps(["BOOM"]);
 
-        assert.equal(
-            target.querySelector(".o-main-components-container").innerHTML,
-            "<span>MainComponentA</span>"
-        );
+        assert.equal(container.el.outerHTML, "<div><span>MainComponentA</span></div>");
     });
 });

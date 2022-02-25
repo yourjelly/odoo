@@ -6,7 +6,7 @@ const { Component } = owl;
 
 export class Popover extends Component {
     setup() {
-        usePosition(this.props.target, "popper", {
+        usePosition(this.props.target, {
             margin: 16,
             position: this.props.position,
         });

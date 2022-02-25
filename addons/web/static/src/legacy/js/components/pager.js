@@ -2,7 +2,6 @@ odoo.define('web.Pager', function (require) {
     "use strict";
 
     const { useAutofocus } = require("@web/core/utils/hooks");
-    const { LegacyComponent } = require("@web/legacy/legacy_component");
 
     const { Component, onWillUpdateProps, useState } = owl;
 
@@ -19,7 +18,7 @@ odoo.define('web.Pager', function (require) {
      * or previous).
      * @extends Component
      */
-    class Pager extends LegacyComponent {
+    class Pager extends Component {
         /**
          * @param {Object} [props]
          * @param {int} [props.size] the total number of elements

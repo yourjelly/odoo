@@ -2,7 +2,6 @@
 
 import { Transition, useTransition, config as transitionConfig } from "@web/core/transition";
 import { getFixture, mockTimeout, mount, nextTick, patchWithCleanup } from "../helpers/utils";
-import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, xml, useState } = owl;
 
@@ -12,7 +11,7 @@ QUnit.test("useTransition hook", async (assert) => {
     patchWithCleanup(transitionConfig, {
         disabled: false,
     });
-    class Parent extends LegacyComponent {
+    class Parent extends Component {
         setup() {
             this.transition = useTransition({
                 name: "test",
@@ -45,7 +44,7 @@ QUnit.test("Transition HOC", async (assert) => {
     patchWithCleanup(transitionConfig, {
         disabled: false,
     });
-    class Parent extends LegacyComponent {
+    class Parent extends Component {
         setup() {
             this.state = useState({ show: true });
         }

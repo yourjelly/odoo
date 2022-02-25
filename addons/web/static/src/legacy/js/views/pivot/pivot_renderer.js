@@ -6,11 +6,10 @@
     import field_utils from 'web.field_utils';
     import { INTERVAL_OPTIONS, getIntervalOptions } from 'web.searchUtils';
     import { CustomGroupByItem } from "@web/search/group_by_menu/custom_group_by_item";
-    import { LegacyComponent } from "@web/legacy/legacy_component";
 
     const { Component, useEffect, useExternalListener, useState } = owl;
 
-    export class PivotGroupByMenu extends LegacyComponent {
+    export class PivotGroupByMenu extends Component {
 
         constructor() {
             super(...arguments);

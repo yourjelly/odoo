@@ -20,7 +20,6 @@ import { registry } from "@web/core/registry";
 import { FilterMenu } from "@web/search/filter_menu/filter_menu";
 import { GroupByMenu } from "@web/search/group_by_menu/group_by_menu";
 import { SearchPanel } from "@web/search/search_panel/search_panel";
-import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, xml } = owl;
 
@@ -30,7 +29,8 @@ const serviceRegistry = registry.category("services");
 // Helpers
 //-----------------------------------------------------------------------------
 
-const getValues = (el, type) => {
+const getValues = (comp, type) => {
+    const el = comp instanceof Component ? comp.el : comp;
     switch (type) {
         case "category": {
             return [...el.querySelectorAll(".o_search_panel_category_value header")];
@@ -47,8 +47,8 @@ const getValues = (el, type) => {
     }
 };
 
-const getValue = (el, type, content = 0, additionalSelector = null) => {
-    const values = getValues(el, type);
+const getValue = (comp, type, content = 0, additionalSelector = null) => {
+    const values = getValues(comp, type);
     let match = null;
     if (Number.isInteger(content) && content < values.length) {
         match = values[content];
@@ -63,24 +63,24 @@ const getValue = (el, type, content = 0, additionalSelector = null) => {
 };
 
 const parseContent = ([value, counter]) => (counter ? `${value}: ${counter}` : value);
-const getContent = (el, type, parse = parseContent) => {
-    return getValues(el, type)
+const getContent = (comp, type, parse = parseContent) => {
+    return getValues(comp, type)
         .map((v) => parse(v.innerText.trim().split(/\s+/)))
         .filter((v) => v !== null);
 };
 
 // Categories
-const getCategory = (el, ...args) => getValue(el, "category", ...args);
-const getCategoriesContent = (el, ...args) => getContent(el, "category", ...args);
+const getCategory = (comp, ...args) => getValue(comp, "category", ...args);
+const getCategoriesContent = (comp, ...args) => getContent(comp, "category", ...args);
 
 // Filters
-const getFilter = (el, ...args) => getValue(el, "filter", ...args);
-const getFiltersContent = (el, ...args) => getContent(el, "filter", ...args);
+const getFilter = (comp, ...args) => getValue(comp, "filter", ...args);
+const getFiltersContent = (comp, ...args) => getContent(comp, "filter", ...args);
 
 // Filter groups
-const getFilterGroup = (el, ...args) => getValue(el, "filterGroup", ...args);
-const getFilterGroupContent = (el, ...args) => {
-    const group = getFilterGroup(el, ...args);
+const getFilterGroup = (comp, ...args) => getValue(comp, "filterGroup", ...args);
+const getFilterGroupContent = (comp, ...args) => {
+    const group = getFilterGroup(comp, ...args);
     return [getContent(group, "groupHeader")[0], getFiltersContent(group)];
 };
 
@@ -88,7 +88,7 @@ const getCounters = (v) => (isNaN(v[1]) ? null : Number(v[1]));
 
 const makeTestComponent = ({ onWillStart, onWillUpdateProps } = {}) => {
     let domain;
-    class TestComponent extends LegacyComponent {
+    class TestComponent extends Component {
         setup() {
             owl.onWillStart(async () => {
                 if (onWillStart) {
@@ -279,7 +279,7 @@ QUnit.module("Search", (hooks) => {
         assert.expect(2);
 
         const { TestComponent, getDomain } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             async mockRPC(route, { method }) {
                 if (/search_panel_/.test(method || route)) {
@@ -291,7 +291,7 @@ QUnit.module("Search", (hooks) => {
             searchViewId: false,
             display: { searchPanel: false },
         });
-        assert.containsNone(target, ".o_search_panel");
+        assert.containsNone(comp, ".o_search_panel");
         assert.deepEqual(getDomain(), []); // initial domain
     });
 
@@ -301,7 +301,7 @@ QUnit.module("Search", (hooks) => {
         serverData.views["partner,false,search"] = `<search><searchpanel /></search>`;
 
         const { TestComponent, getDomain } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             async mockRPC(route, { method, model }) {
                 if (/search_panel_/.test(method || route)) {
@@ -313,14 +313,14 @@ QUnit.module("Search", (hooks) => {
             searchViewId: false,
         });
 
-        assert.containsNone(target, ".o_search_panel");
+        assert.containsNone(comp, ".o_search_panel");
         assert.deepEqual(getDomain(), []); // initial domain
     });
 
     QUnit.test("basic rendering of a component with search panel", async (assert) => {
         assert.expect(15);
         const { TestComponent, getDomain } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             async mockRPC(route, { method, model }) {
                 if (/search_panel_/.test(method || route)) {
@@ -332,10 +332,10 @@ QUnit.module("Search", (hooks) => {
             searchViewId: false,
         });
 
-        assert.containsOnce(target, ".o_search_panel");
-        assert.containsN(target, ".o_search_panel_section", 2);
+        assert.containsOnce(comp, ".o_search_panel");
+        assert.containsN(comp, ".o_search_panel_section", 2);
 
-        const sections = target.querySelectorAll(".o_search_panel_section");
+        const sections = comp.el.querySelectorAll(".o_search_panel_section");
 
         const firstSection = sections[0];
         assert.hasClass(
@@ -386,7 +386,7 @@ QUnit.module("Search", (hooks) => {
                 </searchpanel>
             </search>`;
 
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
@@ -394,7 +394,7 @@ QUnit.module("Search", (hooks) => {
             config: { viewType: "toy" },
         });
 
-        const sectionHeaderIcons = target.querySelectorAll(".o_search_panel_section_header i");
+        const sectionHeaderIcons = comp.el.querySelectorAll(".o_search_panel_section_header i");
         assert.hasClass(sectionHeaderIcons[0], "fa-car");
         assert.hasAttrValue(sectionHeaderIcons[0], 'style="{color: blue}"');
         assert.hasClass(sectionHeaderIcons[1], "fa-star");
@@ -417,7 +417,7 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             async mockRPC(route, { method }) {
                 if (/search_panel_/.test(method || route)) {
@@ -430,7 +430,7 @@ QUnit.module("Search", (hooks) => {
             config: { viewType: "kanban" },
         });
 
-        assert.containsOnce(target, ".o_search_panel_section");
+        assert.containsOnce(comp, ".o_search_panel_section");
         assert.verifySteps(["search_panel_select_range"]);
     });
 
@@ -447,7 +447,7 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
@@ -455,8 +455,8 @@ QUnit.module("Search", (hooks) => {
             config: { viewType: "kanban" },
         });
 
-        const headers = target.getElementsByClassName("o_search_panel_section_header");
-        assert.containsN(target, ".o_search_panel_section", 3);
+        const headers = comp.el.getElementsByClassName("o_search_panel_section_header");
+        assert.containsN(comp, ".o_search_panel_section", 3);
         assert.strictEqual(headers[0].innerText.trim(), "COMPANY");
         assert.strictEqual(headers[1].innerText.trim(), "CATEGORY");
         assert.strictEqual(headers[2].innerText.trim(), "STATE");
@@ -476,7 +476,7 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
             const { TestComponent, getDomain } = makeTestComponent();
-            await makeWithSearch({
+            const comp = await makeWithSearch({
                 serverData,
                 Component: TestComponent,
                 resModel: "partner",
@@ -489,7 +489,7 @@ QUnit.module("Search", (hooks) => {
 
             assert.deepEqual(
                 [
-                    ...target.querySelectorAll(
+                    ...comp.el.querySelectorAll(
                         ".o_search_panel_category_value header.active label"
                     ),
                 ].map((el) => el.innerText),
@@ -498,11 +498,11 @@ QUnit.module("Search", (hooks) => {
             assert.deepEqual(getDomain(), [["state", "=", "ghi"]]);
 
             // select 'ABC' in the category 'state'
-            await click(target.querySelectorAll(".o_search_panel_category_value header")[4]);
+            await click(comp.el.querySelectorAll(".o_search_panel_category_value header")[4]);
 
             assert.deepEqual(
                 [
-                    ...target.querySelectorAll(
+                    ...comp.el.querySelectorAll(
                         ".o_search_panel_category_value header.active label"
                     ),
                 ].map((el) => el.innerText),
@@ -525,7 +525,7 @@ QUnit.module("Search", (hooks) => {
         `;
 
         const { TestComponent, getDomain } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
@@ -540,26 +540,26 @@ QUnit.module("Search", (hooks) => {
         assert.deepEqual(getDomain(), [["bar", "=", true]]);
 
         // select "asustek"
-        await click(target.querySelectorAll(".o_search_panel_category_value header")[1]);
+        await click(comp.el.querySelectorAll(".o_search_panel_category_value header")[1]);
 
-        assert.containsOnce(target, ".o_search_panel_category_value .active");
-        assert.containsOnce(target, ".o_search_panel_category_value:nth(1) .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value:nth(1) .active");
 
         assert.deepEqual(getDomain(), ["&", ["bar", "=", true], ["company_id", "child_of", 3]]);
 
         // select "agrolait"
-        await click(target.querySelectorAll(".o_search_panel_category_value header")[2]);
+        await click(comp.el.querySelectorAll(".o_search_panel_category_value header")[2]);
 
-        assert.containsOnce(target, ".o_search_panel_category_value .active");
-        assert.containsOnce(target, ".o_search_panel_category_value:nth(2) .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value:nth(2) .active");
 
         assert.deepEqual(getDomain(), ["&", ["bar", "=", true], ["company_id", "child_of", 5]]);
 
         // select "All"
-        await click(target.querySelector(".o_search_panel_category_value header"));
+        await click(comp.el.querySelector(".o_search_panel_category_value header"));
 
-        assert.containsOnce(target, ".o_search_panel_category_value .active");
-        assert.containsOnce(target, ".o_search_panel_category_value:first .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value:first .active");
 
         assert.deepEqual(getDomain(), [["bar", "=", true]]);
     });
@@ -575,7 +575,7 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent, getDomain } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
@@ -585,26 +585,26 @@ QUnit.module("Search", (hooks) => {
         assert.deepEqual(getDomain(), []);
 
         // select 'abc'
-        await click(target, ".o_search_panel_category_value:nth-of-type(2) header");
+        await click(comp.el, ".o_search_panel_category_value:nth-of-type(2) header");
 
-        assert.containsOnce(target, ".o_search_panel_category_value .active");
-        assert.containsOnce(target, ".o_search_panel_category_value:nth-of-type(2) .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value:nth-of-type(2) .active");
 
         assert.deepEqual(getDomain(), [["state", "=", "abc"]]);
 
         // select 'ghi'
-        await click(target, ".o_search_panel_category_value:nth-of-type(4) header");
+        await click(comp.el, ".o_search_panel_category_value:nth-of-type(4) header");
 
-        assert.containsOnce(target, ".o_search_panel_category_value .active");
-        assert.containsOnce(target, ".o_search_panel_category_value:nth-of-type(4) .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value:nth-of-type(4) .active");
 
         assert.deepEqual(getDomain(), [["state", "=", "ghi"]]);
 
         // select 'All' again
-        await click(target, ".o_search_panel_category_value:nth-of-type(1) header");
+        await click(comp.el, ".o_search_panel_category_value:nth-of-type(1) header");
 
-        assert.containsOnce(target, ".o_search_panel_category_value:nth-of-type(1) .active");
-        assert.containsOnce(target, ".o_search_panel_category_value:first .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value:nth-of-type(1) .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value:first .active");
 
         assert.deepEqual(getDomain(), []);
     });
@@ -640,7 +640,7 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
@@ -648,14 +648,14 @@ QUnit.module("Search", (hooks) => {
         });
 
         assert.containsN(
-            target,
+            comp,
             ".o_search_panel_category_value",
             2,
             "The number of categories should be 2: All and Company 5"
         );
 
         assert.containsNone(
-            target,
+            comp,
             ".o_toggle_fold > i",
             "None of the categories should have children"
         );
@@ -674,7 +674,7 @@ QUnit.module("Search", (hooks) => {
     `;
 
         const { TestComponent, getDomain } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
@@ -684,12 +684,12 @@ QUnit.module("Search", (hooks) => {
 
         assert.deepEqual(getDomain(), [["bar", "=", true]]);
 
-        assert.containsN(target, ".o_search_panel_section", 2);
+        assert.containsN(comp, ".o_search_panel_section", 2);
 
         // select 'asustek'
         await click(
             [
-                ...target.querySelectorAll(
+                ...comp.el.querySelectorAll(
                     ".o_search_panel_category_value header .o_search_panel_label_title"
                 ),
             ].find((el) => el.innerText === "asustek")
@@ -699,7 +699,7 @@ QUnit.module("Search", (hooks) => {
         // select 'abc'
         await click(
             [
-                ...target.querySelectorAll(
+                ...comp.el.querySelectorAll(
                     ".o_search_panel_category_value header .o_search_panel_label_title"
                 ),
             ].find((el) => el.innerText === "ABC")
@@ -715,7 +715,7 @@ QUnit.module("Search", (hooks) => {
         // select 'ghi'
         await click(
             [
-                ...target.querySelectorAll(
+                ...comp.el.querySelectorAll(
                     ".o_search_panel_category_value header .o_search_panel_label_title"
                 ),
             ].find((el) => el.innerText === "GHI")
@@ -729,11 +729,11 @@ QUnit.module("Search", (hooks) => {
         ]);
 
         // select 'All' in first category (company_id)
-        let firstSection = target.querySelector(".o_search_panel_section");
+        let firstSection = comp.el.querySelector(".o_search_panel_section");
         await click(firstSection.querySelector(".o_search_panel_category_value header"));
         assert.deepEqual(getDomain(), ["&", ["bar", "=", true], ["state", "=", "ghi"]]);
 
-        firstSection = target.querySelectorAll(".o_search_panel_section")[1];
+        firstSection = comp.el.querySelectorAll(".o_search_panel_section")[1];
         // select 'All' in second category (state)
         await click(firstSection.querySelector(".o_search_panel_category_value header"));
         assert.deepEqual(getDomain(), [["bar", "=", true]]);
@@ -755,7 +755,7 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent, getDomain } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
@@ -763,65 +763,61 @@ QUnit.module("Search", (hooks) => {
         });
 
         // 'All' is selected by default
-        assert.containsOnce(target, ".o_search_panel_category_value .active");
-        assert.containsOnce(target, ".o_search_panel_category_value:first .active");
-        assert.containsN(target, ".o_search_panel_category_value", 3);
-        assert.containsOnce(target, ".o_search_panel_category_value .o_toggle_fold > i");
+        assert.containsOnce(comp, ".o_search_panel_category_value .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value:first .active");
+        assert.containsN(comp, ".o_search_panel_category_value", 3);
+        assert.containsOnce(comp, ".o_search_panel_category_value .o_toggle_fold > i");
 
         // unfold parent category and select 'All' again
-        await click(getCategory(target, 2));
-        await click(getCategory(target, 0));
+        await click(getCategory(comp, 2));
+        await click(getCategory(comp, 0));
 
-        assert.containsOnce(target, ".o_search_panel_category_value .active");
-        assert.containsOnce(target, ".o_search_panel_category_value:first .active");
-        assert.containsN(target, ".o_search_panel_category_value", 5);
-        assert.containsN(
-            target,
-            ".o_search_panel_category_value .o_search_panel_category_value",
-            2
-        );
+        assert.containsOnce(comp, ".o_search_panel_category_value .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value:first .active");
+        assert.containsN(comp, ".o_search_panel_category_value", 5);
+        assert.containsN(comp, ".o_search_panel_category_value .o_search_panel_category_value", 2);
 
         assert.deepEqual(getDomain(), []);
 
         // click on first child company
-        await click(getCategory(target, 3));
+        await click(getCategory(comp, 3));
 
-        assert.containsOnce(target, ".o_search_panel_category_value .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value .active");
         assert.containsOnce(
-            target,
+            comp,
             ".o_search_panel_category_value .o_search_panel_category_value:first .active"
         );
 
         assert.deepEqual(getDomain(), [["company_id", "child_of", 40]]);
 
         // click on parent company
-        await click(getCategory(target, 2));
+        await click(getCategory(comp, 2));
 
-        assert.containsOnce(target, ".o_search_panel_category_value .active");
-        assert.containsOnce(target, ".o_search_panel_category_value:nth(2) .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value:nth(2) .active");
 
         assert.deepEqual(getDomain(), [["company_id", "child_of", 5]]);
 
         // fold parent company by clicking on it
-        await click(getCategory(target, 2));
+        await click(getCategory(comp, 2));
 
-        assert.containsOnce(target, ".o_search_panel_category_value .active");
-        assert.containsOnce(target, ".o_search_panel_category_value:nth(2) .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value:nth(2) .active");
 
         // parent company should be folded
-        assert.containsOnce(target, ".o_search_panel_category_value .active");
-        assert.containsOnce(target, ".o_search_panel_category_value:nth(2) .active");
-        assert.containsN(target, ".o_search_panel_category_value", 3);
+        assert.containsOnce(comp, ".o_search_panel_category_value .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value:nth(2) .active");
+        assert.containsN(comp, ".o_search_panel_category_value", 3);
 
         assert.deepEqual(getDomain(), [["company_id", "child_of", 5]]);
 
         // fold category with children
-        await click(getCategory(target, 2));
-        await click(getCategory(target, 2));
+        await click(getCategory(comp, 2));
+        await click(getCategory(comp, 2));
 
-        assert.containsOnce(target, ".o_search_panel_category_value .active");
-        assert.containsOnce(target, ".o_search_panel_category_value:nth(2) .active");
-        assert.containsN(target, ".o_search_panel_category_value", 3);
+        assert.containsOnce(comp, ".o_search_panel_category_value .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value:nth(2) .active");
+        assert.containsN(comp, ".o_search_panel_category_value", 3);
 
         assert.deepEqual(getDomain(), [["company_id", "child_of", 5]]);
     });
@@ -838,7 +834,7 @@ QUnit.module("Search", (hooks) => {
         `;
 
         const { TestComponent, getDomain } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
@@ -848,15 +844,15 @@ QUnit.module("Search", (hooks) => {
         assert.deepEqual(getDomain(), []);
 
         // 'All' is selected by default
-        assert.containsOnce(target, ".o_search_panel_category_value .active");
-        assert.containsOnce(target, ".o_search_panel_category_value:first .active");
-        assert.containsN(target, ".o_search_panel_category_value", 3);
+        assert.containsOnce(comp, ".o_search_panel_category_value .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value:first .active");
+        assert.containsN(comp, ".o_search_panel_category_value", 3);
 
         // click on 'gold' category
-        await click(target.querySelectorAll(".o_search_panel_category_value header")[1]);
+        await click(comp.el.querySelectorAll(".o_search_panel_category_value header")[1]);
 
-        assert.containsOnce(target, ".o_search_panel_category_value .active");
-        assert.containsOnce(target, ".o_search_panel_category_value:nth(1) .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value:nth(1) .active");
 
         assert.deepEqual(getDomain(), [["category_id", "=", 6]]); // must use '=' operator (instead of 'child_of')
     });
@@ -877,7 +873,7 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
@@ -885,21 +881,21 @@ QUnit.module("Search", (hooks) => {
         });
 
         assert.containsOnce(
-            target,
+            comp,
             ".o_search_panel_category_value:contains(agrolait) .o_toggle_fold > i"
         );
-        assert.hasClass(getCategory(target, "agrolait", ".o_toggle_fold > i"), "fa-caret-right");
-        assert.containsN(target, ".o_search_panel_category_value", 3);
+        assert.hasClass(getCategory(comp, "agrolait", ".o_toggle_fold > i"), "fa-caret-right");
+        assert.containsN(comp, ".o_search_panel_category_value", 3);
 
         // unfold agrolait
-        await click(getCategory(target, "agrolait", ".o_toggle_fold > i"));
-        assert.hasClass(getCategory(target, "agrolait", ".o_toggle_fold > i"), "fa-caret-down");
-        assert.containsN(target, ".o_search_panel_category_value", 5);
+        await click(getCategory(comp, "agrolait", ".o_toggle_fold > i"));
+        assert.hasClass(getCategory(comp, "agrolait", ".o_toggle_fold > i"), "fa-caret-down");
+        assert.containsN(comp, ".o_search_panel_category_value", 5);
 
         // fold agrolait
-        await click(getCategory(target, "agrolait", ".o_toggle_fold > i"));
-        assert.hasClass(getCategory(target, "agrolait", ".o_toggle_fold > i"), "fa-caret-right");
-        assert.containsN(target, ".o_search_panel_category_value", 3);
+        await click(getCategory(comp, "agrolait", ".o_toggle_fold > i"));
+        assert.hasClass(getCategory(comp, "agrolait", ".o_toggle_fold > i"), "fa-caret-right");
+        assert.containsN(comp, ".o_search_panel_category_value", 3);
     });
 
     QUnit.test("fold status is kept at reload", async (assert) => {
@@ -921,7 +917,7 @@ QUnit.module("Search", (hooks) => {
         `;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
@@ -931,7 +927,7 @@ QUnit.module("Search", (hooks) => {
         // unfold agrolait
         function getAgrolaitElement() {
             return [
-                ...target.querySelectorAll(".o_search_panel_category_value > header"),
+                ...comp.el.querySelectorAll(".o_search_panel_category_value > header"),
             ].find((el) => el.innerText.includes("agrolait"));
         }
 
@@ -941,17 +937,17 @@ QUnit.module("Search", (hooks) => {
             "fa-caret-down",
             "'agrolait' should be open"
         );
-        assert.containsN(target, ".o_search_panel_category_value", 5);
+        assert.containsN(comp, ".o_search_panel_category_value", 5);
 
-        await toggleFilterMenu(target);
-        await toggleMenuItem(target, "True Domain");
+        await toggleFilterMenu(comp);
+        await toggleMenuItem(comp, "True Domain");
 
         assert.hasClass(
             getAgrolaitElement().querySelector(".o_toggle_fold > i"),
             "fa-caret-down",
             "'agrolait' should be open"
         );
-        assert.containsN(target, ".o_search_panel_category_value", 5);
+        assert.containsN(comp, ".o_search_panel_category_value", 5);
     });
 
     QUnit.test("concurrency: delayed component update", async (assert) => {
@@ -968,7 +964,7 @@ QUnit.module("Search", (hooks) => {
         const { TestComponent, getDomain } = makeTestComponent({
             onWillUpdateProps: () => promise,
         });
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             async mockRPC(route) {
                 if (route === "/web/dataset/search_read") {
@@ -982,29 +978,29 @@ QUnit.module("Search", (hooks) => {
         });
 
         // 'All' should be selected by default
-        assert.containsOnce(target, ".o_search_panel_category_value .active");
-        assert.containsOnce(target, ".o_search_panel_category_value:first .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value:first .active");
 
         assert.deepEqual(getDomain(), [["bar", "=", true]]);
 
         // select 'asustek' (delay the reload)
         const asustekPromise = promise;
-        await click(getCategory(target, 1));
+        await click(getCategory(comp, 1));
 
         // 'asustek' should be selected, but there should still be 3 records
-        assert.containsOnce(target, ".o_search_panel_category_value .active");
-        assert.containsOnce(target, ".o_search_panel_category_value:nth(1) .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value:nth(1) .active");
 
         assert.deepEqual(getDomain(), [["bar", "=", true]]);
 
         // select 'agrolait' (delay the reload)
         promise = makeDeferred();
         const agrolaitPromise = promise;
-        await click(getCategory(target, 2));
+        await click(getCategory(comp, 2));
 
         // 'agrolait' should be selected, but there should still be 3 records
-        assert.containsOnce(target, ".o_search_panel_category_value .active");
-        assert.containsOnce(target, ".o_search_panel_category_value:nth(2) .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value:nth(2) .active");
 
         assert.deepEqual(getDomain(), [["bar", "=", true]]);
 
@@ -1012,8 +1008,8 @@ QUnit.module("Search", (hooks) => {
         asustekPromise.resolve();
         await nextTick();
 
-        assert.containsOnce(target, ".o_search_panel_category_value .active");
-        assert.containsOnce(target, ".o_search_panel_category_value:nth(2) .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value:nth(2) .active");
 
         assert.deepEqual(getDomain(), ["&", ["bar", "=", true], ["company_id", "child_of", 3]]);
 
@@ -1021,8 +1017,8 @@ QUnit.module("Search", (hooks) => {
         agrolaitPromise.resolve();
         await nextTick();
 
-        assert.containsOnce(target, ".o_search_panel_category_value .active");
-        assert.containsOnce(target, ".o_search_panel_category_value:nth(2) .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value:nth(2) .active");
 
         assert.deepEqual(getDomain(), ["&", ["bar", "=", true], ["company_id", "child_of", 5]]);
     });
@@ -1059,15 +1055,15 @@ QUnit.module("Search", (hooks) => {
         assert.verifySteps([]);
 
         promise.resolve();
-        await compPromise;
+        const comp = await compPromise;
 
         assert.verifySteps(["load_views", "search_panel_select_range"]);
 
         // Case 2: search domain changed so we wait for the search panel once again
         promise = makeDeferred();
 
-        await toggleFilterMenu(target);
-        await toggleMenuItem(target, 0);
+        await toggleFilterMenu(comp);
+        await toggleMenuItem(comp, 0);
 
         assert.verifySteps([]);
 
@@ -1079,7 +1075,7 @@ QUnit.module("Search", (hooks) => {
         // Case 3: search domain is the same and default values do not matter anymore
         promise = makeDeferred();
 
-        await click(getCategory(target, 1));
+        await click(getCategory(comp, 1));
 
         // The search read is executed right away in this case
         assert.verifySteps([]);
@@ -1180,7 +1176,7 @@ QUnit.module("Search", (hooks) => {
 
         let promise;
         const { TestComponent, getDomain } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             async mockRPC(route, { method }) {
                 if (method === "search_panel_select_multi_range") {
@@ -1192,30 +1188,30 @@ QUnit.module("Search", (hooks) => {
             searchViewId: false,
         });
 
-        assert.containsOnce(target, ".o_search_panel_category_value .active");
-        assert.containsOnce(target, ".o_search_panel_category_value:first .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value:first .active");
 
         assert.deepEqual(getDomain(), []);
 
         // select 'abc' (delay the reload)
         promise = makeDeferred();
         const abcDef = promise;
-        await click(getCategory(target, 1));
+        await click(getCategory(comp, 1));
 
         // 'All' should still be selected
-        assert.containsOnce(target, ".o_search_panel_category_value .active");
-        assert.containsOnce(target, ".o_search_panel_category_value:first .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value:first .active");
 
         assert.deepEqual(getDomain(), [["state", "=", "abc"]]);
 
         // select 'ghi' (delay the reload)
         promise = makeDeferred();
         const ghiDef = promise;
-        await click(getCategory(target, 3));
+        await click(getCategory(comp, 3));
 
         // 'All' should still be selected
-        assert.containsOnce(target, ".o_search_panel_category_value .active");
-        assert.containsOnce(target, ".o_search_panel_category_value:first .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value:first .active");
 
         assert.deepEqual(getDomain(), [["state", "=", "ghi"]]);
 
@@ -1223,8 +1219,8 @@ QUnit.module("Search", (hooks) => {
         ghiDef.resolve();
         await nextTick();
 
-        assert.containsOnce(target, ".o_search_panel_category_value .active");
-        assert.containsOnce(target, ".o_search_panel_category_value:nth(3) .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value:nth(3) .active");
 
         assert.deepEqual(getDomain(), [["state", "=", "ghi"]]);
 
@@ -1232,8 +1228,8 @@ QUnit.module("Search", (hooks) => {
         abcDef.resolve();
         await nextTick();
 
-        assert.containsOnce(target, ".o_search_panel_category_value .active");
-        assert.containsOnce(target, ".o_search_panel_category_value:nth(3) .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value:nth(3) .active");
 
         assert.deepEqual(getDomain(), [["state", "=", "ghi"]]);
     });
@@ -1251,7 +1247,7 @@ QUnit.module("Search", (hooks) => {
 
         let promise;
         const { TestComponent, getDomain } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             async mockRPC(route, { method }) {
                 if (method === "search_panel_select_multi_range") {
@@ -1268,8 +1264,8 @@ QUnit.module("Search", (hooks) => {
         // trigger a reload and delay the get_filter
         promise = makeDeferred();
 
-        await toggleFilterMenu(target);
-        await toggleMenuItem(target, 0);
+        await toggleFilterMenu(comp);
+        await toggleMenuItem(comp, 0);
 
         assert.deepEqual(getDomain(), []);
 
@@ -1291,7 +1287,7 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent, getDomain } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
@@ -1299,37 +1295,37 @@ QUnit.module("Search", (hooks) => {
             domain: [["bar", "=", true]],
         });
 
-        assert.containsN(target, ".o_search_panel_filter_value", 2);
-        assert.containsNone(target, ".o_search_panel_filter_value input:checked");
-        assert.deepEqual(getFiltersContent(target), ["asustek: 2", "agrolait: 1"]);
+        assert.containsN(comp, ".o_search_panel_filter_value", 2);
+        assert.containsNone(comp, ".o_search_panel_filter_value input:checked");
+        assert.deepEqual(getFiltersContent(comp), ["asustek: 2", "agrolait: 1"]);
         assert.deepEqual(getDomain(), [["bar", "=", true]]);
 
         // check 'asustek'
-        await click(getFilter(target, 0, "input"));
+        await click(getFilter(comp, 0, "input"));
 
-        assert.containsOnce(target, ".o_search_panel_filter_value input:checked");
-        assert.deepEqual(getFiltersContent(target), ["asustek: 2", "agrolait: 1"]);
+        assert.containsOnce(comp, ".o_search_panel_filter_value input:checked");
+        assert.deepEqual(getFiltersContent(comp), ["asustek: 2", "agrolait: 1"]);
         assert.deepEqual(getDomain(), ["&", ["bar", "=", true], ["company_id", "in", [3]]]);
 
         // check 'agrolait'
-        await click(getFilter(target, 1, "input"));
+        await click(getFilter(comp, 1, "input"));
 
-        assert.containsN(target, ".o_search_panel_filter_value input:checked", 2);
-        assert.deepEqual(getFiltersContent(target), ["asustek: 2", "agrolait: 1"]);
+        assert.containsN(comp, ".o_search_panel_filter_value input:checked", 2);
+        assert.deepEqual(getFiltersContent(comp), ["asustek: 2", "agrolait: 1"]);
         assert.deepEqual(getDomain(), ["&", ["bar", "=", true], ["company_id", "in", [3, 5]]]);
 
         // uncheck 'asustek'
-        await click(getFilter(target, 0, "input"));
+        await click(getFilter(comp, 0, "input"));
 
-        assert.containsOnce(target, ".o_search_panel_filter_value input:checked");
-        assert.deepEqual(getFiltersContent(target), ["asustek: 2", "agrolait: 1"]);
+        assert.containsOnce(comp, ".o_search_panel_filter_value input:checked");
+        assert.deepEqual(getFiltersContent(comp), ["asustek: 2", "agrolait: 1"]);
         assert.deepEqual(getDomain(), ["&", ["bar", "=", true], ["company_id", "in", [5]]]);
 
         // uncheck 'agrolait'
-        await click(getFilter(target, 1, "input"));
+        await click(getFilter(comp, 1, "input"));
 
-        assert.containsNone(target, ".o_search_panel_filter_value input:checked");
-        assert.deepEqual(getFiltersContent(target), ["asustek: 2", "agrolait: 1"]);
+        assert.containsNone(comp, ".o_search_panel_filter_value input:checked");
+        assert.deepEqual(getFiltersContent(comp), ["asustek: 2", "agrolait: 1"]);
         assert.deepEqual(getDomain(), [["bar", "=", true]]);
     });
 
@@ -1345,7 +1341,7 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent, getDomain } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
@@ -1353,37 +1349,37 @@ QUnit.module("Search", (hooks) => {
             domain: [["bar", "=", true]],
         });
 
-        assert.containsN(target, ".o_search_panel_filter_value", 3);
-        assert.containsNone(target, ".o_search_panel_filter_value input:checked");
-        assert.deepEqual(getFiltersContent(target), ["ABC: 1", "DEF: 1", "GHI: 1"]);
+        assert.containsN(comp, ".o_search_panel_filter_value", 3);
+        assert.containsNone(comp, ".o_search_panel_filter_value input:checked");
+        assert.deepEqual(getFiltersContent(comp), ["ABC: 1", "DEF: 1", "GHI: 1"]);
         assert.deepEqual(getDomain(), [["bar", "=", true]]);
 
         // check 'abc'
-        await click(getFilter(target, 0, "input"));
+        await click(getFilter(comp, 0, "input"));
 
-        assert.containsOnce(target, ".o_search_panel_filter_value input:checked");
-        assert.deepEqual(getFiltersContent(target), ["ABC: 1", "DEF: 1", "GHI: 1"]);
+        assert.containsOnce(comp, ".o_search_panel_filter_value input:checked");
+        assert.deepEqual(getFiltersContent(comp), ["ABC: 1", "DEF: 1", "GHI: 1"]);
         assert.deepEqual(getDomain(), ["&", ["bar", "=", true], ["state", "in", ["abc"]]]);
 
         // check 'def'
-        await click(getFilter(target, 1, "input"));
+        await click(getFilter(comp, 1, "input"));
 
-        assert.containsN(target, ".o_search_panel_filter_value input:checked", 2);
-        assert.deepEqual(getFiltersContent(target), ["ABC: 1", "DEF: 1", "GHI: 1"]);
+        assert.containsN(comp, ".o_search_panel_filter_value input:checked", 2);
+        assert.deepEqual(getFiltersContent(comp), ["ABC: 1", "DEF: 1", "GHI: 1"]);
         assert.deepEqual(getDomain(), ["&", ["bar", "=", true], ["state", "in", ["abc", "def"]]]);
 
         // uncheck 'abc'
-        await click(getFilter(target, 0, "input"));
+        await click(getFilter(comp, 0, "input"));
 
-        assert.containsOnce(target, ".o_search_panel_filter_value input:checked");
-        assert.deepEqual(getFiltersContent(target), ["ABC: 1", "DEF: 1", "GHI: 1"]);
+        assert.containsOnce(comp, ".o_search_panel_filter_value input:checked");
+        assert.deepEqual(getFiltersContent(comp), ["ABC: 1", "DEF: 1", "GHI: 1"]);
         assert.deepEqual(getDomain(), ["&", ["bar", "=", true], ["state", "in", ["def"]]]);
 
         // uncheck 'def'
-        await click(getFilter(target, 1, "input"));
+        await click(getFilter(comp, 1, "input"));
 
-        assert.containsNone(target, ".o_search_panel_filter_value input:checked");
-        assert.deepEqual(getFiltersContent(target), ["ABC: 1", "DEF: 1", "GHI: 1"]);
+        assert.containsNone(comp, ".o_search_panel_filter_value input:checked");
+        assert.deepEqual(getFiltersContent(comp), ["ABC: 1", "DEF: 1", "GHI: 1"]);
         assert.deepEqual(getDomain(), [["bar", "=", true]]);
     });
 
@@ -1402,7 +1398,7 @@ QUnit.module("Search", (hooks) => {
                 </search>`;
 
             const { TestComponent } = makeTestComponent();
-            await makeWithSearch({
+            const comp = await makeWithSearch({
                 serverData,
                 async mockRPC(route, { method }) {
                     if (/search_panel_/.test(method || route)) {
@@ -1417,13 +1413,13 @@ QUnit.module("Search", (hooks) => {
             assert.verifySteps(["search_panel_select_range", "search_panel_select_multi_range"]);
 
             // reload with another domain, so the filters should be reloaded
-            await toggleFilterMenu(target);
-            await toggleMenuItem(target, 0);
+            await toggleFilterMenu(comp);
+            await toggleMenuItem(comp, 0);
 
             assert.verifySteps(["search_panel_select_multi_range"]);
 
             // change category value, so the filters should be reloaded
-            await click(getCategory(target, 1));
+            await click(getCategory(comp, 1));
 
             assert.verifySteps(["search_panel_select_multi_range"]);
         }
@@ -1444,7 +1440,7 @@ QUnit.module("Search", (hooks) => {
                 </search>`;
 
             const { TestComponent } = makeTestComponent();
-            await makeWithSearch({
+            const comp = await makeWithSearch({
                 serverData,
                 async mockRPC(route, { method }) {
                     if (/search_panel_/.test(method || route)) {
@@ -1459,13 +1455,13 @@ QUnit.module("Search", (hooks) => {
             assert.verifySteps(["search_panel_select_range", "search_panel_select_multi_range"]);
 
             // reload with another domain, so the filters should be reloaded
-            await toggleFilterMenu(target);
-            await toggleMenuItem(target, 0);
+            await toggleFilterMenu(comp);
+            await toggleMenuItem(comp, 0);
 
             assert.verifySteps(["search_panel_select_multi_range"]);
 
             // change category value, so the filters should be reloaded
-            await click(getCategory(target, 1));
+            await click(getCategory(comp, 1));
 
             assert.verifySteps(["search_panel_select_multi_range"]);
         }
@@ -1484,7 +1480,7 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             async mockRPC(route, { args, method }) {
                 if (/search_panel_/.test(method || route)) {
@@ -1505,7 +1501,7 @@ QUnit.module("Search", (hooks) => {
             "search_panel_select_range",
             "company_id",
         ]);
-        assert.deepEqual(getCategoriesContent(target), [
+        assert.deepEqual(getCategoriesContent(comp), [
             "All",
             "ABC: 1",
             "DEF: 1",
@@ -1516,11 +1512,11 @@ QUnit.module("Search", (hooks) => {
         ]);
 
         // reload with another domain, so the categories 'state' and 'company_id' should be reloaded
-        await toggleFilterMenu(target);
-        await toggleMenuItem(target, 0);
+        await toggleFilterMenu(comp);
+        await toggleMenuItem(comp, 0);
 
         assert.verifySteps(["search_panel_select_range", "state"]);
-        assert.deepEqual(getCategoriesContent(target), [
+        assert.deepEqual(getCategoriesContent(comp), [
             "All",
             "ABC: 1",
             "DEF: 1",
@@ -1531,10 +1527,10 @@ QUnit.module("Search", (hooks) => {
         ]);
 
         // change category value, so the category 'state' should be reloaded
-        await click(getCategory(target, 1));
+        await click(getCategory(comp, 1));
 
         assert.verifySteps(["search_panel_select_range", "state"]);
-        assert.deepEqual(getCategoriesContent(target), [
+        assert.deepEqual(getCategoriesContent(comp), [
             "All",
             "ABC: 1",
             "DEF: 1",
@@ -1557,7 +1553,7 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             async mockRPC(route, { args, method }) {
                 if (/search_panel_/.test(method || route)) {
@@ -1573,20 +1569,20 @@ QUnit.module("Search", (hooks) => {
         });
 
         assert.verifySteps(["search_panel_select_range", "state"]);
-        assert.deepEqual(getCategoriesContent(target), ["All", "ABC", "DEF", "GHI"]);
+        assert.deepEqual(getCategoriesContent(comp), ["All", "ABC", "DEF", "GHI"]);
 
         // reload with another domain, so the category 'state' should be reloaded
-        await toggleFilterMenu(target);
-        await toggleMenuItem(target, 0);
+        await toggleFilterMenu(comp);
+        await toggleMenuItem(comp, 0);
 
         assert.verifySteps([]);
-        assert.deepEqual(getCategoriesContent(target), ["All", "ABC", "DEF", "GHI"]);
+        assert.deepEqual(getCategoriesContent(comp), ["All", "ABC", "DEF", "GHI"]);
 
         // change category value, so the category 'state' should be reloaded
-        await click(getCategory(target, 1));
+        await click(getCategory(comp, 1));
 
         assert.verifySteps([]);
-        assert.deepEqual(getCategoriesContent(target), ["All", "ABC", "DEF", "GHI"]);
+        assert.deepEqual(getCategoriesContent(comp), ["All", "ABC", "DEF", "GHI"]);
     });
 
     QUnit.test("filter with groupby", async (assert) => {
@@ -1601,7 +1597,7 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent, getDomain } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
@@ -1609,44 +1605,41 @@ QUnit.module("Search", (hooks) => {
             domain: [["bar", "=", true]],
         });
 
-        assert.containsN(target, ".o_search_panel_filter_group", 2);
+        assert.containsN(comp, ".o_search_panel_filter_group", 2);
         assert.containsOnce(
-            target,
+            comp,
             ".o_search_panel_filter_group:first .o_search_panel_filter_value"
         );
         assert.containsN(
-            target,
+            comp,
             ".o_search_panel_filter_group:nth(1) .o_search_panel_filter_value",
             2
         );
-        assert.containsNone(target, ".o_search_panel_filter_value input:checked");
-        assert.deepEqual(getFilterGroupContent(target, 0), ["gold", ["asustek: 2"]]);
-        assert.deepEqual(getFilterGroupContent(target, 1), [
-            "silver",
-            ["agrolait: 1", "camptocamp"],
-        ]);
+        assert.containsNone(comp, ".o_search_panel_filter_value input:checked");
+        assert.deepEqual(getFilterGroupContent(comp, 0), ["gold", ["asustek: 2"]]);
+        assert.deepEqual(getFilterGroupContent(comp, 1), ["silver", ["agrolait: 1", "camptocamp"]]);
         assert.deepEqual(getDomain(), [["bar", "=", true]]);
 
         // check 'asustek'
-        await click(getFilter(target, 0, "input"));
+        await click(getFilter(comp, 0, "input"));
 
-        const firstGroupCheckbox = getFilterGroup(target, 0, "header > div > input");
+        const firstGroupCheckbox = getFilterGroup(comp, 0, "header > div > input");
 
-        assert.containsOnce(target, ".o_search_panel_filter_value input:checked");
+        assert.containsOnce(comp, ".o_search_panel_filter_value input:checked");
         assert.strictEqual(
             firstGroupCheckbox.checked,
             true,
             "first group checkbox should be checked"
         );
-        assert.deepEqual(getFiltersContent(target), ["asustek: 2", "agrolait", "camptocamp"]);
+        assert.deepEqual(getFiltersContent(comp), ["asustek: 2", "agrolait", "camptocamp"]);
         assert.deepEqual(getDomain(), ["&", ["bar", "=", true], ["company_id", "in", [3]]]);
 
         // check 'agrolait'
-        await click(getFilter(target, 1, "input"));
+        await click(getFilter(comp, 1, "input"));
 
-        assert.containsN(target, ".o_search_panel_filter_value input:checked", 2);
+        assert.containsN(comp, ".o_search_panel_filter_value input:checked", 2);
 
-        const secondGroupCheckbox = getFilterGroup(target, 1, "header > div > input");
+        const secondGroupCheckbox = getFilterGroup(comp, 1, "header > div > input");
 
         assert.strictEqual(
             secondGroupCheckbox.checked,
@@ -1658,7 +1651,7 @@ QUnit.module("Search", (hooks) => {
             true,
             "second group checkbox should be indeterminate"
         );
-        assert.deepEqual(getFiltersContent(target), ["asustek", "agrolait", "camptocamp"]);
+        assert.deepEqual(getFiltersContent(comp), ["asustek", "agrolait", "camptocamp"]);
         assert.deepEqual(getDomain(), [
             "&",
             ["bar", "=", true],
@@ -1668,9 +1661,9 @@ QUnit.module("Search", (hooks) => {
         ]);
 
         // check 'camptocamp'
-        await click(getFilter(target, 2, "input"));
+        await click(getFilter(comp, 2, "input"));
 
-        assert.containsN(target, ".o_search_panel_filter_value input:checked", 3);
+        assert.containsN(comp, ".o_search_panel_filter_value input:checked", 3);
         assert.strictEqual(
             secondGroupCheckbox.checked,
             true,
@@ -1681,7 +1674,7 @@ QUnit.module("Search", (hooks) => {
             false,
             "second group checkbox should not be indeterminate"
         );
-        assert.deepEqual(getFiltersContent(target), ["asustek", "agrolait", "camptocamp"]);
+        assert.deepEqual(getFiltersContent(comp), ["asustek", "agrolait", "camptocamp"]);
         assert.deepEqual(getDomain(), [
             "&",
             ["bar", "=", true],
@@ -1691,9 +1684,9 @@ QUnit.module("Search", (hooks) => {
         ]);
 
         // uncheck second group
-        await click(getFilterGroup(target, 1, "header > div > input"));
+        await click(getFilterGroup(comp, 1, "header > div > input"));
 
-        assert.containsOnce(target, ".o_search_panel_filter_value input:checked");
+        assert.containsOnce(comp, ".o_search_panel_filter_value input:checked");
         assert.strictEqual(
             secondGroupCheckbox.checked,
             false,
@@ -1704,7 +1697,7 @@ QUnit.module("Search", (hooks) => {
             false,
             "second group checkbox should not be indeterminate"
         );
-        assert.deepEqual(getFiltersContent(target), ["asustek: 2", "agrolait", "camptocamp"]);
+        assert.deepEqual(getFiltersContent(comp), ["asustek: 2", "agrolait", "camptocamp"]);
         assert.deepEqual(getDomain(), ["&", ["bar", "=", true], ["company_id", "in", [3]]]);
     });
 
@@ -1720,7 +1713,7 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             async mockRPC(route, { kwargs, method }) {
                 if (method === "search_panel_select_multi_range") {
@@ -1744,8 +1737,8 @@ QUnit.module("Search", (hooks) => {
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_filter_value", 2);
-        assert.deepEqual(getFiltersContent(target), ["asustek: 2", "agrolait: 2"]);
+        assert.containsN(comp, ".o_search_panel_filter_value", 2);
+        assert.deepEqual(getFiltersContent(comp), ["asustek: 2", "agrolait: 2"]);
     });
 
     QUnit.test("filter with domain depending on category", async (assert) => {
@@ -1760,7 +1753,7 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             async mockRPC(route, { kwargs, method }) {
                 if (method === "search_panel_select_multi_range") {
@@ -1786,25 +1779,25 @@ QUnit.module("Search", (hooks) => {
         });
 
         // select 'gold' category
-        await click(getCategory(target, 1));
+        await click(getCategory(comp, 1));
 
-        assert.containsOnce(target, ".o_search_panel_category_value .active");
-        assert.containsOnce(target, ".o_search_panel_category_value:nth(1) .active");
-        assert.containsOnce(target, ".o_search_panel_filter_value");
-        assert.deepEqual(getFiltersContent(target), ["asustek: 1"]);
+        assert.containsOnce(comp, ".o_search_panel_category_value .active");
+        assert.containsOnce(comp, ".o_search_panel_category_value:nth(1) .active");
+        assert.containsOnce(comp, ".o_search_panel_filter_value");
+        assert.deepEqual(getFiltersContent(comp), ["asustek: 1"]);
 
         // select 'silver' category
-        await click(getCategory(target, 2));
+        await click(getCategory(comp, 2));
 
-        assert.containsOnce(target, ".o_search_panel_category_value:nth(2) .active");
-        assert.containsOnce(target, ".o_search_panel_filter_value");
-        assert.deepEqual(getFiltersContent(target), ["agrolait: 2"]);
+        assert.containsOnce(comp, ".o_search_panel_category_value:nth(2) .active");
+        assert.containsOnce(comp, ".o_search_panel_filter_value");
+        assert.deepEqual(getFiltersContent(comp), ["agrolait: 2"]);
 
         // select All
-        await click(getCategory(target, 0));
+        await click(getCategory(comp, 0));
 
-        assert.containsOnce(target, ".o_search_panel_category_value:first .active");
-        assert.containsNone(target, ".o_search_panel_filter_value");
+        assert.containsOnce(comp, ".o_search_panel_category_value:first .active");
+        assert.containsNone(comp, ".o_search_panel_filter_value");
 
         assert.verifySteps([
             "[]", // category_domain (All)
@@ -1830,7 +1823,7 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent, getDomain } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
@@ -1841,7 +1834,7 @@ QUnit.module("Search", (hooks) => {
             },
         });
 
-        assert.containsN(target, ".o_search_panel_filter_value input:checked", 3);
+        assert.containsN(comp, ".o_search_panel_filter_value input:checked", 3);
         assert.deepEqual(getDomain(), [
             "&",
             ["company_id", "in", [5]],
@@ -1849,9 +1842,9 @@ QUnit.module("Search", (hooks) => {
         ]);
 
         // manually untick a default value
-        await click(getFilter(target, 1, "input"));
+        await click(getFilter(comp, 1, "input"));
 
-        assert.containsN(target, ".o_search_panel_filter_value input:checked", 2);
+        assert.containsN(comp, ".o_search_panel_filter_value input:checked", 2);
         assert.deepEqual(getDomain(), [["state", "in", ["abc", "ghi"]]]);
     });
 
@@ -1891,7 +1884,7 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent, getDomain } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
@@ -1901,7 +1894,7 @@ QUnit.module("Search", (hooks) => {
             },
         });
 
-        const secondGroupCheckbox = getFilterGroup(target, 1, "header > div > input");
+        const secondGroupCheckbox = getFilterGroup(comp, 1, "header > div > input");
 
         assert.strictEqual(secondGroupCheckbox.indeterminate, true);
         assert.deepEqual(getDomain(), [["company_id", "in", [5]]]);
@@ -1923,7 +1916,7 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
@@ -1933,17 +1926,17 @@ QUnit.module("Search", (hooks) => {
             },
         });
 
-        assert.containsOnce(target, ".o_search_panel_section");
+        assert.containsOnce(comp, ".o_search_panel_section");
 
         // There should be a group 'false' displayed with only value B inside it.
-        assert.containsOnce(target, ".o_search_panel_filter_group");
-        assert.deepEqual(getFilterGroupContent(target), ["false", ["B"]]);
-        assert.containsOnce(getFilterGroup(target), ".o_search_panel_filter_value");
+        assert.containsOnce(comp, ".o_search_panel_filter_group");
+        assert.deepEqual(getFilterGroupContent(comp), ["false", ["B"]]);
+        assert.containsOnce(getFilterGroup(comp), ".o_search_panel_filter_value");
 
         // Globally, there should be two values, one displayed in the group 'false', and one at the end of the section
         // (the group false is not displayed and its values are displayed at the first level)
-        assert.containsN(target, ".o_search_panel_filter_value", 2);
-        assert.deepEqual(getFiltersContent(target), ["B", "A"]);
+        assert.containsN(comp, ".o_search_panel_filter_value", 2);
+        assert.deepEqual(getFiltersContent(comp), ["B", "A"]);
     });
 
     QUnit.test("tests conservation of category record order", async (assert) => {
@@ -1962,14 +1955,14 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.deepEqual(getCategoriesContent(target), [
+        assert.deepEqual(getCategoriesContent(comp), [
             "All",
             "lowID",
             "asustek: 2",
@@ -2318,7 +2311,7 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
             const { TestComponent } = makeTestComponent();
-            await makeWithSearch({
+            const comp = await makeWithSearch({
                 serverData,
                 async mockRPC(route, { method }) {
                     if (/search_panel_/.test(method || route)) {
@@ -2332,13 +2325,13 @@ QUnit.module("Search", (hooks) => {
 
             assert.verifySteps(["search_panel_select_range", "search_panel_select_multi_range"]);
 
-            assert.deepEqual(getCategoriesContent(target, getCounters), [1, 3]);
-            assert.deepEqual(getFiltersContent(target, getCounters), [1, 1, 2]);
+            assert.deepEqual(getCategoriesContent(comp, getCounters), [1, 3]);
+            assert.deepEqual(getFiltersContent(comp, getCounters), [1, 1, 2]);
 
-            await click(getFilter(target, 0, "input"));
+            await click(getFilter(comp, 0, "input"));
 
-            assert.deepEqual(getCategoriesContent(target, getCounters), [1]);
-            assert.deepEqual(getFiltersContent(target, getCounters), [1, 1, 2]);
+            assert.deepEqual(getCategoriesContent(comp, getCounters), [1]);
+            assert.deepEqual(getFiltersContent(comp, getCounters), [1, 1, 2]);
 
             assert.verifySteps(["search_panel_select_range", "search_panel_select_multi_range"]);
         }
@@ -2360,21 +2353,21 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_field .o_search_panel_category_value", 3);
-        assert.containsOnce(target, ".o_toggle_fold > i");
-        assert.deepEqual(getCategoriesContent(target, getCounters), [2, 1]);
+        assert.containsN(comp, ".o_search_panel_field .o_search_panel_category_value", 3);
+        assert.containsOnce(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getCategoriesContent(comp, getCounters), [2, 1]);
 
-        await click(getCategory(target, "agrolait"));
+        await click(getCategory(comp, "agrolait"));
 
-        assert.containsN(target, ".o_search_panel_field .o_search_panel_category_value", 5);
-        assert.deepEqual(getCategoriesContent(target, getCounters), [2, 1, 1]);
+        assert.containsN(comp, ".o_search_panel_field .o_search_panel_category_value", 5);
+        assert.deepEqual(getCategoriesContent(comp, getCounters), [2, 1, 1]);
     });
 
     QUnit.test("many2one: select one, no expand, hierarchize, counters", async (assert) => {
@@ -2393,21 +2386,21 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_field .o_search_panel_category_value", 3);
-        assert.containsOnce(target, ".o_toggle_fold > i");
-        assert.deepEqual(getCategoriesContent(target, getCounters), [2, 1]);
+        assert.containsN(comp, ".o_search_panel_field .o_search_panel_category_value", 3);
+        assert.containsOnce(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getCategoriesContent(comp, getCounters), [2, 1]);
 
-        await click(getCategory(target, "agrolait"));
+        await click(getCategory(comp, "agrolait"));
 
-        assert.containsN(target, ".o_search_panel_field .o_search_panel_category_value", 4);
-        assert.deepEqual(getCategoriesContent(target, getCounters), [2, 1, 1]);
+        assert.containsN(comp, ".o_search_panel_field .o_search_panel_category_value", 4);
+        assert.deepEqual(getCategoriesContent(comp, getCounters), [2, 1, 1]);
     });
 
     QUnit.test("many2one: select one, expand, no hierarchize, counters", async (assert) => {
@@ -2426,16 +2419,16 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_field .o_search_panel_category_value", 5);
-        assert.containsNone(target, ".o_toggle_fold > i");
-        assert.deepEqual(getCategoriesContent(target, getCounters), [2, 1, 1]);
+        assert.containsN(comp, ".o_search_panel_field .o_search_panel_category_value", 5);
+        assert.containsNone(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getCategoriesContent(comp, getCounters), [2, 1, 1]);
     });
 
     QUnit.test("many2one: select one, no expand, no hierarchize, counters", async (assert) => {
@@ -2454,16 +2447,16 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_field .o_search_panel_category_value", 4);
-        assert.containsNone(target, ".o_toggle_fold > i");
-        assert.deepEqual(getCategoriesContent(target, getCounters), [2, 1, 1]);
+        assert.containsN(comp, ".o_search_panel_field .o_search_panel_category_value", 4);
+        assert.containsNone(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getCategoriesContent(comp, getCounters), [2, 1, 1]);
     });
 
     QUnit.test("many2one: select one, expand, hierarchize, no counters", async (assert) => {
@@ -2482,21 +2475,21 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_field .o_search_panel_category_value", 3);
-        assert.containsOnce(target, ".o_toggle_fold > i");
-        assert.deepEqual(getCategoriesContent(target, getCounters), []);
+        assert.containsN(comp, ".o_search_panel_field .o_search_panel_category_value", 3);
+        assert.containsOnce(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getCategoriesContent(comp, getCounters), []);
 
-        await click(getCategory(target, "agrolait"));
+        await click(getCategory(comp, "agrolait"));
 
-        assert.containsN(target, ".o_search_panel_field .o_search_panel_category_value", 5);
-        assert.deepEqual(getCategoriesContent(target, getCounters), []);
+        assert.containsN(comp, ".o_search_panel_field .o_search_panel_category_value", 5);
+        assert.deepEqual(getCategoriesContent(comp, getCounters), []);
     });
 
     QUnit.test("many2one: select one, no expand, hierarchize, no counters", async (assert) => {
@@ -2515,21 +2508,21 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_field .o_search_panel_category_value", 3);
-        assert.containsOnce(target, ".o_toggle_fold > i");
-        assert.deepEqual(getCategoriesContent(target, getCounters), []);
+        assert.containsN(comp, ".o_search_panel_field .o_search_panel_category_value", 3);
+        assert.containsOnce(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getCategoriesContent(comp, getCounters), []);
 
-        await click(getCategory(target, "agrolait"));
+        await click(getCategory(comp, "agrolait"));
 
-        assert.containsN(target, ".o_search_panel_field .o_search_panel_category_value", 4);
-        assert.deepEqual(getCategoriesContent(target, getCounters), []);
+        assert.containsN(comp, ".o_search_panel_field .o_search_panel_category_value", 4);
+        assert.deepEqual(getCategoriesContent(comp, getCounters), []);
     });
 
     QUnit.test("many2one: select one, expand, no hierarchize, no counters", async (assert) => {
@@ -2548,16 +2541,16 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_field .o_search_panel_category_value", 5);
-        assert.containsNone(target, ".o_toggle_fold > i");
-        assert.deepEqual(getCategoriesContent(target, getCounters), []);
+        assert.containsN(comp, ".o_search_panel_field .o_search_panel_category_value", 5);
+        assert.containsNone(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getCategoriesContent(comp, getCounters), []);
     });
 
     QUnit.test("many2one: select one, no expand, no hierarchize, no counters", async (assert) => {
@@ -2576,16 +2569,16 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_field .o_search_panel_category_value", 4);
-        assert.containsNone(target, ".o_toggle_fold > i");
-        assert.deepEqual(getCategoriesContent(target, getCounters), []);
+        assert.containsN(comp, ".o_search_panel_field .o_search_panel_category_value", 4);
+        assert.containsNone(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getCategoriesContent(comp, getCounters), []);
     });
 
     QUnit.test("many2one: select multi, expand, groupby, counters", async (assert) => {
@@ -2600,16 +2593,16 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_label", 5);
-        assert.containsNone(target, ".o_toggle_fold > i");
-        assert.deepEqual(getFiltersContent(target, getCounters), [2, 2]);
+        assert.containsN(comp, ".o_search_panel_label", 5);
+        assert.containsNone(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getFiltersContent(comp, getCounters), [2, 2]);
     });
 
     QUnit.test("many2one: select multi, no expand, groupby, counters", async (assert) => {
@@ -2624,16 +2617,16 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_label", 4);
-        assert.containsNone(target, ".o_toggle_fold > i");
-        assert.deepEqual(getFiltersContent(target, getCounters), [2, 2]);
+        assert.containsN(comp, ".o_search_panel_label", 4);
+        assert.containsNone(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getFiltersContent(comp, getCounters), [2, 2]);
     });
 
     QUnit.test("many2one: select multi, expand, no groupby, counters", async (assert) => {
@@ -2648,16 +2641,16 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_label", 3);
-        assert.containsNone(target, ".o_toggle_fold > i");
-        assert.deepEqual(getFiltersContent(target, getCounters), [2, 2]);
+        assert.containsN(comp, ".o_search_panel_label", 3);
+        assert.containsNone(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getFiltersContent(comp, getCounters), [2, 2]);
     });
 
     QUnit.test("many2one: select multi, no expand, no groupby, counters", async (assert) => {
@@ -2672,16 +2665,16 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_label", 2);
-        assert.containsNone(target, ".o_toggle_fold > i");
-        assert.deepEqual(getFiltersContent(target, getCounters), [2, 2]);
+        assert.containsN(comp, ".o_search_panel_label", 2);
+        assert.containsNone(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getFiltersContent(comp, getCounters), [2, 2]);
     });
 
     QUnit.test("many2one: select multi, expand, groupby, no counters", async (assert) => {
@@ -2696,16 +2689,16 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_label", 5);
-        assert.containsNone(target, ".o_toggle_fold > i");
-        assert.deepEqual(getFiltersContent(target, getCounters), []);
+        assert.containsN(comp, ".o_search_panel_label", 5);
+        assert.containsNone(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getFiltersContent(comp, getCounters), []);
     });
 
     QUnit.test("many2one: select multi, no expand, groupby, no counters", async (assert) => {
@@ -2720,16 +2713,16 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_label", 4);
-        assert.containsNone(target, ".o_toggle_fold > i");
-        assert.deepEqual(getFiltersContent(target, getCounters), []);
+        assert.containsN(comp, ".o_search_panel_label", 4);
+        assert.containsNone(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getFiltersContent(comp, getCounters), []);
     });
 
     QUnit.test("many2one: select multi, expand, no groupby, no counters", async (assert) => {
@@ -2744,16 +2737,16 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_label", 3);
-        assert.containsNone(target, ".o_toggle_fold > i");
-        assert.deepEqual(getFiltersContent(target, getCounters), []);
+        assert.containsN(comp, ".o_search_panel_label", 3);
+        assert.containsNone(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getFiltersContent(comp, getCounters), []);
     });
 
     QUnit.test("many2one: select multi, no expand, no groupby, no counters", async (assert) => {
@@ -2768,16 +2761,16 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_label", 2);
-        assert.containsNone(target, ".o_toggle_fold > i");
-        assert.deepEqual(getFiltersContent(target, getCounters), []);
+        assert.containsN(comp, ".o_search_panel_label", 2);
+        assert.containsNone(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getFiltersContent(comp, getCounters), []);
     });
 
     QUnit.test("many2many: select multi, expand, groupby, counters", async (assert) => {
@@ -2792,16 +2785,16 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_label", 5);
-        assert.containsNone(target, ".o_toggle_fold > i");
-        assert.deepEqual(getFiltersContent(target, getCounters), [2, 1]);
+        assert.containsN(comp, ".o_search_panel_label", 5);
+        assert.containsNone(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getFiltersContent(comp, getCounters), [2, 1]);
     });
 
     QUnit.test("many2many: select multi, no expand, groupby, counters", async (assert) => {
@@ -2816,16 +2809,16 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_label", 4);
-        assert.containsNone(target, ".o_toggle_fold > i");
-        assert.deepEqual(getFiltersContent(target, getCounters), [2, 1]);
+        assert.containsN(comp, ".o_search_panel_label", 4);
+        assert.containsNone(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getFiltersContent(comp, getCounters), [2, 1]);
     });
 
     QUnit.test("many2many: select multi, expand, no groupby, counters", async (assert) => {
@@ -2840,16 +2833,16 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_label", 3);
-        assert.containsNone(target, ".o_toggle_fold > i");
-        assert.deepEqual(getFiltersContent(target, getCounters), [2, 1]);
+        assert.containsN(comp, ".o_search_panel_label", 3);
+        assert.containsNone(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getFiltersContent(comp, getCounters), [2, 1]);
     });
 
     QUnit.test("many2many: select multi, no expand, no groupby, counters", async (assert) => {
@@ -2864,16 +2857,16 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_label", 2);
-        assert.containsNone(target, ".o_toggle_fold > i");
-        assert.deepEqual(getFiltersContent(target, getCounters), [2, 1]);
+        assert.containsN(comp, ".o_search_panel_label", 2);
+        assert.containsNone(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getFiltersContent(comp, getCounters), [2, 1]);
     });
 
     QUnit.test("many2many: select multi, expand, groupby, no counters", async (assert) => {
@@ -2888,16 +2881,16 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_label", 5);
-        assert.containsNone(target, ".o_toggle_fold > i");
-        assert.deepEqual(getFiltersContent(target, getCounters), []);
+        assert.containsN(comp, ".o_search_panel_label", 5);
+        assert.containsNone(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getFiltersContent(comp, getCounters), []);
     });
 
     QUnit.test("many2many: select multi, no expand, groupby, no counters", async (assert) => {
@@ -2912,16 +2905,16 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_label", 4);
-        assert.containsNone(target, ".o_toggle_fold > i");
-        assert.deepEqual(getFiltersContent(target, getCounters), []);
+        assert.containsN(comp, ".o_search_panel_label", 4);
+        assert.containsNone(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getFiltersContent(comp, getCounters), []);
     });
 
     QUnit.test("many2many: select multi, expand, no groupby, no counters", async (assert) => {
@@ -2936,16 +2929,16 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_label", 3);
-        assert.containsNone(target, ".o_toggle_fold > i");
-        assert.deepEqual(getFiltersContent(target, getCounters), []);
+        assert.containsN(comp, ".o_search_panel_label", 3);
+        assert.containsNone(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getFiltersContent(comp, getCounters), []);
     });
 
     QUnit.test("many2many: select multi, no expand, no groupby, no counters", async (assert) => {
@@ -2960,16 +2953,16 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_label", 2);
-        assert.containsNone(target, ".o_toggle_fold > i");
-        assert.deepEqual(getFiltersContent(target, getCounters), []);
+        assert.containsN(comp, ".o_search_panel_label", 2);
+        assert.containsNone(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getFiltersContent(comp, getCounters), []);
     });
 
     QUnit.test("selection: select one, expand, counters", async (assert) => {
@@ -2984,16 +2977,16 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_field .o_search_panel_category_value", 4);
-        assert.containsNone(target, ".o_toggle_fold > i");
-        assert.deepEqual(getCategoriesContent(target, getCounters), [1, 2]);
+        assert.containsN(comp, ".o_search_panel_field .o_search_panel_category_value", 4);
+        assert.containsNone(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getCategoriesContent(comp, getCounters), [1, 2]);
     });
 
     QUnit.test("selection: select one, no expand, counters", async (assert) => {
@@ -3008,16 +3001,16 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_field .o_search_panel_category_value", 3);
-        assert.containsNone(target, ".o_toggle_fold > i");
-        assert.deepEqual(getCategoriesContent(target, getCounters), [1, 2]);
+        assert.containsN(comp, ".o_search_panel_field .o_search_panel_category_value", 3);
+        assert.containsNone(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getCategoriesContent(comp, getCounters), [1, 2]);
     });
 
     QUnit.test("selection: select one, expand, no counters", async (assert) => {
@@ -3032,16 +3025,16 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_field .o_search_panel_category_value", 4);
-        assert.containsNone(target, ".o_toggle_fold > i");
-        assert.deepEqual(getCategoriesContent(target, getCounters), []);
+        assert.containsN(comp, ".o_search_panel_field .o_search_panel_category_value", 4);
+        assert.containsNone(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getCategoriesContent(comp, getCounters), []);
     });
 
     QUnit.test("selection: select one, no expand, no counters", async (assert) => {
@@ -3056,16 +3049,16 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_field .o_search_panel_category_value", 3);
-        assert.containsNone(target, ".o_toggle_fold > i");
-        assert.deepEqual(getCategoriesContent(target, getCounters), []);
+        assert.containsN(comp, ".o_search_panel_field .o_search_panel_category_value", 3);
+        assert.containsNone(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getCategoriesContent(comp, getCounters), []);
     });
 
     QUnit.test("selection: select multi, expand, counters", async (assert) => {
@@ -3080,16 +3073,16 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_label", 3);
-        assert.containsNone(target, ".o_toggle_fold > i");
-        assert.deepEqual(getFiltersContent(target, getCounters), [1, 2]);
+        assert.containsN(comp, ".o_search_panel_label", 3);
+        assert.containsNone(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getFiltersContent(comp, getCounters), [1, 2]);
     });
 
     QUnit.test("selection: select multi, no expand, counters", async (assert) => {
@@ -3104,16 +3097,16 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_label", 2);
-        assert.containsNone(target, ".o_toggle_fold > i");
-        assert.deepEqual(getFiltersContent(target, getCounters), [1, 2]);
+        assert.containsN(comp, ".o_search_panel_label", 2);
+        assert.containsNone(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getFiltersContent(comp, getCounters), [1, 2]);
     });
 
     QUnit.test("selection: select multi, expand, no counters", async (assert) => {
@@ -3128,16 +3121,16 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_label", 3);
-        assert.containsNone(target, ".o_toggle_fold > i");
-        assert.deepEqual(getFiltersContent(target, getCounters), []);
+        assert.containsN(comp, ".o_search_panel_label", 3);
+        assert.containsNone(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getFiltersContent(comp, getCounters), []);
     });
 
     QUnit.test("selection: select multi, no expand, no counters", async (assert) => {
@@ -3152,16 +3145,16 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_label", 2);
-        assert.containsNone(target, ".o_toggle_fold > i");
-        assert.deepEqual(getFiltersContent(target, getCounters), []);
+        assert.containsN(comp, ".o_search_panel_label", 2);
+        assert.containsNone(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getFiltersContent(comp, getCounters), []);
     });
 
     //-------------------------------------------------------------------------
@@ -3181,21 +3174,21 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsN(target, ".o_search_panel_label", 5);
-        assert.containsNone(target, ".o_toggle_fold > i");
-        assert.deepEqual(getFiltersContent(target, getCounters), [1, 2]);
+        assert.containsN(comp, ".o_search_panel_label", 5);
+        assert.containsNone(comp, ".o_toggle_fold > i");
+        assert.deepEqual(getFiltersContent(comp, getCounters), [1, 2]);
 
-        await click(getCategory(target, "asustek"));
+        await click(getCategory(comp, "asustek"));
 
-        assert.containsN(target, ".o_search_panel_label", 5);
-        assert.deepEqual(getFiltersContent(target, getCounters), [1]);
+        assert.containsN(comp, ".o_search_panel_label", 5);
+        assert.deepEqual(getFiltersContent(comp, getCounters), [1]);
     });
 
     //-------------------------------------------------------------------------
@@ -3212,25 +3205,25 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsOnce(target, ".o_search_panel_section");
-        assert.containsOnce(target, ".o_search_panel_section_header");
+        assert.containsOnce(comp, ".o_search_panel_section");
+        assert.containsOnce(comp, ".o_search_panel_section_header");
         assert.strictEqual(
-            target.querySelector(".o_search_panel_section_header").innerText,
+            comp.el.querySelector(".o_search_panel_section_header").innerText,
             "COMPANY"
         );
-        assert.containsOnce(target, "section div.alert.alert-warning");
+        assert.containsOnce(comp, "section div.alert.alert-warning");
         assert.strictEqual(
-            target.querySelector("section div.alert.alert-warning").innerText,
+            comp.el.querySelector("section div.alert.alert-warning").innerText,
             "Too many items to display."
         );
-        assert.containsNone(target, ".o_search_panel_category_value");
+        assert.containsNone(comp, ".o_search_panel_category_value");
     });
 
     QUnit.test("reached limit for a filter", async (assert) => {
@@ -3243,25 +3236,25 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.containsOnce(target, ".o_search_panel_section");
-        assert.containsOnce(target, ".o_search_panel_section_header");
+        assert.containsOnce(comp, ".o_search_panel_section");
+        assert.containsOnce(comp, ".o_search_panel_section_header");
         assert.strictEqual(
-            target.querySelector(".o_search_panel_section_header").innerText,
+            comp.el.querySelector(".o_search_panel_section_header").innerText,
             "COMPANY"
         );
-        assert.containsOnce(target, "section div.alert.alert-warning");
+        assert.containsOnce(comp, "section div.alert.alert-warning");
         assert.strictEqual(
-            target.querySelector("section div.alert.alert-warning").innerText,
+            comp.el.querySelector("section div.alert.alert-warning").innerText,
             "Too many items to display."
         );
-        assert.containsNone(target, ".o_search_panel_filter_value");
+        assert.containsNone(comp, ".o_search_panel_filter_value");
     });
 
     QUnit.test(
@@ -3277,7 +3270,7 @@ QUnit.module("Search", (hooks) => {
                 </search>`;
 
             const { TestComponent } = makeTestComponent();
-            await makeWithSearch({
+            const comp = await makeWithSearch({
                 serverData,
                 async mockRPC(route, { method }) {
                     if (/search_panel_/.test(method || route)) {
@@ -3292,17 +3285,17 @@ QUnit.module("Search", (hooks) => {
             assert.verifySteps(["search_panel_select_range"]);
 
             // select 'ABC' in search panel
-            await click(getCategory(target, 1));
+            await click(getCategory(comp, 1));
 
             assert.verifySteps(["search_panel_select_range"]);
 
             // select DEF in filter menu
-            await toggleFilterMenu(target);
-            await toggleMenuItem(target, "DEF");
+            await toggleFilterMenu(comp);
+            await toggleMenuItem(comp, "DEF");
 
             assert.verifySteps(["search_panel_select_range"]);
 
-            const firstCategoryValue = getCategory(target, 0);
+            const firstCategoryValue = getCategory(comp, 0);
             assert.strictEqual(firstCategoryValue.innerText, "All");
             assert.hasClass(
                 firstCategoryValue,
@@ -3326,7 +3319,7 @@ QUnit.module("Search", (hooks) => {
                 </search>`;
 
             const { TestComponent } = makeTestComponent();
-            await makeWithSearch({
+            const comp = await makeWithSearch({
                 serverData,
                 async mockRPC(route, { method }) {
                     if (/search_panel_/.test(method || route)) {
@@ -3339,20 +3332,20 @@ QUnit.module("Search", (hooks) => {
             });
 
             assert.verifySteps(["search_panel_select_range"]);
-            assert.deepEqual(getCategoriesContent(target), ["All", "ABC", "DEF", "GHI"]);
+            assert.deepEqual(getCategoriesContent(comp), ["All", "ABC", "DEF", "GHI"]);
 
             // select 'ABC' in search panel --> no need to update the category value
-            await click(getCategory(target, 1));
+            await click(getCategory(comp, 1));
 
             assert.verifySteps([]);
-            assert.deepEqual(getCategoriesContent(target), ["All", "ABC", "DEF", "GHI"]);
+            assert.deepEqual(getCategoriesContent(comp), ["All", "ABC", "DEF", "GHI"]);
 
             // select DEF in filter menu --> the external domain changes --> the values should be updated
-            await toggleFilterMenu(target);
-            await toggleMenuItem(target, "DEF");
+            await toggleFilterMenu(comp);
+            await toggleMenuItem(comp, "DEF");
 
             assert.verifySteps(["search_panel_select_range"]);
-            assert.deepEqual(getCategoriesContent(target), ["All", "DEF"]);
+            assert.deepEqual(getCategoriesContent(comp), ["All", "DEF"]);
         }
     );
 
@@ -3368,13 +3361,13 @@ QUnit.module("Search", (hooks) => {
             </search>`;
 
         const { TestComponent } = makeTestComponent();
-        await makeWithSearch({
+        const comp = await makeWithSearch({
             serverData,
             Component: TestComponent,
             resModel: "partner",
             searchViewId: false,
         });
 
-        assert.deepEqual(getCategoriesContent(target), ["All", "gold", "silver"]);
+        assert.deepEqual(getCategoriesContent(comp), ["All", "gold", "silver"]);
     });
 });

@@ -1,10 +1,9 @@
 /** @odoo-module **/
 
-import { click, getFixture, nextTick } from "@web/../tests/helpers/utils";
+import { click, nextTick } from "@web/../tests/helpers/utils";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { makeWithSearch, setupControlPanelServiceRegistry } from "./helpers";
 
-let target;
 let serverData;
 QUnit.module("Search", (hooks) => {
     hooks.beforeEach(async () => {
@@ -19,13 +18,12 @@ QUnit.module("Search", (hooks) => {
             },
         };
         setupControlPanelServiceRegistry();
-        target = getFixture();
     });
 
     QUnit.module("ControlPanel");
 
     QUnit.test("simple rendering", async (assert) => {
-        await makeWithSearch({
+        const controlPanel = await makeWithSearch({
             serverData,
             resModel: "foo",
             Component: ControlPanel,
@@ -37,16 +35,16 @@ QUnit.module("Search", (hooks) => {
             searchMenuTypes: [],
         });
 
-        assert.containsOnce(target, ".o_cp_top");
-        assert.containsOnce(target, ".o_cp_top_left");
-        assert.containsNone(target, ".o_cp_top_right");
-        assert.containsOnce(target, ".o_cp_bottom");
-        assert.containsOnce(target, ".o_cp_bottom_left");
-        assert.containsOnce(target, ".o_cp_bottom_right");
+        assert.containsOnce(controlPanel, ".o_cp_top");
+        assert.containsOnce(controlPanel, ".o_cp_top_left");
+        assert.containsNone(controlPanel, ".o_cp_top_right");
+        assert.containsOnce(controlPanel, ".o_cp_bottom");
+        assert.containsOnce(controlPanel, ".o_cp_bottom_left");
+        assert.containsOnce(controlPanel, ".o_cp_bottom_right");
 
-        assert.containsNone(target, ".o_cp_switch_buttons");
+        assert.containsNone(controlPanel, ".o_cp_switch_buttons");
 
-        assert.containsOnce(target, ".breadcrumb");
+        assert.containsOnce(controlPanel, ".breadcrumb");
     });
 
     QUnit.test("breadcrumbs", async (assert) => {
@@ -63,8 +61,8 @@ QUnit.module("Search", (hooks) => {
             searchMenuTypes: [],
         });
 
-        assert.containsN(target, ".breadcrumb li.breadcrumb-item", 2);
-        const breadcrumbItems = target.querySelectorAll("li.breadcrumb-item");
+        assert.containsN(controlPanel, ".breadcrumb li.breadcrumb-item", 2);
+        const breadcrumbItems = controlPanel.el.querySelectorAll("li.breadcrumb-item");
         assert.strictEqual(breadcrumbItems[0].innerText, "Previous");
         assert.hasClass(breadcrumbItems[1], "active");
         assert.strictEqual(breadcrumbItems[1].innerText, "Current");
@@ -91,9 +89,9 @@ QUnit.module("Search", (hooks) => {
             searchMenuTypes: [],
         });
 
-        assert.containsOnce(target, ".o_cp_switch_buttons");
-        assert.containsN(target, ".o_switch_view", 2);
-        const views = target.querySelectorAll(".o_switch_view");
+        assert.containsOnce(controlPanel, ".o_cp_switch_buttons");
+        assert.containsN(controlPanel, ".o_switch_view", 2);
+        const views = controlPanel.el.querySelectorAll(".o_switch_view");
 
         assert.strictEqual(views[0].getAttribute("data-tooltip"), "List");
         assert.hasClass(views[0], "active");
@@ -127,11 +125,11 @@ QUnit.module("Search", (hooks) => {
             },
             searchMenuTypes: [],
         });
-        assert.containsOnce(target, ".o_pager");
+        assert.containsOnce(controlPanel.el, ".o_pager");
 
         pagerInfo.total = 0;
         controlPanel.render();
         await nextTick();
-        assert.containsNone(target, ".o_pager");
+        assert.containsNone(controlPanel.el, ".o_pager");
     });
 });

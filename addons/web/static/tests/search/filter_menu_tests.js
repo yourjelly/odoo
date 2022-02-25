@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { getFixture, patchDate, patchWithCleanup } from "@web/../tests/helpers/utils";
+import { patchDate, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { browser } from "@web/core/browser/browser";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
 import {
@@ -22,7 +22,6 @@ function getContext(controlPanel) {
     return controlPanel.env.searchModel.context;
 }
 
-let target;
 let serverData;
 QUnit.module("Search", (hooks) => {
     hooks.beforeEach(async () => {
@@ -51,7 +50,6 @@ QUnit.module("Search", (hooks) => {
             setTimeout: (fn) => fn(),
             clearTimeout: () => {},
         });
-        target = getFixture();
     });
 
     QUnit.module("FilterMenu");
@@ -59,23 +57,23 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("simple rendering with no filter", async function (assert) {
         assert.expect(3);
 
-        await makeWithSearch({
+        const controlPanel = await makeWithSearch({
             serverData,
             resModel: "foo",
             Component: ControlPanel,
             searchMenuTypes: ["filter"],
         });
 
-        await toggleFilterMenu(target);
-        assert.containsNone(target, ".o_menu_item");
-        assert.containsNone(target, ".dropdown-divider");
-        assert.containsOnce(target, ".o_add_custom_filter_menu");
+        await toggleFilterMenu(controlPanel);
+        assert.containsNone(controlPanel, ".o_menu_item");
+        assert.containsNone(controlPanel, ".dropdown-divider");
+        assert.containsOnce(controlPanel, ".o_add_custom_filter_menu");
     });
 
     QUnit.test("simple rendering with a single filter", async function (assert) {
         assert.expect(3);
 
-        await makeWithSearch({
+        const controlPanel = await makeWithSearch({
             serverData,
             resModel: "foo",
             Component: ControlPanel,
@@ -88,10 +86,10 @@ QUnit.module("Search", (hooks) => {
                 `,
         });
 
-        await toggleFilterMenu(target);
-        assert.containsOnce(target, ".o_menu_item");
-        assert.containsOnce(target, ".dropdown-divider");
-        assert.containsOnce(target, ".o_add_custom_filter_menu");
+        await toggleFilterMenu(controlPanel);
+        assert.containsOnce(controlPanel, ".o_menu_item");
+        assert.containsOnce(controlPanel, ".dropdown-divider");
+        assert.containsOnce(controlPanel, ".o_add_custom_filter_menu");
     });
 
     QUnit.test('toggle a "simple" filter in filter menu works', async function (assert) {
@@ -110,25 +108,25 @@ QUnit.module("Search", (hooks) => {
                 `,
         });
 
-        await toggleFilterMenu(target);
-        assert.deepEqual(getFacetTexts(target), []);
-        assert.notOk(isItemSelected(target, "Foo"));
+        await toggleFilterMenu(controlPanel);
+        assert.deepEqual(getFacetTexts(controlPanel), []);
+        assert.notOk(isItemSelected(controlPanel, "Foo"));
         assert.deepEqual(getDomain(controlPanel), []);
 
-        await toggleMenuItem(target, "Foo");
+        await toggleMenuItem(controlPanel, "Foo");
 
-        assert.deepEqual(getFacetTexts(target), ["Foo"]);
+        assert.deepEqual(getFacetTexts(controlPanel), ["Foo"]);
         assert.containsOnce(
-            target.querySelector(".o_searchview .o_searchview_facet"),
+            controlPanel.el.querySelector(".o_searchview .o_searchview_facet"),
             "span.oi.oi-filter.o_searchview_facet_label"
         );
-        assert.ok(isItemSelected(target, "Foo"));
+        assert.ok(isItemSelected(controlPanel, "Foo"));
         assert.deepEqual(getDomain(controlPanel), [["foo", "=", "qsdf"]]);
 
-        await toggleMenuItem(target, "Foo");
+        await toggleMenuItem(controlPanel, "Foo");
 
-        assert.deepEqual(getFacetTexts(target), []);
-        assert.notOk(isItemSelected(target, "Foo"));
+        assert.deepEqual(getFacetTexts(controlPanel), []);
+        assert.notOk(isItemSelected(controlPanel, "Foo"));
         assert.deepEqual(getDomain(controlPanel), []);
     });
 
@@ -151,10 +149,10 @@ QUnit.module("Search", (hooks) => {
             context: { search_default_date_field: 1 },
         });
 
-        await toggleFilterMenu(target);
-        await toggleMenuItem(target, "Date");
+        await toggleFilterMenu(controlPanel);
+        await toggleMenuItem(controlPanel, "Date");
 
-        const optionEls = target.querySelectorAll(".dropdown .o_item_option");
+        const optionEls = controlPanel.el.querySelectorAll(".dropdown .o_item_option");
 
         // default filter should be activated with the global default period 'this_month'
         assert.deepEqual(getDomain(controlPanel), [
@@ -162,8 +160,8 @@ QUnit.module("Search", (hooks) => {
             ["date_field", ">=", "2017-03-01"],
             ["date_field", "<=", "2017-03-31"],
         ]);
-        assert.ok(isItemSelected(target, "Date"));
-        assert.ok(isOptionSelected(target, "Date", "March"));
+        assert.ok(isItemSelected(controlPanel, "Date"));
+        assert.ok(isOptionSelected(controlPanel, "Date", "March"));
 
         // check option descriptions
         const optionDescriptions = [...optionEls].map((e) => e.innerText.trim());
@@ -344,16 +342,16 @@ QUnit.module("Search", (hooks) => {
             },
         ];
         for (const s of steps) {
-            await toggleMenuItemOption(target, "Date", s.toggledOption);
+            await toggleMenuItemOption(controlPanel, "Date", s.toggledOption);
             assert.deepEqual(getDomain(controlPanel), s.domain);
             if (s.resultingFacet) {
-                assert.deepEqual(getFacetTexts(target), [s.resultingFacet]);
+                assert.deepEqual(getFacetTexts(controlPanel), [s.resultingFacet]);
             } else {
-                assert.deepEqual(getFacetTexts(target), []);
+                assert.deepEqual(getFacetTexts(controlPanel), []);
             }
             s.selectedoptions.forEach((option) => {
                 assert.ok(
-                    isOptionSelected(target, "Date", option),
+                    isOptionSelected(controlPanel, "Date", option),
                     `at step ${steps.indexOf(s) + 1}, ${option} should be selected`
                 );
             });
@@ -387,14 +385,14 @@ QUnit.module("Search", (hooks) => {
                 ["date_field", "<=", "2016-12-31"],
             ]);
 
-            assert.deepEqual(getFacetTexts(target), ["Date: December 2016"]);
+            assert.deepEqual(getFacetTexts(controlPanel), ["Date: December 2016"]);
 
-            await toggleFilterMenu(target);
-            await toggleMenuItem(target, "Date");
+            await toggleFilterMenu(controlPanel);
+            await toggleMenuItem(controlPanel, "Date");
 
-            assert.ok(isItemSelected(target, "Date"));
-            assert.ok(isOptionSelected(target, "Date", "December"));
-            assert.ok(isOptionSelected(target, "Date", "2016"));
+            assert.ok(isItemSelected(controlPanel, "Date"));
+            assert.ok(isOptionSelected(controlPanel, "Date", "December"));
+            assert.ok(isOptionSelected(controlPanel, "Date", "2016"));
         }
     );
 
@@ -454,7 +452,7 @@ QUnit.module("Search", (hooks) => {
 
         patchDate(2019, 6, 31, 13, 43, 0);
 
-        await makeWithSearch({
+        const controlPanel = await makeWithSearch({
             serverData,
             resModel: "foo",
             Component: ControlPanel,
@@ -468,7 +466,7 @@ QUnit.module("Search", (hooks) => {
             context: { search_default_date_field: true },
         });
 
-        assert.deepEqual(getFacetTexts(target), ["Date: June 2019"]);
+        assert.deepEqual(getFacetTexts(controlPanel), ["Date: June 2019"]);
     });
 
     QUnit.test("filter domains are correcly combined by OR and AND", async function (assert) {
@@ -503,7 +501,7 @@ QUnit.module("Search", (hooks) => {
             ["foo", "=", "f2_g2"],
         ]);
 
-        assert.deepEqual(getFacetTexts(target), [
+        assert.deepEqual(getFacetTexts(controlPanel), [
             "Filter Group 1",
             "Filter 1 Group 2orFilter 2 GROUP 2",
         ]);
@@ -512,7 +510,7 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("arch order of groups of filters preserved", async function (assert) {
         assert.expect(12);
 
-        await makeWithSearch({
+        const controlPanel = await makeWithSearch({
             serverData,
             resModel: "foo",
             Component: ControlPanel,
@@ -545,10 +543,10 @@ QUnit.module("Search", (hooks) => {
                 `,
         });
 
-        await toggleFilterMenu(target);
-        assert.containsN(target, ".o_filter_menu .o_menu_item", 11);
+        await toggleFilterMenu(controlPanel);
+        assert.containsN(controlPanel, ".o_filter_menu .o_menu_item", 11);
 
-        const menuItemEls = target.querySelectorAll(".o_filter_menu .o_menu_item");
+        const menuItemEls = controlPanel.el.querySelectorAll(".o_filter_menu .o_menu_item");
         [...menuItemEls].forEach((e, index) => {
             assert.strictEqual(e.innerText.trim(), String(index + 1));
         });

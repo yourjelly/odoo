@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { browser } from "@web/core/browser/browser";
-import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, useEffect, useExternalListener } = owl;
 
@@ -34,7 +33,7 @@ const { Component, useEffect, useExternalListener } = owl;
  * importing this file.  The usual way to do that would be to use the effect
  * service (by triggering the 'show_effect' event)
  */
-export class RainbowMan extends LegacyComponent {
+export class RainbowMan extends Component {
     setup() {
         useExternalListener(document.body, "click", this.closeRainbowMan);
         this.delay = RainbowMan.rainbowFadeouts[this.props.fadeout];

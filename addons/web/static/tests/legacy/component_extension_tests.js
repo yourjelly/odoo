@@ -4,11 +4,9 @@ odoo.define('web.component_extension_tests', function (require) {
     const makeTestEnvironment = require("web.test_env");
     const testUtils = require("web.test_utils");
     const { destroy, getFixture, mount } = require("@web/../tests/helpers/utils");
-    const { LegacyComponent } = require("@web/legacy/legacy_component");
 
     const { Component, xml } = owl;
     const { useListener } = require("@web/core/utils/hooks");
-    const { LegacyComponent } = require("@web/legacy/legacy_component");
 
     let target;
     QUnit.module("web", { beforeEach() { target = getFixture(); }}, function () {
@@ -17,7 +15,7 @@ odoo.define('web.component_extension_tests', function (require) {
         QUnit.test("Component destroyed while performing successful RPC", async function (assert) {
             assert.expect(1);
 
-            class Parent extends LegacyComponent {}
+            class Parent extends Component {}
             Parent.template = xml`<div/>`;
 
             const env = makeTestEnvironment({}, () => Promise.resolve());
@@ -35,7 +33,7 @@ odoo.define('web.component_extension_tests', function (require) {
         QUnit.test("Component destroyed while performing failed RPC", async function (assert) {
             assert.expect(1);
 
-            class Parent extends LegacyComponent {}
+            class Parent extends Component {}
             Parent.template = xml`<div/>`;
 
             const env = makeTestEnvironment({}, () => Promise.reject());
@@ -54,7 +52,7 @@ odoo.define('web.component_extension_tests', function (require) {
         QUnit.test("useListener handler type", async function (assert) {
             assert.expect(1);
 
-            class Parent extends LegacyComponent {
+            class Parent extends Component {
                 setup() {
                     useListener('custom1', '_onCustom1');
                 }
@@ -73,7 +71,7 @@ odoo.define('web.component_extension_tests', function (require) {
             assert.expect(12);
             const env = makeTestEnvironment({}, () => Promise.reject());
 
-            class Parent extends LegacyComponent {
+            class Parent extends Component {
                 setup() {
                     useListener('custom1', this._onCustom1);
                     useListener('custom2', this._onCustom2);
@@ -124,7 +122,7 @@ odoo.define('web.component_extension_tests', function (require) {
         QUnit.test("useListener with native JS selector", async function (assert) {
             assert.expect(3);
 
-            class Parent extends LegacyComponent {
+            class Parent extends Component {
                 setup() {
                     useListener('custom1', 'div .custom-class', this._onCustom1);
                 }
@@ -151,7 +149,7 @@ odoo.define('web.component_extension_tests', function (require) {
         QUnit.test("useListener with native JS selector delegation", async function (assert) {
             assert.expect(3);
 
-            class Parent extends LegacyComponent {
+            class Parent extends Component {
                 setup() {
                     useListener('custom1', '.custom-class', this._onCustom1);
                 }
@@ -180,7 +178,7 @@ odoo.define('web.component_extension_tests', function (require) {
         QUnit.test("useListener with capture option", async function (assert) {
             assert.expect(7);
 
-            class Leaf extends LegacyComponent {
+            class Leaf extends Component {
                 setup() {
                     useListener('custom1', this._onCustom1);
                 }
@@ -190,7 +188,7 @@ odoo.define('web.component_extension_tests', function (require) {
             }
             Leaf.template = xml`<div class="leaf"/>`;
 
-            class Root extends LegacyComponent {
+            class Root extends Component {
                 setup() {
                     useListener('custom1', this._onCustom1, { capture: true });
                 }

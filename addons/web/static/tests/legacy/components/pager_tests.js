@@ -3,13 +3,12 @@ odoo.define('web.pager_tests', function (require) {
 
     const Pager = require('web.Pager');
     const testUtils = require('web.test_utils');
-    const { LegacyComponent } = require("@web/legacy/legacy_component");
 
     const { createComponent } = testUtils;
 
     const { Component, xml, useState } = owl;
 
-    class PagerController extends LegacyComponent {
+    class PagerController extends Component {
         setup() {
             this.state = useState({ ...this.props });
         }

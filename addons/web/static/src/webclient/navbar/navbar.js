@@ -6,7 +6,6 @@ import { useService, useBus } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 import { debounce } from "@web/core/utils/timing";
 import { ErrorHandler, NotUpdatable } from "@web/core/utils/components";
-import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, onWillDestroy, useExternalListener, useEffect, useRef } = owl;
 const systrayRegistry = registry.category("systray");
@@ -31,7 +30,7 @@ MenuDropdown.props.xmlid = {
     optional: true,
 };
 
-export class NavBar extends LegacyComponent {
+export class NavBar extends Component {
     setup() {
         this.currentAppSectionsExtra = [];
         this.actionService = useService("action");

@@ -3,7 +3,6 @@
 import { localization } from "@web/core/l10n/localization";
 import { registry } from "@web/core/registry";
 import { useAutofocus } from "@web/core/utils/hooks";
-import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const {
     Component,
@@ -50,7 +49,7 @@ const luxonFormatToMomentFormat = (format) => {
  * stringified since tempusdominus only works with moment objects.
  * @extends Component
  */
-export class DatePicker extends LegacyComponent {
+export class DatePicker extends Component {
     setup() {
         this.inputRef = useRef("input");
         this.state = useState({ warning: false });

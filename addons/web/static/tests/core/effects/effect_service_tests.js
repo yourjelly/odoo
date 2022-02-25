@@ -15,13 +15,12 @@ import {
     nextTick,
     patchWithCleanup,
 } from "../../helpers/utils";
-import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, markup, xml } = owl;
 const serviceRegistry = registry.category("services");
 const mainComponentRegistry = registry.category("main_components");
 
-class Parent extends LegacyComponent {
+class Parent extends Component {
     setup() {
         this.EffectContainer = mainComponentRegistry.get("EffectContainer");
         this.NotificationContainer = mainComponentRegistry.get("NotificationContainer");
@@ -131,7 +130,7 @@ QUnit.module("Effect Service", (hooks) => {
     QUnit.test("rendering a rainbowman with a custom component", async function (assert) {
         assert.expect(2);
         const props = { foo: "bar" };
-        class Custom extends LegacyComponent {
+        class Custom extends Component {
             setup() {
                 assert.deepEqual(this.props, props, "should have received these props");
             }

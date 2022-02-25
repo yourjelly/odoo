@@ -13,13 +13,12 @@ import {
 } from "../helpers/utils";
 import { registry } from "@web/core/registry";
 import { uiService } from "@web/core/ui/ui_service";
-import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, useState, xml } = owl;
 
 const serviceRegistry = registry.category("services");
 
-class PagerController extends LegacyComponent {
+class PagerController extends Component {
     setup() {
         this.state = useState({ ...this.props });
     }
@@ -34,16 +33,12 @@ PagerController.components = { Pager };
 async function makePager(props) {
     serviceRegistry.add("ui", uiService);
     const env = await makeTestEnv();
-    const pager = await mount(PagerController, target, { env, props });
+    const pager = await mount(PagerController, getFixture(), { env, props });
     return pager;
 }
 
-QUnit.module("Components", ({ beforeEach }) => {
+QUnit.module("Components", () => {
     QUnit.module("Pager");
-
-    beforeEach(() => {
-        target = getFixture();
-    });
 
     QUnit.test("basic interactions", async function (assert) {
         assert.expect(2);
@@ -57,14 +52,14 @@ QUnit.module("Components", ({ beforeEach }) => {
             },
         });
         assert.strictEqual(
-            target.querySelector(`.o_pager_counter .o_pager_value`).textContent.trim(),
+            pager.el.querySelector(`.o_pager_counter .o_pager_value`).textContent.trim(),
             "1-4",
             "currentMinimum should be set to 1"
         );
 
-        await click(target.querySelector(`.o_pager button.o_pager_next`));
+        await click(pager.el.querySelector(`.o_pager button.o_pager_next`));
         assert.strictEqual(
-            target.querySelector(`.o_pager_counter .o_pager_value`).textContent.trim(),
+            pager.el.querySelector(`.o_pager_counter .o_pager_value`).textContent.trim(),
             "5-8",
             "currentMinimum should now be 5"
         );
@@ -82,23 +77,23 @@ QUnit.module("Components", ({ beforeEach }) => {
             },
         });
 
-        await click(target, ".o_pager_value");
+        await click(pager.el, ".o_pager_value");
 
-        assert.containsOnce(target, "input", "the pager should contain an input");
+        assert.containsOnce(pager, "input", "the pager should contain an input");
         assert.strictEqual(
-            target.querySelector(`.o_pager_counter .o_pager_value`).value,
+            pager.el.querySelector(`.o_pager_counter .o_pager_value`).value,
             "1-4",
             "the input should have correct value"
         );
 
         // change the limit
-        const input = target.querySelector(`.o_pager_counter input.o_pager_value`);
+        const input = pager.el.querySelector(`.o_pager_counter input.o_pager_value`);
         input.value = "1-6";
         await triggerEvents(input, null, ["change", "blur"]);
 
-        assert.containsNone(target, "input", "the pager should not contain an input anymore");
+        assert.containsNone(pager, "input", "the pager should not contain an input anymore");
         assert.strictEqual(
-            target.querySelector(`.o_pager_counter .o_pager_value`).textContent.trim(),
+            pager.el.querySelector(`.o_pager_counter .o_pager_value`).textContent.trim(),
             "1-6",
             "the limit should have been updated"
         );
@@ -107,7 +102,7 @@ QUnit.module("Components", ({ beforeEach }) => {
     QUnit.test("keydown on pager with same value", async function (assert) {
         assert.expect(7);
 
-        await makePager({
+        const pager = await makePager({
             offset: 0,
             limit: 4,
             total: 10,
@@ -117,18 +112,18 @@ QUnit.module("Components", ({ beforeEach }) => {
         });
 
         // Enter edit mode
-        await click(target, ".o_pager_value");
+        await click(pager.el, ".o_pager_value");
 
-        assert.containsOnce(target, "input");
-        assert.strictEqual(target.querySelector(`.o_pager_counter .o_pager_value`).value, "1-4");
+        assert.containsOnce(pager.el, "input");
+        assert.strictEqual(pager.el.querySelector(`.o_pager_counter .o_pager_value`).value, "1-4");
         assert.verifySteps([]);
 
         // Exit edit mode
-        await triggerEvent(target, "input", "keydown", { key: "Enter" });
+        await triggerEvent(pager.el, "input", "keydown", { key: "Enter" });
 
-        assert.containsNone(target, "input");
+        assert.containsNone(pager.el, "input");
         assert.strictEqual(
-            target.querySelector(`.o_pager_counter .o_pager_value`).textContent.trim(),
+            pager.el.querySelector(`.o_pager_counter .o_pager_value`).textContent.trim(),
             "1-4"
         );
         assert.verifySteps(["pager-changed"]);
@@ -147,18 +142,18 @@ QUnit.module("Components", ({ beforeEach }) => {
         });
 
         assert.strictEqual(
-            target.querySelector(`.o_pager_counter .o_pager_value`).textContent.trim(),
+            pager.el.querySelector(`.o_pager_counter .o_pager_value`).textContent.trim(),
             "1-4",
             "Initial value should be correct"
         );
 
         async function inputAndAssert(inputValue, expected, reason) {
-            await click(target.querySelector(`.o_pager_counter .o_pager_value`));
-            const inputEl = target.querySelector(`.o_pager_counter input.o_pager_value`);
+            await click(pager.el.querySelector(`.o_pager_counter .o_pager_value`));
+            const inputEl = pager.el.querySelector(`.o_pager_counter input.o_pager_value`);
             inputEl.value = inputValue;
             await triggerEvents(inputEl, null, ["change", "blur"]);
             assert.strictEqual(
-                target.querySelector(`.o_pager_counter .o_pager_value`).textContent.trim(),
+                pager.el.querySelector(`.o_pager_counter .o_pager_value`).textContent.trim(),
                 expected,
                 `Pager value should be "${expected}" when given "${inputValue}": ${reason}`
             );
@@ -200,19 +195,19 @@ QUnit.module("Components", ({ beforeEach }) => {
                 pager.updateProps(data);
             },
         });
-        const pagerButtons = target.querySelectorAll("button");
+        const pagerButtons = pager.el.querySelectorAll("button");
 
         // Click twice
-        await click(target.querySelector(`.o_pager button.o_pager_next`));
-        await click(target.querySelector(`.o_pager button.o_pager_next`));
+        await click(pager.el.querySelector(`.o_pager button.o_pager_next`));
+        await click(pager.el.querySelector(`.o_pager button.o_pager_next`));
         // Try to edit the pager value
-        await click(target, ".o_pager_value");
+        await click(pager.el, ".o_pager_value");
 
         assert.strictEqual(pagerButtons.length, 2, "the two buttons should be displayed");
         assert.ok(pagerButtons[0].disabled, "'previous' is disabled");
         assert.ok(pagerButtons[1].disabled, "'next' is disabled");
         assert.strictEqual(
-            target.querySelector(".o_pager_value").tagName,
+            pager.el.querySelector(".o_pager_value").tagName,
             "SPAN",
             "pager edition is prevented"
         );
@@ -225,15 +220,15 @@ QUnit.module("Components", ({ beforeEach }) => {
         assert.notOk(pagerButtons[0].disabled, "'previous' is enabled");
         assert.notOk(pagerButtons[1].disabled, "'next' is enabled");
         assert.strictEqual(
-            target.querySelector(`.o_pager_counter .o_pager_value`).textContent.trim(),
+            pager.el.querySelector(`.o_pager_counter .o_pager_value`).textContent.trim(),
             "5-8",
             "value has been updated"
         );
 
-        await click(target, ".o_pager_value");
+        await click(pager.el, ".o_pager_value");
 
         assert.strictEqual(
-            target.querySelector(".o_pager_value").tagName,
+            pager.el.querySelector(".o_pager_value").tagName,
             "INPUT",
             "pager edition is re-enabled"
         );
@@ -249,15 +244,15 @@ QUnit.module("Components", ({ beforeEach }) => {
             },
         });
 
-        await click(target, ".o_pager_value");
-        assert.containsOnce(target, "input", "the pager should contain an input");
+        await click(pager.el, ".o_pager_value");
+        assert.containsOnce(pager, "input", "the pager should contain an input");
         assert.strictEqual(
-            target.querySelector("input"),
+            pager.el.querySelector("input"),
             document.activeElement,
             "pager input is focused"
         );
 
-        await triggerEvent(target, null, "mousedown");
-        assert.containsNone(target, "input", "the pager should not contain an input");
+        await triggerEvent(pager.el, null, "mousedown");
+        assert.containsNone(pager, "input", "the pager should not contain an input");
     });
 });

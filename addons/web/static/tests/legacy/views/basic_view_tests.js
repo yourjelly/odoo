@@ -5,7 +5,6 @@ odoo.define('web.basic_view_tests', function (require) {
     const BasicRenderer = require("web.BasicRenderer");
     const testUtils = require('web.test_utils');
     const widgetRegistryOwl = require('web.widgetRegistry');
-    const { LegacyComponent } = require("@web/legacy/legacy_component");
 
     const { Component, xml } = owl;
 
@@ -44,7 +43,7 @@ odoo.define('web.basic_view_tests', function (require) {
                 })
             });
 
-            class MyWidget extends LegacyComponent {}
+            class MyWidget extends Component {}
             MyWidget.fieldDependencies = {
                 foo: { type: 'char' },
                 bar: { type: 'boolean' },

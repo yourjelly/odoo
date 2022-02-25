@@ -1,8 +1,6 @@
 odoo.define('web.OwlCompatibility', function (require) {
     "use strict";
 
-    const { LegacyComponent } = require("@web/legacy/legacy_component");
-
     /**
      * This file defines the necessary tools for the transition phase where Odoo
      * legacy widgets and Owl components will coexist. There are two possible
@@ -86,7 +84,7 @@ odoo.define('web.OwlCompatibility', function (require) {
      *         }
      *     }
      */
-    class ComponentAdapter extends LegacyComponent {
+    class ComponentAdapter extends Component {
         /**
          * Creates the template on-the-fly, depending on the type of Component
          * (legacy widget or Owl component).
@@ -481,7 +479,7 @@ odoo.define('web.OwlCompatibility', function (require) {
     /**
      * The component class that will be instanciated between a legacy and an OWL 2 layer.
      */
-    class ProxyComponent extends LegacyComponent {
+    class ProxyComponent extends Component {
         setup() {
             onMounted(() => {
                 this.props.mounted();

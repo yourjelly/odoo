@@ -5,7 +5,6 @@ import { popoverService } from "@web/core/popover/popover_service";
 import { registry } from "@web/core/registry";
 import { clearRegistryWithCleanup, makeTestEnv } from "../../helpers/mock_env";
 import { destroy, getFixture, mount, nextTick } from "../../helpers/utils";
-import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, xml } = owl;
 
@@ -15,7 +14,7 @@ let popoverTarget;
 
 const mainComponents = registry.category("main_components");
 
-class PseudoWebClient extends LegacyComponent {
+class PseudoWebClient extends Component {
     setup() {
         this.Components = mainComponents.getEntries();
     }
@@ -44,10 +43,10 @@ QUnit.module("Popover hook", {
 });
 
 QUnit.test("close popover when component is unmounted", async (assert) => {
-    class Comp extends LegacyComponent {}
+    class Comp extends Component {}
     Comp.template = xml`<div t-att-id="props.id">in popover</div>`;
 
-    class CompWithPopover extends LegacyComponent {
+    class CompWithPopover extends Component {
         setup() {
             this.popover = usePopover();
         }

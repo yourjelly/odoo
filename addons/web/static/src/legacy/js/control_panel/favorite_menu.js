@@ -7,7 +7,6 @@ odoo.define('web.FavoriteMenu', function (require) {
     const { FACET_ICONS } = require("web.searchUtils");
     const Registry = require('web.Registry');
     const { useModel } = require('web.Model');
-    const { LegacyComponent } = require("@web/legacy/legacy_component");
 
     const { Component, useState } = owl;
 
@@ -20,7 +19,7 @@ odoo.define('web.FavoriteMenu', function (require) {
      * Only the favorite generator (@see CustomFavoriteItem) is registered in
      * the `web` module.
      */
-    class FavoriteMenu extends LegacyComponent {
+    class FavoriteMenu extends Component {
         setup() {
             this.icon = FACET_ICONS.favorite;
             this.model = useModel('searchModel');

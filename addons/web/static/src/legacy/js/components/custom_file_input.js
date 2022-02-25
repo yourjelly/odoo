@@ -1,7 +1,6 @@
 odoo.define('web.CustomFileInput', function (require) {
     "use strict";
 
-    const { LegacyComponent } = require("@web/legacy/legacy_component");
     const { Component, useRef } = owl;
 
     /**
@@ -12,7 +11,7 @@ odoo.define('web.CustomFileInput', function (require) {
      * prompt.
      * @extends Component
      */
-    class CustomFileInput extends LegacyComponent {
+    class CustomFileInput extends Component {
         /**
          * @param {Object} [props]
          * @param {string} [props.accepted_file_extensions='*'] Comma-separated

@@ -10,7 +10,6 @@ odoo.define('web.ControlPanel', function (require) {
     const Pager = require('web.Pager');
     const SearchBar = require('web.SearchBar');
     const { useModel } = require('web.Model');
-    const { LegacyComponent } = require("@web/legacy/legacy_component");
 
     const { Component, onMounted, onPatched, onWillDestroy, onWillUpdateProps, useRef, useSubEnv } = owl;
 
@@ -96,7 +95,7 @@ odoo.define('web.ControlPanel', function (require) {
      * inheritance mechanism when converting the views/actions.
      * @extends Component
      */
-    class ControlPanel extends LegacyComponent {
+    class ControlPanel extends Component {
         setup() {
             this.additionalContent = getAdditionalContent(this.props);
 

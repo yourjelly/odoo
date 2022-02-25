@@ -6,7 +6,6 @@ import { registry } from "@web/core/registry";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { useAutofocus, useBus, useService } from "@web/core/utils/hooks";
 import { fuzzyTest } from "@web/core/utils/search";
-import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component, useExternalListener, useState } = owl;
 const parsers = registry.category("parsers");
@@ -15,7 +14,7 @@ const CHAR_FIELDS = ["char", "html", "many2many", "many2one", "one2many", "text"
 
 let nextItemId = 1;
 
-export class SearchBar extends LegacyComponent {
+export class SearchBar extends Component {
     setup() {
         this.fields = this.env.searchModel.searchViewFields;
         this.searchItems = this.env.searchModel.getSearchItems((f) => f.type === "field");

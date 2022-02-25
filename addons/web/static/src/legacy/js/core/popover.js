@@ -1,7 +1,6 @@
 odoo.define('web.Popover', function (require) {
     'use strict';
 
-    const { LegacyComponent } = require("@web/legacy/legacy_component");
     const { Component, status, onWillUnmount, useEffect, useRef, useState } = owl;
 
     /**
@@ -12,7 +11,7 @@ odoo.define('web.Popover', function (require) {
      * CSS pseudo-element.
      * @extends Component
      **/
-    class Popover extends LegacyComponent {
+    class Popover extends Component {
         /**
          * @param {Object} props
          * @param {String} [props.position='bottom']

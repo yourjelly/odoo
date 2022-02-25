@@ -4,7 +4,6 @@ odoo.define('web.DatePickerOwl', function (require) {
     const field_utils = require('web.field_utils');
     const time = require('web.time');
     const { useAutofocus } = require("@web/core/utils/hooks");
-    const { LegacyComponent } = require("@web/legacy/legacy_component");
 
     const {
         Component,
@@ -31,7 +30,7 @@ odoo.define('web.DatePickerOwl', function (require) {
      * to this component will be passed as arguments to instantiate the picker widget).
      * @extends Component
      */
-    class DatePicker extends LegacyComponent {
+    class DatePicker extends Component {
         setup() {
             this.state = useState({ warning: false });
 

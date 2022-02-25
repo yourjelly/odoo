@@ -7,7 +7,6 @@ import { registry } from "@web/core/registry";
 import { capitalize } from "@web/core/utils/strings";
 import { getVisibleElements } from "@web/core/utils/ui";
 import { DefaultCommandItem } from "./command_palette";
-import { LegacyComponent } from "@web/legacy/legacy_component";
 
 const { Component } = owl;
 
@@ -16,7 +15,7 @@ commandSetupRegistry.add("default", {
     emptyMessage: _lt("No command found"),
 });
 
-export class HotkeyCommandItem extends LegacyComponent {
+export class HotkeyCommandItem extends Component {
     setup() {
         useHotkey(this.props.hotkey, () => {
             this.trigger("execute-command");

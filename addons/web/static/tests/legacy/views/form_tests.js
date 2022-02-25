@@ -19,7 +19,6 @@ var ViewDialogs = require('web.view_dialogs');
 var widgetRegistry = require('web.widget_registry');
 const widgetRegistryOwl = require('web.widgetRegistry');
 var Widget = require('web.Widget');
-const { LegacyComponent } = require("@web/legacy/legacy_component");
 
 var _t = core._t;
 var createView = testUtils.createView;
@@ -31,7 +30,6 @@ const makeTestEnvironment = require("web.test_env");
 const { mapLegacyEnvToWowlEnv } = require("@web/legacy/utils");
 const { registry } = require("@web/core/registry");
 const { scrollerService } = require("@web/core/scroller_service");
-const { LegacyComponent } = require("@web/legacy/legacy_component");
 
 const { Component, onMounted, onWillUnmount, xml } = owl;
 
@@ -8353,7 +8351,7 @@ QUnit.module('Views', {
     QUnit.test('basic support for widgets (being Owl Components)', async function (assert) {
         assert.expect(1);
 
-        class MyComponent extends LegacyComponent {
+        class MyComponent extends Component {
             get value() {
                 return JSON.stringify(this.props.record.data);
             }

@@ -5,7 +5,6 @@ odoo.define('web.dropdown_menu_tests', function (require) {
     const testUtils = require('web.test_utils');
     const makeTestEnvironment  = require("web.test_env");
     const { mount } = require("@web/../tests/helpers/utils");
-    const { LegacyComponent } = require("@web/legacy/legacy_component");
 
     const { Component, useState, xml } = owl;
     const { createComponent } = testUtils;
@@ -347,7 +346,7 @@ odoo.define('web.dropdown_menu_tests', function (require) {
             assert.expect(7);
 
             const items = this.items;
-            class Parent extends LegacyComponent {
+            class Parent extends Component {
                 setup() {
                     this.state = useState({ items });
                 }
@@ -394,7 +393,7 @@ odoo.define('web.dropdown_menu_tests', function (require) {
             assert.expect(5);
 
             const items = this.items;
-            class Parent extends LegacyComponent {
+            class Parent extends Component {
                 setup() {
                     this.items = items;
                 }
