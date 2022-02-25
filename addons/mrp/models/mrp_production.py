@@ -1235,7 +1235,7 @@ class MrpProduction(models.Model):
             # `date_planned_start` is in the past, we plan it as soon as possible.
             workorder_ids.leave_id.unlink()
         else:
-            workorder_ids = self.workorder_ids.filtered(lambda wo: not wo.date_planned_start)
+            workorder_ids = self.workorder_ids.filtered(lambda wo: not wo.date_planned_start and wo.state != 'cancel')
         for workorder in workorder_ids:
             workcenters = workorder.workcenter_id | workorder.workcenter_id.alternative_workcenter_ids
 
@@ -1282,8 +1282,8 @@ class MrpProduction(models.Model):
             vals['leave_id'] = leave.id
             workorder.write(vals)
         self.with_context(force_date=True).write({
-            'date_planned_start': self.workorder_ids[0].date_planned_start,
-            'date_planned_finished': self.workorder_ids[-1].date_planned_finished
+            'date_planned_start': workorder_ids[0].date_planned_start,
+            'date_planned_finished': workorder_ids[-1].date_planned_finished
         })
 
     def button_unplan(self):
