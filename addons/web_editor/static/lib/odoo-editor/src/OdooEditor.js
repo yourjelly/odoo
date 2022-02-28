@@ -78,7 +78,7 @@ const CLIPBOARD_BLACKLISTS = {
     unwrap: ['.Apple-interchange-newline', 'DIV'], // These elements' children will be unwrapped.
     remove: ['META', 'STYLE', 'SCRIPT'], // These elements will be removed along with their children.
 };
-const CLIPBOARD_WHITELISTS = {
+export const CLIPBOARD_WHITELISTS = {
     nodes: [
         // Style
         'P',
@@ -2104,6 +2104,7 @@ export class OdooEditor extends EventTarget {
             editable: this.editable,
             document: this.document,
             getContextFromParentRect: this.options.getContextFromParentRect,
+            commandFilters: this.options.powerboxFilters,
             _t: this.options._t,
             onShow: () => {
                 this.commandbarTablePicker.hide();

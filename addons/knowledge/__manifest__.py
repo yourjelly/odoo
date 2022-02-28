@@ -36,6 +36,15 @@
             'knowledge/static/src/js/widgets/knowledge_dialogs.js',
             'knowledge/static/src/webclient/commands/*.js',
             'knowledge/static/src/models/*/*.js',
+            'knowledge/static/src/js/form_controller.js',
+            'knowledge/static/src/js/form_renderer.js',
+            'knowledge/static/src/js/knowledge_macros.js',
+            'knowledge/static/src/js/knowledge_behaviors.js',
+            'knowledge/static/src/js/knowledge_toolbars.js',
+            'knowledge/static/src/js/knowledge_field_html_injector.js',
+            'knowledge/static/src/js/KnowledgePlugin.js',
+            'knowledge/static/src/js/field_html.js',
+            'knowledge/static/src/js/knowledge_service.js',
         ],
         'web.assets_frontend': [
             'knowledge/static/src/scss/knowledge_views.scss',
@@ -43,11 +52,14 @@
         ],
         'web_editor.assets_wysiwyg': [
             'knowledge/static/src/js/wysiwyg.js',
+            'knowledge/static/src/js/knowledge_toolbars_edit.js',
+            'knowledge/static/src/js/knowledge_clipboard_whitelist.js'
         ],
         'web.assets_qweb': [
             'knowledge/static/src/xml/knowledge_editor.xml',
             'knowledge/static/src/xml/knowledge_templates.xml',
             'knowledge/static/src/xml/chatter_topbar.xml',
+            'knowledge/static/src/xml/knowledge_toolbars.xml',
         ],
-    }
+    },
 }
