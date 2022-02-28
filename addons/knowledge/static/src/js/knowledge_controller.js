@@ -23,6 +23,14 @@ const KnowledgeFormController = FormController.extend({
         move: '_onMove',
     }),
 
+    /**
+     * @override
+     */
+    init: function (parent, model, renderer, params) {
+        this.knowledgeFormController = true;
+        this._super.apply(this, arguments);
+    },
+
     // Listeners:
 
     /**
