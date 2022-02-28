@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo.tests.common import TransactionCase, tagged
 import logging
-_logger = logging.getLogger(__name__)
+_logger = logging.getLogger("security")
 
 def value(rule):
     return sum(int(rule[perm]) for perm in ['perm_read', 'perm_write', 'perm_create', 'perm_unlink']) if rule else 0
