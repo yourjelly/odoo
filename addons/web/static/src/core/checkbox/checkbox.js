@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { LegacyComponent } from "@web/legacy/legacy_component";
 const { Component } = owl;
 
 /**
@@ -16,7 +17,7 @@ const { Component } = owl;
  * @extends Component
  */
 
-export class CheckBox extends Component {
+export class CheckBox extends LegacyComponent {
     setup() {
         this.id = `checkbox-comp-${CheckBox.nextId++}`;
     }
