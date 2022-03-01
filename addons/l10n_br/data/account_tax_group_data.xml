@@ -182,5 +182,13 @@
             <field name="name">IPI 330%</field>
             <field name="country_id" ref="base.br"/>
         </record>
+        <record id="tax_group_ii_0" model="account.tax.group">
+            <field name="name">II</field>
+            <field name="country_id" ref="base.br"/>
+        </record>
+        <record id="tax_group_inss_0" model="account.tax.group">
+            <field name="name">INSS</field>
+            <field name="country_id" ref="base.br"/>
+        </record>
     </data>
 </odoo>

@@ -52,6 +52,8 @@ come with any additional paid permission for online use of 'private modules'.
         'data/account_tax_group_data.xml',
         'data/account_tax_report_data.xml',
         'data/account_tax_template_data.xml',
+        'data/account_chart_template_data.xml',
+        'data/menuitem_data.xml',
         'views/account_view.xml',
     ],
     'demo': [

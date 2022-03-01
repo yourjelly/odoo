@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="ch_br_4_01_05_01_01_11_00" model="account.account.template">
+        <field name="code">4.01.05.01.01.11.00</field>
+        <field name="name">Ganho cambial</field>
+        <field name="user_type_id" ref="account.data_account_type_other_income"/>
+        <field name="chart_template_id" ref="l10n_br_account_chart_template"/>
+    </record>
+
+    <record id="ch_br_3_01_03_01_03_03_00" model="account.account.template">
+        <field name="code">3.01.03.01.03.03.00</field>
+        <field name="name">Perda cambial</field>
+        <field name="user_type_id" ref="account.data_account_type_expenses"/>
+        <field name="chart_template_id" ref="l10n_br_account_chart_template"/>
+    </record>
+
+    <record id="l10n_br_account_chart_template" model="account.chart.template">
+        <field name="property_account_receivable_id" ref="account_template_101050200"/>
+        <field name="property_account_payable_id" ref="account_template_201010100" />
+        <field name="property_account_expense_categ_id" ref="account_template_3010103010000" />
+        <field name="property_account_income_categ_id" ref="account_template_3010101010200" />
+        <field name="income_currency_exchange_account_id" ref="ch_br_4_01_05_01_01_11_00"/>
+        <field name="expense_currency_exchange_account_id" ref="ch_br_3_01_03_01_03_03_00"/>
+        <field name="default_pos_receivable_account_id" ref="account_template_101050201" />
+    </record>
+</odoo>

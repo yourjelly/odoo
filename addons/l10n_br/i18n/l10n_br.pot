@@ -1,0 +1,298 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* l10n_br
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 15.3alpha1+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-03-17 12:50+0000\n"
+"PO-Revision-Date: 2022-03-17 12:50+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: l10n_br
+#: model:ir.ui.menu,name:l10n_br.account_reports_br_statements_menu
+msgid "Brazil"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_cofins_0
+msgid "COFINS 0%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_cofins_3
+msgid "COFINS 3%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_csll_0
+msgid "CSLL 0%"
+msgstr ""
+
+#. module: l10n_br
+#: model:ir.model.fields,field_description:l10n_br.field_account_tax__tax_discount
+#: model:ir.model.fields,field_description:l10n_br.field_account_tax_template__tax_discount
+msgid "Discount this Tax in Prince"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_icms_0
+msgid "ICMS 0%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_icms_12
+msgid "ICMS 12%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_icms_19
+msgid "ICMS 19%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_icms_26
+msgid "ICMS 26%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_icms_7
+msgid "ICMS 7%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_ii_0
+msgid "II"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_inss_0
+msgid "INSS"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_ipi_0
+msgid "IPI 0%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_ipi_10
+msgid "IPI 10%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_ipi_12
+msgid "IPI 12%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_ipi_13
+msgid "IPI 13%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_ipi_15
+msgid "IPI 15%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_ipi_16
+msgid "IPI 16%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_ipi_18
+msgid "IPI 18%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_ipi_2
+msgid "IPI 2%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_ipi_20
+msgid "IPI 20%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_ipi_22
+msgid "IPI 22%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_ipi_24
+msgid "IPI 24%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_ipi_25
+msgid "IPI 25%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_ipi_27
+msgid "IPI 27%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_ipi_3
+msgid "IPI 3%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_ipi_30
+msgid "IPI 30%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_ipi_300
+msgid "IPI 300%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_ipi_330
+msgid "IPI 330%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_ipi_35
+msgid "IPI 35%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_ipi_4
+msgid "IPI 4%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_ipi_40
+msgid "IPI 40%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_ipi_42
+msgid "IPI 42%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_ipi_45
+msgid "IPI 45%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_ipi_5
+msgid "IPI 5%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_ipi_50
+msgid "IPI 50%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_ipi_60
+msgid "IPI 60%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_ipi_7
+msgid "IPI 7%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_ipi_8
+msgid "IPI 8%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_ir_0
+msgid "IR 0%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_irpj_0
+msgid "IRPJ 0%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_issqn_0
+msgid "ISSQN 0%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_issqn_1
+msgid "ISSQN 1%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_issqn_2
+msgid "ISSQN 2%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_issqn_3
+msgid "ISSQN 3%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_issqn_4
+msgid "ISSQN 4%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_issqn_5
+msgid "ISSQN 5%"
+msgstr ""
+
+#. module: l10n_br
+#: model:ir.model.fields,field_description:l10n_br.field_account_tax__amount_mva
+#: model:ir.model.fields,field_description:l10n_br.field_account_tax_template__amount_mva
+msgid "MVA Percent"
+msgstr ""
+
+#. module: l10n_br
+#: model:ir.model.fields,help:l10n_br.field_account_tax__tax_discount
+#: model:ir.model.fields,help:l10n_br.field_account_tax_template__tax_discount
+msgid "Mark it for (ICMS, PIS e etc.)."
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_pis_0
+msgid "PIS 0%"
+msgstr ""
+
+#. module: l10n_br
+#: model:account.tax.group,name:l10n_br.tax_group_pis_065
+msgid "PIS 0.65%"
+msgstr ""
+
+#. module: l10n_br
+#: model:ir.model.fields,field_description:l10n_br.field_account_tax__base_reduction
+#: model:ir.model.fields,field_description:l10n_br.field_account_tax_template__base_reduction
+msgid "Redution"
+msgstr ""
+
+#. module: l10n_br
+#: model:ir.model,name:l10n_br.model_account_tax
+msgid "Tax"
+msgstr ""
+
+#. module: l10n_br
+#: model:ir.model,name:l10n_br.model_account_tax_template
+msgid "Templates for Taxes"
+msgstr ""
+
+#. module: l10n_br
+#: model:ir.model.fields,help:l10n_br.field_account_tax__amount_mva
+#: model:ir.model.fields,help:l10n_br.field_account_tax__base_reduction
+#: model:ir.model.fields,help:l10n_br.field_account_tax_template__amount_mva
+#: model:ir.model.fields,help:l10n_br.field_account_tax_template__base_reduction
+msgid "Um percentual decimal em % entre 0-1."
+msgstr ""
