@@ -279,14 +279,12 @@ class MailThread(models.AbstractModel):
             )
 
         # auto_subscribe: take values and defaults into account
-        create_values_list = {}
         for thread, values in zip(threads, vals_list):
             create_values = dict(values)
             for key, val in self._context.items():
                 if key.startswith('default_') and key[8:] not in create_values:
                     create_values[key[8:]] = val
             thread._message_auto_subscribe(create_values, followers_existing_policy='update')
-            create_values_list[thread.id] = create_values
 
         # automatic logging unless asked not to (mainly for various testing purpose)
         if not self._context.get('mail_create_nolog'):
@@ -308,8 +306,8 @@ class MailThread(models.AbstractModel):
         if not self._context.get('mail_notrack'):
             fnames = self._track_get_fields()
             for thread in threads:
-                create_values = create_values_list[thread.id]
-                changes = [fname for fname in fnames if create_values.get(fname)]
+                changes = [fname for fname in fnames if thread[fname]]
+
                 # based on tracked field to stay consistent with write
                 # we don't consider that a falsy field is a change, to stay consistent with previous implementation,
                 # but we may want to change that behaviour later.
