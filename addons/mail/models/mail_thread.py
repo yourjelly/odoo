@@ -301,13 +301,26 @@ class MailThread(models.AbstractModel):
                     for thread in threads_no_subtype)
                 threads_no_subtype._message_log_batch(bodies=bodies)
 
+        return threads
+
+    @api.model
+    def _create(self, data_list):
+        threads = super(MailThread, self)._create(data_list)
+
+        create_values = [
+            {
+                **data['stored'],
+                **data['inherited'],
+                **data['inversed'],
+            } for data in data_list
+        ]
+
         # post track template if a tracked field changed
         threads._track_discard()
         if not self._context.get('mail_notrack'):
             fnames = self._track_get_fields()
-            for thread in threads:
-                changes = [fname for fname in fnames if thread[fname]]
-
+            for thread, vals in zip(threads, create_values):
+                changes = [fname for fname in fnames if vals.get(fname)]
                 # based on tracked field to stay consistent with write
                 # we don't consider that a falsy field is a change, to stay consistent with previous implementation,
                 # but we may want to change that behaviour later.
