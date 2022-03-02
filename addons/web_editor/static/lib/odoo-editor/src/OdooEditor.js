@@ -2036,6 +2036,7 @@ export class OdooEditor extends EventTarget {
         for (const child of [...container.childNodes]) {
             this._cleanForPaste(child);
         }
+        console.log('container.innerHTML', container.innerHTML);
         return container.innerHTML;
     }
     /**
@@ -2758,6 +2759,7 @@ export class OdooEditor extends EventTarget {
         ev.preventDefault();
         const clipboardData = ev.clipboardData.getData('text/html');
         if (clipboardData) {
+            console.warn("paste : ", clipboardData);
             this.execCommand('insertHTML', this._prepareClipboardData(clipboardData));
         } else {
             const text = ev.clipboardData.getData('text/plain');
