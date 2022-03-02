@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 
 from odoo.addons.mrp.tests.common import TestMrpCommon
 from odoo.tests import Form
-from odoo.tests.common import TransactionCase
 
 
 class TestMrpProductionBackorder(TestMrpCommon):
@@ -465,50 +464,3 @@ class TestMrpProductionBackorder(TestMrpCommon):
         backorder = produce_one(production)
         self.assertEqual(backorder.state, 'confirmed')
         self.assertEqual(backorder.reserve_visible, False)
-
-
-class TestMrpWorkorderBackorder(TransactionCase):
-    @classmethod
-    def setUpClass(cls):
-        super(TestMrpWorkorderBackorder, cls).setUpClass()
-        cls.uom_unit = cls.env['uom.uom'].search([
-            ('category_id', '=', cls.env.ref('uom.product_uom_categ_unit').id),
-            ('uom_type', '=', 'reference')
-        ], limit=1)
-        cls.finished1 = cls.env['product.product'].create({
-            'name': 'finished1',
-            'type': 'product',
-        })
-        cls.compfinished1 = cls.env['product.product'].create({
-            'name': 'compfinished1',
-            'type': 'product',
-        })
-        cls.compfinished2 = cls.env['product.product'].create({
-            'name': 'compfinished2',
-            'type': 'product',
-        })
-        cls.workcenter1 = cls.env['mrp.workcenter'].create({
-            'name': 'workcenter1',
-        })
-        cls.workcenter2 = cls.env['mrp.workcenter'].create({
-            'name': 'workcenter2',
-        })
-
-        cls.bom_finished1 = cls.env['mrp.bom'].create({
-            'product_id': cls.finished1.id,
-            'product_tmpl_id': cls.finished1.product_tmpl_id.id,
-            'product_uom_id': cls.uom_unit.id,
-            'product_qty': 1,
-            'consumption': 'flexible',
-            'type': 'normal',
-            'bom_line_ids': [
-                (0, 0, {'product_id': cls.compfinished1.id, 'product_qty': 1}),
-                (0, 0, {'product_id': cls.compfinished2.id, 'product_qty': 1}),
-            ],
-            'operation_ids': [
-                (0, 0, {'sequence': 1, 'name': 'finished operation 1', 'workcenter_id': cls.workcenter1.id}),
-                (0, 0, {'sequence': 2, 'name': 'finished operation 2', 'workcenter_id': cls.workcenter2.id}),
-            ],
-        })
-        cls.bom_finished1.bom_line_ids[0].operation_id = cls.bom_finished1.operation_ids[0].id
-        cls.bom_finished1.bom_line_ids[1].operation_id = cls.bom_finished1.operation_ids[1].id
