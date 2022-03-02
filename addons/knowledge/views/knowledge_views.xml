@@ -153,7 +153,7 @@
                                     <!-- Article body -->
                                     <div class="o_knowledge_editor d-flex border-bottom">
                                         <field name="body" widget="knowledge_html" no_label="1" default_focus="1"
-                                            options="{'resizable': false}"
+                                            options="{'collaborative': true, 'resizable': false}"
                                             attrs="{'readonly': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}"/>
                                     </div>
                                     <!-- Chatter -->
