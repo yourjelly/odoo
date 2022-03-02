@@ -1662,6 +1662,9 @@ class _String(Field):
         return translate
 
     def write(self, records, value):
+        if not (self.store and self.translate):
+            return super().write(records, value)
+
         # discard recomputation of self on records
         records.env.remove_to_compute(self, records)
 
@@ -1671,32 +1674,24 @@ class _String(Field):
         records = cache.get_records_different_from(records, self, cache_value)
         if not records:
             return records
-        cache.update(records, self, [cache_value] * len(records))
-
-        if not self.store:
-            return records
 
         real_recs = records.filtered('id')
         if not real_recs._ids:
+            cache.update(records, self, itertools.repeat(cache_value))
             return records
 
-        update_column = True
-        update_trans = False
+        # determine what to update
+        lang = records.env.lang or None
         single_lang = len(records.env['res.lang'].get_installed()) <= 1
-        if self.translate:
-            lang = records.env.lang or None  # used in _update_translations below
-            if single_lang:
-                # a single language is installed
-                update_trans = True
-            elif callable(self.translate) or lang == 'en_US':
-                # update the source and synchronize translations
-                update_column = True
-                update_trans = True
-            elif lang != 'en_US' and lang is not None:
-                # update the translations only except if emptying
-                update_column = not cache_value
-                update_trans = True
-            # else: lang = None
+        if lang == 'en_US' or single_lang or callable(self.translate):
+            # update the source and synchronize translations
+            update_column, update_trans = True, True
+        elif lang is not None:
+            # lang != 'en_US': update the translations only except if emptying
+            update_column, update_trans = not cache_value, True
+        else:
+            # lang is None: update the source only
+            update_column, update_trans = True, False
 
         # update towrite if modifying the source
         if update_column:
@@ -1707,10 +1702,8 @@ class _String(Field):
             if self.translate is True and cache_value:
                 tname = "%s,%s" % (records._name, self.name)
                 records.env['ir.translation']._set_source(tname, real_recs._ids, value)
-            if self.translate:
-                # invalidate the field in the other languages
-                cache.invalidate([(self, records.ids)])
-                cache.update(records, self, [cache_value] * len(records))
+            # invalidate the field in the other languages
+            cache.invalidate([(self, records.ids)])
 
         if update_trans:
             if callable(self.translate):
@@ -1746,6 +1739,8 @@ class _String(Field):
                     records.env['ir.translation']._set_ids(
                         tname, 'model', lang, real_recs._ids, value, source_value,
                     )
+
+        cache.update(records, self, itertools.repeat(cache_value))
 
         return records
 
