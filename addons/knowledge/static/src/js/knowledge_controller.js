@@ -87,6 +87,7 @@ const KnowledgeFormController = FormController.extend({
     _onOpen: async function (event) {
         const { data } = event;
         this.do_action('knowledge.action_home_page', {
+            stackPosition: 'replaceCurrentAction',
             additional_context: {
                 res_id: data.article_id
             }
