@@ -5749,6 +5749,8 @@ Fields:
                 if field.type == 'one2many' and field.inverse_name:
                     self.env[field.comodel_name].flush([field.inverse_name])
 
+        self.env.cache.check(self.env)
+
     #
     # New records - represent records that do not exist in the database yet;
     # they are used to perform onchanges.
