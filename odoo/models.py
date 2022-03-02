@@ -3962,8 +3962,12 @@ Fields:
         if self._log_access:
             # set magic fields (already done by write(), but not for computed fields)
             vals = dict(vals)
-            vals.setdefault('write_uid', self.env.uid)
-            vals.setdefault('write_date', self.env.cr.now())
+            if 'write_uid' not in vals:
+                vals['write_uid'] = val = self.env.uid
+                self.env.cache.update(self, self._fields['write_uid'], itertools.repeat(val))
+            if 'write_date' not in vals:
+                vals['write_date'] = val = self.env.cr.now()
+                self.env.cache.update(self, self._fields['write_date'], itertools.repeat(val))
 
         # determine SQL values
         columns = {}                    # {column_name: value}
