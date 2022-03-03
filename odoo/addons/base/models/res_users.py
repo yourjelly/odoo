@@ -146,6 +146,64 @@ class Groups(models.Model):
         ('name_uniq', 'unique (category_id, name)', 'The name of the group must be unique within an application!')
     ]
 
+    def _get_parent_group_ids(self):
+        query = """
+            WITH RECURSIVE group_implied_tree AS (
+                SELECT
+                    rgir.gid
+                FROM
+                    res_groups_implied_rel rgir
+                JOIN
+                    res_groups rg ON rg.id=rgir.gid
+                WHERE
+                    rgir.hid IN %s and rg.category_id = %s
+                UNION ALL
+                SELECT
+                    rgirr.gid
+                FROM
+                    res_groups_implied_rel rgirr
+                JOIN
+                    group_implied_tree git ON git.gid = rgirr.hid
+                JOIN
+                    res_groups rg ON rg.id=rgirr.gid
+                WHERE
+                    rg.category_id = %s
+            )
+            SELECT
+                gid
+            FROM
+                group_implied_tree;
+        """
+        self.env.cr.execute(query, [tuple(self.ids), self.category_id.id, self.category_id.id])
+        return [x[0] for x in self.env.cr.fetchall()]
+
+    def check_group_inheritance(self, user):
+        if not self:
+            return {}
+        inherited_groups = {}
+        for group in self:
+            # Filter out the groups which are applying current groups due to group inheritance
+            inherited_groups[group] = self.filtered(
+                lambda grp:
+                group.category_id in grp.implied_ids.category_id and
+                group.category_id != grp.category_id
+            )
+        warnings = []
+        for key, value in inherited_groups.items():
+            if value:
+                # Filter out the group which will be applied upon saving record
+                parent_group = value.implied_ids.filtered(
+                    lambda grp:
+                    grp.category_id == key.category_id and
+                    grp not in (key | key.implied_ids | self)
+                )
+                if parent_group:
+                    # Get all the Parent groups which may add current group in hierarchy
+                    parent_ids = parent_group._get_parent_group_ids()
+                    if not any([gid in parent_ids for gid in self.ids]):
+                        warnings.append(_("Since %s is a/an %s %s, you cannot set %s right lower than %s") % (user.name, value[0].category_id.name, value[0].name, parent_group[0].category_id.name, parent_group[0].name))
+        return warnings
+
     @api.constrains('users')
     def _check_one_user_type(self):
         self.users._check_one_user_type()
@@ -328,8 +386,7 @@ class Users(models.Model):
     @api.depends('groups_id')
     def _compute_groups_id_warning_message(self):
         for user in self:
-            print('group changed')
-            user.groups_id_warning_message = 'Groups: %s' % str(user.groups_id)
+            user.groups_id_warning_message = user.groups_id.check_group_inheritance(user)
 
     def init(self):
         cr = self.env.cr
@@ -1277,6 +1334,7 @@ class GroupsView(models.Model):
                     # application name with a selection field
                     field_name = name_selection_groups(gs.ids)
                     attrs['attrs'] = user_type_readonly
+                    attrs['on_change'] = '1'
                     if category_name not in xml_by_category:
                         xml_by_category[category_name] = []
                         xml_by_category[category_name].append(E.newline())
