@@ -135,7 +135,9 @@ class Currency(models.Model):
     def _compute_decimal_places(self):
         for currency in self:
             if 0 < currency.rounding < 1:
-                currency.decimal_places = int(math.ceil(math.log10(1/currency.rounding)))
+                decimal_precision = currency._fields['rounding'].get_digits(self.env)[1]
+                rounded = int(currency.rounding * 10 ** decimal_precision)
+                currency.decimal_places = len(str(rounded % decimal_precision).rstrip('0'))
             else:
                 currency.decimal_places = 0
 
