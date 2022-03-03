@@ -7,8 +7,7 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
     const { useListener } = require('web.custom_hooks');
     const Registries = require('point_of_sale.Registries');
     const { onChangeOrder, useBarcodeReader } = require('point_of_sale.custom_hooks');
-    const { Gui } = require('point_of_sale.Gui');
-    const { isConnectionError } = require('point_of_sale.utils');
+    const { isConnectionError, posbus } = require('point_of_sale.utils');
     const { useState, onMounted } = owl.hooks;
     const { parse } = require('web.field_utils');
 
@@ -39,13 +38,13 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
             // We don't do this in the `mounted` lifecycle method because it is called before
             // the callbacks in `onMounted` hook.
             onMounted(() => NumberBuffer.reset());
-            this.state = useState({ numpadMode: 'quantity' });
-            this.mobile_pane = this.props.mobile_pane || 'right';
+            this.state = useState({
+                numpadMode: 'quantity',
+                mobile_pane: this.props.mobile_pane || 'right',
+            });
         }
         mounted() {
-            if(this.env.pos.config.cash_control && this.env.pos.pos_session.state == 'opening_control') {
-                Gui.showPopup('CashOpeningPopup', {notEscapable: true});
-            }
+            posbus.trigger('start-cash-control');
             this.env.pos.on('change:selectedClient', this.render, this);
         }
         willUnmount() {
@@ -303,6 +302,11 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
                 return code.code;
             }
         }
+        async _displayAllControlPopup() {
+            await this.showPopup('ControlButtonPopup', {
+                controlButtons: this.controlButtons
+            });
+        }
         /**
          * override this method to perform procedure if the scale is not available.
          * @see isScaleAvailable
@@ -360,14 +364,7 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
             this.showScreen('PaymentScreen');
         }
         switchPane() {
-            if (this.mobile_pane === "left") {
-                this.mobile_pane = "right";
-                this.render();
-            }
-            else {
-                this.mobile_pane = "left";
-                this.render();
-            }
+            this.state.mobile_pane = this.state.mobile_pane === "left" ? "right" : "left";
         }
     }
     ProductScreen.template = 'ProductScreen';

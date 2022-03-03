@@ -45,7 +45,7 @@ class Project(models.Model):
     timesheet_product_id = fields.Many2one(
         'product.product', string='Timesheet Product',
         domain="""[
-            ('type', '=', 'service'),
+            ('detailed_type', '=', 'service'),
             ('invoice_policy', '=', 'delivery'),
             ('service_type', '=', 'timesheet'),
             '|', ('company_id', '=', False), ('company_id', '=', company_id)]""",
@@ -268,14 +268,13 @@ class Project(models.Model):
                 'default_project_id': self.id,
             },
             'domain': [('project_id', '=', self.id)],
-            'view_mode': 'tree,grid,kanban,pivot,graph,form',
+            'view_mode': 'tree,kanban,pivot,graph,form',
             'views': [
                 [self.env.ref('hr_timesheet.timesheet_view_tree_user').id, 'tree'],
-                [self.env.ref('timesheet_grid.timesheet_view_grid_by_employee').id, 'grid'],
                 [self.env.ref('hr_timesheet.view_kanban_account_analytic_line').id, 'kanban'],
                 [self.env.ref('hr_timesheet.view_hr_timesheet_line_pivot').id, 'pivot'],
                 [self.env.ref('hr_timesheet.view_hr_timesheet_line_graph_all').id, 'graph'],
-                [self.env.ref('timesheet_grid.timesheet_view_form').id, 'form'],
+                [self.env.ref('hr_timesheet.timesheet_view_form_user').id, 'form'],
             ],
         })
         return action
@@ -308,7 +307,7 @@ class Project(models.Model):
 
     def _get_sale_order_lines(self):
         sale_orders = self.sale_order_id | self.tasks.sale_order_id
-        return self.env['sale.order.line'].search([('order_id', 'in', sale_orders.ids), ('is_service', '=', True)], order='id asc')
+        return self.env['sale.order.line'].search([('order_id', 'in', sale_orders.ids), ('is_service', '=', True), ('is_downpayment', '=', False)], order='id asc')
 
     def _get_sold_items(self):
         sols = self._get_sale_order_lines()
@@ -326,15 +325,16 @@ class Project(models.Model):
             name = [x[1] for x in sol.name_get()] if number_sale_orders > 1 else sol.name
             qty_delivered = sol.product_uom._compute_quantity(sol.qty_delivered, self.env.company.timesheet_encode_uom_id, raise_if_failure=False)
             product_uom_qty = sol.product_uom._compute_quantity(sol.product_uom_qty, self.env.company.timesheet_encode_uom_id, raise_if_failure=False)
-            sold_items['data'].append({
-                'name': name,
-                'value': '%s / %s %s' % (formatLang(self.env, qty_delivered, 1), formatLang(self.env, product_uom_qty, 1), sol.product_uom.name if sol.product_uom == product_uom_unit else self.env.company.timesheet_encode_uom_id.name),
-                'color': 'red' if qty_delivered > product_uom_qty else 'black'
-            })
-            #We only want to consider hours and days for this calculation
-            if sol.product_uom.category_id == self.env.company.timesheet_encode_uom_id.category_id:
-                sold_items['total_sold'] += product_uom_qty
-                sold_items['effective_sold'] += sol.product_uom._compute_quantity(qty_delivered, self.env.company.timesheet_encode_uom_id, raise_if_failure=False)
+            if qty_delivered > 0 or product_uom_qty > 0:
+                sold_items['data'].append({
+                    'name': name,
+                    'value': '%s / %s %s' % (formatLang(self.env, qty_delivered, 1), formatLang(self.env, product_uom_qty, 1), sol.product_uom.name if sol.product_uom == product_uom_unit else self.env.company.timesheet_encode_uom_id.name),
+                    'color': 'red' if qty_delivered > product_uom_qty else 'black'
+                })
+                #We only want to consider hours and days for this calculation, and eventually units if the service policy is not based on milestones
+                if sol.product_uom.category_id == self.env.company.timesheet_encode_uom_id.category_id or (sol.product_uom == product_uom_unit and sol.product_id.service_policy != 'delivered_manual'):
+                    sold_items['total_sold'] += product_uom_qty
+                    sold_items['effective_sold'] += sol.product_uom._compute_quantity(qty_delivered, self.env.company.timesheet_encode_uom_id, raise_if_failure=False)
         remaining = sold_items['total_sold'] - sold_items['effective_sold']
         sold_items['remaining'] = {
             'value': remaining,
@@ -398,6 +398,11 @@ class Project(models.Model):
                                 profitability['other_revenues']),
             })
         return result
+
+    def _get_sale_order_stat_button(self):
+        so_button = super()._get_sale_order_stat_button()
+        so_button['show'] &= self.allow_billable
+        return so_button
 
     def _get_stat_buttons(self):
         buttons = super(Project, self)._get_stat_buttons()

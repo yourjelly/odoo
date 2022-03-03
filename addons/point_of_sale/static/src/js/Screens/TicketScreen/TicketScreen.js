@@ -1,6 +1,7 @@
 odoo.define('point_of_sale.TicketScreen', function (require) {
     'use strict';
 
+    const { useState } = owl.hooks;
     const models = require('point_of_sale.models');
     const Registries = require('point_of_sale.Registries');
     const IndependentToOrderScreen = require('point_of_sale.IndependentToOrderScreen');
@@ -32,6 +33,9 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                 triggerAtInput: 'update-selected-orderline',
             });
             this._state = this.env.pos.TICKET_SCREEN_STATE;
+            this.state = useState({
+                showSearchBar: !this.env.isMobile,
+            });
             const defaultUIState = this.props.reuseSavedUIState
                 ? this._state.ui
                 : {
@@ -104,10 +108,11 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             const screen = order.get_screen_data();
             if (['ProductScreen', 'PaymentScreen'].includes(screen.name) && order.get_orderlines().length > 0) {
                 const { confirmed } = await this.showPopup('ConfirmPopup', {
-                    title: 'Existing orderlines',
-                    body: `${order.name} has total amount of ${this.getTotal(
-                        order
-                    )}.\n Are you sure you want delete this order?`,
+                    title: this.env._t('Existing orderlines'),
+                    body: _.str.sprintf(
+                      this.env._t('%s has a total amount of %s, are you sure you want to delete this order ?'),
+                      order.name, this.getTotal(order)
+                    ),
                 });
                 if (!confirmed) return;
             }
@@ -545,6 +550,8 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                     args: [idsNotInCache],
                     context: this.env.session.user_context,
                 });
+                // Check for missing products and load them in the PoS
+                await this.env.pos._loadMissingProducts(fetchedOrders);
                 // Cache these fetched orders so that next time, no need to fetch
                 // them again, unless invalidated. See `_onInvoiceOrder`.
                 fetchedOrders.forEach((order) => {

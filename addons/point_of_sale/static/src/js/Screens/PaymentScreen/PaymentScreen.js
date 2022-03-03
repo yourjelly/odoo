@@ -81,8 +81,9 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
             }
             if (!this.selectedPaymentLine) return; // do nothing if no selected payment line
             // disable changing amount on paymentlines with running or done payments on a payment terminal
+            const payment_terminal = this.selectedPaymentLine.payment_method.payment_terminal;
             if (
-                this.payment_interface &&
+                payment_terminal &&
                 !['pending', 'retry'].includes(this.selectedPaymentLine.get_payment_status())
             ) {
                 return;
@@ -229,7 +230,7 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
                 if (!result) {
                     await this.showPopup('ErrorPopup', {
                         title: this.env._t('Error: no internet connection.'),
-                        body: this.env._t('Some, if not all, post-processing after syncing order failed.')
+                        body: this.env._t('Some, if not all, post-processing after syncing order failed.'),
                     });
                 }
             }

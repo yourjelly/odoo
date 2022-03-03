@@ -79,16 +79,16 @@ class StockQuant(models.Model):
     quantity = fields.Float(
         'Quantity',
         help='Quantity of products in this quant, in the default unit of measure of the product',
-        readonly=True)
+        readonly=True, digits='Product Unit of Measure')
     reserved_quantity = fields.Float(
         'Reserved Quantity',
         default=0.0,
         help='Quantity of reserved products in this quant, in the default unit of measure of the product',
-        readonly=True, required=True)
+        readonly=True, required=True, digits='Product Unit of Measure')
     available_quantity = fields.Float(
         'Available Quantity',
         help="On hand quantity which hasn't been reserved on a transfer, in the default unit of measure of the product",
-        compute='_compute_available_quantity')
+        compute='_compute_available_quantity', digits='Product Unit of Measure')
     in_date = fields.Datetime('Incoming Date', readonly=True, required=True, default=fields.Datetime.now)
     tracking = fields.Selection(related='product_id.tracking', readonly=True)
     on_hand = fields.Boolean('On Hand', store=False, search='_search_on_hand')
@@ -556,8 +556,9 @@ class StockQuant(models.Model):
         if self.location_id:
             return
         if self.product_id.tracking in ['lot', 'serial']:
-            previous_quants = self.env['stock.quant'].search(
-                [('product_id', '=', self.product_id.id)], limit=1, order='create_date desc')
+            previous_quants = self.env['stock.quant'].search([
+                ('product_id', '=', self.product_id.id),
+                ('location_id.usage', 'in', ['internal', 'transit'])], limit=1, order='create_date desc')
             if previous_quants:
                 self.location_id = previous_quants.location_id
         if not self.location_id:
@@ -610,7 +611,11 @@ class StockQuant(models.Model):
         self = self.sudo()
         quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=True)
 
-        incoming_dates = [d for d in quants.mapped('in_date') if d]
+        if location_id.should_bypass_reservation():
+            incoming_dates = []
+        else:
+            incoming_dates = [quant.in_date for quant in quants if quant.in_date and
+                              float_compare(quant.quantity, 0, precision_rounding=quant.product_uom_id.rounding) > 0]
         if in_date:
             incoming_dates += [in_date]
         # If multiple incoming dates are available for a given lot_id/package_id/owner_id, we
@@ -751,7 +756,7 @@ class StockQuant(models.Model):
                 self.env.cr.execute(query)
                 self.invalidate_cache()
         except Error as e:
-            _logger.info('an error occured while merging quants: %s', e.pgerror)
+            _logger.info('an error occurred while merging quants: %s', e.pgerror)
 
     @api.model
     def _quant_tasks(self):
@@ -923,7 +928,7 @@ class StockQuant(models.Model):
                     message =  _('The Serial Number (%s) is already used in these location(s): %s.\n\n'
                                  'Is this expected? For example this can occur if a delivery operation is validated '
                                  'before its corresponding receipt operation is validated. In this case the issue will be solved '
-                                 'automatically once all steps are completed. Otherwise, the serial numbershould be corrected to '
+                                 'automatically once all steps are completed. Otherwise, the serial number should be corrected to '
                                  'prevent inconsistent data.',
                                  lot_id.name, ', '.join(sn_locations.mapped('display_name')))
 
@@ -941,11 +946,13 @@ class StockQuant(models.Model):
                                 recommended_location = location
                                 break
                     if recommended_location:
-                        message = _('Serial number (%s) is not located in %s, but is located in location(s): %s. Source location for this move will be changed to %s',
-                        lot_id.name, source_location_id.display_name, ', '.join(sn_locations.mapped('display_name')), recommended_location.display_name)
+                        message = _('Serial number (%s) is not located in %s, but is located in location(s): %s.\n\n'
+                                    'Source location for this move will be changed to %s',
+                                    lot_id.name, source_location_id.display_name, ', '.join(sn_locations.mapped('display_name')), recommended_location.display_name)
                     else:
-                        message = _('Serial number (%s) is not located in %s, but is located in location(s): %s. Please correct this to prevent inconsistent data.',
-                        lot_id.name, source_location_id.display_name, ', '.join(sn_locations.mapped('display_name')))
+                        message = _('Serial number (%s) is not located in %s, but is located in location(s): %s.\n\n'
+                                    'Please correct this to prevent inconsistent data.',
+                                    lot_id.name, source_location_id.display_name, ', '.join(sn_locations.mapped('display_name')))
         return message, recommended_location
 
 
@@ -961,7 +968,7 @@ class QuantPackage(models.Model):
     quant_ids = fields.One2many('stock.quant', 'package_id', 'Bulk Content', readonly=True,
         domain=['|', ('quantity', '!=', 0), ('reserved_quantity', '!=', 0)])
     package_type_id = fields.Many2one(
-        'stock.package.type', 'Package Type', index=True, check_company=True)
+        'stock.package.type', 'Package Type', index=True)
     location_id = fields.Many2one(
         'stock.location', 'Location', compute='_compute_package_info',
         index=True, readonly=True, store=True)
@@ -998,7 +1005,7 @@ class QuantPackage(models.Model):
         else:
             packs = self.search([('quant_ids', operator, value)])
         if packs:
-            return [('id', 'parent_of', packs.ids)]
+            return [('id', 'in', packs.ids)]
         else:
             return [('id', '=', False)]
 

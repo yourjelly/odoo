@@ -222,10 +222,21 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
         $codeview.toggleClass('d-none');
         this.$content.toggleClass('d-none');
         if ($codeview.hasClass('d-none')) {
+            if (this.resizerHandleObserver) {
+                this.resizerHandleObserver.disconnect();
+                delete this.resizerHandleObserver;
+            }
             this.wysiwyg.odooEditor.observerActive();
             this.wysiwyg.setValue($codeview.val());
-            this.wysiwyg.odooEditor.historyStep();
         } else {
+            this.resizerHandleObserver = new MutationObserver((mutations, observer) => {
+                for (let mutation of mutations) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                        $codeview[0].style.height = this.$content[0].style.height;
+                    }
+                }
+            });
+            this.resizerHandleObserver.observe(this.$content[0], {attributes: true});
             $codeview.val(this.$content.html());
             this.wysiwyg.odooEditor.observerActive();
         }
@@ -333,6 +344,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
                     cwindow.document
                         .open("text/html", "replace")
                         .write(
+                            '<!DOCTYPE html><html>' +
                             '<head>' +
                                 '<meta charset="utf-8"/>' +
                                 '<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>\n' +
@@ -351,7 +363,8 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
                                         'window.top.' + self._onUpdateIframeId + '(' + _avoidDoubleLoad + ')' +
                                     '}' +
                                 '</script>\n' +
-                            '</body>');
+                            '</body>' +
+                            '</html>');
 
                     var height = cwindow.document.body.scrollHeight;
                     self.$iframe.css('height', Math.max(30, Math.min(height, 500)) + 'px');
@@ -515,8 +528,8 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
         $button.css({
             'font-size': '15px',
             position: 'absolute',
-            right: '+5px',
-            top: '+5px',
+            right: odoo.debug && this.nodeOptions.codeview ? '40px' : '5px',
+            top: '5px',
         });
         this.$el.append($button);
         if (odoo.debug && this.nodeOptions.codeview) {

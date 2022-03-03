@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from collections import defaultdict
 from lxml import etree
 import re
 
@@ -17,7 +18,7 @@ class AccountAnalyticLine(models.Model):
         if 'encoding_uom_id' in field_list:
             result['encoding_uom_id'] = self.env.company.timesheet_encode_uom_id.id
         if not self.env.context.get('default_employee_id') and 'employee_id' in field_list and result.get('user_id'):
-            result['employee_id'] = self.env['hr.employee'].search([('user_id', '=', result['user_id'])], limit=1).id
+            result['employee_id'] = self.env['hr.employee'].search([('user_id', '=', result['user_id']), ('company_id', '=', result.get('company_id', self.env.company.id))], limit=1).id
         return result
 
     def _domain_project_id(self):
@@ -110,17 +111,25 @@ class AccountAnalyticLine(models.Model):
     def create(self, vals_list):
         default_user_id = self._default_user()
         user_ids = list(map(lambda x: x.get('user_id', default_user_id), filter(lambda x: not x.get('employee_id') and x.get('project_id'), vals_list)))
-        employees = self.env['hr.employee'].search([('user_id', 'in', user_ids)])
-        user_map = {employee.user_id.id: employee.id for employee in employees}
 
         for vals in vals_list:
             # when the name is not provide by the 'Add a line', we set a default one
             if vals.get('project_id') and not vals.get('name'):
                 vals['name'] = '/'
+            vals.update(self._timesheet_preprocess(vals))
+
+        # Although this make a second loop on the vals, we need to wait the preprocess as it could change the company_id in the vals
+        # TODO To be refactored in master
+        company_ids_in_vals = list({vals['company_id'] for vals in vals_list if vals.get('company_id', False)})
+        employees = self.env['hr.employee'].search([('user_id', 'in', user_ids), ('company_id', 'in', [self.env.company.id] + company_ids_in_vals)])
+        user_map = defaultdict(dict)
+        for employee in employees:
+            user_map[employee.company_id.id][employee.user_id.id] = employee.id
+
+        for vals in vals_list:
             # compute employee only for timesheet lines, makes no sense for other lines
             if not vals.get('employee_id') and vals.get('project_id'):
-                vals['employee_id'] = user_map.get(vals.get('user_id') or default_user_id)
-            vals.update(self._timesheet_preprocess(vals))
+                vals['employee_id'] = user_map[vals.get('company_id', self.env.company.id)].get(vals.get('user_id', default_user_id), False)
 
         lines = super(AccountAnalyticLine, self).create(vals_list)
         for line, values in zip(lines, vals_list):
@@ -163,9 +172,10 @@ class AccountAnalyticLine(models.Model):
     def _apply_time_label(self, view_arch, related_model):
         doc = etree.XML(view_arch)
         Model = self.env[related_model]
-        encoding_uom = self.env.company.timesheet_encode_uom_id
+        # Just fetch the name of the uom in `timesheet_encode_uom_id` of the current company
+        encoding_uom_name = self.env.company.timesheet_encode_uom_id.with_context(prefetch_fields=False).sudo().name
         for node in doc.xpath("//field[@widget='timesheet_uom'][not(@string)] | //field[@widget='timesheet_uom_no_toggle'][not(@string)]"):
-            name_with_uom = re.sub(_('Hours') + "|Hours", encoding_uom.name or '', Model._fields[node.get('name')]._description_string(self.env), flags=re.IGNORECASE)
+            name_with_uom = re.sub(_('Hours') + "|Hours", encoding_uom_name or '', Model._fields[node.get('name')]._description_string(self.env), flags=re.IGNORECASE)
             node.set('string', name_with_uom)
 
         return etree.tostring(doc, encoding='unicode')
