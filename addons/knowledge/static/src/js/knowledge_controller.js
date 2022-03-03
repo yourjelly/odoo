@@ -156,17 +156,14 @@ const KnowledgeFormController = FormController.extend({
      * @param {integer} data.target_parent_id
      */
     _create: async function (data) {
-        const params = {};
-        if (data.target_parent_id) {
-            params.parent_id = data.target_parent_id;
-        } else {
-            params.private = data.category === 'private';
-        }
         const articleId = await this._rpc({
             model: 'knowledge.article',
             method: 'article_create',
             args: [[]],
-            kwargs: params,
+            kwargs: {
+                private: data.category === 'private',
+                parent_id: data.target_parent_id ? data.target_parent_id : false
+            },
         });
         if (!articleId) {
             return;
