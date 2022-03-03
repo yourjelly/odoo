@@ -293,6 +293,7 @@ class Users(models.Model):
     action_id = fields.Many2one('ir.actions.actions', string='Home Action',
         help="If specified, this action will be opened at log on for this user, in addition to the standard menu.")
     groups_id = fields.Many2many('res.groups', 'res_groups_users_rel', 'uid', 'gid', string='Groups', default=_default_groups)
+    groups_id_warning_message = fields.Char(compute='_compute_groups_id_warning_message')
     log_ids = fields.One2many('res.users.log', 'create_uid', string='User log entries')
     login_date = fields.Datetime(related='log_ids.create_date', string='Latest authentication', readonly=False)
     share = fields.Boolean(compute='_compute_share', compute_sudo=True, string='Share User', store=True,
@@ -323,6 +324,12 @@ class Users(models.Model):
     _sql_constraints = [
         ('login_key', 'UNIQUE (login)',  'You can not have two users with the same login !')
     ]
+
+    @api.depends('groups_id')
+    def _compute_groups_id_warning_message(self):
+        for user in self:
+            print('group changed')
+            user.groups_id_warning_message = 'Groups: %s' % str(user.groups_id)
 
     def init(self):
         cr = self.env.cr

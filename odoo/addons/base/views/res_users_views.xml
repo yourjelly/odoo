@@ -228,6 +228,7 @@
                         </div>
                         <notebook colspan="4">
                             <page name="access_rights" string="Access Rights">
+                                <field name="groups_id_warning_message"/>
                                 <group string="Multi Companies" attrs="{'invisible': [('companies_count', '&lt;=', 1)]}">
                                     <field string="Allowed Companies" name="company_ids" widget="many2many_tags" options="{'no_create': True}"/>
                                     <field string="Default Company" name="company_id" context="{'user_preference': 0}"/>
