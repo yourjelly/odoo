@@ -57,4 +57,3 @@ StateSelectionField.convertAttrsToProps = (attrs) => {
     };
 };
 registry.category("fields").add("state_selection", StateSelectionField);
-registry.category("fields").add("list.state_selection", StateSelectionField);

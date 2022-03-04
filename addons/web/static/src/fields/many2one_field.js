@@ -247,4 +247,3 @@ Many2OneField.convertAttrsToProps = (attrs) => {
 Many2OneField.searchLimit = 7;
 
 registry.category("fields").add("many2one", Many2OneField);
-registry.category("fields").add("list.many2one", Many2OneField); // TODO WOWL: link isn't clickable in lists
