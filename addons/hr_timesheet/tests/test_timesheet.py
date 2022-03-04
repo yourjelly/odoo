@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.tests.common import TransactionCase
+from .common import TestTimesheetCommon
+
 from odoo.exceptions import AccessError, UserError
 
 
-class TestCommonTimesheet(TransactionCase):
+class TestCommonTimesheet(TestTimesheetCommon):
 
     @classmethod
     def setUpClass(cls):
@@ -52,18 +53,6 @@ class TestCommonTimesheet(TransactionCase):
             'project_id': cls.project_customer.id,
         })
         # users
-        cls.user_employee = cls.env['res.users'].create({
-            'name': 'User Employee',
-            'login': 'user_employee',
-            'email': 'useremployee@test.com',
-            'groups_id': [(6, 0, [cls.env.ref('hr_timesheet.group_hr_timesheet_user').id])],
-        })
-        cls.user_employee2 = cls.env['res.users'].create({
-            'name': 'User Employee 2',
-            'login': 'user_employee2',
-            'email': 'useremployee2@test.com',
-            'groups_id': [(6, 0, [cls.env.ref('hr_timesheet.group_hr_timesheet_user').id])],
-        })
         cls.user_manager = cls.env['res.users'].create({
             'name': 'User Officer',
             'login': 'user_manager',
@@ -71,14 +60,6 @@ class TestCommonTimesheet(TransactionCase):
             'groups_id': [(6, 0, [cls.env.ref('hr_timesheet.group_timesheet_manager').id])],
         })
         # employees
-        cls.empl_employee = cls.env['hr.employee'].create({
-            'name': 'User Empl Employee',
-            'user_id': cls.user_employee.id,
-        })
-        cls.empl_employee2 = cls.env['hr.employee'].create({
-            'name': 'User Empl Employee 2',
-            'user_id': cls.user_employee2.id,
-        })
         cls.empl_manager = cls.env['hr.employee'].create({
             'name': 'User Empl Officer',
             'user_id': cls.user_manager.id,
@@ -310,42 +291,8 @@ class TestTimesheet(TestCommonTimesheet):
         '''This test checks that no error is raised when moving a task that contains timesheet to another project.
            This move implying writing on the account.analytic.line.
         '''
-
-        project_manager = self.env['res.users'].create({
-            'name': 'user_project_manager',
-            'login': 'user_project_manager',
-            'groups_id': [(6, 0, [self.ref('project.group_project_manager')])],
+        self.task_1.with_user(self.project_manager).write({
+            'project_id': self.second_project.id
         })
 
-        project = self.env['project.project'].create({
-            'name': 'Project With Timesheets',
-            'privacy_visibility': 'employees',
-            'allow_timesheets': True,
-            'user_id': project_manager.id,
-        })
-        second_project = self.env['project.project'].create({
-            'name': 'Project w/ timesheets',
-            'privacy_visibility': 'employees',
-            'allow_timesheets': True,
-            'user_id': project_manager.id,
-        })
-
-        task_1 = self.env['project.task'].create({
-            'name': 'First task',
-            'user_ids': self.user_employee2,
-            'project_id': project.id
-        })
-
-        timesheet = self.env['account.analytic.line'].create({
-            'name': 'FirstTimeSheet',
-            'project_id': project.id,
-            'task_id': task_1.id,
-            'unit_amount': 2,
-            'employee_id': self.empl_employee2.id
-        })
-
-        task_1.with_user(project_manager).write({
-            'project_id': second_project.id
-        })
-
-        self.assertEqual(timesheet.project_id, second_project, 'The project_id of timesheet should be second_project')
+        self.assertEqual(self.timesheet.project_id, self.second_project, 'The project_id of timesheet should be second_project')
