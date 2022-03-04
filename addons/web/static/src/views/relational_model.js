@@ -555,7 +555,7 @@ export class Record extends DataPoint {
                     }
                 },
             });
-            this._values[fieldName] = list;
+            this._values[fieldName] = list; // this is wrong, we might be creating a new record
             this.data[fieldName] = list;
             if (!invisible) {
                 list.applyCommands(this._changes[fieldName]);
