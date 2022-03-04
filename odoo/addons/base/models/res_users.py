@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import binascii
+from collections import defaultdict
 import contextlib
 import datetime
 import hmac
