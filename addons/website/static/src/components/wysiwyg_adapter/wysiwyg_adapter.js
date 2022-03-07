@@ -64,6 +64,10 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
      * @returns {Promise} the save promise from the Wysiwyg widget.
      */
     async save() {
+        if (this.observer) {
+            this.observer.disconnect();
+            delete this.observer;
+        }
         await this._websiteRootEvent('widgets_stop_request');
         return this.widget.saveContent(false);
     }
