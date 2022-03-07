@@ -5,7 +5,7 @@ import { _t } from '@web/core/l10n/translation';
 
 import { useWowlService } from '@web/legacy/utils';
 
-const { onWillStart, onMounted } = owl;
+const { onWillStart, onMounted, onWillDestroy } = owl;
 
 
 export class WysiwygAdapterComponent extends ComponentAdapter {
@@ -36,6 +36,7 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
             // useExternalListener only work on setup, but save button doesn't exist on setup
             this.widget.el.querySelector('[data-action="save"]').addEventListener('click', this._onSaveButtonClick.bind(this));
             this.widget.el.querySelector('[data-action="cancel"]').addEventListener('click', this._onDiscardButtonClick.bind(this));
+            this.$editable.on('click.odoo-website-editor', '*', this, this._preventDefault);
             this._setObserver();
             if (this.props.target) {
                 this.widget.snippetsMenu.activateSnippet($(this.props.target));
@@ -48,6 +49,11 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                 this.pageOptions[pageOptionEl.name] = pageOptionEl.value;
             }
         });
+
+        onWillDestroy(() => {
+            this.$editable.off('click.odoo-website-editor', '*');
+        })
+
         super.setup();
     }
     /**
@@ -262,5 +268,8 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
     }
     async _onDiscardButtonClick(event) {
         return this.props.quitCallback();
+    }
+    _preventDefault(e) {
+        e.preventDefault();
     }
 }

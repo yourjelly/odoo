@@ -41,6 +41,12 @@ export class WebsiteEditorComponent extends Component {
                 }
             }
         }, () => [this.websiteContext.edition, this.websiteContext.isEditionReady]);
+        useEffect(() => {
+            if (!this.state.edition) {
+                this.websiteContext.isEditionReady = false;
+                this._reloadIframe().then(() => this.websiteContext.isEditionReady = true);
+            }
+        }, () => [this.state.edition]);
     }
     /**
      * Reload the iframe and the editor
@@ -65,7 +71,6 @@ export class WebsiteEditorComponent extends Component {
      * Reload the iframe and set the edition states to false
      */
     async quit() {
-        await this._reloadIframe();
         this.state.edition = false;
         this.websiteContext.edition = false;
         this.reload_target = null;
