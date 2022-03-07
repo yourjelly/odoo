@@ -28,7 +28,6 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
         }
 
         onWillStart(() => {
-            this.editable.classList.add('o_editable');
             this.editableFromEditorMenu(this.$editable).addClass('o_editable');
             this._addEditorMessages();
         });
