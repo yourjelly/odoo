@@ -17,9 +17,7 @@ commandSetupRegistry.add("default", {
 
 export class HotkeyCommandItem extends Component {
     setup() {
-        useHotkey(this.props.hotkey, () => {
-            this.props.executeCommand();
-        });
+        useHotkey(this.props.hotkey, this.props.executeCommand);
     }
 
     getKeysToPress(command) {

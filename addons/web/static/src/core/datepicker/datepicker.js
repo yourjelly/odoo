@@ -51,7 +51,7 @@ const luxonFormatToMomentFormat = (format) => {
  */
 export class DatePicker extends Component {
     setup() {
-        this.rootRef = useRef("root");
+        this.root = useRef("root");
         this.inputRef = useRef("input");
         this.state = useState({ warning: false });
 
@@ -69,9 +69,9 @@ export class DatePicker extends Component {
     }
 
     onMounted() {
-        window.$(this.rootRef.el).on("show.datetimepicker", () => this.inputRef.el.select());
-        window.$(this.rootRef.el).on("hide.datetimepicker", () => this.onDateChange());
-        window.$(this.rootRef.el).on("error.datetimepicker", () => false); // Ignores datepicker errors
+        window.$(this.root.el).on("show.datetimepicker", () => this.inputRef.el.select());
+        window.$(this.root.el).on("hide.datetimepicker", () => this.onDateChange());
+        window.$(this.root.el).on("error.datetimepicker", () => false); // Ignores datepicker errors
 
         this.bootstrapDateTimePicker(this.props);
         this.updateInput();
@@ -92,7 +92,7 @@ export class DatePicker extends Component {
     }
 
     onWillUnmount() {
-        window.$(this.rootRef.el).off(); // Removes all jQuery events
+        window.$(this.root.el).off(); // Removes all jQuery events
 
         this.bootstrapDateTimePicker("destroy");
     }
@@ -170,7 +170,7 @@ export class DatePicker extends Component {
             }
             commandOrParams = params;
         }
-        window.$(this.rootRef.el).datetimepicker(commandOrParams);
+        window.$(this.root.el).datetimepicker(commandOrParams);
     }
 
     //---------------------------------------------------------------------

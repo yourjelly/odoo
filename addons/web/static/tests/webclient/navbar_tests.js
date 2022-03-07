@@ -235,7 +235,7 @@ QUnit.test("can adapt with 'more' menu sections behavior", async (assert) => {
     ]);
 });
 
-QUnit.skip(
+QUnit.test(
     "'more' menu sections adaptations do not trigger render in some cases",
     async (assert) => {
         let adaptRunning = false;
@@ -271,7 +271,7 @@ QUnit.skip(
         const env = await makeTestEnv(baseConfig);
         const navbar = await mount(MyNavbar, target, { env });
         assert.strictEqual(navbar.currentAppSections.length, 0, "0 app sub menus");
-        assert.strictEqual(target.offsetWidth, 600);
+        assert.strictEqual(target.querySelector(".o_navbar").offsetWidth, 600);
         assert.strictEqual(adaptCount, 1);
         assert.strictEqual(
             adaptRenderCount,
@@ -280,10 +280,10 @@ QUnit.skip(
         );
 
         // Force minimal width and dispatch window resize event
-        target.style.width = "0%";
+        target.querySelector(".o_navbar").style.width = "0%";
         window.dispatchEvent(new Event("resize"));
         await nextTick();
-        assert.strictEqual(target.offsetWidth, 0);
+        assert.strictEqual(target.querySelector(".o_navbar").offsetWidth, 0);
         assert.strictEqual(adaptCount, 2);
         assert.strictEqual(
             adaptRenderCount,
@@ -308,7 +308,7 @@ QUnit.skip(
         );
 
         // Force 40% width and dispatch window resize event
-        target.style.width = "40%";
+        target.querySelector(".o_navbar").style.width = "40%";
         window.dispatchEvent(new Event("resize"));
         await nextTick();
         assert.strictEqual(
@@ -324,7 +324,7 @@ QUnit.skip(
         );
 
         // Reset to full width and dispatch window resize event
-        target.style.width = "100%";
+        target.querySelector(".o_navbar").style.width = "100%";
         window.dispatchEvent(new Event("resize"));
         await nextTick();
         assert.strictEqual(navbar.currentAppSections.length, 3, "still 3 app sub menus");

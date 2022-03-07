@@ -35,7 +35,7 @@ export class NavBar extends Component {
         this.currentAppSectionsExtra = [];
         this.actionService = useService("action");
         this.menuService = useService("menu");
-        this.rootRef = useRef("root");
+        this.root = useRef("root");
         this.appSubMenus = useRef("appSubMenus");
         const debouncedAdapt = debounce(this.adapt.bind(this), 250);
         onWillDestroy(() => debouncedAdapt.cancel());
@@ -95,7 +95,8 @@ export class NavBar extends Component {
      *     By the end of this method another render may occur depending on the adaptation result.
      */
     async adapt() {
-        if (!this.rootRef.el) {
+        if (!this.root.el) {
+            /** @todo do we still need this check? */
             // currently, the promise returned by 'render' is resolved at the end of
             // the rendering even if the component has been destroyed meanwhile, so we
             // may get here and have this.el unset

@@ -128,7 +128,8 @@ export function useActionLinks({ resModel, reload }) {
     }
 
     return (ev) => {
-        if (ev.target.closest(`a[type="action"]`)) {
+        let a = ev.currentTarget.closest(`a[type="action"]`);
+        if (a && ev.target.contains(a)) {
             handler(ev);
         }
     };
