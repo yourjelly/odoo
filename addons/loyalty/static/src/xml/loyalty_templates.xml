@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <t t-name="loyalty_program_helper">
+        <div class="row loyalty-templates-container">
+            <t t-foreach="Object.entries(templateData)" t-as="data">
+                <div class="col-3 loyalty-template" t-att-id="data[0]">
+                    <i title="data[1].title" class="fa fa-cogs fa-6x w-100 text-center mb-2"/>
+                    <h2 class="text-center"><t t-out="data[1].title"/></h2>
+                    <p class="text-center" t-out="data.description"><t t-out="data[1].description"/></p>
+                </div>
+            </t>
+        </div>
+    </t>
+
+    <t t-name="LoyaltyControlPanelX2Many" owl="1">
+        <div t-ref="controlPanel">
+            <h4 class="d-inline"><t t-esc="props.label or ''"/></h4>
+            <div class="o_cp_buttons float-right" role="toolbar" aria-label="Control panel buttons" t-ref="buttons">
+                <t t-slot="buttons"/>
+            </div>
+        </div>
+    </t>
+</odoo>
