@@ -111,6 +111,9 @@ var DebouncedField = AbstractField.extend({
             var debouncedFunction = this._doDebouncedAction;
             this._doDebouncedAction = function () {
                 self._isDirty = true;
+                this.trigger_up('set_dirty', {
+                    dataPointID: this.dataPointID
+                });
                 debouncedFunction.apply(self, arguments);
             };
         }

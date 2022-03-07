@@ -129,6 +129,7 @@ const Wysiwyg = Widget.extend({
                 });
             },
             commands: commands,
+            onChange: options.onChange,
             plugins: options.editorPlugins,
         }, editorCollaborationOptions));
 

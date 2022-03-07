@@ -167,6 +167,7 @@ export class OdooEditor extends EventTarget {
                         return closestElement(selection.anchorNode, 'P, DIV');
                     }
                 },
+                onChange: () => {},
                 isHintBlacklisted: () => false,
                 filterMutationRecords: (records) => records,
                 _t: string => string,
@@ -683,6 +684,7 @@ export class OdooEditor extends EventTarget {
         this._recordHistorySelection();
         this.dispatchEvent(new Event('historyStep'));
         this.multiselectionRefresh();
+        this.options.onChange();
     }
     // apply changes according to some records
     historyApply(records) {
@@ -782,6 +784,7 @@ export class OdooEditor extends EventTarget {
             this._historyStepsStates.set(stepId, 'undo');
             this.historyStep(true, { stepId });
             this.dispatchEvent(new Event('historyUndo'));
+            this.options.onChange();
         }
     }
     /**
@@ -799,6 +802,7 @@ export class OdooEditor extends EventTarget {
             this._historyStepsStates.set(stepId, 'redo');
             this.historyStep(true, { stepId });
             this.dispatchEvent(new Event('historyRedo'));
+            this.options.onChange();
         }
     }
     /**
@@ -1473,17 +1477,23 @@ export class OdooEditor extends EventTarget {
             }
             this.deleteRange(sel);
             if (BACKSPACE_ONLY_COMMANDS.includes(method)) {
+                this.options.onChange();
                 return true;
             }
         }
         if (editorCommands[method]) {
-            return editorCommands[method](this, ...args);
+            editorCommands[method](this, ...args);
+            this.options.onChange();
+            return;
         }
         if (method.startsWith('justify')) {
             const mode = method.split('justify').join('').toLocaleLowerCase();
-            return this._align(mode === 'full' ? 'justify' : mode);
+            this._align(mode === 'full' ? 'justify' : mode);
+            this.options.onChange();
+            return;
         }
-        return sel.anchorNode[method](sel.anchorOffset, ...args);
+        sel.anchorNode[method](sel.anchorOffset, ...args);
+        this.options.onChange();
     }
 
     /**

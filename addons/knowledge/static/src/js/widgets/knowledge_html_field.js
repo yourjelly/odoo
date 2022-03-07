@@ -4,9 +4,22 @@ import fieldRegistry from 'web.field_registry';
 import FieldHtml from 'web_editor.field.html';
 
 const KnowledgeFieldHtml = FieldHtml.extend({
+    DEBOUNCE: 5000,
     events: Object.assign({}, FieldHtml.prototype.events, {
         'click a': '_onLinkClick'
     }),
+    /**
+     * @override
+     * @returns {Object}
+     */
+    _getWysiwygOptions: function () {
+        const options = this._super.apply(this, arguments);
+        options.onChange = () => {
+            const editor = this.wysiwyg.odooEditor;
+            editor.dispatchEvent(new Event('contentChanged'));
+        };
+        return options;
+    },
 
     /**
      * When the user clicks on an article link, we can directly open the
