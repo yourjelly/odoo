@@ -16,6 +16,7 @@ const KnowledgeFormController = FormController.extend({
         'click .btn-share': '_onShare',
         'click #knowledge_search_bar': '_onSearch',
         'change .o_breadcrumb_article_name': '_onRename',
+        'input .o_breadcrumb_article_name': '_adjustInputSize',
     }),
 
     custom_events: Object.assign({}, FormController.prototype.custom_events, {
@@ -56,6 +57,10 @@ const KnowledgeFormController = FormController.extend({
             return;
         }
         await this._rename(id, e.currentTarget.value);
+    },
+
+    _adjustInputSize: async function (e) {
+        e.target.setAttribute('size', e.target.value.length);
     },
 
     /**
