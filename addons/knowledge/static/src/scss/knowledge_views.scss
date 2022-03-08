@@ -2,10 +2,16 @@
     --default-sidebar-size: 300px;
     --sidebar-size: clamp(300px, var(--default-sidebar-size), 50vw);
 
-    .o_knowledge_header,
-    .o_knowledge_aside,
-    .o_knowledge_editor {
-        background: white;
+    $o-knowledge-bg--active: #cceaf9; // TMP -> should match $o-searchpanel-active-bg
+
+
+    // = Navbar
+    // --------------------------------------------------------------------------
+    .o_breadcrumb_article_name:not(:focus) {
+        --o-input-border-color: transparent;
+    }
+    .o_breadcrumb_article_name:hover {
+        border-bottom: $input-border-width solid $o-brand-primary;
     }
 
     .o_toggle_favourite {
@@ -34,61 +40,85 @@
         }
     }
 
+    // = Sidebar
+    // --------------------------------------------------------------------------
     .o_knowledge_aside {
         width: var(--sidebar-size);
         transition: width 0.15s linear;
-        .btn-link:hover {
-            background-color: #CECECE;
+
+        .o_article_active, .o_article_icon_active {
+            background-color: $o-knowledge-bg--active;
         }
-        #knowledge_search_bar:hover {
-            cursor: pointer;
+
+        .o_article_icon:hover {
+            background-color: rgba(#000, .1);
         }
-        ul {
-            padding-left: 15px; /* indentation space */
-        }
+
         li {
-            list-style-type: none;
-            & > ul {
-                border-left: 2px solid #eee;
+            padding: 0.2em 0;
+            position: relative;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li > ul > li:not(.ui-sortable-helper) {
+            margin-left: 1.28571429em * 0.5; // Workaround to get half .fa-fw icon's width.
+            padding-left: 0.8em;
+
+            &:before, &:after {
+                content: '';
+                background-color: $border-color;
+            }
+
+            &:before {
+                @include o-position-absolute($top: 1em, $left: 0);
+                width: .6em;
+                height: 1px;
+                margin: auto;
+            }
+
+            &:after {
+                @include o-position-absolute(0, auto, 0, 0);
+                width: 1px;
+                height: 100%;
+            }
+
+            &:last-child {
+                padding-bottom: 0;
+
+                &:after {
+                    height: 1em;
+                }
             }
         }
+
         .o_section_header:not(:hover) .o_section_create,
         .o_article_handle:not(:hover) .o_article_create {
             visibility: hidden;
         }
-        .o_article_name,
-        .o_article_dropdown i {
-            cursor: pointer;
-        }
+
         .o_article_name a{
             color: inherit;
             text-decoration: none;
         }
-        .o_placeholder {
-            background-color: #eee;
-        }
     }
 
+    // = Resizer
+    // --------------------------------------------------------------------------
     .o_knowledge_resizer {
-        position: absolute;
-        top: 0;
-        left: -10px;
-        width: 20px;
-        height: 100%;
+        // Use '$spacers' measures to match surrounding elements padding
+        $-resizer-spacing: map-get($spacers, 3);
+        $-resizer-line-width: map-get($spacers, 1);
+
+        @include o-position-absolute(0, auto, 0, $-resizer-spacing * -1);
         cursor: ew-resize;
         touch-action: none;
-        z-index: 1;
-        &::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 9px;
-            width: 3px;
-            height: 100%;
-            background: $o-gray-100;
-        }
-        &:hover::after {
-            background: $o-gray-300;
+
+        span {
+            @include o-position-absolute(0, auto, 0, $-resizer-spacing + ($-resizer-line-width * -0.5));
         }
     }
 
@@ -161,14 +191,6 @@
         .o_knowledge_aside {
             width: 100%;
         }
-    }
-}
-
-@media print {
-    .o_knowledge_header,
-    .o_knowledge_aside,
-    .o_knowledge_resizer {
-        display: none !important;
     }
 }
 

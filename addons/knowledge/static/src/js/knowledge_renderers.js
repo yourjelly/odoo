@@ -53,7 +53,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
             toleranceElement: '> div',
             forcePlaceholderSize: true,
             opacity: 0.6,
-            placeholder: 'o_placeholder',
+            placeholder: 'bg-info',
             tolerance: 'pointer',
             helper: 'clone',
             cursor: 'grabbing',

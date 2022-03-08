@@ -12,7 +12,7 @@
                     <i class="fa fa-fw fa-plus"/>
                 </button>
             </div>
-            <ul class="o_tree m-0 px-0 py-2">
+            <ul class="o_tree">
                 <t t-call="knowledge.articles_template">
                     <t t-set="articles" t-value="public_articles"/>
                 </t>
@@ -23,7 +23,7 @@
             <div class="o_section_header d-flex h4 mb-0">
                 <div class="flex-grow-1 text-truncate">Shared</div>
             </div>
-            <ul class="o_tree m-0 px-0 py-2">
+            <ul class="o_tree">
                 <t t-call="knowledge.articles_template">
                     <t t-set="articles" t-value="shared_articles"/>
                 </t>
@@ -37,7 +37,7 @@
                     <i class="fa fa-fw fa-plus"/>
                 </button>
             </div>
-            <ul class="o_tree m-0 px-0 py-2">
+            <ul class="o_tree">
                 <t t-call="knowledge.articles_template">
                     <t t-set="articles" t-value="private_articles"/>
                 </t>
@@ -61,30 +61,30 @@
         <t t-set="unfolded_articles" t-value="unfolded_articles or []"/>
         <t t-foreach="articles" t-as="article">
             <li class="o_article" t-attf-id="article_#{article.id}" t-att-data-article-id="article.id">
-                <div t-attf-class="o_article_handle d-flex #{ 'bg-light font-weight-bold' if article.id == active_article_id else '' }">
-                    <button class="o_article_caret btn btn-link text-secondary p-0" type="button">
+                <t t-set="isActive" t-value="article.id == active_article_id"/>
+                <div t-attf-class="o_article_handle d-flex align-items-center #{ 'o_article_active font-weight-bold' if isActive else 'text-muted' }">
+                    <button t-if="not hideChildren and article.child_ids" class="o_article_caret btn btn-link text-muted p-0" type="button">
                         <i t-if="article.child_ids" t-att-class="'align-self-center fa fa-fw fa-caret-' + ('down' if article.id in unfolded_articles else 'right')"/>
-                        <!-- TODO SRI: Help ! Find a way to take the same space as if there was a carret icon (instead of pl-3) -->
                         <i t-else="" class="pl-3 align-self-center"/>
                     </button>
-                    <div class="btn-group dropdown">
+                    <div class="dropdown">
                         <div class="o_article_dropdown btn-group dropdown">
-                            <button class="o_article_icon btn btn-link text-secondary px-1 py-0" type="button"
+                            <a t-attf-class="o_article_icon p-1 {{'o_article_icon_active text-900' if isActive else ''}}" type="button"
                                 t-attf-id="o_article_dropdown_#{article.id}" data-toggle="dropdown" aria-expanded="true">
                                 <t t-out="article.icon"/>
-                            </button>
+                            </a>
                             <div class="o_knowledge_emoji_panel dropdown-menu rounded p-0" role="menu"
                                 t-attf-aria-labelledby="o_article_dropdown_#{article.id}"/>
                         </div>
                     </div>
-                    <div class="o_article_name flex-grow-1 text-truncate">
+                    <div class="o_article_name flex-grow-1 text-truncate o_cursor_pointer">
                         <t t-out="article.name"/>
                     </div>
-                    <button class="o_article_create btn btn-link text-secondary p-0" type="button">
+                    <button t-if="not hideChildren" class="o_article_create btn p-0 opacity-75 opacity-100-hover" type="button">
                         <i class="fa fa-fw fa-plus"/>
                     </button>
                 </div>
-                <ul t-if="article.child_ids and article.id in unfolded_articles">
+                <ul t-if="not hideChildren and article.child_ids and article.id in unfolded_articles">
                     <t t-call="knowledge.articles_template">
                         <t t-set="articles" t-value="article.child_ids.sorted('sequence').filtered(lambda child: child.user_has_access)"/>
                     </t>
