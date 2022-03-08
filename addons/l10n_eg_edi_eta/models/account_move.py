@@ -69,7 +69,6 @@ class AccountMove(models.Model):
         else:
             pdf = base64.b64encode(invoice)
             self.l10n_eg_pdf = pdf
-            # self.l10n_eg_document_name = "%s.pdf" % self.name.replace('/', '_')
 
     def _get_amount_main_currency(self, amount):
         from_currency = self.currency_id
@@ -82,7 +81,7 @@ class AccountMove(models.Model):
                 company=self.company_id,
                 date=fields.Date.today(),
                 round=False)
-        return to_currency.round(new_amount)
+        return round(new_amount,5)
 
     def _exchange_currency_rate(self):
         from_currency = self.currency_id
@@ -92,4 +91,4 @@ class AccountMove(models.Model):
         if from_currency != to_currency:
             rate = self.env['res.currency']._get_conversion_rate(from_currency, to_currency, company,
                                                                  self.invoice_date)
-        return to_currency.round(rate)
+        return round(rate,5)
