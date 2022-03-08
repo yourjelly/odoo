@@ -2,12 +2,6 @@
     --default-sidebar-size: 300px;
     --sidebar-size: clamp(300px, var(--default-sidebar-size), 50vw);
 
-    .o_knowledge_header,
-    .o_knowledge_aside,
-    .o_knowledge_editor {
-        background: white;
-    }
-
     .o_knowledge_editor {
         min-height: 100%;
         .oe_form_field {
