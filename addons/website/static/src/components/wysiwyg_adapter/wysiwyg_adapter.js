@@ -205,7 +205,7 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
      * This method provides support for the legacy event system.
      * It sends events to the root_widget in the iframe when it needs
      * to (e.g widgets_stop_request). It also provides support for the
-     * action_demand. See {@link _handle_action}.
+     * action_demand. See {@link _handleAction}.
      * If the event is not supported it uses the super class method's.
      * See {@link ComponentAdapter._trigger_up}.
      *
@@ -226,7 +226,7 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                 }
                 break;
             case 'action_demand':
-                event.data.onSuccess(this._handle_action(event.data.actionName, event.data.params));
+                event.data.onSuccess(this._handleAction(event.data.actionName, event.data.params));
                 break;
             case 'snippet_dropped':
                 this._websiteRootEvent('widgets_start_request', event.data);
@@ -238,7 +238,7 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
         return super._trigger_up(...arguments);
     }
 
-    _handle_action(actionName, params) {
+    _handleAction(actionName, params) {
         if (actionName === 'get_page_option') {
             return this.pageOptions[params];
         }
