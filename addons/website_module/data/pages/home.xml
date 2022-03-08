@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!-- Disable Default Home -->
+<record id="website.homepage" model="ir.ui.view">
+    <field name="active" eval="False"/>
+</record>
+
+<!-- Home -->
+<record id="website_module.home" model="website.page">
+    <field name="inherit_id" eval="False"/>
+    <field name="is_published" eval="True"/>
+    <field name="key">website_module.home</field>
+    <field name="name">Home</field>
+    <field name="priority">16</field>
+    <field name="type">qweb</field>
+    <field name="url">/</field>
+    <field name="website_id">1</field>
+    <field name="arch" type="xml">
+        <t name="Home" t-name="website_module.home">
+            <t t-call="website.layout">
+                <div id="wrap" class="oe_structure">
+
+                    <section class="s_text_image pt200 pb200" data-oe-shape-data="{'shape':'illustration/hexagon/01','flip':[]}">
+                        <div class="o_we_shape o_illustration_hexagon_01"/>
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <img src="/web/image/website.s_parallax_default_image" class="img-fluid" alt=""/>
+                                </div>
+                                <div class="col-lg-5 offset-lg-1">
+                                    <h1 class="mb-5"><b>Title</b></h1>
+                                    <p class="lead mb-4">Technology has changed our world. Disrupting every aspect of our lives. Except one. We rethink the way we build in Europe. For a better and more sustainable planet. In an industry that stood still for ages, the only way is up.</p>
+                                    <p><a href="" class="btn btn-primary">Discover</a></p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                </div>
+            </t>
+        </t>
+    </field>
+</record>
+
+</odoo>

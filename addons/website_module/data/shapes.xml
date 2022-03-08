@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<record id="shape_hexagon_01" model="ir.attachment">
+    <field name="name">01.svg</field>
+    <field name="datas" type="base64" file="website_module/static/shapes/hexagon/01.svg"/>
+    <field name="url">/web_editor/shape/illustration/hexagon/01.svg</field>
+    <field name="public">True</field>
+</record>
+
+</odoo>

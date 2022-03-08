@@ -1,0 +1,29 @@
+$o-website-values-palettes: (
+    (
+        // Colors
+        'color-palettes-name':              'coconuts',
+    ),
+);
+
+$o-color-palettes: map-merge($o-color-palettes,
+    (
+        'coconuts': (
+            'o-color-1':                    #BEDB39,
+            'o-color-2':                    #2C3E50,
+            'o-color-3':                    #ECF0F1,
+            'o-color-4':                    #FFFFFF,
+            'o-color-5':                    #212529,
+        ),
+    )
+);
+
+$o-bg-shapes: map-merge($o-bg-shapes,
+(
+    'illustration': map-merge(
+        map-get($o-bg-shapes, 'illustration') or (),
+        (
+            'hexagon/01': ('position': right top, 'size': auto 100%, 'colors': (1), 'repeat-y': false),
+        ),
+    ),
+),
+);
