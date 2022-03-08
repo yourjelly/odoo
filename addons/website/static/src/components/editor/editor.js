@@ -7,9 +7,15 @@ import core from 'web.core';
 import { getWysiwygClass } from 'web_editor.loader';
 import { useService } from '@web/core/utils/hooks';
 
-const { markup, Component, useState, useChildSubEnv, useEffect } = owl;
+const { markup, Component, useState, useChildSubEnv, useEffect, useExternalListener } = owl;
 
 import { WysiwygAdapterComponent } from '../wysiwyg_adapter/wysiwyg_adapter';
+const EDITION_STATE = {
+    LOADING: 'LOADING',
+    STARTED: true,
+    RELOAD: 'RELOAD',
+    OFF: false,
+};
 
 export class WebsiteEditorComponent extends Component {
     /**
@@ -23,11 +29,18 @@ export class WebsiteEditorComponent extends Component {
         this.websiteContext = useState(this.websiteService.context);
 
         useChildSubEnv(legacyEnv);
+        useExternalListener(window.document, 'FRONTEND-EDITION-READY', (event) => {
+            this.websiteRootInstance = event.detail.websiteRootInstance;
+            this.websiteContext.isEditionReady = true;
+        });
 
         useEffect(() => {
             if (this.websiteContext.edition && this.websiteContext.isEditionReady) {
                 if (this.$welcomeMessage) {
                     this.$welcomeMessage.detach();
+                }
+                if (this.reloadSelector) {
+                    this.reloadTarget = this.iframe.el.contentWindow.$(this.reloadSelector)[0];
                 }
                 this.wysiwygLoading = true;
                 this._loadWysiwyg();
@@ -42,9 +55,8 @@ export class WebsiteEditorComponent extends Component {
             }
         }, () => [this.websiteContext.edition, this.websiteContext.isEditionReady]);
         useEffect(() => {
-            if (!this.state.edition) {
-                this.websiteContext.isEditionReady = false;
-                this._reloadIframe().then(() => this.websiteContext.isEditionReady = true);
+            if (this.state.edition === EDITION_STATE.RELOAD) {
+                this._reloadIframe();
             }
         }, () => [this.state.edition]);
     }
@@ -58,22 +70,23 @@ export class WebsiteEditorComponent extends Component {
             this.loadingDummy = markup(widgetEl.innerHTML);
         }
         this.state.loading = true;
-        // FIXME: The loading dummy gets removed too soon
-        this.state.edition = false;
-        await this._reloadIframe();
+        // We do not change the websiteContext edition to false so when the
+        // context isEditionReady is true after the iframe
+        // reloaded, the edition will start again.
         if (event.data.option_selector) {
-            this.reload_target = $(this.iframe.el.contentDocument.body).find(event.data.option_selector)[0];
+            this.reloadSelector = event.data.option_selector;
         }
-        this.state.edition = true;
-        this.state.loading = false;
+        this.state.edition = EDITION_STATE.RELOAD;
     }
     /**
      * Reload the iframe and set the edition states to false
      */
     async quit() {
-        this.state.edition = false;
+        this.state.edition = EDITION_STATE.OFF;
         this.websiteContext.edition = false;
-        this.reload_target = null;
+        this.reloadTarget = null;
+        this.reloadSelector = null;
+        return this._reloadIframe();
     }
     /**
      * Reload the iframe
@@ -82,6 +95,7 @@ export class WebsiteEditorComponent extends Component {
      */
     async _reloadIframe() {
         return new Promise((resolve, reject) => {
+            this.websiteContext.isEditionReady = false;
             this.iframe.el.addEventListener('load', resolve);
             this.iframe.el.contentWindow.location.reload();
         });
@@ -96,8 +110,11 @@ export class WebsiteEditorComponent extends Component {
             await ajax.loadXML('/website/static/src/xml/website.editor.xml', core.qweb);
             this.Wysiwyg = await getWysiwygClass({}, ['website.compiled_assets_wysiwyg']);
         }
-        this.state.edition = 'launch';
+        this.state.edition = EDITION_STATE.STARTED;
         this.wysiwygLoading = false;
+        if (this.state.loading) {
+            this.state.loading = false;
+        }
     }
 }
 WebsiteEditorComponent.components = { WysiwygAdapterComponent };

@@ -57,14 +57,6 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
         super.setup();
     }
     /**
-     * @override
-     */
-    updateWidget(nextProps) {
-        if (!nextProps.state.edition) {
-            this.widget.destroy();
-        }
-    }
-    /**
      * Stop the widgets and save the content.
      *
      * @returns {Promise} the save promise from the Wysiwyg widget.
@@ -259,7 +251,7 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
         console.warn('action ', actionName, 'is not yet supported');
     }
     async _websiteRootEvent(type, eventData = {}) {
-        const websiteRootInstance = await this.iframe.el.contentWindow.websiteRootInstance;
+        const websiteRootInstance = await this.props.websiteRootInstance;
         websiteRootInstance.trigger_up(type, {...eventData});
     }
     async _onSaveButtonClick(event) {

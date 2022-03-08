@@ -2,9 +2,9 @@
 <templates xml:space="preserve">
 
     <t t-name="website.WebsiteEditorComponent" owl="1">
-        <t t-if="this.state.edition">
+        <t t-if="this.state.edition === true">
             <WysiwygAdapterComponent Component="this.Wysiwyg" iframe="this.iframe"
-                                    target="this.reload_target"
+                                    target="this.reloadTarget" websiteRootInstance="this.websiteRootInstance"
                                     reloadCallback="(event, widgetEl) => this.reload(event, widgetEl)"
                                     quitCallback="() => this.quit()"/>
         </t>

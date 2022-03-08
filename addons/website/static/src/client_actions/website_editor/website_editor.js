@@ -44,7 +44,6 @@ export class WebsiteEditorClientAction extends Component {
                     this.iframefallback.el.contentDocument.body.replaceWith(this.iframe.el.contentDocument.body.cloneNode(true));
                     $().getScrollingElement(this.iframefallback.el.contentDocument)[0].scrollTop = $().getScrollingElement(this.iframe.el.contentDocument)[0].scrollTop;
                 });
-                this.websiteContext.isEditionReady = true;
             });
         });
     }
