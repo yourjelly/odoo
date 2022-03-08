@@ -1353,10 +1353,11 @@ class IrModelSelection(models.Model):
                     continue
                 if selection.field_id.store:
                     # replace the value by the new one in the field's corresponding column
-                    query = 'UPDATE "{table}" SET "{field}"=%s WHERE "{field}"=%s'.format(
-                        table=self.env[selection.field_id.model]._table,
-                        field=selection.field_id.name,
-                    )
+                    model = self.env[selection.field_id.model]
+                    fname = selection.field_id.name
+                    model.flush([fname])
+                    model.invalidate_cache([fname])
+                    query = f'UPDATE "{model._table}" SET "{fname}"=%s WHERE "{fname}"=%s'
                     self.env.cr.execute(query, [vals['value'], selection.value])
 
         result = super().write(vals)
@@ -1660,6 +1661,7 @@ class IrModelRelation(models.Model):
         """ Reflect the table of a many2many field for the given model, to make
             it possible to delete it later when the module is uninstalled.
         """
+        self.flush()
         cr = self._cr
         query = """ SELECT 1 FROM ir_model_relation r, ir_module_module m
                     WHERE r.module=m.id AND r.name=%s AND m.name=%s """
@@ -1821,6 +1823,7 @@ class IrModelAccess(models.Model):
 
     @api.model
     def call_cache_clearing_methods(self):
+        self.flush()
         self.invalidate_cache()
         self.check.clear_cache(self)    # clear the cache of check function
         for model, method in self.__cache_clearing_methods:
