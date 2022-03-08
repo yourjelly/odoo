@@ -499,12 +499,13 @@ class BaseCase(unittest.TestCase, metaclass=MetaCase):
             self.env.user.flush()
             self.env.cr.flush()
 
-        with patch('odoo.sql_db.Cursor.execute', execute):
+        with self.env.cache.nocheck(), patch('odoo.sql_db.Cursor.execute', execute):
             with patch('odoo.osv.expression.get_unaccent_wrapper', get_unaccent_wrapper):
-                yield actual_queries
-                if flush:
-                    self.env.user.flush()
-                    self.env.cr.flush()
+                with self.env.cache.nocheck():
+                    yield actual_queries
+                    if flush:
+                        self.env.user.flush()
+                        self.env.cr.flush()
 
         self.assertEqual(
             len(actual_queries), len(expected),
@@ -541,10 +542,11 @@ class BaseCase(unittest.TestCase, metaclass=MetaCase):
                     self.env.user.flush()
                     self.env.cr.flush()
                 count0 = self.cr.sql_log_count
-                yield
-                if flush:
-                    self.env.user.flush()
-                    self.env.cr.flush()
+                with self.env.cache.nocheck():
+                    yield
+                    if flush:
+                        self.env.user.flush()
+                        self.env.cr.flush()
                 count = self.cr.sql_log_count - count0
                 if count != expected:
                     # add some info on caller to allow semi-automatic update of query count

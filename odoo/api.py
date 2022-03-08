@@ -864,6 +864,7 @@ class Cache(object):
     def __init__(self):
         # {field: {record_id: value}, field: {context_key: {record_id: value}}}
         self._data = defaultdict(dict)
+        self._checkable = True
 
     def _get_field_cache(self, model, field):
         """ Return the field cache of the given field, but not for modifying it. """
@@ -982,6 +983,9 @@ class Cache(object):
 
     def check(self, env):
         """ Check the consistency of the cache for the given environment. """
+        if not self._checkable:
+            return
+
         def check_fields(model, field_caches):
             towrite = env.all.towrite.get(model._name) or {}
 
@@ -1046,6 +1050,14 @@ class Cache(object):
 
         for model_name, field_caches in model_field_caches.items():
             check_fields(env[model_name], field_caches)
+
+    @contextmanager
+    def nocheck(self):
+        old, self._checkable = self._checkable, False
+        try:
+            yield
+        finally:
+            self._checkable = old
 
 
 # keep those imports here in order to handle cyclic dependencies correctly
