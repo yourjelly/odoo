@@ -205,8 +205,8 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
      * @returns {Node[]} list of nodes that can be edited.
      */
     _getContentEditableAreas() {
-        const savableElements = this.iframe.el.contentDocument
-                                .querySelectorAll('input, [data-oe-readonly],[data-oe-type="monetary"],[data-oe-many2one-id], [data-oe-field="arch"]:empty');
+        const savableElements = $(this.iframe.el.contentDocument).find(this.savableSelector)
+                                .not('input, [data-oe-readonly],[data-oe-type="monetary"],[data-oe-many2one-id], [data-oe-field="arch"]:empty');
         return Array.from(savableElements).filter(element => !element.closest('.o_not_editable'));
     }
     /**
