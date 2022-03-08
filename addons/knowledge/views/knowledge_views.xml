@@ -56,9 +56,9 @@
                     <aside class="o_knowledge_aside d-print-none flex-shrink-0 p-0 bg-white">
                         <div class="d-flex flex-column h-100">
                             <!-- Search bar -->
-                            <div id="knowledge_search_bar" class="d-flex align-items-center border bg-light rounded m-3 o_cursor_pointer">
+                            <div id="knowledge_search_bar" class="d-flex align-items-center border-bottom bg-light m-3 o_cursor_pointer">
                                 <div class="flex-grow-1 px-2 py-1">Search an article...</div>
-                                <i class="fa fa-w fa-search pr-2" title="search"/>
+                                <i class="oi oi-search pr-2" title="search"/>
                             </div>
                             <!-- File explorer -->
                             <div class="flex-grow-1 position-relative">
@@ -75,7 +75,7 @@
                     <div class="flex-grow-1 position-relative p-0">
                         <div class="d-flex flex-column h-100">
                             <!-- Article header -->
-                            <div class="o_knowledge_header d-print-none d-sm-flex flex-row justify-content-between bg-white">
+                            <div class="o_knowledge_header d-print-none d-sm-flex flex-row justify-content-between bg-white border-bottom">
                                 <div class="d-flex align-items-center">
                                     <!-- Breadcrumbs -->
                                     <ol class="breadcrumb p-3" role="navigation">
@@ -90,7 +90,7 @@
                                     </div>
                                 </div>
                                 <!-- Buttons -->
-                                <div class="d-flex flex-shrink-0 align-items-start">
+                                <div class="d-flex flex-shrink-0 align-items-center pr-2">
                                     <a type="button" role="button" class="btn btn-secondary btn-create">
                                         <i class="fa fa-plus-circle"/> Create
                                     </a>
