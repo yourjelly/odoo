@@ -320,6 +320,8 @@ class TestIrModel(TransactionCase):
         self.assertEqual(record.display_name, "Ifan Ben-Mezd")
 
         # unlinking x_name should fixup _rec_name and display_name
+        record.flush()
+        record.invalidate_cache()
         self.env['ir.model.fields']._get('x_bananas', 'x_name').unlink()
         record = self.env['x_bananas'].browse(record.id)
         self.assertEqual(record._rec_name, None)
