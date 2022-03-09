@@ -274,7 +274,7 @@ export class KanbanArchParser extends XMLParser {
             limit: limit && parseInt(limit, 10),
             progressAttributes,
             xmlDoc: applyDefaultAttributes(kanbanBox),
-            fields: activeFields,
+            activeFields,
             tooltips,
             examples: xmlDoc.getAttribute("examples"),
         };
@@ -288,7 +288,7 @@ class KanbanView extends LegacyComponent {
         this.actionService = useService("action");
         this.archInfo = new KanbanArchParser().parse(this.props.arch, this.props.fields);
         const { resModel, fields } = this.props;
-        const { fields: activeFields, defaultGroupBy, onCreate, quickCreateView } = this.archInfo;
+        const { activeFields, defaultGroupBy, onCreate, quickCreateView } = this.archInfo;
         this.model = useModel(KanbanModel, {
             activeFields,
             progressAttributes: this.archInfo.progressAttributes,

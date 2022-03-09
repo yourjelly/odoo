@@ -37,7 +37,14 @@ const formatterRegistry = registry.category("formatters");
 
 export class KanbanRenderer extends LegacyComponent {
     setup() {
-        const { arch, cards, className, fields, xmlDoc, examples } = this.props.archInfo;
+        const {
+            arch,
+            cards,
+            className,
+            activeFields: fields,
+            xmlDoc,
+            examples,
+        } = this.props.archInfo;
         this.cards = cards;
         this.className = className;
         this.cardTemplate = useViewCompiler(KanbanCompiler, arch, fields, xmlDoc);
