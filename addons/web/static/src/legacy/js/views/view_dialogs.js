@@ -363,6 +363,19 @@ var SelectCreateDialog = ViewDialog.extend({
             });
     },
 
+    /**
+     * return the kanban view options
+     *
+     * @private
+     * @returns {Array[]}
+     */
+    _getKanbanOptions() {
+        return {
+            'noDefaultGroupby': true,
+            'selectionMode': this.options.selectionMode || false,
+        }
+    },
+
     setup: function (fieldsViews) {
         var self = this;
         var fragment = document.createDocumentFragment();
@@ -383,10 +396,7 @@ var SelectCreateDialog = ViewDialog.extend({
             selectCreateController = select_create_controllers_registry.SelectCreateListController;
         }
         if (this.viewType === 'kanban') {
-            _.extend(viewOptions, {
-                noDefaultGroupby: true,
-                selectionMode: this.options.selectionMode || false,
-            });
+            _.extend(viewOptions, this._getKanbanOptions());
             selectCreateController = select_create_controllers_registry.SelectCreateKanbanController;
         }
         var view = new ViewClass(fieldsViews[this.viewType], _.extend(viewOptions, {

@@ -322,6 +322,14 @@ var KanbanRenderer = BasicRenderer.extend({
         return Promise.all(ghostDefs);
     },
     /**
+     *
+     * @private
+     * @returns {boolean}
+     */
+    _isQuickCreateColumn() {
+        return !this.state.data.length;
+    },
+    /**
      * Renders an grouped kanban view in a fragment.
      *
      * @private
@@ -380,7 +388,8 @@ var KanbanRenderer = BasicRenderer.extend({
                 });
                 this.defs.push(this.quickCreate.appendTo(fragment).then(function () {
                     // Open it directly if there is no column yet
-                    if (!self.state.data.length) {
+                    const isQuickCreateColumn = self._isQuickCreateColumn();
+                    if (isQuickCreateColumn) {
                         self.quickCreate.toggleFold();
                         self._renderExampleBackground(fragment);
                     }
@@ -466,6 +475,14 @@ var KanbanRenderer = BasicRenderer.extend({
         });
     },
     /**
+     *
+     * @private
+     * @returns {boolean}
+     */
+    _isGroupedByM2ONoColumn() {
+        return !this.state.isGroupedByM2ONoColumn;
+    },
+    /**
      * @param {boolean} [remove] if true, the nocontent helper is always removed
      * @private
      */
@@ -475,7 +492,7 @@ var KanbanRenderer = BasicRenderer.extend({
             !this._hasContent() &&
             !!this.noContentHelp &&
             !(this.quickCreate && !this.quickCreate.folded) &&
-            !this.state.isGroupedByM2ONoColumn;
+            this._isGroupedByM2ONoColumn();
 
         var $noContentHelper = this.$('.o_view_nocontent');
 
