@@ -45,6 +45,10 @@
             </div>
         </div>
     </t>
+    <!-- Alert command: Alert block -->
+    <t t-name="knowledge.alert_block">
+        <div class="alert alert-success"><br/></div>
+    </t>
     <t t-name="knowledge.wysiwyg_article_link">
         <a t-att-href="href" class="btn btn-sm btn-outline-secondary o_no_link_popover">
             <span t-esc="icon" class="pr-2"/><t t-esc="text"/>

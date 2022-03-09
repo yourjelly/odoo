@@ -63,6 +63,14 @@ Wysiwyg.include({
     _getCommands: function () {
         const commands = this._super();
         commands.push({
+            groupName: 'Basic blocks',
+            title: 'Alert block',
+            description: 'Add alert block',
+            fontawesome: 'fa-exclamation',
+            callback: () => {
+                this.addAlertBlock();
+            },
+        }, {
             groupName: 'Medias',
             title: 'File',
             description: 'Embed a file.',
@@ -124,5 +132,12 @@ Wysiwyg.include({
         }));
         const index = QWeb.render('knowledge.wysiwyg_index', { articles });
         this.odooEditor.execCommand('insertHTML', index);
+    },
+    /**
+     * Adds an alert block
+     */
+    addAlertBlock: async function () {
+        const alert = QWeb.render('knowledge.alert_block', {});
+        this.odooEditor.execCommand('insertHTML', alert);
     },
 });
