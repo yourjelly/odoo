@@ -276,7 +276,7 @@ export class ListView extends LegacyComponent {
     }
 
     onClickDiscard() {
-        if (this.model.root.editedRecord.isVirtual) {
+        if (this.model.root.editedRecord.isNew) {
             this.model.root.removeRecord(this.model.root.editedRecord);
         } else {
             this.model.root.editedRecord.discard();

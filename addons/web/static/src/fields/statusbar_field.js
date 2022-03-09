@@ -103,25 +103,27 @@ StatusBarField.extractProps = (fieldName, record, attrs) => {
 
 registry.category("fields").add("statusbar", StatusBarField);
 
-export async function preloadStatusBar(orm, record, fieldName) {
-    const field = record.fields[fieldName];
+export async function preloadStatusBar(orm, datapoint, fieldName) {
+    const field = datapoint.fields[fieldName];
     if (field.type !== "many2one") {
         return null;
     }
 
     const fieldNames = ["id"];
-    const foldField = record.activeFields[fieldName].options.fold_field;
+    const foldField = datapoint.activeFields[fieldName].options.fold_field;
     if (foldField) {
         fieldNames.push(foldField);
     }
 
     const records = await orm.searchRead(field.relation, [], fieldNames);
     const foldMap = {};
-    for (const rec of records) {
-        foldMap[rec.id] = rec[foldField];
+    for (const record of records) {
+        foldMap[record.id] = record[foldField];
     }
 
-    const nameGets = await orm.call(field.relation, "name_get", [records.map((rec) => rec.id)]);
+    const nameGets = await orm.call(field.relation, "name_get", [
+        records.map((record) => record.id),
+    ]);
     return nameGets.map((nameGet) => ({
         id: nameGet[0],
         name: nameGet[1],

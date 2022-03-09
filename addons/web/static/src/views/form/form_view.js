@@ -101,7 +101,7 @@ export class FormView extends LegacyComponent {
         });
 
         usePager(() => {
-            if (!this.model.root.isVirtual) {
+            if (this.model.root.resId) {
                 const resIds = this.model.root.resIds;
                 return {
                     offset: resIds.indexOf(this.model.root.resId),
@@ -261,7 +261,7 @@ export class FormView extends LegacyComponent {
     }
     discard() {
         this.model.root.discard();
-        if (this.model.root.isVirtual) {
+        if (!this.model.root.resId) {
             this.env.config.historyBack();
         }
     }
