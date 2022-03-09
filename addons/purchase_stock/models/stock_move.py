@@ -9,16 +9,16 @@ from odoo.exceptions import UserError
 class StockMove(models.Model):
     _inherit = 'stock.move'
 
-    purchase_line_id = fields.Many2one('purchase.order.line',
-        'Purchase Order Line', ondelete='set null', index='btree_not_null', readonly=True)
-    created_purchase_line_id = fields.Many2one('purchase.order.line',
-        'Created Purchase Order Line', ondelete='set null', readonly=True, copy=False)
+    purchase_line_id = fields.Many2one(
+        'purchase.order.line', 'Purchase Order Line',
+        ondelete='set null', index='btree_not_null', readonly=True)
+    created_purchase_line_id = fields.Many2one(
+        'purchase.order.line', 'Created Purchase Order Line',
+        ondelete='set null', readonly=True, copy=False)
 
     @api.model
     def _prepare_merge_moves_distinct_fields(self):
-        distinct_fields = super(StockMove, self)._prepare_merge_moves_distinct_fields()
-        distinct_fields += ['purchase_line_id', 'created_purchase_line_id']
-        return distinct_fields
+        return super()._prepare_merge_moves_distinct_fields() + ['purchase_line_id', 'created_purchase_line_id']
 
     @api.model
     def _prepare_merge_negative_moves_excluded_distinct_fields(self):
@@ -46,14 +46,14 @@ class StockMove(models.Model):
                 price_unit = order.currency_id._convert(
                     price_unit, order.company_id.currency_id, order.company_id, fields.Date.context_today(self), round=False)
             return price_unit
-        return super(StockMove, self)._get_price_unit()
+        return super()._get_price_unit()
 
     def _generate_valuation_lines_data(self, partner_id, qty, debit_value, credit_value, debit_account_id, credit_account_id, description):
         """ Overridden from stock_account to support amount_currency on valuation lines generated from po
         """
         self.ensure_one()
 
-        rslt = super(StockMove, self)._generate_valuation_lines_data(partner_id, qty, debit_value, credit_value, debit_account_id, credit_account_id, description)
+        rslt = super()._generate_valuation_lines_data(partner_id, qty, debit_value, credit_value, debit_account_id, credit_account_id, description)
         if self.purchase_line_id:
             purchase_currency = self.purchase_line_id.currency_id
             if purchase_currency != self.company_id.currency_id:
@@ -72,12 +72,12 @@ class StockMove(models.Model):
         return rslt
 
     def _prepare_extra_move_vals(self, qty):
-        vals = super(StockMove, self)._prepare_extra_move_vals(qty)
+        vals = super()._prepare_extra_move_vals(qty)
         vals['purchase_line_id'] = self.purchase_line_id.id
         return vals
 
     def _prepare_move_split_vals(self, uom_qty):
-        vals = super(StockMove, self)._prepare_move_split_vals(uom_qty)
+        vals = super()._prepare_move_split_vals(uom_qty)
         vals['purchase_line_id'] = self.purchase_line_id.id
         return vals
 
@@ -89,7 +89,7 @@ class StockMove(models.Model):
         return proc_values
 
     def _clean_merged(self):
-        super(StockMove, self)._clean_merged()
+        super()._clean_merged()
         self.write({'created_purchase_line_id': False})
 
     def _get_upstream_documents_and_responsibles(self, visited):
@@ -98,18 +98,17 @@ class StockMove(models.Model):
         elif self.purchase_line_id and self.purchase_line_id.state not in ('done', 'cancel'):
             return[(self.purchase_line_id.order_id, self.purchase_line_id.order_id.user_id, visited)]
         else:
-            return super(StockMove, self)._get_upstream_documents_and_responsibles(visited)
+            return super()._get_upstream_documents_and_responsibles(visited)
 
     def _get_related_invoices(self):
         """ Overridden to return the vendor bills related to this stock move.
         """
-        rslt = super(StockMove, self)._get_related_invoices()
-        rslt += self.mapped('picking_id.purchase_id.invoice_ids').filtered(lambda x: x.state == 'posted')
+        rslt = super()._get_related_invoices()
+        rslt += self.picking_id.purchase_id.invoice_ids.filtered(lambda x: x.state == 'posted')
         return rslt
 
     def _get_source_document(self):
-        res = super()._get_source_document()
-        return self.purchase_line_id.order_id or res
+        return self.purchase_line_id.order_id or super()._get_source_document()
 
     def _get_valuation_price_and_qty(self, related_aml, to_curr):
         valuation_price_unit_total = 0
