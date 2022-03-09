@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models, _
-from odoo.tools.float_utils import float_compare
+from odoo import fields, models, _
+from odoo.tools.float_utils import float_compare, float_is_zero
 
 
 class AccountMove(models.Model):
@@ -48,12 +48,12 @@ class AccountMove(models.Model):
                 if line.product_id.type != 'product' or line.product_id.valuation != 'real_time':
                     continue
 
-                # Retrieve accounts needed to generate the price difference.
-                debit_pdiff_account = line.product_id.property_account_creditor_price_difference \
-                                or line.product_id.categ_id.property_account_creditor_price_difference_categ
-                debit_pdiff_account = move.fiscal_position_id.map_account(debit_pdiff_account)
-                if not debit_pdiff_account:
-                    continue
+                # # Retrieve accounts needed to generate the price difference.
+                # debit_pdiff_account = line.product_id.property_account_creditor_price_difference \
+                #                 or line.product_id.categ_id.property_account_creditor_price_difference_categ
+                # debit_pdiff_account = move.fiscal_position_id.map_account(debit_pdiff_account)
+                # if not debit_pdiff_account:
+                #     continue
 
                 if line.product_id.cost_method != 'standard' and line.purchase_line_id:
                     po_currency = line.purchase_line_id.currency_id
@@ -96,7 +96,6 @@ class AccountMove(models.Model):
                         price_unit, move.currency_id,
                         move.company_id, fields.Date.today(), round=False
                     )
-
 
                 price_unit = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
                 if line.tax_ids and line.quantity:

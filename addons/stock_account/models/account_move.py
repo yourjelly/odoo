@@ -60,6 +60,9 @@ class AccountMove(models.Model):
 
         # Unlink the COGS lines generated during the 'post' method.
         self.mapped('line_ids').filtered(lambda line: line.is_anglo_saxon_line).unlink()
+
+        # Deletes stock valuation layers generated during the 'post' method.
+        self.stock_valuation_layer_ids.sudo().unlink()
         return res
 
     def button_cancel(self):
