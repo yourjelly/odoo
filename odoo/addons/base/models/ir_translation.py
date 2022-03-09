@@ -252,6 +252,9 @@ class IrTranslation(models.Model):
         """
         self._modified_model(name.split(',')[0])
 
+        self.flush(self._fields)
+        self.invalidate_cache(self._fields)
+
         # update existing translations
         self._cr.execute("""UPDATE ir_translation
                             SET value=%s, src=%s, state=%s
@@ -701,6 +704,9 @@ class IrTranslation(models.Model):
             ``vals_list`` is trusted to be the right values
             No new translation will be created
         """
+        self.flush(self._fields)
+        self.invalidate_cache(self._fields)
+
         grouped_rows = {}
         for vals in vals_list:
             key = (vals['lang'], vals['type'], vals['name'])
