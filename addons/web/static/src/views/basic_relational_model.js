@@ -135,7 +135,7 @@ export class Record extends DataPoint {
     setup(params, state) {
         const legDP = this.model.basicModel.get(params.handle);
         this.resId = legDP.res_id;
-        this.resIds = legDP.res_ids;
+        this.resIds = [...legDP.res_ids];
 
         this._invalidFields = new Set();
         this.preloadedData = null; // TODo
@@ -322,9 +322,9 @@ export class Record extends DataPoint {
         }
         await this.model.basicModel.notifyChanges(this.__legacyHandle, changes);
         this.load();
-        this._invalidFields.forEach((x) =>
-            x.fieldName === fieldName ? this._invalidFields.delete(x) : x
-        );
+        // this._invalidFields.forEach((x) =>
+        //     x.fieldName === fieldName ? this._invalidFields.delete(x) : x
+        // );
         this.model.notify();
     }
 
@@ -363,32 +363,23 @@ export class Record extends DataPoint {
     // "duplicate" and "delete"). Alternative: handle this in form_view (but then what's the
     // point of calling a Record method to do the operation?)
     async duplicate() {
-        const kwargs = { context: this.context };
-        const index = this.resIds.indexOf(this.resId);
-        this.resId = await this.model.orm.call(this.resModel, "copy", [this.resId], kwargs);
-        this.resIds.splice(index + 1, 0, this.resId);
-        await this.load();
+        this.__legacyHandle = await this.model.basicModel.duplicateRecord(this.__legacyHandle);
+        this.resId = this.model.basicModel.localData[this.__legacyHandle].res_id;
+        this.load();
         this.switchMode("edit");
         this.model.notify();
     }
 
     async delete() {
-        const unlinked = await this.model.orm.unlink(this.resModel, [this.resId], this.context);
-        if (!unlinked) {
-            return false;
+        await this.model.basicModel.deleteRecords([this.__legacyHandle], this.resModel);
+        const legDP = this.model.basicModel.localData[this.__legacyHandle];
+        this.resId = legDP.res_id;
+        this.resIds = [...legDP.res_ids];
+        if (this.resIds.length) {
+            await this.model.basicModel.reload(this.__legacyHandle);
+            this.load();
         }
-        const index = this.resIds.indexOf(this.resId);
-        this.resIds.splice(index, 1);
-        this.resId = this.resIds[Math.min(index, this.resIds.length - 1)] || false;
-        if (this.resId) {
-            await this.load();
-            this.model.notify();
-        } else {
-            this.data = {};
-            this._values = {};
-            this._changes = {};
-            this.preloadedData = {};
-        }
+        this.model.notify();
     }
 
     toggleSelection(selected) {
@@ -417,7 +408,7 @@ export class StaticList extends DataPoint {
         const legDP = this.model.basicModel.get(params.handle);
         this.resId = legDP.res_id;
 
-        this.resIds = legDP.res_ids;
+        this.resIds = [...legDP.res_ids];
         /** @type {Record[]} */
         this.records = [];
 
@@ -515,34 +506,9 @@ export class StaticList extends DataPoint {
     }
 
     async sortBy(fieldName) {
-        if (this.orderBy.name === fieldName) {
-            this.orderBy.asc = !this.orderBy.asc;
-        } else {
-            this.orderBy = { name: fieldName, asc: true };
-        }
-
-        await this.load();
+        await this.model.basicModel.setSort(this.__legacyHandle, fieldName);
+        this.load();
         this.model.notify();
-    }
-
-    async update(command) {
-        await this._applyChange(command);
-    }
-
-    // -------------------------------------------------------------------------
-    // Protected
-    // -------------------------------------------------------------------------
-
-    async _applyChange(command) {
-        switch (command.operation) {
-            case "REPLACE_WITH": {
-                this.onChanges();
-                this.resIds = command.resIds;
-                this._commands = [[6, false, command.resIds]];
-                await this.load();
-                break;
-            }
-        }
     }
 }
 
