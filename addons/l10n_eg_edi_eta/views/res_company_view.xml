@@ -12,6 +12,7 @@
                                 <field name="l10n_eg_client_identifier"/>
                                 <field name="l10n_eg_client_secret_1" password="True"/>
                                 <field name='l10n_eg_production'/>
+                                <field name='l10n_eg_invocing_threshhold'/>
                             </group>
                         </group>
                     </page>

@@ -19,27 +19,22 @@ class AccountEdiFormat(models.Model):
 
     @api.model
     def _l10n_eg_get_eta_api_domain(self):
-        # if not self.env.company.l10n_eg_production:
-        #     self.env['ir.config_parameter'].sudo().get_param(
-        #         'default.eta.preproduction.domain')
-        # return self.env['ir.config_parameter'].sudo().get_param('default.eta.production.domain')
-        return 'https://api.preprod.invoicing.eta.gov.eg'
+        if not self.env.company.l10n_eg_production:
+            return self.env['ir.config_parameter'].sudo().get_param('default.eta.preproduction.domain')
+        return self.env['ir.config_parameter'].sudo().get_param('default.eta.production.domain')
 
     @api.model
     def _l10n_eg_get_eta_token_domain(self):
-        # if not self.env.company.l10n_eg_production:
-        #     self.env['ir.config_parameter'].sudo().get_param(
-        #         'default.eta.token.production.domain')
-        # return self.env['ir.config_parameter'].sudo().get_param('default.eta.token.production.domain')
-        return 'https://id.preprod.eta.gov.eg'
+        if not self.env.company.l10n_eg_production:
+            return self.env['ir.config_parameter'].sudo().get_param('default.eta.token.preproduction.domain')
+        return self.env['ir.config_parameter'].sudo().get_param('default.eta.token.production.domain')
 
     @api.model
     def _l10n_eg_get_einvoice_token(self, invoice):
         user = invoice.company_id.l10n_eg_client_identifier
         secret = invoice.company_id.l10n_eg_client_secret_1
         access = '%s:%s' % (user, secret)
-        user_and_pass = b64encode(
-            bytes(access, encoding='utf8')).decode('ascii')
+        user_and_pass = b64encode(bytes(access, encoding='utf8')).decode('ascii')
         token_domain = self._l10n_eg_get_eta_token_domain()
         request_url = '%s/connect/token' % token_domain
         request_payload = {
@@ -50,7 +45,7 @@ class AccountEdiFormat(models.Model):
             request_response = requests.post(
                 request_url, data=request_payload, headers=headers, timeout=(5, 10))
             response_data = request_response.json()
-        except RequestException as ex :
+        except (ValueError, requests.exceptions.ConnectionError, requests.exceptions.MissingSchema, requests.exceptions.Timeout, requests.exceptions.HTTPError) as ex:
             return {
                 'error': _('Please try again later. Error: \n%s' % ex),
                 'blocking_level': 'warning'
@@ -64,20 +59,24 @@ class AccountEdiFormat(models.Model):
             'error': 'Unable to retrieve ETA token',
             'blocking_level': 'warning'
         }
-
+    def _l10n_eg_validate_different_vats(self,invoice):
+        return invoice.journal_id.l10n_eg_branch_id.vat != invoice.partner_id.vat
+        
     def _l10n_eg_validate_tax_codes(self, invoice):
-        return all(tax.l10n_eg_eta_code for tax in invoice.invoice_line_ids.tax_ids)
+        return all(tax.l10n_eg_eta_code for tax in invoice.invoice_line_ids.filtered(lambda x: x.display_type not in ('line_section', 'line_note')).tax_ids)
 
     def _l10n_eg_validate_uom_codes(self, invoice):
-        return all(account_move_line.product_uom_id.l10n_eg_unit_code_id.code for account_move_line in invoice.invoice_line_ids)
+        return all(account_move_line.product_uom_id.l10n_eg_unit_code_id.code for account_move_line in invoice.invoice_line_ids.filtered(lambda x: x.display_type not in ('line_section', 'line_note')))
 
     def _l10n_eg_validate_item_codes(self, invoice):
-        return all(account_move_line.product_id.l10n_eg_item_type and account_move_line.product_id.l10n_eg_item_code for account_move_line in invoice.invoice_line_ids)
+        return all(account_move_line.product_id.l10n_eg_item_type and account_move_line.product_id.barcode for account_move_line in invoice.invoice_line_ids.filtered(lambda x: x.display_type not in ('line_section', 'line_note')))
 
-    def _l10n_eg_validate_info_address(self, partner_id, issuer=False):
+    def _l10n_eg_validate_info_address(self, partner_id, issuer=False, invoice_amount=False):
         fields = ["country_id",
                   "state_id", "city", "street",
-                  "l10n_eg_building_no",'vat']
+                  "l10n_eg_building_no"]
+        if (invoice_amount >= self.env.company.l10n_eg_invocing_threshhold or self._l10n_eg_get_partner_tax_type(partner_id, issuer) != 'P'):
+            fields.append('vat') #we require vat only at a certain threshold defined in company
         if issuer:
             fields.append('l10n_eg_branch_identifier')
         return all(partner_id[field] for field in fields)
@@ -97,7 +96,7 @@ class AccountEdiFormat(models.Model):
         try:
             request_response = requests.request('GET', request_url, headers=headers, data=request_payload,
                                                 timeout=(5, 10))
-        except RequestException as ex:
+        except (ValueError, requests.exceptions.ConnectionError, requests.exceptions.MissingSchema, requests.exceptions.Timeout, requests.exceptions.HTTPError) as ex:
             return {
                 'error': _('PDF Not Reached. \n%s' % ex)
             }
@@ -111,23 +110,25 @@ class AccountEdiFormat(models.Model):
                 'error': request_response.text
             }
 
+    def _l10n_eg_invoice_discount(self, invoice):
+        return sum(line.discount for line in invoice.invoice_line_ids.filtered(lambda x: x.display_type not in ('line_section', 'line_note')))
+
     def _l10n_eg_eta_prepare_eta_invoice(self, invoice):
         def group_tax_retention(tax_values):
             return {'l10n_eg_eta_code': tax_values['tax_id'].l10n_eg_eta_code.split('_')[0]}
-        # TODO: we will have to do something for all the datetime for existing invoices. (post-init?)
-        date_string = invoice.l10n_eg_posted_datetime.strftime(
+        date_string = invoice.invoice_date.strftime(
             '%Y-%m-%dT%H:%M:%SZ')
-        signature_value = invoice.l10n_eg_signature_data or ''
+        signature_value = invoice.l10n_eg_signature_data
         edi_values = invoice._prepare_edi_vals_to_export()
         grouped_taxes = invoice._prepare_edi_tax_details(
             grouping_key_generator=group_tax_retention)['tax_details'].values()
         eta_invoice = {
-            'issuer': self._l10n_eg_eta_prepare_address_data(invoice.l10n_eg_branch_id, issuer=True),
-            'receiver': self._l10n_eg_eta_prepare_address_data(invoice.partner_id),
+            'issuer': self._l10n_eg_eta_prepare_address_data(invoice.journal_id.l10n_eg_branch_id, issuer=True,),
+            'receiver': self._l10n_eg_eta_prepare_address_data(invoice.partner_id, invoice_amount = invoice.amount_total),
             'documentType': 'I' if invoice.move_type == 'out_invoice' else 'c' if invoice.move_type == 'out_refund' else 'd' if invoice.move_type == 'in_refund' else '',
             'documentTypeVersion': '1.0',
             'dateTimeIssued': date_string,
-            'taxpayerActivityCode': invoice.l10n_eg_branch_id.l10n_eg_activity_type_id.code,
+            'taxpayerActivityCode': invoice.journal_id.l10n_eg_branch_id.l10n_eg_activity_type_id.code,
             'internalID': invoice.name,
         }
         if invoice.move_type in ['out_refund', 'in_refund']:
@@ -141,11 +142,10 @@ class AccountEdiFormat(models.Model):
             'netAmount': invoice._get_amount_main_currency(edi_values['total_price_subtotal_before_discount'] - edi_values['total_price_discount']),
             'taxTotals': [{
                 'taxType': tax['l10n_eg_eta_code'].split('_')[0].upper(),
-                'amount': abs(tax['tax_amount']),
+                'amount': abs(invoice._get_amount_main_currency(tax['tax_amount_currency'])),
             } for tax in grouped_taxes],
-            'totalAmount': invoice._get_amount_main_currency(edi_values['total_price_subtotal_before_discount'] - edi_values['total_price_discount']) + sum(abs(tax['tax_amount']) for tax in grouped_taxes),
-            # this is overall discount amount incase of overall discount on the invoice TODO: create a function to allow for easy override
-            'extraDiscountAmount': 0,
+            'totalAmount': invoice._get_amount_main_currency(edi_values['total_price_subtotal_before_discount'] - edi_values['total_price_discount'] + sum(-1*tax['tax_amount_currency'] for tax in grouped_taxes)),
+            'extraDiscountAmount': invoice._compute_invoice_discount(),
             'totalItemsDiscountAmount': 0,
             'signatures': [
                 {
@@ -158,36 +158,33 @@ class AccountEdiFormat(models.Model):
 
     def _l10n_eg_eta_prepare_invoice_lines_data(self, invoice):
         lines = []
-        for line in invoice.invoice_line_ids:
-            discount = (line.discount / 100.0) * \
-                line.quantity * line.price_unit
+        for line in invoice.invoice_line_ids.filtered(lambda x: x.display_type not in ('line_section', 'line_note')):
+            discount = (line.discount / 100.0) * line.quantity * line.price_unit
             lines.append({
                 'description': line.name,
                 'itemType': line.product_id.l10n_eg_item_type,
-                'itemCode': line.product_id.l10n_eg_item_code,
+                'itemCode': line.product_id.barcode,
                 'unitType': line.product_uom_id.l10n_eg_unit_code_id.code,
                 'quantity': line.quantity,
                 'internalCode': line.product_id.default_code or '',
-                'salesTotal': round(line.quantity*invoice._get_amount_main_currency(line.price_unit),5),
-                'total': round(invoice._get_amount_main_currency(line.price_total),5),
+                'salesTotal': line.quantity*invoice._get_amount_main_currency(line.price_unit),
+                'total': invoice._get_amount_main_currency(line.price_total),
                 'valueDifference': 0,
                 'totalTaxableFees': 0,
-                'netTotal': round(invoice._get_amount_main_currency(line.price_subtotal),5),
+                'netTotal': invoice._get_amount_main_currency(line.price_subtotal),
                 'itemsDiscount': 0,
                 'unitValue': {
                     'currencySold': invoice.currency_id.name,
-                    'amountEGP': round(invoice._get_amount_main_currency(
-                        line.price_unit
-                    ),5)
+                    'amountEGP': invoice._get_amount_main_currency(line.price_unit)
                 },
-                'discount': { #price_discount
+                'discount': {  # price_discount
                     'rate': line.discount or 0,
-                    'amount': round(invoice._get_amount_main_currency(discount) or 0,5),
+                    'amount': invoice._get_amount_main_currency(discount) or 0,
                 },
                 'taxableItems': [
                     {
                         'taxType': tax.l10n_eg_eta_code.split('_')[0].upper(),
-                        'amount': round(abs(invoice._get_amount_main_currency((tax.amount / 100.0) * line.price_subtotal)) or 0, 5),
+                        'amount': abs(invoice._get_amount_main_currency((tax.amount / 100.0) * line.price_subtotal)) or 0,
                         'subType': tax.l10n_eg_eta_code.split('_')[1].upper(),
                         'rate': abs(tax.amount)
                         or 0,
@@ -199,22 +196,20 @@ class AccountEdiFormat(models.Model):
             # if the base currency isn't EGP
             if invoice.currency_id != self.env.ref('base.EGP'):
                 lines[-1]['unitValue']['currencyExchangeRate'] = invoice._exchange_currency_rate()
-                lines[-1]['unitValue']['amountSold'] = round(line.price_unit, 5)
+                lines[-1]['unitValue']['amountSold'] = line.price_unit
         return lines
 
-    def _l10n_eg_get_partner_tax_info(self, partner_id, issuer=False):
-        tax_id = partner_id.vat
+    def _l10n_eg_get_partner_tax_type(self, partner_id, issuer=False):
         if issuer:
-            individaul_type = 'B'
+            return 'B'
         elif partner_id.commercial_partner_id.country_id == self.env.ref('base.eg'):
-            individaul_type = 'B' if partner_id.commercial_partner_id.is_company else 'P'
+            return 'B' if partner_id.commercial_partner_id.is_company else 'P'
         else:
-            individaul_type = 'F'
-        return tax_id, individaul_type
+            return 'F'
 
-    def _l10n_eg_eta_prepare_address_data(self, partner_id, issuer=False):
+    def _l10n_eg_eta_prepare_address_data(self, partner_id, issuer=False, invoice_amount=False):
         address = {
-            'address': {  # TODO: make the eta values come from the commerical partner if it exists.
+            'address': {
                 'country': partner_id.country_id.code,
                 'governate': partner_id.state_id.name or '',
                 'regionCity': partner_id.city or '',
@@ -226,10 +221,13 @@ class AccountEdiFormat(models.Model):
         }
         if issuer:
             address['address']['branchID'] = partner_id.l10n_eg_branch_identifier or ''
-        tax_id, individual_type = self._l10n_eg_get_partner_tax_info(
-            partner_id, issuer)
-        address['type'] = individual_type or ''
-        address['id'] = tax_id or ''
+        individual_type = self._l10n_eg_get_partner_tax_type(partner_id, issuer)
+        if (
+            invoice_amount >= self.env.company.l10n_eg_invocing_threshhold
+            or individual_type != 'P'
+        ):
+            address['type'] = individual_type or ''
+            address['id'] = partner_id.vat or ''
         return address
 
     def _l10n_eg_eta_possible_errors(self):
@@ -242,7 +240,8 @@ class AccountEdiFormat(models.Model):
                 'T7': "Please make sure the invoice is posted",
                 'T8': "Please make sure the invoice lines UoM codes are all set up correctly",
                 'T9': "Please make sure the invoice lines taxes all have the correct ETA tax code",
-                'T10': "Please make sure the EGS/GS1 is set correctly on all products",
+                'T10': "Please make sure the EGS/GS1 Barcode is set correctly on all products",
+                'T11': 'You cannot send an invoice to an entity with the same VAT as the current company!'
                 }
     # -------------------------------------------------------------------------
     # EDI OVERRIDDEN METHODS
@@ -259,16 +258,12 @@ class AccountEdiFormat(models.Model):
             errors.append(self._l10n_eg_eta_possible_errors()['T1'])
         if not self._l10n_eg_get_eta_api_domain():
             errors.append(self._l10n_eg_eta_possible_errors()['T2'])
-        if not invoice.l10n_eg_invoice_signed and self.env.company.l10n_eg_production:
-            errors.append(self._l10n_eg_eta_possible_errors()['T6'])
-        if not invoice.l10n_eg_branch_id:
+        if not invoice.journal_id.l10n_eg_branch_id:
             errors.append(self._l10n_eg_eta_possible_errors()['T3'])
-        if not self._l10n_eg_validate_info_address(invoice.l10n_eg_branch_id, issuer=True):
+        if not self._l10n_eg_validate_info_address(invoice.journal_id.l10n_eg_branch_id, issuer=True):
             errors.append(self._l10n_eg_eta_possible_errors()['T4'])
-        if not self._l10n_eg_validate_info_address(invoice.partner_id):
+        if not self._l10n_eg_validate_info_address(invoice.partner_id, invoice_amount = invoice.amount_total):
             errors.append(self._l10n_eg_eta_possible_errors()['T5'])
-        # if not invoice.l10n_eg_posted_datetime:
-        #     errors.append(self._l10n_eg_eta_possible_errors()['T7'])
         if not self._l10n_eg_validate_uom_codes(invoice):
             errors.append(self._l10n_eg_eta_possible_errors()['T8'])
         if not self._l10n_eg_validate_tax_codes(invoice):
@@ -288,6 +283,12 @@ class AccountEdiFormat(models.Model):
 
         invoice_json = self._l10n_eg_eta_prepare_eta_invoice(invoice)
 
+        if not invoice.l10n_eg_signature_data:
+            return {invoice: {
+                'error': self._l10n_eg_eta_possible_errors()['T6'],
+                'blocking_level': 'error'
+                }
+            }
         res = self._l10n_eg_edi_post_invoice_web_service(invoice, invoice_json)
 
         if res.get(invoice, {}).get('success'):
@@ -318,22 +319,18 @@ class AccountEdiFormat(models.Model):
             'documents': [invoice_json]
         }
 
-        data = json.dumps(request_payload, ensure_ascii=False,indent=4).encode('utf-8')
+        data = json.dumps(request_payload, ensure_ascii=False, indent=4).encode('utf-8')
 
         headers = {'Content-Type': 'application/json',
                    'Authorization': 'Bearer %s' % token}
         try:
             request_response = requests.post(
                 request_url, data=data, headers=headers, timeout=(5, 10))
-        except RequestException as error:
+            submission_data = request_response.json()
+        except (ValueError, requests.exceptions.ConnectionError, requests.exceptions.MissingSchema, requests.exceptions.Timeout, requests.exceptions.HTTPError) as ex:
             return {invoice: {'error': str(error), 'blocking_level': 'warning'}}
 
-        if not request_response:
-            return {invoice: {
-                'error': _('The web service is not responding'),
-                'blocking_level': 'warning'
-            }}
-        if submission_data := request_response.json():
+        if submission_data:
             if submission_data.get('error'):
                 return {invoice: {
                     'error': submission_data.get('error'),
@@ -385,7 +382,7 @@ class AccountEdiFormat(models.Model):
             return {invoice: {
                 'error': token.get('error', False),
                 'blocking_level': token.get('blocking_level', False)
-                }
+            }
             }
         request_url = '%s/api/v1/documents/state/%s/state' % (
             api_domain, invoice.l10n_eg_uuid)

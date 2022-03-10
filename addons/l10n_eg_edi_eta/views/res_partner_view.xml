@@ -6,7 +6,7 @@
             <field name="inherit_id" ref="base.view_partner_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//notebook" position="inside">
-                    <page string="ETA Configuration" attrs="{'invisible': [('country_code', '!=', 'EG')]}">
+                    <page string="ETA Configuration">
                         <group>
                             <group>
                                 <field name="l10n_eg_activity_type_id" attrs="{'invisible': [('company_type', '!=', 'company')]}"/>

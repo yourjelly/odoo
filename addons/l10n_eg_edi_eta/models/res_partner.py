@@ -12,3 +12,8 @@ class ResPartner(models.Model):
                                                help='This is the activity type of partner according to egyptian tax authority')
     l10n_eg_branch_identifier = fields.Char('ETA Branch ID', copy=False)
     l10n_eg_building_no = fields.Char('Building No.')
+
+    @api.model
+    def _commercial_fields(self):
+        #Add l10n_eg_building_no to commercial fields
+        return super()._commercial_fields() + ['l10n_eg_building_no']

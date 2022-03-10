@@ -13,6 +13,7 @@ from odoo.exceptions import ValidationError
 import logging
 
 from odoo.tools import formatLang
+from odoo.tools.float_utils import float_compare, float_is_zero, float_round
 
 _logger = logging.getLogger(__name__)
 
@@ -20,25 +21,22 @@ _logger = logging.getLogger(__name__)
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
-    l10n_eg_invoice_signed = fields.Boolean('Document Signed', copy=False, tracking=True)
-
-    l10n_eg_branch_id = fields.Many2one('res.partner', related='journal_id.l10n_eg_branch_id')
-
     l10n_eg_long_id = fields.Char('ETA Long ID', copy=False)
     l10n_eg_internal_id = fields.Char('ETA Internal ID', copy=False)
     l10n_eg_hash_key = fields.Char('ETA Hash Key', copy=False)
     l10n_eg_uuid = fields.Char(string='Document UUID', copy=False)
     l10n_eg_submission_id = fields.Char(string='Submission ID', copy=False)
     l10n_eg_signature_type = fields.Char(string='Signature Type', copy=False)
-
     l10n_eg_signature_data = fields.Text('Signature Data', copy=False)
-
     l10n_eg_posted_datetime = fields.Datetime('Posted Date', copy=False)
-
     l10n_eg_pdf = fields.Binary(string='ETA PDF Document', copy=False)
+                
+    def button_draft(self):
+        self.filtered(lambda x: x.company_id.country_id.code == "EG").write({'l10n_eg_signature_data':False, 'l10n_eg_signature_type':False})
+        return super().button_draft()
 
-    def action_post(self):
-        res = super().action_post()
+    def _post(self, soft=True):
+        res = super()._post(soft)
         self.filtered(lambda r: r.country_code == 'EG' and r.move_type in ('out_invoice', 'out_refund') and not r.l10n_eg_posted_datetime and r.state == 'posted').write({
             'l10n_eg_posted_datetime': fields.Datetime.now()
         })
@@ -69,6 +67,10 @@ class AccountMove(models.Model):
             }
         }
 
+    def _compute_invoice_discount(self):
+        #To override, if you need to put universal discount on invoice
+        return 0
+
     def action_get_eta_invoice_pdf(self, uuid=False):
         self.ensure_one()
         if not uuid:
@@ -78,6 +80,8 @@ class AccountMove(models.Model):
             _logger.warning('PDF Content Error:  %s.' % invoice.get('error'))
         else:
             pdf = base64.b64encode(invoice)
+            attachments = [('ETA invoice of %s.pdf' %self.name, invoice)]
+            self.message_post(body=_('ETA invoice has been recieved'), attachments=attachments)
             self.l10n_eg_pdf = pdf
 
     def _get_amount_main_currency(self, amount):
@@ -89,7 +93,7 @@ class AccountMove(models.Model):
                 from_amount=amount,
                 to_currency=to_currency,
                 company=self.company_id,
-                date=fields.Date.today(),
+                date=self.invoice_date,
                 round=False)
         return round(new_amount,5)
 

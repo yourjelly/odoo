@@ -4,9 +4,6 @@ import hashlib
 import hmac
 import json
 import time
-
-import ipdb
-
 from odoo import http, _
 from odoo.http import request
 from odoo.tools import consteq
@@ -69,14 +66,14 @@ class EinvoiceIntegration(http.Controller):
             return json.dumps({'errors': _('Invalid Token !')})
 
         try:
-            for key, value in invoices.items():
-                if invoice_id := request.env['account.move'].browse(key):
-                    invoice_id.write({
-                        'l10n_eg_signature_type': str(value.get('l10n_eg_signature_type')),
-                        'l10n_eg_signature_data': str(value.get('l10n_eg_signature_data')),
-                    })
-                    return json.dumps({'data': _('Success')})
-                else:
-                    return json.dumps({'errors': _('Invalid Invoice ID!')})
+            if invoice_id := request.env['account.move'].browse(invoice_id):
+                signature = signatures[0]
+                invoice_id.write({
+                    'l10n_eg_signature_type': str(signature.get('signatureType')),
+                    'l10n_eg_signature_data': str(signature.get('value')),
+                })
+                return {'data': {'result': 'Success'}}
+            else:
+                return {'errors': _('Invalid Invoice ID!')}
         except Exception as e:
             return json.dumps({'errors': str(e)})
