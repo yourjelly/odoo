@@ -1,19 +1,14 @@
 /** @odoo-module */
 
 import core from 'web.core';
-import Dialog from 'web.Dialog';
 import FormController from 'web.FormController';
 import { MoveArticleToDialog } from 'knowledge.dialogs';
-
-var QWeb = core.qweb;
-var _t = core._t;
 
 const KnowledgeFormController = FormController.extend({
     events: Object.assign({}, FormController.prototype.events, {
         'click .btn-duplicate': '_onDuplicate',
         'click .btn-create': '_onCreate',
         'click .btn-move': '_onOpenMoveToModal',
-        'click .btn-share': '_onShare',
         'click #knowledge_search_bar': '_onSearch',
         'change .o_breadcrumb_article_name': '_onRename',
     }),
@@ -126,27 +121,6 @@ const KnowledgeFormController = FormController.extend({
                     onReject: () => {}
                 });
             }
-        });
-        dialog.open();
-    },
-
-    _onShare: function () {
-        const $content = $(QWeb.render('knowledge.knowledge_share_an_article_modal'));
-        const dialog = new Dialog(this, {
-            title: _t('Share a Link'),
-            $content: $content,
-            buttons: [{
-                text: _t('Save'),
-                classes: 'btn-primary',
-                click: async () => {
-                    console.log('sharing the article...');
-                }
-            }, {
-                text: _t('Discard'),
-                click: async () => {
-                    dialog.close();
-                }
-            }]
         });
         dialog.open();
     },

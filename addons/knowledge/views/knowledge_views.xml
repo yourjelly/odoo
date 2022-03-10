@@ -93,9 +93,24 @@
                                     <a type="button" role="button" class="btn btn-secondary btn-create">
                                         <i class="fa fa-plus-circle"/> Create
                                     </a>
-                                    <a type="button" role="button" class="btn btn-secondary btn-share">
-                                        <i class="fa fa-share-alt"/> Share
-                                    </a>
+                                    <div class="btn-group" role="toolbar" aria-label="options">
+                                        <div class="o-dropdown dropdown o-dropdown--no-caret">
+                                            <a type="button" role="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <i class="fa fa-share-alt"/> SHARE
+                                            </a>
+                                            <div class="o_knowledge_share_panel dropdown-menu" role="menu">
+                                                <div class="px-3 pb-2">
+                                                    <button type="object" name="action_open_invite_wizard" class="btn btn-primary w-100">
+                                                        <i class="fa fa-plus"/> Invite
+                                                    </button>
+                                                </div>
+                                                <field class="d-block w-100"
+                                                    name="article_member_ids"
+                                                    widget="knowledge_member_list"
+                                                    options="{'avatarModel': 'res.partner'}"/>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="btn-group" role="toolbar" aria-label="options">
                                         <div class="o-dropdown dropdown o-dropdown--no-caret">
                                             <a type="button" role="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

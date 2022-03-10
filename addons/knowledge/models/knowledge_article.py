@@ -27,6 +27,10 @@ class ArticleMembers(models.Model):
         ('partner_unique', 'unique(article_id, partner_id)', 'You already added this partner in this article.')
     ]
 
+    def name_get(self):
+        """Override the `name_get` function"""
+        return [(rec.id, "%s" % (rec.partner_id.display_name)) for rec in self]
+
     @api.constrains('article_permission', 'permission')
     def _check_members(self):
         """
@@ -463,6 +467,22 @@ class Article(models.Model):
 
     def action_archive(self):
         return super(Article, self | self._get_descendants()).action_archive()
+
+    def action_open_invite_wizard(self):
+        self.ensure_one()
+        context = dict(
+            default_article_id=self.id
+        )
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Invite people'),
+            'view_mode': 'form',
+            'res_model': 'knowledge.invite.wizard',
+            'views': [(False, 'form')],
+            'view_id': False,
+            'target': 'new',
+            'context': context
+        }
 
     #####################
     #  Business methods

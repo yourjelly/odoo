@@ -8,7 +8,8 @@ const KnowledgeFormRenderer = FormRenderer.extend({
         'click .o_article_caret': '_onFold',
         'click .o_article_dropdown i': '_onIconClick',
         'click .o_article_name': '_onOpen',
-        'click .o_article_create, .o_section_create': '_onCreate'
+        'click .o_article_create, .o_section_create': '_onCreate',
+        'click .o_knowledge_share_panel': '_preventDropdownClose'
     }),
 
     /**
@@ -277,6 +278,13 @@ const KnowledgeFormRenderer = FormRenderer.extend({
                 stack.unshift(...$ul.children('li').toArray());
             }
         }
+    },
+
+    /**
+     * @param {Event} event
+     */
+    _preventDropdownClose: function (event) {
+        event.stopPropagation();
     },
 });
 
