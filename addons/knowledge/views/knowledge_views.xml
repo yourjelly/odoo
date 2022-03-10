@@ -54,7 +54,7 @@
                 <field name="is_locked" invisible="1" readonly="1"/>
                 <field name="user_can_write" invisible="1"/>
                 <div class="d-sm-flex h-100">
-                    <aside class="o_knowledge_aside flex-shrink-0 p-0">
+                    <aside class="o_knowledge_aside flex-shrink-0">
                         <div class="d-flex flex-column h-100">
                             <!-- Search bar -->
                             <div id="knowledge_search_bar" class="d-flex align-items-center border bg-light rounded m-3">
@@ -71,7 +71,7 @@
                             </div>
                         </div>
                     </aside>
-                    <div class="flex-grow-1 position-relative p-0">
+                    <div class="flex-grow-1 position-relative">
                         <div class="o_knowledge_resizer d-none d-sm-block" />
                         <div class="d-flex flex-column h-100">
                             <!-- Article header -->
@@ -137,7 +137,7 @@
                                                 </button>
                                                 <div class="dropdown-divider"
                                                     attrs="{'invisible': ['&amp;', ('last_edition_id', '=', False), ('last_edition_date', '=', False)]}"/>
-                                                <div class="flex-column px-3 text-muted"
+                                                <div class="px-3 text-muted"
                                                     attrs="{'invisible': [('last_edition_id', '=', False)]}">
                                                     Last Edited: <field name="last_edition_id" readonly="1" class="text-muted"/><br />
                                                     <field name="last_edition_date" widget="datetime" readonly="1"/><br />

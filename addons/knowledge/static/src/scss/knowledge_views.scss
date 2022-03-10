@@ -29,8 +29,13 @@
     .o_knowledge_aside {
         width: var(--sidebar-size);
         transition: width 0.15s linear;
-        .btn-link:hover {
-            background-color: #CECECE;
+        .btn {
+            &:hover {
+                background-color: #CECECE;
+            }
+            &:focus {
+                box-shadow: none;
+            }
         }
         #knowledge_search_bar:hover {
             cursor: pointer;

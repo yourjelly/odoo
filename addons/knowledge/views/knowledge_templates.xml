@@ -22,7 +22,7 @@
         <section class="o_section" data-section="workspace">
             <div class="o_section_header d-flex h4 mb-0">
                 <div class="flex-grow-1 text-truncate">Workspace</div>
-                <button class="o_section_create btn btn-link text-secondary rounded p-0" type="button">
+                <button class="o_section_create btn rounded p-0" type="button">
                     <i class="fa fa-fw fa-plus"/>
                 </button>
             </div>
@@ -51,7 +51,7 @@
         <section class="o_section mb-3" data-section="private">
             <div class="o_section_header d-flex h4 mb-0">
                 <div class="flex-grow-1 text-truncate">Private</div>
-                <button class="o_section_create btn btn-link text-secondary rounded p-0" type="button">
+                <button class="o_section_create btn rounded p-0" type="button">
                     <i class="fa fa-fw fa-plus"/>
                 </button>
             </div>
@@ -68,11 +68,11 @@
     <template id="article_template">
         <li class="o_article" t-att-data-article-id="article.id">
             <div t-attf-class="o_article_handle d-flex #{ 'bg-light rounded' if article.id == active_article_id else '' }">
-                <button class="o_article_caret btn btn-link text-secondary rounded p-0" type="button">
+                <button class="o_article_caret btn rounded p-0" type="button">
                     <i class="fa fa-fw fa-caret-down align-self-center"/>
                 </button>
                 <div class="o_article_dropdown btn-group dropdown">
-                    <button class="o_article_icon btn btn-link text-secondary rounded px-1 py-0" type="button"
+                    <button class="o_article_icon btn rounded px-1 py-0" type="button"
                         t-attf-id="o_article_dropdown_#{article.id}" data-toggle="dropdown" aria-expanded="true">
                         <t t-esc="article.icon"/>
                     </button>
@@ -82,7 +82,7 @@
                 <div t-attf-class="o_article_name flex-grow-1 text-truncate px-1 #{ 'font-weight-bold' if article.id == active_article_id else '' }">
                     <t t-out="article.name"/>
                 </div>
-                <button class="o_article_create btn btn-link text-secondary rounded p-0" type="button">
+                <button class="o_article_create btn rounded p-0" type="button">
                     <i class="fa fa-fw fa-plus"/>
                 </button>
             </div>
