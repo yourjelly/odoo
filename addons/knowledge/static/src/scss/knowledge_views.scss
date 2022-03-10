@@ -9,12 +9,23 @@
             flex-direction: column;
             width: 100%;
         }
+        .oe_form_field:not(.o_full_width) {
+            .note-editable,
+            .o_readonly {
+                max-width: 560px;
+                margin-left: auto;
+                margin-right: auto;
+                transition: max-width 0.15s linear;
+            }
+        }
         .note-editable {
             border: none;
             height: auto !important;
         }
         .note-editable,
         .o_readonly {
+            width: 100%;
+            max-width: 100%;
             flex-grow: 1;
             padding: 1rem !important;
         }

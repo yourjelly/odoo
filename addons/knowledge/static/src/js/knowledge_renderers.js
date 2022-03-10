@@ -2,10 +2,15 @@
 
 import EmojiPickerWidget from './widgets/knowledge_emoji_picker.js';
 import FormRenderer from 'web.FormRenderer';
+import {
+    isFullWidthModeOptionEnabled,
+    saveFullWidthModeOption
+} from './knowledge_utils.js'
 
 const KnowledgeFormRenderer = FormRenderer.extend({
     className: 'o_knowledge_form_view',
     events: _.extend({}, FormRenderer.prototype.events, {
+        'change #o_knowledge_set_full_width_mode': '_onSetFullWidthMode',
         'click .o_article_caret': '_onFold',
         'click .o_article_name': '_onOpen',
         'click .o_article_create, .o_section_create': '_onCreate',
@@ -134,6 +139,27 @@ const KnowledgeFormRenderer = FormRenderer.extend({
     /**
      * @param {Event} event
      */
+    _onSetFullWidthMode: function (event) {
+        const $input = $(event.target);
+        const checked = $input.is(':checked');
+        saveFullWidthModeOption(checked);
+        for (const field of this._getCustomHTMLFields()) {
+            field.$el.toggleClass('o_full_width', checked);
+        }
+    },
+
+    /**
+     * @returns {Array[Widget]}
+     */
+    _getCustomHTMLFields () {
+        return this.allFieldWidgets[this.state.id].filter(field => {
+            return field.attrs.widget === 'knowledge_html'
+        });
+    },
+
+    /**
+     * @param {Event} event
+     */
     _onCreate: function (event) {
         const $target = $(event.currentTarget);
         if ($target.hasClass('o_section_create')) {
@@ -185,6 +211,19 @@ const KnowledgeFormRenderer = FormRenderer.extend({
         await this._renderTree();
         this._setResizeListener();
         return result;
+    },
+
+    /**
+     * @override
+     * @param {Object} node
+     */
+    _renderNode: function (node) {
+        if (node.tag === 'input' && node.attrs.id === 'o_knowledge_set_full_width_mode') {
+            if (isFullWidthModeOptionEnabled()) {
+                node.attrs.checked = 'checked';
+            }
+        }
+        return this._super(...arguments);
     },
 
     _renderBreadcrumb: function () {

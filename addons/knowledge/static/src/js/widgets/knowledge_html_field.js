@@ -2,6 +2,7 @@
 
 import fieldRegistry from 'web.field_registry';
 import FieldHtml from 'web_editor.field.html';
+import { isFullWidthModeOptionEnabled } from '../knowledge_utils.js'
 
 const KnowledgeFieldHtml = FieldHtml.extend({
     DEBOUNCE: 5000,
@@ -19,6 +20,36 @@ const KnowledgeFieldHtml = FieldHtml.extend({
             editor.dispatchEvent(new Event('contentChanged'));
         };
         return options;
+    },
+
+    /**
+     * @override
+     */
+    _render: function () {
+        this.attrs.options.full_width = isFullWidthModeOptionEnabled();
+        return this._super(...arguments);
+    },
+
+    /**
+     * @override
+     */
+    _renderReadonly: function () {
+        this._super(...arguments);
+        const options = this.attrs.options;
+        if (options) {
+            this.$el.toggleClass('o_full_width', options.full_width);
+        }
+    },
+
+    /**
+     * @override
+     */
+    _renderEdit: function () {
+        this._super(...arguments);
+        const options = this.attrs.options;
+        if (options) {
+            this.$el.toggleClass('o_full_width', options.full_width);
+        }
     },
 
     /**
