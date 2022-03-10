@@ -20,17 +20,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
         this.breadcrumbs = params.breadcrumbs;
     },
 
-    /**
-     * @override
-     * @returns {Promise}
-     */
-    start: function () {
-        return this._super.apply(this, arguments).then(() => {
-            return this.initTree();
-        });
-    },
-
-    initTree: function () {
+    _renderTree: async function () {
         const $container = this.$el.find('.o_knowledge_tree');
         let unfoldedArticles = localStorage.getItem('unfoldedArticles');
         unfoldedArticles = unfoldedArticles ? unfoldedArticles.split(";").map(Number) : false;
@@ -241,6 +231,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
     _renderView: async function () {
         const result = await this._super.apply(this, arguments);
         this._renderBreadcrumb();
+        await this._renderTree();
         this._setResizeListener();
         return result;
     },

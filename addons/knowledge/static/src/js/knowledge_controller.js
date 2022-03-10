@@ -222,28 +222,6 @@ const KnowledgeFormController = FormController.extend({
             data.onReject();
         }
     },
-
-    /* Overrides needed to force the sidebar to be refreshed properly after each reload (or mode changes) triggered by
-    the basic form controller. */
-
-   /**
-     * @override
-     */
-    _setMode: function (mode, recordID) {
-        return this._super.apply(this, arguments).then(() => {
-            this.reload();
-        });
-    },
-
-    /**
-     * @override
-     * @returns {Promise}
-     */
-    reload: function () {
-        return this._super.apply(this, arguments).then(() => {
-            this.renderer.initTree();
-        });
-    },
 });
 
 export {
