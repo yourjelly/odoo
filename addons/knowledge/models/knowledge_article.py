@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import ast
+import json
+from lxml import html
 from werkzeug.urls import url_join
 
 from odoo import fields, models, api, _
@@ -793,3 +795,64 @@ class Article(models.Model):
                 write_vals_by_sequence[i + start_sequence] = child
             else:
                 write_vals_by_sequence[i + start_sequence] |= child
+
+    # ------------------------
+    # Articles index generation
+    # ------------------------
+
+    def get_index(self):
+        """
+        Generates the index of the article
+        [{
+            'id': 0,
+            'name': 'My article',
+            'toc': [{
+                'name': 'title 1',
+                'children': [{
+                    'name': 'title 1.1'
+                }]
+            }]
+        }]
+        """
+        articles = self.search([
+            ('parent_id', '=', self.id)
+        ], order='sequence,write_date desc')
+        index = []
+        for article in articles:
+            index.append({
+                'id': article.id,
+                'name': article.display_name,
+                'toc': article.get_toc()
+            })
+        return json.dumps(index)
+
+    def get_toc(self):
+        """
+        Generates the table of content (toc) of the article.
+        [{
+            'name': 'title 1',
+            'children': [{
+                'name': 'title 1.1'
+            }]
+        }]
+        """
+        if not self.body:
+            return []
+
+        tree = html.fromstring(self.body, parser=html.HTMLParser(encoding='utf-8'))
+        root = {'children': []}
+        stack = [root]
+
+        for match in tree.xpath('//h1|//h2|//h3|//h4|//h5|//h6'):
+            level = int(match.tag[1:])
+            while level < len(stack):
+                stack.pop()
+            while level > len(stack):
+                node = {}
+                stack[-1].setdefault('children', []).append(node)
+                stack.append(node)
+            node = { 'name': match.text }
+            stack[-1].setdefault('children', []).append(node)
+            stack.append(node)
+
+        return root['children']

@@ -30,6 +30,7 @@
     'assets': {
         'web.assets_backend': [
             'knowledge/static/src/scss/knowledge_views.scss',
+            'knowledge/static/src/scss/knowledge_wysiwyg.scss',
             'knowledge/static/src/js/knowledge_controller.js',
             'knowledge/static/src/js/knowledge_model.js',
             'knowledge/static/src/js/knowledge_renderers.js',
@@ -43,6 +44,7 @@
         ],
         'web.assets_frontend': [
             'knowledge/static/src/scss/knowledge_views.scss',
+            'knowledge/static/src/scss/knowledge_wysiwyg.scss',
             'knowledge/static/src/js/knowledge_frontend.js',
         ],
         'web_editor.assets_wysiwyg': [

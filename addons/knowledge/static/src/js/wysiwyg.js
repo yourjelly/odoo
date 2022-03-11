@@ -50,6 +50,14 @@ MediaDialog.include({
 
 Wysiwyg.include({
     /**
+     * @override
+     * @param {Object} parent
+     */
+    init: function (parent) {
+        this._super(...arguments);
+        this.res_id = parent.res_id;
+    },
+    /**
      * @returns {Array[Object]}
      */
     _getCommands: function () {
@@ -66,6 +74,14 @@ Wysiwyg.include({
                     noIcons: true,
                     noDocuments: false
                 });
+            }
+        }, {
+            groupName: 'Widgets',
+            title: 'Article index',
+            description: 'Add an article index',
+            fontawesome: 'fa-bookmark',
+            callback: () => {
+                this.addArticleIndex();
             }
         });
         commands.push({
@@ -96,5 +112,17 @@ Wysiwyg.include({
             restoreSelection();
         });
         dialog.open();
+    },
+    /**
+     * Adds the article index
+     */
+    addArticleIndex: async function () {
+        const articles = JSON.parse(await this._rpc({
+            model: 'knowledge.article',
+            method: 'get_index',
+            args: [this.res_id],
+        }));
+        const index = QWeb.render('knowledge.wysiwyg_index', { articles });
+        this.odooEditor.execCommand('insertHTML', index);
     },
 });

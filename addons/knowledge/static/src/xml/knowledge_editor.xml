@@ -1,5 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates>
+    <!-- Article index block -->
+    <t t-name="knowledge.wysiwyg_index">
+        <ul class="index">
+            <t t-foreach="articles" t-as="article">
+                <li t-if="article.name">
+                    <a t-attf-href="/article/#{article.id}" t-esc="article.name"/>
+                </li>
+                <li t-if="article.toc &amp;&amp; article.toc.length > 0">
+                    <t t-call="knowledge.wysiwyg_toc">
+                        <t t-set="id" t-value="article.id"/>
+                        <t t-set="titles" t-value="article.toc"/>
+                    </t>
+                </li>
+            </t>
+        </ul>
+    </t>
+    <t t-name="knowledge.wysiwyg_toc">
+        <ol>
+            <t t-foreach="titles" t-as="title">
+                <li t-if="title.name">
+                    <a t-attf-href="/article/#{id}" t-esc="title.name"/>
+                </li>
+                <li t-if="title.children &amp;&amp; title.children.length > 0">
+                    <t t-call="knowledge.wysiwyg_toc">
+                        <t t-set="titles" t-value="title.children"/>
+                    </t>
+                </li>
+            </t>
+        </ol>
+    </t>
+    <!-- File block -->
     <t t-name="knowledge.file_block">
         <div class="d-flex bg-light border p-1 my-3" contenteditable="false">
             <img t-att-src="src" class="o_image mr-3" t-att-data-mimetype="img.mimetype"/>

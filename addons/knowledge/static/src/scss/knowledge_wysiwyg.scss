@@ -1,0 +1,12 @@
+.index {
+    padding: 4px 8px;
+    ol {
+        padding-left: 25px; /* indentation space */
+        li > ol {
+            border-left: 2px solid #eee;
+        }
+    }
+    li {
+        list-style-type: none;
+    }
+}
