@@ -27,11 +27,12 @@ export const websiteService = {
         const context = reactive({
             showNewContentModal: false,
             edition: false,
-            isEditionReady: false,
+            isPublicRootReady: false,
         });
         let pageDocument;
         let contentWindow;
         let editedObjectPath;
+        let websiteRootInstance;
         return {
             set currentWebsiteId(id) {
                 currentWebsiteId = id;
@@ -73,6 +74,13 @@ export const websiteService = {
             get contentWindow() {
                 return contentWindow;
             },
+            get websiteRootInstance() {
+                return websiteRootInstance;
+            },
+            set websiteRootInstance(rootInstance) {
+                websiteRootInstance = rootInstance;
+                context.isPublicRootReady = !!rootInstance;
+            },
             set editedObjectPath(path) {
                 editedObjectPath = path;
             },
@@ -98,6 +106,9 @@ export const websiteService = {
             async sendRequest(route, params, readMethod = "text", method = "post") {
                 return http[method](route, { ...params, 'csrf_token': core.csrf_token }, readMethod);
             },
+            toggleFullscreen() {
+                document.body.classList.add('o_website_fullscreen');
+            }
         };
     },
 };

@@ -3,10 +3,16 @@
 
     <t t-name="website.WebsiteEditorClientAction" owl="1">
         <div class="o_website_editor">
-            <iframe t-att-src="iframeFallbackUrl" t-ref="iframefallback" t-att-class="this.websiteContext.edition === 'started' ? 'd-none' : ''"/>
-            <iframe t-att-src="initialUrl" t-ref="iframe" t-att-class="this.websiteContext.edition === 'started' ? 'editor_enable editor_has_snippets' : ''"/>
+            <iframe t-att-src="iframeFallbackUrl" t-ref="iframefallback" t-att-class="this.websiteContext.edition ? 'd-none' : ''"/>
+            <iframe t-att-src="initialUrl" t-ref="iframe"/>
         </div>
-        <WebsiteEditorComponent iframe="this.iframe" />
+        <WebsiteEditorComponent t-if="websiteContext.edition"
+            iframe="this.iframe"
+            reloadIframe="() => this.reloadIframe()" />
     </t>
+    <div t-name="website.homepage_editor_welcome_message" class="container text-center o_homepage_editor_welcome_message">
+        <h2 class="mt0">Welcome to your <b>Homepage</b>!</h2>
+        <p class="lead d-none d-md-block">Click on <b>Edit</b> in the top right corner to start designing.</p>
+    </div>
 
 </templates>

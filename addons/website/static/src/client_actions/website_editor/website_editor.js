@@ -2,6 +2,7 @@
 
 import { registry } from '@web/core/registry';
 import { useService } from '@web/core/utils/hooks';
+import core from 'web.core';
 
 import { WebsiteEditorComponent } from '../../components/editor/editor';
 
@@ -44,11 +45,29 @@ export class WebsiteEditorClientAction extends Component {
                     this.iframefallback.el.contentDocument.body.replaceWith(this.iframe.el.contentDocument.body.cloneNode(true));
                     $().getScrollingElement(this.iframefallback.el.contentDocument)[0].scrollTop = $().getScrollingElement(this.iframe.el.contentDocument)[0].scrollTop;
                 });
+
+                this.iframe.el.contentWindow.addEventListener('PUBLIC-ROOT-READY', (event) => {
+                    if (!this.websiteContext.edition) {
+                        const $wrap = $(this.iframe.el.contentDocument.getElementById('wrap'));
+                        if ($wrap.length && $wrap.html().trim() === '') {
+                            this.$welcomeMessage = $(core.qweb.render('website.homepage_editor_welcome_message'));
+                            this.$welcomeMessage.addClass('o_homepage_editor_welcome_message');
+                            this.$welcomeMessage.css('min-height', $wrap.parent('main').height() - ($wrap.outerHeight(true) - $wrap.height()));
+                            $wrap.empty().append(this.$welcomeMessage);
+                        }
+                    }
+                    this.websiteService.websiteRootInstance = event.detail.rootInstance;
+                });
             };
 
             this.iframe.el.addEventListener('load', () => onPageLoaded());
             return this.iframe.el.removeEventListener('load', () => onPageLoaded());
         }, () => []);
+        useEffect(() => {
+            if (this.websiteContext.edition && this.$welcomeMessage) {
+                this.$welcomeMessage.detach();
+            }
+        }, () => [this.websiteContext.edition]);
     }
 
     get websiteId() {
@@ -71,6 +90,18 @@ export class WebsiteEditorClientAction extends Component {
             path = '/';
         }
         return path;
+    }
+
+    reloadIframe() {
+        return new Promise((resolve, reject) => {
+            const onLoad = () => {
+                resolve();
+                this.iframe.el.removeEventListener('load', onLoad);
+            };
+            this.iframe.el.addEventListener('load', onLoad);
+            this.websiteService.websiteRootInstance = undefined;
+            this.iframe.el.contentWindow.location.reload();
+        });
     }
 }
 WebsiteEditorClientAction.template = 'website.WebsiteEditorClientAction';

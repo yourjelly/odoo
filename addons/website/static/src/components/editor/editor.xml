@@ -4,7 +4,7 @@
     <t t-name="website.WebsiteEditorComponent" owl="1">
         <t t-if="this.state.edition === true">
             <WysiwygAdapterComponent Component="this.Wysiwyg" iframe="this.iframe"
-                                    target="this.reloadTarget" websiteRootInstance="this.websiteRootInstance"
+                                    target="this.reloadTarget"
                                     reloadCallback="(event, widgetEl) => this.reload(event, widgetEl)"
                                     quitCallback="() => this.quit()"/>
         </t>
@@ -18,8 +18,5 @@
             </t>
         </div>
     </t>
-    <div t-name="website.homepage_editor_welcome_message" class="container text-center o_homepage_editor_welcome_message">
-        <h2 class="mt0">Welcome to your <b>Homepage</b>!</h2>
-        <p class="lead d-none d-md-block">Click on <b>Edit</b> in the top right corner to start designing.</p>
-    </div>
+
 </templates>

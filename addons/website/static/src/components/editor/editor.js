@@ -7,7 +7,8 @@ import core from 'web.core';
 import { getWysiwygClass } from 'web_editor.loader';
 import { useService } from '@web/core/utils/hooks';
 
-const { markup, Component, useState, useChildSubEnv, useEffect, useExternalListener } = owl;
+const { markup, Component, useState, useChildSubEnv, useEffect } = owl;
+let Wysiwyg;
 
 import { WysiwygAdapterComponent } from '../wysiwyg_adapter/wysiwyg_adapter';
 const EDITION_STATE = {
@@ -29,34 +30,27 @@ export class WebsiteEditorComponent extends Component {
         this.websiteContext = useState(this.websiteService.context);
 
         useChildSubEnv(legacyEnv);
-        useExternalListener(window.document, 'FRONTEND-EDITION-READY', (event) => {
-            this.websiteRootInstance = event.detail.websiteRootInstance;
-            this.websiteContext.isEditionReady = true;
-        });
 
-        useEffect(() => {
-            if (this.websiteContext.edition && this.websiteContext.isEditionReady) {
+        useEffect((isPublicRootReady) => {
+            if (isPublicRootReady) {
                 if (this.$welcomeMessage) {
                     this.$welcomeMessage.detach();
                 }
                 if (this.reloadSelector) {
-                    this.reloadTarget = this.iframe.el.contentWindow.$(this.reloadSelector)[0];
+                    this.reloadTarget = $(this.iframe.el.contentDocument).find(this.reloadSelector)[0];
                 }
-                this.wysiwygLoading = true;
                 this._loadWysiwyg();
-            } else if (this.websiteContext.isEditionReady) {
-                const $wrap = $(this.iframe.el.contentDocument.getElementById('wrap'));
-                if ($wrap.length && $wrap.html().trim() === '') {
-                    this.$welcomeMessage = $(core.qweb.render('website.homepage_editor_welcome_message'));
-                    this.$welcomeMessage.addClass('o_homepage_editor_welcome_message');
-                    this.$welcomeMessage.css('min-height', $wrap.parent('main').height() - ($wrap.outerHeight(true) - $wrap.height()));
-                    $wrap.empty().append(this.$welcomeMessage);
-                }
             }
-        }, () => [this.websiteContext.edition, this.websiteContext.isEditionReady]);
+        }, () => [this.websiteContext.isPublicRootReady]);
         useEffect(() => {
             if (this.state.edition === EDITION_STATE.RELOAD) {
-                this._reloadIframe();
+                this.props.reloadIframe();
+            }
+            if (this.state.edition === EDITION_STATE.STARTED) {
+                this.iframe.el.classList.add('editor_enable', 'editor_has_snippets');
+            }
+            if (this.state.edition === EDITION_STATE.OFF) {
+                this.iframe.el.classList.remove('editor_enable', 'editor_has_snippets');
             }
         }, () => [this.state.edition]);
     }
@@ -82,23 +76,9 @@ export class WebsiteEditorComponent extends Component {
      * Reload the iframe and set the edition states to false
      */
     async quit() {
-        await this._reloadIframe();
-        this.reloadTarget = null;
-        this.reloadSelector = null;
+        await this.props.reloadIframe();
         this.state.edition = EDITION_STATE.OFF;
         this.websiteContext.edition = false;
-    }
-    /**
-     * Reload the iframe
-     *
-     * @return {Promise} the iframe has reloaded
-     */
-    async _reloadIframe() {
-        return new Promise((resolve, reject) => {
-            this.websiteContext.isEditionReady = false;
-            this.iframe.el.addEventListener('load', resolve);
-            this.iframe.el.contentWindow.location.reload();
-        });
     }
     /**
      * Load wysiwyg libs and start the editor
@@ -106,12 +86,12 @@ export class WebsiteEditorComponent extends Component {
      * @return {Promise} the libs are loaded, the editor is starting
      */
     async _loadWysiwyg() {
-        if (!this.Wysiwyg) {
+        if (!Wysiwyg) {
             await ajax.loadXML('/website/static/src/xml/website.editor.xml', core.qweb);
-            this.Wysiwyg = await getWysiwygClass({}, ['website.compiled_assets_wysiwyg']);
+            Wysiwyg = await getWysiwygClass({}, ['website.compiled_assets_wysiwyg']);
         }
+        this.Wysiwyg = Wysiwyg;
         this.state.edition = EDITION_STATE.STARTED;
-        this.wysiwygLoading = false;
         if (this.state.loading) {
             this.state.loading = false;
         }

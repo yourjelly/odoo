@@ -5,7 +5,7 @@ import { _t } from '@web/core/l10n/translation';
 
 import { useWowlService } from '@web/legacy/utils';
 
-const { onWillStart, onMounted, onWillDestroy } = owl;
+const { onWillStart, useEffect } = owl;
 
 
 export class WysiwygAdapterComponent extends ComponentAdapter {
@@ -13,6 +13,7 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
      * @override
      */
     setup() {
+        super.setup();
         const options = this.props.options || {};
         this.iframe = this.props.iframe;
         this.websiteService = useWowlService('website');
@@ -32,26 +33,24 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
             this._addEditorMessages();
         });
 
-        onMounted(() => {
+        useEffect(() => {
+            // useExternalListener only work on setup, but save button doesn't exist on setup
             this.$editable.on('click.odoo-website-editor', '*', this, this._preventDefault);
             this._setObserver();
             if (this.props.target) {
                 this.widget.snippetsMenu.activateSnippet($(this.props.target));
             }
-            this.websiteService.context.edition = 'started';
+            this.websiteService.toggleFullscreen();
             // Initializing Page Options
             this.pageOptions = {};
             const pageOptionEls = this.iframe.el.contentDocument.querySelectorAll('.o_page_option_data');
             for (const pageOptionEl of pageOptionEls) {
                 this.pageOptions[pageOptionEl.name] = pageOptionEl.value;
             }
-        });
-
-        onWillDestroy(() => {
-            this.$editable.off('click.odoo-website-editor', '*');
-        })
-
-        super.setup();
+            return () => {
+                this.$editable.off('click.odoo-website-editor', '*');
+            };
+        }, () => []);
     }
     /**
      * Stop the widgets and save the content.
@@ -250,8 +249,8 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
         console.warn('action ', actionName, 'is not yet supported');
     }
     async _websiteRootEvent(type, eventData = {}) {
-        const websiteRootInstance = await this.props.websiteRootInstance;
-        websiteRootInstance.trigger_up(type, {...eventData});
+        const websiteRootInstance = this.websiteService.websiteRootInstance;
+        return websiteRootInstance.trigger_up(type, {...eventData});
     }
     _preventDefault(e) {
         e.preventDefault();
