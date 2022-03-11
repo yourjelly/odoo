@@ -2,6 +2,8 @@
     --default-sidebar-size: 300px;
     --sidebar-size: clamp(300px, var(--default-sidebar-size), 50vw);
 
+    $o-knowledge-bg--active: #cceaf9; // TMP -> should match $o-searchpanel-active-bg
+
     .o_knowledge_editor {
         min-height: 100%;
         .oe_form_field {
@@ -25,8 +27,13 @@
     .o_knowledge_aside {
         width: var(--sidebar-size);
         transition: width 0.15s linear;
-        .btn-link:hover {
-            background-color: #CECECE;
+
+        .o_article_active, .o_article_icon_active {
+            background-color: $o-knowledge-bg--active;
+        }
+
+        .o_article_icon:hover {
+            background-color: rgba(#000, .1);
         }
 
         li {
@@ -120,6 +127,11 @@
         .o_m2o_avatar span {
             overflow-wrap: break-word;
         }
+    }
+
+    .o_article_dropdown.show {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
     }
 }
 
