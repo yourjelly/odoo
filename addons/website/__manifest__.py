@@ -243,6 +243,7 @@
             'web/static/lib/bootstrap/scss/_variables.scss',
             'web_editor/static/src/scss/wysiwyg.scss',
             'website/static/src/scss/website.edit_mode.scss',
+            'web/static/lib/nearest/jquery.nearest.js',
         ],
         'website.assets_editor': [
             ('include', 'web._assets_helpers'),
