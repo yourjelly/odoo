@@ -42,18 +42,21 @@ export class WebsitePreview extends Component {
     }
 
     get path() {
-        let path = this.props.action.context.params && this.props.action.context.params.path;
-        if (path) {
-            const url = new URL(path, window.location.origin);
-            // If a path with an external domain, or matching a backend route
-            // that should be opened in the top window, is passed as a
-            // paramater, it is likely that the user did not do that
-            // intentionally. He is redirected to his homepage.
-            if (this._isTopWindow(url)) {
+        let path = this.websiteService.editedObjectPath;
+        if (!path) {
+            path = this.props.action.context.params && this.props.action.context.params.path;
+            if (path) {
+                const url = new URL(path, window.location.origin);
+                // If a path with an external domain, or matching a backend route
+                // that should be opened in the top window, is passed as a
+                // paramater, it is likely that the user did not do that
+                // intentionally. He is redirected to his homepage.
+                if (this._isTopWindow(url)) {
+                    path = '/';
+                }
+            } else {
                 path = '/';
             }
-        } else {
-            path = '/';
         }
         return path;
     }
@@ -80,6 +83,7 @@ export class WebsitePreview extends Component {
         this.title.setParts({ action: this.currentTitle });
 
         this.websiteService.pageDocument = this.iframe.el.contentDocument;
+        this.websiteService.contentWindow = this.iframe.el.contentWindow;
 
         // Before leaving the iframe, its content is replicated on an
         // underlying iframe, to avoid for white flashes (visible on
