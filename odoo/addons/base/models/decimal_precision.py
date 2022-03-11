@@ -28,7 +28,8 @@ class DecimalPrecision(models.Model):
     @api.model
     @tools.ormcache('application')
     def precision_get(self, application):
-        self.flush(['name', 'digits'])
+        with self.env.cache.nocheck():
+            self.flush(['name', 'digits'])
         self.env.cr.execute('select digits from decimal_precision where name=%s', (application,))
         res = self.env.cr.fetchone()
         return res[0] if res else 2
