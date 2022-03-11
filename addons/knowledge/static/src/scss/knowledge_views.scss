@@ -234,8 +234,8 @@
     font-size: $font-size-sm !important;
 }
 
-.o_knowledge_font_family_base {
-    font-family: $font-family-base !important; // need to counter web_editor.backend.scss .note-editable style which is !important
+.o_knowledge_behavior_type_article {
+    border-color: $o-gray-200;
 }
 
 .o_knowledge_template {
