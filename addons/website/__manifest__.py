@@ -205,7 +205,6 @@
             'web_editor/static/src/scss/bootstrap_overridden.scss',
             'web/static/lib/bootstrap/scss/_variables.scss',
             'website/static/src/scss/website.wysiwyg.scss',
-            'website/static/src/scss/website.edit_mode.scss',
             'website/static/src/js/editor/editor.js',
             'website/static/src/js/editor/snippets.editor.js',
             'website/static/src/js/editor/snippets.options.js',
@@ -237,6 +236,13 @@
             'website/static/src/js/editor/widget_link.js',
             'website/static/src/js/widgets/media.js',
             'website/static/src/js/widgets/link_popover_widget.js',
+        ],
+        'website.assets_editor_frontend': [
+            ('include', 'web._assets_helpers'),
+            'web_editor/static/src/scss/bootstrap_overridden.scss',
+            'web/static/lib/bootstrap/scss/_variables.scss',
+            'web_editor/static/src/scss/wysiwyg.scss',
+            'website/static/src/scss/website.edit_mode.scss',
         ],
         'website.assets_editor': [
             ('include', 'web._assets_helpers'),

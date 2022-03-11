@@ -18,6 +18,7 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
         this.iframe = this.props.iframe;
         this.websiteService = useWowlService('website');
         this.userService = useWowlService('user');
+        this.rpc = useWowlService('rpc');
 
         this.oeStructureSelector = '#wrapwrap .oe_structure[data-oe-xpath][data-oe-id]';
         this.oeFieldSelector = '#wrapwrap [data-oe-field]';
