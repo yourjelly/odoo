@@ -21,6 +21,7 @@ const KnowledgeFormController = FormController.extend({
     custom_events: Object.assign({}, FormController.prototype.custom_events, {
         create: '_onCreate',
         move: '_onMove',
+        open: '_onOpen',
     }),
 
     // Listeners:
@@ -82,6 +83,18 @@ const KnowledgeFormController = FormController.extend({
      */
     _onMove: async function (event) {
         await this._move(event.data);
+    },
+
+    /**
+     * @param {Event} event
+     */
+    _onOpen: async function (event) {
+        const { data } = event;
+        this.do_action('knowledge.action_home_page', {
+            additional_context: {
+                res_id: data.article_id
+            }
+        });
     },
 
     /**
