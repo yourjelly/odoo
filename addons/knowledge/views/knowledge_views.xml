@@ -223,10 +223,7 @@
                                 </div>
                                 <div class="d-flex align-items-center">
                                     <div class="flex-grow-1">
-                                        <!-- TODO: Add action to top the share wizard -->
-                                        <button class="btn btn-secondary">Share</button>
-                                        <!-- TODO: Add a new widget to copy the url ? -->
-                                        <button class="btn btn-secondary">Copy Link</button>
+                                        <field name="share_link" widget="CopyClipboardButton"/>
                                     </div>
                                     <field name="activity_ids" widget="kanban_activity"/>
                                 </div>
