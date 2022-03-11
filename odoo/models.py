@@ -3710,13 +3710,15 @@ Fields:
             # Note: the following steps are performed as superuser to avoid
             # access rights restrictions, and with no context to avoid possible
             # side-effects during admin calls.
-            data = Data.search([('model', '=', self._name), ('res_id', 'in', sub_ids)])
+            with self.env.cache.nocheck():
+                data = Data.search([('model', '=', self._name), ('res_id', 'in', sub_ids)])
             if data:
                 ir_model_data_unlink |= data
 
             # For the same reason, remove the defaults having some of the
             # records as value
-            Defaults.discard_records(records)
+            with self.env.cache.nocheck():
+                Defaults.discard_records(records)
 
             # For the same reason, remove the relevant records in ir_attachment
             # (the search is performed with sql as the search method of
