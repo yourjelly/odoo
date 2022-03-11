@@ -1,15 +1,11 @@
-odoo.define('knowledge.wysiwyg', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const core = require('web.core');
-const QWeb = core.qweb;
-
-const { DocumentWidget } = require('wysiwyg.widgets.media');
-const MediaDialog = require('wysiwyg.widgets.MediaDialog');
-const Link = require('wysiwyg.widgets.Link');
-const weWidgets = require('web_editor.widget');
-const Wysiwyg = require('web_editor.wysiwyg');
-const { setCursorStart } = require('@web_editor/../lib/odoo-editor/src/OdooEditor');
+import { qweb as QWeb } from 'web.core';
+import { DocumentWidget } from 'wysiwyg.widgets.media';
+import MediaDialog from 'wysiwyg.widgets.MediaDialog';
+import Wysiwyg from 'web_editor.wysiwyg';
+import { KnowledgeArticleLinkModal } from 'knowledge.wysiwyg.article_link';
+import { preserveCursor, setCursorStart } from '@web_editor/../lib/odoo-editor/src/OdooEditor';
 
 const CustomDocumentWidget = DocumentWidget.extend({
     /**
@@ -114,6 +110,14 @@ Wysiwyg.include({
                 callback: () => {
                     this._insertTemplate();
                 },
+            }, {
+                groupName: 'Medias',
+                title: 'Article',
+                description: 'Link an article.',
+                fontawesome: 'fa-file',
+                callback: () => {
+                    this._insertArticleLink();
+                }
             });
         }
         return commands;
@@ -167,8 +171,30 @@ Wysiwyg.include({
         this._notifyBehaviorsKnowledgeFieldHtmlInjector(owner);
     },
     /**
+     * @private
+     */
+    _insertArticleLink: function () {
+        const restoreSelection = preserveCursor(this.odooEditor.document);
+        const dialog = new KnowledgeArticleLinkModal(this, {});
+        dialog.on('save', this, data => {
+            restoreSelection();
+            const link = QWeb.render('knowledge.wysiwyg_article_link', {
+                icon: data.icon,
+                text: data.text,
+                href: '/article/' + data.id
+            });
+            this.odooEditor.execCommand('insertHTML', link);
+            dialog.close();
+        });
+        dialog.on('closed', this, () => {
+            restoreSelection();
+        });
+        dialog.open();
+    },
+    /**
      * Notify the @see FieldHtmlInjector when a /file block is inserted
      *
+     * @private
      * @override
      */
     _onMediaDialogSave(params, element) {
@@ -184,22 +210,4 @@ Wysiwyg.include({
         }
         return result;
     },
-});
-
-const CustomLinkWidget = Link.extend({
-    template: 'wysiwyg.widgets.link',
-    _getLinkOptions: function () {
-        return [];
-    },
-});
-
-weWidgets.LinkDialog.include({
-    /**
-     * @param {...any} args
-     * @returns
-     */
-    getLinkWidget: function (...args) {
-        return new CustomLinkWidget(this, ...args);
-    }
-});
 });
