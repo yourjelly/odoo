@@ -4,6 +4,13 @@
 
     $o-knowledge-bg--active: #cceaf9; // TMP -> should match $o-searchpanel-active-bg
 
+
+    // = Navbar
+    // --------------------------------------------------------------------------
+    .o_breadcrumb_article_name:not(:focus) {
+        --o-input-border-color: transparent;
+    }
+
     .o_knowledge_editor {
         min-height: 100%;
         .oe_form_field {

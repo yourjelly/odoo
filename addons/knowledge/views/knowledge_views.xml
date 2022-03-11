@@ -78,9 +78,9 @@
                             <div class="o_knowledge_header d-print-none d-sm-flex flex-row justify-content-between bg-white border-bottom">
                                 <div class="d-flex align-items-center">
                                     <!-- Breadcrumbs -->
-                                    <ol class="breadcrumb p-3" role="navigation">
+                                    <ol class="breadcrumb align-items-center p-3" role="navigation">
                                         <li class="breadcrumb-item d-flex">
-                                            <field attrs="{'readonly': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}" class="o_breadcrumb_article_name" name="name"/>
+                                            <field attrs="{'readonly': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}" class="o_breadcrumb_article_name o_input" name="name"/>
                                         </li>
                                     </ol>
                                     <!--TODO DBE: Make the user_favourite widget a button for allow user that don't have write access to set article as favourite-->
