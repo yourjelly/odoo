@@ -20,21 +20,56 @@
         }
     }
 
+    // = Sidebar
+    // --------------------------------------------------------------------------
     .o_knowledge_aside {
         width: var(--sidebar-size);
         transition: width 0.15s linear;
         .btn-link:hover {
             background-color: #CECECE;
         }
-        ul {
-            padding-left: 15px; /* indentation space */
-        }
+
         li {
-            list-style-type: none;
-            & > ul {
-                border-left: 2px solid #eee;
+            padding: 0.2em 0;
+            position: relative;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li > ul > li {
+            margin-left: 1.28571429em * 0.5; // Workaround to get half .fa-fw icon's width.
+            padding-left: 0.8em;
+
+            &:before, &:after {
+                content: '';
+                background-color: $border-color;
+            }
+
+            &:before {
+                @include o-position-absolute($top: 1em, $left: 0);
+                width: .6em;
+                height: 1px;
+                margin: auto;
+            }
+
+            &:after {
+                @include o-position-absolute(0, auto, 0, 0);
+                width: 1px;
+                height: 100%;
+            }
+
+            &:last-child {
+                padding-bottom: 0;
+
+                &:after {
+                    height: 1em;
+                }
             }
         }
+
         .o_section_header:not(:hover) .o_section_create,
         .o_article:not(:hover) .o_article_create {
             visibility: hidden;

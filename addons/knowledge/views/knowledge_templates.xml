@@ -5,7 +5,7 @@
     <template id="knowledge_article_tree_template" name="Article Tree">
         <section t-if="favourites">
             <div class="h4 mb-0">Favourites</div>
-            <ul class="o_tree_favourite m-0 px-0 py-2">
+            <ul class="o_tree_favourite">
                 <li t-foreach="favourites" t-as="favourite"
                     t-attf-class="#{ 'bg-light font-weight-bold' if favourite.id == active_article_id else '' }"
                     t-att-data-article-id="favourite.id">
@@ -28,7 +28,7 @@
                     <i class="fa fa-fw fa-plus"/>
                 </button>
             </div>
-            <ul class="o_tree m-0 px-0 py-2">
+            <ul class="o_tree">
                 <t t-call="knowledge.articles_template">
                     <t t-set="articles" t-value="public_articles"/>
                 </t>
@@ -39,7 +39,7 @@
             <div class="o_section_header d-flex h4 mb-0">
                 <div class="flex-grow-1 text-truncate">Shared</div>
             </div>
-            <ul class="o_tree m-0 px-0 py-2">
+            <ul class="o_tree">
                 <t t-call="knowledge.articles_template">
                     <t t-set="articles" t-value="shared_articles"/>
                 </t>
@@ -53,7 +53,7 @@
                     <i class="fa fa-fw fa-plus"/>
                 </button>
             </div>
-            <ul class="o_tree m-0 px-0 py-2">
+            <ul class="o_tree">
                 <t t-call="knowledge.articles_template">
                     <t t-set="articles" t-value="private_articles"/>
                 </t>
