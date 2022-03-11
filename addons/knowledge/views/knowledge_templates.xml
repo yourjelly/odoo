@@ -62,11 +62,14 @@
     </template>
 
     <template id="articles_template">
+        <t t-set="unfolded_articles" t-value="unfolded_articles or []"/>
         <t t-foreach="articles" t-as="article">
             <li t-attf-id="article_#{article.id}" t-att-data-article-id="article.id">
                 <div t-attf-class="o_article d-flex #{ 'bg-light font-weight-bold' if article.id == active_article_id else '' }">
                     <button class="o_article_caret btn btn-link text-secondary p-0" type="button">
-                        <i class="fa fa-fw fa-caret-down align-self-center"/>
+                        <i t-if="article.child_ids" t-att-class="'align-self-center fa fa-fw fa-caret-' + ('down' if article.id in unfolded_articles else 'right')"/>
+                        <!-- TODO SRI: Help ! Find a way to take the same space as if there was a carret icon (instead of pl-3) -->
+                        <i t-else="" class="pl-3 align-self-center"/>
                     </button>
                     <div class="btn-group dropdown">
                         <button class="o_article_icon btn btn-link text-secondary p-0" type="button" t-attf-id="o_article_dropdown_#{article.id}" data-toggle="dropdown" aria-expanded="true">
@@ -91,6 +94,11 @@
                         <i class="fa fa-fw fa-plus"/>
                     </button>
                 </div>
+                <ul t-if="article.child_ids and article.id in unfolded_articles">
+                    <t t-call="knowledge.articles_template">
+                        <t t-set="articles" t-value="article.child_ids.sorted('sequence').filtered(lambda child: child.user_has_access)"/>
+                    </t>
+                </ul>
             </li>
         </t>
     </template>

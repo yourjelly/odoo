@@ -76,7 +76,7 @@ class KnowledgeController(http.Controller):
     # Articles tree generation
     # ------------------------
 
-    def get_tree_values(self, res_id=False, parent_id=False):
+    def get_tree_values(self, res_id=False, parent_id=False, unfolded_articles=False):
         # sudo article to avoid access error on member or on article for external users.
         # The article the user can see will be based on user_has_access.
         Article = request.env["knowledge.article"].sudo()
@@ -90,6 +90,7 @@ class KnowledgeController(http.Controller):
             "favourites": Article.search([("favourite_user_ids", "in", [request.env.user.id]), ('user_has_access', '=', True)]),
             "public_articles": main_articles.filtered(lambda article: article.category == 'workspace'),
             "shared_articles": main_articles.filtered(lambda article: article.category == 'shared'),
+            "unfolded_articles": unfolded_articles,
         }
 
         if request.env.user.has_group('base.group_user'):
@@ -100,10 +101,13 @@ class KnowledgeController(http.Controller):
         return values
 
     @http.route('/knowledge/get_tree', type='json', auth='user')
-    def display_tree(self, res_id=False):
-        # TODO: remove res_id and highlight active id after adding the template to the view. ??
-        template = request.env.ref('knowledge.knowledge_article_tree_template')._render(self.get_tree_values(res_id=res_id))
-        return template
+    def display_tree(self, res_id=False, unfolded_articles=False):
+        parent_articles = request.env["knowledge.article"].sudo().browse(res_id)._get_parents().ids
+        if not unfolded_articles:
+            unfolded_articles = []
+        unfolded_articles = set(unfolded_articles) | set(parent_articles)
+        template = request.env.ref('knowledge.knowledge_article_tree_template')._render(self.get_tree_values(res_id=res_id, unfolded_articles=unfolded_articles))
+        return {"template": template, "unfolded_articles": ";".join(str(id) for id in unfolded_articles)}
 
     @http.route('/knowledge/get_children', type='json', auth='user')
     def display_children(self, parent_id):
