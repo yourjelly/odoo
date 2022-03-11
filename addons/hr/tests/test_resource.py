@@ -15,13 +15,11 @@ class TestResource(TestHrCommon):
         super(TestResource, cls).setUpClass()
         cls.calendar_40h = cls.env['resource.calendar'].create({'name': 'Default calendar'})
         cls.employee_niv = cls.env['hr.employee'].create({
+            'create_date': '2021-01-01 10:00:00',  # forced create_date
             'name': 'Sharlene Rhodes',
             'departure_date': '2022-06-01',
             'resource_calendar_id': cls.calendar_40h.id,
         })
-        cls.employee_niv_create_date = '2021-01-01 10:00:00'
-        cls.env.cr.execute("UPDATE hr_employee SET create_date=%s WHERE id=%s",
-                           (cls.employee_niv_create_date, cls.employee_niv.id))
 
     def test_calendars_validity_within_period_default(self):
         calendars = self.employee_niv.resource_id._get_calendars_validity_within_period(
