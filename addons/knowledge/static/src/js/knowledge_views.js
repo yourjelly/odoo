@@ -27,7 +27,6 @@ const KnowledgeFormView = FormView.extend({
         params.withBreadcrumbs = false;
         params.withControlPanel = false;
         params.withSearchBar = false;
-        params.mode = 'readonly';
         this._super.apply(this, arguments);
         this.rendererParams.breadcrumbs = params.breadcrumbs;
     },
