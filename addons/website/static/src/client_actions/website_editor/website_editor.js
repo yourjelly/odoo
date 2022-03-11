@@ -63,7 +63,10 @@ export class WebsiteEditorClientAction extends Component {
     }
 
     get path() {
-        let path = this.props.action.context.params && this.props.action.context.params.path;
+        let path = this.websiteService.editedObjectPath;
+        if (!path) {
+            path = this.props.action.context.params && this.props.action.context.params.path;
+        }
         if (!path) {
             path = '/';
         }

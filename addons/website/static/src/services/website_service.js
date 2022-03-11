@@ -31,6 +31,7 @@ export const websiteService = {
         });
         let pageDocument;
         let contentWindow;
+        let editedObjectPath;
         return {
             set currentWebsiteId(id) {
                 currentWebsiteId = id;
@@ -72,7 +73,13 @@ export const websiteService = {
             get contentWindow() {
                 return contentWindow;
             },
-            goToWebsite({ websiteId = currentWebsiteId || websites[0].id, path = '/' } = {}) {
+            set editedObjectPath(path) {
+                editedObjectPath = path;
+            },
+            get editedObjectPath() {
+                return editedObjectPath;
+            },
+            goToWebsite({ websiteId, path } = {}) {
                 action.doAction('website.website_editor', {
                     clearBreadcrumbs: true,
                     additionalContext: {
