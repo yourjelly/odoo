@@ -587,7 +587,7 @@ class StockMove(models.Model):
         if 'product_uom' in vals and any(move.state == 'done' for move in self):
             raise UserError(_('You cannot change the UoM for a stock move that has been set to \'Done\'.'))
         if 'product_uom_qty' in vals:
-            move_to_unreserve = self.env['stock.move']
+            # dead code was here
             for move in self.filtered(lambda m: m.state not in ('done', 'draft') and m.picking_id):
                 if float_compare(vals['product_uom_qty'], move.product_uom_qty, precision_rounding=move.product_uom.rounding):
                     self.env['stock.move.line']._log_message(move.picking_id, move, 'stock.track_move_template', vals)
@@ -1613,6 +1613,16 @@ class StockMove(models.Model):
         return extra_move | self
 
     def _action_done(self, cancel_backorder=False):
+
+        # task-2695732
+        # Once a move is validated (state -> "confirmed"),
+        # the `product_uom_qty` should NOT be updated to reflect the `done_qty` anymore.
+        # Since a lot of things depend on that now deprecated behaviour, we allow this function
+        # to run its course as it previously did, but we:
+        # 1. save the initial demand before validation of the move
+        # 2. restore the `product_uom_qty` once the move has been validated.
+        initial_demand_qty = {move.id: move.product_uom_qty for move in self}
+
         self.filtered(lambda move: move.state == 'draft')._action_confirm()  # MRP allows scrapping draft moves
         moves = self.exists().filtered(lambda x: x.state not in ('done', 'cancel'))
         moves_ids_todo = OrderedSet()
@@ -1670,8 +1680,13 @@ class StockMove(models.Model):
         for company_id, move_dests in move_dests_per_company.items():
             move_dests.sudo().with_company(company_id)._action_assign()
 
+        # Now that all necessary actions has been taken, the initial demand is restored
+        for move in moves_todo:
+            if move.id in initial_demand_qty and initial_demand_qty[move.id] != move.product_uom_qty:
+                moves.browse(move.id).with_context(do_not_unreserve=True).write({'product_uom_qty': initial_demand_qty[move.id]})
+
         # We don't want to create back order for scrap moves
-        # Replace by a kwarg in master
+        # TODO: Replace by a kwarg in master
         if self.env.context.get('is_scrap'):
             return moves_todo
 
@@ -1679,6 +1694,13 @@ class StockMove(models.Model):
             backorder = picking._create_backorder()
             if any([m.state == 'assigned' for m in backorder.move_ids]):
                backorder._check_entire_pack()
+
+        # task-2695732
+        # The backorder move has been created and cancelled, but we do not want to show it to the user anymore.
+        # Since the `done_qty` for it will always be 0, and all necessary actions have been taken during cancellation,
+        # we can safely unlink it.
+        if cancel_backorder:
+            backorder_moves.unlink()
         return moves_todo
 
     @api.ondelete(at_uninstall=False)

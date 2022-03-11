@@ -310,7 +310,11 @@ class ReceptionReport(models.AbstractModel):
                             break
                         else:
                             move_line_id.move_id = out
-                            reserved_amount_to_remain -= move_line_id.product_qty
+                            # Quick fix from TIC, should not be included in this branch
+                            # but the tests did pass before, and with my changes one of them started failing,
+                            # so I'm adding this here for the time being to keep track of the issue until
+                            # it's solved upstream.
+                            reserved_amount_to_remain -= move_line_id.reserved_qty
                     (out | new_out)._compute_reserved_availability()
                 out.move_orig_ids = False
                 new_out._recompute_state()

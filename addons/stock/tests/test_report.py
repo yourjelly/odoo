@@ -1572,6 +1572,7 @@ class TestReports(TestReportsCommon):
         2. Smaller qty is completed + backorder is made for rest
         3. Backorder qty (which is still assigned) is unassigned + re-assigned
         """
+        # boan: not sure I understand the point of this one? Manual testing seems to show things work as expected?
         incoming_qty = 10
         outgoing_qty = 8
         orig_incoming_qty_done = 4

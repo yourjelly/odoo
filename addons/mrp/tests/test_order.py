@@ -105,19 +105,19 @@ class TestMrpOrder(TestMrpCommon):
         # check that copy handles moves correctly
         mo_copy = man_order.copy()
         self.assertEqual(mo_copy.state, 'draft', "Copied production order should be draft.")
-        self.assertEqual(len(mo_copy.move_raw_ids), 4,
+        self.assertEqual(len(mo_copy.move_raw_ids), 2,
                          "Incorrect number of component moves [i.e. all non-0 (even cancelled) moves should be copied].")
         self.assertEqual(len(mo_copy.move_finished_ids), 1, "Incorrect number of moves for products to produce [i.e. cancelled moves should not be copied")
-        self.assertEqual(mo_copy.move_finished_ids.product_uom_qty, 2, "Incorrect qty of products to produce")
+        self.assertEqual(mo_copy.move_finished_ids.product_uom_qty, 3, "Incorrect qty of products to produce")
 
         # check that a cancelled MO is copied correctly
         mo_copy.action_cancel()
         self.assertEqual(mo_copy.state, 'cancel')
         mo_copy_2 = mo_copy.copy()
         self.assertEqual(mo_copy_2.state, 'draft', "Copied production order should be draft.")
-        self.assertEqual(len(mo_copy_2.move_raw_ids), 4, "Incorrect number of component moves.")
+        self.assertEqual(len(mo_copy_2.move_raw_ids), 2, "Incorrect number of component moves.")
         self.assertEqual(len(mo_copy_2.move_finished_ids), 1, "Incorrect number of moves for products to produce [i.e. copying a cancelled MO should copy its cancelled moves]")
-        self.assertEqual(mo_copy_2.move_finished_ids.product_uom_qty, 2, "Incorrect qty of products to produce")
+        self.assertEqual(mo_copy_2.move_finished_ids.product_uom_qty, 3, "Incorrect qty of products to produce")
 
     def test_production_availability(self):
         """ Checks the availability of a production order through mutliple calls to `action_assign`.
@@ -1915,9 +1915,9 @@ class TestMrpOrder(TestMrpCommon):
             ('product_id', '=', mo.bom_id.bom_line_ids[1].product_id.id),
             ('raw_material_production_id', '=', mo.id)])
         self.assertEqual(sum(move_prod_1.mapped('quantity_done')), 90.0)
-        self.assertEqual(sum(move_prod_1.mapped('product_uom_qty')), 90.0)
+        self.assertEqual(sum(move_prod_1.mapped('product_uom_qty')), 30.0)
         self.assertEqual(sum(move_prod_2.mapped('quantity_done')), 70.0)
-        self.assertEqual(sum(move_prod_2.mapped('product_uom_qty')), 70.0)
+        self.assertEqual(sum(move_prod_2.mapped('product_uom_qty')), 20.0)
 
         # Check quantities of the backorder MO
         self.assertEqual(mo_backorder.product_uom_qty, 20.0)
@@ -1949,10 +1949,10 @@ class TestMrpOrder(TestMrpCommon):
         self.assertEqual(mo.qty_produced, 10.0)
         move_prod_1_done = mo.move_raw_ids.filtered(lambda m: m.product_id == p1 and m.state == 'done')
         self.assertEqual(sum(move_prod_1_done.mapped('quantity_done')), 5)
-        self.assertEqual(sum(move_prod_1_done.mapped('product_uom_qty')), 5)
+        self.assertEqual(sum(move_prod_1_done.mapped('product_uom_qty')), 10.0)
         move_prod_1_cancel = mo.move_raw_ids.filtered(lambda m: m.product_id == p1 and m.state == 'cancel')
         self.assertEqual(sum(move_prod_1_cancel.mapped('quantity_done')), 0)
-        self.assertEqual(sum(move_prod_1_cancel.mapped('product_uom_qty')), 5)
+        self.assertEqual(sum(move_prod_1_cancel.mapped('product_uom_qty')), 0)
         move_prod_2 = mo.move_raw_ids.filtered(lambda m: m.product_id == p2)
         self.assertEqual(sum(move_prod_2.mapped('quantity_done')), 10)
         self.assertEqual(sum(move_prod_2.mapped('product_uom_qty')), 10)

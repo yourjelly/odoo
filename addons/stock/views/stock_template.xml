@@ -3,7 +3,7 @@
 
     <template id="message_head">
         <t t-if="move.state != 'done'">
-            <strong>The initial demand has been updated.</strong>
+            <strong>The initial demanded quantity and the quantity actually moved differ.</strong>
         </t>
         <t t-if="move.state == 'done'">
             <strong>

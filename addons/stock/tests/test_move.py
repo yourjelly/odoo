@@ -2578,7 +2578,7 @@ class StockMove(TransactionCase):
         backorder_wizard.process()
         self.assertEqual(move_stock_pack.state, 'done')
         self.assertEqual(move_stock_pack.quantity_done, 0.5)
-        self.assertEqual(move_stock_pack.product_uom_qty, 0.5)
+        self.assertEqual(move_stock_pack.product_uom_qty, 1.0)
 
         # the second move should not be reservable because of the rounding on the dozen
         move_pack_cust._action_assign()
@@ -2605,7 +2605,7 @@ class StockMove(TransactionCase):
         backorder_move = backorder.move_ids
         self.assertEqual(backorder_move.state, 'done')
         self.assertEqual(backorder_move.quantity_done, 12.0)
-        self.assertEqual(backorder_move.product_uom_qty, 12.0)
+        self.assertEqual(backorder_move.product_uom_qty, 6.0)
         self.assertEqual(backorder_move.product_uom, self.uom_unit)
 
         # the second move should now be reservable

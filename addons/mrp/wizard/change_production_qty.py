@@ -58,7 +58,10 @@ class ChangeProductionQty(models.TransientModel):
             done_moves = production.move_finished_ids.filtered(lambda x: x.state == 'done' and x.product_id == production.product_id)
             qty_produced = production.product_id.uom_id._compute_quantity(sum(done_moves.mapped('product_qty')), production.product_uom_id)
 
-            factor = (new_production_qty - qty_produced) / (old_production_qty - qty_produced)
+            if old_production_qty - qty_produced != 0:
+                factor = (new_production_qty - qty_produced) / (old_production_qty - qty_produced)
+            else:
+                factor = 1
             update_info = production._update_raw_moves(factor)
             documents = {}
             for move, old_qty, new_qty in update_info:
