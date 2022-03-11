@@ -829,6 +829,14 @@ class Article(models.Model):
             descendants |= child._get_descendants()
         return descendants
 
+    def _get_parents(self):
+        """ Returns the descendants recordset of the current article. """
+        parents = self.env['knowledge.article']
+        if self.parent_id:
+            parents |= self.parent_id
+            parents |= self.parent_id._get_parents()
+        return parents
+
     def _resequence(self):
         """ This method re-order the children of the same parent (brotherhood) if needed.
          If an article have been moved from one parent to another, we don't need to resequence the children of the
