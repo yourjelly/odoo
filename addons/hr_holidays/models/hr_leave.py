@@ -683,7 +683,13 @@ class HolidaysRequest(models.Model):
                 if mapped_validation_type[leave_type_id] == 'both':
                     self._check_double_validation_rules(employee_id, values.get('state', False))
 
-        holidays = super(HolidaysRequest, self.with_context(mail_create_nosubscribe=True)).create(vals_list)
+        # We have to propagate the employee_id in the context so no more create_multi for us
+        holidays = self.env['hr.leave']
+        for vals in vals_list:
+            # += ensure vals_list order
+            holidays += super(HolidaysRequest, self.with_context(
+                mail_create_nosubscribe=True,
+                employee_id=vals.get('employee_id', False))).create(vals)
 
         for holiday in holidays:
             if self._context.get('import_file'):
