@@ -26,9 +26,6 @@
         .btn-link:hover {
             background-color: #CECECE;
         }
-        #knowledge_search_bar:hover {
-            cursor: pointer;
-        }
         ul {
             padding-left: 15px; /* indentation space */
         }
@@ -42,10 +39,7 @@
         .o_article:not(:hover) .o_article_create {
             visibility: hidden;
         }
-        .o_article_name,
-        .o_article_dropdown i {
-            cursor: pointer;
-        }
+
         .o_article_name a{
             color: inherit;
             text-decoration: none;
