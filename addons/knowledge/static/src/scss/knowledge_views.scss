@@ -55,26 +55,19 @@
         }
     }
 
+    // = Resizer
+    // --------------------------------------------------------------------------
     .o_knowledge_resizer {
-        position: absolute;
-        top: 0;
-        left: -10px;
-        width: 20px;
-        height: 100%;
+        // Use '$spacers' measures to match surrounding elements padding
+        $-resizer-spacing: map-get($spacers, 3);
+        $-resizer-line-width: map-get($spacers, 1);
+
+        @include o-position-absolute(0, auto, 0, $-resizer-spacing * -1);
         cursor: ew-resize;
         touch-action: none;
-        z-index: 1;
-        &::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 9px;
-            width: 3px;
-            height: 100%;
-            background: $o-gray-100;
-        }
-        &:hover::after {
-            background: $o-gray-300;
+
+        span {
+            @include o-position-absolute(0, auto, 0, $-resizer-spacing + ($-resizer-line-width * -0.5));
         }
     }
 

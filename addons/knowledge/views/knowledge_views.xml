@@ -71,7 +71,6 @@
                         </div>
                     </aside>
                     <div class="flex-grow-1 position-relative p-0">
-                        <div class="o_knowledge_resizer d-print-none d-none d-sm-block"></div>
                         <div class="d-flex flex-column h-100">
                             <!-- Article header -->
                             <div class="o_knowledge_header d-print-none d-sm-flex flex-row justify-content-between bg-white">
@@ -150,6 +149,9 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        <div class="o_knowledge_resizer d-print-none d-none d-sm-block px-3 opacity-75 opacity-100-hover">
+                            <span class="bg-300 pl-1"/>
                         </div>
                     </div>
                 </div>
