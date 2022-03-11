@@ -43,25 +43,28 @@ export class WebsitePreview extends Component {
     }
 
     get path() {
-        let path = this.props.action.context.params && this.props.action.context.params.path;
-        if (path) {
-            const url = new URL(path, window.location.origin);
-            if (this._isTopWindowURL(url)) {
-                // If the client action is initialized with a path that
-                // should not be opened inside the iframe (= something we
-                // would want to open on the top window), we consider that
-                // this is not a valid flow. Instead of trying to open it on
-                // the top window, we initialize the iframe with the
-                // website homepage...
-                path = '/';
+        let path = this.websiteService.editedObjectPath;
+        if (!path) {
+            path = this.props.action.context.params && this.props.action.context.params.path;
+            if (path) {
+                const url = new URL(path, window.location.origin);
+                if (this._isTopWindowURL(url)) {
+                    // If the client action is initialized with a path that
+                    // should not be opened inside the iframe (= something we
+                    // would want to open on the top window), we consider that
+                    // this is not a valid flow. Instead of trying to open it on
+                    // the top window, we initialize the iframe with the
+                    // website homepage...
+                    path = '/';
+                } else {
+                    // ... otherwise, the path still needs to be normalized (as
+                    // it would be if the given path was used as an href of a
+                    // <a/> element).
+                    path = url.pathname + url.search + url.hash;
+                }
             } else {
-                // ... otherwise, the path still needs to be normalized (as
-                // it would be if the given path was used as an href of a
-                // <a/> element).
-                path = url.pathname + url.search + url.hash;
+                path = '/';
             }
-        } else {
-            path = '/';
         }
         return path;
     }
@@ -88,6 +91,7 @@ export class WebsitePreview extends Component {
         this.title.setParts({ action: this.currentTitle });
 
         this.websiteService.pageDocument = this.iframe.el.contentDocument;
+        this.websiteService.contentWindow = this.iframe.el.contentWindow;
 
         // Before leaving the iframe, its content is replicated on an
         // underlying iframe, to avoid for white flashes (visible on
