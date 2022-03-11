@@ -221,10 +221,7 @@
                                 <div class="flex-grow-1 text-muted">
                                     <field name="category"/>
                                 </div>
-                                <div class="d-flex align-items-center">
-                                    <div class="flex-grow-1">
-                                        <field name="share_link" widget="CopyClipboardButton"/>
-                                    </div>
+                                <div class="o_knowledge_kanban_card_footer d-flex justify-content-end align-items-center">
                                     <field name="activity_ids" widget="kanban_activity"/>
                                 </div>
                             </div>
