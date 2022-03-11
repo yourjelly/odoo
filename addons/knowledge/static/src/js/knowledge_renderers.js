@@ -1,12 +1,12 @@
 /** @odoo-module */
 
+import EmojiPickerWidget from './widgets/knowledge_emoji_picker.js';
 import FormRenderer from 'web.FormRenderer';
 
 const KnowledgeFormRenderer = FormRenderer.extend({
     className: 'o_knowledge_form_view',
     events: _.extend({}, FormRenderer.prototype.events, {
         'click .o_article_caret': '_onFold',
-        'click .o_article_dropdown i': '_onIconClick',
         'click .o_article_name': '_onOpen',
         'click .o_article_create, .o_section_create': '_onCreate',
         'click .o_knowledge_share_panel': '_preventDropdownClose'
@@ -32,6 +32,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
             $container.append(res);
             // TODO: add active_article class on the article.id == this.state.res_id ??
             this._setTreeListener();
+            this._renderEmojiPicker();
         }).catch(error => {
             $container.empty();
         });
@@ -116,11 +117,10 @@ const KnowledgeFormRenderer = FormRenderer.extend({
     _onFold: function (event) {
         event.stopPropagation();
         const $button = $(event.currentTarget);
-        const $icon = $button.find('i');
-        const $li = $button.closest('li');
-        const $ul = $li.find('ul');
+        const $ul = $button.closest('.o_article_handle').next();
         if ($ul.length !== 0) {
             $ul.toggle();
+            const $icon = $button.find('i');
             if ($ul.is(':visible')) {
                 $icon.removeClass('fa-caret-right');
                 $icon.addClass('fa-caret-down');
@@ -128,30 +128,6 @@ const KnowledgeFormRenderer = FormRenderer.extend({
                 $icon.removeClass('fa-caret-down');
                 $icon.addClass('fa-caret-right');
             }
-        }
-    },
-
-    /**
-     * When the user clicks on a new icon
-     * @param {Event} event
-     */
-    _onIconClick: async function (event) {
-        event.stopPropagation();
-        const $target = $(event.target);
-        const $li = $target.closest('li');
-        const id = $li.data('article-id');
-        const name = $target.data('icon-name');
-        const result = await this._rpc({
-            model: 'knowledge.article',
-            method: 'write',
-            args: [[id], { icon: name }],
-        });
-        if (result) {
-            this.$el.find(`[data-article-id="${id}"]`).each(function() {
-                const $icon = $(this).find('.o_article_icon:first i');
-                $icon.removeClass();
-                $icon.addClass(`fa fa-fw ${name}`);
-            });
         }
     },
 
@@ -224,6 +200,22 @@ const KnowledgeFormRenderer = FormRenderer.extend({
         });
         const $container = this.$el.find('.breadcrumb');
         $container.prepend(items);
+    },
+
+    /**
+     * Renders the emoji picker
+     */
+    _renderEmojiPicker: function () {
+        this.$el.find('.o_article').each((_index, article) => {
+            const $article = $(article);
+            $article.find('> .o_article_handle .o_article_dropdown').each((_index, dropdown) => {
+                const $dropdown = $(dropdown);
+                const $picker = new EmojiPickerWidget(this, {
+                    article_id: $article.data('article-id')
+                });
+                $picker.attachTo($dropdown);
+            });
+        });
     },
 
     /**

@@ -17,6 +17,7 @@ const KnowledgeFormController = FormController.extend({
         create: '_onCreate',
         move: '_onMove',
         open: '_onOpen',
+        emoji_click: '_onEmojiClick',
     }),
 
     // Listeners:
@@ -207,6 +208,24 @@ const KnowledgeFormController = FormController.extend({
             data.onSuccess();
         } else {
             data.onReject();
+        }
+    },
+
+    /**
+     * @param {Event} event
+     */
+    _onEmojiClick: async function (event) {
+        const { article_id, unicode } = event.data;
+        const result = await this._rpc({
+            model: 'knowledge.article',
+            method: 'write',
+            args: [[article_id], { icon: unicode }],
+        });
+        if (result) {
+            this.$el.find(`[data-article-id="${article_id}"]`).each(function() {
+                const $icon = $(this).find('.o_article_icon:first');
+                $icon.text(unicode);
+            });
         }
     },
 });
