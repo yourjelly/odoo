@@ -29,6 +29,7 @@
         <field name="parent_id" eval="False" />
         <field name="author_ids" eval="[(6, 0, [ref('base.user_admin')])]" />
         <field name="favourite_user_ids" eval="[(6, 0, [ref('base.user_demo')])]" />
+        <field name="icon">📚</field>
     </record>
     <record id="knowledge_article_demo_data_1" model="knowledge.article">
         <field name="name">How to make a Sale</field>
@@ -56,7 +57,7 @@
         <field name="parent_id" eval="ref('knowledge_article_demo_data_0')" />
         <field name="author_ids" eval="[(6, 0, [ref('base.user_demo')])]" />
         <field name="favourite_user_ids" eval="[(6, 0, [ref('base.user_demo')])]" />
-        <field name="icon">fa-hand-peace-o</field>
+        <field name="icon">💵</field>
     </record>
     <record id="knowledge_article_demo_data_2" model="knowledge.article">
         <field name="name">Best Sauces for French Fries</field>
@@ -112,7 +113,7 @@
         <field name="parent_id" eval="False" />
         <field name="author_ids" eval="[(6, 0, [ref('base.user_root')])]" />
         <field name="favourite_user_ids" eval="[(6, 0, [ref('base.user_admin')])]" />
-        <field name="icon">fa-cutlery</field>
+        <field name="icon">🍟</field>
         <field name="internal_permission">none</field>
         <field name="article_member_ids" model="knowledge.article.member"
                eval="[(0, 0, {'partner_id': ref('base.partner_admin'), 'permission': 'write'})]"/>
@@ -128,7 +129,7 @@
         </field>
         <field name="parent_id" eval="ref('knowledge_article_demo_data_0')" />
         <field name="author_ids" eval="[(6, 0, [ref('base.user_root')])]" />
-        <field name="icon">fa-user</field>
+        <field name="icon">📫</field>
     </record>
     <record id="knowledge_article_demo_data_4" model="knowledge.article">
         <field name="name">Tips for a sustainable business</field>
@@ -141,7 +142,7 @@
             </p>
         </field>
         <field name="author_ids" eval="[(6, 0, [ref('base.user_root')])]" />
-        <field name="icon">fa-pagelines</field>
+        <field name="icon">💡</field>
     </record>
 
 </odoo>
