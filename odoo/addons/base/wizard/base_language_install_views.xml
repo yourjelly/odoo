@@ -10,6 +10,7 @@
                     <field name="state" invisible="1"/>
                     <group states="init">
                         <field name="lang"/>
+                        <field name="info_message" attrs="{'invisible': [('info_message', '=', False)]}"
                         <field name="overwrite" groups="base.group_no_one"/>
                     </group>
                     <group states="done" colspan="4">

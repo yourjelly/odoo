@@ -18,9 +18,28 @@ class BaseLanguageInstall(models.TransientModel):
             return lang.code
         return False
 
+
     @api.model
     def _get_languages(self):
         return [[code, name] for code, _, name, *_ in self.env['res.lang'].get_available()]
+
+    def _get_info_message(self):
+        for wizard in self:
+            if not wizard.lang:
+                wizard.info_message = False
+                continue
+            lang, country = wizard.lang.split("_")
+            if lang == country.lower():
+                # e.g. fr_FR
+                wizard.info_message = False
+                continue
+            base_lang = f"{lang}_{lang.upper()}"
+            languages = dict(self._get_languages())
+            if base_lang in languages.keys():
+                wizard.info_message = _("This translation is based on %r content and may lack of regional language variations.",
+                    languages[base_lang])
+            else:
+                wizard.info_message = False
 
     lang = fields.Selection(_get_languages, string='Language', required=True,
                             default=_default_language)
@@ -29,6 +48,7 @@ class BaseLanguageInstall(models.TransientModel):
                                help="If you check this box, your customized translations will be overwritten and replaced by the official ones.")
     state = fields.Selection([('init', 'init'), ('done', 'done')],
                              string='Status', readonly=True, default='init')
+    info_message = fields.Char(compute=_get_info_message, string="Info Message")
 
     def lang_install(self):
         self.ensure_one()
