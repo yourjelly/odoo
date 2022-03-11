@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from datetime import datetime
 
-from werkzeug.urls import url_join
-from collections import defaultdict
+import ast
 import sys
+
+from collections import defaultdict
+from datetime import datetime
+from werkzeug.urls import url_join
 
 from odoo import fields, models, api, _
 from odoo.exceptions import AccessError, UserError, ValidationError
@@ -496,8 +498,16 @@ class Article(models.Model):
     #########
 
     def action_home_page(self):
+        article = self.search([
+            ('parent_id', '=', False),
+            ('internal_permission', '!=', 'none')
+        ], limit=1, order='sequence')
+        mode = 'edit' if article.user_can_write else 'readonly'
         action = self.env['ir.actions.act_window']._for_xml_id('knowledge.knowledge_article_dashboard_action')
-        action['res_id'] = self.env.context.get('res_id', self.search([('parent_id', '=', False), ('internal_permission', '!=', 'none')], limit=1, order='sequence').id)
+        action['res_id'] = self.env.context.get('res_id', article.id)
+        action['context'] = dict(ast.literal_eval(action.get('context')),
+            form_view_initial_mode=mode
+        )
         return action
 
     def action_set_lock(self):
