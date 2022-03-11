@@ -161,7 +161,7 @@ const MoveArticleToDialog = Dialog.extend({
             formatResult: (result, container, query, escapeMarkup) => {
                 const { text } = result;
                 const markup = [];
-                Select2.util.markMatch(text, query.term, markup, escapeMarkup);
+                window.Select2.util.markMatch(text, query.term, markup, escapeMarkup);
                 if (result.id === 'private') {
                     const src = escapeMarkup(this.getLoggedUserPicture());
                     markup.unshift(`<img src="${src}" class="rounded-circle mr-1"/>`);

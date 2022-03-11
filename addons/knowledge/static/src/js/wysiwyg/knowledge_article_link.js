@@ -106,7 +106,7 @@ const KnowledgeArticleLinkModal = Dialog.extend({
             formatResult: (result, container, query, escapeMarkup) => {
                 const { text } = result;
                 const markup = [];
-                Select2.util.markMatch(text, query.term, markup, escapeMarkup);
+                window.Select2.util.markMatch(text, query.term, markup, escapeMarkup);
                 if (typeof result.icon !== 'undefined') {
                     markup.unshift(`<span class="mr-1">${escapeMarkup(result.icon)}</span>`);
                 }
