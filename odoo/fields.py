@@ -1704,6 +1704,9 @@ class _String(Field):
                 records.env['ir.translation']._set_source(tname, real_recs._ids, value)
             # invalidate the field in the other languages
             cache.invalidate([(self, records.ids)])
+        else:
+            # avoid cache inconsistencies
+            cache.remove(records, self)
 
         if update_trans:
             if callable(self.translate):

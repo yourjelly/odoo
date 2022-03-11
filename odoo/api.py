@@ -904,13 +904,13 @@ class Cache(object):
         field_cache = self._set_field_cache(records, field)
         field_cache.update(zip(records._ids, values))
 
-    def remove(self, record, field):
-        """ Remove the value of ``field`` for ``record``. """
-        try:
-            field_cache = self._set_field_cache(record, field)
-            del field_cache[record._ids[0]]
-        except KeyError:
-            pass
+    def remove(self, records, field):
+        """ Remove the value of ``field`` for ``records``. """
+        field_cache = self._get_field_cache(records, field)
+        if not field_cache:
+            return
+        for id_ in records._ids:
+            field_cache.pop(id_, None)
 
     def get_values(self, records, field):
         """ Return the cached values of ``field`` for ``records``. """
