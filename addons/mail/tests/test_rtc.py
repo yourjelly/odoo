@@ -537,6 +537,7 @@ class TestChannelInternals(MailCommon):
         channel_partner = channel.sudo().channel_last_seen_partner_ids.filtered(lambda channel_partner: channel_partner.partner_id == self.user_employee.partner_id)
         channel_partner._rtc_join_call()
         channel_partner.rtc_session_ids.flush()
+        channel_partner.rtc_session_ids.invalidate_cache(['write_date'])
         channel_partner.rtc_session_ids._write({'write_date': fields.Datetime.now() - relativedelta(days=2)})
         self.env['bus.bus'].sudo().search([]).unlink()
         with self.assertBus(
@@ -607,6 +608,7 @@ class TestChannelInternals(MailCommon):
         })
         test_session = self.env['mail.channel.rtc.session'].sudo().create({'channel_partner_id': test_channel_partner.id})
         test_session.flush()
+        test_session.invalidate_cache(['write_date'])
         test_session._write({'write_date': fields.Datetime.now() - relativedelta(days=2)})
         unused_ids = [9998, 9999]
         self.env['bus.bus'].sudo().search([]).unlink()
