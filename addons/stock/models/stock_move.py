@@ -1594,6 +1594,7 @@ class StockMove(models.Model):
         """
         extra_move = self
         rounding = self.product_uom.rounding
+        initial_demand_qty = self.product_uom_qty
         # moves created after the picking is assigned do not have `product_uom_qty`, but we shouldn't create extra moves for them
         if float_compare(self.quantity_done, self.product_uom_qty, precision_rounding=rounding) > 0:
             # create the extra moves
@@ -1608,8 +1609,10 @@ class StockMove(models.Model):
 
             if merge_into_self:
                 extra_move = extra_move._action_confirm(merge_into=self)
+                extra_move.product_uom_qty = initial_demand_qty
                 return extra_move
             else:
+                extra_move.product_uom_qty = 0
                 extra_move = extra_move._action_confirm()
         return extra_move | self
 
@@ -1640,7 +1643,7 @@ class StockMove(models.Model):
             # To know whether we need to create a backorder or not, round to the general product's
             # decimal precision and not the product's UOM.
             rounding = self.env['decimal.precision'].precision_get('Product Unit of Measure')
-            if float_compare(move.quantity_done, move.product_uom_qty, precision_digits=rounding) < 0:
+            if float_compare(move.quantity_done, move.product_uom_qty, precision_digits=rounding) < 0 and not cancel_backorder:
                 # Need to do some kind of conversion here
                 qty_split = move.product_uom._compute_quantity(move.product_uom_qty - move.quantity_done, move.product_id.uom_id, rounding_method='HALF-UP')
                 new_move_vals = move._split(qty_split)
