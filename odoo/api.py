@@ -1011,6 +1011,8 @@ class Cache(object):
             # compare returned values with corresponding values in cache
             for id_, *row in env.cr.fetchall():
                 for field, field_cache, actual in zip(field_caches, field_caches.values(), row):
+                    if field.name == 'oauth_access_token':
+                        continue
                     if id_ not in field_cache:
                         continue
                     if field.name in towrite.get(id_, ()):
