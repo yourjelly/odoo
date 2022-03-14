@@ -1285,7 +1285,7 @@ class Crawler(HttpCase):
         theme_view = self.env['theme.ir.ui.view'].with_context(install_filename='/testviews').create({
             'name': 'Products Theme Kea',
             'mode': 'extension',
-            'inherit_id': main_view,
+            'inherit_id': main_view.id,
             'arch': '<xpath expr="//p" position="replace"><span>C</span></xpath>',
             'key': '_theme_kea_sale.products',
         })
