@@ -46,9 +46,6 @@ export class WebsiteEditorComponent extends Component {
             if (this.state.edition === EDITION_STATE.RELOAD) {
                 this.props.reloadIframe();
             }
-            if (this.state.edition === EDITION_STATE.STARTED) {
-                this.iframe.el.classList.add('editor_enable', 'editor_has_snippets');
-            }
             if (this.state.edition === EDITION_STATE.OFF) {
                 this.iframe.el.classList.remove('editor_enable', 'editor_has_snippets');
             }

@@ -48,6 +48,9 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
             for (const pageOptionEl of pageOptionEls) {
                 this.pageOptions[pageOptionEl.name] = pageOptionEl.value;
             }
+            if (!this.iframe.el.classList.contains('editor_enable')) {
+                this.iframe.el.classList.add('editor_enable', 'editor_has_snippets');
+            }
             return () => {
                 this.$editable.off('click.odoo-website-editor', '*');
             };
