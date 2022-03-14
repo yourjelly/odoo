@@ -29,12 +29,14 @@ class TestChangeDepartment(TestHrHolidaysCommon):
 
         # Non approved leave request change department
         self.employee_emp.department_id = self.rd_dept
+        self.employee_emp.flush()
         hol1_employee_group = create_holiday("hol1", 1, 2)
         self.employee_emp.department_id = self.hr_dept
         self.assertEqual(hol1_employee_group.department_id, self.hr_dept, 'hr_holidays: non approved leave request should change department if employee change department')
 
         # Approved passed leave request change department
         self.employee_emp.department_id = self.hr_dept
+        self.employee_emp.flush()
         hol2_employee_group = create_holiday("hol2", -4, -3)
         hol2_user_group = hol2_employee_group.with_user(self.user_hruser_id)
         hol2_user_group.action_approve()
@@ -43,6 +45,7 @@ class TestChangeDepartment(TestHrHolidaysCommon):
 
         # Approved futur leave request change department
         self.employee_emp.department_id = self.hr_dept
+        self.employee_emp.flush()
         hol22_employee_group = create_holiday("hol22", 3, 4)
         hol22_user_group = hol22_employee_group.with_user(self.user_hruser_id)
         hol22_user_group.action_approve()
@@ -51,6 +54,7 @@ class TestChangeDepartment(TestHrHolidaysCommon):
 
         # Refused passed leave request change department
         self.employee_emp.department_id = self.rd_dept
+        self.employee_emp.flush()
         hol3_employee_group = create_holiday("hol3", -6, -5)
         hol3_user_group = hol3_employee_group.with_user(self.user_hruser_id)
         hol3_user_group.action_refuse()
@@ -59,6 +63,7 @@ class TestChangeDepartment(TestHrHolidaysCommon):
 
         # Refused futur leave request change department
         self.employee_emp.department_id = self.rd_dept
+        self.employee_emp.flush()
         hol32_employee_group = create_holiday("hol32", 5, 6)
         hol32_user_group = hol32_employee_group.with_user(self.user_hruser_id)
         hol32_user_group.action_refuse()
