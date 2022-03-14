@@ -207,6 +207,8 @@ class LunchOrder(models.Model):
         return True
 
     def _check_wallet(self):
+        report = self.env['lunch.cashmove.report']
+        report.invalidate_cache(report._fields)  # discard cache inconsistencies
         self.flush()
         for line in self:
             if self.env['lunch.cashmove'].get_wallet_balance(line.user_id) < 0:
