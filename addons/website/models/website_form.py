@@ -107,6 +107,8 @@ class website_form_model_fields(models.Model):
         # registry reload once that's happened. We want to be able to
         # whitelist non-custom fields and the registry reload absolutely
         # isn't desirable, so go with a method and raw SQL
+        self.flush(self._fields)
+        self.invalidate_cache(self._fields)
         self.env.cr.execute(
             "UPDATE ir_model_fields"
             " SET website_form_blacklisted=false"
