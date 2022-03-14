@@ -330,6 +330,8 @@ class WebsiteVisitor(models.Model):
 
     def _update_visitor_timezone(self, timezone):
         """ We need to do this part here to avoid concurrent updates error. """
+        self.flush(['timezone'], self)
+        self.invalidate_cache(['timezone'], self.ids)
         query = """
             UPDATE website_visitor
             SET timezone = %s
@@ -342,6 +344,7 @@ class WebsiteVisitor(models.Model):
 
     def _update_visitor_last_visit(self):
         """ We need to do this part here to avoid concurrent updates error. """
+        self.flush(self._fields, self)
         try:
             with self.env.cr.savepoint():
                 query_lock = "SELECT * FROM website_visitor where id = %s FOR NO KEY UPDATE NOWAIT"
@@ -356,6 +359,7 @@ class WebsiteVisitor(models.Model):
                     last_connection_datetime = %s
                     WHERE id = %s
                 """
+                self.invalidate_cache(self._fields, self.ids)
                 self.env.cr.execute(query, (date_now, self.id), log_exceptions=False)
         except Exception:
             pass
