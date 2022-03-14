@@ -94,7 +94,7 @@ class TestIrSequenceNoGap(BaseCase):
                 env1.cr._default_log_exceptions = False # Prevent logging a traceback
                 # NOTE: The error has to be an OperationalError
                 # s.t. the automatic request retry (service/model.py) works.
-                with self.assertRaises(psycopg2.OperationalError) as e:
+                with self.assertRaises(psycopg2.OperationalError) as e, env1.cr.savepoint():
                     n0 = env0['ir.sequence'].next_by_code('test_sequence_type_2')
                     self.assertTrue(n0)
                     n1 = env1['ir.sequence'].next_by_code('test_sequence_type_2')
