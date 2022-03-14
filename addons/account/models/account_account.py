@@ -505,6 +505,9 @@ class AccountAccount(models.Model):
         '''
         if not self.ids:
             return None
+        aml = self.env['account.move.line']
+        aml.flush(aml._fields)
+        aml.invalidate_cache(['reconciled', 'amount_residual', 'amount_residual_currency'])
         query = """
             UPDATE account_move_line SET
                 reconciled = CASE WHEN debit = 0 AND credit = 0 AND amount_currency = 0
@@ -532,6 +535,9 @@ class AccountAccount(models.Model):
         if partial_lines_count > 0:
             raise UserError(_('You cannot switch an account to prevent the reconciliation '
                               'if some partial reconciliations are still pending.'))
+        aml = self.env['account.move.line']
+        aml.flush(aml._fields)
+        aml.invalidate_cache(['amount_residual', 'amount_residual_currency'])
         query = """
             UPDATE account_move_line
                 SET amount_residual = 0, amount_residual_currency = 0
