@@ -26,6 +26,7 @@ import {
     nodeSize,
     preserveCursor,
     setSelection,
+    setCursorStart,
     startPos,
     toggleClass,
     closestElement,
@@ -217,6 +218,9 @@ export class OdooEditor extends EventTarget {
             this._pluginAdd(plugin);
         }
 
+        // <p> element added temporarily during navigation with ArrowUp/ArrowDown, between blocks, if there is no existing <p>
+        this._navigationNode = null;
+
         // -------------------
         // Alter the editable
         // -------------------
@@ -276,6 +280,7 @@ export class OdooEditor extends EventTarget {
 
         this.addDomListener(this.document, 'selectionchange', this._onSelectionChange);
         this.addDomListener(this.document, 'selectionchange', this._handleCommandHint);
+        this.addDomListener(this.document, 'selectionchange', this._handleNavigationNode);
         this.addDomListener(this.document, 'keydown', this._onDocumentKeydown);
         this.addDomListener(this.document, 'keyup', this._onDocumentKeyup);
         this.addDomListener(this.document, 'mousedown', this._onDoumentMousedown);
@@ -292,6 +297,16 @@ export class OdooEditor extends EventTarget {
                 this._historyMakeSnapshot();
             }, HISTORY_SNAPSHOT_INTERVAL);
         }
+
+        this._navigationNodeObserver = new MutationObserver(function (mutationList, observer) {
+            observer.disconnect();
+            const targets = new Set(mutationList.map(mutation => mutation.target));
+            targets.forEach(navigationNode => {
+                if (this._navigationNode === navigationNode) {
+                    this._navigationNode = null; // the navigationNode is "validated" in the dom by the mutation
+                }
+            });
+        }.bind(this));
 
         // -------
         // Toolbar
@@ -2338,8 +2353,71 @@ export class OdooEditor extends EventTarget {
             ev.preventDefault();
             ev.stopPropagation();
             this.execCommand('strikeThrough');
+        } else if (['ArrowDown', 'ArrowUp'].includes(ev.key) && !ev.ctrlKey && !ev.metaKey) {
+            this._handleVerticalArrowsNavigation(ev);
         }
     }
+
+    _handleVerticalArrowsNavigation(ev) {
+        const direction = ['ArrowDown', 'ArrowUp'].indexOf(ev.key);
+        if (direction === -1) {
+            return;
+        }
+        const sel = this.document.getSelection();
+        const root = ev.currentTarget;
+        let node = root.contains(sel.anchorNode) && sel.anchorNode;
+        while (node && node !== root) {
+            if (node.nodeType === Node.TEXT_NODE) {
+                const parent = node.parentElement;
+                if (parent.tagName === 'P') {
+                    node = parent;
+                }
+            }
+            let sibling = (direction) ? node.previousElementSibling : node.nextElementSibling;
+            if (sibling && sibling.tagName === 'P') {
+                return; // sibling is a <p> node, no need for a navigationNode
+            } else if (node.nodeType !== Node.TEXT_NODE && node.tagName !== 'P' &&
+                ['DIV', 'TD'].includes(node.parentElement.tagName) && node.parentElement.isContentEditable) {
+                // a navigationNode is needed between two "complex" blocks
+                ev.preventDefault();
+                ev.stopPropagation();
+                sel.removeAllRanges();
+                const range = this.document.createRange();
+                if (direction) {
+                    range.setStartBefore(node);
+                    range.setEndBefore(node);
+                } else {
+                    range.setStartAfter(node);
+                    range.setEndAfter(node);
+                }
+                sel.addRange(range);
+                const navigationNodeHtml = `<p><br></p>`;
+                const [navigationNode] = this.execCommand('insertHTML', navigationNodeHtml);
+                this._removeNavigationNode(); // the previous navigation node is removed when we add a new one
+                setCursorStart(navigationNode);
+                this._navigationNode = navigationNode;
+                this._navigationNodeObserver.observe(this._navigationNode, {
+                    attributes: false, childList: true, subtree: true
+                });
+                return;
+            } else if (sibling) {
+                if (node.parentElement.isContentEditable && !sibling.isContentEditable &&
+                    !sibling.querySelector('[contenteditable="true"]')) {
+                    // sibling is not able to handle the carret, but may need a navigationNode relative to its position at the
+                    // same depth level
+                    node = sibling;
+                } else {
+                    return; // sibling is able to handle the carret, no need for a navigationNode
+                }
+            } else {
+                do {
+                    // exiting a complex block, a parent block may need a navigationNode relative to its position at a smaller depth
+                    node = node.parentElement;
+                } while (node !== root && !node.parentElement.isContentEditable);
+            }
+        }
+    }
+
     /**
      * @private
      */
@@ -2516,6 +2594,26 @@ export class OdooEditor extends EventTarget {
             this._makeHint(this.editable.firstChild, this.options.placeholder, true);
         }
     }
+
+    _removeNavigationNode() {
+        this._navigationNodeObserver.disconnect();
+        if (this._navigationNode) {
+            this._navigationNode.remove();
+            this.historyStep();
+        }
+        this._navigationNode = null;
+    }
+
+    /**
+     * The navigationNode is removed from the dom when the selection changes, unless it is still the powerbox element.
+     */
+    _handleNavigationNode() {
+        const block = this.options.getPowerboxElement();
+        if (this._navigationNode !== block) {
+            this._removeNavigationNode();
+        }
+    }
+
     _makeHint(block, text, temporary = false) {
         const content = block && block.innerHTML.trim();
         if (
