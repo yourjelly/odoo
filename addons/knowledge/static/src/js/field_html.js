@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import FieldHtml from 'web_editor.field.html';
-import {ToolbarsManager} from './knowledge_toolbars';
+import {FieldHtmlInjector} from './knowledge_field_html_injector';
 import {KnowledgePlugin} from './KnowledgePlugin';
 
 FieldHtml.include({
@@ -15,21 +15,21 @@ FieldHtml.include({
         if (this.nodeOptions.knowledge_commands) {
             if (prom) {
                 return prom.then(function () {
-                    return this._addToolbarsManager();
+                    return this._addFieldHtmlInjector();
                 }.bind(this));
             } else {
-                return this._addToolbarsManager();
+                return this._addFieldHtmlInjector();
             }
         }
         return prom;
     },
     /**
-     * Appends the ToolbarsManager widget to the field, and start managing toolbars
+     * Appends the FieldHtmlInjector widget to the field, and start managing toolbars
      *
      * @private
      * @returns {Promise}
      */
-    _addToolbarsManager: function () {
+    _addFieldHtmlInjector: function () {
         let historyMethods;
         if (this.mode == 'edit') {
             historyMethods = {
@@ -44,8 +44,8 @@ FieldHtml.include({
                 historyStep: () => {},
             };
         }
-        const toolbarsManager = new ToolbarsManager(this, this.mode, historyMethods);
-        return toolbarsManager.appendTo(this.el).then(toolbarsManager.manageToolbars.bind(toolbarsManager, this.$content[0]));
+        const fieldHtmlInjector = new FieldHtmlInjector(this, this.mode, this.$content[0], historyMethods);
+        return fieldHtmlInjector.appendTo(this.el);
     },
     /**
      * A Toolbar may need to be reconstructed in edit mode, i.e.: when the user delete then undelete a knowledge_commands block
@@ -56,7 +56,7 @@ FieldHtml.include({
     _onLoadWysiwyg: function () {
         this._super.apply(this, arguments);
         if (this.nodeOptions.knowledge_commands) {
-            this._addToolbarsManager();
+            this._addFieldHtmlInjector();
             this.wysiwyg.odooEditor.addEventListener('historyUndo', () => this.$content.trigger('refresh_knowledge_toolbars'));
             this.wysiwyg.odooEditor.addEventListener('historyRedo', () => this.$content.trigger('refresh_knowledge_toolbars'));
         }

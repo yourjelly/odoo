@@ -111,7 +111,7 @@ Wysiwyg.include({
         }
         return commands;
     },
-    _notifyKnowledgeToolbarsManager(owner) {
+    _notifyKnowledgeFieldHtmlInjector(owner) {
         const toolbarsData = [];
         owner.querySelectorAll('.o_knowledge_toolbar_anchor').forEach(function (owner, anchor) {
             const type = Array.from(anchor.classList).find(className => className.startsWith('o_knowledge_toolbar_type_'));
@@ -132,8 +132,8 @@ Wysiwyg.include({
     _insertTemplate() {
         const templateHtml = $(QWeb.render('knowledge.template_block', {}))[0].outerHTML;
         const [owner] = this.odooEditor.execCommand('insertHTML', templateHtml);
-        setCursorStart(owner.querySelector('.o_knowledge_template_content > p'));
-        this._notifyKnowledgeToolbarsManager(owner);
+        setCursorStart(owner.querySelector('.o_knowledge_content > p'));
+        this._notifyKnowledgeFieldHtmlInjector(owner);
     },
     /**
      * @private
@@ -147,7 +147,7 @@ Wysiwyg.include({
         const [owner] = result;
         if (owner.classList.contains('o_knowledge_file')) {
             setCursorStart(owner.nextElementSibling);
-            this._notifyKnowledgeToolbarsManager(owner);
+            this._notifyKnowledgeFieldHtmlInjector(owner);
         }
         return result;
     },

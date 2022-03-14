@@ -37,7 +37,4 @@
             </div>
         </div>
     </t>
-    <t t-name="knowledge.toolbars_manager">
-        <div class="o_knowledge_toolbars_manager" contenteditable="false"></div>
-    </t>
 </templates>
