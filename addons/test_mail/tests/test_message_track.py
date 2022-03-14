@@ -389,5 +389,6 @@ class TestTrackingInternals(TestMailCommon):
         ir_model_field = self.env['ir.model.fields'].search([
             ('model', '=', 'mail.test.ticket'),
             ('name', '=', 'email_from')])
-        ir_model_field.with_context(_force_unlink=True).unlink()
+        with self.env.cache.nocheck():
+            ir_model_field.with_context(_force_unlink=True).unlink()
         self.assertEqual(len(record_sudo.message_ids.tracking_value_ids), 0)
