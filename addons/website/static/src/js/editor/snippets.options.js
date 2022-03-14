@@ -3179,6 +3179,37 @@ options.registry.MegaMenuNoDelete = options.Class.extend({
     },
 });
 
+options.registry.sizing.include({
+    /**
+     * @override
+     */
+    start() {
+        const defs = this._super(...arguments);
+        const self = this;
+        this.$handles.on('mousedown', function (ev) {
+            // since website is edited in an iframe, a div that goes over the
+            // iframe is necessary to catch de mousemove and mouseup events.
+            // otherwise the iframe absorbs them.
+            const $body = $(this.ownerDocument.body);
+            if (!self.divEl) {
+                self.divEl = document.createElement('div');
+                self.divEl.style.position = 'absolute';
+                self.divEl.style.height = '100%';
+                self.divEl.style.width = '100%';
+                self.divEl.setAttribute('id', 'iframeEventOverlay');
+                $body.append(self.divEl);
+            }
+            const documentMouseUp = () => {
+                self.divEl.remove();
+                self.divEl = undefined;
+                $body.off('mouseup', documentMouseUp);
+            };
+            $body.on('mouseup', documentMouseUp);
+        });
+        return defs;
+    }
+});
+
 return {
     UrlPickerUserValueWidget: UrlPickerUserValueWidget,
     FontFamilyPickerUserValueWidget: FontFamilyPickerUserValueWidget,
