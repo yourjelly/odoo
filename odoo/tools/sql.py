@@ -323,6 +323,9 @@ def increment_field_skiplock(record, field):
 
     assert record._fields[field].type == 'integer'
 
+    record.flush([field], record)
+    record.invalidate_cache([field], record.ids)
+
     cr = record._cr
     query = """
         UPDATE {table} SET {field} = {field} + 1 WHERE id IN (
