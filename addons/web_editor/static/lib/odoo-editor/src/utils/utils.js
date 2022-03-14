@@ -1060,7 +1060,7 @@ export function getOuid(node, optimize = false) {
  */
 const selfClosingElementTags = ['BR', 'IMG', 'INPUT'];
 export function isVisibleEmpty(node) {
-    return selfClosingElementTags.includes(node.nodeName);
+    return selfClosingElementTags.includes(node.nodeName) || (isMediaElement(node) && !node.childNodes.length);
 }
 /**
  * Returns true if the given node is in a PRE context for whitespace handling.
