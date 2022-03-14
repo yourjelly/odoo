@@ -803,7 +803,7 @@ class SaleOrder(models.Model):
                 # Count all points separately if the order is for the future and the split option is enabled
                 if program.applies_on == 'future' and rule.reward_point_split and rule.reward_point_mode != 'order':
                     if rule.reward_point_mode == 'unit':
-                        rule_points.extend(rule.reward_point_amount for _ in range(ordered_rule_products_qty))
+                        rule_points.extend(rule.reward_point_amount for _ in range(int(ordered_rule_products_qty)))
                     elif rule.reward_point_mode == 'money':
                         for line in self.order_line:
                             if line.is_reward_line or line.product_id not in rule_products or line.product_uom_qty <= 0:
