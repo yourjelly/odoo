@@ -31,6 +31,7 @@ class TestControllers(tests.HttpCase):
             })
             if i % 2 == 0:
                 # mark as old
+                new_page.invalidate_cache(['write_date'], new_page.ids)
                 new_page._write({'write_date': '2020-01-01'})
             else:
                 last_5_url_edited.append(new_page.url)
