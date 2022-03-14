@@ -26,6 +26,9 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
             of the allocations.
             This is done in SQL because ORM does not allow to write onto the create_date field.
         """
+        allocation = self.env['hr.leave.allocation'].browse(allocation_id)
+        allocation.flush(['create_date'], allocation)
+        allocation.invalidate_cache(['create_date'], allocation.ids)
         self.env.cr.execute("""
                        UPDATE
                        hr_leave_allocation
