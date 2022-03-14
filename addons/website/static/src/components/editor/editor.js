@@ -82,11 +82,11 @@ export class WebsiteEditorComponent extends Component {
      * Reload the iframe and set the edition states to false
      */
     async quit() {
-        this.state.edition = EDITION_STATE.OFF;
-        this.websiteContext.edition = false;
+        await this._reloadIframe();
         this.reloadTarget = null;
         this.reloadSelector = null;
-        return this._reloadIframe();
+        this.state.edition = EDITION_STATE.OFF;
+        this.websiteContext.edition = false;
     }
     /**
      * Reload the iframe
