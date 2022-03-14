@@ -1826,7 +1826,11 @@ export class OdooEditor extends EventTarget {
                 this._historyRevertUntil(this._beforeCommandbarStepIndex);
                 this.historyStep(true);
                 setTimeout(() => {
-                    this.editable.focus();
+                    const activeElement = this.editable.ownerDocument.activeElement;
+                    if (activeElement !== this.editable &&
+                        (!this.editable.contains(activeElement) || !activeElement.isContentEditable)) {
+                        this.editable.focus();
+                    }
                     getDeepRange(this.editable, { select: true });
                 });
             },
