@@ -15,6 +15,8 @@ const QWeb = core.qweb;
 
 var _t = core._t;
 
+let cacheSnippetTemplate = {};
+
 // jQuery extensions
 $.extend($.expr[':'], {
     o_editable: function (node, i, m) {
@@ -1483,7 +1485,6 @@ var SnippetsMenu = Widget.extend({
         }
         core.bus.off('deactivate_snippet', this, this._onDeactivateSnippet);
         $(document.body).off('click', this._checkEditorToolbarVisibilityCallback);
-        delete this.cacheSnippetTemplate[this.options.snippets];
     },
 
     //--------------------------------------------------------------------------
@@ -1523,8 +1524,8 @@ var SnippetsMenu = Widget.extend({
      * @param {boolean} invalidateCache
      */
     loadSnippets: function (invalidateCache) {
-        if (!invalidateCache && this.cacheSnippetTemplate[this.options.snippets]) {
-            this._defLoadSnippets = this.cacheSnippetTemplate[this.options.snippets];
+        if (!invalidateCache && cacheSnippetTemplate[this.options.snippets]) {
+            this._defLoadSnippets = cacheSnippetTemplate[this.options.snippets];
             return this._defLoadSnippets;
         }
         this._defLoadSnippets = this._rpc({
@@ -1535,7 +1536,7 @@ var SnippetsMenu = Widget.extend({
                 context: this.options.context,
             },
         }, { shadow: true });
-        this.cacheSnippetTemplate[this.options.snippets] = this._defLoadSnippets;
+        cacheSnippetTemplate[this.options.snippets] = this._defLoadSnippets;
         return this._defLoadSnippets;
     },
     /**
