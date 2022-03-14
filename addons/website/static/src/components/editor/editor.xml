@@ -8,15 +8,13 @@
                                     reloadCallback="(event, widgetEl) => this.reload(event, widgetEl)"
                                     quitCallback="() => this.quit()"/>
         </t>
-        <div t-ref="loading">
-            <t t-if="this.state.loading">
-                <t t-out="this.loadingDummy" />
-                <!-- coulnd't use o_we_ui_loading here because wysiwys_snippets style might not be loaded-->
-                <div class="o_website_loading d-flex justify-content-center align-items-center">
-                    <i class="fa fa-circle-o-notch fa-spin fa-4x" />
-                </div>
-            </t>
-        </div>
+        <t t-if="this.state.loading">
+            <t t-out="this.loadingDummy" />
+            <!-- coulnd't use o_we_ui_loading here because wysiwys_snippets style might not be loaded-->
+            <div class="o_website_loading d-flex justify-content-center align-items-center">
+                <i class="fa fa-circle-o-notch fa-spin fa-4x" />
+            </div>
+        </t>
     </t>
 
 </templates>

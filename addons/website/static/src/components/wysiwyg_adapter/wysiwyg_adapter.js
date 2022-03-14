@@ -238,9 +238,6 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
     }
 
     _handleAction(actionName, params) {
-        if (actionName === 'get_page_option') {
-            return this.pageOptions[params];
-        }
         switch (actionName) {
             case 'get_page_option':
                 return this.pageOptions[params];
