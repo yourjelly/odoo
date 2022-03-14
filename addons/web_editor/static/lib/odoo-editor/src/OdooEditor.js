@@ -27,6 +27,7 @@ import {
     preserveCursor,
     setSelection,
     setCursorStart,
+    setCursorEnd,
     startPos,
     toggleClass,
     closestElement,
@@ -2309,15 +2310,20 @@ export class OdooEditor extends EventTarget {
                 this.deleteRange(selection);
             }
         }
-        if (ev.key === 'Backspace' && !ev.ctrlKey && !ev.metaKey) {
-            // backspace
-            // We need to hijack it because firefox doesn't trigger a
-            // deleteBackward input event with a collapsed selection in front of
-            // a contentEditable="false" (eg: font awesome).
+        if (ev.key === 'Backspace') {
             const selection = this.document.getSelection();
-            if (selection.isCollapsed) {
-                ev.preventDefault();
-                this._applyCommand('oDeleteBackward');
+            if (!ev.ctrlKey && !ev.metaKey) {
+                // backspace
+                // We need to hijack it because firefox doesn't trigger a
+                // deleteBackward input event with a collapsed selection in front of
+                // a contentEditable="false" (eg: font awesome).
+                if (selection.isCollapsed) {
+                    ev.preventDefault();
+                    this._applyCommand('oDeleteBackward');
+                }
+            } else {
+                // allows to remove an isolated empty <p> if it has special siblings (contentEditable=false blocks) with ctrl + backspace
+                this._removeLastEmptyP(ev, selection);
             }
         } else if (ev.key === 'Tab') {
             // Tab
@@ -2355,6 +2361,60 @@ export class OdooEditor extends EventTarget {
             this.execCommand('strikeThrough');
         } else if (['ArrowDown', 'ArrowUp'].includes(ev.key) && !ev.ctrlKey && !ev.metaKey) {
             this._handleVerticalArrowsNavigation(ev);
+        }
+    }
+
+    _removeLastEmptyP(ev, selection) {
+        if (selection.isCollapsed) {
+            let anchor = selection.anchorNode;
+            if (!anchor) {
+                return;
+            }
+            if (anchor.nodeType === Node.TEXT_NODE) {
+                anchor = anchor.parentElement;
+            }
+            let prevSibling, nextSibling;
+            if (anchor === this._navigationNode || (anchor.tagName === 'P' && isEmptyBlock(anchor))) {
+                ev.preventDefault(); // disallow to completely remove the last P (this woud be the default behavior)
+                prevSibling = anchor.previousElementSibling;
+                nextSibling = anchor.nextElementSibling;
+            }
+            if (prevSibling || nextSibling) {
+                if (anchor === this._navigationNode) {
+                    this._navigationNodeObserver.disconnect();
+                    this._navigationNode = null;
+                }
+                if (prevSibling) {
+                    let contents = prevSibling.querySelectorAll('*:not(br)');
+                    contents = [...contents].filter(element => element.isContentEditable);
+                    if (contents.length) {
+                        prevSibling = contents[contents.length - 1];
+                    }
+                    if (prevSibling.isContentEditable) {
+                        setCursorEnd(prevSibling);
+                    }
+                } else {
+                    let contents = nextSibling.querySelectorAll('*:not(br)');
+                    contents = [...contents].filter(element => element.isContentEditable);
+                    if (contents.length) {
+                        let element = contents[0];
+                        for (let i = 1; i < contents.length; i++) {
+                            let parent = element;
+                            element = contents[i];
+                            if (!parent.contains(element)) {
+                                element = parent;
+                                break;
+                            }
+                        }
+                        nextSibling = element;
+                    }
+                    if (nextSibling.isContentEditable) {
+                        setCursorStart(nextSibling);
+                    }
+                }
+                anchor.remove();
+                this.historyStep();
+            }
         }
     }
 
