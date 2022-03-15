@@ -236,6 +236,14 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
             case 'context_get':
                 event.data.callback(this.userService.context);
                 break;
+            case 'reload_bundles':
+                this._reloadBundles(event).then(result => {
+                    event.data.onSuccess(result);
+                })
+                .catch(error => {
+                    event.data.onFailure(error);
+                });
+                break;
         }
         return super._trigger_up(...arguments);
     }
@@ -255,5 +263,51 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
     }
     _preventDefault(e) {
         e.preventDefault();
+    }
+    /**
+     * Reloads the website customize bundles on both the web client and
+     * the iframe
+     */
+    async _reloadBundles() {
+        const bundles = await this.rpc('/website/theme_customize_bundle_reload');
+        let $allLinksIframe = $();
+        let $allLinksEditor = $();
+        const proms = [];
+        const createLinksProms = (bundleURLs, insertionEl) => {
+            let $newLinks = $();
+            for (const url of bundleURLs) {
+                $newLinks = $newLinks.add('<link/>', {
+                    type: 'text/css',
+                    rel: 'stylesheet',
+                    href: url
+                });
+            }
+            proms.push(new Promise((resolve, reject) => {
+                let nbLoaded = 0;
+                $newLinks.on('load error', () => {
+                    if (++nbLoaded >= $newLinks.length) {
+                        resolve();
+                    }
+                });
+            }));
+            insertionEl.after($newLinks);
+        };
+        _.map(bundles, (bundleURLs, bundleName) => {
+            const selector = `link[href*="${bundleName}"]`;
+            const $linksIframe = this.iframe.el.contentWindow.$(selector);
+            const $linksEditor = $(selector);
+            if ($linksEditor.length) {
+                $allLinksEditor.add($linksEditor);
+                createLinksProms(bundleURLs, $linksEditor.last());
+            }
+            if ($linksIframe.length) {
+                $allLinksIframe = $allLinksIframe.add($linksIframe);
+                createLinksProms(bundleURLs, $linksIframe.last());
+            }
+        });
+        await Promise.all(proms).then(() => {
+            $allLinksIframe.remove();
+            $allLinksEditor.remove();
+        });
     }
 }

@@ -458,18 +458,15 @@ options.Class.include({
             if (!specialMethodsNames.length) {
                 continue;
             }
-            const isDebugAssets = config.isDebug('assets');
-            let paramsReload = isDebugAssets;
-            if (!isDebugAssets) {
+            let paramsReload = false;
                 for (const methodName of specialMethodsNames) {
                     if (widget.getMethodsParams(methodName).reload) {
                         paramsReload = true;
                         break;
                     }
                 }
-            }
             if (paramsReload) {
-                return (isDebugAssets ? _t("It appears you are in debug=assets mode, all theme customization options require a page reload in this mode.") : true);
+                return true;
             }
         }
         return false;
@@ -523,13 +520,18 @@ options.Class.include({
                 }
         }
 
-        if (params.reload || config.isDebug('assets') || params.noBundleReload) {
+        if (params.reload || params.noBundleReload) {
             // Caller will reload the page, nothing needs to be done anymore.
             return;
         }
 
         // Finally, only update the bundles as no reload is required
-        await this._reloadBundles();
+        await new Promise((resolve, reject) => {
+            this.trigger_up('reload_bundles', {
+                onSuccess: () => resolve(),
+                onFailure: () => reject(),
+            });
+        });
 
         // Some public widgets may depend on the variables that were
         // customized, so we have to restart them *all*.
@@ -660,39 +662,6 @@ options.Class.include({
                 onFailure: reject,
             });
         });
-    },
-    /**
-     * @private
-     */
-    _reloadBundles: async function () {
-        const bundles = await this._rpc({
-            route: '/website/theme_customize_bundle_reload',
-        });
-        let $allLinks = $();
-        const proms = _.map(bundles, (bundleURLs, bundleName) => {
-            var $links = this.$target[0].ownerDocument.defaultView.$('link[href*="' + bundleName + '"]');
-            $allLinks = $allLinks.add($links);
-            var $newLinks = $();
-            _.each(bundleURLs, url => {
-                $newLinks = $newLinks.add($('<link/>', {
-                    type: 'text/css',
-                    rel: 'stylesheet',
-                    href: url,
-                }));
-            });
-
-            const linksLoaded = new Promise(resolve => {
-                let nbLoaded = 0;
-                $newLinks.on('load error', () => { // If we have an error, just ignore it
-                    if (++nbLoaded >= $newLinks.length) {
-                        resolve();
-                    }
-                });
-            });
-            $links.last().after($newLinks);
-            return linksLoaded;
-        });
-        await Promise.all(proms).then(() => $allLinks.remove());
     },
     /**
      * @override
