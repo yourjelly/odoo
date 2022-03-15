@@ -110,6 +110,7 @@ class AccountEdiFormat(models.Model):
             return {
                 'error': request_response.text
             }
+
     def _l10n_eg_eta_prepare_eta_invoice(self, invoice):
         def group_tax_retention(tax_values):
             return {'l10n_eg_eta_code': tax_values['tax_id'].l10n_eg_eta_code.split('_')[0]}
@@ -186,8 +187,7 @@ class AccountEdiFormat(models.Model):
                 'taxableItems': [
                     {
                         'taxType': tax.l10n_eg_eta_code.split('_')[0].upper(),
-                        'amount': round(abs(invoice._get_amount_main_currency((tax.amount / 100.0) * line.price_subtotal))
-                        or 0,5),
+                        'amount': round(abs(invoice._get_amount_main_currency((tax.amount / 100.0) * line.price_subtotal)) or 0, 5),
                         'subType': tax.l10n_eg_eta_code.split('_')[1].upper(),
                         'rate': abs(tax.amount)
                         or 0,

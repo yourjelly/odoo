@@ -3,8 +3,7 @@ odoo.define('l10n_eg_edi_eta.action_post_sign_invoice', function (require) {
 
     function action_post_sign_invoice(parent, {params}) {
 
-        const invoice_id = params.invoice_id;
-        const win = window.open(`${params.sign_host}?invoice_id=${invoice_id}`, '_blank', 'height=500,width=400');
+        const win = window.open(`${params.sign_host}/hw_drivers/sign/login?invoice_ids=${params.invoice_ids}&url=${params.url}&otp=${params.token}`, '_blank', 'height=500,width=400');
         const pollTimer = window.setInterval(function () {
             if (!win.closed) return;
             window.clearInterval(pollTimer);

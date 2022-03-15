@@ -23,7 +23,7 @@
 
         <record id="default_eta_sign_host" model="ir.config_parameter">
             <field name="key">default.sign.host</field>
-            <field name="value">http://localhost:5100</field>
+            <field name="value">http://localhost:5100/hw_drivers/sign</field>
         </record>
     </data>
 </odoo>

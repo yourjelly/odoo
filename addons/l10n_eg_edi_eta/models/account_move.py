@@ -3,6 +3,9 @@
 
 
 import base64
+import hashlib
+import hmac
+import time
 from collections import defaultdict
 
 from odoo import models, fields, api, _
@@ -42,20 +45,27 @@ class AccountMove(models.Model):
         return res
 
     def action_post_sign_invoice(self):
-        # TODO return a wizard with the json invoice
-        self.ensure_one()
         sign_host = self.env['ir.config_parameter'].sudo().get_param('default.sign.host')
+
         if not sign_host:
             raise ValidationError(_('Please define the host of sign toll.'))
-        eta_invoice = self.env['account.edi.format']._l10n_eg_eta_prepare_eta_invoice(self)
-        eta_invoice.pop('signatures', None)
+
+        url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        max_ts = int(time.time() + 120)  # valid for two minute
+        msg = '%s%s%s' % (url, self.ids, max_ts)
+
+        secret = self.env['ir.config_parameter'].sudo().get_param('database.secret')
+        assert secret, "CSRF protection requires a configured database secret"
+        hm = hmac.new(secret.encode('ascii'), msg.encode('utf-8'), hashlib.sha256).hexdigest()
+
         return {
             'type': 'ir.actions.client',
             'tag': 'action_post_sign_invoice',
             'params': {
-                'invoice_id': self.id,
+                'invoice_ids': self.ids,
                 'sign_host': sign_host,
-                'eta_invoice': eta_invoice
+                'token': '%so%s' % (hm, max_ts),
+                'url': url
             }
         }
 
