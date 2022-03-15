@@ -145,6 +145,7 @@ return session.is_bound.then(function () {
                 return new Promise(function (resolve, reject) {
                     tour_manager._register_all(observe).then(function () {
                         if (observe) {
+                            console.log(document.body);
                             observer.observe(document.body, {
                                 attributes: true,
                                 childList: true,

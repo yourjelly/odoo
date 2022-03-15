@@ -38,7 +38,7 @@ tour.register('shop_sale_loyalty', {
             content: "click on 'Add to Cart' button",
             trigger: "a:contains(ADD TO CART)",
         },
-            tourUtils.goToCart(2),
+            tourUtils.goToCart({quantity: 2}),
         {
             content: "open customize menu",
             extra_trigger: '.oe_website_sale .oe_cart',
@@ -121,7 +121,7 @@ tour.register('shop_sale_loyalty', {
             content: "click on 'Add to Cart' button",
             trigger: "a:contains(ADD TO CART)",
         },
-            tourUtils.goToCart(3),
+            tourUtils.goToCart({quantity: 3}),
         {
             content: "check reduction amount got recomputed and merged both discount lines into one only",
             extra_trigger: '.oe_currency_value:contains("-﻿75.50"):not(#cart_total .oe_currency_value:contains("-﻿75.50"))',
