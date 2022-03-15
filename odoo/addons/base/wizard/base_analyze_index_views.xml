@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="base_analyze_index_form" model="ir.ui.view">
+        <field name="name">Index Cleaning</field>
+        <field name="model">base.index.analyze</field>
+        <field name="arch" type="xml">
+            <form string="Index Cleaning">
+                <button name="show_unused_index" type="object" string="Show Unused Indexes"/>
+                <button name="show_duplicate_index" type="object" string="Show Duplicated Indexes"/>
+                <field name="duplicate_index_ids" readonly="1">
+                    <tree>
+                        <field name="model_id"/>
+                        <field name="confident"/>
+                        <field name="human_size"/>
+                        <field name="name"/>
+                        <field name="description"/>
+                    </tree>
+                </field>
+                <field name="unused_index_ids" readonly="1">
+                    <tree>
+                        <field name="model_id"/>
+                        <field name="confident"/>
+                        <field name="human_size"/>
+                        <field name="name"/>
+                        <field name="description"/>
+                    </tree>
+                </field>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_index_cleaning" model="ir.actions.act_window">
+        <field name="name">Index Cleaning</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">base.index.analyze</field>
+        <field name="view_mode">form</field>
+        <field name="target">main</field>
+    </record>
+    <menuitem action="action_index_cleaning" id="index_analyze_menu" parent="next_id_9"/>
+</odoo>
