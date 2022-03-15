@@ -459,12 +459,12 @@ options.Class.include({
                 continue;
             }
             let paramsReload = false;
-                for (const methodName of specialMethodsNames) {
-                    if (widget.getMethodsParams(methodName).reload) {
-                        paramsReload = true;
-                        break;
-                    }
+            for (const methodName of specialMethodsNames) {
+                if (widget.getMethodsParams(methodName).reload) {
+                    paramsReload = true;
+                    break;
                 }
+            }
             if (paramsReload) {
                 return true;
             }
@@ -3169,8 +3169,12 @@ options.registry.sizing.include({
                 $body.append(self.divEl);
             }
             const documentMouseUp = () => {
-                self.divEl.remove();
-                self.divEl = undefined;
+                // Multiple mouseup can occur if mouse goes out of the window
+                // while moving.
+                if (self.divEl) {
+                    self.divEl.remove();
+                    self.divEl = undefined;
+                }
                 $body.off('mouseup', documentMouseUp);
             };
             $body.on('mouseup', documentMouseUp);
