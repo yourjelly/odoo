@@ -36,7 +36,7 @@
                     </div>
                     <group>
                         <group>
-                            <label for="program_type"/> 
+                            <label for="program_type"/>
                             <div>
                                 <field name="program_type" widget="selection"/>
                                 <p class="text-muted" attrs="{'invisible': [('program_type', '!=', 'coupons')]}" colspan="2">
@@ -135,8 +135,10 @@
         <field name="res_model">loyalty.program</field>
         <field name="view_mode">tree,form</field>
         <field name="help" type="html">
-            <h1>No loyalty program found.</h1>
-            <p>Create a new one from scratch, or use one of the templates below.</p>
+            <div class="o_loyalty_not_found container">
+                <h1>No loyalty program found.</h1>
+                <p class="lead font-weight-light">Create a new one from scratch, or use one of the templates below.</p>
+            </div>
         </field>
     </record>
 </odoo>

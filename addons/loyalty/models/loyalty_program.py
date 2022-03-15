@@ -241,34 +241,42 @@ class LoyaltyProgram(models.Model):
             'promo_code': {
                 'title': _('Promo Code'),
                 'description': _('Get a code to receive 10% discount on specific products'),
+                'icon': _('promo_code'),
             },
             'gift_card': {
                 'title': _('Gift Card'),
                 'description': _('Sell Gift Cards, that can be used to purchase products'),
+                'icon': _('gift_card'),
             },
             'loyalty': {
                 'title': _('Loyalty Cards'),
                 'description': _('Win points with each purchases, and use points to get gifts'),
+                'icon': _('loyalty_cards'),
             },
             'fidelity': {
                 'title': _('Fidelity Cards'),
                 'description': _('Buy 10 products, and get 10$ discount on the 11th one'),
+                'icon': _('fidelity_cards'),
             },
             'promotion': {
                 'title': _('Promotional Program'),
                 'description': _('Automatic promotion: free shipping on orders higher than $50'),
+                'icon': _('promotional_program'),
             },
             'coupons': {
                 'title': _('Coupons'),
                 'description': _('Send unique coupons that give access to rewards'),
+                'icon': _('coupons'),
             },
             'buy_two_get_one': {
                 'title': _('2+1 Free'),
                 'description': _('Buy 2 products and get a third one for free'),
+                'icon': _('2_plus_1'),
             },
             'ewallet': {
                 'title': _('eWallet'),
                 'description': _('Fill in your eWallet, and use it to pay future orders'),
+                'icon': _('ewallet'),
             },
         }
 
