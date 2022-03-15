@@ -43,7 +43,7 @@ function toggleDropdown($toggles, show) {
  * class non editable: o_not_editable
  *
  */
-Wysiwyg.include({
+const WebsiteWysiwyg = Wysiwyg.extend({
     /**
      * @override
      */
@@ -243,4 +243,6 @@ snippetsEditor.SnippetsMenu.include({
         return $dropzone;
     },
 });
+
+return WebsiteWysiwyg;
 });

@@ -85,7 +85,7 @@ export class WebsiteEditorComponent extends Component {
     async _loadWysiwyg() {
         if (!Wysiwyg) {
             await ajax.loadXML('/website/static/src/xml/website.editor.xml', core.qweb);
-            Wysiwyg = await getWysiwygClass({}, ['website.compiled_assets_wysiwyg']);
+            Wysiwyg = await getWysiwygClass({wysiwygAlias: 'website.wysiwyg'}, ['website.compiled_assets_wysiwyg']);
         }
         this.Wysiwyg = Wysiwyg;
         this.state.edition = EDITION_STATE.STARTED;
