@@ -6420,7 +6420,7 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
             .clone()
             .addClass('d-none')
             // Needs to be in document for bg-image class to take effect
-            .appendTo(document.body);
+            .appendTo(this.$target[0].ownerDocument.body);
         const shapeContainer = $shapeContainer[0];
         $shapeContainer.css('background-image', '');
         const shapeSrc = shapeContainer && getBgImageURL(shapeContainer);
