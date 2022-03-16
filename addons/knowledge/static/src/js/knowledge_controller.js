@@ -4,9 +4,12 @@ import { _t, bus } from 'web.core';
 import Dialog from 'web.Dialog';
 import FormController from 'web.FormController';
 import { MoveArticleToDialog } from 'knowledge.dialogs';
+import emojis from '@mail/js/emojis';
 
 const KnowledgeFormController = FormController.extend({
     events: Object.assign({}, FormController.prototype.events, {
+        'click .o_knowledge_add_icon': '_onAddRandomIcon',
+        'click .o_knowledge_add_cover': '_onAddCover',
         'click .btn-duplicate': '_onDuplicate',
         'click .btn-create': '_onCreate',
         'click .btn-move': '_onOpenMoveToModal',
@@ -72,6 +75,27 @@ const KnowledgeFormController = FormController.extend({
     },
 
     // Listeners:
+
+    _onAddRandomIcon: function() {
+        this.trigger_up('field_changed', {
+            dataPointID: this.handle,
+            changes: {
+                'icon': emojis[Math.floor(Math.random() * emojis.length)]['unicode']
+            }
+        });
+    },
+
+    _onAddCover: async function() {
+        // If record does not exist yet, save it first.
+        let { id } = this.getState();
+        if (typeof id === 'undefined') {
+            await this.saveRecord(this.handle);
+        }
+        if (this.mode === 'readonly') {
+            await this._setMode('edit');
+        }
+        this.$('.o_input_file').click();
+    },
 
     /**
      * @override
@@ -215,20 +239,26 @@ const KnowledgeFormController = FormController.extend({
      * @param {Event} event
      */
     _onEmojiClick: async function (event) {
+        const { id } = this.getState();
         const { articleId, unicode } = event.data;
-        const result = await this._rpc({
-            model: 'knowledge.article',
-            method: 'write',
-            args: [[articleId], { icon: unicode }],
-        });
-        if (result) {
-            this.$el.find(`[data-article-id="${articleId}"]`).each(function() {
-                const $icon = $(this).find('.o_article_icon:first');
-                $icon.text(unicode);
+        if (articleId === id) {
+            this.trigger_up('field_changed', {
+                dataPointID: this.handle,
+                changes: {
+                    icon: unicode
+                }
             });
+        } else {
+            const result = await this._rpc({
+                model: 'knowledge.article',
+                method: 'write',
+                args: [[articleId], { icon: unicode }],
+            });
+            if (result) {
+                this.renderer._setEmoji(articleId, unicode);
+            }
         }
     },
-
     // API calls:
 
     /**

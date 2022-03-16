@@ -12,7 +12,8 @@ const { Component, xml } = owl;
 class KnowledgeCommand extends Component {}
 KnowledgeCommand.template = xml`
     <div class="o_command_left d-flex align-items-center">
-        <span class="pr-2" t-out="props.icon_string"/>
+        <span class="pr-2" t-if="props.icon_string" t-out="props.icon_string"/>
+        <span class="pr-2" t-else="">📄</span>
         <span class="pr-2"><t t-slot="name"/></span>
         <icon t-if="props.isFavourite" class="fa fa-star o_favorite pr-2 position-static"/>
         <span t-if="props.subjectName" t-out="'— '" class="text-muted small pr-2" />

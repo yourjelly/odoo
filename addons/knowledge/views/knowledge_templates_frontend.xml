@@ -14,8 +14,8 @@
             <div class="container-fluid h-100 o_knowledge_form_view" t-att-data-article-id="article.id">
                 <div class="row h-100">
                     <t t-set="show_sidebar" t-value="favourites or public_articles"/>
-                    <div class="col-sm-2 p-0 overflow-auto">
-                        <div t-att-class="'o_knowledge_aside border-right flex-column h-100 w-100' + (' d-flex' if show_sidebar else ' d-none')">
+                    <div t-att-class="'p-0 overflow-auto' + (' col-sm-2' if show_sidebar else ' d-none')">
+                        <div t-att-class="'o_knowledge_aside border-bottom border-right flex-column h-100 w-100' + (' d-flex' if show_sidebar else ' d-none')">
                             <div class="p-3" id="knowledge_search_bar">
                                 <input id="knowledge_search" type="text" class="form-control" placeholder="Search an Article..."/>
                             </div>
@@ -32,13 +32,13 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-8 p-0 overflow-auto'">
+                    <div t-att-class="('col-sm-10' if show_sidebar else 'col-sm-12') + ' p-0 overflow-auto'">
                         <div class="d-flex flex-column h-100">
                             <!-- Article header -->
-                            <div class="o_knowledge_header d-sm-flex flex-row justify-content-between">
+                            <div class="o_knowledge_header d-sm-flex flex-row justify-content-between border-bottom">
                                 <div class="d-flex align-items-center p-3">
                                     <!-- Title -->
-                                    <span t-out="article.name" class="o_breadcrumb_article_name" />
+                                    <span t-out="article.name" />
                                     <a href="#" class="o_favorites_toggle_button pl-1" t-att-data-article-id="article.id">
                                         <i t-if="article.is_user_favourite" class="fa fa-star" />
                                         <i t-else="" class="fa fa-star-o" />
@@ -47,15 +47,29 @@
                             </div>
                             <div class="flex-grow-1 position-relative">
                                 <div class="o_scroll_view">
+                                    <!-- Article Cover -->
+                                    <div class="o_knowledge_cover" t-if="article.cover">
+                                        <span class="o_knowledge_cover_image">
+                                            <img t-attf-src="data:image/png;base64,{{ article.cover }}" />
+                                        </span>
+                                    </div>
+
+                                    <!-- Full Width handling -->
+                                    <span t-attf-class="o_knowledge_article_view_form_dynamic_width d-none #{'o_invisible_modifier' if not article.full_width else ''}"/>
+
+                                    <!-- Article Icon -->
+                                    <span t-attf-class="d-none #{'o_invisible_modifier' if article.cover else ''}"/>
+                                    <div t-attf-class="o_knowledge_icon #{'o_full_width' if article.full_width else ''}" t-att-invisible="not article.icon">
+                                        <t t-out="article.icon" />
+                                    </div>
                                     <!-- Article body -->
-                                    <div class="o_knowledge_editor d-flex pl-3">
+                                    <div class="d-flex pl-3">
                                         <div t-attf-class="o_knowledge_article #{'o_full_width' if article.full_width else ''}" t-out="article.body" />
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-2"><!--Empty column to center the article body--></div>
                 </div>
             </div>
         </t>

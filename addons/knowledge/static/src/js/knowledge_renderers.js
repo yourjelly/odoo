@@ -133,6 +133,13 @@ const KnowledgeFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin, {
         });
     },
 
+    _renderArticleEmoji: function () {
+        const { data } = this.state;
+        const $dropdown = this.$el.find('.o_knowledge_icon > .o_article_emoji_dropdown');
+        $dropdown.attr('data-article-id', this.state.res_id);
+        $dropdown.find('.o_article_emoji').text(data.icon || '📄');
+    },
+
     /**
      * @override
      * @returns {Promise}
@@ -141,6 +148,7 @@ const KnowledgeFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin, {
         const result = await this._super.apply(this, arguments);
         this._renderBreadcrumb();
         await this._renderTree(this.state.res_id, '/knowledge/tree_panel/all');
+        this._renderArticleEmoji();
         this._renderPermissionPanel();
         this._setResizeListener();
         return result;
@@ -163,13 +171,14 @@ const KnowledgeFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin, {
 
     /**
      * Renders the emoji picker
+     * @param {JQuery} [$container]
      */
-    _renderEmojiPicker: function () {
-        this.$el.find('.o_article_dropdown').one('click', event => {
+    _renderEmojiPicker: function ($container) {
+        $container = $container || this.$el;
+        $container.find('.o_article_emoji_dropdown').one('click', event => {
             const $dropdown = $(event.currentTarget);
-            const $article = $dropdown.closest('.o_article');
             const $picker = new EmojiPickerWidget(this, {
-                article_id: $article.data('article-id')
+                article_id: $dropdown.data('article-id')
             });
             $picker.attachTo($dropdown);
         });
