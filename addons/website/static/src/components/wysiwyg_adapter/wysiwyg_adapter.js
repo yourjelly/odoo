@@ -31,13 +31,17 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
 
         onWillStart(() => {
             this.editableFromEditorMenu(this.$editable).addClass('o_editable');
-            this._addEditorMessages();
         });
 
         useEffect(() => {
             // useExternalListener only work on setup, but save button doesn't exist on setup
             this.$editable.on('click.odoo-website-editor', '*', this, this._preventDefault);
+            // Disable OdooEditor observer's while setting up classes
+            this.widget.odooEditor.observerUnactive();
+            this._addEditorMessages();
+            this.widget.odooEditor.observerActive();
             this._setObserver();
+
             if (this.props.target) {
                 this.widget.snippetsMenu.activateSnippet($(this.props.target));
             }
