@@ -7,9 +7,10 @@
     .o_knowledge_editor {
         background: white;
     }
-
-    .o_knowledge_editor {
+    .o_knowledge_body {
         min-height: 100%;
+    }
+    .o_knowledge_editor {
         .oe_form_field {
             display: flex;
             flex-direction: column;
@@ -144,6 +145,29 @@
             bottom: 0;
             overflow-y: auto;
             overflow-x: hidden;
+        }
+        .o_knowledge_cover {
+            z-index: 1;
+            // height: 30vh;
+            .o_knowledge_cover_image {
+                width: 100%;
+                img {
+                    display: block;
+                    object-fit: cover;
+                    border-radius: 0px;
+                    width: 100%;
+                    height: 30vh;
+                }
+            }
+        }
+        .o_knowledge_icon {
+            &.knowledge_icon_hover {
+                margin-top: -70px;
+            }
+            z-index: 3;
+            margin-bottom: -20px;
+            position: relative;
+            font-size: 80px;
         }
     }
 }

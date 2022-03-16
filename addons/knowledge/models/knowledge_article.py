@@ -89,7 +89,8 @@ class Article(models.Model):
     active = fields.Boolean(default=True)
     name = fields.Char(string="Title", default="New Article")
     body = fields.Html(string="Article Body")
-    icon = fields.Char(string='Article Icon', default='📄')
+    icon = fields.Char(string='Article Icon', default=False)
+    cover = fields.Binary('Cover Image', default=False)
     author_ids = fields.Many2many("res.users", string="Authors", default=lambda self: self.env.user)
     is_locked = fields.Boolean(string='Locked', default=False)
 
@@ -150,7 +151,7 @@ class Article(models.Model):
 
     def name_get(self):
         """Override the `name_get` function to add the article icon"""
-        return [(rec.id, "%s %s" % (rec.icon, rec.name)) for rec in self]
+        return [(rec.id, "%s %s" % (rec.icon or "📄", rec.name)) for rec in self]
 
     ##############################
     # Computes, Searches, Inverses

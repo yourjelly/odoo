@@ -73,7 +73,8 @@
                         <div class="o_article_dropdown btn-group dropdown">
                             <button class="o_article_icon btn btn-link text-secondary px-1 py-0" type="button"
                                 t-attf-id="o_article_dropdown_#{article.id}" data-toggle="dropdown" aria-expanded="true">
-                                <t t-esc="article.icon"/>
+                                <t t-if="article.icon" t-esc="article.icon"/>
+                                <t t-else="">📄</t>
                             </button>
                             <div class="o_knowledge_emoji_panel dropdown-menu rounded p-0" role="menu"
                                 t-attf-aria-labelledby="o_article_dropdown_#{article.id}"/>

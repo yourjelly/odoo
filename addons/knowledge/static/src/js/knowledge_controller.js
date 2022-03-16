@@ -4,12 +4,15 @@ import core from 'web.core';
 import Dialog from 'web.Dialog';
 import FormController from 'web.FormController';
 import { MoveArticleToDialog } from 'knowledge.dialogs';
+import emojis from '@mail/js/emojis';
 
 var QWeb = core.qweb;
 var _t = core._t;
 
 const KnowledgeFormController = FormController.extend({
     events: Object.assign({}, FormController.prototype.events, {
+        'click .o_knowledge_add_icon': '_onAddRandomIcon',
+        'click #o_knowledge_add_cover': '_onAddCover',
         'click .btn-duplicate': '_onDuplicate',
         'click .btn-create': '_onCreate',
         'click .btn-move': '_onOpenMoveToModal',
@@ -33,6 +36,36 @@ const KnowledgeFormController = FormController.extend({
     },
 
     // Listeners:
+
+    _onAddRandomIcon: async function() {
+        var unicode = emojis[Math.floor(Math.random() * emojis.length)]['unicode'];
+        const { id } = this.getState();
+        if (typeof id === 'undefined') {
+            return;
+        }
+        const result = await this._rpc({
+            model: 'knowledge.article',
+            method: 'write',
+            args: [
+                [id], { icon: unicode }
+            ],
+        });
+        if (result) {
+            this.$el.find(`[data-article-id="${id}"]`).each(function() {
+                const $icon = $(this).find('.o_article_icon:first');
+                $icon.text(unicode);
+            });
+            // FIXME: this clearly isn't the best way to do it...
+            this.reload();
+        }
+    },
+
+    _onAddCover: async function() {
+        if (this.mode === 'readonly') {
+            await this._setMode('edit');
+        }
+        this.$('.o_input_file').click();
+    },
 
     /**
      * @override
