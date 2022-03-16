@@ -612,7 +612,7 @@ class Article(models.Model):
         if title:
             values.update({
                 'name': title,
-                'body': title
+                'body': "<h1>" + title + "</h1>",
             })
 
         article = self.create(values)
