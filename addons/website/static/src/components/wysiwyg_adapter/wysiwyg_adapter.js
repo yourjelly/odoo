@@ -216,7 +216,7 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
      * @override
      * @param {Event} event
      */
-    async _trigger_up(event) {
+    _trigger_up(event) {
         switch (event.name) {
             case 'widgets_start_request':
                 this._websiteRootEvent('widgets_start_request', event.data);
@@ -224,12 +224,13 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
             case 'reload_editable':
                 return this.props.reloadCallback(event, this.widget.el);
             case 'request_save':
-                await this.save();
-                if (event.data.onSuccess) {
-                    event.data.onSuccess();
-                } else {
-                    this.props.quitCallback();
-                }
+                this.save().then(() => {
+                    if (event.data.onSuccess) {
+                        event.data.onSuccess();
+                    } else {
+                        this.props.quitCallback();
+                    }
+                });
                 break;
             case 'action_demand':
                 event.data.onSuccess(this._handleAction(event.data.actionName, event.data.params));
@@ -238,7 +239,11 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                 this._websiteRootEvent('widgets_start_request', event.data);
                 break;
             case 'context_get':
-                event.data.callback(this.userService.context);
+                event.data.callback(
+                    Object.assign({},
+                        this.userService.context,
+                        {website_id: this.websiteService.currentWebsite.id})
+                );
                 break;
             case 'reload_bundles':
                 this._reloadBundles(event).then(result => {
