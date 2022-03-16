@@ -160,6 +160,8 @@
             ('prepend', 'website/static/src/scss/secondary_variables.scss'),
         ],
         'web.assets_tests': [
+            ('include', 'web_editor.assets_wysiwyg'),
+            ('include', 'website.assets_wysiwyg'),
             'website/static/tests/tours/**/*',
         ],
         'web.assets_backend': [
@@ -187,6 +189,7 @@
             'website/static/src/components/webclient/webclient.js',
             'website/static/src/components/webclient/webclient.scss',
             'website/static/src/components/wysiwyg_adapter/wysiwyg_adapter.js',
+            'website/static/src/js/tours/tour_utils.js',
             'website/static/src/components/fullscreen_indication/fullscreen_indication.js',
             'website/static/src/components/fullscreen_indication/fullscreen_indication.scss',
             'website/static/src/systray_items/*.js',
