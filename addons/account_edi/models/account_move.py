@@ -5,6 +5,7 @@ from collections import defaultdict
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
+from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_TIME_FORMAT
 
 
 class AccountMove(models.Model):
@@ -25,6 +26,9 @@ class AccountMove(models.Model):
     edi_web_services_to_process = fields.Text(
         compute='_compute_edi_web_services_to_process',
         help="Technical field to display the documents that will be processed by the CRON")
+    edi_network_cron_schedule = fields.Text(
+        compute='_compute_edi_network_cron_schedule',
+        help="Field to display the next scheduled activation of the 'EDI : Perform web services operations' scheduled action")
     edi_show_cancel_button = fields.Boolean(
         compute='_compute_edi_show_cancel_button')
 
@@ -48,6 +52,18 @@ class AccountMove(models.Model):
         for move in self:
             move.edi_error_count = len(move.edi_document_ids.filtered(lambda d: d.error))
 
+    @api.depends('edi_document_ids.error')
+    def _compute_edi_error_state(self):
+        for move in self:
+            blocking_levels = set([doc.blocking_level for doc in move.edi_document_ids if doc.blocking_level])
+            if blocking_levels:
+                if blocking_levels == {'info'}:
+                    move.edi_error_state = 'info'
+                elif 'error' in blocking_levels:
+                    move.edi_error_state = 'error'
+            else:
+                move.edi_error_state = False
+
     @api.depends(
         'edi_document_ids',
         'edi_document_ids.state',
@@ -58,6 +74,17 @@ class AccountMove(models.Model):
             to_process = move.edi_document_ids.filtered(lambda d: d.state in ['to_send', 'to_cancel'])
             format_web_services = to_process.edi_format_id.filtered(lambda f: f._needs_web_services())
             move.edi_web_services_to_process = ', '.join(f.name for f in format_web_services)
+
+    def _compute_edi_network_cron_schedule(self):
+        cron = self.env.ref('account_edi.ir_cron_edi_network', raise_if_not_found=False)
+        if not cron:
+            schedule = _("never (no scheduled action)")
+        elif cron.active is False:
+            schedule = _("never (cron inactive)")
+        elif cron.nextcall:
+            schedule = cron.nextcall.time().strftime(DEFAULT_SERVER_TIME_FORMAT) if cron.nextcall.date() == fields.datetime.today().date() else cron.nextcall.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+        for move in self:
+            move.edi_network_cron_schedule = False or schedule
 
     @api.depends('restrict_mode_hash_table', 'state')
     def _compute_show_reset_to_draft_button(self):
