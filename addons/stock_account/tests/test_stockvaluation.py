@@ -89,6 +89,10 @@ class TestStockValuation(TransactionCase):
             'property_stock_journal': cls.stock_journal.id,
         })
 
+    def _set_create_date(self, records, value):
+        records._write({'create_date': value})
+        records.invalidate_cache(['create_date'], records.ids)
+
     def _get_stock_input_move_lines(self):
         return self.env['account.move.line'].search([
             ('account_id', '=', self.stock_input_account.id),
@@ -103,7 +107,6 @@ class TestStockValuation(TransactionCase):
         return self.env['account.move.line'].search([
             ('account_id', '=', self.stock_valuation_account.id),
         ], order='date, id')
-
 
     def _make_in_move(self, product, quantity, unit_cost=None):
         """ Helper to create and validate a receipt move.
@@ -3335,7 +3338,7 @@ class TestStockValuation(TransactionCase):
         move1.move_line_ids.qty_done = 10
         move1._action_done()
         move1.date = date2
-        move1.stock_valuation_layer_ids._write({'create_date': date2})
+        self._set_create_date(move1.stock_valuation_layer_ids, date2)
 
         self.assertEqual(self.product1.quantity_svl, 10)
         self.assertEqual(self.product1.value_svl, 100)
@@ -3354,7 +3357,7 @@ class TestStockValuation(TransactionCase):
         move2.move_line_ids.qty_done = 20
         move2._action_done()
         move2.date = date3
-        move2.stock_valuation_layer_ids._write({'create_date': date3})
+        self._set_create_date(move2.stock_valuation_layer_ids, date3)
 
         self.assertEqual(self.product1.quantity_svl, 30)
         self.assertEqual(self.product1.value_svl, 300)
@@ -3373,14 +3376,14 @@ class TestStockValuation(TransactionCase):
         move3.move_line_ids.qty_done = 15
         move3._action_done()
         move3.date = date4
-        move3.stock_valuation_layer_ids._write({'create_date': date4})
+        self._set_create_date(move3.stock_valuation_layer_ids, date4)
 
         self.assertEqual(self.product1.quantity_svl, 15)
         self.assertEqual(self.product1.value_svl, 150)
 
         # set the standard price to 5
         self.product1.standard_price = 5
-        self.product1.stock_valuation_layer_ids.sorted()[-1]._write({'create_date': date5})
+        self._set_create_date(self.product1.stock_valuation_layer_ids.sorted()[-1], date5)
 
         self.assertEqual(self.product1.quantity_svl, 15)
         self.assertEqual(self.product1.value_svl, 75)
@@ -3399,14 +3402,14 @@ class TestStockValuation(TransactionCase):
         move4.move_line_ids.qty_done = 10
         move4._action_done()
         move4.date = date6
-        move4.stock_valuation_layer_ids._write({'create_date': date6})
+        self._set_create_date(move4.stock_valuation_layer_ids, date6)
 
         self.assertEqual(self.product1.quantity_svl, 5)
         self.assertEqual(self.product1.value_svl, 25.0)
 
         # set the standard price to 7.5
         self.product1.standard_price = 7.5
-        self.product1.stock_valuation_layer_ids.sorted()[-1]._write({'create_date': date7})
+        self._set_create_date(self.product1.stock_valuation_layer_ids.sorted()[-1], date7)
 
         # receive 90
         move5 = self.env['stock.move'].create({
@@ -3422,7 +3425,7 @@ class TestStockValuation(TransactionCase):
         move5.move_line_ids.qty_done = 90
         move5._action_done()
         move5.date = date8
-        move5.stock_valuation_layer_ids._write({'create_date': date8})
+        self._set_create_date(move5.stock_valuation_layer_ids, date8)
 
         self.assertEqual(self.product1.quantity_svl, 95)
         self.assertEqual(self.product1.value_svl, 712.5)
@@ -3499,7 +3502,7 @@ class TestStockValuation(TransactionCase):
         move1.move_line_ids.qty_done = 10
         move1._action_done()
         move1.date = date1
-        move1.stock_valuation_layer_ids._write({'create_date': date1})
+        self._set_create_date(move1.stock_valuation_layer_ids, date1)
 
         self.assertEqual(self.product1.quantity_svl, 10)
         self.assertEqual(self.product1.value_svl, 100)
@@ -3519,7 +3522,7 @@ class TestStockValuation(TransactionCase):
         move2.move_line_ids.qty_done = 10
         move2._action_done()
         move2.date = date2
-        move2.stock_valuation_layer_ids._write({'create_date': date2})
+        self._set_create_date(move2.stock_valuation_layer_ids, date2)
 
         self.assertAlmostEqual(self.product1.quantity_svl, 20)
         self.assertEqual(self.product1.value_svl, 220)
@@ -3538,7 +3541,7 @@ class TestStockValuation(TransactionCase):
         move3.move_line_ids.qty_done = 15
         move3._action_done()
         move3.date = date3
-        move3.stock_valuation_layer_ids._write({'create_date': date3})
+        self._set_create_date(move3.stock_valuation_layer_ids, date3)
 
         self.assertAlmostEqual(self.product1.quantity_svl, 5.0)
         self.assertEqual(self.product1.value_svl, 60)
@@ -3557,7 +3560,7 @@ class TestStockValuation(TransactionCase):
         move4.move_line_ids.qty_done = 20
         move4._action_done()
         move4.date = date4
-        move4.stock_valuation_layer_ids._write({'create_date': date4})
+        self._set_create_date(move4.stock_valuation_layer_ids, date4)
 
         self.assertAlmostEqual(self.product1.quantity_svl, -15.0)
         self.assertEqual(self.product1.value_svl, -180)
@@ -3577,10 +3580,10 @@ class TestStockValuation(TransactionCase):
         move5.move_line_ids.qty_done = 100
         move5._action_done()
         move5.date = date5
-        move5.stock_valuation_layer_ids._write({'create_date': date5})
+        self._set_create_date(move5.stock_valuation_layer_ids, date5)
 
         # the vacuum ran
-        move4.stock_valuation_layer_ids.sorted()[-1]._write({'create_date': date6})
+        self._set_create_date(move4.stock_valuation_layer_ids.sorted()[-1], date6)
 
         self.assertEqual(self.product1.quantity_svl, 85)
         self.assertEqual(self.product1.value_svl, 1275)
@@ -3628,7 +3631,7 @@ class TestStockValuation(TransactionCase):
         move1.move_line_ids.qty_done = 10
         move1._action_done()
         move1.date = date1
-        move1.stock_valuation_layer_ids._write({'create_date': date1})
+        self._set_create_date(move1.stock_valuation_layer_ids, date1)
 
         self.assertAlmostEqual(self.product1.quantity_svl, 10.0)
         self.assertEqual(self.product1.value_svl, 100)
@@ -3648,7 +3651,7 @@ class TestStockValuation(TransactionCase):
         move2.move_line_ids.qty_done = 10
         move2._action_done()
         move2.date = date2
-        move2.stock_valuation_layer_ids._write({'create_date': date2})
+        self._set_create_date(move2.stock_valuation_layer_ids, date2)
 
         self.assertAlmostEqual(self.product1.quantity_svl, 20.0)
         self.assertEqual(self.product1.value_svl, 250)
@@ -3667,7 +3670,7 @@ class TestStockValuation(TransactionCase):
         move3.move_line_ids.qty_done = 30
         move3._action_done()
         move3.date = date3
-        move3.stock_valuation_layer_ids._write({'create_date': date3})
+        self._set_create_date(move3.stock_valuation_layer_ids, date3)
 
         self.assertAlmostEqual(self.product1.quantity_svl, -10.0)
         self.assertEqual(self.product1.value_svl, -150)
@@ -3687,8 +3690,8 @@ class TestStockValuation(TransactionCase):
         move4.move_line_ids.qty_done = 10
         move4._action_done()
         move4.date = date4
-        move3.stock_valuation_layer_ids.sorted()[-1]._write({'create_date': date4})
-        move4.stock_valuation_layer_ids._write({'create_date': date4})
+        self._set_create_date(move3.stock_valuation_layer_ids.sorted()[-1], date4)
+        self._set_create_date(move4.stock_valuation_layer_ids, date4)
 
         self.assertAlmostEqual(self.product1.quantity_svl, 0.0)
         self.assertEqual(self.product1.value_svl, 0)
@@ -3708,7 +3711,7 @@ class TestStockValuation(TransactionCase):
         move5.move_line_ids.qty_done = 10
         move5._action_done()
         move5.date = date5
-        move5.stock_valuation_layer_ids._write({'create_date': date5})
+        self._set_create_date(move5.stock_valuation_layer_ids, date5)
 
         self.assertAlmostEqual(self.product1.quantity_svl, 10.0)
         self.assertEqual(self.product1.value_svl, 100)
@@ -3800,7 +3803,7 @@ class TestStockValuation(TransactionCase):
         move1.move_line_ids.qty_done = 10.0
         move1._action_done()
         move1.date = date1
-        move1.stock_valuation_layer_ids._write({'create_date': date1})
+        self._set_create_date(move1.stock_valuation_layer_ids, date1)
 
         move2 = self.env['stock.move'].create({
             'name': 'Sell 5 units',
@@ -3815,7 +3818,7 @@ class TestStockValuation(TransactionCase):
         move2.move_line_ids.qty_done = 5.0
         move2._action_done()
         move2.date = date2
-        move2.stock_valuation_layer_ids._write({'create_date': date2})
+        self._set_create_date(move2.stock_valuation_layer_ids, date2)
 
         self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date1)).quantity_svl, 10)
         self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date1)).value_svl, 100)
