@@ -17,6 +17,7 @@ const KnowledgeFormController = FormController.extend({
         'click .btn-create': '_onCreate',
         'click .btn-move': '_onOpenMoveToModal',
         'click .btn-share': '_onShare',
+        'click .btn-chatter': '_onToggleChatter',
         'click #knowledge_search_bar': '_onSearch',
         'change .o_breadcrumb_article_name': '_onRename',
     }),
@@ -178,6 +179,14 @@ const KnowledgeFormController = FormController.extend({
             }]
         });
         dialog.open();
+    },
+
+    /**
+     * @param {Event} event
+     */
+    _onToggleChatter: function (event) {
+        const $chatter = $('.o_knowledge_chatter');
+        $chatter.toggleClass('d-none');
     },
 
     /**

@@ -58,7 +58,7 @@
                 <field name="is_locked" invisible="1" readonly="1"/>
                 <field name="user_can_write" invisible="1"/>
                 <div class="d-sm-flex h-100">
-                    <aside class="o_knowledge_aside flex-shrink-0 p-0">
+                    <aside class="o_knowledge_aside flex-shrink-0">
                         <div class="d-flex flex-column h-100">
                             <!-- Search bar -->
                             <div id="knowledge_search_bar" class="d-flex align-items-center border bg-light rounded m-3" data-hotkey="F">
@@ -75,11 +75,11 @@
                             </div>
                         </div>
                     </aside>
-                    <div class="flex-grow-1 position-relative p-0">
+                    <div class="flex-grow-1 position-relative">
                         <div class="o_knowledge_resizer d-none d-sm-block" />
                         <div class="d-flex flex-column h-100">
                             <!-- Article header -->
-                            <div class="o_knowledge_header d-sm-flex flex-row justify-content-between">
+                            <div class="o_knowledge_header d-sm-flex justify-content-between">
                                 <div class="d-flex align-items-center">
                                     <!-- Breadcrumbs -->
                                     <ol class="breadcrumb p-3" role="navigation">
@@ -104,6 +104,9 @@
                                     </a>
                                     <a type="button" role="button" class="btn btn-secondary btn-share" data-hotkey="S">
                                         <i class="fa fa-share-alt"/> Share
+                                    </a>
+                                    <a type="button" role="button" class="btn btn-secondary btn-chatter">
+                                        <i class="rounded-circle text-center fa fa-comments" title="Open chatter"/>
                                     </a>
                                     <div class="btn-group" role="toolbar" aria-label="options">
                                         <div class="o-dropdown dropdown o-dropdown--no-caret">
@@ -130,7 +133,7 @@
                                                 </button>
                                                 <div class="dropdown-divider"
                                                     attrs="{'invisible': ['&amp;', ('last_edition_id', '=', False), ('last_edition_date', '=', False)]}"/>
-                                                <div class="flex-column px-3 text-muted"
+                                                <div class="px-3 text-muted"
                                                     attrs="{'invisible': [('last_edition_id', '=', False)]}">
                                                     Last Edited: <field name="last_edition_id" readonly="1" class="text-muted"/><br />
                                                     <field name="last_edition_date" widget="datetime" readonly="1"/><br />
@@ -144,35 +147,44 @@
                             </div>
                             <div class="flex-grow-1 position-relative">
                                 <div class="o_scroll_view">
-                                    <div class="o_knowledge_body d-flex flex-column">
-                                        <!-- Article Cover -->
-                                        <div class="o_knowledge_cover">
-                                            <field name="cover" widget="image" class="o_knowledge_cover_image" attrs="{'invisible': [('cover', '=', False)]}"/>
+                                    <div class="row p-0 m-0" style="min-height: 100%">
+                                        <div class="d-flex col-12 col-lg position-relative p-0">
+                                            <div class="o_scroll_view_lg">
+                                                <!-- Article body -->
+                                                <div class="o_knowledge_body">
+                                                    <!-- Article Cover -->
+                                                    <div class="o_knowledge_cover">
+                                                        <field name="cover" widget="image" class="o_knowledge_cover_image" attrs="{'invisible': [('cover', '=', False)]}"/>
+                                                    </div>
+                                                    <!-- Article Icon -->
+                                                    <!-- FIXME: find better way to do this (widget?) -->
+                                                    <div class="o_knowledge_icon knowledge_icon_hover" attrs="{'invisible': ['|', ('icon', '=', False), ('cover', '=', False)]}">
+                                                        <field name="icon" readonly="1"/>
+                                                        <div class="o_knowledge_emoji_panel dropdown-menu rounded p-0" role="menu"
+                                                            t-attf-aria-labelledby="o_article_dropdown_#{article.id}"/>
+                                                    </div>
+                                                    <div class="o_knowledge_icon" attrs="{'invisible': ['|', ('icon', '=', False), ('cover', '!=', False)]}">
+                                                        <field name="icon" readonly="1"/>
+                                                        <div class="o_knowledge_emoji_panel dropdown-menu rounded p-0" role="menu"
+                                                            t-attf-aria-labelledby="o_article_dropdown_#{article.id}"/>
+                                                    </div>
+                                                    <!-- Article body -->
+                                                    <div class="o_knowledge_editor d-flex flex-grow-1">
+                                                        <field name="body" widget="html" no_label="1" default_focus="1"
+                                                            options="{'resizable': False, 'knowledge_commands': true}"
+                                                            attrs="{'readonly': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}"/>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <!-- Article Icon -->
-                                        <!-- FIXME: find better way to do this (widget?) -->
-                                        <div class="o_knowledge_icon knowledge_icon_hover" attrs="{'invisible': ['|', ('icon', '=', False), ('cover', '=', False)]}">
-                                            <field name="icon" readonly="1"/>
-                                            <div class="o_knowledge_emoji_panel dropdown-menu rounded p-0" role="menu"
-                                                t-attf-aria-labelledby="o_article_dropdown_#{article.id}"/>
-                                        </div>
-                                        <div class="o_knowledge_icon" attrs="{'invisible': ['|', ('icon', '=', False), ('cover', '!=', False)]}">
-                                            <field name="icon" readonly="1"/>
-                                            <div class="o_knowledge_emoji_panel dropdown-menu rounded p-0" role="menu"
-                                                t-attf-aria-labelledby="o_article_dropdown_#{article.id}"/>
-                                        </div>
-                                        <!-- Article body -->
-                                        <div class="o_knowledge_editor d-flex flex-grow-1 border-bottom">
-                                            <field name="body" widget="html" no_label="1" default_focus="1"
-                                                options="{'resizable': False, 'knowledge_commands': true}"
-                                                attrs="{'readonly': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}"/>
-                                        </div>
-                                    </div>
-                                    <!-- Chatter -->
-                                    <div class="o_knowledge_chatter_container">
-                                        <div class="oe_chatter">
-                                            <field name="message_follower_ids" groups="base.group_user"/>
-                                            <field name="message_ids"/>
+                                        <!-- Chatter -->
+                                        <div class="o_knowledge_chatter col-12 col-lg-4 position-relative d-none p-0">
+                                            <div class="o_scroll_view_lg">
+                                                <div class="oe_chatter">
+                                                    <field name="message_follower_ids" groups="base.group_user"/>
+                                                    <field name="message_ids"/>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
