@@ -636,7 +636,7 @@ class Profiler:
         return path.format(
             time=datetime.datetime.now().strftime("%Y%m%d-%H%M%S"),
             len=self.entry_count(),
-            desc=re.sub("[^0-9a-zA-Z-]+", "_", self.description)
+            #desc=re.sub("[^0-9a-zA-Z-]+", "_", self.description)
         )
 
     def json(self):
