@@ -3841,24 +3841,21 @@ class Many2many(_RelationalMulti):
         comodel._apply_ir_rules(wquery, 'read')
         order_by = comodel._generate_order_by(None, wquery)
         from_c, where_c, where_params = wquery.get_sql()
-        query = """ SELECT {rel}.{id1}, {rel}.{id2} FROM {rel}, {from_c}
-                    WHERE {where_c} AND {rel}.{id1} IN %s AND {rel}.{id2} = {tbl}.id
-                    {order_by}
-                """.format(rel=self.relation, id1=self.column1, id2=self.column2,
-                           tbl=comodel._table, from_c=from_c, where_c=where_c or '1=1',
-                           order_by=order_by)
-        where_params.append(tuple(records.ids))
+        query = f"""
+            SELECT {self.relation}.{self.column1}, ARRAY_AGG({self.relation}.{self.column2} {order_by})
+            FROM {self.relation}, {from_c}
+            WHERE {f"{where_c} AND" if where_c else ''}
+                {self.relation}.{self.column1} IN %s
+                AND {self.relation}.{self.column2} = {comodel._table}.id
+            GROUP BY {self.relation}.{self.column1}
+        """
+        record_ids = tuple(records.ids)
+        where_params.append(record_ids)
 
-        # retrieve lines and group them by record
-        group = defaultdict(list)
         records._cr.execute(query, where_params)
-        for row in records._cr.fetchall():
-            group[row[0]].append(row[1])
+        group = defaultdict(tuple, records._cr.fetchall())
 
-        # store result in cache
-        cache = records.env.cache
-        for record in records:
-            cache.set(record, self, tuple(group[record.id]))
+        records.env.cache.update(records, self, [tuple(group[_id]) for _id in record_ids])
 
     def write_real(self, records_commands_list, create=False):
         # records_commands_list = [(records, commands), ...]
