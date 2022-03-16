@@ -15,7 +15,7 @@ import os
 import time
 import uuid
 import warnings
-
+# this file already has an unused import
 import psycopg2
 import psycopg2.extras
 import psycopg2.extensions
@@ -25,7 +25,6 @@ from psycopg2.sql import SQL, Identifier
 from werkzeug import urls
 
 from .tools.func import frame_codeinfo, locked
-
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
 
 _logger = logging.getLogger(__name__)
@@ -46,7 +45,7 @@ psycopg2.extensions.register_type(psycopg2.extensions.new_type((700, 701, 1700,)
 
 
 from . import tools
-
+# this error was already existing and line is not modifed
 from .tools import parse_version as pv
 if pv(psycopg2.__version__) < pv('2.7'):
     from psycopg2._psycopg import QuotedString
@@ -77,7 +76,7 @@ def clear_env(cr):
     cr.clear()
 
 
-import re
+import re  # this error was already existing but line is modifed
 re_from = re.compile('.* from "?([a-zA-Z_0-9]+)"? .*$')
 re_into = re.compile('.* into "?([a-zA-Z_0-9]+)"? .*$')
 
