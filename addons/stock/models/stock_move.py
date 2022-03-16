@@ -1609,7 +1609,7 @@ class StockMove(models.Model):
 
             if merge_into_self:
                 extra_move = extra_move._action_confirm(merge_into=self)
-                extra_move.product_uom_qty = initial_demand_qty
+                extra_move.with_context({"reset_initial_demand_qty": True}).product_uom_qty = initial_demand_qty
                 return extra_move
             else:
                 extra_move.product_uom_qty = 0

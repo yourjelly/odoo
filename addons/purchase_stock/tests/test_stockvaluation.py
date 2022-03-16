@@ -178,7 +178,8 @@ class TestStockValuation(TransactionCase):
         self.assertEqual(len(picking1.move_ids), 1)
         self.assertEqual(move1.price_unit, 100)
         self.assertEqual(move1.stock_valuation_layer_ids.unit_cost, 100)
-        self.assertEqual(move1.product_qty, 15)
+        self.assertEqual(move1.product_qty, 10)
+        self.assertEqual(move1.quantity_done, 15)
         self.assertEqual(self.product1.value_svl, 1500)
 
     def test_backorder_fifo_1(self):

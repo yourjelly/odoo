@@ -5,7 +5,7 @@ from collections import defaultdict
 
 from odoo import fields, models, _
 from odoo.exceptions import UserError
-from odoo.tools.float_utils import float_compare, float_is_zero
+from odoo.tools.float_utils import float_is_zero
 
 
 class StockMove(models.Model):
@@ -55,8 +55,14 @@ class StockMove(models.Model):
         """ If the initial demand is updated then also update the linked
         subcontract order to the new quantity.
         """
-        if 'product_uom_qty' in values and self.env.context.get('cancel_backorder') is not False:
-            self.filtered(lambda m: m.is_subcontract and m.state not in ['draft', 'cancel', 'done'])._update_subcontract_order_qty(values['product_uom_qty'])
+        if (
+                'product_uom_qty' in values
+                and self.env.context.get('cancel_backorder') is not False
+                and self.env.context.get('reset_initial_demand_qty') is not True
+        ):
+            self.filtered(lambda m: m.is_subcontract and m.state not in ['draft', 'cancel',
+                                                                         'done'])._update_subcontract_order_qty(
+                values['product_uom_qty'])
         res = super().write(values)
         if 'date' in values:
             for move in self:
