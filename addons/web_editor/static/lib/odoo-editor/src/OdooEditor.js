@@ -1283,11 +1283,301 @@ export class OdooEditor extends EventTarget {
         const contents = range.extractContents();
         setSelection(start, nodeSize(start));
         range = getDeepRange(this.editable, { sel });
+
         // Restore unremovables removed by extractContents.
-        [...contents.querySelectorAll('*')].filter(isUnremovable).forEach(n => {
-            closestBlock(range.endContainer).after(n);
-            n.textContent = '';
-        });
+        const contentsElements = [...contents.querySelectorAll('*')];
+        if (contentsElements.length) {
+            const parentedGrouping = [];
+            const parents = new Set(contents.children);
+            let i = -1;
+            // group elements under each child of the fragment, and isolate unremovables
+            contentsElements.forEach(element => {
+                if (parents.has(element)) {
+                    i++;
+                    parentedGrouping.push({
+                        parent: element,
+                        elements: [],
+                        unremovables: [],
+                    });
+                }
+                parentedGrouping[i].elements.push(element);
+                if (isUnremovable(element)) {
+                    parentedGrouping[i].unremovables.push(element);
+                }
+            });
+
+            // match the roots of the selection still in the document with the respective roots in the fragment
+            const startRoot = parentedGrouping[0].parent;
+            const endRoot = parentedGrouping[parentedGrouping.length - 1].parent;
+            const docStart = (start.nodeType !== Node.ELEMENT_NODE) ? start.parentElement : start;
+            const docEnd = (end.nodeType !== Node.ELEMENT_NODE) ? end.parentElement : end;
+            let docStartRoot = null;
+            let docEndRoot = null;
+            if (docStart === this.editable) {
+                // the selection removed the start fragment entirely from this.editable
+                // in this case the algorithm should prepend recovered nodes to this.editable
+                docStartRoot = this.editable;
+            }
+            if (docEnd === this.editable) {
+                // the selection removed the end fragment entirely from this.editable
+                // in this case the algorithm should append recovered nodes to this.editable
+                docEndRoot = this.editable;
+            }
+            if (docStart !== this.editable && docEnd !== this.editable) {
+                // recover the last child of this.editable present in this selection
+                // using the fact that the last element of contentsElements corresponds to docEnd or is one of its children
+                let docE = docEnd;
+                let fragE = contentsElements[contentsElements.length - 1];
+                while (fragE && fragE.oid && fragE.parentElement) {
+                    // fragE could have been fully selected (and thus is a child of docE)
+                    // fragE cannot have an oid if it is still present in the document.
+                    fragE = fragE.parentElement;
+                }
+                while (fragE && fragE.parentElement) {
+                    // docE and fragE are synchronized, reducing depth until fragE has no parent (its parent would then be this.editable)
+                    docE = docE.parentElement;
+                    fragE = fragE.parentElement;
+                }
+                docEndRoot = docE;
+                docStartRoot = docE.previousElementSibling || docEndRoot;
+            }
+
+            // extract children of root from an array of unremovables which is ordered and in reverse order.
+            // children of root are guaranteed to be at the end of unremovables if any.
+            // to maintain O(n) complexity, push and reverse are used instead of shift
+            const extractUnremovableChildren = function (root, unremovables) {
+                const unremovableChildren = [];
+                while (unremovables.length) {
+                    const unremovable = unremovables.pop();
+                    if (root.contains(unremovable)) {
+                        unremovableChildren.push(unremovable);
+                    } else {
+                        unremovables.push(unremovable);
+                        break;
+                    }
+                }
+                return unremovableChildren.reverse();
+            };
+
+            // used to fill nodes with an empty <p><br></p> (i.e. when emptying an contentEditable=True)
+            const ensureEmptyPElement = function (nodes) {
+                if (!nodes.length) {
+                    const pElement = this.document.createElement('P');
+                    const brElement = this.document.createElement('BR');
+                    pElement.append(brElement);
+                    nodes.push(pElement);
+                }
+            }.bind(this);
+
+            // main algorithm used to restore unremovables which were completely removed from document.
+            // unremovables is an array of unremovable stored in reverse traversal order to maintain O(n) complexity
+            // since it has to be completely emptied to finish the work.
+            // destination is an array which will store the result of the restoration, and contains nodes to be added
+            // to document in order.
+            // editableContext is the value that isContentEditable should have when contentEditable is 'inherit', when
+            // the fragment is not able to provide inheritance.
+            const restoreUnremovables = function (unremovables, destination, editableContext = null) {
+                while (unremovables.length) {
+                    const unremovableRoot = unremovables.pop();
+                    const unremovableChildren = extractUnremovableChildren(unremovableRoot, unremovables);
+                    editableContext = unremovableRoot.isContentEditable || (unremovableRoot.contentEditable === 'inherit' && editableContext);
+                    if (editableContext) {
+                        // if the unremovable is editable, reset its content.
+                        unremovableRoot.textContent = '';
+                        const children = [];
+                        // restore nested unremovables
+                        restoreUnremovables(unremovableChildren, children, editableContext);
+
+                        ensureEmptyPElement(children);
+                        unremovableRoot.append(...children);
+                        unremovableRoot.normalize();
+                    }
+                    // restore the unremovable, unmodified if it is not editable
+                    destination.push(unremovableRoot);
+                }
+            };
+
+            // restore a cloned node and all of its content when its existing part is the start of the node
+            // fragE is the current exploration element in the fragment
+            // docE is the current exploration element in the document
+            const restoreStartSplit = function (fragE, docE) {
+                const firstChild = fragE.firstElementChild;
+                const children = [...fragE.childNodes];
+                if (firstChild && !firstChild.oid) {
+                    children.shift();
+                    restoreStartSplit(firstChild, docE.lastElementChild);
+                }
+                docE.append(...children);
+                docE.normalize();
+            };
+
+            // secondary algorithm used to restore unremovables which are in an element partially removed from document
+            // (selection start)
+            const restoreStartSplitUnremovables = function (unremovables, fragE, docE) {
+                let unremovableRoot = unremovables[unremovables.length - 1];
+                if (!unremovableRoot) {
+                    // there is nothing to restore
+                    return;
+                }
+                // using oid to know if a node is a cloned element or was completely removed from document.
+                // navigate through the fragment and the document to recover the container in which to
+                // restore unremovables (docContainer)
+                let docContainer = docE;
+                while (!fragE.oid && fragE !== unremovableRoot && fragE.contains(unremovableRoot)) {
+                    docContainer = docE;
+                    docE = docE.lastElementChild || docE; // the document may not possess the required node to navigate to
+                    fragE = fragE.firstElementChild;
+                }
+                if (!unremovableRoot.oid) {
+                    // if the unremovable is a clone, it is already present in the document and its content
+                    // may need to be partially restored. In such a case, docE is the corresponding unremovable in document.
+                    unremovableRoot = unremovables.pop();
+                    const unremovableChildren = extractUnremovableChildren(unremovableRoot, unremovables);
+
+                    if (!unremovableRoot.isContentEditable && (unremovableRoot.contentEditable !== 'inherit' || !docE.isContentEditable)) {
+                        // if the unremovable is not editable, its removed content need to be restored
+                        const firstChild = unremovableRoot.firstElementChild;
+                        const children = [...unremovableRoot.childNodes];
+                        if (firstChild && !firstChild.oid) {
+                            // if the firstChild is a clone, partial restoration may need to be done for this node
+                            children.shift();
+                            // restoration in docE of partial node disregarding unremovables
+                            restoreStartSplit(firstChild, docE.lastElementChild);
+                        }
+                        // full restoration disregarding unremovables
+                        docE.append(...children);
+                        docE.normalize();
+                    } else {
+                        // if the unremovable is editable, only unremovables need to be restored
+                        if (unremovableChildren.length) {
+                            restoreStartSplitUnremovables(unremovableChildren, fragE, docE);
+                        } else {
+                            // if there is no unremovable child, ensure that a <P><BR><P> is present
+                            const children = [];
+                            ensureEmptyPElement(children);
+                            docE.append(...children);
+                        }
+                    }
+                }
+                // from this point on, split nodes handling is finished, continue with the main algorithm
+                const unremovableRoots = [];
+                restoreUnremovables(unremovables, unremovableRoots, docContainer.isContentEditable);
+                docContainer.append(...unremovableRoots);
+            };
+
+            // restore a cloned node and all of its content when its existing part is the end of the node
+            const restoreEndSplit = function (fragE, docE) {
+                const lastChild = fragE.lastElementChild;
+                const children = [...fragE.childNodes];
+                if (lastChild && !lastChild.oid) {
+                    children.pop();
+                    restoreEndSplit(lastChild, docE.firstElementChild);
+                }
+                docE.prepend(...children);
+                docE.normalize();
+            };
+
+            // secondary algorithm used to restore unremovables which are in an element partially removed from document
+            // (selection end)
+            const restoreEndSplitUnremovables = function (unremovables, fragE, docE) {
+                let unremovableRoot = unremovables[unremovables.length - 1];
+                if (!unremovableRoot) {
+                    return;
+                }
+                // in this case, only the last unremovable has a chance to be a cloned node which need
+                // to be partially restored
+                while (unremovables.includes(unremovableRoot.nextElementSibling)) {
+                    unremovableRoot = unremovableRoot.nextElementSibling;
+                }
+
+                let docContainer = docE;
+                while (!fragE.oid && fragE !== unremovableRoot && fragE.contains(unremovableRoot)) {
+                    docContainer = docE;
+                    docE = docE.firstElementChild || docE;
+                    fragE = fragE.lastElementChild;
+                }
+
+                // every unremovable prior to the last one was completely removed from document and their
+                // restoration will be done through the main algo
+                let previousUnremovables;
+                if (!unremovableRoot.oid) {
+                    // the last unremovable is indeed a cloned node
+                    const indexRoot = unremovables.lastIndexOf(unremovableRoot);
+                    previousUnremovables = unremovables.splice(-1, unremovables.length - indexRoot - 1);
+                    unremovableRoot = unremovables.pop();
+                    const unremovableChildren = extractUnremovableChildren(unremovableRoot, unremovables);
+
+                    if (!unremovableRoot.isContentEditable && (unremovableRoot.contentEditable !== 'inherit' || !docE.isContentEditable)) {
+                        // not editable
+                        const lastChild = unremovableRoot.lastElementChild;
+                        const children = [...unremovableRoot.childNodes];
+                        if (lastChild && !lastChild.oid) {
+                            // last child is a clone that needs to be partially restored
+                            children.pop();
+                            // restoration in docE of partial node disregarding unremovables
+                            restoreEndSplit(lastChild, docE.firstElementChild);
+                        }
+                        // full restoration disregarding unremovables
+                        docE.prepend(...children);
+                        docE.normalize();
+                    } else {
+                        // editable
+                        if (unremovableChildren.length) {
+                            restoreEndSplitUnremovables(unremovableChildren, fragE, docE);
+                        } else {
+                            // no unremovable child
+                            const children = [];
+                            ensureEmptyPElement(children);
+                            docE.prepend(...children);
+                        }
+                    }
+                } else {
+                    // the last unremovable is not a cloned node
+                    previousUnremovables = unremovables;
+                }
+                // main algo
+                const unremovableRoots = [];
+                restoreUnremovables(previousUnremovables, unremovableRoots, docContainer.isContentEditable);
+                docContainer.prepend(...unremovableRoots);
+            };
+
+            // recover and test if the first batch of nodes is split and needs to be partially restored
+            let batch = parentedGrouping.shift();
+            if (batch && batch.unremovables.length) {
+                if (batch.parent.oid) {
+                    parentedGrouping.unshift(batch);
+                } else {
+                    batch.unremovables.reverse();
+                    restoreStartSplitUnremovables(batch.unremovables, startRoot, docStartRoot);
+                }
+            }
+            // recover and test if the last batch of nodes needs to be partially restored
+            batch = parentedGrouping.pop();
+            if (batch && batch.unremovables.length) {
+                if (batch.parent.oid) {
+                    parentedGrouping.push(batch);
+                } else {
+                    batch.unremovables.reverse();
+                    restoreEndSplitUnremovables(batch.unremovables, endRoot, docEndRoot);
+                }
+            }
+            // handle every other batch of nodes that were completely removed from document
+            const unremovableRoots = [];
+            for (batch of parentedGrouping) {
+                batch.unremovables.reverse();
+                restoreUnremovables(batch.unremovables, unremovableRoots, docStartRoot.parentElement.isContentEditable);
+            }
+
+            // restore nodes to the document
+            if (docStartRoot === this.editable) {
+                this.editable.prepend(...unremovableRoots);
+            } else if (docEndRoot === this.editable) {
+                this.editable.append(...unremovableRoots);
+            } else {
+                docEndRoot.before(...unremovableRoots);
+            }
+        }
+
         // Restore table contents removed by extractContents.
         const tds = [...contents.querySelectorAll('td')].filter(n => !closestElement(n, 'table'));
         let currentFragmentTr, currentTr;
