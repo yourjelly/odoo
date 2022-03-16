@@ -22,6 +22,12 @@
         cursor: pointer;
     }
 
+    .o_knowledge_header,
+    .o_knowledge_aside,
+    .o_scroll_view {
+        background: white;
+    }
+
     .o_knowledge_editor {
         min-height: 100%;
         .oe_form_field {
@@ -41,12 +47,14 @@
         }
     }
 
+    .o_knowledge_article_view_form_dynamic_width.o_invisible_modifier ~ .o_knowledge_icon,
     .o_knowledge_article_view_form_dynamic_width.o_invisible_modifier ~ .o_knowledge_editor .oe_form_field .note-editable,
     .o_knowledge_article_view_form_dynamic_width.o_invisible_modifier ~ .o_knowledge_editor .oe_form_field .o_readonly {
         width: 750px; /* Almost same as Notion (900px - 96px padding (left and right) )*/
         max-width: 100%;
         margin-left: auto;
         margin-right: auto;
+        padding-left: 0;
     }
 
     /* For frontend View. */
@@ -165,6 +173,17 @@
             overflow-wrap: break-word;
         }
     }
+    .o_knowledge_add_icon,
+    .o_knowledge_add_cover {
+        cursor: pointer;
+        // same colour as text
+        border: 1px solid $o-knowledge-bg--active;
+        padding: 0.5rem;
+        padding-top: 0.7rem;
+    }
+    .o_knowledge_add_icon {
+        margin-right: 0.5rem;
+    }
 }
 
 // Select2 style:
@@ -200,6 +219,30 @@
             bottom: 0;
             overflow-y: auto;
             overflow-x: hidden;
+        }
+        .o_knowledge_cover {
+            z-index: 1;
+            // height: 30vh;
+            .o_knowledge_cover_image {
+                width: 100%;
+                img {
+                    display: block;
+                    object-fit: cover;
+                    border-radius: 0px;
+                    width: 100%;
+                    height: 30vh;
+                }
+            }
+        }
+        span.o_invisible_modifier + .o_knowledge_icon {
+            margin-top: -70px;
+        }
+        .o_knowledge_icon {
+            z-index: 3;
+            margin-bottom: -20px;
+            position: relative;
+            font-size: 80px;
+            padding-left: 3rem;
         }
     }
 }

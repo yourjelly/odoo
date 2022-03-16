@@ -4,12 +4,15 @@ import core from 'web.core';
 import Dialog from 'web.Dialog';
 import FormController from 'web.FormController';
 import { MoveArticleToDialog } from 'knowledge.dialogs';
+import emojis from '@mail/js/emojis';
 
 var QWeb = core.qweb;
 var _t = core._t;
 
 const KnowledgeFormController = FormController.extend({
     events: Object.assign({}, FormController.prototype.events, {
+        'click .o_knowledge_add_icon': '_onAddRandomIcon',
+        'click .o_knowledge_add_cover': '_onAddCover',
         'click .btn-duplicate': '_onDuplicate',
         'click .btn-create': '_onCreate',
         'click .btn-move': '_onOpenMoveToModal',
@@ -40,6 +43,25 @@ const KnowledgeFormController = FormController.extend({
     },
 
     // Listeners:
+
+    _onAddRandomIcon: function() {
+        const { id } = this.getState();
+        if (typeof id === 'undefined') {
+            return;
+        }
+        var unicode = emojis[Math.floor(Math.random() * emojis.length)]['unicode'];
+        this.trigger_up('emoji_click', {
+            article_id: id,
+            unicode: unicode
+        });
+    },
+
+    _onAddCover: async function() {
+        if (this.mode === 'readonly') {
+            await this._setMode('edit');
+        }
+        this.$('.o_input_file').click();
+    },
 
     /**
      * @override
@@ -202,6 +224,14 @@ const KnowledgeFormController = FormController.extend({
                 const $icon = $(this).find('.o_article_icon:first');
                 $icon.text(unicode);
             });
+            this.$el.find('.o_knowledge_add_icon').addClass('d-none');
+            this.trigger_up('field_changed', {
+                dataPointID: this.handle,
+                changes: {
+                    icon: unicode
+                }
+            });
+            this.renderer._refreshBigIcon();
         }
     },
 

@@ -72,7 +72,8 @@
                         <div class="o_article_dropdown btn-group dropdown">
                             <a t-attf-class="o_article_icon p-1 {{'o_article_icon_active text-900' if isActive else ''}}" type="button"
                                 t-attf-id="o_article_dropdown_#{article.id}" data-toggle="dropdown" aria-expanded="true">
-                                <t t-out="article.icon"/>
+                                <t t-if="article.icon" t-out="article.icon"/>
+                                <t t-else="">📄</t>
                             </a>
                             <div class="o_knowledge_emoji_panel dropdown-menu rounded p-0" role="menu"
                                 t-attf-aria-labelledby="o_article_dropdown_#{article.id}"/>

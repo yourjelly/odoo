@@ -10,7 +10,9 @@ const KnowledgeFormRenderer = FormRenderer.extend({
     events: _.extend({}, FormRenderer.prototype.events, {
         'click .o_article_caret': '_onFold',
         'click .o_article_name': '_onOpen',
-        'click .o_article_create, .o_section_create': '_onCreate'
+        'click .o_article_create, .o_section_create': '_onCreate',
+        'change .o_knowledge_cover_image': '_refreshBigIcon',
+        'click .o_clear_file_button': '_refreshBigIcon',
     }),
 
     /**
@@ -192,6 +194,19 @@ const KnowledgeFormRenderer = FormRenderer.extend({
         });
     },
 
+    _refreshBigIcon: function () {
+        const $icon = this.$el.find('.o_knowledge_icon');
+        let addIconButton = this.$el.find('.o_knowledge_add_icon');
+        let hasIcon = addIconButton.hasClass('d-none') || addIconButton.hasClass('o_invisible_modifier');
+        if (hasIcon) {
+            let article_id = this.state.res_id;
+            let unicode = this.$el.find(`[data-article-id="${article_id}"]`).first().find('.o_article_icon:first').text();
+            if (unicode) {
+                $icon.empty().append(unicode);
+            }
+        }
+    },
+
     /**
      * @override
      * @returns {Promise}
@@ -201,6 +216,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
         this._renderBreadcrumb();
         await this._renderTree();
         this._setResizeListener();
+        this._refreshBigIcon();
         return result;
     },
 

@@ -38,6 +38,8 @@
                             <field name="internal_permission"/>
                         </group>
                     </group>
+                    <label for="cover"/>
+                    <field name="cover" widget="image" options="{'size': [64, 64]}"/><br />
                     <label for="body"/>
                     <field name="body" widget="html" options="{'knowledge_commands': true}" no_label="1" class="col col-lg w-100"/>
                  </sheet>
@@ -51,6 +53,7 @@
         <field name="type">form</field>
         <field name="arch" type="xml">
             <form class="h-100" js_class="knowledge_view_form">
+                <field name="icon" invisible="1"/>
                 <field name="category" invisible="1"/>
                 <field name="is_locked" invisible="1" readonly="1"/>
                 <field name="user_can_write" invisible="1"/>
@@ -90,6 +93,15 @@
                                     <i class="fa fa-star-o o_toggle_favourite" attrs="{'invisible': [('is_user_favourite', '=', True)]}" title="Add to favourites"/>
                                     <div attrs="{'invisible': ['|', ('is_locked', '=', False), ('user_can_write', '=', False)]}">
                                         <i class="fa fa-fw fa-lock" title="locked"/>
+                                    </div>
+                                    <div class="text-primary bg-white m-2">
+                                        <!-- have two square boxes, next to each other -->
+                                        <span attrs="{'invisible': [('icon', '!=', False)]}" class="o_knowledge_add_icon">
+                                            <i class="fa fa-fw fa-smile-o" style="font-size: 1.5em;" title="Add icon"/> Add icon
+                                        </span>
+                                        <span attrs="{'invisible': [('cover', '!=', False)]}" class="o_knowledge_add_cover">
+                                            <i class="fa fa-fw fa-picture-o" style="font-size: 1.5em;" title="Add cover"/> Add cover
+                                        </span>
                                     </div>
                                 </div>
                                 <!-- Buttons -->
@@ -149,12 +161,24 @@
                             </div>
                             <div class="flex-grow-1 position-relative">
                                 <div class="o_scroll_view">
-                                    <!-- Article body -->
-                                    <span class="o_knowledge_article_view_form_dynamic_width d-none" attrs="{'invisible': [('full_width', '=', False)]}"/>
-                                    <div class="o_knowledge_editor d-flex border-bottom bg-white px-5">
-                                        <field name="body" widget="html" no_label="1" default_focus="1"
-                                            options="{'resizable': False, 'knowledge_commands': true}"
-                                            attrs="{'readonly': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}"/>
+                                        <!-- Article Cover -->
+                                        <div class="o_knowledge_cover">
+                                            <field name="cover" widget="image" class="o_knowledge_cover_image" attrs="{'invisible': [('cover', '=', False)]}"/>
+                                        </div>
+
+                                        <!-- Full Width handling -->
+                                        <span class="o_knowledge_article_view_form_dynamic_width d-none" attrs="{'invisible': [('full_width', '=', False)]}"/>
+
+                                        <!-- Article Icon -->
+                                        <span class="d-none" attrs="{'invisible': [('cover', '!=', False)]}" />
+                                        <div class="o_knowledge_icon" attrs="{'invisible': [('icon', '=', False)]}">
+                                            <i/>
+                                        </div>
+                                        <!-- Article body -->
+                                        <div class="o_knowledge_editor d-flex border-bottom bg-white px-5">
+                                            <field name="body" widget="html" no_label="1" default_focus="1"
+                                                options="{'resizable': False, 'knowledge_commands': true}"
+                                                attrs="{'readonly': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}"/>
                                     </div>
                                     <!-- Chatter -->
                                     <div class="o_knowledge_chatter_container">
