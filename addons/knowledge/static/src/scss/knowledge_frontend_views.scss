@@ -1,0 +1,30 @@
+.o_knowledge_view {
+    .o_knowledge_aside {
+        ul {
+            padding-left: 15px; /* indentation space */
+        }
+        li {
+            list-style-type: none;
+            & > ul {
+                border-left: 2px solid #eee;
+            }
+        }
+    }
+}
+
+@include media-breakpoint-up(sm) {
+    .o_knowledge_view {
+        .o_knowledge_aside {
+            border-right: 1px solid $o-gray-200;
+        }
+        .o_scroll_view {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+    }
+}

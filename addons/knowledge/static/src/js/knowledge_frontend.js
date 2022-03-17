@@ -7,7 +7,7 @@ var core = require('web.core');
 var QWeb = core.qweb;
 
 publicWidget.registry.KnowledgeWidget = publicWidget.Widget.extend({
-    selector: '.o_knowledge_form_view',
+    selector: '.o_knowledge_view',
     xmlDependencies: ['/knowledge/static/src/xml/knowledge_templates.xml'],
     events: {
         'keyup #knowledge_search': '_searchArticles',

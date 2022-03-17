@@ -49,7 +49,8 @@ class KnowledgeController(http.Controller):
                 request.env.ref('knowledge.knowledge_article_dashboard_action').id,
                 request.env.ref('knowledge.knowledge_menu_root').id
             ))
-        return request.render('knowledge.knowledge_article_view_frontend', self._prepare_article_frontend_values(article, **post))
+        values = self._prepare_article_frontend_values(article, **post)
+        return request.render('knowledge.knowledge_article_view_frontend', values)
 
     @http.route('/article/toggle_favourite', type='json', auth='user')
     def article_toggle_favourite(self, article_id, **post):
@@ -70,6 +71,10 @@ class KnowledgeController(http.Controller):
     def _prepare_article_frontend_values(self, article, **post):
         values = {'article': article}
         values.update(self.get_tree_values(article.id))
+        values.update({
+            'show_sidebar': bool(values.get('favourites')) or bool(values.get('public_articles')),
+            'show_favorite': True
+        })
         return values
 
     # ------------------------

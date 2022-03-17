@@ -50,7 +50,7 @@
             'knowledge/static/src/js/knowledge_service.js',
         ],
         'web.assets_frontend': [
-            'knowledge/static/src/scss/knowledge_views.scss',
+            'knowledge/static/src/scss/knowledge_frontend_views.scss',
             'knowledge/static/src/js/knowledge_frontend.js',
         ],
         'web_editor.assets_wysiwyg': [

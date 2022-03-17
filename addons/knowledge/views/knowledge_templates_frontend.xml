@@ -11,55 +11,68 @@
 
     <template id="knowledge_article_view_frontend" name="Knowledge Article Frontend Template">
         <t t-call="knowledge.layout">
-            <div class="container-fluid h-100 o_knowledge_form_view" t-att-data-article-id="article.id">
+            <div class="o_knowledge_view container-fluid h-100" t-att-data-article-id="article.id">
                 <div class="row h-100">
-                    <t t-set="show_sidebar" t-value="favourites or public_articles"/>
-                    <div class="col-sm-2 p-0 overflow-auto">
-                        <div t-att-class="'o_knowledge_aside border-right flex-column h-100 w-100' + (' d-flex' if show_sidebar else ' d-none')">
-                            <div class="p-3" id="knowledge_search_bar">
-                                <input id="knowledge_search" type="text" class="form-control" placeholder="Search an Article..."/>
-                            </div>
-                            <!-- File explorer -->
-                            <div class="flex-grow-1 position-relative">
-                                <div class="o_scroll_view px-3">
-                                    <aside class="o_sidebar">
-                                        <div t-call="knowledge.knowledge_article_frontend_tree_template" />
-                                    </aside>
-                                </div>
-                            </div>
+                    <t t-if="show_sidebar">
+                        <div class="col-12 col-sm-4 col-lg-3 p-0">
+                            <t t-call="knowledge.knowledge_article_frontend_aside"/>
                         </div>
-                    </div>
-                    <div class="col-sm-8 p-0 overflow-auto'">
-                        <div class="d-flex flex-column h-100">
-                            <!-- Article header -->
-                            <div class="o_knowledge_header d-sm-flex flex-row justify-content-between">
-                                <div class="d-flex align-items-center p-3">
-                                    <!-- Title -->
-                                    <span t-out="article.name" class="o_breadcrumb_article_name" />
-                                    <a href="#" class="o_favorites_toggle_button pl-1" t-att-data-article-id="article.id">
-                                        <i t-if="article.is_user_favourite" class="fa fa-star" />
-                                        <i t-else="" class="fa fa-star-o" />
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="flex-grow-1 position-relative">
-                                <div class="o_scroll_view">
-                                    <!-- Article body -->
-                                    <div class="o_knowledge_editor d-flex pl-3">
-                                        <div t-out="article.body" />
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="col-12 col-sm-8 col-lg-9 p-0">
+                            <t t-call="knowledge.knowledge_article_frontend_main"/>
                         </div>
-                    </div>
-                    <div class="col-sm-2"><!--Empty column to center the article body--></div>
+                    </t>
+                    <t t-else="">
+                        <div class="col-12 p-0">
+                            <t t-call="knowledge.knowledge_article_frontend_main"/>
+                        </div>
+                    </t>
                 </div>
             </div>
         </t>
     </template>
 
-    <template id="knowledge_article_frontend_tree_template" name="Frontend Article Tree">
-        <section t-att-class="'' if favourites else 'd-none'">
+    <!-- Note: The parent of the scroll view should have a display `flex` -->
+    <template id="knowledge_scroll_view">
+        <div class="flex-grow-1 position-relative">
+            <div class="o_scroll_view px-3">
+                <t t-out="0"/>
+            </div>
+        </div>
+    </template>
+
+    <template id="knowledge_article_frontend_aside">
+        <div class="o_knowledge_aside d-flex flex-column h-100">
+            <div class="p-3" id="knowledge_search_bar">
+                <input id="knowledge_search" type="text" class="form-control" placeholder="Search an Article..."/>
+            </div>
+            <t t-call="knowledge.knowledge_scroll_view">
+                <aside t-call="knowledge.knowledge_article_frontend_tree_template"/>
+            </t>
+        </div>
+    </template>
+
+    <template id="knowledge_article_frontend_main">
+        <div class="d-flex flex-column h-100">
+            <t t-call="knowledge.knowledge_article_frontend_header"/>
+            <t t-call="knowledge.knowledge_scroll_view">
+                <div t-out="article.body"/>
+            </t>
+        </div>
+    </template>
+
+    <template id="knowledge_article_frontend_header">
+        <div class="o_knowledge_header p-3">
+            <i t-attf-class="fa fa-w #{ article.icon }"/>
+            <span t-out="article.name" class="o_breadcrumb_article_name"/>
+            <a t-if="show_favorite" href="#" class="o_favorites_toggle_button pl-1" t-att-data-article-id="article.id">
+                <i t-if="article.is_user_favourite" class="fa fa-star"/>
+                <i t-else="" class="fa fa-star-o"/>
+            </a>
+        </div>
+    </template>
+
+    <template id="knowledge_article_frontend_tree_template">
+        <section t-if="show_favorite">
             <div class="h4 mb-0">Favourites</div>
             <ul class="o_tree_favourite m-0 px-0 py-2">
                 <li t-foreach="favourites" t-as="favourite" t-att-data-article-id="favourite.id">
@@ -74,7 +87,6 @@
                 </li>
             </ul>
         </section>
-
         <section>
             <div class="h4 mb-0">All Documents</div>
             <ul class="o_tree o_tree_workspace m-0 px-0 py-2">
