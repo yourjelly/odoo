@@ -36,7 +36,7 @@ class LoyaltyProgram(models.Model):
         ('gift_card', 'Gift Card'),
         ('loyalty', 'Loyalty Cards'),
         ('promotion', 'Promotions'),
-        ('ewallet', 'eWallet')], default='coupons', required=True,
+        ('ewallet', 'eWallet')], default='promotion', required=True,
     )
     date_to = fields.Date(string='Validity')
     limit_usage = fields.Boolean(string='Limit Usage')
