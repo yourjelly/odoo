@@ -56,11 +56,17 @@
                                             </div>
                                             <div class="col-4">
                                                 <a class="btn btn-primary" t-att-href="'/shop/claimreward?reward=%s' % reward.id">
-                                                    Claim
+                                                    <t t-if="reward.program_id.program_type == 'ewallet'">Pay with eWallet</t>
+                                                    <t t-else="">Claim</t>
                                                 </a>
                                             </div>
                                             <div t-if="reward.program_id.portal_visible" class="col-12">
-                                                <span t-out="website_sale_order._get_real_points_for_coupon(coupon_reward[0])"/> <span t-out="reward.point_name"/>
+                                                <span t-if="not reward.program_id.is_nominative" t-out="website_sale_order._get_real_points_for_coupon(coupon_reward[0])"/> <span t-out="reward.point_name"/>
+                                                <t t-else="">
+                                                    <span>You have <t t-out="website_sale_order._get_real_points_for_coupon(coupon_reward[0])"/></span>
+                                                    <br/>
+                                                    <span>Costs <t t-out="coupon_reward[0].points"/></span>
+                                                </t>
                                             </div>
                                         </div>
                                     </div>
