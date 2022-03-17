@@ -31,4 +31,13 @@
             </div>
         </form>
     </t>
+    <t t-name="knowledge.toc_block">
+        <div class="o_knowledge_toc" content-editable="false">
+            <div class="o_knowledge_toolbar_anchor"/>
+            <i>Table of Contents:</i>
+            <div class="o_knowledge_toc_content">
+                <i>No content yet</i>
+            </div>
+        </div>
+    </t>
 </templates>

@@ -3,6 +3,8 @@
 import FieldHtml from 'web_editor.field.html';
 import {FieldHtmlInjector} from './knowledge_field_html_injector';
 import {KnowledgePlugin} from './KnowledgePlugin';
+import core from 'web.core';
+const _t = core._t;
 
 FieldHtml.include({
     /**
@@ -54,6 +56,48 @@ FieldHtml.include({
         this.wysiwyg.odooEditor.addEventListener('historyUndo', () => this.$content.trigger('refresh_injector'));
         this.wysiwyg.odooEditor.addEventListener('historyRedo', () => this.$content.trigger('refresh_injector'));
         this.$content[0].addEventListener('paste', () => this.$content.trigger('refresh_injector'));
+        if (this.nodeOptions.knowledge_commands) {
+            this._updateTableOfContents();
+            this.wysiwyg.odooEditor.addDomListener(this.wysiwyg.odooEditor.editable, 'keyup', () => this._updateTableOfContents());
+        }
+    },
+    _updateTableOfContents: function () {
+        var doc = $(this.wysiwyg.odooEditor.editable);
+        const $toc = doc.find('.o_knowledge_toc_content');
+        if ($toc.length) {
+            $toc.empty();
+            const stack = [];
+            const $titles = doc.find('h1, h2, h3, h4, h5, h6');
+            let prevLevel = 0;
+            $titles.each((_index, title) => {
+                const level = ~~title.tagName.substring(1);
+                if (level > stack.length && level > prevLevel) {
+                    const $ol = $('<ol/>');
+                    if (stack.length > 0) {
+                        const $li = $('<li/>');
+                        $li.append($ol);
+                        stack[stack.length - 1].append($li);
+                    }
+                    stack.push($ol);
+                }
+                while (level < stack.length) {
+                    stack.pop();
+                }
+                prevLevel = level;
+                const $title = $(title);
+                const $a = $('<a contenteditable="false" class="o_no_link_popover o_toc_link" href="#" id="' + _index + '"/>');
+                $a.text($title.text());
+                const $li = $('<li/>');
+                $li.append($a);
+                stack[stack.length - 1].append($li);
+            });
+            if (stack.length > 0) {
+                $toc.append(stack[0].get(0));
+            }
+            else {
+                $toc.append($('<i/>').text(_t('No content')));
+            }
+        }
     },
     /**
      * @override

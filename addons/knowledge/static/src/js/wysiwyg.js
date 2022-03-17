@@ -119,11 +119,26 @@ Wysiwyg.include({
                 callback: () => {
                     this._insertTemplate();
                 },
+            }, {
+                groupName: 'Knowledge',
+                title: 'Table Of Content',
+                description: 'Add a table of content.',
+                fontawesome: 'fa-bookmark',
+                callback: () => {
+                    this.addTableOfContent();
+                }
             });
         }
         return commands;
     },
 
+    /**
+     * Adds a table of content
+     */
+    addTableOfContent: function () {
+        const templateHtml = $(QWeb.render('knowledge.toc_block', {}))[0].outerHTML;
+        const [owner] = this.odooEditor.execCommand('insertHTML', templateHtml);
+    },
     /**
      * Notify @see FieldHtmlInjector that toolbars need to be injected
      * @see KnowledgeToolbar
