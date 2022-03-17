@@ -38,6 +38,10 @@ class ArticleMembers(models.Model):
         ('partner_unique', 'unique(article_id, partner_id)', 'You already added this partner in this article.')
     ]
 
+    def name_get(self):
+        """Override the `name_get` function"""
+        return [(rec.id, "%s" % (rec.partner_id.display_name)) for rec in self]
+
     @api.constrains('article_permission', 'permission')
     def _check_members(self):
         """
@@ -115,6 +119,7 @@ class Article(models.Model):
     article_member_ids = fields.One2many('knowledge.article.member', 'article_id', string='Members Information')
     user_has_access = fields.Boolean(string='Has Access', compute="_compute_user_has_access", search="_search_user_has_access")
     user_can_write = fields.Boolean(string='Can Write', compute="_compute_user_can_write", search="_search_user_can_write")
+    user_can_invite = fields.Boolean(string='Can Invite', compute='_compute_user_can_invite')
     category = fields.Selection([
         ('workspace', 'Workspace'),
         ('private', 'Private'),
@@ -222,6 +227,10 @@ class Article(models.Model):
                 # You cannot have only one member per article.
                 article.user_can_write = member_permissions[article.id] == "write" if article.id in member_permissions \
                     else article_permissions[article.id] == 'write'
+
+    def _compute_user_can_invite(self):
+        for article in self:
+            article.user_can_invite = article.user_can_write or article.env.user.has_group('base.group_system')
 
     @api.depends('internal_permission', 'article_member_ids.permission', 'article_member_ids.partner_id')
     def _compute_category(self):
@@ -527,6 +536,22 @@ class Article(models.Model):
     def action_archive(self):
         return super(Article, self | self._get_descendants()).action_archive()
 
+    def action_open_invite_wizard(self):
+        self.ensure_one()
+        context = dict(
+            default_article_id=self.id
+        )
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Invite people'),
+            'view_mode': 'form',
+            'res_model': 'knowledge.invite.wizard',
+            'views': [(False, 'form')],
+            'view_id': False,
+            'target': 'new',
+            'context': context
+        }
+
     #####################
     #  Business methods
     #####################
@@ -647,12 +672,11 @@ class Article(models.Model):
 
     def invite_member(self, access_rule, partner_id=False, email=False, send_mail=True):
         self.ensure_one()
-        if self.user_can_write:
-            # A priori no reason to give a wrong partner_id at this stage as user must be logged in and have access.
-            partner = self.env['res.partner'].browse(partner_id)
-            self.sudo()._invite_member(access_rule, partner=partner, email=email, send_mail=send_mail)
-        else:
+        if not self.user_can_invite:
             raise UserError(_("You cannot give access to this article as you are not editor."))
+        # A priori no reason to give a wrong partner_id at this stage as user must be logged in and have access.
+        partner = self.env['res.partner'].browse(partner_id)
+        self.sudo()._invite_member(access_rule, partner=partner, email=email, send_mail=send_mail)
 
     def _invite_member(self, access_rule, partner=False, email=False, send_mail=True):
         self.ensure_one()
