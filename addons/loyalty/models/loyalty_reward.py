@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import ast
+
 from odoo import _, api, fields, models
+from odoo.osv import expression
 
 class LoyaltyReward(models.Model):
     _name = 'loyalty.reward'
@@ -44,7 +47,9 @@ class LoyaltyReward(models.Model):
         ('cheapest', 'Cheapest Product'),
         ('specific', 'Specific Products')], default='order',
     )
+    discount_product_domain = fields.Char(default="[]")
     discount_product_ids = fields.Many2many('product.product', string="Discounted Products")
+    discount_product_category_id = fields.Many2one('product.category', string="Discounted Prod. Categories")
     discount_product_tag_id = fields.Many2one('product.tag', string="Discounted Prod. Tag")
     all_discount_product_ids = fields.Many2many('product.product', compute='_compute_all_discount_product_ids')
     discount_max_amount = fields.Monetary('Max Discount', 'currency_id',
@@ -81,10 +86,23 @@ class LoyaltyReward(models.Model):
         for reward in self:
             reward.reward_product_uom_id = reward.reward_product_ids.product_tmpl_id.uom_id[:1]
 
-    @api.depends('discount_product_ids', 'discount_product_tag_id')
+    def _get_discount_product_domain(self):
+        self.ensure_one()
+        domain = []
+        if self.discount_product_ids:
+            domain = [('id', 'in', self.discount_product_ids.ids)]
+        if self.discount_product_category_id:
+            domain = expression.OR([domain, [('categ_id', 'child_of', self.discount_product_category_id.id)]])
+        if self.discount_product_tag_id:
+            domain = expression.OR([domain, [('all_product_tag_ids', 'in', self.discount_product_tag_id.id)]])
+        if self.discount_product_domain and self.discount_product_domain != '[]':
+            domain = expression.AND([domain, ast.literal_eval(self.discount_product_domain)])
+        return domain
+
+    @api.depends('discount_product_ids', 'discount_product_category_id', 'discount_product_tag_id', 'discount_product_domain')
     def _compute_all_discount_product_ids(self):
         for reward in self:
-            reward.all_discount_product_ids = reward.discount_product_ids | reward.discount_product_tag_id.product_ids
+            reward.all_discount_product_ids = self.env['product.product'].search(reward._get_discount_product_domain())
 
     @api.depends('reward_product_id', 'reward_product_tag_id', 'reward_type')
     def _compute_multi_product(self):

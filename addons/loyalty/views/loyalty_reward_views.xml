@@ -23,8 +23,10 @@
                             <field name="all_discount_product_ids" invisible="1"/>
                             <label for="discount_applicability" string=""/>
                             <field name="discount_applicability" nolabel="1" widget="radio"/>
+                            <field name="discount_product_domain" groups="base.group_no_one" widget="domain"/>
                             <field name="discount_product_ids" widget="many2many_tags"
                                 attrs="{'invisible': [('discount_applicability', '!=', 'specific')]}"/>
+                            <field name="discount_product_category_id" attrs="{'invisible': [('discount_applicability', '!=', 'specific')]}"/>
                             <field name="discount_product_tag_id" attrs="{'invisible': [('discount_applicability', '!=', 'specific')]}"/>
                             <field name="discount_max_amount"/>
                         </group>
@@ -67,6 +69,7 @@
                 <field name="discount"/>
                 <field name="discount_mode"/>
                 <field name="discount_applicability"/>
+                <field name="discount_product_domain"/>
                 <field name="discount_max_amount"/>
                 <field name="discount_line_product_id"/>
                 <field name="reward_product_id"/>
@@ -82,8 +85,15 @@
                         <div class="oe_kanban_global_click_edit mx-0">
                             <field name="description"/>
                             <t t-if="record.reward_type.raw_value === 'discount' &amp;&amp; record.discount_applicability.raw_value === 'specific'">
+                                <t t-if="record.discount_product_domain.raw_value &amp;&amp; record.discount_product_domain.raw_value !== '[]'" groups="base.group_no_one">
+                                    <a><i class="fa fa-search fa-fw" title="Product Domain"/> <field name="discount_product_domain"/></a>
+                                </t>
                                 <t t-if="record.discount_product_ids.raw_value.length > 0">
                                     <div class="d-flex"><i class="fa fa-cube fa-fw" title="Products"/> <field name="discount_product_ids" widget="many2many_tags" class="d-inline"/></div>
+                                </t>
+                                <t t-if="record.discount_product_category_id.raw_value">
+                                    <a><i class="fa fa-cubes fa-fw" title="Product Categories"/> <field name="discount_product_category_id"/></a>
+                                    <br/>
                                 </t>
                                 <t t-if="record.discount_product_tag_id.raw_value">
                                     <a><i class="fa fa-tags fa-fw" title="Product Tags"/> <field name="discount_product_tag_id"/></a>
