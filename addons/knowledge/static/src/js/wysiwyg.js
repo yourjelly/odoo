@@ -110,10 +110,26 @@ Wysiwyg.include({
                 fontawesome: 'fa-file',
                 callback: () => {
                     this._insertArticleLink();
+                },
+            }, {
+                groupName: 'Knowledge',
+                title: 'Table Of Content',
+                description: 'Add a table of content.',
+                fontawesome: 'fa-bookmark',
+                callback: () => {
+                    this.addTableOfContent();
                 }
             });
         }
         return commands;
+    },
+
+    /**
+     * Adds a table of content
+     */
+    addTableOfContent: function () {
+        const templateHtml = $(QWeb.render('knowledge.toc_block', {}))[0].outerHTML;
+        const [owner] = this.odooEditor.execCommand('insertHTML', templateHtml);
     },
     _notifyKnowledgeFieldHtmlInjector(owner) {
         const toolbarsData = [];
