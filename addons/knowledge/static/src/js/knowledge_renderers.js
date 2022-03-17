@@ -203,10 +203,8 @@ const KnowledgeFormRenderer = FormRenderer.extend({
     _onOpen: async function (event) {
         event.stopPropagation();
         const $li = $(event.target).closest('li');
-        this.do_action('knowledge.action_home_page', {
-            additional_context: {
-                res_id: $li.data('article-id')
-            }
+        this.trigger_up('open', {
+            article_id: $li.data('article-id')
         });
     },
 
