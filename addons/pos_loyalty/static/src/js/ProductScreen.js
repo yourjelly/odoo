@@ -23,9 +23,9 @@ export const PosLoyaltyProductScreen = (ProductScreen) =>
                     (event.detail.key === 'Backspace' || event.detail.key === 'Delete')) {
                 const reward = this.env.pos.reward_by_id[selectedLine.reward_id];
                 const { confirmed } = await this.showPopup('ConfirmPopup', {
-                    title: this.env._t('Deactivating program'),
+                    title: this.env._t('Deactivating reward'),
                     body: _.str.sprintf(
-                        this.env._t('Are you sure you want to remove %s from this order?'),
+                        this.env._t('Are you sure you want to remove %s from this order?\n You will still be able to claim it through the reward button.'),
                         reward.description
                     ),
                     cancelText: this.env._t('No'),
@@ -64,6 +64,7 @@ export const PosLoyaltyProductScreen = (ProductScreen) =>
             }
             if (!selectedLine) return;
             if (selectedLine.is_reward_line && val === 'remove') {
+                this.currentOrder.disabledRewards.push(selectedLine.reward_id);
                 const coupon = this.env.pos.couponCache[selectedLine.coupon_id];
                 if (coupon && coupon.id > 0 && this.currentOrder.codeActivatedCoupons.find((c) => c.code === coupon.code)) {
                     delete this.env.pos.couponCache[selectedLine.coupon_id];

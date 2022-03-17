@@ -25,7 +25,6 @@ ProductScreen.do.clickHomeCategory();
 
 // Valid
 ProductScreen.exec.addOrderline('Whiteboard Pen', '5');
-PosLoyalty.do.claimSingleReward();
 PosLoyalty.check.hasRewardLine('90% on the cheapest product', '-2.88');
 PosLoyalty.exec.finalizeOrder('Cash', '20');
 

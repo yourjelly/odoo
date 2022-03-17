@@ -17,7 +17,6 @@ ProductScreen.do.clickHomeCategory();
 // applied programs:
 //   - on cheapest product
 ProductScreen.exec.addOrderline('Whiteboard Pen', '5');
-PosLoyalty.do.claimSingleReward();
 PosLoyalty.check.hasRewardLine('90% on the cheapest product', '-2.88');
 PosLoyalty.do.selectRewardLine('on the cheapest product');
 PosLoyalty.check.orderTotalIs('13.12');
@@ -26,7 +25,6 @@ PosLoyalty.exec.finalizeOrder('Cash', '20');
 // remove the reward from auto promo program
 // no applied programs
 ProductScreen.exec.addOrderline('Whiteboard Pen', '6');
-PosLoyalty.do.claimSingleReward();
 PosLoyalty.check.hasRewardLine('on the cheapest product', '-2.88');
 PosLoyalty.check.orderTotalIs('16.32');
 PosLoyalty.exec.removeRewardLine('90% on the cheapest product');
@@ -37,7 +35,6 @@ PosLoyalty.exec.finalizeOrder('Cash', '20');
 // applied programs:
 //   - coupon program
 ProductScreen.exec.addOrderline('Desk Organizer', '9');
-PosLoyalty.do.claimSingleReward();
 PosLoyalty.check.hasRewardLine('on the cheapest product', '-4.59');
 PosLoyalty.exec.removeRewardLine('90% on the cheapest product');
 PosLoyalty.check.orderTotalIs('45.90');
@@ -51,7 +48,6 @@ PosLoyalty.exec.finalizeOrder('Cash', '50');
 //   - on cheapest product
 ProductScreen.exec.addOrderline('Letter Tray', '4');
 ProductScreen.exec.addOrderline('Desk Organizer', '9');
-PosLoyalty.do.claimSingleReward();
 PosLoyalty.check.hasRewardLine('90% on the cheapest product', '-4.75');
 PosLoyalty.check.orderTotalIs('62.27');
 PosLoyalty.do.enterCode('5678');
@@ -68,7 +64,6 @@ PosLoyalty.exec.finalizeOrder('Cash', '90');
 ProductScreen.exec.addOrderline('Magnetic Board', '10') // 1.98
 ProductScreen.exec.addOrderline('Desk Organizer', '3') // 5.1
 ProductScreen.exec.addOrderline('Letter Tray', '4') // 4.8 tax 10%
-PosLoyalty.do.claimSingleReward();
 PosLoyalty.check.hasRewardLine('90% on the cheapest product', '-1.78')
 PosLoyalty.check.orderTotalIs('54.44')
 PosLoyalty.do.enterCode('promocode', false)
@@ -89,7 +84,6 @@ ProductScreen.do.clickHomeCategory();
 //   - global discount
 //   - on cheapest discount
 ProductScreen.exec.addOrderline('Desk Organizer', '10'); // 5.1
-PosLoyalty.do.claimSingleReward();
 PosLoyalty.check.hasRewardLine('on the cheapest product', '-4.59');
 ProductScreen.exec.addOrderline('Letter Tray', '4'); // 4.8 tax 10%
 PosLoyalty.check.hasRewardLine('on the cheapest product', '-4.75');
@@ -107,7 +101,6 @@ PosLoyalty.exec.finalizeOrder('Cash', '70');
 //  - global discount
 //  - on cheapest discount
 ProductScreen.exec.addOrderline('Desk Organizer', '11'); // 5.1 per item
-PosLoyalty.do.claimSingleReward();
 PosLoyalty.check.hasRewardLine('90% on the cheapest product', '-4.59');
 PosLoyalty.check.orderTotalIs('51.51');
 // add global discount and the discount will be replaced
@@ -134,7 +127,6 @@ PosLoyalty.exec.finalizeOrder('Cash', '65');
 //   - discount on specific products
 //   - free product
 ProductScreen.exec.addOrderline('Desk Organizer', '6'); // 5.1 per item
-PosLoyalty.do.claimSingleReward();
 PosLoyalty.check.hasRewardLine('on the cheapest product', '-4.59');
 PosLoyalty.exec.removeRewardLine('90% on the cheapest product');
 PosLoyalty.do.enterCode('promocode', false);
@@ -151,7 +143,6 @@ PosLoyalty.exec.finalizeOrder('Cash', '20');
 // Applied programs:
 //   - cheapest product
 ProductScreen.exec.addOrderline('Monitor Stand', '6'); // 3.19 per item
-PosLoyalty.do.claimSingleReward();
 PosLoyalty.do.enterCode('098765');
 PosLoyalty.check.hasRewardLine('90% on the cheapest product', '-2.87');
 PosLoyalty.check.hasRewardLine('10% on your order', '-1.63');
@@ -160,7 +151,6 @@ PosLoyalty.exec.removeRewardLine('90% on the cheapest product');
 PosLoyalty.check.hasRewardLine('10% on your order', '-1.91');
 PosLoyalty.check.orderTotalIs('17.23');
 PosLoyalty.do.resetActivePrograms();
-PosLoyalty.do.claimSingleReward();
 PosLoyalty.check.hasRewardLine('90% on the cheapest product', '-2.87');
 PosLoyalty.check.orderTotalIs('16.27');
 PosLoyalty.exec.finalizeOrder('Cash', '20');

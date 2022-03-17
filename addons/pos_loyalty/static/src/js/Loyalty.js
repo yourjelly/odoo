@@ -9,7 +9,7 @@ import { round_precision } from 'web.utils';
 import core from 'web.core';
 
 const _t = core._t;
-const dropPrevious = new concurrency.DropPrevious(); // Used for queuing reward updates
+const dropPrevious = new concurrency.MutexedDropPrevious(); // Used for queuing reward updates
 const mutex = new concurrency.Mutex(); // Used for sequential cache updates
 
 const COUPON_CACHE_MAX_SIZE = 4096 // Maximum coupon cache size, prevents long run memory issues and (to some extent) invalid data
@@ -200,7 +200,7 @@ const PosLoyaltyOrder = (Order) => class PosLoyaltyOrder extends Order {
     }
     export_as_JSON() {
         const json = super.export_as_JSON(...arguments);
-        json.disabledPrograms = this.disabledPrograms;
+        json.disabledRewards = this.disabledRewards;
         json.codeActivatedProgramRules = this.codeActivatedProgramRules;
         json.codeActivatedCoupons = this.codeActivatedCoupons;
         json.couponPointChanges = this.couponPointChanges;
@@ -223,7 +223,7 @@ const PosLoyaltyOrder = (Order) => class PosLoyaltyOrder extends Order {
         }
         super.init_from_JSON(...arguments);
         delete this.oldCouponMapping;
-        this.disabledPrograms = json.disabledPrograms;
+        this.disabledRewards = json.disabledRewards;
         this.codeActivatedProgramRules = json.codeActivatedProgramRules;
         this.codeActivatedCoupons = json.codeActivatedCoupons;
         this.invalidCoupons = true;
@@ -342,9 +342,9 @@ const PosLoyaltyOrder = (Order) => class PosLoyaltyOrder extends Order {
 
     async _initializePrograms() {
         // When deleting a reward line, a popup will be displayed if the reward was automatic,
-        //  if confirmed the program is added here and will not be added to the order again until a reset.
-        if (!this.disabledPrograms) {
-            this.disabledPrograms = [];
+        //  if confirmed the reward is added to this list and will not be claimed automatically again.
+        if (!this.disabledRewards) {
+            this.disabledRewards = [];
         }
         // List of programs that require a code that are activated.
         if (!this.codeActivatedProgramRules) {
@@ -361,7 +361,7 @@ const PosLoyaltyOrder = (Order) => class PosLoyaltyOrder extends Order {
         }
     }
     _resetPrograms() {
-        this.disabledPrograms = [];
+        this.disabledRewards = [];
         this.codeActivatedProgramRules = [];
         this.codeActivatedCoupons = [];
         this.couponPointChanges = {};
@@ -373,9 +373,23 @@ const PosLoyaltyOrder = (Order) => class PosLoyaltyOrder extends Order {
         if (this.pos.programs.length === 0) {
             return;
         }
-        dropPrevious.add(this._updateLoyaltyPrograms()).then(() => {
+        dropPrevious.exec(() => {return this._updateLoyaltyPrograms().then(async () => {
+            // Try auto claiming rewards
+            const claimableRewards = this.getClaimableRewards(false, false, true);
+            let changed = false;
+            for (const {coupon_id, reward} of claimableRewards) {
+                if (reward.program_id.rewards.length === 1 &&
+                    (reward.reward_type !== 'product' || !reward.multi_product)) {
+                    this._applyReward(reward, coupon_id);
+                    changed = true;
+                }
+            }
+            // Rewards may impact the number of points gained
+            if (changed) {
+                await this._updateLoyaltyPrograms();
+            }
             this._updateRewardLines();
-        }).catch((ex) => {console.log(ex);/* catch the reject of dp when calling `add` to avoid unhandledrejection */});
+        })}).catch(() => {/* catch the reject of dp when calling `add` to avoid unhandledrejection */});
     }
     async _updateLoyaltyPrograms() {
         await this._checkMissingCoupons();
@@ -590,9 +604,6 @@ const PosLoyaltyOrder = (Order) => class PosLoyaltyOrder extends Order {
         return new PosLoyaltyCard(null, null, program.id, (this.get_partner() || {id: -1}).id, 0);
     }
     _programIsApplicable(program) {
-        if (this.disabledPrograms.includes(program.id)) {
-            return false;
-        }
         if (program.trigger === 'auto' && !program.rules.find((rule) => rule.mode === 'auto' || this.codeActivatedProgramRules.includes(rule.id))) {
             return false;
         }
@@ -729,7 +740,7 @@ const PosLoyaltyOrder = (Order) => class PosLoyaltyOrder extends Order {
      * @param {Integer} program_id (optional) Program id
      * @returns {Array} List of {Object} containing the coupon_id and reward keys
      */
-    getClaimableRewards(coupon_id=false, program_id=false) {
+    getClaimableRewards(coupon_id=false, program_id=false, auto=false) {
         const allCouponPrograms = Object.values(this.couponPointChanges).map((pe) => {
             return {
                 program_id: pe.program_id,
@@ -753,6 +764,9 @@ const PosLoyaltyOrder = (Order) => class PosLoyaltyOrder extends Order {
             const program = this.pos.program_by_id[couponProgram.program_id];
             const points = this._getRealCouponPoints(couponProgram.coupon_id);
             for (const reward of program.rewards) {
+                if (auto && this.disabledRewards.includes(reward.id)) {
+                    continue;
+                }
                 // Try to filter out rewards that will not be claimable anyway.
                 if (reward.is_global_discount && reward.discount <= globalDiscountPercent) {
                     continue;
