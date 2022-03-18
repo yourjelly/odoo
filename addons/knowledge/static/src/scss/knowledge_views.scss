@@ -223,3 +223,14 @@
         display: none;
     }
 }
+
+.o_breadcrumb_article_name {
+    border: 1px solid transparent;
+    margin-top: -2px;
+    &:hover {
+        border: 1px solid $o-gray-300;
+    }
+    &:focus {
+        border: 1px solid $o-brand-primary;
+    }
+}
