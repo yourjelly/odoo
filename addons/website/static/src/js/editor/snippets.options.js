@@ -669,7 +669,7 @@ options.Class.include({
     _select: async function (previewMode, widget) {
         await this._super(...arguments);
 
-        if (!widget.$el.closest('[data-no-widget-refresh="true"]').length) {
+        if (this.options.enableWebsite && !widget.$el.closest('[data-no-widget-refresh="true"]').length) {
             // TODO the flag should be retrieved through widget params somehow
             await this._refreshPublicWidgets();
         }

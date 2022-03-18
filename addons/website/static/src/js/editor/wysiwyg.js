@@ -2,7 +2,7 @@ odoo.define('website.wysiwyg', function (require) {
 'use strict';
 
 var Wysiwyg = require('web_editor.wysiwyg');
-var snippetsEditor = require('web_editor.snippet.editor');
+var snippetsEditor = require('website.snippet.editor');
 
 /**
  * Show/hide the dropdowns associated to the given toggles and allows to wait
@@ -145,6 +145,12 @@ const WebsiteWysiwyg = Wysiwyg.extend({
                 {'cover_properties': JSON.stringify(coverProps)}
             ],
         });
+    },
+    _createSnippetsMenuInstance(options = {}) {
+        return new snippetsEditor.SnippetsMenu(this, Object.assign({
+            wysiwyg: this,
+            selectorEditableArea: '.o_editable',
+        }, options));
     },
     /**
      * @override
