@@ -3,3 +3,4 @@ access_account_edi_format_readonly,account.edi.format,model_account_edi_format,,
 access_account_edi_format_group_invoice,account.edi.format,model_account_edi_format,account.group_account_invoice,1,1,1,1
 access_account_edi_document_readonly,account.edi.document,model_account_edi_document,,1,0,0,0
 access_account_edi_document_group_invoice,account.edi.document,model_account_edi_document,account.group_account_invoice,1,1,1,1
+access_account_edi_certificate,account_edi.certificate,model_account_edi_certificate,,1,1,1,1
