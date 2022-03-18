@@ -125,19 +125,11 @@ Wysiwyg.include({
                 description: 'Add a table of content.',
                 fontawesome: 'fa-bookmark',
                 callback: () => {
-                    this.addTableOfContent();
+                    this._addTableOfContent();
                 }
             });
         }
         return commands;
-    },
-
-    /**
-     * Adds a table of content
-     */
-    addTableOfContent: function () {
-        const templateHtml = $(QWeb.render('knowledge.toc_block', {}))[0].outerHTML;
-        const [owner] = this.odooEditor.execCommand('insertHTML', templateHtml);
     },
     /**
      * Notify @see FieldHtmlInjector that toolbars need to be injected
@@ -175,6 +167,15 @@ Wysiwyg.include({
             });
         }
         this.$editable.trigger('refresh_behaviors', { behaviorsData: behaviorsData});
+    },
+    /**
+     * Insert a /toc block (table of content)
+     */
+    _addTableOfContent: function () {
+        const templateHtml = $(QWeb.render('knowledge.toc_block', {}))[0].outerHTML;
+        const [owner] = this.odooEditor.execCommand('insertHTML', templateHtml);
+        this._notifyToolbarsKnowledgeFieldHtmlInjector(owner);
+        this._notifyBehaviorsKnowledgeFieldHtmlInjector(owner);
     },
     /**
      * Insert a /template block

@@ -32,11 +32,10 @@
         </form>
     </t>
     <t t-name="knowledge.toc_block">
-        <div class="o_knowledge_toc" content-editable="false">
-            <div class="o_knowledge_toolbar_anchor"/>
-            <i>Table of Contents:</i>
+        <div class="o_knowledge_toc o_knowledge_toolbars_owner o_knowledge_behavior_anchor o_knowledge_behavior_type_toc">
+            <div class="o_knowledge_toolbar_anchor o_knowledge_toolbar_type_toc float-right"/>
             <div class="o_knowledge_toc_content">
-                <i>No content yet</i>
+                <i>No heading found in this document.</i>
             </div>
         </div>
     </t>

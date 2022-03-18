@@ -15,7 +15,6 @@ const KnowledgeFormController = FormController.extend({
         'click .btn-move': '_onOpenMoveToModal',
         'click .btn-share': '_onShare',
         'click #knowledge_search_bar': '_onSearch',
-        'click .o_toc_link': '_onTocLinkClick',
         'change .o_breadcrumb_article_name': '_onRename',
     }),
 
@@ -161,18 +160,6 @@ const KnowledgeFormController = FormController.extend({
         });
     },
 
-    _onTocLinkClick: function (event) {
-        event.preventDefault();
-        const id = event.target.id;
-        const el = $('.o_knowledge_editor').find('h1, h2, h3, h4, h5, h6')[id];
-        el.scrollIntoView({
-            behavior: 'smooth',
-        });
-        el.setAttribute('highlight', true);
-        setTimeout(() => {
-            el.removeAttribute('highlight');
-        }, 2000);
-    },
     // API calls:
 
     /**

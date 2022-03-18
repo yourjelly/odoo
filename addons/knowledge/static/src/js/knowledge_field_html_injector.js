@@ -2,8 +2,8 @@
 import Widget from 'web.Widget';
 import { ComponentWrapper, WidgetAdapterMixin } from 'web.OwlCompatibility';
 import { useService } from "@web/core/utils/hooks";
-import { TemplateToolbar, FileToolbar } from './knowledge_toolbars';
-import { ArticleBehavior, UnremovableBehavior } from './knowledge_behaviors';
+import { KnowledgeToolbar, TemplateToolbar, FileToolbar } from './knowledge_toolbars';
+import { ArticleBehavior, TableOfContentsBehavior, UnremovableBehavior } from './knowledge_behaviors';
 const { Component } = owl;
 
 /**
@@ -40,6 +40,10 @@ const FieldHtmlInjector = Widget.extend(WidgetAdapterMixin, {
             template: 'knowledge.file_toolbar',
             Toolbar: FileToolbar,
         },
+        o_knowledge_toolbar_type_toc: {
+            template: 'knowledge.toc_toolbar',
+            Toolbar: KnowledgeToolbar,
+        },
     },
     /**
      * Map classes used in @see OdooEditor blocks to their corresponding
@@ -51,6 +55,9 @@ const FieldHtmlInjector = Widget.extend(WidgetAdapterMixin, {
         },
         o_knowledge_behavior_type_article: {
             Behavior: ArticleBehavior,
+        },
+        o_knowledge_behavior_type_toc: {
+            Behavior: TableOfContentsBehavior,
         },
     },
     /**

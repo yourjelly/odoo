@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <templates id="template" xml:space="preserve">
+    <t t-name="knowledge.toc_toolbar">
+        <div class="o_knowledge_toolbar float-right" contenteditable="false">
+            <div class="btn-group">
+                <button t-if="widget.mode == 'edit'" data-call="trash" title="Remove Table of Contents" class="btn btn-link btn-sm border-0">
+                    <i class="fa fa-trash"/> <span class="o_knowledge_toolbar_button_text">Remove</span>
+                </button>
+            </div>
+        </div>
+    </t>
     <t t-name="knowledge.template_toolbar">
         <div class="o_knowledge_toolbar float-right" contenteditable="false">
             <div class="btn-group">
