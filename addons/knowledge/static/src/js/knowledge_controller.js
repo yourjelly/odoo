@@ -311,6 +311,18 @@ const KnowledgeFormController = FormController.extend({
             });
         }
     },
+
+    /**
+     * @override
+     * @param {Object} event
+     */
+    _onFieldChanged: function (event) {
+        this._super.apply(this, arguments);
+        const { changes } = event.data;
+        if (typeof changes.full_width !== 'undefined') {
+            this.renderer.updateFullWidthMode(changes.full_width);
+        }
+    },
 });
 
 export {

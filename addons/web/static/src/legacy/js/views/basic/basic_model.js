@@ -2413,6 +2413,12 @@ var BasicModel = AbstractModel.extend({
         };
     },
     /**
+     * @returns {Array[String]}
+     */
+    getSupportedModifiers: function () {
+        return ['invisible', 'column_invisible', 'readonly', 'required'];
+    },
+    /**
      * Evaluate modifiers
      *
      * @private
@@ -2425,7 +2431,7 @@ var BasicModel = AbstractModel.extend({
     _evalModifiers: function (element, modifiers) {
         let evalContext = null;
         const evaluated = {};
-        for (const k of ['invisible', 'column_invisible', 'readonly', 'required']) {
+        for (const k of this.getSupportedModifiers()) {
             const mod = modifiers[k];
             if (mod === undefined || mod === false || mod === true) {
                 if (k in modifiers) {

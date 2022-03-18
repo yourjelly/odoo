@@ -55,7 +55,7 @@
         <div class="d-flex flex-column h-100">
             <t t-call="knowledge.knowledge_article_frontend_header"/>
             <t t-call="knowledge.knowledge_scroll_view">
-                <div t-out="article.body"/>
+                <div t-attf-class="o_knowledge_article #{'o_full_width' if article.full_width else ''}" t-out="article.body" />
             </t>
         </div>
     </template>

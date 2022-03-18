@@ -295,6 +295,24 @@ const KnowledgeFormRenderer = FormRenderer.extend({
     _preventDropdownClose: function (event) {
         event.stopPropagation();
     },
+
+    /**
+     * Update the editor mode
+     */
+    updateFullWidthMode: function (toggled) {
+        for (const field of this._getHTMLFields()) {
+            field.$el.toggleClass('o_full_width', toggled);
+        }
+    },
+
+    /**
+     * @returns {Array[Widget]}
+     */
+    _getHTMLFields: function () {
+        return this.allFieldWidgets[this.state.id].filter(field => {
+            return field.attrs.widget === 'knowledge_html'
+        });
+    },
 });
 
 export {

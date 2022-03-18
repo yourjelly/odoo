@@ -145,6 +145,11 @@
                                                 <button class="dropdown-item btn-archive" type="object" name="action_archive">
                                                     <i class="fa fa-fw fa-archive"/> Archive
                                                 </button>
+                                                <div class="dropdown-divider"/>
+                                                <div class="px-3">
+                                                    <field name="full_width" widget="boolean_toggle"/>
+                                                    <label for="full_width" class="m-0"/>
+                                                </div>
                                                 <div class="dropdown-divider"
                                                     attrs="{'invisible': ['&amp;', ('last_edition_id', '=', False), ('last_edition_date', '=', False)]}"/>
                                                 <div class="px-3 text-muted"
