@@ -61,11 +61,11 @@
                                                 </a>
                                             </div>
                                             <div t-if="reward.program_id.portal_visible" class="col-12">
-                                                <span t-if="not reward.program_id.is_nominative" t-out="website_sale_order._get_real_points_for_coupon(coupon_reward[0])"/> <span t-out="reward.point_name"/>
+                                                <t t-if="not reward.program_id.is_nominative"><span t-out="website_sale_order._get_real_points_for_coupon(coupon_reward[0])"/> <span t-out="reward.point_name"/></t>
                                                 <t t-else="">
-                                                    <span>You have <t t-out="website_sale_order._get_real_points_for_coupon(coupon_reward[0])"/></span>
+                                                    <span>You have <t t-out="website_sale_order._get_real_points_for_coupon(coupon_reward[0])"/></span> <span t-out="reward.point_name"/>
                                                     <br/>
-                                                    <span>Costs <t t-out="coupon_reward[0].points"/></span>
+                                                    <span>Costs <t t-out="coupon_reward[0].points"/></span> <span t-out="reward.point_name"/>
                                                 </t>
                                             </div>
                                         </div>
