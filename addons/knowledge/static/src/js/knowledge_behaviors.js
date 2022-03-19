@@ -63,8 +63,70 @@ const UnremovableBehavior = KnowledgeBehavior.extend({
         }
     },
 });
+/**
+ * A behavior for the /article command @see Wysiwyg
+ */
+const ArticleBehavior = KnowledgeBehavior.extend({
+    /**
+     * @override
+     */
+    init: function () {
+        this.busy = false;
+        this._super.apply(this, arguments);
+    },
+    /**
+     * @override
+     */
+    applyAttributes: function () {
+        this._super.apply(this, arguments);
+        if (this.mode === 'edit') {
+            this.anchor.setAttribute('contenteditable', 'false');
+        }
+    },
+    /**
+     * @override
+     */
+    applyBehaviors: function () {
+        this._super.apply(this, arguments);
+        this.anchor.addEventListener("click", async function (ev) {
+            if (this.busy) {
+                ev.preventDefault();
+                ev.stopPropagation();
+            } else {
+                this.busy = true;
+                await this._onLinkClick(ev);
+                this.busy = false;
+            }
+        }.bind(this));
+        this.anchor.addEventListener("dblclick", function (ev) {
+            ev.preventDefault();
+            ev.stopPropagation();
+        });
+    },
+    /**
+     * When the user clicks on an article link, we can directly open the
+     * article in the current view without having to reload the page.
+     *
+     * @param {Event} event
+     */
+    _onLinkClick: async function (event) {
+        const href = $(event.currentTarget).attr('href');
+        const matches = href.match(/^\/article\/(\d+)(?:\/|(?:#|\?).*)?$/);
+        if (matches) {
+            event.stopPropagation();
+            event.preventDefault();
+            const id = parseInt(matches[1]);
+            await this.handler.do_action('knowledge.action_home_page', {
+                additional_context: {
+                    res_id: id
+                }
+            });
+        }
+    },
+});
 
 export {
     KnowledgeBehavior,
     UnremovableBehavior,
+    ArticleBehavior,
 };

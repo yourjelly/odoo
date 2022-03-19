@@ -88,6 +88,15 @@ Wysiwyg.include({
      */
     _getCommands: function () {
         const commands = this._super();
+        commands.push({
+            groupName: 'Medias',
+            title: 'Article',
+            description: 'Link an article.',
+            fontawesome: 'fa-file',
+            callback: () => {
+                this._insertArticleLink();
+            },
+        });
         if (this.options.knowledge_commands) {
             commands.push({
                 groupName: 'Knowledge',
@@ -110,14 +119,6 @@ Wysiwyg.include({
                 callback: () => {
                     this._insertTemplate();
                 },
-            }, {
-                groupName: 'Medias',
-                title: 'Article',
-                description: 'Link an article.',
-                fontawesome: 'fa-file',
-                callback: () => {
-                    this._insertArticleLink();
-                }
             });
         }
         return commands;
@@ -171,19 +172,20 @@ Wysiwyg.include({
         this._notifyBehaviorsKnowledgeFieldHtmlInjector(owner);
     },
     /**
-     * @private
+     * Insert a /article block (through a dialog)
      */
     _insertArticleLink: function () {
         const restoreSelection = preserveCursor(this.odooEditor.document);
         const dialog = new KnowledgeArticleLinkModal(this, {});
         dialog.on('save', this, data => {
             restoreSelection();
-            const link = QWeb.render('knowledge.wysiwyg_article_link', {
+            const linkHtml = $(QWeb.render('knowledge.wysiwyg_article_link', {
                 icon: data.icon,
                 text: data.text,
                 href: '/article/' + data.id
-            });
-            this.odooEditor.execCommand('insertHTML', link);
+            }))[0].outerHTML;
+            const [anchor] = this.odooEditor.execCommand('insertHTML', linkHtml);
+            this._notifyBehaviorsKnowledgeFieldHtmlInjector(anchor);
             dialog.close();
         });
         dialog.on('closed', this, () => {

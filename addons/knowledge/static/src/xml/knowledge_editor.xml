@@ -20,8 +20,8 @@
         </div>
     </t>
     <t t-name="knowledge.wysiwyg_article_link">
-        <a t-att-href="href" class="btn btn-sm btn-outline-secondary o_no_link_popover">
-            <i t-attf-class="fa #{icon} pr-2"/><t t-esc="text"/>
+        <a t-att-href="href" class="btn btn-sm btn-outline-secondary o_knowledge_font_family_base o_knowledge_behavior_anchor o_knowledge_behavior_type_article">
+            <i t-attf-class="fa #{icon}"/> <t t-esc="text"/>
         </a>
     </t>
     <t t-name="knowledge.wysiwyg_article_link_modal">
