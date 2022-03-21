@@ -163,7 +163,7 @@ var SnippetEditor = Widget.extend({
         this.templateOptions = templateOptions;
         this.isTargetParentEditable = false;
         this.isTargetMovable = false;
-        this.$scrollingElement = $().getScrollingElement(this.$editable.ownerDocument);
+        this.$scrollingElement = $().getScrollingElement(this.$editable[0].ownerDocument);
         if (!this.$scrollingElement[0]) {
             this.$scrollingElement = $(this.ownerDocument).find('.o_editable');
         }
@@ -1692,7 +1692,7 @@ var SnippetsMenu = Widget.extend({
         }
 
         // Firstly, add a dropzone after the clone
-        var $clone = $('.oe_drop_clone');
+        var $clone = this.$body.find('.oe_drop_clone');
         if ($clone.length) {
             var $neighbor = $clone.prev();
             if (!$neighbor.length) {

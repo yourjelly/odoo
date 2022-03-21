@@ -11,6 +11,7 @@
 }
 // Duplicate code from web_editor/wysiwyg_snippets.scss
 .editor_has_snippets {
+    overflow: hidden;
     > .oe_overlay.ui-draggable {
         .o_handles {
             display: none;
