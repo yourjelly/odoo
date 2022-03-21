@@ -221,6 +221,9 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
             case 'widgets_start_request':
                 this._websiteRootEvent('widgets_start_request', event.data);
                 break;
+            case 'widgets_stop_request':
+                this._websiteRootEvent('widgets_stop_request', event.data);
+                break;
             case 'reload_editable':
                 return this.props.reloadCallback(event, this.widget.el);
             case 'request_save':
@@ -232,12 +235,22 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                     }
                 });
                 break;
+            case 'request_cancel':
+                return this.props.quitCallback();
             case 'action_demand':
                 event.data.onSuccess(this._handleAction(event.data.actionName, event.data.params));
                 break;
             case 'snippet_dropped':
                 this._websiteRootEvent('widgets_start_request', event.data);
                 break;
+            case 'snippet_removed': {
+                const $empty = this.$editable.find('.oe_empty');
+                if (!$empty.children().length) {
+                    $empty.empty(); // Remove any superfluous whitespace
+                    this._addEditorMessages();
+                }
+                break;
+            }
             case 'context_get':
                 event.data.callback(
                     Object.assign({},
@@ -266,7 +279,7 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
         }
         console.warn('action ', actionName, 'is not yet supported');
     }
-    async _websiteRootEvent(type, eventData = {}) {
+     _websiteRootEvent(type, eventData = {}) {
         const websiteRootInstance = this.websiteService.websiteRootInstance;
         return websiteRootInstance.trigger_up(type, {...eventData});
     }
