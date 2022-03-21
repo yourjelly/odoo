@@ -18,6 +18,7 @@ const KnowledgeFormController = FormController.extend({
         'click .btn-move': '_onOpenMoveToModal',
         'click .btn-share': '_onShare',
         'click .btn-chatter': '_onToggleChatter',
+        'click .btn-archive': '_onArchive',
         'click #knowledge_search_bar': '_onSearch',
         'change .o_breadcrumb_article_name': '_onRename',
         'click i.o_toggle_favourite': '_onToggleFavourite',
@@ -180,6 +181,15 @@ const KnowledgeFormController = FormController.extend({
             }]
         });
         dialog.open();
+    },
+
+    _onArchive: function () {
+        const { id } = this.getState();
+        if (typeof id === 'undefined') {
+            return;
+        }
+        // go to home page
+        this.do_action('knowledge.action_home_page', {});
     },
 
     /**

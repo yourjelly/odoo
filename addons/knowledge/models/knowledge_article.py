@@ -113,7 +113,7 @@ class Article(models.Model):
     # partner_ids = fields.Many2many("res.partner", string="Article Members", compute="_compute_partner_ids",
     #     inverse="_inverse_partner_ids", search="_search_partner_ids", compute_sudo=True,
     #     help="Article members are the partners that have specific access rules on the related article.")
-    article_member_ids = fields.One2many('knowledge.article.member', 'article_id', string='Members Information')
+    article_member_ids = fields.One2many('knowledge.article.member', 'article_id', string='Members Information', copy=True)
     user_has_access = fields.Boolean(string='Has Access', compute="_compute_user_has_access", search="_search_user_has_access")
     user_can_write = fields.Boolean(string='Can Write', compute="_compute_user_can_write", search="_search_user_can_write")
     category = fields.Selection([
@@ -522,17 +522,21 @@ class Article(models.Model):
     #########
 
     def action_home_page(self):
-        article = self.search([('is_user_favourite', '=', True)], limit=1)
-        if not article:
-            article = self.search([
-                ('parent_id', '=', False),
-                ('internal_permission', '!=', 'none')
-            ], limit=1, order='sequence')
-        # get first favourite article
+        if 'res_id' not in self.env.context:
+            article = self.search([('is_user_favourite', '=', True)], limit=1)
+            if not article:
+                article = self.search([
+                    ('parent_id', '=', False),
+                    ('internal_permission', '!=', 'none')
+                ], limit=1, order='sequence')
+                if not article:
+                    article = self.search([('parent_id', '=', False)], limit=1, order='sequence')
+        else:
+            article = self.browse(self.env.context['res_id'])
         mode = 'edit' if article.user_can_write else 'readonly'
         action = self.env['ir.actions.act_window']._for_xml_id('knowledge.knowledge_article_dashboard_action')
         action['res_id'] = self.env.context.get('res_id', article.id)
-        action['context'] = dict(ast.literal_eval(action.get('context')),form_view_initial_mode=mode)
+        action['context'] = dict(ast.literal_eval(action.get('context')), form_view_initial_mode=mode)
         return action
 
     def action_set_lock(self):
