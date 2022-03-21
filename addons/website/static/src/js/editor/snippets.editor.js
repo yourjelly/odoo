@@ -203,7 +203,7 @@ const wSnippetMenu = weSnippetEditor.SnippetsMenu.extend({
         this._super(...arguments);
         this.$('#o_we_editor_toolbar_container > we-title > span').after($(`
             <div class="btn fa fa-fw fa-2x o_we_highlight_animated_text d-none
-                ${$('body').hasClass('o_animated_text_highlighted') ? 'fa-eye text-success' : 'fa-eye-slash'}"
+                ${this.$body.hasClass('o_animated_text_highlighted') ? 'fa-eye text-success' : 'fa-eye-slash'}"
                 title="${_t('Highlight Animated Text')}"
                 aria-label="Highlight Animated Text"/>
         `));
@@ -217,7 +217,8 @@ const wSnippetMenu = weSnippetEditor.SnippetsMenu.extend({
      * @private
      */
     _toggleAnimatedTextButton() {
-        if (!this._isValidSelection(window.getSelection())) {
+        const sel = this.options.wysiwyg.odooEditor.document.getSelection();
+        if (!this._isValidSelection(sel)) {
             return;
         }
         const animatedText = this._getAnimatedTextElement();
@@ -321,7 +322,7 @@ const wSnippetMenu = weSnippetEditor.SnippetsMenu.extend({
      * @private
      */
     _onAnimateTextClick(ev) {
-        const sel = window.getSelection();
+        const sel = this.options.wysiwyg.odooEditor.document.getSelection();
         if (!this._isValidSelection(sel)) {
             return;
         }
@@ -372,7 +373,7 @@ const wSnippetMenu = weSnippetEditor.SnippetsMenu.extend({
      * @private
      */
     _onHighlightAnimatedTextClick(ev) {
-        $('body').toggleClass('o_animated_text_highlighted');
+        this.$body.toggleClass('o_animated_text_highlighted');
         $(ev.target).toggleClass('fa-eye fa-eye-slash').toggleClass('text-success');
     },
 });
