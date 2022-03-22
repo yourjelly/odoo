@@ -2066,7 +2066,7 @@ var SnippetsMenu = Widget.extend({
                 return $from.closest(selector, parentNode).filter(filterFunc);
             };
             functions.all = function ($from) {
-                return ($from ? dom.cssFind($from, selector) : $(selector)).filter(filterFunc);
+                return ($from ? dom.cssFind($from, selector) : self.$body.find(selector)).filter(filterFunc);
             };
         } else {
             functions.closest = function ($from, parentNode) {

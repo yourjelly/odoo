@@ -5,7 +5,49 @@ import { _t } from '@web/core/l10n/translation';
 
 import { useWowlService } from '@web/legacy/utils';
 
+
 const { onWillStart, useEffect } = owl;
+
+export class PageOption {
+    /***
+     * A page option is defined with an input el hidden inside the content that we're editing.
+     * @param {HTMLInputElement} el The element holding the value of the page option
+     * @param isDirty If the option is dirty, it's value will be sent to the database
+     */
+    constructor(el, isDirty = false) {
+        this.el = el;
+        this.isDirty = isDirty;
+    }
+    get value() {
+        if (this.el.value.toLowerCase() === 'true') {
+            return true;
+        } else if (this.el.value.toLowerCase() === 'false') {
+            return false;
+        }
+        return this.el.value;
+    }
+    set value(value) {
+        this.el.value = value;
+        this.isDirty = true;
+    }
+}
+// The callbacks are called to represent a change inside the
+PageOption.prototype.optionsCallbacks = {
+    header_overlay: function ($pageEl, value) {
+        $pageEl.find('#wrapwrap').toggleClass('o_header_overlay', value);
+    },
+    header_color: function ($pageEl, value) {
+        debugger;
+        $pageEl.find('#wrapwrap > header').removeClass(this.value)
+                               .addClass(value);
+    },
+    header_visible: function ($pageEl, value) {
+        $pageEl.find('#wrapwrap > header').toggleClass('d-none o_snippet_invisible', !value);
+    },
+    footer_visible: function ($pageEl, value) {
+        $pageEl.find('#wrapwrap > footer').toggleClass('d-none o_snippet_invisible', !value);
+    },
+};
 
 
 export class WysiwygAdapterComponent extends ComponentAdapter {
@@ -16,9 +58,11 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
         super.setup();
         const options = this.props.options || {};
         this.iframe = this.props.iframe;
+
         this.websiteService = useWowlService('website');
         this.userService = useWowlService('user');
         this.rpc = useWowlService('rpc');
+        this.orm = useWowlService('orm');
 
         this.oeStructureSelector = '#wrapwrap .oe_structure[data-oe-xpath][data-oe-id]';
         this.oeFieldSelector = '#wrapwrap [data-oe-field]';
@@ -28,8 +72,13 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
         } else {
             this.savableSelector = `${this.oeStructureSelector}, ${this.oeFieldSelector}, ${this.oeCoverSelector}`;
         }
+        this.pageOptions = {};
 
         onWillStart(() => {
+            const pageOptionEls = this.iframe.el.contentDocument.querySelectorAll('.o_page_option_data');
+            for (const pageOptionEl of pageOptionEls) {
+                this.pageOptions[pageOptionEl.name] = new PageOption(pageOptionEl);
+            }
             this.editableFromEditorMenu(this.$editable).addClass('o_editable');
         });
 
@@ -47,11 +96,7 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
             }
             this.websiteService.toggleFullscreen();
             // Initializing Page Options
-            this.pageOptions = {};
-            const pageOptionEls = this.iframe.el.contentDocument.querySelectorAll('.o_page_option_data');
-            for (const pageOptionEl of pageOptionEls) {
-                this.pageOptions[pageOptionEl.name] = pageOptionEl.value;
-            }
+
             if (!this.iframe.el.classList.contains('editor_enable')) {
                 this.iframe.el.classList.add('editor_enable', 'editor_has_snippets');
             }
@@ -66,11 +111,18 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
      * @returns {Promise} the save promise from the Wysiwyg widget.
      */
     async save() {
+        const mainObject = this.websiteService.currentWebsite.metadata.mainObject;
         if (this.observer) {
             this.observer.disconnect();
             delete this.observer;
         }
         await this._websiteRootEvent('widgets_stop_request');
+        const dirtyPageOptions = Object.entries(this.pageOptions).filter(([name, option]) => option.isDirty);
+        const proms = [];
+        for (const [name, option] of dirtyPageOptions) {
+            proms.push(this.orm.write(mainObject.model, [mainObject.id], {[name]: option.value}));
+        }
+        await Promise.all(proms);
         return this.widget.saveContent(false);
     }
      /**
@@ -208,7 +260,7 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
     /**
      * This method provides support for the legacy event system.
      * It sends events to the root_widget in the iframe when it needs
-     * to (e.g widgets_stop_request). It also provides support for the
+     * to (e.g. widgets_stop_request). It also provides support for the
      * action_demand. See {@link _handleAction}.
      * If the event is not supported it uses the super class method's.
      * See {@link ComponentAdapter._trigger_up}.
@@ -237,9 +289,13 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                 break;
             case 'request_cancel':
                 return this.props.quitCallback();
-            case 'action_demand':
-                event.data.onSuccess(this._handleAction(event.data.actionName, event.data.params));
+            case 'action_demand': {
+                const values = this._handleAction(event.data.actionName, event.data.params);
+                if (event.data.onSuccess) {
+                    event.data.onSuccess(values);
+                }
                 break;
+            }
             case 'snippet_dropped':
                 this._websiteRootEvent('widgets_start_request', event.data);
                 break;
@@ -270,16 +326,31 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
         return super._trigger_up(...arguments);
     }
 
+    /***
+     * Handles action request from inner widgets
+     * @param actionName
+     * @param params
+     * @returns {*}
+     * @private
+     */
     _handleAction(actionName, params) {
         switch (actionName) {
             case 'get_page_option':
-                return this.pageOptions[params];
-            case 'toggle_page_option':
-                console.warn('Cannot toggle page option yet', params);
+                return this.pageOptions[params[0]].value;
+            case 'toggle_page_option': {
+                return this._togglePageOption(...params);
+            }
         }
         console.warn('action ', actionName, 'is not yet supported');
     }
-     _websiteRootEvent(type, eventData = {}) {
+    _togglePageOption(params) {
+        const pageOption = this.pageOptions[params.name];
+        const newValue = params.value === undefined ? !pageOption.value : params.value;
+        // Some option callbacks need the old value before applying the new one.
+        pageOption.optionsCallbacks[params.name]($(this.iframe.el.contentDocument.body), newValue);
+        pageOption.value = newValue;
+    }
+    _websiteRootEvent(type, eventData = {}) {
         const websiteRootInstance = this.websiteService.websiteRootInstance;
         return websiteRootInstance.trigger_up(type, {...eventData});
     }
