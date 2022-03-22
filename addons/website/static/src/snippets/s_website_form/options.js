@@ -1289,11 +1289,6 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
         list.dataset.renderListItems = '';
 
         list.dataset.hasDefault = ['one2many', 'many2many'].includes(type) ? 'multiple' : 'unique';
-        const defaults = [...this.$target[0].querySelectorAll('[checked], [selected]')].map(el => {
-            const idInt = parseInt(el.value);
-            return isNaN(idInt) ? el.value : idInt;
-        });
-        list.dataset.defaults = JSON.stringify(defaults);
 
         if (!this._isFieldCustom()) {
             await this._fetchFieldRecords(field);
@@ -1377,7 +1372,7 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
             return {
                 id: isNaN(id) ? opt.value : id,
                 display_name: name.textContent.trim(),
-                selected: select ? opt.selected : opt.checked,
+                selected: select ? opt.getAttribute('selected') : opt.checked,
             };
         });
     },

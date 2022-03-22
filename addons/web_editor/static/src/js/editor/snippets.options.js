@@ -1910,9 +1910,8 @@ const ListUserValueWidget = UserValueWidget.extend({
         } else {
             this.isCustom = !this.el.dataset.notEditable;
         }
-        if (this.el.dataset.defaults || this.el.dataset.hasDefault) {
+        if (this.el.dataset.hasDefault) {
             this.hasDefault = this.el.dataset.hasDefault || 'unique';
-            this.selected = this.el.dataset.defaults ? JSON.parse(this.el.dataset.defaults) : [];
         }
         this.listTable = document.createElement('table');
         const tableWrapper = document.createElement('div');
@@ -2028,7 +2027,6 @@ const ListUserValueWidget = UserValueWidget.extend({
             draggableTdEl.appendChild(draggableEl);
             trEl.appendChild(draggableTdEl);
         }
-        let recordDataSelected = false;
         const inputEl = document.createElement('input');
         inputEl.type = this.el.dataset.inputType || 'text';
         if (value) {
@@ -2038,7 +2036,6 @@ const ListUserValueWidget = UserValueWidget.extend({
             inputEl.name = id;
         }
         if (recordData) {
-            recordDataSelected = recordData.selected;
             if (recordData.placeholder) {
                 inputEl.placeholder = recordData.placeholder;
             }
@@ -2054,10 +2051,10 @@ const ListUserValueWidget = UserValueWidget.extend({
         if (this.hasDefault) {
             const checkboxEl = document.createElement('we-button');
             checkboxEl.classList.add('o_we_user_value_widget', 'o_we_checkbox_wrapper');
-            if (this.selected.includes(id) || recordDataSelected) {
-                checkboxEl.classList.add('active');
-            }
-            checkboxEl.disabled = !value && !recordDataSelected;
+            checkboxEl.classList.toggle('active',
+                this.el.dataset.newElementsToggled || recordData && recordData.selected
+            );
+            checkboxEl.disabled = !value && !checkboxEl.classList.contains('active');
             const div = document.createElement('div');
             const checkbox = document.createElement('we-checkbox');
             div.appendChild(checkbox);
@@ -2104,27 +2101,17 @@ const ListUserValueWidget = UserValueWidget.extend({
             if (this.el.dataset.idMode && this.el.dataset.idMode === "name") {
                 id = el.name;
             }
+            const checkboxEl = el.closest('tr').querySelector('.o_we_checkbox_wrapper');
             const idInt = parseInt(id);
             return Object.assign({
                 id: isNaN(idInt) ? id : idInt,
                 name: el.value,
                 display_name: el.value,
                 undeletable: !el.closest('tr').querySelector('.o_we_select_remove_option'),
-            }, el.dataset);
+            }, el.dataset, {
+                selected: this.hasDefault && checkboxEl.classList.contains('active'),
+            });
         });
-        if (this.hasDefault) {
-            const checkboxes = [...this.listTable.querySelectorAll('we-button.o_we_checkbox_wrapper.active')];
-            let selected = checkboxes.map(el => {
-                const input = el.parentElement.previousSibling.firstChild;
-                const id = input.name || input.value;
-                const idInt = parseInt(id);
-                return isNaN(idInt) ? id : idInt;
-            });
-            values.forEach(v => {
-                v.selected = selected.includes(v.id);
-            });
-            this.selected = [];
-        }
         this._value = JSON.stringify(values);
         this.notifyValueChange(false);
         if (!this.createWidget && !this.isCustom) {
@@ -2164,14 +2151,7 @@ const ListUserValueWidget = UserValueWidget.extend({
      * @private
      */
     _onAddCustomItemClick() {
-        let id;
-        if (this.el.dataset.generateIdForNewItems) {
-            id = generateHTMLId();
-        }
-        if (this.el.dataset.newElementsToggled) {
-            this.selected.push(id);
-        }
-        this._addItemToTable(id, this.el.dataset.defaultValue);
+        this._addItemToTable();
         this._notifyCurrentState();
     },
     /**

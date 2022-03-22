@@ -12,13 +12,13 @@ options.registry.SocialMedia = options.Class.extend({
      * @override
      */
     async willStart() {
+        await this._super(...arguments);
         this.recordData = [];
         // Get the social medias from the DOM. This is done before the super
         // call, since _renderCustomXml depends on this.links.
         this.links = new Map([...this.$target[0].querySelectorAll(':scope:not(.s_preview) > a')].map(el => {
             return [generateHTMLId(), el];
         }));
-        await this._super(...arguments);
         if (!dbSocialValues) {
             let websiteId;
             this.trigger_up('context_get', {
@@ -142,6 +142,7 @@ options.registry.SocialMedia = options.Class.extend({
      */
     async renderListItems(previewMode, widgetValue, params) {
         this.recordData = JSON.parse(widgetValue);
+        //debugger;
         // Handle element deletation.
         const entriesIds = this.recordData.map(entry => entry.id);
         Array.from(this.links.keys()).filter(id => !entriesIds.includes(id)).forEach(id => {
@@ -154,6 +155,8 @@ options.registry.SocialMedia = options.Class.extend({
                 // It's a new custom social media.
                 anchorEl = this.$target[0].querySelector(':scope > a').cloneNode(true);
                 anchorEl.href = '#';
+                entry.id = generateHTMLId();
+                entry.selected = true;
                 this.links.set(entry.id, anchorEl);
             }
             // Handle visibility of the link
@@ -292,13 +295,6 @@ options.registry.SocialMedia = options.Class.extend({
         regx = new RegExp('\\b' + 'fa-' + '[^1-9][^ ]*[ ]?\\b', 'g');
         // Remove every fa classes except fa-x sizes.
         iEl.className = iEl.className.replace(regx, '');
-    },
-    /**
-     * @override
-     */
-    _renderCustomXML(uiFragment) {
-        uiFragment.querySelector('we-list').dataset.defaults = JSON.stringify(Array.from(
-            this.links.keys()).filter(id => !this.links.get(id).classList.contains('d-none')));
     },
 });
 
