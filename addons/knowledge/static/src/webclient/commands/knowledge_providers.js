@@ -12,14 +12,14 @@ const { Component, xml } = owl;
 class KnowledgeCommand extends Component {}
 KnowledgeCommand.template = xml`
     <div class="o_command_left">
-        <icon t-att-class="'pr-2 fa ' + props.icon_string"/>
+        <span class="pr-2" t-out="props.icon_string"/>
         <span class="pr-2"><t t-slot="name"/></span>
         <icon t-if="props.isFavourite" class="fa fa-star o_favorite pr-2"/>
-        <span t-if="props.parentName" t-esc="'— '" class="text-muted small pr-2" />
+        <span t-if="props.parentName" t-out="'— '" class="text-muted small pr-2" />
         <span t-if="props.parentName" class="o_command_name text-muted small">
             <t t-foreach="props.splitParentName" t-as="name" t-key="name_index">
-                <b t-if="name_index % 2" t-esc="name"/>
-                <t t-else="" t-esc="name"/>
+                <b t-if="name_index % 2" t-out="name"/>
+                <t t-else="" t-out="name"/>
             </t>
         </span>
     </div>
@@ -30,7 +30,7 @@ class Knowledge404Command extends Component {}
 Knowledge404Command.template = xml`
     <div class="o_command_hotkey">
         <span>
-            No Article found. <span class="text-primary">Create "<u t-esc="props.articleName"/>"</span>
+            No Article found. <span class="text-primary">Create "<u t-out="props.articleName"/>"</span>
         </span>
     </div>
 `;
@@ -41,11 +41,11 @@ KnowledgeExtraCommand.template = xml`
     <div class="o_command_hotkey">
         <span>
             <icon class="fa fa-arrows-alt pr-2" />
-            <t t-esc="props.name" />
+            <t t-out="props.name" />
         </span>
         <span>
             <t t-foreach="getKeysToPress(props)" t-as="key" t-key="key_index">
-                <kbd t-esc="key" />
+                <kbd t-out="key" />
                 <span t-if="!key_last"> + </span>
             </t>
         </span>

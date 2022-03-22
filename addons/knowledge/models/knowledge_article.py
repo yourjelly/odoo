@@ -90,7 +90,7 @@ class Article(models.Model):
     active = fields.Boolean(default=True)
     name = fields.Char(string="Title", default="New Article")
     body = fields.Html(string="Article Body")
-    icon = fields.Char(string='Article Icon', default='fa-file')
+    icon = fields.Char(string='Article Icon', default='📄')
     author_ids = fields.Many2many("res.users", string="Authors", default=lambda self: self.env.user)
     is_locked = fields.Boolean(string='Locked', default=False)
 
@@ -148,6 +148,10 @@ class Article(models.Model):
             members = member_permissions.get(article.id)
             if article_permissions[article.id] != 'write' and not any(m['permission'] == 'write' for m in list(members.values())):
                 raise ValidationError(_("You must have at least one writer."))
+
+    def name_get(self):
+        """Override the `name_get` function to add the article icon"""
+        return [(rec.id, "%s %s" % (rec.icon, rec.name)) for rec in self]
 
     ##############################
     # Computes, Searches, Inverses
