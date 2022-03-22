@@ -58,7 +58,6 @@ class Job(models.Model):
     ]
 
     @mute_logger('odoo.addons.base.models.ir_qweb')
-    
     def _get_default_description(self):
         default_description = self.env.ref("website_hr_recruitment.default_description", raise_if_not_found=False)
         return (default_description._render() if default_description else "")
@@ -93,7 +92,7 @@ class Job(models.Model):
         action = super().open_website_url()
         action['target'] = 'new'
         return action
-    
+
     @api.model
     def _search_get_detail(self, website, order, options):
         requires_sudo = False

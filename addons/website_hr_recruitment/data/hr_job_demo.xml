@@ -141,10 +141,10 @@
                 </div>
             </section>
             <!-- What's great -->
-            <section class="pt64 pb24">
+            <section class="s_comparisons pt24 pb24" data-snippet="s_comparisons">
                 <div class="container">
-                    <div class="row">
-                        <div class="col-lg-8 pb40">
+                    <div class="row align-items-center">
+                        <div class="col-sm-8 pb40">
                             <h2>What's great in the job?</h2>
                             <br/>
                             <ul class="lead">
@@ -156,10 +156,15 @@
                                 <li>Real responsibilities and challenges in a fast evolving company</li>
                             </ul>
                         </div>
-                        <div class="o_colored_level o_cc o_cc1 border pt24 pb8 shadow rounded align-self-center col-lg-3 offset-lg-1" style="border-width: 1px !important; border-color: var(--o-color-1) !important; border-radius: 5px !important; text-align: center;">
-                            <h5>Our Product</h5>
-                            <p>Discover our products.</p>
-                            <p><a href="/" class="btn btn-primary" target="_blank"><small><b>READ</b></small></a></p>
+                        <div data-name="Box" class="col-sm-3 offset-sm-1 pt16 pb16">
+                            <div class="card text-bg-primary shadow text-center">
+                                <h5 class="card-header">Our Product</h5>
+                                <div class="o_cc o_cc1 pt24">
+                                    <img class="img-fluid o_we_custom_image pb24" src="/website_hr_recruitment/static/src/img/job_product.svg" style="width: 50% !important;" alt="Our Product"/>
+                                    <p>Discover our products.</p>
+                                    <p><a href="/" class="btn btn-primary" target="_blank"><small><b>READ</b></small></a></p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -201,7 +206,7 @@
                 </div>
             </section>
             <!-- Photos -->
-            <section class="s_image_gallery pt24 pb24 o_fake_not_editable o_colored_level o_grid o_spc-medium" data-vcss="001" data-columns="3" style="overflow: hidden;" data-snippet="s_images_wall" data-name="Images Wall">
+            <section class="o_jobs_image_gallery s_image_gallery pt24 pb24 o_fake_not_editable o_colored_level o_grid o_spc-medium" data-vcss="001" data-columns="3" style="overflow: hidden;" data-snippet="s_images_wall" data-name="Images Wall">
                 <div class="container">
                     <div class="row s_nb_column_fixed">
                         <div class="col-lg-8">
@@ -367,10 +372,10 @@
                 </div>
             </section>
             <!-- What's great -->
-            <section class="pt64 pb24">
+            <section class="s_comparisons pt24 pb24" data-snippet="s_comparisons">
                 <div class="container">
-                    <div class="row">
-                        <div class="col-lg-8 pb40">
+                    <div class="row align-items-center">
+                        <div class="col-sm-8 pb40">
                             <h2>What's great in the job?</h2>
                             <br/>
                             <ul class="lead">
@@ -382,10 +387,15 @@
                                 <li>Real responsibilities and challenges in a fast evolving company</li>
                             </ul>
                         </div>
-                        <div class="o_colored_level o_cc o_cc1 border pt24 pb8 shadow rounded align-self-center col-lg-3 offset-lg-1" style="border-width: 1px !important; border-color: var(--o-color-1) !important; border-radius: 5px !important; text-align: center;">
-                            <h5>Our Product</h5>
-                            <p>Discover our products.</p>
-                            <p><a href="/" class="btn btn-primary" target="_blank"><small><b>READ</b></small></a></p>
+                        <div data-name="Box" class="col-sm-3 offset-sm-1 pt16 pb16">
+                            <div class="card text-bg-primary shadow text-center">
+                                <h5 class="card-header">Our Product</h5>
+                                <div class="o_cc o_cc1 pt24">
+                                    <img class="img-fluid o_we_custom_image pb24" src="/website_hr_recruitment/static/src/img/job_product.svg" style="width: 50% !important;" alt="Our Product"/>
+                                    <p>Discover our products.</p>
+                                    <p><a href="/" class="btn btn-primary" target="_blank"><small><b>READ</b></small></a></p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -427,7 +437,7 @@
                 </div>
             </section>
             <!-- Photos -->
-            <section class="s_image_gallery pt24 pb24 o_fake_not_editable o_colored_level o_grid o_spc-medium" data-vcss="001" data-columns="3" style="overflow: hidden;" data-snippet="s_images_wall" data-name="Images Wall">
+            <section class="o_jobs_image_gallery s_image_gallery pt24 pb24 o_fake_not_editable o_colored_level o_grid o_spc-medium" data-vcss="001" data-columns="3" style="overflow: hidden;" data-snippet="s_images_wall" data-name="Images Wall">
                 <div class="container">
                     <div class="row s_nb_column_fixed">
                         <div class="col-lg-8">
@@ -593,10 +603,10 @@
                 </div>
             </section>
             <!-- What's great -->
-            <section class="pt64 pb24">
+            <section class="s_comparisons pt24 pb24" data-snippet="s_comparisons">
                 <div class="container">
-                    <div class="row">
-                        <div class="col-lg-8 pb40">
+                    <div class="row align-items-center">
+                        <div class="col-sm-8 pb40">
                             <h2>What's great in the job?</h2>
                             <br/>
                             <ul class="lead">
@@ -608,10 +618,15 @@
                                 <li>Real responsibilities and challenges in a fast evolving company</li>
                             </ul>
                         </div>
-                        <div class="o_colored_level o_cc o_cc1 border pt24 pb8 shadow rounded align-self-center col-lg-3 offset-lg-1" style="border-width: 1px !important; border-color: var(--o-color-1) !important; border-radius: 5px !important; text-align: center;">
-                            <h5>Our Product</h5>
-                            <p>Discover our products.</p>
-                            <p><a href="/" class="btn btn-primary" target="_blank"><small><b>READ</b></small></a></p>
+                        <div data-name="Box" class="col-sm-3 offset-sm-1 pt16 pb16">
+                            <div class="card text-bg-primary shadow text-center">
+                                <h5 class="card-header">Our Product</h5>
+                                <div class="o_cc o_cc1 pt24">
+                                    <img class="img-fluid o_we_custom_image pb24" src="/website_hr_recruitment/static/src/img/job_product.svg" style="width: 50% !important;" alt="Our Product"/>
+                                    <p>Discover our products.</p>
+                                    <p><a href="/" class="btn btn-primary" target="_blank"><small><b>READ</b></small></a></p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -653,7 +668,7 @@
                 </div>
             </section>
             <!-- Photos -->
-            <section class="s_image_gallery pt24 pb24 o_fake_not_editable o_colored_level o_grid o_spc-medium" data-vcss="001" data-columns="3" style="overflow: hidden;" data-snippet="s_images_wall" data-name="Images Wall">
+            <section class="o_jobs_image_gallery s_image_gallery pt24 pb24 o_fake_not_editable o_colored_level o_grid o_spc-medium" data-vcss="001" data-columns="3" style="overflow: hidden;" data-snippet="s_images_wall" data-name="Images Wall">
                 <div class="container">
                     <div class="row s_nb_column_fixed">
                         <div class="col-lg-8">
@@ -818,10 +833,10 @@
                 </div>
             </section>
             <!-- What's great -->
-            <section class="pt64 pb24">
+            <section class="s_comparisons pt24 pb24" data-snippet="s_comparisons">
                 <div class="container">
-                    <div class="row">
-                        <div class="col-lg-8 pb40">
+                    <div class="row align-items-center">
+                        <div class="col-sm-8 pb40">
                             <h2>What's great in the job?</h2>
                             <br/>
                             <ul class="lead">
@@ -833,10 +848,15 @@
                                 <li>Real responsibilities and challenges in a fast evolving company</li>
                             </ul>
                         </div>
-                        <div class="o_colored_level o_cc o_cc1 border pt24 pb8 shadow rounded align-self-center col-lg-3 offset-lg-1" style="border-width: 1px !important; border-color: var(--o-color-1) !important; border-radius: 5px !important; text-align: center;">
-                            <h5>Our Product</h5>
-                            <p>Discover our products.</p>
-                            <p><a href="/" class="btn btn-primary" target="_blank"><small><b>READ</b></small></a></p>
+                        <div data-name="Box" class="col-sm-3 offset-sm-1 pt16 pb16">
+                            <div class="card text-bg-primary shadow text-center">
+                                <h5 class="card-header">Our Product</h5>
+                                <div class="o_cc o_cc1 pt24">
+                                    <img class="img-fluid o_we_custom_image pb24" src="/website_hr_recruitment/static/src/img/job_product.svg" style="width: 50% !important;" alt="Our Product"/>
+                                    <p>Discover our products.</p>
+                                    <p><a href="/" class="btn btn-primary" target="_blank"><small><b>READ</b></small></a></p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -878,7 +898,7 @@
                 </div>
             </section>
             <!-- Photos -->
-            <section class="s_image_gallery pt24 pb24 o_fake_not_editable o_colored_level o_grid o_spc-medium" data-vcss="001" data-columns="3" style="overflow: hidden;" data-snippet="s_images_wall" data-name="Images Wall">
+            <section class="o_jobs_image_gallery s_image_gallery pt24 pb24 o_fake_not_editable o_colored_level o_grid o_spc-medium" data-vcss="001" data-columns="3" style="overflow: hidden;" data-snippet="s_images_wall" data-name="Images Wall">
                 <div class="container">
                     <div class="row s_nb_column_fixed">
                         <div class="col-lg-8">
@@ -1043,10 +1063,10 @@
                 </div>
             </section>
             <!-- What's great -->
-            <section class="pt64 pb24">
+            <section class="s_comparisons pt24 pb24" data-snippet="s_comparisons">
                 <div class="container">
-                    <div class="row">
-                        <div class="col-lg-8 pb40">
+                    <div class="row align-items-center">
+                        <div class="col-sm-8 pb40">
                             <h2>What's great in the job?</h2>
                             <br/>
                             <ul class="lead">
@@ -1058,10 +1078,15 @@
                                 <li>Real responsibilities and challenges in a fast evolving company</li>
                             </ul>
                         </div>
-                        <div class="o_colored_level o_cc o_cc1 border pt24 pb8 shadow rounded align-self-center col-lg-3 offset-lg-1" style="border-width: 1px !important; border-color: var(--o-color-1) !important; border-radius: 5px !important; text-align: center;">
-                            <h5>Our Product</h5>
-                            <p>Discover our products.</p>
-                            <p><a href="/" class="btn btn-primary" target="_blank"><small><b>READ</b></small></a></p>
+                        <div data-name="Box" class="col-sm-3 offset-sm-1 pt16 pb16">
+                            <div class="card text-bg-primary shadow text-center">
+                                <h5 class="card-header">Our Product</h5>
+                                <div class="o_cc o_cc1 pt24">
+                                    <img class="img-fluid o_we_custom_image pb24" src="/website_hr_recruitment/static/src/img/job_product.svg" style="width: 50% !important;" alt="Our Product"/>
+                                    <p>Discover our products.</p>
+                                    <p><a href="/" class="btn btn-primary" target="_blank"><small><b>READ</b></small></a></p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1103,7 +1128,7 @@
                 </div>
             </section>
             <!-- Photos -->
-            <section class="s_image_gallery pt24 pb24 o_fake_not_editable o_colored_level o_grid o_spc-medium" data-vcss="001" data-columns="3" style="overflow: hidden;" data-snippet="s_images_wall" data-name="Images Wall">
+            <section class="o_jobs_image_gallery s_image_gallery pt24 pb24 o_fake_not_editable o_colored_level o_grid o_spc-medium" data-vcss="001" data-columns="3" style="overflow: hidden;" data-snippet="s_images_wall" data-name="Images Wall">
                 <div class="container">
                     <div class="row s_nb_column_fixed">
                         <div class="col-lg-8">
@@ -1268,10 +1293,10 @@
                 </div>
             </section>
             <!-- What's great -->
-            <section class="pt64 pb24">
+            <section class="s_comparisons pt24 pb24" data-snippet="s_comparisons">
                 <div class="container">
-                    <div class="row">
-                        <div class="col-lg-8 pb40">
+                    <div class="row align-items-center">
+                        <div class="col-sm-8 pb40">
                             <h2>What's great in the job?</h2>
                             <br/>
                             <ul class="lead">
@@ -1283,10 +1308,15 @@
                                 <li>Real responsibilities and challenges in a fast evolving company</li>
                             </ul>
                         </div>
-                        <div class="o_colored_level o_cc o_cc1 border pt24 pb8 shadow rounded align-self-center col-lg-3 offset-lg-1" style="border-width: 1px !important; border-color: var(--o-color-1) !important; border-radius: 5px !important; text-align: center;">
-                            <h5>Our Product</h5>
-                            <p>Discover our products.</p>
-                            <p><a href="/" class="btn btn-primary" target="_blank"><small><b>READ</b></small></a></p>
+                        <div data-name="Box" class="col-sm-3 offset-sm-1 pt16 pb16">
+                            <div class="card text-bg-primary shadow text-center">
+                                <h5 class="card-header">Our Product</h5>
+                                <div class="o_cc o_cc1 pt24">
+                                    <img class="img-fluid o_we_custom_image pb24" src="/website_hr_recruitment/static/src/img/job_product.svg" style="width: 50% !important;" alt="Our Product"/>
+                                    <p>Discover our products.</p>
+                                    <p><a href="/" class="btn btn-primary" target="_blank"><small><b>READ</b></small></a></p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1328,29 +1358,29 @@
                 </div>
             </section>
             <!-- Photos -->
-        <section class="s_image_gallery pt24 pb24 o_fake_not_editable o_colored_level o_grid o_spc-medium" data-vcss="001" data-columns="3" style="overflow: hidden;" data-snippet="s_images_wall" data-name="Images Wall">
-            <div class="container">
-                <div class="row s_nb_column_fixed">
-                    <div class="col-lg-8">
-                        <img src="/website_hr_recruitment/static/src/img/job_image_9.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+            <section class="o_jobs_image_gallery s_image_gallery pt24 pb24 o_fake_not_editable o_colored_level o_grid o_spc-medium" data-vcss="001" data-columns="3" style="overflow: hidden;" data-snippet="s_images_wall" data-name="Images Wall">
+                <div class="container">
+                    <div class="row s_nb_column_fixed">
+                        <div class="col-lg-8">
+                            <img src="/website_hr_recruitment/static/src/img/job_image_9.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                        </div>
+                        <div class="col-lg-4">
+                            <img src="/website_hr_recruitment/static/src/img/job_image_10.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                        </div>
                     </div>
-                    <div class="col-lg-4">
-                        <img src="/website_hr_recruitment/static/src/img/job_image_10.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                    <div class="row s_nb_column_fixed">
+                        <div class="col-lg-3">
+                            <img src="/website_hr_recruitment/static/src/img/job_image_11.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                        </div>
+                        <div class="col-lg-3">
+                            <img src="/website_hr_recruitment/static/src/img/job_image_12.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                        </div>
+                        <div class="col-lg-6">
+                            <img src="/website_hr_recruitment/static/src/img/job_image_13.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                        </div>
                     </div>
                 </div>
-                <div class="row s_nb_column_fixed">
-                    <div class="col-lg-3">
-                        <img src="/website_hr_recruitment/static/src/img/job_image_11.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
-                    </div>
-                    <div class="col-lg-3">
-                        <img src="/website_hr_recruitment/static/src/img/job_image_12.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
-                    </div>
-                    <div class="col-lg-6">
-                        <img src="/website_hr_recruitment/static/src/img/job_image_13.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
-                    </div>
-                </div>
-            </div>
-        </section>
+            </section>
         </field>
     </record>
 
@@ -1493,10 +1523,10 @@
                 </div>
             </section>
             <!-- What's great -->
-            <section class="pt64 pb24">
+            <section class="s_comparisons pt24 pb24" data-snippet="s_comparisons">
                 <div class="container">
-                    <div class="row">
-                        <div class="col-lg-8 pb40">
+                    <div class="row align-items-center">
+                        <div class="col-sm-8 pb40">
                             <h2>What's great in the job?</h2>
                             <br/>
                             <ul class="lead">
@@ -1508,10 +1538,15 @@
                                 <li>Real responsibilities and challenges in a fast evolving company</li>
                             </ul>
                         </div>
-                        <div class="o_colored_level o_cc o_cc1 border pt24 pb8 shadow rounded align-self-center col-lg-3 offset-lg-1" style="border-width: 1px !important; border-color: var(--o-color-1) !important; border-radius: 5px !important; text-align: center;">
-                            <h5>Our Product</h5>
-                            <p>Discover our products.</p>
-                            <p><a href="/" class="btn btn-primary" target="_blank"><small><b>READ</b></small></a></p>
+                        <div data-name="Box" class="col-sm-3 offset-sm-1 pt16 pb16">
+                            <div class="card text-bg-primary shadow text-center">
+                                <h5 class="card-header">Our Product</h5>
+                                <div class="o_cc o_cc1 pt24">
+                                    <img class="img-fluid o_we_custom_image pb24" src="/website_hr_recruitment/static/src/img/job_product.svg" style="width: 50% !important;" alt="Our Product"/>
+                                    <p>Discover our products.</p>
+                                    <p><a href="/" class="btn btn-primary" target="_blank"><small><b>READ</b></small></a></p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1553,7 +1588,7 @@
                 </div>
             </section>
             <!-- Photos -->
-            <section class="s_image_gallery pt24 pb24 o_fake_not_editable o_colored_level o_grid o_spc-medium" data-vcss="001" data-columns="3" style="overflow: hidden;" data-snippet="s_images_wall" data-name="Images Wall">
+            <section class="o_jobs_image_gallery s_image_gallery pt24 pb24 o_fake_not_editable o_colored_level o_grid o_spc-medium" data-vcss="001" data-columns="3" style="overflow: hidden;" data-snippet="s_images_wall" data-name="Images Wall">
                 <div class="container">
                     <div class="row s_nb_column_fixed">
                         <div class="col-lg-8">

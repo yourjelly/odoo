@@ -54,6 +54,12 @@ class WebsiteHrRecruitment(http.Controller):
         Country = env['res.country']
         Jobs = env['hr.job']
 
+         # List jobs available to current UID
+        domain = request.website.website_domain()
+        job_ids = Jobs.search(domain, order="is_published desc, sequence, no_of_recruitment desc").ids
+        # Browse jobs as superuser, because address is restricted
+        jobs = Jobs.sudo().browse(job_ids)
+
         is_remote = 'remote' in request.httprequest.path.split('/')
         is_other_department = '/department/other' in request.httprequest.path and not department
 
