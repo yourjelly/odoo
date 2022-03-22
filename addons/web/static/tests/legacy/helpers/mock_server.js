@@ -52,6 +52,10 @@ var MockServer = Class.extend({
             }
         }
 
+        // fill relational fields' inverse.
+        for (const modelName in this.data) {
+            this.data[modelName].records.forEach(record => this._updateComodelRelationalFields(modelName, record.id, record));
+        }
         this.debug = options.debug;
 
         this.currentDate = options.currentDate || moment().format("YYYY-MM-DD");
@@ -578,6 +582,7 @@ var MockServer = Class.extend({
         model.records.push(record);
         this._applyDefaults(model, values);
         this._writeRecord(modelName, values, id);
+        this._updateComodelRelationalFields(modelName, id, values);
         return id;
     },
     /**
@@ -1846,14 +1851,18 @@ var MockServer = Class.extend({
             return _.contains(ids, record.id);
         });
 
-        // update value of one2many fields pointing to the deleted records
+        // update value of relationnal fields pointing to the deleted records
         _.each(this.data, function (d) {
             var relatedFields = _.pick(d.fields, function (field) {
-                return field.type === 'one2many' && field.relation === model;
+                return field.relation === model;
             });
             _.each(Object.keys(relatedFields), function (relatedField) {
                 _.each(d.records, function (record) {
-                    record[relatedField] = _.difference(record[relatedField], ids);
+                    if (Array.isArray(record[relatedField])) {
+                        record[relatedField] = _.difference(record[relatedField], ids);
+                    } else if (ids.includes(record[relatedField])) {
+                        record[relatedField] = false;
+                    }
                 });
             });
         });
@@ -1914,7 +1923,10 @@ var MockServer = Class.extend({
      * @returns {boolean} currently, always return 'true'
      */
     _mockWrite: function (model, args) {
-        _.each(args[0], this._writeRecord.bind(this, model, args[1]));
+        _.each(args[0], id => {
+            this._writeRecord(model, args[1], id);
+            this._updateComodelRelationalFields(model, id, args[1]);
+        });
         return true;
     },
     /**
@@ -2074,6 +2086,42 @@ var MockServer = Class.extend({
         var self = this;
         if (f(tree)) {
             _.each(tree.childNodes, function (c) { self._traverse(c, f); });
+        }
+    },
+    /**
+     * Fill all inverse fields of the relational fields present in the record
+     * to be created/updated.
+     *
+     * @param {string} modelName
+     * @param {integer} recordId id of the record that have been created/updated.
+     * @param {Object} record record that have been created/updated.
+     */
+     _updateComodelRelationalFields(modelName, recordId, record) {
+        for (const fname in record) {
+            if (!record[fname]) {
+                continue;
+            }
+            const field = this.data[modelName].fields[fname];
+            const comodelName = field.relation || record[field['model_name_ref_fname']];
+            const inverseFieldName = field['inverse_fname_by_model_name'] && field['inverse_fname_by_model_name'][comodelName];
+             if (inverseFieldName) {
+                const relatedRecordIds = Array.isArray(record[fname]) ? record[fname] : [record[fname]];
+                for (const relatedRecordId of relatedRecordIds) {
+                    let inverseFieldNewValue = recordId;
+                    const relatedRecord = this.data[comodelName].records.find(record => record.id === relatedRecordId);
+                    const relatedFieldValue = relatedRecord && relatedRecord[inverseFieldName];
+                    if (
+                        relatedFieldValue === undefined
+                        || relatedFieldValue === recordId
+                        || field.type !== 'one2many' && relatedFieldValue.includes(recordId)
+                    ) {
+                        continue;
+                    } else if (field.type !== 'one2many') {
+                        inverseFieldNewValue = [...relatedFieldValue, recordId];
+                    }
+                    this._writeRecord(comodelName, { [inverseFieldName]: inverseFieldNewValue }, relatedRecordId);
+                }
+            }
         }
     },
     /**

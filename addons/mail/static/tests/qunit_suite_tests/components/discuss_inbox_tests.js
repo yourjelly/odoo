@@ -662,7 +662,12 @@ QUnit.test('click on (non-channel/non-partner) origin thread link should redirec
             "action should open view with id 10 (id of message origin thread)"
         );
     });
-    this.data['some.model'] = { fields: {}, records: [{ id: 10, name: "Some record" }] };
+    this.data['some.model'] = {
+        fields: {
+            message_ids: { type: 'one2many', relation: 'mail.message' },
+        },
+        records: [{ id: 10, name: "Some record" }],
+    };
     this.data['mail.message'].records.push({
         body: "not empty",
         id: 100,
