@@ -92,7 +92,7 @@ const KnowledgeArticleLinkModal = Dialog.extend({
             formatSelection: (data, container, escapeMarkup) => {
                 const markup = [];
                 if (typeof data.icon !== 'undefined') {
-                    markup.push(`<i class="fa fa-w ${escapeMarkup(data.icon)} mr-1"/>`);
+                    markup.push(escapeMarkup(data.icon) + ' ');
                 }
                 markup.push(escapeMarkup(data.text));
                 return markup.join('');
@@ -108,7 +108,7 @@ const KnowledgeArticleLinkModal = Dialog.extend({
                 const markup = [];
                 Select2.util.markMatch(text, query.term, markup, escapeMarkup);
                 if (typeof result.icon !== 'undefined') {
-                    markup.unshift(`<i class="fa fa-w ${escapeMarkup(result.icon)} mr-1"/>`);
+                    markup.unshift(escapeMarkup(result.icon) + ' ');
                 }
                 return markup.join('');
             },
