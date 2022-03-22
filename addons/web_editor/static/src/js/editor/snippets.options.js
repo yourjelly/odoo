@@ -2028,7 +2028,7 @@ const ListUserValueWidget = UserValueWidget.extend({
             draggableTdEl.appendChild(draggableEl);
             trEl.appendChild(draggableTdEl);
         }
-        let forceSelected = true;
+        let recordDataSelected = false;
         const inputEl = document.createElement('input');
         inputEl.type = this.el.dataset.inputType || 'text';
         if (value) {
@@ -2038,7 +2038,7 @@ const ListUserValueWidget = UserValueWidget.extend({
             inputEl.name = id;
         }
         if (recordData) {
-            forceSelected = recordData.selected;
+            recordDataSelected = recordData.selected;
             if (recordData.placeholder) {
                 inputEl.placeholder = recordData.placeholder;
             }
@@ -2054,10 +2054,10 @@ const ListUserValueWidget = UserValueWidget.extend({
         if (this.hasDefault) {
             const checkboxEl = document.createElement('we-button');
             checkboxEl.classList.add('o_we_user_value_widget', 'o_we_checkbox_wrapper');
-            if (this.selected.includes(id) && forceSelected) {
+            if (this.selected.includes(id) || recordDataSelected) {
                 checkboxEl.classList.add('active');
             }
-            checkboxEl.disabled = !value && !forceSelected;
+            checkboxEl.disabled = !value && !recordDataSelected;
             const div = document.createElement('div');
             const checkbox = document.createElement('we-checkbox');
             div.appendChild(checkbox);
@@ -2114,15 +2114,16 @@ const ListUserValueWidget = UserValueWidget.extend({
         });
         if (this.hasDefault) {
             const checkboxes = [...this.listTable.querySelectorAll('we-button.o_we_checkbox_wrapper.active')];
-            this.selected = checkboxes.map(el => {
+            let selected = checkboxes.map(el => {
                 const input = el.parentElement.previousSibling.firstChild;
                 const id = input.name || input.value;
                 const idInt = parseInt(id);
                 return isNaN(idInt) ? id : idInt;
             });
             values.forEach(v => {
-                v.selected = this.selected.includes(v.id);
+                v.selected = selected.includes(v.id);
             });
+            this.selected = [];
         }
         this._value = JSON.stringify(values);
         this.notifyValueChange(false);

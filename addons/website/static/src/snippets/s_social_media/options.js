@@ -15,7 +15,7 @@ options.registry.SocialMedia = options.Class.extend({
         this.recordData = [];
         // Get the social medias from the DOM. This is done before the super
         // call, since _renderCustomXml depends on this.links.
-        this.links = new Map([...this.$target[0].querySelectorAll(':scope > a')].map(el => {
+        this.links = new Map([...this.$target[0].querySelectorAll(':scope:not(.s_preview) > a')].map(el => {
             return [generateHTMLId(), el];
         }));
         await this._super(...arguments);
@@ -38,39 +38,40 @@ options.registry.SocialMedia = options.Class.extend({
         // Adds the DB social media links that are not in the DOM.
         for (const socialMedia of Object.keys(dbSocialValues)) {
             const mediaName = socialMedia.split('social_').pop();
-            if (!this.$target[0].querySelector(`:scope > a[href="/website/social/${mediaName}"]`)) {
+            let anchorEl = this.$target[0].querySelector(`:scope > a[href="/website/social/${mediaName}"]`);
+            if (!anchorEl) {
                 const otherAnchorEl = this.$target[0].querySelector(':scope > a');
-                let anchorEl;
                 if (otherAnchorEl) {
                     anchorEl = otherAnchorEl.cloneNode(true);
                     this._removeSocialMediaClasses(anchorEl);
                 } else {
                     anchorEl = document.createElement('a');
-                    anchorEl.classList.add('d-none');
                     anchorEl.setAttribute('target', '_blank');
                     const iEl = document.createElement('i');
                     iEl.classList.add('fa', 'rounded-circle', 'shadow-sm');
                     iEl.setAttribute('contenteditable', 'false');
                     anchorEl.appendChild(iEl);
                 }
-                const iEl = anchorEl.querySelector('i');
-                anchorEl.classList.add(`s_social_media_${mediaName}`);
-                iEl.classList.add(`fa-${mediaName}`);
+                anchorEl.classList.add('d-none', `s_social_media_${mediaName}`);
+                anchorEl.querySelector('i').classList.add(`fa-${mediaName}`);
                 anchorEl.href = `/website/social/${mediaName}`;
+            }
+            if (!anchorEl.closest('.s_social_media:not(.s_preview)')) {
                 this.links.set(generateHTMLId(), anchorEl);
             }
         }
         // Calculate the initial state of the ListUserValueWidget.
         for (const [id, el] of Array.from(this.links.entries())) {
             const media = el.href.split('/website/social/')[1];
-            const visible = !el.classList.contains('d-none');
             const display_name = media ?
                 dbSocialValues[`social_${media}`] : el.getAttribute('href');
-            const forceSelected = Boolean(media) && !display_name && visible;
+            const isVisible = !el.classList.contains('d-none');
+            const isPreview = this.$target[0].classList.contains('s_preview');
+            const forceSelected = media && display_name && isVisible;
             const entry = {
                 id,
                 display_name,
-                selected: Boolean(this.$target[0].contains(el) && visible || forceSelected),
+                selected: !isPreview && isVisible || forceSelected,
                 undeletable: Boolean(media),
                 placeholder: `https://${media || 'example'}.com/yourPage`,
             };
@@ -108,6 +109,7 @@ options.registry.SocialMedia = options.Class.extend({
             // Ensure we do not drop a blank block.
             this._addNoMediaAlert();
         }
+        this.$target[0].classList.remove('s_preview');
     },
     /**
      * @override
@@ -224,6 +226,13 @@ options.registry.SocialMedia = options.Class.extend({
      */
     _computeWidgetState: function (methodName, params) {
         if (methodName === 'renderListItems') {
+            for (const entry of this.recordData) {
+                if (entry.undeletable) {
+                    const anchorEl = this.links.get(entry.id);
+                    const media = anchorEl.href.split('/website/social/')[1];
+                    entry.display_name = dbSocialValues[`social_${media}`];
+                }
+            }
             return JSON.stringify(this.recordData);
         }
         return this._super(methodName, params);
