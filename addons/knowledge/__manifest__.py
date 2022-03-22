@@ -29,6 +29,7 @@
     'assets': {
         'web.assets_backend': [
             'knowledge/static/src/components/*/*.scss',
+            'knowledge/static/src/components/*/*.js',
             'knowledge/static/src/scss/knowledge_views.scss',
             'knowledge/static/src/js/knowledge_controller.js',
             'knowledge/static/src/js/knowledge_model.js',
@@ -37,6 +38,7 @@
             'knowledge/static/src/js/widgets/knowledge_dialogs.js',
             'knowledge/static/src/js/tools/tree_panel_mixin.js',
             'knowledge/static/src/js/widgets/knowledge_permission_panel.js',
+            'knowledge/static/src/js/widgets/knowledge_emoji_picker.js',
         ],
         'web.assets_frontend': [
             'knowledge/static/src/scss/knowledge_frontend.scss',
@@ -47,6 +49,7 @@
             'knowledge/static/src/js/wysiwyg.js',
         ],
         'web.assets_qweb': [
+            'knowledge/static/src/components/*/*.xml',
             'knowledge/static/src/xml/knowledge_editor.xml',
             'knowledge/static/src/xml/knowledge_templates.xml'
         ]

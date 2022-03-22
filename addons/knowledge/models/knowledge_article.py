@@ -23,7 +23,7 @@ class Article(models.Model):
     active = fields.Boolean(default=True)
     name = fields.Char(string="Title", default=lambda self: _('New Article'), required=True)
     body = fields.Html(string="Article Body")
-    icon = fields.Char(string='Article Icon', default='fa-file')
+    icon = fields.Char(string='Article Icon', default='📄')
     is_locked = fields.Boolean(string='Locked')
     full_width = fields.Boolean(string='Full width')
     share_link = fields.Char('Link', compute='_compute_share_link', store=False, readonly=True)
@@ -113,10 +113,14 @@ class Article(models.Model):
         if not self._check_recursion():
             raise ValidationError(_('You cannot create recursive articles.'))
 
+    def name_get(self):
+        """Override the `name_get` function to add the article icon"""
+        return [(rec.id, "%s %s" % (rec.icon, rec.name)) for rec in self]
+
     _sql_constraints = [
         ('check_permission_on_root', 'check(parent_id IS NOT NULL OR (parent_id IS NULL AND internal_permission IS NOT NULL))', 'Root articles must have internal permission.')
     ]
-    
+
     ##############################
     # Computes, Searches, Inverses
     ##############################
