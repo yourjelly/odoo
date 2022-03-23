@@ -913,15 +913,22 @@ export function isUnbreakable(node) {
     );
 }
 
-export function isUnremovable(node) {
+export function isUnremovable(node, {editable} = {}) {
     if (node.nodeType !== Node.ELEMENT_NODE && node.nodeType !== Node.TEXT_NODE) {
         return true;
     }
     const isEditableRoot =
-        node.isContentEditable &&
-        node.parentElement &&
-        !node.parentElement.isContentEditable &&
-        node.nodeName !== 'A'; // links can be their own contenteditable but should be removable by default.
+        // Todo: refactor to always have the editable passed to this function
+        (editable && node === editable) ||
+        // Heuristic in case the editable has not been passed to this function
+        (
+            !editable &&
+            node.isContentEditable &&
+            node.parentElement &&
+            !node.parentElement.isContentEditable &&
+            node.nodeName !== 'A' // links can be their own contenteditable but should be removable by default.
+        );
+    if (isEditableRoot) debugger
     return (
         isEditableRoot ||
         (node.nodeType === Node.ELEMENT_NODE &&
