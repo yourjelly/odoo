@@ -30,8 +30,8 @@ options.registry.SocialMedia = options.Class.extend({
             [dbSocialValues] = await this._rpc({
                 model: 'website',
                 method: 'read',
-                args: [websiteId, ['social_facebook', 'social_twitter', 'social_youtube',
-                    'social_instagram', 'social_linkedin', 'social_github']],
+                args: [websiteId, ['social_facebook', 'social_twitter', 'social_linkedin',
+                    'social_youtube', 'social_instagram', 'social_github']],
             });
             delete dbSocialValues.id;
         }
