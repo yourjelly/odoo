@@ -2052,7 +2052,7 @@ const ListUserValueWidget = UserValueWidget.extend({
             const checkboxEl = document.createElement('we-button');
             checkboxEl.classList.add('o_we_user_value_widget', 'o_we_checkbox_wrapper');
             checkboxEl.classList.toggle('active',
-                this.el.dataset.newElementsToggled || recordData && recordData.selected
+                !recordData && this.el.dataset.newElementsToggled || recordData && recordData.selected
             );
             checkboxEl.disabled = !value && !checkboxEl.classList.contains('active');
             const div = document.createElement('div');
