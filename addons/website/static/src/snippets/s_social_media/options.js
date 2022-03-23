@@ -227,7 +227,7 @@ options.registry.SocialMedia = options.Class.extend({
     _computeWidgetState: function (methodName, params) {
         if (methodName === 'renderListItems') {
             for (const entry of this.recordData) {
-                if (entry.undeletable) {
+                if (entry.undeletable === 'true') {
                     const anchorEl = this.links.get(entry.id);
                     const media = anchorEl.href.split('/website/social/')[1];
                     entry.display_name = dbSocialValues[`social_${media}`];
