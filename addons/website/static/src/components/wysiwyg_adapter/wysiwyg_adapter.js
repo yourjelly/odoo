@@ -12,11 +12,15 @@ export class PageOption {
     /***
      * A page option is defined with an input el hidden inside the content that we're editing.
      * @param {HTMLInputElement} el The element holding the value of the page option
+     * @param {Document} document The document on which the option applies.
+     * @param {Function} callback The method called after applying an option
      * @param isDirty If the option is dirty, it's value will be sent to the database
      */
-    constructor(el, isDirty = false) {
+    constructor(el, document, callback, isDirty = false) {
         this.el = el;
         this.isDirty = isDirty;
+        this.document = document;
+        this.callback = callback.bind(this);
     }
     get value() {
         if (this.el.value.toLowerCase() === 'true') {
@@ -27,25 +31,31 @@ export class PageOption {
         return this.el.value;
     }
     set value(value) {
+        this.callback(value);
         this.el.value = value;
         this.isDirty = true;
     }
 }
-// The callbacks are called to represent a change inside the
-PageOption.prototype.optionsCallbacks = {
-    header_overlay: function ($pageEl, value) {
-        $pageEl.find('#wrapwrap').toggleClass('o_header_overlay', value);
+export const pageOptionsCallbacks = {
+    header_overlay: function (value) {
+        this.document.getElementById('wrapwrap').classList.toggle('o_header_overlay', value);
     },
-    header_color: function ($pageEl, value) {
-        debugger;
-        $pageEl.find('#wrapwrap > header').removeClass(this.value)
-                               .addClass(value);
+    header_color: function (value) {
+        const headerEl = this.document.querySelector('#wrapwrap > header');
+        if (this.value) {
+            headerEl.classList.remove(this.value);
+        }
+        if (value) {
+            headerEl.classList.add(value);
+        }
     },
-    header_visible: function ($pageEl, value) {
-        $pageEl.find('#wrapwrap > header').toggleClass('d-none o_snippet_invisible', !value);
+    header_visible: function (value) {
+        const headerEl = this.document.querySelector('#wrapwrap > header');
+        headerEl.classList.toggle('d-none', !value);
+        headerEl.classList.toggle('o_snippet_invisible', !value);
     },
-    footer_visible: function ($pageEl, value) {
-        $pageEl.find('#wrapwrap > footer').toggleClass('d-none o_snippet_invisible', !value);
+    footer_visible: function (value) {
+        this.document.querySelector('#wrapwrap > footer').toggleClass('d-none o_snippet_invisible', !value);
     },
 };
 
@@ -77,7 +87,8 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
         onWillStart(() => {
             const pageOptionEls = this.iframe.el.contentDocument.querySelectorAll('.o_page_option_data');
             for (const pageOptionEl of pageOptionEls) {
-                this.pageOptions[pageOptionEl.name] = new PageOption(pageOptionEl);
+                const optionName = pageOptionEl.name;
+                this.pageOptions[optionName] = new PageOption(pageOptionEl, this.iframe.el.contentDocument, pageOptionsCallbacks[optionName]);
             }
             this.editableFromEditorMenu(this.$editable).addClass('o_editable');
         });
@@ -345,10 +356,7 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
     }
     _togglePageOption(params) {
         const pageOption = this.pageOptions[params.name];
-        const newValue = params.value === undefined ? !pageOption.value : params.value;
-        // Some option callbacks need the old value before applying the new one.
-        pageOption.optionsCallbacks[params.name]($(this.iframe.el.contentDocument.body), newValue);
-        pageOption.value = newValue;
+        pageOption.value = params.value === undefined ? !pageOption.value : params.value;
     }
     _websiteRootEvent(type, eventData = {}) {
         const websiteRootInstance = this.websiteService.websiteRootInstance;
@@ -372,7 +380,7 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                 $newLinks = $newLinks.add('<link/>', {
                     type: 'text/css',
                     rel: 'stylesheet',
-                    href: url
+                    href: url + `?${new Date().getTime()}`, // Insures that the css will be reloaded.
                 });
             }
             proms.push(new Promise((resolve, reject) => {
