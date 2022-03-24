@@ -2103,7 +2103,8 @@ var MockServer = Class.extend({
             }
             const field = this.data[modelName].fields[fname];
             const comodelName = field.relation || record[field['model_name_ref_fname']];
-            const inverseFieldName = field['inverse_fname_by_model_name'] && field['inverse_fname_by_model_name'][comodelName];
+            // many2one_reference fields have a dict of inverse fields instead of a single inverse.
+            const inverseFieldName = field['inverse'] || field['inverse_fname_by_model_name'] && field['inverse_fname_by_model_name'][comodelName];
              if (inverseFieldName) {
                 const relatedRecordIds = Array.isArray(record[fname]) ? record[fname] : [record[fname]];
                 for (const relatedRecordId of relatedRecordIds) {

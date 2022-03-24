@@ -8,9 +8,9 @@ QUnit.module('mock_relational_fields_tests.js', {
         this.data = {
             foo: {
                 fields: {
-                    one2many_field: { type: 'one2many', relation: 'bar', inverse_fname_by_model_name: { bar: 'many2one_field' } },
-                    many2one_field: { type: 'many2one', relation: 'bar', inverse_fname_by_model_name: { bar: 'one2many_field' } },
-                    many2many_field: { type: 'many2many', relation: 'bar', inverse_fname_by_model_name: { bar: 'many2many_field' } },
+                    one2many_field: { type: 'one2many', relation: 'bar', inverse: 'many2one_field' },
+                    many2one_field: { type: 'many2one', relation: 'bar', inverse: 'one2many_field' },
+                    many2many_field: { type: 'many2many', relation: 'bar', inverse: 'many2many_field' },
                     many2one_reference: { type: 'many2one_reference', model_name_ref_fname: 'res_model', inverse_fname_by_model_name: { bar: 'one2many_field' } },
                     res_model: { type: 'char' },
 
@@ -20,8 +20,8 @@ QUnit.module('mock_relational_fields_tests.js', {
             bar: {
                 fields: {
                     many2one_field: { type: 'many2one', relation: 'foo' },
-                    one2many_field: { type: 'one2many', relation: 'foo', inverse_fname_by_model_name: { foo: 'many2one_field' } },
-                    many2many_field: { type: 'many2many', relation: 'foo', inverse_fname_by_model_name: { foo: 'many2many_field' } },
+                    one2many_field: { type: 'one2many', relation: 'foo', inverse: 'many2one_field' },
+                    many2many_field: { type: 'many2many', relation: 'foo', inverse: 'many2many_field' },
                 },
                 records: [],
             },

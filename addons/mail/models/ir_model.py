@@ -130,9 +130,11 @@ class IrModel(models.Model):
                         field for field in model.pool.field_inverses[model._fields[fname]]
                         if field.model_name in model_names_to_fetch
                     ]
-                    if inverse_fields:
-                        field_data['inverse_fname_by_model_name'] = {field.model_name: field.name for field in inverse_fields}
                     if field_data['type'] == 'many2one_reference':
                         field_data['model_name_ref_fname'] = model._fields[fname].model_field
+                        if inverse_fields:
+                            field_data['inverse_fname_by_model_name'] = {field.model_name: field.name for field in inverse_fields}
+                    elif inverse_fields:
+                        field_data['inverse'] = inverse_fields[0].name
             fields_by_model_names[model_name] = fields_data_by_fname
         return fields_by_model_names
