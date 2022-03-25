@@ -15,12 +15,20 @@ class PosOrderLine(models.Model):
     mp_dirty = fields.Boolean()
 
 
+class ProformaOrder(models.Model):
+    _inherit = 'pos.proforma.order'
+
+    table_id = fields.Many2one('restaurant.table', string='Table', help='The table where this order was served',
+                               index='btree_not_null')
+
+
+
 class PosOrder(models.Model):
     _inherit = 'pos.order'
 
-    table_id = fields.Many2one('restaurant.table', string='Table', help='The table where this order was served', index='btree_not_null')
-    customer_count = fields.Integer(string='Guests', help='The amount of customers that have been served by this order.')
     multiprint_resume = fields.Char()
+    customer_count = fields.Integer(string='Guests',
+                                    help='The amount of customers that have been served by this order.')
 
     def _get_pack_lot_lines(self, order_lines):
         """Add pack_lot_lines to the order_lines.

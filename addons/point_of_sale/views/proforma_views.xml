@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pos_proforma_order_tree" model="ir.ui.view">
+        <field name="name">pos.proforma.order.tree</field>
+        <field name="model">pos.proforma.order</field>
+        <field name="arch" type="xml">
+            <tree string="POS Proforma Orders" create="0" sample="1" decoration-info="state == 'draft'" decoration-muted="state == 'cancel'">
+                <field name="currency_id" invisible="1"/>
+                <field name="name" decoration-bf="1"/>
+                <field name="session_id" />
+                <field name="date_order"/>
+                <field name="pos_reference"/>
+                <field name="partner_id"/>
+                <field string="Cashier" name="user_id" widget="many2one_avatar_user"/>
+                <field name="amount_total" sum="Amount total" widget="monetary" decoration-bf="1"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state not in ('draft','cancel')"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_pos_proforma_order_tree_no_session_id" model="ir.ui.view">
+        <field name="name">pos.proforma.order.tree_no_session_id</field>
+        <field name="model">pos.proforma.order</field>
+        <field name="mode">primary</field>
+        <field name="priority">1000</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_order_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='session_id']" position="replace"></xpath>
+        </field>
+    </record>
+</odoo>

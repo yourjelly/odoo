@@ -2,7 +2,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import logging
 from datetime import timedelta
-from functools import partial
 from itertools import groupby
 
 import psycopg2
@@ -22,7 +21,7 @@ _logger = logging.getLogger(__name__)
 class PosOrder(models.Model):
     _name = "pos.order"
     _description = "Point of Sale Orders"
-    _order = "date_order desc, name desc, id desc"
+    _inherit = 'pos.proforma.order'
 
     @api.model
     def _amount_line_tax(self, line, fiscal_position_id):
@@ -34,27 +33,17 @@ class PosOrder(models.Model):
 
     @api.model
     def _order_fields(self, ui_order):
-        process_line = partial(self.env['pos.order.line']._order_line_fields, session_id=ui_order['pos_session_id'])
-        return {
-            'user_id':      ui_order['user_id'] or False,
-            'session_id':   ui_order['pos_session_id'],
-            'lines':        [process_line(l) for l in ui_order['lines']] if ui_order['lines'] else False,
-            'pos_reference': ui_order['name'],
-            'sequence_number': ui_order['sequence_number'],
-            'partner_id':   ui_order['partner_id'] or False,
-            'date_order':   ui_order['creation_date'].replace('T', ' ')[:19],
+        fields = super(PosOrder, self)._order_fields(ui_order)
+
+        fields.update({
             'fiscal_position_id': ui_order['fiscal_position_id'],
-            'pricelist_id': ui_order['pricelist_id'],
-            'amount_paid':  ui_order['amount_paid'],
-            'amount_total':  ui_order['amount_total'],
-            'amount_tax':  ui_order['amount_tax'],
-            'amount_return':  ui_order['amount_return'],
-            'company_id': self.env['pos.session'].browse(ui_order['pos_session_id']).company_id.id,
             'to_invoice': ui_order['to_invoice'] if "to_invoice" in ui_order else False,
             'to_ship': ui_order['to_ship'] if "to_ship" in ui_order else False,
             'is_tipped': ui_order.get('is_tipped', False),
             'tip_amount': ui_order.get('tip_amount', 0),
-        }
+        })
+
+        return fields
 
     @api.model
     def _payment_fields(self, order, ui_paymentline):
@@ -150,7 +139,6 @@ class PosOrder(models.Model):
 
         return pos_order.id
 
-
     def _process_payment_lines(self, pos_order, order, pos_session, draft):
         """Create account.bank.statement.lines from the dictionary given to the parent function.
 
@@ -227,39 +215,10 @@ class PosOrder(models.Model):
         price_unit = product.with_company(self.company_id)._compute_average_price(0, quantity, moves)
         return price_unit
 
-    name = fields.Char(string='Order Ref', required=True, readonly=True, copy=False, default='/')
-    date_order = fields.Datetime(string='Date', readonly=True, index=True, default=fields.Datetime.now)
-    user_id = fields.Many2one(
-        comodel_name='res.users', string='Responsible',
-        help="Person who uses the cash register. It can be a reliever, a student or an interim employee.",
-        default=lambda self: self.env.uid,
-        states={'done': [('readonly', True)], 'invoiced': [('readonly', True)]},
-    )
-    amount_tax = fields.Float(string='Taxes', digits=0, readonly=True, required=True)
-    amount_total = fields.Float(string='Total', digits=0, readonly=True, required=True)
-    amount_paid = fields.Float(string='Paid', states={'draft': [('readonly', False)]},
-        readonly=True, digits=0, required=True)
-    amount_return = fields.Float(string='Returned', digits=0, required=True, readonly=True)
     margin = fields.Monetary(string="Margin", compute='_compute_margin')
     margin_percent = fields.Float(string="Margin (%)", compute='_compute_margin', digits=(12, 4))
     is_total_cost_computed = fields.Boolean(compute='_compute_is_total_cost_computed',
         help="Allows to know if all the total cost of the order lines have already been computed")
-    lines = fields.One2many('pos.order.line', 'order_id', string='Order Lines', states={'draft': [('readonly', False)]}, readonly=True, copy=True)
-    company_id = fields.Many2one('res.company', string='Company', required=True, readonly=True)
-    pricelist_id = fields.Many2one('product.pricelist', string='Pricelist', required=True, states={
-                                   'draft': [('readonly', False)]}, readonly=True)
-    partner_id = fields.Many2one('res.partner', string='Customer', change_default=True, index='btree_not_null', states={'draft': [('readonly', False)], 'paid': [('readonly', False)]})
-    sequence_number = fields.Integer(string='Sequence Number', help='A session-unique sequence number for the order', default=1)
-
-    session_id = fields.Many2one(
-        'pos.session', string='Session', required=True, index=True,
-        domain="[('state', '=', 'opened')]", states={'draft': [('readonly', False)]},
-        readonly=True)
-    config_id = fields.Many2one('pos.config', related='session_id.config_id', string="Point of Sale", readonly=False)
-    currency_id = fields.Many2one('res.currency', related='config_id.currency_id', string="Currency")
-    currency_rate = fields.Float("Currency Rate", compute='_compute_currency_rate', compute_sudo=True, store=True, digits=0, readonly=True,
-        help='The rate of the currency to the currency of rate applicable at the date of the order')
-
     invoice_group = fields.Boolean(related="config_id.module_account", readonly=False)
     state = fields.Selection(
         [('draft', 'New'), ('cancel', 'Cancelled'), ('paid', 'Paid'), ('done', 'Posted'), ('invoiced', 'Invoiced')],
@@ -272,9 +231,7 @@ class PosOrder(models.Model):
     picking_type_id = fields.Many2one('stock.picking.type', related='session_id.config_id.picking_type_id', string="Operation Type", readonly=False)
     procurement_group_id = fields.Many2one('procurement.group', 'Procurement Group', copy=False)
 
-    note = fields.Text(string='Internal Notes')
     nb_print = fields.Integer(string='Number of Print', readonly=True, copy=False, default=0)
-    pos_reference = fields.Char(string='Receipt Number', readonly=True, copy=False)
     sale_journal = fields.Many2one('account.journal', related='session_id.config_id.journal_id', string='Sales Journal', store=True, readonly=True, ondelete='restrict')
     fiscal_position_id = fields.Many2one(
         comodel_name='account.fiscal.position', string='Fiscal Position',
@@ -318,11 +275,6 @@ class PosOrder(models.Model):
         for order in self:
             order.picking_count = len(order.picking_ids)
             order.failed_pickings = bool(order.picking_ids.filtered(lambda p: p.state != 'done'))
-
-    @api.depends('date_order', 'company_id', 'currency_id', 'company_id.currency_id')
-    def _compute_currency_rate(self):
-        for order in self:
-            order.currency_rate = self.env['res.currency']._get_conversion_rate(order.company_id.currency_id, order.currency_id, order.company_id, order.date_order)
 
     @api.depends('lines.is_total_cost_computed')
     def _compute_is_total_cost_computed(self):
