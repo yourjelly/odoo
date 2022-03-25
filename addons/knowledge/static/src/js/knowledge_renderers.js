@@ -57,6 +57,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
             tolerance: 'pointer',
             helper: 'clone',
             cursor: 'grabbing',
+            cancel: '.readonly',
             start: (event, ui) => {
                 this.$el.find('aside').toggleClass('dragging', true);
             },
