@@ -69,6 +69,16 @@ export class WebsiteEditorComponent extends Component {
         }
         this.state.edition = EDITION_STATE.RELOAD;
     }
+    async wysiwygStarted() {
+        if (this.state.edition !== EDITION_STATE.RELOAD) {
+            this.websiteService.toggleFullscreen();
+            this.iframe.el.classList.add('editor_enable', 'editor_has_snippets');
+            // make sure the animation is played
+            setTimeout(() => {
+                document.getElementById('oe_snippets').classList.add('o_loaded');
+            });
+        }
+    }
     /**
      * Reload the iframe and set the edition states to false
      */

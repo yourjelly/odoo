@@ -241,13 +241,6 @@ iframe.editor_enable.editor_has_snippets {
     font-size: $o-we-sidebar-font-size;
     font-weight: 400;
 
-    transition: transform 400ms ease 0s;
-    transform: translateX(100%);
-
-    &.o_loaded {
-        transform: none;
-    }
-
     *::selection {
         background: lighten($o-we-accent, 9);
         color: $o-we-bg-darkest;

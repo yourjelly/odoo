@@ -9,6 +9,17 @@
     color: $o-we-fg-lighter;
     z-index: 10000;
 }
+iframe {
+    transition: padding-right 400ms ease 0s;
+}
+#oe_snippets {
+    transition: transform 400ms ease 0s;
+    transform: translateX(100%);
+
+    &.o_loaded {
+        transform: none;
+    }
+}
 // Duplicate code from web_editor/wysiwyg_snippets.scss
 .editor_has_snippets {
     overflow: hidden;

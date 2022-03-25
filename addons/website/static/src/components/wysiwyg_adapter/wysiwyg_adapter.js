@@ -105,12 +105,9 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
             if (this.props.target) {
                 this.widget.snippetsMenu.activateSnippet($(this.props.target));
             }
-            this.websiteService.toggleFullscreen();
-            // Initializing Page Options
 
-            if (!this.iframe.el.classList.contains('editor_enable')) {
-                this.iframe.el.classList.add('editor_enable', 'editor_has_snippets');
-            }
+            this.props.startedCallback();
+
             return () => {
                 this.$editable.off('click.odoo-website-editor', '*');
             };

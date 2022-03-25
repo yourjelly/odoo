@@ -5,6 +5,7 @@
         <t t-if="this.state.edition === true">
             <WysiwygAdapterComponent Component="this.Wysiwyg" iframe="this.iframe"
                                     target="this.reloadTarget"
+                                    startedCallback="() => this.wysiwygStarted()"
                                     reloadCallback="(event, widgetEl) => this.reload(event, widgetEl)"
                                     quitCallback="() => this.quit()"/>
         </t>

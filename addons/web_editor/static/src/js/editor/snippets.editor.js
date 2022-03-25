@@ -2238,7 +2238,6 @@ var SnippetsMenu = Widget.extend({
         this._makeSnippetDraggable(this.$snippets);
         this._disableUndroppableSnippets();
 
-        this.$el.addClass('o_loaded');
         this.trigger_up('snippets_loaded', self.$el);
         $(this.el.ownerDocument.body).addClass('editor_has_snippets');
     },

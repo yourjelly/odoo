@@ -107,7 +107,7 @@ export const websiteService = {
                 return http[method](route, { ...params, 'csrf_token': core.csrf_token }, readMethod);
             },
             toggleFullscreen() {
-                document.body.classList.add('o_website_fullscreen');
+                document.body.classList.toggle('o_website_fullscreen');
             }
         };
     },
