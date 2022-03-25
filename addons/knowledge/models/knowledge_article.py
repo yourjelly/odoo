@@ -57,14 +57,15 @@ class ArticleMembers(models.Model):
     def _compute_article_permission(self):
         articles_permission = self.article_id._get_internal_permission(article_ids=self.article_id.ids)
         for member in self:
-            member.article_permission = articles_permission[member.article_id.id]
+            # using article.ids[0] to avoid <NewId> issues when adding a new member.
+            member.article_permission = articles_permission[member.article_id.ids[0]]
 
     def _compute_is_current_user(self):
         for member in self:
             member.is_current_user = member.partner_id.user_id == self.env.user
 
     @api.ondelete(at_uninstall=False)
-    def unlink(self):
+    def _unlink_except_no_writer(self):
         """ When removing a member, the constraint is not triggered.
         We need to check manually on article with no write permission that we do not remove the last write member """
         articles = self.article_id
@@ -78,8 +79,6 @@ class ArticleMembers(models.Model):
             remaining_members = article.article_member_ids - members_by_articles[article.id]
             if not remaining_members.filtered(lambda m: m.permission == 'write'):
                 raise ValidationError(_("You must have at least one writer."))
-
-        return super(ArticleMembers, self).unlink()
 
 class Article(models.Model):
     _name = "knowledge.article"
@@ -141,17 +140,32 @@ class Article(models.Model):
     def _check_members(self):
         """ If article has no member, the internal_permission must be write. as article must have at least one writer.
         If article has member, the validation is done in article.member model has we cannot trigger constraint depending
-        on fields from related model. see _check_members from 'knowledge.article.member' model for more details. """
-        article_permissions = self._get_internal_permission(article_ids=self.ids)
-        member_permissions = self._get_article_member_permissions()
+        on fields from related model. see _check_members from 'knowledge.article.member' model for more details.
+        Note : We cannot use the optimised sql request to get the permission and members as values are not yet in DB"""
         for article in self:
-            members = member_permissions.get(article.id)
-            if article_permissions[article.id] != 'write' and not any(m['permission'] == 'write' for m in list(members.values())):
+            def has_write_permission(a):
+                if a.internal_permission == 'write':
+                    return True
+                elif a.parent_id:
+                    return has_write_permission(a.parent_id)
+                return False
+
+            def has_write_member(a):
+                if any(member.permission == 'write' for member in a.article_member_ids):
+                    return True
+                elif a.parent_id:
+                    return has_write_member(a.parent_id)
+                return False
+            if not has_write_permission(article) and not has_write_member(article):
                 raise ValidationError(_("You must have at least one writer."))
 
     def name_get(self):
         """Override the `name_get` function to add the article icon"""
         return [(rec.id, "%s %s" % (rec.icon, rec.name)) for rec in self]
+
+    _sql_constraints = [
+        ('check_permission_on_root', 'check(parent_id IS NOT NULL OR (parent_id IS NULL and internal_permission IS NOT NULL))', 'Root articles must have internal permission.')
+    ]
 
     ##############################
     # Computes, Searches, Inverses
@@ -554,7 +568,7 @@ class Article(models.Model):
         }
         if not parent_id:
             # If parent_id, the write method will set the internal_permission based on the parent.
-            # If moved from workspace to private -> set none. If moved from private to workspace -> set write
+            # If set as root article: if moved to private -> set none; if moved to workspace -> set write
             values['internal_permission'] = 'none' if private else 'write'
 
         members_to_remove = self.env['knowledge.article.member']

@@ -30,6 +30,7 @@
         <field name="author_ids" eval="[(6, 0, [ref('base.user_admin')])]" />
         <field name="favourite_user_ids" eval="[(6, 0, [ref('base.user_demo')])]" />
         <field name="icon">📚</field>
+        <field name="internal_permission">write</field>
     </record>
     <record id="knowledge_article_demo_data_1" model="knowledge.article">
         <field name="name">How to make a Sale</field>
@@ -143,6 +144,7 @@
         </field>
         <field name="author_ids" eval="[(6, 0, [ref('base.user_root')])]" />
         <field name="icon">💡</field>
+        <field name="internal_permission">write</field>
     </record>
 
 </odoo>
