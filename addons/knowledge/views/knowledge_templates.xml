@@ -3,15 +3,7 @@
 <data>
     <!-- Article Tree layout -->
     <template id="knowledge_article_tree_template" name="Article Tree">
-        <section t-if="favourites">
-            <div class="h4 mb-0">Favourites</div>
-            <ul class="o_tree_favourite">
-                <t t-call="knowledge.articles_template">
-                    <t t-set="articles" t-value="favourites"/>
-                    <t t-set="hideChildren" t-value="true"/>
-                </t>
-            </ul>
-        </section>
+        <t t-call="knowledge.article_favourite_section_template"/>
 
         <section class="o_section" data-section="workspace">
             <div class="o_section_header d-flex h4 mb-0">
@@ -48,6 +40,18 @@
             <ul class="o_tree">
                 <t t-call="knowledge.articles_template">
                     <t t-set="articles" t-value="private_articles"/>
+                </t>
+            </ul>
+        </section>
+    </template>
+
+    <template id="article_favourite_section_template">
+        <section class="o_favourite_container" t-if="favourites">
+            <div class="h4 mb-0">Favourites</div>
+            <ul class="o_tree_favourite">
+                <t t-call="knowledge.articles_template">
+                    <t t-set="articles" t-value="favourites"/>
+                    <t t-set="hideChildren" t-value="true"/>
                 </t>
             </ul>
         </section>

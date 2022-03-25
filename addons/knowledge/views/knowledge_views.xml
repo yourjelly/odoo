@@ -85,7 +85,9 @@
                                         </li>
                                     </ol>
                                     <!--TODO DBE: Make the user_favourite widget a button for allow user that don't have write access to set article as favourite-->
-                                    <field name="is_user_favourite" class="m-0" widget="boolean_favorite" nolabel="1" force_save="1"/>
+                                    <field name="is_user_favourite" invisible="1"/>
+                                    <i class="fa fa-star o_toggle_favourite" attrs="{'invisible': [('is_user_favourite', '=', False)]}"/>
+                                    <i class="fa fa-star-o o_toggle_favourite" attrs="{'invisible': [('is_user_favourite', '=', True)]}"/>
                                     <div attrs="{'invisible': ['|', ('is_locked', '=', False), ('user_can_write', '=', False)]}">
                                         <i class="fa fa-fw fa-lock" title="locked"/>
                                     </div>

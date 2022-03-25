@@ -17,6 +17,7 @@ const KnowledgeFormController = FormController.extend({
         'click #knowledge_search_bar': '_onSearch',
         'change .o_breadcrumb_article_name': '_onRename',
         'input .o_breadcrumb_article_name': '_adjustInputSize',
+        'click i.o_toggle_favourite': '_onToggleFavourite',
     }),
 
     custom_events: Object.assign({}, FormController.prototype.custom_events, {
@@ -35,6 +36,7 @@ const KnowledgeFormController = FormController.extend({
     init: function (parent, model, renderer, params) {
         this.knowledgeFormController = true;
         this._super.apply(this, arguments);
+        this.renderer = renderer;
     },
 
     // Listeners:
@@ -184,6 +186,23 @@ const KnowledgeFormController = FormController.extend({
         }
     },
 
+    _onToggleFavourite: async function (event) {
+        const self = this;
+        const { id } = this.getState();
+        if (typeof id === 'undefined') {
+            return;
+        }
+        const result = await this._toggleFavourite(id);
+        $(event.target).toggleClass('fa-star-o', !result).toggleClass('fa-star', result);
+        this._rpc({
+            route: '/knowledge/get_favourite_tree'
+        }).then(favouriteTemplate => {
+            self.$(".o_favourite_container").replaceWith(favouriteTemplate);
+            this.renderer._setTreeListener();
+            this.renderer._renderEmojiPicker();
+        });
+    },
+
     // API calls:
 
     /**
@@ -255,6 +274,14 @@ const KnowledgeFormController = FormController.extend({
         } else {
             data.onReject();
         }
+    },
+
+    _toggleFavourite: async function (articleId) {
+        return await this._rpc({
+            model: 'knowledge.article',
+            method: 'action_toggle_favourite',
+            args: [articleId]
+        });
     },
 });
 

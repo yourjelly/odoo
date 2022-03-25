@@ -537,6 +537,13 @@ class Article(models.Model):
         for article in self:
             article.is_locked = False
 
+    def action_toggle_favourite(self):
+        article = self.sudo()
+        if not article.user_has_access:
+            raise AccessError(_("You cannot add this article to your favourites"))
+        article.is_user_favourite = not article.is_user_favourite
+        return article.is_user_favourite
+
     def action_archive(self):
         return super(Article, self | self._get_descendants()).action_archive()
 

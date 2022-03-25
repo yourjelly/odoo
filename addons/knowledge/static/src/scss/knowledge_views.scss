@@ -14,6 +14,14 @@
         border-bottom: $input-border-width solid $o-brand-primary;
     }
 
+    .o_toggle_favourite {
+        &.fa-star, &:hover {
+            color: #f3cc00;
+        }
+        font-size: 16px;
+        cursor: pointer;
+    }
+
     .o_knowledge_editor {
         min-height: 100%;
         .oe_form_field {

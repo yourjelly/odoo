@@ -100,6 +100,14 @@ class KnowledgeController(http.Controller):
 
         return values
 
+    @http.route('/knowledge/get_favourite_tree', type='json', auth='user')
+    def get_favourite_tree(self):
+        favourite_articles = request.env["knowledge.article"].sudo().search([
+            ("favourite_user_ids", "in", [request.env.user.id]),
+            ('user_has_access', '=', True)
+        ])
+        return request.env.ref('knowledge.article_favourite_section_template')._render({'favourites': favourite_articles})
+
     @http.route('/knowledge/get_tree', type='json', auth='user')
     def display_tree(self, res_id=False, unfolded_articles=False):
         parent_articles = request.env["knowledge.article"].sudo().browse(res_id)._get_parents().ids
