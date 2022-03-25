@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!-- Delete Default "Home" item -->
+<delete model="website.menu" search="[('url','in', ['/', '/']), ('website_id', '=', 1)]"/>
+
+<!-- HOME -->
+<record id="menu_home" model="website.menu">
+    <field name="name">Home</field>
+    <field name="url">/</field>
+    <field name="parent_id" search="[('url', '=', '/default-main-menu')]"/>
+    <field name="sequence" type="int">10</field>
+</record>
+
+<!-- Services -->
+<record id="menu_services" model="website.menu">
+    <field name="name">Services</field>
+    <field name="parent_id" search="[('url', '=', '/default-main-menu')]"/>
+    <field name="sequence" type="int">20</field>
+</record>
+
+<!-- Services - Item 1 -->
+<record id="menu_services_item_1" model="website.menu">
+    <field name="name">Item 1</field>
+    <field name="url">/services/item-1</field>
+    <field name="parent_id" ref="theme_coconuts.menu_services"/>
+    <field name="sequence" type="int">21</field>
+</record>
+
+<!-- Services - Item 2 -->
+<record id="menu_services_item_2" model="website.menu">
+    <field name="name">Item 2</field>
+    <field name="url">/services/item-2</field>
+    <field name="parent_id" ref="theme_coconuts.menu_services"/>
+    <field name="sequence" type="int">22</field>
+</record>
+
+<!-- Services - Item 3 -->
+<record id="menu_services_item_3" model="website.menu">
+    <field name="name">Item 3</field>
+    <field name="url">/services/item-3</field>
+    <field name="parent_id" ref="theme_coconuts.menu_services"/>
+    <field name="sequence" type="int">23</field>
+</record>
+
+<record id="menu_products" model="website.menu">
+    <field name="is_mega_menu">true</field>
+    <field name="name">Products</field>
+    <field name="url">/products</field>
+    <field name="parent_id" search="[('url', '=', '/default-main-menu')]"/>
+    <field name="sequence" type="int">30</field>
+    <field name="mega_menu_content">
+        <![CDATA[
+            <section class="o_cc o_cc2 pt32 pb32">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-3">
+                            <i class="fa fa-cube"/>
+                            <p>Text</p>
+                        </div>
+                        <div class="col-lg-3">
+                            <i class="fa fa-cube"/>
+                            <p>Text</p>
+                        </div>
+                        <div class="col-lg-3">
+                            <i class="fa fa-cube"/>
+                            <p>Text</p>
+                        </div>
+                        <div class="col-lg-3">
+                            <i class="fa fa-cube"/>
+                            <p>Text</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        ]]>
+    </field>
+</record>
+
+<!-- About us -->
+<record id="menu_about_us" model="website.menu">
+    <field name="name">About us</field>
+    <field name="url">/about-us</field>
+    <field name="parent_id" search="[('url', '=', '/default-main-menu')]"/>
+    <field name="sequence" type="int">40</field>
+</record>
+
+<!-- Contact -->
+<record id="menu_contact" model="website.menu">
+    <field name="name">Contact</field>
+    <field name="url">/contactus</field>
+    <field name="parent_id" search="[('url', '=', '/default-main-menu')]"/>
+    <field name="sequence" type="int">50</field>
+</record>
+
+</odoo>

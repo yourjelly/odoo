@@ -1,0 +1,47 @@
+// Custom Styles
+// .x_my_class_name { .. }
+
+#wrapwrap {
+
+    .x_font_family_lobster {
+        font-family: 'Lobster', sans-serif;
+    }
+
+    .x_zindex_1 {
+        z-index: 1;
+    }
+
+    .x_zindex_2 {
+        z-index: 2;
+    }
+
+    .x_danger {
+        background-color: theme-color("danger");
+        color: o-color('o-color-3');
+        padding: map-get($spacers, 1) map-get($spacers, 2);
+    }
+
+    > header {
+       //
+    }
+
+    > main {
+        .x_btn_test {
+            color: o-color('o-color-1'); // primary
+            background-color: o-color('400'); // gray
+        }
+    }
+
+    > footer {
+        //
+    }
+
+
+    code {
+    color:  o-color('o-color-1');
+       background-color: o-color('o-color-2');
+       padding:map-get($spacers, 1) map-get($spacers, 2);
+    
+    }
+
+}

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!-- Replace Company Name -->
+<template id="footer_copyright_company_name" inherit_id="website.footer_copyright_company_name">
+    <xpath expr="//*[hasclass('o_footer_copyright_name')]" position="replace">
+        <span class="o_footer_copyright_name mr-2">Copyright &amp;copy; Coconuts</span>
+    </xpath>
+</template>
+
+<!-- Disable Language Selector -->
+<record id="portal.footer_language_selector" model="ir.ui.view">
+    <field name="active" eval="False"/>
+</record>
+
+</odoo>

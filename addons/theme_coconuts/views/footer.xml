@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!-- FOOTER - METHOD #02 - Add Custom Footer -->
+<!-- ======================================= -->
+
+<!-- Disable Default Footer -->
+<record id="website.footer_custom" model="ir.ui.view">
+    <field name="active" eval="False"/>
+</record>
+
+<!-- Theme Footer - Option -->
+<template id="footer_opt" inherit_id="website.snippet_options" name="Coconuts Footer - Option">
+    <xpath expr="//we-select[@data-variable='footer-template']" position="inside">
+        <we-button title="Coconuts"
+            data-customize-website-views="theme_coconuts.footer"
+            data-customize-website-variable="'coconuts'"
+            data-img="/theme_coconuts/static/src/img/wbuilder/footer_opt.svg"/>
+    </xpath>
+</template>
+
+<!-- Theme Footer - Layout -->
+<record id="theme_coconuts.footer" model="ir.ui.view">
+    <field name="active" eval="True"/>
+    <field name="field_parent" eval="False"/>
+    <field name="inherit_id" ref="website.layout"/>
+    <field name="key">theme_coconuts.footer</field>
+    <field name="mode">extension</field>
+    <field name="model" eval="False"/>
+    <field name="name">Coconuts Footer</field>
+    <field name="priority">16</field>
+    <field name="type">qweb</field>
+    <field name="visibility" eval="False"/>
+    <field name="website_id" eval="False"/>
+    <field name="arch" type="xml">
+        <data inherit_id="website.layout" name="Coconuts Footer" active="True">
+            <xpath expr="//div[@id='footer']" position="replace">
+                <div id="footer" class="oe_structure oe_structure_solo" t-ignore="true" t-if="not no_footer">
+
+                    <section class="s_text_block pt24 pb24" data-snippet="s_text_block" data-name="Text">
+                        <div class="container-fluid px-lg-5">
+                            <div class="row">
+                                <div class="col-lg-2 pt24 pb24">
+                                    <h5 class="mb-4">Useful Links</h5>
+                                    <ul class="list-unstyled">
+                                        <li><a href="/">Home</a></li>
+                                        <li><a href="/about-us">About us</a></li>
+                                        <li><a href="#">Services</a></li>
+                                        <li><a href="#">Jobs</a></li>
+                                        <li><a href="/contact">Contact</a></li>
+                                    </ul>
+                                </div>
+                                <div class="col-lg-5 pt24 pb24">
+                                    <h5 class="mb-4">Useful Information</h5>
+                                    <p class="lead">We are a team of passionate people whose goal is to improve everyone's life through disruptive products. We build great products to solve your business problems.</p>
+                                    <p class="lead">Our products are designed for small to medium size companies willing to optimize their performance.</p>
+                                </div>
+                                <div class="col-lg-2 offset-lg-2 pt24 pb24">
+                                    <h5 class="mb-4">Contact us</h5>
+                                    <i class="fa fa-fw fa-envelope mr-2"/><a href="#">hello@coconuts.be</a><br/>
+                                    <i class="fa fa-fw fa-phone mr-2"/><a href="#">+00 123 45 67 89</a>
+                                    <p><br/></p>
+                                    <div class="s_share text-left no_icon_color" data-snippet="s_share" data-name="Social Media">
+                                        <h5 class="s_share_title d-none">Social Media</h5>
+                                        <a href="/website/social/linkedin" class="s_share_linkedin mr-3" target="_blank">
+                                            <i class="fa fa-2x fa-linkedin-square"/>
+                                        </a>
+                                        <a href="/website/social/facebook" class="s_share_facebook mr-3" target="_blank">
+                                            <i class="fa fa-2x fa-facebook-square"/>
+                                        </a>
+                                        <a href="/website/social/instagram" class="s_share_instagram mr-3" target="_blank">
+                                            <i class="fa fa-2x fa-instagram"/>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="col-lg-1 pt24 pb24">
+                                    <img src="/web/image/theme_coconuts.logo" class="img-fluid rounded-circle" alt=""/>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                </div>
+            </xpath>
+        </data>
+    </field>
+</record>
+
+</odoo>

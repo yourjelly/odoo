@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!-- Branding -->
+<record id="theme_coconuts.logo" model="ir.attachment">
+    <field name="name">Company Logo</field>
+    <field name="datas" type="base64" file="theme_coconuts/static/src/img/content/logo.jpg"/>
+    <field name="res_model">ir.ui.view</field>
+    <field name="public" eval="True"/>
+</record>
+
+<record id="website.default_website" model="website">
+    <field name="logo" type="base64" file="theme_coconuts/static/src/img/content/logo.jpg"/>
+</record>
+
+<!-- Snippets -->
+<record id="theme_coconuts.s_peanuts_default_img" model="ir.attachment">
+    <field name="name">Peanuts snippet - Default Image</field>
+    <field name="datas" type="base64" file="theme_coconuts/static/src/img/snippets/s_peanuts_default_img.jpg"/>
+    <field name="res_model">ir.ui.view</field>
+    <field name="public" eval="True"/>
+</record>
+
+<!-- Content -->
+<record id="theme_coconuts.img_about_01" model="ir.attachment">
+    <field name="name">About page - First Image</field>
+    <field name="datas" type="base64" file="theme_coconuts/static/src/img/content/img_about_01.jpg"/>
+    <field name="res_model">ir.ui.view</field>
+    <field name="public" eval="True"/>
+</record>
+
+</odoo>

@@ -1,0 +1,96 @@
+// ------------------------------------------------------------------------------ //
+// PRESETS
+// ------------------------------------------------------------------------------ //
+
+$o-website-values-palettes: (
+    (
+        // Colors
+        'color-palettes-name':              'Coconuts',
+
+        // Fonts
+        'font':                             'Source Sans Pro',
+        'headings-font':                    'Source Sans Pro',
+        'navbar-font':                      'Source Sans Pro',
+        'buttons-font':                     'Source Sans Pro',
+
+        // Buttons
+        'btn-padding-y':                    .5rem,
+        'btn-padding-x':                    1.5rem,
+
+        // Header
+        'header-template':                  'default',
+        'hamburger-position':               'center',
+        'logo-height':                      4rem,
+
+        // Footer
+        'footer-template':                  'coconuts',
+    ),
+);
+
+// ------------------------------------------------------------------------------ //
+// FONTS
+// ------------------------------------------------------------------------------ //
+
+$o-theme-font-configs: (
+    'Source Sans Pro': (
+        'family': ('Source Sans Pro', sans-serif),
+        'url': 'Source+Sans+Pro:300,400,400i,600',
+        'properties' : (
+            'base': (
+                'font-size-base':           1rem,
+            ),
+        )
+    ),
+    'Lobster': (
+        'family': ('Lobster', sans-serif),
+        'url': 'Lobster:400',
+        'properties' : (
+            'base': (
+                'font-size-base':           1rem,
+            ),
+        )
+    ),
+);
+
+// ------------------------------------------------------------------------------ //
+// COLORS
+// ------------------------------------------------------------------------------ //
+
+$o-color-palettes: map-merge($o-color-palettes,
+    (
+        'Coconuts': (
+            'o-color-1':                    #BEDB39,
+            'o-color-2':                    #2C3E50,
+            'o-color-3':                    #ECF0F1,
+            'o-color-4':                    #FFFFFF,
+            'o-color-5':                    #212529,
+
+            // 'o-cc1-text':                    'o-color-1',
+            // 'o-cc1-headings':                'o-color-1',
+            // 'o-cc1-link':                    'o-color-1',
+            // 'o-cc1-btn-primary':             'o-color-1',
+            // 'o-cc1-btn-secondary':           'o-color-1',
+            // 'o-cc1-btn-primary':             'o-color-1',
+
+            // 'body':                         'o-color-5',
+            'menu':                         1,
+            'footer':                       3,
+            'copyright':                    5,
+        ),
+    )
+);
+
+$o-selected-color-palettes-names: append($o-selected-color-palettes-names, 'Coconuts');
+
+// ------------------------------------------------------------------------------ //
+// SHAPES
+// ------------------------------------------------------------------------------ //
+
+// Add new shape
+$o-bg-shapes: map-merge($o-bg-shapes,
+    (
+        'theme_coconuts': (
+            'hexagon/01': ('position': center center, 'size': auto 100%, 'colors': (1), 'repeat-y': false),
+        ),
+    )
+);

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!-- Disable Default Home -->
+<record id="website.homepage" model="ir.ui.view">
+    <field name="active" eval="False"/>
+</record>
+
+<!-- Home -->
+<record id="theme_coconuts.home" model="website.page">
+    <field name="inherit_id" eval="False"/>
+    <field name="is_published" eval="True"/>
+    <field name="key">theme_coconuts.home</field>
+    <field name="name">Home</field>
+    <field name="priority">16</field>
+    <field name="type">qweb</field>
+    <field name="url">/</field>
+    <field name="website_id">1</field>
+    <field name="arch" type="xml">
+        <t name="Home" t-name="theme_coconuts.home">
+            <!-- Title -->
+            <t t-set="additional_title" t-value="'Home'"/>
+            <!-- Content -->
+            <t t-call="website.layout">
+                <div id="wrap" class="oe_structure">
+
+                    <section class="s_title">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-lg-12 pt80 pb80">
+                                    <h1 class="x_font_family_lobster display-2" style="text-align: center;">Welcome!</h1>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                </div>
+            </t>
+        </t>
+    </field>
+</record>
+
+</odoo>

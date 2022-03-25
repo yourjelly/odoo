@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!-- WEBSITE BUILDER - Disable/Enable Options -->
+<!-- ======================================== -->
+
+<!-- Disable Brand Logo -->
+<record id="website.option_header_brand_logo" model="ir.ui.view">
+     <field name="active" eval="True"/>
+</record>
+
+<!-- Enable Brand Text -->
+<record id="website.option_header_brand_name" model="ir.ui.view">
+     <field name="active" eval="False"/>
+</record>
+
+<!-- Disable Default Scroll Effect -->
+<record id="website.header_visibility_standard" model="ir.ui.view">
+    <field name="active" eval="False"/>
+</record>
+
+<!-- Enable Fixed Scroll Effect -->
+<record id="website.header_visibility_fixed" model="ir.ui.view">
+     <field name="active" eval="True"/>
+</record>
+
+
+<!-- HEADER - METHOD #01 - Modify Default Header -->
+<!-- =========================================== -->
+
+<!-- Change Menu Items Alignment -->
+<record id="website.template_header_default_align_center" model="ir.ui.view">
+     <field name="active" eval="True"/>
+</record>
+
+<!-- Modify Default Header -->
+<template id="template_header_default" inherit_id="website.template_header_default" name="Coconuts Header">
+    <!-- Add custom class to change font-family -->
+    <xpath expr="//*[@t-call='website.placeholder_header_brand']" position="inside">
+        <t t-set="_link_class" t-valuef="x_font_family_lobster"/>
+    </xpath>
+    <!-- Remove horizontal padding -->
+    <xpath expr="//*[@t-call='website.navbar']" position="inside">
+        <t t-set="_navbar_classes" t-valuef="px-lg-0"/>
+    </xpath>
+    <!-- Switch to full-width + Add horizontal padding -->
+    <xpath expr="//*[@id='top_menu_container']" position="attributes">
+        <attribute name="class" add="container-fluid px-lg-5" remove="container" separator=" "/>
+    </xpath>
+</template>
+
+<!-- Modify Default Call-to-Action -->
+<template id="header_call_to_action" inherit_id="website.header_call_to_action"  name="Coconuts Header - Call-to-Action">
+    <!-- Remove horizontal padding -->
+    <xpath expr="//*[hasclass('container')]" position="attributes">
+        <attribute name="class" add="px-0" separator=" "/>
+    </xpath>
+    <!-- Replace Button text -->
+    <xpath expr="//a" position="replace" mode="inner">
+        <b>Free Coconuts</b>
+    </xpath>
+</template>
+
+</odoo>

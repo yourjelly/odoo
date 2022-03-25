@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<record id="theme_coconuts.about_us" model="website.page">
+    <field name="inherit_id" eval="False"/>
+    <field name="is_published" eval="True"/>
+    <field name="key">theme_coconuts.about_us</field>
+    <field name="name">About us</field>
+    <field name="priority">16</field>
+    <field name="type">qweb</field>
+    <field name="url">/about-us</field>
+    <field name="website_id">1</field>
+    <!-- Enable "Over the content" option -->
+    <field name="header_overlay" eval="True"/>
+    <field name="arch" type="xml">
+        <t name="About us" t-name="theme_coconuts.about_us">
+            <!-- Title -->
+            <t t-set="additional_title" t-value="'About us'"/>
+            <!-- Content -->
+            <t t-call="website.layout">
+                <div id="wrap" class="oe_structure">
+
+                    <section class="s_cover parallax s_parallax_is_fixed bg-black-50 pt160 pb160" data-scroll-background-ratio="1">
+                        <span class="s_parallax_bg oe_img_bg" style="background-image: url('/web/image/theme_coconuts.img_about_01'); background-position: 50% 50%;"/>
+                        <div class="o_we_bg_filter bg-black-50"/>
+                        <div class="container s_allow_columns">
+                            <h1 class="display-2" style="text-align: center;">We all have <br/>a story to tell.</h1>
+                        </div>
+                    </section>
+
+                </div>
+            </t>
+        </t>
+    </field>
+</record>
+
+</odoo>
+
