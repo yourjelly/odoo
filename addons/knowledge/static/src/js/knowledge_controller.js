@@ -205,6 +205,7 @@ const KnowledgeFormController = FormController.extend({
             return;
         }
         this.do_action('knowledge.action_home_page', {
+            stackPosition: 'replaceCurrentAction',
             additional_context: {
                 res_id: articleId
             }
