@@ -296,6 +296,29 @@ export function closestBlock(node) {
     return findNode(closestPath(node), node => isBlock(node));
 }
 /**
+ * Return the furthest uneditable parent of node contained within parentLimit.
+ * @see deleteRange Used to guarantee that uneditables are fully contained in
+ * the range (so that it is not possible to partially remove them)
+ *
+ * @param {Node} node
+ * @param {Node} parentLimit non-inclusive furthest parent allowed
+ * @returns {Node|null} uneditable parent if it exists
+ */
+export function getFurthestUneditableParent(node, parentLimit) {
+    if (node === parentLimit || !parentLimit.contains(node)) {
+        return null;
+    }
+    let parent = node && node.parentElement;
+    let nonEditableElement = null;
+    while (parent && parent !== parentLimit) {
+        if (!parent.isContentEditable) {
+            nonEditableElement = parent;
+        }
+        parent = parent.parentElement;
+    }
+    return nonEditableElement;
+}
+/**
  * Returns the deepest child in last position.
  *
  * @param {Node} node

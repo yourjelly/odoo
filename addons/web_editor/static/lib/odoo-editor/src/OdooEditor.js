@@ -24,6 +24,7 @@ import {
     getBrSibling,
     getCursorDirection,
     getListMode,
+    getFurthestUneditableParent,
     getOuid,
     getSiblingWithContentEditable,
     inlineTextTagNames,
@@ -1356,6 +1357,31 @@ export class OdooEditor extends EventTarget {
         if (!range) return;
         let start = range.startContainer;
         let end = range.endContainer;
+        // Expand the range to fully include all contentEditable=False elements.
+        let commonAncestorContainer = range.commonAncestorContainer;
+        if (commonAncestorContainer !== this.editable && !this.editable.contains(commonAncestorContainer)) {
+            commonAncestorContainer = this.editable;
+        }
+        const startUneditable = getFurthestUneditableParent(start, commonAncestorContainer);
+        if (startUneditable) {
+            let leaf = previousLeaf(startUneditable);
+            if (leaf) {
+                range.setStart(leaf, nodeSize(leaf));
+            } else {
+                range.setStart(commonAncestorContainer, 0);
+            }
+            start = range.startContainer;
+        }
+        const endUneditable = getFurthestUneditableParent(end, commonAncestorContainer);
+        if (endUneditable) {
+            let leaf = nextLeaf(endUneditable);
+            if (leaf) {
+                range.setEnd(leaf, 0);
+            } else {
+                range.setEnd(commonAncestorContainer, nodeSize(commonAncestorContainer));
+            }
+            end = range.endContainer;
+        }
         // Let the DOM split and delete the range.
         const doJoin = closestBlock(start) !== closestBlock(range.commonAncestorContainer);
         let next = nextLeaf(end, this.editable);
