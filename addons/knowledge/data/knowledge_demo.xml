@@ -28,7 +28,8 @@
         </field>
         <field name="parent_id" eval="False" />
         <field name="author_ids" eval="[(6, 0, [ref('base.user_admin')])]" />
-        <field name="favourite_user_ids" eval="[(6, 0, [ref('base.user_demo')])]" />
+        <field name="favourite_user_ids" model="knowledge.article.favourite"
+                eval="[(0, 0, {'user_id': ref('base.user_demo'), 'sequence': 1})]" />
         <field name="icon">📚</field>
         <field name="internal_permission">write</field>
     </record>
@@ -57,7 +58,8 @@
         </field>
         <field name="parent_id" eval="ref('knowledge_article_demo_data_0')" />
         <field name="author_ids" eval="[(6, 0, [ref('base.user_demo')])]" />
-        <field name="favourite_user_ids" eval="[(6, 0, [ref('base.user_demo')])]" />
+        <field name="favourite_user_ids" model="knowledge.article.favourite"
+                eval="[(0, 0, {'user_id': ref('base.user_demo'), 'sequence': 2})]" />
         <field name="icon">💵</field>
     </record>
     <record id="knowledge_article_demo_data_2" model="knowledge.article">
@@ -113,7 +115,8 @@
         </field>
         <field name="parent_id" eval="False" />
         <field name="author_ids" eval="[(6, 0, [ref('base.user_root')])]" />
-        <field name="favourite_user_ids" eval="[(6, 0, [ref('base.user_admin')])]" />
+        <field name="favourite_user_ids" model="knowledge.article.favourite"
+                eval="[(0, 0, {'user_id': ref('base.user_admin'), 'sequence': 3})]" />
         <field name="icon">🍟</field>
         <field name="internal_permission">none</field>
         <field name="article_member_ids" model="knowledge.article.member"

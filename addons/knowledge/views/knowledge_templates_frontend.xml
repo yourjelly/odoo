@@ -77,13 +77,14 @@
         <section t-att-class="'' if favourites else 'd-none'">
             <div class="h4 mb-0">Favourites</div>
             <ul class="o_tree_favourite m-0 px-0 py-2">
-                <li t-foreach="favourites" t-as="favourite" t-att-data-article-id="favourite.id">
+                <li t-foreach="favourites" t-as="favourite" t-att-data-article-id="favourite.article_id.id"
+                    t-att-data-favourite-sequence="favourite.sequence">
                     <div class="d-flex">
                         <button class="o_article_icon btn btn-link text-secondary p-0" type="button">
-                            <i t-attf-class="fa fa-fw #{favourite.icon}" />
+                            <t t-out="favourite.article_id.icon" />
                         </button>
                         <div class="o_article_name flex-grow-1 text-truncate">
-                            <a t-out="favourite.name" t-attf-href="/article/{{favourite.id}}" />
+                            <a t-out="favourite.article_id.name" t-attf-href="/article/{{favourite.article_id.id}}" />
                         </div>
                     </div>
                 </li>

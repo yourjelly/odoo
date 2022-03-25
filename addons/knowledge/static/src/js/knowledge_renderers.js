@@ -37,6 +37,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
             $container.empty();
             $container.append(res.template);
             this._setTreeListener();
+            this._setTreeFavoriteListener();
 
             // Update unfoldedArticles with active article and all its parents.
             localStorage.setItem('unfoldedArticles', res.unfolded_articles);
@@ -118,6 +119,43 @@ const KnowledgeFormRenderer = FormRenderer.extend({
                 'connectWith',
                 `.o_tree:not(${selector})`
             );
+        });
+    },
+
+    _setTreeFavoriteListener () {
+        const $sortable = this.$el.find('.o_tree_favourite');
+        $sortable.sortable({
+            axis: 'y',
+            items: 'li',
+            cursor: 'grabbing',
+            forcePlaceholderSize: true,
+            placeholder: 'o_placeholder',
+            /**
+             * @param {Event} event
+             * @param {Object} ui
+             */
+            stop: (event, ui) => {
+                const $li = $(ui.item);
+                const data = {
+                    article_id: $li.data('article-id'),
+                };
+                const $next = $li.next();
+                if ($next.length > 0) {
+                    data.sequence = $next.data('favourite-sequence') || 0;
+                }
+                $sortable.sortable('disable');
+                this._rpc({
+                    model: 'knowledge.article.favourite',
+                    method: 'set_sequence',
+                    args: [[]],
+                    kwargs: data,
+                }).then(() => {
+                    $sortable.sortable('enable');
+                }).catch(() => {
+                    $sortable.sortable('cancel');
+                    $sortable.sortable('enable');
+                });
+            },
         });
     },
 

@@ -13,6 +13,60 @@ from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.osv import expression
 from odoo.tools import get_lang, formataddr
 
+class ArticleFavourites(models.Model):
+    _name = 'knowledge.article.favourite'
+    _description = 'Favourite Articles'
+    _table = 'knowledge_article_favourite_user_rel'
+    _order = 'sequence asc'
+
+    article_id = fields.Many2one('knowledge.article', 'Article', required=True, ondelete='cascade')
+    user_id = fields.Many2one('res.users', 'User', index=True, required=True, ondelete='cascade')
+    sequence = fields.Integer(default=0)
+
+    @api.model_create_single
+    def create(self, vals):
+        set_sequence = 'sequence' in vals
+        if not set_sequence:
+            vals["sequence"] = self._get_max_sequence() + 1
+
+        article = super(ArticleFavourites, self).create(vals)
+
+        if set_sequence:
+            self._resequence_favourites(article)
+        return article
+
+    def set_sequence(self, article_id, sequence=False):
+        """ Set user sequence of target favourite article."""
+        favourite = self.search([('user_id', '=', self.env.user.id), ('article_id', '=', article_id)])
+        if not favourite:
+            raise UserError(_("You don't have this article in your favourites."))
+
+        # if no given sequence, place the favourite at the end.
+        if sequence is False:
+            favourite.sequence = self._get_max_sequence() + 1
+            return True
+
+        # else: set the sequence + reorder all the following articles
+        favourite.sequence = sequence
+        self._resequence_favourites(favourite)
+
+    def _resequence_favourites(self, from_favourite):
+        start_sequence = from_favourite.sequence + 1
+        to_update = self.search([
+            ('user_id', '=', self.env.user.id),
+            ('sequence', '>=', from_favourite.sequence),
+            ('id', '!=', from_favourite.id)])
+        for i, favourite in enumerate(to_update):
+            favourite.sequence = start_sequence + i
+
+    _sql_constraints = [
+        ('unique_favourite', 'unique(article_id, user_id)', 'User already has this article in favourites.')
+    ]
+
+    def _get_max_sequence(self):
+        max_sequence_favourite = self.search([('user_id', '=', self.env.user.id)], order='sequence desc', limit=1)
+        return max_sequence_favourite.sequence + 1 if max_sequence_favourite else -1
+
 
 class ArticleMembers(models.Model):
     _name = 'knowledge.article.member'
@@ -132,8 +186,7 @@ class Article(models.Model):
     # Favourite
     is_user_favourite = fields.Boolean(string="Favourite?", compute="_compute_is_user_favourite",
                                        inverse="_inverse_is_user_favourite", search="_search_is_user_favourite")
-    favourite_user_ids = fields.Many2many("res.users", "knowledge_favourite_user_rel", "article_id", "user_id",
-                                          string="Favourites", copy=False)
+    favourite_user_ids = fields.One2many('knowledge.article.favourite', 'article_id', string='Favourite Articles', copy=False)
     # Set default=0 to avoid false values and messed up order
     favourite_count = fields.Integer(string="#Is Favourite", copy=False, default=0)
 
@@ -362,18 +415,20 @@ class Article(models.Model):
 
     def _compute_is_user_favourite(self):
         for article in self:
-            article.is_user_favourite = self.env.user in article.favourite_user_ids
+            article.is_user_favourite = self.env.user in article.favourite_user_ids.mapped('user_id')
 
     def _inverse_is_user_favourite(self):
         favorite_articles = not_fav_articles = self.env['knowledge.article']
         for article in self:
-            if self.env.user in article.favourite_user_ids:  # unset as favourite
+            if self.env.user in article.favourite_user_ids.user_id: # unset as favourite
                 not_fav_articles |= article
             else:  # set as favourite
                 favorite_articles |= article
 
-        favorite_articles.write({'favourite_user_ids': [(4, self.env.uid)]})
-        not_fav_articles.write({'favourite_user_ids': [(3, self.env.uid)]})
+        favorite_articles.write({'favourite_user_ids': [(0, 0, {
+            'user_id': self.env.user.id,
+        })]})
+        not_fav_articles.favourite_user_ids.filtered(lambda u: u.user_id == self.env.user).unlink()
 
         for article in not_fav_articles:
             article.favourite_count -= 1
@@ -385,9 +440,9 @@ class Article(models.Model):
             raise NotImplementedError("Unsupported search operation on favourite articles")
 
         if value:
-            return [('favourite_user_ids', 'in', [self.env.user.id])]
+            return [('favourite_user_ids.user_id', 'in', [self.env.user.id])]
         else:
-            return [('favourite_user_ids', 'not in', [self.env.user.id])]
+            return [('favourite_user_ids.user_id', 'not in', [self.env.user.id])]
 
     def _search_main_article_id(self, operator, value):
         if isinstance(value, str):
@@ -435,7 +490,7 @@ class Article(models.Model):
         favourite_asc = any('is_user_favourite asc' in item for item in order_items)
 
         # Search articles that are favourite of the current user.
-        my_articles_domain = expression.AND([[('favourite_user_ids', 'in', [self.env.user.id])], args])
+        my_articles_domain = expression.AND([[('favourite_user_ids.user_id', 'in', [self.env.user.id])], args])
         my_articles_order = ', '.join(item for item in order_items if 'is_user_favourite' not in item)
         articles_ids = super(Article, self).search(my_articles_domain, offset=0, limit=None, order=my_articles_order, count=count).ids
 
@@ -523,7 +578,9 @@ class Article(models.Model):
 
     def action_home_page(self):
         if 'res_id' not in self.env.context:
-            article = self.search([('is_user_favourite', '=', True)], limit=1)
+            article = self.env['knowledge.article.favourite'].search([
+                ('user_id', '=', self.env.user.id),
+                ('article_id.user_has_access', '=', True)], limit=1).article_id
             if not article:
                 article = self.search([
                     ('parent_id', '=', False),

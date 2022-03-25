@@ -86,11 +86,15 @@ class KnowledgeController(http.Controller):
 
         values = {
             "active_article_id": res_id,
-            "favourites": Article.search([("favourite_user_ids", "in", [request.env.user.id]), ('user_has_access', '=', True)]),
             "public_articles": main_articles.filtered(lambda article: article.category == 'workspace'),
             "shared_articles": main_articles.filtered(lambda article: article.category == 'shared'),
             "unfolded_articles": unfolded_articles,
         }
+
+        if not request.env.user._is_public():
+            # sudo needed to let portal user have access to article model to check the user_has_access field.
+            values["favourites"] = request.env['knowledge.article.favourite'].sudo().search([
+                ("user_id", "=", request.env.user.id), ('article_id.user_has_access', '=', True)])
 
         if request.env.user.has_group('base.group_user'):
             values['private_articles'] = main_articles.filtered(lambda article: article.owner_id == request.env.user)
@@ -100,12 +104,10 @@ class KnowledgeController(http.Controller):
         return values
 
     @http.route('/knowledge/get_favourite_tree', type='json', auth='user')
-    def get_favourite_tree(self):
-        favourite_articles = request.env["knowledge.article"].sudo().search([
-            ("favourite_user_ids", "in", [request.env.user.id]),
-            ('user_has_access', '=', True)
-        ])
-        return request.env.ref('knowledge.article_favourite_section_template')._render({'favourites': favourite_articles})
+    def get_favourite_tree(self, res_id=False):
+        favourite_articles = request.env['knowledge.article.favourite'].search([("user_id", "=", request.env.user.id), ('article_id.user_has_access', '=', True)])
+        favourite_articles = favourite_articles.filtered(lambda favourite: favourite.article_id.user_has_access)
+        return request.env.ref('knowledge.article_favourite_section_template')._render({'favourites': favourite_articles, "active_article_id": res_id})
 
     @http.route('/knowledge/get_tree', type='json', auth='user')
     def display_tree(self, res_id=False, unfolded_articles=False):

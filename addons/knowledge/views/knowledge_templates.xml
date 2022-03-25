@@ -3,7 +3,9 @@
 <data>
     <!-- Article Tree layout -->
     <template id="knowledge_article_tree_template" name="Article Tree">
-        <t t-call="knowledge.article_favourite_section_template"/>
+        <t t-call="knowledge.article_favourite_section_template">
+            <t t-set="articles" t-value="favourites.mapped('article_id')"/>
+        </t>
 
         <section class="o_section" data-section="workspace">
             <div class="o_section_header d-flex h4 mb-0">
@@ -50,18 +52,23 @@
             <div class="h4 mb-0">Favourites</div>
             <ul class="o_tree_favourite">
                 <t t-call="knowledge.articles_template">
-                    <t t-set="articles" t-value="favourites"/>
+                    <t t-set="articles" t-value="favourites.mapped('article_id')"/>
                     <t t-set="hideChildren" t-value="true"/>
                 </t>
             </ul>
         </section>
+        <section class="o_favourite_container" t-else=""/>
     </template>
 
     <template id="articles_template">
         <t t-set="unfolded_articles" t-value="unfolded_articles or []"/>
         <t t-foreach="articles" t-as="article">
             <t t-set="readonly" t-value="not article.user_can_write"/>
-            <li t-attf-class="o_article #{ 'readonly' if readonly else '' }" t-attf-id="article_#{article.id}" t-att-data-article-id="article.id"  t-att-data-category="article.category">
+            <t t-set="favourite" t-value="favourites.filtered(lambda f: f.article_id == article) if favourites else False"/>
+            <t t-set="favourite_sequence" t-value="favourite.sequence if favourite else False"/>
+            <li t-attf-class="o_article #{ 'readonly' if readonly else '' }" t-attf-id="article_#{article.id}"
+                t-att-data-article-id="article.id"  t-att-data-category="article.category"
+                t-att-data-favourite-sequence="favourite_sequence">
                 <t t-set="isActive" t-value="article.id == active_article_id"/>
                 <div t-attf-class="o_article_handle d-flex align-items-center #{ 'o_article_active font-weight-bold' if isActive else 'text-muted' }">
                     <button t-if="not hideChildren and article.child_ids" class="o_article_caret btn btn-link text-muted p-0" type="button">

@@ -220,14 +220,18 @@ const KnowledgeFormController = FormController.extend({
         $(event.target).toggleClass('fa-star-o', !result).toggleClass('fa-star', result);
         event.target.title = result ? _t('Remove from favourites') : _t('Add to favourites');
         this._rpc({
-            route: '/knowledge/get_favourite_tree'
+            route: '/knowledge/get_favourite_tree',
+            params: {
+                res_id: id,
+            }
+
         }).then(favouriteTemplate => {
             self.$(".o_favourite_container").replaceWith(favouriteTemplate);
-            this.renderer._setTreeListener();
+            this.renderer._setTreeFavoriteListener();
             this.renderer._renderEmojiPicker();
         });
    },
-   
+
     /**
      * @param {Event} event
      */
