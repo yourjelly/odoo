@@ -13,6 +13,12 @@ import { getLangDatetimeFormat, str_to_datetime } from 'web.time';
 
 const { markup } = owl;
 
+/**
+ * @typedef {Object} Message - creates a new type named 'Message'
+ * @property {string} id - message id from the server
+ * @property {string} author_id - author_id from the server
+ */
+
 registerModel({
     name: 'Message',
     identifyingFields: ['id'],

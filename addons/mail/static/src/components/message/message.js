@@ -118,6 +118,7 @@ export class Message extends Component {
     }
 
     /**
+     * @type {import('@mail/models/message_view').MessageView}
      * @returns {MessageView}
      */
     get messageView() {

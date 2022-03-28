@@ -5,6 +5,12 @@ import { attr, one } from '@mail/model/model_field';
 import { clear, insertAndReplace, replace } from '@mail/model/model_field_command';
 import { markEventHandled } from '@mail/utils/utils';
 
+/**
+ * @typedef {Object} MessageView - creates a new type named 'Message'
+ * @property {Number} id - message linked
+ * @property {import('./message').Message} message - message linked
+ */
+
 registerModel({
     name: 'MessageView',
     identifyingFields: [['threadView', 'deleteMessageConfirmViewOwner'], 'message'],
