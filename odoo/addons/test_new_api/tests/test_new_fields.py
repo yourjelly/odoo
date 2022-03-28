@@ -1595,6 +1595,17 @@ class TestFields(common.TransactionCase):
         # check that this does not generate an infinite recursion
         new_disc._convert_to_write(new_disc._cache)
 
+    def test_40_new_round(self):
+        """ Test rounding on new records. """
+        record = self.env['test_new_api.mixed'].new({
+            'number': 1.23456,
+            'amount': 1.23456,
+        })
+        with self.subTest("new() must round float fields"):
+            self.assertEqual(record.number, 1.23)
+        with self.subTest("new() must round monetary fields"):
+            self.assertEqual(record.amount, 1.23)
+
     def test_40_new_ref_origin(self):
         """ Test the behavior of new records with ref/origin. """
         Discussion = self.env['test_new_api.discussion']
