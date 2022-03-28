@@ -1,4 +1,4 @@
-/** @odoo-module alias=mass_mailing.FieldMassMailingFavoriteFilter.test */
+/** @odoo-module */
 
 import FormView from 'web.FormView';
 import testUtils from 'web.test_utils';

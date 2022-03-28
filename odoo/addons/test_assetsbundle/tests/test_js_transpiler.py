@@ -3,7 +3,7 @@
 
 from odoo.tests import tagged
 from odoo.tests.common import TransactionCase
-from odoo.tools import transpile_javascript
+from odoo.tools import transpile_javascript, mute_logger
 
 
 @tagged('post_install', '-at_install')
@@ -12,7 +12,9 @@ class TestJsTranspiler(TransactionCase):
 
     def test_01_alias(self):
         input_content = """/** @odoo-module alias=test_assetsbundle.Alias **/"""
-        result = transpile_javascript("/test_assetsbundle/static/src/alias.js", input_content)
+        # Not having default=false/False/0 without having a default export emits a warning, ignore it
+        with mute_logger('odoo.tools.js_transpiler'):
+            result = transpile_javascript("/test_assetsbundle/static/src/alias.js", input_content)
 
         expected_result = """odoo.define('@test_assetsbundle/alias', async function (require) {
 'use strict';

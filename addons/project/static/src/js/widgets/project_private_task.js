@@ -1,4 +1,4 @@
-/** @odoo-module alias=project.project_private_task **/
+/** @odoo-module **/
 "use strict";
 
 import field_registry from 'web.field_registry';

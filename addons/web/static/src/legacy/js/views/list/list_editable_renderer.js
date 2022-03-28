@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.EditableListRenderer **/
+/** @odoo-module **/
 
 /**
  * Editable List renderer

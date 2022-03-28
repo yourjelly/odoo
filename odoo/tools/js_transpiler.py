@@ -711,6 +711,8 @@ def get_aliased_odoo_define_content(module_path, content):
                         return require('%s');
                         });\n""" % (alias, module_path)
             else:
+                if "export default" not in content:
+                    _logger.warning("Odoo js module '%s' defined an alias without 'default=false' but has no default export. This is most likely a mistake.", alias)
                 return """\nodoo.define(`%s`, async function(require) {
                         return require('%s')[Symbol.for("default")];
                         });\n""" % (alias, module_path)
