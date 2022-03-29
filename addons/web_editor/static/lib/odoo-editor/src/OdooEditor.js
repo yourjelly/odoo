@@ -2403,15 +2403,48 @@ export class OdooEditor extends EventTarget {
                 this.deleteRange(selection);
             }
         }
-        if (ev.key === 'Backspace' && !ev.ctrlKey && !ev.metaKey) {
+        if (ev.key === 'Backspace') {
             // backspace
-            // We need to hijack it because firefox doesn't trigger a
-            // deleteBackward input event with a collapsed selection in front of
-            // a contentEditable="false" (eg: font awesome).
             const selection = this.document.getSelection();
-            if (selection.isCollapsed) {
-                ev.preventDefault();
-                this._applyCommand('oDeleteBackward');
+            if (!ev.ctrlKey && !ev.metaKey) {
+                if (selection.isCollapsed) {                    
+                    /**
+                     * We need to hijack it because firefox doesn't trigger a
+                     * deleteBackward input event with a collapsed selection in
+                     * front of a contentEditable="false" (eg: font awesome).
+                     */
+                    ev.preventDefault();
+                    this._applyCommand('oDeleteBackward');
+                }
+            } else if (selection.isCollapsed && selection.anchorNode) {
+                const anchor = (selection.anchorNode.nodeType !== Node.TEXT_NODE && selection.anchorOffset) ?
+                    selection.anchorNode[selection.anchorOffset] : selection.anchorNode;
+                const element = closestBlock(anchor);
+                if ((element === this._navigationNode || (element.tagName === 'P' && isEmptyBlock(element))) &&
+                    element && element.parentElement.children.length === 1) {
+                    /**
+                     * Prevent removing a <p> if it is the last element of its
+                     * parent.
+                     */
+                    ev.preventDefault();
+                } else if (element) {
+                    /**
+                     * Allow to remove any other element with CTRL+BACKSPACE,
+                     * but place an empty <p><br></p> element if the parent
+                     * block becomes empty after the element was removed.
+                     */
+                    const parent = (element === this.editable) ? this.editable : element.parentElement;
+                    if (isBlock(parent)) {
+                        setTimeout(() => {
+                            if (!parent.children.length) {
+                                const paragraph = createPBR();
+                                parent.append(paragraph);
+                                setCursorStart(paragraph);
+                                this.historyStep();
+                            }
+                        });
+                    }
+                }
             }
         } else if (ev.key === 'Tab') {
             // Tab

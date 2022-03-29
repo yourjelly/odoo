@@ -2273,6 +2273,92 @@ X[]
         });
     });
 
+    describe('CTRL+Backspace', () => {
+        it('should not remove the last p with ctrl+backspace', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: unformat(`<p>[]<br></p>`),
+                stepFunction: async editor => {
+                    editor.editable.addEventListener('keydown', ev => {
+                        // simulation of the browser default behavior
+                        if (ev.key === 'Backspace' && ev.ctrlKey === true && !ev.defaultPrevented) {
+                            const sel = document.getSelection();
+                            sel.anchorNode.remove();
+                        }
+                    });
+                    await keydown(editor.editable, 'Backspace', { ctrlKey: true, cancelable: true });
+                },
+                contentAfter: unformat(`<p>[]<br></p>`),
+            });
+        });
+        it('should not remove the last p enclosed in a contenteditable=false with ctrl+backspace', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: unformat(`
+                    <p>text</p>
+                    <div contenteditable="false"><div contenteditable="true">
+                        <p>[]<br></p>
+                    </div></div>`),
+                stepFunction: async editor => {
+                    editor.editable.addEventListener('keydown', ev => {
+                        // simulation of the browser default behavior
+                        if (ev.key === 'Backspace' && ev.ctrlKey === true && !ev.defaultPrevented) {
+                            const sel = document.getSelection();
+                            sel.anchorNode.remove();
+                        }
+                    });
+                    await keydown(editor.editable, 'Backspace', { ctrlKey: true, cancelable: true });
+                },
+                contentAfter: unformat(`
+                    <p>text</p>
+                    <div contenteditable="false"><div contenteditable="true">
+                        <p>[]<br></p>
+                    </div></div>`),
+            });
+        });
+        it('should add a <p><br></p> element when deleting the last child of the editable with ctrl+backspace', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: unformat(`
+                    <blockquote>
+                        []<br>
+                    </blockquote>`),
+                stepFunction: async editor => {
+                    editor.editable.addEventListener('keydown', ev => {
+                        // simulation of the browser default behavior
+                        if (ev.key === 'Backspace' && ev.ctrlKey === true) {
+                            const sel = document.getSelection();
+                            sel.anchorNode.remove();
+                        }
+                    });
+                    await keydown(editor.editable, 'Backspace', { ctrlKey: true });
+                },
+                contentAfter: unformat(`<p>[]<br></p>`),
+            });
+        });
+        it('should add a <p><br></p> element when deleting the last child of an element with ctrl+backspace', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: unformat(`
+                    <div contenteditable="false"><div contenteditable="true">
+                        <blockquote>
+                            []<br>
+                        </blockquote>
+                    </div></div>`),
+                stepFunction: async editor => {
+                    editor.editable.addEventListener('keydown', ev => {
+                        // simulation of the browser default behavior
+                        if (ev.key === 'Backspace' && ev.ctrlKey === true) {
+                            const sel = document.getSelection();
+                            sel.anchorNode.remove();
+                        }
+                    });
+                    await keydown(editor.editable, 'Backspace', { ctrlKey: true });
+                },
+                contentAfter: unformat(`
+                    <div contenteditable="false"><div contenteditable="true">
+                        <p>[]<br></p>
+                    </div></div>`),
+            });
+        });
+    });
+
     describe('insertParagraphBreak', () => {
         describe('Selection collapsed', () => {
             describe('Basic', () => {
@@ -3268,7 +3354,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: '[ab]<span>\u200B</span>cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowRight', true);
+                        await keydown(editor.editable, 'ArrowRight', { shiftKey: true });
                     },
                     contentAfter: '[ab<span>\u200B]</span>cd',
                     // Final state: '[ab<span>\u200B</span>c]d'
@@ -3276,7 +3362,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: '[ab<span>]\u200B</span>cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowRight', true);
+                        await keydown(editor.editable, 'ArrowRight', { shiftKey: true });
                     },
                     contentAfter: '[ab<span>\u200B]</span>cd',
                     // Final state: '[ab<span>\u200B</span>c]d'
@@ -3286,7 +3372,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'a[b]<span>\u200B</span>cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowRight', true);
+                        await keydown(editor.editable, 'ArrowRight', { shiftKey: true });
                     },
                     contentAfter: 'a[b<span>\u200B]</span>cd',
                     // Final state: 'a[b<span>\u200B</span>c]d'
@@ -3294,7 +3380,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'a[b<span>]\u200B</span>cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowRight', true);
+                        await keydown(editor.editable, 'ArrowRight', { shiftKey: true });
                     },
                     contentAfter: 'a[b<span>\u200B]</span>cd',
                     // Final state: 'a[b<span>\u200B</span>c]d'
@@ -3304,7 +3390,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab[]<span>\u200B</span>cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowRight', true);
+                        await keydown(editor.editable, 'ArrowRight', { shiftKey: true });
                     },
                     contentAfter: 'ab[<span>\u200B]</span>cd',
                     // Final state: 'ab[<span>\u200B</span>c]d'
@@ -3312,7 +3398,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab<span>[]\u200B</span>cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowRight', true);
+                        await keydown(editor.editable, 'ArrowRight', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>[\u200B]</span>cd',
                     // Final state: 'ab<span>[\u200B</span>c]d'
@@ -3322,7 +3408,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab<span>]\u200B[</span>cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowRight', true);
+                        await keydown(editor.editable, 'ArrowRight', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>\u200B[]</span>cd',
                     // Final state: 'ab<span>\u200B</span>[c]d'
@@ -3330,7 +3416,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab<span>]\u200B</span>[cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowRight', true);
+                        await keydown(editor.editable, 'ArrowRight', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>\u200B[]</span>cd',
                     // Final state: 'ab<span>\u200B</span>[c]d'
@@ -3338,7 +3424,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab]<span>\u200B</span>[cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowRight', true);
+                        await keydown(editor.editable, 'ArrowRight', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>\u200B[]</span>cd',
                     // Final state: 'ab<span>\u200B</span>[c]d'
@@ -3346,7 +3432,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab]<span>\u200B[</span>cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowRight', true);
+                        await keydown(editor.editable, 'ArrowRight', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>\u200B[]</span>cd',
                     // Final state: 'ab<span>\u200B</span>[c]d'
@@ -3356,7 +3442,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab<span>]\u200B</span>c[d',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowRight', true);
+                        await keydown(editor.editable, 'ArrowRight', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>\u200B]</span>c[d',
                     // Final state: 'ab<span>\u200B</span>c[]d'
@@ -3364,7 +3450,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab]<span>\u200B</span>c[d',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowRight', true);
+                        await keydown(editor.editable, 'ArrowRight', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>\u200B]</span>c[d',
                     // Final state: 'ab<span>\u200B</span>c[]d'
@@ -3394,7 +3480,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab<span>\u200B[]</span>cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowLeft', true);
+                        await keydown(editor.editable, 'ArrowLeft', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>]\u200B[</span>cd',
                     // Final state: 'a]b<span>\u200B[</span>cd'
@@ -3402,7 +3488,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab<span>\u200B</span>[]cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowLeft', true);
+                        await keydown(editor.editable, 'ArrowLeft', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>]\u200B[</span>cd',
                     // Final state: 'a]b<span>\u200B[</span>cd'
@@ -3412,7 +3498,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab<span>\u200B</span>]cd[',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowLeft', true);
+                        await keydown(editor.editable, 'ArrowLeft', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>]\u200B</span>cd[',
                     // Final state: 'a]b<span>\u200B</span>cd['
@@ -3420,7 +3506,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab<span>\u200B]</span>cd[',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowLeft', true);
+                        await keydown(editor.editable, 'ArrowLeft', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>]\u200B</span>cd[',
                     // Final state: 'a]b<span>\u200B</span>cd['
@@ -3430,7 +3516,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab<span>\u200B</span>]c[d',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowLeft', true);
+                        await keydown(editor.editable, 'ArrowLeft', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>]\u200B</span>c[d',
                     // Final state: 'a]b<span>\u200B</span>c[d'
@@ -3438,7 +3524,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab<span>\u200B]</span>c[d',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowLeft', true);
+                        await keydown(editor.editable, 'ArrowLeft', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>]\u200B</span>c[d',
                     // Final state: 'a]b<span>\u200B</span>c[d'
@@ -3448,7 +3534,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab<span>[\u200B]</span>cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowLeft', true);
+                        await keydown(editor.editable, 'ArrowLeft', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>[]\u200B</span>cd',
                     // Final state: 'a]b<span>[\u200B</span>cd'
@@ -3456,7 +3542,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab<span>[\u200B</span>]cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowLeft', true);
+                        await keydown(editor.editable, 'ArrowLeft', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>[]\u200B</span>cd',
                     // Final state: 'a]b<span>[\u200B</span>cd'
@@ -3464,7 +3550,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab[<span>\u200B]</span>cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowLeft', true);
+                        await keydown(editor.editable, 'ArrowLeft', { shiftKey: true });
                     },
                     contentAfter: 'ab[<span>]\u200B</span>cd',
                     // Final state: 'a]b[<span>\u200B</span>cd'
@@ -3472,7 +3558,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab[<span>\u200B</span>]cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowLeft', true);
+                        await keydown(editor.editable, 'ArrowLeft', { shiftKey: true });
                     },
                     contentAfter: 'ab[<span>]\u200B</span>cd',
                     // Final state: 'a]b[<span>\u200B</span>cd'
@@ -3482,7 +3568,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'a[b<span>\u200B]</span>cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowLeft', true);
+                        await keydown(editor.editable, 'ArrowLeft', { shiftKey: true });
                     },
                     contentAfter: 'a[b<span>]\u200B</span>cd',
                     // Final state: 'a[]b<span>\u200B</span>cd'
@@ -3490,7 +3576,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'a[b<span>\u200B</span>]cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowLeft', true);
+                        await keydown(editor.editable, 'ArrowLeft', { shiftKey: true });
                     },
                     contentAfter: 'a[b<span>]\u200B</span>cd',
                     // Final state: 'a[]b<span>\u200B</span>cd'
