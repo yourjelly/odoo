@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
     <!-- VAT domestic sale-->
     <record id="vyc_tuz_21" model="account.tax.template">
         <field name="chart_template_id" ref="cz_chart_template"/>
@@ -15,6 +14,7 @@
               'factor_percent': 100,
               'repartition_type': 'base',
             }),
+
             (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
@@ -26,6 +26,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -34,7 +35,6 @@
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_21"/>
     </record>
-
     <record id="vyc_tuz_15" model="account.tax.template">
         <field name="chart_template_id" ref="cz_chart_template"/>
         <field name="name">DPH na výstupu 15%</field>
@@ -48,6 +48,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -59,6 +60,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -67,7 +69,6 @@
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_15"/>
     </record>
-
     <record id="vyc_tuz_0" model="account.tax.template">
         <field name="chart_template_id" ref="cz_chart_template"/>
         <field name="name">DPH na výstupu 0%</field>
@@ -80,6 +81,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -90,6 +92,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -97,9 +100,7 @@
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_0"/>
     </record>
-
     <!-- VAT domestic purchase -->
-
     <record id="vsc_tuz_21" model="account.tax.template">
         <field name="chart_template_id" ref="cz_chart_template"/>
         <field name="name">DPH na vstupu 21%</field>
@@ -114,6 +115,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -125,6 +127,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -132,7 +135,6 @@
             }),
         ]"/>
     </record>
-
     <record id="vsc_tuz_15" model="account.tax.template">
         <field name="chart_template_id" ref="cz_chart_template"/>
         <field name="name">DPH na vstupu 15%</field>
@@ -147,6 +149,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -158,6 +161,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -165,11 +169,8 @@
             }),
         ]"/>
     </record>
-
-
     <!-- European Union -->
     <!-- =========================================================== -->
-
     <record id="vyc_dod_eu" model="account.tax.template">
         <field name="chart_template_id" ref="cz_chart_template"/>
         <field name="name">Dodání do EU</field>
@@ -182,6 +183,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -192,6 +194,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -199,7 +202,6 @@
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_0"/>
     </record>
-
     <record id="vsc_nad_eu" model="account.tax.template">
         <field name="chart_template_id" ref="cz_chart_template"/>
         <field name="name">Pořízení z EU</field>
@@ -212,11 +214,13 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('chart_cz_343121'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -228,11 +232,13 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('chart_cz_343121'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',

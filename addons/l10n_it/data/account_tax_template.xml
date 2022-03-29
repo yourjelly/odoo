@@ -1,6 +1,5 @@
-<?xml version='1.0' encoding='UTF-8'?>
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
     <!-- IVA 22 -->
     <record id="22v" model="account.tax.template">
         <field name="description">22v</field>
@@ -16,13 +15,14 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_vp2')],
+                'plus_report_expression_ids': [ref('tax_report_line_vp2_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('2601'),
-                'plus_report_line_ids': [ref('tax_report_line_vp4')],
+                'plus_report_expression_ids': [ref('tax_report_line_vp4_tag')],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -30,6 +30,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -37,7 +38,6 @@
             }),
         ]"/>
     </record>
-
     <record id="22a" model="account.tax.template">
         <field name="description">22a</field>
         <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
@@ -52,13 +52,14 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_vp3')],
+                'plus_report_expression_ids': [ref('tax_report_line_vp3_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('1601'),
-                'plus_report_line_ids': [ref('tax_report_line_vp5')],
+                'plus_report_expression_ids': [ref('tax_report_line_vp5_tag')],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -66,6 +67,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -73,7 +75,6 @@
             }),
         ]"/>
     </record>
-
     <!-- IVA 10 -->
     <record id="10v" model="account.tax.template">
         <field name="description">10v</field>
@@ -89,13 +90,14 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_vp2')],
+                'plus_report_expression_ids': [ref('tax_report_line_vp2_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('2601'),
-                'plus_report_line_ids': [ref('tax_report_line_vp4')],
+                'plus_report_expression_ids': [ref('tax_report_line_vp4_tag')],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -103,6 +105,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -110,7 +113,6 @@
             }),
         ]"/>
     </record>
-
     <record id="10a" model="account.tax.template">
         <field name="description">10a</field>
         <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
@@ -125,13 +127,14 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_vp3')],
+                'plus_report_expression_ids': [ref('tax_report_line_vp3_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('1601'),
-                'plus_report_line_ids': [ref('tax_report_line_vp5')],
+                'plus_report_expression_ids': [ref('tax_report_line_vp5_tag')],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -139,6 +142,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -146,7 +150,6 @@
             }),
         ]"/>
     </record>
-
     <!-- IVA 5 -->
     <record id="5v" model="account.tax.template">
         <field name="description">5v</field>
@@ -162,13 +165,14 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_vp2')],
+                'plus_report_expression_ids': [ref('tax_report_line_vp2_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('2601'),
-                'plus_report_line_ids': [ref('tax_report_line_vp4')],
+                'plus_report_expression_ids': [ref('tax_report_line_vp4_tag')],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -176,6 +180,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -183,7 +188,6 @@
             }),
         ]"/>
     </record>
-
     <record id="5a" model="account.tax.template">
         <field name="description">5a</field>
         <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
@@ -198,13 +202,14 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_vp3')],
+                'plus_report_expression_ids': [ref('tax_report_line_vp3_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('1601'),
-                'plus_report_line_ids': [ref('tax_report_line_vp5')],
+                'plus_report_expression_ids': [ref('tax_report_line_vp5_tag')],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -212,6 +217,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -219,7 +225,6 @@
             }),
         ]"/>
     </record>
-
     <!-- IVA 4 -->
     <record id="4v" model="account.tax.template">
         <field name="description">4v</field>
@@ -235,13 +240,14 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_vp2')],
+                'plus_report_expression_ids': [ref('tax_report_line_vp2_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('2601'),
-                'plus_report_line_ids': [ref('tax_report_line_vp4')],
+                'plus_report_expression_ids': [ref('tax_report_line_vp4_tag')],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -249,6 +255,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -256,7 +263,6 @@
             }),
         ]"/>
     </record>
-
     <record id="4a" model="account.tax.template">
         <field name="description">4a</field>
         <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
@@ -271,13 +277,14 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_vp3')],
+                'plus_report_expression_ids': [ref('tax_report_line_vp3_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('1601'),
-                'plus_report_line_ids': [ref('tax_report_line_vp5')],
+                'plus_report_expression_ids': [ref('tax_report_line_vp5_tag')],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -285,6 +292,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -292,7 +300,6 @@
             }),
         ]"/>
     </record>
-
     <!-- IVA 0 -->
     <record id="00v" model="account.tax.template">
         <field name="description">00v</field>
@@ -309,6 +316,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -319,13 +327,13 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
             }),
         ]"/>
     </record>
-
     <record id="00a" model="account.tax.template">
         <field name="description">00a</field>
         <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
@@ -340,8 +348,9 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_vp2')],
+                'plus_report_expression_ids': [ref('tax_report_line_vp2_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -352,13 +361,13 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
             }),
         ]"/>
     </record>
-
     <record id="00art15v" model="account.tax.template">
         <field name="description">00art15v</field>
         <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
@@ -373,8 +382,9 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_vp2')],
+                'plus_report_expression_ids': [ref('tax_report_line_vp2_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -385,13 +395,13 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
             }),
         ]"/>
     </record>
-
     <record id="00art15a" model="account.tax.template">
         <field name="description">00art15a</field>
         <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
@@ -406,8 +416,9 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_vp3')],
+                'plus_report_expression_ids': [ref('tax_report_line_vp3_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -418,11 +429,11 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
             }),
         ]"/>
     </record>
-
 </odoo>
