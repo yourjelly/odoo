@@ -16,6 +16,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -27,6 +28,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -34,7 +36,6 @@
             }),
         ]"/>
     </record>
-
     <record id="tr_kdv_satis_purchase_18" model="account.tax.template">
         <field name="sequence">11</field>
         <field name="description">KDV %18(purchase)</field>
@@ -50,6 +51,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -61,6 +63,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',

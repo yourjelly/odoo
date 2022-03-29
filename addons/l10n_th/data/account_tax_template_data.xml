@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
     <record id="tax_input_vat" model="account.tax.template">
         <field name="chart_template_id" ref="chart"/>
         <field name="name">Input VAT 7%</field>
@@ -12,30 +11,31 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_input_tax_purchase_from_out_tax')],
+                'plus_report_expression_ids': [ref('tax_report_input_tax_purchase_from_out_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('a_input_vat'),
-                'plus_report_line_ids': [ref('tax_report_input_tax')],
+                'plus_report_expression_ids': [ref('tax_report_input_tax_tag')],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_input_tax_purchase_from_out_tax')],
+                'minus_report_expression_ids': [ref('tax_report_input_tax_purchase_from_out_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('a_input_vat'),
-                'minus_report_line_ids': [ref('tax_report_input_tax')],
+                'minus_report_expression_ids': [ref('tax_report_input_tax_tag')],
             }),
         ]"/>
     </record>
-
     <record id="tax_output_vat" model="account.tax.template">
         <field name="chart_template_id" ref="chart"/>
         <field name="name">Output VAT 7%</field>
@@ -47,30 +47,31 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_out_tax_sale')],
+                'plus_report_expression_ids': [ref('tax_report_out_tax_sale_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('a_output_vat'),
-                'plus_report_line_ids': [ref('tax_report_out_tax')],
+                'plus_report_expression_ids': [ref('tax_report_out_tax_tag')],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_out_tax_sale')],
+                'minus_report_expression_ids': [ref('tax_report_out_tax_sale_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('a_output_vat'),
-                'minus_report_line_ids': [ref('tax_report_out_tax')],
+                'minus_report_expression_ids': [ref('tax_report_out_tax_tag')],
             }),
         ]"/>
     </record>
-
     <record id="tax_input_vat_0" model="account.tax.template">
         <field name="chart_template_id" ref="chart"/>
         <field name="name">Input VAT 0%</field>
@@ -81,30 +82,31 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_input_tax_purchase_from_out_tax')],
+                'plus_report_expression_ids': [ref('tax_report_input_tax_purchase_from_out_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('a_input_vat'),
-                'plus_report_line_ids': [ref('tax_report_input_tax')],
+                'plus_report_expression_ids': [ref('tax_report_input_tax_tag')],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_input_tax_purchase_from_out_tax')],
+                'minus_report_expression_ids': [ref('tax_report_input_tax_purchase_from_out_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('a_input_vat'),
-                'plus_report_line_ids': [ref('tax_report_input_tax')],
+                'plus_report_expression_ids': [ref('tax_report_input_tax_tag')],
             }),
         ]"/>
     </record>
-
     <record id="tax_output_vat_0" model="account.tax.template">
         <field name="chart_template_id" ref="chart"/>
         <field name="name">Output VAT 0%</field>
@@ -115,30 +117,31 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_out_tax_sale'), ref('tax_report_out_tax_less_sales_0_rate')],
+                'plus_report_expression_ids': [ref('tax_report_out_tax_sale_tag'), ref('tax_report_out_tax_less_sales_0_rate_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('a_output_vat'),
-                'plus_report_line_ids': [ref('tax_report_out_tax')],
+                'plus_report_expression_ids': [ref('tax_report_out_tax_tag')],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_out_tax_sale'), ref('tax_report_out_tax_less_sales_0_rate')],
+                'minus_report_expression_ids': [ref('tax_report_out_tax_sale_tag'), ref('tax_report_out_tax_less_sales_0_rate_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('a_output_vat'),
-                'minus_report_line_ids': [ref('tax_report_out_tax')],
+                'minus_report_expression_ids': [ref('tax_report_out_tax_tag')],
             }),
         ]"/>
     </record>
-
     <record id="tax_input_vat_exempted" model="account.tax.template">
         <field name="chart_template_id" ref="chart"/>
         <field name="name">Input VAT Exempted</field>
@@ -149,30 +152,31 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_input_tax_purchase_from_out_tax')],
+                'plus_report_expression_ids': [ref('tax_report_input_tax_purchase_from_out_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('a_input_vat'),
-                'plus_report_line_ids': [ref('tax_report_input_tax')],
+                'plus_report_expression_ids': [ref('tax_report_input_tax_tag')],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_input_tax_purchase_from_out_tax')],
+                'minus_report_expression_ids': [ref('tax_report_input_tax_purchase_from_out_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('a_input_vat'),
-                'minus_report_line_ids': [ref('tax_report_input_tax')],
+                'minus_report_expression_ids': [ref('tax_report_input_tax_tag')],
             }),
         ]"/>
     </record>
-
     <record id="tax_output_vat_exempted" model="account.tax.template">
         <field name="chart_template_id" ref="chart"/>
         <field name="name">Output VAT Exempted</field>
@@ -183,30 +187,31 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_out_tax_sale'), ref('tax_report_out_tax_less_exempted_sales')],
+                'plus_report_expression_ids': [ref('tax_report_out_tax_sale_tag'), ref('tax_report_out_tax_less_exempted_sales_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('a_output_vat'),
-                'plus_report_line_ids': [ref('tax_report_out_tax')],
+                'plus_report_expression_ids': [ref('tax_report_out_tax_tag')],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_out_tax_sale'), ref('tax_report_out_tax_less_exempted_sales')],
+                'minus_report_expression_ids': [ref('tax_report_out_tax_sale_tag'), ref('tax_report_out_tax_less_exempted_sales_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('a_output_vat'),
-                'minus_report_line_ids': [ref('tax_report_out_tax')],
+                'minus_report_expression_ids': [ref('tax_report_out_tax_tag')],
             }),
         ]"/>
     </record>
-
     <record id="tax_wht_co_1" model="account.tax.template">
         <field name="chart_template_id" ref="chart"/>
         <field name="name">Company Withholding Tax 1% (Transportation)</field>
@@ -219,6 +224,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -230,6 +236,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -237,7 +244,6 @@
             }),
         ]"/>
     </record>
-
     <record id="tax_wht_co_2" model="account.tax.template">
         <field name="chart_template_id" ref="chart"/>
         <field name="name">Company Withholding Tax 2% (Advertising)</field>
@@ -250,6 +256,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -261,6 +268,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -268,7 +276,6 @@
             }),
         ]"/>
     </record>
-
     <record id="tax_wht_co_3" model="account.tax.template">
         <field name="chart_template_id" ref="chart"/>
         <field name="name">Company Withholding Tax 3% (Service)</field>
@@ -281,6 +288,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -292,6 +300,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -299,7 +308,6 @@
             }),
         ]"/>
     </record>
-
     <record id="tax_wht_co_5" model="account.tax.template">
         <field name="chart_template_id" ref="chart"/>
         <field name="name">Company Withholding Tax 5% (Rental)</field>
@@ -312,6 +320,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -323,6 +332,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -330,7 +340,6 @@
             }),
         ]"/>
     </record>
-
     <record id="tax_wht_pers_1" model="account.tax.template">
         <field name="chart_template_id" ref="chart"/>
         <field name="name">Personal Withholding Tax 1% (Transportation)</field>
@@ -343,6 +352,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -354,6 +364,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -361,7 +372,6 @@
             }),
         ]"/>
     </record>
-
     <record id="tax_wht_pers_2" model="account.tax.template">
         <field name="chart_template_id" ref="chart"/>
         <field name="name">Personal Withholding Tax 2% (Advertising)</field>
@@ -374,6 +384,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -385,6 +396,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -392,7 +404,6 @@
             }),
         ]"/>
     </record>
-
     <record id="tax_wht_pers_3" model="account.tax.template">
         <field name="chart_template_id" ref="chart"/>
         <field name="name">Personal Withholding Tax 3% (Service)</field>
@@ -405,6 +416,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -416,6 +428,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -423,7 +436,6 @@
             }),
         ]"/>
     </record>
-
     <record id="tax_wht_pers_5" model="account.tax.template">
         <field name="chart_template_id" ref="chart"/>
         <field name="name">Personal Withholding Tax 5% (Rental)</field>
@@ -436,6 +448,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -447,6 +460,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -454,7 +468,6 @@
             }),
         ]"/>
     </record>
-
     <record id="tax_wht_income_1" model="account.tax.template">
         <field name="chart_template_id" ref="chart"/>
         <field name="name">Withholding Income Tax 1% (Transportation)</field>
@@ -467,6 +480,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -478,6 +492,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -485,7 +500,6 @@
             }),
         ]"/>
     </record>
-
     <record id="tax_wht_income_2" model="account.tax.template">
         <field name="chart_template_id" ref="chart"/>
         <field name="name">Withholding Income Tax 2% (Advertising)</field>
@@ -498,6 +512,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -509,6 +524,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -516,7 +532,6 @@
             }),
         ]"/>
     </record>
-
     <record id="tax_wht_income_3" model="account.tax.template">
         <field name="chart_template_id" ref="chart"/>
         <field name="name">Withholding Income Tax 3% (Service)</field>
@@ -529,6 +544,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -540,6 +556,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -547,7 +564,6 @@
             }),
         ]"/>
     </record>
-
     <record id="tax_wht_income_5" model="account.tax.template">
         <field name="chart_template_id" ref="chart"/>
         <field name="name">Withholding Income Tax 5% (Rental)</field>
@@ -560,6 +576,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -571,6 +588,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -578,5 +596,4 @@
             }),
         ]"/>
     </record>
-
 </odoo>
