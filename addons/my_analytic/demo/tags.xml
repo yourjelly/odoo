@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record model="my.analytic.tag" id="department_all">
+        <field name="name">All Department</field>
+    </record>
+
+    <record model="my.analytic.tag" id="department_a">
+        <field name="name">Department A</field>
+        <field name="repartition_ids" eval="[(5, 0, 0),
+            (0, 0, {
+                'tag_id': ref('my_analytic.department_all'),
+                'percentage': 100,
+            }),
+        ]"/>
+    </record>
+
+    <record model="my.analytic.tag" id="department_a_1">
+        <field name="name">Department A.1</field>
+        <field name="repartition_ids" eval="[(5, 0, 0),
+            (0, 0, {
+                'tag_id': ref('my_analytic.department_a'),
+                'percentage': 100,
+            }),
+        ]"/>
+    </record>
+
+    <record model="my.analytic.tag" id="department_a_2">
+        <field name="name">Department A.2</field>
+        <field name="repartition_ids" eval="[(5, 0, 0),
+            (0, 0, {
+                'tag_id': ref('my_analytic.department_a'),
+                'percentage': 100,
+            }),
+        ]"/>
+    </record>
+
+    <record model="my.analytic.tag" id="department_b">
+        <field name="name">Department B</field>
+        <field name="repartition_ids" eval="[(5, 0, 0),
+            (0, 0, {
+                'tag_id': ref('my_analytic.department_all'),
+                'percentage': 100,
+            }),
+        ]"/>
+    </record>
+
+    <record model="my.analytic.tag" id="department_c">
+        <field name="name">Department C</field>
+        <field name="repartition_ids" eval="[(5, 0, 0),
+            (0, 0, {
+                'tag_id': ref('my_analytic.department_all'),
+                'percentage': 100,
+            }),
+        ]"/>
+    </record>
+
+    <record model="my.analytic.tag" id="expense_common">
+        <field name="name">Expense Common</field>
+    </record>
+
+    <record model="my.analytic.tag" id="expense_a_1">
+        <field name="name">Expense A.1</field>
+    </record>
+
+    <record model="my.analytic.tag" id="expense_a_2">
+        <field name="name">Expense A.2</field>
+    </record>
+
+    <record model="my.analytic.tag" id="expense_b_1">
+        <field name="name">Expense B.1</field>
+    </record>
+
+    <record model="my.analytic.tag" id="expense_a">
+        <field name="name">Expense A</field>
+        <field name="repartition_ids" eval="[(5, 0, 0),
+            (0, 0, {
+                'tag_id': ref('my_analytic.expense_common'),
+                'percentage': 10,
+            }),
+            (0, 0, {
+                'tag_id': ref('my_analytic.expense_a_1'),
+                'percentage': 45,
+            }),
+            (0, 0, {
+                'tag_id': ref('my_analytic.expense_a_2'),
+                'percentage': 45,
+            }),
+        ]"/>
+    </record>
+
+    <record model="my.analytic.tag" id="expense_b">
+        <field name="name">Expense B</field>
+        <field name="repartition_ids" eval="[(5, 0, 0),
+            (0, 0, {
+                'tag_id': ref('my_analytic.expense_common'),
+                'percentage': 20,
+            }),
+            (0, 0, {
+                'tag_id': ref('my_analytic.expense_b_1'),
+                'percentage': 80,
+            }),
+        ]"/>
+    </record>
+</odoo>

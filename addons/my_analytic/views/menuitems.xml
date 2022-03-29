@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_my_analytic" name="My Analytic" sequence="15" web_icon="note,static/description/icon.svg">
+        <menuitem id="line_menu" name="Lines" action="line_action" sequence="21"/>
+        <menuitem id="tag_menu" name="Tags" action="tag_action" sequence="22"/>
+        <menuitem id="line_detail_menu" name="Report" action="line_detail_action" sequence="23"/>
+    </menuitem>
+</odoo>

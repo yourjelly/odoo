@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record model="my.analytic.line" id="line_1">
+        <field name="name">Something</field>
+        <field name="amount">100</field>
+        <field name="tag_ids" eval="[(5, 0, 0),
+            (4, ref('my_analytic.department_a')),
+            (4, ref('my_analytic.expense_a')),
+        ]"/>
+    </record>
+
+    <record model="my.analytic.line" id="line_2">
+        <field name="name">Something Else</field>
+        <field name="amount">300</field>
+        <field name="tag_ids" eval="[(5, 0, 0),
+            (4, ref('my_analytic.department_b')),
+            (4, ref('my_analytic.expense_b')),
+        ]"/>
+    </record>
+</odoo>

@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+my_analytic.access_my_analytic_repartition,access_my_analytic_repartition,my_analytic.model_my_analytic_repartition,base.group_user,1,1,1,1
+my_analytic.access_my_analytic_tag,access_my_analytic_tag,my_analytic.model_my_analytic_tag,base.group_user,1,1,1,1
+my_analytic.access_my_analytic_line,access_my_analytic_line,my_analytic.model_my_analytic_line,base.group_user,1,1,1,1
+my_analytic.access_my_analytic_line_detail,access_my_analytic_line_detail,my_analytic.model_my_analytic_line_detail,base.group_user,1,0,0,0

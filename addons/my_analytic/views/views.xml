@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Line views -->
+
+    <record id="line_list" model="ir.ui.view">
+        <field name="name">line.list</field>
+        <field name="model">my.analytic.line</field>
+        <field name="arch" type="xml">
+            <tree string="Analytic Lines" editable="bottom">
+                <field name="name"/>
+                <field name="amount"/>
+                <field name="tag_ids" widget="many2many_tags"/>
+                <field name="repartition_string"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="line_action" model="ir.actions.act_window">
+        <field name="name">Lines</field>
+        <field name="res_model">my.analytic.line</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+    <!-- Report views -->
+
+    <record id="line_detail_list" model="ir.ui.view">
+        <field name="name">line.detail.list</field>
+        <field name="model">my.analytic.line.detail</field>
+        <field name="arch" type="xml">
+            <tree string="Analytic Report">
+                <field name="name"/>
+                <field name="amount"/>
+                <field name="amount_detail"/>
+                <field string="Original Tags" name="tag_ids" widget="many2many_tags"/>
+                <field name="tag_id"/>
+                <field name="repartition_string"/>
+                <field name="originator_id" invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="line_detail_search" model="ir.ui.view">
+        <field name="name">line.detail.search</field>
+        <field name="model">my.analytic.line.detail</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="tag_id"/>
+                <group expand="1">
+                    <filter string="Tag" name="group_by_tag" context="{'group_by': 'tag_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="line_detail_action" model="ir.actions.act_window">
+        <field name="name">Report</field>
+        <field name="res_model">my.analytic.line.detail</field>
+        <field name="view_mode">tree</field>
+        <field name="context">{'search_default_group_by_tag': 1}</field>
+    </record>
+
+    <!-- Tag views -->
+
+    <record id="tag_list" model="ir.ui.view">
+        <field name="name">tag.list</field>
+        <field name="model">my.analytic.tag</field>
+        <field name="arch" type="xml">
+            <tree string="Analytic Tags">
+                <field name="name"/>
+                <field name="repartition_ids" widget="many2many_tags"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="tag_form" model="ir.ui.view">
+        <field name="name">tag.list</field>
+        <field name="model">my.analytic.tag</field>
+        <field name="arch" type="xml">
+            <form string="Analytic Tags" editable="bottom">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                    </group>
+                    <field name="repartition_ids">
+                        <tree>
+                            <field name="parent_id" invisible="1"/>
+                            <field name="tag_id"/>
+                            <field name="percentage"/>
+                        </tree>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="tag_action" model="ir.actions.act_window">
+        <field name="name">Tags</field>
+        <field name="res_model">my.analytic.tag</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>
