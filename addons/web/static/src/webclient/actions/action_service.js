@@ -753,7 +753,8 @@ function makeActionManager(env) {
             componentProps: controller.props,
         };
         env.bus.trigger("ACTION_MANAGER:UPDATE", controller.__info__);
-        return Promise.all([currentActionProm, closingProm]).then((r) => r[0]);
+        let res = Promise.all([currentActionProm, closingProm]).then((r) => r[0]);
+        return res;
     }
 
     // ---------------------------------------------------------------------------

@@ -12,7 +12,6 @@ from . import account_report_common_journal
 from . import account_report_print_journal
 from . import account_resequence
 from . import setup_wizards
-from . import wizard_tax_adjustments
 from . import account_invoice_send
 from . import base_document_layout
 from . import account_payment_register

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
     <record id="account_tax_sale_vat1" model="account.tax.template">
         <field name="name">НӨАТ бараа</field>
         <field name="amount">10.0</field>
@@ -17,6 +16,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag5')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -30,6 +30,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag5')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -38,7 +39,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_purchase_vat1" model="account.tax.template">
         <field name="name">НӨАТ-тэй худалдан авалт</field>
         <field name="amount">10.0</field>
@@ -55,6 +55,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag36'),ref('vat_report_tag33')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -68,6 +69,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag36'),ref('vat_report_tag33')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -76,7 +78,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_purchase_vat2" model="account.tax.template">
         <field name="name">НӨАТ-гүй худалдан авалт</field>
         <field name="amount">0.0</field>
@@ -93,6 +94,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag33')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -104,13 +106,13 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag33')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
             }),
         ]"/>
     </record>
-
     <record id="account_tax_sale_vat2" model="account.tax.template">
         <field name="name">НӨАТ 0% борлуулалт</field>
         <field name="amount">0.0</field>
@@ -127,6 +129,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag2')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -138,13 +141,13 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag2')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
             }),
         ]"/>
     </record>
-
     <record id="account_tax_sale_vat3" model="account.tax.template">
         <field name="name">НӨАТ чөлөөлөх борлуулалт</field>
         <field name="amount">0.0</field>
@@ -161,6 +164,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag2')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -172,13 +176,13 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag2')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
             }),
         ]"/>
     </record>
-
     <record id="account_tax_sale_vat4" model="account.tax.template">
         <field name="name">НӨАТ бусад барааны борлуулалт</field>
         <field name="amount">10.0</field>
@@ -195,6 +199,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag6')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -208,6 +213,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag6')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -216,7 +222,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_sale_vat5" model="account.tax.template">
         <field name="name">НӨАТ эрх борлуулалт</field>
         <field name="amount">10.0</field>
@@ -233,6 +238,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag7')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -246,6 +252,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag7')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -254,7 +261,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_sale_vat6" model="account.tax.template">
         <field name="name">НӨАТ татан буугдах үеийн борлуулалт</field>
         <field name="amount">10.0</field>
@@ -271,6 +277,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag8')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -284,6 +291,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag8')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -292,7 +300,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_sale_vat7" model="account.tax.template">
         <field name="name">НӨАТ өрийн төлбөрт өгсөн бараа</field>
         <field name="amount">10.0</field>
@@ -309,6 +316,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag9')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -322,6 +330,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag9')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -330,7 +339,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_sale_vat8" model="account.tax.template">
         <field name="name">НӨАТ нотариат үйлчилгээ</field>
         <field name="amount">10.0</field>
@@ -347,6 +355,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag11')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -360,6 +369,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag11')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -368,7 +378,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_sale_vat9" model="account.tax.template">
         <field name="name">НӨАТ өрийн төлбөрт өгсөн үйлчилгээ</field>
         <field name="amount">10.0</field>
@@ -385,6 +394,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag12')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -398,6 +408,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag12')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -406,7 +417,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_sale_vat10" model="account.tax.template">
         <field name="name">НӨАТ цахилгаан, дулаан, ус, шуудан, холбоо</field>
         <field name="amount">10.0</field>
@@ -423,6 +433,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag13')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -436,6 +447,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag13')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -444,7 +456,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_sale_vat11" model="account.tax.template">
         <field name="name">НӨАТ бараа түрээслүүлэх, эзэмшүүлэх</field>
         <field name="amount">10.0</field>
@@ -461,6 +472,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag14')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -474,6 +486,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag14')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -482,7 +495,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_sale_vat12" model="account.tax.template">
         <field name="name">НӨАТ байр түрээслүүлэх, эзэмшүүлэх</field>
         <field name="amount">10.0</field>
@@ -499,6 +511,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag15')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -512,6 +525,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag15')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -520,7 +534,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_sale_vat13" model="account.tax.template">
         <field name="name">НӨАТ хөрөнгө түрээслүүлэх, эзэмшүүлэх</field>
         <field name="amount">10.0</field>
@@ -537,6 +550,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag16')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -550,6 +564,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag16')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -558,7 +573,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_sale_vat14" model="account.tax.template">
         <field name="name">НӨАТ бүтээл, загвар, зохиогчийн эрх</field>
         <field name="amount">10.0</field>
@@ -575,6 +589,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag17')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -588,6 +603,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag17')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -596,7 +612,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_sale_vat15" model="account.tax.template">
         <field name="name">НӨАТ хонжворт сугалаа, таавар, бооцоо</field>
         <field name="amount">10.0</field>
@@ -613,6 +628,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag18')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -626,6 +642,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag18')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -634,7 +651,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_sale_vat16" model="account.tax.template">
         <field name="name">НӨАТ зуучлалын үйлчилгээ</field>
         <field name="amount">10.0</field>
@@ -651,6 +667,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag19')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -664,6 +681,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag19')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -672,7 +690,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_sale_vat17" model="account.tax.template">
         <field name="name">НӨАТ авсан хүү торгууль, алданги</field>
         <field name="amount">10.0</field>
@@ -689,6 +706,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag20')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -702,6 +720,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag20')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -710,7 +729,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_sale_vat18" model="account.tax.template">
         <field name="name">НӨАТ хөрөнгийн үнэлгээний үйлчилгээ</field>
         <field name="amount">10.0</field>
@@ -727,6 +745,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag21')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -740,6 +759,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag21')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -748,7 +768,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_sale_vat19" model="account.tax.template">
         <field name="name">НӨАТ төсвийн санхүүжилт, татаас</field>
         <field name="amount">10.0</field>
@@ -765,6 +784,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag22')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -778,6 +798,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag22')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -786,7 +807,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_sale_vat20" model="account.tax.template">
         <field name="name">НӨАТ хууль зүйн үйлчилгээ</field>
         <field name="amount">10.0</field>
@@ -803,6 +823,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag23')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -816,6 +837,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag23')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -824,7 +846,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_sale_vat21" model="account.tax.template">
         <field name="name">НӨАТ үсчин, гоо сайхан, угаалга, цэвэрлэгээ</field>
         <field name="amount">10.0</field>
@@ -841,6 +862,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag24')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -854,6 +876,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag24')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -862,7 +885,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_sale_vat22" model="account.tax.template">
         <field name="name">НӨАТ бусад үйлчилгээ</field>
         <field name="amount">10.0</field>
@@ -879,6 +901,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag25')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -892,6 +915,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag25')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -900,7 +924,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_sale_vat23" model="account.tax.template">
         <field name="name">НӨАТ 0% экспорт бараа</field>
         <field name="amount">0.0</field>
@@ -917,6 +940,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag28')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -928,13 +952,13 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag28')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
             }),
         ]"/>
     </record>
-
     <record id="account_tax_sale_vat24" model="account.tax.template">
         <field name="name">НӨАТ 0% экспорт үйлчилгээ</field>
         <field name="amount">0.0</field>
@@ -951,6 +975,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag29')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -962,13 +987,13 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag29')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
             }),
         ]"/>
     </record>
-
     <record id="account_tax_purchase_vat3" model="account.tax.template">
         <field name="name">НӨАТ импортоор авсан бараа, үйлчилгээ</field>
         <field name="amount">10.0</field>
@@ -985,6 +1010,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag33'),ref('vat_report_tag35')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -998,6 +1024,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag33'),ref('vat_report_tag35')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1006,7 +1033,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_purchase_vat4" model="account.tax.template">
         <field name="name">НӨАТ төлөгчөөр бүртгүүлэх үед худалдан авсан</field>
         <field name="amount">10.0</field>
@@ -1023,6 +1049,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag33'),ref('vat_report_tag37')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1036,6 +1063,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag33'),ref('vat_report_tag37')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1044,7 +1072,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_purchase_vat5" model="account.tax.template">
         <field name="name">НӨАТ мал аж ахуй эрхлэгчээс худалдан авсан</field>
         <field name="amount">10.0</field>
@@ -1061,6 +1088,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag33'),ref('vat_report_tag38')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1074,6 +1102,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag33'),ref('vat_report_tag38')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1082,7 +1111,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_purchase_vat6" model="account.tax.template">
         <field name="name">НӨАТ автомашин, эд анги худалдан авалт</field>
         <field name="amount">10.0</field>
@@ -1099,6 +1127,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag33')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1112,6 +1141,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag33')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1120,7 +1150,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_purchase_vat7" model="account.tax.template">
         <field name="name">НӨАТ ажлын хэрэгцээнд авсан бараа</field>
         <field name="amount">10.0</field>
@@ -1137,6 +1166,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag33')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1150,6 +1180,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag33')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1158,7 +1189,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_purchase_vat8" model="account.tax.template">
         <field name="name">НӨАТ импортоор авсан үндсэн хөрөнгө</field>
         <field name="amount">10.0</field>
@@ -1175,6 +1205,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag33')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1188,6 +1219,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag33')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1196,7 +1228,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_purchase_vat9" model="account.tax.template">
         <field name="name">НӨАТ чөлөөлөгдөх үйлдвэрлэлд зориулсан бараа, үйлчилгээ</field>
         <field name="amount">10.0</field>
@@ -1213,6 +1244,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag33')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1226,6 +1258,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag33')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1234,7 +1267,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_purchase_vat10" model="account.tax.template">
         <field name="name">НӨАТ хайгуулд зориулсан импортын бараа, үйлчилгээ</field>
         <field name="amount">10.0</field>
@@ -1251,6 +1283,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag33')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1264,6 +1297,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag33')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1272,7 +1306,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_purchase_vat11" model="account.tax.template">
         <field name="name">НӨАТ импортын бусад хамааралгүй бараа, үйлчилгээ</field>
         <field name="amount">10.0</field>
@@ -1289,6 +1322,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag33')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1302,6 +1336,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag33')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1310,7 +1345,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_sale_vat25" model="account.tax.template">
         <field name="name">НӨАТ дотоодод зарсан санхүүгийн түрээс</field>
         <field name="amount">10.0</field>
@@ -1327,6 +1361,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag48')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1340,6 +1375,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag48')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1348,7 +1384,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_sale_vat26" model="account.tax.template">
         <field name="name">НӨАТ Факторинг, форфайтинг хэлцлийн үйлчилгээ</field>
         <field name="amount">10.0</field>
@@ -1365,6 +1400,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag49')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1378,6 +1414,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag49')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1386,7 +1423,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_purchase_vat12" model="account.tax.template">
         <field name="name">НӨАТ Санхүүгийн түрээсийн худалдан авалт</field>
         <field name="amount">10.0</field>
@@ -1403,6 +1439,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag51')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1416,6 +1453,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag51')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1424,7 +1462,6 @@
             }),
         ]"/>
     </record>
-
     <record id="account_tax_purchase_vat13" model="account.tax.template">
         <field name="name">НӨАТ Факторинг, форфайтинг худалдан авалт</field>
         <field name="amount">10.0</field>
@@ -1441,6 +1478,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag52')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1454,6 +1492,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [ref('vat_report_tag52')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1462,5 +1501,4 @@
             }),
         ]"/>
     </record>
-
 </odoo>

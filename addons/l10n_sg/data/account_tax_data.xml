@@ -15,8 +15,9 @@
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'plus_report_line_ids': [ref('account_tax_report_line_exempt_supplies')],
+                        'plus_report_expression_ids': [ref('account_tax_report_line_exempt_supplies_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
@@ -26,15 +27,15 @@
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'minus_report_line_ids': [ref('account_tax_report_line_exempt_supplies')],
+                        'minus_report_expression_ids': [ref('account_tax_report_line_exempt_supplies_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                     }),
                 ]"/>
         </record>
-
         <record id="sg_sale_tax_ds_7" model="account.tax.template">
             <field name="name">Sales Tax 7% DS</field>
             <field name="description">7% DS</field>
@@ -48,30 +49,31 @@
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'plus_report_line_ids': [ref('account_tax_report_line_std_rated_supplies')],
+                        'plus_report_expression_ids': [ref('account_tax_report_line_std_rated_supplies_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                         'account_id': ref('account_account_792'),
-                        'plus_report_line_ids': [ref('account_tax_report_line_output_tax_due')],
+                        'plus_report_expression_ids': [ref('account_tax_report_line_output_tax_due_tag')],
                     }),
                 ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'minus_report_line_ids': [ref('account_tax_report_line_std_rated_supplies')],
+                        'minus_report_expression_ids': [ref('account_tax_report_line_std_rated_supplies_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                         'account_id': ref('account_account_792'),
-                        'minus_report_line_ids': [ref('account_tax_report_line_output_tax_due')],
+                        'minus_report_expression_ids': [ref('account_tax_report_line_output_tax_due_tag')],
                     }),
                 ]"/>
         </record>
-
         <record id="sg_sale_tax_esn_0" model="account.tax.template">
             <field name="name">Sales Tax 0% ESN33</field>
             <field name="description">0% ESN33</field>
@@ -85,8 +87,9 @@
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'plus_report_line_ids': [ref('account_tax_report_line_exempt_supplies')],
+                        'plus_report_expression_ids': [ref('account_tax_report_line_exempt_supplies_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
@@ -96,15 +99,15 @@
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'minus_report_line_ids': [ref('account_tax_report_line_exempt_supplies')],
+                        'minus_report_expression_ids': [ref('account_tax_report_line_exempt_supplies_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                     }),
                 ]"/>
         </record>
-
         <record id="sg_sale_tax_os_0" model="account.tax.template">
             <field name="name">Sales Tax 0% OS</field>
             <field name="description">0% OS</field>
@@ -119,6 +122,7 @@
                         'factor_percent': 100,
                         'repartition_type': 'base',
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
@@ -129,13 +133,13 @@
                         'factor_percent': 100,
                         'repartition_type': 'base',
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                     }),
                 ]"/>
         </record>
-
         <record id="sg_sale_tax_zr_0" model="account.tax.template">
             <field name="name">Sales Tax 0% ZR</field>
             <field name="description">0% ZR</field>
@@ -149,8 +153,9 @@
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'plus_report_line_ids': [ref('account_tax_report_line_zero_rated_supplies')],
+                        'plus_report_expression_ids': [ref('account_tax_report_line_zero_rated_supplies_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
@@ -160,15 +165,15 @@
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'minus_report_line_ids': [ref('account_tax_report_line_zero_rated_supplies')],
+                        'minus_report_expression_ids': [ref('account_tax_report_line_zero_rated_supplies_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                     }),
                 ]"/>
         </record>
-
         <record id="sg_sale_tax_sr_7" model="account.tax.template">
             <field name="name">Sales Tax 7% SR</field>
             <field name="description">7% SR</field>
@@ -182,30 +187,31 @@
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'plus_report_line_ids': [ref('account_tax_report_line_std_rated_supplies')],
+                        'plus_report_expression_ids': [ref('account_tax_report_line_std_rated_supplies_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                         'account_id': ref('account_account_796'),
-                        'plus_report_line_ids': [ref('account_tax_report_line_output_tax_due')],
+                        'plus_report_expression_ids': [ref('account_tax_report_line_output_tax_due_tag')],
                     }),
                 ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'minus_report_line_ids': [ref('account_tax_report_line_std_rated_supplies')],
+                        'minus_report_expression_ids': [ref('account_tax_report_line_std_rated_supplies_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                         'account_id': ref('account_account_796'),
-                        'minus_report_line_ids': [ref('account_tax_report_line_output_tax_due')],
+                        'minus_report_expression_ids': [ref('account_tax_report_line_output_tax_due_tag')],
                     }),
                 ]"/>
         </record>
-
         <record id="sg_sale_tax_srca_s_na" model="account.tax.template">
             <field name="name">Sales Tax SRCA-S</field>
             <field name="description">SRCA-S</field>
@@ -219,8 +225,9 @@
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'plus_report_line_ids': [ref('account_tax_report_line_std_rated_supplies')],
+                        'plus_report_expression_ids': [ref('account_tax_report_line_std_rated_supplies_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
@@ -230,15 +237,15 @@
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'minus_report_line_ids': [ref('account_tax_report_line_std_rated_supplies')],
+                        'minus_report_expression_ids': [ref('account_tax_report_line_std_rated_supplies_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                     }),
                 ]"/>
         </record>
-
         <record id="sg_sale_tax_srca_c_7" model="account.tax.template">
             <field name="name">Sales Tax 7% SRCA-C</field>
             <field name="description">7% SRCA-C</field>
@@ -252,32 +259,32 @@
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'plus_report_line_ids': [ref('account_tax_report_line_std_rated_supplies')],
+                        'plus_report_expression_ids': [ref('account_tax_report_line_std_rated_supplies_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                         'account_id': ref('account_account_798'),
-                        'plus_report_line_ids': [ref('account_tax_report_line_output_tax_due')],
+                        'plus_report_expression_ids': [ref('account_tax_report_line_output_tax_due_tag')],
                     }),
                 ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'minus_report_line_ids': [ref('account_tax_report_line_std_rated_supplies')],
+                        'minus_report_expression_ids': [ref('account_tax_report_line_std_rated_supplies_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                         'account_id': ref('account_account_798'),
-                        'minus_report_line_ids': [ref('account_tax_report_line_output_tax_due')],
+                        'minus_report_expression_ids': [ref('account_tax_report_line_output_tax_due_tag')],
                     }),
                 ]"/>
         </record>
-
         <!-- Purchases Tax -->
-
         <record id="sg_purchase_tax_txn33_7" model="account.tax.template">
             <field name="name">Purchase Tax 7% TX-N33</field>
             <field name="description">7% TX-N33</field>
@@ -291,30 +298,31 @@
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'plus_report_line_ids': [ref('account_tax_report_line_total_taxable_purchases')],
+                        'plus_report_expression_ids': [ref('account_tax_report_line_total_taxable_purchases_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                         'account_id': ref('account_account_738'),
-                        'plus_report_line_ids': [ref('account_tax_report_line_inp_tax_refund_claim')],
+                        'plus_report_expression_ids': [ref('account_tax_report_line_inp_tax_refund_claim_tag')],
                     }),
                 ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'minus_report_line_ids': [ref('account_tax_report_line_total_taxable_purchases')],
+                        'minus_report_expression_ids': [ref('account_tax_report_line_total_taxable_purchases_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                         'account_id': ref('account_account_738'),
-                        'minus_report_line_ids': [ref('account_tax_report_line_inp_tax_refund_claim')],
+                        'minus_report_expression_ids': [ref('account_tax_report_line_inp_tax_refund_claim_tag')],
                     }),
                 ]"/>
         </record>
-
         <record id="sg_purchase_tax_txe33_7" model="account.tax.template">
             <field name="name">Purchase Tax 7% TX-E33</field>
             <field name="description">7% TX-E33</field>
@@ -328,30 +336,31 @@
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'plus_report_line_ids': [ref('account_tax_report_line_total_taxable_purchases')],
+                        'plus_report_expression_ids': [ref('account_tax_report_line_total_taxable_purchases_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                         'account_id': ref('account_account_739'),
-                        'plus_report_line_ids': [ref('account_tax_report_line_inp_tax_refund_claim')],
+                        'plus_report_expression_ids': [ref('account_tax_report_line_inp_tax_refund_claim_tag')],
                     }),
                 ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'minus_report_line_ids': [ref('account_tax_report_line_total_taxable_purchases')],
+                        'minus_report_expression_ids': [ref('account_tax_report_line_total_taxable_purchases_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                         'account_id': ref('account_account_739'),
-                        'minus_report_line_ids': [ref('account_tax_report_line_inp_tax_refund_claim')],
+                        'minus_report_expression_ids': [ref('account_tax_report_line_inp_tax_refund_claim_tag')],
                     }),
                 ]"/>
         </record>
-
         <record id="sg_purchase_tax_bl_7" model="account.tax.template">
             <field name="name">Purchase Tax 7% BL</field>
             <field name="description">7% BL</field>
@@ -366,6 +375,7 @@
                         'factor_percent': 100,
                         'repartition_type': 'base',
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
@@ -377,6 +387,7 @@
                         'factor_percent': 100,
                         'repartition_type': 'base',
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
@@ -384,7 +395,6 @@
                     }),
                 ]"/>
         </record>
-
         <record id="sg_purchase_tax_im_7" model="account.tax.template">
             <field name="name">Purchase Tax 7% IM</field>
             <field name="description">7% IM</field>
@@ -398,30 +408,31 @@
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'plus_report_line_ids': [ref('account_tax_report_line_total_taxable_purchases')],
+                        'plus_report_expression_ids': [ref('account_tax_report_line_total_taxable_purchases_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                         'account_id': ref('account_account_741'),
-                        'plus_report_line_ids': [ref('account_tax_report_line_inp_tax_refund_claim')],
+                        'plus_report_expression_ids': [ref('account_tax_report_line_inp_tax_refund_claim_tag')],
                     }),
                 ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'minus_report_line_ids': [ref('account_tax_report_line_total_taxable_purchases')],
+                        'minus_report_expression_ids': [ref('account_tax_report_line_total_taxable_purchases_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                         'account_id': ref('account_account_741'),
-                        'minus_report_line_ids': [ref('account_tax_report_line_inp_tax_refund_claim')],
+                        'minus_report_expression_ids': [ref('account_tax_report_line_inp_tax_refund_claim_tag')],
                     }),
                 ]"/>
         </record>
-
         <record id="sg_purchase_tax_txre_7" model="account.tax.template">
             <field name="name">Purchase Tax 7% TX-RE</field>
             <field name="description">7% TX-RE</field>
@@ -435,30 +446,31 @@
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'plus_report_line_ids': [ref('account_tax_report_line_total_taxable_purchases')],
+                        'plus_report_expression_ids': [ref('account_tax_report_line_total_taxable_purchases_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                         'account_id': ref('account_account_742'),
-                        'plus_report_line_ids': [ref('account_tax_report_line_inp_tax_refund_claim')],
+                        'plus_report_expression_ids': [ref('account_tax_report_line_inp_tax_refund_claim_tag')],
                     }),
                 ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'minus_report_line_ids': [ref('account_tax_report_line_total_taxable_purchases')],
+                        'minus_report_expression_ids': [ref('account_tax_report_line_total_taxable_purchases_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                         'account_id': ref('account_account_742'),
-                        'minus_report_line_ids': [ref('account_tax_report_line_inp_tax_refund_claim')],
+                        'minus_report_expression_ids': [ref('account_tax_report_line_inp_tax_refund_claim_tag')],
                     }),
                 ]"/>
         </record>
-
         <record id="sg_purchase_tax_me_0" model="account.tax.template">
             <field name="name">Purchase Tax 7% IGDS</field>
             <field name="description">7% IGDS</field>
@@ -472,30 +484,31 @@
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'plus_report_line_ids': [ref('account_tax_report_line_total_taxable_purchases')],
+                        'plus_report_expression_ids': [ref('account_tax_report_line_total_taxable_purchases_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                         'account_id': ref('account_account_743'),
-                        'plus_report_line_ids': [ref('account_tax_report_line_inp_tax_refund_claim')],
+                        'plus_report_expression_ids': [ref('account_tax_report_line_inp_tax_refund_claim_tag')],
                     }),
                 ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'minus_report_line_ids': [ref('account_tax_report_line_total_taxable_purchases')],
+                        'minus_report_expression_ids': [ref('account_tax_report_line_total_taxable_purchases_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                         'account_id': ref('account_account_743'),
-                        'minus_report_line_ids': [ref('account_tax_report_line_inp_tax_refund_claim')],
+                        'minus_report_expression_ids': [ref('account_tax_report_line_inp_tax_refund_claim_tag')],
                     }),
                 ]"/>
         </record>
-
         <record id="sg_purchase_tax_nr_0" model="account.tax.template">
             <field name="name">Purchase Tax 0% NR</field>
             <field name="description">0% NR</field>
@@ -510,6 +523,7 @@
                         'factor_percent': 100,
                         'repartition_type': 'base',
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
@@ -520,13 +534,13 @@
                         'factor_percent': 100,
                         'repartition_type': 'base',
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                     }),
                 ]"/>
         </record>
-
         <record id="sg_purchase_tax_zp_0" model="account.tax.template">
             <field name="name">Purchase Tax 0% ZP</field>
             <field name="description">0% ZP</field>
@@ -540,8 +554,9 @@
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'plus_report_line_ids': [],
+                        'plus_report_expression_ids': [],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
@@ -551,15 +566,15 @@
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'minus_report_line_ids': [],
+                        'minus_report_expression_ids': [],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                     }),
                 ]"/>
         </record>
-
         <record id="sg_purchase_tax_op_0" model="account.tax.template">
             <field name="name">Purchase Tax 0% OP</field>
             <field name="description">0% OP</field>
@@ -574,6 +589,7 @@
                         'factor_percent': 100,
                         'repartition_type': 'base',
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
@@ -584,13 +600,13 @@
                         'factor_percent': 100,
                         'repartition_type': 'base',
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                     }),
                 ]"/>
         </record>
-
         <record id="sg_purchase_tax_ep_0" model="account.tax.template">
             <field name="name">Purchase Tax 0% EP</field>
             <field name="description">0% EP</field>
@@ -605,6 +621,7 @@
                         'factor_percent': 100,
                         'repartition_type': 'base',
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
@@ -615,13 +632,13 @@
                         'factor_percent': 100,
                         'repartition_type': 'base',
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                     }),
                 ]"/>
         </record>
-
         <record id="sg_purchase_tax_mes_0" model="account.tax.template">
             <field name="name">Purchase Tax MES</field>
             <field name="description">0% MES</field>
@@ -635,8 +652,9 @@
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'plus_report_line_ids': [ref('account_tax_report_line_applicable_goods_imported_value')],
+                        'plus_report_expression_ids': [ref('account_tax_report_line_applicable_goods_imported_value_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
@@ -646,15 +664,15 @@
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'minus_report_line_ids': [ref('account_tax_report_line_applicable_goods_imported_value')],
+                        'minus_report_expression_ids': [ref('account_tax_report_line_applicable_goods_imported_value_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                     }),
                 ]"/>
         </record>
-
         <record id="sg_purchase_tax_tx7_7" model="account.tax.template">
             <field name="name">Purchase Tax 7% TX7</field>
             <field name="description">7% TX7</field>
@@ -668,30 +686,31 @@
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'plus_report_line_ids': [ref('account_tax_report_line_total_taxable_purchases')],
+                        'plus_report_expression_ids': [ref('account_tax_report_line_total_taxable_purchases_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                         'account_id': ref('account_account_749'),
-                        'plus_report_line_ids': [ref('account_tax_report_line_inp_tax_refund_claim')],
+                        'plus_report_expression_ids': [ref('account_tax_report_line_inp_tax_refund_claim_tag')],
                     }),
                 ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'minus_report_line_ids': [ref('account_tax_report_line_total_taxable_purchases')],
+                        'minus_report_expression_ids': [ref('account_tax_report_line_total_taxable_purchases_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                         'account_id': ref('account_account_749'),
-                        'minus_report_line_ids': [ref('account_tax_report_line_inp_tax_refund_claim')],
+                        'minus_report_expression_ids': [ref('account_tax_report_line_inp_tax_refund_claim_tag')],
                     }),
                 ]"/>
         </record>
-
         <record id="sg_purchase_tax_txca_7" model="account.tax.template">
             <field name="name">Purchase Tax 7% TXCA</field>
             <field name="description">7% TXCA</field>
@@ -705,26 +724,28 @@
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'plus_report_line_ids': [ref('account_tax_report_line_total_taxable_purchases')],
+                        'plus_report_expression_ids': [ref('account_tax_report_line_total_taxable_purchases_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                         'account_id': ref('account_account_750'),
-                        'plus_report_line_ids': [ref('account_tax_report_line_inp_tax_refund_claim')],
+                        'plus_report_expression_ids': [ref('account_tax_report_line_inp_tax_refund_claim_tag')],
                     }),
                 ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'base',
-                        'minus_report_line_ids': [ref('account_tax_report_line_total_taxable_purchases')],
+                        'minus_report_expression_ids': [ref('account_tax_report_line_total_taxable_purchases_tag')],
                     }),
+
                     (0,0, {
                         'factor_percent': 100,
                         'repartition_type': 'tax',
                         'account_id': ref('account_account_750'),
-                        'minus_report_line_ids': [ref('account_tax_report_line_inp_tax_refund_claim')],
+                        'minus_report_expression_ids': [ref('account_tax_report_line_inp_tax_refund_claim_tag')],
                     }),
                 ]"/>
         </record>
