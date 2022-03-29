@@ -189,16 +189,7 @@ class Pricelist(models.Model):
                     suitable_rule = rule
                     break
 
-            # TODO VFE provide a way for lazy computation of price ?
-            if suitable_rule:
-                price = suitable_rule._compute_price(product, qty, target_uom, date)
-            else:
-                # fall back on Sales Price if no rule is found
-                price = product.price_compute('list_price', uom=target_uom, date=date)[product.id]
-
-                if product.currency_id != self.currency_id:
-                    price = product.currency_id._convert(price, self.currency_id, self.env.company, date, round=False)
-
+            price = suitable_rule._compute_price(product, qty, target_uom, date=date, currency=self.currency_id)
             results[product.id] = (price, suitable_rule.id)
 
         return results

@@ -387,18 +387,9 @@ class SaleOrderLine(models.Model):
         product = self.product_id.with_context(**product_context)
         qty = self.product_uom_qty or 1.0
 
-        if pricelist_rule:
-            price = pricelist_rule._compute_price(
-                product, qty, self.product_uom, order_date)
-        else:
-            # fall back on Sales Price if no rule is found
-            price = product.price_compute('list_price', uom=self.product_uom, date=order_date)[product.id]
+        price = pricelist_rule._compute_price(
+            product, qty, self.product_uom, order_date, self.currency_id)
 
-            # Note: we do not rely on the currency parameter of price_compute
-            # to avoid rounding the resulting price value to the currency decimal precision
-            if product.currency_id != self.currency_id:
-                price = product.currency_id._convert(
-                    price, self.currency_id, self.env.company, order_date, round=False)
         return price, pricelist_rule.id
 
     @api.depends('product_id', 'product_uom', 'product_uom_qty')
