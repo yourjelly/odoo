@@ -209,10 +209,10 @@ class Article(models.Model):
         member_permissions = self._get_partner_member_permissions(partner_id.id, article_ids=self.ids)
         for article in self:
             if self.env.user.share:
-                article.user_has_access = member_permissions.get(article.id, "none") != "none"
+                article.user_has_access = member_permissions.get(article.ids[0], "none") != "none"
             else:
-                article.user_has_access = member_permissions[article.id] != "none" if article.id in member_permissions \
-                    else article_permissions[article.id] != 'none'
+                article.user_has_access = member_permissions[article.ids[0]] != "none" if article.ids[0] in member_permissions \
+                    else article_permissions[article.ids[0]] != 'none'
 
     @api.depends_context('uid')
     @api.depends('internal_permission', 'article_member_ids.partner_id', 'article_member_ids.permission')
@@ -230,11 +230,12 @@ class Article(models.Model):
         member_permissions = self._get_partner_member_permissions(partner_id.id, article_ids=self.ids)
         for article in self:
             if self.env.user.share:
-                article.user_can_write = member_permissions.get(article.id) == "write"
+                article.user_can_write = member_permissions.get(article.ids[0]) == "write"
             else:
                 # You cannot have only one member per article.
-                article.user_can_write = member_permissions[article.id] == "write" if article.id in member_permissions \
-                    else article_permissions[article.id] == 'write'
+                article_id = article.ids[0]
+                article.user_can_write = member_permissions[article_id] == "write" if article_id in member_permissions \
+                    else article_permissions[article_id] == 'write'
 
     @api.depends('internal_permission', 'article_member_ids.permission', 'article_member_ids.partner_id')
     def _compute_category(self):
