@@ -37,7 +37,7 @@ class ResCurrency(models.Model):
         return bool(self.env['account.move.line'].search_count(['|', ('currency_id', '=', self.id), ('company_currency_id', '=', self.id)]))
 
     @api.model
-    def _get_query_currency_table(self, options):
+    def _get_query_currency_table(self, options): #TODO OCO ce serait sans doute pas mal d'appeler ça sur les tax report aussi, non ? En se démerdant pour convertir dans la devise du rapport ?
         ''' Construct the currency table as a mapping company -> rate to convert the amount to the user's company
         currency in a multi-company/multi-currency environment.
         The currency_table is a small postgresql table construct with VALUES.

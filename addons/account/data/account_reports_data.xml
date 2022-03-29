@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- GENERIC TAX REPORT -->
+        <!--TODO OCO il faudra tester ce que fait la colonne de debug sur les rapports custom-->
+        <record id="generic_tax_report" model="account.report">
+            <field name="name">Generic Tax report</field>
+            <field name="filter_multi_company">tax_units</field>
+            <field name="filter_tax_exigible" eval="True"/>
+            <field name="dynamic_lines_generator">_generic_tax_report_default_grouping</field> <!--TODO OCO pareil: ça, c'est à ajouter en enterprise. Le champ aussi ?-->
+            <field name="column_ids" eval="[(5, 0, 0),
+                (0, 0, {'name': 'NET', 'expression_label': 'net', 'sequence': 1}),
+                (0, 0, {'name': 'TAX', 'expression_label': 'tax', 'sequence': 2}),
+            ]"/>
+            <!--TODO OCO les expression_label sur le rapport générique n'ont pas trop de sens ; il faudra en outre adapter le Python-->
+            <!--TODO OCO les colonnes, on les déclare à la wan ?-->
+            <!--TODO OCO fiscal_position à voir-->
+        </record>
+
+        <record id="generic_tax_report_account_tax" model="account.report">
+            <field name="name">Group by: Account &gt; Tax </field>
+            <field name="root_report_id" ref="generic_tax_report"/>
+            <field name="filter_multi_company">tax_units</field>
+            <field name="filter_tax_exigible" eval="True"/>
+            <field name="dynamic_lines_generator">_generic_tax_report_account_tax_grouping</field>
+            <field name="column_ids" eval="[(5, 0, 0),
+                (0, 0, {'name': 'NET', 'expression_label': 'net', 'sequence': 1}),
+                (0, 0, {'name': 'TAX', 'expression_label': 'tax', 'sequence': 2}),
+            ]"/>
+        </record>
+
+        <record id="generic_tax_report_tax_account" model="account.report">
+            <field name="name">Group by: Tax &gt; Account </field>
+            <field name="root_report_id" ref="generic_tax_report"/>
+            <field name="filter_multi_company">tax_units</field>
+            <field name="filter_tax_exigible" eval="True"/>
+            <field name="dynamic_lines_generator">_generic_tax_report_tax_account_grouping</field>
+            <field name="column_ids" eval="[(5, 0, 0),
+                (0, 0, {'name': 'NET', 'expression_label': 'net', 'sequence': 1}),
+                (0, 0, {'name': 'TAX', 'expression_label': 'tax', 'sequence': 2}),
+            ]"/>
+        </record>
+
+        <!--TODO OCO pour simplifier ce genre de déclaration, je ferais bien un modèle account.report.config qui permette de définir des valeurs par défaut avec un seul m2o (je pense notamment au rapport de taxes, c'est mieux)
+          => Au write/create de config_id, on complète les valeurs en fonction de la config
+          => Au write d'un nouveau champ sur config_id, on corrige les rapports ? A voir.
+
+          ====> Tous les champs de config du rapport pourraient être des compute éditables vers la config, du coup. Peut-être too much
+
+          ===> OU BIEN
+          le champ config_id est required m2o. On la crée avec une commande ORM pour les cas simples, et on le crée à part pour les rapports de taxes,
+          de sorte qu'ils appellent tous la même. Mais du coup, pas de variante d'un sous rapport qui puisse changer un seul point de config sans changer
+          toute la config. On peut vivre avec, non ? Ca veut aussi dire qu'on est limités niveau customisation par l'utilisateur. À voir. Encore qu'on pourrait
+          mettre des champs related et les montrer dans la vue pour ça.
+        -->
+
+        <!--TODO OCO TEST REPORT -->
+        <record id="test_report" model="account.report">
+            <field name="name">Test Report (with generic tax report dynamic lines)</field>
+            <field name="root_report_id" ref="generic_tax_report"/>
+            <field name="filter_multi_company">tax_units</field>
+            <field name="filter_tax_exigible" eval="True"/>
+            <field name="filter_unfold_all" eval="True"/>
+            <field name="filter_analytic" eval="True"/>
+            <field name="filter_hierarchy">by_default</field>
+            <field name="filter_journals" eval="True"/>
+            <field name="filter_partner" eval="True"/>
+            <field name="filter_account_type" eval="None"/>
+            <field name="dynamic_lines_generator" eval="False"/><!-- TODO OCO à remettre en testant davantage _generic_tax_report_default_grouping</field>--> <!--TODO OCO pareil: ça, c'est à ajouter en enterprise. Le champ aussi ?-->
+            <field name="column_ids" eval="[(5, 0, 0),
+                (0, 0, {'name': 'MAIN', 'expression_label': 'main', 'sequence': 1, 'sortable': True}),
+                (0, 0, {'name': '42', 'expression_label': 'forty_two', 'sequence': 2}),
+            ]"/>
+            <!--TODO OCO fiscal_position à voir-->
+        </record>
+
+        <record id="oco_test_line_1" model="account.report.line">
+            <field name="name">test line 1</field>
+            <field name="code">LINE_1</field>
+            <field name="report_id" ref="test_report"/>
+            <!--TODO OCO pour les vrais cas comme ceci, on a un souci: la fonction est en enterprise: donc soit on la déclare qui retourne 0 en community, soit on l'ajoute là-bas...
+            Ou bien on la met aussi en community ? Ca fait quand même bcp, là ...
+            ==> Ou bien on s'en tape parce qu'ici c'est juste le string ?
+             -->
+            <field name="expression_ids" eval="[(5, 0, 0),
+                (0, 0, {'total': 'main', 'engine': 'tax_tags', 'formula': 'tag A'}),
+                (0, 0, {'total': 'forty_two', 'engine': 'tax_tags', 'formula': 'tag B'}),
+            ]"/>
+            <!--TODO OCO pour le control, on pourrait du coup mettre control_main, control_opt, ... EASY-->
+            <field name="sequence">1</field>
+        </record>
+
+        <record id="oco_test_line_financial" model="account.report.line">
+            <field name="name">test line financial</field>
+            <field name="report_id" ref="test_report"/>
+            <!--TODO OCO pour les vrais cas comme ceci, on a un souci: la fonction est en enterprise: donc soit on la déclare qui retourne 0 en community, soit on l'ajoute là-bas...
+            Ou bien on la met aussi en community ? Ca fait quand même bcp, là ...
+            ==> Ou bien on s'en tape parce qu'ici c'est juste le string ?
+             -->
+            <field name="expression_ids" eval="[(5, 0, 0),
+                (0, 0, {'total': 'main', 'engine': 'domain', 'formula': &quot;[('account_id.user_type_id.internal_group', '=', 'income')]&quot;, 'subformula': 'count_rows', 'figure_type': 'integer'}),
+                (0, 0, {'total': 'forty_two', 'engine': 'domain', 'formula': &quot;[('account_id.user_type_id.internal_group', '=', 'income')]&quot;, 'subformula': 'sum'}),
+            ]"/>
+            <field name="foldable" eval="False"/>
+            <field name="sequence">2</field>
+        </record>
+
+        <record id="oco_test_line_financial_ref" model="account.report.line">
+            <field name="name">test line financial ref</field>
+            <field name="report_id" ref="test_report"/>
+            <!--TODO OCO pour les vrais cas comme ceci, on a un souci: la fonction est en enterprise: donc soit on la déclare qui retourne 0 en community, soit on l'ajoute là-bas...
+            Ou bien on la met aussi en community ? Ca fait quand même bcp, là ...
+            ==> Ou bien on s'en tape parce qu'ici c'est juste le string ?
+             -->
+            <field name="expression_ids" eval="[(5, 0, 0),
+                (0, 0, {'total': 'main', 'engine': 'domain', 'formula': &quot;[('account_id.user_type_id', '=', ref('account.data_account_type_revenue'))]&quot;, 'subformula': 'count_rows', 'figure_type': 'integer'}),
+                (0, 0, {'total': 'forty_two', 'engine': 'domain', 'formula': &quot;[('account_id.user_type_id', '=', ref('account.data_account_type_revenue'))]&quot;, 'subformula': 'sum'}),
+            ]"/>
+            <field name="foldable" eval="False"/>
+            <field name="sequence">2</field>
+        </record>
+
+        <record id="oco_test_line_financial_group" model="account.report.line">
+            <field name="name">test line financial groupby</field>
+            <field name="code">FINANCIAL_GROUPBY</field>
+            <field name="report_id" ref="test_report"/>
+            <field name="expression_ids" eval="[(5, 0, 0),
+                (0, 0, {'total': 'main', 'engine': 'domain', 'formula': &quot;[('account_id.user_type_id.internal_group', '=', 'income')]&quot;, 'subformula': 'count_rows', 'figure_type': 'integer'}),
+                (0, 0, {'total': 'forty_two', 'engine': 'domain', 'formula': &quot;[('account_id.user_type_id.internal_group', '=', 'income')]&quot;, 'subformula': 'sum'}),
+            ]"/>
+            <!--TODO OCO BUG: le count_rows ici ne marche pas bien: il devrait afficher le nombre d'éléments du groupby >< Donc, 2 ici, pas 11 qui est le nombre d'amls (avec les demo data) ===> un moteur count_rows-->
+            <!--TODO OCO AUTRE BUG: les éléments du groupby, à l'audit, donnent le même résultat que leur ligne parente :/ => On oublie d'ajouter la clé du groupby dans ce qui appelle la db.-->
+            <field name="foldable" eval="True"/>
+            <field name="groupby">partner_id,account_id,id</field>
+            <field name="sequence">2</field>
+        </record>
+
+        <record id="oco_test_line_sub1_main" model="account.report.line">
+            <field name="name">test sub line - MAIN</field>
+            <field name="report_id" ref="test_report"/>
+            <field name="foldable" eval="True"/>
+            <field name="hierarchy_level">1</field>
+            <field name="sequence">3</field>
+        </record>
+
+        <record id="oco_test_line_sub1_sub1" model="account.report.line">
+            <field name="name">test sub line - SUB1</field>
+            <field name="report_id" ref="test_report"/>
+            <field name="expression_ids" eval="[(5, 0, 0),
+                (0, 0, {'total': 'main', 'engine': 'tax_tags', 'formula': 'test B'}),
+                (0, 0, {'total': 'forty_two', 'engine': 'tax_tags', 'formula': 'test C'}),
+            ]"/>
+            <field name="parent_id" ref="oco_test_line_sub1_main"/>
+            <field name="foldable" eval="True"/>
+            <field name="hierarchy_level">2</field>
+            <field name="sequence">4</field>
+        </record>
+
+        <record id="oco_test_line_sub1_sub1-sub" model="account.report.line">
+            <field name="name">test sub line - SUB1 -SUB</field>
+            <field name="report_id" ref="test_report"/>
+            <field name="foldable" eval="False"/>
+            <field name="parent_id" ref="oco_test_line_sub1_sub1"/>
+            <field name="hierarchy_level">3</field>
+            <field name="sequence">5</field>
+        </record>
+
+        <record id="oco_test_line_sub1_sub2" model="account.report.line">
+            <field name="name">test sub line - SUB2</field>
+            <field name="report_id" ref="test_report"/>
+            <field name="expression_ids" eval="[(5, 0, 0),
+                (0, 0, {'total': 'main', 'engine': 'tax_tags', 'formula': 'test D'}),
+                (0, 0, {'total': 'forty_two', 'engine': 'tax_tags', 'formula': 'test E'}),
+            ]"/>
+            <field name="foldable" eval="False"/>
+            <field name="hierarchy_level">2</field>
+            <field name="sequence">6</field>
+        </record>
+
+        <record id="oco_test_aggregate1" model="account.report.line">
+            <field name="name">test aggregate</field>
+            <field name="code">AGGREGATE</field>
+            <field name="report_id" ref="test_report"/>
+            <field name="expression_ids" eval="[(5, 0, 0),
+                (0, 0, {'total': 'main', 'engine': 'aggregation', 'formula': 'FINANCIAL_GROUPBY.forty_two + LINE_1.main'}),
+            ]"/>
+            <field name="foldable" eval="False"/>
+            <field name="hierarchy_level">1</field>
+            <field name="sequence">7</field>
+        </record>
+
+        <record id="oco_test_aggregate2" model="account.report.line">
+            <field name="name">test aggregate with 2 levels recursion</field>
+            <field name="report_id" ref="test_report"/>
+            <field name="expression_ids" eval="[(5, 0, 0),
+                (0, 0, {'total': 'main', 'engine': 'aggregation', 'formula': 'AGGREGATE.main + LINE_1.forty_two'}),
+            ]"/>
+            <field name="foldable" eval="False"/>
+            <field name="hierarchy_level">1</field>
+            <field name="sequence">8</field>
+        </record>
+
+        <record id="oco_test_aggregate3" model="account.report.line">
+            <field name="name">test aggregate with inner reference</field>
+            <field name="code">TEST_INNER</field>
+            <field name="report_id" ref="test_report"/>
+            <field name="expression_ids" eval="[(5, 0, 0),
+                (0, 0, {'total': 'main', 'engine': 'aggregation', 'formula': 'TEST_INNER.inner + LINE_1.forty_two'}),
+                (0, 0, {'total': 'inner', 'engine': 'domain', 'formula': &quot;[('account_id.code', 'like', '4%')]&quot;, 'subformula': 'sum'}),
+            ]"/>
+            <field name="hierarchy_level">1</field>
+            <field name="sequence">9</field>
+        </record>
+
+        <record id="oco_test_line_prefix" model="account.report.line">
+            <field name="name">test prefix</field>
+            <field name="report_id" ref="test_report"/>
+            <field name="expression_ids" eval="[(5, 0, 0),
+                (0, 0, {'total': 'main', 'engine': 'account_codes', 'formula': '44 + 7002 + cocolasticot'}),
+                (0, 0, {'total': 'forty_two', 'engine': 'domain', 'formula': &quot;['|', '|', ('account_id.code', 'like', '44%'), ('account_id.code', 'like', '7002%'), ('account_id.code', 'like', 'cocolasticot%')]&quot;, 'subformula': 'sum'}),
+            ]"/>
+            <field name="hierarchy_level">1</field>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="oco_test_carryover_be" model="account.report.line">
+            <field name="name">Carryover: Belgian case</field>
+            <field name="code">test_carryover_be</field>
+            <field name="report_id" ref="test_report"/>
+            <field name="expression_ids" eval="[(5, 0, 0),
+                (0, 0, {'total': 'main', 'engine': 'aggregation', 'formula': 'test_carryover_be.main_unbounded', 'subformula': 'if_above(EUR(0))'}),
+                (0, 0, {'total': '_carryover_main', 'engine': 'aggregation', 'formula': 'test_carryover_be.main_unbounded', 'subformula': 'if_below(EUR(0))'}),
+                (0, 0, {'total': '_applied_carryover_main', 'engine': 'external', 'formula': 'sum', 'date_scope': 'to_beginning_of_period'}),
+                (0, 0, {'total': 'main_tags', 'engine': 'tax_tags', 'formula': 'carryover_test_be'}),
+                (0, 0, {'total': 'main_unbounded', 'engine': 'aggregation', 'formula': 'test_carryover_be.main_tags + test_carryover_be._applied_carryover_main'}),
+            ]"/> <!--TODO OCO pour _applied_carryover_main, faire un nouveau date_scope previous_period => PAS garder to_beginning, suite à ce qu'on a dit avec tsb-->
+            <field name="hierarchy_level">1</field>
+            <field name="sequence">11</field>
+        </record>
+
+        <record id="oco_test_carryover_fr_27" model="account.report.line">
+            <field name="name">Carryover: French case - grid 27</field>
+            <field name="code">test_carryover_fr_27</field>
+            <field name="report_id" ref="test_report"/>
+            <field name="expression_ids" eval="[(5, 0, 0),
+                (0, 0, {'total': '_carryover_main', 'engine': 'aggregation', 'formula': 'test_carryover_fr_27.main', 'carryover_target': 'test_carryover_fr_22._applied_carryover_main'}),
+                (0, 0, {'total': 'main', 'engine': 'tax_tags', 'formula': 'carryover_test_fr'}),
+            ]"/>
+            <field name="hierarchy_level">1</field>
+            <field name="sequence">12</field>
+        </record>
+
+        <record id="oco_test_carryover_fr_22" model="account.report.line">
+            <field name="name">Carryover: French case - grid 22</field>
+            <field name="code">test_carryover_fr_22</field>
+            <field name="report_id" ref="test_report"/>
+            <field name="expression_ids" eval="[(5, 0, 0),
+                (0, 0, {'total': '_applied_carryover_main', 'engine': 'external', 'formula': 'sum', 'date_scope': 'to_beginning_of_period'}),
+                (0, 0, {'total': 'main', 'engine': 'aggregation', 'formula': 'test_carryover_fr_22._applied_carryover_main'}),
+            ]"/>
+            <field name="hierarchy_level">1</field>
+            <field name="sequence">13</field>
+        </record>
+
+        <record id="oco_test_manual" model="account.report.line">
+            <field name="name">Manual value</field>
+            <field name="code">test_manual</field>
+            <field name="report_id" ref="test_report"/>
+            <field name="expression_ids" eval="[(5, 0, 0),
+                (0, 0, {'total': 'main', 'engine': 'external', 'formula': 'sum', 'subformula': 'editable;rounding=3', 'figure_type': 'none'}),
+            ]"/>
+            <field name="hierarchy_level">1</field>
+            <field name="sequence">14</field>
+        </record>
+
+        <record id="oco_test_line_financial_hide_if_zero" model="account.report.line">
+            <field name="name">test line financial hide if zero</field>
+            <field name="code">FINANCIAL_GROUPBY_HIDE_ZERO</field>
+            <field name="hide_if_zero" eval="True"/>
+            <field name="report_id" ref="test_report"/>
+            <field name="expression_ids" eval="[(5, 0, 0),
+                (0, 0, {'total': 'main', 'engine': 'domain', 'formula': &quot;[('account_id.user_type_id.internal_group', '=', 'income')]&quot;, 'subformula': 'count_rows', 'figure_type': 'integer'}),
+                (0, 0, {'total': 'forty_two', 'engine': 'domain', 'formula': &quot;[('account_id.user_type_id.internal_group', '=', 'income')]&quot;, 'subformula': 'sum'}),
+            ]"/>
+            <field name="foldable" eval="True"/>
+            <field name="groupby">account_id</field>
+            <field name="sequence">15</field>
+        </record>
+
+        <!--TODO OCO le print du test report déconne complet (les colonnes sont bonnes, mais les lignes viennent du rapport générique) => sans doute un souci de passage d'options-->
+    </data>
+</odoo>

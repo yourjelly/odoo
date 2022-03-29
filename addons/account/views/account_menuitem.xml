@@ -74,7 +74,6 @@
             <menuitem id="account_management_menu" name="Management" groups="account.group_account_manager" sequence="5">
                 <menuitem id="menu_product_product_categories" action="product.product_category_action_form" sequence="3"/>
                 <menuitem id="menu_action_rounding_form_view" action="rounding_list_action" groups="account.group_cash_rounding" sequence="4"/>
-                <menuitem id="menu_configure_tax_report" name="Tax Report" action="account.action_configure_tax_report" groups="base.group_no_one" sequence="5"/>
             </menuitem>
             <menuitem id="menu_analytic_accounting" name="Analytic Accounting" groups="analytic.group_analytic_accounting,analytic.group_analytic_tags" sequence="6">
                 <menuitem id="account_analytic_def_account" action="analytic.action_account_analytic_account_form" groups="analytic.group_analytic_accounting" sequence="1"/>

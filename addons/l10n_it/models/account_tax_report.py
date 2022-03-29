@@ -48,7 +48,7 @@ class AccountTaxReportLine(models.AbstractModel):
         if self.report_id.id != italian_report_id or self.code != 'VP14b':
             return super()._get_carryover_destination_line(options)
 
-        end_of_period_month = fields.Date.from_string(options['date']['date_to']).month
+        end_of_period_month = fields.Date.from_string(options['date']['date_to']).month #TODO OCO pour ça, je pense qu'on va devoir garder un hack :/ A voir ... => possibilité de passer une fonction ??? un if qui reçoit date ?? ===> ou j'ajoute if_date_above et if_date_below ?=> non car alors on ne peut pas mélanger ==> un mot-clé _custom et interdire une bonne fois les _ dans les code de lignes ?
 
         # For the line 14, we are having a different target between periods or years
         if end_of_period_month == 12:

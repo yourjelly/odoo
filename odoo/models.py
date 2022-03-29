@@ -4780,6 +4780,7 @@ Fields:
 
         if expression.is_false(self, domain):
             # optimization: no need to query, as no record satisfies the domain
+
             return 0 if count else []
 
         # the flush must be done before the _where_calc(), as the latter can do some selects

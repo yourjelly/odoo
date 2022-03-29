@@ -460,7 +460,7 @@ function makeActionManager(env) {
         // END LEGACY CODE COMPATIBILITY
 
         return {
-            props: viewProps,
+            props: viewProps, //TODO OCO
             config: {
                 actionId: action.id,
                 actionType: "ir.actions.act_window",
@@ -524,7 +524,7 @@ function makeActionManager(env) {
      * @param {number} [options.index]
      * @returns {Promise<Number>}
      */
-    async function _updateUI(controller, options = {}) {
+    async function _updateUI(controller, options = {}) { //TODO OCO
         let resolve;
         let reject;
         let dialogCloseResolve;
@@ -743,7 +743,8 @@ function makeActionManager(env) {
             componentProps: controller.props,
         };
         env.bus.trigger("ACTION_MANAGER:UPDATE", controller.__info__);
-        return Promise.all([currentActionProm, closingProm]).then((r) => r[0]);
+        let res = Promise.all([currentActionProm, closingProm]).then((r) => r[0]);
+        return res;
     }
 
     // ---------------------------------------------------------------------------
@@ -1114,7 +1115,7 @@ function makeActionManager(env) {
      * @param {ActionOptions} options
      * @returns {Promise<number | undefined | void>}
      */
-    async function doAction(actionRequest, options = {}) {
+    async function doAction(actionRequest, options = {}) { //TODO OCO
         const actionProm = _loadAction(actionRequest, options.additionalContext);
         let action = await keepLast.add(actionProm);
         action = _preprocessAction(action, options.additionalContext);
@@ -1126,7 +1127,7 @@ function makeActionManager(env) {
                 if (action.target !== "new") {
                     await clearUncommittedChanges(env);
                 }
-                return _executeActWindowAction(action, options);
+                return _executeActWindowAction(action, options); //TODO OCO
             case "ir.actions.act_window_close":
                 return _executeCloseAction({ onClose: options.onClose, onCloseInfo: action.infos });
             case "ir.actions.client":
