@@ -19,7 +19,7 @@
         <xpath expr="//t[@name='code_not_available']" position="replace"/>
     </template>
 
-    <template id="modify_code_form" inherit_id="website_sale.total" name="Gift Card">
+    <template id="modify_code_form" inherit_id="website_sale.total" name="Loyalty, coupon, gift card">
         <xpath expr="//div[@id='cart_total']//table/tr[last()]" position="after">
             <tr t-if="not hide_promotions" class="oe_website_sale_gift_card">
                 <td colspan="3" class="text-center text-xl-right border-0">
@@ -49,27 +49,33 @@
                         <t t-if="website_sale_order">
                             <t t-foreach="website_sale_order._get_claimable_rewards().items()" t-as="coupon_reward">
                                 <t t-foreach="coupon_reward[1]" t-as="reward">
-                                    <div class="alert alert-success text-left mt16" role="alert">
-                                        <div class="row">
-                                            <div class="col-8">
-                                                <strong t-esc="reward.description"/>
-                                            </div>
-                                            <div class="col-4">
-                                                <a class="btn btn-primary" t-att-href="'/shop/claimreward?reward=%s' % reward.id">
-                                                    <t t-if="reward.program_id.program_type == 'ewallet'">Pay with eWallet</t>
-                                                    <t t-else="">Claim</t>
-                                                </a>
-                                            </div>
-                                            <div t-if="reward.program_id.portal_visible" class="col-12">
-                                                <t t-if="not reward.program_id.is_nominative"><span t-out="website_sale_order._get_real_points_for_coupon(coupon_reward[0])"/> <span t-out="reward.point_name"/></t>
-                                                <t t-else="">
-                                                    <span>You have <t t-out="website_sale_order._get_real_points_for_coupon(coupon_reward[0])"/></span> <span t-out="reward.point_name"/>
-                                                    <br/>
-                                                    <span>Costs <t t-out="coupon_reward[0].points"/></span> <span t-out="reward.point_name"/>
-                                                </t>
+                                    <t t-out="redirect" />
+                                    <form t-att-action="'/shop/claimreward%s' % (redirect and '?r=' + redirect or '')"
+                                        method="post" name="claim_reward">
+                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                        <input type="hidden" name="reward" t-att-value="reward.id"/>
+                                        <div class="alert alert-success text-left mt16" role="alert">
+                                            <div class="row">
+                                                <div class="col-8">
+                                                    <strong t-esc="reward.description"/>
+                                                </div>
+                                                <div class="col-4">
+                                                    <a class="btn btn-primary a-submit" href="#" role="button">
+                                                        <t t-if="reward.program_id.program_type == 'ewallet'">Pay with eWallet</t>
+                                                        <t t-else="">Claim</t>
+                                                    </a>
+                                                </div>
+                                                <div t-if="reward.program_id.portal_visible" class="col-12">
+                                                    <t t-if="not reward.program_id.is_nominative"><span t-out="website_sale_order._get_real_points_for_coupon(coupon_reward[0])"/> <span t-out="reward.point_name"/></t>
+                                                    <t t-else="">
+                                                        <span>You have <t t-out="website_sale_order._get_real_points_for_coupon(coupon_reward[0])"/></span> <span t-out="reward.point_name"/>
+                                                        <br/>
+                                                        <span>Costs <t t-out="coupon_reward[0].points"/></span> <span t-out="reward.point_name"/>
+                                                    </t>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </form>
                                 </t>
                             </t>
                         </t>

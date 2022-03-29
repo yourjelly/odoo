@@ -52,7 +52,7 @@ class LoyaltyRule(models.Model):
         ('auto', 'Automatic'),
         ('with_code', 'With a promotion code'),
     ], string="Application", default="auto")
-    code = fields.Char(string='Promotion Code')
+    code = fields.Char(string='Promotion Code', compute='_compute_code', store=True, readonly=False)
 
     _sql_constraints = [
         ('reward_point_amount_positive', 'CHECK (reward_point_amount > 0)', 'Rule points reward must be strictly positive.'),
@@ -76,6 +76,13 @@ class LoyaltyRule(models.Model):
         # Prevent coupons and programs from sharing a code
         if self.env['loyalty.card'].search_count([('code', 'in', mapped_codes)]):
             raise ValidationError(_('A coupon with the same code was found.'))
+
+    @api.depends('mode')
+    def _compute_code(self):
+        # Reset code when mode is set to auto
+        for rule in self:
+            if rule.mode == 'auto':
+                rule.code = False
 
     def _get_valid_product_domain(self):
         self.ensure_one()
