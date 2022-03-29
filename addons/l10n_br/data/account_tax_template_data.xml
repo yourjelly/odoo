@@ -1,153 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-	<record id="tax_template_out_icms_interno18" model="account.tax.template">
-		<field name="description">ICMS Interno 18%</field>
-		<field name="name">ICMS Saida Interno 18%</field>
-		<field name="amount">18</field>
-		<field name="type_tax_use">sale</field>
-		<field eval="0" name="price_include"/>
-		<field eval="1" name="tax_discount"/>
-		<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-		<field name="tax_group_id" ref="tax_group_icms_18"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-			(0,0, {
-				'factor_percent': 100,
-				'repartition_type': 'base',
-				'plus_report_line_ids': [ref('tax_report_icms_1')],
-			}),
-			(0,0, {
-				'factor_percent': 100,
-				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010302'),
-				'plus_report_line_ids': [ref('tax_report_icms_2')],
-			}),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-			(0,0, {
-				'factor_percent': 100,
-				'repartition_type': 'base',
-				'minus_report_line_ids': [ref('tax_report_icms_1')],
-			}),
-			(0,0, {
-				'factor_percent': 100,
-				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050505'),
-				'minus_report_line_ids': [ref('tax_report_icms_2')],
-			}),
-		]"/>
-	</record>
-
-	<record id="tax_template_out_icms_externo18" model="account.tax.template">
-		<field name="description">ICMS Externo 18%</field>
-		<field name="name">ICMS Saida Externo 18%</field>
-		<field name="amount">18</field>
-		<field name="type_tax_use">sale</field>
-		<field eval="0" name="price_include"/>
-		<field eval="1" name="tax_discount"/>
-		<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-		<field name="tax_group_id" ref="tax_group_icms_18"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-			(0,0, {
-				'factor_percent': 100,
-				'repartition_type': 'base',
-				'plus_report_line_ids': [ref('tax_report_icms_1')],
-			}),
-			(0,0, {
-				'factor_percent': 100,
-				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010302'),
-				'plus_report_line_ids': [ref('tax_report_icms_2')],
-			}),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-			(0,0, {
-				'factor_percent': 100,
-				'repartition_type': 'base',
-				'minus_report_line_ids': [ref('tax_report_icms_1')],
-			}),
-			(0,0, {
-				'factor_percent': 100,
-				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050505'),
-				'minus_report_line_ids': [ref('tax_report_icms_2')],
-			}),
-		]"/>
-	</record>
-
-	<record id="tax_template_in_icms_interno18" model="account.tax.template">
-		<field name="description">ICMS Interno 18%</field>
-		<field name="name">ICMS Entrada Interno 18%</field>
-		<field name="amount">18</field>
-		<field name="type_tax_use">purchase</field>
-		<field eval="0" name="price_include"/>
-		<field eval="1" name="tax_discount"/>
-		<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-		<field name="tax_group_id" ref="tax_group_icms_18"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-			(0,0, {
-				'factor_percent': 100,
-				'repartition_type': 'base',
-				'minus_report_line_ids': [ref('tax_report_icms_1')],
-			}),
-			(0,0, {
-				'factor_percent': 100,
-				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050505'),
-				'minus_report_line_ids': [ref('tax_report_icms_2')],
-			}),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-			(0,0, {
-				'factor_percent': 100,
-				'repartition_type': 'base',
-				'plus_report_line_ids': [ref('tax_report_icms_1')],
-			}),
-			(0,0, {
-				'factor_percent': 100,
-				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010302'),
-				'plus_report_line_ids': [ref('tax_report_icms_2')],
-			}),
-		]"/>
-	</record>
-
-	<record id="tax_template_in_icms_externo18" model="account.tax.template">
-		<field name="description">ICMS Externo 18%</field>
-		<field name="name">ICMS Entrada Externo 18%</field>
-		<field name="amount">18</field>
-		<field name="type_tax_use">purchase</field>
-		<field eval="0" name="price_include"/>
-		<field eval="1" name="tax_discount"/>
-		<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-		<field name="tax_group_id" ref="tax_group_icms_18"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-			(0,0, {
-				'factor_percent': 100,
-				'repartition_type': 'base',
-				'minus_report_line_ids': [ref('tax_report_icms_1')],
-			}),
-			(0,0, {
-				'factor_percent': 100,
-				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050505'),
-				'minus_report_line_ids': [ref('tax_report_icms_2')],
-			}),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-			(0,0, {
-				'factor_percent': 100,
-				'repartition_type': 'base',
-				'plus_report_line_ids': [ref('tax_report_icms_1')],
-			}),
-			(0,0, {
-				'factor_percent': 100,
-				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010302'),
-				'plus_report_line_ids': [ref('tax_report_icms_2')],
-			}),
-		]"/>
-	</record>
-
 	<record id="tax_template_out_icms_interno17" model="account.tax.template">
 		<field name="description">ICMS Interno 17%</field>
 		<field name="name">ICMS Saida Interno 17%</field>
@@ -166,7 +18,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010302'),
+				'account_id': ref('account_template_201010903'),
 				'plus_report_line_ids': [ref('tax_report_icms_2')],
 			}),
 		]"/>
@@ -179,7 +31,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050505'),
+				'account_id': ref('account_template_101020302'),
 				'minus_report_line_ids': [ref('tax_report_icms_2')],
 			}),
 		]"/>
@@ -203,7 +55,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010302'),
+				'account_id': ref('account_template_201010903'),
 				'plus_report_line_ids': [ref('tax_report_icms_2')],
 			}),
 		]"/>
@@ -216,7 +68,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050505'),
+				'account_id': ref('account_template_101020302'),
 				'minus_report_line_ids': [ref('tax_report_icms_2')],
 			}),
 		]"/>
@@ -240,7 +92,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050505'),
+				'account_id': ref('account_template_101020302'),
 				'minus_report_line_ids': [ref('tax_report_icms_2')],
 			}),
 		]"/>
@@ -253,7 +105,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010302'),
+				'account_id': ref('account_template_201010903'),
 				'plus_report_line_ids': [ref('tax_report_icms_2')],
 			}),
 		]"/>
@@ -277,7 +129,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050505'),
+				'account_id': ref('account_template_101020302'),
 				'minus_report_line_ids': [ref('tax_report_icms_2')],
 			}),
 		]"/>
@@ -290,7 +142,155 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010302'),
+				'account_id': ref('account_template_201010903'),
+				'plus_report_line_ids': [ref('tax_report_icms_2')],
+			}),
+		]"/>
+	</record>
+
+	<record id="tax_template_out_icms_interno18" model="account.tax.template">
+		<field name="description">ICMS Interno 18%</field>
+		<field name="name">ICMS Saida Interno 18%</field>
+		<field name="amount">18</field>
+		<field name="type_tax_use">sale</field>
+		<field eval="0" name="price_include"/>
+		<field eval="1" name="tax_discount"/>
+		<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
+		<field name="tax_group_id" ref="tax_group_icms_18"/>
+		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+			(0,0, {
+				'factor_percent': 100,
+				'repartition_type': 'base',
+				'plus_report_line_ids': [ref('tax_report_icms_1')],
+			}),
+			(0,0, {
+				'factor_percent': 100,
+				'repartition_type': 'tax',
+				'account_id': ref('account_template_201010903'),
+				'plus_report_line_ids': [ref('tax_report_icms_2')],
+			}),
+		]"/>
+		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+			(0,0, {
+				'factor_percent': 100,
+				'repartition_type': 'base',
+				'minus_report_line_ids': [ref('tax_report_icms_1')],
+			}),
+			(0,0, {
+				'factor_percent': 100,
+				'repartition_type': 'tax',
+				'account_id': ref('account_template_101020302'),
+				'minus_report_line_ids': [ref('tax_report_icms_2')],
+			}),
+		]"/>
+	</record>
+
+	<record id="tax_template_out_icms_externo18" model="account.tax.template">
+		<field name="description">ICMS Externo 18%</field>
+		<field name="name">ICMS Saida Externo 18%</field>
+		<field name="amount">18</field>
+		<field name="type_tax_use">sale</field>
+		<field eval="0" name="price_include"/>
+		<field eval="1" name="tax_discount"/>
+		<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
+		<field name="tax_group_id" ref="tax_group_icms_18"/>
+		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+			(0,0, {
+				'factor_percent': 100,
+				'repartition_type': 'base',
+				'plus_report_line_ids': [ref('tax_report_icms_1')],
+			}),
+			(0,0, {
+				'factor_percent': 100,
+				'repartition_type': 'tax',
+				'account_id': ref('account_template_201010903'),
+				'plus_report_line_ids': [ref('tax_report_icms_2')],
+			}),
+		]"/>
+		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+			(0,0, {
+				'factor_percent': 100,
+				'repartition_type': 'base',
+				'minus_report_line_ids': [ref('tax_report_icms_1')],
+			}),
+			(0,0, {
+				'factor_percent': 100,
+				'repartition_type': 'tax',
+				'account_id': ref('account_template_101020302'),
+				'minus_report_line_ids': [ref('tax_report_icms_2')],
+			}),
+		]"/>
+	</record>
+
+	<record id="tax_template_in_icms_interno18" model="account.tax.template">
+		<field name="description">ICMS Interno 18%</field>
+		<field name="name">ICMS Entrada Interno 18%</field>
+		<field name="amount">18</field>
+		<field name="type_tax_use">purchase</field>
+		<field eval="0" name="price_include"/>
+		<field eval="1" name="tax_discount"/>
+		<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
+		<field name="tax_group_id" ref="tax_group_icms_18"/>
+		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+			(0,0, {
+				'factor_percent': 100,
+				'repartition_type': 'base',
+				'minus_report_line_ids': [ref('tax_report_icms_1')],
+			}),
+			(0,0, {
+				'factor_percent': 100,
+				'repartition_type': 'tax',
+				'account_id': ref('account_template_101020302'),
+				'minus_report_line_ids': [ref('tax_report_icms_2')],
+			}),
+		]"/>
+		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+			(0,0, {
+				'factor_percent': 100,
+				'repartition_type': 'base',
+				'plus_report_line_ids': [ref('tax_report_icms_1')],
+			}),
+			(0,0, {
+				'factor_percent': 100,
+				'repartition_type': 'tax',
+				'account_id': ref('account_template_201010903'),
+				'plus_report_line_ids': [ref('tax_report_icms_2')],
+			}),
+		]"/>
+	</record>
+
+	<record id="tax_template_in_icms_externo18" model="account.tax.template">
+		<field name="description">ICMS Externo 18%</field>
+		<field name="name">ICMS Entrada Externo 18%</field>
+		<field name="amount">18</field>
+		<field name="type_tax_use">purchase</field>
+		<field eval="0" name="price_include"/>
+		<field eval="1" name="tax_discount"/>
+		<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
+		<field name="tax_group_id" ref="tax_group_icms_18"/>
+		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+			(0,0, {
+				'factor_percent': 100,
+				'repartition_type': 'base',
+				'minus_report_line_ids': [ref('tax_report_icms_1')],
+			}),
+			(0,0, {
+				'factor_percent': 100,
+				'repartition_type': 'tax',
+				'account_id': ref('account_template_101020302'),
+				'minus_report_line_ids': [ref('tax_report_icms_2')],
+			}),
+		]"/>
+		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+			(0,0, {
+				'factor_percent': 100,
+				'repartition_type': 'base',
+				'plus_report_line_ids': [ref('tax_report_icms_1')],
+			}),
+			(0,0, {
+				'factor_percent': 100,
+				'repartition_type': 'tax',
+				'account_id': ref('account_template_201010903'),
 				'plus_report_line_ids': [ref('tax_report_icms_2')],
 			}),
 		]"/>
@@ -314,7 +314,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010302'),
+				'account_id': ref('account_template_201010903'),
 				'plus_report_line_ids': [ref('tax_report_icms_2')],
 			}),
 		]"/>
@@ -327,7 +327,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050505'),
+				'account_id': ref('account_template_101020302'),
 				'minus_report_line_ids': [ref('tax_report_icms_2')],
 			}),
 		]"/>
@@ -351,7 +351,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010302'),
+				'account_id': ref('account_template_201010903'),
 				'plus_report_line_ids': [ref('tax_report_icms_2')],
 			}),
 		]"/>
@@ -364,7 +364,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050505'),
+				'account_id': ref('account_template_101020302'),
 				'minus_report_line_ids': [ref('tax_report_icms_2')],
 			}),
 		]"/>
@@ -388,7 +388,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050505'),
+				'account_id': ref('account_template_101020302'),
 				'minus_report_line_ids': [ref('tax_report_icms_2')],
 			}),
 		]"/>
@@ -401,7 +401,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010302'),
+				'account_id': ref('account_template_201010903'),
 				'plus_report_line_ids': [ref('tax_report_icms_2')],
 			}),
 		]"/>
@@ -425,7 +425,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050505'),
+				'account_id': ref('account_template_101020302'),
 				'minus_report_line_ids': [ref('tax_report_icms_2')],
 			}),
 		]"/>
@@ -438,7 +438,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010302'),
+				'account_id': ref('account_template_201010903'),
 				'plus_report_line_ids': [ref('tax_report_icms_2')],
 			}),
 		]"/>
@@ -462,7 +462,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -475,7 +475,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -499,7 +499,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -512,7 +512,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -569,7 +569,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -582,7 +582,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -606,7 +606,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -619,7 +619,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -643,7 +643,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -656,7 +656,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -680,7 +680,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -693,7 +693,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -717,7 +717,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -730,7 +730,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -754,7 +754,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -767,7 +767,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -791,7 +791,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -804,7 +804,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -828,7 +828,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -841,7 +841,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -865,7 +865,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -878,7 +878,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -902,7 +902,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -915,7 +915,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -939,7 +939,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -952,7 +952,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -976,7 +976,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -989,7 +989,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1013,7 +1013,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1026,7 +1026,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1050,7 +1050,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1063,7 +1063,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1087,7 +1087,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1100,7 +1100,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1124,7 +1124,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1137,7 +1137,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1161,7 +1161,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1174,7 +1174,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1198,7 +1198,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1211,7 +1211,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1235,7 +1235,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1248,7 +1248,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1272,7 +1272,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1285,7 +1285,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1309,7 +1309,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1322,7 +1322,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1346,7 +1346,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1359,7 +1359,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1383,7 +1383,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1396,7 +1396,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1420,7 +1420,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1433,7 +1433,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1457,7 +1457,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1470,7 +1470,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1527,7 +1527,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1540,7 +1540,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1564,7 +1564,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1577,7 +1577,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1601,7 +1601,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1614,7 +1614,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1638,7 +1638,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1651,7 +1651,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1675,7 +1675,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1688,7 +1688,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1712,7 +1712,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1725,7 +1725,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1749,7 +1749,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1762,7 +1762,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1786,7 +1786,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1799,7 +1799,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1823,7 +1823,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1836,7 +1836,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1860,7 +1860,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1873,7 +1873,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1897,7 +1897,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1910,7 +1910,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1934,7 +1934,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1947,7 +1947,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1971,7 +1971,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -1984,7 +1984,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -2008,7 +2008,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -2021,7 +2021,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -2045,7 +2045,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -2058,7 +2058,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -2082,7 +2082,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -2095,7 +2095,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -2119,7 +2119,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -2132,7 +2132,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -2156,7 +2156,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -2169,7 +2169,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -2193,7 +2193,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -2206,7 +2206,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -2230,7 +2230,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -2243,7 +2243,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -2267,7 +2267,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -2280,7 +2280,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -2304,7 +2304,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -2317,7 +2317,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -2341,7 +2341,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -2354,7 +2354,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -2378,7 +2378,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -2391,7 +2391,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -2415,7 +2415,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050502'),
+				'account_id': ref('account_template_101020301'),
 				'minus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -2428,7 +2428,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010301'),
+				'account_id': ref('account_template_201010902'),
 				'plus_report_line_ids': [ref('tax_report_ipi_2')],
 			}),
 		]"/>
@@ -2551,7 +2551,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010302'),
+				'account_id': ref('account_template_201010903'),
 				'plus_report_line_ids': [ref('tax_report_icms_2')],
 			}),
 		]"/>
@@ -2564,7 +2564,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050505'),
+				'account_id': ref('account_template_101020302'),
 				'minus_report_line_ids': [ref('tax_report_icms_2')],
 			}),
 		]"/>
@@ -2588,7 +2588,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010302'),
+				'account_id': ref('account_template_201010903'),
 				'plus_report_line_ids': [ref('tax_report_icms_2')],
 			}),
 		]"/>
@@ -2601,7 +2601,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050505'),
+				'account_id': ref('account_template_101020302'),
 				'minus_report_line_ids': [ref('tax_report_icms_2')],
 			}),
 		]"/>
@@ -2625,7 +2625,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010302'),
+				'account_id': ref('account_template_201010903'),
 				'plus_report_line_ids': [ref('tax_report_icms_2')],
 			}),
 		]"/>
@@ -2638,7 +2638,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050505'),
+				'account_id': ref('account_template_101020302'),
 				'minus_report_line_ids': [ref('tax_report_icms_2')],
 			}),
 		]"/>
@@ -2646,7 +2646,7 @@
 
 	<record id="tax_template_in_icms_interno" model="account.tax.template">
 		<field name="description">ICMS Interno</field>
-		<field name="name">ICMS Entrada Interno</field>
+		<field name="name">ICMS Entrada Interno 0%</field>
 		<field name="amount">0.00</field>
 		<field name="type_tax_use">purchase</field>
 		<field eval="0" name="price_include"/>
@@ -2761,7 +2761,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050505'),
+				'account_id': ref('account_template_101020302'),
 				'minus_report_line_ids': [ref('tax_report_icms_2')],
 			}),
 		]"/>
@@ -2774,7 +2774,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010302'),
+				'account_id': ref('account_template_201010903'),
 				'plus_report_line_ids': [ref('tax_report_icms_2')],
 			}),
 		]"/>
@@ -2798,7 +2798,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050505'),
+				'account_id': ref('account_template_101020302'),
 				'minus_report_line_ids': [ref('tax_report_icms_2')],
 			}),
 		]"/>
@@ -2811,7 +2811,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010302'),
+				'account_id': ref('account_template_201010903'),
 				'plus_report_line_ids': [ref('tax_report_icms_2')],
 			}),
 		]"/>
@@ -2835,7 +2835,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050505'),
+				'account_id': ref('account_template_101020302'),
 				'minus_report_line_ids': [ref('tax_report_icms_2')],
 			}),
 		]"/>
@@ -2848,7 +2848,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010302'),
+				'account_id': ref('account_template_201010903'),
 				'plus_report_line_ids': [ref('tax_report_icms_2')],
 			}),
 		]"/>
@@ -2856,7 +2856,7 @@
 
 	<record id="tax_template_out_pis" model="account.tax.template">
 		<field name="description">PIS</field>
-		<field name="name">PIS Saida</field>
+		<field name="name">PIS Saida 0%</field>
 		<field name="amount">0.00</field>
 		<field name="type_tax_use">sale</field>
 		<field eval="0" name="price_include"/>
@@ -2905,7 +2905,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010500'),
+				'account_id': ref('account_template_201010904'),
 				'plus_report_line_ids': [ref('tax_report_pis_2')],
 			}),
 		]"/>
@@ -2918,7 +2918,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050503'),
+				'account_id': ref('account_template_101020303'),
 				'minus_report_line_ids': [ref('tax_report_pis_2')],
 			}),
 		]"/>
@@ -2926,7 +2926,7 @@
 
 	<record id="tax_template_in_pis" model="account.tax.template">
 		<field name="description">PIS</field>
-		<field name="name">PIS Entrada</field>
+		<field name="name">PIS Entrada 0%</field>
 		<field name="amount">0.00</field>
 		<field name="type_tax_use">purchase</field>
 		<field eval="0" name="price_include"/>
@@ -2975,7 +2975,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050503'),
+				'account_id': ref('account_template_101020303'),
 				'minus_report_line_ids': [ref('tax_report_pis_2')],
 			}),
 		]"/>
@@ -2988,7 +2988,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010500'),
+				'account_id': ref('account_template_201010904'),
 				'plus_report_line_ids': [ref('tax_report_pis_2')],
 			}),
 		]"/>
@@ -2996,7 +2996,7 @@
 
 	<record id="tax_template_out_cofins" model="account.tax.template">
 		<field name="description">COFINS</field>
-		<field name="name">COFINS Saida</field>
+		<field name="name">COFINS Saida 0%</field>
 		<field name="amount">0.00</field>
 		<field name="type_tax_use">sale</field>
 		<field eval="0" name="price_include"/>
@@ -3045,7 +3045,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010500'),
+				'account_id': ref('account_template_201010905'),
 				'plus_report_line_ids': [ref('tax_report_cofins_2')],
 			}),
 		]"/>
@@ -3058,7 +3058,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050503'),
+				'account_id': ref('account_template_101020305'),
 				'minus_report_line_ids': [ref('tax_report_cofins_2')],
 			}),
 		]"/>
@@ -3066,7 +3066,7 @@
 
 	<record id="tax_template_in_cofins" model="account.tax.template">
 		<field name="description">COFINS</field>
-		<field name="name">COFINS Entrada</field>
+		<field name="name">COFINS Entrada 0%</field>
 		<field name="amount">0.00</field>
 		<field name="type_tax_use">purchase</field>
 		<field eval="0" name="price_include"/>
@@ -3115,7 +3115,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_101050503'),
+				'account_id': ref('account_template_101020305'),
 				'minus_report_line_ids': [ref('tax_report_cofins_2')],
 			}),
 		]"/>
@@ -3128,7 +3128,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
-				'account_id': ref('account_template_201010500'),
+				'account_id': ref('account_template_201010905'),
 				'plus_report_line_ids': [ref('tax_report_cofins_2')],
 			}),
 		]"/>
@@ -3136,7 +3136,7 @@
 
 	<record id="tax_template_out_irpj" model="account.tax.template">
 		<field name="description">IRPJ</field>
-		<field name="name">IRPJ</field>
+		<field name="name">IRPJ 0%</field>
 		<field name="amount">0.00</field>
 		<field name="type_tax_use">sale</field>
 		<field eval="0" name="price_include"/>
@@ -3169,7 +3169,7 @@
 
 	<record id="tax_template_out_ir" model="account.tax.template">
 		<field name="description">IR</field>
-		<field name="name">IR</field>
+		<field name="name">IR 0%</field>
 		<field name="amount">0.00</field>
 		<field name="type_tax_use">sale</field>
 		<field eval="0" name="price_include"/>
@@ -3202,7 +3202,7 @@
 
 	<record id="tax_template_out_issqn" model="account.tax.template">
 		<field name="description">ISSQN</field>
-		<field name="name">ISSQN Saida</field>
+		<field name="name">ISSQN Saida 0%</field>
 		<field name="amount">0.00</field>
 		<field name="type_tax_use">sale</field>
 		<field eval="0" name="price_include"/>
@@ -3251,6 +3251,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
+				'account_id': ref('account_template_101020340'),
 				'plus_report_line_ids': [ref('tax_report_issqn_2')],
 			}),
 		]"/>
@@ -3263,6 +3264,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
+				'account_id': ref('account_template_201010928'),
 				'minus_report_line_ids': [ref('tax_report_issqn_2')],
 			}),
 		]"/>
@@ -3286,6 +3288,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
+				'account_id': ref('account_template_101020340'),
 				'plus_report_line_ids': [ref('tax_report_issqn_2')],
 			}),
 		]"/>
@@ -3298,6 +3301,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
+				'account_id': ref('account_template_201010928'),
 				'minus_report_line_ids': [ref('tax_report_issqn_2')],
 			}),
 		]"/>
@@ -3320,6 +3324,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
+				'account_id': ref('account_template_101020340'),
 				'minus_report_line_ids': [ref('tax_report_issqn_2')],
 			}),
 		]"/>
@@ -3332,6 +3337,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
+				'account_id': ref('account_template_201010928'),
 				'plus_report_line_ids': [ref('tax_report_issqn_2')],
 			}),
 		]"/>
@@ -3355,6 +3361,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
+				'account_id': ref('account_template_101020340'),
 				'plus_report_line_ids': [ref('tax_report_issqn_2')],
 			}),
 		]"/>
@@ -3367,6 +3374,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
+				'account_id': ref('account_template_201010928'),
 				'minus_report_line_ids': [ref('tax_report_issqn_2')],
 			}),
 		]"/>
@@ -3390,6 +3398,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
+				'account_id': ref('account_template_101020340'),
 				'plus_report_line_ids': [ref('tax_report_issqn_2')],
 			}),
 		]"/>
@@ -3402,6 +3411,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
+				'account_id': ref('account_template_201010928'),
 				'minus_report_line_ids': [ref('tax_report_issqn_2')],
 			}),
 		]"/>
@@ -3425,6 +3435,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
+				'account_id': ref('account_template_101020340'),
 				'plus_report_line_ids': [ref('tax_report_issqn_2')],
 			}),
 		]"/>
@@ -3437,6 +3448,7 @@
 			(0,0, {
 				'factor_percent': 100,
 				'repartition_type': 'tax',
+				'account_id': ref('account_template_201010928'),
 				'minus_report_line_ids': [ref('tax_report_issqn_2')],
 			}),
 		]"/>
@@ -3444,7 +3456,7 @@
 
 	<record id="tax_template_out_csll" model="account.tax.template">
 		<field name="description">CSLL</field>
-		<field name="name">CSLL</field>
+		<field name="name">CSLL 0%</field>
 		<field name="amount">0.00</field>
 		<field name="type_tax_use">sale</field>
 		<field eval="0" name="price_include"/>
@@ -3476,7 +3488,7 @@
 	</record>
 	<record id="tax_template_out_ii0" model="account.tax.template">
 		<field name="description">II</field>
-		<field name="name">II Saida</field>
+		<field name="name">II Saida 0%</field>
 		<field name="amount">0</field>
 		<field name="type_tax_use">sale</field>
 		<field eval="0" name="price_include"/>
@@ -3508,7 +3520,7 @@
 	</record>
 	<record id="tax_template_in_ii0" model="account.tax.template">
 		<field name="description">II</field>
-		<field name="name">II Entrada</field>
+		<field name="name">II Entrada 0%</field>
 		<field name="amount">0</field>
 		<field name="type_tax_use">purchase</field>
 		<field eval="0" name="price_include"/>
@@ -3540,7 +3552,7 @@
 	</record>
 	<record id="tax_template_out_inss0" model="account.tax.template">
 		<field name="description">INSS</field>
-		<field name="name">INSS Saida</field>
+		<field name="name">INSS Saida 0%</field>
 		<field name="amount">0</field>
 		<field name="type_tax_use">sale</field>
 		<field eval="0" name="price_include"/>
@@ -3572,7 +3584,7 @@
 	</record>
 	<record id="tax_template_in_inss0" model="account.tax.template">
 		<field name="description">INSS</field>
-		<field name="name">INSS Entrada</field>
+		<field name="name">INSS Entrada 0%</field>
 		<field name="amount">0</field>
 		<field name="type_tax_use">purchase</field>
 		<field eval="0" name="price_include"/>
