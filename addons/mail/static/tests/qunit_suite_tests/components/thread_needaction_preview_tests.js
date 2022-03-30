@@ -316,6 +316,7 @@ QUnit.test('preview should display last needaction message preview even if there
         '.o_ThreadNeedactionPreview_inlineText',
         "should have a preview from the last message"
     );
+    debugger;
     assert.strictEqual(
         document.querySelector('.o_ThreadNeedactionPreview_inlineText').textContent,
         'Stranger: I am the oldest but needaction',
