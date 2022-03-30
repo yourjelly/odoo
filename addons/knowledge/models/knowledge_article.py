@@ -25,6 +25,7 @@ class Article(models.Model):
     body = fields.Html(string="Article Body")
     icon = fields.Char(string='Article Icon', default='fa-file')
     is_locked = fields.Boolean(string='Locked')
+    full_width = fields.Boolean(string='Full width')
     share_link = fields.Char('Link', compute='_compute_share_link', store=False, readonly=True)
 
     # Hierarchy and sequence
