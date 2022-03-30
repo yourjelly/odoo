@@ -34,6 +34,8 @@ var id = 0;
 const faZoomClassRegex = RegExp('fa-[0-9]x');
 const mediaSelector = 'img, .fa, .o_image, .media_iframe_video';
 
+const initDate = new Date();
+
 // Time to consider a user offline in ms. This fixes the problem of the
 // navigator closing rtc connection when the mac laptop screen is closed.
 const CONSIDER_OFFLINE_TIME = 1000;
@@ -517,7 +519,7 @@ const Wysiwyg = Widget.extend({
         }, CHECK_OFFLINE_TIME);
 
         this._peerToPeerLoading = new Promise(async (resolve) => {
-            this._currentRecordWriteDate = this._getRecordWriteDate(await this._getCurrentRecord());
+            this._currentRecord = await this._getCurrentRecord();
             let iceServers = await this._rpc({route: '/web_editor/get_ice_servers'});
             if (!iceServers.length) {
                 iceServers = [
@@ -1989,6 +1991,8 @@ const Wysiwyg = Widget.extend({
         if (!this._isOnline) {
             return;
         }
+        this._signalOfflineCounter = this._signalOfflineCounter || 0;
+        this._signalOfflineCounter++;
         this._isOnline = false;
 
         this.ptp.stop();
@@ -2015,10 +2019,55 @@ const Wysiwyg = Widget.extend({
             this.preSavePromiseReject = undefined;
         }
         try {
-            const record = await this._getCurrentRecord();
-            const newDate = this._getRecordWriteDate(record);
-            if (newDate !== this._currentRecordWriteDate) {
-                this._resetEditor(record.body);
+            const fieldName = this.options.collaborationChannel.collaborationFieldName;
+            const currentContent = this._currentRecord[fieldName];
+            const currentRecordDate = this._getRecordWriteDate(this._currentRecord);
+            const dbRecord = await this._getCurrentRecord();
+            const dbContent = dbRecord[fieldName];
+            const dbRecordDate = this._getRecordWriteDate(dbRecord);
+
+            if (dbRecordDate !== currentRecordDate) {
+                const clientsInfos = Object.values(this.ptp.clientsInfos);
+                this._ptpLog({
+                    logDate: new Date(),
+                    recordConfig: this.options.collaborationChannel,
+                    initDate,
+                    isSameContent: currentContent === dbContent,
+                    'clientsInfos.length': clientsInfos.length,
+                    currentRecordDate,
+                    dbRecordDate,
+                    currentContent,
+                    dbContent,
+                    signalOfflineCounter: this._signalOfflineCounter,
+                });
+            }
+
+
+            if (currentContent !== dbContent && dbRecordDate !== currentRecordDate) {
+                const $element = $(this.odooEditor.editable).clone();
+                const $div = $(`<div>
+                    <div style="color: red;">
+                        <p>
+                            There is a conflict between your version and the one in the database.
+                        </p>
+                        <p>
+                            The version from the database will be used.
+                            If you need to keep your changes, copy the content below and edit the new document.
+                        </p>
+                        <p style="font-weight: bold;">
+                            Attention: after quitting this dialog, the version you were working on will be discarded and will never be available anymore.
+                        </p>
+                    </div>
+                </div>`);
+                $div.append($element);
+                const dialog = new Dialog(this, {
+                    title: _t("Content conflict"),
+                    $content: $div,
+                    size: 'medium',
+                });
+                dialog.open({shouldFocusButtons:true});
+
+                this._resetEditor(dbRecord.body);
             }
             this.preSavePromiseResolve();
             resetPreSavePromise();
@@ -2026,6 +2075,34 @@ const Wysiwyg = Widget.extend({
             this.preSavePromiseReject(e);
             resetPreSavePromise();
         }
+    },
+    _ptpLog(jsonContent) {
+        const localStorageKey = 'ODOO_PEER_TO_PEER_LOGS';
+        console.warn(`${localStorageKey}:`, jsonContent);
+
+        const maxLogSize = 30;
+        const localContent = localStorage.getItem(localStorageKey);
+        let logs;
+        try {
+            logs = JSON.parse(localContent) || [];
+            logs = Array.isArray(logs) ? logs : [];
+        } catch (e) {
+            logs = [];
+        }
+        logs.push(jsonContent);
+        if (logs.length > maxLogSize) {
+            logs = logs.slice(logs.length - maxLogSize);
+        }
+        localStorage.setItem(localStorageKey, JSON.stringify(logs));
+
+        const stringContent = JSON.stringify(jsonContent);
+
+        return this._rpc({
+            route: '/web_editor/tmp/ODOO_PEER_TO_PEER_LOGS',
+            params: {
+                message: stringContent,
+            },
+        });
     },
     _generateClientId: function () {
         // No need for secure random number.

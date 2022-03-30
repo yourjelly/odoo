@@ -732,3 +732,19 @@ class Web_Editor(http.Controller):
         channel = (request.db, 'editor_collaboration', model_name, field_name, int(res_id))
         bus_data.update({'model_name': model_name, 'field_name': field_name, 'res_id': res_id})
         request.env['bus.bus']._sendone(channel, 'editor_collaboration', bus_data)
+
+    # Warning: do not use this method in stable. It is used as a temporary debug
+    # mechanism in production that could be removed at any time.
+    @http.route("/web_editor/tmp/ODOO_PEER_TO_PEER_LOGS", type="json", auth="user")
+    def tmp_peer_to_peer_log(self, message):
+        if request.env.user.has_group('base.group_user'):
+            request.env['ir.logging'].sudo().create({
+                'name': 'ODOO_PEER_TO_PEER_LOGS',
+                'type': 'server',
+                'level': 'DEBUG',
+                'dbname': request.env.cr.dbname,
+                'message': message,
+                'func': '',
+                'path': '',
+                'line': '0',
+            })
