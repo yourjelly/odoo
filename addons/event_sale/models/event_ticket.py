@@ -43,21 +43,14 @@ class EventTemplateTicket(models.Model):
             if not ticket.description:
                 ticket.description = False
 
-    # TODO clean this feature in master
-    # Feature broken by design, depending on the hacky `_get_contextual_price` field on products
-    # context_dependent, core part of the pricelist mess
-    # This field usage should be restricted to the UX, and any use in effective
-    # price computation should be replaced by clear calls to the pricelist API
-    @api.depends_context('uom', 'qty', 'pricelist') # Cf product.price context dependencies
+    @api.depends_context('pricelist', 'quantity', 'uom')  # Cf product._get_contextual_price context dependencies
     @api.depends('product_id', 'price')
     def _compute_price_reduce(self):
         for ticket in self:
-            product = ticket.product_id
-            # seems strange to not apply pricelist logic but still use pricelist discount...
-            discount = (
-                product.lst_price - product._get_contextual_price()
-            ) / product.lst_price if product.lst_price else 0.0
-            ticket.price_reduce = (1.0 - discount) * ticket.price
+            ctx = {'event_ticket_override_price': ticket.price, **self.env.context}
+            # Force quantity to 1 because we don't support price policy based on quantity for tickets
+            ctx['quantity'] = 1
+            ticket.price_reduce = ticket.product_id.with_context(ctx)._get_contextual_price(default_price=ticket.price)
 
     def _init_column(self, column_name):
         if column_name != "product_id":

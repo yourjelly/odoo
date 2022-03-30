@@ -1273,12 +1273,12 @@ class ProductTemplate(models.Model):
             'template': '/product/static/xls/product_template.xls'
         }]
 
-    def _get_contextual_price(self, product=None):
+    def _get_contextual_price(self, product=None, default_price=0.0):
         self.ensure_one()
         # YTI TODO: During website_sale cleaning, we should get rid of those crappy context thing
         pricelist = self._get_contextual_pricelist()
         if not pricelist:
-            return 0.0
+            return default_price
 
         quantity = self.env.context.get('quantity', 1.0)
         uom = self.env['uom.uom'].browse(self.env.context.get('uom'))

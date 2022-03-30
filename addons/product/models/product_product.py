@@ -702,6 +702,6 @@ class ProductProduct(models.Model):
         (tmpl_to_deactivate + tmpl_to_activate).toggle_active()
         return result
 
-    def _get_contextual_price(self):
+    def _get_contextual_price(self, default_price=0.0):
         self.ensure_one()
-        return self.product_tmpl_id._get_contextual_price(self)
+        return self.product_tmpl_id._get_contextual_price(self, default_price=default_price)

@@ -75,6 +75,15 @@ class TestEventSale(TestEventSaleCommon):
         customer_so = self.customer_so.with_user(self.env.user)
         ticket1 = self.event_0.event_ticket_ids[0]
         ticket2 = self.event_0.event_ticket_ids[1]
+        ticket1.price = 10
+        ticket2.price = 50
+
+        pricelist = self.env['product.pricelist'].sudo().create({
+            'name': 'empty_pricelist'
+        })
+
+        pricelist.discount_policy = 'without_discount'
+        ticket1.product_id.currency_id = pricelist.currency_id
 
         # PREPARE SO DATA
         # ------------------------------------------------------------
@@ -87,16 +96,18 @@ class TestEventSale(TestEventSaleCommon):
                     'event_ticket_id': ticket1.id,
                     'product_id': ticket1.product_id.id,
                     'product_uom_qty': TICKET1_COUNT,
-                    'price_unit': 10,
+                    'price_unit': ticket1.price,
                 }), (0, 0, {
                     'event_id': self.event_0.id,
                     'event_ticket_id': ticket2.id,
                     'product_id': ticket2.product_id.id,
                     'product_uom_qty': TICKET2_COUNT,
-                    'price_unit': 50,
+                    'price_unit': ticket2.price,
                 })
-            ]
+            ],
+            'pricelist_id': pricelist.id,
         })
+
         ticket1_line = customer_so.order_line.filtered(lambda line: line.event_ticket_id == ticket1)
         ticket2_line = customer_so.order_line.filtered(lambda line: line.event_ticket_id == ticket2)
         self.assertEqual(customer_so.amount_untaxed, TICKET1_COUNT * 10 + TICKET2_COUNT * 50)
@@ -194,7 +205,9 @@ class TestEventSale(TestEventSaleCommon):
 
     def test_ticket_price_with_pricelist_and_tax(self):
         self.env.user.partner_id.country_id = False
+        currency_id = self.env.company.currency_id
         pricelist = self.env['product.pricelist'].search([], limit=1)
+        pricelist.currency_id = currency_id
 
         tax = self.env['account.tax'].create({
             'name': "Tax 10",
@@ -207,6 +220,7 @@ class TestEventSale(TestEventSaleCommon):
         })
 
         event_product.taxes_id = tax
+        event_product.currency_id = currency_id
 
         event = self.env['event.event'].create({
             'name': 'New Event',
@@ -219,6 +233,7 @@ class TestEventSale(TestEventSaleCommon):
             'event_id': event.id,
             'product_id': event_product.product_variant_id.id,
         })
+        event_ticket.product_id.currency_id = pricelist.currency_id
 
         pricelist.item_ids = self.env['product.pricelist.item'].create({
             'applied_on': "1_product",
