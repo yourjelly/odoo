@@ -14,6 +14,7 @@
         'portal'
     ],
     'data': [
+        'data/knowledge_data.xml',
         'views/mail_templates.xml',
         'views/knowledge_views.xml',
         'views/knowledge_templates.xml',
