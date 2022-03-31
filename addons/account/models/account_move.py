@@ -57,6 +57,46 @@ class AccountMove(models.Model):
             ON account_move(journal_id, state, payment_state, move_type, date);
         """)
 
+    def action_generate_test_lines(self):
+        self.ensure_one()
+        accounts = self.env['account.account'].search([('company_id', '=', self.company_id.id), ('internal_group', '!=', 'off_balance')])
+
+        vals = []
+        sum_debit = 0
+        sum_credit = 0
+
+        for i, account in enumerate(accounts):
+            debit = i * 100 if i % 2 == 0 else 0
+            credit = i * 100 if i % 2 != 0 else 0
+            sum_debit = debit
+            sum_credit = credit
+
+            amount = debit - credit
+            vals.append({
+                'name': 'line product',
+                'move_id': self.id,
+                'account_id': account.id,
+                'debit': debit,
+                'credit': credit,
+                'amount_currency': amount,
+                'currency_id': self.currency_id.id,
+            })
+
+            if sum_debit - sum_credit != 0:
+                diff = sum_debit - sum_credit
+
+                vals.append({
+                    'name': 'line product',
+                    'move_id': self.id,
+                    'account_id': accounts[0].id,
+                    'debit': -diff if diff < 0 else 0,
+                    'credit': diff if diff > 0 else 0,
+                    'amount_currency': diff,
+                    'currency_id': self.currency_id.id,
+                })
+
+        self.env['account.move.line'].create(vals)
+
     @property
     def _sequence_monthly_regex(self):
         return self.journal_id.sequence_override_regex or super()._sequence_monthly_regex
