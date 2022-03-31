@@ -13,6 +13,7 @@
         'mail'
     ],
     'data': [
+        'data/knowledge_data.xml',
         'data/mail_template_data.xml',
         'views/knowledge_views.xml',
         'views/knowledge_templates.xml',
