@@ -7,6 +7,7 @@ import {
     legacyExtraNextTick,
     makeDeferred,
     nextTick,
+    selectDropdownItem,
 } from "@web/../tests/helpers/utils";
 import {
     makeWithSearch,
@@ -2302,7 +2303,7 @@ QUnit.module("Search", (hooks) => {
         assert.strictEqual(getSearchPanel().scrollTop, 25);
     });
 
-    QUnit.skipWOWL("search panel is not instantiated in dialogs", async (assert) => {
+    QUnit.test("search panel is not instantiated in dialogs", async (assert) => {
         assert.expect(2);
 
         serverData.models.company.records = Array.from(Array(8), (_, i) => ({
@@ -2322,9 +2323,7 @@ QUnit.module("Search", (hooks) => {
 
         await doAction(webclient, 1, { viewType: "form" });
 
-        await testUtils.fields.many2one.clickOpenDropdown("company_id");
-        await testUtils.fields.many2one.clickItem("company_id", "Search");
-        await legacyExtraNextTick();
+        await selectDropdownItem(target, "company_id", "Search More...");
 
         assert.containsOnce(document.body, ".modal .o_list_view");
         assert.containsNone(document.body, ".modal .o_search_panel");

@@ -9,18 +9,9 @@ import {
     patchWithCleanup,
 } from "../../helpers/utils";
 import { createWebClient, doAction, getActionManagerServerData } from "./../helpers";
-<<<<<<< HEAD
-import FormController from "web.FormController";
-import { makeFakeUserService } from "@web/../tests/helpers/mock_services";
-import ListController from "web.ListController";
-import { pivotView } from "@web/views/pivot/pivot_view";
-import { registry } from "@web/core/registry";
 
-const serviceRegistry = registry.category("services");
-=======
 import { ListView } from "@web/views/list/list_view";
 import { FormView } from "@web/views/form/form_view";
->>>>>>> 794d562a1635 (adapt history back tests)
 
 let serverData;
 let target;
