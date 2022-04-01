@@ -65,24 +65,16 @@ commandProviderRegistry.add("knowledge", {
     debounceDelay: 200,
     namespace: "?",
     async provide(env, options) {
-        // search article's name and parent name
-        const domain = ["|",
-            ["name", "ilike", options.searchValue],
-            ["parent_id.name", "ilike", options.searchValue],
-        ];
-        // retrieve the following fields
-        const fields = ['id', 'name', 'is_user_favourite', 'parent_id', 'icon'];
-        const limit = 10;
-        const orderBy =  [{ name: "is_user_favourite", desc: false }, { name: "favourite_count", desc: true }];
         const articlesData = await Component.env.services.rpc({
             model: "knowledge.article",
-            method: "search_read",
+            method: "get_user_sorted_articles",
+            args: [[]],
             kwargs: {
-                domain,
-                fields,
-                limit,
-            },
-            orderBy,
+                search_query: options.searchValue,
+                fields: ['id', 'name', 'is_user_favourite', 'favourite_count', 'parent_id', 'icon'],
+                order_by: "is_user_favourite, favourite_count desc",
+                limit: 10,
+            }
         });
 
         if (articlesData.length === 0) {
