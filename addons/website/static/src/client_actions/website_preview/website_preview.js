@@ -4,6 +4,7 @@ import { registry } from '@web/core/registry';
 import { useService } from '@web/core/utils/hooks';
 import core from 'web.core';
 import { WebsiteEditorComponent } from '../../components/editor/editor';
+import { WebsiteTranslator } from '../../components/translator/translator';
 
 const { Component, onWillStart, useRef, useEffect, useState } = owl;
 
@@ -62,7 +63,11 @@ export class WebsitePreview extends Component {
             this.websiteService.currentWebsiteId = this.websiteId;
             this.websiteService.context.showNewContentModal = this.props.action.context.params && this.props.action.context.params.display_new_content;
             this.websiteService.context.edition = this.props.action.context.params && !!this.props.action.context.params.enable_editor;
-            return () => this.websiteService.currentWebsiteId = null;
+            this.websiteService.context.translation = this.props.action.context.params && !!this.props.action.context.params.edit_translations;
+            return () => {
+                this.websiteService.currentWebsiteId = null;
+                this.websiteService.websiteRootInstance = undefined;
+            };
         }, () => [this.props.action.context.params]);
 
         useEffect(() => {
@@ -201,7 +206,8 @@ export class WebsitePreview extends Component {
 WebsitePreview.template = 'website.WebsitePreview';
 WebsitePreview.components = {
     WebsiteEditorComponent,
-    BlockIframe
+    BlockIframe,
+    WebsiteTranslator,
 };
 
 registry.category('actions').add('website_preview', WebsitePreview);
