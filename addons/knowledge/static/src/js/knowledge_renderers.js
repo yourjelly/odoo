@@ -11,8 +11,6 @@ const KnowledgeFormRenderer = FormRenderer.extend({
         'click .o_article_caret': '_onFold',
         'click .o_article_name': '_onOpen',
         'click .o_article_create, .o_section_create': '_onCreate',
-        'change .o_knowledge_cover_image': '_refreshBigIcon',
-        'click .o_clear_file_button': '_refreshBigIcon',
     }),
 
     /**
@@ -232,17 +230,9 @@ const KnowledgeFormRenderer = FormRenderer.extend({
         });
     },
 
-    _refreshBigIcon: function () {
-        const $icon = this.$el.find('.o_knowledge_icon');
-        let addIconButton = this.$el.find('.o_knowledge_add_icon');
-        let hasIcon = addIconButton.hasClass('d-none') || addIconButton.hasClass('o_invisible_modifier');
-        if (hasIcon) {
-            let article_id = this.state.res_id;
-            let unicode = this.$el.find(`[data-article-id="${article_id}"]`).first().find('.o_article_icon:first').text();
-            if (unicode) {
-                $icon.empty().append(unicode);
-            }
-        }
+    _renderArticleEmoji: function () {
+        const { data } = this.state;
+        this.$el.find('#o_article_emoji').text(data.icon);
     },
 
     /**
@@ -253,8 +243,8 @@ const KnowledgeFormRenderer = FormRenderer.extend({
         const result = await this._super.apply(this, arguments);
         this._renderBreadcrumb();
         await this._renderTree();
+        this._renderArticleEmoji();
         this._setResizeListener();
-        this._refreshBigIcon();
         return result;
     },
 
@@ -277,11 +267,10 @@ const KnowledgeFormRenderer = FormRenderer.extend({
      * Renders the emoji picker
      */
     _renderEmojiPicker: function () {
-        this.$el.find('.o_article_dropdown').one('click', event => {
+        this.$el.find('.o_article_emoji_dropdown').one('click', event => {
             const $dropdown = $(event.currentTarget);
-            const $article = $dropdown.closest('.o_article');
             const $picker = new EmojiPickerWidget(this, {
-                article_id: $article.data('article-id')
+                article_id: $dropdown.data('article-id') || this.state.res_id
             });
             $picker.attachTo($dropdown);
         });

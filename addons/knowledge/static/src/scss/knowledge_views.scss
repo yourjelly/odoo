@@ -70,11 +70,11 @@
         width: var(--sidebar-size);
         transition: width 0.15s linear;
 
-        .o_article_active, .o_article_icon_active {
+        .o_article_active, .o_article_emoji_active {
             background-color: $o-knowledge-bg--active;
         }
 
-        .o_article_icon:hover {
+        .o_article_emoji:hover {
             background-color: rgba(#000, .1);
         }
 
@@ -124,7 +124,7 @@
             visibility: hidden;
         }
         .o_article_name,
-        .o_article_dropdown i {
+        .o_article_emoji_dropdown i {
             cursor: pointer;
         }
         .o_article_name a {
@@ -163,7 +163,7 @@
         }
     }
 
-    .dropdown-menu.o_knowledge_emoji_panel {
+    .dropdown-menu.o_article_emoji_dropdown_panel {
         min-width: 200px;
         width: 200px;
     }

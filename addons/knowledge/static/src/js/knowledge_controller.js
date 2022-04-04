@@ -243,18 +243,18 @@ const KnowledgeFormController = FormController.extend({
             args: [[article_id], { icon: unicode }],
         });
         if (result) {
-            this.$el.find(`[data-article-id="${article_id}"]`).each(function() {
-                const $icon = $(this).find('.o_article_icon:first');
-                $icon.text(unicode);
-            });
-            this.$el.find('.o_knowledge_add_icon').addClass('d-none');
-            this.trigger_up('field_changed', {
-                dataPointID: this.handle,
-                changes: {
-                    icon: unicode
-                }
-            });
-            this.renderer._refreshBigIcon();
+            const { id } = this.getState();
+            if (id == article_id) {
+                this.$el.find('.o_knowledge_add_icon').addClass('d-none');
+                this.$el.find('#o_article_emoji').text(unicode);
+                this.trigger_up('field_changed', {
+                    dataPointID: this.handle,
+                    changes: {
+                        icon: unicode
+                    }
+                });
+            }
+            this.$el.find(`.o_article_emoji_dropdown[data-article-id="${article_id}"] > .o_article_emoji`).text(unicode);
         }
     },
 

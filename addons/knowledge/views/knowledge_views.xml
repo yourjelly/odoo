@@ -181,7 +181,12 @@
                                                     <!-- Article Icon -->
                                                     <span class="d-none" attrs="{'invisible': [('cover', '!=', False)]}" />
                                                     <div class="o_knowledge_icon" attrs="{'invisible': [('icon', '=', False)]}">
-                                                        <i/>
+                                                        <div class="o_article_emoji_dropdown dropdown">
+                                                            <a href="#" id="o_article_emoji" class="o_article_emoji dropdown-toggle o-no-caret" role="button"
+                                                                type="button" data-toggle="dropdown" aria-expanded="true" />
+                                                            <div class="o_article_emoji_dropdown_panel dropdown-menu rounded p-0" role="menu"
+                                                                aria-labelledby="o_article_emoji" />
+                                                        </div>
                                                     </div>
                                                     <!-- Article body -->
                                                     <div class="o_knowledge_editor d-flex bg-white px-5">
