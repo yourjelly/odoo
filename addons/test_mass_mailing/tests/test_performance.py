@@ -92,3 +92,13 @@ class TestMassMailBlPerformance(TestMassMailPerformanceBase):
 
         self.assertEqual(mailing.sent, 50)
         self.assertEqual(mailing.delivered, 50)
+
+        mails = self.env['mail.mail'].sudo().search([('mailing_id', '=', mailing.id)])
+
+        self.assertEqual(len(mails), 12, 'Should not have auto deleted the blacklisted emails')
+
+        blacklisted_emails = self.env['mail.blacklist'].search([]).mapped('email')
+
+        for mail in mails:
+            self.assertEqual(mail.state, 'cancel', 'Should have kept the cancelled emails')
+            self.assertIn(mail.email_to, blacklisted_emails)
