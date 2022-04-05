@@ -86,3 +86,21 @@ def create_xml_node(parent_node, node_name, node_value=None):
     :rtype: etree._Element
     """
     return create_xml_node_chain(parent_node, [node_name], node_value)[0]
+
+
+def format_xml_file_content(xml_content, indent_size=4, encoding='UTF-8', standalone=None, doctype=None):
+    """Formats and indents the XML content provided.
+    It removes blank text, indents with the given number of spaces and returns a pretty XML with XML declaration.
+
+    :param xml_content: the content of the XML file
+    :param int indent_size: number of spaces used to indent
+    :param str encoding: the desired encoding
+    :param bool standalone: set the xml declaration with the corresponding standalone boolean flag
+    :param doctype: plain string that will be serialised before the XML tree
+
+    :rtype: bytes
+    :return: the content of the XML, formatted and indented correctly
+    """
+    tree = etree.fromstring(xml_content, parser=etree.XMLParser(remove_blank_text=True))
+    etree.indent(tree, space="".join([" " for _ in range(indent_size)]))
+    return etree.tostring(tree, pretty_print=True, xml_declaration=True, encoding=encoding, standalone=standalone, doctype=doctype)
