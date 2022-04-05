@@ -584,7 +584,7 @@ var MockServer = Class.extend({
         this._writeRecord(modelName, values, id);
         this._updateComodelRelationalFields(modelName, id, values);
         return id;
-    },
+x    },
     /**
      * Simulate a 'default_get' operation
      *

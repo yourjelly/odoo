@@ -255,7 +255,7 @@ async function getInitialServerData() {
             // prevent tests from mutating the records.
             records.push(...JSON.parse(JSON.stringify(recordsToInsertRegistry.get(modelName))));
         }
-        data[modelName] = { fields, records };
+        data[modelName] = { fields: { ...fields }, records };
     }
     return data;
 }

@@ -91,6 +91,7 @@ MockServer.include({
      * @override
      */
     async _performRpc(route, args) {
+        try {
         // routes
         if (route === '/mail/message/post') {
             if (args.thread_model === 'mail.channel') {
@@ -309,6 +310,7 @@ MockServer.include({
             return this._mockMailThreadNotifyCancelByType(args.model, args.kwargs.notification_type);
         }
         return this._super(route, args);
+    } catch(e) { console.log(e)}
     },
     /**
      * @override
