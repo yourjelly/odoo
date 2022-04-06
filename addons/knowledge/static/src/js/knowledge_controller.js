@@ -53,8 +53,9 @@ const KnowledgeFormController = FormController.extend({
         }
         var unicode = emojis[Math.floor(Math.random() * emojis.length)]['unicode'];
         this.trigger_up('emoji_click', {
-            article_id: id,
-            unicode: unicode
+            articleId: id,
+            unicode: unicode,
+            addIcon: true,
         });
     },
 
@@ -236,25 +237,30 @@ const KnowledgeFormController = FormController.extend({
      * @param {Event} event
      */
     _onEmojiClick: async function (event) {
-        const { article_id, unicode } = event.data;
+        const { articleId, unicode, addIcon } = event.data;
         const result = await this._rpc({
             model: 'knowledge.article',
             method: 'write',
-            args: [[article_id], { icon: unicode }],
+            args: [[articleId], { icon: unicode }],
         });
         if (result) {
             const { id } = this.getState();
-            if (id == article_id) {
-                this.$el.find('.o_knowledge_add_icon').addClass('d-none');
-                this.$el.find('#o_article_emoji').text(unicode);
-                this.trigger_up('field_changed', {
-                    dataPointID: this.handle,
-                    changes: {
-                        icon: unicode
-                    }
-                });
+            if (id == articleId) {
+                if (unicode) {
+                    this.$el.find('.o_knowledge_add_icon').addClass('d-none');
+                }
+                this.$el.find('#o_article_emoji').text(unicode ? unicode : '');
+                if (addIcon) {  // refresh the form view to display the icon if there was no icon yet.
+                    this.trigger_up('field_changed', {
+                        dataPointID: this.handle,
+                        changes: {
+                            icon: unicode
+                        }
+                    });
+                }
+                this.saveChanges(this.handle);
             }
-            this.$el.find(`.o_article_emoji_dropdown[data-article-id="${article_id}"] > .o_article_emoji`).text(unicode);
+            this.$el.find(`.o_article_emoji_dropdown[data-article-id="${articleId}"] > .o_article_emoji`).text(unicode ? unicode : '📄');
         }
     },
 

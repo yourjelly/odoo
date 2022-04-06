@@ -29,8 +29,8 @@ const EmojiPickerWidget = Widget.extend(WidgetAdapterMixin, {
              */
             onClickEmoji: unicode => {
                 this.trigger_up('emoji_click', {
-                    article_id: this.options.article_id,
-                    unicode
+                    articleId: this.options.article_id,
+                    unicode: unicode || false,
                 });
                 this.close()
             }
