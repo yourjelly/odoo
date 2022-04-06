@@ -13,19 +13,31 @@ import './commands/align.js';
 import { sanitize } from './utils/sanitize.js';
 import { serializeNode, unserializeNode, serializeSelection } from './utils/serialize.js';
 import {
+    baseTextBlockTagNames,
     closestBlock,
     commonParentGet,
     containsUnremovable,
+    createPBR,
     DIRECTIONS,
     endPos,
+    getBrSibling,
     getCursorDirection,
     getListMode,
+    getEditableContextParent,
+    getFurthestUneditableParent,
     getOuid,
+    getSiblingWithContentEditable,
+    inlineTextTagNames,
     insertText,
+    isBlock,
+    isLastBR,
     isColorGradient,
+    keepFocus,
     nodeSize,
     preserveCursor,
     setSelection,
+    setCursorStart,
+    setCursorEnd,
     startPos,
     toggleClass,
     closestElement,
@@ -141,6 +153,20 @@ const CLIPBOARD_WHITELISTS = {
     attributes: ['class', 'href', 'src'],
 };
 
+/**
+ * Elements tags that are allowed to contain a navigationNode. A node meets the
+ * requirements if it has [a very similar/the same] behavior as this.editable.
+ * criteria (debatable):
+ * - can be the container of the result of most commands of the powerbox
+ * - behave similarly to this.editable when typing text (i.e. behavior on ENTER)
+ *   (note: <li> is ruled out because of its behavior with ENTER, but it can be
+ *    argued that it should also find itself in this set)
+ */
+const NAVIGATIONNODE_ALLOWED_CONTAINERS = new Set([
+    'DIV',
+    'TD',
+]);
+
 function defaultOptions(defaultObject, object) {
     const newObject = Object.assign({}, defaultObject, object);
     for (const [key, value] of Object.entries(object)) {
@@ -246,6 +272,25 @@ export class OdooEditor extends EventTarget {
             this._pluginAdd(plugin);
         }
 
+        /**
+         * <p> element added temporarily during navigation with
+         * ArrowUp/ArrowDown, between blocks, if there is no existing <p>
+         */
+        this._navigationNode = null;
+        /**
+         * Element that will stand out in the editor. If this property is set,
+         * subsequent @see 'selectionchange' or @see _onKeyDown calls will
+         * decide if the element should be removed or unselected. Its main
+         * purpose is to handle the deletion of contenteditable=false elements
+         * (which do not have a caret). Such elements can be "selected" via this
+         * property with @see oDeleteBackward when the selection is at the start
+         * of the next (editable) sibling. The editable will be removed if it is
+         * empty, and the uneditable will be selected. The element is unselected
+         * when the selection change, or upon keydown events.
+         */
+        this._uneditableSelection = null;
+        this._lockedUneditableSelection = false;
+
         // -------------------
         // Alter the editable
         // -------------------
@@ -302,9 +347,12 @@ export class OdooEditor extends EventTarget {
         this.addDomListener(this.editable, 'mouseup', this._onMouseup);
         this.addDomListener(this.editable, 'paste', this._onPaste);
         this.addDomListener(this.editable, 'drop', this._onDrop);
+        this.addDomListener(this.editable, 'click', this._onClick);
 
         this.addDomListener(this.document, 'selectionchange', this._onSelectionChange);
         this.addDomListener(this.document, 'selectionchange', this._handleCommandHint);
+        this.addDomListener(this.document, 'selectionchange', this._handleNavigationNode);
+        this.addDomListener(this.document, 'selectionchange', this._handleUneditableSelection);
         this.addDomListener(this.document, 'keydown', this._onDocumentKeydown);
         this.addDomListener(this.document, 'keyup', this._onDocumentKeyup);
         this.addDomListener(this.document, 'mousedown', this._onDoumentMousedown);
@@ -321,6 +369,20 @@ export class OdooEditor extends EventTarget {
                 this._historyMakeSnapshot();
             }, HISTORY_SNAPSHOT_INTERVAL);
         }
+
+        this._navigationNodeObserver = new MutationObserver((mutationList, observer) => {
+            observer.disconnect();
+            const targets = new Set(mutationList.map(mutation => mutation.target));
+            targets.forEach(navigationNode => {
+                if (this._navigationNode === navigationNode) {
+                    /**
+                     * the navigationNode is "validated" in the dom by the
+                     * mutation
+                     */
+                    this._navigationNode = null;
+                }
+            });
+        });
 
         // -------
         // Toolbar
@@ -537,6 +599,19 @@ export class OdooEditor extends EventTarget {
                         'value': record.target.getAttribute(record.attributeName),
                         'oldValue': record.oldValue,
                     });
+                    if (record.attributeName === 'class' && record.target) {
+                        /**
+                         * Apply or remove an uneditable selection when a
+                         * mutation related to the custom class occur.
+                         */
+                        const wasUneditableSelected = record.oldValue !== null && record.oldValue.includes('oe-uneditable-selected');
+                        const isUneditableSelected = record.target.classList.contains('oe-uneditable-selected');
+                        if (isUneditableSelected && !wasUneditableSelected) {
+                            this._setUneditableSelection(record.target);
+                        } else if (wasUneditableSelected && !isUneditableSelected && record.target === this._uneditableSelection) {
+                            this._removeUneditableSelection();
+                        }
+                    }
                     break;
                 }
                 case 'childList': {
@@ -895,7 +970,7 @@ export class OdooEditor extends EventTarget {
                         node && node.after(nodeToRemove);
                     } else {
                         const node = this.idFind(mutation.parentId);
-                        node && node.append(nodeToRemove);
+                        node && node.prepend(nodeToRemove);
                     }
                     break;
                 }
@@ -939,6 +1014,13 @@ export class OdooEditor extends EventTarget {
         }
     }
     historySetSelection(step) {
+        if (this._uneditableSelection) {
+            /**
+             * If an uneditable selection is currently displayed, the selection
+             * should not be altered.
+             */
+            return;
+        }
         if (step.selection && step.selection.anchorNodeOid) {
             const anchorNode = this.idFind(step.selection.anchorNodeOid);
             const focusNode = this.idFind(step.selection.focusNodeOid) || anchorNode;
@@ -989,7 +1071,15 @@ export class OdooEditor extends EventTarget {
                 focusNode: undefined,
                 focusOffset: undefined,
             },
-            mutations: Array.from(this.editable.childNodes).map(node => ({
+            /**
+             * Some temporary nodes may have been added during an event cycle
+             * and will be deleted at the start of the next event cycle. If the
+             * snapshot occurs between those steps, ignore those nodes.
+             * @see _navigateUneditable
+             */
+            mutations: Array.from(this.editable.childNodes)
+                            .filter(node => !node.oIgnoreSerialize)
+                            .map(node => ({
                 type: 'add',
                 append: 1,
                 id: node.oid,
@@ -1289,6 +1379,31 @@ export class OdooEditor extends EventTarget {
         if (!range) return;
         let start = range.startContainer;
         let end = range.endContainer;
+        // Expand the range to fully include all contentEditable=False elements.
+        let commonAncestorContainer = range.commonAncestorContainer;
+        if (commonAncestorContainer !== this.editable && !this.editable.contains(commonAncestorContainer)) {
+            commonAncestorContainer = this.editable;
+        }
+        const startUneditable = getFurthestUneditableParent(start, commonAncestorContainer);
+        if (startUneditable) {
+            let leaf = previousLeaf(startUneditable);
+            if (leaf) {
+                range.setStart(leaf, nodeSize(leaf));
+            } else {
+                range.setStart(commonAncestorContainer, 0);
+            }
+            start = range.startContainer;
+        }
+        const endUneditable = getFurthestUneditableParent(end, commonAncestorContainer);
+        if (endUneditable) {
+            let leaf = nextLeaf(endUneditable);
+            if (leaf) {
+                range.setEnd(leaf, 0);
+            } else {
+                range.setEnd(commonAncestorContainer, nodeSize(commonAncestorContainer));
+            }
+            end = range.endContainer;
+        }
         // Let the DOM split and delete the range.
         const doJoin = closestBlock(start) !== closestBlock(range.commonAncestorContainer);
         let next = nextLeaf(end, this.editable);
@@ -1846,7 +1961,7 @@ export class OdooEditor extends EventTarget {
                 this._historyRevertUntil(this._beforeCommandbarStepIndex);
                 this.historyStep(true);
                 setTimeout(() => {
-                    this.editable.focus();
+                    keepFocus(this.editable);
                     getDeepRange(this.editable, { select: true });
                 });
             },
@@ -2214,6 +2329,71 @@ export class OdooEditor extends EventTarget {
     }
 
     /**
+     * Implement various failsafes in order to add a <p> element to handle the
+     * caret if the user clicks on an element that should be able to handle the
+     * caret but currently can not or incorrectly (i.e. will add text nodes
+     * instead of <p> elements).
+     */
+    _onClick(ev) {
+        if (this.editable && this.editable.isContentEditable) {
+            const editableContextParent = getEditableContextParent(ev.target, this.editable);
+            if (editableContextParent) {
+                /**
+                 * Check whether the editableContextParent has at least one
+                 * editable (or text) child (able to handle the caret).
+                 */
+                const hasEditable = !![...editableContextParent.childNodes].find(node => {
+                    return node.nodeType === Node.TEXT_NODE ||
+                        node.isContentEditable || node.querySelector('[contenteditable="true"]');
+                });
+                if (!hasEditable) {
+                    const lastChild = editableContextParent.lastElementChild;
+                    if (lastChild) {
+                        /**
+                         * Add a navigationNode if all children of the
+                         * editableContextParent are uneditables (unable to
+                         * handle the caret).
+                         */
+                        ev.preventDefault();
+                        ev.stopPropagation();
+                        this._setNavigationNode(lastChild);
+                        return;
+                    } else {
+                        /**
+                         * Add a permanent <p><br></p> if the
+                         * editableContextParent has no child (and thus is
+                         * unable to properly handle the caret <=> will create
+                         * text nodes instead of <p> elements)
+                         */
+                        const paragraph = createPBR();
+                        editableContextParent.append(paragraph);
+                        setCursorStart(paragraph);
+                        this.historyStep();
+                        return;
+                    }
+                }
+            }
+        }
+        /**
+         * Append an empty <p><br></p> when clicking below the last child of
+         * this.editable if the last child is not a <p> element.
+         */
+        const clientY = ev.clientY;
+        const lastElementChild = this.editable.lastElementChild;
+        let childY = 0;
+        if (lastElementChild) {
+            const {top, height} = lastElementChild.getBoundingClientRect();
+            childY = top + height;
+        }
+        if (clientY > childY && (!lastElementChild || lastElementChild.tagName !== 'P')) {
+            const paragraph = createPBR();
+            this.editable.append(paragraph);
+            setCursorStart(paragraph);
+            this.historyStep();
+        }
+    }
+
+    /**
      * If backspace/delete input, rollback the operation and handle the
      * operation ourself. Needed for mobile, used for desktop for consistency.
      *
@@ -2326,6 +2506,13 @@ export class OdooEditor extends EventTarget {
     _onKeyDown(ev) {
         this.keyboardType =
             ev.key === 'Unidentified' ? KEYBOARD_TYPES.VIRTUAL : KEYBOARD_TYPES.PHYSICAL;
+        /**
+         * An uneditableSelectionSnapshot can be set by an event handler when
+         * the uneditableSelection must be locked in order to apply a real
+         * selection change while maintaining the uneditableSelection.
+         * @see _navigateUneditable
+         */
+        let uneditableSelectionSnapshot = null;
         // If the pressed key has a printed representation, the returned value
         // is a non-empty Unicode character string containing the printable
         // representation of the key. In this case, call `deleteRange` before
@@ -2334,17 +2521,82 @@ export class OdooEditor extends EventTarget {
             const selection = this.document.getSelection();
             if (selection && !selection.isCollapsed) {
                 this.deleteRange(selection);
+            } else if (this._uneditableSelection) {
+                /**
+                 * If the pressed key has a printed representation and a
+                 * contenteditable=false is currently "selected", create a <p>
+                 * to hold the typed character, which will replace the
+                 * contenteditable=false if it can be removed. @see _protect
+                 */
+                this._uneditableSelection.classList.remove('oe-uneditable-selected');
+                this._addPBR('after', this._uneditableSelection, {
+                    isStep: true,
+                    replace: true,
+                });
             }
         }
-        if (ev.key === 'Backspace' && !ev.ctrlKey && !ev.metaKey) {
+        if (ev.key === 'Delete') {
+            if (!ev.ctrlKey && !ev.metaKey) {
+                if (this._uneditableSelection) {
+                    // replace the uneditableSelection by <p>
+                    ev.preventDefault();
+                    this._uneditableSelection.classList.remove('oe-uneditable-selected');
+                    this._addPBR('before', this._uneditableSelection, {
+                        isStep: true,
+                        replace: true,
+                    });
+                }
+            }
+        } else if (ev.key === 'Backspace') {
             // backspace
-            // We need to hijack it because firefox doesn't trigger a
-            // deleteBackward input event with a collapsed selection in front of
-            // a contentEditable="false" (eg: font awesome).
             const selection = this.document.getSelection();
-            if (selection.isCollapsed) {
-                ev.preventDefault();
-                this._applyCommand('oDeleteBackward');
+            if (!ev.ctrlKey && !ev.metaKey) {
+                if (this._uneditableSelection) {
+                    // replace the uneditableSelection by <p>
+                    ev.preventDefault();
+                    this._uneditableSelection.classList.remove('oe-uneditable-selected');
+                    this._addPBR('after', this._uneditableSelection, {
+                        isStep: true,
+                        replace: true,
+                    });
+                } else if (selection.isCollapsed) {
+                    /**
+                     * We need to hijack it because firefox doesn't trigger a
+                     * deleteBackward input event with a collapsed selection in
+                     * front of a contentEditable="false" (eg: font awesome).
+                     */
+                    ev.preventDefault();
+                    this._applyCommand('oDeleteBackward');
+                }
+            } else if (selection.isCollapsed && selection.anchorNode) {
+                const anchor = (selection.anchorNode.nodeType !== Node.TEXT_NODE && selection.anchorOffset) ?
+                    selection.anchorNode[selection.anchorOffset] : selection.anchorNode;
+                const element = closestBlock(anchor);
+                if ((element === this._navigationNode || (element.tagName === 'P' && isEmptyBlock(element))) &&
+                    element && element.parentElement.children.length === 1) {
+                    /**
+                     * Prevent removing a <p> if it is the last element of its
+                     * parent.
+                     */
+                    ev.preventDefault();
+                } else if (element) {
+                    /**
+                     * Allow to remove any other element with CTRL+BACKSPACE,
+                     * but place an empty <p><br></p> element if the parent
+                     * block becomes empty after the element was removed.
+                     */
+                    const parent = (element === this.editable) ? this.editable : element.parentElement;
+                    if (isBlock(parent)) {
+                        setTimeout(() => {
+                            if (!parent.children.length) {
+                                const paragraph = createPBR();
+                                parent.append(paragraph);
+                                setCursorStart(paragraph);
+                                this.historyStep();
+                            }
+                        });
+                    }
+                }
             }
         } else if (ev.key === 'Tab') {
             // Tab
@@ -2390,7 +2642,11 @@ export class OdooEditor extends EventTarget {
             ev.preventDefault();
             ev.stopPropagation();
             this.execCommand('strikeThrough');
-        } else if (IS_KEYBOARD_EVENT_LEFT_ARROW(ev)) {
+        } else if (IS_KEYBOARD_EVENT_LEFT_ARROW(ev) && !ev.altKey && !ev.defaultPrevented) {
+            if (this._uneditableSelection) {
+                // create a caret holder to handle the Arrow event
+                uneditableSelectionSnapshot = this._navigateUneditable(1);
+            }
             getDeepRange(this.editable);
             const selection = this.document.getSelection();
             // Find previous character.
@@ -2412,7 +2668,11 @@ export class OdooEditor extends EventTarget {
                 const startOffset = ev.shiftKey ? selection.anchorOffset : focusOffset;
                 setSelection(startContainer, startOffset, focusNode, focusOffset);
             }
-        } else if (IS_KEYBOARD_EVENT_RIGHT_ARROW(ev)) {
+        } else if (IS_KEYBOARD_EVENT_RIGHT_ARROW(ev) && !ev.altKey && !ev.defaultPrevented) {
+            if (this._uneditableSelection) {
+                // create a caret holder to handle the Arrow event
+                uneditableSelectionSnapshot = this._navigateUneditable(0);
+            }
             getDeepRange(this.editable);
             const selection = this.document.getSelection();
             // Find next character.
@@ -2434,8 +2694,297 @@ export class OdooEditor extends EventTarget {
                 const startOffset = ev.shiftKey ? selection.anchorOffset : focusOffset;
                 setSelection(startContainer, startOffset, focusNode, focusOffset);
             }
+        } else if (['ArrowDown', 'ArrowUp'].includes(ev.key) && !ev.ctrlKey && !ev.metaKey && !ev.altKey && !ev.defaultPrevented) {
+            if (this._uneditableSelection) {
+                // create a caret holder to handle the Arrow event
+                uneditableSelectionSnapshot = this._navigateUneditable((ev.key === 'ArrowDown') ? 0 : 1);
+            }
+            this._handleVerticalArrowsNavigation(ev);
+        }
+        if (uneditableSelectionSnapshot) {
+            /**
+             * Handle the uneditableSelectionSnapshot to remove eventual
+             * temporary caret holders and unlock the uneditableSelection.
+             * This must be done at the start of the next event cycle, in order
+             * for all event handlers to carry their tasks.
+             */
+            setTimeout(() => {
+                const selection = this.document.getSelection();
+                let unlockTimeout = false;
+                if (selection.anchorNode === uneditableSelectionSnapshot.uneditableCaretHolder) {
+                    /**
+                     * If the selection is still on the temporary caret holder,
+                     * maintain the uneditable selection.
+                     */
+                    selection.removeAllRanges();
+                    unlockTimeout = true;
+                    uneditableSelectionSnapshot.uneditableSelection.classList.add('oe-uneditable-selected');
+                } else {
+                    /**
+                     * Remove the uneditable selection (since it was locked, it
+                     * did not catch the selection change).
+                     */
+                    uneditableSelectionSnapshot.uneditableSelection.classList.remove('oe-uneditable-selected');
+                    if (this._uneditableSelection === uneditableSelectionSnapshot.uneditableSelection) {
+                        /**
+                         * Removing the current uneditable selection should
+                         * always be a step.
+                         */
+                        this.historyStep();
+                    }
+                }
+                this._removeUneditableCaretHolder(uneditableSelectionSnapshot.uneditableCaretHolder, unlockTimeout);
+            });
         }
     }
+
+    /**
+     * Remove an uneditableCaretHolder and unlock the uneditableSelection.
+     *
+     * @param {Element} uneditableCaretHolder
+     * @param {boolean} unlockTimeout Whether to unlock right now or at the
+     *                                start of the next event cycle (i.e. when
+     *                                the selection will change in the current
+     *                                event cycle, but the uneditable selection
+     *                                has to be preserved).
+     */
+    _removeUneditableCaretHolder(uneditableCaretHolder, unlockTimeout=false) {
+        this.observerUnactive('uneditableSelection');
+        uneditableCaretHolder.remove();
+        this.observerActive('uneditableSelection');
+        const unlockUneditableSelection = () => {
+            this._lockedUneditableSelection = false;
+        };
+        if (unlockTimeout) {
+            setTimeout(unlockUneditableSelection);
+        } else {
+            unlockUneditableSelection();
+        }
+    }
+
+    /**
+     * Create a temporary caret holder for an uneditableSelection. The purpose
+     * is to handle an Arrow event handling from an element which does not have
+     * a caret. The caret holder is placed before the element if the direction
+     * is next, and after if the direction is previous so that the navigation
+     * will go through the element during the event handling.
+     * Lock the uneditable Selection to allow the caret to be placed in the
+     * temporary holder.
+     *
+     * @param {integer} direction 0 <=> NEXT, 1 <=> PREVIOUS
+     * @returns uneditableSelectionSnapshot which contains the current
+     *          uneditable selection and the temporary caret holder.
+     */
+    _navigateUneditable(direction) {
+        this._lockedUneditableSelection = true;
+        this.observerUnactive('uneditableSelection');
+        let uneditableCaretHolder;
+        if (direction) {
+            uneditableCaretHolder = this._addPBR('after', this._uneditableSelection, {
+                select: false,
+                style: { maxHeight: '0px', padding: '0px', marginBottom: '0px', marginTop: '0px' },
+            });
+        } else {
+            uneditableCaretHolder = this._addPBR('before', this._uneditableSelection, {
+                select: false,
+                style: { maxHeight: '0px', padding: '0px', marginBottom: `0px`, marginTop: '0px' },
+            });
+        }
+        uneditableCaretHolder.oIgnoreSerialize = true;
+        setCursorStart(uneditableCaretHolder);
+        this.observerActive('uneditableSelection');
+        return {
+            uneditableSelection: this._uneditableSelection,
+            uneditableCaretHolder: uneditableCaretHolder,
+        };
+    }
+
+    /**
+     * @see getComplexNode
+     */
+    getComplexNodeParent(node, direction, editableContextChange=false) {
+        if (!node || node === this.editable) {
+            return editableContextChange;
+        }
+        do {
+            /**
+             * Exiting a node. A parent node may need a navigationNode
+             * relative to its position at a smaller depth. Only editable
+             * nodes are considered. During parents traversal, the editable
+             * context may change (one of the parents is not editable)
+             */
+            node = node.parentElement;
+            if (!editableContextChange && !node.parentElement.isContentEditable) {
+                editableContextChange = true;
+            }
+            /**
+             * If the current node has a contentEditable=false parent and a
+             * sibling with a contentEditable=true, don't add a navigationNode
+             * since the depth will increase during navigation and
+             * navigationNodes are only added at the same depth or smaller.
+             * (debatable)
+             */
+            if (!node.parentElement.isContentEditable && getSiblingWithContentEditable(node, direction)) {
+                return editableContextChange;
+            }
+        } while (node !== this.editable && !node.parentElement.isContentEditable);
+        return this.getComplexNode(node, direction, editableContextChange);
+    }
+
+    /**
+     * Recursive identification of a "complex" node used for the creation of
+     * the @see _navigationNode . The meaning of "complex" here is that the
+     * node is identified as being in a configuration where it is difficult/not
+     * possible to place the caret in between elements. In this case, a
+     * navigationNode should be inserted.
+     * As such, this function may navigate around the siblings or the parents
+     * of the provided node to identify such a configuration.
+     *
+     * @param {Node} node Current node to identify as "complex" or to navigate
+     *                    from
+     * @param {integer} direction 0 <=> DOWN, 1 <=> UP
+     * @param {boolean} editableContextChange Tracks editable context changes.
+     *                  @see _handleVerticalArrowsNavigation
+     *
+     * @returns {Node|boolean} The "complex" node from which to insert the
+     *                         navigationNode, or a boolean if no navigationNode
+     *                         need to be inserted. In this case, return true
+     *                         if the editable context changed, and false if not
+     */
+    getComplexNode(node, direction, editableContextChange=false) {
+        if (!node || node === this.editable) {
+            return editableContextChange;
+        }
+        // Identify an inline configuration (can be multilines with br elements)
+        if (node.nodeType === Node.TEXT_NODE || inlineTextTagNames.has(node.tagName)) {
+            const br = getBrSibling(node, direction);
+            if (direction) {
+                if (br) {
+                    // node is not on the first line, no navigationNode needed.
+                    return editableContextChange;
+                } else {
+                    /**
+                     * The current node is on the first line, hand over the
+                     * caret responsibility to the parent.
+                     */
+                    return this.getComplexNodeParent(node, direction, editableContextChange);
+                }
+            } else {
+                if (!br || isLastBR(br)) {
+                    /**
+                     * The current node is on the last line, hand over the
+                     * caret responsibility to the parent.
+                     */
+                    return this.getComplexNodeParent(node, direction, editableContextChange);
+                } else {
+                    return editableContextChange;
+                }
+            }
+        }
+        const sibling = (direction) ? node.previousElementSibling : node.nextElementSibling;
+        // Check if sibling should take precedence over a navigationNode
+        if (sibling && sibling.isContentEditable && (sibling.tagName === 'BR' ||
+            baseTextBlockTagNames.has(sibling.tagName) || inlineTextTagNames.has(sibling.tagName))) {
+            /**
+             * Text nodes which do not have a br sibling element are not
+             * considered here, as they should not be allowed outside an inline
+             * configuration. (debatable)
+             */
+            return editableContextChange;
+        }
+        // Identify a complex configuration (which needs a navigationNode)
+        if (node.parentElement.isContentEditable && !baseTextBlockTagNames.has(node.tagName) &&
+            NAVIGATIONNODE_ALLOWED_CONTAINERS.has(node.parentElement.tagName)) {
+            return node;
+        }
+        // Hand over the caret responsibility to the sibling
+        if (sibling) {
+            if (node.parentElement.isContentEditable && !sibling.isContentEditable &&
+                !sibling.querySelector('[contenteditable="true"]')) {
+                /**
+                 * Sibling is not able to handle the caret, but may need a
+                 * navigationNode relative to its position.
+                 */
+                return this.getComplexNode(sibling, direction, editableContextChange);
+            }
+            return editableContextChange;
+        }
+        // Hand over the caret responsibility to the parent
+        return this.getComplexNodeParent(node, direction, editableContextChange);
+    }
+
+    /**
+     * Create a temporary <p><br></p> node when navigating the document with
+     * ArrowUp and ArrowDown keys. This node will appear in between "complex"
+     * blocks or while exiting those blocks. This node will disappear if the
+     * selection change. If the user starts typing in the node, it will be
+     * validated in the dom and won't be removed anymore.
+     *
+     * The purpose of this node is to ease insertion of text in between
+     * "complex" blocks such as contentEditable='false', <table>, <blockquote>,
+     * <pre>, ..., when there is not already a <p>-like element.
+     *
+     * @param {Event} ev ArrowDown or ArrowUp events
+     */
+    _handleVerticalArrowsNavigation(ev) {
+        const direction = ['ArrowDown', 'ArrowUp'].indexOf(ev.key);
+        if (direction === -1) {
+            return;
+        }
+        const sel = this.document.getSelection();
+        const anchorOffset = sel.anchorOffset;
+        const anchorNode = (sel.anchorNode.nodeType !== Node.TEXT_NODE && anchorOffset) ?
+            sel.anchorNode.childNodes[anchorOffset] : sel.anchorNode;
+        const startNode = this.editable.contains(anchorNode) && anchorNode;
+        const complexNode = this.getComplexNode(startNode, direction);
+        if (complexNode.nodeType) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            this._setNavigationNode(complexNode, direction);
+        } else if (complexNode) {
+            /**
+             * No navigationNode is needed, but if the configuration analysis
+             * of startNode detected an editable context change, this means that
+             * the caret will have to pass through a contenteditable=false
+             * parent, which is still contained in this.editable. Browsers such
+             * as Mozilla Firefox do not allow this pass through. Chrome allows
+             * it. In Odoo, in the context of this.editable, the adopted
+             * strategy follows the Chrome logic (ArrowUp and ArrowDown should
+             * be enforced).
+             */
+            ev.preventDefault();
+            ev.stopPropagation();
+            let destinationNode = startNode;
+            let textParent;
+            // Reposition on the last text node sibling if any.
+            let sibling = (direction) ? destinationNode.previousSibling : destinationNode.nextSibling;
+            while (sibling && sibling.nodeType === Node.TEXT_NODE) {
+                destinationNode = sibling;
+                sibling = (direction) ? destinationNode.previousSibling : destinationNode.nextSibling;
+            }
+            // Search for the next caret holder (non-editable are excluded).
+            do {
+                let backupNode = destinationNode;
+                textParent = undefined;
+                destinationNode = (direction) ? previousLeaf(destinationNode, this.editable, true) : nextLeaf(destinationNode, this.editable, true);
+                if (destinationNode && !isBlock(destinationNode)) {
+                    textParent = destinationNode.parentElement;
+                } else if (destinationNode === backupNode || destinationNode === this.editable) {
+                    destinationNode = null;
+                }
+            } while (destinationNode && ((textParent && !textParent.isContentEditable) || (!textParent && !destinationNode.isContentEditable)));
+            // Place the caret.
+            if (destinationNode) {
+                if (destinationNode.nodeType === Node.TEXT_NODE && startNode.nodeType === Node.TEXT_NODE) {
+                    // Keep the previous text offset if possible.
+                    setSelection(destinationNode, anchorOffset);
+                } else {
+                    setCursorStart(destinationNode);
+                }
+            }
+        }
+    }
+
     /**
      * @private
      */
@@ -2563,6 +3112,15 @@ export class OdooEditor extends EventTarget {
             el.textContent = el.textContent.replace('\u200B', '');
         }
 
+        // Remove oe-uneditable-selected on elements
+        for (const el of element.querySelectorAll('.oe-uneditable-selected')) {
+            el.classList.remove('oe-uneditable-selected');
+        }
+
+        // Clean empty class attributes
+        for (const el of element.querySelectorAll('[class=""]')) {
+            el.removeAttribute('class');
+        }
     }
     /**
      * Handle the hint preview for the commandbar.
@@ -2612,6 +3170,123 @@ export class OdooEditor extends EventTarget {
             this._makeHint(this.editable.firstChild, this.options.placeholder, true);
         }
     }
+
+    /**
+     * Add a <p><br></p> element with various options
+     *
+     * @param {string} operation Node insertion operation (after, before, ...)
+     * @param {Element} element Target for the desired PBR
+     * @param {Object}
+     * @param {boolean} [replace] Whether <p> should replace element
+     * @param {boolean} [isStep] Whether the operation should register a history
+     *                           step
+     * @param {boolean} [select] Whether the caret should be placed in <p>
+     * @param {Object} [style] HTMLElement style properties to be applied on <p>
+     * @returns {Element} <p><br></p>
+     */
+    _addPBR(operation, element, {replace, isStep, style, select=true} = {}) {
+        if (!element) {
+            return;
+        }
+        const paragraph = createPBR();
+        element[operation](paragraph);
+        for (let property in style) {
+            paragraph.style[property] = style[property];
+        }
+        if (select) {
+            setCursorStart(paragraph);
+        }
+        if (replace) {
+            this._protect(() => element.remove());
+        }
+        if (isStep) {
+            this.historyStep();
+        }
+        return paragraph;
+    }
+
+    /**
+     * Mark element as an "Uneditable Selection".
+     *
+     * @param {Element} element
+     */
+    _setUneditableSelection(element) {
+        this._removeUneditableSelection();
+        this._lockedUneditableSelection = true;
+        const sel = this.document.getSelection();
+        sel.removeAllRanges();
+        /**
+         * Unlock the uneditable selection only after the selection removal
+         * has been handled, at the start of the next event cycle.
+         */
+        setTimeout(() => {
+            this._lockedUneditableSelection = false;
+        });
+        this._uneditableSelection = element;
+    }
+
+    _removeUneditableSelection() {
+        this._uneditableSelection = null;
+    }
+
+    /**
+     * Called on 'selectionchange' events. It will remove the uneditable
+     * selection unless it is locked or if there is no current "normal"
+     * selection.
+     */
+    _handleUneditableSelection() {
+        const sel = this.document.getSelection();
+        if (!this._lockedUneditableSelection && this._uneditableSelection && sel.anchorNode) {
+            if (this._uneditableSelection.classList.contains('oe-uneditable-selected')) {
+                this._uneditableSelection.classList.remove('oe-uneditable-selected');
+                // Removing the uneditableSelection should always be a step
+                this.historyStep();
+            } else {
+                /**
+                 * Failsafe if for some reason the uneditableSelection has lost
+                 * its class.
+                 */
+                this._removeUneditableSelection();
+            }
+        }
+    }
+
+    /**
+     * @param {Node} sibling (future) sibling of the navigationNode
+     * @param {integer} direction 0 <=> DOWN, 1 <=> UP
+     */
+    _setNavigationNode(sibling, direction) {
+        const paragraph = createPBR();
+        sibling[direction ? 'before': 'after'](paragraph);
+        this._removeNavigationNode();
+        setCursorStart(paragraph);
+        this.historyStep();
+        this._navigationNode = paragraph;
+        this._navigationNodeObserver.observe(this._navigationNode, {
+            attributes: false, childList: true, subtree: true
+        });
+    }
+
+    _removeNavigationNode() {
+        this._navigationNodeObserver.disconnect();
+        if (this._navigationNode) {
+            this._navigationNode.remove();
+            this.historyStep();
+        }
+        this._navigationNode = null;
+    }
+
+    /**
+     * The navigationNode is removed from the dom when the selection changes
+     * unless it is still the powerbox element.
+     */
+    _handleNavigationNode() {
+        const block = this.options.getPowerboxElement();
+        if (this._navigationNode !== block) {
+            this._removeNavigationNode();
+        }
+    }
+
     _makeHint(block, text, temporary = false) {
         const content = block && block.innerHTML.trim();
         if (

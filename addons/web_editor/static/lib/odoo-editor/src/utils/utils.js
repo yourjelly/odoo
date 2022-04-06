@@ -231,6 +231,24 @@ export function findNode(domPath, findCallback = () => true, stopCallback = () =
  */
 
 /**
+ * Return the first sibling in @see direction which contains an element with
+ * isContentEditable=true
+ *
+ * @param {Node} node 
+ * @param {integer} direction 0 <=> NEXT, 1 <=> PREVIOUS
+ * @returns {Node} the sibling with a contenteditable="true"
+ */
+export function getSiblingWithContentEditable(node, direction) {
+    let sibling = node;
+    do {
+        sibling = (direction) ? sibling.previousElementSibling : sibling.nextElementSibling;
+        if (sibling && (sibling.isContentEditable || sibling.querySelector('[contenteditable="true"]'))) {
+            return sibling;
+        }
+    } while (sibling);
+    return null;
+}
+/**
  * Returns the closest HTMLElement of the provided Node
  * if a 'selector' is provided, Returns the closest HTMLElement that match the selector
  *
@@ -276,6 +294,62 @@ export function descendants(node) {
 
 export function closestBlock(node) {
     return findNode(closestPath(node), node => isBlock(node));
+}
+/**
+ * Return the furthest uneditable parent of node contained within parentLimit.
+ * @see deleteRange Used to guarantee that uneditables are fully contained in
+ * the range (so that it is not possible to partially remove them)
+ *
+ * @param {Node} node
+ * @param {Node} parentLimit non-inclusive furthest parent allowed
+ * @returns {Node|null} uneditable parent if it exists
+ */
+export function getFurthestUneditableParent(node, parentLimit) {
+    if (node === parentLimit || !parentLimit.contains(node)) {
+        return null;
+    }
+    let parent = node && node.parentElement;
+    let nonEditableElement = null;
+    while (parent && parent !== parentLimit) {
+        if (!parent.isContentEditable) {
+            nonEditableElement = parent;
+        }
+        parent = parent.parentElement;
+    }
+    return nonEditableElement;
+}
+/**
+ * Return the first editable block element starting from node which has an
+ * uneditable parent. Search limited by root. Search stops when a parent is not
+ * editable. The node itself can be an editableContextParent.
+ *
+ * @param {Node} node current node
+ * @param {Element} root uppermost element that contains node, to limit the
+ *                       search (typically the editable)
+ * @returns {Element|null}
+ */
+export function getEditableContextParent(node, root) {
+    if (!root.contains(node) || (node === root && !root.isContentEditable)) {
+        return null;
+    }
+    if (!node.isContentEditable) {
+        node = node.parentElement;
+    }
+    while (root.contains(node) && node.isContentEditable) {
+        if (root === node) {
+            return root;
+        }
+        let parent = node.parentElement;
+        if (!parent.isContentEditable) {
+            if (isBlock(node)) {
+                return node;
+            } else {
+                return null;
+            }
+        }
+        node = parent;
+    }
+    return null;
 }
 /**
  * Returns the deepest child in last position.
@@ -461,6 +535,24 @@ export function getNormalizedCursorPosition(node, offset, full = true) {
     }
 
     return [node, offset];
+}
+/**
+ * Guarantee that the focus is on element or one of its children.
+ *
+ * A simple call to element.focus will change the editable context
+ * if one of the parents of the current activeElement is not editable,
+ * and the caret position will not be preserved, even if activeElement is
+ * one of the subchildren of element. This is why the (re)focus is
+ * only called when the current activeElement is not one of the
+ * (sub)children of element.
+ *
+ * @param {Element} element should have the focus or a child with the focus
+ */
+ export function keepFocus(element) {
+    const activeElement = element.ownerDocument.activeElement;
+    if (activeElement !== element && (!element.contains(activeElement) || !activeElement.isContentEditable)) {
+        element.focus();
+    }
 }
 /**
  * @param {Node} anchorNode
@@ -760,6 +852,70 @@ export function preserveCursor(document) {
 //------------------------------------------------------------------------------
 
 /**
+ * The following set is the intersection of the deprecated list of "inline"
+ * elements, the "flow content category", and the rule that they can contain
+ * text nodes.
+ * Those nodes don't need a @see OdooEditor._navigationNode when navigating
+ * using ArrowUp and ArrowDown.
+ *
+ * Sources:
+ * - inline elements:
+ *   https://developer.mozilla.org/en-US/docs/Web/HTML/Inline_elements
+ * - flow content:
+ *   https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Content_categories#flow_content
+ */
+export const inlineTextTagNames = new Set([
+    /**
+     * Intersection of "inline" and "flow content" elements that can contain
+     * text nodes.
+     */
+    'A',
+    'ABBR',
+    'B',
+    'BDI',
+    'BDO',
+    'BUTTON',
+    'CITE',
+    'CODE',
+    'DATA',
+    'DEL',
+    'DFN',
+    'EM',
+    'I',
+    'INPUT',
+    'INS',
+    'KBD',
+    'LABEL',
+    'MARK',
+    'METER',
+    'OUTPUT',
+    'Q',
+    'RUBY',
+    'S',
+    'SAMP',
+    'SMALL',
+    'SPAN',
+    'STRONG',
+    'SUB',
+    'SUP',
+    'TIME',
+    'U',
+    'VAR',
+]);
+/**
+ * Basic "text" containers of the editor. Those nodes don't need a
+ * @see OdooEditor._navigationNode when navigating using ArrowUp and ArrowDown.
+ */
+export const baseTextBlockTagNames = new Set([
+    'H1',
+    'H2',
+    'H3',
+    'H4',
+    'H5',
+    'H6',
+    'P',
+]);
+/**
  * The following is a complete list of all HTML "block-level" elements.
  *
  * Source:
@@ -962,13 +1118,8 @@ export function isUnremovable(node) {
     if (node.nodeType !== Node.ELEMENT_NODE && node.nodeType !== Node.TEXT_NODE) {
         return true;
     }
-    const isEditableRoot =
-        node.isContentEditable &&
-        node.parentElement &&
-        !node.parentElement.isContentEditable &&
-        node.nodeName !== 'A'; // links can be their own contenteditable but should be removable by default.
     return (
-        isEditableRoot ||
+        node.oid === 'root' ||
         (node.nodeType === Node.ELEMENT_NODE &&
             (node.getAttribute('t-set') || node.getAttribute('t-call'))) ||
         (node.classList && node.classList.contains('oe_unremovable'))
@@ -1105,7 +1256,7 @@ export function getOuid(node, optimize = false) {
  */
 const selfClosingElementTags = ['BR', 'IMG', 'INPUT'];
 export function isVisibleEmpty(node) {
-    return selfClosingElementTags.includes(node.nodeName);
+    return selfClosingElementTags.includes(node.nodeName) || (isMediaElement(node) && !node.childNodes.length);
 }
 /**
  * Returns true if the given node is in a PRE context for whitespace handling.
@@ -1257,6 +1408,13 @@ export function createList(mode) {
     return node;
 }
 
+export function createPBR() {
+    const node = document.createElement('P');
+    const br = document.createElement('BR');
+    node.append(br);
+    return node;
+}
+
 export function insertListAfter(afterNode, mode, content = []) {
     const list = createList(mode);
     afterNode.after(list);
@@ -1287,6 +1445,29 @@ export function toggleClass(node, className) {
  */
 export function isFakeLineBreak(brEl) {
     return !(getState(...rightPos(brEl), DIRECTIONS.RIGHT).cType & (CTGROUPS.INLINE | CTGROUPS.BR));
+}
+/**
+ * Return whether the provided node is a BR element and is the last child of
+ * its parent.
+ *
+ * @param {Node} node
+ * @returns {boolean}
+ */
+export function isLastBR(node) {
+    return (node && node.nodeType === Node.ELEMENT_NODE && node.tagName === 'BR' && !node.nextSibling);
+}
+/**
+ * Returns the next BR element in the provided direction
+ *
+ * @param {Node} node
+ * @param {integer} direction 0 <=> NEXT, 1 <=> PREVIOUS
+ * @returns {boolean}
+ */
+export function getBrSibling(node, direction) {
+    do {
+        node = (direction) ? node.previousElementSibling : node.nextElementSibling;
+    } while (node && node.tagName !== 'BR');
+    return node;
 }
 /**
  * Checks whether or not the given block has any visible content, except for

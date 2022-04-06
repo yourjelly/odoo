@@ -1,14 +1,17 @@
 import { applyInlineStyle } from '../../src/commands/commands.js';
 import { OdooEditor } from '../../src/OdooEditor.js';
-import { getTraversedNodes } from '../../src/utils/utils.js';
+import { getTraversedNodes, keepFocus, setCursorStart } from '../../src/utils/utils.js';
 import {
     BasicEditor,
+    click,
     deleteBackward,
     deleteForward,
     insertLineBreak,
     insertParagraphBreak,
     insertText,
     keydown,
+    keyup,
+    nextTickFrame,
     redo,
     testEditor,
     undo,
@@ -21,6 +24,86 @@ async function twoDeleteForward(editor) {
 }
 
 describe('Editor', () => {
+    describe('click', () => {
+        it('should append an empty <p><br></p> when clicking this.editable below an uneditable element.', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: unformat(`
+                    <p><br></p>
+                    <div contenteditable="false">
+                        <p>uneditable</p>
+                    </div>`),
+                stepFunction: async editor => {
+                    const pos = editor.editable.getBoundingClientRect();
+                    const clientY = pos.top + pos.height + 1;
+                    await click(editor.editable, {
+                        clientY: clientY,
+                    });
+                },
+                contentAfter: unformat(`
+                    <p><br></p>
+                    <div contenteditable="false">
+                        <p>uneditable</p>
+                    </div>
+                    <p>[]<br></p>`),
+            });
+        });
+        it('should not append an empty <p><br></p> when clicking this.editable below an uneditable element if the last element is already a <p>', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: unformat(`
+                    <div contenteditable="false">
+                        <p>uneditable</p>
+                    </div>
+                    <p><br></p>`),
+                stepFunction: async editor => {
+                    const pos = editor.editable.getBoundingClientRect();
+                    const clientY = pos.top + pos.height + 1;
+                    await click(editor.editable, {
+                        clientY: clientY,
+                    });
+                },
+                contentAfter: unformat(`
+                    <div contenteditable="false">
+                        <p>uneditable</p>
+                    </div>
+                    <p><br></p>`),
+            });
+        });
+        it('should not append an empty <p><br></p> when clicking above/on an uneditable', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: unformat(`
+                    <p><br></p>
+                    <div contenteditable="false">
+                        <p>uneditable</p>
+                    </div>`),
+                stepFunction: async editor => {
+                    await click(editor.editable);
+                },
+                contentAfter: unformat(`
+                    <p><br></p>
+                    <div contenteditable="false">
+                        <p>uneditable</p>
+                    </div>`),
+            });
+        });
+        it('should append an empty <p><br></p> when clicking on an editableContextParent if it has no child', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: unformat(`
+                    <p><br></p>
+                    <div contenteditable="false"><div id="target" contenteditable="true">
+                    </div></div>`),
+                stepFunction: async editor => {
+                    const element = editor.editable.querySelector('#target');
+                    await click(element);
+                },
+                contentAfter: unformat(`
+                    <p><br></p>
+                    <div contenteditable="false"><div id="target" contenteditable="true">
+                        <p>[]<br></p>
+                    </div></div>`),
+            });
+        });
+    });
+
     describe('deleteForward', () => {
         describe('Selection collapsed', () => {
             describe('Basic', () => {
@@ -794,13 +877,13 @@ X[]
                             </tbody></table>
                             <p>kl</p>`,
                         ),
-                        stepFunction: deleteForward,
+                        stepFunction: async editor => {
+                            await deleteForward(editor);
+                            await keydown(editor.editable, 'Delete');
+                        },
                         contentAfter: unformat(
                             `<p>ab</p>
-                            <table><tbody>
-                                <tr><td>cd</td><td>ef</td></tr>
-                                <tr><td>gh</td><td>ij[]</td></tr>
-                            </tbody></table>
+                                <p>[]<br></p>
                             <p>kl</p>`,
                         ),
                     });
@@ -1298,6 +1381,147 @@ X[]
                             await deleteBackward(editor);
                         },
                         contentAfter: `<div>[]def</div>`,
+                    });
+                });
+                it('should remove contenteditable="false" (replace by <p>) at the begining of a P', async () => {
+                    await testEditor(BasicEditor, {
+                        contentBefore: `<p>abc</p><div contenteditable="false">def</div><p>[]ghi</p>`,
+                        stepFunction: async editor => {
+                            // Select uneditable block
+                            await deleteBackward(editor);
+                            // Confirm suppression
+                            await keydown(editor.editable, 'Backspace');
+                        },
+                        contentAfter: `<p>abc</p><p>[]<br></p><p>ghi</p>`,
+                    });
+                });
+                it('should remove a fontawesome', async () => {
+                    await testEditor(BasicEditor, {
+                        contentBefore: `<p>abc</p><span class="fa"></span><p>[]def</p>`,
+                        stepFunction: async editor => {
+                            await deleteBackward(editor);
+                        },
+                        contentAfter: `<p>abc</p><p>[]def</p>`,
+                    });
+                });
+                it('should remove a media element (replace by <p>)', async () => {
+                    await testEditor(BasicEditor, {
+                        contentBefore: `<p>abc</p><div class="o_image"></div><p>[]def</p>`,
+                        stepFunction: async editor => {
+                            /**
+                             * Select uneditable block (o_image is sanitized and
+                             * its contenteditable is set to false)
+                             */
+                            await deleteBackward(editor);
+                            // Confirm suppression
+                            await keydown(editor.editable, 'Backspace');
+                        },
+                        contentAfter: `<p>abc</p><p>[]<br></p><p>def</p>`,
+                    });
+                });
+                it('should highlight a contenteditable="false" and remove the current selected block if it is empty, and clean the selection class on save', async () => {
+                    await testEditor(BasicEditor, {
+                        contentBefore: `<p>abc</p><div contenteditable="false"></div><p>[]<br></p>`,
+                        stepFunction: async editor => {
+                            await deleteBackward(editor);
+                        },
+                        contentAfterEdit: `<p>abc</p><div contenteditable="false" data-oe-keep-contenteditable="" class="oe-uneditable-selected"></div>`,
+                        contentAfter: `<p>abc</p><div contenteditable="false"></div>`
+                    });
+                });
+                it('should remove the uneditable selection when the selection changes', async () => {
+                    await testEditor(BasicEditor, {
+                        contentBefore: `<p id="target">abc</p><div contenteditable="false"></div><p>[]def</p>`,
+                        stepFunction: async editor => {
+                            await deleteBackward(editor);
+                            const element = editor.editable.querySelector('#target');
+                            // Wait for the attribute mutation to take effect
+                            await nextTickFrame();
+                            setCursorStart(element);
+                            await nextTickFrame();
+                        },
+                        contentAfterEdit: `<p id="target">[]abc</p><div contenteditable="false" data-oe-keep-contenteditable="" class=""></div><p>def</p>`,
+                    });
+                });
+                it('should preserve the uneditable selection when using an arrow key but the selection did not change', async () => {
+                    await testEditor(BasicEditor, {
+                        contentBefore: `<p>abc</p><div contenteditable="false"></div><p>[]<br></p>`,
+                        stepFunction: async editor => {
+                            await deleteBackward(editor);
+                            await keydown(editor.editable, 'ArrowRight');
+                        },
+                        contentAfterEdit: `<p>abc</p><div contenteditable="false" data-oe-keep-contenteditable="" class="oe-uneditable-selected"></div>`,
+                    });
+                });
+                it('should delete the uneditable selection with delete', async () => {
+                    await testEditor(BasicEditor, {
+                        contentBefore: `<p>abc</p><div contenteditable="false">def</div><p>[]ghi</p>`,
+                        stepFunction: async editor => {
+                            // Select uneditable block
+                            await deleteBackward(editor);
+                            // Confirm suppression
+                            await keydown(editor.editable, 'Delete');
+                        },
+                        contentAfter: `<p>abc</p><p>[]<br></p><p>ghi</p>`,
+                    });
+                });
+                it('should delete the uneditable selection when a printable character is written over it', async () => {
+                    await testEditor(BasicEditor, {
+                        contentBefore: `<p>abc</p><div contenteditable="false">def</div><p>[]ghi</p>`,
+                        stepFunction: async editor => {
+                            await deleteBackward(editor);
+                            // Write over the uneditable selection
+                            await keydown(editor.editable, 'a');
+                            await insertText(editor, 'a');
+                        },
+                        contentAfter: `<p>abc</p><p>a[]</p><p>ghi</p>`,
+                    });
+                });
+                it('should undo an uneditable selection', async () => {
+                    await testEditor(BasicEditor, {
+                        contentBefore: `<p>abc</p><div contenteditable="false">def</div><p>[]ghi</p>`,
+                        stepFunction: async editor => {
+                            await deleteBackward(editor);
+                            undo(editor);
+                        },
+                        contentAfterEdit: `<p>abc</p><div contenteditable="false" data-oe-keep-contenteditable="">def</div><p>[]ghi</p>`,
+                    });
+                });
+                it('should redo an undone uneditable selection', async () => {
+                    await testEditor(BasicEditor, {
+                        contentBefore: `<p>abc</p><div contenteditable="false">def</div><p>[]ghi</p>`,
+                        stepFunction: async editor => {
+                            await deleteBackward(editor);
+                            undo(editor);
+                            redo(editor);
+                            await nextTickFrame();
+                        },
+                        contentAfterEdit: `<p>abc</p><div contenteditable="false" data-oe-keep-contenteditable="" class="oe-uneditable-selected">def</div><p>ghi</p>`,
+                    });
+                });
+                it('should undo a removed uneditable selection', async () => {
+                    await testEditor(BasicEditor, {
+                        contentBefore: `<p>abc</p><div contenteditable="false">def</div><p>[]ghi</p>`,
+                        stepFunction: async editor => {
+                            await deleteBackward(editor);
+                            await keydown(editor.editable, 'Delete');
+                            undo(editor);
+                            await nextTickFrame();
+                        },
+                        contentAfterEdit: `<p>abc</p><div contenteditable="false" data-oe-keep-contenteditable="" class="oe-uneditable-selected">def</div><p>ghi</p>`,
+                    });
+                });
+                it('should redo an undone removal of an uneditable selection', async () => {
+                    await testEditor(BasicEditor, {
+                        contentBefore: `<p>abc</p><div contenteditable="false">def</div><p>[]ghi</p>`,
+                        stepFunction: async editor => {
+                            await deleteBackward(editor);
+                            await keydown(editor.editable, 'Delete');
+                            undo(editor);
+                            redo(editor);
+                            await nextTickFrame();
+                        },
+                        contentAfter: `<p>abc</p><p>[]<br></p><p>ghi</p>`,
                     });
                 });
             });
@@ -1970,14 +2194,14 @@ X[]
                             </tbody></table>
                             <p>[]kl</p>`,
                         ),
-                        stepFunction: deleteBackward,
+                        stepFunction: async editor => {
+                            await deleteBackward(editor);
+                            await keydown(editor.editable, 'Backspace');
+                        },
                         contentAfter: unformat(
                             `<p>ab</p>
-                            <table><tbody>
-                                <tr><td>cd</td><td>ef</td></tr>
-                                <tr><td>gh</td><td>ij</td></tr>
-                            </tbody></table>
-                            <p>[]kl</p>`,
+                            <p>[]<br></p>
+                            <p>kl</p>`,
                         ),
                     });
                 });
@@ -2242,6 +2466,212 @@ X[]
                     stepFunction: deleteBackward,
                     contentAfter: '<p>ab<b class="oe_unremovable">[]\u200B</b>ef</p>',
                 });
+            });
+        });
+    });
+
+    describe('deleteRange', () => {
+        it('should extend the range to fully include contenteditable=false that are partially selected at the end of the range', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: unformat(`
+                    <p>before[o</p>
+                    <div contenteditable="false">
+                        <div contenteditable="true"><p>intruder]</p></div>
+                    </div>
+                    <p>after</p>`),
+                stepFunction: async editor => {
+                    await deleteBackward(editor);
+                },
+                contentAfter: unformat(`
+                    <p>before[]</p><p>after</p>`),
+            });
+        });
+        it('should extend the range to fully include contenteditable=false that are partially selected at the start of the range', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: unformat(`
+                    <p>before</p>
+                    <div contenteditable="false">
+                        <div contenteditable="true"><p>[intruder</p></div>
+                    </div>
+                    <p>o]after</p>`),
+                stepFunction: async editor => {
+                    await deleteBackward(editor);
+                },
+                contentAfter: unformat(`
+                    <p>before[]after</p>`),
+            });
+        });
+    });
+
+    describe('CTRL+Backspace', () => {
+        it('should not remove the last p with ctrl+backspace', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: unformat(`<p>[]<br></p>`),
+                stepFunction: async editor => {
+                    editor.editable.addEventListener('keydown', ev => {
+                        // simulation of the browser default behavior
+                        if (ev.key === 'Backspace' && ev.ctrlKey === true && !ev.defaultPrevented) {
+                            const sel = document.getSelection();
+                            sel.anchorNode.remove();
+                        }
+                    });
+                    await keydown(editor.editable, 'Backspace', { ctrlKey: true, cancelable: true });
+                },
+                contentAfter: unformat(`<p>[]<br></p>`),
+            });
+        });
+        it('should not remove the last p enclosed in a contenteditable=false with ctrl+backspace', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: unformat(`
+                    <p>text</p>
+                    <div contenteditable="false"><div contenteditable="true">
+                        <p>[]<br></p>
+                    </div></div>`),
+                stepFunction: async editor => {
+                    editor.editable.addEventListener('keydown', ev => {
+                        // simulation of the browser default behavior
+                        if (ev.key === 'Backspace' && ev.ctrlKey === true && !ev.defaultPrevented) {
+                            const sel = document.getSelection();
+                            sel.anchorNode.remove();
+                        }
+                    });
+                    await keydown(editor.editable, 'Backspace', { ctrlKey: true, cancelable: true });
+                },
+                contentAfter: unformat(`
+                    <p>text</p>
+                    <div contenteditable="false"><div contenteditable="true">
+                        <p>[]<br></p>
+                    </div></div>`),
+            });
+        });
+        it('should add a <p><br></p> element when deleting the last child of the editable with ctrl+backspace', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: unformat(`
+                    <blockquote>
+                        []<br>
+                    </blockquote>`),
+                stepFunction: async editor => {
+                    editor.editable.addEventListener('keydown', ev => {
+                        // simulation of the browser default behavior
+                        if (ev.key === 'Backspace' && ev.ctrlKey === true) {
+                            const sel = document.getSelection();
+                            sel.anchorNode.remove();
+                        }
+                    });
+                    await keydown(editor.editable, 'Backspace', { ctrlKey: true });
+                },
+                contentAfter: unformat(`<p>[]<br></p>`),
+            });
+        });
+        it('should add a <p><br></p> element when deleting the last child of an element with ctrl+backspace', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: unformat(`
+                    <div contenteditable="false"><div contenteditable="true">
+                        <blockquote>
+                            []<br>
+                        </blockquote>
+                    </div></div>`),
+                stepFunction: async editor => {
+                    editor.editable.addEventListener('keydown', ev => {
+                        // simulation of the browser default behavior
+                        if (ev.key === 'Backspace' && ev.ctrlKey === true) {
+                            const sel = document.getSelection();
+                            sel.anchorNode.remove();
+                        }
+                    });
+                    await keydown(editor.editable, 'Backspace', { ctrlKey: true });
+                },
+                contentAfter: unformat(`
+                    <div contenteditable="false"><div contenteditable="true">
+                        <p>[]<br></p>
+                    </div></div>`),
+            });
+        });
+    });
+
+    describe('keepFocus', () => {
+        it('should preserve the focus on the child of this.editable when executing a powerbox command even if it is enclosed in a contenteditable=false', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: unformat(`
+                    <div contenteditable="false"><div contenteditable="true">
+                        <p>[]<br></p>
+                    </div></div>
+                    <p><br></p>`),
+                stepFunction: async editor => {
+                    const sel = document.getSelection();
+                    const element = sel.anchorNode;
+                    await keydown(editor.editable, '/');
+                    await insertText(editor, '/');
+                    await keyup(editor.editable, '/');
+                    await insertText(editor, 'h2');
+                    await keyup(element, '2', { bubbles: true });
+                    await keydown(editor.editable, 'Enter');
+                    const activeElement = document.activeElement;
+                    setCursorStart(activeElement.lastElementChild);
+                    await nextTickFrame();
+                },
+                contentAfter: unformat(`
+                    <div contenteditable="false"><div contenteditable="true">
+                        <h2>[]<br></h2>
+                    </div></div>
+                    <p><br></p>`),
+            });
+        });
+        it('should preserve the focus on the child of this.editable even if it is enclosed in a contenteditable=false', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: unformat(`
+                    <div contenteditable="false"><div contenteditable="true">
+                        <p>[]<br></p>
+                    </div></div>
+                    <p><br></p>`),
+                stepFunction: async editor => {
+                    keepFocus(editor.editable);
+                    await nextTickFrame();
+                    let activeElement = document.activeElement;
+                    setCursorStart(activeElement.lastElementChild);
+                    await insertText(editor, 'focusWasConserved');
+                    /**
+                     * Proof that a simple call to Element.focus would change
+                     * the focus in this case.
+                     */
+                    editor.editable.focus();
+                    await nextTickFrame();
+                    activeElement = document.activeElement;
+                    setCursorStart(activeElement.lastElementChild);
+                    await nextTickFrame();
+                },
+                contentAfter: unformat(`
+                    <div contenteditable="false"><div contenteditable="true">
+                        <p>focusWasConserved</p>
+                    </div></div>
+                    <p>[]<br></p>`),
+            });
+        });
+        it('should update the focus when the active element is not the focus target', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: unformat(`
+                    <div contenteditable="false"><div contenteditable="true">
+                        <p>[]<br></p>
+                    </div></div>
+                    <div contenteditable="false"><div id="target" contenteditable="true">
+                        <p><br></p>
+                    </div></div>`),
+                stepFunction: async editor => {
+                    const sel = document.getSelection();
+                    const element = editor.editable.querySelector('#target');
+                    keepFocus(element);
+                    await nextTickFrame();
+                    const activeElement = document.activeElement;
+                    setCursorStart(activeElement.lastElementChild);
+                    await nextTickFrame();
+                },
+                contentAfter: unformat(`
+                    <div contenteditable="false"><div contenteditable="true">
+                        <p><br></p>
+                    </div></div>
+                    <div contenteditable="false"><div id="target" contenteditable="true">
+                        <p>[]<br></p>
+                    </div></div>`),
             });
         });
     });
@@ -3241,7 +3671,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: '[ab]<span>\u200B</span>cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowRight', true);
+                        await keydown(editor.editable, 'ArrowRight', { shiftKey: true });
                     },
                     contentAfter: '[ab<span>\u200B]</span>cd',
                     // Final state: '[ab<span>\u200B</span>c]d'
@@ -3249,7 +3679,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: '[ab<span>]\u200B</span>cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowRight', true);
+                        await keydown(editor.editable, 'ArrowRight', { shiftKey: true });
                     },
                     contentAfter: '[ab<span>\u200B]</span>cd',
                     // Final state: '[ab<span>\u200B</span>c]d'
@@ -3259,7 +3689,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'a[b]<span>\u200B</span>cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowRight', true);
+                        await keydown(editor.editable, 'ArrowRight', { shiftKey: true });
                     },
                     contentAfter: 'a[b<span>\u200B]</span>cd',
                     // Final state: 'a[b<span>\u200B</span>c]d'
@@ -3267,7 +3697,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'a[b<span>]\u200B</span>cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowRight', true);
+                        await keydown(editor.editable, 'ArrowRight', { shiftKey: true });
                     },
                     contentAfter: 'a[b<span>\u200B]</span>cd',
                     // Final state: 'a[b<span>\u200B</span>c]d'
@@ -3277,7 +3707,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab[]<span>\u200B</span>cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowRight', true);
+                        await keydown(editor.editable, 'ArrowRight', { shiftKey: true });
                     },
                     contentAfter: 'ab[<span>\u200B]</span>cd',
                     // Final state: 'ab[<span>\u200B</span>c]d'
@@ -3285,7 +3715,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab<span>[]\u200B</span>cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowRight', true);
+                        await keydown(editor.editable, 'ArrowRight', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>[\u200B]</span>cd',
                     // Final state: 'ab<span>[\u200B</span>c]d'
@@ -3295,7 +3725,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab<span>]\u200B[</span>cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowRight', true);
+                        await keydown(editor.editable, 'ArrowRight', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>\u200B[]</span>cd',
                     // Final state: 'ab<span>\u200B</span>[c]d'
@@ -3303,7 +3733,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab<span>]\u200B</span>[cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowRight', true);
+                        await keydown(editor.editable, 'ArrowRight', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>\u200B[]</span>cd',
                     // Final state: 'ab<span>\u200B</span>[c]d'
@@ -3311,7 +3741,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab]<span>\u200B</span>[cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowRight', true);
+                        await keydown(editor.editable, 'ArrowRight', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>\u200B[]</span>cd',
                     // Final state: 'ab<span>\u200B</span>[c]d'
@@ -3319,7 +3749,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab]<span>\u200B[</span>cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowRight', true);
+                        await keydown(editor.editable, 'ArrowRight', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>\u200B[]</span>cd',
                     // Final state: 'ab<span>\u200B</span>[c]d'
@@ -3329,7 +3759,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab<span>]\u200B</span>c[d',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowRight', true);
+                        await keydown(editor.editable, 'ArrowRight', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>\u200B]</span>c[d',
                     // Final state: 'ab<span>\u200B</span>c[]d'
@@ -3337,7 +3767,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab]<span>\u200B</span>c[d',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowRight', true);
+                        await keydown(editor.editable, 'ArrowRight', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>\u200B]</span>c[d',
                     // Final state: 'ab<span>\u200B</span>c[]d'
@@ -3367,7 +3797,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab<span>\u200B[]</span>cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowLeft', true);
+                        await keydown(editor.editable, 'ArrowLeft', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>]\u200B[</span>cd',
                     // Final state: 'a]b<span>\u200B[</span>cd'
@@ -3375,7 +3805,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab<span>\u200B</span>[]cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowLeft', true);
+                        await keydown(editor.editable, 'ArrowLeft', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>]\u200B[</span>cd',
                     // Final state: 'a]b<span>\u200B[</span>cd'
@@ -3385,7 +3815,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab<span>\u200B</span>]cd[',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowLeft', true);
+                        await keydown(editor.editable, 'ArrowLeft', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>]\u200B</span>cd[',
                     // Final state: 'a]b<span>\u200B</span>cd['
@@ -3393,7 +3823,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab<span>\u200B]</span>cd[',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowLeft', true);
+                        await keydown(editor.editable, 'ArrowLeft', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>]\u200B</span>cd[',
                     // Final state: 'a]b<span>\u200B</span>cd['
@@ -3403,7 +3833,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab<span>\u200B</span>]c[d',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowLeft', true);
+                        await keydown(editor.editable, 'ArrowLeft', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>]\u200B</span>c[d',
                     // Final state: 'a]b<span>\u200B</span>c[d'
@@ -3411,7 +3841,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab<span>\u200B]</span>c[d',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowLeft', true);
+                        await keydown(editor.editable, 'ArrowLeft', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>]\u200B</span>c[d',
                     // Final state: 'a]b<span>\u200B</span>c[d'
@@ -3421,7 +3851,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab<span>[\u200B]</span>cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowLeft', true);
+                        await keydown(editor.editable, 'ArrowLeft', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>[]\u200B</span>cd',
                     // Final state: 'a]b<span>[\u200B</span>cd'
@@ -3429,7 +3859,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab<span>[\u200B</span>]cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowLeft', true);
+                        await keydown(editor.editable, 'ArrowLeft', { shiftKey: true });
                     },
                     contentAfter: 'ab<span>[]\u200B</span>cd',
                     // Final state: 'a]b<span>[\u200B</span>cd'
@@ -3437,7 +3867,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab[<span>\u200B]</span>cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowLeft', true);
+                        await keydown(editor.editable, 'ArrowLeft', { shiftKey: true });
                     },
                     contentAfter: 'ab[<span>]\u200B</span>cd',
                     // Final state: 'a]b[<span>\u200B</span>cd'
@@ -3445,7 +3875,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'ab[<span>\u200B</span>]cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowLeft', true);
+                        await keydown(editor.editable, 'ArrowLeft', { shiftKey: true });
                     },
                     contentAfter: 'ab[<span>]\u200B</span>cd',
                     // Final state: 'a]b[<span>\u200B</span>cd'
@@ -3455,7 +3885,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'a[b<span>\u200B]</span>cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowLeft', true);
+                        await keydown(editor.editable, 'ArrowLeft', { shiftKey: true });
                     },
                     contentAfter: 'a[b<span>]\u200B</span>cd',
                     // Final state: 'a[]b<span>\u200B</span>cd'
@@ -3463,7 +3893,7 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: 'a[b<span>\u200B</span>]cd',
                     stepFunction: async editor => {
-                        await keydown(editor.editable, 'ArrowLeft', true);
+                        await keydown(editor.editable, 'ArrowLeft', { shiftKey: true });
                     },
                     contentAfter: 'a[b<span>]\u200B</span>cd',
                     // Final state: 'a[]b<span>\u200B</span>cd'

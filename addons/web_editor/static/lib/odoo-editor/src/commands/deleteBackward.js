@@ -9,12 +9,15 @@ import {
     endPos,
     fillEmpty,
     getState,
+    inlineTextTagNames,
     isBlock,
+    isEmptyBlock,
     isInPre,
     isUnremovable,
     isVisible,
     isVisibleStr,
     leftPos,
+    rightPos,
     moveNodes,
     nodeSize,
     prepareUpdate,
@@ -22,8 +25,10 @@ import {
     splitTextNode,
     isMediaElement,
     isVisibleEmpty,
+    isNotEditableNode,
+    createDOMPathGenerator,
 } from '../utils/utils.js';
-
+//
 Text.prototype.oDeleteBackward = function (offset, alreadyMoved = false) {
     const parentNode = this.parentNode;
 
@@ -65,6 +70,10 @@ Text.prototype.oDeleteBackward = function (offset, alreadyMoved = false) {
     setSelection(parentNode, firstSplitOffset);
 };
 
+const isDeletable = (node) => {
+    return isMediaElement(node) || isNotEditableNode(node);
+}
+
 HTMLElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false) {
     const contentIsZWS = this.textContent === '\u200B';
     let moveDest;
@@ -73,16 +82,24 @@ HTMLElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false) 
         if (isUnremovable(leftNode)) {
             throw UNREMOVABLE_ROLLBACK_CODE;
         }
-        if (
-            isMediaElement(leftNode) ||
-            (leftNode.getAttribute &&
-                typeof leftNode.getAttribute('contenteditable') === 'string' &&
-                leftNode.getAttribute('contenteditable').toLowerCase() === 'false')
-        ) {
-            leftNode.remove();
+        if ((isNotEditableNode(leftNode) && !inlineTextTagNames.has(leftNode.tagName)) || leftNode.tagName === 'TABLE') {
+            /**
+             * Create a special contentEditable=false selection for non inline
+             * elements
+             */
+            if (isEmptyBlock(this.childNodes[offset])) {
+                /**
+                 * Remove the current block element if it is empty. This allows
+                 * to remove an element between 2 contenteditable=false.
+                 */
+                this.childNodes[offset].remove();
+            }
+            leftNode.classList.add('oe-uneditable-selected');
             return;
         }
-        if (leftNode.getAttribute && leftNode.getAttribute('contenteditable') === 'false') {
+        if (
+            isDeletable(leftNode)
+        ) {
             leftNode.remove();
             return;
         }
@@ -144,6 +161,9 @@ HTMLElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false) 
             }
             parentEl.oDeleteBackward(parentOffset, alreadyMoved);
             return;
+        } else if (this.previousSibling && this.previousSibling.tagName === 'TABLE') {
+            parentEl.oDeleteBackward(childNodeIndex(this), alreadyMoved);
+            return;
         }
 
         /**
@@ -162,6 +182,16 @@ HTMLElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false) 
         moveDest = leftPos(this);
     }
 
+    const domPathGenerator = createDOMPathGenerator(DIRECTIONS.LEFT, {
+        leafOnly: true,
+        stopTraverseFunction: isDeletable,
+    });
+    const domPath = domPathGenerator(this, offset)
+    const leftNode = domPath.next().value;
+    if (leftNode && isDeletable(leftNode)) {
+        const [parent, offset] = rightPos(leftNode);
+        return parent.oDeleteBackward(offset, alreadyMoved);
+    }
     let node = this.childNodes[offset];
     let firstBlockIndex = offset;
     while (node && !isBlock(node)) {
