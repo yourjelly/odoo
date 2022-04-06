@@ -58,6 +58,7 @@
             'knowledge/static/src/js/knowledge_clipboard_whitelist.js'
         ],
         'web.assets_qweb': [
+            'knowledge/static/src/components/*/*.xml',
             'knowledge/static/src/xml/knowledge_editor.xml',
             'knowledge/static/src/xml/knowledge_templates.xml',
             'knowledge/static/src/xml/chatter_topbar.xml',

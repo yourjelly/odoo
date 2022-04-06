@@ -77,7 +77,12 @@
                     </button>
                     <div class="o_article_emoji_dropdown dropdown" t-att-data-article-id="article.id">
                         <a t-attf-class="o_article_emoji p-1 {{'o_article_emoji_active text-900' if isActive else ''}}" type="button"
-                            t-attf-id="o_article_emoji_dropdown_#{article.id}" data-toggle="dropdown" aria-expanded="true">
+                            t-attf-id="o_article_emoji_dropdown_#{article.id}" data-toggle="dropdown" aria-expanded="true"
+                            t-if="article.user_can_write and not article.is_locked">
+                            <t t-if="article.icon" t-out="article.icon"/>
+                            <t t-else="">📄</t>
+                        </a>
+                        <a t-else="" t-attf-class="p-1">
                             <t t-if="article.icon" t-out="article.icon"/>
                             <t t-else="">📄</t>
                         </a>

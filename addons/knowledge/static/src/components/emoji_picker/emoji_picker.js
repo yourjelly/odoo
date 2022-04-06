@@ -25,7 +25,7 @@ class EmojiPicker extends Component {
     }
 }
 
-EmojiPicker.template = 'mail.EmojiList';
+EmojiPicker.template = 'knowledge.EmojiList';
 EmojiPicker.props = ['onClickEmoji'];
 
 export default EmojiPicker;

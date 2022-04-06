@@ -249,8 +249,10 @@ const KnowledgeFormController = FormController.extend({
                 if (unicode) {
                     this.$el.find('.o_knowledge_add_icon').addClass('d-none');
                 }
-                this.$el.find('#o_article_emoji').text(unicode ? unicode : '');
-                if (addIcon) {  // refresh the form view to display the icon if there was no icon yet.
+                this.$el.find('.o_article_big_emoji').text(unicode ? unicode : '');
+                // TODO DBE: find a way to remove / add the icon manually without having to reload the view
+                // (as the changes are saved and the side bar is updated anyway)
+                if (addIcon || !unicode) {  // refresh the form view to display the icon if there was no icon yet or if icon is deleted.
                     this.trigger_up('field_changed', {
                         dataPointID: this.handle,
                         changes: {
