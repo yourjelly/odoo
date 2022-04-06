@@ -24,9 +24,19 @@ from odoo.tools import (config, existing_tables, ignore,
                         Collector, OrderedSet)
 from odoo.tools.func import locked
 from odoo.tools.lru import LRU
+from odoo.modules.shared_memory import SharedMemoryLRU
 
 _logger = logging.getLogger(__name__)
 _schema = logging.getLogger('odoo.schema')
+
+
+shared_memory = None
+
+def create_shared_memory():
+    global shared_memory
+    if shared_memory is None:
+        _logger.info("Create shared memory")
+        shared_memory = SharedMemoryLRU()
 
 
 class Registry(Mapping):
@@ -115,7 +125,7 @@ class Registry(Mapping):
         self._fields_by_model = None
         self._ordinary_tables = None
         self._constraint_queue = deque()
-        self.__cache = LRU(8192)
+        self.__cache = {}
 
         # modules fully loaded (maintained during init phase by `loading` module)
         self._init_modules = set()
