@@ -8,11 +8,19 @@ var QWeb = core.qweb;
 
 publicWidget.registry.KnowledgeWidget = publicWidget.Widget.extend({
     selector: '.o_knowledge_form_view',
-    xmlDependencies: ['/knowledge/static/src/xml/knowledge_templates.xml'],
     events: {
         'keyup #knowledge_search': '_searchArticles',
         'click .o_article_caret': '_onFold',
         'click .o_favorites_toggle_button': '_toggleFavourite',
+    },
+
+    /**
+     * @override
+     */
+     start: function () {
+        return this._super(...arguments).then(async () => {
+            this._setTreeFavoriteListener();
+        });
     },
 
     _searchArticles: function (e) {
@@ -66,29 +74,64 @@ publicWidget.registry.KnowledgeWidget = publicWidget.Widget.extend({
         }
     },
 
+    _setTreeFavoriteListener () {
+        const $sortable = this.$el.find('.o_tree_favourite');
+        $sortable.sortable({
+            axis: 'y',
+            items: 'li',
+            cursor: 'grabbing',
+            forcePlaceholderSize: true,
+            placeholder: 'o_placeholder',
+            /**
+             * @param {Event} event
+             * @param {Object} ui
+             */
+            stop: (event, ui) => {
+                const $li = $(ui.item);
+                const data = {
+                    article_id: $li.data('article-id'),
+                };
+                const $next = $li.next();
+                if ($next.length > 0) {
+                    data.sequence = $next.data('favourite-sequence') || 0;
+                }
+                $sortable.sortable('disable');
+                this._rpc({
+                    model: 'knowledge.article.favourite',
+                    method: 'set_sequence',
+                    args: [[]],
+                    kwargs: data,
+                }).then(() => {
+                    $sortable.sortable('enable');
+                }).catch(() => {
+                    $sortable.sortable('cancel');
+                    $sortable.sortable('enable');
+                });
+            },
+        });
+    },
+
     _toggleFavourite: async function (e) {
         const toggleWidget = $(e.currentTarget);
+        const id = toggleWidget.data('articleId');
         const article = await this._rpc({
             route: '/article/toggle_favourite',
             params: {
-                article_id: toggleWidget.data('articleId')
+                article_id: id,
             }
         });
         toggleWidget.find('i').toggleClass("fa-star", article.is_favourite).toggleClass("fa-star-o", !article.is_favourite);
         // Add/Remove the article to/from the favourite in the sidebar
-        const $favourites = $(this.target).find('.o_tree_favourite');
-        let hasFavourites = true;
-        if (article.is_favourite) {
-            $favourites.append($(QWeb.render("knowledge.knowledge_article_template_frontend", {"article": article})));
-        } else {
-            $favourites.find(`li[data-article-id="${article.id}"]`).remove();
-            hasFavourites = $favourites.find('li').length > 0;
-        }
-        // if (hasFavourites) {
-        $favourites.closest('section').toggleClass('d-none', !hasFavourites);
-        const hasDocuments = hasFavourites || $(this.target).find('.o_tree_workspace').find('li').length > 0;
-        $favourites.closest('.o_knowledge_aside').toggleClass('d-none', !hasDocuments).toggleClass('d-flex', hasDocuments);
-        //}
+        this._rpc({
+            route: '/knowledge/get_favourite_tree_frontend',
+            params: {
+                res_id: id,
+            }
+
+        }).then(favouriteTemplate => {
+            this.$(".o_favourite_container").replaceWith(favouriteTemplate);
+            this._setTreeFavoriteListener();
+        });
     }
 });
 });

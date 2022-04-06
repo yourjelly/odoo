@@ -3,9 +3,7 @@
 <data>
     <!-- Article Tree layout -->
     <template id="knowledge_article_tree_template" name="Article Tree">
-        <t t-call="knowledge.article_favourite_section_template">
-            <t t-set="articles" t-value="favourites.mapped('article_id')"/>
-        </t>
+        <t t-call="knowledge.article_favourite_section_template"/>
 
         <section class="o_section" data-section="workspace">
             <div class="o_section_header d-flex h4 mb-0">
