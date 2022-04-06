@@ -16,11 +16,18 @@ import sys
 import threading
 import time
 import unittest
-from itertools import chain
 
 import psutil
 import werkzeug.serving
 from werkzeug.debug import DebuggedApplication
+
+import odoo
+from odoo.modules import get_modules
+from odoo.modules.registry import Registry, create_shared_memory, unlink_shared_memory, release_lock_shared_memory, close_shared_memory
+from odoo.release import nt_service_name
+from odoo.tools import config
+from odoo.tools import stripped_sys_argv, dumpstacks, log_ormcache_stats
+from ..tests import loader
 
 if os.name == 'posix':
     # Unix only for workers
@@ -52,17 +59,10 @@ try:
 except ImportError:
     setproctitle = lambda x: None
 
-import odoo
-from odoo.modules import get_modules
-from odoo.modules.registry import Registry
-from odoo.release import nt_service_name
-from odoo.tools import config
-from odoo.tools import stripped_sys_argv, dumpstacks, log_ormcache_stats
-from ..tests import loader, runner
-
 _logger = logging.getLogger(__name__)
 
 SLEEP_INTERVAL = 60     # 1 min
+
 
 def memory_info(process):
     """
@@ -487,6 +487,7 @@ class ThreadedServer(CommonServer):
         t.start()
 
     def start(self, stop=False):
+        create_shared_memory()
         _logger.debug("Setting signal handlers")
         set_limit_memory_hard()
         if os.name == 'posix':
@@ -540,6 +541,7 @@ class ThreadedServer(CommonServer):
                     time.sleep(0.05)
 
         odoo.sql_db.close_all()
+        unlink_shared_memory()
 
         _logger.debug('--')
         logging.shutdown()
@@ -760,6 +762,7 @@ class PreforkServer(CommonServer):
         if pid == self.long_polling_pid:
             self.long_polling_pid = None
         if pid in self.workers:
+            release_lock_shared_memory(pid)
             _logger.debug("Worker (%s) unregistered", pid)
             try:
                 self.workers_http.pop(pid, None)
@@ -852,6 +855,7 @@ class PreforkServer(CommonServer):
                 raise
 
     def start(self):
+        create_shared_memory()
         # wakeup pipe, python doesn't throw EINTR when a syscall is interrupted
         # by a signal simulating a pseudo SA_RESTART. We write to a pipe in the
         # signal handler to overcome this behaviour
@@ -900,6 +904,7 @@ class PreforkServer(CommonServer):
             self.worker_kill(pid, signal.SIGTERM)
         if self.socket:
             self.socket.close()
+        unlink_shared_memory()
 
     def run(self, preload, stop):
         self.start()
@@ -1027,7 +1032,7 @@ class Worker(object):
         signal.set_wakeup_fd(self.wakeup_fd_w)
 
     def stop(self):
-        pass
+        close_shared_memory()
 
     def run(self):
         try:
