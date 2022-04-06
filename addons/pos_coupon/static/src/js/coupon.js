@@ -902,20 +902,16 @@ odoo.define('pos_coupon.pos', function (require) {
          * @returns {[Reward[], string | null]}
          */
         _getFixedDiscount: function (program, coupon_id) {
-            const discountAmount = Math.min(program.discount_fixed_amount, program.discount_max_amount || Infinity);
-            return [
-                [
-                    new Reward({
-                        product: this.pos.db.get_product_by_id(program.discount_line_product_id[0]),
-                        unit_price: -discountAmount,
-                        quantity: 1,
-                        program: program,
-                        tax_ids: [],
-                        coupon_id: coupon_id,
-                    }),
-                ],
-                null,
-            ];
+            const amountsToDiscount = {};
+            for (let line of this._getRegularOrderlines()) {
+                const key = this._getGroupKey(line);
+                if (!(key in amountsToDiscount)) {
+                    amountsToDiscount[key] = line.get_quantity() * line.price;
+                } else {
+                    amountsToDiscount[key] += line.get_quantity() * line.price;
+                }
+            }
+            return this._createFixedDiscountRewards(program, coupon_id, amountsToDiscount);
         },
         /**
          * This method is called via `collectRewards` inside `_calculateRewards`.
@@ -1021,6 +1017,23 @@ odoo.define('pos_coupon.pos', function (require) {
             const discountRewards = Object.entries(amountsToDiscount).map(([tax_keys, amount]) => {
                 let discountAmount = (amount * program.discount_percentage) / 100.0;
                 discountAmount = Math.min(discountAmount, program.discount_max_amount || Infinity);
+                return new Reward({
+                    product: this.pos.db.get_product_by_id(program.discount_line_product_id[0]),
+                    unit_price: -discountAmount,
+                    quantity: 1,
+                    program: program,
+                    tax_ids: tax_keys !== '' ? tax_keys.split(',').map((val) => parseInt(val, 10)) : [],
+                    coupon_id: coupon_id,
+                });
+            });
+            return [discountRewards, discountRewards.length > 0 ? null : 'No items to discount.'];
+        },
+
+        _createFixedDiscountRewards: function (program, coupon_id, amountsToDiscount) {
+            const discountAmount = Math.min(program.discount_fixed_amount, program.discount_max_amount || Infinity);
+            const discountRatio = discountAmount / this.get_total_with_tax();
+            const discountRewards = Object.entries(amountsToDiscount).map(([tax_keys, amount]) => {
+                let discountAmount = amount * discountRatio;
                 return new Reward({
                     product: this.pos.db.get_product_by_id(program.discount_line_product_id[0]),
                     unit_price: -discountAmount,
