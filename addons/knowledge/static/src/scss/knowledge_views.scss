@@ -44,8 +44,17 @@
             padding-bottom: 1rem !important;
         }
     }
-
+    .o_knowledge_add_icon, .o_knowledge_add_cover{
+        visibility: hidden;
+        opacity: 0;
+        transition: visibility 0.4s, opacity 0.4s linear;
+    }
+    .o_knowledge_body:hover .o_knowledge_add_icon, .o_knowledge_body:hover .o_knowledge_add_cover{
+        visibility: visible;
+        opacity: 1;
+    }
     .o_knowledge_article_view_form_dynamic_width.o_invisible_modifier ~ .o_knowledge_icon,
+    .o_knowledge_article_view_form_dynamic_width.o_invisible_modifier ~ .o_knowledge_icon_cover_buttons,
     .o_knowledge_article_view_form_dynamic_width.o_invisible_modifier ~ .o_knowledge_editor .oe_form_field .note-editable,
     .o_knowledge_article_view_form_dynamic_width.o_invisible_modifier ~ .o_knowledge_editor .oe_form_field .o_readonly {
         width: 750px; /* Almost same as Notion (900px - 96px padding (left and right) )*/
@@ -123,11 +132,8 @@
         .o_article_handle:not(:hover) .o_article_create {
             visibility: hidden;
         }
-        .o_article_name,
-        .o_article_emoji_dropdown i {
-            cursor: pointer;
-        }
         .o_article_name a {
+            cursor: pointer;
             color: inherit;
             text-decoration: none;
         }
@@ -173,17 +179,6 @@
         .o_m2o_avatar span {
             overflow-wrap: break-word;
         }
-    }
-    .o_knowledge_add_icon,
-    .o_knowledge_add_cover {
-        cursor: pointer;
-        // same colour as text
-        border: 1px solid $o-knowledge-bg--active;
-        padding: 0.5rem;
-        padding-top: 0.7rem;
-    }
-    .o_knowledge_add_icon {
-        margin-right: 0.5rem;
     }
 }
 
