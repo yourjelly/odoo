@@ -558,6 +558,7 @@ class Article(models.Model):
 
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
+        self = self.sudo()
         default = dict(default or {},
                        name=_("%s (copy)", self.name),
                        sequence=self.sequence+1)
@@ -786,7 +787,7 @@ class Article(models.Model):
                 raise ValueError(_('The given email address is incorrect.'))
 
         # add member
-        member = self.sudo().article_member_ids.filtered(lambda member: member.partner_id == partner)
+        member = self.article_member_ids.filtered(lambda member: member.partner_id == partner)
         if member:
             member.write({'permission': access_rule})
         else:
