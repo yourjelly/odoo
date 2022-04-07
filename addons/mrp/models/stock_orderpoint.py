@@ -3,6 +3,7 @@
 
 from odoo import _, api, fields, models
 from odoo.tools.float_utils import float_is_zero
+from dateutil.relativedelta import relativedelta
 
 
 class StockWarehouseOrderpoint(models.Model):
@@ -109,3 +110,9 @@ class StockWarehouseOrderpoint(models.Model):
             ('state', '=', 'draft'),
         ]).action_confirm()
         return super()._post_process_scheduler()
+
+    def _get_orderpoint_procurement_date(self):
+        date = super()._get_orderpoint_procurement_date()
+        if any(rule.action == 'manufacture' for rule in self.rule_ids):
+            date -= relativedelta(days=self.company_id.manufacturing_lead)
+        return date
