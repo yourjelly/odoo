@@ -380,6 +380,7 @@ import werkzeug
 
 from markupsafe import Markup, escape
 from collections.abc import Sized, Mapping
+from collections import OrderedDict
 from itertools import count, chain
 from lxml import etree
 from psycopg2.extensions import TransactionRollbackError
@@ -388,11 +389,13 @@ from dateutil.relativedelta import relativedelta
 from odoo import api, models, tools
 from odoo.tools import config, safe_eval, pycompat, SUPPORTED_DEBUGGER
 from odoo.tools.safe_eval import assert_valid_codeobj, _BUILTINS, to_opcodes, _EXPR_OPCODES, _BLACKLIST
-from odoo.tools.json import scriptsafe
+from odoo.tools.expr_checker import expr_checker, __ast_default_check_call as _ast_default_check_call, __ast_default_check_type
+from odoo.tools.json import _ScriptSafe, JSON, scriptsafe
 from odoo.tools.misc import get_lang
 from odoo.tools.image import image_data_uri
 from odoo.http import request
 from odoo.modules.module import get_resource_path
+from odoo.models import BaseModel
 from odoo.tools.profiler import QwebTracker
 from odoo.exceptions import UserError
 
@@ -471,6 +474,17 @@ def keep_query(*keep_params, **additional_params):
             if param not in additional_params and param in qs_keys:
                 params[param] = request.httprequest.args.getlist(param)
     return werkzeug.urls.url_encode(params)
+
+
+def _qweb_ast_get_attr(obj, key, value):
+    # TODO ?
+    return value
+
+def _qweb_ast_check_type(method, value):
+    if type(value) in {OrderedDict, Markup, JSON, _ScriptSafe} or isinstance(value, BaseModel):
+        return value
+
+    return __ast_default_check_type(method, value)
 
 ####################################
 ###        QWebException         ###
@@ -839,6 +853,13 @@ class IrQWeb(models.AbstractModel):
         """ Prepare the global context that will sent to eval the qweb
         generated code.
         """
+
+        _BUILTINS.update(
+            __ast_check_fn=_ast_default_check_call,
+            __ast_check_type_fn=_qweb_ast_check_type,
+            __ast_check_attr=_qweb_ast_get_attr
+        )
+
         return {
             'Sized': Sized,
             'Mapping': Mapping,
@@ -948,7 +969,7 @@ class IrQWeb(models.AbstractModel):
         open_bracket_index = -1
         bracket_depth = 0
 
-        argument_name = '_arg_%s__'
+        argument_name = 'arg_%s__'
         argument_names = argument_names or []
 
         for index, t in enumerate(tokens):
@@ -1102,8 +1123,9 @@ class IrQWeb(models.AbstractModel):
         expression = self._compile_expr_tokens(tokens, ALLOWED_KEYWORD, raise_on_missing=raise_on_missing)
 
         assert_valid_codeobj(_SAFE_QWEB_OPCODES, compile(expression, '<>', 'eval'), expr)
+        expression_with_checks, _ = expr_checker(expression, _qweb_ast_get_attr, return_code=False)
 
-        return f"({expression})"
+        return f"({expression_with_checks})"
 
     def _compile_bool(self, attr, default=False):
         """Convert the statements as a boolean."""
