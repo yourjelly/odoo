@@ -65,7 +65,7 @@ Text.prototype.oDeleteBackward = function (offset, alreadyMoved = false) {
     setSelection(parentNode, firstSplitOffset);
 };
 
-HTMLElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false) {
+HTMLElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false, moveNodeLimit = null) {
     const contentIsZWS = this.textContent === '\u200B';
     let moveDest;
     if (offset) {
@@ -164,7 +164,16 @@ HTMLElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false) 
 
     let node = this.childNodes[offset];
     let firstBlockIndex = offset;
-    while (node && !isBlock(node)) {
+
+    // `moveNodeLimit` will ensure we never move nodes that were not initialy in the element
+    //  => when Deleting and merging an element the containing node will temporary be hosted
+    //  in the common parent beside possible other nodes. We don't want to touch those others node when merging
+    //  two html elements
+    //  ex : <div>12<p>ab[]</p><p>cd</p>34</div> should never touche the 12 and 34 text node.
+    while (
+        node && !isBlock(node) &&
+        (moveNodeLimit === null || offset + moveNodeLimit > firstBlockIndex)
+    ) {
         node = node.nextSibling;
         firstBlockIndex++;
     }
@@ -183,7 +192,7 @@ HTMLElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false) 
     if (cursorNode.nodeType !== Node.TEXT_NODE) {
         const { cType } = getState(cursorNode, cursorOffset, DIRECTIONS.LEFT);
         if (cType & CTGROUPS.BLOCK && (!alreadyMoved || cType === CTYPES.BLOCK_OUTSIDE)) {
-            cursorNode.oDeleteBackward(cursorOffset, alreadyMoved);
+            cursorNode.oDeleteBackward(cursorOffset, alreadyMoved, firstBlockIndex - offset);
         }
     }
 };
