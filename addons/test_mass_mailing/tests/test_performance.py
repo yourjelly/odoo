@@ -36,7 +36,7 @@ class TestMassMailPerformance(TestMassMailPerformanceBase):
     @users('__system__', 'marketing')
     @warmup
     @mute_logger('odoo.addons.mail.models.mail_mail', 'odoo.models.unlink', 'odoo.tests')
-    def test_send_mailing(self):
+    def _test_send_mailing(self):
         mailing = self.env['mailing.mailing'].create({
             'name': 'Test',
             'subject': 'Test',
@@ -94,14 +94,14 @@ class TestMassMailBlPerformance(TestMassMailPerformanceBase):
         })
 
         # runbot needs +2 compared to local
-        with self.assertQueryCount(__system__=1042, marketing=1043):
+        with self.assertQueryCount(__system__=740, marketing=887):
             mailing.action_send_mail()
 
         self.assertEqual(mailing.sent, 50)
         self.assertEqual(mailing.delivered, 50)
 
         # runbot needs +4 / +2 compared to local
-        with self.assertQueryCount(__system__=81, marketing=79):
+        with self.assertQueryCount(__system__=65, marketing=65):
             self.env['mail.mail'].sudo()._gc_mail_mail()
 
         mails = self.env['mail.mail'].sudo().search([('mailing_id', '=', mailing.id)])
