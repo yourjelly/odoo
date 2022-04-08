@@ -544,6 +544,7 @@ class IrQWeb(models.AbstractModel):
 
     _name = 'ir.qweb'
     _description = 'Qweb'
+    _execution_context = {}
 
     @QwebTracker.wrap_render
     @api.model
@@ -858,6 +859,7 @@ class IrQWeb(models.AbstractModel):
             'Markup': Markup,
             'escape': escape,
             'VOID_ELEMENTS': VOID_ELEMENTS,
+            **self._execution_context,
             **_BUILTINS,
         }
 
@@ -1117,7 +1119,8 @@ class IrQWeb(models.AbstractModel):
         assert_valid_codeobj(_SAFE_QWEB_OPCODES, compile(expression, '<>', 'eval'), expr)
         expression_with_checks, ctx = expr_checker(expression, _qweb_ast_get_attr, return_code=False, check_type=_qweb_ast_check_type)
 
-        _BUILTINS.update(ctx)
+        self._execution_context.clear()
+        self._execution_context.update(ctx)
 
         return f"({expression_with_checks})"
 
