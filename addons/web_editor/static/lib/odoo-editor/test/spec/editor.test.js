@@ -93,6 +93,13 @@ describe('Editor', () => {
                         contentAfter: '<div>a<p>b[]c</p>d</div>',
                     });
                 });
+                it('should merge node correctly', async () => {
+                    await testEditor(BasicEditor, {
+                        contentBefore: '<div>a<span>b[]</span><p>c</p>d</div>',
+                        stepFunction: deleteForward,
+                        contentAfter: '<div>a<span>b[]</span>c<br>d</div>',
+                    });
+                });
                 it('should merge SPAN node correctly ', async () => {
                     await testEditor(BasicEditor, {
                         contentBefore: '<div>a<span>bc[]</span><span>de</span>f</div>',
@@ -848,6 +855,13 @@ X[]
                     contentBefore: '<p>ab]cd[ef</p>',
                     stepFunction: deleteForward,
                     contentAfter: '<p>ab[]ef</p>',
+                });
+            });
+            it('should merge node correctly', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<div>a<span>b[c</span><p>d]e</p>f</div>',
+                    stepFunction: deleteForward,
+                    contentAfter: '<div>a<span>b[]</span>e<br>f</div>',
                 });
             });
             it('should delete part of the text across two paragraphs', async () => {
@@ -2082,6 +2096,13 @@ X[]
                     },
                     contentAfterEdit: '<div><p>ab <span class="style">x[]</span> f</p></div>',
                     contentAfter: '<div><p>ab <span class="style">x[]</span> f</p></div>',
+                });
+            });
+            it('should merge node correctly', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<div>a<span>b[c</span><p>d]e</p>f</div>',
+                    stepFunction: deleteBackward,
+                    contentAfter: '<div>a<span>b[]</span>e<br>f</div>',
                 });
             });
             it('should delete part of the text within a paragraph', async () => {
