@@ -433,33 +433,47 @@ class TestFuncChecker(BaseCase):
         code = "Good.tell_me_hi(Good())"
         safe_eval(code, check_type=check_type, mode="eval", locals_dict={"Good": Good})
 
-        # code = "obj.tell_me_hi()"
-        # safe_eval(code, check_type=check_type, mode="eval", locals_dict={"obj": obj})
+        code = "obj.tell_me_hi()"
+        safe_eval(code, check_type=check_type, mode="eval", locals_dict={"obj": obj})
 
-        # code = cleandoc(
-        #     """
-        #     def foo(self):
-        #         return self
+        code = cleandoc(
+            """
+            def foo(self):
+                return self
 
-        #     foo(65535)
-        #     """
-        # )
-        #safe_eval(code, check_type=check_type, mode="exec")
-
-
-        # If you check the function object you'll get something like <listcomp>.<lambda>
+            foo(65535)
+            """
+        )
+        safe_eval(code, check_type=check_type, mode="exec")
 
         obj = Good()
         code = cleandoc(
-            # """
-            # [(lambda x: x**2)(n) for n in range(1, 11)] 
-            # """
             """
-            [obj.tell_me_hi() for n in range(1, 11)]
+            [(lambda x: x**2)(n) for n in range(1, 11)] 
             """
         )
 
         safe_eval(code, check_type=check_type, mode="exec", globals_dict={"obj": obj})
+
+        code = cleandoc(
+            """
+            def a():
+                def b():
+                    pass
+                b()
+
+            a()
+            """
+        )
+        safe_eval(code, mode="exec")
+
+        code = cleandoc(
+            """
+            a = {'a': 'b', 'c': 'd'}
+            a.get('a')
+            """
+        )
+        safe_eval(code, mode="exec")
 
         with self.assertRaises(ValueError):
             code = "Good.tell_me_hi('hi')"

@@ -4,8 +4,6 @@
 import ast
 import types
 from inspect import cleandoc, getsource
-from collections import OrderedDict
-from odoo.tools.json import JSON
 
 
 def __ast_default_check_type(method, value):
@@ -48,7 +46,7 @@ def __ast_default_check_type(method, value):
     return value
 
 
-def is_method_call(func):
+def is_unbound_method_call(func):
     try:
         classname, methodname = func.__qualname__.split(".")
     except ValueError:
@@ -58,6 +56,9 @@ def is_method_call(func):
 
     if not classname.isidentifier() or not methodname.isidentifier():
         return False  # Probably smth like <listcomp>.<lambda>
+
+    if type(func) == types.BuiltinMethodType:
+        return False
 
     return type(func) != types.MethodType
 
@@ -74,7 +75,7 @@ def __ast_default_check_call(func, check_type, *args, **kwargs):
         check_type("arguments", arg)
 
         if "." in func.__qualname__:
-            if args and (is_method_call(func) and not hasattr(args[0], func.__name__)):
+            if args and (is_unbound_method_call(func) and not hasattr(args[0], func.__name__)):
                 raise ValueError(
                     "safe_eval didn't like method call without appropriate type"
                 )

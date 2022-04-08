@@ -51,6 +51,7 @@ def safe_get_attr(obj, key, value):
     # NOTE: Those keys are for testing purpose
     if key not in (
         "a",
+        "get",
         "x",
         "tell_me_hi",
         "set_x_value",
