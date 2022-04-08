@@ -511,6 +511,133 @@ describe('Copy and paste', () => {
             });
         });
     });
+     describe('Complex html 3 p', () => {
+        const complexHtmlData = '<p>1<i>X</i>2</p><p>3<i>X</i>4</p><p>5<i>X</i>6</p>';
+        describe('range collapsed', async () => {
+            it('should paste a text in a p', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<p>ab[]cd</p>',
+                    stepFunction: async editor => {
+                        await pasteHtml(editor, complexHtmlData);
+                    },
+                    contentAfter: '<p>ab1<i>X</i>2</p><p>3<i>X</i>4</p><p>5<i>X</i>6[]cd</p>',
+                });
+            });
+            it('should paste a text in a span', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<p>a<span>b[]c</span>d</p>',
+                    stepFunction: async editor => {
+                        await pasteHtml(editor, complexHtmlData);
+                    },
+                    contentAfter: '<p>a<span>b1<i>X</i>2</span></p><p>3<i>X</i>4</p><p>5<i>X</i>6[]<span>c</span>d</p>',
+                });
+            });
+        });
+        describe('range not collapsed', async () => {
+            it('should paste a text in a p', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<p>a[bc]d</p>',
+                    stepFunction: async editor => {
+                        await pasteHtml(editor, complexHtmlData);
+                    },
+                    contentAfter: '<p>a1<i>X</i>2</p><p>3<i>X</i>4</p><p>5<i>X</i>6[]d</p>',
+                });
+            });
+            it('should paste a text in a span', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<p>a<span>b[cd]e</span>f</p>',
+                    stepFunction: async editor => {
+                        await pasteHtml(editor, complexHtmlData);
+                    },
+                    contentAfter: '<p>a<span>b1<i>X</i>2</span></p><p>3<i>X</i>4</p><p>5<i>X</i>6[]<span>e</span>f</p>',
+                });
+            });
+            it('should paste a text when selection across two span (1)', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<p>1a<span>b[c</span><span>d]e</span>f</p>',
+                    stepFunction: async editor => {
+                        await pasteHtml(editor, complexHtmlData);
+                    },
+                    contentAfter: '<p>1a<span>b1<i>X</i>2</span></p><p>3<i>X</i>4</p><p>5<i>X</i>6[]<span>e</span>f</p>',
+                });
+            });
+            it('should paste a text when selection across two span (2)', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<p>2a<span>b[c</span>- -<span>d]e</span>f</p>',
+                    stepFunction: async editor => {
+                        await pasteHtml(editor, complexHtmlData);
+                    },
+                    contentAfter: '<p>2a<span>b1<i>X</i>2</span></p><p>3<i>X</i>4</p><p>5<i>X</i>6[]<span>e</span>f</p>',
+                });
+            });
+            it('should paste a text when selection across two p', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<div>a<p>b[c</p><p>d]e</p>f</div>',
+                    stepFunction: async editor => {
+                        await pasteHtml(editor, complexHtmlData);
+                    },
+                    contentAfter: '<div>a<p>b1<i>X</i>2</p><p>3<i>X</i>4</p><p>5<i>X</i>6[]e</p>f</div>',
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: '<div>a<p>b[c</p>- -<p>d]e</p>f</div>',
+                    stepFunction: async editor => {
+                        await pasteHtml(editor, complexHtmlData);
+                    },
+                    contentAfter: '<div>a<p>b1<i>X</i>2</p><p>3<i>X</i>4</p><p>5<i>X</i>6[]e</p>f</div>',
+                });
+            });
+            it('should paste a text when selection leave a span (1)', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<div>1ab<span>c[d</span>e]f</div>',
+                    stepFunction: async editor => {
+                        await pasteHtml(editor, complexHtmlData);
+                    },
+                    contentAfter: '<div>1ab<span>c1<i>X</i>2</span></div><p>3<i>X</i>4</p><div><span>5<i>X</i>6[]</span>f</div>',
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: '<div>2a[b<span>c]d</span>ef</div>',
+                    stepFunction: async editor => {
+                        await pasteHtml(editor, complexHtmlData);
+                    },
+                    contentAfter: '<div>2a1<i>X</i>2</div><p>3<i>X</i>4</p><div>5<i>X</i>6[]<span>d</span>ef</div>',
+                });
+            });
+            it('should paste a text when selection leave a span (2)', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<p>1ab<span>c[d</span>e]f</p>',
+                    stepFunction: async editor => {
+                        await pasteHtml(editor, complexHtmlData);
+                    },
+                    contentAfter: '<p>1ab<span>c1<i>X</i>2</span></p><p>3<i>X</i>4</p><p>5<i>X</i>6[]f</p>',
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: '<p>2a[b<span>c]d</span>ef</p>',
+                    stepFunction: async editor => {
+                        await pasteHtml(editor, complexHtmlData);
+                    },
+                    contentAfter: '<p>2a1<i>X</i>2</p><p>3<i>X</i>4</p><p>5<i>X</i>6[]<span>d</span>ef</p>',
+                });
+            });
+            it('should paste a text when selection across two element (1)', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<div>1a<p>b[c</p><span>d]e</span>f</div>',
+                    stepFunction: async editor => {
+                        await pasteHtml(editor, complexHtmlData);
+                    },
+                    contentAfter: '<div>1a<p>b1<i>X</i>2</p><p>3<i>X</i>4</p>5<i>X</i>6[]<span>e</span>f</div>',
+                });
+            });
+            it('should paste a text when selection across two element (2)', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<div>2a<span>b[c</span><p>d]e</p>f</div>',
+                    stepFunction: async editor => {
+                        await pasteHtml(editor, complexHtmlData);
+                    },
+                    contentAfter: '<div>2a<span>b1<i>X</i>2</span></div><p>3<i>X</i>4</p><div><span>5<i>X</i>6[]</span>e<br>f</div>',
+                });
+            });
+        });
+    });
     describe('Complex html p+i', () => {
         const complexHtmlData = '<p style="box-sizing: border-box; margin-top: 0px; margin-bottom: 1rem; color: rgb(33, 37, 41); font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, &quot;Noto Sans&quot;, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;, &quot;Noto Color Emoji&quot;; font-size: 16px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;">12</p><p style="box-sizing: border-box; margin-top: 0px; margin-bottom: 1rem; color: rgb(33, 37, 41); font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, &quot;Noto Sans&quot;, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;, &quot;Noto Color Emoji&quot;; font-size: 16px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><i style="box-sizing: border-box;">ii</i></p>';
         describe('range collapsed', async () => {
