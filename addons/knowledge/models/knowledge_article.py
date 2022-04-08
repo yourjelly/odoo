@@ -170,6 +170,12 @@ class Article(models.Model):
     article_member_ids = fields.One2many('knowledge.article.member', 'article_id', string='Members Information', copy=True)
     user_has_access = fields.Boolean(string='Has Access', compute="_compute_user_has_access", search="_search_user_has_access")
     user_can_write = fields.Boolean(string='Can Write', compute="_compute_user_can_write", search="_search_user_can_write")
+    user_permission = fields.Selection([
+        ('none', 'none'),
+        ('read', 'read'),
+        ('write', 'write')
+    ], string='User permission', compute='_compute_user_permission')
+
     category = fields.Selection([
         ('workspace', 'Workspace'),
         ('private', 'Private'),
@@ -251,49 +257,33 @@ class Article(models.Model):
 
     @api.depends_context('uid')
     @api.depends('internal_permission', 'article_member_ids.partner_id', 'article_member_ids.permission')
+    def _compute_user_permission(self):
+        if self.env.user.has_group('base.group_system'):
+            self.user_permission = 'write'
+            return
+        partner_id = self.env.user.partner_id
+        if not partner_id:
+            self.user_permission = 'none'
+            return
+        article_permissions = self._get_internal_permission(article_ids=self.ids)
+        member_permissions = self._get_partner_member_permissions(partner_id.id, article_ids=self.ids)
+        for article in self:
+            article_id = article.ids[0]
+            article.user_permission = member_permissions.get(article_id, False) or article_permissions[article_id]
+
+    @api.depends('user_permission')
     def _compute_user_has_access(self):
         """ Compute if the current user has access to the article.
         This is done by checking if the user is admin, or checking the internal permission of the article
         and wether the user is member of the article. `.ids[0]` is used to avoid issues with <newId> records
         """
-        if self.env.user.has_group('base.group_system'):
-            self.user_has_access = True
-            return
-        partner_id = self.env.user.partner_id
-        if not partner_id:
-            self.user_has_access = False
-            return
-        # get access for current articles from parents
-        article_permissions = self._get_internal_permission(article_ids=self.ids)
-        member_permissions = self._get_partner_member_permissions(partner_id.id, article_ids=self.ids)
         for article in self:
-            if self.env.user.share:
-                article.user_has_access = member_permissions.get(article.ids[0], "none") != "none"
-            else:
-                article.user_has_access = member_permissions[article.ids[0]] != "none" if article.ids[0] in member_permissions \
-                    else article_permissions[article.ids[0]] != 'none'
+            article.user_has_access = article.user_permission != 'none'
 
-    @api.depends_context('uid')
-    @api.depends('internal_permission', 'article_member_ids.partner_id', 'article_member_ids.permission')
+    @api.depends('user_permission')
     def _compute_user_can_write(self):
-        if self.env.user.has_group('base.group_system'):
-            self.user_can_write = True
-            return
-
-        partner_id = self.env.user.partner_id
-        if not partner_id:
-            self.user_can_write = False
-            return
-        # get access for current articles from parents
-        article_permissions = self._get_internal_permission(article_ids=self.ids)
-        member_permissions = self._get_partner_member_permissions(partner_id.id, article_ids=self.ids)
         for article in self:
-            if self.env.user.share:
-                article.user_can_write = member_permissions.get(article.ids[0]) == "write"
-            else:
-                # You cannot have only one member per article.
-                article.user_can_write = member_permissions[article.ids[0]] == "write" if article.ids[0] in member_permissions \
-                    else article_permissions[article.ids[0]] == 'write'
+            article.user_can_write = article.user_permission == 'write'
 
     @api.depends('internal_permission', 'article_member_ids.permission', 'article_member_ids.partner_id')
     def _compute_category(self):
