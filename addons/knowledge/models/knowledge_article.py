@@ -268,8 +268,7 @@ class Article(models.Model):
         article_permissions = self._get_internal_permission(article_ids=self.ids)
         member_permissions = self._get_partner_member_permissions(partner_id.id, article_ids=self.ids)
         for article in self:
-            article_id = article.ids[0]
-            article.user_permission = member_permissions.get(article_id, False) or article_permissions[article_id]
+            article.user_permission = member_permissions.get(article.ids[0], False) or 'none' if self.env.user.share else article_permissions[article.ids[0]]
 
     @api.depends('user_permission')
     def _compute_user_has_access(self):
@@ -277,13 +276,13 @@ class Article(models.Model):
         This is done by checking if the user is admin, or checking the internal permission of the article
         and wether the user is member of the article. `.ids[0]` is used to avoid issues with <newId> records
         """
-        for article in self:
-            article.user_has_access = article.user_permission != 'none'
+        for (article, user_permission) in zip(self, self.mapped('user_permission')):
+            article.user_has_access = user_permission != 'none'
 
     @api.depends('user_permission')
     def _compute_user_can_write(self):
-        for article in self:
-            article.user_can_write = article.user_permission == 'write'
+        for (article, user_permission) in zip(self, self.mapped('user_permission')):
+            article.user_can_write = user_permission == 'write'
 
     @api.depends('internal_permission', 'article_member_ids.permission', 'article_member_ids.partner_id')
     def _compute_category(self):
