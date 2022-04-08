@@ -5,85 +5,34 @@ import ast
 import types
 from inspect import cleandoc, getsource
 
+__require_checks_type = (
+    types.FunctionType,
+    types.LambdaType,
+    types.MethodType,
+    types.BuiltinFunctionType,
+    types.BuiltinMethodType,
+    types.WrapperDescriptorType,
+    types.MethodWrapperType,
+    types.MethodDescriptorType,
+    types.ClassMethodDescriptorType,
+    types.ModuleType,
+)
 
-def __ast_default_check_type(method, value):
-    require_checks_type = (
-        types.FunctionType,
-        types.LambdaType,
-        types.MethodType,
-        types.BuiltinFunctionType,
-        types.BuiltinMethodType,
-        types.WrapperDescriptorType,
-        types.MethodWrapperType,
-        types.MethodDescriptorType,
-        types.ClassMethodDescriptorType,
-        types.ModuleType,
-    )
-
-    safe_type = (
-        str,
-        bytes,
-        float,
-        complex,
-        int,
-        bool,
-        type(None),
-        tuple,
-        list,
-        set,
-        dict,
-        range,
-        types.GeneratorType,
-    )
-
-    if (
-        type(value) not in safe_type + require_checks_type
-        or type(value) in require_checks_type
-        and method in ["returned", "arguments"]
-    ):
-        raise ValueError(f"safe_eval didn't like {value}")
-
-    return value
-
-
-def is_unbound_method_call(func):
-    try:
-        classname, methodname = func.__qualname__.split(".")
-    except ValueError:
-        return (
-            False  # Probably a namespace (like TestFuncChecker.test_function_call.abc)
-        )
-
-    if not classname.isidentifier() or not methodname.isidentifier():
-        return False  # Probably smth like <listcomp>.<lambda>
-
-    if type(func) == types.BuiltinMethodType:
-        return False
-
-    return type(func) != types.MethodType
-
-
-def __ast_default_check_call(func, check_type, *args, **kwargs):
-    if (
-        func.__name__ == "get"
-        and hasattr(func, "__self__")
-        and type(func.__self__) == dict
-    ):
-        return func(*args, **kwargs)
-
-    for arg in (*args, *kwargs.values()):
-        check_type("arguments", arg)
-
-        if "." in func.__qualname__:
-            if args and (is_unbound_method_call(func) and not hasattr(args[0], func.__name__)):
-                raise ValueError(
-                    "safe_eval didn't like method call without appropriate type"
-                )
-
-    if hasattr(func, "__self__"):
-        check_type("called", func.__self__)
-
-    return check_type("returned", func(*args, **kwargs))
+__safe_type = (
+    str,
+    bytes,
+    float,
+    complex,
+    int,
+    bool,
+    type(None),
+    tuple,
+    list,
+    set,
+    dict,
+    range,
+    types.GeneratorType,
+)
 
 
 class NodeChecker(ast.NodeTransformer):
@@ -94,6 +43,7 @@ class NodeChecker(ast.NodeTransformer):
             "__ast_check_fn",
             "__ast_check_type_fn",
             "__ast_check_attr",
+            "__ast_check_attr_and_type",
         ]
         super().__init__()
 
@@ -133,15 +83,9 @@ class NodeChecker(ast.NodeTransformer):
         node = self.generic_visit(node)
 
         if isinstance(node.ctx, ast.Load):
-            subcall = ast.Call(
-                func=ast.Name("__ast_check_attr", ctx=ast.Load()),
-                args=[node.value, ast.Constant(node.attr), node],
-                keywords=[],
-            )
-
             return ast.Call(
-                func=ast.Name("__ast_check_type_fn", ctx=ast.Load()),
-                args=[ast.Constant("attribute"), subcall],
+                func=ast.Name("__ast_check_attr_and_type", ctx=ast.Load()),
+                args=[node.value, ast.Constant(node.attr), node],
                 keywords=[],
             )
 
@@ -159,8 +103,8 @@ def expr_checker(
     get_attr,
     allow_function_calls=True,
     allow_private=False,
-    check_type=__ast_default_check_type,
-    check_function=__ast_default_check_call,
+    check_type=None,
+    check_function=None,
     return_code=True,
 ):
     node_checker = NodeChecker(allow_function_calls, allow_private)
@@ -189,11 +133,73 @@ def expr_checker(
     else:
         code = user_code
 
+    def __ast_default_check_type(method, value):
+        if check_type is not None:
+            ret = check_type(method, value)
+            if ret is not None:
+                return ret
+
+        if (
+            type(value) not in __safe_type + __require_checks_type
+            or type(value) in __require_checks_type
+            and method in ["returned", "arguments"]
+        ):
+            raise ValueError(f"safe_eval didn't like {value}")
+
+        return value
+
+    def is_unbound_method_call(func):
+        try:
+            classname, methodname = func.__qualname__.split(".")
+        except ValueError:
+            return False  # Probably a namespace (like TestFuncChecker.test_function_call.abc)
+
+        if not classname.isidentifier() or not methodname.isidentifier():
+            return False  # Probably smth like <listcomp>.<lambda>
+
+        if type(func) == types.BuiltinMethodType:
+            return False
+
+        return type(func) != types.MethodType
+
+    def __ast_default_check_call(func, check_type, *args, **kwargs):
+        if check_function is not None:
+            ret = check_function(func, check_type, *args, **kwargs)
+            if ret is not None:
+                return ret
+
+        if (
+            func.__name__ == "get"
+            and hasattr(func, "__self__")
+            and type(func.__self__) == dict
+        ):
+            return func(*args, **kwargs)
+
+        for arg in (*args, *kwargs.values()):
+            check_type("arguments", arg)
+
+            if "." in func.__qualname__:
+                if args and (
+                    is_unbound_method_call(func) and not hasattr(args[0], func.__name__)
+                ):
+                    raise ValueError(
+                        "safe_eval didn't like method call without appropriate type"
+                    )
+
+        if hasattr(func, "__self__"):
+            check_type("called", func.__self__)
+
+        return check_type("returned", func(*args, **kwargs))
+
+    def __ast_check_attr_and_type(value, attr, node):
+        return __ast_default_check_type("attribute", get_attr(value, attr, node))
+
     return (
         code,
         {
-            "__ast_check_type_fn": check_type,
-            "__ast_check_fn": check_function,
+            "__ast_check_type_fn": __ast_default_check_type,
+            "__ast_check_fn": __ast_default_check_call,
             "__ast_check_attr": get_attr,
+            "__ast_check_attr_and_type": __ast_check_attr_and_type,
         },
     )

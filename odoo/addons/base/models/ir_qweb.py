@@ -389,7 +389,7 @@ from dateutil.relativedelta import relativedelta
 from odoo import api, models, tools
 from odoo.tools import config, safe_eval, pycompat, SUPPORTED_DEBUGGER
 from odoo.tools.safe_eval import assert_valid_codeobj, _BUILTINS, to_opcodes, _EXPR_OPCODES, _BLACKLIST
-from odoo.tools.expr_checker import expr_checker, __ast_default_check_call as _ast_default_check_call, __ast_default_check_type
+from odoo.tools.expr_checker import expr_checker
 from odoo.tools.json import _ScriptSafe, JSON, scriptsafe
 from odoo.tools.misc import get_lang
 from odoo.tools.image import image_data_uri
@@ -483,8 +483,6 @@ def _qweb_ast_get_attr(obj, key, value):
 def _qweb_ast_check_type(method, value):
     if type(value) in {OrderedDict, Markup, JSON, _ScriptSafe} or isinstance(value, BaseModel):
         return value
-
-    return __ast_default_check_type(method, value)
 
 ####################################
 ###        QWebException         ###
@@ -854,12 +852,6 @@ class IrQWeb(models.AbstractModel):
         generated code.
         """
 
-        _BUILTINS.update(
-            __ast_check_fn=_ast_default_check_call,
-            __ast_check_type_fn=_qweb_ast_check_type,
-            __ast_check_attr=_qweb_ast_get_attr
-        )
-
         return {
             'Sized': Sized,
             'Mapping': Mapping,
@@ -1123,7 +1115,9 @@ class IrQWeb(models.AbstractModel):
         expression = self._compile_expr_tokens(tokens, ALLOWED_KEYWORD, raise_on_missing=raise_on_missing)
 
         assert_valid_codeobj(_SAFE_QWEB_OPCODES, compile(expression, '<>', 'eval'), expr)
-        expression_with_checks, _ = expr_checker(expression, _qweb_ast_get_attr, return_code=False)
+        expression_with_checks, ctx = expr_checker(expression, _qweb_ast_get_attr, return_code=False, check_type=_qweb_ast_check_type)
+
+        _BUILTINS.update(ctx)
 
         return f"({expression_with_checks})"
 

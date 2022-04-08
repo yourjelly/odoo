@@ -1,8 +1,4 @@
-from odoo.tools.expr_checker import (
-    __ast_default_check_call,
-    __ast_default_check_type,
-    expr_checker,
-)
+from odoo.tools.expr_checker import expr_checker
 
 unsafe_eval = eval
 
@@ -42,8 +38,6 @@ _BUILTINS = {
     "zip": zip,
     "Exception": Exception,
     "print": print,
-    "__ast_default_check_type": __ast_default_check_type,
-    "__ast_default_check_call": __ast_default_check_call,
 }
 
 

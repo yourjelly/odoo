@@ -4,7 +4,7 @@ from inspect import cleandoc
 
 from odoo.tests.common import BaseCase
 from odoo.tools.safe_eval2 import safe_eval
-from odoo.tools.expr_checker import __ast_default_check_type
+from odoo.tools.expr_checker import expr_checker
 
 
 class Dangerous:
@@ -45,8 +45,6 @@ def check_type(method, value):
 
     if type(value) in safe_type:
         return value
-
-    return __ast_default_check_type(method, value)
 
 class TestFuncChecker(BaseCase):
     def test_function_call(self):
