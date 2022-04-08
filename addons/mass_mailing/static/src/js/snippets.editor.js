@@ -7,6 +7,7 @@ const snippetsEditor = require('web_editor.snippet.editor');
 const MassMailingSnippetsMenu = snippetsEditor.SnippetsMenu.extend({
     events: _.extend({}, snippetsEditor.SnippetsMenu.prototype.events, {
         'click .o_we_customize_design_btn': '_onDesignTabClick',
+        'click .o_mobile_preview_btn': '_onMobilePreviewClick',
     }),
     custom_events: _.extend({}, snippetsEditor.SnippetsMenu.prototype.custom_events, {
         drop_zone_over: '_onDropZoneOver',

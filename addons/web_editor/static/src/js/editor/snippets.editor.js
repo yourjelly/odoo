@@ -11,6 +11,7 @@ var options = require('web_editor.snippets.options');
 const {ColorPaletteWidget} = require('web_editor.ColorPalette');
 const SmoothScrollOnDrag = require('web/static/src/js/core/smooth_scroll_on_drag.js');
 const {getCSSVariableValue} = require('web_editor.utils');
+const {MobilePreviewDialog} = require('web_editor.mobile');
 const QWeb = core.qweb;
 
 var _t = core._t;
@@ -3363,7 +3364,13 @@ var SnippetsMenu = Widget.extend({
      * Preview on mobile.
      */
     _onMobilePreviewClick: async function () {
-        throw new Error('implement me');
+        if (this.mobilePreview && !this.mobilePreview.isDestroyed()) {
+            return this.mobilePreview.close();
+        }
+        this.mobilePreview = new MobilePreviewDialog(this, {
+            title: Markup(_.escape(_t('Mobile preview')) + ' <span class="fa fa-refresh"/>'),
+            hasEditor: this.$body.hasClass('editor_enable'),
+        }).open();
     },
     /**
      * Undo..

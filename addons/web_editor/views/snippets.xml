@@ -8,7 +8,7 @@
         </div>
         <form class="ml-auto d-flex">
             <!-- Uncomment the following line when the mobile preview will be available. -->
-            <!-- <button type="button" class="btn btn-secondary fa fa-mobile" name="mobile" data-action="mobilePreview"/> -->
+            <!-- <button type="button" class="btn btn-secondary fa fa-mobile" name="mobile" data-action="mobile"/> -->
             <button type="button" class="btn btn-secondary" data-action="cancel" title="Discard record" accesskey="j">Discard</button>
             <button type="button" class="btn btn-primary" data-action="save" title="Save record" accesskey="s">Save</button>
         </form>
