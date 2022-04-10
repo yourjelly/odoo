@@ -453,7 +453,7 @@ class Registry(Mapping):
     def check_indexes(self, cr, model_names):
         """ Create or drop column indexes for the given models. """
         expected = [
-            (f"{Model._table}_{field.name}_index", Model._table, field.name, field.index)
+            (f"{Model._table}_{field.name}_index", Model._table, field)
             for model_name in model_names
             for Model in [self.models[model_name]]
             if Model._auto and not Model._abstract
@@ -467,23 +467,31 @@ class Registry(Mapping):
                    [tuple(row[0] for row in expected)])
         existing = {row[0] for row in cr.fetchall()}
 
-        if not self.has_trigram and any(row[3] == 'trigram' for row in expected):
+        if not self.has_trigram and any(row[2].index == 'trigram' for row in expected):
             self.has_trigram = sql.install_pg_trgm(cr)
 
-        for indexname, tablename, columnname, index in expected:
+        for indexname, tablename, field in expected:
+            columnname = field.name
+            index = field.index
             assert index in ('btree', 'btree_not_null', 'trigram', True, False, None)
-            if index and indexname not in existing:
-                method = 'btree'
-                operator = ''
-                where = ''
-                if index == 'btree_not_null':
-                    where = f'"{columnname}" IS NOT NULL'
-                elif index == 'trigram' and self.has_trigram:
+            if index and indexname not in existing and \
+                    ((not field.translate and index != 'trigram') or (index == 'trigram' and self.has_trigram)):
+
+                if index == 'trigram':
+                    if not field.translate:
+                        expression = f'"{columnname}" gin_trgm_ops'
+                    else:  # field.translate == True
+                        # TODO VSC : see if we can simplify the index so it doesn't contain the [ and " and spaces, only values
+                        # TODO CWG: also check logic for inactive languages
+                        expression = f'(jsonb_path_query_array("{columnname}", \'$.*\'::jsonpath)::text) gin_trgm_ops'
                     method = 'gin'
-                    operator = 'gin_trgm_ops'
+                    where = ''
+                else:  # index in ['btree', 'btree_not_null'， True]
+                    expression = f'"{columnname}"'
+                    method = 'btree'
+                    where = f'"{columnname}" IS NOT NULL' if index == 'btree_not_null' else ''
                 try:
                     with cr.savepoint(flush=False):
-                        expression = f'"{columnname}" {operator}'
                         sql.create_index(cr, indexname, tablename, [expression], method, where)
                 except psycopg2.OperationalError:
                     _schema.error("Unable to add index for %s", self)

@@ -260,13 +260,18 @@ class Lang(models.Model):
         langs = self.with_context(active_test=True).search([])
         return sorted([(lang.code, lang.name) for lang in langs], key=itemgetter(1))
 
-    def toggle_active(self):
+    @api.model
+    @tools.ormcache()
+    def is_en_US_active(self):
+        return bool(self.with_context(active_test=True).search([('code', '=', 'en_US')]))
+
+    def toggle_active(self, overwrite=False):
         super().toggle_active()
         # Automatically load translation
         active_lang = [lang.code for lang in self.filtered(lambda l: l.active)]
         if active_lang:
             mods = self.env['ir.module.module'].search([('state', '=', 'installed')])
-            mods._update_translations(active_lang)
+            mods._update_translations(active_lang, overwrite)
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -305,8 +310,6 @@ class Lang(models.Model):
                 raise UserError(_("You cannot delete the language which is Active!\nPlease de-activate the language first."))
 
     def unlink(self):
-        for language in self:
-            self.env['ir.translation'].search([('lang', '=', language.code)]).unlink()
         self.clear_caches()
         return super(Lang, self).unlink()
 

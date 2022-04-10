@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
+
+# FP TODO 5: remove this file completely, and fix everywhere its is used
+# TODO VSC don't forget to keep import/export
+
 import hashlib
 import itertools
 import json
@@ -843,6 +848,8 @@ class IrTranslation(models.Model):
                 if trans_extra_file:
                     _logger.info('module %s: loading extra translation file (%s) for language %s', module_name, lang_code, lang)
                     tools.trans_load(self._cr, trans_extra_file, lang, verbose=False, overwrite=lang_overwrite)
+        # TODO VSC we should probably analyze every table that contain translations after import
+        self._cr.execute('ANALYZE ir_translation')
         return True
 
     @api.model

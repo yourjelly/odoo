@@ -2809,11 +2809,11 @@ class BaseModel(metaclass=MetaModel):
                 extra=extra, extra_params=extra_params,
             )
             return '"%s"."%s"' % (rel_alias, field.column2)
-
-        elif field.translate is True:
-            # handle the case where the field is translated
-            return model._generate_translated_field(alias, fname, query)
-
+        elif field.translate:
+            lang = self.env.lang or 'en_US'
+            if lang == 'en_US':
+                return f'''"{alias}"."{fname}"->>'en_US' '''
+            return f'''COALESCE("{alias}"."{fname}"->>'{lang}', "{alias}"."{fname}"->>'en_US')'''
         else:
             return '"%s"."%s"' % (alias, fname)
 
@@ -2888,6 +2888,8 @@ class BaseModel(metaclass=MetaModel):
             value = field.default(self)
             value = field.convert_to_write(value, self)
             value = field.convert_to_column(value, self)
+            if field.translate is True:
+                value = value[0]
         else:
             value = None
         # Write value if non-NULL, except for booleans for which False means
@@ -3428,6 +3430,7 @@ class BaseModel(metaclass=MetaModel):
         # determine columns fields and those with their own read() method
         column_fields = []
         other_fields = []
+        translated_field_names = []
         for name in field_names:
             if name == 'id':
                 continue
@@ -3436,11 +3439,12 @@ class BaseModel(metaclass=MetaModel):
                 _logger.warning("%s._read() with unknown field %r", self._name, name)
                 continue
             if field.base_field.store and field.base_field.column_type:
-                if not (field.inherited and callable(field.base_field.translate)):
-                    column_fields.append(field)
+                column_fields.append(field)
             elif field.store and not field.column_type:
                 # non-column fields: for the sake of simplicity, we ignore inherited fields
                 other_fields.append(field)
+            if field.store and field.translate:
+                translated_field_names.append(field.name)
 
         if column_fields:
             cr, context = self.env.cr, self.env.context
@@ -3449,6 +3453,16 @@ class BaseModel(metaclass=MetaModel):
             # an impact on checking security rules, as they are injected into
             # the query.  However, we don't need to flush the fields to fetch,
             # as explained below when putting values in cache.
+
+            # Since only one language translation is fetched from database,
+            # we must flush these translated fields before read
+            # E.g. in database, the {'en_US': 'English'},
+            # write record.with_context(lang='en_US').name = 'English2'
+            # then record.with_context(lang='fr_FR').name => cache miss => _read
+            # 'English2'should is flushed before query as it is the fallback of empty 'fr_FR'
+            # TODO flush only for model translation, optimize for en_US only env
+            if translated_field_names:
+                self.flush_recordset(translated_field_names)
             self._flush_search([], order='id')
 
             # make a query object for selecting ids, and apply security rules to it
@@ -3492,11 +3506,6 @@ class BaseModel(metaclass=MetaModel):
             # overwrite values in cache.
             for field in column_fields:
                 values = next(column_values)
-                # post-process translations
-                if context.get('lang') and not field.inherited and callable(field.translate):
-                    if any(values):
-                        translate = field.get_trans_func(fetched)
-                        values = [translate(id_, value) for id_, value in zip(ids, values)]
                 # store values in cache, but without overwriting
                 self.env.cache.insert_missing(fetched, field, values)
 
@@ -4070,7 +4079,8 @@ class BaseModel(metaclass=MetaModel):
             vals.setdefault('write_date', self.env.cr.now())
 
         # determine SQL values
-        columns = {}                    # {column_name: value}
+        columns = []
+        params = []
 
         for name, val in sorted(vals.items()):
             if self._log_access and name in LOG_ACCESS_COLUMNS and not val:
@@ -4078,13 +4088,18 @@ class BaseModel(metaclass=MetaModel):
             field = self._fields[name]
             assert field.store
             assert field.column_type
-            columns[name] = val
+            if field.translate is True and isinstance(val, tuple):
+                columns.append(f""""{name}" = %s || COALESCE("{name}", '{'{}'}'::jsonb) || %s""")
+                params.append(val[1])
+                params.append(val[0])
+            else:
+                columns.append(f'"{name}" = %s')
+                params.append(val)
 
         # update columns
         if columns:
-            template = ', '.join(f'"{name}" = %s' for name in columns)
+            template = ', '.join(columns)
             query = f'UPDATE "{self._table}" SET {template} WHERE id IN %s'
-            params = list(columns.values())
             for sub_ids in cr.split_for_in_conditions(self._ids):
                 cr.execute(query, params + [sub_ids])
 
@@ -4333,7 +4348,6 @@ class BaseModel(metaclass=MetaModel):
         # insert rows in batches of maximum INSERT_BATCH_SIZE
         ids = []                                # ids of created records
         other_fields = OrderedSet()             # non-column fields
-        translated_fields = OrderedSet()        # translated fields
 
         for data_sublist in split_every(INSERT_BATCH_SIZE, data_list):
             stored_list = [data['stored'] for data in data_sublist]
@@ -4344,12 +4358,14 @@ class BaseModel(metaclass=MetaModel):
             for fname in fnames:
                 field = self._fields[fname]
                 if field.column_type:
-                    if field.translate is True:
-                        translated_fields.add(field)
                     columns.append(fname)
                     for stored, row in zip(stored_list, rows):
                         if fname in stored:
-                            row.append(field.convert_to_column(stored[fname], self, stored))
+                            colval = field.convert_to_column(stored[fname], self, stored)
+                            if field.translate and isinstance(colval, tuple):
+                                colval[0].adapted.update(colval[1].adapted)
+                                colval = colval[0]
+                            row.append(colval)
                         else:
                             row.append(SQL_DEFAULT)
                 else:
@@ -4403,7 +4419,11 @@ class BaseModel(metaclass=MetaModel):
                 if field.type in ('one2many', 'many2many'):
                     cachetoclear.append((record, field))
                 else:
-                    cache_value = field.convert_to_cache(value, record)
+                    if not field.translate:
+                        cache_value = field.convert_to_cache(value, record)
+                    else:
+                        # pass empty record for translate field to prevent _get_stored_translations
+                        cache_value = field.convert_to_cache(value, record.browse())
                     self.env.cache.set(record, field, cache_value)
                     if field.type in ('many2one', 'many2one_reference') and self.pool.field_inverses[field]:
                         inverses_update[(field, cache_value)].append(record.id)
@@ -4441,18 +4461,6 @@ class BaseModel(metaclass=MetaModel):
         # check Python constraints for stored fields
         records._validate_fields(name for data in data_list for name in data['stored'])
         records.check_access_rule('create')
-
-        # add translations
-        if self.env.lang and self.env.lang != 'en_US':
-            Translations = self.env['ir.translation']
-            for field in translated_fields:
-                tname = "%s,%s" % (field.model_name, field.name)
-                for data in data_list:
-                    if field.name in data['stored']:
-                        record = data['record']
-                        val = data['stored'][field.name]
-                        Translations._set_ids(tname, 'model', self.env.lang, record.ids, val, val)
-
         return records
 
     def _compute_field_value(self, field):
@@ -4696,26 +4704,6 @@ class BaseModel(metaclass=MetaModel):
                 parent_model = self.env[parent_model_name]
                 parent_alias = self._inherits_join_add(self, parent_model_name, query)
                 expression.expression(domain, parent_model.sudo(), parent_alias, query)
-
-    @api.model
-    def _generate_translated_field(self, table_alias, field, query):
-        """
-        Add possibly missing JOIN with translations table to ``query`` and
-        generate the expression for the translated field.
-
-        :return: the qualified field name (or expression) to use for ``field``
-        """
-        if self.env.lang:
-            # for the COALESCE to work properly, the column must be flushed
-            self.flush_model([field])
-            alias = query.left_join(
-                table_alias, 'id', 'ir_translation', 'res_id', field,
-                extra='"{rhs}"."type" = \'model\' AND "{rhs}"."name" = %s AND "{rhs}"."lang" = %s AND "{rhs}"."value" != %s',
-                extra_params=["%s,%s" % (self._name, field), self.env.lang, ""],
-            )
-            return 'COALESCE("%s"."%s", "%s"."%s")' % (alias, 'value', table_alias, field)
-        else:
-            return '"%s"."%s"' % (table_alias, field)
 
     @api.model
     def _generate_m2o_order_by(self, alias, order_field, query, reverse_direction, seen):
@@ -4992,80 +4980,6 @@ class BaseModel(metaclass=MetaModel):
 
         return [default]
 
-    def copy_translations(self, new, excluded=()):
-        """ Recursively copy the translations from original to new record
-
-        :param self: the original record
-        :param new: the new record (copy of the original one)
-        :param excluded: a container of user-provided field names
-        """
-        old = self
-        # avoid recursion through already copied records in case of circular relationship
-        if '__copy_translations_seen' not in old._context:
-            old = old.with_context(__copy_translations_seen=defaultdict(set))
-        seen_map = old._context['__copy_translations_seen']
-        if old.id in seen_map[old._name]:
-            return
-        seen_map[old._name].add(old.id)
-
-        def get_trans(field, old, new):
-            """ Return the 'name' of the translations to search for, together
-                with the record ids corresponding to ``old`` and ``new``.
-            """
-            if field.inherited:
-                pname = field.related.split('.')[0]
-                return get_trans(field.related_field, old[pname], new[pname])
-            return "%s,%s" % (field.model_name, field.name), old.id, new.id
-
-        # removing the lang to compare untranslated values
-        old_wo_lang, new_wo_lang = (old + new).with_context(lang=None)
-        Translation = old.env['ir.translation']
-
-        for name, field in old._fields.items():
-            if not field.copy:
-                continue
-
-            if field.inherited and field.related.split('.')[0] in excluded:
-                # inherited fields that come from a user-provided parent record
-                # must not copy translations, as the parent record is not a copy
-                # of the old parent record
-                continue
-
-            if field.type == 'one2many' and field.name not in excluded:
-                # we must recursively copy the translations for o2m; here we
-                # rely on the order of the ids to match the translations as
-                # foreseen in copy_data()
-                old_lines = old[name].sorted(key='id')
-                new_lines = new[name].sorted(key='id')
-                for (old_line, new_line) in zip(old_lines, new_lines):
-                    # don't pass excluded as it is not about those lines
-                    old_line.copy_translations(new_line)
-
-            elif field.translate:
-                # for translatable fields we copy their translations
-                trans_name, source_id, target_id = get_trans(field, old, new)
-                domain = [('name', '=', trans_name), ('res_id', '=', source_id)]
-                new_val = new_wo_lang[name]
-                if old.env.lang and callable(field.translate):
-                    # the new value *without lang* must be the old value without lang
-                    new_wo_lang[name] = old_wo_lang[name]
-                vals_list = []
-                for vals in Translation.search_read(domain):
-                    del vals['id']
-                    del vals['module']      # duplicated vals is not linked to any module
-                    vals['res_id'] = target_id
-                    if not callable(field.translate):
-                        vals['src'] = new_wo_lang[name]
-                    if vals['lang'] == old.env.lang and field.translate is True:
-                        # update master record if the new_val was not changed by copy override
-                        if new_val == old[name]:
-                            new_wo_lang[name] = old_wo_lang[name]
-                            vals['src'] = old_wo_lang[name]
-                        # the value should be the new value (given by copy())
-                        vals['value'] = new_val
-                    vals_list.append(vals)
-                Translation._upsert_translations(vals_list)
-
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
         """ copy(default=None)
@@ -5078,11 +4992,10 @@ class BaseModel(metaclass=MetaModel):
 
         """
         self.ensure_one()
+        # vals = self.with_context(active_test=False, lang="ALL").copy_data(default)[0]
+
         vals = self.with_context(active_test=False).copy_data(default)[0]
-        # To avoid to create a translation in the lang of the user, copy_translation will do it
-        new = self.with_context(lang=None).create(vals)
-        self.with_context(from_copy_translation=True).copy_translations(new, excluded=default or ())
-        return new
+        return self.create(vals)
 
     @api.returns('self')
     def exists(self):
@@ -5919,8 +5832,11 @@ class BaseModel(metaclass=MetaModel):
                         f"    Context: {self.env.context}\n" \
                         f"    Cache: {self.env.cache!r}"
                     for record, value in zip(records, values):
-                        value = field.convert_to_write(value, record)
-                        value = field.convert_to_column(value, record)
+                        if not field.translate:
+                            value = field.convert_to_write(value, record)
+                            value = field.convert_to_column(value, record)
+                        else:
+                            value = field._convert_from_cache_to_column(value)
                         id_vals[record.id][field.name] = value
                 process(model, id_vals)
 
@@ -6716,10 +6632,13 @@ class BaseModel(metaclass=MetaModel):
                 cache = self.env.cache
                 for fname in fnames:
                     field = lines._fields[fname]
-                    cache.update(new_lines, field, [
-                        field.convert_to_cache(value, new_line, validate=False)
-                        for value, new_line in zip(cache.get_values(lines, field), new_lines)
-                    ])
+                    if not field.translate:
+                        cache.update(new_lines, field, [
+                            field.convert_to_cache(value, new_line, validate=False)
+                            for value, new_line in zip(cache.get_values(lines, field), new_lines)
+                        ])
+                    else:
+                        cache.update(new_lines, field, cache.get_values(lines, field))
 
         # Isolate changed values, to handle inconsistent data sent from the
         # client side: when a form view contains two one2many fields that
