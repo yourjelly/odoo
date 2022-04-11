@@ -350,11 +350,17 @@ class HolidaysRequest(models.Model):
                 '&',
                 ('date_to', '=', False),
                 ('date_from', '<=', max(self.mapped('date_from'))),
-            ], ['id', 'date_from', 'date_to', 'holiday_status_id', 'employee_id', 'number_of_days'], order="number_of_days desc, date_to, id"
+            ], ['id', 'date_from', 'date_to', 'holiday_status_id', 'employee_id', 'max_leaves', 'taken_leave_ids']
         )
         allocations_dict = defaultdict(lambda: [])
         for allocation in allocations:
             allocations_dict[(allocation['holiday_status_id'][0], allocation['employee_id'][0])].append(allocation)
+
+        taken_leaves = self.env['hr.leave'].browse([
+            lid
+            for a in allocations
+            for lid in a['taken_leave_ids']
+        ]).filtered(lambda l: l.state in ['confirm', 'validate', 'validate1'])
 
         for leave in self:
             if leave.holiday_status_id.requires_allocation == 'yes' and leave.date_from and leave.date_to:
@@ -365,8 +371,13 @@ class HolidaysRequest(models.Model):
                     date_to_check = allocation['date_to'] >= date_to if allocation['date_to'] else True
                     date_from_check = allocation['date_from'] <= date_from
                     if (date_to_check and date_from_check):
-                        found_allocation = allocation['id']
-                        break
+                        leave_ids = set(allocation['taken_leave_ids'])
+                        if leave.id:
+                            leave_ids -= set(leave.ids)
+                        total_taken = sum(taken_leaves.filtered(lambda l: l.id in leave_ids).mapped('number_of_days'))
+                        if allocation['max_leaves'] >= total_taken + leave.number_of_days:
+                            found_allocation = allocation['id']
+                            break
                 leave.holiday_allocation_id = self.env['hr.leave.allocation'].browse(found_allocation) if found_allocation else False
             else:
                 leave.holiday_allocation_id = False
