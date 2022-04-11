@@ -18,6 +18,7 @@
         'views/knowledge_templates.xml',
         'views/knowledge_templates_common.xml',
         'views/knowledge_templates_frontend.xml',
+        'wizard/knowledge_invite_wizard.xml',
         'security/ir.model.access.csv',
         'security/security.xml',
     ],
@@ -27,6 +28,7 @@
     'license': 'LGPL-3',
     'assets': {
         'web.assets_backend': [
+            'knowledge/static/src/components/*/*.scss',
             'knowledge/static/src/scss/knowledge_views.scss',
             'knowledge/static/src/js/knowledge_controller.js',
             'knowledge/static/src/js/knowledge_model.js',
@@ -34,6 +36,7 @@
             'knowledge/static/src/js/knowledge_views.js',
             'knowledge/static/src/js/widgets/knowledge_dialogs.js',
             'knowledge/static/src/js/tools/tree_panel_mixin.js',
+            'knowledge/static/src/js/widgets/knowledge_permission_panel.js',
         ],
         'web.assets_frontend': [
             'knowledge/static/src/scss/knowledge_frontend.scss',

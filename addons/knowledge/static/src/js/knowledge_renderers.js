@@ -1,5 +1,6 @@
 /** @odoo-module */
 
+import PermissionPanelWidget from './widgets/knowledge_permission_panel.js';
 import FormRenderer from 'web.FormRenderer';
 import localStorage from 'web.local_storage';
 import KnowledgeTreePanelMixin from '@knowledge/js/tools/tree_panel_mixin';
@@ -12,6 +13,7 @@ const KnowledgeFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin, {
         'click .o_article_dropdown i': '_onIconClick',
         'click .o_article_name': '_onOpen',
         'click .o_article_create, .o_section_create': '_onCreate',
+        'click .o_knowledge_share_panel': '_preventDropdownClose',
         'click .o_knowledge_more_options_panel': '_preventDropdownClose',
     }),
 
@@ -163,6 +165,7 @@ const KnowledgeFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin, {
         const result = await this._super.apply(this, arguments);
         this._renderBreadcrumb();
         await this._renderTree(this.state.res_id, '/knowledge/tree_panel/all');
+        this._renderPermissionPanel();
         this._setResizeListener();
         return result;
     },
@@ -180,6 +183,20 @@ const KnowledgeFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin, {
         });
         const $container = this.$el.find('.breadcrumb');
         $container.prepend(items);
+    },
+
+    /**
+     * Renders the permission panel
+     */
+    _renderPermissionPanel: function () {
+        this.$el.find('.btn-share').one('click', event => {
+            const $container = this.$el.find('.o_knowledge_permission_panel');
+            const panel = new PermissionPanelWidget(this, {
+                article_id: this.state.data.id,
+                user_permission: this.state.data.user_permission
+            });
+            panel.attachTo($container);
+        });
     },
 
     /**
@@ -234,6 +251,17 @@ const KnowledgeFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin, {
                 stack.unshift(...$ul.children('li').toArray());
             }
         }
+    },
+
+    /**
+     * By default, Bootstrap closes automatically the dropdown menu when the user
+     * clicks inside it. To avoid that behavior, we will add a new event listener
+     * on the dropdown menu that will prevent the click event from bubbling up and
+     * triggering the listener closing the dropdown menu.
+     * @param {Event} event
+     */
+    _preventDropdownClose: function (event) {
+        event.stopPropagation();
     },
 });
 

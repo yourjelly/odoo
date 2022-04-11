@@ -23,15 +23,22 @@ class ArticleMember(models.Model):
     article_id = fields.Many2one('knowledge.article', 'Article', ondelete='cascade', required=True)
     partner_id = fields.Many2one('res.partner', 'Partner', index=True, ondelete='cascade', required=True)
     permission = fields.Selection([
-        ('none', 'None'),
-        ('read', 'Read'),
-        ('write', 'Write'),
+        ('none', 'No access'),
+        ('read', 'Can read'),
+        ('write', 'Can write'),
     ], required=True, default='read')
     article_permission = fields.Selection(related='article_id.inherited_permission')
+    has_higher_permission = fields.Boolean(
+        compute='_compute_has_higher_permission',
+        help="If True, the member has a higher permission then the one set on the article.")
 
     _sql_constraints = [
         ('partner_unique', 'unique(article_id, partner_id)', 'You already added this partner in this article.')
     ]
+
+    def name_get(self):
+        """Override the `name_get` function"""
+        return [(rec.id, "%s" % (rec.partner_id.display_name)) for rec in self]
 
     @api.constrains('article_permission', 'permission')
     def _check_members(self):
@@ -68,21 +75,39 @@ class ArticleMember(models.Model):
             if member.partner_id.partner_share and member.permission == 'write':
                 raise ValidationError(_('An external user cannot have a "write" permission'))
 
+    @api.depends("article_id", "permission")
+    def _compute_has_higher_permission(self):
+        permission_level = {'none': 0, 'read': 1, 'write': 2}
+        articles_permission = self.article_id._get_internal_permission(article_ids=self.article_id.ids)
+        for member in self:
+            member.has_higher_permission = permission_level[member.permission] > permission_level[articles_permission[member.article_id.ids[0]]]
+
     @api.ondelete(at_uninstall=False)
     def _unlink_except_no_writer(self):
         """ When removing a member, the constraint is not triggered.
         We need to check manually on article with no write permission that we do not remove the last write member """
         articles = self.article_id
-        members_by_articles = dict.fromkeys(self.article_id.ids, self.env['knowledge.article.member'])
-        articles_permission = articles._get_internal_permission(article_ids=articles.ids)
+        deleted_members_by_articles = dict.fromkeys(self.article_id.ids, self.env['knowledge.article.member'])
+        parent_articles = articles.mapped('parent_id')
+        parents_members_permission = parent_articles._get_article_member_permissions()
         for member in self:
-            members_by_articles[member.article_id.id] |= member
+            deleted_members_by_articles[member.article_id.id] |= member
         for article in articles:
-            if articles_permission.get(article.id) == 'write':
+            # Check article permission
+            if article.inherited_permission == 'write':
                 continue
-            remaining_members = article.article_member_ids - members_by_articles[article.id]
-            if not remaining_members.filtered(lambda m: m.permission == 'write'):
-                raise ValidationError(_("You must have at least one writer."))
+            # Check on permission on members
+            remaining_members = article.article_member_ids - deleted_members_by_articles[article.id]
+            if remaining_members.filtered(lambda m: m.permission == 'write'):
+                continue
+            # we need to add the members on parents to check the validity
+            parent_members_permission = [
+                values['permission'] for partner_id, values
+                in parents_members_permission[article.parent_id.id].items()
+            ] if article.parent_id and not article.is_desynchronized else []
+
+            if not any(permission == 'write' for permission in parent_members_permission):
+                raise ValidationError(_("An article needs at least one member with 'Write' access."))
 
     def _get_invitation_hash(self):
         """ We use a method instead of a field in order to reduce DB space."""
