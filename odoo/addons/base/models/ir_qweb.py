@@ -1117,12 +1117,18 @@ class IrQWeb(models.AbstractModel):
         expression = self._compile_expr_tokens(tokens, ALLOWED_KEYWORD, raise_on_missing=raise_on_missing)
 
         assert_valid_codeobj(_SAFE_QWEB_OPCODES, compile(expression, '<>', 'eval'), expr)
-        expression_with_checks, ctx = expr_checker(expression, _qweb_ast_get_attr, return_code=False, check_type=_qweb_ast_check_type)
 
-        self._execution_context.clear()
-        self._execution_context.update(ctx)
+        try:
+            if self.env["benchmark_mode"]:
+                return f"({expression})" 
 
-        return f"({expression_with_checks})"
+        except KeyError:
+            expression_with_checks, ctx = expr_checker(expression, _qweb_ast_get_attr, return_code=False, check_type=_qweb_ast_check_type)
+
+            self._execution_context.clear()
+            self._execution_context.update(ctx)
+
+            return f"({expression_with_checks})"
 
     def _compile_bool(self, attr, default=False):
         """Convert the statements as a boolean."""

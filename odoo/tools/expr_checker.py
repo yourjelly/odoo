@@ -163,11 +163,13 @@ def expr_checker(
         return type(func) != types.MethodType
 
     def __ast_default_check_call(func, check_type, *args, **kwargs):
+        if func is None:
+            return None 
+        
         if check_function is not None:
             ret = check_function(func, check_type, *args, **kwargs)
             if ret is not None:
                 return ret
-
         if (
             func.__name__ == "get"
             and hasattr(func, "__self__")
