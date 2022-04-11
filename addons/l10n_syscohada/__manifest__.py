@@ -5,8 +5,8 @@
 # contact: leadsn@baamtu.com
 
 {
-    'name' : 'OHADA - Accounting',
-    'author' : 'Baamtu Senegal',
+    'name' : 'OHADA (révisé) - Accounting',
+    'author' : 'Optesis',
     'category': 'Accounting/Localizations/Account Charts',
     'icon': '/l10n_syscohada/static/description/icon.jpeg',
     'description': """
@@ -23,7 +23,7 @@ Countries that use OHADA are the following:
 
     Replica of Democratic Congo, Senegal, Chad, Togo.
     """,
-    'website': 'http://www.baamtu.com',
+    'website': 'http://www.optesis.com',
     'depends' : [
         'account',
     ],

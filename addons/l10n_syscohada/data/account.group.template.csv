@@ -1,0 +1,526 @@
+id,code_prefix_start,code_prefix_end,name,chart_template_id/id
+pcg_group_1,1,,"Comptes de ressources durables",l10n_syscohada.syscohada_chart_template
+pcg_group_10,10,,"Capital",l10n_syscohada.syscohada_chart_template
+pcg_group_101,101,,"Capital social",l10n_syscohada.syscohada_chart_template
+pcg_group_102,102,,"Capital par dotation",l10n_syscohada.syscohada_chart_template
+pcg_group_103,103,,"Capital personnel",l10n_syscohada.syscohada_chart_template
+pcg_group_104,104,,"Capital de l'exploitant",l10n_syscohada.syscohada_chart_template
+pcg_group_105,105,,"Primes liées au capital social",l10n_syscohada.syscohada_chart_template
+pcg_group_106,106,,"Ecarts de réévaluation",l10n_syscohada.syscohada_chart_template
+pcg_group_109,109,,"Apporteurs, capital souscrit, non appelé",l10n_syscohada.syscohada_chart_template
+pcg_group_11,11,,"Réserves",l10n_syscohada.syscohada_chart_template
+pcg_group_111,111,,"Réserve légale",l10n_syscohada.syscohada_chart_template
+pcg_group_112,112,,"Réserves statutaires ou contractuelles",l10n_syscohada.syscohada_chart_template
+pcg_group_113,113,,"Réserves réglementées",l10n_syscohada.syscohada_chart_template
+pcg_group_114,118,,"Autres réserves",l10n_syscohada.syscohada_chart_template
+pcg_group_12,12,,"Report à nouveau",l10n_syscohada.syscohada_chart_template
+pcg_group_121,121,,"Report à nouveau créditeur",l10n_syscohada.syscohada_chart_template
+pcg_group_129,129,,"Report à nouveau débiteur",l10n_syscohada.syscohada_chart_template
+pcg_group_13,13,,"Résultat net de l'excercice",l10n_syscohada.syscohada_chart_template
+pcg_group_130,130,,"Résultat en instance d'affectation",l10n_syscohada.syscohada_chart_template
+pcg_group_131,131,,"Résultat net : bénéfice",l10n_syscohada.syscohada_chart_template
+pcg_group_132,132,,"Marge commerciale",l10n_syscohada.syscohada_chart_template
+pcg_group_133,133,,"Valeur ajoutée",l10n_syscohada.syscohada_chart_template
+pcg_group_134,134,,"Excédent brut d'exploitation",l10n_syscohada.syscohada_chart_template
+pcg_group_135,135,,"Résultat d'exploitation",l10n_syscohada.syscohada_chart_template
+pcg_group_136,136,,"Résultat financier",l10n_syscohada.syscohada_chart_template
+pcg_group_137,137,,"Résultat des activités ordinaires",l10n_syscohada.syscohada_chart_template
+pcg_group_138,138,,"Résultat hors activités ordinaires",l10n_syscohada.syscohada_chart_template
+pcg_group_139,139,,"Résultat net : perte",l10n_syscohada.syscohada_chart_template
+pcg_group_14,14,,"Subventions d'investissement",l10n_syscohada.syscohada_chart_template
+pcg_group_141,141,,"Subventions d'équipement",l10n_syscohada.syscohada_chart_template
+pcg_group_148,148,,"Autres subventions d'investissement",l10n_syscohada.syscohada_chart_template
+pcg_group_15,15,,"Provisions réglementées et fonds assimilés",l10n_syscohada.syscohada_chart_template
+pcg_group_151,151,,"Amortissements dérogatoires",l10n_syscohada.syscohada_chart_template
+pcg_group_152,152,,"Plus-values de cession à réinvestir",l10n_syscohada.syscohada_chart_template
+pcg_group_153,153,,"Fonds réglementés",l10n_syscohada.syscohada_chart_template
+pcg_group_154,154,,"Provisions spéciales de réévaluation",l10n_syscohada.syscohada_chart_template
+pcg_group_155,155,,"Provisions réglementées relatives aux immobilisations",l10n_syscohada.syscohada_chart_template
+pcg_group_156,156,,"Provisions réglementées relatives aux stocks",l10n_syscohada.syscohada_chart_template
+pcg_group_157,157,,"Provisions pour investissement",l10n_syscohada.syscohada_chart_template
+pcg_group_158,158,,"Autres provisions et fonds réglementés",l10n_syscohada.syscohada_chart_template
+pcg_group_16,16,,"Emprunts et dettes assimilées",l10n_syscohada.syscohada_chart_template
+pcg_group_161,161,,"Emprunts obligataires",l10n_syscohada.syscohada_chart_template
+pcg_group_162,162,,"Emprunts et dettes auprès des établissements de crédit",l10n_syscohada.syscohada_chart_template
+pcg_group_163,163,,"Avances reçues de l'Etat",l10n_syscohada.syscohada_chart_template
+pcg_group_164,164,,"Avances reçues et comptes courants bloqués",l10n_syscohada.syscohada_chart_template
+pcg_group_165,165,,"Dépots et cautionnements reçus",l10n_syscohada.syscohada_chart_template
+pcg_group_166,166,,"Intérêts courus",l10n_syscohada.syscohada_chart_template
+pcg_group_167,167,,"Avances assorties de conditions particulières",l10n_syscohada.syscohada_chart_template
+pcg_group_168,168,,"Autres emprunts et dettes",l10n_syscohada.syscohada_chart_template
+pcg_group_17,17,,"Dettes de location-acquisition",l10n_syscohada.syscohada_chart_template
+pcg_group_172,172,,"Dettes de location-acquisition / crédit-bail immobilier",l10n_syscohada.syscohada_chart_template
+pcg_group_173,173,,"Dettes de location-acquisition / crédit-bail mobilier",l10n_syscohada.syscohada_chart_template
+pcg_group_174,174,,"Dettes de location-acquisition / location-vente",l10n_syscohada.syscohada_chart_template
+pcg_group_176,176,,"Intérêts courus",l10n_syscohada.syscohada_chart_template
+pcg_group_178,178,,"Autres dettes de location-acquisition",l10n_syscohada.syscohada_chart_template
+pcg_group_18,18,,"Dettes liées à des participations et comptes de liaison des établissements et sociétés en participation",l10n_syscohada.syscohada_chart_template
+pcg_group_181,181,,"Dettes liées à des participations",l10n_syscohada.syscohada_chart_template
+pcg_group_182,182,,"Dettes liées à des sociétés en participation",l10n_syscohada.syscohada_chart_template
+pcg_group_183,183,,"Intérêts courus sur dettes liées à des participations",l10n_syscohada.syscohada_chart_template
+pcg_group_184,184,,"Comptes permanents bloqués des établissements et succursales",l10n_syscohada.syscohada_chart_template
+pcg_group_185,185,,"Comptes permanents non bloqués des établissements et succursales",l10n_syscohada.syscohada_chart_template
+pcg_group_186,186,,"Comptes de liaison charges",l10n_syscohada.syscohada_chart_template
+pcg_group_187,187,,"Comptes de liaison produits",l10n_syscohada.syscohada_chart_template
+pcg_group_188,188,,"Comptes de liaison des sociétés en participation",l10n_syscohada.syscohada_chart_template
+pcg_group_19,19,,"Provisions pour risques et charges",l10n_syscohada.syscohada_chart_template
+pcg_group_191,191,,"Provisions pour litiges",l10n_syscohada.syscohada_chart_template
+pcg_group_192,192,,"Provisions pour garanties données aux clients",l10n_syscohada.syscohada_chart_template
+pcg_group_193,193,,"Provisions pour pertes sur marchés à achèvement futur",l10n_syscohada.syscohada_chart_template
+pcg_group_194,194,,"Provisions pour pertes de change",l10n_syscohada.syscohada_chart_template
+pcg_group_195,195,,"Provisions pour impôts",l10n_syscohada.syscohada_chart_template
+pcg_group_196,196,,"Provisions pour pensions et obligations similaires",l10n_syscohada.syscohada_chart_template
+pcg_group_197,197,,"Provisions pour restructuration",l10n_syscohada.syscohada_chart_template
+pcg_group_198,198,,"Autres provisions pour risques et charges",l10n_syscohada.syscohada_chart_template
+pcg_group_2,2,,"Comptes d'actif immobilisé",l10n_syscohada.syscohada_chart_template
+pcg_group_21,21,,"Immobilisation incorporelles",l10n_syscohada.syscohada_chart_template
+pcg_group_211,211,,"Frais de développement",l10n_syscohada.syscohada_chart_template
+pcg_group_212,212,,"Brevets, licenses, concessions, et droits similaires",l10n_syscohada.syscohada_chart_template
+pcg_group_213,213,,"Logiciels et sites internet",l10n_syscohada.syscohada_chart_template
+pcg_group_214,214,,"Marques",l10n_syscohada.syscohada_chart_template
+pcg_group_215,215,,"Fonds commercial",l10n_syscohada.syscohada_chart_template
+pcg_group_216,216,,"Droit au bail",l10n_syscohada.syscohada_chart_template
+pcg_group_217,217,,"Investissements de création",l10n_syscohada.syscohada_chart_template
+pcg_group_218,218,,"Autres droits et valeurs incorporels",l10n_syscohada.syscohada_chart_template
+pcg_group_219,219,,"Immobilisations incorporelles en cours",l10n_syscohada.syscohada_chart_template
+pcg_group_22,22,,"Terrains",l10n_syscohada.syscohada_chart_template
+pcg_group_221,221,,"Terrains agricoles et forestiers",l10n_syscohada.syscohada_chart_template
+pcg_group_222,222,,"Terrains nus",l10n_syscohada.syscohada_chart_template
+pcg_group_223,223,,"Terrains bâtis",l10n_syscohada.syscohada_chart_template
+pcg_group_224,224,,"Travaux de mise en valeur des terrains",l10n_syscohada.syscohada_chart_template
+pcg_group_225,225,,"Terrains de carrières-tréfonds",l10n_syscohada.syscohada_chart_template
+pcg_group_226,226,,"Terrains aménagés",l10n_syscohada.syscohada_chart_template
+pcg_group_227,227,,"Terrains mis en concession",l10n_syscohada.syscohada_chart_template
+pcg_group_228,228,,"Autres terrains",l10n_syscohada.syscohada_chart_template
+pcg_group_229,229,,"Aménagements de terrains en cours",l10n_syscohada.syscohada_chart_template
+pcg_group_23,23,,"Bâtiments, installations techniques et agencements",l10n_syscohada.syscohada_chart_template
+pcg_group_231,231,,"Bâtiments industriels, agricoles, administratifs et commerciaux sur sol propre",l10n_syscohada.syscohada_chart_template
+pcg_group_232,232,,"Bâtiments industriels, agricoles, administratifs et commerciaux sur sol d'autrui",l10n_syscohada.syscohada_chart_template
+pcg_group_233,233,,"Ouvrages d'infrastructure",l10n_syscohada.syscohada_chart_template
+pcg_group_234,234,,"Aménagements, agencements et installations techniques",l10n_syscohada.syscohada_chart_template
+pcg_group_235,235,,"Aménagments de bureaux",l10n_syscohada.syscohada_chart_template
+pcg_group_237,237,,"Bâtiments industriels, agricoles et commerciaux mis en concession",l10n_syscohada.syscohada_chart_template
+pcg_group_238,238,,"Autres installations et agencements",l10n_syscohada.syscohada_chart_template
+pcg_group_239,239,,"Bâtiments, aménagements, agencements et installations en cours",l10n_syscohada.syscohada_chart_template
+pcg_group_24,24,,"Matériel, mobilier et actifs biologiques",l10n_syscohada.syscohada_chart_template
+pcg_group_241,241,,"Matériel et outillage industriel et commercial",l10n_syscohada.syscohada_chart_template
+pcg_group_242,242,,"Matériel et outillage agricole",l10n_syscohada.syscohada_chart_template
+pcg_group_243,243,,"Matériel d'emballage récupérable et identifiable",l10n_syscohada.syscohada_chart_template
+pcg_group_244,244,,"Matériel et mobilier",l10n_syscohada.syscohada_chart_template
+pcg_group_245,245,,"Matériel de transport",l10n_syscohada.syscohada_chart_template
+pcg_group_246,246,,"Actifs biologiques",l10n_syscohada.syscohada_chart_template
+pcg_group_247,247,,"Agencements, aménagements du matériel et actifs biologiques",l10n_syscohada.syscohada_chart_template
+pcg_group_248,248,,"Autres matériels et mobiliers",l10n_syscohada.syscohada_chart_template
+pcg_group_249,249,,"Matériel et actifs biologiques en cours",l10n_syscohada.syscohada_chart_template
+pcg_group_25,25,,"Avances et acomptes versés sur immobilisations",l10n_syscohada.syscohada_chart_template
+pcg_group_251,251,,"Avances et acomptes versés sur immobilisations incorporelles",l10n_syscohada.syscohada_chart_template
+pcg_group_252,252,,"Avances et acomptes versés sur immobilisations corporelles",l10n_syscohada.syscohada_chart_template
+pcg_group_26,26,,"Titres de participation",l10n_syscohada.syscohada_chart_template
+pcg_group_261,261,,"Titres de participation dans des entités sous contrôle exclusif",l10n_syscohada.syscohada_chart_template
+pcg_group_262,262,,"Titres de participation dans des entités sous contrôle conjoint",l10n_syscohada.syscohada_chart_template
+pcg_group_263,263,,"Titres de participation dans des entités sous influence notable",l10n_syscohada.syscohada_chart_template
+pcg_group_265,265,,"Participations dans des organismes professionnels",l10n_syscohada.syscohada_chart_template
+pcg_group_266,266,,"Parts dans des groupements d'intérêt économique",l10n_syscohada.syscohada_chart_template
+pcg_group_268,268,,"Autres titres de participation",l10n_syscohada.syscohada_chart_template
+pcg_group_27,27,,"Autres immobilisation financières",l10n_syscohada.syscohada_chart_template
+pcg_group_271,271,,"Prêts et créances",l10n_syscohada.syscohada_chart_template
+pcg_group_272,272,,"Prêts au personnel",l10n_syscohada.syscohada_chart_template
+pcg_group_273,273,,"Créances sur l'Etat",l10n_syscohada.syscohada_chart_template
+pcg_group_274,274,,"Titres immobilisés",l10n_syscohada.syscohada_chart_template
+pcg_group_275,275,,"Dépôts et cautionnements versés",l10n_syscohada.syscohada_chart_template
+pcg_group_276,276,,"Intérêts courus",l10n_syscohada.syscohada_chart_template
+pcg_group_277,277,,"Créances rattachées à des participations et avances à des G.I.E.",l10n_syscohada.syscohada_chart_template
+pcg_group_278,278,,"Immobilisations financières diverses",l10n_syscohada.syscohada_chart_template
+pcg_group_28,28,,"Amortissements",l10n_syscohada.syscohada_chart_template
+pcg_group_281,281,,"Amortissements des immobilisations incorporelles",l10n_syscohada.syscohada_chart_template
+pcg_group_282,282,,"Amortissements des terrains",l10n_syscohada.syscohada_chart_template
+pcg_group_283,283,,"Amortissements des bâtimeents, installations techniques et agencements",l10n_syscohada.syscohada_chart_template
+pcg_group_284,284,,"Amortissements du matériel",l10n_syscohada.syscohada_chart_template
+pcg_group_29,29,,"Dépréciations des immobilisations",l10n_syscohada.syscohada_chart_template
+pcg_group_291,291,,"Dépréciations des immobilisations incorporelles",l10n_syscohada.syscohada_chart_template
+pcg_group_292,292,,"Dépréciations des terrains",l10n_syscohada.syscohada_chart_template
+pcg_group_293,293,,"Dépréciations des bâtiments, installations techniques et agencements",l10n_syscohada.syscohada_chart_template
+pcg_group_294,294,,"Dépréciations du matériel, du mobilier et de l'actif biologique",l10n_syscohada.syscohada_chart_template
+pcg_group_295,295,,"Dépréciations des avances et acomptes versés sur immobilisations",l10n_syscohada.syscohada_chart_template
+pcg_group_296,296,,"Dépréciations des titres de participation",l10n_syscohada.syscohada_chart_template
+pcg_group_297,297,,"Dépréciations des autres immobilisations financières",l10n_syscohada.syscohada_chart_template
+pcg_group_3,3,,"Comptes de stocks",l10n_syscohada.syscohada_chart_template
+pcg_group_31,31,,"Marchandises",l10n_syscohada.syscohada_chart_template
+pcg_group_311,311,,"Marchandises A",l10n_syscohada.syscohada_chart_template
+pcg_group_312,312,,"Marchandises B",l10n_syscohada.syscohada_chart_template
+pcg_group_313,313,,"Actifs biologiques",l10n_syscohada.syscohada_chart_template
+pcg_group_318,318,,"Marchandises hors activités ordinaires",l10n_syscohada.syscohada_chart_template
+pcg_group_32,32,,"Matières premières et fournitures liées",l10n_syscohada.syscohada_chart_template
+pcg_group_321,321,,"Matières A",l10n_syscohada.syscohada_chart_template
+pcg_group_322,322,,"Matières B",l10n_syscohada.syscohada_chart_template
+pcg_group_323,323,,"Fournitures (A,B)",l10n_syscohada.syscohada_chart_template
+pcg_group_33,33,,"Autres Approvisionnements",l10n_syscohada.syscohada_chart_template
+pcg_group_331,331,,"Matières consommables",l10n_syscohada.syscohada_chart_template
+pcg_group_332,332,,"Fournitures d'atelier et d'usine",l10n_syscohada.syscohada_chart_template
+pcg_group_333,333,,"Fournitures de magasin",l10n_syscohada.syscohada_chart_template
+pcg_group_334,334,,"Founitures de bureau",l10n_syscohada.syscohada_chart_template
+pcg_group_335,335,,"Emballages",l10n_syscohada.syscohada_chart_template
+pcg_group_338,338,,"Autres matières",l10n_syscohada.syscohada_chart_template
+pcg_group_34,34,,"Produits en cours",l10n_syscohada.syscohada_chart_template
+pcg_group_341,341,,"Produits en cours",l10n_syscohada.syscohada_chart_template
+pcg_group_342,342,,"Travaux en cours",l10n_syscohada.syscohada_chart_template
+pcg_group_343,343,,"Produits intermédiaires en cours",l10n_syscohada.syscohada_chart_template
+pcg_group_344,344,,"Produits résiduels en cours",l10n_syscohada.syscohada_chart_template
+pcg_group_345,345,,"Actifs biologiques en cours",l10n_syscohada.syscohada_chart_template
+pcg_group_35,35,,"Services en cours",l10n_syscohada.syscohada_chart_template
+pcg_group_351,351,,"Etudes en cours",l10n_syscohada.syscohada_chart_template
+pcg_group_352,352,,"Prestations de services en cours",l10n_syscohada.syscohada_chart_template
+pcg_group_36,36,,"Produits finis",l10n_syscohada.syscohada_chart_template
+pcg_group_361,361,,"Produits finis A",l10n_syscohada.syscohada_chart_template
+pcg_group_362,362,,"Produits finis B",l10n_syscohada.syscohada_chart_template
+pcg_group_363,363,,"Actifs biologiques",l10n_syscohada.syscohada_chart_template
+pcg_group_37,37,,"Produits intermédiaires et résiduels",l10n_syscohada.syscohada_chart_template
+pcg_group_371,371,,"Produits intermédiaires",l10n_syscohada.syscohada_chart_template
+pcg_group_372,372,,"Produits résiduels",l10n_syscohada.syscohada_chart_template
+pcg_group_373,373,,"Actifs biologiques",l10n_syscohada.syscohada_chart_template
+pcg_group_38,38,,"Stocks en cours de route, en consignation ou en dépôt",l10n_syscohada.syscohada_chart_template
+pcg_group_381,381,,"Marchandises en cours de route",l10n_syscohada.syscohada_chart_template
+pcg_group_382,382,,"Matières premières et fournitures liées en cours de route",l10n_syscohada.syscohada_chart_template
+pcg_group_383,383,,"Autres approvisionnements en cours de route",l10n_syscohada.syscohada_chart_template
+pcg_group_386,386,,"Produits finis en cours de route",l10n_syscohada.syscohada_chart_template
+pcg_group_387,387,,"Stock en consignation ou en dépôt",l10n_syscohada.syscohada_chart_template
+pcg_group_388,388,,"Stock provenant d'immobilisations mises hors service ou au rebut",l10n_syscohada.syscohada_chart_template
+pcg_group_39,39,,"Dépréciations des stocks et encours de production",l10n_syscohada.syscohada_chart_template
+pcg_group_391,391,,"Dépréciations des stocks de marchandises",l10n_syscohada.syscohada_chart_template
+pcg_group_392,392,,"Dépréciations des stocks de matières premières et fournitures liées",l10n_syscohada.syscohada_chart_template
+pcg_group_393,393,,"Dépréciations des stocks d'autres approvisionnements",l10n_syscohada.syscohada_chart_template
+pcg_group_394,394,,"Dépréciations des productions en cours",l10n_syscohada.syscohada_chart_template
+pcg_group_395,395,,"Dépréciations des services en cours",l10n_syscohada.syscohada_chart_template
+pcg_group_396,396,,"Dépréciations des stocks de produits finis",l10n_syscohada.syscohada_chart_template
+pcg_group_397,397,,"Dépréciations des stocks de produits intermédiaires et résiduels",l10n_syscohada.syscohada_chart_template
+pcg_group_398,398,,"Dépréciations des stocks en cours de route, en consignation ou en dépot",l10n_syscohada.syscohada_chart_template
+pcg_group_4,4,,"Comptes de tiers",l10n_syscohada.syscohada_chart_template
+pcg_group_40,40,,"Fournisseurs et comptes rattachés",l10n_syscohada.syscohada_chart_template
+pcg_group_401,401,,"Fournisseurs, dettes en compte",l10n_syscohada.syscohada_chart_template
+pcg_group_402,403,,"Fournisseurs, effets à payer",l10n_syscohada.syscohada_chart_template
+pcg_group_404,404,,"Founisseurs, acquisitions courantes d'immobilisations",l10n_syscohada.syscohada_chart_template
+pcg_group_408,408,,"Fournisseurs, factures non parvenues",l10n_syscohada.syscohada_chart_template
+pcg_group_409,409,,"Fournisseurs débiteurs",l10n_syscohada.syscohada_chart_template
+pcg_group_41,41,,"Clients et comtpes rattachés",l10n_syscohada.syscohada_chart_template
+pcg_group_411,411,,"Clients",l10n_syscohada.syscohada_chart_template
+pcg_group_412,412,,"Clients, effets à recevoir en portefeuille",l10n_syscohada.syscohada_chart_template
+pcg_group_413,413,,"Clients, chèques, effets et autres valeurs impayés",l10n_syscohada.syscohada_chart_template
+pcg_group_414,414,,"Créances sur cessions courantes d'immobilisations",l10n_syscohada.syscohada_chart_template
+pcg_group_415,415,,"Clients, effets escomptés non échus",l10n_syscohada.syscohada_chart_template
+pcg_group_416,416,,"Créances clients litigieuses ou douteuses",l10n_syscohada.syscohada_chart_template
+pcg_group_418,418,,"Clients, produits à recevoir",l10n_syscohada.syscohada_chart_template
+pcg_group_419,419,,"Clients créditeurs",l10n_syscohada.syscohada_chart_template
+pcg_group_42,42,,"Personnel",l10n_syscohada.syscohada_chart_template
+pcg_group_421,421,,"Personnel, avances et acomptes",l10n_syscohada.syscohada_chart_template
+pcg_group_422,422,,"Personnel, rémunérations dees",l10n_syscohada.syscohada_chart_template
+pcg_group_423,423,,"Personnel, oppositions, saisies-arrêts",l10n_syscohada.syscohada_chart_template
+pcg_group_424,424,,"Personnel, œuvres sociales internes",l10n_syscohada.syscohada_chart_template
+pcg_group_425,425,,"Représentants du personnel",l10n_syscohada.syscohada_chart_template
+pcg_group_426,426,,"Personnel, participation aux bénéfices et au capital",l10n_syscohada.syscohada_chart_template
+pcg_group_427,427,,"Personnel - dépôts",l10n_syscohada.syscohada_chart_template
+pcg_group_428,428,,"Personnel, charges à payer et produits à recevoir",l10n_syscohada.syscohada_chart_template
+pcg_group_43,43,,"Organismes sociaux",l10n_syscohada.syscohada_chart_template
+pcg_group_431,431,,"Sécurité sociale",l10n_syscohada.syscohada_chart_template
+pcg_group_432,432,,"Caisses de retraite complémentaire",l10n_syscohada.syscohada_chart_template
+pcg_group_433,433,,"Autres organismes sociaux",l10n_syscohada.syscohada_chart_template
+pcg_group_438,438,,"Organismes sociaux, charges à payer et produits à recevoir",l10n_syscohada.syscohada_chart_template
+pcg_group_44,44,,"Etat et collectivités publiques",l10n_syscohada.syscohada_chart_template
+pcg_group_441,441,,"Etat, impôt sur les bénéfices",l10n_syscohada.syscohada_chart_template
+pcg_group_442,442,,"Etat, autres impôts et taxes",l10n_syscohada.syscohada_chart_template
+pcg_group_443,443,,"Etat, T.V.A. facturée",l10n_syscohada.syscohada_chart_template
+pcg_group_444,444,,"Etat, T.V.A. due ou crédit de T.V.A.",l10n_syscohada.syscohada_chart_template
+pcg_group_445,445,,"Etat, T.V.A. récupérable",l10n_syscohada.syscohada_chart_template
+pcg_group_446,446,,"Etat, autres taxes sur le chiffre d'affaires",l10n_syscohada.syscohada_chart_template
+pcg_group_447,447,,"Etat, impôts retenus à la source",l10n_syscohada.syscohada_chart_template
+pcg_group_448,448,,"Etat, charges à payer et produits à recevoir",l10n_syscohada.syscohada_chart_template
+pcg_group_449,449,,"Etat, créances et dettes diverses",l10n_syscohada.syscohada_chart_template
+pcg_group_45,45,,"Organismes internationaux",l10n_syscohada.syscohada_chart_template
+pcg_group_451,451,,"Opérations avec les organismes africains",l10n_syscohada.syscohada_chart_template
+pcg_group_452,452,,"Opérations avec les autres organismes internationaux",l10n_syscohada.syscohada_chart_template
+pcg_group_458,458,,"Organismes internationaux, fonds de dotation et subventions à recevoir",l10n_syscohada.syscohada_chart_template
+pcg_group_46,46,,"Apporteurs, associés et groupe",l10n_syscohada.syscohada_chart_template
+pcg_group_461,461,,"Apporteurs, opérations sur le capital",l10n_syscohada.syscohada_chart_template
+pcg_group_462,462,,"Associés, comptes courants",l10n_syscohada.syscohada_chart_template
+pcg_group_463,463,,"Associés, opérations faites en commun et GIE",l10n_syscohada.syscohada_chart_template
+pcg_group_465,465,,"Associés, dividendes à payer",l10n_syscohada.syscohada_chart_template
+pcg_group_466,466,,"Groupe, comptes courants",l10n_syscohada.syscohada_chart_template
+pcg_group_467,467,,"Apporteurs, restant dû sur capital appelé",l10n_syscohada.syscohada_chart_template
+pcg_group_47,47,,"Débiteurs et créditeurs divers",l10n_syscohada.syscohada_chart_template
+pcg_group_471,471,,"Débiteurs et créditeurs divers",l10n_syscohada.syscohada_chart_template
+pcg_group_472,472,,"Créances et dettes sur titres de placement",l10n_syscohada.syscohada_chart_template
+pcg_group_473,473,,"Intermédiaires - opérations faites pour compte de tiers",l10n_syscohada.syscohada_chart_template
+pcg_group_474,474,,"Compte de répartition périodique des charges et des produits",l10n_syscohada.syscohada_chart_template
+pcg_group_475,475,,"Comtpe transitoire, ajustement spécial lié à la révision du SYSCOHADA",l10n_syscohada.syscohada_chart_template
+pcg_group_476,476,,"Charges constatées d'avance",l10n_syscohada.syscohada_chart_template
+pcg_group_477,477,,"Produits constatés d'avance",l10n_syscohada.syscohada_chart_template
+pcg_group_478,478,,"Ecarts de conversion - actif",l10n_syscohada.syscohada_chart_template
+pcg_group_479,479,,"Ecarts de conversion - passif",l10n_syscohada.syscohada_chart_template
+pcg_group_48,48,,"Créances et dettes hors activités ordinaires",l10n_syscohada.syscohada_chart_template
+pcg_group_481,481,,"Fournisseurs d'investissements",l10n_syscohada.syscohada_chart_template
+pcg_group_482,482,,"Fournisseurs d'investissements, effets à payer",l10n_syscohada.syscohada_chart_template
+pcg_group_484,484,,"Autres dettes hors activités ordinaires",l10n_syscohada.syscohada_chart_template
+pcg_group_485,485,,"Créances sur cessions d'immobilisations",l10n_syscohada.syscohada_chart_template
+pcg_group_488,488,,"Autres créances hors activités ordinaires",l10n_syscohada.syscohada_chart_template
+pcg_group_49,49,,"Dépréciations et provisions pour risques à court terme (tiers)",l10n_syscohada.syscohada_chart_template
+pcg_group_490,490,,"Dépréciations des comptes : fournisseurs",l10n_syscohada.syscohada_chart_template
+pcg_group_491,491,,"Dépréciations des comptes : clients",l10n_syscohada.syscohada_chart_template
+pcg_group_492,492,,"Dépréciations des comptes : personnel",l10n_syscohada.syscohada_chart_template
+pcg_group_493,493,,"Dépréciations des comptes : organismes sociaux",l10n_syscohada.syscohada_chart_template
+pcg_group_494,494,,"Dépréciations des comptes : Etat et collectivités publiques",l10n_syscohada.syscohada_chart_template
+pcg_group_495,495,,"Dépréciations des comptes : organismes internationaux",l10n_syscohada.syscohada_chart_template
+pcg_group_496,496,,"Dépréciations des comptes : apporteurs, associés et groupe",l10n_syscohada.syscohada_chart_template
+pcg_group_497,497,,"Dépréciations des comptes : débiteurs divers",l10n_syscohada.syscohada_chart_template
+pcg_group_498,498,,"Dépréciations des comptes de créances H.A.O.",l10n_syscohada.syscohada_chart_template
+pcg_group_499,499,,"Provisions pour risques à court terme",l10n_syscohada.syscohada_chart_template
+pcg_group_5,5,,"Comptes de trésorerie",l10n_syscohada.syscohada_chart_template
+pcg_group_50,50,,"Titres de placement",l10n_syscohada.syscohada_chart_template
+pcg_group_501,501,,"Titres du trésor et bons de caisse à court terme",l10n_syscohada.syscohada_chart_template
+pcg_group_502,502,,"Actions",l10n_syscohada.syscohada_chart_template
+pcg_group_503,503,,"Obligations",l10n_syscohada.syscohada_chart_template
+pcg_group_504,504,,"Bons de souscription",l10n_syscohada.syscohada_chart_template
+pcg_group_505,505,,"Titres négociables hors région",l10n_syscohada.syscohada_chart_template
+pcg_group_506,506,,"Intérêt courus",l10n_syscohada.syscohada_chart_template
+pcg_group_508,508,,"Autres titres de placement et créances assimilées",l10n_syscohada.syscohada_chart_template
+pcg_group_51,51,,"Valeurs à encaisser",l10n_syscohada.syscohada_chart_template
+pcg_group_511,511,,"Effets à encaisser",l10n_syscohada.syscohada_chart_template
+pcg_group_512,512,,"Effets à l'encaissement",l10n_syscohada.syscohada_chart_template
+pcg_group_513,513,,"Chèques à encaisser",l10n_syscohada.syscohada_chart_template
+pcg_group_514,514,,"Chèques à l'encaissement",l10n_syscohada.syscohada_chart_template
+pcg_group_515,515,,"Cartes de crédit à encaisser",l10n_syscohada.syscohada_chart_template
+pcg_group_518,518,,"Autres valeurs à l'encaissement",l10n_syscohada.syscohada_chart_template
+pcg_group_52,52,,"Banques",l10n_syscohada.syscohada_chart_template
+pcg_group_521,521,,"Banques locales",l10n_syscohada.syscohada_chart_template
+pcg_group_522,522,,"Banques, autres états, région",l10n_syscohada.syscohada_chart_template
+pcg_group_523,523,,"Banques, autres états, zone monétaire",l10n_syscohada.syscohada_chart_template
+pcg_group_524,524,,"Banques, hors zone monétaire",l10n_syscohada.syscohada_chart_template
+pcg_group_525,525,,"Banques, dépôt à terme",l10n_syscohada.syscohada_chart_template
+pcg_group_526,526,,"Banques, intérêts courus",l10n_syscohada.syscohada_chart_template
+pcg_group_53,53,,"Etablissements financiers et assimilés",l10n_syscohada.syscohada_chart_template
+pcg_group_531,531,,"Chèques postaux",l10n_syscohada.syscohada_chart_template
+pcg_group_532,532,,"Trésor",l10n_syscohada.syscohada_chart_template
+pcg_group_533,533,,"Sociétés de gestion et d'intermédiation",l10n_syscohada.syscohada_chart_template
+pcg_group_536,536,,"Etablissements financiers, intérêts courus",l10n_syscohada.syscohada_chart_template
+pcg_group_538,538,,"Autres organismes financiers",l10n_syscohada.syscohada_chart_template
+pcg_group_54,54,,"Instruments de trésorerie",l10n_syscohada.syscohada_chart_template
+pcg_group_541,541,,"Option de taux d'intérêt",l10n_syscohada.syscohada_chart_template
+pcg_group_542,542,,"Option de taux de change",l10n_syscohada.syscohada_chart_template
+pcg_group_543,543,,"Option de taux boursiers",l10n_syscohada.syscohada_chart_template
+pcg_group_544,544,,"Instruments de marchés à terme",l10n_syscohada.syscohada_chart_template
+pcg_group_545,545,,"Avoirs d'or et autres métaux précieux",l10n_syscohada.syscohada_chart_template
+pcg_group_55,55,,"Instruments de monnaie électronique",l10n_syscohada.syscohada_chart_template
+pcg_group_551,551,,"Monnaie électronique - carte carburant",l10n_syscohada.syscohada_chart_template
+pcg_group_552,552,,"Monnaie électronique - téléphone portable",l10n_syscohada.syscohada_chart_template
+pcg_group_553,553,,"Monnaie électronique- carte péage",l10n_syscohada.syscohada_chart_template
+pcg_group_554,554,,"Porte-monnaie électronique",l10n_syscohada.syscohada_chart_template
+pcg_group_558,558,,"Autres instruments de monnaies électroniques",l10n_syscohada.syscohada_chart_template
+pcg_group_56,56,,"Banques, crédits de trésorerie et d'escompte",l10n_syscohada.syscohada_chart_template
+pcg_group_561,561,,"Crédits de trésorerie",l10n_syscohada.syscohada_chart_template
+pcg_group_564,564,,"Escompte de crédit de campagne",l10n_syscohada.syscohada_chart_template
+pcg_group_565,565,,"Escompte de crédits ordinaires",l10n_syscohada.syscohada_chart_template
+pcg_group_566,566,,"Banques, crédits de trésorerie, intérêts courus",l10n_syscohada.syscohada_chart_template
+pcg_group_57,57,,"Caisse",l10n_syscohada.syscohada_chart_template
+pcg_group_571,571,,"Caisse siège social",l10n_syscohada.syscohada_chart_template
+pcg_group_572,573,,"Caisse succursale A",l10n_syscohada.syscohada_chart_template
+pcg_group_572,573,,"Caisse succursale B",l10n_syscohada.syscohada_chart_template
+pcg_group_58,58,,"Régies d'avances, accréditifs et virements internes",l10n_syscohada.syscohada_chart_template
+pcg_group_581,581,,"Régies d'avances",l10n_syscohada.syscohada_chart_template
+pcg_group_582,582,,"Accréditifs",l10n_syscohada.syscohada_chart_template
+pcg_group_585,585,,"Virements de fonds",l10n_syscohada.syscohada_chart_template
+pcg_group_588,588,,"Autres virements internes",l10n_syscohada.syscohada_chart_template
+pcg_group_59,59,,"Dépréciations et provisions pour risque à court terme",l10n_syscohada.syscohada_chart_template
+pcg_group_590,590,,"Dépréciations des titres de placement",l10n_syscohada.syscohada_chart_template
+pcg_group_591,591,,"Dépréciations des titres et valeurs à encaisser",l10n_syscohada.syscohada_chart_template
+pcg_group_592,592,,"Dépréciations des comptes banques",l10n_syscohada.syscohada_chart_template
+pcg_group_593,593,,"Dépréciations des comptes établissements financiers et assimilés",l10n_syscohada.syscohada_chart_template
+pcg_group_594,594,,"Dépréciations des comptes d'instruments de trésorerie",l10n_syscohada.syscohada_chart_template
+pcg_group_599,599,,"Provisions pour risque à court terme à caractère financier",l10n_syscohada.syscohada_chart_template
+pcg_group_6,6,,"Comptes de charges des activités ordinaires",l10n_syscohada.syscohada_chart_template
+pcg_group_60,60,,"Achats et variations de stocks",l10n_syscohada.syscohada_chart_template
+pcg_group_601,601,,"Achats de marchandises",l10n_syscohada.syscohada_chart_template
+pcg_group_602,602,,"Achats de matières premières et fournitures liées",l10n_syscohada.syscohada_chart_template
+pcg_group_603,603,,"Variations des stocks de biens achetés",l10n_syscohada.syscohada_chart_template
+pcg_group_604,604,,"Achats sotkcés de matières et fournitures consommables",l10n_syscohada.syscohada_chart_template
+pcg_group_605,605,,"Autres achats",l10n_syscohada.syscohada_chart_template
+pcg_group_608,608,,"Achats d'emballages",l10n_syscohada.syscohada_chart_template
+pcg_group_61,61,,"Transports",l10n_syscohada.syscohada_chart_template
+pcg_group_612,612,,"Transports sur ventes",l10n_syscohada.syscohada_chart_template
+pcg_group_613,613,,"Transports pour le compte de tiers",l10n_syscohada.syscohada_chart_template
+pcg_group_614,614,,"Transport du personnel",l10n_syscohada.syscohada_chart_template
+pcg_group_616,616,,"Autres frais de transport",l10n_syscohada.syscohada_chart_template
+pcg_group_618,618,,"Rémunérations, primes pour assurances extralégales, pensions de retraite et de survie des administrateurs, gérants et associés actifs qui ne sont pas attribuées en vertu d'un contrat de travail",l10n_syscohada.syscohada_chart_template
+pcg_group_62,62,,"Services extérieurs",l10n_syscohada.syscohada_chart_template
+pcg_group_621,621,,"Sous-traitance générale",l10n_syscohada.syscohada_chart_template
+pcg_group_622,622,,"Locations, charges locatives",l10n_syscohada.syscohada_chart_template
+pcg_group_623,623,,"Redevances de location-acquisition",l10n_syscohada.syscohada_chart_template
+pcg_group_624,624,,"Entretien, réparations, remise en état et maintenance",l10n_syscohada.syscohada_chart_template
+pcg_group_625,625,,"Primes d'assurances",l10n_syscohada.syscohada_chart_template
+pcg_group_626,626,,"Etudes, recherches et documentation",l10n_syscohada.syscohada_chart_template
+pcg_group_627,627,,"Publicité, publications, relations publiques",l10n_syscohada.syscohada_chart_template
+pcg_group_628,628,,"Frais de télécommunications",l10n_syscohada.syscohada_chart_template
+pcg_group_63,63,,"Autres services extérieurs",l10n_syscohada.syscohada_chart_template
+pcg_group_631,631,,"Frais bancaires",l10n_syscohada.syscohada_chart_template
+pcg_group_632,632,,"Rémunérations d'intermédiaires et de conseils",l10n_syscohada.syscohada_chart_template
+pcg_group_633,633,,"Frais de formation du personnel",l10n_syscohada.syscohada_chart_template
+pcg_group_634,634,,"Redevances pour brevets, licenses, logiciels, concessions, droits et valeurs similaires",l10n_syscohada.syscohada_chart_template
+pcg_group_635,635,,"Cotisations",l10n_syscohada.syscohada_chart_template
+pcg_group_637,637,,"Rémunérations de personnel extérieur à l'entité",l10n_syscohada.syscohada_chart_template
+pcg_group_638,638,,"Autres charges externes",l10n_syscohada.syscohada_chart_template
+pcg_group_64,64,,"Impôts et taxes",l10n_syscohada.syscohada_chart_template
+pcg_group_641,641,,"Impôts et taxes directs",l10n_syscohada.syscohada_chart_template
+pcg_group_645,645,,"Impôts et taxes indirects",l10n_syscohada.syscohada_chart_template
+pcg_group_646,646,,"Droits d'enregistrement",l10n_syscohada.syscohada_chart_template
+pcg_group_647,647,,"Pénalités, amendes fiscales",l10n_syscohada.syscohada_chart_template
+pcg_group_648,648,,"Autres impôts et taxes",l10n_syscohada.syscohada_chart_template
+pcg_group_65,65,,"Autres charges",l10n_syscohada.syscohada_chart_template
+pcg_group_651,651,,"Pertes sur créances clients et autres débiteurs",l10n_syscohada.syscohada_chart_template
+pcg_group_652,652,,"Quote-part de résultat sur opérations faites en commun",l10n_syscohada.syscohada_chart_template
+pcg_group_654,654,,"Valeurs comptables des cessions courantes d'immobilisations",l10n_syscohada.syscohada_chart_template
+pcg_group_656,656,,"Perte de change sur créances et dettes commerciales",l10n_syscohada.syscohada_chart_template
+pcg_group_659,659,,"Charges diverses",l10n_syscohada.syscohada_chart_template
+pcg_group_658,658,,"Charges pour dépréciations et provisions pour risques à court terme d'exploitation",l10n_syscohada.syscohada_chart_template
+pcg_group_66,66,,"Charges de personnel",l10n_syscohada.syscohada_chart_template
+pcg_group_661,661,,"Rémunérations directes versées au personnel national",l10n_syscohada.syscohada_chart_template
+pcg_group_662,662,,"Rémunérations directes versées au personnel non national",l10n_syscohada.syscohada_chart_template
+pcg_group_663,663,,"Indemnités forfaitaires versées au personnel",l10n_syscohada.syscohada_chart_template
+pcg_group_664,664,,"Charges sociales",l10n_syscohada.syscohada_chart_template
+pcg_group_666,666,,"Rémunérations et charges sociales de l'exploitant individuel",l10n_syscohada.syscohada_chart_template
+pcg_group_667,667,,"Rémunération transférée de personnel extérieur",l10n_syscohada.syscohada_chart_template
+pcg_group_668,668,,"Autres charges sociales",l10n_syscohada.syscohada_chart_template
+pcg_group_67,67,,"Frais financiers et charges assimilées",l10n_syscohada.syscohada_chart_template
+pcg_group_671,671,,"Intérêts des emprunts",l10n_syscohada.syscohada_chart_template
+pcg_group_672,672,,"Intérêts dans loyers de location acquisition",l10n_syscohada.syscohada_chart_template
+pcg_group_673,673,,"Escomptes accordés",l10n_syscohada.syscohada_chart_template
+pcg_group_674,674,,"Autres intérêts",l10n_syscohada.syscohada_chart_template
+pcg_group_675,675,,"Escomptes des effets de commerce",l10n_syscohada.syscohada_chart_template
+pcg_group_676,676,,"Pertes de change financières",l10n_syscohada.syscohada_chart_template
+pcg_group_677,677,,"Pertes sur titres de placement",l10n_syscohada.syscohada_chart_template
+pcg_group_678,678,,"Pertes et charges sur risques financiers",l10n_syscohada.syscohada_chart_template
+pcg_group_679,679,,"Charges pour dépréciations et provisions pour risques à court terme financières",l10n_syscohada.syscohada_chart_template
+pcg_group_68,68,,"Dotation aux amortissements",l10n_syscohada.syscohada_chart_template
+pcg_group_681,681,,"Dotation aux amortissements d'exploitation",l10n_syscohada.syscohada_chart_template
+pcg_group_69,69,,"Dotations aux provisions et aux dépréciations",l10n_syscohada.syscohada_chart_template
+pcg_group_691,691,,"Dotations aux provisions et aux dépréciations d'exploitation",l10n_syscohada.syscohada_chart_template
+pcg_group_697,697,,"Dotations aux provisions et aux dépréciations financières",l10n_syscohada.syscohada_chart_template
+pcg_group_7,7,,"Comptes de produits des activités ordinaires",l10n_syscohada.syscohada_chart_template
+pcg_group_70,70,,"Ventes",l10n_syscohada.syscohada_chart_template
+pcg_group_701,701,,"Ventes de marchandises",l10n_syscohada.syscohada_chart_template
+pcg_group_702,702,,"Ventes de produits finis",l10n_syscohada.syscohada_chart_template
+pcg_group_703,703,,"Ventes de produits intermédiaires",l10n_syscohada.syscohada_chart_template
+pcg_group_704,704,,"Ventes de produits résiduels",l10n_syscohada.syscohada_chart_template
+pcg_group_705,705,,"Travaux facturés",l10n_syscohada.syscohada_chart_template
+pcg_group_706,706,,"Services vendus",l10n_syscohada.syscohada_chart_template
+pcg_group_707,707,,"Produits accessoires",l10n_syscohada.syscohada_chart_template
+pcg_group_71,71,,"Subventions d'exploitation",l10n_syscohada.syscohada_chart_template
+pcg_group_711,711,,"Sur produits à l'exportation",l10n_syscohada.syscohada_chart_template
+pcg_group_712,712,,"Sur produits à l'importation",l10n_syscohada.syscohada_chart_template
+pcg_group_713,713,,"Sur produits de péréquation",l10n_syscohada.syscohada_chart_template
+pcg_group_714,714,,"Indemnités et subventions d'exploitation (entité agricole)",l10n_syscohada.syscohada_chart_template
+pcg_group_718,718,,"Autres subventions d'exploitation",l10n_syscohada.syscohada_chart_template
+pcg_group_72,72,,"Production immobilisée",l10n_syscohada.syscohada_chart_template
+pcg_group_721,721,,"Immobilisations incorporelles",l10n_syscohada.syscohada_chart_template
+pcg_group_722,722,,"Immobilisations corporelles",l10n_syscohada.syscohada_chart_template
+pcg_group_724,724,,"Production auto-consommée",l10n_syscohada.syscohada_chart_template
+pcg_group_726,726,,"Immobilisations financières",l10n_syscohada.syscohada_chart_template
+pcg_group_73,73,,"Variations des stocks de biens et de services produits",l10n_syscohada.syscohada_chart_template
+pcg_group_734,734,,"Variations des stocks de produits en cours",l10n_syscohada.syscohada_chart_template
+pcg_group_735,735,,"Variations des stocks des en-cours de services",l10n_syscohada.syscohada_chart_template
+pcg_group_736,736,,"Variations des stocks des stocks de produits finis",l10n_syscohada.syscohada_chart_template
+pcg_group_737,737,,"Variations des stocks de produits intermédiaires et résiduels",l10n_syscohada.syscohada_chart_template
+pcg_group_75,75,,"Autres produits",l10n_syscohada.syscohada_chart_template
+pcg_group_751,751,,"Profits sur créances clients et autres débiteurs",l10n_syscohada.syscohada_chart_template
+pcg_group_752,752,,"Quote-part de résultat sur opérations faites en commun",l10n_syscohada.syscohada_chart_template
+pcg_group_754,754,,"Produits des cessions courantes d'immobilisations",l10n_syscohada.syscohada_chart_template
+pcg_group_756,756,,"Gains de change sur créances et dettes commerciales",l10n_syscohada.syscohada_chart_template
+pcg_group_758,758,,"Produits divers",l10n_syscohada.syscohada_chart_template
+pcg_group_759,759,,"Reprises de charges pour dépréciations et provisions pour risques à court terme d'exploitation",l10n_syscohada.syscohada_chart_template
+pcg_group_77,77,,"Revenus financiers et produits assimilés",l10n_syscohada.syscohada_chart_template
+pcg_group_771,771,,"Intérêts de prêts et créances diverses",l10n_syscohada.syscohada_chart_template
+pcg_group_772,772,,"Revenus de participations et autres titres immobilisés",l10n_syscohada.syscohada_chart_template
+pcg_group_773,773,,"Escomptes obtenus",l10n_syscohada.syscohada_chart_template
+pcg_group_774,774,,"Revenus de placement",l10n_syscohada.syscohada_chart_template
+pcg_group_775,775,,"Intérêts dans loyers de location-acquisition",l10n_syscohada.syscohada_chart_template
+pcg_group_776,776,,"Gains de change financiers",l10n_syscohada.syscohada_chart_template
+pcg_group_777,777,,"Gains sur cessions de titres de placement",l10n_syscohada.syscohada_chart_template
+pcg_group_778,778,,"Gains sur risques financiers",l10n_syscohada.syscohada_chart_template
+pcg_group_779,779,,"Reprises de charges pour dépréciations et provisions à court terme financières",l10n_syscohada.syscohada_chart_template
+pcg_group_78,78,,"Transfert de charges",l10n_syscohada.syscohada_chart_template
+pcg_group_781,781,,"Transferts de charges d'exploitation",l10n_syscohada.syscohada_chart_template
+pcg_group_787,787,,"Transferts de charges financières",l10n_syscohada.syscohada_chart_template
+pcg_group_79,79,,"Reprises de provisions, de dépréciations et autres",l10n_syscohada.syscohada_chart_template
+pcg_group_791,791,,"Reprises de provisions et dépréciations d'exploitation",l10n_syscohada.syscohada_chart_template
+pcg_group_797,792,,"Reprises de provisions et dépréciations financières",l10n_syscohada.syscohada_chart_template
+pcg_group_798,798,,"Reprises d'amortissements",l10n_syscohada.syscohada_chart_template
+pcg_group_799,799,,"Reprises de subventions d'investissement",l10n_syscohada.syscohada_chart_template
+pcg_group_8,8,,"Comptes des autres charges et des autres produits",l10n_syscohada.syscohada_chart_template
+pcg_group_81,81,,"Valeurs comptables des cessions d'immobilisations",l10n_syscohada.syscohada_chart_template
+pcg_group_811,811,,"Immobilisations incorporelles",l10n_syscohada.syscohada_chart_template
+pcg_group_812,812,,"Immobilisations corporelles",l10n_syscohada.syscohada_chart_template
+pcg_group_813,813,,"Immobilisations financières",l10n_syscohada.syscohada_chart_template
+pcg_group_82,82,,"Produits des cessions d'immobilisations",l10n_syscohada.syscohada_chart_template
+pcg_group_821,821,,"Immobilisations incorporelles",l10n_syscohada.syscohada_chart_template
+pcg_group_822,822,,"Immobilisations corporelles",l10n_syscohada.syscohada_chart_template
+pcg_group_823,823,,"Immobilisations financières",l10n_syscohada.syscohada_chart_template
+pcg_group_83,83,,"Charges hors activités ordinaires",l10n_syscohada.syscohada_chart_template
+pcg_group_831,831,,"Charges H.A.O. constatées",l10n_syscohada.syscohada_chart_template
+pcg_group_833,833,,"Charges liées aux opérations de restructuration",l10n_syscohada.syscohada_chart_template
+pcg_group_834,834,,"Pertes sur créances HAO",l10n_syscohada.syscohada_chart_template
+pcg_group_835,835,,"Dons et libéralités accordés",l10n_syscohada.syscohada_chart_template
+pcg_group_836,836,,"abandons de créances consentis",l10n_syscohada.syscohada_chart_template
+pcg_group_837,837,,"Charges liées aux opérations de liquidation",l10n_syscohada.syscohada_chart_template
+pcg_group_839,839,,"Charges pour dépréciations et provisions pour risques à court terme HAO",l10n_syscohada.syscohada_chart_template
+pcg_group_84,84,,"Produits hors activités ordinaires",l10n_syscohada.syscohada_chart_template
+pcg_group_841,841,,"Produits HAO constatés",l10n_syscohada.syscohada_chart_template
+pcg_group_843,843,,"Produits liés aux opérations de restructuration",l10n_syscohada.syscohada_chart_template
+pcg_group_844,844,,"Indemnités et subventions HAO (entité agricole)",l10n_syscohada.syscohada_chart_template
+pcg_group_845,845,,"Dons et libéralités obtenus",l10n_syscohada.syscohada_chart_template
+pcg_group_846,846,,"Abandons de créances obtenus",l10n_syscohada.syscohada_chart_template
+pcg_group_847,847,,"Produits liés aux opérations de liquidation",l10n_syscohada.syscohada_chart_template
+pcg_group_848,848,,"Transferts de charges HAO",l10n_syscohada.syscohada_chart_template
+pcg_group_849,849,,"Reprises de charges pour dépréciations et provisions pour risques à court terme HAO",l10n_syscohada.syscohada_chart_template
+pcg_group_85,85,,"Dotations hors activités ordinaires",l10n_syscohada.syscohada_chart_template
+pcg_group_851,851,,"Dotations aux provisions réglementées",l10n_syscohada.syscohada_chart_template
+pcg_group_852,852,,"Dotations aux amortissements HAO",l10n_syscohada.syscohada_chart_template
+pcg_group_853,853,,"Dotations aux dépréciations HAO",l10n_syscohada.syscohada_chart_template
+pcg_group_854,854,,"Dotations aux provisions pour risques et charges HAO",l10n_syscohada.syscohada_chart_template
+pcg_group_858,858,,"Autres dotations HAO",l10n_syscohada.syscohada_chart_template
+pcg_group_86,86,,"Reprises de charges, provisions et dépréciations HAO",l10n_syscohada.syscohada_chart_template
+pcg_group_861,861,,"Reprises de provisions réglementées",l10n_syscohada.syscohada_chart_template
+pcg_group_862,862,,"Reprises d'amortissements HAO",l10n_syscohada.syscohada_chart_template
+pcg_group_863,863,,"Reprises de dépréciations HAO",l10n_syscohada.syscohada_chart_template
+pcg_group_864,864,,"Reprises de provisions pour risques et charges HAO",l10n_syscohada.syscohada_chart_template
+pcg_group_868,868,,"Autres reprises HAO",l10n_syscohada.syscohada_chart_template
+pcg_group_87,87,,"Participation des travailleurs",l10n_syscohada.syscohada_chart_template
+pcg_group_871,871,,"Participation légale aux bénéfices",l10n_syscohada.syscohada_chart_template
+pcg_group_874,874,,"Participation contractuelle aux bénéfice",l10n_syscohada.syscohada_chart_template
+pcg_group_878,878,,"Autres participations",l10n_syscohada.syscohada_chart_template
+pcg_group_88,88,,"Subventions d'équilibre",l10n_syscohada.syscohada_chart_template
+pcg_group_881,881,,"Etat",l10n_syscohada.syscohada_chart_template
+pcg_group_884,884,,"Collectivités publiques",l10n_syscohada.syscohada_chart_template
+pcg_group_886,886,,"Groupe",l10n_syscohada.syscohada_chart_template
+pcg_group_888,888,,"Autres",l10n_syscohada.syscohada_chart_template
+pcg_group_89,89,,"Impôt sur le résultat",l10n_syscohada.syscohada_chart_template
+pcg_group_891,891,,"Impôt sur les bénéfices de l'exercice",l10n_syscohada.syscohada_chart_template
+pcg_group_892,892,,"Rappel d'impôts sur résultats antérieurs",l10n_syscohada.syscohada_chart_template
+pcg_group_895,895,,"Impôt minimum forfaitaire",l10n_syscohada.syscohada_chart_template
+pcg_group_899,899,,"Dégrèvements et annulations d'impôts sur résultats antérieurs",l10n_syscohada.syscohada_chart_template
+pcg_group_9,9,,"Comptes des engagements hors bilan",l10n_syscohada.syscohada_chart_template
+pcg_group_90,90,,"Engagements obtenus et engagements accordés",l10n_syscohada.syscohada_chart_template
+pcg_group_901,901,,"Engagements de financement otenus",l10n_syscohada.syscohada_chart_template
+pcg_group_902,902,,"Engagements de garantie otenus",l10n_syscohada.syscohada_chart_template
+pcg_group_903,903,,"Engagements réciproques obtenus",l10n_syscohada.syscohada_chart_template
+pcg_group_904,904,,"Autres engagements otenus",l10n_syscohada.syscohada_chart_template
+pcg_group_905,905,,"Engagements de financement accordés",l10n_syscohada.syscohada_chart_template
+pcg_group_906,906,,"Engagements de garantie accordés",l10n_syscohada.syscohada_chart_template
+pcg_group_907,907,,"Engagements réciproques accordés",l10n_syscohada.syscohada_chart_template
+pcg_group_908,908,,"Autres engagements accordés",l10n_syscohada.syscohada_chart_template
+pcg_group_91,91,,"Contreparties des engagements",l10n_syscohada.syscohada_chart_template
+pcg_group_911_914,911,914,"Contreparties des engagements obtenus",l10n_syscohada.syscohada_chart_template
+pcg_group_915_918,915,918,"Contreparties des engagements accordés",l10n_syscohada.syscohada_chart_template
+pcg_group_92,92,,"Comptes réfléchis",l10n_syscohada.syscohada_chart_template
+pcg_group_93,93,,"Comptes de reclassements",l10n_syscohada.syscohada_chart_template
+pcg_group_94,94,,"Comtpes de coûts",l10n_syscohada.syscohada_chart_template
+pcg_group_95,95,,"Comptes de stocks",l10n_syscohada.syscohada_chart_template
+pcg_group_96,96,,"Comptes d'écarts sur coûts préétablis",l10n_syscohada.syscohada_chart_template
+pcg_group_97,97,,"Comptes de différences de traitement comptable",l10n_syscohada.syscohada_chart_template
+pcg_group_98,98,,"Comptes de résultats",l10n_syscohada.syscohada_chart_template
+pcg_group_99,99,,"Comptes de liaisons internes",l10n_syscohada.syscohada_chart_template
