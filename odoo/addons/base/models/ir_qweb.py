@@ -389,7 +389,7 @@ from dateutil.relativedelta import relativedelta
 from odoo import api, models, tools
 from odoo.tools import config, safe_eval, pycompat, SUPPORTED_DEBUGGER
 from odoo.tools.safe_eval import assert_valid_codeobj, _BUILTINS, to_opcodes, _EXPR_OPCODES, _BLACKLIST
-from odoo.tools.expr_checker import expr_checker
+from odoo.tools.expr_checker import expr_checker, expr_checker_prepare_context
 from odoo.tools.json import _ScriptSafe, JSON, scriptsafe
 from odoo.tools.misc import get_lang
 from odoo.tools.image import image_data_uri
@@ -544,7 +544,6 @@ class IrQWeb(models.AbstractModel):
 
     _name = 'ir.qweb'
     _description = 'Qweb'
-    _execution_context = {}
 
     @QwebTracker.wrap_render
     @api.model
@@ -859,7 +858,7 @@ class IrQWeb(models.AbstractModel):
             'Markup': Markup,
             'escape': escape,
             'VOID_ELEMENTS': VOID_ELEMENTS,
-            **self._execution_context,
+            **expr_checker_prepare_context(_qweb_ast_get_attr, check_type=_qweb_ast_check_type),
             **_BUILTINS,
         }
 
@@ -1118,17 +1117,16 @@ class IrQWeb(models.AbstractModel):
 
         assert_valid_codeobj(_SAFE_QWEB_OPCODES, compile(expression, '<>', 'eval'), expr)
 
-        try:
-            if self.env["benchmark_mode"]:
-                return f"({expression})" 
+        expression_with_checks = expr_checker(expression)
+        return f"({expression_with_checks})"
 
-        except KeyError:
-            expression_with_checks, ctx = expr_checker(expression, _qweb_ast_get_attr, return_code=False, check_type=_qweb_ast_check_type)
 
-            self._execution_context.clear()
-            self._execution_context.update(ctx)
-
-            return f"({expression_with_checks})"
+        # try:
+            # if self.env["benchmark_mode"]:
+                # return f"({expression})" 
+        # except KeyError:
+            # expression_with_checks, ctx = expr_checker(expression)
+            # return f"({expression_with_checks})"
 
     def _compile_bool(self, attr, default=False):
         """Convert the statements as a boolean."""

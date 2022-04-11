@@ -42,9 +42,7 @@ class ReadOnlyObject:
 
 def check_type(method, value):
     safe_type = (Good, ReadOnlyObject)
-
-    if type(value) in safe_type:
-        return value
+    return type(value) in safe_type
 
 class TestFuncChecker(BaseCase):
     def test_function_call(self):
@@ -183,45 +181,6 @@ class TestFuncChecker(BaseCase):
         ):
             safe_eval("a._secret_stuff = 42", mode="exec", locals_dict={"a": a})
 
-    def test_file_open(self):
-        a = Good()
-        a.evil = open("/etc/passwd")
-
-        # FIXME with ast_set_attr
-        with self.assertRaisesRegex(
-            ValueError, "safe_eval doesn't permit you to read evil"
-        ):
-            safe_eval("print(a.evil)", locals_dict={"a": a})
-
-        a.evil.close()
-
-    def test_isinstance_bad_idea(self):
-        class Dangerous2(Good):
-            pass
-
-        def check_type2(method, value):
-            safe_type = (str, int, type(None), type(range(0)), Good)
-
-            if isinstance(value, (list, tuple, set)):
-                for val in value:
-                    check_type(method, val)
-                return value
-            elif not isinstance(value, safe_type):
-                raise ValueError(f"safe_eval didn't like {value}")
-            else:
-                return value
-
-        code = "(1, 'Hi', Dangerous2())"
-
-        safe_eval(code, locals_dict={"Dangerous2": Dangerous2}, check_type=check_type2)
-
-        with self.assertRaisesRegex(
-            ValueError,
-            "safe_eval didn't like <.+.test_isinstance_bad_idea.<locals"
-            ">.Dangerous2 object at .+>",
-        ):
-            safe_eval(code, locals_dict={"Dangerous2": Dangerous2})
-
     def test_deny_function_call(self):
         with self.assertRaises(Exception) as e:
             safe_eval("print('Hello, World')", allow_functions_calls=False)
@@ -230,12 +189,8 @@ class TestFuncChecker(BaseCase):
             e.exception.args[0], "safe_eval didn't permit you to call any functions"
         )
 
-        with self.assertRaises(Exception) as e:
+        with self.assertRaisesRegex(Exception, "safe_eval didn't permit you to call any functions"):
             safe_eval("kanban.get('sold')", allow_functions_calls=False)
-
-        self.assertEqual(
-            e.exception.args[0], "safe_eval didn't permit you to call any functions"
-        )
 
     def test_assign(self):
         safe_eval("a = 4", mode="exec")
@@ -255,6 +210,8 @@ class TestFuncChecker(BaseCase):
             )
 
     def test_dangerous_lambda(self):
+        safe_eval("(lambda: 4)()", mode="exec")
+
         with self.assertRaisesRegex(ValueError, "<.+.Dangerous object at .+>"):
             safe_eval(
                 "(lambda : print(Dangerous()))()",
@@ -272,7 +229,6 @@ class TestFuncChecker(BaseCase):
                 """
                 def __ast_check_type_fn(t):
                     return t
-                c = a.evil
                 """
             )
 
@@ -284,14 +240,13 @@ class TestFuncChecker(BaseCase):
             code = cleandoc(
                 """
                 __ast_check_type_fn = lambda t: t
-                c = a.evil
                 """
             )
 
             safe_eval(code, check_type=check_type, locals_dict={"a": a}, mode="exec")
 
     def test_function_body(self):
-        Good.test = open("/etc/passwd")
+        Good.test = Dangerous()
         code = cleandoc(
             """
                def b():
@@ -444,7 +399,10 @@ class TestFuncChecker(BaseCase):
         )
         safe_eval(code, check_type=check_type, mode="exec")
 
-        obj = Good()
+        # Because we use qualname to detect non-bounded classes (class.method) 
+        # It's safer to test those cases 
+        
+        # Lambda functions inside of a listcomps are interpreted as <listcomp>.<lambda>
         code = cleandoc(
             """
             [(lambda x: x**2)(n) for n in range(1, 11)] 
@@ -453,6 +411,7 @@ class TestFuncChecker(BaseCase):
 
         safe_eval(code, check_type=check_type, mode="exec", globals_dict={"obj": obj})
 
+        # Functions inside of functions are interpreted as a.<locals>.b 
         code = cleandoc(
             """
             def a():

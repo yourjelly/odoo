@@ -1,4 +1,5 @@
-from odoo.tools.expr_checker import expr_checker
+import ast 
+from odoo.tools.expr_checker import expr_checker, expr_checker_prepare_context
 
 unsafe_eval = eval
 
@@ -66,6 +67,7 @@ def safe_eval(
     mode="eval",
     check_type=None,
     allow_functions_calls=True,
+    dbg = False
 ):
     if globals_dict is not None:
         globals_dict = dict(globals_dict)
@@ -76,24 +78,18 @@ def safe_eval(
     globals_dict["__builtins__"] = _BUILTINS
 
     if check_type is None:
-        code, scope = expr_checker(
-            expr,
-            safe_get_attr,
-            allow_function_calls=allow_functions_calls,
-            allow_private=True,
-            return_code=False,
-        )
+        scope = expr_checker_prepare_context(safe_get_attr)
     else:
-        code, scope = expr_checker(
-            expr,
-            safe_get_attr,
-            check_type=check_type,
-            allow_function_calls=allow_functions_calls,
-            allow_private=True,
-            return_code=False,
-        )
+        scope = expr_checker_prepare_context(safe_get_attr, check_type=check_type)
 
+    code = expr_checker(expr, allow_function_calls=allow_functions_calls, allow_private=True)
     globals_dict.update(scope)
+
+    if dbg:
+        print(" === ")
+        print(ast.dump(ast.parse(expr), indent=4))
+        print(" === \n\n")
+        print(code)
 
     c = compile(code, "", mode)
     return unsafe_eval(c, globals_dict, locals_dict)

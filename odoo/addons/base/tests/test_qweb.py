@@ -650,6 +650,7 @@ class TestQWebBasic(TransactionCase):
             compiled = compile("""def test(values):\n  values['result'] = %s""" % expr_namespace, '<test>', 'exec')
             globals_dict = IrQweb._prepare_globals()
             values = {}
+            print(expr_namespace)
             unsafe_eval(compiled, globals_dict, values)
             test = values['test']
 
