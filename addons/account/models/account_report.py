@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import models, fields, api, _
-from odoo.exceptions import ValidationError
-from odoo import osv
-
-from collections import defaultdict
 import itertools
 import re
+from collections import defaultdict
+
+from odoo import models, fields, api, _, osv
+from odoo.exceptions import ValidationError, UserError
 
 FIGURE_TYPE_SELECTION_VALUES = [
     ('monetary', "Monetary"),
