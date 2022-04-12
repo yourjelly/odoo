@@ -1,0 +1,585 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record model="account.tax.template" id="tva_sale_18">
+        <field name="name">TVA 18% (vente)</field>
+        <field name="chart_template_id" ref="l10n_syscohada.syscohada_chart_template"/>
+        <field name="amount">18</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="tax_group_id" ref="tax_group_18"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_line_ids': [ref('l10n_sn.tax_report_op_realisees_base_taxable_autres_op')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'plus_report_line_ids': [ref('l10n_sn.tax_report_tva_brut_normal')],
+                'account_id': ref('l10n_syscohada.pcg_4431'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [ref('l10n_sn.tax_report_op_realisees_base_taxable_autres_op')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'minus_report_line_ids': [ref('l10n_sn.tax_report_tva_brut_normal')],
+                'account_id': ref('l10n_syscohada.pcg_4431'),
+            }),
+        ]"/>
+    </record>
+    <record model="account.tax.template" id="tva_services_18">
+        <field name="name">TVA 18% (services)</field>
+        <field name="chart_template_id" ref="l10n_syscohada.syscohada_chart_template"/>
+        <field name="amount">18</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="tax_group_id" ref="tax_group_18"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_line_ids': [ref('l10n_sn.tax_report_op_realisees_base_taxable_autres_op')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'plus_report_line_ids': [ref('l10n_sn.tax_report_tva_brut_normal')],
+                'account_id': ref('l10n_syscohada.pcg_4432'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [ref('l10n_sn.tax_report_op_realisees_base_taxable_autres_op')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_syscohada.pcg_4432'),
+                'minus_report_line_ids': [ref('l10n_sn.tax_report_tva_brut_normal')],
+            }),
+        ]"/>
+    </record>
+    <record model="account.tax.template" id="tva_travaux_18">
+        <field name="name">TVA 18% (travaux)</field>
+        <field name="chart_template_id" ref="l10n_syscohada.syscohada_chart_template"/>
+        <field name="amount">18</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="tax_group_id" ref="tax_group_18"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_line_ids': [ref('l10n_sn.tax_report_op_realisees_base_taxable_autres_op')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'plus_report_line_ids': [ref('l10n_sn.tax_report_tva_brut_normal')],
+                'account_id': ref('l10n_syscohada.pcg_4433'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [ref('l10n_sn.tax_report_op_realisees_base_taxable_autres_op')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'minus_report_line_ids': [ref('l10n_sn.tax_report_tva_brut_normal')],
+                'account_id': ref('l10n_syscohada.pcg_4433'),
+            }),
+        ]"/>
+    </record>
+    <record model="account.tax.template" id="tva_lasm_18">
+        <field name="name">TVA 18% (lasm)</field>
+        <field name="chart_template_id" ref="l10n_syscohada.syscohada_chart_template"/>
+        <field name="amount">18</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="tax_group_id" ref="tax_group_18"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_line_ids': [ref('l10n_sn.tax_report_op_realisees_base_taxable_lasm')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'plus_report_line_ids': [ref('l10n_sn.tax_report_tva_brut_normal')],
+                'account_id': ref('l10n_syscohada.pcg_4434'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [ref('l10n_sn.tax_report_op_realisees_base_taxable_lasm')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'minus_report_line_ids': [ref('l10n_sn.tax_report_tva_brut_normal')],
+                'account_id': ref('l10n_syscohada.pcg_4434'),
+            }),
+        ]"/>
+    </record>
+    <record model="account.tax.template" id="tva_services_10">
+        <field name="name">TVA 10% (services)</field>
+        <field name="chart_template_id" ref="l10n_syscohada.syscohada_chart_template"/>
+        <field name="amount">10</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="tax_group_id" ref="tax_group_10"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_line_ids': [ref('l10n_sn.tax_report_op_realisees_base_taxable_taux_reduit')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'plus_report_line_ids': [ref('l10n_sn.tax_report_tva_brut_reduit')],
+                'account_id': ref('l10n_syscohada.pcg_4433'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [ref('l10n_sn.tax_report_op_realisees_base_taxable_taux_reduit')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'minus_report_line_ids': [ref('l10n_sn.tax_report_tva_brut_reduit')],
+                'account_id': ref('l10n_syscohada.pcg_4433'),
+            }),
+        ]"/>
+    </record>
+    <record model="account.tax.template" id="tva_purchase_18">
+        <field name="name">TVA 18% (achat)</field>
+        <field name="chart_template_id" ref="l10n_syscohada.syscohada_chart_template"/>
+        <field name="amount">18</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_18"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_htva_achats')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'plus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_tva_acquittee_achat')],
+                'account_id': ref('l10n_syscohada.pcg_4452'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_htva_achats')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'minus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_tva_acquittee_achat')],
+                'account_id': ref('l10n_syscohada.pcg_4452'),
+            }),
+        ]"/>
+    </record>
+    <record model="account.tax.template" id="tva_assets_18">
+        <field name="name">TVA 18% (immobilisations)</field>
+        <field name="chart_template_id" ref="l10n_syscohada.syscohada_chart_template"/>
+        <field name="amount">18</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_18"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_htva_achats')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'plus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_tva_acquittee_achat')],
+                'account_id': ref('l10n_syscohada.pcg_4451'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_htva_achats')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'minus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_tva_acquittee_achat')],
+                'account_id': ref('l10n_syscohada.pcg_4451'),
+            }),
+        ]"/>
+    </record>
+    <record model="account.tax.template" id="tva_purchase_transport_18">
+        <field name="name">TVA 18% (transport)</field>
+        <field name="chart_template_id" ref="l10n_syscohada.syscohada_chart_template"/>
+        <field name="amount">18</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_18"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_htva_achats')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'plus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_tva_acquittee_achat')],
+                'account_id': ref('l10n_syscohada.pcg_4453'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_htva_achats')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'minus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_tva_acquittee_achat')],
+                'account_id': ref('l10n_syscohada.pcg_4453'),
+            }),
+        ]"/>
+    </record>
+    <record model="account.tax.template" id="tva_purchase_services_18">
+        <field name="name">TVA 18% (achat service)</field>
+        <field name="chart_template_id" ref="l10n_syscohada.syscohada_chart_template"/>
+        <field name="amount">18</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_18"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_htva_achats')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'plus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_tva_acquittee_achat')],
+                'account_id': ref('l10n_syscohada.pcg_4454'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_htva_achats')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'minus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_tva_acquittee_achat')],
+                'account_id': ref('l10n_syscohada.pcg_4454'),
+            }),
+        ]"/>
+    </record>
+    <record model="account.tax.template" id="tva_achat_services_10">
+        <field name="name">TVA 10% (achat service taux reduit)</field>
+        <field name="chart_template_id" ref="l10n_syscohada.syscohada_chart_template"/>
+        <field name="amount">10</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_10"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_htva_achats')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'plus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_tva_acquittee_achat')],
+                'account_id': ref('l10n_syscohada.pcg_4454'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_htva_achats')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'minus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_tva_acquittee_achat')],
+                'account_id': ref('l10n_syscohada.pcg_4454'),
+            }),
+        ]"/>
+    </record>
+    <record model="account.tax.template" id="tva_sale_exonere">
+        <field name="name">TVA 0% (Vente Exo.)</field>
+        <field name="description">Exonéré de TVA (vente à l'intérieur)</field>
+        <field name="chart_template_id" ref="l10n_syscohada.syscohada_chart_template"/>
+        <field name="amount">0</field>
+        <field name="type_tax_use">sale</field>
+        <field name="tax_group_id" ref="tax_group_0"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_line_ids': [ref('l10n_sn.tax_report_op_realisees_base_non_taxable_intern')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [ref('l10n_sn.tax_report_op_realisees_base_non_taxable_intern')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+    </record>
+    <record model="account.tax.template" id="tva_sale_suspension">
+        <field name="name">Suspension de TVA (vente)</field>
+        <field name="chart_template_id" ref="l10n_syscohada.syscohada_chart_template"/>
+        <field name="amount">0</field>
+        <field name="type_tax_use">sale</field>
+        <field name="tax_group_id" ref="tax_group_0"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_line_ids': [ref('l10n_sn.tax_report_op_realisees_base_non_taxable_suspension')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [ref('l10n_sn.tax_report_op_realisees_base_non_taxable_suspension')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+    </record>
+    <record model="account.tax.template" id="tva_sale_export">
+        <field name="name">EXP</field>
+        <field name="description">Exportations</field>
+        <field name="chart_template_id" ref="l10n_syscohada.syscohada_chart_template"/>
+        <field name="amount">0</field>
+        <field name="type_tax_use">sale</field>
+        <field name="tax_group_id" ref="tax_group_0"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_line_ids': [ref('l10n_sn.tax_report_op_realisees_base_non_taxable_export')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [ref('l10n_sn.tax_report_op_realisees_base_non_taxable_export')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+    </record>
+    <record model="account.tax.template" id="tva_purchase_exonere">
+        <field name="name">TVA 0% (Achat Exo.)</field>
+        <field name="description">Exonéré de TVA (achat)</field>
+        <field name="chart_template_id" ref="l10n_syscohada.syscohada_chart_template"/>
+        <field name="amount">0</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_0"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_htva_achats')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_htva_achats')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+    </record>
+    <record model="account.tax.template" id="tva_import_18">
+        <field name="name">IMP (18%)</field>
+        <field name="description">Importations de produits et services au taux 18%</field>
+        <field name="chart_template_id" ref="l10n_syscohada.syscohada_chart_template"/>
+        <field name="amount">18</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_18"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_htva_import')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'plus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_tva_acquittee_import')],
+                'account_id': ref('l10n_syscohada.pcg_4454'),
+            }),
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_htva_import')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'minus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_tva_acquittee_import')],
+                'account_id': ref('l10n_syscohada.pcg_4454'),
+            }),
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+    </record>
+    <record model="account.tax.template" id="tva_import_10">
+        <field name="name">IMP (10%)</field>
+        <field name="description">Importations de produits et services au taux 10%</field>
+        <field name="chart_template_id" ref="l10n_syscohada.syscohada_chart_template"/>
+        <field name="amount">10</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_10"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_htva_import')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'plus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_tva_acquittee_import')],
+                'account_id': ref('l10n_syscohada.pcg_4454'),
+            }),
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_htva_import')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'minus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_tva_acquittee_import')],
+                'account_id': ref('l10n_syscohada.pcg_4454'),
+            }),
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+    </record>
+    <record model="account.tax.template" id="tva_import_0">
+        <field name="name">IMP (0%)</field>
+        <field name="description">Importations de produits et services exonérés de TVA</field>
+        <field name="chart_template_id" ref="l10n_syscohada.syscohada_chart_template"/>
+        <field name="amount">10</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_10"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_htva_import')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [ref('l10n_sn.tax_report_achat_import_htva_import')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+    </record>
+</odoo>

@@ -1,0 +1,66 @@
+<odoo>
+    <data noupdate="1">
+        <record id="fiscal_position_national" model="account.fiscal.position.template">
+            <field name="name">National</field>
+            <field name="auto_apply" eval="True"/>
+            <field name="sequence">10</field>
+            <field name="country_id" ref="base.td"/>
+            <field name="chart_template_id" ref="l10n_syscohada.syscohada_chart_template"/>
+        </record>
+        <record id="fiscal_position_international" model="account.fiscal.position.template">
+            <field name="name">International</field>
+            <field name="auto_apply" eval="True"/>
+            <field name="sequence">20</field>
+            <field name="chart_template_id" ref="l10n_syscohada.syscohada_chart_template"/>
+        </record>
+
+
+        <record id="export_18" model="account.fiscal.position.tax.template">
+            <field name="position_id" ref="fiscal_position_international"/>
+            <field name="tax_src_id" ref="tva_sale_18"/>
+            <field name="tax_dest_id" ref="tva_export_0"/>
+        </record>
+
+        <record id="export_9" model="account.fiscal.position.tax.template">
+            <field name="position_id" ref="fiscal_position_international"/>
+            <field name="tax_src_id" ref="tva_sale_9"/>
+            <field name="tax_dest_id" ref="tva_export_0"/>
+        </record>
+
+        <record id="export_sale_0" model="account.fiscal.position.tax.template">
+            <field name="position_id" ref="fiscal_position_international"/>
+            <field name="tax_src_id" ref="tva_sale_0"/>
+            <field name="tax_dest_id" ref="tva_export_0"/>
+        </record>
+
+        <record id="export_exempt_0" model="account.fiscal.position.tax.template">
+            <field name="position_id" ref="fiscal_position_international"/>
+            <field name="tax_src_id" ref="tva_sale_exempt"/>
+            <field name="tax_dest_id" ref="tva_export_0"/>
+        </record>
+
+        <record id="import_18" model="account.fiscal.position.tax.template">
+            <field name="position_id" ref="fiscal_position_international"/>
+            <field name="tax_src_id" ref="tva_purchase_18"/>
+            <field name="tax_dest_id" ref="tva_import_0"/>
+        </record>
+
+        <record id="import_9" model="account.fiscal.position.tax.template">
+            <field name="position_id" ref="fiscal_position_international"/>
+            <field name="tax_src_id" ref="tva_purchase_9"/>
+            <field name="tax_dest_id" ref="tva_import_0"/>
+        </record>
+
+        <record id="import_0" model="account.fiscal.position.tax.template">
+            <field name="position_id" ref="fiscal_position_international"/>
+            <field name="tax_src_id" ref="tva_purchase_0"/>
+            <field name="tax_dest_id" ref="tva_import_0"/>
+        </record>
+
+        <record id="import_exempt_0" model="account.fiscal.position.tax.template">
+            <field name="position_id" ref="fiscal_position_international"/>
+            <field name="tax_src_id" ref="tva_purchase_exempt"/>
+            <field name="tax_dest_id" ref="tva_import_0"/>
+        </record>
+    </data>
+</odoo>

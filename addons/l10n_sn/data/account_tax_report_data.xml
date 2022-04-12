@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="tax_report" model="account.tax.report">
+        <field name="name">Tax Report</field>
+        <field name="country_id" ref="base.sn"/>
+    </record>
+
+    <record id="tax_report_op_realisees" model="account.tax.report.line">
+        <field name="name">A. Opérations réalisées</field>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">10</field>
+        <field name="formula">None</field>
+    </record>
+
+    <record id="tax_report_op_realisees_affaires" model="account.tax.report.line">
+        <field name="name">Total affaires</field>
+        <field name="parent_id" ref="tax_report_op_realisees"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">20</field>
+    </record>
+
+    <record id="tax_report_op_realisees_base_non_taxables" model="account.tax.report.line">
+        <field name="name">Total affaires non soumises à la TVA</field>
+        <field name="parent_id" ref="tax_report_op_realisees_affaires"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">30</field>
+    </record>
+
+    <record id="tax_report_op_realisees_base_non_taxable_export" model="account.tax.report.line">
+        <field name="name">Affaires à l'exportation</field>
+        <field name="tag_name">A10</field>
+        <field name="code">A10</field>
+        <field name="parent_id" ref="tax_report_op_realisees_base_non_taxables"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">40</field>
+    </record>
+
+    <record id="tax_report_op_realisees_base_non_taxable_intern" model="account.tax.report.line">
+        <field name="name">Affaires réalisées à l’intérieur non taxées</field>
+        <field name="tag_name">A15</field>
+        <field name="code">A15</field>
+        <field name="parent_id" ref="tax_report_op_realisees_base_non_taxables"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">50</field>
+    </record>
+
+    <record id="tax_report_op_realisees_base_non_taxable_suspension" model="account.tax.report.line">
+        <field name="name">Affaires réalisées en suspension de la TVA</field>
+        <field name="tag_name">A20</field>
+        <field name="code">A20</field>
+        <field name="parent_id" ref="tax_report_op_realisees_base_non_taxables"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">60</field>
+    </record>
+
+    <record id="tax_report_op_realisees_base_taxable" model="account.tax.report.line">
+        <field name="name">Total affaires soumises à la TVA</field>
+        <field name="parent_id" ref="tax_report_op_realisees_affaires"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">70</field>
+    </record>
+
+    <record id="tax_report_op_realisees_base_taxable_taux_normal" model="account.tax.report.line">
+        <field name="name">Taux Normal</field>
+        <field name="parent_id" ref="tax_report_op_realisees_base_taxable"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">80</field>
+    </record>
+
+    <record id="tax_report_op_realisees_base_taxable_lasm" model="account.tax.report.line">
+        <field name="name">Prélèvements et livraisons ou prestations à soi-même</field>
+        <field name="tag_name">B30</field>
+        <field name="code">B30</field>
+        <field name="parent_id" ref="tax_report_op_realisees_base_taxable_taux_normal"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">90</field>
+    </record>
+
+    <record id="tax_report_op_realisees_base_taxable_autres_op" model="account.tax.report.line">
+        <field name="name">Autres opérations</field>
+        <field name="tag_name">B45</field>
+        <field name="code">B45</field>
+        <field name="parent_id" ref="tax_report_op_realisees_base_taxable_taux_normal"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">100</field>
+    </record>
+
+    <record id="tax_report_op_realisees_base_taxable_taux_reduit" model="account.tax.report.line">
+        <field name="name">Taux réduit</field>
+        <field name="tag_name">B40</field>
+        <field name="code">B40</field>
+        <field name="parent_id" ref="tax_report_op_realisees_base_taxable"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">110</field>
+    </record>
+
+    <record id="tax_report_tva_brut" model="account.tax.report.line">
+        <field name="name">TVA Brut</field>
+        <field name="parent_id" ref="tax_report_op_realisees"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">120</field>
+    </record>
+
+    <record id="tax_report_tva_brut_normal" model="account.tax.report.line">
+        <field name="name">TVA - Taux normal (18%)</field>
+        <field name="tag_name">C50</field>
+        <field name="code">C50</field>
+        <field name="parent_id" ref="tax_report_tva_brut"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">130</field>
+    </record>
+
+    <record id="tax_report_tva_brut_reduit" model="account.tax.report.line">
+        <field name="name">TVA - Taux réduit (10%)</field>
+        <field name="tag_name">C55</field>
+        <field name="code">C55</field>
+        <field name="parent_id" ref="tax_report_tva_brut"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">140</field>
+    </record>
+
+    <record id="tax_report_achat_import" model="account.tax.report.line">
+        <field name="name">B. Achats et importations</field>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">150</field>
+        <field name="formula">None</field>
+    </record>
+
+    <record id="tax_report_achat_import_htva" model="account.tax.report.line">
+        <field name="name">Montant HTVA</field>
+        <field name="parent_id" ref="tax_report_achat_import"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">160</field>
+    </record>
+
+    <record id="tax_report_achat_import_htva_achats" model="account.tax.report.line">
+        <field name="name">Achats intérieurs</field>
+        <field name="tag_name">D91</field>
+        <field name="code">D91</field>
+        <field name="parent_id" ref="tax_report_achat_import_htva"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">170</field>
+    </record>
+
+    <record id="tax_report_achat_import_htva_import" model="account.tax.report.line">
+        <field name="name">Importations</field>
+        <field name="tag_name">D80</field>
+        <field name="code">D80</field>
+        <field name="parent_id" ref="tax_report_achat_import_htva"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">180</field>
+    </record>
+
+    <record id="tax_report_achat_import_tva_acquittee" model="account.tax.report.line">
+        <field name="name">TVA acquittée</field>
+        <field name="parent_id" ref="tax_report_achat_import"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">190</field>
+    </record>
+
+    <record id="tax_report_achat_import_tva_acquittee_achat" model="account.tax.report.line">
+        <field name="name">Achats intérieurs</field>
+        <field name="tag_name">D90</field>
+        <field name="code">D90</field>
+        <field name="parent_id" ref="tax_report_achat_import_tva_acquittee"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">200</field>
+    </record>
+
+    <record id="tax_report_achat_import_tva_acquittee_import" model="account.tax.report.line">
+        <field name="name">Importations</field>
+        <field name="tag_name">D85</field>
+        <field name="code">D85</field>
+        <field name="parent_id" ref="tax_report_achat_import_tva_acquittee"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">210</field>
+    </record>
+</odoo>

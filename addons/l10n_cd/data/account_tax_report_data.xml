@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="tax_report" model="account.tax.report">
+        <field name="name">Tax Report</field>
+        <field name="country_id" ref="base.cd"/>
+    </record>
+
+    <record id="tax_report_op_realisees" model="account.tax.report.line">
+        <field name="name">A. Opérations réalisées</field>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">10</field>
+        <field name="formula">None</field>
+    </record>
+
+    <record id="tax_report_op_realisee_chiffre_affaires" model="account.tax.report.line">
+        <field name="name">Chiffre d'affaires</field>
+        <field name="parent_id" ref="tax_report_op_realisees"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">20</field>
+    </record>
+
+    <record id="tax_report_base_livraisons_biens" model="account.tax.report.line">
+        <field name="name">Livraisons de biens</field>
+        <field name="tag_name">a_1</field>
+        <field name="code">a_1</field>
+        <field name="parent_id" ref="tax_report_op_realisee_chiffre_affaires"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">30</field>
+    </record>
+
+    <record id="tax_report_base_prestations_services" model="account.tax.report.line">
+        <field name="name">Prestations de services</field>
+        <field name="tag_name">a_2</field>
+        <field name="code">a_2</field>
+        <field name="parent_id" ref="tax_report_op_realisee_chiffre_affaires"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">40</field>
+    </record>
+
+    <record id="tax_report_base_livraisons_biens_soi_meme" model="account.tax.report.line">
+        <field name="name">Livraisons de biens à soi-même</field>
+        <field name="tag_name">a_3</field>
+        <field name="code">a_3</field>
+        <field name="parent_id" ref="tax_report_op_realisee_chiffre_affaires"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">50</field>
+    </record>
+
+    <record id="tax_report_base_prestations_services_soi_meme" model="account.tax.report.line">
+        <field name="name">Prestations de services à soi-même</field>
+        <field name="tag_name">a_4</field>
+        <field name="code">a_4</field>
+        <field name="parent_id" ref="tax_report_op_realisee_chiffre_affaires"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">60</field>
+    </record>
+
+    <record id="tax_report_base_marche_public" model="account.tax.report.line">
+        <field name="name">Opérations afférentes aux marchés publics à financement extérieur</field>
+        <field name="tag_name">a_5</field>
+        <field name="code">a_5</field>
+        <field name="parent_id" ref="tax_report_op_realisee_chiffre_affaires"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">70</field>
+    </record>
+
+    <record id="tax_report_base_exportations" model="account.tax.report.line">
+        <field name="name">Exportations et opérations assimilées</field>
+        <field name="tag_name">a_6</field>
+        <field name="code">a_6</field>
+        <field name="parent_id" ref="tax_report_op_realisee_chiffre_affaires"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">80</field>
+    </record>
+
+    <record id="tax_report_base_op_exonerees" model="account.tax.report.line">
+        <field name="name">Opérations exonérées</field>
+        <field name="tag_name">a_7</field>
+        <field name="code">a_7</field>
+        <field name="parent_id" ref="tax_report_op_realisee_chiffre_affaires"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">90</field>
+    </record>
+
+    <record id="tax_report_base_op_non_imposables" model="account.tax.report.line">
+        <field name="name">Opérations non imposables</field>
+        <field name="tag_name">a_8</field>
+        <field name="code">a_8</field>
+        <field name="parent_id" ref="tax_report_op_realisee_chiffre_affaires"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">100</field>
+    </record>
+
+    <record id="tax_report_tva_collectee" model="account.tax.report.line">
+        <field name="name">TVA collectée</field>
+        <field name="parent_id" ref="tax_report_op_realisees"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">110</field>
+    </record>
+
+    <record id="tax_report_tva_livraisons_biens" model="account.tax.report.line">
+        <field name="name">Livraisons de biens</field>
+        <field name="tag_name">b_1</field>
+        <field name="code">b_1</field>
+        <field name="parent_id" ref="tax_report_tva_collectee"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">120</field>
+    </record>
+
+    <record id="tax_report_tva_prestations_services" model="account.tax.report.line">
+        <field name="name">Prestations de services</field>
+        <field name="tag_name">b_2</field>
+        <field name="code">b_2</field>
+        <field name="parent_id" ref="tax_report_tva_collectee"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">130</field>
+    </record>
+
+    <record id="tax_report_tva_livraisons_biens_soi_meme" model="account.tax.report.line">
+        <field name="name">Livraisons de biens à soi-même</field>
+        <field name="tag_name">b_3</field>
+        <field name="code">b_3</field>
+        <field name="parent_id" ref="tax_report_tva_collectee"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">140</field>
+    </record>
+
+    <record id="tax_report_tva_prestations_services_soi_meme" model="account.tax.report.line">
+        <field name="name">Prestations de services à soi-même</field>
+        <field name="tag_name">b_4</field>
+        <field name="code">b_4</field>
+        <field name="parent_id" ref="tax_report_tva_collectee"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">150</field>
+    </record>
+
+    <record id="tax_report_tva_marche_public" model="account.tax.report.line">
+        <field name="name">Opérations afférentes aux marchés publics à financement extérieur</field>
+        <field name="tag_name">b_5</field>
+        <field name="code">b_5</field>
+        <field name="parent_id" ref="tax_report_tva_collectee"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">160</field>
+    </record>
+
+    <record id="tax_report_prestations_hors_rdc" model="account.tax.report.line">
+        <field name="name">B. Prestations reçues des prestataires non établis en RDC</field>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">170</field>
+        <field name="formula">None</field>
+    </record>
+
+    <record id="tax_report_montant_factures_prestations_hors_rdc" model="account.tax.report.line">
+        <field name="name">Montant des factures</field>
+        <field name="tag_name">c_10</field>
+        <field name="code">c_10</field>
+        <field name="parent_id" ref="tax_report_prestations_hors_rdc"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">180</field>
+    </record>
+
+    <record id="tax_report_tva_collectee_prestations_hors_rdc" model="account.tax.report.line">
+        <field name="name">TVA collectée</field>
+        <field name="tag_name">d_10</field>
+        <field name="code">d_10</field>
+        <field name="parent_id" ref="tax_report_prestations_hors_rdc"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">190</field>
+    </record>
+
+    <record id="tax_report_deductions" model="account.tax.report.line">
+        <field name="name">C. Déductions/taxe déductible sur:</field>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">200</field>
+    </record>
+
+    <record id="tax_report_deductions_immobilisations" model="account.tax.report.line">
+        <field name="name">Immobilisations</field>
+        <field name="parent_id" ref="tax_report_deductions"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">210</field>
+    </record>
+
+    <record id="tax_report_deductions_immobilisations_importations" model="account.tax.report.line">
+        <field name="name">Importations</field>
+        <field name="tag_name">e_11</field>
+        <field name="code">e_11</field>
+        <field name="parent_id" ref="tax_report_deductions_immobilisations"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">220</field>
+    </record>
+
+    <record id="tax_report_deductions_immobilisations_local" model="account.tax.report.line">
+        <field name="name">Local</field>
+        <field name="tag_name">f_11</field>
+        <field name="code">f_11</field>
+        <field name="parent_id" ref="tax_report_deductions_immobilisations"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">230</field>
+    </record>
+
+    <record id="tax_report_deductions_marchandises" model="account.tax.report.line">
+        <field name="name">Marchandises</field>
+        <field name="parent_id" ref="tax_report_deductions"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">240</field>
+    </record>
+
+    <record id="tax_report_deductions_marchandises_importations" model="account.tax.report.line">
+        <field name="name">Importations</field>
+        <field name="tag_name">e_12</field>
+        <field name="code">e_12</field>
+        <field name="parent_id" ref="tax_report_deductions_marchandises"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">250</field>
+    </record>
+
+    <record id="tax_report_deductions_marchandises_local" model="account.tax.report.line">
+        <field name="name">Local</field>
+        <field name="tag_name">f_12</field>
+        <field name="code">f_12</field>
+        <field name="parent_id" ref="tax_report_deductions_marchandises"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">260</field>
+    </record>
+
+    <record id="tax_report_deductions_matieres_premieres" model="account.tax.report.line">
+        <field name="name">Matières premières</field>
+        <field name="parent_id" ref="tax_report_deductions"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">270</field>
+    </record>
+
+    <record id="tax_report_deductions_matieres_premieres_importations" model="account.tax.report.line">
+        <field name="name">Importations</field>
+        <field name="tag_name">e_13</field>
+        <field name="code">e_13</field>
+        <field name="parent_id" ref="tax_report_deductions_matieres_premieres"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">280</field>
+    </record>
+
+    <record id="tax_report_deductions_matieres_premieres_local" model="account.tax.report.line">
+        <field name="name">Local</field>
+        <field name="tag_name">f_13</field>
+        <field name="code">f_13</field>
+        <field name="parent_id" ref="tax_report_deductions_matieres_premieres"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">290</field>
+    </record>
+
+    <record id="tax_report_deductions_autres_biens_services" model="account.tax.report.line">
+        <field name="name">Autres biens et services</field>
+        <field name="parent_id" ref="tax_report_deductions"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">300</field>
+    </record>
+
+    <record id="tax_report_deductions_autres_biens_services_importations" model="account.tax.report.line">
+        <field name="name">Importations</field>
+        <field name="tag_name">e_14</field>
+        <field name="code">e_14</field>
+        <field name="parent_id" ref="tax_report_deductions_autres_biens_services"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">310</field>
+    </record>
+
+    <record id="tax_report_deductions_autres_biens_services_local" model="account.tax.report.line">
+        <field name="name">Local</field>
+        <field name="tag_name">f_14</field>
+        <field name="code">f_14</field>
+        <field name="parent_id" ref="tax_report_deductions_autres_biens_services"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">320</field>
+    </record>
+</odoo>

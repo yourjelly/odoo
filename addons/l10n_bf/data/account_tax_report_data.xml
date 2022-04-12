@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="tax_report" model="account.tax.report">
+        <field name="name">Tax Report</field>
+        <field name="country_id" ref="base.bf"/>
+    </record>
+
+    <record id="tax_report_chiffre_affaires" model="account.tax.report.line">
+        <field name="name">A. Chiffre d'affaires</field>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">10</field>
+    </record>
+
+    <record id="tax_report_chiffre_affaires_taxable" model="account.tax.report.line">
+        <field name="name">1. Opérations taxables</field>
+        <field name="parent_id" ref="tax_report_chiffre_affaires"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">20</field>
+    </record>
+
+    <record id="tax_report_chiffre_affaires_taxable_courant" model="account.tax.report.line">
+        <field name="name">a. Opérations courantes</field>
+        <field name="parent_id" ref="tax_report_chiffre_affaires_taxable"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">20</field>
+    </record>
+
+    <record id="tax_report_chiffre_affaires_taxable_courant_ventes" model="account.tax.report.line">
+        <field name="name">Ventes, prestations de services, travaux immobiliers, etc.</field>
+        <field name="tag_name">A_1_a_1</field>
+        <field name="code">A_1_a_1</field>
+        <field name="parent_id" ref="tax_report_chiffre_affaires_taxable_courant"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">30</field>
+    </record>
+
+    <record id="tax_report_chiffre_affaires_taxable_courant_lasm" model="account.tax.report.line">
+        <field name="name">Livraisons à soi-même (LASM)</field>
+        <field name="tag_name">A_1_a_2</field>
+        <field name="code">A_1_a_2</field>
+        <field name="parent_id" ref="tax_report_chiffre_affaires_taxable_courant"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">40</field>
+    </record>
+
+    <record id="tax_report_chiffre_affaires_taxable_courant_immobilisations" model="account.tax.report.line">
+        <field name="name">Cessions d’immobilisations</field>
+        <field name="tag_name">A_1_a_3</field>
+        <field name="code">A_1_a_3</field>
+        <field name="parent_id" ref="tax_report_chiffre_affaires_taxable_courant"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">50</field>
+    </record>
+
+    <record id="tax_report_chiffre_affaires_taxable_courant_10" model="account.tax.report.line">
+        <field name="name">Opérations taxables au taux de 10%</field>
+        <field name="tag_name">A_1_a_4</field>
+        <field name="code">A_1_a_4</field>
+        <field name="parent_id" ref="tax_report_chiffre_affaires_taxable_courant"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">60</field>
+    </record>
+
+    <record id="tax_report_chiffre_affaires_taxable_courant_autres" model="account.tax.report.line">
+        <field name="name">Autres opérations taxables</field>
+        <field name="tag_name">A_1_a_5</field>
+        <field name="code">A_1_a_5</field>
+        <field name="parent_id" ref="tax_report_chiffre_affaires_taxable_courant"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">70</field>
+    </record>
+
+    <record id="tax_report_chiffre_affaires_taxable_autres" model="account.tax.report.line">
+        <field name="name">b. Marchés, lettres de commande, autres contrats publics et privés</field>
+        <field name="parent_id" ref="tax_report_chiffre_affaires_taxable"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">80</field>
+    </record>
+
+    <record id="tax_report_chiffre_affaires_taxable_autres_ventes" model="account.tax.report.line">
+        <field name="name">Ventes</field>
+        <field name="tag_name">A_1_b_6</field>
+        <field name="code">A_1_b_6</field>
+        <field name="parent_id" ref="tax_report_chiffre_affaires_taxable_autres"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">90</field>
+    </record>
+
+    <record id="tax_report_chiffre_affaires_taxable_autres_services" model="account.tax.report.line">
+        <field name="name">Prestations de services</field>
+        <field name="tag_name">A_1_b_7</field>
+        <field name="code">A_1_b_7</field>
+        <field name="parent_id" ref="tax_report_chiffre_affaires_taxable_autres"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">100</field>
+    </record>
+
+    <record id="tax_report_chiffre_affaires_taxable_autres_travaux" model="account.tax.report.line">
+        <field name="name">Travaux immobiliers, travaux publics, etc.</field>
+        <field name="tag_name">A_1_b_8</field>
+        <field name="code">A_1_b_8</field>
+        <field name="parent_id" ref="tax_report_chiffre_affaires_taxable_autres"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">110</field>
+    </record>
+
+    <record id="tax_report_chiffre_affaires_taxable_autres_10" model="account.tax.report.line">
+        <field name="name">Opérations taxables au taux de 10%</field>
+        <field name="tag_name">A_1_b_9</field>
+        <field name="code">A_1_b_9</field>
+        <field name="parent_id" ref="tax_report_chiffre_affaires_taxable_autres"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">120</field>
+    </record>
+
+    <record id="tax_report_chiffre_affaires_taxable_autres_autres" model="account.tax.report.line">
+        <field name="name">Autres opérations taxables</field>
+        <field name="tag_name">A_1_b_10</field>
+        <field name="code">A_1_b_10</field>
+        <field name="parent_id" ref="tax_report_chiffre_affaires_taxable_autres"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">130</field>
+    </record>
+
+    <record id="tax_report_chiffre_affaires_non_taxable" model="account.tax.report.line">
+        <field name="name">2. Opérations non taxables</field>
+        <field name="parent_id" ref="tax_report_chiffre_affaires"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">140</field>
+    </record>
+
+    <record id="tax_report_chiffre_affaires_non_taxable_exportations" model="account.tax.report.line">
+        <field name="name">Exportations</field>
+        <field name="tag_name">A_2_11</field>
+        <field name="code">A_2_11</field>
+        <field name="parent_id" ref="tax_report_chiffre_affaires_non_taxable"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">150</field>
+    </record>
+
+    <record id="tax_report_chiffre_affaires_non_taxable_exterieur_suspension" model="account.tax.report.line">
+        <field name="name">Autres opérations relevant du commerce extérieur, ventes en suspension de taxe</field>
+        <field name="tag_name">A_2_12</field>
+        <field name="code">A_2_12</field>
+        <field name="parent_id" ref="tax_report_chiffre_affaires_non_taxable"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">160</field>
+    </record>
+
+    <record id="tax_report_chiffre_affaires_non_taxable_autres" model="account.tax.report.line">
+        <field name="name">Autres opérations non taxables</field>
+        <field name="tag_name">A_2_13</field>
+        <field name="code">A_2_13</field>
+        <field name="parent_id" ref="tax_report_chiffre_affaires_non_taxable"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">170</field>
+    </record>
+
+    <record id="tax_report_tva_brute" model="account.tax.report.line">
+        <field name="name">B. TVA Brute</field>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">180</field>
+    </record>
+
+    <record id="tax_report_tva_brute_normal18" model="account.tax.report.line">
+        <field name="name">Opérations soumises au taux normal (18%)</field>
+        <field name="tag_name">B_15</field>
+        <field name="code">B_15</field>
+        <field name="parent_id" ref="tax_report_tva_brute"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">190</field>
+    </record>
+
+    <record id="tax_report_tva_brute_reduit10" model="account.tax.report.line">
+        <field name="name">Opérations soumises au taux réduit (10%)</field>
+        <field name="tag_name">B_16</field>
+        <field name="code">B_16</field>
+        <field name="parent_id" ref="tax_report_tva_brute"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">200</field>
+    </record>
+
+    <record id="tax_report_tva_deductible" model="account.tax.report.line">
+        <field name="name">C. TVA Déductible</field>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">210</field>
+    </record>
+
+    <record id="tax_report_tva_deductible_normal18" model="account.tax.report.line">
+        <field name="name">Opérations soumises au taux normal (18%)</field>
+        <field name="tag_name">C_20_a</field>
+        <field name="code">C_20_a</field>
+        <field name="parent_id" ref="tax_report_tva_deductible"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">220</field>
+    </record>
+
+    <record id="tax_report_tva_deductible_reduit10" model="account.tax.report.line">
+        <field name="name">Opérations soumises au taux réduit (10%)</field>
+        <field name="tag_name">C_20_b</field>
+        <field name="code">C_20_b</field>
+        <field name="parent_id" ref="tax_report_tva_deductible"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">230</field>
+    </record>
+
+    <record id="tax_report_tva_deductible_annulation" model="account.tax.report.line">
+        <field name="name">TVA acquittée sur ventes ou services résiliés ou annulés</field>
+        <field name="tag_name">C_25</field>
+        <field name="code">C_25</field>
+        <field name="parent_id" ref="tax_report_tva_deductible"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">230</field>
+    </record>
+</odoo>

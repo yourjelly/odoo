@@ -1,0 +1,29 @@
+<odoo>
+    <data noupdate="1">
+        <record id="fiscal_position_national" model="account.fiscal.position.template">
+            <field name="name">National</field>
+            <field name="auto_apply" eval="True"/>
+            <field name="sequence">10</field>
+            <field name="country_id" ref="base.gw"/>
+            <field name="chart_template_id" ref="l10n_syscohada.syscohada_chart_template"/>
+        </record>
+        <record id="fiscal_position_international" model="account.fiscal.position.template">
+            <field name="name">International</field>
+            <field name="auto_apply" eval="True"/>
+            <field name="sequence">20</field>
+            <field name="chart_template_id" ref="l10n_syscohada.syscohada_chart_template"/>
+        </record>
+
+
+        <record id="exportations_sale_15" model="account.fiscal.position.tax.template">
+            <field name="position_id" ref="fiscal_position_international"/>
+            <field name="tax_src_id" ref="tva_sale_15"/>
+            <field name="tax_dest_id" ref="tva_exportation_0"/>
+        </record>
+        <record id="importations_purchase_15" model="account.fiscal.position.tax.template">
+            <field name="position_id" ref="fiscal_position_international"/>
+            <field name="tax_src_id" ref="tva_purchase_15"/>
+            <field name="tax_dest_id" ref="tva_importation_0"/>
+        </record>
+    </data>
+</odoo>

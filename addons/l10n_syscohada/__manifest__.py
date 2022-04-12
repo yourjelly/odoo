@@ -21,22 +21,20 @@ Countries that use OHADA are the following:
 
     Ivory Coast, Gabon, Guinea, Guinea Bissau, Equatorial Guinea, Mali, Niger,
 
-    Replica of Democratic Congo, Senegal, Chad, Togo.
+    Republica of Democratic Congo, Senegal, Chad, Togo.
     """,
     'website': 'http://www.optesis.com',
     'depends' : [
         'account',
     ],
     'data': [
-        'data/account_tax_group_data.xml',
         'data/l10n_syscohada_chart_data.xml',
         'data/account.account.template.csv',
         'data/l10n_syscohada_chart_post_data.xml',
-        'data/account_tax_template_data.xml',
+        'data/account.group.template.csv',
         'data/account_chart_template_data.xml',
     ],
     'demo': [
-        'demo/demo_company.xml',
     ],
     'license': 'LGPL-3',
 }

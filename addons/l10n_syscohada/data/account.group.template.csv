@@ -12,7 +12,7 @@ pcg_group_11,11,,"Réserves",l10n_syscohada.syscohada_chart_template
 pcg_group_111,111,,"Réserve légale",l10n_syscohada.syscohada_chart_template
 pcg_group_112,112,,"Réserves statutaires ou contractuelles",l10n_syscohada.syscohada_chart_template
 pcg_group_113,113,,"Réserves réglementées",l10n_syscohada.syscohada_chart_template
-pcg_group_114,118,,"Autres réserves",l10n_syscohada.syscohada_chart_template
+pcg_group_118,118,,"Autres réserves",l10n_syscohada.syscohada_chart_template
 pcg_group_12,12,,"Report à nouveau",l10n_syscohada.syscohada_chart_template
 pcg_group_121,121,,"Report à nouveau créditeur",l10n_syscohada.syscohada_chart_template
 pcg_group_129,129,,"Report à nouveau débiteur",l10n_syscohada.syscohada_chart_template
@@ -197,7 +197,7 @@ pcg_group_398,398,,"Dépréciations des stocks en cours de route, en consignatio
 pcg_group_4,4,,"Comptes de tiers",l10n_syscohada.syscohada_chart_template
 pcg_group_40,40,,"Fournisseurs et comptes rattachés",l10n_syscohada.syscohada_chart_template
 pcg_group_401,401,,"Fournisseurs, dettes en compte",l10n_syscohada.syscohada_chart_template
-pcg_group_402,403,,"Fournisseurs, effets à payer",l10n_syscohada.syscohada_chart_template
+pcg_group_402,402,,"Fournisseurs, effets à payer",l10n_syscohada.syscohada_chart_template
 pcg_group_404,404,,"Founisseurs, acquisitions courantes d'immobilisations",l10n_syscohada.syscohada_chart_template
 pcg_group_408,408,,"Fournisseurs, factures non parvenues",l10n_syscohada.syscohada_chart_template
 pcg_group_409,409,,"Fournisseurs débiteurs",l10n_syscohada.syscohada_chart_template
@@ -320,8 +320,8 @@ pcg_group_565,565,,"Escompte de crédits ordinaires",l10n_syscohada.syscohada_ch
 pcg_group_566,566,,"Banques, crédits de trésorerie, intérêts courus",l10n_syscohada.syscohada_chart_template
 pcg_group_57,57,,"Caisse",l10n_syscohada.syscohada_chart_template
 pcg_group_571,571,,"Caisse siège social",l10n_syscohada.syscohada_chart_template
-pcg_group_572,573,,"Caisse succursale A",l10n_syscohada.syscohada_chart_template
-pcg_group_572,573,,"Caisse succursale B",l10n_syscohada.syscohada_chart_template
+pcg_group_572,572,,"Caisse succursale A",l10n_syscohada.syscohada_chart_template
+pcg_group_573,573,,"Caisse succursale B",l10n_syscohada.syscohada_chart_template
 pcg_group_58,58,,"Régies d'avances, accréditifs et virements internes",l10n_syscohada.syscohada_chart_template
 pcg_group_581,581,,"Régies d'avances",l10n_syscohada.syscohada_chart_template
 pcg_group_582,582,,"Accréditifs",l10n_syscohada.syscohada_chart_template
@@ -376,8 +376,8 @@ pcg_group_651,651,,"Pertes sur créances clients et autres débiteurs",l10n_sysc
 pcg_group_652,652,,"Quote-part de résultat sur opérations faites en commun",l10n_syscohada.syscohada_chart_template
 pcg_group_654,654,,"Valeurs comptables des cessions courantes d'immobilisations",l10n_syscohada.syscohada_chart_template
 pcg_group_656,656,,"Perte de change sur créances et dettes commerciales",l10n_syscohada.syscohada_chart_template
-pcg_group_659,659,,"Charges diverses",l10n_syscohada.syscohada_chart_template
-pcg_group_658,658,,"Charges pour dépréciations et provisions pour risques à court terme d'exploitation",l10n_syscohada.syscohada_chart_template
+pcg_group_658,658,,"Charges diverses",l10n_syscohada.syscohada_chart_template
+pcg_group_659,659,,"Charges pour dépréciations et provisions pour risques à court terme d'exploitation",l10n_syscohada.syscohada_chart_template
 pcg_group_66,66,,"Charges de personnel",l10n_syscohada.syscohada_chart_template
 pcg_group_661,661,,"Rémunérations directes versées au personnel national",l10n_syscohada.syscohada_chart_template
 pcg_group_662,662,,"Rémunérations directes versées au personnel non national",l10n_syscohada.syscohada_chart_template

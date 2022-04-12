@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="tax_report" model="account.tax.report">
+        <field name="name">Tax Report</field>
+        <field name="country_id" ref="base.ne"/>
+    </record>
+
+    <record id="tax_report_base" model="account.tax.report.line">
+        <field name="name">I. Chiffre d'affaires (hors taxe)</field>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">100</field>
+    </record>
+
+    <record id="tax_report_base_imposable" model="account.tax.report.line">
+        <field name="name">Chiffre d'affaires imposable au taux normal</field>
+        <field name="parent_id" ref="tax_report_base"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">110</field>
+    </record>
+
+    <record id="tax_report_base_imposable_vente_biens" model="account.tax.report.line">
+        <field name="name">Ventes hors taxe de biens</field>
+        <field name="tag_name">SB_goods</field>
+        <field name="parent_id" ref="tax_report_base_imposable"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">120</field>
+    </record>
+
+    <record id="tax_report_base_imposable_prestations_services" model="account.tax.report.line">
+        <field name="name">Prestations de services</field>
+        <field name="tag_name">SB_services</field>
+        <field name="parent_id" ref="tax_report_base_imposable"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">130</field>
+    </record>
+
+    <record id="tax_report_base_imposable_livraisons_soi_meme" model="account.tax.report.line">
+        <field name="name">Livraisons à soi-même</field>
+        <field name="tag_name">SB_lasm</field>
+        <field name="parent_id" ref="tax_report_base_imposable"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">140</field>
+    </record>
+
+    <record id="tax_report_base_biens_taux_reduits" model="account.tax.report.line">
+        <field name="name">Ventes hors taxe de biens soumis au taux réduit</field>
+        <field name="tag_name">S_reduct</field>
+        <field name="parent_id" ref="tax_report_base"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">150</field>
+    </record>
+
+    <record id="tax_report_base_transport" model="account.tax.report.line">
+        <field name="name">Transport terrestre de personnes et de marchandises</field>
+        <field name="tag_name">SB_transp</field>
+        <field name="parent_id" ref="tax_report_base"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">160</field>
+    </record>
+
+    <record id="tax_report_base_exportation" model="account.tax.report.line">
+        <field name="name">Chiffre d'affaires exportation</field>
+        <field name="tag_name">SB_export</field>
+        <field name="parent_id" ref="tax_report_base"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">170</field>
+    </record>
+
+    <record id="tax_report_base_autres_exonérés" model="account.tax.report.line">
+        <field name="name">Autres chiffres d'affaires exonérés</field>
+        <field name="tag_name">SB_exo</field>
+        <field name="parent_id" ref="tax_report_base"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">180</field>
+    </record>
+
+    <record id="tax_report_tva_brute" model="account.tax.report.line">
+        <field name="name">II. TVA brute</field>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">200</field>
+    </record>
+
+    <record id="tax_report_tva_brute_taux_normal" model="account.tax.report.line">
+        <field name="name">TVA brute au taux normal</field>
+        <field name="tag_name">ST_norm</field>
+        <field name="parent_id" ref="tax_report_tva_brute"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">210</field>
+    </record>
+
+    <record id="tax_report_tva_brute_taux_reduit" model="account.tax.report.line">
+        <field name="name">TVA brute au taux réduit</field>
+        <field name="tag_name">ST_reduct</field>
+        <field name="parent_id" ref="tax_report_tva_brute"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">220</field>
+    </record>
+
+    <record id="tax_report_tva_brute_taux_10" model="account.tax.report.line">
+        <field name="name">TVA brute au taux de 10%</field>
+        <field name="tag_name">ST_10</field>
+        <field name="parent_id" ref="tax_report_tva_brute"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">230</field>
+    </record>
+
+    <record id="tax_report_tva_deductible" model="account.tax.report.line">
+        <field name="name">III. TVA déductible</field>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">300</field>
+    </record>
+
+    <record id="tax_report_tva_deductible_investissement_import" model="account.tax.report.line">
+        <field name="name">TVA sur investissements importés</field>
+        <field name="tag_name">PT_inv_import</field>
+        <field name="parent_id" ref="tax_report_tva_deductible"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">310</field>
+    </record>
+
+    <record id="tax_report_tva_deductible_investissement_local" model="account.tax.report.line">
+        <field name="name">TVA sur achats locaux d'investissements</field>
+        <field name="tag_name">PT_inv_loc</field>
+        <field name="parent_id" ref="tax_report_tva_deductible"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">320</field>
+    </record>
+
+    <record id="tax_report_tva_deductible_achats_services_charges_import" model="account.tax.report.line">
+        <field name="name">TVA sur achats, services et charges importés</field>
+        <field name="tag_name">PT_serv_import</field>
+        <field name="parent_id" ref="tax_report_tva_deductible"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">330</field>
+    </record>
+
+    <record id="tax_report_tva_deductible_services_charges_local" model="account.tax.report.line">
+        <field name="name">TVA sur achats et services locaux</field>
+        <field name="tag_name">PT_serv_loc</field>
+        <field name="parent_id" ref="tax_report_tva_deductible"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">340</field>
+    </record>
+
+    <record id="tax_report_tva_deductible_retenue_source" model="account.tax.report.line">
+        <field name="name">TVA retenue à la source par les clients</field>
+        <field name="tag_name">PT_retenu</field>
+        <field name="parent_id" ref="tax_report_tva_deductible"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">350</field>
+    </record>
+
+    <record id="tax_report_tva_deductible_livraison_soi_meme" model="account.tax.report.line">
+        <field name="name">TVA sur livraisons à soi-même</field>
+        <field name="tag_name">PT_lasm</field>
+        <field name="parent_id" ref="tax_report_tva_deductible"/>
+        <field name="report_id" ref="tax_report"/>
+        <field name="sequence">360</field>
+    </record>
+</odoo>
