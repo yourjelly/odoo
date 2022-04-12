@@ -52,6 +52,7 @@ const LinkTools = Link.extend({
         this.options.wysiwyg.odooEditor.observerUnactive();
         this.$link.addClass('oe_edited_link');
         this.$button.addClass('active');
+        this.options.wysiwyg.odooEditor.observerActive();
         return this._super(...arguments);
     },
     destroy: function () {
@@ -70,6 +71,7 @@ const LinkTools = Link.extend({
             this.options.wysiwyg.odooEditor.historyStep();
         }
         this._observer.disconnect();
+        this.options.wysiwyg.odooEditor.observerActive();
         this._super(...arguments);
     },
 
