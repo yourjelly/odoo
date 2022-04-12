@@ -28,7 +28,7 @@ var FormView = BasicView.extend({
         var hasActionMenus = params.hasActionMenus;
         this._super.apply(this, arguments);
 
-        var mode = params.mode || (params.currentId ? 'readonly' : 'edit');
+        var mode = "edit"; // params.mode || (params.currentId ? 'readonly' : 'edit');
         this.loadParams.type = 'record';
 
         // this is kind of strange, but the param object is modified by
