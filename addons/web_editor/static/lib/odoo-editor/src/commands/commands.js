@@ -136,7 +136,9 @@ function insert(editor, data, isText = true) {
         // newRange.setStart(lastPosition[0], lastPosition[1]);
         // newRange.setEnd(lastPosition[0], lastPosition[1]);
         // selection.addRange(newRange);
-        currentNode.nextSibling.oEnter();
+        console.log('here before oEnter', closestElement(currentNode.nextSibling), closestElement(currentNode.nextSibling).outerHTML);
+        HTMLElement.prototype.oEnter.call(closestElement(currentNode.nextSibling), [0]);
+        console.log('here after oEnter');
     }
 
     let nodeToInsert;
@@ -178,6 +180,7 @@ function insert(editor, data, isText = true) {
         currentNode = nodeToInsert;
     }
     currentNode = lastChildNode || currentNode;
+    console.log("curent node for range", currentNode, currentNode.outerHTML)
 
     selection.removeAllRanges();
     const newRange = new Range();

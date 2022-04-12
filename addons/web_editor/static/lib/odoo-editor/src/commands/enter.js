@@ -32,6 +32,7 @@ Text.prototype.oEnter = function (offset) {
  * beginning of the first split node
  */
 HTMLElement.prototype.oEnter = function (offset, firstSplit = true) {
+    console.log('oEnter', this, this.outerHTML, offset);
     let didSplit = false;
     if (isUnbreakable(this)) {
         throw UNBREAKABLE_ROLLBACK_CODE;
