@@ -171,8 +171,4 @@ class TestQwebProcessAtt(TransactionCase):
             match = http.root.get_db_router.return_value.bind.return_value.match
             # #{fragment} is stripped from URL when testing route
             self._test_att('/x#y?z', {'href': '/x#y?z'})
-            match.assert_called_with('/x', method='POST', query_args=None)
-
-            match.reset_calls()
-            self._test_att('/x?y#z', {'href': '/x?y#z'})
-            match.assert_called_with('/x', method='POST', query_args='y')
+            match.assert_called_with('/x', method='POST')

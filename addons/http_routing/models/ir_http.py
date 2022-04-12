@@ -223,11 +223,9 @@ def is_multilang_url(local_url, lang_url_codes=None):
     if '/static/' in path or path.startswith('/web/'):
         return False
 
-    query_string = url[1] if len(url) > 1 else None
-
     # Try to match an endpoint in werkzeug's routing table
     try:
-        _, func = request.env['ir.http'].url_rewrite(path, query_args=query_string)
+        _, func = request.env['ir.http'].url_rewrite(path)
 
         # /page/xxx has no endpoint/func but is multilang
         return (not func or (
@@ -651,19 +649,20 @@ class IrHttp(models.AbstractModel):
         return werkzeug.wrappers.Response(html, status=code, content_type='text/html;charset=utf-8')
 
     @api.model
-    @tools.ormcache('path', 'query_args')
+    @tools.ormcache('path')
     def url_rewrite(self, path, query_args=None):
+        # query_args is deprecated
         new_url = False
         router = http.root.get_db_router(request.db).bind('')
         endpoint = False
         try:
-            endpoint = router.match(path, method='POST', query_args=query_args)
+            endpoint = router.match(path, method='POST')
         except werkzeug.exceptions.MethodNotAllowed:
-            endpoint = router.match(path, method='GET', query_args=query_args)
+            endpoint = router.match(path, method='GET')
         except werkzeug.routing.RequestRedirect as e:
             # get path from http://{path}?{current query string}
             new_url = e.new_url.split('?')[0][7:]
-            _, endpoint = self.url_rewrite(new_url, query_args)
+            _, endpoint = self.url_rewrite(new_url)
             endpoint = endpoint and [endpoint]
         except werkzeug.exceptions.NotFound:
             new_url = path

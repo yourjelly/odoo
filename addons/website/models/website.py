@@ -1296,6 +1296,12 @@ class Website(models.Model):
             'target': 'self',
         }
 
+    @tools.ormcache('path', 'lang')
+    def _get_canonical_url_localized_cached(self, path, args, lang):
+        router = http.root.get_db_router(request.db).bind_to_environ(request.httprequest.environ)
+        endpoint = router.match(path_info=path, return_rule=True)[0].endpoint
+        return router.build(endpoint, args)
+
     def _get_canonical_url_localized(self, lang, canonical_params):
         """Returns the canonical URL for the current request with translatable
         elements appropriately translated in `lang`.
@@ -1305,21 +1311,23 @@ class Website(models.Model):
         `url_quote_plus` is applied on the returned path.
         """
         self.ensure_one()
+        need_rebuild = False
+        path = request.httprequest.path
         if request.endpoint:
-            router = http.root.get_db_router(request.db).bind_to_environ(request.httprequest.environ)
-            arguments = dict(request.endpoint_arguments)
-            for key, val in list(arguments.items()):
+            args = dict(request.endpoint_arguments)
+            for key, val in list(args.items()):
                 if isinstance(val, models.BaseModel):
                     if val.env.context.get('lang') != lang.code:
-                        arguments[key] = val.with_context(lang=lang.code)
-            endpoint = router.match(path_info=request.httprequest.path, return_rule=True)[0].endpoint
-            path = router.build(endpoint, arguments)
+                        args[key] = val.with_context(lang=lang.code)
+                        need_rebuild = True
+        if not need_rebuild:
+            path = self.env['ir.http'].url_rewrite(path)[0]
         else:
-            # The build method returns a quoted URL so convert in this case for consistency.
-            path = urls.url_quote_plus(request.httprequest.path, safe='/')
-        lang_path = ('/' + lang.url_code) if lang != self.default_lang_id else ''
+            path = self._get_canonical_url_localized_cached(path, args, lang.code)
+
+        lang_path = ('/' + lang.url_code) if lang.id != self._get_cached('default_lang_id') else ''
         canonical_query_string = '?%s' % urls.url_encode(canonical_params) if canonical_params else ''
-        return self.get_base_url() + lang_path + path + canonical_query_string
+        return self.get_base_url() + ((lang_path + path).rstrip('/') or '/') + canonical_query_string
 
     def _get_canonical_url(self, canonical_params):
         """Returns the canonical URL for the current request."""
