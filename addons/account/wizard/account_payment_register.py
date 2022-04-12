@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
+from datetime import datetime, date
 
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
@@ -420,6 +421,12 @@ class AccountPaymentRegister(models.TransientModel):
             if wizard.source_currency_id == wizard.currency_id:
                 # Same currency.
                 wizard.amount = wizard.source_amount_currency
+                account_move = self.line_ids.move_id
+                if account_move.invoice_payment_term_id.has_early_payment:
+                    last_day = account_move.invoice_payment_term_id.get_last_date_for_discount(account_move.invoice_date)
+                    if date.today() <= last_day and account_move.early_pay_total_amount:
+                        wizard.amount = account_move.early_pay_total_amount
+                #TODO account for different currencies
             elif wizard.currency_id == wizard.company_id.currency_id:
                 # Payment expressed on the company's currency.
                 wizard.amount = wizard.source_amount

@@ -267,6 +267,11 @@ class AccountMove(models.Model):
     payment_state = fields.Selection(PAYMENT_STATE_SELECTION, string="Payment Status", store=True,
         readonly=True, copy=False, tracking=True, compute='_compute_amount')
 
+    # ==== Early payment fields ====
+    early_pay_total_amount = fields.Float(default=0.0, compute='_compute_early_pay_total_amount')
+    early_pay_description = fields.Char(default="", compute='_compute_early_pay_description')
+
+
     # ==== Cash basis feature fields ====
     tax_cash_basis_rec_id = fields.Many2one(
         'account.partial.reconcile',
@@ -1089,7 +1094,6 @@ class AccountMove(models.Model):
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
-
     @api.depends('move_type')
     def _compute_is_storno(self):
         for move in self:
@@ -1725,6 +1729,32 @@ class AccountMove(models.Model):
         msg += ': %s' % formatLang(self.env, updated_credit, currency_obj=record.company_id.currency_id)
         return msg
 
+    @api.depends('amount_residual_signed')
+    def _compute_early_pay_total_amount(self):
+        #TODO display warning if early_pay_total_amount == 0
+        amount_to_discount = self.invoice_payment_term_id.amount_to_discount
+        discount_type = self.invoice_payment_term_id.early_payment_discount_type
+        if discount_type == "percentage":
+            to_deduce = (self.amount_residual / 100) * amount_to_discount
+            self.early_pay_total_amount = "{:.2f}".format(self.amount_residual - to_deduce)
+        elif discount_type == "fixed":
+            self.early_pay_total_amount = "{:.2f}".format(self.amount_residual - amount_to_discount)
+        if self.early_pay_total_amount < 0:
+            self.early_pay_total_amount = 0
+
+    def _compute_early_pay_description(self):
+        discount_description = ""
+        discount_end_date = self.invoice_payment_term_id.get_last_date_for_discount(self.invoice_date)
+        discount = self.invoice_payment_term_id.amount_to_discount
+        discount_type = self.invoice_payment_term_id.early_payment_discount_type
+        if discount_type == "percentage":
+            discount_description = _('%s %% discount', discount)
+        elif discount_type == "fixed":
+            discount_description = _('%s%s discount', (discount, self.currency_id.symbol))
+        self.early_pay_description = _("Early Payment (before %s) : %s %s (%s)", (discount_end_date,
+                                                                                  self.currency_id.symbol,
+                                                                                  self.early_pay_total_amount,
+                                                                                  discount_description))
     # -------------------------------------------------------------------------
     # BUSINESS MODELS SYNCHRONIZATION
     # -------------------------------------------------------------------------

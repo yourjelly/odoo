@@ -4,6 +4,7 @@ from odoo import api, exceptions, fields, models, _
 from odoo.exceptions import UserError, ValidationError
 
 from dateutil.relativedelta import relativedelta
+from datetime import timedelta
 
 
 class AccountPaymentTerm(models.Model):
@@ -20,6 +21,42 @@ class AccountPaymentTerm(models.Model):
     line_ids = fields.One2many('account.payment.term.line', 'payment_id', string='Terms', copy=True, default=_default_line_ids)
     company_id = fields.Many2one('res.company', string='Company')
     sequence = fields.Integer(required=True, default=10)
+
+    # -------Early payment discount fields-------
+    has_early_payment = fields.Boolean(string="Apply Early Payment Discount", default=False)
+    early_payment_discount_type = fields.Selection([
+        ('percentage', 'Percentage'),
+        ('fixed', 'Fixed Value'),
+    ], string='Discount Type', default='percentage')
+    amount_to_discount = fields.Float(string="Amount discounted")  # TODO differenciate € vs % ?
+    discount_expense_account = fields.Char(string="Discount Expense Account")  # TODO configure expense account
+    discount_computation = fields.Selection([  # TODO apply 3 different computations
+        ('included', 'Tax included'),
+        ('excluded', 'Tax excluded'),
+        ('mixed', 'Belgium'),
+    ], string='Discount Computation', default='included')
+    #TODO validate only positive (on_change?)
+    discount_days = fields.Integer(string='Number of Days or Day date', required=True, default=0)
+    discount_time_availability = fields.Selection([
+        ('d_day_after_invoice_date', "days after the invoice date"),
+        ('d_after_invoice_month', "days after the end of the invoice month"),
+        ('d_day_following_month', "of the following month"),
+        ('d_day_current_month', "of the current month"),
+    ],
+        default='d_day_after_invoice_date', required=True, string='Discount Availability'
+    )
+
+    def get_last_date_for_discount(self, invoice_date): #TODO tjrs assigner? + déplacer
+        if self.discount_time_availability == "d_day_after_invoice_date":
+            return invoice_date + timedelta(days=self.discount_days)
+        elif self.discount_time_availability == "d_after_invoice_month":
+            next_month = invoice_date.replace(day=28) + timedelta(days=4)
+            last_day = next_month - timedelta(days=next_month.day)
+            return last_day + timedelta(days=self.discount_days)
+        elif self.discount_time_availability == "d_day_following_month":
+            return (invoice_date.replace(day=1) + timedelta(days=32)).replace(day=self.discount_days)
+        elif self.discount_time_availability == "d_day_current_month":
+            return invoice_date.replace(day=self.discount_days)
 
     @api.constrains('line_ids')
     def _check_lines(self):
