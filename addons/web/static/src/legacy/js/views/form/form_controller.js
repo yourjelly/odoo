@@ -75,6 +75,10 @@ var FormController = BasicController.extend({
     // Public
     //--------------------------------------------------------------------------
 
+    reload(params = {}) {
+        params.mode = "edit";
+        return this._super(params);
+    },
     /**
      * Calls autofocus on the renderer
      */

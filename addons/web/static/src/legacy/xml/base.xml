@@ -648,7 +648,7 @@
     </div>
     <div class="o_form_buttons_edit" role="toolbar" aria-label="Main actions">
         <button type="button"
-                class="btn btn-primary o_form_button_save d-none" title="Save record" accesskey="s">
+                class="btn btn-primary o_form_button_save" title="Save record" accesskey="s">
             Save
         </button>
         <button type="button"
