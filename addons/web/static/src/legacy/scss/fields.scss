@@ -16,7 +16,8 @@
 }
 
 .o_field_widget:focus-within {
-    @include print-variable(o-input-border-color, $o-brand-primary);
+    // @include print-variable(o-input-border-color, $o-brand-primary);
+    border-bottom: 1px solid gray;
 }
 
 .o_field_invalid {
