@@ -87,6 +87,8 @@ def safe_eval(
 
     if dbg:
         print(" === ")
+        print(expr)
+        print(" === ")
         print(ast.dump(ast.parse(expr), indent=4))
         print(" === \n\n")
         print(code)

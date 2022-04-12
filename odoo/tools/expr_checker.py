@@ -63,10 +63,6 @@ class NodeChecker(ast.NodeTransformer):
     def visit_Name(self, node):
         node = self.generic_visit(node)
 
-        if node.id.startswith("_") and not self.allow_private:
-            raise NameError(
-                f"safe_eval: didn't permit you to read private elements")
-
         if node.id in self.reserved_name:
             raise NameError(f"safe_eval: {node.id} is a reserved name")
 
@@ -82,6 +78,9 @@ class NodeChecker(ast.NodeTransformer):
 
     def visit_Attribute(self, node):
         node = self.generic_visit(node)
+
+        if isinstance(node.value, ast.Name) and node.value.id.startswith("_") and not self.priv:
+            raise NameError(f"safe_eval: didn't permit you to read private elements")
 
         if isinstance(node.ctx, ast.Load):
             return ast.Call(
@@ -185,7 +184,7 @@ def expr_checker_prepare_context(get_attr, return_code=False, check_type=None, c
             or type(value) in __require_checks_type
             and method in ["returned", "arguments"]
         ):
-            raise ValueError(f"safe_eval didn't like {value}")
+            raise ValueError(f"safe_eval didn't like {value} (type: {type(value)})")
 
         return value
 

@@ -282,30 +282,27 @@ class TestFuncChecker(BaseCase):
             )
 
     def test_basics(self):
-        result = {}
-        expected_result = {}
-
         codes = [
             (
                 """
-                result['loop_sum'] = 0
+                result['val'] = 0
                 for i in range(2, 10):
-                    result['loop_sum'] += i
+                    result['val'] += i
                 """
             ),
             (
                 """
-                result['sum_range'] = sum(range(5))
+                result['val'] = sum(range(5))
                 """
             ),
             (
                 """
-                result['index'] = list(range(5))[-1]
+                result['val'] = list(range(5))[-1]
                 """
             ),
             (
                 """
-                result['index_slice'] = list(range(5))[1:-1]
+                result['val'] = list(range(5))[1:-1]
                 """
             ),
             (
@@ -314,12 +311,12 @@ class TestFuncChecker(BaseCase):
                     for i in range(5):
                         yield 2 * 5
                 
-                result['generator'] = sum(gen())
+                result['val'] = sum(gen())
                 """
             ),
             (
                 """
-                result['lispcomp'] = [x * 2 for x in range(5)]
+                result['val'] = [x * 2 for x in range(5)]
                 """
             ),
             (
@@ -327,7 +324,7 @@ class TestFuncChecker(BaseCase):
                 a = 4
                 b = 5
                 c = a + b
-                result['basic_math'] = c // 3
+                result['val'] = c // 3
                 """
             ),
             (
@@ -342,14 +339,14 @@ class TestFuncChecker(BaseCase):
                 else:
                     d = c
 
-                result['cond'] = d
+                result['val'] = d
                 """
             ),
             (
                 """
-                result['strop'] = "Hello" + ",World !"
-                result['strop'] += 6 * "PythonProgrammingIsFun"
-                result['strop'] = result['strop'][::-1]
+                result['val'] = "Hello" + ",World !"
+                result['val'] += 6 * "PythonProgrammingIsFun"
+                result['val'] = result['val'][::-1]
                 """
             ),
             (
@@ -357,28 +354,30 @@ class TestFuncChecker(BaseCase):
                 m = "Monkey"
                 l = ["a", "b"]
 
-                result['dunder_str'] = l.__str__()
-                result['dunder_len'] = m.__len__()    
+                result['val'] = l.__str__()
+                result['val'] += str(m.__len__())
                 """
             ),
             (
                 """
                 i = 0
-                result['while_loop'] = ''
+                result['val'] = ''
 
                 while i < 10:
-                    result['while_loop'] += chr(65+i)
+                    result['val'] += chr(65+i)
                     i += 1
                 """
             ),
         ]
 
         for code in codes:
+            output = {} 
+            expected_output = {}
             code = cleandoc(code)
-            safe_eval(code, mode="exec", locals_dict={"result": result})
-            exec(code, None, {"result": expected_result})
+            safe_eval(code, mode="exec", locals_dict={"result": output})
+            exec(code, None, {"result": expected_output})
 
-        self.assertEqual(result, expected_result)
+            self.assertEqual(output['val'], expected_output['val'])
 
     def test_safe_self(self):
         obj = Good()
@@ -391,13 +390,16 @@ class TestFuncChecker(BaseCase):
 
         code = cleandoc(
             """
-            def foo(self):
+            def foo(self):  
                 return self
 
-            foo(65535)
+            ret['val'] = foo(65535)
             """
         )
-        safe_eval(code, check_type=check_type, mode="exec")
+
+        value = {}
+        safe_eval(code, check_type=check_type, mode="exec", locals_dict={"ret": value})
+        self.assertEqual(value['val'], 65535)
 
         # Because we use qualname to detect non-bounded classes (class.method) 
         # It's safer to test those cases 
@@ -405,11 +407,13 @@ class TestFuncChecker(BaseCase):
         # Lambda functions inside of a listcomps are interpreted as <listcomp>.<lambda>
         code = cleandoc(
             """
-            [(lambda x: x**2)(n) for n in range(1, 11)] 
+            value['ret'] = [(lambda x: x**2)(n) for n in range(1, 11)] 
             """
         )
 
-        safe_eval(code, check_type=check_type, mode="exec", globals_dict={"obj": obj})
+        value = {}
+        safe_eval(code, check_type=check_type, mode="exec", globals_dict={"obj": obj, "value": value})
+        self.assertEqual(value['ret'], [1, 4, 9, 16, 25, 36, 49, 64, 81, 100])
 
         # Functions inside of functions are interpreted as a.<locals>.b 
         code = cleandoc(
