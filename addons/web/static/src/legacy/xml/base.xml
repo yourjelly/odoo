@@ -642,7 +642,7 @@
             Edit
         </button>
         <button t-if="widget.is_action_enabled('create')" type="button"
-                class="btn btn-secondary o_form_button_create" title="Create record" accesskey="c">
+                class="btn btn-secondary o_form_button_create d-none" title="Create record" accesskey="c">
             Create
         </button>
     </div>
@@ -652,7 +652,7 @@
             Save
         </button>
         <button type="button"
-                class="btn btn-secondary o_form_button_cancel" title="Discard record" accesskey="j">
+                class="btn btn-secondary o_form_button_cancel d-none" title="Discard record" accesskey="j">
             Discard
         </button>
     </div>
