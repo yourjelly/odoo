@@ -2098,11 +2098,21 @@ X[]
                     contentAfter: '<div><p>ab <span class="style">x[]</span> f</p></div>',
                 });
             });
-            it('should merge node correctly', async () => {
+            it('should merge node correctly (1)', async () => {
                 await testEditor(BasicEditor, {
-                    contentBefore: '<div>a<span>b[c</span><p>d]e</p>f</div>',
+                    contentBefore: '<div>a<span>b[c</span><p>d]e</p>f<br>g</div>',
                     stepFunction: deleteBackward,
-                    contentAfter: '<div>a<span>b[]</span>e<br>f</div>',
+                    // FIXME ?? : Maybe this should bing the content inside the <p>
+                    // Instead of removing the <p>,
+                    // ex : <div><p>a<span>b[]</span>e</p>f<br>g</div>
+                    contentAfter: '<div>a<span>b[]</span>e<br>f<br>g</div>',
+                });
+            });
+            it('should merge node correctly (2)', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<div>a<p>b[c</p><span>d]e</span>f<p>xxx</p></div>',
+                    stepFunction: deleteBackward,
+                    contentAfter: '<div>a<p>b[]<span>e</span>f</p><p>xxx</p></div>',
                 });
             });
             it('should delete part of the text within a paragraph', async () => {
