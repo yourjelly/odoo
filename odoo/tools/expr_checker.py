@@ -50,8 +50,7 @@ class NodeChecker(ast.NodeTransformer):
         node = self.generic_visit(node)
 
         if not self.allow_function_calls:
-            raise Exception(
-                "safe_eval didn't permit you to call any functions")
+            raise Exception("safe_eval didn't permit you to call any functions")
 
         return ast.Call(
             func=ast.Name("__ast_check_fn", ctx=ast.Load()),
@@ -79,7 +78,11 @@ class NodeChecker(ast.NodeTransformer):
     def visit_Attribute(self, node):
         node = self.generic_visit(node)
 
-        if isinstance(node.value, ast.Name) and node.value.id.startswith("_") and not self.priv:
+        if (
+            isinstance(node.value, ast.Name)
+            and node.value.id.startswith("_")
+            and not self.priv
+        ):
             raise NameError(f"safe_eval: didn't permit you to read private elements")
 
         if isinstance(node.ctx, ast.Load):
@@ -95,8 +98,7 @@ class NodeChecker(ast.NodeTransformer):
             )
 
         elif isinstance(node.ctx, ast.Del):
-            raise ValueError(
-                "safe_eval: doesn't permit you to delete attributes")
+            raise ValueError("safe_eval: doesn't permit you to delete attributes")
 
 
 def is_unbound_method_call(func):
@@ -125,12 +127,16 @@ def is_unbound_method_call(func):
     return True
 
 
-def expr_checker_prepare_context(get_attr, return_code=False, check_type=None, check_function=None):
+def expr_checker_prepare_context(
+    get_attr, return_code=False, check_type=None, check_function=None
+):
     def __ast_default_check_call(func, check_type, *args, **kwargs):
         if func is None:
             return None
 
-        if check_function is not None and check_function(func, check_type, *args, **kwargs):
+        if check_function is not None and check_function(
+            func, check_type, *args, **kwargs
+        ):
             return check_type("returned", func(*args, **kwargs))
 
         if (
@@ -145,9 +151,16 @@ def expr_checker_prepare_context(get_attr, return_code=False, check_type=None, c
             check_type("arguments", arg)
 
             if "." in func.__qualname__:
-                if args and (
-                    is_unbound_method_call(func) and not hasattr(
-                        args[0], func.__name__)
+                if (
+                    args
+                    and (
+                        is_unbound_method_call(func)
+                        and not hasattr(args[0], func.__name__)
+                    )
+                    or (
+                        hasattr(args[0], func.__name__)
+                        and getattr(args[0], func.__name__).__func__ != func
+                    )
                 ):
                     raise ValueError(
                         "safe_eval didn't like method call without appropriate type"
@@ -162,7 +175,7 @@ def expr_checker_prepare_context(get_attr, return_code=False, check_type=None, c
         """
         __ast_default_check_type(method, value) -> value
 
-        check the type of `value` against a whitelist and return the value. 
+        check the type of `value` against a whitelist and return the value.
         will the check if the plug-in function `check_type` (argument from the `prepare_context` function) is present or not.
 
         The plug-in function will take the same arguments as this function and should return a boolean (True if allowed and False otherwise)
@@ -172,7 +185,7 @@ def expr_checker_prepare_context(get_attr, return_code=False, check_type=None, c
                         * arguments: if it's a function argument (eg: foo(value))
                         * constant: if it's a constant (eg: value)
                         * called: if it's a function call, it can be useful in case of bound method (with the __self__ attribute) (eg: value()).
-        
+
         :param value: A value that needs to be checked.
         :return: The value passed to this function.
         """
@@ -195,15 +208,14 @@ def expr_checker_prepare_context(get_attr, return_code=False, check_type=None, c
         return {
             "__ast_check_type_fn": __ast_default_check_type,
             "__ast_check_fn": __ast_default_check_call,
-            "__ast_check_attr_and_type": __ast_check_attr_and_type
+            "__ast_check_attr_and_type": __ast_check_attr_and_type,
         }
 
     else:
         return "\n".join(
             [
                 cleandoc(
-                    getsource(get_attr).replace(
-                        get_attr.__name__, "__ast_check_attr")
+                    getsource(get_attr).replace(get_attr.__name__, "__ast_check_attr")
                 ),
                 cleandoc(
                     getsource(check_type).replace(
