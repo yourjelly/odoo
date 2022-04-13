@@ -405,9 +405,11 @@ class PosGlobalState extends PosModel {
                 }
             }
         }
-        const args = [odoo.pos_session_id, { domain: [['id', 'in', [...missingProductIds]]] }];
-        const products = await this.env.services.orm.call('pos.session', 'get_pos_ui_product_product_by_params', args);
-        this._loadProductProduct(products);
+        if (missingProductIds.size > 0) {
+            const args = [odoo.pos_session_id, { domain: [['id', 'in', [...missingProductIds]]] }];
+            const products = await this.env.services.orm.call('pos.session', 'get_pos_ui_product_product_by_params', args);
+            this._loadProductProduct(products);
+        }
     }
     async loadProductsBackground() {
         let page = 0;
