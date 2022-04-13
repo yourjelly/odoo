@@ -332,11 +332,26 @@ var FormController = BasicController.extend({
     // Private
     //--------------------------------------------------------------------------
 
+    _updateControlPanelProps(state) {
+        this._super(state);
+        Object.assign(this.controlPanelProps, {
+            isNew: state.isNew(),
+            isDirty: state.isDirty(),
+            hasErrors: false,
+            discard: () => this.discardChanges(),
+            save: () => this.saveRecord(),
+        });
+    },
     /**
      * @override
      */
     _applyChanges: async function () {
         const result = await this._super.apply(this, arguments);
+        Object.assign(this.controlPanelProps, {
+            isDirty: true,
+            hasErrors: !this.canBeSaved(),
+        });
+        await this.updateControlPanel();
         core.bus.trigger('DOM_updated');
         return result;
     },

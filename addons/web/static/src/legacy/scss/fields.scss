@@ -20,10 +20,6 @@
     border-bottom: 1px solid gray;
 }
 
-.o_field_invalid {
-    @include print-variable(o-input-border-color, theme-color('danger'));
-}
-
 //------------------------------------------------------------------------------
 // Generic input
 //------------------------------------------------------------------------------
@@ -39,6 +35,10 @@
     }
 }
 
+.o_field_invalid {
+    @include print-variable(o-input-border-color, theme-color('danger'));
+    border-width: 1px !important;
+}
 // Invalid
 .o_field_invalid:not(:focus-within) {
     &.o_input, .o_input, &.o_form_label {

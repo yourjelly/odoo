@@ -7,6 +7,7 @@ var core = require('web.core');
 var FormController = require('web.FormController');
 var FormRenderer = require('web.FormRenderer');
 const { generateID } = require('web.utils');
+const FormControlPanel = require("web.FormControlPanel");
 
 var _lt = core._lt;
 
@@ -14,6 +15,7 @@ var FormView = BasicView.extend({
     config: _.extend({}, BasicView.prototype.config, {
         Renderer: FormRenderer,
         Controller: FormController,
+        ControlPanel: FormControlPanel,
     }),
     display_name: _lt('Form'),
     icon: 'fa-edit',
