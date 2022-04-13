@@ -25,6 +25,7 @@ class Article(models.Model):
     body = fields.Html(string="Article Body")
     icon = fields.Char(string='Article Icon', default='fa-file')
     is_locked = fields.Boolean(string='Locked')
+    share_link = fields.Char('Link', compute='_compute_share_link', store=False, readonly=True)
 
     # Hierarchy and sequence
     parent_id = fields.Many2one("knowledge.article", string="Parent Article")
@@ -112,6 +113,10 @@ class Article(models.Model):
     ##############################
     # Computes, Searches, Inverses
     ##############################
+
+    def _compute_share_link(self):
+        for article in self:
+            article.share_link = url_join(article.get_base_url(), 'article/%s' % article.id)
 
     @api.depends_context('uid')
     @api.depends('internal_permission', 'article_member_ids.partner_id', 'article_member_ids.permission')
