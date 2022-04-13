@@ -3554,7 +3554,9 @@ Fields:
                 # DLE P150: `test_cancel_propagation`, `test_manufacturing_3_steps`, `test_manufacturing_flow`
                 # TODO: check whether still necessary
                 records_to_inverse[field] = self.filtered('id')
-            if field.relational or self._field_inverses[field]:
+            if field.relational or self._field_inverses[field] or any(
+                dep.relational for dep in self._dependent_fields(field)
+            ):
                 relational_names.append(fname)
             if field.inverse or (field.compute and not field.readonly):
                 if field.store or field.type not in ('one2many', 'many2many'):
