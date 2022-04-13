@@ -17,6 +17,7 @@
             <BlockIframe/>
             <iframe t-if="!this.websiteContext.edition"
                 t-att-src="iframeFallbackUrl"
+                class="o_technical_iframe"
                 t-ref="iframefallback"/>
             <iframe t-att-src="initialUrl"
                 t-ref="iframe"/>
