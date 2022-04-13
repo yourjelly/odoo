@@ -34,4 +34,20 @@
             </xpath>
         </field>
     </record>
+    <!-- Kanban view: -->
+    <record id="knowledge_article_view_kanban" model="ir.ui.view">
+        <field name="name">knowledge.article.kanban.inherit</field>
+        <field name="model">knowledge.article</field>
+        <field name="inherit_id" ref="knowledge.knowledge_article_view_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='activity_ids']" position="before">
+                <div class="flex-grow-1">
+                    <field name="is_published" invisible="1"/>
+                    <field name="share_link" widget="CopyClipboardButton"
+                        attrs="{'invisible': [('is_published', '=', False)]}"
+                        options="{'label': 'Copy Link'}"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
 </odoo>
