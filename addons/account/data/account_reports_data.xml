@@ -4,7 +4,7 @@
 
         <!-- GENERIC TAX REPORT -->
         <!--TODO OCO il faudra tester ce que fait la colonne de debug sur les rapports custom-->
-        <record id="generic_tax_report" model="account.report">
+        <record id="generic_tax_report" model="account.report"> <!--TODO OCO et la création du menu ?? Comment gérer ça ?-->
             <field name="name">Generic Tax report</field>
             <field name="filter_multi_company">tax_units</field>
             <field name="filter_tax_exigible" eval="True"/>

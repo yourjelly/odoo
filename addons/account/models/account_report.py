@@ -59,6 +59,9 @@ class AccountReport(models.Model):
     filter_tax_exigible = fields.Boolean(string="Only Tax Exigible Lines", default=False, required=True)
     filter_unfold_all = fields.Boolean(string="Show 'Unfold All' Filter", default=False)
     ir_filter_ids = fields.Many2many(string="Applicable filters", comodel_name='ir.filters', help="Filters that can be used to filter and group lines on this report. This uses saved filtes on journal items") #TODO OCO REDOC + domaine
+    custom_options_initializer = fields.Char(string="Custom Options Initializer")
+    custom_line_postprocessor = fields.Char(string="Custom Line Postprocessor")
+    user_group_id = fields.Many2one(string="Required User Group", comodel_name="res.groups") #TODO OCO utiliser ça pour cacher le rapport dans le menu des variants ?
 
     #TODO OCO réordonner les déclarations de champs (et décider d'un standard sur ce qu'on préfixe filter_)
 
