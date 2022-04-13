@@ -37,6 +37,7 @@
         "ClipboardJS": "readonly",
         "globalThis": "readonly",
         "Modal": "readonly",
-        "Dropdown": "readonly"
+        "Dropdown": "readonly",
+        "Collapse": "readonly"
     }
 }
