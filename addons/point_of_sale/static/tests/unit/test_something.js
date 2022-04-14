@@ -15,6 +15,7 @@ const serviceRegistry = registry.category('services');
 QUnit.module('test something', {
     beforeEach() {
         serviceRegistry.add('orm', ormService);
+        localStorage.clear();
     },
 });
 
@@ -27,7 +28,6 @@ QUnit.test('make test env', async function (assert) {
 
 QUnit.test('test OrderWidget', async function (assert) {
     assert.expect(5);
-    localStorage.clear();
     const env = await makePosTestEnv({ serverData: posServerData });
     await env.pos.load_server_data();
 
