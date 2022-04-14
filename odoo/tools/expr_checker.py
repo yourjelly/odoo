@@ -38,12 +38,13 @@ __safe_type = (
 
 
 class SubscriptWrapper:
-    """ 
+    """
     SubscriptWrapper
 
     :param value: The value of the subscript (can be any object that supports __getitem__ and __setitem__)
     :param check_type: A function that will check the arguments passed to the methods and also the return values
     """
+
     def __init__(self, value, check_type):
         self.value = value
         self.check_type = check_type
@@ -59,8 +60,8 @@ class SubscriptWrapper:
         self.value.__setitem__(key, value)
 
 
-class NodeChecker(ast.NodeTransformer): 
-    """ 
+class NodeChecker(ast.NodeTransformer):
+    """
     https://docs.python.org/3/library/ast.html#ast.NodeTransformer
     """
 
@@ -97,7 +98,8 @@ class NodeChecker(ast.NodeTransformer):
     def visit_Subscript(self, node):
         node = self.generic_visit(node)
 
-        node.value = ast.Call( ast.Name("SubscriptWrapper", ctx=ast.Load),
+        node.value = ast.Call(
+            ast.Name("SubscriptWrapper", ctx=ast.Load),
             args=[node.value, ast.Name("__ast_check_type_fn", ctx=ast.Load())],
             keywords={},
         )
@@ -167,22 +169,23 @@ def is_unbound_method_call(func):
 def expr_checker_prepare_context(
     get_attr, return_code=False, check_type=None, check_function=None
 ):
-    """ 
+    """
     expr_checker_prepare_context(get_attr, return_code, check_type, check_type) -> (dict | str)
 
     This function prepare the execution context for the sandbox, you should pass the execution context to an eval / exec function
 
     :param get_attr: A function that will check the methods / attributes according to their object, name and value and will return a boolean
-                     eg: def __safe_get_attr(obj: object, name: str, value: Any) -> bool 
+                     eg: def __safe_get_attr(obj: object, name: str, value: Any) -> bool
 
     :param return_code: if True it will return a string with all the code needed for the execution, if False it will return a dictionnary {function_name: function_object}
 
     :param check_type: if not None will pass the check of type to a custom function (please refer to the docstring for __ast_default_check_type)
                         eg: def __safe_check_type(method: str, value: object) -> bool
-    
+
     :param check_function: if not None will pass the function check to a custom function (please refer to the docstring for __ast_default_check_call)
                             eg: def __safe_check_function_call(func: FunctionType, *args, **kwargs) -> bool
     """
+
     def __ast_default_check_type(method, value):
         """
         __ast_default_check_type(method, value) -> value
@@ -217,7 +220,7 @@ def expr_checker_prepare_context(
         return value
 
     def __ast_default_check_call(func, *args, **kwargs):
-        """ 
+        """
         __ast_default_check_call(func, check_type, *args, **kwargs) -> value
 
         Check functions / method calls.
@@ -234,9 +237,7 @@ def expr_checker_prepare_context(
         if func is None:
             return None
 
-        if check_function is not None and check_function(
-            func, *args, **kwargs
-        ):
+        if check_function is not None and check_function(func, *args, **kwargs):
             return __ast_default_check_type("returned", func(*args, **kwargs))
 
         if (
@@ -271,10 +272,9 @@ def expr_checker_prepare_context(
 
         return __ast_default_check_type("returned", func(*args, **kwargs))
 
-
     def __ast_check_attr_and_type(value, attr, node):
         """
-        __ast_check_attr_and_type -> value 
+        __ast_check_attr_and_type -> value
 
         A simple wrapper for check_type and get_attr (given by the user in the super function)
 
@@ -296,7 +296,7 @@ def expr_checker_prepare_context(
             "__ast_check_type_fn": __ast_default_check_type,
             "__ast_check_fn": __ast_default_check_call,
             "__ast_check_attr_and_type": __ast_check_attr_and_type,
-            "SubscriptWrapper": SubscriptWrapper
+            "SubscriptWrapper": SubscriptWrapper,
         }
 
     else:
@@ -325,7 +325,7 @@ def expr_checker(
     allow_function_calls=True,
     allow_private=False,
 ):
-    """ 
+    """
     expr_checker(expr, allow_function_calls, allow_private, return_code) -> str
 
     Take a Python expression and will return an expression with different checks (look above ;-) )
