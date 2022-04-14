@@ -476,11 +476,8 @@ def keep_query(*keep_params, **additional_params):
     return werkzeug.urls.url_encode(params)
 
 
-def _qweb_ast_get_attr(obj, key, value):
-    if key not in ("dumps", "get", "count", "strip") and (hasattr(obj, "_fields") and key not in obj._fields):
-        raise ValueError(f"safe_eval doesn't permit you to read {key} from {obj}")
-    
-    return value
+def _qweb_ast_get_attr(obj, key):
+    return key in ("dumps", "get", "count", "strip") or (hasattr(obj, "_fields") and key in obj._fields)
 
 def _qweb_ast_check_type(method, value):
     if type(value) in {OrderedDict, Markup, JSON, _ScriptSafe} or isinstance(value, BaseModel):

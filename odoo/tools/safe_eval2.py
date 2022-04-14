@@ -1,4 +1,5 @@
-import ast 
+import ast
+import traceback
 from odoo.tools.expr_checker import expr_checker, expr_checker_prepare_context
 
 unsafe_eval = eval
@@ -42,9 +43,9 @@ _BUILTINS = {
 }
 
 
-def safe_get_attr(obj, key, value):
+def safe_get_attr(obj, key):
     # NOTE: Those keys are for testing purpose
-    if key not in (
+    return key in (
         "a",
         "get",
         "x",
@@ -54,10 +55,7 @@ def safe_get_attr(obj, key, value):
         "say_goodbye",
         "__str__",
         "__len__",
-    ):
-        raise ValueError(f"safe_eval doesn't permit you to read {key}")
-
-    return value
+    )
 
 
 def safe_eval(
@@ -67,7 +65,7 @@ def safe_eval(
     mode="eval",
     check_type=None,
     allow_functions_calls=True,
-    dbg = False
+    dbg=False,
 ):
     if globals_dict is not None:
         globals_dict = dict(globals_dict)
@@ -82,7 +80,9 @@ def safe_eval(
     else:
         scope = expr_checker_prepare_context(safe_get_attr, check_type=check_type)
 
-    code = expr_checker(expr, allow_function_calls=allow_functions_calls, allow_private=True)
+    code = expr_checker(
+        expr, allow_function_calls=allow_functions_calls, allow_private=True
+    )
     globals_dict.update(scope)
 
     if dbg:
@@ -92,6 +92,15 @@ def safe_eval(
         print(ast.dump(ast.parse(expr), indent=4))
         print(" === \n\n")
         print(code)
+        input()
 
     c = compile(code, "", mode)
-    return unsafe_eval(c, globals_dict, locals_dict)
+
+    try:
+        return unsafe_eval(c, globals_dict, locals_dict)
+    except Exception as e:
+        if dbg:
+            traceback.print_exc()
+            input(e)
+        else:
+            raise e

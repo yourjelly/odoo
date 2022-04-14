@@ -72,8 +72,7 @@ class NodeChecker(ast.NodeTransformer):
 
         return ast.Call(
             func=ast.Name("__ast_check_fn", ctx=ast.Load()),
-            args=[node.func, ast.Name("__ast_check_type_fn", ctx=ast.Load())]
-            + node.args,
+            args=[node.func] + node.args,
             keywords=node.keywords,
         )
 
@@ -158,50 +157,11 @@ def is_unbound_method_call(func):
 def expr_checker_prepare_context(
     get_attr, return_code=False, check_type=None, check_function=None
 ):
-    def __ast_default_check_call(func, check_type, *args, **kwargs):
-        if func is None:
-            return None
-
-        if check_function is not None and check_function(
-            func, check_type, *args, **kwargs
-        ):
-            return check_type("returned", func(*args, **kwargs))
-
-        if (
-            func.__name__ == "get"
-            and hasattr(func, "__self__")
-            and type(func.__self__) == dict
-        ):
-            # If it's a dictionnary, we check types like it's a constant
-            return check_type("constant", func(*args, **kwargs))
-
-        for arg in (*args, *kwargs.values()):
-            check_type("arguments", arg)
-
-            if "." in func.__qualname__:
-                if (
-                    args
-                    and (
-                        is_unbound_method_call(func)
-                        and not hasattr(args[0], func.__name__)
-                    )
-                    or (
-                        hasattr(args[0], func.__name__)
-                        and getattr(args[0], func.__name__).__func__ != func
-                    )
-                ):
-                    raise ValueError(
-                        "safe_eval didn't like method call without appropriate type"
-                    )
-
-        if hasattr(func, "__self__"):
-            check_type("called", func.__self__)
-
-        return check_type("returned", func(*args, **kwargs))
-
     def __ast_default_check_type(method, value):
         """
         __ast_default_check_type(method, value) -> value
+
+        Also represented as check_type
 
         check the type of `value` against a whitelist and return the value.
         will the check if the plug-in function `check_type` (argument from the `prepare_context` function) is present or not.
@@ -230,8 +190,80 @@ def expr_checker_prepare_context(
 
         return value
 
+    def __ast_default_check_call(func, *args, **kwargs):
+        """ 
+        __ast_default_check_call(func, check_type, *args, **kwargs) -> value
+
+        Check functions / method calls.
+        In case of a simple function / lambda, it will send its arguments and its return values to check_type.
+        In case of an unbound method (e.g Class.method) it will ensure that the self origins from the same class as the method.
+        In case of a bound method, it will ensure that the __self__ is safe.
+
+        :param func: The called function
+        :param args: Arguments to the given function
+        :param kargs: Keywords arguments to the given function
+        :return: The checked value from the called function
+        """
+
+        if func is None:
+            return None
+
+        if check_function is not None and check_function(
+            func, *args, **kwargs
+        ):
+            return __ast_default_check_type("returned", func(*args, **kwargs))
+
+        if (
+            func.__name__ == "get"
+            and hasattr(func, "__self__")
+            and type(func.__self__) == dict
+        ):
+            # If it's a dictionnary, we check types like it's a constant
+            return __ast_default_check_type("constant", func(*args, **kwargs))
+
+        for arg in (*args, *kwargs.values()):
+            __ast_default_check_type("arguments", arg)
+
+            if "." in func.__qualname__:
+                if (
+                    args
+                    and (
+                        is_unbound_method_call(func)
+                        and not hasattr(args[0], func.__name__)
+                    )
+                    or (
+                        hasattr(args[0], func.__name__)
+                        and getattr(args[0], func.__name__).__func__ != func
+                    )
+                ):
+                    raise ValueError(
+                        "safe_eval didn't like method call without appropriate type"
+                    )
+
+        if hasattr(func, "__self__"):
+            __ast_default_check_type("called", func.__self__)
+
+        return __ast_default_check_type("returned", func(*args, **kwargs))
+
+
     def __ast_check_attr_and_type(value, attr, node):
-        return __ast_default_check_type("attribute", get_attr(value, attr, node))
+        """
+        __ast_check_attr_and_type -> value 
+
+        A simple wrapper for check_type and get_attr (given by the user in the super function)
+
+
+        :param value: an object we want to test
+        :param attr: a string that respresent the attribute / method we want to test
+        :param node: the value we want to test
+
+        :return: the tested value
+        """
+
+        if __ast_default_check_type("attribute", get_attr(value, attr)):
+            return node
+        else:
+            raise ValueError(f"safe_eval doesn't permit you to read {attr} from {node}")
 
     if not return_code:
         return {
