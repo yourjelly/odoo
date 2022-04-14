@@ -83,7 +83,7 @@
                                     </div>
                                     <div class="btn-group" role="toolbar" aria-label="options">
                                         <div class="o-dropdown dropdown o-dropdown--no-caret">
-                                            <a type="button" role="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <a type="button" role="button" class="btn btn-secondary btn-more dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                 <i class="fa fa-ellipsis-v"/>
                                             </a>
                                             <div class="o_knowledge_more_options_panel dropdown-menu" role="menu">

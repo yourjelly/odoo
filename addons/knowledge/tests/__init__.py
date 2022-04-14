@@ -2,3 +2,4 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from . import test_knowledge_perf
+from . import test_knowledge_tour
