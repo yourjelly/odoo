@@ -2,6 +2,7 @@ import {
     BasicEditor, customErrorMessage,
     testEditor
 } from "../utils.js";
+import {CLIPBOARD_WHITELISTS} from "../../src/OdooEditor.js";
 
 // Mock an paste event and send it to the editor.
 const pasteData = async function (editor, text, type) {
@@ -22,6 +23,59 @@ const pasteText = async (editor, text) => pasteData(editor, text, 'text/plain');
 const pasteHtml = async (editor, html) => pasteData(editor, html, 'text/html');
 
 describe('Copy and paste', () => {
+    describe('Html Paste cleaning', () => {
+        describe('whitelist', async () => {
+            it('should keep whitelisted Tags tag', async () => {
+                const tagsToKeep = [
+                    'a<img src="http://www.imgurl.com/img.jpg">d', // img tag
+                    'a<br>b' // br tags
+                ];
+
+                for (const node of CLIPBOARD_WHITELISTS.nodes) {
+                    if (!['TABLE', 'THEAD', 'TH', 'TBODY', 'TR', 'TD', 'IMG', 'BR', '.fa'].includes(node)) {
+                        tagsToKeep.push(`a<${node.toLowerCase()}>b</${node.toLowerCase()}>c`);
+                    }
+                }
+
+                for (const tagToKeep of tagsToKeep) {
+                    await testEditor(BasicEditor, {
+                        contentBefore: '123[]',
+                        stepFunction: async editor => {
+                            await pasteHtml(editor, tagToKeep);
+                        },
+                        contentAfter: '123' + tagToKeep + '[]',
+                    });
+                }
+            });
+            it('should keep tables Tags tag and add classes', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '123[]',
+                    stepFunction: async editor => {
+                        await pasteHtml(editor, 'a<table><thead><tr><th>h</th></tr></thead><tbody><tr><td>b</td></tr></tbody></table>d');
+                    },
+                    contentAfter: '123a<table class="table table-bordered"><thead><tr><th>h</th></tr></thead><tbody><tr><td>b</td></tr></tbody></table>d[]',
+                });
+            });
+            it('should not keep span', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '123[]',
+                    stepFunction: async editor => {
+                        await pasteHtml(editor, 'a<span>bc</span>d');
+                    },
+                    contentAfter: '123abcd[]',
+                });
+            });
+            it('should keep styled span', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '123[]',
+                    stepFunction: async editor => {
+                        await pasteHtml(editor, 'a<span style="text-decoration: underline">bc</span>d');
+                    },
+                    contentAfter: '123a<span style="text-decoration: underline">bc</span>d[]',
+                });
+            });
+        });
+    });
     describe('Simple text', () => {
         describe('range collapsed', async () => {
             it('should paste a text in a p', async () => {
@@ -595,14 +649,14 @@ describe('Copy and paste', () => {
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<p>1ab<span>c12</span></p><p>34[]f</p>',
+                    contentAfter: '<p>1ab<span>c12</span></p><p><span>34[]</span>f</p>',
                 });
                 await testEditor(BasicEditor, {
                     contentBefore: '<p>2a[b<span>c]d</span>ef</p>',
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<p>2a12</p><p><span>34[]d</span>ef</p>',
+                    contentAfter: '<p>2a12</p><p>34[]<span>d</span>ef</p>',
                 });
             });
             it('should paste a text when selection across two element (1)', async () => {
@@ -611,7 +665,10 @@ describe('Copy and paste', () => {
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<div>1a<p>b12</p>34[]<span>e</span>f</div>',
+                    // FIXME: Bringing `e` and `f` into the `<p>` is a tradeOff
+                    // Should we change it ? How ? Might warrant a discution.
+                    // possible alt contentAfter : <div>1a<p>b12</p>34[]<span>e</span>f</div>
+                    contentAfter: '<div>1a<p>b12</p><p>34[]<span>e</span>f</p></div>',
                 });
             });
             it('should paste a text when selection across two element (2)', async () => {
@@ -643,7 +700,7 @@ describe('Copy and paste', () => {
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<p>a<span>b1<i>X</i>2</span></p><p>3<i>X</i>4</p><p>5<i>X</i>6[]<span>c</span>d</p>',
+                    contentAfter: '<p>a<span>b1<i>X</i>2</span></p><p>3<i>X</i>4</p><p><span>5<i>X</i>6[]c</span>d</p>',
                 });
             });
         });
@@ -663,7 +720,7 @@ describe('Copy and paste', () => {
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<p>a<span>b1<i>X</i>2</span></p><p>3<i>X</i>4</p><p>5<i>X</i>6[]<span>e</span>f</p>',
+                    contentAfter: '<p>a<span>b1<i>X</i>2</span></p><p>3<i>X</i>4</p><p><span>5<i>X</i>6[]e</span>f</p>',
                 });
             });
             it('should paste a text when selection across two span (1)', async () => {
@@ -672,7 +729,7 @@ describe('Copy and paste', () => {
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<p>1a<span>b1<i>X</i>2</span></p><p>3<i>X</i>4</p><p>5<i>X</i>6[]<span>e</span>f</p>',
+                    contentAfter: '<p>1a<span>b1<i>X</i>2</span></p><p>3<i>X</i>4</p><p><span>5<i>X</i>6[]e</span>f</p>',
                 });
             });
             it('should paste a text when selection across two span (2)', async () => {
@@ -681,7 +738,7 @@ describe('Copy and paste', () => {
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<p>2a<span>b1<i>X</i>2</span></p><p>3<i>X</i>4</p><p>5<i>X</i>6[]<span>e</span>f</p>',
+                    contentAfter: '<p>2a<span>b1<i>X</i>2</span></p><p>3<i>X</i>4</p><p><span>5<i>X</i>6[]e</span>f</p>',
                 });
             });
             it('should paste a text when selection across two p', async () => {
@@ -706,14 +763,14 @@ describe('Copy and paste', () => {
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<div>1ab<span>c1<i>X</i>2</span></div><p>3<i>X</i>4</p><div><span>5<i>X</i>6[]</span>f</div>',
+                    contentAfter: '<div>1ab<span>c1<i>X</i>2</span><p>3<i>X</i>4</p><span>5<i>X</i>6[]</span>f</div>',
                 });
                 await testEditor(BasicEditor, {
                     contentBefore: '<div>2a[b<span>c]d</span>ef</div>',
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<div>2a1<i>X</i>2</div><p>3<i>X</i>4</p><div>5<i>X</i>6[]<span>d</span>ef</div>',
+                    contentAfter: '<div>2a1<i>X</i>2<p>3<i>X</i>4</p>5<i>X</i>6[]<span>d</span>ef</div>',
                 });
             });
             it('should paste a text when selection leave a span (2)', async () => {
@@ -722,7 +779,7 @@ describe('Copy and paste', () => {
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<p>1ab<span>c1<i>X</i>2</span></p><p>3<i>X</i>4</p><p>5<i>X</i>6[]f</p>',
+                    contentAfter: '<p>1ab<span>c1<i>X</i>2</span></p><p>3<i>X</i>4</p><p><span>5<i>X</i>6[]</span>f</p>',
                 });
                 await testEditor(BasicEditor, {
                     contentBefore: '<p>2a[b<span>c]d</span>ef</p>',
@@ -738,7 +795,7 @@ describe('Copy and paste', () => {
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<div>1a<p>b1<i>X</i>2</p><p>3<i>X</i>4</p>5<i>X</i>6[]<span>e</span>f</div>',
+                    contentAfter: '<div>1a<p>b1<i>X</i>2</p><p>3<i>X</i>4</p><p>5<i>X</i>6[]<span>e</span>f</p></div>',
                 });
             });
             it('should paste a text when selection across two element (2)', async () => {
@@ -747,7 +804,7 @@ describe('Copy and paste', () => {
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<div>2a<span>b1<i>X</i>2</span></div><p>3<i>X</i>4</p><div><span>5<i>X</i>6[]</span>e<br>f</div>',
+                    contentAfter: '<div>2a<span>b1<i>X</i>2</span><p>3<i>X</i>4</p><span>5<i>X</i>6[]</span>e<br>f</div>',
                 });
             });
         });
@@ -761,7 +818,7 @@ describe('Copy and paste', () => {
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<p>ab12</p><p><i>ii[]</i>cd</p>',
+                    contentAfter: '<p>ab12</p><p><i>ii</i>[]cd</p>',
                 });
             });
             it('should paste a text in a span', async () => {
@@ -770,7 +827,7 @@ describe('Copy and paste', () => {
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<p>a<span>b12</span></p><p><i>ii[]</i><span>c</span>d</p>',
+                    contentAfter: '<p>a<span>b12</span></p><p><span><i>ii</i>[]c</span>d</p>',
                 });
             });
         });
@@ -781,7 +838,7 @@ describe('Copy and paste', () => {
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<p>a12</p><p><i>ii[]</i>d</p>',
+                    contentAfter: '<p>a12</p><p><i>ii</i>[]d</p>',
                 });
             });
             it('should paste a text in a span', async () => {
@@ -790,7 +847,7 @@ describe('Copy and paste', () => {
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<p>a<span>b12</span></p><p><i>ii[]</i><span>e</span>f</p>',
+                    contentAfter: '<p>a<span>b12</span></p><p><span><i>ii</i>[]e</span>f</p>',
                 });
             });
             it('should paste a text when selection across two span', async () => {
@@ -799,14 +856,14 @@ describe('Copy and paste', () => {
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<p>a<span>b12</span></p><p><i>ii[]</i><span>e</span>f</p>',
+                    contentAfter: '<p>a<span>b12</span></p><p><span><i>ii</i>[]e</span>f</p>',
                 });
                 await testEditor(BasicEditor, {
                     contentBefore: '<p>a<span>b[c</span>- -<span>d]e</span>f</p>',
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<p>a<span>b12</span></p><p><i>ii[]</i><span>e</span>f</p>',
+                    contentAfter: '<p>a<span>b12</span></p><p><span><i>ii[]</i>e</span>f</p>',
                 });
             });
             it('should paste a text when selection across two p', async () => {
@@ -815,14 +872,14 @@ describe('Copy and paste', () => {
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<div>a<p>b12</p><p><i>ii[]</i>e</p>f</div>',
+                    contentAfter: '<div>a<p>b12</p><p><i>ii</i>[]e</p>f</div>',
                 });
                 await testEditor(BasicEditor, {
                     contentBefore: '<div>a<p>b[c</p>- -<p>d]e</p>f</div>',
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<div>a<p>b12</p><p><i>ii[]</i>e</p>f</div>',
+                    contentAfter: '<div>a<p>b12</p><p><i>ii</i>[]e</p>f</div>',
                 });
             });
             it('should paste a text when selection leave a span (1)', async () => {
@@ -831,14 +888,14 @@ describe('Copy and paste', () => {
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<div>1ab<span>c12<br><i>ii</i>[]</span>f</div>',
+                    contentAfter: '<div>1ab<span>c12<i><br>ii</i>[]</span>f</div>',
                 });
                 await testEditor(BasicEditor, {
                     contentBefore: '<div>2a[b<span>c]d</span>ef</div>',
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<div>2a12<br><i>ii</i>[]<span>d</span>ef</div>',
+                    contentAfter: '<div>2a12<i><br>ii</i>[]<span>d</span>ef</div>',
                 });
             });
             it('should paste a text when selection leave a span (2)', async () => {
@@ -847,14 +904,14 @@ describe('Copy and paste', () => {
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<p>1ab<span>c12</span></p><p><i>ii[]</i>f</p>',
+                    contentAfter: '<p>1ab<span>c12</span></p><p><span><i>ii</i>[]</span>f</p>',
                 });
                 await testEditor(BasicEditor, {
                     contentBefore: '<p>2a[b<span>c]d</span>ef</p>',
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<p>2a12</p><p><i>ii[]</i><span>d</span>ef</p>',
+                    contentAfter: '<p>2a12</p><p><i>ii</i>[]<span>d</span>ef</p>',
                 });
             });
             it('should paste a text when selection across two element (1)', async () => {
@@ -863,7 +920,7 @@ describe('Copy and paste', () => {
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<div>1a<p>b12</p><i>ii[]</i><span>e</span>f</div>',
+                    contentAfter: '<div>1a<p>b12</p><p><i>ii</i>[]<span>e</span>f</p></div>',
                 });
             });
             it('should paste a text when selection across two element (2)', async () => {
@@ -872,12 +929,12 @@ describe('Copy and paste', () => {
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<div>2a<span>b12<br><i>ii</i>[]</span>e<br>f</div>',
+                    contentAfter: '<div>2a<span>b12<i><br>ii</i>[]</span>e<br>f</div>',
                 });
             });
         });
     });
-    describe('Complex html p+', () => {
+    describe('Complex html 3p+b', () => {
         const complexHtmlData = '<p>1<b>23</b></p><p>zzz</p><p>45<b>6</b>7</p>';
         describe('range collapsed', async () => {
             it('should paste a text in a p', async () => {
@@ -895,7 +952,7 @@ describe('Copy and paste', () => {
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<p>a<span>b1<b>23</b></span></p><p>zzz</p><p>45<b>6</b>7[]<span>c</span>d</p>',
+                    contentAfter: '<p>a<span>b1<b>23</b></span></p><p>zzz</p><p><span>45<b>6</b>7[]c</span>d</p>',
                 });
             });
         });
@@ -915,7 +972,7 @@ describe('Copy and paste', () => {
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<p>a<span>b1<b>23</b></span></p><p>zzz</p><p>45<b>6</b>7[]<span>e</span>f</p>',
+                    contentAfter: '<p>a<span>b1<b>23</b></span></p><p>zzz</p><p><span>45<b>6</b>7[]e</span>f</p>',
                 });
             });
             it('should paste a text when selection across two span', async () => {
@@ -924,14 +981,14 @@ describe('Copy and paste', () => {
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<p>a<span>b1<b>23</b></span></p><p>zzz</p><p>45<b>6</b>7[]<span>e</span>f</p>',
+                    contentAfter: '<p>a<span>b1<b>23</b></span></p><p>zzz</p><p><span>45<b>6</b>7[]e</span>f</p>',
                 });
                 await testEditor(BasicEditor, {
                     contentBefore: '<p>a<span>b[c</span>- -<span>d]e</span>f</p>',
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<p>a<span>b1<b>23</b></span></p><p>zzz</p><p>45<b>6</b>7[]<span>e</span>f</p>',
+                    contentAfter: '<p>a<span>b1<b>23</b></span></p><p>zzz</p><p><span>45<b>6</b>7[]e</span>f</p>',
                 });
             });
             it('should paste a text when selection across two p', async () => {
@@ -956,14 +1013,14 @@ describe('Copy and paste', () => {
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<div>1ab<span>c1<b>23</b></span><p>zzz</p>45<b>6</b>7[]f</div>',
+                    contentAfter: '<div>1ab<span>c1<b>23</b></span><p>zzz</p><span>45<b>6</b>7[]</span>f</div>',
                 });
                 await testEditor(BasicEditor, {
                     contentBefore: '<div>2a[b<span>c]d</span>ef</div>',
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<div>2a1<b>23</b></p><p>zzz</p>45<b>6</b>7[]<span>d</span>ef</div>',
+                    contentAfter: '<div>2a1<b>23</b><p>zzz</p>45<b>6</b>7[]<span>d</span>ef</div>',
                 });
             });
             it('should paste a text when selection across two element (1)', async () => {
@@ -972,7 +1029,7 @@ describe('Copy and paste', () => {
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<div>1a<p>b1<b>23</b></p><p>zzz</p>45<b>6</b>7[]<span>e</span>f</div>',
+                    contentAfter: '<div>1a<p>b1<b>23</b></p><p>zzz</p><p>45<b>6</b>7[]<span>e</span>f</p></div>',
                 });
             });
             it('should paste a text when selection across two element (2)', async () => {
@@ -981,11 +1038,25 @@ describe('Copy and paste', () => {
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
                     },
-                    contentAfter: '<div>2a<span>b1<b>23</b></span><p>zzz</p><p>45<b>6</b>7[]e</p>f</div>',
+                    contentAfter: '<div>2a<span>b1<b>23</b></span><p>zzz</p><span>45<b>6</b>7[]</span>e<br>f</div>',
                 });
             });
         });
     });
+    describe('Special cases', () => {
+        describe('lists', async () => {
+            it('should paste a list in a p', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<p>12[]34</p>',
+                    stepFunction: async editor => {
+                        await pasteHtml(editor, '<ul><li>abc</li><li>def</li><li>ghi</li></ul>');
+                    },
+                    contentAfter: '<p>12</p><ul><li>abc</li><li>def</li><li>ghi</li></ul>[]<p>34</p>',
+                });
+            });
+        });
+    });
+
     describe('link', () => {
         describe('range collapsed', async () => {
             it('should paste and transform an URL in a p', async () => {

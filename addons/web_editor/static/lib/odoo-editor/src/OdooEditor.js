@@ -79,7 +79,7 @@ const CLIPBOARD_BLACKLISTS = {
     unwrap: ['.Apple-interchange-newline', 'DIV'], // These elements' children will be unwrapped.
     remove: ['META', 'STYLE', 'SCRIPT'], // These elements will be removed along with their children.
 };
-const CLIPBOARD_WHITELISTS = {
+export const CLIPBOARD_WHITELISTS = {
     nodes: [
         // Style
         'P',
@@ -103,6 +103,7 @@ const CLIPBOARD_WHITELISTS = {
         'STRONG',
         // Table
         'TABLE',
+        'THEAD',
         'TH',
         'TBODY',
         'TR',
@@ -137,6 +138,15 @@ const CLIPBOARD_WHITELISTS = {
         /^fa/,
     ],
     attributes: ['class', 'href', 'src'],
+    spanStyle: [
+        'span[style*="text-decoration"]',
+        'span[style*="font-weight"]',
+        'span[style*="background-color"]',
+        'span[style*="text-color"]',
+        'span[style*="font-style"]',
+        'span[style*="text-decoration-line"]',
+        'span[style*="font-size"]',
+    ]
 };
 
 function defaultOptions(defaultObject, object) {
@@ -169,7 +179,7 @@ function getImageUrl (file) {
                 return reject(reader.error);
             }
             resolve(e.target.result);
-        }
+        };
     });
 }
 export class OdooEditor extends EventTarget {
@@ -2079,7 +2089,7 @@ export class OdooEditor extends EventTarget {
 
         for (const tableElement of container.querySelectorAll('table')) {
             tableElement.classList.add('table', 'table-bordered');
-        };
+        }
 
         for (const child of [...container.childNodes]) {
             this._cleanForPaste(child);
@@ -2107,7 +2117,8 @@ export class OdooEditor extends EventTarget {
             // Remove all illegal attributes and classes from the node, then
             // clean its children.
             for (const attribute of [...node.attributes]) {
-                if (!this._isWhitelisted(attribute)) {
+                // we kee some style on span to be able to paste text styled in the editor
+                if (!this._isWhitelisted(attribute) && (node.nodeName !== 'SPAN' || attribute.name !== 'style')) {
                     node.removeAttribute(attribute.name);
                 }
             }
@@ -2137,9 +2148,13 @@ export class OdooEditor extends EventTarget {
                 okClass instanceof RegExp ? okClass.test(item) : okClass === item,
             );
         } else {
+            console.log('node wl', item, item.matches);
             return (
                 item.nodeType === Node.TEXT_NODE ||
-                (item.matches && item.matches(CLIPBOARD_WHITELISTS.nodes.join(',')))
+                (
+                    item.matches &&
+                    item.matches([...CLIPBOARD_WHITELISTS.nodes, ...CLIPBOARD_WHITELISTS.spanStyle].join(','))
+                )
             );
         }
     }
@@ -2893,25 +2908,33 @@ export class OdooEditor extends EventTarget {
      */
     _onPaste(ev) {
         ev.preventDefault();
+        const sel = this.document.getSelection();
         const files = getImageFiles(ev.clipboardData);
         const clipboardHtml = ev.clipboardData.getData('text/html');
+        console.log('clipboard is true', !!clipboardHtml);
+        console.log('clipboard html', clipboardHtml);
+        console.log('prepareClipboardData', this._prepareClipboardData(clipboardHtml));
         if (files.length) {
             this.addImagesFiles(files);
         } else if (clipboardHtml) {
+            console.log('>>insertHTML');
             this.execCommand('insertHTML', this._prepareClipboardData(clipboardHtml));
         } else {
             const text = ev.clipboardData.getData('text/plain');
             const splitAroundUrl = text.split(URL_REGEX);
             const linkAttributes = this.options.defaultLinkAttributes || {};
+            const selectionIsInsideALink = !!closestElement(sel.anchorNode, 'a');
 
             for (let i = 0; i < splitAroundUrl.length; i++) {
+                const url = /^https?:\/\//gi.test(splitAroundUrl[i])
+                    ? splitAroundUrl[i]
+                    : 'https://' + splitAroundUrl[i];
+                const youtubeUrl = YOUTUBE_URL_GET_VIDEO_ID.exec(url);
+                const urlFileExtention = url.split('.').pop();
+                const isImageUrl = ['jpg', 'jpeg', 'png', 'gif'].includes(urlFileExtention.toLowerCase());
                 // Even indexes will always be plain text, and odd indexes will always be URL.
-                if (i % 2) {
-                    const url = /^https?:\/\//gi.test(splitAroundUrl[i])
-                        ? splitAroundUrl[i]
-                        : 'https://' + splitAroundUrl[i];
-                    const youtubeUrl = YOUTUBE_URL_GET_VIDEO_ID.exec(url);
-                    const urlFileExtention = url.split('.').pop();
+                // only allow images emebed inside an existing link. No other url or video embed.
+                if (i % 2 && (isImageUrl || !selectionIsInsideALink)) {
                     const baseEmbedCommand = [
                         {
                             groupName: 'paste',
@@ -2927,6 +2950,9 @@ export class OdooEditor extends EventTarget {
                                 }
                                 link.innerText = splitAroundUrl[i];
                                 const sel = this.document.getSelection();
+                                if (!sel.isCollapsed) {
+                                    this.deleteRange(sel);
+                                }
                                 if (sel.rangeCount) {
                                     sel.getRangeAt(0).insertNode(link);
                                     sel.collapseToEnd();
@@ -2950,9 +2976,9 @@ export class OdooEditor extends EventTarget {
                         callback();
 
                         this.historyStep(true);
-                    }
+                    };
 
-                    if (['jpg', 'jpeg', 'png', 'gif'].includes(urlFileExtention)) {
+                    if (isImageUrl) {
                         const stepIndexBeforeInsert = this._historySteps.length - 1;
                         this.execCommand('insertText', splitAroundUrl[i]);
                         this.commandBar.open({
@@ -2968,6 +2994,9 @@ export class OdooEditor extends EventTarget {
                                             const img = document.createElement('IMG');
                                             img.setAttribute('src', url);
                                             const sel = this.document.getSelection();
+                                            if (!sel.isCollapsed) {
+                                                this.deleteRange(sel);
+                                            }
                                             if (sel.rangeCount) {
                                                 sel.getRangeAt(0).insertNode(img);
                                                 sel.collapseToEnd();
@@ -3010,6 +3039,9 @@ export class OdooEditor extends EventTarget {
                                                 videoElement.setAttribute('allowfullscreen', '1');
                                             }
                                             const sel = this.document.getSelection();
+                                            if (!sel.isCollapsed) {
+                                                this.deleteRange(sel);
+                                            }
                                             if (sel.rangeCount) {
                                                 sel.getRangeAt(0).insertNode(videoElement);
                                                 sel.collapseToEnd();
@@ -3027,6 +3059,9 @@ export class OdooEditor extends EventTarget {
                         }
                         link.innerText = splitAroundUrl[i];
                         const sel = this.document.getSelection();
+                        if (!sel.isCollapsed) {
+                            this.deleteRange(sel);
+                        }
                         if (sel.rangeCount) {
                             sel.getRangeAt(0).insertNode(link);
                             sel.collapseToEnd();

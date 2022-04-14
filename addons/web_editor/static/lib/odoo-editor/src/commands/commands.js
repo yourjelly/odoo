@@ -46,6 +46,7 @@ const TEXT_CLASSES_REGEX = /\btext-[^\s]*\b/g;
 const BG_CLASSES_REGEX = /\bbg-[^\s]*\b/g;
 
 function insert(editor, data, isText = true) {
+    console.warn('insert() :: data :', data);
     const selection = editor.document.getSelection();
     const range = selection.getRangeAt(0);
     let currentNode;
@@ -136,9 +137,45 @@ function insert(editor, data, isText = true) {
         // newRange.setStart(lastPosition[0], lastPosition[1]);
         // newRange.setEnd(lastPosition[0], lastPosition[1]);
         // selection.addRange(newRange);
-        console.log('here before oEnter', closestElement(currentNode.nextSibling), closestElement(currentNode.nextSibling).outerHTML);
-        HTMLElement.prototype.oEnter.call(closestElement(currentNode.nextSibling), [0]);
-        console.log('here after oEnter');
+        console.log('here before oEnter : ');
+        console.log('currentNode', currentNode, currentNode.outerHTML);
+        console.log('lastChildNode', lastChildNode, lastChildNode.outerHTML);
+        console.log('CN.nextSibling', currentNode.nextSibling, currentNode.nextSibling.outerHTML);
+        console.log("editable", editor.editable.innerHTML);
+        // currentNode.nextSibling.oEnter(0);
+
+        // if ( === UNBREAKABLE_ROLLBACK_CODE) {
+        //     currentNode.nextSibling.oShiftEnter(0);
+        // }
+
+        if (isUnbreakable(closestBlock(currentNode.nextSibling))) {
+            currentNode.nextSibling.oShiftEnter(0);
+        } else {
+            // If we arrive here, the o_enter index should always be 0.
+            const parent = currentNode.nextSibling.parentElement;
+            const index = [...parent.childNodes].indexOf(currentNode.nextSibling);
+            console.log('parent.childNodes', parent.childNodes);
+            console.log('[...parent.childNodes]', [...parent.childNodes]);
+            console.log('index', index);
+            // debugger;
+            currentNode.nextSibling.parentElement.oEnter(index);
+            // currentNode.nextSibling.oEnter(0);
+        }
+        // try {
+        // } catch (error) {
+        //     console.warn("error : ", error, this);
+        //     if (error === UNBREAKABLE_ROLLBACK_CODE) {
+        //         currentNode.nextSibling.oShiftEnter(0);
+        //     } else {
+        //         throw error;
+        //     }
+        // }
+
+        // closestElement(currentNode.nextSibling).oEnter(0);
+        console.log('here after oEnter : ');
+        console.log('currentNode', currentNode, currentNode.outerHTML);
+        console.log('lastChildNode', lastChildNode, lastChildNode.outerHTML);
+        console.log("editable", editor.editable.innerHTML);
     }
 
     let nodeToInsert;
@@ -179,8 +216,10 @@ function insert(editor, data, isText = true) {
         }
         currentNode = nodeToInsert;
     }
+    console.log("curent node for range before fix", currentNode, currentNode.outerHTML);
     currentNode = lastChildNode || currentNode;
-    console.log("curent node for range", currentNode, currentNode.outerHTML)
+    console.log("curent node for range", currentNode, currentNode.outerHTML);
+    console.log("editable", editor.editable.innerHTML);
 
     selection.removeAllRanges();
     const newRange = new Range();
