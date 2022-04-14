@@ -1,10 +1,25 @@
 # -*- coding: utf-8 -*-
 
 from inspect import cleandoc
+from collections import OrderedDict
 
 from odoo.tests.common import BaseCase
 from odoo.tools.safe_eval2 import safe_eval
 from odoo.tools.expr_checker import expr_checker
+
+
+class CustomCollection:
+    def __init__(self, value):
+        pass
+
+    def __setitem__(self, key, value):
+        pass
+
+    def __getitem__(self, key):
+        pass
+
+    def __iter__(self):
+        return iter([42])
 
 
 class Dangerous:
@@ -41,8 +56,9 @@ class ReadOnlyObject:
 
 
 def check_type(method, value):
-    safe_type = (Good, ReadOnlyObject)
+    safe_type = (Good, ReadOnlyObject, CustomCollection, OrderedDict)
     return type(value) in safe_type
+
 
 class TestFuncChecker(BaseCase):
     def test_function_call(self):
@@ -189,7 +205,9 @@ class TestFuncChecker(BaseCase):
             e.exception.args[0], "safe_eval didn't permit you to call any functions"
         )
 
-        with self.assertRaisesRegex(Exception, "safe_eval didn't permit you to call any functions"):
+        with self.assertRaisesRegex(
+            Exception, "safe_eval didn't permit you to call any functions"
+        ):
             safe_eval("kanban.get('sold')", allow_functions_calls=False)
 
     def test_assign(self):
@@ -371,13 +389,13 @@ class TestFuncChecker(BaseCase):
         ]
 
         for code in codes:
-            output = {} 
+            output = {}
             expected_output = {}
             code = cleandoc(code)
             safe_eval(code, mode="exec", locals_dict={"result": output})
             exec(code, None, {"result": expected_output})
 
-            self.assertEqual(output['val'], expected_output['val'])
+            self.assertEqual(output["val"], expected_output["val"])
 
     def test_safe_self(self):
         obj = Good()
@@ -399,11 +417,11 @@ class TestFuncChecker(BaseCase):
 
         value = {}
         safe_eval(code, check_type=check_type, mode="exec", locals_dict={"ret": value})
-        self.assertEqual(value['val'], 65535)
+        self.assertEqual(value["val"], 65535)
 
-        # Because we use qualname to detect non-bounded classes (class.method) 
-        # It's safer to test those cases 
-        
+        # Because we use qualname to detect non-bounded classes (class.method)
+        # It's safer to test those cases
+
         # Lambda functions inside of a listcomps are interpreted as <listcomp>.<lambda>
         code = cleandoc(
             """
@@ -412,10 +430,15 @@ class TestFuncChecker(BaseCase):
         )
 
         value = {}
-        safe_eval(code, check_type=check_type, mode="exec", globals_dict={"obj": obj, "value": value})
-        self.assertEqual(value['ret'], [1, 4, 9, 16, 25, 36, 49, 64, 81, 100])
+        safe_eval(
+            code,
+            check_type=check_type,
+            mode="exec",
+            globals_dict={"obj": obj, "value": value},
+        )
+        self.assertEqual(value["ret"], [1, 4, 9, 16, 25, 36, 49, 64, 81, 100])
 
-        # Functions inside of functions are interpreted as a.<locals>.b 
+        # Functions inside of functions are interpreted as a.<locals>.b
         code = cleandoc(
             """
             def a():
@@ -441,3 +464,78 @@ class TestFuncChecker(BaseCase):
             safe_eval(
                 code, check_type=check_type, mode="eval", locals_dict={"Good": Good}
             )
+
+    def test_subscript(self):
+        result = {}
+        code = cleandoc(
+            """ 
+            result['list'] = [1, 2, 3, 4]
+            result['list'][0] *= 2
+            result['list'] = result['list'][::-1]
+            """
+        )
+
+        safe_eval(code, mode="exec", locals_dict={"result": result})
+        self.assertEqual(result["list"], [4, 3, 2, 2])
+
+        code = cleandoc(
+            """ 
+            result['list2'] = [1, 2, 3, 4]
+            result['list2'] = result['list2'][2:0:-1]
+            """
+        )
+
+        safe_eval(code, mode="exec", locals_dict={"result": result})
+        self.assertEqual(result["list2"], [3, 2])
+
+        code = cleandoc(
+            """
+            result['dict'] = {}
+            result['dict']['Hello'] = 'World !'
+            result['dict'][45] = 99
+            """
+        )
+
+        safe_eval(code, mode="exec", locals_dict={"result": result})
+        self.assertEqual(result["dict"], {"Hello": "World !", 45: 99})
+
+        code = cleandoc(
+            """ 
+            result['sum_all'] = 0
+
+            result['all'] = [
+                CustomCollection(44),
+                [1, 2, 3, 4],
+                {1: "Hello", 5: "World !", 9: "Foobar"},
+                (5, 4, 3, 0),
+                OrderedDict({2: "Ok", 4: "Nooo", 8: "Nice"}),
+                {4, 9, 2, 22}
+            ]
+
+            for i in enumerate(result['all']):
+                result['sum_all'] += sum(result['all'][i[0]])
+            """
+        )
+
+        safe_eval(
+            code,
+            mode="exec",
+            check_type=check_type,
+            locals_dict={
+                "result": result,
+                "CustomCollection": CustomCollection,
+                "OrderedDict": OrderedDict,
+            },
+        )
+
+        expected_output = {}
+        exec(
+            code,
+            None,
+            {
+                "result": expected_output,
+                "CustomColletion": CustomCollection,
+                "OrderedDict": OrderedDict,
+            },
+        )
+        self.assertEqual(result["sum_all"], expected_output["sum_all"])

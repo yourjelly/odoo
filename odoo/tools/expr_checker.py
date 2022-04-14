@@ -30,9 +30,27 @@ __safe_type = (
     list,
     set,
     dict,
+    slice,
+    enumerate,
     range,
     types.GeneratorType,
 )
+
+
+class SubscriptWrapper:
+    def __init__(self, value, check_type):
+        self.value = value
+        self.check_type = check_type
+
+    def __getitem__(self, key):
+        self.check_type("arguments", key)
+        return self.check_type("subscript", self.value.__getitem__(key))
+
+    def __setitem__(self, key, value):
+        self.check_type("arguments", key)
+        self.check_type("constant", value)
+
+        self.value.__setitem__(key, value)
 
 
 class NodeChecker(ast.NodeTransformer):
@@ -64,6 +82,16 @@ class NodeChecker(ast.NodeTransformer):
 
         if node.id in self.reserved_name:
             raise NameError(f"safe_eval: {node.id} is a reserved name")
+
+        return node
+
+    def visit_Subscript(self, node):
+        node = self.generic_visit(node)
+
+        node.value = ast.Call( ast.Name("SubscriptWrapper", ctx=ast.Load),
+            args=[node.value, ast.Name("__ast_check_type_fn", ctx=ast.Load())],
+            keywords={},
+        )
 
         return node
 
@@ -185,6 +213,7 @@ def expr_checker_prepare_context(
                         * arguments: if it's a function argument (eg: foo(value))
                         * constant: if it's a constant (eg: value)
                         * called: if it's a function call, it can be useful in case of bound method (with the __self__ attribute) (eg: value()).
+                        * subscript: if it's the return value of a subscript
 
         :param value: A value that needs to be checked.
         :return: The value passed to this function.
@@ -209,6 +238,7 @@ def expr_checker_prepare_context(
             "__ast_check_type_fn": __ast_default_check_type,
             "__ast_check_fn": __ast_default_check_call,
             "__ast_check_attr_and_type": __ast_check_attr_and_type,
+            "SubscriptWrapper": SubscriptWrapper
         }
 
     else:

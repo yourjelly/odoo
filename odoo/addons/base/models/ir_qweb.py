@@ -1117,16 +1117,11 @@ class IrQWeb(models.AbstractModel):
 
         assert_valid_codeobj(_SAFE_QWEB_OPCODES, compile(expression, '<>', 'eval'), expr)
 
-        expression_with_checks = expr_checker(expression)
-        return f"({expression_with_checks})"
-
-
-        # try:
-            # if self.env["benchmark_mode"]:
-                # return f"({expression})" 
-        # except KeyError:
-            # expression_with_checks, ctx = expr_checker(expression)
-            # return f"({expression_with_checks})"
+        if self.env.context.get("benchmark_mode"):
+            return f"({expression})"
+        else:
+            expression_with_checks = expr_checker(expression)
+            return f"({expression_with_checks})"
 
     def _compile_bool(self, attr, default=False):
         """Convert the statements as a boolean."""
