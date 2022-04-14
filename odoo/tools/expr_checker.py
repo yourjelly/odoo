@@ -38,6 +38,12 @@ __safe_type = (
 
 
 class SubscriptWrapper:
+    """ 
+    SubscriptWrapper
+
+    :param value: The value of the subscript (can be any object that supports __getitem__ and __setitem__)
+    :param check_type: A function that will check the arguments passed to the methods and also the return values
+    """
     def __init__(self, value, check_type):
         self.value = value
         self.check_type = check_type
@@ -53,7 +59,11 @@ class SubscriptWrapper:
         self.value.__setitem__(key, value)
 
 
-class NodeChecker(ast.NodeTransformer):
+class NodeChecker(ast.NodeTransformer): 
+    """ 
+    https://docs.python.org/3/library/ast.html#ast.NodeTransformer
+    """
+
     def __init__(self, allow_function_calls, allow_private):
         self.allow_function_calls = allow_function_calls
         self.allow_private = allow_private
@@ -157,6 +167,22 @@ def is_unbound_method_call(func):
 def expr_checker_prepare_context(
     get_attr, return_code=False, check_type=None, check_function=None
 ):
+    """ 
+    expr_checker_prepare_context(get_attr, return_code, check_type, check_type) -> (dict | str)
+
+    This function prepare the execution context for the sandbox, you should pass the execution context to an eval / exec function
+
+    :param get_attr: A function that will check the methods / attributes according to their object, name and value and will return a boolean
+                     eg: def __safe_get_attr(obj: object, name: str, value: Any) -> bool 
+
+    :param return_code: if True it will return a string with all the code needed for the execution, if False it will return a dictionnary {function_name: function_object}
+
+    :param check_type: if not None will pass the check of type to a custom function (please refer to the docstring for __ast_default_check_type)
+                        eg: def __safe_check_type(method: str, value: object) -> bool
+    
+    :param check_function: if not None will pass the function check to a custom function (please refer to the docstring for __ast_default_check_call)
+                            eg: def __safe_check_function_call(func: FunctionType, *args, **kwargs) -> bool
+    """
     def __ast_default_check_type(method, value):
         """
         __ast_default_check_type(method, value) -> value
@@ -298,7 +324,15 @@ def expr_checker(
     expr,
     allow_function_calls=True,
     allow_private=False,
-    return_code=True,
 ):
+    """ 
+    expr_checker(expr, allow_function_calls, allow_private, return_code) -> str
+
+    Take a Python expression and will return an expression with different checks (look above ;-) )
+
+    :param expr: A str that contains the expression to check
+    :param allow_function_calls: If False will raise an exception when it will meet a function call
+    :param allow_private: If True will raise an exception when it will meet a dunder attribute / method
+    """
     node_checker = NodeChecker(allow_function_calls, allow_private)
     return ast.unparse(node_checker.visit(ast.parse(expr)))
