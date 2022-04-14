@@ -21,7 +21,7 @@ class AccountReport(models.Model):
     _description = "Accounting Report"
 
     #TODO OCO garder filter_ en préfixe ?? => Nettoyer les noms de ces champs
-    name = fields.Char(string="Name", required=True)
+    name = fields.Char(string="Name", required=True) #TODO OCO traductions en multilan
     filter_multi_company = fields.Selection(
         string="Multi-Company",
         selection=[('disabled', "Disabled"), ('selector', "Use Company Selector"), ('tax_units', "Use Tax Units")],
