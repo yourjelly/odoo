@@ -145,6 +145,7 @@ class PosOrder(models.Model):
                     'table_id',
                     'to_invoice',
                     'multiprint_resume',
+                    'employee_id',
                     ]
 
     @api.model
