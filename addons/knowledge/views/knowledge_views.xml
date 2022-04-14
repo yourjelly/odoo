@@ -73,7 +73,7 @@
                                             </a>
                                             <div class="o_knowledge_share_panel dropdown-menu" role="menu">
                                                 <div class="px-3 pb-2">
-                                                    <button type="action" name="%(knowledge_invite_members)d" class="btn btn-primary w-100" attrs="{'invisible': [('user_can_write', '=', False)]}">
+                                                    <button type="action" name="%(knowledge_invite_members)d" class="btn btn-primary btn-invite w-100" attrs="{'invisible': [('user_can_write', '=', False)]}">
                                                         <i class="fa fa-plus"/> Invite
                                                     </button>
                                                 </div>

@@ -7,5 +7,8 @@ from odoo.tests.common import tagged, HttpCase
 
 @tagged('post_install', '-at_install', 'knowledge_tour_tests')
 class TestUI(HttpCase):
+    def test_knowledge_share(self):
+        self.start_tour('/web', 'knowledge_share', login='admin')
+
     def test_knowledge_editor_display(self):
         self.start_tour('/web', 'knowledge_editor_display', login='admin')
