@@ -9,7 +9,7 @@ export const posServerData = {
             fields: {},
             records: [],
             methods: {
-                async load_pos_data() {
+                load_pos_data() {
                     return loadPosData;
                 },
             },
@@ -18,7 +18,7 @@ export const posServerData = {
             fields: {},
             records: [],
             methods: {
-                async check_object_reference() {
+                check_object_reference() {
                     return ["uom.uom", 1]
                 }
             }
