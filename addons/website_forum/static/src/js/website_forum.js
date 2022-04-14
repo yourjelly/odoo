@@ -56,8 +56,8 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
         $('.forum_register_url').attr('href', forumLogin);
 
         // Initialize forum's tooltips
-        this.$('[data-toggle="tooltip"]').tooltip({delay: 0});
-        this.$('[data-toggle="popover"]').popover({offset: 8});
+        this.$('[data-bs-toggle="tooltip"]').tooltip({delay: 0});
+        this.$('[data-bs-toggle="popover"]').popover({offset: 8});
 
         $('input.js_select2').select2({
             tags: true,
@@ -620,7 +620,7 @@ publicWidget.registry.websiteForumSpam = publicWidget.Widget.extend({
      */
     _onMarkSpamClick: function (ev) {
         var key = this.$('.modal .tab-pane.active').data('key');
-        var $inputs = this.$('.modal .tab-pane.active input.custom-control-input:checked');
+        var $inputs = this.$('.modal .tab-pane.active input.form-check-input:checked');
         var values = _.map($inputs, function (o) {
             return parseInt(o.value);
         });

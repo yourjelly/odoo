@@ -4,7 +4,7 @@
   <t t-name="web.CommandPalette" owl="1">
     <div>
       <div class="o_command_palette_search input-group mb-2 px-4 py-3 border-bottom">
-        <span t-if="state.namespace !== 'default'" class="o_namespace d-flex align-items-center mr-1" t-out="state.namespace"/>
+        <span t-if="state.namespace !== 'default'" class="o_namespace d-flex align-items-center me-1" t-out="state.namespace"/>
         <input class="form-control border-0 p-0" type="text" t-att-value="state.searchValue" t-ref="autofocus" t-att-placeholder="state.placeholder" t-on-input="onSearchInput" t-on-keydown="onKeyDown"/>
         <span class="input-group-append">
           <div class="input-group-text border-0 bg-transparent">

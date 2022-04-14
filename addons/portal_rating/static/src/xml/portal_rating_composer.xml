@@ -17,7 +17,7 @@
                                 Write a review
                             </t>
                         </h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                             <span>×</span>
                         </button>
                     </div>

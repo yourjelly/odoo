@@ -42,7 +42,7 @@ publicWidget.registry.websiteSaleCartLink = publicWidget.Widget.extend({
             },
             container: 'body',
             placement: 'auto',
-            template: '<div class="popover mycart-popover" role="tooltip"><div class="arrow"></div><h3 class="popover-header"></h3><div class="popover-body"></div></div>'
+            template: '<div class="popover mycart-popover" role="tooltip"><div class="tooltip-arrow"></div><h3 class="popover-header"></h3><div class="popover-body"></div></div>'
         });
         window.addEventListener('visibilitychange', this._onVisibilityChange);
         this._updateCartQuantityText();
@@ -370,10 +370,10 @@ publicWidget.registry.WebsiteSale = publicWidget.Widget.extend(VariantMixin, car
                 var cart_alert = $('.oe_cart').parent().find('#data_warning');
                 if (cart_alert.length === 0) {
                     $('.oe_cart').prepend('<div class="alert alert-danger alert-dismissable" role="alert" id="data_warning">'+
-                            '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button> ' + data.warning + '</div>');
+                            '<button type="button" class="close" data-bs-dismiss="alert" aria-hidden="true">&times;</button> ' + data.warning + '</div>');
                 }
                 else {
-                    cart_alert.html('<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button> ' + data.warning);
+                    cart_alert.html('<button type="button" class="close" data-bs-dismiss="alert" aria-hidden="true">&times;</button> ' + data.warning);
                 }
                 $input.val(data.quantity);
             }

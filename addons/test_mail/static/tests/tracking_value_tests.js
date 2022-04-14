@@ -209,7 +209,7 @@ QUnit.test('rendering of tracked field of type boolean: from true to false', asy
     const mailTestTrackAllId1 = pyEnv['mail.test.track.all'].create({ boolean_field: true });
     const { afterNextRender, widget: form } = await this.start({ res_id: mailTestTrackAllId1 });
 
-    form.$('.custom-checkbox input').click();
+    form.$('.form-check input').click();
     await afterNextRender(() => testUtils.form.clickSave(form));
     assert.strictEqual(
         document.querySelector('.o_Message_trackingValue').textContent,
@@ -227,7 +227,7 @@ QUnit.test('rendering of tracked field of type boolean: from false to true', asy
     const mailTestTrackAllId1 = pyEnv['mail.test.track.all'].create({});
     const { afterNextRender, widget: form } = await this.start({ res_id: mailTestTrackAllId1 });
 
-    form.$('.custom-checkbox input').click();
+    form.$('.form-check input').click();
     await afterNextRender(() => testUtils.form.clickSave(form));
     assert.strictEqual(
         document.querySelector('.o_Message_trackingValue').textContent,
