@@ -477,7 +477,9 @@ def keep_query(*keep_params, **additional_params):
 
 
 def _qweb_ast_get_attr(obj, key, value):
-    # TODO ?
+    if key not in ("dumps", "get", "count", "strip") and (hasattr(obj, "_fields") and key not in obj._fields):
+        raise ValueError(f"safe_eval doesn't permit you to read {key} from {obj}")
+    
     return value
 
 def _qweb_ast_check_type(method, value):
