@@ -477,7 +477,7 @@ def keep_query(*keep_params, **additional_params):
 
 
 def _qweb_ast_get_attr(obj, key):
-    return key in ("dumps", "get", "count", "strip") or (hasattr(obj, "_fields") and key in obj._fields)
+    return (isinstance(obj, (dict, JSON, Markup, list)) and key in ("dumps", "get", "count", "strip")) or (hasattr(obj, "_fields") and key in obj._fields)
 
 def _qweb_ast_check_type(method, value):
     if type(value) in {OrderedDict, Markup, JSON, _ScriptSafe} or isinstance(value, BaseModel):
@@ -850,7 +850,6 @@ class IrQWeb(models.AbstractModel):
         """ Prepare the global context that will sent to eval the qweb
         generated code.
         """
-
         return {
             'Sized': Sized,
             'Mapping': Mapping,

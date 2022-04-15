@@ -210,10 +210,8 @@ def expr_checker_prepare_context(
         if check_type is not None and check_type(method, value):
             return value
 
-        if (
-            type(value) not in __safe_type + __require_checks_type
-            or type(value) in __require_checks_type
-            and method in ["returned", "arguments"]
+        if type(value) not in __safe_type + __require_checks_type or (
+            type(value) in __require_checks_type and method in ["returned", "arguments"]
         ):
             raise ValueError(f"safe_eval didn't like {value} (type: {type(value)})")
 
