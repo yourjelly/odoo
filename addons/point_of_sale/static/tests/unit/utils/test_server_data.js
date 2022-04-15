@@ -1,6 +1,11 @@
 /** @odoo-module **/
 
-import { loadPosData } from './test_load_pos_data';
+import { makeEnv, startServices } from '@web/env';
+import { registry } from "@web/core/registry";
+import { rpcService as realRpcService } from '@web/core/network/rpc_service';
+
+const serviceRegistry = registry.category("services");
+let data;
 
 export const posServerData = {
     actions: {},
@@ -9,8 +14,18 @@ export const posServerData = {
             fields: {},
             records: [],
             methods: {
-                load_pos_data() {
-                    return loadPosData;
+                async load_pos_data() {
+                    if (!data) {
+                        const env = makeEnv();
+                        const mockRpcService = serviceRegistry.get('rpc');
+                        serviceRegistry.remove('rpc');
+                        serviceRegistry.add('rpc', realRpcService);
+                        await startServices(env);
+                        data = await env.services.orm.call('pos.session', 'load_pos_data', [[odoo.pos_session_id]]);
+                        serviceRegistry.remove('rpc');
+                        serviceRegistry.add('rpc', mockRpcService);
+                    }
+                    return data;
                 },
             },
         },

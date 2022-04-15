@@ -57,8 +57,9 @@ QUnit.test('test OrderWidget', async function (assert) {
 
     // add two orderlines.
     const order = env.pos.get_order();
-    order.add_product(env.pos.db.product_by_id[49]);
-    order.add_product(env.pos.db.product_by_id[48]);
+    const products = Object.values(env.pos.db.product_by_id);
+    order.add_product(products[0]);
+    order.add_product(products[1]);
 
     await testUtils.nextTick();
     const lines = root.el.querySelectorAll('li.orderline');
