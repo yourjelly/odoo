@@ -9,6 +9,7 @@ export async function makePosTestEnv(config) {
     const legacyEnv = makeTestEnvironment();
     const webEnv = await makeTestEnv(config);
     const posEnv = Object.create(webEnv);
+    posEnv.posbus = new owl.EventBus();
     const localStorage = makeRAMLocalStorage();
     const pos = PosGlobalState.create({ env: owl.markRaw(posEnv), legacyEnv: owl.markRaw(legacyEnv), localStorage });
     const reactivePos = owl.reactive(pos);
