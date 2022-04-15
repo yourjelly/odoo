@@ -23,11 +23,13 @@ const CACHE = {};
 var PosDB = core.Class.extend({
     name: 'openerp_pos_db', //the prefix of the localstorage data
     limit: 100,  // the maximum number of results returned by a search
+    localStorage: localStorage,
     init: function(options){
         options = options || {};
         this.name = options.name || this.name;
         this.limit = options.limit || this.limit;
-        
+        this.localStorage = options.localStorage || this.localStorage;
+
         if (options.uuid) {
             this.name = this.name + '_' + options.uuid;
         }
@@ -151,7 +153,7 @@ var PosDB = core.Class.extend({
         if(CACHE[store] !== undefined){
             return CACHE[store];
         }
-        var data = localStorage[this.name + '_' + store];
+        var data = this.localStorage[this.name + '_' + store];
         if(data !== undefined && data !== ""){
             data = JSON.parse(data);
             CACHE[store] = data;
@@ -162,7 +164,7 @@ var PosDB = core.Class.extend({
     },
     /* saves a record store to the database */
     save: function(store,data){
-        localStorage[this.name + '_' + store] = JSON.stringify(data);
+        this.localStorage[this.name + '_' + store] = JSON.stringify(data);
         CACHE[store] = data;
     },
     _product_search_string: function(product){
@@ -353,7 +355,7 @@ var PosDB = core.Class.extend({
     /* removes all the data from the database. TODO : being able to selectively remove data */
     clear: function(){
         for(var i = 0, len = arguments.length; i < len; i++){
-            localStorage.removeItem(this.name + '_' + arguments[i]);
+            this.localStorage.removeItem(this.name + '_' + arguments[i]);
         }
     },
     /* this internal methods returns the count of properties in an object. */

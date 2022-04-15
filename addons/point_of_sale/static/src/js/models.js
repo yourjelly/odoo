@@ -86,7 +86,7 @@ class PosGlobalState extends PosModel {
     constructor(obj) {
         super(obj);
 
-        this.db = new PosDB();                       // a local database used to search trough products and categories & store pending orders
+        this.db = new PosDB({ localStorage: obj.localStorage });                       // a local database used to search trough products and categories & store pending orders
         this.debug = config.isDebug(); //debug mode
         this.unwatched = markRaw({});
 

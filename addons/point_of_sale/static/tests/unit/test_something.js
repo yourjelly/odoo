@@ -15,7 +15,6 @@ const serviceRegistry = registry.category('services');
 QUnit.module('test something', {
     beforeEach() {
         serviceRegistry.add('orm', ormService);
-        localStorage.clear();
     },
 });
 
