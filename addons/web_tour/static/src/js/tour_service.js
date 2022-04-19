@@ -136,7 +136,7 @@ return session.is_bound.then(function () {
         const observer = new MutationObserver(mutations => {
             clearTimeout(mutationTimer);
             currentMutations = currentMutations.concat(mutations);
-            mutationTimer = setTimeout(() => _processMutations(), 750);
+            mutationTimer = setTimeout(() => _processMutations(), 100);
         });
 
         // Now that the observer is configured, we have to start it when needed.
