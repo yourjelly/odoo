@@ -30,7 +30,7 @@ class AccountReport(models.Model):
     ) # TODO OCO on pourrait en faire un champ sélection (no, with_selector, with_tax_units)
     filter_date_range = fields.Boolean(string="Use Date Range", default=True) # TODO OCO remplace filter_date > True si range, False si date unique.
     allow_showing_draft = fields.Boolean(string="Allow Showing Draft Entries", default=True) #TODO OCO remplace filter_all_entries (qui n'est jamais passé à True, dirait-on)
-    filter_unfold_all = fields.Boolean(string="Allow Unfolding All Lines", default=False) # TODO OCO on pourrait le calculer: si le rapport compte au moins une ligne unfoldable, on l'affiche (why not ?)
+    filter_unfold_all = fields.Boolean(string="Allow Unfolding All Lines") # TODO OCO on pourrait le calculer: si le rapport compte au moins une ligne unfoldable, on l'affiche (why not ?)
     allow_comparison = fields.Boolean(string="Allow Comparison", default=True)
     filter_journals = fields.Boolean(string="Allow Filtering by Journal")
     filter_analytic = fields.Boolean(string="Allow Analytic Filters")
@@ -62,7 +62,7 @@ class AccountReport(models.Model):
     # TODO OCO en enterprise, ces trucs ?
     custom_options_initializer = fields.Char(string="Custom Options Initializer")
     custom_line_postprocessor = fields.Char(string="Custom Line Postprocessor")
-    custom_groupby_line_completer = fields.Char(string="Custom Static Line Completer")
+    custom_groupby_line_completer = fields.Char(string="Custom Groupby Line Completer")
 
     #TODO OCO réordonner les déclarations de champs (et décider d'un standard sur ce qu'on préfixe filter_)
 
