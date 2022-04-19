@@ -146,7 +146,7 @@
         }
 
         &.o_group_skills .o_group_name > b, .o_horizontal_separator {
-            color: color-yiq(map-get($grays, '200'));
+            color: color-contrast(map-get($grays, '200'));
             font-style: italic;
         }
     }

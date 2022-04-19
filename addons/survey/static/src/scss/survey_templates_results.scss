@@ -39,7 +39,7 @@
         }
         .dropdown-item {
             &.active .badge { // Invert badge display when the item is active
-                background-color: color-yiq(map-get($theme-colors, 'primary'));
+                background-color: color-contrast(map-get($theme-colors, 'primary'));
                 color: map-get($theme-colors, 'primary');
             }
         }
