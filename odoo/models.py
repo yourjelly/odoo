@@ -6135,50 +6135,55 @@ Fields:
         #  - mark H to recompute on inverse(X, records),
         #  - mark I to recompute on inverse(W, inverse(X, records)),
         #  - mark J to recompute on inverse(Y, records).
-        if len(fnames) == 1:
-            tree = self.pool.field_triggers.get(self._fields[next(iter(fnames))])
+        trees = [
+            tree
+            for fname in fnames
+            if (tree := self.pool.field_triggers.get(self._fields[fname])) is not None
+        ]
+        if not trees:
+            return
+
+        if len(trees) == 1:
+            [tree] = trees
         else:
-            # merge dependency trees to evaluate all triggers at once
+            # merge all trees into a single one
             tree = {}
-            for fname in fnames:
-                node = self.pool.field_triggers.get(self._fields[fname])
-                if node:
-                    trigger_tree_merge(tree, node)
+            for t in trees:
+                trigger_tree_merge(tree, t)
 
-        if tree:
-            # determine what to compute (through an iterator)
-            tocompute = self.sudo().with_context(active_test=False)._modified_triggers(tree, create)
+        # determine what to compute (through an iterator)
+        tocompute = self.sudo().with_context(active_test=False)._modified_triggers(tree, create)
 
-            # When called after modification, one should traverse backwards
-            # dependencies by taking into account all fields already known to be
-            # recomputed.  In that case, we mark fieds to compute as soon as
-            # possible.
-            #
-            # When called before modification, one should mark fields to compute
-            # after having inversed all dependencies.  This is because we
-            # determine what currently depends on self, and it should not be
-            # recomputed before the modification!
-            if before:
-                tocompute = list(tocompute)
+        # When called after modification, one should traverse backwards
+        # dependencies by taking into account all fields already known to be
+        # recomputed.  In that case, we mark fieds to compute as soon as
+        # possible.
+        #
+        # When called before modification, one should mark fields to compute
+        # after having inversed all dependencies.  This is because we
+        # determine what currently depends on self, and it should not be
+        # recomputed before the modification!
+        if before:
+            tocompute = list(tocompute)
 
-            # process what to compute
-            for field, records, create in tocompute:
-                records -= self.env.protected(field)
-                if not records:
-                    continue
-                if field.compute and field.store:
-                    if field.recursive:
-                        recursively_marked = self.env.not_to_compute(field, records)
-                    self.env.add_to_compute(field, records)
-                else:
-                    # Don't force the recomputation of compute fields which are
-                    # not stored as this is not really necessary.
-                    if field.recursive:
-                        recursively_marked = records & self.env.cache.get_records(records, field)
-                    self.env.cache.invalidate([(field, records._ids)])
-                # recursively trigger recomputation of field's dependents
+        # process what to compute
+        for field, records, create in tocompute:
+            records -= self.env.protected(field)
+            if not records:
+                continue
+            if field.compute and field.store:
                 if field.recursive:
-                    recursively_marked.modified([field.name], create)
+                    recursively_marked = self.env.not_to_compute(field, records)
+                self.env.add_to_compute(field, records)
+            else:
+                # Don't force the recomputation of compute fields which are
+                # not stored as this is not really necessary.
+                if field.recursive:
+                    recursively_marked = records & self.env.cache.get_records(records, field)
+                self.env.cache.invalidate([(field, records._ids)])
+            # recursively trigger recomputation of field's dependents
+            if field.recursive:
+                recursively_marked.modified([field.name], create)
 
     def _modified_triggers(self, tree, create=False):
         """ Return an iterator traversing a tree of field triggers on ``self``,
@@ -6196,46 +6201,49 @@ Fields:
         for key, val in tree.items():
             if key is None:
                 continue
-            elif create and key.type in ('many2one', 'many2one_reference'):
+            if create and key.type in ('many2one', 'many2one_reference'):
                 # upon creation, no other record has a reference to self
                 continue
-            else:
-                # val is another tree of dependencies
-                model = self.env[key.model_name]
-                for invf in model.pool.field_inverses[key]:
-                    # use an inverse of field without domain
-                    if not (invf.type in ('one2many', 'many2many') and invf.domain):
-                        if invf.type == 'many2one_reference':
-                            rec_ids = set()
-                            for rec in self:
-                                try:
-                                    if rec[invf.model_field] == key.model_name:
-                                        rec_ids.add(rec[invf.name])
-                                except MissingError:
-                                    continue
-                            records = model.browse(rec_ids)
-                        else:
-                            try:
-                                records = self[invf.name]
-                            except MissingError:
-                                records = self.exists()[invf.name]
 
-                        # TODO: find a better fix
-                        if key.model_name == records._name:
-                            if not any(self._ids):
-                                # if self are new, records should be new as well
-                                records = records.browse(it and NewId(it) for it in records._ids)
-                            break
+            # val is another tree of dependencies
+            model = self.env[key.model_name]
+            for invf in model.pool.field_inverses[key]:
+                # use an inverse of field without domain
+                if invf.type in ('one2many', 'many2many') and invf.domain:
+                    continue
+                if invf.type == 'many2one_reference':
+                    rec_ids = set()
+                    for rec in self:
+                        try:
+                            if rec[invf.model_field] == key.model_name:
+                                rec_ids.add(rec[invf.name])
+                        except MissingError:
+                            continue
+                    records = model.browse(rec_ids)
+                elif invf.comodel_name == key.model_name:
+                    try:
+                        records = self[invf.name]
+                    except MissingError:
+                        records = self.exists()[invf.name]
                 else:
-                    new_records = self.filtered(lambda r: not r.id)
-                    real_records = self - new_records
-                    records = model.browse()
-                    if real_records:
-                        records = model.search([(key.name, 'in', real_records.ids)], order='id')
-                    if new_records:
-                        cache_records = self.env.cache.get_records(model, key)
-                        records |= cache_records.filtered(lambda r: set(r[key.name]._ids) & set(self._ids))
-                yield from records._modified_triggers(val)
+                    continue
+
+                if not any(self._ids):
+                    # if self are new, records should be new as well
+                    records = records.browse(it and NewId(it) for it in records._ids)
+                break
+
+            else:
+                new_records = self.filtered(lambda r: not r.id)
+                real_records = self - new_records
+                records = model.browse()
+                if real_records:
+                    records = model.search([(key.name, 'in', real_records.ids)], order='id')
+                if new_records:
+                    cache_records = self.env.cache.get_records(model, key)
+                    records |= cache_records.filtered(lambda r: set(r[key.name]._ids) & set(self._ids))
+
+            yield from records._modified_triggers(val)
 
     @api.model
     def recompute(self, fnames=None, records=None):
