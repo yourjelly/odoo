@@ -14,6 +14,7 @@ import psycopg2
 from odoo import models, fields, Command
 from odoo.addons.base.tests.common import TransactionCaseWithUserDemo
 from odoo.exceptions import AccessError, UserError, ValidationError
+from odoo.modules.registry import _logger as registry_logger
 from odoo.tests import common
 from odoo.tools import mute_logger, float_repr
 from odoo.tools.date_utils import add, subtract, start_of, end_of
@@ -3957,3 +3958,31 @@ class TestPrecompute(common.TransactionCase):
         ]
         with self.assertQueries(QUERIES):
             model.create({})
+
+
+@common.tagged('post_install', '-at_install')
+class TestTriggers(common.TransactionCase):
+    def test_triggers(self):
+        def key_str(item):
+            return str(item[0])
+
+        def walk(tree):
+            yield ", ".join(sorted(f.name for f in tree.get(None, ())))
+            for field, subtree in sorted(tree.items(), key=key_str):
+                if field is None:
+                    continue
+                for index, line in enumerate(walk(subtree)):
+                    if not index:
+                        yield f"{field}: {line}"
+                    else:
+                        yield f"    {line}"
+
+        lines = []
+        for field, tree in sorted(self.registry.field_triggers.items(), key=key_str):
+            for index, line in enumerate(walk(tree)):
+                if not index:
+                    lines.append(f"    {field}: {line}")
+                else:
+                    lines.append(f"        {line}")
+
+        registry_logger.info("Field triggers\n%s", "\n".join(lines))

@@ -1,0 +1,1018 @@
+    auth_totp.device.name: display_name
+    auth_totp.wizard.create_date: __last_update
+    auth_totp.wizard.secret: qrcode, url
+    auth_totp.wizard.user_id: qrcode, url
+    auth_totp.wizard.write_date: __last_update
+    base.document.layout.company_details: preview
+    base.document.layout.company_id: company_details, country_id, custom_colors, display_name, email, external_report_layout_id, font, layout_background, layout_background_image, logo, logo_primary_color, logo_secondary_color, name, paperformat_id, partner_id, phone, preview, preview_logo, primary_color, report_footer, report_header, secondary_color, vat, website
+    base.document.layout.create_date: __last_update
+    base.document.layout.font: preview
+    base.document.layout.layout_background: preview
+    base.document.layout.layout_background_image: preview
+    base.document.layout.logo: custom_colors, logo_primary_color, logo_secondary_color, preview, preview_logo
+    base.document.layout.logo_primary_color: custom_colors
+    base.document.layout.logo_secondary_color: custom_colors
+    base.document.layout.name: display_name
+    base.document.layout.primary_color: custom_colors, preview
+    base.document.layout.report_footer: preview
+    base.document.layout.report_header: preview
+    base.document.layout.report_layout_id: preview
+    base.document.layout.secondary_color: custom_colors, preview
+    base.document.layout.write_date: __last_update
+    base.enable.profiling.wizard.create_date: __last_update
+    base.enable.profiling.wizard.duration: expiration
+    base.enable.profiling.wizard.write_date: __last_update
+    base.language.export.create_date: __last_update
+    base.language.export.name: display_name
+    base.language.export.write_date: __last_update
+    base.language.import.create_date: __last_update
+    base.language.import.name: display_name
+    base.language.import.write_date: __last_update
+    base.language.install.create_date: __last_update
+    base.language.install.write_date: __last_update
+    base.module.uninstall.create_date: __last_update
+    base.module.uninstall.module_id: model_ids, module_ids
+    base.module.uninstall.module_ids: model_ids
+    base.module.uninstall.show_all: model_ids, module_ids
+    base.module.uninstall.write_date: __last_update
+    base.module.update.create_date: __last_update
+    base.module.update.write_date: __last_update
+    base.module.upgrade.create_date: __last_update
+    base.module.upgrade.write_date: __last_update
+    base.partner.merge.automatic.wizard.create_date: __last_update
+    base.partner.merge.automatic.wizard.write_date: __last_update
+    base.partner.merge.line.create_date: __last_update
+    base.partner.merge.line.write_date: __last_update
+    base.update.translations.create_date: __last_update
+    base.update.translations.write_date: __last_update
+    base_import.import.create_date: __last_update
+    base_import.import.write_date: __last_update
+    base_import.mapping.create_date: __last_update
+    base_import.mapping.write_date: __last_update
+    base_import.tests.models.char.create_date: __last_update
+    base_import.tests.models.char.noreadonly.create_date: __last_update
+    base_import.tests.models.char.noreadonly.write_date: __last_update
+    base_import.tests.models.char.readonly.create_date: __last_update
+    base_import.tests.models.char.readonly.write_date: __last_update
+    base_import.tests.models.char.required.create_date: __last_update
+    base_import.tests.models.char.required.write_date: __last_update
+    base_import.tests.models.char.states.create_date: __last_update
+    base_import.tests.models.char.states.write_date: __last_update
+    base_import.tests.models.char.stillreadonly.create_date: __last_update
+    base_import.tests.models.char.stillreadonly.write_date: __last_update
+    base_import.tests.models.char.write_date: __last_update
+    base_import.tests.models.complex.create_date: __last_update
+    base_import.tests.models.complex.write_date: __last_update
+    base_import.tests.models.float.create_date: __last_update
+    base_import.tests.models.float.write_date: __last_update
+    base_import.tests.models.m2o.create_date: __last_update
+    base_import.tests.models.m2o.related.create_date: __last_update
+    base_import.tests.models.m2o.related.write_date: __last_update
+    base_import.tests.models.m2o.required.create_date: __last_update
+    base_import.tests.models.m2o.required.related.create_date: __last_update
+    base_import.tests.models.m2o.required.related.write_date: __last_update
+    base_import.tests.models.m2o.required.write_date: __last_update
+    base_import.tests.models.m2o.write_date: __last_update
+    base_import.tests.models.o2m.child.create_date: __last_update
+    base_import.tests.models.o2m.child.write_date: __last_update
+    base_import.tests.models.o2m.create_date: __last_update
+    base_import.tests.models.o2m.name: display_name
+    base_import.tests.models.o2m.write_date: __last_update
+    base_import.tests.models.preview.create_date: __last_update
+    base_import.tests.models.preview.name: display_name
+    base_import.tests.models.preview.write_date: __last_update
+    change.password.user.create_date: __last_update
+    change.password.user.write_date: __last_update
+    change.password.wizard.create_date: __last_update
+    change.password.wizard.write_date: __last_update
+    decimal.precision.create_date: __last_update
+    decimal.precision.name: display_name
+    decimal.precision.test.create_date: __last_update
+    decimal.precision.test.write_date: __last_update
+    decimal.precision.write_date: __last_update
+    domain.bool.create_date: __last_update
+    domain.bool.write_date: __last_update
+    ir.actions.act_url.create_date: __last_update
+    ir.actions.act_url.name: display_name
+    ir.actions.act_url.write_date: __last_update
+    ir.actions.act_window.create_date: __last_update
+    ir.actions.act_window.name: display_name
+    ir.actions.act_window.res_model: search_view
+    ir.actions.act_window.search_view_id: search_view
+    ir.actions.act_window.view.act_window_id: 
+        ir.actions.act_window.view_ids: views
+    ir.actions.act_window.view.create_date: __last_update
+    ir.actions.act_window.view.view_id: display_name
+    ir.actions.act_window.view.view_mode: 
+        ir.actions.act_window.view_ids: views
+    ir.actions.act_window.view.write_date: __last_update
+    ir.actions.act_window.view_id: views
+    ir.actions.act_window.view_ids: views
+    ir.actions.act_window.view_mode: views
+    ir.actions.act_window.write_date: __last_update
+    ir.actions.act_window_close.create_date: __last_update
+    ir.actions.act_window_close.name: display_name
+    ir.actions.act_window_close.write_date: __last_update
+    ir.actions.actions.create_date: __last_update
+    ir.actions.actions.name: display_name
+    ir.actions.actions.write_date: __last_update
+    ir.actions.client.create_date: __last_update
+    ir.actions.client.name: display_name
+    ir.actions.client.params_store: params
+    ir.actions.client.write_date: __last_update
+    ir.actions.report.create_date: __last_update
+    ir.actions.report.model: model_id
+    ir.actions.report.name: display_name
+    ir.actions.report.write_date: __last_update
+    ir.actions.server.binding_model_id: 
+        ir.cron.ir_actions_server_id: binding_model_id
+    ir.actions.server.binding_type: 
+        ir.cron.ir_actions_server_id: binding_type
+    ir.actions.server.binding_view_types: 
+        ir.cron.ir_actions_server_id: binding_view_types
+    ir.actions.server.child_ids: 
+        ir.cron.ir_actions_server_id: child_ids
+    ir.actions.server.code: 
+        ir.cron.ir_actions_server_id: code
+    ir.actions.server.create_date: __last_update
+    ir.actions.server.crud_model_id: crud_model_name
+        ir.cron.ir_actions_server_id: crud_model_id, crud_model_name
+    ir.actions.server.crud_model_name: 
+        ir.cron.ir_actions_server_id: crud_model_name
+    ir.actions.server.fields_lines: 
+        ir.cron.ir_actions_server_id: fields_lines
+    ir.actions.server.groups_id: 
+        ir.cron.ir_actions_server_id: groups_id
+    ir.actions.server.help: 
+        ir.cron.ir_actions_server_id: help
+    ir.actions.server.link_field_id: 
+        ir.cron.ir_actions_server_id: link_field_id
+    ir.actions.server.model_id: model_name
+        ir.cron.ir_actions_server_id: model_id, model_name
+    ir.actions.server.model_name: 
+        ir.cron.ir_actions_server_id: model_name
+    ir.actions.server.name: display_name
+        ir.cron.ir_actions_server_id: cron_name, display_name, name
+    ir.actions.server.sequence: 
+        ir.cron.ir_actions_server_id: sequence
+    ir.actions.server.state: 
+        ir.cron.ir_actions_server_id: state
+    ir.actions.server.type: 
+        ir.cron.ir_actions_server_id: type
+    ir.actions.server.usage: 
+        ir.cron.ir_actions_server_id: usage
+    ir.actions.server.write_date: __last_update
+    ir.actions.server.xml_id: 
+        ir.cron.ir_actions_server_id: xml_id
+    ir.actions.todo.action_id: display_name
+    ir.actions.todo.create_date: __last_update
+    ir.actions.todo.write_date: __last_update
+    ir.asset.create_date: __last_update
+    ir.asset.name: display_name
+    ir.asset.write_date: __last_update
+    ir.attachment.create_date: __last_update
+    ir.attachment.datas: image_height, image_width
+    ir.attachment.db_datas: datas, image_height, image_width, raw
+    ir.attachment.file_size: datas, image_height, image_width
+    ir.attachment.mimetype: image_src
+    ir.attachment.name: display_name, image_src
+    ir.attachment.store_fname: datas, image_height, image_width, raw
+    ir.attachment.url: image_src
+    ir.attachment.write_date: __last_update
+    ir.config_parameter.create_date: __last_update
+    ir.config_parameter.key: display_name
+    ir.config_parameter.write_date: __last_update
+    ir.cron.create_date: __last_update
+    ir.cron.ir_actions_server_id: binding_model_id, binding_type, binding_view_types, child_ids, code, cron_name, crud_model_id, crud_model_name, display_name, fields_lines, groups_id, help, link_field_id, model_id, model_name, name, sequence, state, type, usage, xml_id
+    ir.cron.name: display_name
+    ir.cron.trigger.create_date: __last_update
+    ir.cron.trigger.write_date: __last_update
+    ir.cron.write_date: __last_update
+    ir.default.create_date: __last_update
+    ir.default.field_id: display_name
+    ir.default.write_date: __last_update
+    ir.demo.create_date: __last_update
+    ir.demo.write_date: __last_update
+    ir.demo_failure.create_date: __last_update
+    ir.demo_failure.wizard.create_date: __last_update
+    ir.demo_failure.wizard.failure_ids: failures_count
+    ir.demo_failure.wizard.write_date: __last_update
+    ir.demo_failure.wizard_id: 
+        ir.demo_failure.wizard.failure_ids: failures_count
+    ir.demo_failure.write_date: __last_update
+    ir.exports.create_date: __last_update
+    ir.exports.line.create_date: __last_update
+    ir.exports.line.name: display_name
+    ir.exports.line.write_date: __last_update
+    ir.exports.name: display_name
+    ir.exports.write_date: __last_update
+    ir.filters.create_date: __last_update
+    ir.filters.name: display_name
+    ir.filters.write_date: __last_update
+    ir.logging.create_date: __last_update
+    ir.logging.name: display_name
+    ir.logging.write_date: __last_update
+    ir.mail_server.create_date: __last_update
+    ir.mail_server.name: display_name
+    ir.mail_server.write_date: __last_update
+    ir.model.access.create_date: __last_update
+    ir.model.access.name: display_name
+    ir.model.access.write_date: __last_update
+    ir.model.constraint.create_date: __last_update
+    ir.model.constraint.name: display_name
+    ir.model.constraint.write_date: __last_update
+    ir.model.create_date: __last_update
+    ir.model.data.create_date: __last_update
+    ir.model.data.model: reference
+    ir.model.data.module: complete_name
+    ir.model.data.name: complete_name, display_name
+    ir.model.data.res_id: reference
+    ir.model.data.write_date: __last_update
+    ir.model.fields.compute: copied
+    ir.model.fields.create_date: __last_update
+    ir.model.fields.field_description: display_name
+    ir.model.fields.related: copied, related_field_id
+    ir.model.fields.relation: relation_field_id
+        ir.server.object.lines.col1: resource_ref
+    ir.model.fields.relation_field: relation_field_id
+    ir.model.fields.selection.create_date: __last_update
+    ir.model.fields.selection.field_id: 
+        ir.model.fields.selection_ids: selection
+    ir.model.fields.selection.name: display_name
+    ir.model.fields.selection.write_date: __last_update
+    ir.model.fields.selection_ids: selection
+    ir.model.fields.ttype: copied
+    ir.model.fields.write_date: __last_update
+    ir.model.model: 
+        ir.actions.server.crud_model_id: crud_model_name
+            ir.cron.ir_actions_server_id: crud_model_name
+        ir.actions.server.model_id: model_name
+            ir.cron.ir_actions_server_id: model_name
+        test_new_api.creativework.edition.res_model_id: res_model
+            test_new_api.creativework.book.editions: editions
+            test_new_api.creativework.movie.editions: editions
+    ir.model.name: display_name
+    ir.model.relation.create_date: __last_update
+    ir.model.relation.name: display_name
+    ir.model.relation.write_date: __last_update
+    ir.model.write_date: __last_update
+    ir.module.category.create_date: __last_update
+    ir.module.category.module_ids: module_nr
+    ir.module.category.name: display_name
+        res.groups.category_id: display_name, full_name
+    ir.module.category.write_date: __last_update
+    ir.module.module.category_id: 
+        ir.module.category.module_ids: module_nr
+    ir.module.module.create_date: __last_update
+    ir.module.module.dependency.create_date: __last_update
+    ir.module.module.dependency.depend_id: state
+    ir.module.module.dependency.name: depend_id, display_name, state
+    ir.module.module.dependency.write_date: __last_update
+    ir.module.module.description: description_html
+    ir.module.module.exclusion.create_date: __last_update
+    ir.module.module.exclusion.exclusion_id: state
+    ir.module.module.exclusion.name: display_name, exclusion_id, state
+    ir.module.module.exclusion.write_date: __last_update
+    ir.module.module.icon: icon_image
+    ir.module.module.name: description_html, installed_version, menus_by_module, reports_by_module, views_by_module
+    ir.module.module.shortdesc: display_name
+    ir.module.module.state: menus_by_module, reports_by_module, views_by_module
+        ir.module.module.dependency.depend_id: state
+        ir.module.module.exclusion.exclusion_id: state
+    ir.module.module.write_date: __last_update
+    ir.profile.name: display_name
+    ir.property.create_date: __last_update
+    ir.property.name: display_name
+    ir.property.write_date: __last_update
+    ir.rule.create_date: __last_update
+    ir.rule.groups: global
+    ir.rule.name: display_name
+    ir.rule.write_date: __last_update
+    ir.sequence.create_date: __last_update
+    ir.sequence.date_range.create_date: __last_update
+    ir.sequence.date_range.sequence_id: display_name
+    ir.sequence.date_range.write_date: __last_update
+    ir.sequence.name: display_name
+    ir.sequence.write_date: __last_update
+    ir.server.object.lines.col1: resource_ref
+    ir.server.object.lines.create_date: __last_update
+    ir.server.object.lines.evaluation_type: resource_ref
+    ir.server.object.lines.server_id: 
+        ir.actions.server.fields_lines: 
+            ir.cron.ir_actions_server_id: fields_lines
+    ir.server.object.lines.value: resource_ref
+    ir.server.object.lines.write_date: __last_update
+    ir.translation.name: display_name
+    ir.ui.menu.complete_name: 
+        ir.ui.menu.parent_id: complete_name
+    ir.ui.menu.create_date: __last_update
+    ir.ui.menu.name: complete_name, display_name
+    ir.ui.menu.parent_id: complete_name
+    ir.ui.menu.write_date: __last_update
+    ir.ui.view.arch: arch_base
+    ir.ui.view.arch_db: arch, arch_base
+    ir.ui.view.arch_fs: arch, arch_base
+    ir.ui.view.arch_updated: arch, arch_base
+    ir.ui.view.create_date: __last_update
+    ir.ui.view.custom.create_date: __last_update
+    ir.ui.view.custom.user_id: display_name
+    ir.ui.view.custom.write_date: __last_update
+    ir.ui.view.name: display_name
+    ir.ui.view.type: 
+        ir.actions.act_window.view_id: views
+    ir.ui.view.write_date: __last_update, model_data_id
+    report.layout.create_date: __last_update
+    report.layout.name: display_name
+    report.layout.write_date: __last_update
+    report.paperformat.create_date: __last_update
+    report.paperformat.name: display_name
+    report.paperformat.write_date: __last_update
+    res.bank.bic: 
+        res.partner.bank.bank_id: bank_bic
+    res.bank.create_date: __last_update
+    res.bank.name: display_name
+        res.partner.bank.bank_id: bank_name
+    res.bank.write_date: __last_update
+    res.company.create_date: __last_update
+    res.company.name: display_name
+    res.company.partner_id: bank_ids, display_name, email, logo, logo_web, mobile, name, phone, vat, website
+    res.company.write_date: __last_update
+    res.config.create_date: __last_update
+    res.config.installer.create_date: __last_update
+    res.config.installer.write_date: __last_update
+    res.config.settings.create_date: __last_update
+    res.config.settings.write_date: __last_update
+    res.config.write_date: __last_update
+    res.country.code: image_url
+        res.partner.country_id: country_code
+            res.users.partner_id: country_code
+    res.country.create_date: __last_update
+    res.country.group.create_date: __last_update
+    res.country.group.name: display_name
+    res.country.group.write_date: __last_update
+    res.country.name: display_name
+    res.country.state.create_date: __last_update
+    res.country.state.name: display_name
+    res.country.state.write_date: __last_update
+    res.country.write_date: __last_update
+    res.currency.create_date: __last_update
+    res.currency.name: display_name
+    res.currency.rate.company_id: company_rate, inverse_company_rate
+    res.currency.rate.company_rate: inverse_company_rate
+    res.currency.rate.create_date: __last_update
+    res.currency.rate.currency_id: company_rate, inverse_company_rate
+        res.currency.rate_ids: date, inverse_rate, rate, rate_string
+            res.currency.rate.currency_id: company_rate, inverse_company_rate
+    res.currency.rate.name: company_rate, display_name, inverse_company_rate
+        res.currency.rate_ids: date
+    res.currency.rate.rate: company_rate, inverse_company_rate
+        res.currency.rate_ids: inverse_rate, rate, rate_string
+            res.currency.rate.currency_id: company_rate, inverse_company_rate
+    res.currency.rate.write_date: __last_update
+    res.currency.rate_ids: date, inverse_rate, rate, rate_string
+        res.currency.rate.currency_id: company_rate, inverse_company_rate
+    res.currency.rounding: decimal_places
+    res.currency.write_date: __last_update
+    res.groups.category_id: display_name, full_name
+    res.groups.create_date: __last_update
+    res.groups.full_name: display_name
+    res.groups.implied_ids: trans_implied_ids
+    res.groups.name: display_name, full_name
+    res.groups.rule_groups: 
+        ir.rule.groups: global
+    res.groups.trans_implied_ids: 
+        res.groups.implied_ids: trans_implied_ids
+    res.groups.users: 
+        res.users.groups_id: accesses_count, groups_count, rules_count, share
+            res.partner.user_ids: avatar_1024, avatar_128, avatar_1920, avatar_256, avatar_512, partner_share
+                res.users.partner_id: avatar_1024, avatar_128, avatar_1920, avatar_256, avatar_512, partner_share
+    res.groups.write_date: __last_update
+    res.lang.code: flag_image_url
+    res.lang.create_date: __last_update
+    res.lang.flag_image: flag_image_url
+    res.lang.name: display_name
+    res.lang.write_date: __last_update
+    res.partner.active: 
+        res.partner.child_ids: child_ids
+            res.users.partner_id: child_ids
+            test_new_api.multi.partner: partners
+        res.users.partner_id: active_partner
+    res.partner.active_lang_count: 
+        res.users.partner_id: active_lang_count
+    res.partner.avatar_1024: 
+        res.users.partner_id: avatar_1024
+    res.partner.avatar_128: 
+        res.users.partner_id: avatar_128
+    res.partner.avatar_1920: 
+        res.users.partner_id: avatar_1920
+    res.partner.avatar_256: 
+        res.users.partner_id: avatar_256
+    res.partner.avatar_512: 
+        res.users.partner_id: avatar_512
+    res.partner.bank.acc_number: acc_type, display_name, sanitized_acc_number
+    res.partner.bank.bank_id: bank_bic, bank_name
+    res.partner.bank.create_date: __last_update
+    res.partner.bank.partner_id: company_id
+        res.partner.bank_ids: 
+            res.company.partner_id: bank_ids
+            res.users.partner_id: bank_ids
+    res.partner.bank.write_date: __last_update
+    res.partner.bank_ids: 
+        res.company.partner_id: bank_ids
+        res.users.partner_id: bank_ids
+    res.partner.barcode: 
+        res.users.partner_id: barcode
+    res.partner.category.create_date: __last_update
+    res.partner.category.name: display_name
+    res.partner.category.partner_ids: 
+        res.partner.category_id: 
+            res.users.partner_id: category_id
+    res.partner.category.write_date: __last_update
+    res.partner.category_id: 
+        res.users.partner_id: category_id
+    res.partner.child_ids: 
+        res.users.partner_id: child_ids
+        test_new_api.multi.partner: partners
+    res.partner.city: contact_address
+        res.users.partner_id: city, contact_address
+    res.partner.color: 
+        res.users.partner_id: color
+    res.partner.comment: 
+        res.users.partner_id: comment
+    res.partner.commercial_company_name: 
+        res.users.partner_id: commercial_company_name
+    res.partner.commercial_partner_id: commercial_company_name
+        res.partner.parent_id: commercial_company_name, commercial_partner_id
+            res.users.partner_id: commercial_company_name, commercial_partner_id
+            test_new_api.precompute.partner_id: commercial_id
+        res.users.partner_id: commercial_company_name, commercial_partner_id
+        test_new_api.precompute.partner_id: commercial_id
+    res.partner.company_id: same_vat_partner_id
+        res.partner.bank.partner_id: company_id
+        res.users.partner_id: same_vat_partner_id
+    res.partner.company_name: commercial_company_name, contact_address, display_name
+        res.users.partner_id: commercial_company_name, company_name, contact_address
+    res.partner.company_type: 
+        res.users.partner_id: company_type
+    res.partner.contact_address: 
+        res.users.partner_id: contact_address
+    res.partner.country_code: 
+        res.users.partner_id: country_code
+    res.partner.country_id: contact_address, country_code
+        res.users.partner_id: contact_address, country_code, country_id
+    res.partner.create_date: __last_update
+    res.partner.date: 
+        res.users.partner_id: date
+    res.partner.display_name: 
+        res.partner.parent_id: display_name
+    res.partner.email: email_formatted
+        res.company.partner_id: email
+        res.users.partner_id: email, email_formatted
+    res.partner.email_formatted: 
+        res.users.partner_id: email_formatted
+    res.partner.employee: 
+        res.users.partner_id: employee
+    res.partner.function: 
+        res.users.partner_id: function
+    res.partner.image_1024: avatar_1024
+        res.users.partner_id: avatar_1024, image_1024
+    res.partner.image_128: avatar_128
+        res.users.partner_id: avatar_128, image_128
+    res.partner.image_1920: avatar_1024, avatar_128, avatar_1920, avatar_256, avatar_512, image_1024, image_128, image_256, image_512
+        res.company.partner_id: logo, logo_web
+        res.users.partner_id: avatar_1024, avatar_128, avatar_1920, avatar_256, avatar_512, image_1024, image_128, image_1920, image_256, image_512
+    res.partner.image_256: avatar_256
+        res.users.partner_id: avatar_256, image_256
+    res.partner.image_512: avatar_512
+        res.users.partner_id: avatar_512, image_512
+    res.partner.industry.create_date: __last_update
+    res.partner.industry.name: display_name
+    res.partner.industry.write_date: __last_update
+    res.partner.industry_id: 
+        res.users.partner_id: industry_id
+    res.partner.is_company: avatar_1024, avatar_128, avatar_1920, avatar_256, avatar_512, commercial_company_name, commercial_partner_id, company_type, display_name
+        res.partner.parent_id: commercial_company_name
+            res.users.partner_id: commercial_company_name
+        res.users.partner_id: avatar_1024, avatar_128, avatar_1920, avatar_256, avatar_512, commercial_company_name, commercial_partner_id, company_type, is_company
+        test_new_api.precompute.partner_id: commercial_id
+    res.partner.is_public: 
+        res.users.partner_id: is_public
+    res.partner.lang: active_lang_count
+        res.users.partner_id: active_lang_count, lang
+    res.partner.mobile: 
+        res.company.partner_id: mobile
+        res.users.partner_id: mobile
+    res.partner.name: avatar_1024, avatar_128, avatar_1920, avatar_256, avatar_512, display_name, email_formatted
+        res.company.partner_id: display_name, name
+        res.partner.commercial_partner_id: commercial_company_name
+            res.users.partner_id: commercial_company_name
+        res.partner.parent_id: parent_name
+            res.users.partner_id: parent_name
+        res.users.partner_id: avatar_1024, avatar_128, avatar_1920, avatar_256, avatar_512, display_name, email_formatted, name, signature
+            test_new_api.message.author: display_name, name
+                test_new_api.emailmessage.message: display_name, name
+        test_new_api.multi.partner: display_name, name
+        test_new_api.precompute.required.partner_id: display_name, name
+    res.partner.parent_id: commercial_company_name, commercial_partner_id, display_name, parent_name
+        res.partner.child_ids: child_ids
+            res.users.partner_id: child_ids
+            test_new_api.multi.partner: partners
+        res.users.partner_id: commercial_company_name, commercial_partner_id, parent_id, parent_name
+        test_new_api.precompute.partner_id: commercial_id
+    res.partner.parent_name: 
+        res.users.partner_id: parent_name
+    res.partner.partner_latitude: 
+        res.users.partner_id: partner_latitude
+    res.partner.partner_longitude: 
+        res.users.partner_id: partner_longitude
+    res.partner.partner_share: 
+        res.users.partner_id: partner_share
+    res.partner.phone: 
+        res.company.partner_id: phone
+        res.users.partner_id: phone
+    res.partner.ref: 
+        res.users.partner_id: ref
+    res.partner.same_vat_partner_id: 
+        res.users.partner_id: same_vat_partner_id
+    res.partner.self: 
+        res.users.partner_id: self
+    res.partner.state_id: contact_address
+        res.users.partner_id: contact_address, state_id
+    res.partner.street: contact_address
+        res.users.partner_id: contact_address, street
+    res.partner.street2: contact_address
+        res.users.partner_id: contact_address, street2
+    res.partner.title: 
+        res.users.partner_id: title
+    res.partner.title.create_date: __last_update
+    res.partner.title.name: display_name
+    res.partner.title.write_date: __last_update
+    res.partner.type: avatar_1024, avatar_128, avatar_1920, avatar_256, avatar_512, display_name
+        res.users.partner_id: avatar_1024, avatar_128, avatar_1920, avatar_256, avatar_512, type
+    res.partner.tz: tz_offset
+        res.users.partner_id: tz, tz_offset
+    res.partner.user_id: 
+        res.users.partner_id: user_id
+    res.partner.user_ids: avatar_1024, avatar_128, avatar_1920, avatar_256, avatar_512, partner_share
+        res.users.partner_id: avatar_1024, avatar_128, avatar_1920, avatar_256, avatar_512, partner_share, user_ids
+    res.partner.vat: same_vat_partner_id
+        res.company.partner_id: vat
+        res.users.partner_id: same_vat_partner_id, vat
+    res.partner.website: 
+        res.company.partner_id: website
+        res.users.partner_id: website
+    res.partner.write_date: __last_update
+    res.partner.zip: contact_address
+        res.users.partner_id: contact_address, zip
+    res.users.active: 
+        res.partner.user_ids: partner_share
+            res.users.partner_id: partner_share
+    res.users.apikeys.description.create_date: __last_update
+    res.users.apikeys.description.name: display_name
+    res.users.apikeys.description.write_date: __last_update
+    res.users.apikeys.name: display_name
+    res.users.create_date: __last_update
+    res.users.groups_id: accesses_count, groups_count, rules_count, share
+        res.partner.user_ids: avatar_1024, avatar_128, avatar_1920, avatar_256, avatar_512, partner_share
+            res.users.partner_id: avatar_1024, avatar_128, avatar_1920, avatar_256, avatar_512, partner_share
+    res.users.identitycheck.create_date: __last_update
+    res.users.identitycheck.write_date: __last_update
+    res.users.log.create_date: __last_update
+        res.users.log_ids: login_date
+    res.users.log.create_uid: 
+        res.users.log_ids: login_date
+    res.users.log.write_date: __last_update
+    res.users.log_ids: login_date
+    res.users.name: display_name, signature
+        test_new_api.message.author: display_name, name
+            test_new_api.emailmessage.message: display_name, name
+    res.users.partner_id: active_lang_count, active_partner, avatar_1024, avatar_128, avatar_1920, avatar_256, avatar_512, bank_ids, barcode, category_id, child_ids, city, color, comment, commercial_company_name, commercial_partner_id, company_name, company_type, contact_address, country_code, country_id, date, display_name, email, email_formatted, employee, function, image_1024, image_128, image_1920, image_256, image_512, industry_id, is_company, is_public, lang, mobile, name, parent_id, parent_name, partner_latitude, partner_longitude, partner_share, phone, ref, same_vat_partner_id, self, signature, state_id, street, street2, title, type, tz, tz_offset, user_id, user_ids, vat, website, zip
+        res.partner.user_ids: avatar_1024, avatar_128, avatar_1920, avatar_256, avatar_512, partner_share
+            res.users.partner_id: avatar_1024, avatar_128, avatar_1920, avatar_256, avatar_512, partner_share, user_ids
+        test_new_api.message.author: author_partner, display_name, name
+            test_new_api.emailmessage.message: author_partner, display_name, name
+    res.users.share: 
+        res.partner.user_ids: avatar_1024, avatar_128, avatar_1920, avatar_256, avatar_512, partner_share
+            res.users.partner_id: avatar_1024, avatar_128, avatar_1920, avatar_256, avatar_512, partner_share
+    res.users.totp_secret: totp_enabled
+    res.users.tz: tz_offset
+    res.users.write_date: __last_update
+    reset.view.arch.wizard.compare_view_id: arch_diff, arch_to_compare, has_diff
+    reset.view.arch.wizard.create_date: __last_update
+    reset.view.arch.wizard.reset_mode: arch_diff, arch_to_compare, has_diff
+    reset.view.arch.wizard.view_id: arch_diff, arch_to_compare, has_diff, view_name
+    reset.view.arch.wizard.write_date: __last_update
+    test_new_api.attachment.create_date: __last_update
+    test_new_api.attachment.host.create_date: __last_update
+    test_new_api.attachment.host.write_date: __last_update
+    test_new_api.attachment.name: display_name
+    test_new_api.attachment.res_id: display_name, name
+    test_new_api.attachment.res_model: display_name, name
+    test_new_api.attachment.write_date: __last_update
+    test_new_api.bar.create_date: __last_update
+    test_new_api.bar.foo: text1, text2, value1, value2
+    test_new_api.bar.name: display_name, foo, text1, text2, value1, value2
+    test_new_api.bar.write_date: __last_update
+    test_new_api.binary_svg.create_date: __last_update
+    test_new_api.binary_svg.name: display_name
+    test_new_api.binary_svg.write_date: __last_update
+    test_new_api.cascade.bar: baz
+    test_new_api.cascade.create_date: __last_update
+    test_new_api.cascade.foo: bar, baz
+    test_new_api.cascade.write_date: __last_update
+    test_new_api.category.create_date: __last_update
+    test_new_api.category.display_name: 
+        test_new_api.category.parent: display_name
+    test_new_api.category.name: display_name
+    test_new_api.category.parent: display_name, root_categ
+    test_new_api.category.parent_path: depth
+    test_new_api.category.write_date: __last_update
+    test_new_api.city.create_date: __last_update
+    test_new_api.city.name: display_name
+    test_new_api.city.write_date: __last_update
+    test_new_api.company.attr.company: bar
+    test_new_api.company.attr.create_date: __last_update
+    test_new_api.company.attr.quantity: bar
+    test_new_api.company.attr.write_date: __last_update
+    test_new_api.company.create_date: __last_update
+    test_new_api.company.foo: 
+        test_new_api.company.attr.company: bar
+    test_new_api.company.write_date: __last_update
+    test_new_api.compute.container.create_date: __last_update
+    test_new_api.compute.container.name: display_name
+    test_new_api.compute.container.write_date: __last_update
+    test_new_api.compute.dynamic.depends.create_date: __last_update
+    test_new_api.compute.dynamic.depends.write_date: __last_update
+    test_new_api.compute.inverse.create_date: __last_update
+    test_new_api.compute.inverse.foo: bar
+    test_new_api.compute.inverse.write_date: __last_update
+    test_new_api.compute.member.create_date: __last_update
+    test_new_api.compute.member.name: container_id, display_name
+    test_new_api.compute.member.write_date: __last_update
+    test_new_api.compute.onchange.active: baz
+    test_new_api.compute.onchange.create_date: __last_update
+    test_new_api.compute.onchange.foo: bar, baz, line_ids, tag_ids
+    test_new_api.compute.onchange.line.create_date: __last_update
+    test_new_api.compute.onchange.line.foo: bar
+    test_new_api.compute.onchange.line.write_date: __last_update
+    test_new_api.compute.onchange.write_date: __last_update
+    test_new_api.compute.readonly.create_date: __last_update
+    test_new_api.compute.readonly.foo: bar
+    test_new_api.compute.readonly.write_date: __last_update
+    test_new_api.compute.readwrite.create_date: __last_update
+    test_new_api.compute.readwrite.foo: bar
+    test_new_api.compute.readwrite.write_date: __last_update
+    test_new_api.compute.unassigned.create_date: __last_update
+    test_new_api.compute.unassigned.foo: bar, bare, bares, bars
+    test_new_api.compute.unassigned.write_date: __last_update
+    test_new_api.compute_editable.create_date: __last_update
+    test_new_api.compute_editable.line.create_date: __last_update
+    test_new_api.compute_editable.line.value: edit, same
+    test_new_api.compute_editable.line.write_date: __last_update
+    test_new_api.compute_editable.write_date: __last_update
+    test_new_api.country.create_date: __last_update
+    test_new_api.country.name: display_name
+    test_new_api.country.write_date: __last_update
+    test_new_api.creativework.book.create_date: __last_update
+    test_new_api.creativework.book.name: display_name
+    test_new_api.creativework.book.write_date: __last_update
+    test_new_api.creativework.edition.create_date: __last_update
+    test_new_api.creativework.edition.name: display_name
+    test_new_api.creativework.edition.res_model: 
+        test_new_api.creativework.book.editions: editions
+        test_new_api.creativework.movie.editions: editions
+    test_new_api.creativework.edition.res_model_id: res_model
+        test_new_api.creativework.book.editions: editions
+        test_new_api.creativework.movie.editions: editions
+    test_new_api.creativework.edition.write_date: __last_update
+    test_new_api.creativework.movie.create_date: __last_update
+    test_new_api.creativework.movie.name: display_name
+    test_new_api.creativework.movie.write_date: __last_update
+    test_new_api.crew.create_date: __last_update
+    test_new_api.crew.write_date: __last_update
+    test_new_api.discussion.create_date: __last_update
+    test_new_api.discussion.name: display_name
+        test_new_api.message.discussion: discussion_name, display_name, name
+            test_new_api.emailmessage.message: discussion_name, display_name, name
+    test_new_api.discussion.write_date: __last_update
+    test_new_api.display.create_date: __last_update
+    test_new_api.display.write_date: __last_update
+    test_new_api.emailmessage.create_date: __last_update
+    test_new_api.emailmessage.discussion: 
+        test_new_api.discussion.important_emails: important_emails
+    test_new_api.emailmessage.important: 
+        test_new_api.discussion.important_emails: important_emails
+    test_new_api.emailmessage.message: author, author_partner, body, discussion, discussion_name, display_name, double_size, important, label, name, priority, size
+        test_new_api.discussion.important_emails: important_emails
+    test_new_api.emailmessage.name: display_name
+    test_new_api.emailmessage.write_date: __last_update
+    test_new_api.field_with_caps.create_date: __last_update
+    test_new_api.field_with_caps.write_date: __last_update
+    test_new_api.foo.create_date: __last_update
+    test_new_api.foo.name: display_name
+    test_new_api.foo.text: 
+        test_new_api.bar.foo: text1, text2
+    test_new_api.foo.value1: 
+        test_new_api.bar.foo: value1
+    test_new_api.foo.value2: 
+        test_new_api.bar.foo: value2
+    test_new_api.foo.write_date: __last_update
+    test_new_api.inverse_m2o_ref.create_date: __last_update
+    test_new_api.inverse_m2o_ref.model_ids: model_ids_count
+    test_new_api.inverse_m2o_ref.write_date: __last_update
+    test_new_api.message.author: author_partner, display_name, name
+        test_new_api.emailmessage.message: author, author_partner, display_name, name
+        test_new_api.related.message: message_currency
+    test_new_api.message.author_partner: 
+        test_new_api.emailmessage.message: author_partner
+    test_new_api.message.body: display_name, double_size, size
+        test_new_api.emailmessage.message: body, double_size, size
+        test_new_api.related.message: message_name
+    test_new_api.message.create_date: __last_update
+    test_new_api.message.discussion: discussion_name, display_name, name
+        test_new_api.discussion.important_messages: important_messages
+        test_new_api.emailmessage.message: discussion, discussion_name, display_name, name
+            test_new_api.discussion.important_emails: important_emails
+    test_new_api.message.discussion_name: 
+        test_new_api.emailmessage.message: discussion_name
+    test_new_api.message.double_size: 
+        test_new_api.emailmessage.message: double_size
+    test_new_api.message.important: 
+        test_new_api.discussion.important_messages: important_messages
+        test_new_api.emailmessage.message: important
+            test_new_api.discussion.important_emails: important_emails
+    test_new_api.message.label: 
+        test_new_api.emailmessage.message: label
+    test_new_api.message.name: display_name
+        test_new_api.emailmessage.message: display_name, name
+    test_new_api.message.priority: 
+        test_new_api.emailmessage.message: priority
+    test_new_api.message.size: double_size
+        test_new_api.emailmessage.message: double_size, size
+    test_new_api.message.write_date: __last_update
+    test_new_api.mixed.create_date: __last_update
+    test_new_api.mixed.write_date: __last_update
+    test_new_api.model_a.create_date: __last_update
+    test_new_api.model_a.name: display_name
+    test_new_api.model_a.write_date: __last_update
+    test_new_api.model_active_field.active: 
+        test_new_api.model_active_field.parent_id: parent_active
+    test_new_api.model_active_field.create_date: __last_update
+    test_new_api.model_active_field.name: display_name
+    test_new_api.model_active_field.parent_id: parent_active
+    test_new_api.model_active_field.write_date: __last_update
+    test_new_api.model_b.create_date: __last_update
+    test_new_api.model_b.name: display_name
+    test_new_api.model_b.write_date: __last_update
+    test_new_api.model_binary.binary: binary_computed, binary_related_no_store, binary_related_store
+    test_new_api.model_binary.create_date: __last_update
+    test_new_api.model_binary.write_date: __last_update
+    test_new_api.model_child.create_date: __last_update
+    test_new_api.model_child.name: display_name
+    test_new_api.model_child.write_date: __last_update
+    test_new_api.model_child_m2o.cost: 
+        test_new_api.model_parent_m2o.child_ids: cost
+    test_new_api.model_child_m2o.create_date: __last_update
+    test_new_api.model_child_m2o.name: cost, display_name
+        test_new_api.model_parent_m2o.child_ids: cost
+    test_new_api.model_child_m2o.parent_id: size1, size2
+        test_new_api.model_parent_m2o.child_ids: cost
+    test_new_api.model_child_m2o.write_date: __last_update
+    test_new_api.model_child_nocheck.create_date: __last_update
+    test_new_api.model_child_nocheck.name: display_name
+    test_new_api.model_child_nocheck.write_date: __last_update
+    test_new_api.model_constrained_unlinks.create_date: __last_update
+    test_new_api.model_constrained_unlinks.write_date: __last_update
+    test_new_api.model_image.create_date: __last_update
+    test_new_api.model_image.image: image_256, image_512
+    test_new_api.model_image.name: display_name
+    test_new_api.model_image.write_date: __last_update
+    test_new_api.model_many2one_reference.create_date: __last_update
+    test_new_api.model_many2one_reference.res_id: 
+        test_new_api.inverse_m2o_ref.model_ids: model_ids_count
+    test_new_api.model_many2one_reference.write_date: __last_update
+    test_new_api.model_parent.create_date: __last_update
+    test_new_api.model_parent.name: display_name
+    test_new_api.model_parent.write_date: __last_update
+    test_new_api.model_parent_m2o.child_ids: cost
+    test_new_api.model_parent_m2o.create_date: __last_update
+    test_new_api.model_parent_m2o.name: display_name
+        test_new_api.model_child_m2o.parent_id: size1, size2
+    test_new_api.model_parent_m2o.write_date: __last_update
+    test_new_api.model_private_address_onchange.create_date: __last_update
+    test_new_api.model_private_address_onchange.name: display_name
+    test_new_api.model_private_address_onchange.write_date: __last_update
+    test_new_api.model_selection_base.create_date: __last_update
+    test_new_api.model_selection_base.my_selection: 
+        test_new_api.model_selection_related.selection_id: related_selection
+        test_new_api.model_selection_related_updatable.selection_id: related_selection
+    test_new_api.model_selection_base.write_date: __last_update
+    test_new_api.model_selection_non_stored.create_date: __last_update
+    test_new_api.model_selection_non_stored.write_date: __last_update
+    test_new_api.model_selection_related.create_date: __last_update
+    test_new_api.model_selection_related.selection_id: related_selection
+    test_new_api.model_selection_related.write_date: __last_update
+    test_new_api.model_selection_related_updatable.create_date: __last_update
+    test_new_api.model_selection_related_updatable.selection_id: related_selection
+    test_new_api.model_selection_related_updatable.write_date: __last_update
+    test_new_api.model_selection_required.create_date: __last_update
+    test_new_api.model_selection_required.write_date: __last_update
+    test_new_api.model_selection_required_for_write_override.create_date: __last_update
+    test_new_api.model_selection_required_for_write_override.write_date: __last_update
+    test_new_api.model_shared_cache_compute_line.amount: 
+        test_new_api.model_shared_cache_compute_parent.line_ids: total_amount
+    test_new_api.model_shared_cache_compute_line.create_date: __last_update
+    test_new_api.model_shared_cache_compute_line.parent_id: 
+        test_new_api.model_shared_cache_compute_parent.line_ids: total_amount
+    test_new_api.model_shared_cache_compute_line.write_date: __last_update
+    test_new_api.model_shared_cache_compute_parent.create_date: __last_update
+    test_new_api.model_shared_cache_compute_parent.line_ids: total_amount
+    test_new_api.model_shared_cache_compute_parent.name: display_name
+    test_new_api.model_shared_cache_compute_parent.write_date: __last_update
+    test_new_api.monetary_base.amount: 
+        test_new_api.monetary_custom.monetary_id: x_amount
+        test_new_api.monetary_inherits.monetary_id: amount
+        test_new_api.monetary_related.monetary_id: amount
+    test_new_api.monetary_base.base_currency_id: 
+        test_new_api.monetary_custom.monetary_id: x_currency_id
+        test_new_api.monetary_inherits.monetary_id: base_currency_id
+        test_new_api.monetary_related.monetary_id: currency_id
+    test_new_api.monetary_base.create_date: __last_update
+    test_new_api.monetary_base.write_date: __last_update
+    test_new_api.monetary_custom.create_date: __last_update
+    test_new_api.monetary_custom.monetary_id: x_amount, x_currency_id
+    test_new_api.monetary_custom.write_date: __last_update
+    test_new_api.monetary_inherits.create_date: __last_update
+    test_new_api.monetary_inherits.monetary_id: amount, base_currency_id
+    test_new_api.monetary_inherits.write_date: __last_update
+    test_new_api.monetary_order.create_date: __last_update
+    test_new_api.monetary_order.line_ids: total
+    test_new_api.monetary_order.write_date: __last_update
+    test_new_api.monetary_order_line.create_date: __last_update
+    test_new_api.monetary_order_line.order_id: 
+        test_new_api.monetary_order.line_ids: total
+    test_new_api.monetary_order_line.subtotal: 
+        test_new_api.monetary_order.line_ids: total
+    test_new_api.monetary_order_line.write_date: __last_update
+    test_new_api.monetary_related.create_date: __last_update
+    test_new_api.monetary_related.monetary_id: amount, currency_id
+    test_new_api.monetary_related.write_date: __last_update
+    test_new_api.move.create_date: __last_update
+    test_new_api.move.line_ids: quantity
+        test_new_api.payment.move_id: line_ids, quantity
+    test_new_api.move.payment_ids: 
+        test_new_api.payment.move_id: payment_ids
+    test_new_api.move.quantity: 
+        test_new_api.payment.move_id: quantity
+    test_new_api.move.tag_id: tag_name, tag_string
+        test_new_api.payment.move_id: tag_id, tag_name, tag_string
+    test_new_api.move.tag_name: tag_string
+        test_new_api.payment.move_id: tag_name, tag_string
+    test_new_api.move.tag_repeat: tag_string
+        test_new_api.payment.move_id: tag_repeat, tag_string
+    test_new_api.move.tag_string: 
+        test_new_api.payment.move_id: tag_string
+    test_new_api.move.write_date: __last_update
+    test_new_api.move_line.create_date: __last_update
+    test_new_api.move_line.move_id: 
+        test_new_api.move.line_ids: line_ids, quantity
+            test_new_api.payment.move_id: line_ids, quantity
+    test_new_api.move_line.quantity: 
+        test_new_api.move.line_ids: quantity
+            test_new_api.payment.move_id: quantity
+    test_new_api.move_line.visible: 
+        test_new_api.move.line_ids: line_ids, quantity
+            test_new_api.payment.move_id: line_ids, quantity
+    test_new_api.move_line.write_date: __last_update
+    test_new_api.multi.create_date: __last_update
+    test_new_api.multi.line.create_date: __last_update
+    test_new_api.multi.line.multi: partner
+    test_new_api.multi.line.name: display_name
+    test_new_api.multi.line.write_date: __last_update
+    test_new_api.multi.line2.create_date: __last_update
+    test_new_api.multi.line2.multi: partner
+    test_new_api.multi.line2.name: display_name
+    test_new_api.multi.line2.write_date: __last_update
+    test_new_api.multi.name: display_name
+    test_new_api.multi.partner: display_name, name, partners
+        test_new_api.multi.line.multi: partner
+        test_new_api.multi.line2.multi: partner
+    test_new_api.multi.tag.create_date: __last_update
+    test_new_api.multi.tag.name: display_name
+        test_new_api.move.tag_id: tag_name, tag_string
+            test_new_api.payment.move_id: tag_name, tag_string
+        test_new_api.multi.tags: tags
+    test_new_api.multi.tag.write_date: __last_update
+    test_new_api.multi.write_date: __last_update
+    test_new_api.multi_compute_inverse.create_date: __last_update
+    test_new_api.multi_compute_inverse.foo: bar1, bar2, bar3
+    test_new_api.multi_compute_inverse.write_date: __last_update
+    test_new_api.one2many.create_date: __last_update
+    test_new_api.one2many.line.create_date: __last_update
+    test_new_api.one2many.line.name: display_name
+    test_new_api.one2many.line.write_date: __last_update
+    test_new_api.one2many.name: display_name, line_ids
+    test_new_api.one2many.write_date: __last_update
+    test_new_api.order.create_date: __last_update
+    test_new_api.order.line.create_date: __last_update
+    test_new_api.order.line.write_date: __last_update
+    test_new_api.order.write_date: __last_update
+    test_new_api.payment.create_date: __last_update
+    test_new_api.payment.move_id: line_ids, payment_ids, quantity, tag_id, tag_name, tag_repeat, tag_string
+        test_new_api.move.payment_ids: 
+            test_new_api.payment.move_id: payment_ids
+    test_new_api.payment.write_date: __last_update
+    test_new_api.pirate.create_date: __last_update
+    test_new_api.pirate.name: display_name
+    test_new_api.pirate.write_date: __last_update
+    test_new_api.precompute.combo.create_date: __last_update
+    test_new_api.precompute.combo.name: display_name, editer, reader, setter
+    test_new_api.precompute.combo.write_date: __last_update
+    test_new_api.precompute.create_date: __last_update
+    test_new_api.precompute.editable.bar: baz, baz2
+    test_new_api.precompute.editable.baz: baz2
+    test_new_api.precompute.editable.create_date: __last_update
+    test_new_api.precompute.editable.foo: bar, baz, baz2
+    test_new_api.precompute.editable.write_date: __last_update
+    test_new_api.precompute.line.create_date: __last_update
+    test_new_api.precompute.line.name: display_name, size
+        test_new_api.precompute.line_ids: size
+    test_new_api.precompute.line.parent_id: 
+        test_new_api.precompute.line_ids: size
+    test_new_api.precompute.line.size: 
+        test_new_api.precompute.line_ids: size
+    test_new_api.precompute.line.write_date: __last_update
+    test_new_api.precompute.line_ids: size
+    test_new_api.precompute.lower: lowup
+    test_new_api.precompute.monetary.create_date: __last_update
+    test_new_api.precompute.monetary.write_date: __last_update
+    test_new_api.precompute.name: display_name, lower, lowup, upper
+    test_new_api.precompute.partner_id: commercial_id
+    test_new_api.precompute.required.create_date: __last_update
+    test_new_api.precompute.required.name: display_name
+    test_new_api.precompute.required.partner_id: display_name, name
+    test_new_api.precompute.required.write_date: __last_update
+    test_new_api.precompute.upper: lowup
+    test_new_api.precompute.write_date: __last_update
+    test_new_api.prefetch.create_date: __last_update
+    test_new_api.prefetch.name: display_name
+    test_new_api.prefetch.write_date: __last_update
+    test_new_api.prisoner.create_date: __last_update
+    test_new_api.prisoner.name: display_name
+    test_new_api.prisoner.write_date: __last_update
+    test_new_api.recursive.create_date: __last_update
+    test_new_api.recursive.display_name: 
+        test_new_api.recursive.parent: display_name
+    test_new_api.recursive.full_name: 
+        test_new_api.recursive.parent: full_name
+    test_new_api.recursive.name: display_name, full_name
+    test_new_api.recursive.parent: display_name, full_name
+    test_new_api.recursive.tree.children_ids: display_name
+    test_new_api.recursive.tree.create_date: __last_update
+    test_new_api.recursive.tree.display_name: 
+        test_new_api.recursive.tree.children_ids: display_name
+    test_new_api.recursive.tree.name: display_name
+    test_new_api.recursive.tree.parent_id: 
+        test_new_api.recursive.tree.children_ids: display_name
+    test_new_api.recursive.tree.write_date: __last_update
+    test_new_api.recursive.write_date: __last_update
+    test_new_api.related.create_date: __last_update
+    test_new_api.related.message: message_currency, message_name
+    test_new_api.related.name: display_name, related_name, related_related_name
+    test_new_api.related.related_name: related_related_name
+    test_new_api.related.write_date: __last_update
+    test_new_api.req_m2o.create_date: __last_update
+    test_new_api.req_m2o.write_date: __last_update
+    test_new_api.req_m2o_transient.create_date: __last_update
+    test_new_api.req_m2o_transient.write_date: __last_update
+    test_new_api.selection.create_date: __last_update
+    test_new_api.selection.write_date: __last_update
+    test_new_api.ship.create_date: __last_update
+    test_new_api.ship.name: display_name
+    test_new_api.ship.write_date: __last_update
+    test_new_api.trigger.left.create_date: __last_update
+    test_new_api.trigger.left.middle_ids: right_id
+        test_new_api.trigger.right.left_ids: left_size
+    test_new_api.trigger.left.right_id: 
+        test_new_api.trigger.right.left_ids: left_size
+    test_new_api.trigger.left.write_date: __last_update
+    test_new_api.trigger.middle.create_date: __last_update
+    test_new_api.trigger.middle.left_id: 
+        test_new_api.trigger.left.middle_ids: right_id
+            test_new_api.trigger.right.left_ids: left_size
+    test_new_api.trigger.middle.right_id: 
+        test_new_api.trigger.left.middle_ids: right_id
+            test_new_api.trigger.right.left_ids: left_size
+    test_new_api.trigger.middle.write_date: __last_update
+    test_new_api.trigger.right.create_date: __last_update
+    test_new_api.trigger.right.left_ids: left_size
+    test_new_api.trigger.right.write_date: __last_update
+    web_editor.converter.test.create_date: __last_update
+    web_editor.converter.test.sub.create_date: __last_update
+    web_editor.converter.test.sub.name: display_name
+    web_editor.converter.test.sub.write_date: __last_update
+    web_editor.converter.test.write_date: __last_update
+    web_tour.tour.name: display_name
+    wizard.ir.model.menu.create.create_date: __last_update
+    wizard.ir.model.menu.create.name: display_name
+    wizard.ir.model.menu.create.write_date: __last_update 
