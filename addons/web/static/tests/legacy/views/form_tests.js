@@ -531,10 +531,14 @@ QUnit.module('Views', {
         serverData.models.product.records = [{id: 1, name: 'Tromblon', partner_type_ids: [12,14]}];
         serverData.models.partner.records[0].product_id = 1;
 
+        // This is an old test, written before "get_views" (formerly "load_views") automatically
+        // inlines x2many subviews. As the purpose of this test is to assert that the js fetches
+        // the correct sub view when it is not inline (which can still happen in nested form views),
+        // we bypass the inline mecanism of "get_views" by setting widget="one2many" on the field.
         serverData.views = {
             'product,false,form': '<form>'+
                                         '<field name="name"/>'+
-                                        '<field name="partner_type_ids" context="{\'tree_view_ref\': \'some_other_tree_view\'}"/>' +
+                                        '<field name="partner_type_ids" widget="one2many" context="{\'tree_view_ref\': \'some_other_tree_view\'}"/>' +
                                     '</form>',
 
             'partner_type,false,list': '<tree>'+
