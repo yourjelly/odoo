@@ -68,6 +68,8 @@ export class WebsitePreview extends Component {
             return () => {
                 this.websiteService.currentWebsiteId = null;
                 this.websiteService.websiteRootInstance = undefined;
+                this.websiteService.pageDocument = null;
+                this.websiteService.contentWindow = null;
             };
         }, () => [this.props.action.context.params]);
 
