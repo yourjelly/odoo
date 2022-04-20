@@ -1026,6 +1026,53 @@ class Collector(dict):
             self[key] = vals + (val,)
 
 
+class TriggerTree(dict):
+    r""" Tree of recomputation triggers.  The triggers of a field F is a tree
+    that contains the fields that depend on F, together with the fields to
+    inverse to find out which records to recompute.
+
+    For instance, assume that G depends on F, H depends on X.F, I depends
+    on W.X.F, and J depends on Y.F.  The triggers of F will be the tree:
+
+                                 [G]
+                               X/   \Y
+                             [H]     [J]
+                           W/
+                         [I]
+    """
+    __slots__ = ['root']
+
+    def __init__(self):
+        super().__init__()
+        self.root = OrderedSet()
+
+    def extend(self, *labels):
+        """ Follow the given sequence of labels, extend the tree if necessary,
+        and return the corresponding subtree.
+        """
+        tree = self
+        for label in labels:
+            try:
+                tree = tree[label]
+            except KeyError:
+                tree[label] = tree = TriggerTree()
+        return tree
+
+    def merge(self, tree):
+        """ Merge ``tree`` into ``self``. """
+        self.root.update(tree.root)
+        for label, subtree in tree.items():
+            self.extend(label).merge(subtree)
+
+    def depth_first(self):
+        """ Iterate on all the subtrees of self, starting from self, in
+        depth-first order.
+        """
+        yield self
+        for subtree in self.values():
+            yield from subtree.depth_first()
+
+
 class StackMap(MutableMapping):
     """ A stack of mappings behaving as a single mapping, and used to implement
         nested scopes. The lookups search the stack from top to bottom, and

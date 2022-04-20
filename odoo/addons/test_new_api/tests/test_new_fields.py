@@ -164,74 +164,66 @@ class TestFields(TransactionCaseWithUserDemo):
 
     def test_10_computed_custom_invalid_transitive_depends(self):
         self.patch(type(self.env["ir.model.fields"]), "_check_depends", lambda self: True)
-        self.env["ir.model.fields"].create(
-            {
-                "name": "x_computed_custom_valid_depends",
-                "model_id": self.env.ref("test_new_api.model_test_new_api_foo").id,
-                "state": "manual",
-                "field_description": "A compute with a valid depends",
-                "compute": "for r in self: r['x_computed_custom_valid_depends'] = False",
-                "depends": "value1",
-                "store": False,
-                "ttype": "boolean",
-            }
-        )
-        self.env["ir.model.fields"].create(
-            {
-                "name": "x_computed_custom_valid_transitive_depends",
-                "model_id": self.env.ref("test_new_api.model_test_new_api_foo").id,
-                "state": "manual",
-                "field_description": "A compute with a valid transitive depends",
-                "compute": "for r in self: r['x_computed_custom_valid_transitive_depends'] = False",
-                "depends": "x_computed_custom_valid_depends",
-                "store": False,
-                "ttype": "boolean",
-            }
-        )
-        self.env["ir.model.fields"].create(
-            {
-                "name": "x_computed_custom_invalid_depends",
-                "model_id": self.env.ref("test_new_api.model_test_new_api_foo").id,
-                "state": "manual",
-                "field_description": "A compute with an invalid depends",
-                "compute": "for r in self: r['x_computed_custom_invalid_depends'] = False",
-                "depends": "bar",
-                "store": False,
-                "ttype": "boolean",
-            }
-        )
-        self.env["ir.model.fields"].create(
-            {
-                "name": "x_computed_custom_invalid_transitive_depends",
-                "model_id": self.env.ref("test_new_api.model_test_new_api_foo").id,
-                "state": "manual",
-                "field_description": "A compute with an invalid transitive depends",
-                "compute": "for r in self: r['x_computed_custom_invalid_transitive_depends'] = False",
-                "depends": "x_computed_custom_invalid_depends",
-                "store": False,
-                "ttype": "boolean",
-            }
-        )
-        fields = self.env["test_new_api.foo"]._fields
+        self.env["ir.model.fields"].create([{
+            "name": "x_valid_depends",
+            "model_id": self.env.ref("test_new_api.model_test_new_api_foo").id,
+            "state": "manual",
+            "field_description": "A compute with a valid depends",
+            "compute": "self['x_valid_depends'] = False",
+            "depends": "value1",
+            "store": False,
+            "ttype": "boolean",
+        }, {
+            "name": "x_valid_transitive_depends",
+            "model_id": self.env.ref("test_new_api.model_test_new_api_foo").id,
+            "state": "manual",
+            "field_description": "A compute with a valid transitive depends",
+            "compute": "self['x_valid_transitive_depends'] = False",
+            "depends": "x_valid_depends",
+            "store": False,
+            "ttype": "boolean",
+        }, {
+            "name": "x_invalid_depends",
+            "model_id": self.env.ref("test_new_api.model_test_new_api_foo").id,
+            "state": "manual",
+            "field_description": "A compute with an invalid depends",
+            "compute": "self['x_invalid_depends'] = False",
+            "depends": "bar",
+            "store": False,
+            "ttype": "boolean",
+        }, {
+            "name": "x_invalid_transitive_depends",
+            "model_id": self.env.ref("test_new_api.model_test_new_api_foo").id,
+            "state": "manual",
+            "field_description": "A compute with an invalid transitive depends",
+            "compute": "self['x_invalid_transitive_depends'] = False",
+            "depends": "x_invalid_depends",
+            "store": False,
+            "ttype": "boolean",
+        }])
+
+        Model = self.registry['test_new_api.foo']
         triggers = self.env.registry.field_triggers
-        value1 = fields["value1"]
-        valid_depends = fields["x_computed_custom_valid_depends"]
-        valid_transitive_depends = fields["x_computed_custom_valid_transitive_depends"]
-        invalid_depends = fields["x_computed_custom_invalid_depends"]
-        invalid_transitive_depends = fields["x_computed_custom_invalid_transitive_depends"]
-        # `x_computed_custom_valid_depends` in the triggers of the field `value1`
-        self.assertTrue(valid_depends in triggers[value1][None])
-        # `x_computed_custom_valid_transitive_depends` in the triggers `x_computed_custom_valid_depends` and `value1`
-        self.assertTrue(valid_transitive_depends in triggers[valid_depends][None])
-        self.assertTrue(valid_transitive_depends in triggers[value1][None])
-        # `x_computed_custom_invalid_depends` not in any triggers, as it was invalid and was skipped
-        self.assertEqual(
-            sum(invalid_depends in field_triggers.get(None, []) for field_triggers in triggers.values()), 0
+
+        # `Model.x_valid_depends` in the triggers of the field `Model.value1`
+        self.assertCountEqual(
+            [field for field, tree in triggers.items() if Model.x_valid_depends in tree.root],
+            [Model.value1],
         )
-        # `x_computed_custom_invalid_transitive_depends` in the triggers of `x_computed_custom_invalid_depends` only
-        self.assertTrue(invalid_transitive_depends in triggers[invalid_depends][None])
-        self.assertEqual(
-            sum(invalid_transitive_depends in field_triggers.get(None, []) for field_triggers in triggers.values()), 1
+        # `Model.x_valid_transitive_depends` in the triggers of `Model.x_valid_depends` and `Model.value1`
+        self.assertCountEqual(
+            [field for field, tree in triggers.items() if Model.x_valid_transitive_depends in tree.root],
+            [Model.x_valid_depends, Model.value1],
+        )
+        # `Model.x_invalid_depends` not in any triggers, as it was invalid and was skipped
+        self.assertCountEqual(
+            [field for field, tree in triggers.items() if Model.x_invalid_depends in tree.root],
+            [],
+        )
+        # `Model.x_invalid_transitive_depends` in the triggers of `Model.x_invalid_depends` only
+        self.assertCountEqual(
+            [field for field, tree in triggers.items() if Model.x_invalid_transitive_depends in tree.root],
+            [Model.x_invalid_depends],
         )
 
     @mute_logger('odoo.fields')
@@ -3967,10 +3959,8 @@ class TestTriggers(common.TransactionCase):
             return str(item[0])
 
         def walk(tree):
-            yield ", ".join(sorted(f.name for f in tree.get(None, ())))
+            yield ", ".join(sorted(f.name for f in tree.root))
             for field, subtree in sorted(tree.items(), key=key_str):
-                if field is None:
-                    continue
                 for index, line in enumerate(walk(subtree)):
                     if not index:
                         yield f"{field}: {line}"

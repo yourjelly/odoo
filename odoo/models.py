@@ -56,7 +56,7 @@ from .exceptions import AccessError, MissingError, ValidationError, UserError
 from .osv.query import Query
 from .tools import frozendict, lazy_classproperty, ormcache, \
                    LastOrderedSet, OrderedSet, ReversedIterable, \
-                   unique, discardattr, partition
+                   unique, discardattr, partition, TriggerTree
 from .tools.config import config
 from .tools.func import frame_codeinfo
 from .tools.misc import CountingStream, clean_context, DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT, get_lang, split_every
@@ -132,16 +132,6 @@ def fix_import_export_id_paths(fieldname):
     fixed_db_id = re.sub(r'([^/])\.id', r'\1/.id', fieldname)
     fixed_external_id = re.sub(r'([^/]):id', r'\1/id', fixed_db_id)
     return fixed_external_id.split('/')
-
-def trigger_tree_merge(node1, node2):
-    """ Merge two trigger trees. """
-    for key, val in node2.items():
-        if key is None:
-            node1.setdefault(None, OrderedSet())
-            node1[None].update(val)
-        else:
-            node1.setdefault(key, {})
-            trigger_tree_merge(node1[key], node2[key])
 
 
 class MetaModel(api.Meta):
@@ -6147,9 +6137,9 @@ Fields:
             [tree] = trees
         else:
             # merge all trees into a single one
-            tree = {}
+            tree = TriggerTree()
             for t in trees:
-                trigger_tree_merge(tree, t)
+                tree.merge(t)
 
         # determine what to compute (through an iterator)
         tocompute = self.sudo().with_context(active_test=False)._modified_triggers(tree, create)
@@ -6194,20 +6184,18 @@ Fields:
             return
 
         # first yield what to compute
-        for field in tree.get(None, ()):
+        for field in tree.root:
             yield field, self, create
 
         # then traverse dependencies backwards, and proceed recursively
-        for key, val in tree.items():
-            if key is None:
-                continue
-            if create and key.type in ('many2one', 'many2one_reference'):
+        for field, subtree in tree.items():
+            if create and field.type in ('many2one', 'many2one_reference'):
                 # upon creation, no other record has a reference to self
                 continue
 
-            # val is another tree of dependencies
-            model = self.env[key.model_name]
-            for invf in model.pool.field_inverses[key]:
+            # subtree is another tree of dependencies
+            model = self.env[field.model_name]
+            for invf in model.pool.field_inverses[field]:
                 # use an inverse of field without domain
                 if invf.type in ('one2many', 'many2many') and invf.domain:
                     continue
@@ -6215,12 +6203,12 @@ Fields:
                     rec_ids = set()
                     for rec in self:
                         try:
-                            if rec[invf.model_field] == key.model_name:
+                            if rec[invf.model_field] == field.model_name:
                                 rec_ids.add(rec[invf.name])
                         except MissingError:
                             continue
                     records = model.browse(rec_ids)
-                elif invf.comodel_name == key.model_name:
+                elif invf.comodel_name == field.model_name:
                     try:
                         records = self[invf.name]
                     except MissingError:
@@ -6238,12 +6226,12 @@ Fields:
                 real_records = self - new_records
                 records = model.browse()
                 if real_records:
-                    records = model.search([(key.name, 'in', real_records.ids)], order='id')
+                    records = model.search([(field.name, 'in', real_records.ids)], order='id')
                 if new_records:
-                    cache_records = self.env.cache.get_records(model, key)
-                    records |= cache_records.filtered(lambda r: set(r[key.name]._ids) & set(self._ids))
+                    cache_records = self.env.cache.get_records(model, field)
+                    records |= cache_records.filtered(lambda r: set(r[field.name]._ids) & set(self._ids))
 
-            yield from records._modified_triggers(val)
+            yield from records._modified_triggers(subtree)
 
     @api.model
     def recompute(self, fnames=None, records=None):
@@ -6290,13 +6278,12 @@ Fields:
 
     def _dependent_fields(self, field):
         """ Return an iterator on the fields that depend on ``field``. """
-        def traverse(node):
-            for key, val in node.items():
-                if key is None:
-                    yield from val
-                else:
-                    yield from traverse(val)
-        return traverse(self.pool.field_triggers.get(field, {}))
+        tree = self.pool.field_triggers.get(field)
+        return () if tree is None else (
+            field
+            for subtree in tree.depth_first()
+            for field in subtree.root
+        )
 
     def _has_onchange(self, field, other_fields):
         """ Return whether ``field`` should trigger an onchange event in the

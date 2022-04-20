@@ -820,7 +820,6 @@ class IrModelFields(models.Model):
         self._prepare_update()
 
         # determine registry fields corresponding to self
-        triggers = self.pool.field_triggers
         fields = []
         for record in self:
             try:
@@ -833,18 +832,15 @@ class IrModelFields(models.Model):
         res = super(IrModelFields, self).unlink()
 
         # discard the removed fields from field triggers
-        def discard_fields(tree):
-            # discard fields from the tree's root node
-            tree.get(None, set()).difference_update(fields)
-            # discard subtrees labelled with any of the fields
-            for field in fields:
-                tree.pop(field, None)
-            # discard fields from remaining subtrees
-            for field, subtree in tree.items():
-                if field is not None:
-                    discard_fields(subtree)
+        triggers = self.pool.field_triggers
+        for field in fields:
+            triggers.pop(field, None)
+        for tree in triggers.values():
+            for subtree in tree.depth_first():
+                subtree.root.difference_update(fields)
+                for field in fields:
+                    subtree.pop(field, None)
 
-        discard_fields(triggers)
         self.pool.registry_invalidated = True
 
         # The field we just deleted might be inherited, and the registry is
