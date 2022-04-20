@@ -26,8 +26,9 @@ class Page(models.Model):
     view_id = fields.Many2one('ir.ui.view', string='View', required=True, ondelete="cascade")
     website_indexed = fields.Boolean('Is Indexed', default=True)
     date_publish = fields.Datetime('Publishing Date')
-    # This is needed to be able to display if page is a menu in /website/pages
     menu_ids = fields.One2many('website.menu', 'page_id', 'Related Menus')
+    # This is needed to be able to control if page is a menu in page properties.
+    is_menu = fields.Boolean(compute='_compute_website_menu', inverse='_set_website_menu', string='Is In Menu')
     is_homepage = fields.Boolean(compute='_compute_homepage', inverse='_set_homepage', string='Homepage')
     is_visible = fields.Boolean(compute='_compute_visible', string='Is Visible')
 
@@ -61,6 +62,26 @@ class Page(models.Model):
                 not page.date_publish or page.date_publish < fields.Datetime.now()
             )
 
+    @api.depends('menu_ids')
+    def _compute_website_menu(self):
+        for page in self:
+            page.is_menu = bool(page.menu_ids)
+
+    def _set_website_menu(self):
+        for page in self:
+            website = self.env['website'].get_current_website()
+            if page.is_menu:
+                if not page.menu_ids:
+                    self.env['website.menu'].create({
+                        'name': page.name,
+                        'url': page.url,
+                        'page_id': page.id,
+                        'parent_id': website.menu_id.id,
+                        'website_id': website.id,
+                    })
+            elif page.menu_ids:
+                page.menu_ids.unlink()
+
     def _get_most_specific_pages(self):
         ''' Returns the most specific pages in self. '''
         ids = []
@@ -86,78 +107,6 @@ class Page(models.Model):
 
         res['visibility_password'] = res['visibility'] == 'password' and self.visibility_password_display or ''
         return res
-
-    @api.model
-    def save_page_info(self, website_id, data):
-        website = self.env['website'].browse(website_id)
-        page = self.browse(int(data['id']))
-
-        # If URL has been edited, slug it
-        original_url = page.url
-        url = data['url']
-        if not url.startswith('/'):
-            url = '/' + url
-        if page.url != url:
-            url = '/' + slugify(url, max_length=1024, path=True)
-            url = self.env['website'].get_unique_path(url)
-
-        # If name has changed, check for key uniqueness
-        if page.name != data['name']:
-            page_key = self.env['website'].get_unique_key(slugify(data['name']))
-        else:
-            page_key = page.key
-
-        menu = self.env['website.menu'].search([('page_id', '=', int(data['id']))])
-        if not data['is_menu']:
-            # If the page is no longer in menu, we should remove its website_menu
-            if menu:
-                menu.unlink()
-        else:
-            # The page is now a menu, check if has already one
-            if menu:
-                menu.write({'url': url})
-            else:
-                self.env['website.menu'].create({
-                    'name': data['name'],
-                    'url': url,
-                    'page_id': data['id'],
-                    'parent_id': website.menu_id.id,
-                    'website_id': website.id,
-                })
-
-        # Edits via the page manager shouldn't trigger the COW
-        # mechanism and generate new pages. The user manages page
-        # visibility manually with is_published here.
-        w_vals = {
-            'key': page_key,
-            'name': data['name'],
-            'url': url,
-            'is_published': data['website_published'],
-            'website_indexed': data['website_indexed'],
-            'date_publish': data['date_publish'] or None,
-            'is_homepage': data['is_homepage'],
-            'visibility': data['visibility'],
-        }
-        if page.visibility == 'restricted_group' and data['visibility'] != "restricted_group":
-            w_vals['groups_id'] = False
-        elif 'group_id' in data:
-            w_vals['groups_id'] = [data['group_id']]
-        if 'visibility_pwd' in data:
-            w_vals['visibility_password_display'] = data['visibility_pwd'] or ''
-
-        page.with_context(no_cow=True).write(w_vals)
-
-        # Create redirect if needed
-        if data['create_redirect']:
-            self.env['website.rewrite'].create({
-                'name': data['name'],
-                'redirect_type': data['redirect_type'],
-                'url_from': original_url,
-                'url_to': url,
-                'website_id': website.id,
-            })
-
-        return url
 
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
@@ -209,8 +158,10 @@ class Page(models.Model):
         return super(Page, self).unlink()
 
     def write(self, vals):
-        if 'url' in vals and not vals['url'].startswith('/'):
-            vals['url'] = '/' + vals['url']
+        if 'url' in vals:
+            vals['url'] = ('/' if not vals['url'].startswith('/') else '') + vals['url']
+            for page in self:
+                page.menu_ids.write({'url': vals['url']})
         self.clear_caches()  # write on page == write on view that invalid cache
         return super(Page, self).write(vals)
 
