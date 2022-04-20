@@ -49,6 +49,10 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
     /**
      * @override
      */
+    DEBOUNCE: 400,
+    /**
+     * @override
+     */
     willStart: async function () {
         this.isRendered = false;
         this._onUpdateIframeId = 'onLoad_' + _.uniqueId('FieldHtml');
