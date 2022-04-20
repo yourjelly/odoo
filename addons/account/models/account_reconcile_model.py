@@ -805,21 +805,25 @@ class AccountReconcileModel(models.Model):
 
     def _get_invoice_matching_amls_result(self, st_line, partner, candidate_vals):
         st_line_currency = st_line.foreign_currency_id or st_line.currency_id
-
         amls = candidate_vals['amls']
+        rslt = {}
         if amls.currency_id == st_line_currency:
             st_line_amount = st_line._prepare_move_line_default_vals()[1]['amount_currency']
             sign = 1 if st_line_amount > 0.0 else -1
-
             kepts_amls = self.env['account.move.line']
             sum_aml_residual = 0.0
             for aml in amls:
-
                 if st_line_currency.compare_amounts(st_line_amount, -aml.amount_residual_currency) == 0:
                     # Special case: the amounts are the same, submit the line directly.
                     kepts_amls = aml
                     break
-
+                elif aml.move_id.is_eligible_for_early_discount(st_line.date):
+                    discounted_amount = aml.move_id.invoice_early_pay_amount_after_discount * sign
+                    if st_line_currency.compare_amounts(st_line_amount, discounted_amount) == 0:
+                        rslt = {'amls': aml}
+                        rslt['auto_reconcile'] = True
+                        rslt['early_discount'] = True
+                    return rslt
                 elif st_line_currency.compare_amounts(sign * (st_line_amount + sum_aml_residual), 0.0) > 0:
                     # Here, we still have room for other candidates ; so we add the current one to the list we keep.
                     # Then, we continue iterating, even if there is no room anymore, just in case one of the following candidates
@@ -829,68 +833,50 @@ class AccountReconcileModel(models.Model):
         else:
             kepts_amls = amls
 
+        if not kepts_amls:
+            return None
+        rslt['amls'] = kepts_amls
+
         # We check the amount criteria of the reconciliation model, and select the
         # kept_candidates if they pass the verification.
-        status = self._check_rule_propositions(st_line, kepts_amls)
-        if 'rejected' in status:
-            return None
+        if not self.allow_payment_tolerance:
+            status = {'allow_write_off', 'allow_auto_reconcile'}
+        else:
+            status = {}
+            st_line_amount_curr = st_line._prepare_move_line_default_vals()[1]['amount_currency']
+            amls_amount_curr = sum(
+                st_line._prepare_counterpart_amounts_using_st_line_rate(aml.currency_id, aml.amount_residual,
+                                                                        aml.amount_residual_currency)['amount_currency']
+                for aml in kepts_amls
+            )
+            sign = 1 if st_line_amount_curr > 0.0 else -1
+            amount_curr_after_rec = sign * (amls_amount_curr + st_line_amount_curr)
+            # The statement line will be fully reconciled.
+            if st_line_currency.is_zero(amount_curr_after_rec):
+                status = {'allow_auto_reconcile'}
+            # The payment amount is higher than the sum of invoices.
+            # In that case, don't check the tolerance and don't try to generate any write-off.
+            elif amount_curr_after_rec > 0.0:
+                status = {'allow_auto_reconcile'}
+            # No tolerance, reject the candidates.
+            elif self.payment_tolerance_param == 0:
+                status = {'rejected'}
+            # If the tolerance is expressed as a fixed amount, check the residual payment amount doesn't exceed the
+            # tolerance.
+            elif self.payment_tolerance_type == 'fixed_amount' and -amount_curr_after_rec <= self.payment_tolerance_param:
+                status = {'allow_write_off', 'allow_auto_reconcile'}
+            else:
+                # The tolerance is expressed as a percentage between 0 and 100.0.
+                reconciled_percentage_left = (abs(amount_curr_after_rec / amls_amount_curr)) * 100.0
+                if self.payment_tolerance_type == 'percentage' and reconciled_percentage_left <= self.payment_tolerance_param:
+                    status = {'allow_write_off', 'allow_auto_reconcile'}
 
-        rslt = {'amls': kepts_amls}
+        if 'rejected' in status or status == {}:
+            return None
 
         if 'allow_write_off' in status and self.line_ids:
             rslt['status'] = 'write_off'
 
         if 'allow_auto_reconcile' in status and candidate_vals['allow_auto_reconcile'] and self.auto_reconcile:
             rslt['auto_reconcile'] = True
-
         return rslt
-
-    def _check_rule_propositions(self, st_line, amls):
-        """ Check restrictions that can't be handled for each move.line separately.
-        Note: Only used by models having a type equals to 'invoice_matching'.
-
-        :param st_line:     The statement line.
-        :param amls:        The candidates account.move.line.
-        :return: A string representing what to do with the candidates:
-            * rejected:             Reject candidates.
-            * allow_write_off:      Allow to generate the write-off from the reconcile model lines if specified.
-            * allow_auto_reconcile: Allow to automatically reconcile entries if 'auto_validate' is enabled.
-        """
-        if not self.allow_payment_tolerance:
-            return {'allow_write_off', 'allow_auto_reconcile'}
-        if not amls:
-            return {'rejected'}
-
-        currency = st_line.foreign_currency_id or st_line.currency_id
-        st_line_amount_curr = st_line._prepare_move_line_default_vals()[1]['amount_currency']
-        amls_amount_curr = sum(
-            st_line._prepare_counterpart_amounts_using_st_line_rate(aml.currency_id, aml.amount_residual, aml.amount_residual_currency)['amount_currency']
-            for aml in amls
-        )
-        sign = 1 if st_line_amount_curr > 0.0 else -1
-        amount_curr_after_rec = sign * (amls_amount_curr + st_line_amount_curr)
-
-        # The statement line will be fully reconciled.
-        if currency.is_zero(amount_curr_after_rec):
-            return {'allow_auto_reconcile'}
-
-        # The payment amount is higher than the sum of invoices.
-        # In that case, don't check the tolerance and don't try to generate any write-off.
-        if amount_curr_after_rec > 0.0:
-            return {'allow_auto_reconcile'}
-
-        # No tolerance, reject the candidates.
-        if self.payment_tolerance_param == 0:
-            return {'rejected'}
-
-        # If the tolerance is expressed as a fixed amount, check the residual payment amount doesn't exceed the
-        # tolerance.
-        if self.payment_tolerance_type == 'fixed_amount' and -amount_curr_after_rec <= self.payment_tolerance_param:
-            return {'allow_write_off', 'allow_auto_reconcile'}
-
-        # The tolerance is expressed as a percentage between 0 and 100.0.
-        reconciled_percentage_left = (abs(amount_curr_after_rec / amls_amount_curr)) * 100.0
-        if self.payment_tolerance_type == 'percentage' and reconciled_percentage_left <= self.payment_tolerance_param:
-            return {'allow_write_off', 'allow_auto_reconcile'}
-
-        return {'rejected'}

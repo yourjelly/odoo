@@ -263,6 +263,31 @@ class AccountMove(models.Model):
     payment_state = fields.Selection(PAYMENT_STATE_SELECTION, string="Payment Status", store=True,
         readonly=True, copy=False, tracking=True, compute='_compute_amount')
 
+    # ==== Early payment cash discount fields ====
+    invoice_early_pay_amount_after_discount = fields.Monetary(
+        default=0.0,
+        compute='_compute_early_pay_amount_after_discount',
+        store=True,
+        help='Total amount left to pay after the discount was applied',
+    )
+    invoice_early_pay_amount_granted_discount = fields.Monetary(
+        default=0.0,
+        compute='_compute_early_pay_amount_granted_discount',
+        help='Amount to deduce from the original price',
+    )
+    invoice_early_pay_untaxed_amount_after_discount = fields.Monetary(
+        default=0.0,
+        compute='_compute_early_pay_untaxed_amount_after_discount',
+        help='Untaxed amount after the discount was applied',
+    )
+    invoice_early_pay_tax_after_discount = fields.Monetary(
+        default=0.0,
+        compute='_compute_early_pay_tax_after_discount',
+        help='Tax after the discount was applied',
+    )
+    early_pay_end_date = fields.Date(compute="_compute_early_pay_end_date")
+    is_in_invoice = fields.Boolean(compute="_compute_is_in_invoice")
+
     # ==== Cash basis feature fields ====
     tax_cash_basis_rec_id = fields.Many2one(
         'account.partial.reconcile',
@@ -3675,6 +3700,70 @@ class AccountMove(models.Model):
         else:
             render_context['subtitle'] = format_amount(self.env, self.amount_total, self.currency_id, lang_code=render_context.get('lang'))
         return render_context
+
+    # -------Early Payment Cash Discount Functions -----
+    @api.depends('invoice_payment_term_id', 'invoice_early_pay_amount_after_discount')
+    def _compute_early_pay_amount_granted_discount(self):
+        for record in self:
+            if record.invoice_payment_term_id.has_early_payment:
+                record.invoice_early_pay_amount_granted_discount = record.amount_total - record.invoice_early_pay_amount_after_discount
+            else:
+                record.invoice_early_pay_amount_granted_discount = 0.0
+
+    @api.depends('invoice_payment_term_id')
+    def _compute_early_pay_end_date(self):
+        for record in self:
+            if record.invoice_payment_term_id.has_early_payment:
+                record.early_pay_end_date = record.invoice_payment_term_id._get_last_date_for_discount(record.invoice_date)
+            else:
+                record.early_pay_end_date = None
+
+    @api.depends('invoice_payment_term_id', 'amount_residual_signed')
+    def _compute_early_pay_amount_after_discount(self):
+        for record in self:
+            if record.invoice_payment_term_id.has_early_payment:
+                record.invoice_early_pay_amount_after_discount = record.invoice_early_pay_untaxed_amount_after_discount + record.invoice_early_pay_tax_after_discount
+                if not float(record.invoice_early_pay_amount_after_discount) or \
+                        float(record.invoice_early_pay_amount_after_discount) < 0.0:
+                    record.invoice_early_pay_amount_after_discount = 0
+            else:
+                record.invoice_early_pay_amount_after_discount = 0
+
+    @api.depends('invoice_payment_term_id')
+    def _compute_early_pay_untaxed_amount_after_discount(self):
+        for record in self:
+            if record.invoice_payment_term_id.has_early_payment:
+                percentage_to_discount = record.invoice_payment_term_id.percentage_to_discount
+                record.invoice_early_pay_untaxed_amount_after_discount = record.amount_untaxed - ((record.amount_untaxed/100)*percentage_to_discount)
+            else:
+                record.invoice_early_pay_untaxed_amount_after_discount = 0
+
+    @api.depends('invoice_payment_term_id')
+    def _compute_early_pay_tax_after_discount(self):
+        for record in self:
+            if record.invoice_payment_term_id.has_early_payment:
+                discount_computation = record.invoice_payment_term_id.discount_computation
+                if discount_computation != 'included':
+                    record.invoice_early_pay_tax_after_discount = record.amount_tax
+                else:
+                    percentage_to_discount = record.invoice_payment_term_id.percentage_to_discount
+                    record.invoice_early_pay_tax_after_discount = record.amount_tax - ((record.amount_tax/100)*percentage_to_discount)
+            else:
+                record.invoice_early_pay_tax_after_discount = 0
+
+    def _compute_is_in_invoice(self):
+        self.is_in_invoice = len(self.ids) == 1 and self.move_type == 'in_invoice'
+
+    def is_eligible_for_early_discount(self, payment_date):
+        '''
+        An early payment discount is possible if the option has been activated,
+        no partial payment was registered,
+        and the payment date is before the last early_payment_date possible.
+        '''
+        return len(self.ids) == 1 and \
+            self.invoice_payment_term_id.has_early_payment and \
+            self.payment_state != 'partial' and \
+            payment_date <= self.invoice_payment_term_id._get_last_date_for_discount(self.invoice_date)
 
 
 class AccountMoveLine(models.Model):

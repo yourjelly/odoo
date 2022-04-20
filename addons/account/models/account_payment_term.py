@@ -2,8 +2,10 @@
 
 from odoo import api, exceptions, fields, models, _
 from odoo.exceptions import UserError, ValidationError
+from odoo.tools import date_utils
 
 from dateutil.relativedelta import relativedelta
+from datetime import timedelta
 
 
 class AccountPaymentTerm(models.Model):
@@ -14,12 +16,36 @@ class AccountPaymentTerm(models.Model):
     def _default_line_ids(self):
         return [(0, 0, {'value': 'balance', 'value_amount': 0.0, 'sequence': 9, 'days': 0, 'option': 'day_after_invoice_date'})]
 
+    def get_early_payment_discount_account(self, move_is_in_invoice):
+        return self.env.company.account_journal_cash_discount_income_id if move_is_in_invoice else self.env.company.account_journal_cash_discount_expense_id
+
     name = fields.Char(string='Payment Terms', translate=True, required=True)
     active = fields.Boolean(default=True, help="If the active field is set to False, it will allow you to hide the payment terms without removing it.")
     note = fields.Html(string='Description on the Invoice', translate=True)
     line_ids = fields.One2many('account.payment.term.line', 'payment_id', string='Terms', copy=True, default=_default_line_ids)
     company_id = fields.Many2one('res.company', string='Company')
     sequence = fields.Integer(required=True, default=10)
+
+    # -------Early payment discount fields-------
+    early_payment_applicable = fields.Boolean(string="True if the conditions required to offer an EPD are fulfilled.", store=False, compute="_compute_early_payment_applicable")
+    has_early_payment = fields.Boolean(string="Apply Early Payment Discount")
+    percentage_to_discount = fields.Float("Discount", default=2)
+    discount_computation = fields.Selection([
+        ('included', 'Tax included'),
+        ('excluded', 'Tax excluded'),
+       ], string='Computation', default='included')
+    discount_days = fields.Integer(string='Availability', required=True, default=7)
+    discount_time_availability = fields.Selection(
+        string='Discount Availability',
+        selection=[
+            ('days_after_invoice_date', "days after the invoice date"),
+            ('days_after_invoice_month', "days after the end of the invoice month"),
+            ('day_following_month', "of the following month"),
+            ('day_current_month', "of the current month"),
+        ], default='days_after_invoice_date',
+        required=True,
+    )
+    discount_account = fields.Many2one('account.account', string='Counterpart Account')
 
     @api.constrains('line_ids')
     def _check_lines(self):
@@ -81,6 +107,50 @@ class AccountPaymentTerm(models.Model):
                 [('value_reference', 'in', ['account.payment.term,%s'%payment_term.id for payment_term in terms])]
             ).unlink()
         return super(AccountPaymentTerm, self).unlink()
+
+    @api.depends('line_ids')
+    def _compute_early_payment_applicable(self):
+        for line in self.line_ids:
+            if line.value != 'balance':
+                self.early_payment_applicable = False
+                self.has_early_payment = False
+                return
+        self.early_payment_applicable = True
+
+    @api.onchange('discount_days')
+    def _onchange_discount_days(self):
+        if self.discount_days <= 0:
+            raise ValidationError(_("The discount availability must be strictly positive."))
+        if self.discount_time_availability == "day_following_month" or self.discount_time_availability == "day_current_month":
+            if self.discount_days > 31:
+                raise ValidationError(_("This date is not valid."))
+
+    @api.onchange('discount_time_availability')
+    def _onchange_discount_time_availability(self):
+        if self.discount_time_availability == "day_following_month" or self.discount_time_availability == "day_current_month":
+            if self.discount_days > 31:
+                raise ValidationError(_("This date is not valid."))
+
+    @api.onchange('percentage_to_discount')
+    def _onchange_percentage_to_discount(self):
+        if self.percentage_to_discount <= 0:
+            raise ValidationError(_("The discount percentage must be strictly positive."))
+        if self.percentage_to_discount > 100:
+            raise ValidationError(_("The discount percentage cannot exceed 100."))
+
+    def _get_last_date_for_discount(self, move_date):
+        if self.discount_time_availability == 'days_after_invoice_date':
+            return move_date + timedelta(days=self.discount_days)
+        if self.discount_time_availability == 'days_after_invoice_month':
+            return date_utils.end_of(move_date, 'month') + timedelta(self.discount_days)
+        if self.discount_time_availability == 'day_following_month' or self.discount_time_availability == 'day_current_month':
+            month_to_add = 1 if self.discount_time_availability == 'day_following_month' else 0
+            computed_date = date_utils.end_of(move_date, 'month') + timedelta(self.discount_days)
+            if self.discount_days > 28:
+                last_day_of_month = date_utils.get_month(move_date.replace(month=move_date.month + month_to_add))[1]
+                if last_day_of_month < computed_date:
+                    return last_day_of_month
+            return computed_date
 
 
 class AccountPaymentTermLine(models.Model):

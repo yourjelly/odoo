@@ -102,6 +102,40 @@
                             The last line's computation type should be "Balance" to ensure that the whole amount will be allocated.
                         </p>
                         <field name="line_ids"/>
+
+                        <!-- ============================== Early payment section ============================== -->
+                        <field name="early_payment_applicable" invisible="1"/>
+                        <div attrs="{'invisible':[('early_payment_applicable','=',False)]}">
+                            <field name="has_early_payment"/>
+                            <label for="has_early_payment"/>
+                            <div attrs="{'invisible':[('has_early_payment','=',False)]}">
+                                <group>
+                                    <group>
+                                        <div class="o_row">
+                                            <label for="percentage_to_discount"/>
+                                            <field name="percentage_to_discount"/>
+                                            <span class="o_form_label oe_inline">%</span>
+                                        </div>
+                                    </group>
+                                </group>
+                                <group>
+                                    <group>
+                                        <div class="o_row">
+                                            <label for="discount_computation"/>
+                                            <field name="discount_computation"/>
+                                        </div>
+                                    </group>
+                                </group>
+                                <group>
+                                    <div colspan="2">
+                                        <label for="discount_time_availability"/>
+                                        <field name="discount_days" class="oe_inline"/>
+                                        <label for="discount_time_availability" string=""/>
+                                        <field name="discount_time_availability" class="oe_inline"/>
+                                    </div>
+                                </group>
+                            </div>
+                        </div>
                     </sheet>
                 </form>
             </field>

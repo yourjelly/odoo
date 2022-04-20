@@ -103,9 +103,9 @@ class AccountPaymentRegister(models.TransientModel):
         ('reconcile', 'Mark as fully paid'),
     ], default='open', string="Payment Difference Handling")
     writeoff_account_id = fields.Many2one('account.account', string="Difference Account", copy=False,
-        domain="[('deprecated', '=', False), ('company_id', '=', company_id)]")
+                                          domain="[('deprecated', '=', False), ('company_id', '=', company_id)]")
     writeoff_label = fields.Char(string='Journal Item Label', default='Write-Off',
-        help='Change label of the counterpart that will hold the payment difference')
+                                 help='Change label of the counterpart that will hold the payment difference')
 
     # == Display purpose fields ==
     show_partner_bank_account = fields.Boolean(
@@ -116,9 +116,54 @@ class AccountPaymentRegister(models.TransientModel):
         help="Technical field used to know whether the field `partner_bank_id` needs to be required or not in the payments form views")
     country_code = fields.Char(related='company_id.account_fiscal_country_id.code', readonly=True)
 
+    # == Early Payment Discount ==
+    has_epd_and_is_in_time = fields.Boolean(
+        compute='_compute_has_epd_and_is_in_time',
+        readonly=True,
+        store=False,
+        help="Indicates whether or not an early payment discount is available and if the conditions required to activate it are fulfilled",
+    )
+
+    show_epd_button = fields.Boolean(compute="_compute_show_epd_button")
+
     # -------------------------------------------------------------------------
     # HELPERS
     # -------------------------------------------------------------------------
+    @api.onchange('amount')
+    def _on_change_amount(self):
+        for wizard in self:
+            move_id = wizard.line_ids.move_id
+            if wizard.has_epd_and_is_in_time and wizard.amount == move_id.invoice_early_pay_amount_after_discount:
+                wizard.writeoff_label = _('Early Payment Discount')
+                invoice_payment_term = wizard.line_ids.move_id.invoice_payment_term_id
+                wizard.writeoff_account_id = invoice_payment_term.get_early_payment_discount_account(move_id.is_in_invoice)
+                wizard.payment_difference_handling = 'reconcile'
+
+    @api.onchange('payment_date')
+    def _on_change_payment_date(self):
+        for wizard in self:
+            wizard.has_epd_and_is_in_time = wizard.line_ids.move_id.is_eligible_for_early_discount(wizard.payment_date)
+            if wizard.has_epd_and_is_in_time and wizard.line_ids.move_id.is_in_invoice:
+                wizard.amount = wizard.line_ids.move_id.invoice_early_pay_amount_after_discount
+
+    def fill_in_with_epd(self):
+        for wizard in self:
+            wizard.line_ids.move_id.is_eligible_for_early_discount(wizard.payment_date)
+            wizard.amount = wizard.line_ids.move_id.invoice_early_pay_amount_after_discount
+            wizard.writeoff_label = _('Early Payment Discount')
+            wizard.writeoff_account_id = wizard.line_ids.move_id.invoice_payment_term_id.get_early_payment_discount_account(wizard.line_ids.move_id.is_in_invoice)
+            wizard.payment_difference_handling = 'reconcile'
+        return {
+            'context': self.env.context,
+            'name': 'Register Payment',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'account.payment.register',
+            'res_id': self.id,
+            'view_id': False,
+            'type': 'ir.actions.act_window',
+            'target': 'new',
+        }
 
     @api.model
     def _get_batch_communication(self, batch_result):
@@ -207,6 +252,7 @@ class AccountPaymentRegister(models.TransientModel):
         partner_bank_account = self.env['res.partner.bank']
         if move.is_invoice(include_receipts=True):
             partner_bank_account = move.partner_bank_id._origin
+        early_pay = move.invoice_payment_term_id if move.is_eligible_for_early_discount(self.payment_date) else False
 
         return {
             'partner_id': line.partner_id.id,
@@ -214,6 +260,7 @@ class AccountPaymentRegister(models.TransientModel):
             'currency_id': line.currency_id.id,
             'partner_bank_id': partner_bank_account.id,
             'partner_type': 'customer' if line.account_type == 'asset_receivable' else 'supplier',
+            'early_pay': early_pay,
         }
 
     def _get_batches(self):
@@ -458,8 +505,11 @@ class AccountPaymentRegister(models.TransientModel):
     def _compute_amount(self):
         for wizard in self:
             if wizard.source_currency_id and wizard.can_edit_wizard:
-                batch_result = wizard._get_batches()[0]
-                wizard.amount = wizard._get_total_amount_in_wizard_currency_to_full_reconcile(batch_result)
+                if wizard.has_epd_and_is_in_time and wizard.line_ids.move_id.is_in_invoice:
+                    wizard.amount = wizard.line_ids.move_id.invoice_early_pay_amount_after_discount
+                else:
+                    batch_result = wizard._get_batches()[0]
+                    wizard.amount = wizard._get_total_amount_in_wizard_currency_to_full_reconcile(batch_result)
             else:
                 # The wizard is not editable so no partial payment allowed and then, 'amount' is not used.
                 wizard.amount = None
@@ -473,6 +523,17 @@ class AccountPaymentRegister(models.TransientModel):
                 wizard.payment_difference = total_amount_residual_in_wizard_currency - wizard.amount
             else:
                 wizard.payment_difference = 0.0
+
+    @api.depends('line_ids')
+    def _compute_has_epd_and_is_in_time(self):
+        for wizard in self:
+            wizard.has_epd_and_is_in_time = wizard.line_ids.move_id.is_eligible_for_early_discount(wizard.payment_date)
+
+    @api.depends('line_ids')
+    def _compute_show_epd_button(self):
+        for wizard in self:
+            wizard.show_epd_button = wizard.has_epd_and_is_in_time and not wizard.line_ids.move_id.is_in_invoice \
+                                     and wizard.amount != wizard.line_ids.move_id.invoice_early_pay_amount_after_discount
 
     # -------------------------------------------------------------------------
     # LOW-LEVEL METHODS
@@ -558,15 +619,18 @@ class AccountPaymentRegister(models.TransientModel):
 
     def _create_payment_vals_from_batch(self, batch_result):
         batch_values = self._get_wizard_values_from_batch(batch_result)
-
         if batch_values['payment_type'] == 'inbound':
             partner_bank_id = self.journal_id.bank_account_id.id
         else:
             partner_bank_id = batch_result['payment_values']['partner_bank_id']
+        early_pay = batch_result['payment_values']['early_pay']
+        discounted_amount = 0.0
+        if early_pay:
+            discounted_amount = batch_result['lines'].move_id.invoice_early_pay_amount_after_discount
 
-        return {
+        payment_vals = {
             'date': self.payment_date,
-            'amount': batch_values['source_amount_currency'],
+            'amount': discounted_amount if early_pay else batch_values['source_amount_currency'],
             'payment_type': batch_values['payment_type'],
             'partner_type': batch_values['partner_type'],
             'ref': self._get_batch_communication(batch_result),
@@ -577,6 +641,14 @@ class AccountPaymentRegister(models.TransientModel):
             'payment_method_line_id': self.payment_method_line_id.id,
             'destination_account_id': batch_result['lines'][0].account_id.id
         }
+
+        if not self.currency_id.is_zero(self.payment_difference) and self.payment_difference_handling == 'reconcile':
+            payment_vals['write_off_line_vals'] = {
+                'name': self.writeoff_label,
+                'amount': self.payment_difference,
+                'account_id': self.writeoff_account_id.id,
+            }
+        return payment_vals
 
     def _init_payments(self, to_process, edit_mode=False):
         """ Create the payments.
