@@ -39,6 +39,10 @@
                     border-radius: 25px;
                     box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
                 }
+
+                .o_block_iframe {
+                    border-radius: 25px;
+                }
             }
         }
     }
@@ -48,4 +52,8 @@
     .o_website_editor.editor_enable.editor_has_snippets {
         margin-right: 0 !important;
     }
+}
+
+.o_block_iframe {
+    z-index: $zindex-dropdown - 1;
 }

@@ -8,6 +8,41 @@ import { WebsiteEditorComponent } from '../../components/editor/editor';
 
 const { Component, onWillStart, useEffect, useRef, useState } = owl;
 
+class BlockIframe extends Component {
+    setup() {
+        this.websiteService = useService('website');
+        this.state = useState({
+            blockIframe: false,
+            showLoader: false,
+        });
+        this.iframeLocks = 0;
+        this.websiteService.bus.addEventListener("BLOCK", this.block.bind(this));
+        this.websiteService.bus.addEventListener("UNBLOCK", this.unblock.bind(this));
+    }
+    block(event) {
+        if (event.detail.showLoader && !this.state.showLoader) {
+            setTimeout(() => {
+                this.state.showLoader = true;
+            }, event.detail.loaderDelay);
+        }
+        if (this.iframeLocks === 0) {
+            this.state.blockIframe = true;
+        }
+        this.iframeLocks++;
+    }
+    unblock() {
+        this.iframeLocks--;
+        if (this.iframeLocks < 0) {
+            this.iframeLocks = 0;
+        }
+        if (this.iframeLocks === 0) {
+            this.state.blockIframe = false;
+            this.state.showLoader = false;
+        }
+    }
+}
+BlockIframe.template = 'website.BlockIframe';
+
 export class WebsiteEditorClientAction extends Component {
     setup() {
         this.websiteService = useService('website');
@@ -45,7 +80,6 @@ export class WebsiteEditorClientAction extends Component {
                     this.iframefallback.el.contentDocument.body.replaceWith(this.iframe.el.contentDocument.body.cloneNode(true));
                     $().getScrollingElement(this.iframefallback.el.contentDocument)[0].scrollTop = $().getScrollingElement(this.iframe.el.contentDocument)[0].scrollTop;
                 });
-
                 this.iframe.el.contentWindow.addEventListener('PUBLIC-ROOT-READY', (event) => {
                     if (!this.websiteContext.edition) {
                         this.addWelcomeMessage();
@@ -67,6 +101,11 @@ export class WebsiteEditorClientAction extends Component {
                 this.addWelcomeMessage();
             }
         }, () => [this.websiteContext.edition]);
+
+        useEffect(() => {
+            this.websiteService.blockIframe();
+            this.iframe.el.addEventListener('OdooFrameContentLoaded', () => this.websiteService.unblockIframe(), { once: true });
+        }, () => []);
     }
 
     get websiteId() {
@@ -114,6 +153,9 @@ export class WebsiteEditorClientAction extends Component {
     }
 }
 WebsiteEditorClientAction.template = 'website.WebsiteEditorClientAction';
-WebsiteEditorClientAction.components = { WebsiteEditorComponent };
+WebsiteEditorClientAction.components = {
+    WebsiteEditorComponent,
+    BlockIframe
+};
 
 registry.category('actions').add('website_editor', WebsiteEditorClientAction);
