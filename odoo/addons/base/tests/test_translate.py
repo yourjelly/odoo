@@ -3,10 +3,10 @@
 from odoo.exceptions import AccessError, ValidationError
 from odoo.tools import mute_logger
 from odoo.tools.translate import quote, unquote, xml_translate, html_translate
-from odoo.tests.common import TransactionCase, BaseCase, new_test_user
+from odoo.tests.common import TransactionCase, BaseCase, new_test_user, tagged
 from psycopg2 import IntegrityError
 
-
+@tagged('translate')
 class TranslationToolsTestCase(BaseCase):
     def assertItemsEqual(self, a, b, msg=None):
         self.assertEqual(sorted(a), sorted(b), msg)
@@ -243,7 +243,7 @@ class TranslationToolsTestCase(BaseCase):
         result = html_translate(lambda term: term, source)
         self.assertEqual(result, source)
 
-
+@tagged('translate')
 class TestTranslation(TransactionCase):
     @classmethod
     def setUpClass(cls):
@@ -396,6 +396,7 @@ class TestTranslation(TransactionCase):
         ])
         self.assertEqual(translation_fr.src, 'Customers', "Did not set English version as source")
 
+@tagged('translate')
 class TestTranslationWrite(TransactionCase):
     @classmethod
     def setUpClass(cls):
@@ -663,7 +664,7 @@ class TestTranslationWrite(TransactionCase):
         info = model.fields_view_get()['fields']
         self.assertEqual(info['name']['string'], LABEL)
 
-
+@tagged('translate')
 class TestXMLTranslation(TransactionCase):
     @classmethod
     def setUpClass(cls):
