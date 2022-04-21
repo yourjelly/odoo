@@ -305,9 +305,17 @@ export class MockServer {
                         missingViewtypes.push((node.getAttribute("mode") || "list").split(",")[0]);
                     }
                     for (let type of missingViewtypes) {
-                        const key = `${field.relation},false,${type === "tree" ? "list" : type}`;
+                        type = type === "tree" ? "list" : type;
+                        let key = `${field.relation},false,${type}`;
+                        if (!this.archs[key]) {
+                            const regexp = new RegExp(`${field.relation},[a-z._0-9]+,${type}`);
+                            key = Object.keys(this.archs).find((k) => regexp.test(k));
+                        }
                         // in a lot of tests, we don't need the form view, so it doesn't even exist
                         const arch = this.archs[key] || (type === "form" ? "<form/>" : null);
+                        if (!arch) {
+                            throw new Error(`Can't find ${type} view to inline`);
+                        }
                         node.appendChild(
                             domParser.parseFromString(arch, "text/xml").documentElement
                         );
