@@ -21,4 +21,8 @@
             </div>
         </div>
     </t>
+
+    <t t-name="website.FieldFaPrefix" owl="1">
+        <span><i t-attf-class="fa fa-fw {{prefix.class}} {{prefix.visible ? '': 'invisible'}}"/><t t-esc="_formatValue(value)"/></span>
+    </t>
 </templates>
