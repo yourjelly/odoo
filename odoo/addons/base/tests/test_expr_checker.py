@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import datetime
+from os import system
 from inspect import cleandoc
 from collections import OrderedDict
 
@@ -26,6 +28,9 @@ class Dangerous:
     def say_goodbye(self):
         return "GoodBye"
 
+    def __add__(self, val):
+        print("Pwned !")
+
 
 class Good:
     a = "hi"
@@ -47,16 +52,8 @@ class Good:
         self.a = a
 
 
-class ReadOnlyObject:
-    def __init__(self, x):
-        self.set_x_value(x)
-
-    def set_x_value(self, x):
-        self.x = x
-
-
 def check_type(method, value):
-    safe_type = (Good, ReadOnlyObject, CustomCollection, OrderedDict)
+    safe_type = (Good, CustomCollection, OrderedDict)
     return type(value) in safe_type
 
 
@@ -107,14 +104,6 @@ class TestFuncChecker(BaseCase):
             ValueError, "safe_eval doesn't permit you to read gather_secret"
         ):
             safe_eval("a.gather_secret()", locals_dict={"a": a})
-
-    # FIXME: Need to implement ast_set_attr
-    # def test_readonly_type(self):
-    #     a = ReadOnlyObject(42)
-    #
-    #     exec(expr_checker("a.set_x_value(25)", ast_get_attr, check_type=check_type))
-    #
-    #     self.assertEqual(a.x, 42)
 
     def test_delete_attr(self):
         with self.assertRaisesRegex(
@@ -539,3 +528,68 @@ class TestFuncChecker(BaseCase):
             },
         )
         self.assertEqual(result["sum_all"], expected_output["sum_all"])
+
+    def test_functional_functions(self):
+        code = "list(map(lambda x: x*2, [1, 2, 3, 4]))"
+        self.assertEqual(safe_eval(code), [2, 4, 6, 8])
+
+        with self.assertRaisesRegex(ValueError, "<.+.Dangerous object at .+>"):
+            code = "list(map(lambda x: Dangerous(), [1]))"
+            safe_eval(code, mode="exec", globals_dict={"Dangerous": Dangerous})
+
+    def test_sketchy_function_body(self):
+        with self.assertRaisesRegex(ValueError, "<.+.Dangerous object at .+>"):
+            code = cleandoc(
+                """
+                def evil_function(good_arg):
+                    Dangerous()
+                    return good_arg
+                
+                list(map(evil_function, [1, 2, 3]))
+                """
+            )
+
+            safe_eval(code, mode="exec", globals_dict={"Dangerous": Dangerous})
+
+    def test_sketchy_mapping(self):
+        with self.assertRaisesRegex(ValueError, "<.+.Dangerous object at .+>"):
+            code = cleandoc(
+                """
+                a = map(lambda x: Dangerous(), [1])
+                for x in a:
+                    x + 2
+                """
+            )
+
+            safe_eval(code, mode="exec", globals_dict={"Dangerous": Dangerous})
+
+    def test_common_bypass(self):
+        with self.assertRaisesRegex(ValueError, "safe_eval doesn't permit you to read sys"):
+            code = cleandoc(
+                """
+                datetime.sys.modules['os'].system('ls -la')
+                """
+            )
+
+            safe_eval(code, globals_dict={"datetime": datetime})
+
+        # FIXME !
+        # with self.assertRaisesRegex(ValueError, "safe_eval didn't like <built-in function system>"):
+        #     code = cleandoc(
+        #         """ 
+        #         system("ls -la")
+        #         """
+        #     )
+        #     safe_eval(code, locals_dict={"system": system})
+        
+        code = cleandoc(
+            """ 
+            def myfunc():
+                Dangerous()
+
+            getattr(myfunc, '__globals__')['__ast_check_type'] = lambda x: x
+            """ 
+        )
+
+        safe_eval(code, mode="exec", locals_dict={"Dangerous": Dangerous, "datetime": datetime})
+

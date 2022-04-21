@@ -40,6 +40,7 @@ _BUILTINS = {
     "zip": zip,
     "Exception": Exception,
     "print": print,
+    "type": type,
 }
 
 

@@ -5,6 +5,39 @@ import ast
 import types
 from inspect import cleandoc, getsource
 
+
+class SubscriptWrapper:
+    """
+    SubscriptWrapper
+
+    :param value: The value of the subscript (can be any object that supports __getitem__ and __setitem__)
+    :param check_type: A function that will check the arguments passed to the methods and also the return values
+    """
+
+    def __init__(self, value, check_type):
+        self.value = value
+        self.check_type = check_type
+
+    def __getitem__(self, key):
+        self.check_type("arguments", key)
+        return self.check_type("returned", self.value.__getitem__(key))
+
+    def __setitem__(self, key, value):
+        self.check_type("arguments", key)
+        self.check_type("constant", value)
+
+        self.value.__setitem__(key, value)
+
+
+class FuncWrapper:
+    def __init__(self, function, check_fn):
+        self.function = function
+        self.check_fn = check_fn
+
+    def call(self, *args, **kwargs):
+        self.check_fn(self.function, *args, **kwargs)
+
+
 __require_checks_type = (
     types.FunctionType,
     types.LambdaType,
@@ -34,30 +67,10 @@ __safe_type = (
     enumerate,
     range,
     types.GeneratorType,
+    map,
+    FuncWrapper,
+    SubscriptWrapper,
 )
-
-
-class SubscriptWrapper:
-    """
-    SubscriptWrapper
-
-    :param value: The value of the subscript (can be any object that supports __getitem__ and __setitem__)
-    :param check_type: A function that will check the arguments passed to the methods and also the return values
-    """
-
-    def __init__(self, value, check_type):
-        self.value = value
-        self.check_type = check_type
-
-    def __getitem__(self, key):
-        self.check_type("arguments", key)
-        return self.check_type("subscript", self.value.__getitem__(key))
-
-    def __setitem__(self, key, value):
-        self.check_type("arguments", key)
-        self.check_type("constant", value)
-
-        self.value.__setitem__(key, value)
 
 
 class NodeChecker(ast.NodeTransformer):
@@ -72,6 +85,8 @@ class NodeChecker(ast.NodeTransformer):
             "__ast_check_fn",
             "__ast_check_type_fn",
             "__ast_check_attr_and_type",
+            "FuncWrapper",
+            "SubscriptWrapper"
         )
         super().__init__()
 
@@ -203,19 +218,21 @@ def expr_checker_prepare_context(
                         * constant: if it's a constant (eg: value)
                         * called: if it's a function call, it can be useful in case of bound method (with the __self__ attribute) (eg: value()).
                         * subscript: if it's the return value of a subscript
+                        * self: if it's a method, represent the bound object
 
         :param value: A value that needs to be checked.
         :return: The value passed to this function.
         """
 
-        if (
-            type(value) not in __safe_type + __require_checks_type
-            or (
-                type(value) in __require_checks_type
-                and method in ["returned", "arguments"]
-            )
-        ) and not (check_type is not None and check_type(method, value)):
-            raise ValueError(f"safe_eval didn't like {value} (type: {type(value)})")
+        if callable(value) and method:
+            return FuncWrapper(value, __ast_default_check_call).call
+
+        if type(value) not in __safe_type + __require_checks_type or (
+            type(value) in __require_checks_type
+            and method in ["returned", "arguments", "subscript", "self"]
+        ):
+            if not (check_type is not None and check_type(method, value)):
+                raise ValueError(f"safe_eval didn't like {value} (type: {type(value)})")
 
         return value
 
@@ -267,8 +284,8 @@ def expr_checker_prepare_context(
                         "safe_eval didn't like method call without appropriate type"
                     )
 
-        if hasattr(func, "__self__"):
-            __ast_default_check_type("called", func.__self__)
+        if hasattr(func, "__self__") and type(func) not in [types.BuiltinFunctionType, types.BuiltinMethodType]:
+            __ast_default_check_type("self", func.__self__)
 
         return __ast_default_check_type("returned", func(*args, **kwargs))
 
@@ -297,6 +314,7 @@ def expr_checker_prepare_context(
             "__ast_check_fn": __ast_default_check_call,
             "__ast_check_attr_and_type": __ast_check_attr_and_type,
             "SubscriptWrapper": SubscriptWrapper,
+            "FuncWrapper": FuncWrapper
         }
 
     else:
