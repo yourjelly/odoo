@@ -56,4 +56,24 @@ FieldPageUrl.components = {Switch, PageDependencies};
 FieldPageUrl.supportedFieldTypes = ['char'];
 FieldPageUrl.template = 'website.FieldPageUrl';
 
+/**
+ * Displays 'char' field's value prefixed by a FA icon.
+ * The prefix is shown by default, but the visibility can be updated depending on
+ * other field value.
+ * e.g. `<field name="name" widget="fa_prefix" options="{'icon': 'fa-lock',
+ * 'visibility': 'is_locked'}"/>` renders the icon only when 'is_locked' is True.
+ */
+class FieldFaPrefix extends AbstractFieldOwl {
+    get prefix() {
+        const {icon, visibility} = this.nodeOptions;
+        return {
+            class: icon.split(' ').filter(str => str.indexOf('fa-') === 0).join(' '),
+            visible: !visibility || !!this.recordData[visibility],
+        };
+    }
+}
+FieldFaPrefix.supportedFieldTypes = ['char'];
+FieldFaPrefix.template = 'website.FieldFaPrefix';
+
 fieldRegistry.add('page_url', FieldPageUrl);
+fieldRegistry.add('fa_prefix', FieldFaPrefix);
