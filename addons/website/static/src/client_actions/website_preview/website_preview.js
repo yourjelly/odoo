@@ -2,8 +2,9 @@
 
 import { registry } from '@web/core/registry';
 import { useService } from '@web/core/utils/hooks';
+import { WebsiteEditorComponent } from '../../components/editor/editor';
 
-const { Component, onWillStart, useRef, useEffect } = owl;
+const { Component, onWillStart, useRef, useEffect, useState } = owl;
 
 export class WebsitePreview extends Component {
     setup() {
@@ -14,6 +15,7 @@ export class WebsitePreview extends Component {
 
         this.iframe = useRef('iframe');
         this.iframefallback = useRef('iframefallback');
+        this.websiteContext = useState(this.websiteService.context);
 
         onWillStart(async () => {
             await this.websiteService.fetchWebsites();
@@ -23,6 +25,7 @@ export class WebsitePreview extends Component {
         useEffect(() => {
             this.websiteService.currentWebsiteId = this.websiteId;
             this.websiteService.context.showNewContentModal = this.props.action.context.params && this.props.action.context.params.display_new_content;
+            this.websiteService.context.edition = this.props.action.context.params && !!this.props.action.context.params.enable_editor;
             return () => this.websiteService.currentWebsiteId = null;
         }, () => [this.props.action.context.params]);
     }
@@ -61,6 +64,18 @@ export class WebsitePreview extends Component {
         return path;
     }
 
+    reloadIframe(url) {
+        return new Promise((resolve, reject) => {
+            this.iframe.el.addEventListener('OdooFrameContentLoaded', resolve, { once: true });
+            this.websiteService.websiteRootInstance = undefined;
+            if (url) {
+                this.iframe.el.contentWindow.location = url;
+            } else {
+                this.iframe.el.contentWindow.location.reload();
+            }
+        });
+    }
+
     /**
      * Returns true if the url should be opened in the top
      * window.
@@ -84,6 +99,9 @@ export class WebsitePreview extends Component {
 
         this.websiteService.pageDocument = this.iframe.el.contentDocument;
         this.websiteService.contentWindow = this.iframe.el.contentWindow;
+        this.iframe.el.contentWindow.addEventListener('PUBLIC-ROOT-READY', (event) => {
+            this.websiteService.websiteRootInstance = event.detail.rootInstance;
+        });
 
         // Before leaving the iframe, its content is replicated on an
         // underlying iframe, to avoid for white flashes (visible on
@@ -117,5 +135,6 @@ export class WebsitePreview extends Component {
     }
 }
 WebsitePreview.template = 'website.WebsitePreview';
+WebsitePreview.components = { WebsiteEditorComponent };
 
 registry.category('actions').add('website_preview', WebsitePreview);
