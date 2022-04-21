@@ -4,3 +4,5 @@
 # Copyright (C) 2009  Renato Lima - Akretion
 
 from . import account
+from . import account_fiscal_position_template
+from . import account_fiscal_position
