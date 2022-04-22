@@ -736,7 +736,11 @@ const Wysiwyg = Widget.extend({
             };
             this.$resizer.on('mousedown', resizerMousedown);
         } else {
-            this._replaceElement(this.$editable);
+            if (this.options.sideAttach) {
+                return this._super(...arguments);
+            } else {
+                this._replaceElement(this.$editable);
+            }
         }
     },
     //--------------------------------------------------------------------------
@@ -1900,6 +1904,7 @@ const Wysiwyg = Widget.extend({
      */
     _saveViewBlocks: function (context) {
 
+        const $ = (this.$editable[0].ownerDocument.defaultView.$ || window.$);
         const $allBlocks = $((this.options || {}).savableSelector).filter('.o_dirty');
 
         const $dirty = $('.o_dirty');
