@@ -15,7 +15,7 @@ publicWidget.registry.EventTicketQtySelection = publicWidget.Widget.extend({
     },
 
     _onQtyChange: function (ev) {
-        core.bus.trigger('event_ticket_qty_change', { ticketId: this.ticketId, qty: ev.target.value });
+        core.bus.trigger('event_ticket_qty_change', { ticketId: this.ticketId, qty: parseInt(ev.target.value) });
     },
 });
 

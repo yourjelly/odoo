@@ -48,8 +48,6 @@ class EventTemplateTicket(models.Model):
     def _compute_price_reduce(self):
         for ticket in self:
             ctx = {'event_ticket_override_price': ticket.price, **self.env.context}
-            # Force quantity to 1 because we don't support price policy based on quantity for tickets
-            ctx['quantity'] = 1
             ticket.price_reduce = ticket.product_id.with_context(ctx)._get_contextual_price(default_price=ticket.price)
 
     def _init_column(self, column_name):

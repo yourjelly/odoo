@@ -16,7 +16,7 @@ publicWidget.registry.EventSaleTicketPrice = publicWidget.Widget.extend({
     _qty_change: function(data) {
         if (data.ticketId == this.ticketId) {
             this._rpc({
-                model: 'event.ticket',
+                model: 'event.event.ticket',
                 method: 'read',
                 args: [[this.ticketId]],
                 context: { quantity:data.qty },
