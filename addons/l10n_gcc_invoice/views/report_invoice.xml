@@ -541,8 +541,8 @@
              t-att-data-oe-lang="o and o.env.context.get('lang')">
             <div class="pt-5">
                 <t t-set="address">
-                    <address t-field="o.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}' class="mb-0"/>
-                    <p t-if="o.partner_id.vat">
+                    <address t-field="o.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}' class="mb-0" style="text-align: right"/>
+                    <p t-if="o.partner_id.vat" style="text-align: right">
                         <t t-esc="o.company_id.country_id.vat_label or 'Tax ID'"/>:
                         <span t-field="o.partner_id.vat"/>
                     </p>
