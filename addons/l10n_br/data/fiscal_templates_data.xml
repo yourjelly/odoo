@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- Fiscal Position Templates -->
-
     <record id="fiscal_position_template_1" model="account.fiscal.position.template">
         <field name="sequence">1</field>
         <field name="name">Internal (within one state)</field>
@@ -9,7 +8,7 @@
         <field name="auto_apply" eval="True"/>
         <field name="vat_required" eval="True"/>
         <field name="country_id" ref="base.br"/>
-        <field name="l10n_br_fiscal_type">internal</field>
+        <field name="l10n_br_fp_type">internal</field>
     </record>
 
     <record id="fiscal_position_template_2" model="account.fiscal.position.template">
@@ -25,8 +24,9 @@
         <field name="name">South and Southeast to North, Northeast, and Midwest</field>
         <field name="chart_template_id" ref="l10n_br_account_chart_template"/>
         <field name="auto_apply" eval="True"/>
+        <field name="vat_required" eval="True"/>
         <field name="country_id" ref="base.br"/>
-        <field name="l10n_br_fiscal_type">ss_nnm</field>
+        <field name="l10n_br_fp_type">ss_nnm</field>
     </record>
 
     <!-- Other interstate transactions -->
@@ -35,12 +35,12 @@
         <field name="name">Interstate</field>
         <field name="chart_template_id" ref="l10n_br_account_chart_template"/>
         <field name="auto_apply" eval="True"/>
+        <field name="vat_required" eval="True"/>
         <field name="country_id" ref="base.br"/>
-        <field name="l10n_br_fiscal_type">interstate</field>
+        <field name="l10n_br_fp_type">interstate</field>
     </record>
 
     <!-- Fiscal Position Account Templates -->
-
     <record id="fiscal_position_account_template_2" model="account.fiscal.position.account.template">
         <field name="position_id" ref="fiscal_position_template_2" />
         <field name="account_src_id" ref="l10n_br.account_template_30101010105" />

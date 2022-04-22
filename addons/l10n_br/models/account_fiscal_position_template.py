@@ -7,7 +7,7 @@ class AccountFiscalPositionTemplate(models.Model):
 
     _inherit = 'account.fiscal.position.template'
 
-    l10n_br_fiscal_type = fields.Selection([
+    l10n_br_fp_type = fields.Selection([
         ('internal', 'Internal'),
         ('ss_nnm', 'South/Southeast selling to North/Northeast/Midwest'),
         ('interstate', 'Other interstate'),
