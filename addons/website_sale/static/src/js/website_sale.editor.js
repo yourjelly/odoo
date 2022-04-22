@@ -224,14 +224,6 @@ Wysiwyg.include({
     },
 });
 
-function reload() {
-    if (window.location.href.match(/\?enable_editor/)) {
-        window.location.reload();
-    } else {
-        window.location.href = window.location.href.replace(/\?(enable_editor=1&)?|#.*|$/, '?enable_editor=1&');
-    }
-}
-
 options.registry.WebsiteSaleGridLayout = options.Class.extend({
 
     /**
@@ -269,7 +261,7 @@ options.registry.WebsiteSaleGridLayout = options.Class.extend({
             params: {
                 'ppg': ppg,
             },
-        }).then(() => reload());
+        });
     },
     /**
      * @see this.selectClass for params
@@ -281,7 +273,7 @@ options.registry.WebsiteSaleGridLayout = options.Class.extend({
             params: {
                 'ppr': this.ppr,
             },
-        }).then(reload);
+        });
     },
     /**
      * @see this.selectClass for params
@@ -293,7 +285,7 @@ options.registry.WebsiteSaleGridLayout = options.Class.extend({
             params: {
                 'default_sort': this.default_sort,
             },
-        }).then(reload);
+        });
     },
 
     //--------------------------------------------------------------------------
@@ -465,7 +457,7 @@ options.registry.WebsiteSaleProductsItem = options.Class.extend({
                 product_id: this.productTemplateID,
                 sequence: widgetValue,
             },
-        }).then(reload);
+        }).then(() => this._reloadEditable());
     },
 
     //--------------------------------------------------------------------------
@@ -657,7 +649,7 @@ options.registry.WebsiteSaleProductsItem = options.Class.extend({
     _onTableItemClick: function (ev) {
         var $td = $(ev.currentTarget);
         var x = $td.index() + 1;
-        var y = $td.parent().index() + 1;
+        var y = $td.parent().index() + 1
         this._rpc({
             route: '/shop/config/product',
             params: {
@@ -665,8 +657,11 @@ options.registry.WebsiteSaleProductsItem = options.Class.extend({
                 x: x,
                 y: y,
             },
-        }).then(reload);
+        }).then(() => this._reloadEditable());
     },
+    _reloadEditable() {
+        return this.trigger_up('request_save', {reload: true, optionSelector: `.oe_product:has(span[data-oe-id=${this.productTemplateID}])`});
+    }
 });
 
 options.registry.WebsiteSaleProductAttribute = options.Class.extend({
@@ -688,7 +683,7 @@ options.registry.WebsiteSaleProductAttribute = options.Class.extend({
                 attribute_id: this.attributeID,
                 display_type: widgetValue,
             },
-        }).then(reload);
+        }).then(() => this.trigger_up('request_save', {reload: true, optionSelector: this.data.selector}));
     },
 
     /**
