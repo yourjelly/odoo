@@ -3,14 +3,14 @@
     <!-- Sales within the same state -->
     <record id="account_fiscal_position_same_state_sale1" model="account.fiscal.position.tax.template">
         <field name="position_id" ref="fiscal_position_template_1"/>
-        <field name="tax_src_id" ref="tax_template_out_icms_externo18"/>
-        <field name="tax_dest_id" ref="tax_template_out_icms_interno18"/>
+        <field name="tax_src_id" ref="tax_template_out_icms_externo17"/>
+        <field name="tax_dest_id" ref="tax_template_out_icms_interno17"/>
     </record>
 
     <record id="account_fiscal_position_same_state_sale2" model="account.fiscal.position.tax.template">
         <field name="position_id" ref="fiscal_position_template_1"/>
-        <field name="tax_src_id" ref="tax_template_out_icms_externo19"/>
-        <field name="tax_dest_id" ref="tax_template_out_icms_interno19"/>
+        <field name="tax_src_id" ref="tax_template_out_icms_externo18"/>
+        <field name="tax_dest_id" ref="tax_template_out_icms_interno18"/>
     </record>
 
     <record id="account_fiscal_position_same_state_sale3" model="account.fiscal.position.tax.template">
@@ -139,14 +139,14 @@
     <!-- Purchases within the same state -->
     <record id="account_fiscal_position_same_state_purchase1" model="account.fiscal.position.tax.template">
         <field name="position_id" ref="fiscal_position_template_1"/>
-        <field name="tax_src_id" ref="tax_template_in_icms_externo18"/>
-        <field name="tax_dest_id" ref="tax_template_in_icms_interno18"/>
+        <field name="tax_src_id" ref="tax_template_in_icms_externo17"/>
+        <field name="tax_dest_id" ref="tax_template_in_icms_interno17"/>
     </record>
 
     <record id="account_fiscal_position_same_state_purchase2" model="account.fiscal.position.tax.template">
         <field name="position_id" ref="fiscal_position_template_1"/>
-        <field name="tax_src_id" ref="tax_template_in_icms_externo19"/>
-        <field name="tax_dest_id" ref="tax_template_in_icms_interno19"/>
+        <field name="tax_src_id" ref="tax_template_in_icms_externo18"/>
+        <field name="tax_dest_id" ref="tax_template_in_icms_interno18"/>
     </record>
 
     <record id="account_fiscal_position_same_state_purchase3" model="account.fiscal.position.tax.template">
