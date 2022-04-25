@@ -211,6 +211,15 @@ const KnowledgeFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin, {
     },
 
     /**
+     * @param {integer} id - Article id
+     * @param {String} unicode
+     */
+    _setEmoji: function (id, unicode) {
+        const emojis = this.$el.find(`.o_article_emoji_dropdown[data-article-id="${id}"] > .o_article_emoji`);
+        emojis.text(unicode || '📄');
+    },
+
+    /**
      * Helper function to traverses the nested list (dfs)
      * @param {jQuery} $tree
      * @param {Function} callback

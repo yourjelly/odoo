@@ -28,6 +28,32 @@ const KnowledgeFormController = FormController.extend({
     init: function (parent, model, renderer, params) {
         this.renderer = renderer;
         this._super.apply(this, arguments);
+        this.onFieldSavedListeners = new Map();
+    },
+
+    /**
+     * @override
+     */
+    start: async function () {
+        await this._super.apply(this, arguments);
+        this.onFieldSaved('is_user_favourite', () => {
+            const { id } = this.getState();
+            this._rpc({
+                route: '/knowledge/tree_panel/favorites',
+                params: {
+                    active_article_id: id,
+                }
+            }).then(template => {
+                const $dom = $(template);
+                this.$('.o_favourite_container').replaceWith($dom);
+                this.renderer._setTreeFavoriteListener();
+                this.renderer._renderEmojiPicker($dom);
+            });
+        });
+        this.onFieldSaved('icon', unicode => {
+            const { id } = this.getState();
+            this.renderer._setEmoji(id, unicode);
+        });
     },
 
     // Listeners:
@@ -155,7 +181,6 @@ const KnowledgeFormController = FormController.extend({
     },
 
     _onToggleFavourite: async function (event) {
-        const self = this;
         const id = await this._getId();
         const result = await this._toggleFavourite(id);
         $(event.target).toggleClass('fa-star-o', !result).toggleClass('fa-star', result);
@@ -165,11 +190,12 @@ const KnowledgeFormController = FormController.extend({
             params: {
                 active_article_id: id,
             }
-
-        }).then(favouriteTemplate => {
-            self.$(".o_favourite_container").replaceWith(favouriteTemplate);
+        }).then(template => {
+            const $dom = $(template);
+            this.$(".o_favourite_container").replaceWith($dom);
             this.renderer._setTreeFavoriteListener();
             this.renderer._renderEmojiPicker();
+            this.renderer._renderEmojiPicker($dom);
         });
     },
 
@@ -290,7 +316,6 @@ const KnowledgeFormController = FormController.extend({
     },
 
     _toggleFavourite: async function (articleId) {
-        this.saveChanges(this.handle);
         return await this._rpc({
             model: 'knowledge.article',
             method: 'action_toggle_favourite',
@@ -298,9 +323,69 @@ const KnowledgeFormController = FormController.extend({
         });
     },
 
+    /**
+     * @returns {Array[String]}
+     */
+    _getFieldsToForceSave: function () {
+        return ['full_width', 'is_user_favourite', 'icon'];
+    },
+
+    /**
+     * @override
+     * @param {Event} event
+     */
+    _onFieldChanged: async function (event) {
+        this._super(...arguments);
+        const { changes } = event.data;
+        for (const field of this._getFieldsToForceSave()) {
+            if (changes.hasOwnProperty(field)) {
+                await this.saveRecord(this.handle, {
+                    reload: false,
+                    stayInEdit: true
+                });
+                return;
+            }
+        }
+    },
+
+    /**
+     * @override
+     */
+    saveRecord: async function () {
+        const modifiedFields = await this._super(...arguments);
+        const { data } = this.model.get(this.handle);
+        for (const field of modifiedFields) {
+            if (this.onFieldSavedListeners.has(field)) {
+                this.onFieldSavedListeners.get(field).forEach(listener => {
+                    listener.call(this, data[field]);
+                });
+            }
+        }
+        return modifiedFields;
+    },
+
+    /**
+     * @param {String} name - field name
+     * @param {Function} callback
+     */
+    onFieldSaved: function (name, callback) {
+        if (this.onFieldSavedListeners.has(name)) {
+            this.onFieldSavedListeners.get(name).push(callback);
+        } else {
+            this.onFieldSavedListeners.set(name, [callback]);
+        }
+    },
+
+    /**
+     * @returns {integer}
+     */
     _getId: async function () {
-        await this.saveRecord(this.handle);
-        return this.getState()['id'];
+        let state = this.getState();
+        if (typeof state.id === 'undefined') {
+            await this.saveRecord(this.handle);
+            state = this.getState();
+        }
+        return state.id;
     },
 });
 
