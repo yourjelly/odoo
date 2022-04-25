@@ -62,9 +62,6 @@ export const makeView = async (params) => {
 
     const env = await makeTestEnv({ serverData, mockRPC, config });
 
-    props.selectRecord = props.selectRecord || (() => {});
-    props.createRecord = props.createRecord || (() => {});
-
     /** Legacy Environment, for compatibility sakes
      *  Remove this as soon as we drop the legacy support
      */
