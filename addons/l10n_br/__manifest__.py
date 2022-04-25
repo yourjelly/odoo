@@ -58,6 +58,8 @@ come with any additional paid permission for online use of 'private modules'.
         'data/menuitem_data.xml',
         'views/account_view.xml',
         'views/account_fiscal_position_views.xml',
+        'views/res_company_views.xml',
+        'views/res_partner_views.xml',
     ],
     'demo': [
         'demo/demo_company.xml',
