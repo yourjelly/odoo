@@ -45,7 +45,7 @@ come with any additional paid permission for online use of 'private modules'.
 """,
     'author': 'Akretion, Odoo Brasil',
     'website': 'http://openerpbrasil.org',
-    'depends': ['account'],
+    'depends': ['account', 'base_vat'],
     'data': [
         'data/l10n_br_chart_data.xml',
         'data/account.account.template.csv',
