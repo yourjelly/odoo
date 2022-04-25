@@ -19,7 +19,7 @@ import psycopg2
 import odoo
 from .. import SUPERUSER_ID
 from odoo.sql_db import TestCursor
-from odoo.tools import (config, existing_tables, ignore,
+from odoo.tools import (config, existing_tables, ignore, lazy,
                         lazy_classproperty, lazy_property, sql, unique,
                         Collector, OrderedSet, TriggerTree)
 from odoo.tools.func import locked
@@ -359,14 +359,14 @@ class Registry(Mapping):
                     return concat(seq1[:-1], seq2[1:])
             return seq1 + seq2
 
-        # determine triggers dict
-        triggers = {}
-        for field in direct:
-            tree = triggers[field] = TriggerTree()
+        # make tree based on transitive triggers
+        def trigger_tree(field):
+            tree = TriggerTree()
             for path, target in transitive_triggers(field):
                 tree.extend(*path).root.add(target)
+            return tree
 
-        return triggers
+        return {field: lazy(trigger_tree, field) for field in direct}
 
     def post_init(self, func, *args, **kwargs):
         """ Register a function to call at the end of :meth:`~.init_models`. """
