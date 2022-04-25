@@ -4855,7 +4855,7 @@ QUnit.module("Views", (hooks) => {
 
         await editInput(target, ".modal .o_form_editable input", "ged"); // change the value
         nbRPCs = 0;
-        await click(target, ".modal-header .close");
+        await click(target, ".modal-header .btn-close");
 
         assert.containsNone(target, ".modal");
         assert.strictEqual(
