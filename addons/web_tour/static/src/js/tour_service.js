@@ -170,10 +170,10 @@ return session.is_bound.then(function () {
                                 for (const mutation of mutations) {
                                     for (const addedNode of Array.from(mutation.addedNodes)) {
                                         if (addedNode.nodeType === Node.ELEMENT_NODE) {
-                                            if (addedNode.classList.contains('o_iframe')) {
+                                            if (addedNode.classList.contains('o_iframe') && !addedNode.classList.contains('o_technical_iframe')) {
                                                 return addedNode;
                                             }
-                                            const iframeChildEl = addedNode.querySelector('.o_iframe');
+                                            const iframeChildEl = addedNode.querySelector('.o_iframe:not(.o_technical_iframe)');
                                             if (iframeChildEl) {
                                                 return iframeChildEl;
                                             }
