@@ -39,16 +39,29 @@ const KnowledgeFormController = FormController.extend({
         this.knowledgeFormController = true;
         this.renderer = renderer;
         this._super.apply(this, arguments);
+        this.onFieldSavedListeners = new Map();
+    },
+
+    /**
+     * @override
+     */
+    start: async function () {
+        const result = await this._super.apply(this, arguments);
+        this.onFieldSaved('icon', unicode => {
+            const { id } = this.getState();
+            this.renderer._setEmoji(id, unicode);
+        });
+        return result;
     },
 
     // Listeners:
 
-    _onAddRandomIcon: async function() {
-        let id = await this._getId();
-        var unicode = emojis[Math.floor(Math.random() * emojis.length)]['unicode'];
-        this.trigger_up('emoji_click', {
-            articleId: id,
-            unicode: unicode,
+    _onAddRandomIcon: function() {
+        this.trigger_up('field_changed', {
+            dataPointID: this.handle,
+            changes: {
+                'icon': emojis[Math.floor(Math.random() * emojis.length)]['unicode']
+            }
         });
     },
 
@@ -189,7 +202,6 @@ const KnowledgeFormController = FormController.extend({
     },
 
     _onToggleFavourite: async function (event) {
-        const self = this;
         const id = await this._getId();
         const result = await this._toggleFavourite(id);
         $(event.target).toggleClass('fa-star-o', !result).toggleClass('fa-star', result);
@@ -199,11 +211,11 @@ const KnowledgeFormController = FormController.extend({
             params: {
                 res_id: id,
             }
-
-        }).then(favouriteTemplate => {
-            self.$(".o_favourite_container").replaceWith(favouriteTemplate);
+        }).then(template => {
+            const $dom = $(template);
+            this.$(".o_favourite_container").replaceWith($dom);
             this.renderer._setTreeFavoriteListener();
-            this.renderer._renderEmojiPicker();
+            this.renderer._renderEmojiPicker($dom);
         });
    },
 
@@ -211,32 +223,24 @@ const KnowledgeFormController = FormController.extend({
      * @param {Event} event
      */
     _onEmojiClick: async function (event) {
+        const { id } = this.getState();
         const { articleId, unicode } = event.data;
-        const result = await this._rpc({
-            model: 'knowledge.article',
-            method: 'write',
-            args: [[articleId], { icon: unicode }],
-        });
-        if (result) {
-            const { id } = this.getState();
-            if (id == articleId) {
-                const addIconButton = this.$('.o_knowledge_add_icon');
-                const addIcon = !addIconButton.hasClass('d-none') && !addIconButton.hasClass('o_invisible_modifier');
-                addIconButton.toggleClass('d-none', unicode);
-                this.$el.find('.o_article_editable_emoji').text(unicode ? unicode : '');
-                // TODO DBE: find a way to remove / add the icon manually without having to reload the view
-                // (as the changes are saved and the side bar is updated anyway)
-                if (addIcon || !unicode) {  // refresh the form view to display the icon if there was no icon yet or if icon is deleted.
-                    this.trigger_up('field_changed', {
-                        dataPointID: this.handle,
-                        changes: {
-                            icon: unicode
-                        }
-                    });
+        if (articleId === id) {
+            this.trigger_up('field_changed', {
+                dataPointID: this.handle,
+                changes: {
+                    icon: unicode
                 }
-                this.saveChanges(this.handle);
+            });
+        } else {
+            const result = await this._rpc({
+                model: 'knowledge.article',
+                method: 'write',
+                args: [[articleId], { icon: unicode }],
+            });
+            if (result) {
+                this.renderer._setEmoji(articleId, unicode);
             }
-            this.$el.find(`.o_article_emoji_dropdown[data-article-id="${articleId}"] > .o_article_emoji`).text(unicode ? unicode : '📄');
         }
     },
 
@@ -363,6 +367,59 @@ const KnowledgeFormController = FormController.extend({
             method: 'action_toggle_favourite',
             args: [articleId]
         });
+    },
+
+    /**
+     * @returns {Array[String]}
+     */
+    _getFieldsToForceSave: function () {
+        return ['full_width', 'icon'];
+    },
+
+    /**
+     * @override
+     * @param {Event} event
+     */
+    _onFieldChanged: async function (event) {
+        this._super(...arguments);
+        const { changes } = event.data;
+        for (const field of this._getFieldsToForceSave()) {
+            if (changes.hasOwnProperty(field)) {
+                await this.saveRecord(this.handle, {
+                    reload: false,
+                    stayInEdit: true
+                });
+                return;
+            }
+        }
+    },
+
+    /**
+     * @override
+     */
+    saveRecord: async function () {
+        const modifiedFields = await this._super(...arguments);
+        const { data } = this.model.get(this.handle);
+        for (const field of modifiedFields) {
+            if (this.onFieldSavedListeners.has(field)) {
+                this.onFieldSavedListeners.get(field).forEach(listener => {
+                    listener.call(this, data[field]);
+                });
+            }
+        }
+        return modifiedFields;
+    },
+
+    /**
+     * @param {String} name - field name
+     * @param {Function} callback
+     */
+    onFieldSaved: function (name, callback) {
+        if (this.onFieldSavedListeners.has(name)) {
+            this.onFieldSavedListeners.get(name).push(callback);
+        } else {
+            this.onFieldSavedListeners.set(name, [callback]);
+        }
     },
 
     _getId: async function () {
