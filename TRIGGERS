@@ -307,9 +307,7 @@
         ir.ui.menu.parent_id: complete_name
     ir.ui.menu.create_date: __last_update
     ir.ui.menu.name: complete_name, display_name
-        ir.ui.menu.parent_id: complete_name
     ir.ui.menu.parent_id: complete_name
-        ir.ui.menu.parent_id: complete_name
     ir.ui.menu.write_date: __last_update
     ir.ui.view.arch: arch_base
     ir.ui.view.arch_db: arch, arch_base
@@ -379,7 +377,6 @@
     res.groups.create_date: __last_update
     res.groups.full_name: display_name
     res.groups.implied_ids: trans_implied_ids
-        res.groups.implied_ids: trans_implied_ids
     res.groups.name: display_name, full_name
     res.groups.rule_groups: 
         ir.rule.groups: global
@@ -452,7 +449,6 @@
         res.partner.bank.partner_id: company_id
         res.users.partner_id: same_vat_partner_id
     res.partner.company_name: commercial_company_name, contact_address, display_name
-        res.partner.parent_id: display_name
         res.users.partner_id: commercial_company_name, company_name, contact_address
     res.partner.company_type: 
         res.users.partner_id: company_type
@@ -492,11 +488,10 @@
     res.partner.industry.write_date: __last_update
     res.partner.industry_id: 
         res.users.partner_id: industry_id
-    res.partner.is_company: avatar_1024, avatar_128, avatar_1920, avatar_256, avatar_512, commercial_company_name, commercial_partner_id, company_type, display_name
-        res.partner.parent_id: commercial_company_name, commercial_partner_id, display_name
+    res.partner.is_company: avatar_1024, avatar_128, avatar_1920, avatar_256, avatar_512, commercial_partner_id, company_type, display_name
+        res.partner.parent_id: commercial_company_name
             res.users.partner_id: commercial_company_name
-        res.users.partner_id: avatar_1024, avatar_128, avatar_1920, avatar_256, avatar_512, commercial_company_name, commercial_partner_id, company_type, is_company
-        test_new_api.precompute.partner_id: commercial_id
+        res.users.partner_id: avatar_1024, avatar_128, avatar_1920, avatar_256, avatar_512, company_type, is_company
     res.partner.is_public: 
         res.users.partner_id: is_public
     res.partner.lang: active_lang_count
@@ -508,7 +503,7 @@
         res.company.partner_id: display_name, name
         res.partner.commercial_partner_id: commercial_company_name
             res.users.partner_id: commercial_company_name
-        res.partner.parent_id: display_name, parent_name
+        res.partner.parent_id: parent_name
             res.users.partner_id: parent_name
         res.users.partner_id: avatar_1024, avatar_128, avatar_1920, avatar_256, avatar_512, display_name, email_formatted, name, signature
             test_new_api.message.author: display_name, name
@@ -519,9 +514,7 @@
         res.partner.child_ids: child_ids
             res.users.partner_id: child_ids
             test_new_api.multi.partner: partners
-        res.partner.parent_id: commercial_partner_id, display_name
-        res.users.partner_id: commercial_company_name, commercial_partner_id, parent_id, parent_name
-        test_new_api.precompute.partner_id: commercial_id
+        res.users.partner_id: commercial_company_name, parent_id, parent_name
     res.partner.parent_name: 
         res.users.partner_id: parent_name
     res.partner.partner_latitude: 
@@ -551,7 +544,6 @@
     res.partner.title.name: display_name
     res.partner.title.write_date: __last_update
     res.partner.type: avatar_1024, avatar_128, avatar_1920, avatar_256, avatar_512, display_name
-        res.partner.parent_id: display_name
         res.users.partner_id: avatar_1024, avatar_128, avatar_1920, avatar_256, avatar_512, type
     res.partner.tz: tz_offset
         res.users.partner_id: tz, tz_offset
@@ -628,9 +620,7 @@
     test_new_api.category.display_name: 
         test_new_api.category.parent: display_name
     test_new_api.category.name: display_name
-        test_new_api.category.parent: display_name
     test_new_api.category.parent: display_name, root_categ
-        test_new_api.category.parent: display_name
     test_new_api.category.parent_path: depth
     test_new_api.category.write_date: __last_update
     test_new_api.city.create_date: __last_update
@@ -972,19 +962,14 @@
     test_new_api.recursive.full_name: 
         test_new_api.recursive.parent: full_name
     test_new_api.recursive.name: display_name, full_name
-        test_new_api.recursive.parent: display_name, full_name
     test_new_api.recursive.parent: display_name, full_name
-        test_new_api.recursive.parent: display_name, full_name
     test_new_api.recursive.tree.children_ids: display_name
-        test_new_api.recursive.tree.children_ids: display_name
     test_new_api.recursive.tree.create_date: __last_update
     test_new_api.recursive.tree.display_name: 
         test_new_api.recursive.tree.children_ids: display_name
     test_new_api.recursive.tree.name: display_name
-        test_new_api.recursive.tree.children_ids: display_name
     test_new_api.recursive.tree.parent_id: 
         test_new_api.recursive.tree.children_ids: display_name
-            test_new_api.recursive.tree.children_ids: display_name
     test_new_api.recursive.tree.write_date: __last_update
     test_new_api.recursive.write_date: __last_update
     test_new_api.related.create_date: __last_update

@@ -343,12 +343,14 @@ class Registry(Mapping):
                         direct[dep].append((path, field))
 
         # determine transitive triggers
-        def transitive_triggers(field, seen=[]):
+        def transitive_triggers(field, seen=()):
             if field in seen:
                 return
             for path1, field1 in direct.get(field, ()):
                 yield path1, field1
-                for path2, field2 in transitive_triggers(field1, seen + [field]):
+                if field1.recursive:
+                    continue
+                for path2, field2 in transitive_triggers(field1, seen + (field,)):
                     yield concat(path1, path2), field2
 
         def concat(seq1, seq2):
