@@ -12,6 +12,7 @@ from contextlib import contextmanager
 from functools import wraps
 import itertools
 import logging
+import threading
 import time
 import uuid
 import warnings
@@ -266,6 +267,9 @@ class Cursor(BaseCursor):
 
         self.cache = {}
         self._now = None
+        self.cursor_start = time.time()
+        if getattr(threading.currentThread(), 'statement_timeout', None):
+            self.current_statement_timeout = threading.currentThread().statement_timeout
 
     def __build_dict(self, row):
         return {d.name: row[i] for i, d in enumerate(self._obj.description)}
@@ -307,6 +311,12 @@ class Cursor(BaseCursor):
         start = time.time()
         try:
             params = params or None
+            if getattr(threading.currentThread(), 'statement_timeout', None):
+                statement_timeout = int(threading.currentThread().statement_timeout - time.time() + self.cursor_start)
+                # update statement_timeout only for change on value over 10s
+                if self.current_statement_timeout - statement_timeout > 10:
+                    self.current_statement_timeout = statement_timeout
+                    self._obj.execute("SET statement_timeout TO %s", ('%ss' % int(self.current_statement_timeout),))
             res = self._obj.execute(query, params)
         except Exception as e:
             if self._default_log_exceptions if log_exceptions is None else log_exceptions:

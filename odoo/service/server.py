@@ -180,6 +180,7 @@ class ThreadedWSGIServerReloadable(LoggingBaseWSGIServerMixIn, werkzeug.serving.
                              args = (request, client_address))
         t.daemon = self.daemon_threads
         t.type = 'http'
+        t.statement_timeout = config['limit_time_real']
         t.start_time = time.time()
         t.start()
 
@@ -468,6 +469,7 @@ class ThreadedServer(CommonServer):
             t = threading.Thread(target=target, name="odoo.service.cron.cron%d" % i)
             t.setDaemon(True)
             t.type = 'cron'
+            t.statement_timeout = config['limit_time_real_cron'] if config['limit_time_real_cron'] > 0 else config['limit_time_real']
             t.start()
             _logger.debug("cron%d started!" % i)
 
@@ -1027,6 +1029,10 @@ class Worker(object):
         try:
             self.start()
             t = threading.Thread(name="Worker %s (%s) workthread" % (self.__class__.__name__, self.pid), target=self._runloop)
+            if self.__class__ == WorkerHTTP:
+                t.statement_timeout = config['limit_time_real']
+            if self.__class__ == WorkerCron:
+                t.statement_timeout = config['limit_time_real_cron'] if config['limit_time_real_cron'] > 0 else config['limit_time_real']
             t.daemon = True
             t.start()
             t.join()
