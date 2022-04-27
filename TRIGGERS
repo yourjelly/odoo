@@ -362,12 +362,12 @@
     res.currency.rate.create_date: __last_update
     res.currency.rate.currency_id: company_rate, inverse_company_rate
         res.currency.rate_ids: date, inverse_rate, rate, rate_string
-            res.currency.rate.currency_id: company_rate, inverse_company_rate
+            res.currency.rate.currency_id: company_rate
     res.currency.rate.name: company_rate, display_name, inverse_company_rate
         res.currency.rate_ids: date
     res.currency.rate.rate: company_rate, inverse_company_rate
         res.currency.rate_ids: inverse_rate, rate, rate_string
-            res.currency.rate.currency_id: company_rate, inverse_company_rate
+            res.currency.rate.currency_id: company_rate
     res.currency.rate.write_date: __last_update
     res.currency.rate_ids: date, inverse_rate, rate, rate_string
         res.currency.rate.currency_id: company_rate, inverse_company_rate

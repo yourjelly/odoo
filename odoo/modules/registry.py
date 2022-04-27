@@ -329,8 +329,8 @@ class Registry(Mapping):
 
     @lazy_property
     def field_triggers(self):
-        # determine direct triggers
-        direct = defaultdict(list)
+        # determine direct trigger trees
+        direct = defaultdict(TriggerTree)
         for Model in self.models.values():
             if Model._abstract:
                 continue
@@ -340,33 +340,27 @@ class Registry(Mapping):
                 with ignore(*exceptions):
                     for dependency in unique(field.resolve_depends(self)):
                         dep, *path = reversed(dependency)
-                        direct[dep].append((path, field))
+                        direct[dep].extend(*path).root.add(field)
 
-        # determine transitive triggers
-        def transitive_triggers(field, seen=()):
-            if field in seen:
-                return
-            for path1, field1 in direct.get(field, ()):
-                yield path1, field1
-                if field1.recursive:
-                    continue
-                for path2, field2 in transitive_triggers(field1, seen + (field,)):
-                    yield concat(path1, path2), field2
-
-        def concat(seq1, seq2):
-            if seq1 and seq2:
-                f1, f2 = seq1[-1], seq2[0]
-                if f1.type == 'many2one' and f2.type == 'one2many' and \
-                        f1.comodel_name == f2.model_name and f1.name == f2.inverse_name:
-                    return concat(seq1[:-1], seq2[1:])
-            return seq1 + seq2
-
-        # make tree based on transitive triggers
+        # return the transitive closure of trigger trees
         def trigger_tree(field):
             tree = TriggerTree()
-            for path, target in transitive_triggers(field):
-                tree.extend(*path).root.add(target)
+            tree.merge(direct[field])
+            complete_tree(tree, {field})
             return tree
+
+        def complete_tree(tree, seen):
+            done = set()
+            while len(tree.root) > len(done):
+                for field in list(tree.root):
+                    if field in done:
+                        continue
+                    done.add(field)
+                    if field in direct and not field.recursive and field not in seen:
+                        tree.merge(direct[field])
+            seen = seen | tree.root
+            for subtree in tree.values():
+                complete_tree(subtree, seen)
 
         return {field: lazy(trigger_tree, field) for field in direct}
 
