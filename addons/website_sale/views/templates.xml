@@ -635,9 +635,11 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-lg-6 mt-lg-4">
-                            <t t-call="website_sale.shop_product_carousel"/>
+                    <div class="row product_container" t-att-data-name="'Product page'">
+                        <div t-attf-class="col-lg-{} mt-lg-4">
+                            <!-- <t t-call="website_sale.shop_product_carousel"/> -->
+                            <t t-call="website_sale.shop_product_grid"/>
+
                         </div>
                         <div class="col-lg-6 mt-md-4" id="product_details">
                             <h1 itemprop="name" t-field="product.name">Product Name</h1>
@@ -2029,6 +2031,22 @@
                 </t>
             </div>
         </div>
+    </template>
+
+    <template id="website_sale.shop_product_grid" name="Shop Product Grid">
+        <t t-set="product_images" t-value="product_variant._get_images() if product_variant else product._get_images()"/>
+        <!-- Edit this the way you want so that it looks like an image grid -->
+        <!-- make sure that all variables can be set with classes or data and not by changing css values (image spacing, ...) -->
+        <section class="o_spc-small o_masonry pt24 pb24" data-vcss="001" data-columns="2" style="overflow: hidden;">
+            <div class="container">
+                <div class="row s_nb_column_fixed">
+                        <div class="o_masonry_col o_snippet_not_selectable col-lg-4">
+                            <img class="img img-fluid d-block" src="/web/image/website.library_image_14" data-index="2" data-name="Image"/>
+                            <img class="img img-fluid d-block" src="/web/image/website.library_image_16" data-index="5" data-name="Image"/>
+                        </div>
+                </div>
+            </div>
+        </section>
     </template>
 
     <template id="carousel_product_indicators_bottom" inherit_id="website_sale.shop_product_carousel" name="Carousel Product Indicators Bottom">

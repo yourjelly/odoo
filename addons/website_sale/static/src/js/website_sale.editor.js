@@ -715,4 +715,49 @@ options.registry.WebsiteSaleProductAttribute = options.Class.extend({
         return this._super(methodName, params);
     },
 });
+
+options.registry.WebsiteSaleProductContainer = options.Class.extend({
+
+    willStart: async function () {
+        const _super = this._super.bind(this);
+        this.imageDiv = this.$target[0].children[0];
+        this.textDiv = this.$target[0].children[1];
+
+        return _super(...arguments);
+    },
+
+    removeClassByPrefix: function (el, prefix) {
+        let regx = new RegExp('\\b' + prefix + '.*?\\b', 'g');
+        el.className = el.className.replace(regx, '');
+        return el;
+    },
+
+    setSize: function (previewMode, value) {
+        if(!previewMode){
+            this.removeClassByPrefix(this.imageDiv, 'col-');
+            this.removeClassByPrefix(this.textDiv, 'col-');
+            this.imageDiv.classList.remove('d-none');
+
+            // Full size
+            let imgSize = 12;
+            let textSize = 12;
+
+            switch(value) {
+                case 'hidden':
+                    this.imageDiv.classList.add('d-none');
+                    break;
+                case 'half':
+                    imgSize = 6;
+                    textSize = textSize - imgSize;
+                    break;
+                case 'big':
+                    imgSize = 8;
+                    textSize = textSize - imgSize;
+                    break;
+            }
+            this.imageDiv.classList.add(`col-lg-${imgSize}`);
+            this.textDiv.classList.add(`col-lg-${textSize}`);
+        }
+    }
+});
 });

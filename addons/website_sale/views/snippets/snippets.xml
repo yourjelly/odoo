@@ -149,6 +149,26 @@
                 <we-button data-set-display-type="color">Color</we-button>
             </we-select>
         </div>
+        <div data-js="WebsiteSaleProductContainer" data-selector=".product_container" data-no-check="true">
+            <we-button-group string="Image width">
+                <we-button data-set-size="hidden"
+                           title="Hidden"
+                           data-img="/website/static/src/img/snippets_options/product_size_0.svg"
+                />
+                <we-button data-set-size="half"
+                           title="Half"
+                           data-img="/website/static/src/img/snippets_options/product_size_half.svg"
+                />
+                <we-button data-set-size="big"
+                           title="Big"
+                           data-img="/website/static/src/img/snippets_options/product_size_big.svg"
+                />
+                <we-button data-set-size="full"
+                           title="Full"
+                           data-img="/website/static/src/img/snippets_options/product_size_full.svg"
+                />
+            </we-button-group>
+        </div>
     </xpath>
 </template>
 
