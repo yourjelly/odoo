@@ -570,7 +570,7 @@ class Article(models.Model):
         self = self.sudo()
         default = dict(default or {},
                        name=_("%s (copy)", self.name),
-                       sequence=self.sequence+1)
+                       sequence=self.sequence + 1)
         if self.user_has_access:
             if not self.user_can_write:
                 default.update({

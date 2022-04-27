@@ -288,7 +288,7 @@
 
                 <filter name="filter_active" string="Archived"  domain="[('active', '=' ,False)]"/>
                 <filter name="filter_favorites" string="My Favorites" domain="[('is_user_favorite', '=', True)]"/>
-                <filter name="filter_own_privates" string="My Private Articles" domain="[('category', '=', 'private'), ('user_can_write', '=', True)]"/>
+                <filter name="filter_own_privates" string="My Private Articles" domain="[('category', '=', 'private')]"/>
                 <filter name="filter_shared_articles" string="My Shared Articles" domain="[('category', '=', 'shared')]"/>
 
                 <group expand="0" string="Group By">
