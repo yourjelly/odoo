@@ -12,7 +12,7 @@
                             <span><t t-if="props.product.default_code" t-esc="props.product.default_code"/> <t t-if="props.product.default_code and props.product.barcode"> - </t> <t t-if="props.product.barcode" t-esc="props.product.barcode"/></span>
                         </div>
                         <div class="column flex-end">
-                            <span t-esc="env.pos.format_currency(productInfo.all_prices.price_with_tax)" class="global-info-title" />
+                            <span t-esc="env.pos.format_currency(productInfo.all_prices.price_with_tax)" class="global-info-title product-price" />
                             <t t-foreach="productInfo.all_prices.tax_details" t-as="tax" t-key="tax.name">
                                 <div><t t-esc="tax.name"/>: <t t-esc="env.pos.format_currency(tax.amount)"/></div>
                             </t>
