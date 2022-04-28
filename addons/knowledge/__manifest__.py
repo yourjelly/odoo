@@ -16,6 +16,7 @@
         'data/mail_template_data.xml',
         'views/knowledge_views.xml',
         'views/knowledge_templates.xml',
+        'views/knowledge_templates_common.xml',
         'views/knowledge_templates_frontend.xml',
         'security/ir.model.access.csv',
         'security/security.xml',
@@ -32,10 +33,12 @@
             'knowledge/static/src/js/knowledge_renderers.js',
             'knowledge/static/src/js/knowledge_views.js',
             'knowledge/static/src/js/widgets/knowledge_dialogs.js',
+            'knowledge/static/src/js/tools/tree_panel_mixin.js',
         ],
         'web.assets_frontend': [
             'knowledge/static/src/scss/knowledge_frontend.scss',
             'knowledge/static/src/js/knowledge_frontend.js',
+            'knowledge/static/src/js/tools/tree_panel_mixin.js',
         ],
         'web_editor.assets_wysiwyg': [
             'knowledge/static/src/js/wysiwyg.js',

@@ -22,9 +22,12 @@
                             <!-- File explorer -->
                             <div class="flex-grow-1 position-relative">
                                 <div class="o_scroll_view px-3">
-                                    <aside class="o_sidebar">
-                                        <div t-call="knowledge.knowledge_article_frontend_tree_template" />
-                                    </aside>
+                                    <div class="o_knowledge_tree" t-att-data-readonly-mode="readonly_mode">
+                                        <div class="p-5 text-center">
+                                            <i class="fa fa-circle-o-notch fa-2x fa-spin" title="loader" role="img"/>
+                                        </div>
+                                    </div>
+<!--                                    <div t-call="knowledge.knowledge_article_tree_frontend" />-->
                                 </div>
                             </div>
                         </div>
@@ -58,69 +61,16 @@
         </t>
     </template>
 
-    <template id="knowledge_article_frontend_favourite_tree_template" name="Knowledge Article Frontend Favourite Template">
-        <section class="o_favourite_container" t-if="favourites">
-            <div class="h4 mb-0">Favourites</div>
-            <ul class="o_tree_favourite m-0 px-0 py-2">
-                <li t-foreach="favourites" t-as="favourite" t-att-data-article-id="favourite.article_id.id"
-                    t-att-data-favourite-sequence="favourite.sequence">
-                    <div class="d-flex">
-                        <button class="o_article_icon btn btn-link text-secondary p-0" type="button">
-                            <t t-out="favourite.article_id.icon" />
-                        </button>
-                        <div class="o_article_name flex-grow-1 text-truncate">
-                            <a t-out="favourite.article_id.name" t-attf-href="/knowledge/article/{{favourite.article_id.id}}" />
-                        </div>
-                    </div>
-                </li>
-            </ul>
-        </section>
-        <section class="o_favourite_container" t-else=""/>
-    </template>
-
-    <template id="knowledge_article_frontend_tree_template" name="Frontend Article Tree">
-        <t t-call="knowledge.knowledge_article_frontend_favourite_tree_template" />
-        <section>
+    <template id="knowledge_article_tree_frontend" name="Frontend Article Tree">
+        <t t-call="knowledge.knowledge_article_tree_favourites" />
+        <section t-if="public_articles | shared_articles">
             <div class="h4 mb-0">All Documents</div>
             <ul class="o_tree o_tree_workspace m-0 px-0 py-2">
-                <t t-foreach="public_articles.sorted('sequence')" t-as="child">
-                    <t t-if="child.user_has_access" t-call="knowledge.article_frontend_template">
-                        <t t-set="article" t-value="child" />
-                    </t>
-                </t>
-                <!-- FIXME: is there a better way to merge Workspace and Shared? -->
-                <!-- Should portal users be able to see shared articles?? -->
-                <t t-foreach="shared_articles.sorted('sequence')" t-as="child">
-                    <t t-if="child.user_has_access" t-call="knowledge.article_frontend_template">
-                        <t t-set="article" t-value="child" />
-                    </t>
+                <t t-call="knowledge.articles_template">
+                    <t t-set="articles" t-value="(public_articles | shared_articles)"/>
                 </t>
             </ul>
         </section>
-    </template>
-
-    <template id="article_frontend_template">
-        <li t-attf-id="article_#{article.id}" t-att-data-article-id="article.id">
-            <div class="o_article d-flex">
-                <button class="o_article_caret btn btn-link text-secondary p-0" type="button">
-                    <i class="fa fa-fw fa-caret-down align-self-center" />
-                </button>
-                <div class="btn-group dropdown">
-                    <i t-attf-class="fa fa-fw #{article.icon}" />
-                </div>
-                <t t-set="isActive" t-value="article.id == active_article_id"/>
-                <div t-attf-class="o_article_name flex-grow-1 text-truncate #{ 'font-weight-bold' if isActive else 'text-muted' }">
-                    <a t-out="article.name" t-attf-href="/knowledge/article/{{article.id}}" />
-                </div>
-            </div>
-            <ul t-if="article.child_ids">
-                <t t-foreach="article.child_ids.sorted('sequence')" t-as="child">
-                    <t t-if="child.user_has_access" t-call="knowledge.article_frontend_template">
-                        <t t-set="article" t-value="child" />
-                    </t>
-                </t>
-            </ul>
-        </li>
     </template>
 </data>
 </odoo>

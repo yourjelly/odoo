@@ -3,10 +3,11 @@ odoo.define('knowledge.knowledge_frontend', function (require) {
 
 var publicWidget = require('web.public.widget');
 var core = require('web.core');
-
 var QWeb = core.qweb;
 
-publicWidget.registry.KnowledgeWidget = publicWidget.Widget.extend({
+var KnowledgeTreePanelMixin = require('@knowledge/js/tools/tree_panel_mixin')[Symbol.for("default")];
+
+publicWidget.registry.KnowledgeWidget = publicWidget.Widget.extend(KnowledgeTreePanelMixin, {
     selector: '.o_knowledge_form_view',
     events: {
         'keyup #knowledge_search': '_searchArticles',
@@ -19,7 +20,8 @@ publicWidget.registry.KnowledgeWidget = publicWidget.Widget.extend({
      */
      start: function () {
         return this._super(...arguments).then(async () => {
-            this._setTreeFavoriteListener();
+            const { articleId } = $('.o_knowledge_form_view').data();
+            this._renderTree(articleId, '/knowledge/tree_panel/portal');
         });
     },
 
@@ -35,27 +37,6 @@ publicWidget.registry.KnowledgeWidget = publicWidget.Widget.extend({
                 $li.hide();
             }
         })
-    },
-    /**
-     * When the user clicks on the caret to hide and show some files
-     * @param {Event} event
-     */
-    _onFold: function (event) {
-        event.stopPropagation();
-        const $button = $(event.currentTarget);
-        const $icon = $button.find('i');
-        const $li = $button.closest('li');
-        const $ul = $li.find('ul');
-        if ($ul.length !== 0) {
-            $ul.toggle();
-            if ($ul.is(':visible')) {
-                $icon.removeClass('fa-caret-right');
-                $icon.addClass('fa-caret-down');
-            } else {
-                $icon.removeClass('fa-caret-down');
-                $icon.addClass('fa-caret-right');
-            }
-        }
     },
     /**
      * Helper function to traverses the nested list (dfs)
@@ -74,43 +55,6 @@ publicWidget.registry.KnowledgeWidget = publicWidget.Widget.extend({
         }
     },
 
-    _setTreeFavoriteListener () {
-        const $sortable = this.$el.find('.o_tree_favourite');
-        $sortable.sortable({
-            axis: 'y',
-            items: 'li',
-            cursor: 'grabbing',
-            forcePlaceholderSize: true,
-            placeholder: 'o_placeholder',
-            /**
-             * @param {Event} event
-             * @param {Object} ui
-             */
-            stop: (event, ui) => {
-                const $li = $(ui.item);
-                const data = {
-                    article_id: $li.data('article-id'),
-                };
-                const $next = $li.next();
-                if ($next.length > 0) {
-                    data.sequence = $next.data('favourite-sequence') || 0;
-                }
-                $sortable.sortable('disable');
-                this._rpc({
-                    model: 'knowledge.article.favourite',
-                    method: 'set_sequence',
-                    args: [[]],
-                    kwargs: data,
-                }).then(() => {
-                    $sortable.sortable('enable');
-                }).catch(() => {
-                    $sortable.sortable('cancel');
-                    $sortable.sortable('enable');
-                });
-            },
-        });
-    },
-
     _toggleFavourite: async function (e) {
         const toggleWidget = $(e.currentTarget);
         const id = toggleWidget.data('articleId');
@@ -122,7 +66,7 @@ publicWidget.registry.KnowledgeWidget = publicWidget.Widget.extend({
         toggleWidget.find('i').toggleClass("fa-star", result).toggleClass("fa-star-o", !result);
         // Add/Remove the article to/from the favourite in the sidebar
         this._rpc({
-            route: '/knowledge/get_favourite_tree_frontend',
+            route: '/knowledge/tree_panel/favorites',
             params: {
                 active_article_id: id,
             }

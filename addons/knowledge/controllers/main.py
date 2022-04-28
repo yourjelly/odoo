@@ -61,8 +61,11 @@ class KnowledgeController(http.Controller):
         return request.render('knowledge.knowledge_article_view_frontend', self._prepare_article_values(article))
 
     def _prepare_article_values(self, article):
-        values = {'article': article}
-        values.update(self._prepare_articles_tree_values(active_article_id=article.id))
+        values = self._prepare_articles_tree_values(active_article_id=article.id)
+        values.update({
+            'article': article,
+            'readonly_mode': True  # used to bypass access check (to speed up loading)
+        })
         return values
 
     # ------------------------
@@ -94,42 +97,36 @@ class KnowledgeController(http.Controller):
             "private_articles": root_articles.filtered(lambda article: article.owner_id == request.env.user)
         }
 
-    @http.route('/knowledge/get_favourite_tree', type='json', auth='user')
-    def get_favourite_tree(self, active_article_id=False):
-        favourite_articles = request.env['knowledge.article.favourite'].search([("user_id", "=", request.env.user.id), ('article_id.user_has_access', '=', True)])
-        return request.env['ir.qweb']._render('knowledge.article_favourite_section_template', {'favourites': favourite_articles, "active_article_id": active_article_id})
-
-    @http.route('/knowledge/get_favourite_tree_frontend', type='json', auth='user')
-    def get_favourite_tree_frontend(self, active_article_id=False):
-        favourite_articles = request.env['knowledge.article.favourite'].sudo().search([("user_id", "=", request.env.user.id), ('article_id.user_has_access', '=', True)])
-        values = {
-            'favourites': favourite_articles,
-            'active_article_id': active_article_id
-        }
-        return request.env['ir.qweb']._render('knowledge.knowledge_article_frontend_favourite_tree_template', values)
-
-    @http.route('/knowledge/get_tree', type='json', auth='user')
-    def display_tree(self, active_article_id, unfolded_articles=False):
-        article = request.env["knowledge.article"].browse(active_article_id).exists()
-        if not article:
+    def get_tree_panel(self, active_article, template, unfolded_articles=False):
+        if not active_article:
             return werkzeug.exceptions.NotFound()
-        if not article.user_has_access:
+        if not active_article.user_has_access:
             return werkzeug.exceptions.Forbidden()
         if not unfolded_articles:
             unfolded_articles = []
-        unfolded_articles = set(unfolded_articles) | set(article._get_parents().ids)
+        unfolded_articles = set(unfolded_articles) | set(active_article._get_parents().ids)
         return {
             "template": request.env['ir.qweb']._render(
-                'knowledge.knowledge_article_tree_template',
+                template,
                 self._prepare_articles_tree_values(
-                    active_article_id=active_article_id, unfolded_articles=unfolded_articles
+                    active_article_id=active_article.id, unfolded_articles=unfolded_articles
                 )
             ),
             "unfolded_articles": list(unfolded_articles)
         }
 
-    @http.route('/knowledge/get_children', type='json', auth='user')
-    def display_children(self, parent_id):
+    @http.route('/knowledge/tree_panel/all', type='json', auth='user')
+    def get_tree_panel_all(self, active_article_id, unfolded_articles=False):
+        article = request.env["knowledge.article"].browse(active_article_id).exists()
+        return self.get_tree_panel(article, 'knowledge.knowledge_article_tree', unfolded_articles=unfolded_articles)
+
+    @http.route('/knowledge/tree_panel/portal', type='json', auth='user')
+    def get_tree_panel_portal(self, active_article_id, unfolded_articles=False):
+        article = request.env["knowledge.article"].sudo().browse(active_article_id).exists()
+        return self.get_tree_panel(article, 'knowledge.knowledge_article_tree_frontend', unfolded_articles=unfolded_articles)
+
+    @http.route('/knowledge/tree_panel/children', type='json', auth='user')
+    def get_tree_panel_children(self, parent_id):
         Article = request.env["knowledge.article"].sudo()
         parent = Article.browse(parent_id).exists()
         if not parent:
@@ -137,4 +134,18 @@ class KnowledgeController(http.Controller):
         if not parent.user_has_access:
             return werkzeug.exceptions.Forbidden()
         root_articles = Article.search([("parent_id", "=", parent_id), ('user_has_access', '=', True)]).sorted('sequence')
-        return request.env['ir.qweb']._render('knowledge.articles_template', {'articles': root_articles})
+        return request.env['ir.qweb']._render('knowledge.articles_template', {
+            'articles': root_articles,
+            'readonly_mode': True,  # used to bypass access check (to speed up loading)
+        })
+
+    @http.route('/knowledge/tree_panel/favorites', type='json', auth='user')
+    def get_tree_panel_favorites(self, active_article_id=False):
+        favourite_articles = request.env['knowledge.article.favourite'].sudo().search([
+            ("user_id", "=", request.env.user.id),
+            ('article_id.user_has_access', '=', True)
+        ])
+        return request.env['ir.qweb']._render('knowledge.knowledge_article_tree_favourites', {
+            'favourites': favourite_articles,
+            "active_article_id": active_article_id
+        })

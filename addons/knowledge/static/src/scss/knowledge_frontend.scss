@@ -5,8 +5,8 @@
         cursor: default;
     }
 
-    .o_toggle_favourite {
-        &.fa-star, &:hover {
+    .o_favorites_toggle_button {
+        i.fa-star, i:hover {
             color: #f3cc00;
         }
         font-size: 16px;

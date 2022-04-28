@@ -161,7 +161,7 @@ const KnowledgeFormController = FormController.extend({
         $(event.target).toggleClass('fa-star-o', !result).toggleClass('fa-star', result);
         event.target.title = result ? _t('Remove from favourites') : _t('Add to favourites');
         this._rpc({
-            route: '/knowledge/get_favourite_tree',
+            route: '/knowledge/tree_panel/favorites',
             params: {
                 active_article_id: id,
             }
