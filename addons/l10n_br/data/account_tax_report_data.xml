@@ -4,6 +4,34 @@
         <field name="name">Tax Report</field>
         <field name="country_id" ref="base.br"/>
         <field name="root_line_ids">
+            <record id="tax_report_icms" model="account.tax.report.line">
+                <field name="name">ICMS</field>
+                <field name="sequence" eval="0"/>
+                <field name="children_line_ids">
+                    <record id="tax_report_icms_tributada" model="account.tax.report.line">
+                        <field name="name">Tributada integralmente</field>
+                        <field name="sequence" eval="1"/>
+                        <field name="children_line_ids">
+                            <record id="tax_report_icms_1" model="account.tax.report.line">
+                                <field name="name">ICMS base</field>
+                                <field name="tag_name">ICMS_1</field>
+                                <field name="sequence" eval="1"/>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_icms_tributada_com" model="account.tax.report.line">
+                        <field name="name">Tributada e com cobrança do ICMS por substituição tributária</field>
+                        <field name="sequence" eval="2"/>
+                        <field name="children_line_ids">
+                            <record id="tax_report_icms_2" model="account.tax.report.line">
+                                <field name="name">ICMS tax</field>
+                                <field name="tag_name">ICMS_2</field>
+                                <field name="sequence" eval="1"/>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
             <record id="tax_report_icmsst" model="account.tax.report.line">
                 <field name="name">ICMS Subist</field>
                 <field name="sequence" eval="1"/>
@@ -152,34 +180,6 @@
                             <record id="tax_report_ipi_2" model="account.tax.report.line">
                                 <field name="name">IPI tax</field>
                                 <field name="tag_name">IPI_2</field>
-                                <field name="sequence" eval="1"/>
-                            </record>
-                        </field>
-                    </record>
-                </field>
-            </record>
-            <record id="tax_report_icms" model="account.tax.report.line">
-                <field name="name">ICMS</field>
-                <field name="sequence" eval="9"/>
-                <field name="children_line_ids">
-                    <record id="tax_report_icms_tributada" model="account.tax.report.line">
-                        <field name="name">Tributada integralmente</field>
-                        <field name="sequence" eval="1"/>
-                        <field name="children_line_ids">
-                            <record id="tax_report_icms_1" model="account.tax.report.line">
-                                <field name="name">ICMS base</field>
-                                <field name="tag_name">ICMS_1</field>
-                                <field name="sequence" eval="1"/>
-                            </record>
-                        </field>
-                    </record>
-                    <record id="tax_report_icms_tributada_com" model="account.tax.report.line">
-                        <field name="name">Tributada e com cobrança do ICMS por substituição tributária</field>
-                        <field name="sequence" eval="2"/>
-                        <field name="children_line_ids">
-                            <record id="tax_report_icms_2" model="account.tax.report.line">
-                                <field name="name">ICMS tax</field>
-                                <field name="tag_name">ICMS_2</field>
                                 <field name="sequence" eval="1"/>
                             </record>
                         </field>
