@@ -32,6 +32,7 @@ class AccountReport(models.Model):
     allow_showing_draft = fields.Boolean(string="Allow Showing Draft Entries", default=True) #TODO OCO remplace filter_all_entries (qui n'est jamais passé à True, dirait-on)
     filter_unfold_all = fields.Boolean(string="Allow Unfolding All Lines") # TODO OCO on pourrait le calculer: si le rapport compte au moins une ligne unfoldable, on l'affiche (why not ?)
     allow_comparison = fields.Boolean(string="Allow Comparison", default=True)
+    allow_growth_comparison = fields.Boolean(string="Growth Comparison", default=True)
     filter_journals = fields.Boolean(string="Allow Filtering by Journal")
     filter_analytic = fields.Boolean(string="Allow Analytic Filters")
     filter_hierarchy = fields.Selection(string="Hierarchy", selection=[('by_default', "Enabled by Default"), ('optional', "Optional"), ('never', "Never")], required=True, default='never')
