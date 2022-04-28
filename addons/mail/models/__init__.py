@@ -24,7 +24,6 @@ from . import mail_message_reaction
 from . import mail_message_subtype
 from . import mail_message
 from . import mail_mail
-from . import mail_mail_deletion
 from . import mail_tracking_value
 from . import mail_template
 

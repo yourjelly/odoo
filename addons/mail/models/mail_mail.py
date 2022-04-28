@@ -160,7 +160,6 @@ class MailMail(models.Model):
             res = self.browse(ids).send(auto_commit=auto_commit)
         except Exception:
             _logger.exception("Failed processing mail queue")
-        self.env['mail.mail.deletion']._gc_mail_mail()
         return res
 
     def _postprocess_sent_message(self, success_pids, failure_reason=False, failure_type=None):
@@ -169,7 +168,7 @@ class MailMail(models.Model):
         attachment if the ``auto_delete`` flag of the mail was set.
         Overridden by subclasses for extra post-processing behaviors.
 
-        :return: True
+        :return: <mail.mail> we need to delete
         """
         notif_mails_ids = [mail.id for mail in self if mail.is_notification]
         if notif_mails_ids:
@@ -198,15 +197,9 @@ class MailMail(models.Model):
                     # TDE TODO: could be great to notify message-based, not notifications-based, to lessen number of notifs
                     messages._notify_message_notification_update()  # notify user that we have a failure
         if not failure_type or failure_type in ['mail_email_invalid', 'mail_email_missing']:  # if we have another error, we want to keep the mail.
-            mails_to_delete = self.filtered(lambda mail: mail.auto_delete)
-            if mails_to_delete:
-                # Delay the deletion to speedup the email sending
-                self.env['mail.mail.deletion'].sudo().create([
-                    {'mail_id': mail_id}
-                    for mail_id in mails_to_delete.ids
-                ])
+            return self.filtered(lambda mail: mail.auto_delete)
 
-        return True
+        return self.env['mail.mail']
 
     # ------------------------------------------------------
     # mail_mail formatting, tools and send mechanism
@@ -295,6 +288,7 @@ class MailMail(models.Model):
                 email sending process has failed
             :return: True
         """
+        mail_to_deletes = self.env['mail.mail']
         for mail_server_id, smtp_from, batch_ids in self._split_by_mail_configuration():
             smtp_session = None
             try:
@@ -307,7 +301,7 @@ class MailMail(models.Model):
                 else:
                     batch = self.browse(batch_ids)
                     batch.write({'state': 'exception', 'failure_reason': exc})
-                    batch._postprocess_sent_message(success_pids=[], failure_type="mail_smtp")
+                    mail_to_deletes |= batch._postprocess_sent_message(success_pids=[], failure_type="mail_smtp")
             else:
                 self.browse(batch_ids)._send(
                     auto_commit=auto_commit,
@@ -320,9 +314,13 @@ class MailMail(models.Model):
                 if smtp_session:
                     smtp_session.quit()
 
+        if mail_to_deletes:
+            mail_to_deletes.unlink()
+
     def _send(self, auto_commit=False, raise_exception=False, smtp_session=None):
         IrMailServer = self.env['ir.mail_server']
         IrAttachment = self.env['ir.attachment']
+        mail_to_deletes = self.env['mail.mail']
         for mail_id in self.ids:
             success_pids = []
             failure_type = None
@@ -440,7 +438,7 @@ class MailMail(models.Model):
                     _logger.info('Mail with ID %r and Message-Id %r successfully sent', mail.id, mail.message_id)
                     # /!\ can't use mail.state here, as mail.refresh() will cause an error
                     # see revid:odo@openerp.com-20120622152536-42b2s28lvdv3odyr in 6.1
-                mail._postprocess_sent_message(success_pids=success_pids, failure_type=failure_type)
+                mail_to_deletes |= mail._postprocess_sent_message(success_pids=success_pids, failure_type=failure_type)
             except MemoryError:
                 # prevent catching transient MemoryErrors, bubble up to notify user or abort cron job
                 # instead of marking the mail as failed
@@ -460,7 +458,7 @@ class MailMail(models.Model):
                 failure_reason = tools.ustr(e)
                 _logger.exception('failed sending mail (id: %s) due to %s', mail.id, failure_reason)
                 mail.write({'state': 'exception', 'failure_reason': failure_reason})
-                mail._postprocess_sent_message(success_pids=success_pids, failure_reason=failure_reason, failure_type='unknown')
+                mail_to_deletes |= mail._postprocess_sent_message(success_pids=success_pids, failure_reason=failure_reason, failure_type='unknown')
                 if raise_exception:
                     if isinstance(e, (AssertionError, UnicodeEncodeError)):
                         if isinstance(e, UnicodeEncodeError):
@@ -472,4 +470,15 @@ class MailMail(models.Model):
 
             if auto_commit is True:
                 self._cr.commit()
+
+                print(mail_to_deletes)
+
+                if mail_to_deletes:
+                    mail_to_deletes.unlink()
+                    mail_to_deletes = self.env['mail.mail']
+
+        if auto_commit is not True and mail_to_deletes:
+            print("not auto commit", mail_to_deletes)
+            mail_to_deletes.unlink()
+
         return True
