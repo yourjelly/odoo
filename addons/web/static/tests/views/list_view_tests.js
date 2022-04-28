@@ -8781,6 +8781,7 @@ QUnit.module("Views", (hooks) => {
                 },
             ],
         };
+        patchTimeZone(360);
 
         await makeView({
             type: "list",
@@ -8798,13 +8799,6 @@ QUnit.module("Views", (hooks) => {
                         { date_start: "2017-01-16", date_end: "2017-02-12" },
                     ]);
                 }
-                return this._super(...arguments);
-            },
-            session: {
-                // see #tzoffset_daterange
-                getTZOffset: function () {
-                    return 360;
-                },
             },
         });
 
