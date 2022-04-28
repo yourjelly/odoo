@@ -57,7 +57,6 @@ class AccountReport(models.Model):
         default='always',
     )
     filter_tax_exigible = fields.Boolean(string="Only Tax Exigible Lines", default=False, required=True)
-    filter_unfold_all = fields.Boolean(string="Show 'Unfold All' Filter", default=False)
     ir_filter_ids = fields.Many2many(string="Applicable filters", comodel_name='ir.filters', help="Filters that can be used to filter and group lines on this report. This uses saved filtes on journal items") #TODO OCO REDOC + domaine
 
     # TODO OCO en enterprise, ces trucs ?
