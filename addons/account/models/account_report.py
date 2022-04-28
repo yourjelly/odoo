@@ -339,10 +339,10 @@ class AccountReportExpression(models.Model):
         return rslt
 
     def write(self, vals):
-        rslt = super(AccountReportExpression, self).create(vals)
+        rslt = super(AccountReportExpression, self).write(vals)
 
         if 'formula' in vals:
-            tax_tags_expressions = expressions.filtered(lambda x: x.engine == 'tax_tags')
+            tax_tags_expressions = self.filtered(lambda x: x.engine == 'tax_tags')
             expressions_formulas = tax_tags_expressions.mapped('formula')
 
             formulas_by_country = defaultdict(lambda: [])
