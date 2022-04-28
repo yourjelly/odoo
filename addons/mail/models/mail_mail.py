@@ -59,7 +59,6 @@ class MailMail(models.Model):
         ('received', 'Received'),
         ('exception', 'Delivery Failed'),
         ('cancel', 'Cancelled'),
-        ('todelete', 'To Delete'),  # Will be deleted in the autovacuum CRON
     ], 'Status', readonly=True, copy=False, default='outgoing')
     failure_type = fields.Selection(selection=[
         # generic
@@ -161,7 +160,7 @@ class MailMail(models.Model):
             res = self.browse(ids).send(auto_commit=auto_commit)
         except Exception:
             _logger.exception("Failed processing mail queue")
-        self.env['mail.mail']._gc_mail_mail()
+        self.env['mail.mail.deletion']._gc_mail_mail()
         return res
 
     def _postprocess_sent_message(self, success_pids, failure_reason=False, failure_type=None):
@@ -201,17 +200,13 @@ class MailMail(models.Model):
         if not failure_type or failure_type in ['mail_email_invalid', 'mail_email_missing']:  # if we have another error, we want to keep the mail.
             mails_to_delete = self.filtered(lambda mail: mail.auto_delete)
             if mails_to_delete:
-                mails_to_delete.state = 'todelete'
+                # Delay the deletion to speedup the email sending
+                self.env['mail.mail.deletion'].sudo().create([
+                    {'mail_id': mail_id}
+                    for mail_id in mails_to_delete.ids
+                ])
 
         return True
-
-    @api.autovacuum
-    def _gc_mail_mail(self):
-        mail_to_delete_ids = self.env['mail.mail'].search([
-            ('auto_delete', '=', True),
-            ('state', '=', 'todelete'),
-        ])
-        mail_to_delete_ids.unlink()
 
     # ------------------------------------------------------
     # mail_mail formatting, tools and send mechanism
