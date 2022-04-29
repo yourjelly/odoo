@@ -160,6 +160,8 @@ export class ListArchParser extends XMLParser {
                 treeAttr.groupsLimit = groupsLimitAttr && parseInt(groupsLimitAttr, 10);
                 const noOpenAttr = node.getAttribute("no_open");
                 treeAttr.noOpen = noOpenAttr && archParseBoolean(noOpenAttr);
+                const multiEditAttr = node.getAttribute("multi_edit");
+                treeAttr.multiEdit = multiEditAttr && archParseBoolean(multiEditAttr);
             }
         });
 
@@ -191,6 +193,7 @@ export class ListView extends Component {
 
         this.archInfo = new ListArchParser().parse(this.props.arch, this.props.fields);
         this.editable = this.props.editable ? this.archInfo.editable : false;
+        this.multiEdit = this.archInfo.multiEdit;
         this.activeActions = this.archInfo.activeActions;
         const fields = this.props.fields;
         this.model = useModel(RelationalModel, {
@@ -203,6 +206,7 @@ export class ListView extends Component {
             defaultOrder: this.archInfo.defaultOrder,
             expand: this.archInfo.expand,
             groupsLimit: this.archInfo.groupsLimit,
+            multiEdit: this.multiEdit,
         });
         useViewButtons(this.model, useRef("root"));
 
@@ -278,6 +282,7 @@ export class ListView extends Component {
 
     onClickDiscard() {
         const editedRecord = this.model.root.editedRecord;
+        debugger
         if (editedRecord.isVirtual) {
             this.model.root.removeRecord(editedRecord);
         } else {

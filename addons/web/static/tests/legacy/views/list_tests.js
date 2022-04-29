@@ -8212,6 +8212,7 @@ QUnit.module('Views', {
         var list = await createView({
             View: ListView,
             model: 'foo',
+            debug:1,
             data: this.data,
             arch: '<tree editable="bottom" multi_edit="1">' +
                         '<field name="foo"/>' +
@@ -8407,6 +8408,7 @@ QUnit.module('Views', {
             View: ListView,
             model: 'foo',
             data: this.data,
+            debug:1,
             arch: '<tree multi_edit="1">' +
                         '<field name="foo" required="1"/>' +
                         '<field name="int_field"/>' +
@@ -8439,6 +8441,7 @@ QUnit.module('Views', {
         // edit a line with an invalid value
         await testUtils.dom.click(list.$('.o_data_row:eq(0) .o_data_cell:eq(0)'));
         assert.containsNone(list, '.o_list_record_selector input:enabled');
+        debugger
         await testUtils.fields.editInput(list.$('.o_selected_row .o_field_widget[name=foo]'), "");
         assert.containsOnce(document.body, '.modal', "there should be an opened modal");
         await testUtils.dom.click($('.modal .btn-primary'));

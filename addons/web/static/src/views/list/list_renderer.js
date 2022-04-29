@@ -11,6 +11,7 @@ import { Field } from "@web/fields/field";
 import { ViewButton } from "@web/views/view_button/view_button";
 import { useBounceButton } from "../helpers/view_hook";
 import { Pager } from "@web/core/pager/pager";
+import { useService } from "@web/core/utils/hooks";
 
 const {
     Component,
@@ -83,6 +84,7 @@ export class ListRenderer extends Component {
         useBounceButton(rootRef, () => {
             return this.showNoContentHelper;
         });
+        this.uiService = useService("ui");
 
         useEffect(
             (columns, isEmpty) => {
@@ -494,7 +496,10 @@ export class ListRenderer extends Component {
     }
 
     async onCellClicked(record, column) {
-        if (this.props.editable) {
+        if (this.props.multiEdit && record.selected) {
+            await record.switchMode("edit");
+            this.cellToFocus = { column, record };
+        } else if (this.props.editable) {
             if (record.isInEdition) {
                 this.focusCell(column);
                 this.cellToFocus = null;
@@ -585,6 +590,9 @@ export class ListRenderer extends Component {
         if (this.tableRef.el.contains(ev.target)) {
             return; // ignore clicks inside the table, they are handled directly by the renderer
         }
+        if (this.props.list.multiEditConfirmation) {
+            return;
+        }
         this.unselectRow();
     }
 
@@ -627,5 +635,6 @@ ListRenderer.props = [
     "hasSelectors?",
     "editable?",
     "noContentHelp?",
+    "multiEdit?",
 ];
 ListRenderer.defaultProps = { hasSelectors: false };

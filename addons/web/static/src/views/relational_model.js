@@ -17,6 +17,9 @@ import { Model } from "@web/views/helpers/model";
 import { registry } from "@web/core/registry";
 import { escape } from "@web/core/utils/strings";
 import { session } from "@web/session";
+import { ListConfirmationDialog } from "@web/views/list/list_confirmation_dialog";
+import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { _lt } from "@web/core/l10n/translation";
 
 const { DateTime } = luxon;
 const { markRaw, markup, toRaw } = owl;
@@ -537,6 +540,7 @@ export class Record extends DataPoint {
     }
 
     discard() {
+        debugger;
         clearObject(this._changes);
         clearObject(this._domains);
         for (const fieldName in this.activeFields) {
@@ -750,6 +754,7 @@ export class Record extends DataPoint {
      * @returns {Promise<boolean>}
      */
     async save(options = { stayInEdition: false, noReload: false }) {
+        debugger;
         return this.model.mutex.exec(async () => {
             if (!this.checkValidity()) {
                 const invalidFields = [...this._invalidFields].map((fieldName) => {
@@ -782,6 +787,7 @@ export class Record extends DataPoint {
                 this.data.id = this.resId;
                 this.resIds.push(this.resId);
             } else if (keys.length > 0) {
+                debugger;
                 await this.model.orm.write(this.resModel, [this.resId], changes, this.context);
             }
             // Switch to the parent active fields
@@ -802,9 +808,19 @@ export class Record extends DataPoint {
         });
     }
 
-    setInvalidField(fieldName) {
-        this._invalidFields.add(fieldName);
-        this.model.notify();
+    async setInvalidField(fieldName) {
+        if (this.model.multiEdit) {
+            const dialogProps = {
+                body: this.model.env._t("No valid record to save"),
+                confirm: () => {
+                    this.discard();
+                },
+            };
+            await this.model.dialogService.add(AlertDialog, dialogProps);
+        } else {
+            this._invalidFields.add(fieldName);
+            this.model.notify();
+        }
     }
 
     /**
@@ -851,32 +867,36 @@ export class Record extends DataPoint {
 
     async update(fieldName, value) {
         await this._applyChange(fieldName, value);
-        this._removeInvalidField(fieldName);
-        this.onChanges();
-        const activeField = this.activeFields[fieldName];
-        const proms = [];
-        if (activeField && activeField.onChange) {
-            await this.model.mutex.exec(async () => {
-                const changes = await this._onChange(fieldName);
-                for (const [fieldName, value] of Object.entries(changes)) {
-                    const field = this.fields[fieldName];
-                    // for x2many fields, the onchange returns commands, not ids, so we need to process them
-                    // for now, we simply return an empty list
-                    if (isX2Many(field)) {
-                        this._changes[fieldName] = value;
-                        this.data[fieldName].applyCommands(value);
-                        proms.push(this.data[fieldName].load());
-                    } else {
-                        this._changes[fieldName] = value;
-                        this.data[fieldName] = this._changes[fieldName];
+        if (this.selected && this.model.multiEdit) {
+            await this.model.root.multiSave(this);
+        } else {
+            this._removeInvalidField(fieldName);
+            this.onChanges();
+            const activeField = this.activeFields[fieldName];
+            const proms = [];
+            if (activeField && activeField.onChange) {
+                await this.model.mutex.exec(async () => {
+                    const changes = await this._onChange(fieldName);
+                    for (const [fieldName, value] of Object.entries(changes)) {
+                        const field = this.fields[fieldName];
+                        // for x2many fields, the onchange returns commands, not ids, so we need to process them
+                        // for now, we simply return an empty list
+                        if (isX2Many(field)) {
+                            this._changes[fieldName] = value;
+                            this.data[fieldName].applyCommands(value);
+                            proms.push(this.data[fieldName].load());
+                        } else {
+                            this._changes[fieldName] = value;
+                            this.data[fieldName] = this._changes[fieldName];
+                        }
                     }
-                }
-            });
+                });
+            }
+            proms.push(this.loadPreloadedData());
+            await Promise.all(proms);
+            this.canBeAbandoned = false;
+            this.model.notify();
         }
-        proms.push(this.loadPreloadedData());
-        await Promise.all(proms);
-        this.canBeAbandoned = false;
-        this.model.notify();
     }
 
     // -------------------------------------------------------------------------
@@ -1174,6 +1194,7 @@ class DynamicList extends DataPoint {
         this.isDomainSelected = false;
         this.loadedCount = state.loadedCount || 0;
         this.previousParams = state.previousParams || "[]";
+        this.multiEditConfirmation = false;
 
         this.editedRecord = null;
         this.onCreateRecord = params.onCreateRecord || (() => {});
@@ -1183,7 +1204,7 @@ class DynamicList extends DataPoint {
             if (!params.onRecordWillSwitchMode && editedRecord) {
                 // not really elegant, but we only need the root list to save the record
                 if (editedRecord !== record && editedRecord.canBeAbandoned) {
-                    this.abandonRecord(editedRecord.id)
+                    this.abandonRecord(editedRecord.id);
                 } else {
                     const isSaved = await editedRecord.save();
                     if (!isSaved) {
@@ -1290,6 +1311,69 @@ class DynamicList extends DataPoint {
             resIds = this.records.map((r) => r.resId);
         }
         return resIds;
+    }
+
+    async multiSave(record) {
+        const selection = this.selection;
+        const resIds = selection.map((r) => r.resId);
+        const changes = record.getChanges();
+        debugger
+        if (!changes) {
+            return;
+        }
+        const validSelection = selection.reduce((result, record) => {
+            if (
+                !Object.keys(changes).filter(
+                    (fieldName) =>
+                        record.isReadonly(fieldName) ||
+                        (record.isRequired(fieldName) && !changes[fieldName])
+                ).length
+            ) {
+                result.push(record);
+            }
+            return result;
+        }, []);
+
+        if (validSelection.length === 0) {
+            const dialogProps = {
+                body: this.model.env._t("No valid record to save"),
+                confirm: () => {
+                    record.discard();
+                },
+            };
+            await this.model.dialogService.add(AlertDialog, dialogProps);
+        } else if (resIds.length > 1) {
+            this.multiEditConfirmation = true;
+            this.editedRecord = null;
+            const dialogProps = {
+                close: () => {
+                    this.multiEditConfirmation = false;
+                },
+                confirm: async () => {
+                    await this.model.orm.write(this.resModel, resIds, changes);
+                    selection.forEach((record) => {
+                        record.selected = false;
+                    });
+                    await Promise.all(selection.map((record) => record.load()));
+                    record.switchMode("readonly");
+                },
+                cancel: () => {
+                    record.discard();
+                },
+                isDomainSelected: this.isDomainSelected,
+                fields: Object.keys(changes).map((fieldName) => {
+                    let fieldLabel =
+                        record.activeFields[fieldName].string || record.fields[fieldName].string;
+                    return { change: changes[fieldName], label: fieldLabel };
+                }),
+                nbRecords: resIds.length,
+                nbValidRecords: validSelection.length,
+            };
+            await this.model.dialogService.add(ListConfirmationDialog, dialogProps);
+        } else {
+            record.selected = false;
+            record.switchMode("readonly");
+        }
     }
 
     selectDomain(value) {
@@ -2767,6 +2851,7 @@ export class RelationalModel extends Model {
         this.mutex = new Mutex();
 
         this.onCreate = params.onCreate;
+        this.multiEdit = params.multiEdit || false;
         this.quickCreateView = params.quickCreateView;
         this.defaultGroupBy = params.defaultGroupBy || false;
         this.defaultOrderBy = params.defaultOrder;
