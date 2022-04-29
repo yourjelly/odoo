@@ -7,3 +7,4 @@ from . import test_knowledge_article_constraints
 from . import test_knowledge_article_permission_inheritance
 from . import test_knowledge_controllers
 from . import test_knowledge_invite
+from . import test_knowledge_tours

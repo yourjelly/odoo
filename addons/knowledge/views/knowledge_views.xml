@@ -86,7 +86,7 @@
                                             </a>
                                             <div class="o_knowledge_share_panel dropdown-menu" role="menu">
                                                 <div class="px-3 pb-2">
-                                                    <button type="action" name="%(knowledge_invite_members)d" class="btn btn-primary w-100" attrs="{'invisible': [('user_can_write', '=', False)]}">
+                                                    <button type="action" name="%(knowledge_invite_members)d" class="btn btn-primary btn-invite w-100" attrs="{'invisible': [('user_can_write', '=', False)]}">
                                                         <i class="fa fa-plus"/> Invite
                                                     </button>
                                                 </div>
@@ -96,7 +96,7 @@
                                     </div>
                                     <div class="btn-group" role="toolbar" aria-label="options">
                                         <div class="o-dropdown dropdown o-dropdown--no-caret">
-                                            <a type="button" role="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <a type="button" role="button" class="btn btn-secondary btn-more dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                 <i class="fa fa-ellipsis-v"/>
                                             </a>
                                             <div class="o_knowledge_more_options_panel dropdown-menu" role="menu">

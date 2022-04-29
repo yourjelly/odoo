@@ -10,6 +10,7 @@
     'depends': [
         'web',
         'web_editor',
+        'web_tour',
         'mail'
     ],
     'data': [
@@ -73,6 +74,9 @@
             'knowledge/static/src/xml/knowledge_templates.xml',
             'knowledge/static/src/xml/chatter_topbar.xml',
             'knowledge/static/src/xml/knowledge_toolbars.xml',
+        ],
+        'web.assets_tests': [
+            'knowledge/static/tests/tours/*.js',
         ],
         'web.qunit_suite_tests': [
             'knowledge/static/src/tests/test_services.js',
