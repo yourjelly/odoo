@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="EpsonPrinterErrorPopup" owl="1">
+        <div role="dialog" class="modal-dialog">
+            <div class="popup popup-error">
+                <p class="title">
+                    <t t-esc="props.title" />
+                </p>
+                <div class="body">
+                    To solve this issue, please check the following:
+
+                    <ol>
+                        <li>The printer is switched on and connected to internet</li>
+                        <li>The printer supports the ePOS protocol</li>
+                        <li>The printer IP address is reachable:
+                            <a t-att-href="'https://' + props.url" target="_blank"><t t-esc="props.url"/></a>
+                        </li>
+                        <li>
+                            Some browsers don't allow HTTP calls from websites to devices in the network (for security reasons).
+                            If it is the case, you will need to follow Odoo's documentation:
+                            <ol>
+                                <li>
+                                    <a href="https://www.odoo.com/documentation/14.0/applications/sales/point_of_sale/overview/epos_ssc.html">Self-signed certificate for ePOS printers</a>
+                                </li>
+                                <li t-if="props.is_http">
+                                    <a href="https://www.odoo.com/documentation/14.0/applications/sales/point_of_sale/overview/https.html">Secure connection (HTTPS)</a>
+                                </li>
+                            </ol>
+                        </li>
+                    </ol>
+                </div>
+                <div class="footer">
+                    <div class="button cancel" t-on-click="confirm">
+                        <t t-esc="props.confirmText" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>
