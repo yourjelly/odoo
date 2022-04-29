@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <div t-name="mrp.WarehouseFilter" class="btn-group dropdown" owl="1">
+        <button type="button" class="dropdown-toggle btn btn-secondary" data-bs-toggle="dropdown">
+            <span class="fa fa-home"/> Warehouse: <span t-esc="props.currentWarehouse.name"/>
+        </button>
+        <div class="dropdown-menu o_filter_menu" role="menu">
+            <t t-foreach="props.warehouses" t-as="wh" t-key="wh.id">
+                <a role="menuitem" t-on-click="() => this.onClickWarehouse(wh.id)" class="dropdown-item" t-esc="wh.name"/>
+            </t>
+        </div>
+    </div>
+
+</templates>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <div t-name="mrp.BomOverviewDisplayFilter" class="btn-group dropdown" owl="1">
+        <button type="button" class=" btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown">
+            <span class="fa fa-filter"/>
+            Display: <t t-esc="currentDisplayedNames"/>
+        </button>
+        <div class="dropdown-menu o_filter_menu" role="menu">
+            <t t-foreach="displayableOptions" t-as="optionKey" t-key="optionKey">
+                <a role="menuitem" t-attf-class="{{ this.props.showOptions[optionKey] ? 'selected': ''}}" t-on-click.stop="() => this.onClickDisplay(optionKey)" class="dropdown-item" t-esc="displayOptions[optionKey]"/>
+            </t>
+        </div>
+    </div>
+
+</templates>
