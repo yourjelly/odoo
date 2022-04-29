@@ -740,16 +740,22 @@ class HolidaysRequest(models.Model):
             if holiday.state in ['cancel', 'refuse', 'validate1', 'validate']:
                 raise ValidationError(_("This modification is not allowed in the current state."))
 
+    def _get_number_of_days_batch(self, date_from, date_to, employee_ids):
+        """ Returns a float equals to the timedelta between two dates given as string."""
+        employee = self.env['hr.employee'].browse(employee_ids)
+        # We force the company in the domain as we are more than likely in a compute_sudo
+        domain = [('company_id', 'in', self.env.company.ids + self.env.context.get('allowed_company_ids', []))]
+
+        result = employee._get_work_days_data_batch(date_from, date_to, domain=domain)
+        for employee_id in result:
+            if self.request_unit_half and result[employee_id]['hours'] > 0:
+                result[employee_id]['days'] = 0.5
+        return result
+
     def _get_number_of_days(self, date_from, date_to, employee_id):
         """ Returns a float equals to the timedelta between two dates given as string."""
         if employee_id:
-            employee = self.env['hr.employee'].browse(employee_id)
-            # We force the company in the domain as we are more than likely in a compute_sudo
-            domain = [('company_id', 'in', self.env.company.ids + self.env.context.get('allowed_company_ids', []))]
-            result = employee._get_work_days_data_batch(date_from, date_to, domain=domain)[employee.id]
-            if self.request_unit_half and result['hours'] > 0:
-                result['days'] = 0.5
-            return result
+            return self._get_number_of_days_batch(date_from, date_to, employee_id)[employee_id]
 
         today_hours = self.env.company.resource_calendar_id.get_work_hours_count(
             datetime.combine(date_from.date(), time.min),
@@ -926,23 +932,37 @@ class HolidaysRequest(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        employee_ids = [values['employee_id'] for values in vals_list if values.get('employee_id')]
+        leave_date_employees = defaultdict(list)
+        employee_ids = []
+        for values in vals_list:
+            if values.get('employee_id'):
+                employee_ids.append(values['employee_id'])
+                if values.get('date_from') and values.get('date_to'):
+                    date_from = fields.Datetime.to_datetime(values['date_from'])
+                    date_to = fields.Datetime.to_datetime(values['date_to'])
+                    if values['employee_id'] not in leave_date_employees[(date_from, date_to)]:
+                        leave_date_employees[(date_from, date_to)].append(values['employee_id'])
         employees = self.env['hr.employee'].browse(employee_ids)
         if self._context.get('leave_compute_date_from_to') and employees:
+            employee_leave_date_duration = defaultdict(dict)
+            for (date_from, date_to), employee_ids in leave_date_employees.items():
+                employee_leave_date_duration[(date_from, date_to)] = self._get_number_of_days_batch(date_from, date_to, employee_ids)
             for values in vals_list:
                 employee_id = values.get('employee_id')
                 if employee_id and values.get('date_from') and values.get('date_to'):
+                    date_from = values.get('date_from')
+                    date_to = values.get('date_to')
                     employee = employees.filtered(lambda emp: emp.id == employee_id)
-                    attendance_from, attendance_to = self._get_attendances(employee, values['date_from'].date(), values['date_to'].date())
-                    hour_from = max(values.get('date_from').replace(tzinfo=UTC).astimezone(timezone(self.env.user.tz)).time(), float_to_time(attendance_from.hour_from))
-                    hour_to = min(values.get('date_to').replace(tzinfo=UTC).astimezone(timezone(self.env.user.tz)).time(), float_to_time(attendance_to.hour_to))
+                    attendance_from, attendance_to = self._get_attendances(employee, date_from.date(), date_to.date())
+                    hour_from = max(values['date_from'].replace(tzinfo=UTC).astimezone(timezone(self.env.user.tz)).time(), float_to_time(attendance_from.hour_from))
+                    hour_to = min(values['date_to'].replace(tzinfo=UTC).astimezone(timezone(self.env.user.tz)).time(), float_to_time(attendance_to.hour_to))
                     hour_from = hour_from.hour + hour_from.minute / 60
                     hour_to = hour_to.hour + hour_to.minute / 60
 
-                    values['date_from'] = self._get_start_or_end_from_attendance(hour_from, values['date_from'].date(), employee)
-                    values['date_to'] = self._get_start_or_end_from_attendance(hour_to, values['date_to'].date(), employee)
+                    values['date_from'] = self._get_start_or_end_from_attendance(hour_from, date_from.date(), employee)
+                    values['date_to'] = self._get_start_or_end_from_attendance(hour_to, date_to.date(), employee)
                     values['request_date_from'], values['request_date_to'] = values['date_from'].date(), values['date_to'].date()
-                    values['number_of_days'] = self._get_number_of_days(values['date_from'], values['date_to'], employee_id)['days']
+                    values['number_of_days'] = employee_leave_date_duration[(date_from, date_to)][values['employee_id']]['days']
 
         """ Override to avoid automatic logging of creation """
         if not self._context.get('leave_fast_create'):
