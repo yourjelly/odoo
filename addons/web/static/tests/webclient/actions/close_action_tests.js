@@ -10,8 +10,8 @@ import {
 } from "../../helpers/utils";
 import { createWebClient, doAction, getActionManagerServerData } from "./../helpers";
 
-import { ListView } from "@web/views/list/list_view";
-import { FormView } from "@web/views/form/form_view";
+import { formView } from "@web/views/form/form_view";
+import { listView } from "../../../src/views/list/list_view";
 
 let serverData;
 let target;
@@ -103,7 +103,7 @@ QUnit.module("ActionManager", (hooks) => {
     QUnit.test("history back calls on_close handler of dialog action", async function (assert) {
         assert.expect(4);
         let form;
-        patchWithCleanup(FormView.prototype, {
+        patchWithCleanup(formView.Controller.prototype, {
             setup() {
                 this._super(...arguments);
                 form = this;
@@ -125,7 +125,7 @@ QUnit.module("ActionManager", (hooks) => {
     QUnit.test("history back called within on_close", async function (assert) {
         assert.expect(7);
         let list;
-        patchWithCleanup(ListView.prototype, {
+        patchWithCleanup(listView.Controller.prototype, {
             setup() {
                 this._super(...arguments);
                 list = this;
@@ -159,7 +159,7 @@ QUnit.module("ActionManager", (hooks) => {
         async function (assert) {
             assert.expect(7);
             let list;
-            patchWithCleanup(ListView.prototype, {
+            patchWithCleanup(listView.Controller.prototype, {
                 setup() {
                     this._super(...arguments);
                     list = this;
