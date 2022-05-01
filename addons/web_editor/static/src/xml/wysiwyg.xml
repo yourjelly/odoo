@@ -686,4 +686,22 @@
         </div>
     </div>
 
+    <!-- Placeholder Dialog (allows to create a QWeb placeholder) -->
+    <div t-name="wysiwyg.widgets.placeholder">
+        <form>
+            <div t-attf-class="form-group row">
+                <label class="col-form-label col-md-3" for="o_placeholder_dialog_value_input">Value</label>
+                <div class="col-md-9">
+                    <input type="text" name="value" class="form-control" id="o_placeholder_dialog_value_input" required="required" t-att-value="widget.data.value"/>
+                </div>
+            </div>
+            <div t-attf-class="form-group row">
+                <label class="col-form-label col-md-3" for="o_placeholder_dialog_condition_input">Condition</label>
+                <div class="col-md-9">
+                    <input type="text" name="condition" class="form-control" id="o_placeholder_dialog_condition_input" required="required" t-att-value="widget.data.condition"/>
+                </div>
+            </div>
+        </form>
+    </div>
+
 </templates>

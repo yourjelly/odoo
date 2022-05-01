@@ -274,7 +274,7 @@ const Wysiwyg = Widget.extend({
         this._updateEditorUI();
 
         this.$root.on('click', (ev) => {
-            const $target = $(ev.target).closest('a');
+            const $target = $(ev.target).closest('a, t');
 
             // Keep popover open if clicked inside it, but not on a button
             if ($(ev.target).parents('.o_edit_menu_popover').length && !$target.length) {
@@ -312,6 +312,10 @@ const Wysiwyg = Widget.extend({
                         noFocusUrl: ev.detail === 1,
                     });
                 }
+            } else if ($target.is('t')) {
+                this.openPlaceholderDialog({
+                    placeholder: $target[0],
+                });
             }
         });
 
@@ -1170,6 +1174,53 @@ const Wysiwyg = Widget.extend({
             }
         });
     },
+    /**
+     * Open the placeholder dialog.
+     *
+     * Used to insert or change a placeholder.
+     *
+     * @param {object} options
+     */
+    openPlaceholderDialog(options = {}) {
+        let placeholder;
+        const placeholderDialog = new weWidgets.PlaceholderDialog(this, {
+            wysiwyg: this,
+        }, this.$editable[0], {
+            needLabel: true,
+        }, undefined, options.placeholder);
+        const restoreSelection = preserveCursor(this.odooEditor.document);
+        placeholderDialog.open();
+        placeholderDialog.on('save', this, data => {
+            if (!data) {
+                return;
+            }
+            const placeholderWidget = placeholderDialog.placeholderWidget;
+            getDeepRange(this.$editable[0], {range: data.range, select: true});
+            if (!placeholderWidget.$placeholder.length) {
+                placeholderWidget.$placeholder = $(placeholderWidget.getOrCreatePlaceholder(this.$editable[0]));
+            }
+            placeholderWidget.applyPlaceholderToDom(data);
+            this.odooEditor.historyStep();
+            placeholder = placeholderWidget.$placeholder[0];
+            //this.odooEditor.setContenteditablePlaceholder(placeholderWidget.$placeholder[0]);
+            setSelection(placeholder, 0, placeholder, placeholder.childNodes.length, false);
+            // Focus the placeholder after the dialog element is removed because
+            // if the dialog element is still in the DOM at the time of
+            // doing placeholder.focus(), because there is the attribute tabindex
+            // on the dialog element, the focus cannot occurs.
+            // Using a microtask to set the focus is hackish and might break
+            // if another microtask wich focus an elemen in the dom occurs
+            // at the same time (but this case seems unlikely).
+            Promise.resolve().then(() => placeholder.focus());
+        });
+        placeholderDialog.on('closed', this, function () {
+            // If the placeholderDialog content has been saved
+            // the previous selection in not relevant anymore.
+            if (placeholderDialog.destroyAction !== 'save') {
+                restoreSelection();
+            }
+        });
+    },
 
     //--------------------------------------------------------------------------
     // Private
@@ -1783,6 +1834,15 @@ const Wysiwyg = Widget.extend({
                 fontawesome: 'fa-file-image-o',
                 callback: () => {
                     this.openMediaDialog();
+                },
+            },
+            {
+                groupName: 'Basic blocks',
+                title: 'Placeholder',
+                description: 'Add a placeholder.',
+                fontawesome: 'fa-edit',
+                callback: () => {
+                    this.openPlaceholderDialog();
                 },
             },
         ];
