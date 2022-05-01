@@ -961,7 +961,7 @@ class expression(object):
 
                 # FP TODO 1: this is correct for "%like%", but implement other operators
                 #            using "field->>lang operator right" without jsonb_path
-                elif field.translate and right:
+                elif field.translate:
                     need_wildcard = operator in ('like', 'ilike', 'not like', 'not ilike')
                     sql_operator = {'=like': 'like', '=ilike': 'ilike'}.get(operator, operator)
                     if need_wildcard:
@@ -973,7 +973,15 @@ class expression(object):
                     instr = unaccent('%s')
                     # TODO VSC: returns something like 'instr' = dog
                     # 1: '["dog","chien","..."]' --> This doesn't look like the most optimal index
-                    left = unaccent('jsonb_path_query_array("%s"."%s", \'$.*\')::text' % (alias, left))
+                    if need_wildcard:
+                        # TODO CWG: currently, inactive languages are not removed in DB and can be searched by using this function
+                        left = unaccent('jsonb_path_query_array("%s"."%s", \'$.*\')::text' % (alias, left))
+                    else:
+                        lang = model.env.lang or 'en_US'
+                        if lang == 'en_US':
+                            left = unaccent(f'"{alias}"."{left}"->>\'en_US\'')
+                        else:
+                            left = unaccent(f'COALESCE(NULLIF("{alias}"."{left}"->>\'{lang}\', \'\'), "{alias}"."{left}"->>\'en_US\')')
                     push_result(f"{left} {sql_operator} {instr}", [right])
                 else:
                     expr, params = self.__leaf_to_sql(leaf, model, alias)
