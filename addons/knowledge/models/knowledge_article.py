@@ -190,17 +190,39 @@ class Article(models.Model):
 
     @api.depends('parent_id', 'internal_permission')
     def _compute_inherited_permission(self):
-        """ This method and related fields are not meant to be used in batch.
-        For batch load, use _get_internal_permission instead."""
-        for article in self:
-            parent = article
+        """ Computed inherited internal permission. We go up ancestors until
+        finding an article with an internal permission set, or a root article
+        (without parent) or until finding a desynchronized article which
+        serves as permission ancestor. Desynchronized articles break the
+        permission tree finding. """
+        self_inherit = self.filtered(lambda article: article.internal_permission)
+        for article in self_inherit:
+            article.inherited_permission = article.internal_permission
+            article.inherited_permission_parent_id = False
+
+        remaining = self - self_inherit
+        if not remaining:
+            return
+        # group by parents to lessen number of computation
+        articles_byparent = defaultdict(lambda: self.env['knowledge.article'])
+        for article in remaining:
+            articles_byparent[article.parent_id] += article
+
+        for parent, articles in articles_byparent.items():
+            ancestors = self.env['knowledge.article']
             while parent:
-                article_permission = parent.internal_permission
-                if article_permission:
+                if parent in ancestors:
+                    raise ValidationError(
+                        _('Articles %s cannot be updated as this would create a recursive hierarchy.',
+                          ', '.join(articles.mapped('name'))
+                         )
+                    )
+                ancestors += parent
+                if parent.internal_permission or parent.is_desynchronized:
                     break
                 parent = parent.parent_id
-            article.inherited_permission = article_permission
-            article.inherited_permission_parent_id = parent if parent != article else False
+            articles.inherited_permission = ancestors[-1:].internal_permission
+            articles.inherited_permission_parent_id = ancestors[-1:]
 
     @api.depends_context('uid')
     @api.depends('internal_permission', 'article_member_ids.partner_id', 'article_member_ids.permission')
