@@ -145,7 +145,7 @@ class PickingType(models.Model):
         }
         for field in domains:
             data = self.env['stock.picking']._read_group(domains[field] +
-                [('state', 'not in', ('done', 'cancel')), ('picking_type_id', 'in', self.ids)],
+                [('picking_type_id', 'in', self.ids)],
                 ['picking_type_id'], ['picking_type_id'])
             count = {
                 x['picking_type_id'][0]: x['picking_type_id_count']

@@ -438,6 +438,7 @@ class expression(object):
             :attr result: the result of the parsing, as a pair (query, params)
             :attr query: Query object holding the final result
         """
+        self.selection_inversion = False
         self._unaccent_wrapper = get_unaccent_wrapper(model._cr)
         self.root_model = model
         self.root_alias = alias or model._table
@@ -991,6 +992,10 @@ class expression(object):
         [self.result] = result_stack
         where_clause, where_params = self.result
         self.query.add_where(where_clause, where_params)
+        if self.selection_inversion:
+            print("".join(traceback.format_stack(limit=10)))
+            print(self.query)
+            print("\n --------------------------------")
 
     def __leaf_to_sql(self, leaf, model, alias):
         left, operator, right = leaf
@@ -1036,15 +1041,31 @@ class expression(object):
                 query = '(%s."%s" %s (%s))' % (table_alias, left, operator, subquery)
                 params = subparams
             elif isinstance(right, (list, tuple)):
-                if model._fields[left].type == "boolean":
+                field = model._fields[left]
+                if field.type == "boolean":
                     params = [it for it in (True, False) if it in right]
                     check_null = False in right
                 else:
                     params = [it for it in right if it != False]
                     check_null = len(params) < len(right)
+
+                # Optimization for selection fields
+                if operator == 'not in' and params and field.type == 'selection' and isinstance(field.selection, list):
+                    # Inverse the fixed selection to help postgresql to plan
+                    params = set(params)
+                    all_values = field.get_values(model.env)
+                    if not field.required:
+                        all_values.append(False)
+                    new_params = [value for value in all_values if value not in params]
+                    # TO remove
+                    self.selection_inversion = True
+                    print(f"Inverse selection of {model} / {left}: NOT IN {params} -> IN {new_params}")
+
+                    params = new_params
+                    operator = 'in'
+
                 if params:
                     if left != 'id':
-                        field = model._fields[left]
                         params = [field.convert_to_column(p, model, validate=False) for p in params]
                     query = f'({table_alias}."{left}" {operator} %s)'
                     params = [tuple(params)]

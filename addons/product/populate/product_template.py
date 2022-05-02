@@ -63,7 +63,7 @@ class ProductTemplate(models.Model):
             for product in product_variants:
                 product.barcode = "BARCODE-PT-%s" % product.id
 
-        set_barcode_variant(0.85)
+        set_barcode_variant(0.01)
 
         return res
 
