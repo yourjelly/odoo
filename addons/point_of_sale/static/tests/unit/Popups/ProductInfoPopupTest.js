@@ -2,12 +2,12 @@
 
 import PosComponent from 'point_of_sale.PosComponent';
 import ProductInfoPopup from 'point_of_sale.ProductInfoPopup';
-import { Order } from 'point_of_sale.models';
+const { useBus } = require('@web/core/utils/hooks');
 import { makePosTestEnv } from '../utils/test_env';
 import { posServerData } from '../utils/test_server_data';
 import { removeSpace } from '../utils/test_utils';
 import testUtils from 'web.test_utils';
-import { mount } from '@web/../tests/helpers/utils';
+import { mount, click } from '@web/../tests/helpers/utils';
 import { ormService } from '@web/core/orm_service';
 import { registry } from '@web/core/registry';
 import { batched } from 'point_of_sale.utils';
@@ -24,16 +24,6 @@ QUnit.module('ProductInfoPopup Test', {
                 return savedData;
             }
         };
-        // TODO patch is not working, it loops infinitely on reactive object during mount
-        // testUtils.mock.patch(Order.prototype, {
-        //     get_total_without_tax: () => {
-        //         return savedData['all_prices']['price_without_tax'] + ADDED_PRICE;
-        //     }
-        // })
-
-        serviceRegistry.add('orm', ormService);
-        this.env = await makePosTestEnv({ serverData: posServerData, mockRPC: this.mockRPC });
-        await this.env.pos.load_server_data();
 
         this.rootClass = class Root extends PosComponent {
             setup() {
@@ -44,23 +34,26 @@ QUnit.module('ProductInfoPopup Test', {
                 );
                 owl.useSubEnv({ pos });
             }
-            render() {
-                console.log('gg');
-                super.render();
-            }
+        }
+        this.createDummyComponent = (mixin) => {
+          return mixin(this.rootClass);
         }
 
+        // TODO patch is not working, it loops infinitely on reactive object during mount
+        // testUtils.mock.patch(Order.prototype, {
+        //     get_total_without_tax: () => {
+        //         return savedData['all_prices']['price_without_tax'] + ADDED_PRICE;
+        //     }
+        // })
+
+        serviceRegistry.add('orm', ormService);
+        this.env = await makePosTestEnv({ serverData: posServerData, mockRPC: this.mockRPC });
+        await this.env.pos.load_server_data();
         this.product = Object.values(this.env.pos.db.product_by_id)[0];
         // we don't know which product we'll have so to make sure it has everything, we override some info
         this.product.barcode = this.product.barcode || '00000';
         this.product.default_code = this.product.default_code || 'E-COM01';
         this.props = { product: this.product, quantity :1 };
-        this.rootClass.template = owl.xml/* html */ `
-            <t>
-                <ProductInfoPopup t-props='props'/>
-            </t>
-        `;
-        this.rootClass.components = { ProductInfoPopup };
     },
     beforeEach() {
         savedData = {
@@ -101,16 +94,24 @@ QUnit.module('ProductInfoPopup Test', {
             }]
         };
         this.target = testUtils.prepareTarget();
+
+        this.rootClass.template = owl.xml/* html */ `
+            <t>
+                <ProductInfoPopup t-props='props'/>
+            </t>
+        `;
+        this.rootClass.components = { ProductInfoPopup };
     }
 });
 
 // Test all the things that should always be displayed regardless of config and data
 QUnit.test('Component basic display', async function (assert) {
     const order = this.env.pos.get_order()
+    // mocking a method
     order.get_total_without_tax = () => savedData['all_prices']['price_without_tax'] + ADDED_PRICE;
-     await mount(this.rootClass, this.target, { env: this.env, props: this.props });
-    // assert.expect(2);
-    // Product info titles
+    await mount(this.rootClass, this.target, { env: this.env, props: this.props });
+
+     // Product info titles
     const productNameContent = this.target.querySelector('.global-info-title.product-name').textContent;
     assert.strictEqual(productNameContent, this.product.display_name);
 
@@ -136,7 +137,6 @@ QUnit.test('Component basic display', async function (assert) {
     assert.strictEqual(pricelistPriceContent, this.env.pos.format_currency(savedData['pricelists'][0]['price']));
 
     // Order section
-    // We override some methods that are used to mock them
     const expectedTotalWithoutTax = this.env.pos.format_currency(this.env.pos.get_order().get_total_without_tax());
     const orderPriceNoVATContent = this.target.querySelector('.section-order-body table tr td:nth-child(2)').textContent;
     assert.strictEqual(orderPriceNoVATContent, expectedTotalWithoutTax);
@@ -153,7 +153,6 @@ QUnit.test('Cost Margin display in Financial section cashier with no access', as
     this.env.pos.get_cashier().role = 'cashier';
     await mount(this.rootClass, this.target, { env: this.env, props: this.props });
     assert.containsN(this.target, priceDetailSelector, 1);
-
 });
 
 QUnit.test('Cost Margin display in Financial section cashier with access', async function (assert) {
@@ -253,11 +252,46 @@ QUnit.test('Supplier section not displayed', async function (assert) {
 
 
 // ----------------
-// Extra section
+// Extra section variant
 // ----------------
 
-// QUnit.test('Search/filter product variant', async function (assert) {
-// });
+QUnit.test('Variants section displayed', async function (assert) {
+    await mount(this.rootClass, this.target, {env: this.env, props: this.props});
+    assert.containsOnce(this.target, '.section-variants');
+
+    const variantsData = savedData['variants'][0];
+    const tableDataSelector = '.section-variants .section-variants-body table tr td';
+    const variantNameContent = this.target.querySelector(tableDataSelector + ' span').textContent;
+    assert.strictEqual(variantNameContent, variantsData['name']);
+
+    const variantValueContent1 = this.target.querySelector(tableDataSelector + ':nth-child(2) span').textContent;
+    const variantValueContent2 = this.target.querySelector(tableDataSelector + ':nth-child(2) span:nth-child(2)').textContent;
+    assert.strictEqual(variantValueContent1, variantsData['values'][0]['name']);
+    assert.strictEqual(variantValueContent2, variantsData['values'][1]['name']);
+});
+
+QUnit.test('Variants section not displayed', async function (assert) {
+    savedData['variants'] = [];
+    await mount(this.rootClass, this.target, {env: this.env, props: this.props});
+    assert.containsNone(this.target, '.section-variants');
+});
+
+QUnit.test('Search/filter product variant', async function (assert) {
+    // When clicking on a product variant, it performs a search on the products list, the popup should then be closed
+    const step1 = 'trigger-search';
+    const step2 = 'close-popup';
+    const ExtendedRoot = this.createDummyComponent(Root => class ExtendedRoot extends Root {
+        setup() {
+            super.setup();
+            useBus(this.env.posbus, 'search-product-from-info-popup', () => assert.step(step1));
+            useBus(this.env.posbus, 'close-popup', () => assert.step(step2));
+        }
+    });
+
+    await mount(ExtendedRoot, this.target, {env: this.env, props: this.props});
+    await click(this.target.querySelector('.section-variants .section-variants-body table tr td:nth-child(2) span'))
+    assert.verifySteps([step1, step2]);
+});
 
 
 // ----------------
