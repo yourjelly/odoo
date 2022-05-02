@@ -47,6 +47,7 @@ Bu modül kurulduktan sonra, Muhasebe yapılandırma sihirbazı çalışır
         "views/tax_office_views.xml",
         "views/res_partner_views.xml",
         "views/ir_qweb_widget_templates.xml",
+        "views/res_country_views.xml",
 
         "data/res_country_data.xml",
 
