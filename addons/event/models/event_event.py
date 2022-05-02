@@ -616,3 +616,9 @@ class EventEvent(models.Model):
         ])
         if ended_events:
             ended_events.action_set_done()
+
+    def _template_allowed_fields(self):
+        self.ensure_one()
+        return super()._template_allowed_fields() + [
+            'organizer_id', 'event_type_id', 'tag_ids',
+        ]

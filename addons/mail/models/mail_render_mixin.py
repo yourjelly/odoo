@@ -239,11 +239,18 @@ class MailRenderMixin(models.AbstractModel):
         return render_context
 
     def _sanitize_eval_context(self, context):
+        for key, value in context.items():
+            if isinstance(value, models.BaseModel):
+                context[key] = value._prepare_template_context()
 
-        # print(context)
+        # TODO: remove
+        for ctx_value in context.get('ctx', {}).values():
+            import datetime
+            if not isinstance(ctx_value, (bool, str, int, float, list, tuple, dict, type(None), datetime.datetime)):
+                _logger.warning('Wrong value in the context: %r.', ctx_value)
+        ##################################
 
         return context
-
 
     @api.model
     def _render_template_qweb(self, template_src, model, res_ids,

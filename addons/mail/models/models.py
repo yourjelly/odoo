@@ -1,10 +1,17 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import datetime
+import logging
+
 from lxml.builder import E
 from markupsafe import Markup
 
 from odoo import api, models, tools, _
+from odoo.exceptions import UserError
+
+
+_logger = logging.getLogger(__name__)
 
 
 class BaseModel(models.AbstractModel):
@@ -248,3 +255,50 @@ class BaseModel(models.AbstractModel):
         self.ensure_one()
         return Markup("<a href=# data-oe-model='%s' data-oe-id='%s'>%s</a>") % (
             self._name, self.id, title or self.display_name)
+
+    def _template_allowed_fields(self):
+        self.ensure_one()
+        # Fields allowed to be read for any models
+        return [
+            'id', 'name', 'display_name', 'lang', 'lang_id', 'color', 'active', 'date',
+            'title', 'tz', 'user_id', 'company_id', 'team_id', 'partner_id', 'parent_id',
+            'partner_name', 'partner_email', 'currency_id', 'state',
+            'create_uid', 'write_uid', 'create_date', 'write_date',
+            'email', 'email_formatted', 'email_normalized', 'email_from',
+            'phone', 'mobile', 'website', 'website_url', 'signature', 'description',
+            'kanban_state', 'kanban_state_label', 'stage_id',
+        ]
+
+    def _prepare_template_context(self):
+        self.ensure_one()
+
+        # Those models can be read on any fields
+        ALLOWED_MODELS = ('res.partner', 'res.lang', 'res.country', 'res.currency')
+        # Those types can be read on any models, for any fields
+        ALLOWED_TYPES = (bool, int, float, datetime.datetime, datetime.date)
+
+        class TemplateRecord:
+            def __init__(self, record):
+                self.__record = record
+                self.__allowed_fields = record._template_allowed_fields()
+
+            def __getattr__(self, field_name):
+                assert field_name in self.__record._fields
+
+                value = self.__record[field_name]
+
+                if not isinstance(value, ALLOWED_TYPES) \
+                   and not (isinstance(value, BaseModel) and value._name in ALLOWED_MODELS) \
+                   and field_name not in self.__allowed_fields:
+                    _logger.warning('You are not allowed to read %s on %s', field_name, self.__record._description)
+                    raise UserError(_('You are not allowed to read %s on %s', field_name, self.__record._description))
+
+                if isinstance(value, BaseModel):
+                    return TemplateRecord(value)
+
+                return value
+
+            def __repr__(self):
+                return f"TemplateRecord<{self.__record._name}, {self.__record.id}>"
+
+        return TemplateRecord(self)
