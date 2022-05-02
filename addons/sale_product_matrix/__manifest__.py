@@ -9,7 +9,7 @@
     """,
     'category': 'Sales/Sales',
     'version': '1.0',
-    'depends': ['sale', 'product_matrix', 'sale_product_configurator'],
+    'depends': ['product_matrix', 'sale_product_configurator'],
     'data': [
         'views/product_template_views.xml',
         'views/sale_order_views.xml',

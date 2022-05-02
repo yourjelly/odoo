@@ -10,13 +10,7 @@
     'summary': 'Organize and plan your projects',
     'depends': [
         'analytic',
-        'base_setup',
-        'mail',
-        'portal',
         'rating',
-        'resource',
-        'web',
-        'web_tour',
         'digest',
     ],
     'description': "",

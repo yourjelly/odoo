@@ -7,7 +7,7 @@
 Add a selection of delivery methods to your eCommerce store.
 Configure your own methods with a pricing grid or integrate with carriers for a fully automated shipping process.
     """,
-    'depends': ['website_sale', 'delivery', 'website_sale_stock'],
+    'depends': ['delivery', 'website_sale_stock'],
     'data': [
         'views/website_sale_delivery_templates.xml',
         'views/website_sale_delivery_views.xml',

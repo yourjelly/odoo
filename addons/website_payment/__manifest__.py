@@ -11,7 +11,6 @@ This is a bridge module that adds multi-website support for payment acquirers.
     'depends': [
         'website',
         'payment',
-        'portal',
     ],
     'data': [
         'data/donation_data.xml',

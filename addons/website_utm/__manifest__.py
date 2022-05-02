@@ -7,7 +7,7 @@
     'website': "https://www.odoo.com",
     'category': 'Hidden',
     'version': '1.0',
-    'depends': ['utm', 'website'],
+    'depends': ['website'],  # TODO merge with website
     'auto_install': True,
     'license': 'LGPL-3',
 }

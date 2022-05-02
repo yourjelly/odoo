@@ -14,10 +14,8 @@ Bridge module adding UX requirements to ease SMS marketing on event track
 speakers..
         """,
     'depends': [
-        'mass_mailing',
         'mass_mailing_sms',
-        'sms',
-        'website_event_track'
+        'website_event_track',
     ],
     'data': [
     ],
