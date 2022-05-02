@@ -277,6 +277,29 @@ class Module(models.Model):
     sequence = fields.Integer('Sequence', default=100)
     dependencies_id = fields.One2many('ir.module.module.dependency', 'module_id',
                                        string='Dependencies', readonly=True)
+    using_ids = fields.Many2many(
+        'ir.module.module',
+        column1='parent_id', column2='child_id',
+        relation='module_deps_rel',
+        compute="_compute_deps", store=True)
+    used_by_ids = fields.Many2many(
+        'ir.module.module',
+        column1='child_id', column2='parent_id',
+        relation='module_deps_rel',
+    )
+
+    @api.depends('dependencies_id')
+    def _compute_deps(self):
+        for module in self.sorted('name'):
+            module.using_ids = module.dependencies_id.depend_id
+            if module.name.startswith('test_') or module.name.startswith('l10n'):
+                continue
+            dependencies = module.using_ids
+            for submodule in dependencies:
+                conflicts = submodule.dependencies_id.depend_id & dependencies
+                if conflicts:
+                    print(module.name, "depends on", submodule.name, "sharing dependencies:", conflicts.mapped('name'))
+
     exclusion_ids = fields.One2many('ir.module.module.exclusion', 'module_id',
                                     string='Exclusions', readonly=True)
     auto_install = fields.Boolean('Automatic Installation',
