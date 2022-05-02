@@ -43,7 +43,6 @@ class MailRenderMixin(models.AbstractModel):
 
     # If True, we trust the value on the model for rendering
     # If False, we need the group "Template Editor" to render the model fields
-    _unrestricted_rendering = False
 
     # language for rendering
     lang = fields.Char(
@@ -239,6 +238,13 @@ class MailRenderMixin(models.AbstractModel):
         render_context.update(copy.copy(template_env_globals))
         return render_context
 
+    def _sanitize_eval_context(self, context):
+
+        # print(context)
+
+        return context
+
+
     @api.model
     def _render_template_qweb(self, template_src, model, res_ids,
                               add_context=None, options=None):
@@ -265,8 +271,7 @@ class MailRenderMixin(models.AbstractModel):
         variables = self._render_eval_context()
         if add_context:
             variables.update(**add_context)
-
-        is_restricted = not self._unrestricted_rendering and not self.env.is_admin() and not self.env.user.has_group('mail.group_mail_template_editor')
+        variables = self._sanitize_eval_context(variables)
 
         for record in self.env[model].browse(res_ids):
             variables['object'] = record
@@ -274,7 +279,6 @@ class MailRenderMixin(models.AbstractModel):
                 render_result = self.env['ir.qweb']._render(
                     html.fragment_fromstring(template_src, create_parent='div'),
                     variables,
-                    raise_on_code=is_restricted,
                     **(options or {})
                 )
                 # remove the rendered tag <div> that was added in order to wrap potentially multiples nodes into one.
@@ -320,6 +324,7 @@ class MailRenderMixin(models.AbstractModel):
         variables = self._render_eval_context()
         if add_context:
             variables.update(**add_context)
+        variables = self._sanitize_eval_context(variables)
 
         for record in self.env[model].browse(res_ids):
             variables['object'] = record
@@ -362,25 +367,12 @@ class MailRenderMixin(models.AbstractModel):
             return results
 
         template_instructions = parse_inline_template(str(template_txt))
-        is_dynamic = len(template_instructions) > 1 or template_instructions[0][1]
-
-        if (not self._unrestricted_rendering and is_dynamic and not self.env.is_admin() and
-           not self.env.user.has_group('mail.group_mail_template_editor')):
-            group = self.env.ref('mail.group_mail_template_editor')
-            raise AccessError(_('Only users belonging to the "%s" group can modify dynamic templates.', group.name))
-
-        if not is_dynamic:
-            # Either the content is a raw text without placeholders, either we fail to
-            # detect placeholders code. In both case we skip the rendering and return
-            # the raw content, so even if we failed to detect dynamic code,
-            # non "mail_template_editor" users will not gain rendering tools available
-            # only for template specific group users
-            return {record_id: template_instructions[0][0] for record_id in res_ids}
 
         # prepare template variables
         variables = self._render_eval_context()
         if add_context:
             variables.update(**add_context)
+        variables = self._sanitize_eval_context(variables)
 
         for record in self.env[model].browse(res_ids):
             variables['object'] = record

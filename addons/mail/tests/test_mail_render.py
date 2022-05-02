@@ -263,41 +263,6 @@ class TestMailRender(common.MailCommon):
         self.assertIn(expected, result)
 
     @users('user_rendering_restricted')
-    def test_template_rendering_function_call(self):
-        """Test the case when the template call a custom function.
-
-        This function should not be called when the template is not rendered.
-        """
-        model = 'res.partner'
-        res_ids = self.env[model].search([], limit=1).ids
-        partner = self.env[model].browse(res_ids)
-        MailRenderMixin = self.env['mail.render.mixin']
-
-        def cust_function():
-            # Can not use "MagicMock" in a Jinja sand-boxed environment
-            # so create our own function
-            cust_function.call = True
-            return 'return value'
-
-        cust_function.call = False
-
-        src = """<h1>This is a test</h1>
-<p>{{ cust_function() }}</p>"""
-        expected = """<h1>This is a test</h1>
-<p>return value</p>"""
-        context = {'cust_function': cust_function}
-
-        result = self.env['mail.render.mixin'].with_user(self.user_admin)._render_template_inline_template(
-            src, partner._name, partner.ids,
-            add_context=context
-        )[partner.id]
-        self.assertEqual(expected, result)
-        self.assertTrue(cust_function.call)
-
-        with self.assertRaises(AccessError, msg='Simple user should not be able to render dynamic code'):
-            MailRenderMixin._render_template_inline_template(src, model, res_ids, add_context=context)
-
-    @users('user_rendering_restricted')
     def test_template_render_static(self):
         """Test that we render correctly static templates (without placeholders)."""
         model = 'res.partner'
@@ -307,13 +272,6 @@ class TestMailRender(common.MailCommon):
         result = MailRenderMixin._render_template_inline_template(self.base_inline_template_bits[0], model, res_ids)[res_ids[0]]
         self.assertEqual(result, self.base_inline_template_bits[0])
 
-    @users('user_rendering_restricted')
-    def test_template_rendering_restricted(self):
-        """Test if we correctly detect static template."""
-        res_ids = self.env['res.partner'].search([], limit=1).ids
-        with self.assertRaises(AccessError, msg='Simple user should not be able to render dynamic code'):
-            self.env['mail.render.mixin']._render_template_inline_template(self.base_inline_template_bits[3], 'res.partner', res_ids)
-
     @users('employee')
     def test_template_rendering_unrestricted(self):
         """Test if we correctly detect static template."""
@@ -321,7 +279,7 @@ class TestMailRender(common.MailCommon):
         result = self.env['mail.render.mixin']._render_template_inline_template(self.base_inline_template_bits[3], 'res.partner', res_ids)[res_ids[0]]
         self.assertIn('26', result, 'Template Editor should be able to render inline_template code')
 
-    @users('employee')
+    @users('user_rendering_restricted')
     def test_template_rendering_various(self):
         """ Test static rendering """
         partner = self.env['res.partner'].browse(self.render_object.ids)
@@ -390,39 +348,11 @@ class TestMailRender(common.MailCommon):
             self.assertEqual(result, expected)
 
     @users('user_rendering_restricted')
-    def test_security_inline_template_restricted(self):
-        """Test if we correctly detect condition block (which might contains code)."""
-        res_ids = self.env['res.partner'].search([], limit=1).ids
-        with self.assertRaises(AccessError, msg='Simple user should not be able to render dynamic code'):
-            self.env['mail.render.mixin']._render_template_inline_template(self.base_inline_template_bits[4], 'res.partner', res_ids)
-
-    @users('employee')
     def test_is_inline_template_condition_block_unrestricted(self):
-        """Test if we correctly detect condition block (which might contains code)."""
+        """Test condition block."""
         res_ids = self.env['res.partner'].search([], limit=1).ids
         result = self.env['mail.render.mixin']._render_template_inline_template(self.base_inline_template_bits[4], 'res.partner', res_ids)[res_ids[0]]
         self.assertNotIn('Code not executed', result, 'The condition block did not work')
-
-    @users('user_rendering_restricted')
-    def test_security_qweb_template_restricted(self):
-        """Test if we correctly detect condition block (which might contains code)."""
-        res_ids = self.env['res.partner'].search([], limit=1).ids
-        with self.assertRaises(AccessError, msg='Simple user should not be able to render qweb code'):
-            self.env['mail.render.mixin']._render_template_qweb(self.base_qweb_bits[1], 'res.partner', res_ids)
-
-    @users('user_rendering_restricted')
-    def test_security_qweb_template_restricted_cached(self):
-        """Test if we correctly detect condition block (which might contains code)."""
-        res_ids = self.env['res.partner'].search([], limit=1).ids
-
-        # Render with the admin first to fill the cache
-        self.env['mail.render.mixin'].with_user(self.user_admin)._render_template_qweb(
-            self.base_qweb_bits[1], 'res.partner', res_ids)
-
-        # Check that it raise even when rendered previously by an admin
-        with self.assertRaises(AccessError, msg='Simple user should not be able to render qweb code'):
-            self.env['mail.render.mixin']._render_template_qweb(
-                self.base_qweb_bits[1], 'res.partner', res_ids)
 
     @users('employee')
     def test_security_qweb_template_unrestricted(self):

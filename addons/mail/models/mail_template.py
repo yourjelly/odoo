@@ -19,8 +19,6 @@ class MailTemplate(models.Model):
     _description = 'Email Templates'
     _order = 'name'
 
-    _unrestricted_rendering = True
-
     @api.model
     def default_get(self, fields):
         res = super(MailTemplate, self).default_get(fields)
@@ -65,6 +63,7 @@ class MailTemplate(models.Model):
     auto_delete = fields.Boolean(
         'Auto Delete', default=True,
         help="This option permanently removes any track of email after it's been sent, including from the Technical menu in the Settings, in order to preserve storage space of your Odoo database.")
+    is_system_template = fields.Boolean('System Template', help='System template have no restriction but only template editor can edit them')
     # contextual action
     ref_ir_act_window = fields.Many2one('ir.actions.act_window', 'Sidebar action', readonly=True, copy=False,
                                         help="Sidebar action to make this template available on records "
@@ -87,8 +86,10 @@ class MailTemplate(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        return super().create(vals_list)\
+        templates = super().create(vals_list)\
             ._fix_attachment_ownership()
+
+        return templates
 
     def write(self, vals):
         super().write(vals)
@@ -242,6 +243,12 @@ class MailTemplate(models.Model):
                     results[res_id]['attachments'] = attachments
 
         return multi_mode and results or results[res_ids[0]]
+
+    def _sanitize_eval_context(self, context):
+        if len(self) == 1 and self.is_system_template:
+            return context
+
+        return super()._sanitize_eval_context(context)
 
     # ------------------------------------------------------------
     # EMAIL

@@ -109,4 +109,26 @@
             <field name="perm_unlink" eval="True"/>
         </record>
 
+        <record id="mail_template_rule_user" model="ir.rule">
+            <field name="name">Only template editors can access system templates.</field>
+            <field name="model_id" ref="model_mail_template"/>
+            <field name="groups" eval="[Command.link(ref('base.group_user'))]"/>
+            <field name="domain_force">[('is_system_template', '=', False)]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+        <record id="mail_template_rule_admin" model="ir.rule">
+            <field name="name">Administrators can access all mail templates.</field>
+            <field name="model_id" ref="model_mail_template"/>
+            <field name="groups" eval="[Command.link(ref('mail.group_mail_template_editor'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
 </odoo>

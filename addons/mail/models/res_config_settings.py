@@ -16,11 +16,6 @@ class ResConfigSettings(models.TransientModel):
         'Alias Domain', config_parameter='mail.catchall.domain',
         help="If you have setup a catch-all email domain redirected to the Odoo server, enter the domain name here.")
     module_google_gmail = fields.Boolean('Support Gmail Authentication')
-    restrict_template_rendering = fields.Boolean(
-        'Restrict Template Rendering',
-        config_parameter='mail.restrict.template.rendering',
-        help='Users will still be able to render templates.\n'
-        'However only Mail Template Editors will be able to create new dynamic templates or modify existing ones.')
     use_twilio_rtc_servers = fields.Boolean(
         'Use Twilio ICE servers',
         help="If you want to use twilio as TURN/STUN server provider",

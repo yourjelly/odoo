@@ -54,12 +54,16 @@ class TestMailTemplate(MailCommon):
         mail_template = self.env['mail.template'].with_user(self.user_admin).create({'name': 'Test template'})
         self.assertEqual(mail_template.name, 'Test template')
 
-        mail_template.with_user(self.user_admin).name = 'New name'
+        mail_template.with_user(self.user_admin).write({
+            'name': 'New name',
+            'is_system_template': True,
+        })
         self.assertEqual(mail_template.name, 'New name')
+        self.assertTrue(mail_template.is_system_template)
 
         # Standard employee can not
         with self.assertRaises(AccessError):
-            self.env['mail.template'].with_user(self.user_employee).create({})
+            self.env['mail.template'].with_user(self.user_employee).create({'is_system_template': True})
 
         with self.assertRaises(AccessError):
             mail_template.with_user(self.user_employee).name = 'Test write'
