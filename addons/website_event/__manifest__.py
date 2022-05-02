@@ -11,7 +11,6 @@
     'description': "",
     'depends': [
         'event',
-        'website',
         'website_partner',
         'website_mail',
     ],

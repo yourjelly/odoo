@@ -16,7 +16,7 @@ Based on:
 
 Allows to contact directly the employee in case of unjustified absence.
     """,
-    'depends': ['hr', 'hr_holidays', 'sms'],
+    'depends': ['hr_holidays', 'sms'],
     'data': [
         'security/sms_security.xml',
         'security/ir.model.access.csv',

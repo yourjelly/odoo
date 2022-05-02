@@ -21,7 +21,6 @@ Featuring
 """,
     'depends': [
         'portal_rating',
-        'website',
         'website_mail',
         'website_profile',
     ],

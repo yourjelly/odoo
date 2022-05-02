@@ -8,10 +8,7 @@
         Manage your mailing lists from Odoo.
     """,
     'version': '1.0',
-    'depends': [
-        'mail',
-        'portal',
-    ],
+    'depends': ['portal'],
     'auto_install': False,
     'data': [
         'data/ir_cron_data.xml',
