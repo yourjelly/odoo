@@ -191,7 +191,6 @@ const KnowledgeArticleFormController = FormController.extend({
             const $dom = $(template);
             this.$(".o_favorite_container").replaceWith($dom);
             this.renderer._setTreeFavoriteListener();
-            this.renderer._renderEmojiPicker();
             this.renderer._renderEmojiPicker($dom);
         });
    },
