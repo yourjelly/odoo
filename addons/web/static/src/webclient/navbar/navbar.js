@@ -80,13 +80,15 @@ export class NavBar extends Component {
 
     set currentAppSections(_) {}
 
-    getSystrayItems() {
+    get systrayItems() {
         return systrayRegistry
             .getEntries()
             .map(([key, value]) => ({ key, ...value }))
             .filter((item) => ("isDisplayed" in item ? item.isDisplayed(this.env) : true))
             .reverse();
     }
+
+    set systrayItems(_) {}
 
     /**
      * Adapt will check the available width for the app sections to get displayed.

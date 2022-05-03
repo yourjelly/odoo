@@ -71,7 +71,7 @@ patch(NavBar.prototype, 'website_navbar', {
     /**
      * @override
      */
-    getSystrayItems() {
+    get systrayItems() {
         if (this.websiteService.currentWebsite) {
             return websiteSystrayRegistry
                 .getEntries()
