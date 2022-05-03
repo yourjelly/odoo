@@ -253,6 +253,8 @@ class configmanager(object):
                          help="specify the maximum number of physical connections to PostgreSQL")
         group.add_option("--db-template", dest="db_template", my_default="template0",
                          help="specify a custom database template to create a new database")
+        group.add_option("--no-database", dest="no_database", action="store_true", my_default=False,
+                         help="Start Odoo without database connexion.")
         parser.add_option_group(group)
 
         group = optparse.OptionGroup(parser, "Internationalisation options",
@@ -447,7 +449,7 @@ class configmanager(object):
                 'smtp_ssl_certificate_filename', 'smtp_ssl_private_key_filename',
                 'db_maxconn', 'import_partial', 'addons_path', 'upgrade_path',
                 'syslog', 'without_demo', 'screencasts', 'screenshots',
-                'dbfilter', 'log_level', 'log_db',
+                'dbfilter', 'log_level', 'log_db', 'no_database',
                 'log_db_level', 'geoip_database', 'dev_mode', 'shell_interface'
         ]
 

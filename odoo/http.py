@@ -1462,7 +1462,8 @@ class Root(object):
             current_thread.perf_t0 = time.time()
 
             explicit_session = self.setup_session(httprequest)
-            self.setup_db(httprequest)
+            if not odoo.tools.config['no_database']:
+                self.setup_db(httprequest)
             self.setup_lang(httprequest)
 
             request = self.get_request(httprequest)
@@ -1550,6 +1551,8 @@ class Root(object):
         return request.registry['ir.http'].routing_map()
 
 def db_list(force=False, httprequest=None):
+    if odoo.tools.config['no_database']:
+        return []
     dbs = odoo.service.db.list_dbs(force)
     return db_filter(dbs, httprequest=httprequest)
 
