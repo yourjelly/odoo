@@ -21,8 +21,8 @@ const unslugHtmlDataObject = (repr) => {
 };
 
 export const websiteService = {
-    dependencies: ['rpc', 'http', 'action'],
-    async start(env, { rpc, http, action }) {
+    dependencies: ['orm', 'action'],
+    async start(env, { orm, action }) {
         let websites = [];
         let currentWebsiteId;
         let currentMetadata = {};
@@ -119,10 +119,12 @@ export const websiteService = {
                 });
             },
             async fetchWebsites() {
-                websites = await rpc('/website/get_websites');
-            },
-            async sendRequest(route, params, readMethod = "text", method = "post") {
-                return http[method](route, { ...params, 'csrf_token': core.csrf_token }, readMethod);
+                const [currentWebsiteRepr, allWebsites] = await Promise.all([
+                    orm.call('website', 'get_current_website'),
+                    orm.searchRead('website', []),
+                ]);
+                websites = [...allWebsites];
+                currentWebsiteId = unslugHtmlDataObject(currentWebsiteRepr).id;
             },
             async loadWysiwyg() {
                 if (!Wysiwyg) {

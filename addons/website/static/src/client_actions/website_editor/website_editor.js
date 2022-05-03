@@ -13,7 +13,6 @@ const { Component, onWillStart, useEffect, useRef, useState } = owl;
 
 export class WebsiteEditorClientAction extends Component {
     setup() {
-        super.setup(...arguments);
         this.websiteService = useService('website');
         this.dialogService = useService('dialog');
         this.title = useService('title');
