@@ -63,10 +63,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         document.addEventListener('keydown', ev => {
-            window.parent.document.dispatchEvent(new KeyboardEvent('keydown', ev));
+            window.frameElement.dispatchEvent(new KeyboardEvent('keydown', ev));
         });
         document.addEventListener('keyup', ev => {
-            window.parent.document.dispatchEvent(new KeyboardEvent('keyup', ev));
+            window.frameElement.dispatchEvent(new KeyboardEvent('keyup', ev));
         });
     }
 });
