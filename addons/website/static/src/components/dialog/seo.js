@@ -39,7 +39,7 @@ class ImageSelector extends Component {
         this.state = useState({
             images: [
                 firstImage,
-                ...this.props.pageImages.map(({src}) => {
+                ...this.props.pageImages.map((src) => {
                     return {
                         src,
                         active: this.areSameImages(src, this.seoContext.metaImage),
@@ -110,6 +110,7 @@ class ImageSelector extends Component {
                     this.state.images.push({
                         src: image.src,
                         active: true,
+                        custom: true,
                     });
                 }
                 this.seoContext.metaImage = image.src;
@@ -379,7 +380,11 @@ export class OptimizeSEODialog extends Component {
     }
 
     getImages() {
-        return Array.from(this.pageDocumentElement.querySelectorAll('#wrap img')).filter(img => img.naturalHeight > 200 && img.naturalWidth > 200).map(({src}) => ({src}));
+        const imageEls = this.pageDocumentElement.querySelectorAll('#wrap img');
+        return [...new Set(Array.from(imageEls)
+                .filter(img => img.naturalHeight > 200 && img.naturalWidth > 200)
+                .map(({src}) => (src))
+            )];
     }
 
     getMeta({ name, property }) {

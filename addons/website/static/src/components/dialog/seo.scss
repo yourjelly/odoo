@@ -3,6 +3,11 @@
         padding-right: 25px;
         background-color: white;
     }
+
+    select {
+        background-position: bottom 50% right 1em;
+    }
+
     .o_seo_og_image {
         .o_meta_img {
             position: relative;
@@ -41,19 +46,22 @@
                     font-size: 12px;
                 }
             }
+
             .o-custom-label {
                 @include o-position-absolute($bottom: 0px);
+                cursor: pointer;
                 background: rgba(gray('800'), 0.6);
                 font-size: 12px;
             }
         }
+
         .o_meta_img_upload {
+            cursor: pointer;
             transition: 200ms;
             display: inline-block;
             padding: 23px 27px;
             border: 3px dashed lighten(gray('700'), 30%);
             vertical-align: top;
-            cursor: pointer;
             color: lighten(gray('600'), 30%);
 
             &:hover {
@@ -61,6 +69,7 @@
                 color: $o-brand-primary;
             }
         }
+
         .o_meta_active_img {
             height: 240px;
             object-fit: cover;
