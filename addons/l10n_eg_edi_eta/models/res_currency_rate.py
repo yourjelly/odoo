@@ -10,15 +10,14 @@ class ResCurrencyRate(models.Model):
 
     @api.onchange('company_rate')
     def _onchange_rate_warning(self):
-        #override
-        #We send the ETA a rate that is 5 decimal accuracy, so to ensure consistancy, Odoo should also operate with 5 decimal accuracy rate
+        # We send the ETA a rate that is 5 decimal accuracy, so to ensure consistency, Odoo should also operate with 5 decimal accuracy rate
         if self.company_id.account_fiscal_country_id.code == 'EG' and self.inverse_company_rate != round(self.inverse_company_rate, 5):
             return {
                 'warning': {
                     'title': _("Warning for %s", self.currency_id.name),
                     'message': _(
                         "Please make sure that the EGP per unit is within 5 decimal accuracy.\n"
-                        "Higher decimal accuracy might lead to inconsistancy with the ETA invoicing portal!"
+                        "Higher decimal accuracy might lead to inconsistency with the ETA invoicing portal!"
                     )
                 }
             }

@@ -12,7 +12,7 @@ ETA_TEST_RESPONSE = {
     'l10n_eg_long_id': 'LIDMN12132LASKXXA',
     'l10n_eg_internal_id': 'INTLA1212MMKA12',
     'l10n_eg_hash_key': 'BaK12lX1kASdma12',
-    'l10n_eg_submission_id': '12125523452353',
+    'l10n_eg_submission_number': '12125523452353',
 }
 ETA_TEST_SIGNATURES = [{'1': '1'}]
 COMMON_REQUEST_DICT = {
@@ -41,7 +41,7 @@ COMMON_REQUEST_DICT = {
     'signatures': ETA_TEST_SIGNATURES,
 }
 
-def mocked_action_post_sign_invoice(self):
+def mocked_action_post_sign_invoices(self):
     for invoice in self:
         eta_invoice = self.env['account.edi.format']._l10n_eg_eta_prepare_eta_invoice(self)
         eta_invoice['signatures'] = ETA_TEST_SIGNATURES
@@ -72,8 +72,8 @@ class TestEdiJson(TestEGEdiCommon):
 
     def test_1_simple_test_local_parter_no_tax(self):
         with freeze_time(self.frozen_today), patch(
-            'odoo.addons.l10n_eg_edi_eta.models.account_move.AccountMove.action_post_sign_invoice',
-            new=mocked_action_post_sign_invoice,
+            'odoo.addons.l10n_eg_edi_eta.models.account_move.AccountMove.action_post_sign_invoices',
+            new=mocked_action_post_sign_invoices,
         ), patch(
             'odoo.addons.l10n_eg_edi_eta.models.account_edi_format.AccountEdiFormat._l10n_eg_edi_post_invoice_web_service',
             new=mocked_l10n_eg_edi_post_invoice_web_service,
@@ -94,7 +94,7 @@ class TestEdiJson(TestEGEdiCommon):
                 ],
             )
             invoice.action_post()
-            invoice.action_post_sign_invoice()
+            invoice.action_post_sign_invoices()
 
             generated_files = self._process_documents_web_services(invoice, {'eg_eta'})
             self.assertTrue(generated_files)
@@ -163,8 +163,8 @@ class TestEdiJson(TestEGEdiCommon):
 
     def test_2_simple_test_local_parter_vat_14(self):
         with freeze_time(self.frozen_today), patch(
-            'odoo.addons.l10n_eg_edi_eta.models.account_move.AccountMove.action_post_sign_invoice',
-            new=mocked_action_post_sign_invoice,
+            'odoo.addons.l10n_eg_edi_eta.models.account_move.AccountMove.action_post_sign_invoices',
+            new=mocked_action_post_sign_invoices,
         ), patch(
             'odoo.addons.l10n_eg_edi_eta.models.account_edi_format.AccountEdiFormat._l10n_eg_edi_post_invoice_web_service',
             new=mocked_l10n_eg_edi_post_invoice_web_service,
@@ -189,7 +189,7 @@ class TestEdiJson(TestEGEdiCommon):
                 ],
             )
             invoice.action_post()
-            invoice.action_post_sign_invoice()
+            invoice.action_post_sign_invoices()
 
             generated_files = self._process_documents_web_services(invoice, {'eg_eta'})
             self.assertTrue(generated_files)
@@ -258,8 +258,8 @@ class TestEdiJson(TestEGEdiCommon):
 
     def test_3_simple_test_local_parter_vat_14_discount_credit_note(self):
         with freeze_time(self.frozen_today), patch(
-            'odoo.addons.l10n_eg_edi_eta.models.account_move.AccountMove.action_post_sign_invoice',
-            new=mocked_action_post_sign_invoice,
+            'odoo.addons.l10n_eg_edi_eta.models.account_move.AccountMove.action_post_sign_invoices',
+            new=mocked_action_post_sign_invoices,
         ), patch(
             'odoo.addons.l10n_eg_edi_eta.models.account_edi_format.AccountEdiFormat._l10n_eg_edi_post_invoice_web_service',
             new=mocked_l10n_eg_edi_post_invoice_web_service,
@@ -287,7 +287,7 @@ class TestEdiJson(TestEGEdiCommon):
                 ],
             )
             invoice.action_post()
-            invoice.action_post_sign_invoice()
+            invoice.action_post_sign_invoices()
 
             generated_files = self._process_documents_web_services(invoice, {'eg_eta'})
             self.assertTrue(generated_files)
@@ -359,8 +359,8 @@ class TestEdiJson(TestEGEdiCommon):
 
     def test_4_simple_test_local_parter_vat_14_discount(self):
         with freeze_time(self.frozen_today), patch(
-            'odoo.addons.l10n_eg_edi_eta.models.account_move.AccountMove.action_post_sign_invoice',
-            new=mocked_action_post_sign_invoice,
+            'odoo.addons.l10n_eg_edi_eta.models.account_move.AccountMove.action_post_sign_invoices',
+            new=mocked_action_post_sign_invoices,
         ), patch(
             'odoo.addons.l10n_eg_edi_eta.models.account_edi_format.AccountEdiFormat._l10n_eg_edi_post_invoice_web_service',
             new=mocked_l10n_eg_edi_post_invoice_web_service,
@@ -387,7 +387,7 @@ class TestEdiJson(TestEGEdiCommon):
                 ],
             )
             invoice.action_post()
-            invoice.action_post_sign_invoice()
+            invoice.action_post_sign_invoices()
 
             generated_files = self._process_documents_web_services(invoice, {'eg_eta'})
             self.assertTrue(generated_files)
@@ -458,8 +458,8 @@ class TestEdiJson(TestEGEdiCommon):
 
     def test_5_simple_test_foreign_partner_exempt_discount(self):
         with freeze_time(self.frozen_today), patch(
-            'odoo.addons.l10n_eg_edi_eta.models.account_move.AccountMove.action_post_sign_invoice',
-            new=mocked_action_post_sign_invoice,
+            'odoo.addons.l10n_eg_edi_eta.models.account_move.AccountMove.action_post_sign_invoices',
+            new=mocked_action_post_sign_invoices,
         ), patch(
             'odoo.addons.l10n_eg_edi_eta.models.account_edi_format.AccountEdiFormat._l10n_eg_edi_post_invoice_web_service',
             new=mocked_l10n_eg_edi_post_invoice_web_service,
@@ -486,7 +486,7 @@ class TestEdiJson(TestEGEdiCommon):
                 ],
             )
             invoice.action_post()
-            invoice.action_post_sign_invoice()
+            invoice.action_post_sign_invoices()
 
             generated_files = self._process_documents_web_services(invoice, {'eg_eta'})
             self.assertTrue(generated_files)
@@ -557,8 +557,8 @@ class TestEdiJson(TestEGEdiCommon):
 
     def test_6_simple_test_foreign_parter_exempt_discount_foreign_currency(self):
         with freeze_time(self.frozen_today), patch(
-            'odoo.addons.l10n_eg_edi_eta.models.account_move.AccountMove.action_post_sign_invoice',
-            new=mocked_action_post_sign_invoice,
+            'odoo.addons.l10n_eg_edi_eta.models.account_move.AccountMove.action_post_sign_invoices',
+            new=mocked_action_post_sign_invoices,
         ), patch(
             'odoo.addons.l10n_eg_edi_eta.models.account_edi_format.AccountEdiFormat._l10n_eg_edi_post_invoice_web_service',
             new=mocked_l10n_eg_edi_post_invoice_web_service,
@@ -586,7 +586,7 @@ class TestEdiJson(TestEGEdiCommon):
                 ],
             )
             invoice.action_post()
-            invoice.action_post_sign_invoice()
+            invoice.action_post_sign_invoices()
 
             generated_files = self._process_documents_web_services(invoice, {'eg_eta'})
             self.assertTrue(generated_files)
@@ -666,8 +666,8 @@ class TestEdiJson(TestEGEdiCommon):
 
     def test_7_simple_test_foreign_parter_exempt_discount_foreign_currency_credit_note(self):
         with freeze_time(self.frozen_today), patch(
-            'odoo.addons.l10n_eg_edi_eta.models.account_move.AccountMove.action_post_sign_invoice',
-            new=mocked_action_post_sign_invoice,
+            'odoo.addons.l10n_eg_edi_eta.models.account_move.AccountMove.action_post_sign_invoices',
+            new=mocked_action_post_sign_invoices,
         ), patch(
             'odoo.addons.l10n_eg_edi_eta.models.account_edi_format.AccountEdiFormat._l10n_eg_edi_post_invoice_web_service',
             new=mocked_l10n_eg_edi_post_invoice_web_service,
@@ -696,7 +696,7 @@ class TestEdiJson(TestEGEdiCommon):
                 ],
             )
             invoice.action_post()
-            invoice.action_post_sign_invoice()
+            invoice.action_post_sign_invoices()
 
             generated_files = self._process_documents_web_services(invoice, {'eg_eta'})
             self.assertTrue(generated_files)
@@ -774,10 +774,10 @@ class TestEdiJson(TestEGEdiCommon):
                 },
             )
 
-    def test_8_test_serilization_function(self):
+    def test_8_test_serialization_function(self):
         with freeze_time(self.frozen_today), patch(
-            'odoo.addons.l10n_eg_edi_eta.models.account_move.AccountMove.action_post_sign_invoice',
-            new=mocked_action_post_sign_invoice,
+            'odoo.addons.l10n_eg_edi_eta.models.account_move.AccountMove.action_post_sign_invoices',
+            new=mocked_action_post_sign_invoices,
         ), patch(
             'odoo.addons.l10n_eg_edi_eta.models.account_edi_format.AccountEdiFormat._l10n_eg_edi_post_invoice_web_service',
             new=mocked_l10n_eg_edi_post_invoice_web_service,
@@ -806,7 +806,7 @@ class TestEdiJson(TestEGEdiCommon):
                 ],
             )
             invoice.action_post()
-            invoice.action_post_sign_invoice()
+            invoice.action_post_sign_invoices()
 
             generated_files = self._process_documents_web_services(invoice, {'eg_eta'})
             self.assertTrue(generated_files)

@@ -16,12 +16,12 @@
                             <span class="fa fa-lg fa-building-o" title="Values set here are company-specific." aria-label="Values set here are company-specific." groups="base.group_multi_company" role="img"/>
                             <div class="text-muted">
                                     Enter your API credentials to enable ETA E-Invoicing.
-                                    <field name="country_code"/>
+                                    <field name="country_code" invisible="1"/>
                             </div>
                             <div class="content-group">
                                 <div class="row mt16">
                                     <label for="l10n_eg_production_env" class="col-lg-6 o_light_label"/>
-                                    <field name="l10n_eg_production_env" help="Check to start sending invoices to your e-invocing production enviroment"/>
+                                    <field name="l10n_eg_production_env" help="Check to start sending invoices to your e-invoicing production environment"/>
                                 </div>
                                 <div class="row">
                                     <label for="l10n_eg_client_identifier" class="col-lg-4 o_light_label"/>

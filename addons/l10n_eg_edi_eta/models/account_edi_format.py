@@ -59,6 +59,7 @@ class AccountEdiFormat(models.Model):
 
     @api.model
     def _l10n_eg_edi_round(self, amount):
+        """ Odoo does half-up with float_round instead of round which could round down because of machine representation."""
         return float(float_repr(float_round(amount, precision_digits=5), precision_digits=5))
 
     @api.model
@@ -83,11 +84,11 @@ class AccountEdiFormat(models.Model):
             }
         if response_data.get('submissionId') is not None and response_data.get('acceptedDocuments'):
             invoice_json['response'] = {
-                'l10n_eg_uuid': response_data.get('acceptedDocuments')[0].get('uuid'),
-                'l10n_eg_long_id': response_data.get('acceptedDocuments')[0].get('longId'),
-                'l10n_eg_internal_id': response_data.get('acceptedDocuments')[0].get('internalId'),
-                'l10n_eg_hash_key': response_data.get('acceptedDocuments')[0].get('hashKey'),
-                'l10n_eg_submission_id': response_data.get('submissionId'),
+                'l10n_eg_uuid': response_data['acceptedDocuments'][0].get('uuid'),
+                'l10n_eg_long_id': response_data['acceptedDocuments'][0].get('longId'),
+                'l10n_eg_internal_id': response_data['acceptedDocuments'][0].get('internalId'),
+                'l10n_eg_hash_key': response_data['acceptedDocuments'][0].get('hashKey'),
+                'l10n_eg_submission_number': response_data['submissionId'],
             }
             invoice.l10n_eg_eta_json_doc_id.raw = json.dumps(invoice_json)
             return {'attachment': invoice.l10n_eg_eta_json_doc_id}
@@ -121,7 +122,7 @@ class AccountEdiFormat(models.Model):
         access_data = self._l10n_eg_eta_get_access_token(invoice)
         if access_data.get('error'):
             return access_data
-        request_url = f'%s/api/v1.0/documentsubmissions/{url_quote(invoice.l10n_eg_submission_id)}'
+        request_url = f'%s/api/v1.0/documentsubmissions/{url_quote(invoice.l10n_eg_submission_number)}'
         request_data = {
             'body': None,
             'header': {'Content-Type': 'application/json', 'Authorization': 'Bearer %s' % access_data.get('access_token')}
@@ -160,7 +161,7 @@ class AccountEdiFormat(models.Model):
         return {'access_token' : response_data.get('response').json().get('access_token')}
 
     @api.model
-    def _l10n_eg_get_eta_invoice_pdf_request(self, invoice):
+    def _l10n_eg_get_eta_invoice_pdf(self, invoice):
         access_data = self._l10n_eg_eta_get_access_token(invoice)
         if access_data.get('error'):
             return access_data
@@ -184,10 +185,6 @@ class AccountEdiFormat(models.Model):
         if (invoice and invoice.amount_total >= invoice.company_id.l10n_eg_invoicing_threshold) or self._l10n_eg_get_partner_tax_type(partner_id, issuer) != 'P':
             fields.append('vat')
         return all(partner_id[field] for field in fields)
-
-    @api.model
-    def _l10n_eg_get_eta_invoice_pdf(self, invoice):
-        return self._l10n_eg_get_eta_invoice_pdf_request(invoice)
 
     @api.model
     def _l10n_eg_eta_prepare_eta_invoice(self, invoice):
@@ -268,7 +265,7 @@ class AccountEdiFormat(models.Model):
             totals['discount_total'] += discount_amount
             totals['total_price_subtotal_before_discount'] += price_subtotal_before_discount
             if invoice.currency_id != self.env.ref('base.EGP'):
-                lines[-1]['unitValue']['currencyExchangeRate'] = invoice._exchange_currency_rate()
+                lines[-1]['unitValue']['currencyExchangeRate'] = invoice._l10n_eg_edi_exchange_currency_rate()
                 lines[-1]['unitValue']['amountSold'] = line.price_unit
         return lines, totals
 
@@ -297,10 +294,7 @@ class AccountEdiFormat(models.Model):
         if issuer:
             address['address']['branchID'] = invoice.journal_id.l10n_eg_branch_identifier or ''
         individual_type = self._l10n_eg_get_partner_tax_type(partner, issuer)
-        if (
-            invoice.amount_total >= invoice.company_id.l10n_eg_invoicing_threshold
-            or individual_type != 'P'
-        ):
+        if invoice.amount_total >= invoice.company_id.l10n_eg_invoicing_threshold or individual_type != 'P':
             address['type'] = individual_type or ''
             address['id'] = partner.vat or ''
         return address
@@ -338,24 +332,25 @@ class AccountEdiFormat(models.Model):
         return errors
 
     def _post_invoice_edi(self, invoices):
-        # OVERRIDE
         if self.code != 'eg_eta':
             return super()._post_invoice_edi(invoices)
         invoice = invoices  # Batching is disabled for this EDI.
 
         # In case we have already sent it, but have not got a final answer yet.
-        if invoice.l10n_eg_submission_id:
+        if invoice.l10n_eg_submission_number:
             return {invoice: self._l10n_eg_get_einvoice_status(invoice)}
 
         if not invoice.l10n_eg_eta_json_doc_id:
-            return {invoice:{
+            return {
+                invoice: {
                     'error':  _("An error occured in created the ETA invoice, please retry signing"),
                     'blocking_level': 'info'
                 }
             }
         invoice_json = json.loads(invoice.l10n_eg_eta_json_doc_id.raw)['request']
         if not invoice_json.get('signatures'):
-            return {invoice: {
+            return {
+                invoice: {
                     'error':  _("Please make sure the invoice is signed"),
                     'blocking_level': 'info'
                 }
@@ -363,7 +358,6 @@ class AccountEdiFormat(models.Model):
         return {invoice: self._l10n_eg_edi_post_invoice_web_service(invoice)}
 
     def _cancel_invoice_edi(self, invoices):
-        # OVERRIDE
         if self.code != 'eg_eta':
             return super()._cancel_invoice_edi(invoices)
         invoice = invoices
@@ -375,12 +369,7 @@ class AccountEdiFormat(models.Model):
         return json.dumps(self._l10n_eg_eta_prepare_eta_invoice(move)).encode()
 
     def _is_compatible_with_journal(self, journal):
-        # OVERRIDE
         if self.code != 'eg_eta':
             return super()._is_compatible_with_journal(journal)
         return journal.country_code == 'EG' and journal.type == 'sale'
 
-    def _is_embedding_to_invoice_pdf_needed(self):
-        # OVERRIDE
-        self.ensure_one()
-        return self.code == 'eg_eta' or super()._is_embedding_to_invoice_pdf_needed()

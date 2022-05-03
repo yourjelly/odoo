@@ -11,4 +11,4 @@ from . import account_journal
 from . import eta_thumb_drive
 from . import res_currency_rate
 from . import product_template
-from . import res_config_setting
+from . import res_config_settings

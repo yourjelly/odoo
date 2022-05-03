@@ -12,7 +12,6 @@
                     <field name="access_token" password="True"/>
                     <button name="action_set_certificate_from_usb" type="object" string="Get certificate" attrs="{'invisible': [('certificate', '!=', False)]}"/>
                 </tree>
-
             </field>
         </record>
 

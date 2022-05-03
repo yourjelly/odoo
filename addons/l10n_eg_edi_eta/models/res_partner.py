@@ -12,9 +12,7 @@ class ResPartner(models.Model):
 
     @api.model
     def _commercial_fields(self):
-        #OVERRIDE
         return super()._commercial_fields() + ['l10n_eg_building_no']
 
     def _address_fields(self):
-        #OVERRIDE
         return super()._address_fields() + ['l10n_eg_building_no']

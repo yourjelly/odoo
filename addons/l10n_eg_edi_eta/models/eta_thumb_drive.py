@@ -3,8 +3,8 @@
 import base64
 import hashlib
 import json
-
 import pytz
+
 from asn1crypto import cms, core, x509, algos, tsp
 
 from odoo import models, fields, _
@@ -25,7 +25,7 @@ class EtaThumbDrive(models.Model):
         ('user_drive_uniq', 'unique (user_id, company_id)', 'You can only have one thumb drive per user per company!'),
     ]
 
-    def action_sign_invoice(self, invoice_ids):
+    def _action_sign_invoices(self, invoice_ids):
         self.ensure_one()
         sign_host = self._get_host()
 
@@ -63,11 +63,13 @@ class EtaThumbDrive(models.Model):
         }
 
     def set_certificate(self, certificate):
+        """ This is called from the browser to set the certficate"""
         self.ensure_one()
         self.certificate = certificate.encode()
         return True
 
     def set_signature_data(self, invoices):
+        """ This is called from the browser with the signed data from the local server """
         invoices = json.loads(invoices)
         for key, value in invoices.items():
             invoice_id = self.env['account.move'].browse(int(key))
@@ -83,6 +85,8 @@ class EtaThumbDrive(models.Model):
         return True
 
     def _get_host(self):
+        # It should be on the loopback address or with a fully valid https host
+        # in order to be an exception to the mixed-content restrictions
         sign_host = self.env['ir.config_parameter'].sudo().get_param('l10n_eg_eta.sign.host', 'http://localhost:8069')
         if not sign_host:
             raise ValidationError(_('Please define the host of sign tool.'))

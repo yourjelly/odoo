@@ -7,7 +7,7 @@
             <field name="model_id" ref="account.model_account_move"/>
             <field name="binding_model_id" ref="account.model_account_move"/>
             <field name="code">
-                action = records.action_post_sign_invoice()
+                action = records.action_post_sign_invoices()
             </field>
         </record>
 
@@ -19,7 +19,7 @@
             <field name="priority" eval="40"/>
             <field name="arch" type="xml">
                 <xpath expr="//header/button[@name='action_post']" position="after">
-                    <button name="action_post_sign_invoice" type="object"
+                    <button name="action_post_sign_invoices" type="object"
                             class="oe_highlight"
                             groups="account.group_account_invoice"
                             string="Sign Invoice"
@@ -30,7 +30,7 @@
                         <group>
                             <group>
                                 <field name="l10n_eg_uuid" readonly="1"/>
-                                <field name="l10n_eg_submission_id" readonly="1"/>
+                                <field name="l10n_eg_submission_number" readonly="1"/>
                             </group>
                             <group>
                                 <field name="l10n_eg_eta_json_doc_id" readonly="1" invisible="1"/>
@@ -42,7 +42,7 @@
                                         class="oe_link"
                                         icon="fa-clone"
                                         string="Get ETA Invoice PDF"
-                                        attrs="{'invisible': ['|', ('country_code', '!=', 'EG'), ('edi_state', '!=', 'sent')]}"/>
+                                        attrs="{'invisible': [('edi_state', '!=', 'sent')]}"/>
                             </group>
                         </group>
                     </page>

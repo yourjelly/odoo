@@ -26,7 +26,7 @@
         'views/account_journal_view.xml',
         'views/eta_thumb_drive.xml',
         'views/product_template_views.xml',
-        'views/res_config_setting_view.xml',
+        'views/res_config_settings_view.xml',
         'data/res_country_data.xml',
     ],
     'assets': {
