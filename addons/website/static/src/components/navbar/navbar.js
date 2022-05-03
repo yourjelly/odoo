@@ -20,10 +20,6 @@ patch(NavBar.prototype, 'website_navbar', {
         this.websiteContext = useState(this.websiteService.context);
         this.aceEditor = WebsiteAceEditor;
 
-        if (this.env.debug) {
-            registry.category('website_systray').add('DebugMenu', registry.category('systray').get('web.debug_mode_menu'), { sequence: 100 });
-        }
-
         useBus(websiteSystrayRegistry, 'EDIT-WEBSITE', () => this.render(true));
         useBus(websiteSystrayRegistry, 'CONTENT-UPDATED', () => this.render(true));
 

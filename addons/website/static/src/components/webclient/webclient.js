@@ -4,6 +4,7 @@ import { WebClient } from '@web/webclient/webclient';
 import { FullscreenIndication } from '@website/components/fullscreen_indication/fullscreen_indication';
 import { patch } from 'web.utils';
 import { useService } from '@web/core/utils/hooks';
+import { registry } from "@web/core/registry";
 
 const { useState, useExternalListener } = owl;
 
@@ -23,6 +24,10 @@ patch(WebClient.prototype, 'website_web_client', {
                 document.body.classList.toggle('o_website_fullscreen', this.fullscreenState.isFullscreen);
             }
         });
+
+        if (this.env.debug) {
+            registry.category('website_systray').add('DebugMenu', registry.category('systray').get('web.debug_mode_menu'), { sequence: 100 });
+        }
     },
 });
 
