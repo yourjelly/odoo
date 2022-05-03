@@ -11,7 +11,7 @@ patch(NavBar.prototype, 'website_links_navbar', {
 
         onWillStart(() => {
             this.websiteEditingMenus['website_links.menu_link_tracker'] = {
-                openWidget: () => this.websiteService.goToWebsite({ path: '/r' }),
+                openWidget: () => this.websiteService.goToWebsite({ path: `/r?u=${this.websiteService.contentWindow.location.href}` }),
                 isDisplayed: () => true,
                 options: () => {},
             };
