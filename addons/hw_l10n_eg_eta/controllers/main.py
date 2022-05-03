@@ -53,8 +53,7 @@ class EtaUsbController(http.Controller):
     @http.route('/hw_l10n_eg_eta/sign', type='http', auth='none', cors='*', csrf=False, save_session=False)
     def eta_sign(self, pin, access_token, invoices):
         """
-        Gets cades-bes binaries from the odoo server for each invoice, signs each of them individually using the token
-        then returns the signatures
+        Check if the access_token is valid and sign the invoices accessing the usb key with the pin.
         @param pin: pin of the token
         @param access_token: token shared with the main odoo instance
         @param invoices: dictionary of invoices. Keys are invoices ids, value are the base64 encoded binaries to sign
