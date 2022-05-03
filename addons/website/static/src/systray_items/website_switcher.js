@@ -13,9 +13,11 @@ class WebsiteSwitcherSystray extends Component {
     }
 
     getElements() {
-        return this.websiteService.websites.map(({name, id}) => ({
-            name,
-            callback: () => this.websiteService.goToWebsite({ websiteId: id }),
+        return this.websiteService.websites.map((website) => ({
+            name: website.name,
+            callback: () => {
+                this.websiteService.goToWebsite({ websiteId: website.id });
+            },
         }));
     }
 }
