@@ -85,7 +85,7 @@ patch(NavBar.prototype, 'website_navbar', {
     /**
      * @override
      */
-    getCurrentAppSections() {
+    get currentAppSections() {
         const currentAppSections = this._super();
         if (this.currentApp && this.currentApp.xmlid === 'website.menu_website_configuration') {
             return this.filterWebsiteMenus(currentAppSections).filter(section => section.childrenTree.length);

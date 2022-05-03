@@ -71,12 +71,14 @@ export class NavBar extends Component {
         return this.menuService.getCurrentApp();
     }
 
-    getCurrentAppSections() {
+    get currentAppSections() {
         return (
             (this.currentApp && this.menuService.getMenuAsTree(this.currentApp.id).childrenTree) ||
             []
         );
     }
+
+    set currentAppSections(_) {}
 
     getSystrayItems() {
         return systrayRegistry
