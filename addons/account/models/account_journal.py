@@ -459,7 +459,11 @@ class AccountJournal(models.Model):
 
     def _get_alias_values(self, type, alias_name=None):
         if not alias_name:
-            alias_name = self.name
+            try:
+                remove_accents(alias_name).encode('ascii')
+                alias_name = self.name
+            except UnicodeEncodeError:
+                alias_name = self.code
             if self.company_id != self.env.ref('base.main_company'):
                 alias_name += '-' + str(self.company_id.name)
         try:
