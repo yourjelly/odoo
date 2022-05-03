@@ -275,7 +275,7 @@ class LunchSupplier(models.Model):
             'address': site.address,
         } for site in sites]
 
-        self.env.ref('lunch.lunch_order_mail_supplier').with_context(
+        self.env.ref('lunch.lunch_order_mail_supplier').sudo().with_context(
             order=order, lines=email_orders, sites=email_sites
         ).send_mail(self.id)
 

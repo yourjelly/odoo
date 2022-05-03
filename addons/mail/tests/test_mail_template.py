@@ -10,8 +10,6 @@ class TestMailTemplate(MailCommon):
     @classmethod
     def setUpClass(cls):
         super(TestMailTemplate, cls).setUpClass()
-        # Enable the Jinja rendering restriction
-        cls.env['ir.config_parameter'].set_param('mail.restrict.template.rendering', True)
         cls.user_employee.groups_id -= cls.env.ref('mail.group_mail_template_editor')
 
         cls.mail_template = cls.env['mail.template'].create({
@@ -37,13 +35,13 @@ class TestMailTemplate(MailCommon):
             'composition_mode': 'mass_mail',
             'model': 'res.partner',
             'template_id': self.mail_template.id,
-            'subject': '{{ 1 + 5 }}',
+            'subject': '{{ 1 + 8 }}',  # not the same subject as the template
         })
 
         values = mail_compose_message.get_mail_values(self.partner_employee.ids)
 
-        self.assertEqual(values[self.partner_employee.id]['subject'], '6', 'We must trust mail template values')
-        self.assertIn('13', values[self.partner_employee.id]['body_html'], 'We must trust mail template values')
+        self.assertEqual(values[self.partner_employee.id]['subject'], '9', 'Must have rendered the template')
+        self.assertIn('13', values[self.partner_employee.id]['body_html'], 'Must have rendered the template')
 
     def test_mail_template_acl(self):
         # Sanity check

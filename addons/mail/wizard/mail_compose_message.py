@@ -204,6 +204,20 @@ class MailComposer(models.TransientModel):
     # ------------------------------------------------------------
     # CRUD / ORM
     # ------------------------------------------------------------
+    @api.model_create_multi
+    def create(self, vals_list):
+        for values in vals_list:
+            if 'template_id' not in values or 'composition_mode' not in values:
+                continue
+
+            template_values = self._onchange_template_id(
+                values['template_id'], values['composition_mode'],
+                values.get('model'), values.get('res_id'))['value']
+
+            for field in template_values:
+                if field not in values:
+                    values[field] = template_values[field]
+        return super().create(vals_list)
 
     @api.autovacuum
     def _gc_lost_attachments(self):

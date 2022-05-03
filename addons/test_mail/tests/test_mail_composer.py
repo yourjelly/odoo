@@ -615,6 +615,7 @@ class TestComposerInternals(TestMailComposer):
     @mute_logger('odoo.tests', 'odoo.addons.mail.models.mail_mail', 'odoo.models.unlink')
     def test_mail_composer_rights_attachments(self):
         """ Ensure a user without write access to a template can send an email"""
+        self.template.sudo().is_system_template = True
         template_1 = self.template.copy({
             'report_name': 'TestReport for {{ object.name }} (thanks TDE).html',  # test cursor forces html
             'report_template': self.test_report.id,

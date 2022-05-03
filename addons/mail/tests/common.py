@@ -961,14 +961,12 @@ class MailCommon(common.TransactionCase, MailCase):
         cls.user_root = cls.env.ref('base.user_root')
         cls.partner_root = cls.user_root.partner_id
 
-        cls.env['ir.config_parameter'].set_param('mail.restrict.template.rendering', False)
-
         # test standard employee
         cls.user_employee = mail_new_test_user(
             cls.env,
             company_id=cls.company_admin.id,
             country_id=cls.env.ref('base.be').id,
-            groups='base.group_user,mail.group_mail_template_editor',
+            groups='base.group_user',
             login='employee',
             name='Ernest Employee',
             notification_type='inbox',

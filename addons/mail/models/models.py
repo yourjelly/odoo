@@ -258,7 +258,7 @@ class BaseModel(models.AbstractModel):
 
     def _template_allowed_fields(self):
         self.ensure_one()
-        # Fields allowed to be read for any models
+        # Fields allowed to be read on any models
         return [
             'id', 'name', 'display_name', 'lang', 'lang_id', 'color', 'active', 'date',
             'title', 'tz', 'user_id', 'company_id', 'team_id', 'partner_id', 'parent_id',
@@ -274,7 +274,7 @@ class BaseModel(models.AbstractModel):
 
         # Those models can be read on any fields
         ALLOWED_MODELS = ('res.partner', 'res.lang', 'res.country', 'res.currency')
-        # Those types can be read on any models, for any fields
+        # Those types can be read on any models, on any fields
         ALLOWED_TYPES = (bool, int, float, datetime.datetime, datetime.date)
 
         class TemplateRecord:
@@ -282,8 +282,23 @@ class BaseModel(models.AbstractModel):
                 self.__record = record
                 self.__allowed_fields = record._template_allowed_fields()
 
-            def __getattr__(self, field_name):
+            def __getitem__(self, field_name):
+                """Read a field with record[field_name]."""
                 assert field_name in self.__record._fields
+                return self.__getattr__(field_name)
+
+            def __getattr__(self, field_name):
+                if field_name == '_fields':
+                    # TODO: needed for t-field
+                    # e.g. /odoo/addons/digest/tests/test_digest.py
+                    # is it safe ?
+                    return self.__record._fields
+
+                if field_name == 'with_context':
+                    return lambda *args, **kwargs: TemplateRecord(self.__record.with_context(*args, **kwargs))
+
+                if field_name not in self.__record._fields:
+                    _logger.warning('Field %s does not exist on the model %s', field_name, self.__record._name)
 
                 value = self.__record[field_name]
 
