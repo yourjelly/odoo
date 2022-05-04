@@ -364,13 +364,8 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
                 'group_payment': False,
                 'amount': 1200.0
             })
+        self.assertRecordValues(payment_register, [{'payment_difference': 1800.0}])
         payments = payment_register._create_payments()
-        self.assertRecordValues(payment_register, [
-            {
-                'payment_difference': 1800.0  # Test _compute_payment_difference
-            }
-        ])
-
         self.assertRecordValues(payments, [
             {
                 'ref': 'INV/2017/00001',
@@ -1043,7 +1038,10 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
         # 600.0 USD should be computed correctly to fully paid the invoices.
         payment = self.env['account.payment.register']\
             .with_context(active_model='account.move', active_ids=invoice.ids)\
-            .create({'currency_id': self.company_data['currency'].id})\
+            .create({
+                'currency_id': self.company_data['currency'].id,
+                'amount': 600.0,
+            })\
             ._create_payments()
 
         lines = (invoice + payment.move_id).line_ids.filtered(lambda x: x.account_internal_type == 'receivable')

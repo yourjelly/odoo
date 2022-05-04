@@ -414,42 +414,47 @@ class AccountPaymentRegister(models.TransientModel):
                 wizard.show_partner_bank_account = wizard.payment_method_line_id.code in self.env['account.payment']._get_method_codes_using_bank_account()
             wizard.require_partner_bank_account = wizard.payment_method_line_id.code in self.env['account.payment']._get_method_codes_needing_bank_account()
 
+    def _get_amount_to_fully_reconciled(self, batch_result):
+        self.ensure_one()
+        amount_sign = 1 if sum(batch_result['lines'].mapped('balance')) < 0.0 else -1
+
+        sentinel_amount_currency = amount_sign * 9999999
+        sentinel_balance = self.currency_id._convert(
+            sentinel_amount_currency,
+            self.company_id.currency_id,
+            self.company_id,
+            self.payment_date,
+        )
+        payment_vals = {
+            'balance': sentinel_balance,
+            'amount_currency': sentinel_amount_currency,
+            'amount_residual': sentinel_balance,
+            'amount_residual_currency': sentinel_amount_currency,
+            'company': self.company_id,
+            'currency': self.currency_id,
+            'date': self.payment_date,
+        }
+        counterpart_vals_list = [
+            {
+                'balance': x.balance,
+                'amount_currency': x.amount_currency,
+                'amount_residual': x.amount_residual,
+                'amount_residual_currency': x.amount_residual_currency,
+                'company': x.company_id,
+                'currency': x.currency_id,
+                'date': x.date,
+            }
+            for x in batch_result['lines']
+        ]
+        self.env['account.move.line']._prepare_reconciliation_partials(counterpart_vals_list + [payment_vals])
+        return abs(sentinel_amount_currency - payment_vals['amount_residual_currency'])
+
     @api.depends('can_edit_wizard', 'source_amount', 'source_amount_currency', 'source_currency_id', 'company_id', 'currency_id', 'payment_date')
     def _compute_amount(self):
         for wizard in self:
             if wizard.source_currency_id and wizard.can_edit_wizard:
-                comp_curr = wizard.company_id.currency_id
-                if wizard.source_currency_id == wizard.currency_id:
-                    # Same currency.
-                    wizard.amount = wizard.source_amount_currency
-                elif wizard.source_currency_id != comp_curr and wizard.currency_id == comp_curr:
-                    # Foreign currency on source line but the company currency one on the opposite line.
-                    wizard.amount = wizard.source_currency_id._convert(
-                        wizard.source_amount_currency,
-                        comp_curr,
-                        wizard.company_id,
-                        wizard.payment_date,
-                    )
-                elif wizard.source_currency_id == comp_curr and wizard.currency_id != comp_curr:
-                    # Company currency on source line but a foreign currency one on the opposite line.
-                    batch = wizard._get_batches()[0]
-                    wizard.amount = abs(sum(
-                        comp_curr._convert(
-                            aml.amount_residual,
-                            wizard.currency_id,
-                            wizard.company_id,
-                            aml.date,
-                        )
-                        for aml in batch['lines']
-                    ))
-                else:
-                    # Foreign currency on payment different than the one set on the journal entries.
-                    wizard.amount = comp_curr._convert(
-                        wizard.source_amount,
-                        wizard.currency_id,
-                        wizard.company_id,
-                        wizard.payment_date,
-                    )
+                batch_result = wizard._get_batches()[0]
+                wizard.amount = wizard._get_amount_to_fully_reconciled(batch_result)
             else:
                 # The wizard is not editable so no partial payment allowed and then, 'amount' is not used.
                 wizard.amount = None
@@ -458,35 +463,9 @@ class AccountPaymentRegister(models.TransientModel):
     def _compute_payment_difference(self):
         for wizard in self:
             if wizard.can_edit_wizard:
-                comp_curr = wizard.company_id.currency_id
-                if wizard.source_currency_id == wizard.currency_id:
-                    # Same currency.
-                    wizard.payment_difference = wizard.source_amount_currency - wizard.amount
-                elif wizard.source_currency_id != comp_curr and wizard.currency_id == comp_curr:
-                    # Foreign currency on source line but the company currency one on the opposite line.
-                    rate = self.env['res.currency']._get_conversion_rate(
-                        wizard.company_id.currency_id,
-                        wizard.source_currency_id,
-                        wizard.company_id,
-                        wizard.payment_date,
-                    )
-                    amount_payment_foreign_curr = wizard.source_currency_id.round(wizard.amount * rate)
-                    residual_foreign_curr = wizard.source_amount_currency - amount_payment_foreign_curr
-                    wizard.payment_difference = wizard.company_id.currency_id.round(residual_foreign_curr / rate)
-                elif wizard.source_currency_id == comp_curr and wizard.currency_id != comp_curr:
-                    # Company currency on source line but a foreign currency one on the opposite line.
-                    rate = self.env['res.currency']._get_conversion_rate(
-                        wizard.company_id.currency_id,
-                        wizard.source_currency_id,
-                        wizard.company_id,
-                        wizard.payment_date,
-                    )
-                    amount_to_pay_foreign_curr = wizard.currency_id.round(wizard.source_amount * rate)
-                    wizard.payment_difference = amount_to_pay_foreign_curr - wizard.amount
-                else:
-                    # Foreign currency on payment different than the one set on the journal entries.
-                    amount_payment_currency = wizard.company_id.currency_id._convert(wizard.source_amount, wizard.currency_id, wizard.company_id, wizard.payment_date)
-                    wizard.payment_difference = amount_payment_currency - wizard.amount
+                batch_result = wizard._get_batches()[0]
+                amount_to_full_reconcile = wizard._get_amount_to_fully_reconciled(batch_result)
+                wizard.payment_difference = amount_to_full_reconcile - wizard.amount
             else:
                 wizard.payment_difference = 0.0
 
