@@ -129,30 +129,6 @@ const KnowledgeFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin, {
     },
 
     /**
-     * When the user clicks on a new icon
-     * @param {Event} event
-     */
-    _onIconClick: async function (event) {
-        event.stopPropagation();
-        const $target = $(event.target);
-        const $li = $target.closest('li');
-        const id = $li.data('article-id');
-        const name = $target.data('icon-name');
-        const result = await this._rpc({
-            model: 'knowledge.article',
-            method: 'write',
-            args: [[id], { icon: name }],
-        });
-        if (result) {
-            this.$el.find(`[data-article-id="${id}"]`).each(function() {
-                const $icon = $(this).find('.o_article_icon:first i');
-                $icon.removeClass();
-                $icon.addClass(`fa fa-fw ${name}`);
-            });
-        }
-    },
-
-    /**
      * Callback function called when the user creates a new article.
      * @param {Event} event
      */
