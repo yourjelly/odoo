@@ -1,3 +1,11 @@
+@mixin o-iframe-position($height) {
+    $width: $height * (9 / 16);
+    height: $height;
+    width: $width;
+    left: calc(50% - #{$width} / 2);
+    top: calc(50% - #{$height} / 2);
+}
+
 .o_website_editor {
     position: relative;
     height: 100%;
@@ -14,16 +22,14 @@
         height: 100%;
 
         &.o_is_mobile {
-            $mobile-preview-width: 416px;
-            $mobile-preview-height: 735px;
-
             @include media-breakpoint-up(md) {
                 border-radius: 25px;
-                height: $mobile-preview-height;
-                width: $mobile-preview-width;
-                left: calc(50% - #{$mobile-preview-width} / 2);
-                top: calc(50% - #{$mobile-preview-height} / 2);
                 box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
+                @include o-iframe-position(720px);
+
+                @media(max-height: calc(720px + #{$o-navbar-height})) {
+                    @include o-iframe-position(520px);
+                }
             }
         }
     }
