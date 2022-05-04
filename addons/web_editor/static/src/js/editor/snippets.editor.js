@@ -370,8 +370,10 @@ var SnippetEditor = Widget.extend({
         const offset = $target.offset();
 
         // If the target is in an iframe, we need the iframe offset.
-        if ($target[0].ownerDocument.defaultView.frameElement) {
-            const { x, y } = $target[0].ownerDocument.defaultView.frameElement.getBoundingClientRect();
+        const targetWindow = $target[0].ownerDocument.defaultView;
+        const editorWindow = this.$el[0].ownerDocument.defaultView;
+        if (targetWindow.frameElement && targetWindow !== editorWindow) {
+            const { x, y } = targetWindow.frameElement.getBoundingClientRect();
             offset.left += x;
             offset.top += y;
         }
@@ -1786,7 +1788,13 @@ var SnippetsMenu = Widget.extend({
         // Cleaning consecutive zone and up zones placed between floating or
         // inline elements. We do not like these kind of zones.
         $zones = this.getEditableArea().find('.oe_drop_zone:not(.oe_vertical)');
-        const iframeOffset = $zones[0] && $zones[0].ownerDocument.defaultView.frameElement.getBoundingClientRect();
+
+        let iframeOffset;
+        const bodyWindow = this.$body[0].ownerDocument.defaultView;
+        if (bodyWindow.frameElement && bodyWindow !== this.ownerDocument.defaultView) {
+            iframeOffset = bodyWindow.frameElement.getBoundingClientRect();
+        }
+
         $zones.each(function () {
             var zone = $(this);
             var prev = zone.prev();
@@ -1808,6 +1816,9 @@ var SnippetsMenu = Widget.extend({
                 zone.remove();
             }
 
+            // In the case of the SnippetsMenu being instanciated in the global
+            // document, with its editable content in an iframe, we want to
+            // take the iframe's offset into account to compute the dropzones.
             if (iframeOffset) {
                 this.oldGetBoundingClientRect = this.getBoundingClientRect;
                 this.getBoundingClientRect = () => {
