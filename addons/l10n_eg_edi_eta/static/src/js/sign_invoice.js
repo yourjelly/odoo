@@ -5,6 +5,17 @@ odoo.define('l10n_eg_edi_eta.action_post_sign_invoice', function (require) {
     var rpc = require('web.rpc');
     var _t = core._t;
 
+    function get_drive_error(value) {
+        switch(value) {
+           case 'no_drive': return _t("No drive found - Make sure the thumb drive is correctly inserted");
+           case 'multiple_drive': return _t("Multiple drive detected - Only one secure thumb drive can be inserted at the same time");
+           case 'system_unsupported': return _t("System not supported");
+           case 'unauthorized': return _t("Unauthorized");
+        }
+        return _t("Unknown error:") + value;
+
+    }
+
     async function action_get_drive_certificate(parent, {params}) {
         const host = params.sign_host;
         const drive_id = params.drive_id;
@@ -13,7 +24,7 @@ odoo.define('l10n_eg_edi_eta.action_post_sign_invoice', function (require) {
         await ajax.post(host + '/hw_l10n_eg_eta/certificate', params).then(function (res) {
             const res_obj = JSON.parse(res);
             if (res_obj.error) {
-                Dialog.alert(this, res_obj.error);
+                Dialog.alert(this, get_drive_error(res_obj.error));
             } else if (res_obj.certificate) {
                 rpc.query({
                     model: 'l10n_eg_edi.thumb.drive',
@@ -29,7 +40,7 @@ odoo.define('l10n_eg_edi_eta.action_post_sign_invoice', function (require) {
                 })
 
             } else {
-                Dialog.alert(this, 'An unexpected error has occurred');
+                Dialog.alert(this, _t('An unexpected error has occurred'));
             }
         }, function () {
             Dialog.alert(this, _t("Error trying to connect to the middleware. Is the middleware running?"));
@@ -44,7 +55,7 @@ odoo.define('l10n_eg_edi_eta.action_post_sign_invoice', function (require) {
         await ajax.post(host + '/hw_l10n_eg_eta/sign', params).then(function (res) {
             const res_obj = JSON.parse(res);
             if (res_obj.error) {
-                Dialog.alert(this, res_obj.error);
+                Dialog.alert(this, get_drive_error(res_obj.error));
             } else if (res_obj.invoices) {
                 rpc.query({
                     model: 'l10n_eg_edi.thumb.drive',
@@ -60,7 +71,7 @@ odoo.define('l10n_eg_edi_eta.action_post_sign_invoice', function (require) {
                 })
 
             } else {
-                Dialog.alert(this, 'An unexpected error has occurred');
+                Dialog.alert(this, _t('An unexpected error has occurred'));
             }
         }, function () {
             Dialog.alert(this, _t("Error trying to connect to the middleware. Is the middleware running?"));

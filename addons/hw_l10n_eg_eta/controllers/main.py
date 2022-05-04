@@ -33,7 +33,7 @@ class EtaUsbController(http.Controller):
         @return:
         """
         if not self._is_access_token_valid(access_token):
-            return self.unauthorized_error()
+            return 'unauthorized'
         session, error = self._get_session(pin)
         if error:
             return error
@@ -45,7 +45,7 @@ class EtaUsbController(http.Controller):
             }
             return json.dumps(payload)
         except Exception as ex:
-            return self._get_error_template(str(ex), '')
+            return str(ex)
         finally:
             session.logout()
             session.closeSession()
@@ -59,7 +59,7 @@ class EtaUsbController(http.Controller):
         @param invoices: dictionary of invoices. Keys are invoices ids, value are the base64 encoded binaries to sign
         """
         if not self._is_access_token_valid(access_token):
-            return self.unauthorized_error()
+            return 'unauthorized'
         session, error = self._get_session(pin)
         if error:
             return error
@@ -80,7 +80,7 @@ class EtaUsbController(http.Controller):
             }
             return json.dumps(payload)
         except Exception as ex:
-            return self._get_error_template(str(ex), '')
+            return str(ex)
         finally:
             session.logout()
             session.closeSession()
@@ -96,22 +96,19 @@ class EtaUsbController(http.Controller):
             pkcs11 = PyKCS11.PyKCS11Lib()
             pkcs11.load(pkcs11dll_filename=lib)
         except PyKCS11Error as ex:
-            return session, self._get_error_template(str(ex), '')
+            return session, str(ex)
 
         slots = pkcs11.getSlotList(tokenPresent=True)
         if not slots:
-            return session, self._get_error_template('No drive found - Make sure the thumb drive is correctly inserted',
-                                            'تأكد من أن الذاكرة الخارجية مدخلة بشكل صحيح - لم يتم العثور على أي محرك ذاكرة ')
+            return session, 'no_drive'
         if len(slots) > 1:
-            return session, self._get_error_template(
-                'Multiple drive detected - Only one secure thumb drive can be inserted at the same time',
-                'يمكن إدراج ذاكرة خارجية آمنة واحدة فقط في آن واحد - تم رصد عدة محركات ذاكرة')
+            return session, 'multiple_drive'
 
         try:
             session = pkcs11.openSession(slots[0], PyKCS11.CKF_SERIAL_SESSION | PyKCS11.CKF_RW_SESSION)
             session.login(pin)
         except Exception as ex:
-            error = self._get_error_template(str(ex), '')
+            error = str(ex)
         return session, error
 
     def get_crypto_lib(self):
@@ -124,13 +121,6 @@ class EtaUsbController(http.Controller):
         elif system == 'Darwin':
             lib = '/Library/OpenSC/lib/onepin-opensc-pkcs11.so'
         else:
-            error = self._get_error_template('System not supported', 'النظام غير مدعوم')
+            error = 'unsupported_system'
         return lib, error
 
-    def unauthorized_error(self):
-        return self._get_error_template('Unauthorized', 'غير مصرح')
-
-    def _get_error_template(self, english, arabic):
-        return json.dumps({
-            'error': english + '\n' + arabic,
-        })
