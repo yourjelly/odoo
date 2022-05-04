@@ -347,7 +347,7 @@ class ResPartnerBank(models.Model):
                     raise UserError(' '.join(error_messages))
                 return False
             return True
-        return super()._eligible_for_qr_code(qr_method, debtor_partner, currency)
+        return super()._eligible_for_qr_code(qr_method, debtor_partner, currency, raises_error)
 
     def _check_for_qr_code_errors(self, qr_method, amount, currency, debtor_partner, free_communication, structured_communication):
         def _partner_fields_set(partner):

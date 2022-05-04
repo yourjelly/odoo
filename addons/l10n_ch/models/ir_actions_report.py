@@ -30,13 +30,14 @@ class IrActionsReport(models.Model):
     def _render_qweb_pdf_prepare_streams(self, data, res_ids=None):
         # OVERRIDE
         res = super()._render_qweb_pdf_prepare_streams(data, res_ids)
-        if self.env.company.country_code == 'CH' and \
-                res_ids and self.report_name in ('account.report_invoice_with_payments', 'account.report_invoice'):
+        if res_ids and self.report_name in ('account.report_invoice_with_payments', 'account.report_invoice'):
             invoices = self.env[self.model].browse(res_ids)
             # Determine which invoices need a QR/ISR.
             qr_inv_ids = []
             isr_inv_ids = []
             for invoice in invoices:
+                if invoice.company_id.country_code != 'CH':
+                    continue
                 if invoice.l10n_ch_is_qr_valid:
                     qr_inv_ids.append(invoice.id)
                 elif invoice.l10n_ch_isr_valid:

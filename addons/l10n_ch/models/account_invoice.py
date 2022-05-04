@@ -35,10 +35,10 @@ class AccountMove(models.Model):
     l10n_ch_currency_name = fields.Char(related='currency_id.name', readonly=True, string="Currency Name", help="The name of this invoice's currency") #This field is used in the "invisible" condition field of the 'Print ISR' button.
     l10n_ch_isr_needs_fixing = fields.Boolean(compute="_compute_l10n_ch_isr_needs_fixing", help="Used to show a warning banner when the vendor bill needs a correct ISR payment reference. ")
 
-    l10n_ch_is_qr_valid = fields.Boolean(compute='_compute_qr_is_valid', help="Determines whether an invoice can be printed as a QR or not")
+    l10n_ch_is_qr_valid = fields.Boolean(compute='_compute_l10n_ch_qr_is_valid', help="Determines whether an invoice can be printed as a QR or not")
 
     @api.depends('partner_id', 'currency_id')
-    def _compute_qr_is_valid(self):
+    def _compute_l10n_ch_qr_is_valid(self):
         for move in self:
             move.l10n_ch_is_qr_valid = move.move_type == 'out_invoice' \
                                        and move.partner_bank_id._eligible_for_qr_code('ch_qr', move.partner_id, move.currency_id, raises_error=False)
@@ -331,26 +331,18 @@ class AccountMove(models.Model):
             i -= 5
         return spaced_qrr_ref
 
-    def l10n_ch_action_create_batch_qr(self):
-        return self.env.ref('account.account_invoices').report_action(self)
-
     def l10n_ch_action_print_qr(self):
+        '''
+        Checks that all invoices can be printed in the QR format.
+        If so, launches the printing action.
+        Else, triggers the l10n_ch wizard that will display the informations.
+        '''
         if any(x.move_type != 'out_invoice' for x in self):
             raise UserError(_("Only customers invoices can be QR-printed."))
         all_inv = self.env['account.move']
-        classic_inv = self.env['account.move']
-        qr_inv = self.env['account.move']
-        isr_inv = self.env['account.move']
         for invoice in self:
             all_inv |= invoice
-            if invoice.l10n_ch_is_qr_valid:
-                qr_inv |= invoice
-            elif invoice.l10n_ch_isr_valid:
-                isr_inv |= invoice
-            else:
-                classic_inv |= invoice
-
-        if classic_inv or isr_inv:
+        if any(not i.l10n_ch_is_qr_valid for i in all_inv):
             return {
                 'name': "Some invoices could not be printed in the QR format",
                 'type': 'ir.actions.act_window',
@@ -359,10 +351,27 @@ class AccountMove(models.Model):
                 'view_mode': 'form',
                 'target': 'new',
                 'context': {
-                    'default_classic_inv_ids': classic_inv.ids,
-                    'default_qr_inv_ids': qr_inv.ids,
-                    'default_all_inv_ids': all_inv.ids,
-                    'default_isr_inv_ids': isr_inv.ids,
+                    'inv_ids': all_inv.ids
                 },
             }
-        return self.l10n_ch_action_create_batch_qr()
+        return self.env.ref('account.account_invoices').report_action(self)
+
+    def sort_invoices_for_display(self, active_ids):
+        all_inv = self.env['account.move'].browse(active_ids)
+        classic_inv = self.env['account.move']
+        qr_inv = self.env['account.move']
+        isr_inv = self.env['account.move']
+        for invoice in all_inv:
+            all_inv |= all_inv
+            if invoice.l10n_ch_is_qr_valid:
+                qr_inv |= invoice
+            elif invoice.l10n_ch_isr_valid:
+                isr_inv |= invoice
+            else:
+                classic_inv |= invoice
+        return {
+            'classic_inv_ids': classic_inv.ids,
+            'qr_inv_ids': qr_inv.ids,
+            'all_inv_ids': all_inv.ids,
+            'isr_inv_ids': isr_inv.ids,
+        }

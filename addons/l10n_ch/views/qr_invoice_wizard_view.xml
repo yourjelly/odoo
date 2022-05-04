@@ -22,7 +22,7 @@
                     </p>
                 <footer>
                     <button name="print_all_invoices" string="Print All" type="object" class="btn-primary"/>
-                    <button name="view_faulty_invoices" string="Check invalid invoices" type="object"/>
+                    <button name="action_view_faulty_invoices" string="Check invalid invoices" type="object"/>
                 </footer>
             </form>
         </field>

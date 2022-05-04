@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from odoo.addons.l10n_ch.models.account_invoice import AccountMove
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
@@ -16,9 +16,9 @@ class QrInvoiceWizard(models.TransientModel):
     _name = 'l10n_ch.qr_invoice.wizard'
     _description = 'Handles problems occurring while creating multiple QR-invoices at once'
 
-    nb_qr_inv = fields.Integer(default=lambda self: len(self._context.get('default_qr_inv_ids', [])))
-    nb_isr_inv = fields.Integer(default=lambda self: len(self._context.get('default_isr_inv_ids', [])))
-    nb_classic_inv = fields.Integer(default=lambda self: len(self._context.get('default_classic_inv_ids', [])))
+    nb_qr_inv = fields.Integer(default=0)
+    nb_isr_inv = fields.Integer(default=0)
+    nb_classic_inv = fields.Integer(default=0)
     qr_inv_text = fields.Text(readonly=True)
     isr_inv_text = fields.Text(readonly=True)
     classic_inv_text = fields.Text(readonly=True)
@@ -38,15 +38,12 @@ class QrInvoiceWizard(models.TransientModel):
             return str(nb_inv) + _(" invoices could be printed in the %s format.", inv_format)
         res = super().default_get(fields)
         # Create and format the text to be displayed in the wizard
-        isr_len = len(self._context.get('default_isr_inv_ids', []))
-        classic_len = len(self._context.get('default_classic_inv_ids', []))
-        qr_len = len(self._context.get('default_qr_inv_ids', []))
-        qr_inv_text = determine_invoices_text(nb_inv=qr_len, inv_format="QR")
-        isr_inv_text = determine_invoices_text(nb_inv=isr_len, inv_format="ISR")
-        classic_inv_text = determine_invoices_text(nb_inv=classic_len)
-        res['qr_inv_text'] = qr_inv_text
-        res['classic_inv_text'] = classic_inv_text
-        res['isr_inv_text'] = isr_inv_text
+        invoices = self._context.get('inv_ids')
+        sorted_invoices = AccountMove.sort_invoices_for_display(self, invoices)
+
+        res['qr_inv_text'] = determine_invoices_text(nb_inv=len(sorted_invoices['qr_inv_ids']), inv_format="QR")
+        res['isr_inv_text'] = determine_invoices_text(nb_inv=len(sorted_invoices['isr_inv_ids']), inv_format="ISR")
+        res['classic_inv_text'] = determine_invoices_text(nb_inv=len(sorted_invoices['classic_inv_ids']))
         return res
 
     def print_all_invoices(self):
@@ -56,12 +53,14 @@ class QrInvoiceWizard(models.TransientModel):
         all_invoices_ids = self.env.context.get('default_all_inv_ids')
         return self.env.ref('account.account_invoices').report_action(all_invoices_ids)
 
-    def view_faulty_invoices(self):
+    def action_view_faulty_invoices(self):
         '''
         Open a list view of all the invoices that could not be printed in the QR nor the ISR format.
         '''
         # Prints the error stopping the invoice from being QR-printed in the invoice's chatter.
-        classic_inv_ids = self.env.context.get('default_classic_inv_ids')
+        invoices = self._context.get('inv_ids')
+        sorted_invoices = AccountMove.sort_invoices_for_display(self, invoices)
+        classic_inv_ids = sorted_invoices['classic_inv_ids']
         if classic_inv_ids:
             for inv_id in classic_inv_ids:
                 inv = self.env["account.move"].browse(inv_id)
@@ -77,8 +76,14 @@ class QrInvoiceWizard(models.TransientModel):
         action = self.env['ir.actions.act_window']._for_xml_id('account.action_move_out_invoice_type')
         action['context'] = {'default_move_type': 'out_invoice', 'create': False}
         action['display_name'] = _('Invalid invoices')
-        action.update({
-            'view_mode': 'list,form',
-            'domain': [('id', 'in', classic_inv_ids)],
-        })
+        if len(classic_inv_ids) == 1:
+            action.update({
+                'views': [(False, 'form')],
+                'res_id': classic_inv_ids[0],
+            })
+        else:
+            action.update({
+                'view_mode': 'tree,form',
+                'domain': [('id', 'in', classic_inv_ids)],
+            })
         return action
