@@ -1,0 +1,46 @@
+# -*- coding: utf-8 -*-
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
+{
+    'name': "Knowledge Macros Tests",
+    'summary': """Tests Knowledge macros for every supported module""",
+    'description': """Tests Knowledge macros for every supported module""",
+    'category': 'Knowledge',
+    'version': '0.1',
+    'depends': [
+        # 'account',
+        # 'base',
+        # 'crm',
+        # 'event',
+        # 'event_booth',
+        # 'helpdesk',
+        # 'hr_appraisal',
+        # 'hr_recruitment',
+        'knowledge',
+        # 'maintenance',
+        # 'mrp',
+        # 'mrp_plm',
+        # 'note',
+        # 'product',
+        # 'project',
+        # 'purchase',
+        # 'quality_control',
+        # 'repair',
+        # 'sale',
+        # 'sale_management',
+        # 'sale_subscription',
+        # 'stock',
+        # 'survey',
+        # 'website_event_track',
+        # 'website_slides',
+    ],
+    'installable': True,
+    'application': False,
+    'auto_install': False,
+    'license': 'LGPL-3',
+    'assets': {
+        'web.assets_tests': [
+            'knowledge_test/static/src/tests/tours/*.js',
+        ],
+    },
+}
