@@ -115,13 +115,6 @@ const KnowledgeFormController = FormController.extend({
     },
 
     /**
-     * @override
-     */
-    _onDeletedRecords: function () {
-        this.do_action('knowledge.action_home_page', {});
-    },
-
-    /**
      * @param {OdooEvent} event
      */
     _onDuplicate: async function (event) {
