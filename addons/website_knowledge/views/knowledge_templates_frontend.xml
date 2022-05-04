@@ -8,18 +8,6 @@
                 <i t-else="" class="fa fa-star-o" />
             </a>
         </xpath>
-        <xpath expr="//div[hasclass('o_knowledge_header')]" position="inside">
-            <!-- Sign In -->
-            <t t-call="portal.placeholder_user_sign_in">
-                <t t-set="_item_class" t-valuef="d-flex align-items-center p-2"/>
-                <t t-set="_link_class" t-valuef="nav-link font-weight-bold"/>
-            </t>
-            <t t-call="portal.user_dropdown">
-                <t t-set="_user_name" t-value="True"/>
-                <t t-set="_item_class" t-valuef="d-flex align-items-center p-2"/>
-                <t t-set="_link_class" t-valuef="nav-link font-weight-bold"/>
-            </t>
-        </xpath>
     </template>
 
     <template id="website_knowledge_article_tree_frontend" name="Website Knowledge Article Tree" inherit_id="knowledge.knowledge_article_tree_frontend">
