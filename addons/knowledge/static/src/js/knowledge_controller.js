@@ -53,12 +53,14 @@ const KnowledgeFormController = FormController.extend({
 
     /**
      * @override
+     * @returns {Promise}
      */
-    start: async function () {
-        await this._super.apply(this, arguments);
-        this.onFieldSaved('icon', unicode => {
-            const { id } = this.getState();
-            this.renderer._setEmoji(id, unicode);
+    start: function () {
+        return this._super.apply(this, arguments).then(() => {
+            this.onFieldSaved('icon', unicode => {
+                const { id } = this.getState();
+                this.renderer._setEmoji(id, unicode);
+            });
         });
     },
 

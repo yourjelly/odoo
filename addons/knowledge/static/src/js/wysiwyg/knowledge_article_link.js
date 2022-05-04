@@ -27,12 +27,12 @@ const KnowledgeArticleLinkModal = Dialog.extend({
 
     /**
      * @override
-     * @returns
+     * @returns {Promise}
      */
-    start: async function () {
-        const result = await this._super(...arguments);
-        this.initSelect2();
-        return result;
+    start: function () {
+        return this._super.apply(this, arguments).then(() => {
+            this.initSelect2();
+        });
     },
 
     /**

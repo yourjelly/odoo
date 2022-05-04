@@ -15,11 +15,13 @@ publicWidget.registry.KnowledgeWidget = publicWidget.Widget.extend(KnowledgeTree
 
     /**
      * @override
+     * @returns {Promise}
      */
-    start: async function () {
-        await this._super(...arguments);
-        const id = this.$el.data('article-id');
-        this._renderTree(id, '/knowledge/tree_panel/portal');
+    start: function () {
+        return this._super.apply(this, arguments).then(() => {
+            const id = this.$el.data('article-id');
+            this._renderTree(id, '/knowledge/tree_panel/portal');
+        });
     },
 
     /**
