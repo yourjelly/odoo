@@ -10,8 +10,7 @@
     'depends': [
         'web',
         'web_editor',
-        'mail',
-        'portal'
+        'mail'
     ],
     'data': [
         'data/knowledge_data.xml',

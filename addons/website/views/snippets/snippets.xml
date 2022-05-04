@@ -832,7 +832,7 @@
             <we-button data-select-class="" data-name="header_dropdown_on_click_opt">On Click</we-button>
         </we-select>
 
-        <we-checkbox string="Show Sign In" data-customize-website-views="portal.user_sign_in" data-reload="/"/>
+        <we-checkbox string="Show Sign In" data-customize-website-views="web.user_sign_in" data-reload="/"/>
         <we-checkbox string="Call to Action" data-customize-website-views="website.header_call_to_action"
                      data-reset-view-arch="true" data-reload="/"/>
         <we-select string="Language Selector" data-reload="/">
@@ -940,7 +940,7 @@
                 data-reload="/"/>
         <we-checkbox string="Language Selector"
                 data-dependencies="!footer_copyright_opt"
-                data-customize-website-views="website.footer_no_copyright|portal.footer_language_selector"
+                data-customize-website-views="website.footer_no_copyright|web.footer_language_selector"
                 data-no-preview="true"
                 data-reload="/"/>
     </div>
@@ -998,8 +998,8 @@
         <we-select string="Language Selector" data-reload="/">
             <we-button data-name="language_selector_none_opt"
                        data-customize-website-views="">None</we-button>
-            <we-button data-customize-website-views="portal.footer_language_selector">Dropdown</we-button>
-            <we-button data-customize-website-views="portal.footer_language_selector, website.footer_language_selector_inline">Inline</we-button>
+            <we-button data-customize-website-views="web.footer_language_selector">Dropdown</we-button>
+            <we-button data-customize-website-views="web.footer_language_selector, website.footer_language_selector_inline">Inline</we-button>
         </we-select>
         <we-select string="⌙ Label" data-dependencies="!language_selector_none_opt" data-reload="/">
             <we-button data-customize-website-views="">Text</we-button>
