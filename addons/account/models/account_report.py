@@ -30,6 +30,7 @@ class AccountReport(models.Model):
     ) # TODO OCO on pourrait en faire un champ sélection (no, with_selector, with_tax_units)
     filter_date_range = fields.Boolean(string="Use Date Range", default=True) # TODO OCO remplace filter_date > True si range, False si date unique.
     allow_showing_draft = fields.Boolean(string="Allow Showing Draft Entries", default=True) #TODO OCO remplace filter_all_entries (qui n'est jamais passé à True, dirait-on)
+    filter_unreconciled = fields.Boolean(string="Allow Filtering Unreconciled Entries")
     filter_unfold_all = fields.Boolean(string="Allow Unfolding All Lines") # TODO OCO on pourrait le calculer: si le rapport compte au moins une ligne unfoldable, on l'affiche (why not ?)
     allow_comparison = fields.Boolean(string="Allow Comparison", default=True)
     allow_growth_comparison = fields.Boolean(string="Growth Comparison", default=True)
