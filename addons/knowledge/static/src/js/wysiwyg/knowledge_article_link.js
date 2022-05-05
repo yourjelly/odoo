@@ -45,6 +45,8 @@ const KnowledgeArticleLinkModal = Dialog.extend({
     initSelect2: function () {
         const $input = this.getInput();
         $input.select2({
+            containerCssClass: 'o_knowledge_select2',
+            dropdownCssClass: 'o_knowledge_select2',
             ajax: {
                 /**
                  * @param {String} term

@@ -71,7 +71,9 @@ const MoveArticleToDialog = Dialog.extend({
 
         const $input = this.getInput();
         $input.select2({
-            data: cache,
+            containerCssClass: 'o_knowledge_select2',
+            dropdownCssClass: 'o_knowledge_select2',
+            data: cache, // Pre-fetched records
             ajax: {
                 /**
                  * @param {String} term

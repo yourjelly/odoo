@@ -63,8 +63,8 @@
                                         </li>
                                     </ol>
                                     <field name="is_user_favorite" invisible="1"/>
-                                    <i class="fa fa-star o_toggle_favorite" attrs="{'invisible': [('is_user_favorite', '=', False)]}" title="Remove from favorites"/>
-                                    <i class="fa fa-star-o o_toggle_favorite" attrs="{'invisible': [('is_user_favorite', '=', True)]}" title="Add to favorites"/>
+                                    <i class="fa fa-star o_toggle_favorite o_cursor_pointer" attrs="{'invisible': [('is_user_favorite', '=', False)]}" title="Remove from favorites"/>
+                                    <i class="fa fa-star-o o_toggle_favorite o_cursor_pointer" attrs="{'invisible': [('is_user_favorite', '=', True)]}" title="Add to favorites"/>
                                     <div attrs="{'invisible': ['|', ('is_locked', '=', False), ('user_can_write', '=', False)]}">
                                         <i class="fa fa-fw fa-lock" title="locked"/>
                                     </div>

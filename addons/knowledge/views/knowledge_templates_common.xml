@@ -68,7 +68,7 @@
 
     <template id="articles_template_name_readonly">
         <div class="o_article_name flex-grow-1 text-truncate o_cursor_pointer">
-            <a t-out="article.display_name" t-attf-href="/knowledge/article/{{article.id}}"/>
+            <a t-out="article.display_name" t-attf-href="/knowledge/article/{{article.id}}" class="text-decoration-none"/>
         </div>
     </template>
 
