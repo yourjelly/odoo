@@ -278,19 +278,20 @@ QUnit.test('Variants section not displayed', async function (assert) {
 
 QUnit.test('Search/filter product variant', async function (assert) {
     // When clicking on a product variant, it performs a search on the products list, the popup should then be closed
-    const step1 = 'trigger-search';
-    const step2 = 'close-popup';
+    const closeStep = 'close-popup';
+    const expectedSearch = savedData['variants'][0]['values'][0]['search'];
     const ExtendedRoot = this.createDummyComponent(Root => class ExtendedRoot extends Root {
         setup() {
             super.setup();
-            useBus(this.env.posbus, 'search-product-from-info-popup', () => assert.step(step1));
-            useBus(this.env.posbus, 'close-popup', () => assert.step(step2));
+            useBus(this.env.posbus, 'search-product-from-info-popup', ({detail}) => assert.strictEqual(detail, expectedSearch));
+            useBus(this.env.posbus, 'close-popup', () => assert.step(closeStep));
         }
     });
+    assert.expect(3);
 
     await mount(ExtendedRoot, this.target, {env: this.env, props: this.props});
-    await click(this.target.querySelector('.section-variants .section-variants-body table tr td:nth-child(2) span'))
-    assert.verifySteps([step1, step2]);
+    await click(this.target.querySelector('.section-variants .section-variants-body table tr td:nth-child(2) span'));
+    assert.verifySteps([closeStep]);
 });
 
 

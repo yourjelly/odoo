@@ -23,7 +23,10 @@ This module adds features depending on both modules.
         ],
         'web.assets_qweb': [
             'pos_sale_product_configurator/static/src/xml/**/*'
-        ]
+        ],
+        'point_of_sale.qunit_suite_tests': [
+            'pos_sale_product_configurator/static/tests/unit/**/*',
+        ],
     },
     'license': 'LGPL-3',
 }
