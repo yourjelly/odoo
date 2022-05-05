@@ -63,11 +63,15 @@ class KnowledgeController(http.Controller):
 
     def _fetch_article(self, article_id):
         """ Check the access of the given article for the current user. """
-        Article = request.env['knowledge.article']
-        article = Article.browse(article_id).exists()
-        if not request.env.user._is_public() and article.user_has_access:
-            return article
-        return Article
+        article = request.env['knowledge.article'].browse(int(article_id)).exists()
+        if not article:
+            return request.env['knowledge.article']
+        try:
+            article.check_access_rights('read')
+            article.check_access_rule('read')
+        except AccessError:
+            return request.env['knowledge.article']
+        return article
 
     # ------------------------
     # Articles tree generation
@@ -75,9 +79,10 @@ class KnowledgeController(http.Controller):
 
     def _get_root_articles(self, limit=None):
         """ Meant to be overriden by website_knowledge to search in sudo with adapted domain."""
-        return request.env["knowledge.article"].search([("parent_id", "=", False)], limit=limit, order='sequence')
+        _order = 'sequence' if limit is not None else None
+        return request.env["knowledge.article"].search([("parent_id", "=", False)], limit=limit, order=_order)
 
-    def _prepare_articles_tree_html(self, template, active_article=False, unfolded_articles=False):
+    def _prepare_articles_tree_html(self, template, active_article, unfolded_articles=False):
         """
         This method prepares all the info needed to render the article tree view side panel and returns the rendered
         given template with those values.
@@ -88,10 +93,11 @@ class KnowledgeController(http.Controller):
         :return: (Dict) that will be used to render templates in the articles tree side panel.
         """
         unfolded_articles = set() if not unfolded_articles else set(unfolded_articles)
-        # root articles = starting point of the tree view : unfold only if root_article in (accessible) parents
-        parents = active_article._get_parents()
-        if active_article.root_article_id in parents:
-            unfolded_articles |= set(parents.ids)
+        if active_article:
+            # root articles = starting point of the tree view : unfold only if root_article in (accessible) parents
+            ancestors = active_article._get_readable_ancetors()
+            if active_article.root_article_id in ancestors:
+                unfolded_articles |= set(ancestors.ids)
 
         root_articles = self._get_root_articles()
 
@@ -116,7 +122,7 @@ class KnowledgeController(http.Controller):
     def get_tree_panel_all(self, active_article_id=False, unfolded_articles=False):
         return self._prepare_articles_tree_html(
             'knowledge.knowledge_article_tree',
-            active_article=self._fetch_article(active_article_id),
+            self._fetch_article(active_article_id),
             unfolded_articles=unfolded_articles
         )
 
@@ -124,7 +130,7 @@ class KnowledgeController(http.Controller):
     def get_tree_panel_portal(self, active_article_id=False, unfolded_articles=False):
         return self._prepare_articles_tree_html(
             'knowledge.knowledge_article_tree_frontend',
-            active_article=self._fetch_article(active_article_id),
+            self._fetch_article(active_article_id),
             unfolded_articles=unfolded_articles
         )
 
@@ -233,9 +239,9 @@ class KnowledgeController(http.Controller):
         :param member_id: (int) id of the article's member
         :param inherited_member_id: (int) member id of one of the parent's article (if based on)
         """
-        article = request.env['knowledge.article'].browse(article_id).exists()
+        article = self._fetch_article(article_id)
         if not article:
-            return {'error': _("The selected article does not exists or has been already deleted.")}
+            return werkzeug.exceptions.Forbidden()
         member = request.env['knowledge.article.member'].browse(member_id or inherited_member_id).exists()
         if not member:
             return {'error': _("The selected member does not exists or has been already deleted.")}
@@ -265,9 +271,9 @@ class KnowledgeController(http.Controller):
         :param member_id: (int) id of the article's member
         :param inherited_member_id: (int) member id of one of the parent's article (if based on)
         """
-        article = request.env['knowledge.article'].browse(article_id).exists()
+        article = self._fetch_article(article_id)
         if not article:
-            return {'error': _("The selected article does not exists or has been already deleted.")}
+            return werkzeug.exceptions.Forbidden()
         member = request.env['knowledge.article.member'].browse(member_id or inherited_member_id).exists()
         if not member:
             return {'error': _("The selected member does not exists or has been already deleted.")}
@@ -295,9 +301,9 @@ class KnowledgeController(http.Controller):
         :param article_id: (int) article id
         :param permission: (string) permission
         """
-        article = request.env['knowledge.article'].browse(article_id)
+        article = self._fetch_article(article_id)
         if not article:
-            return {'error': _("The selected article does not exists or has been already deleted.")}
+            return werkzeug.exceptions.Forbidden()
 
         previous_category = article.category
 
