@@ -389,7 +389,7 @@ from odoo import api, models, tools
 from odoo.tools import config, safe_eval, pycompat, SUPPORTED_DEBUGGER
 from odoo.tools.safe_eval import assert_valid_codeobj, _BUILTINS, to_opcodes, _EXPR_OPCODES, _BLACKLIST
 from odoo.tools.json import scriptsafe
-from odoo.tools.misc import get_lang
+from odoo.tools.misc import get_lang, frozendict
 from odoo.tools.image import image_data_uri
 from odoo.http import request
 from odoo.modules.module import get_resource_path
@@ -535,7 +535,7 @@ class IrQWeb(models.AbstractModel):
 
     @QwebTracker.wrap_render
     @api.model
-    def _render(self, template, values=None, **options):
+    def _render(self, template, values=None, compile_result_info=False, **options):
         """ render(template, values, **options)
 
         Render the template specified by the given name.
@@ -568,7 +568,10 @@ class IrQWeb(models.AbstractModel):
         rendering = render_template(irQweb, values)
         result = ''.join(rendering)
 
-        return Markup(result)
+        if compile_result_info:
+            return Markup(result), render_template.result_info
+        else:
+            return Markup(result)
 
     # assume cache will be invalidated by third party on write to ir.ui.view
     def _get_template_cache_keys(self):
@@ -600,9 +603,12 @@ class IrQWeb(models.AbstractModel):
         # technical information useful for generating the function. This
         # dictionary is only used when compiling the template.
         compile_context = self.env.context.copy()
+        # Dict to put information about the compiled template
+        # e.g. for back-end views, models and fields included in the view.
+        compile_context['result_info'] = {}
 
         try:
-            element, document, ref, template = self._get_template(template)
+            element, document, ref, template = self.with_context(**compile_context)._get_template(template)
         except (ValueError, UserError) as e:
             message = str(e)
             ClassError = e.__class__
@@ -703,6 +709,7 @@ class IrQWeb(models.AbstractModel):
 
         # add key cache options for profiling tools
         render_template.options = options
+        render_template.result_info = frozendict(compile_context['result_info'])
 
         return render_template
 

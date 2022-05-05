@@ -47,6 +47,8 @@ class IrQWebJs(models.AbstractModel):
         # Get the view arch and all other attributes describing the composition of the view
         model = self.env.context['view_model']
         arch, view = model._get_view(template, self.env.context['view_type'])
+        if 'result_info' in self.env.context:
+            self.env.context['result_info']['view_id'] = view.id
         arch.set('t-view', model._name)
         self._rename_qweb_js_directives(arch)
         return (arch, etree.tostring(arch, encoding='unicode'), view.id, view.id)
@@ -65,10 +67,14 @@ class IrQWebJs(models.AbstractModel):
         def _set_view(el, options):
             model = el.attrib.pop('t-view')
             model = self.env[model].sudo()
-            fields = model.fields_get(
-                [field.get('name') for field in el.xpath('.//field[not(ancestor::field[position() = 2])]')],
-                ['groups', 'invisible', 'readonly', 'required', 'relation', 'states', 'type'],
+            model_fields = model.fields_get(
+                attributes=None,
             )
+            view_fields = {
+                field.get('name'): model_fields[field.get('name')]
+                for field in el.xpath('.//field[not(ancestor::field[position() = 2])]')
+                if field.get('name') in model_fields
+            }
             field_nodes = {}
 
             for action, operation in (('create', 'create'), ('delete', 'unlink'), ('edit', 'write')):
@@ -89,7 +95,9 @@ class IrQWebJs(models.AbstractModel):
 
             view_stack = options.get('view_stack', []) + [el]
 
-            return dict(options, model=model, fields=fields, field_nodes=field_nodes, view_stack=view_stack)
+            options['result_info'].setdefault('models', {})[model._name] = model_fields
+
+            return dict(options, model=model, fields=view_fields, field_nodes=field_nodes, view_stack=view_stack)
 
         if el.get('t-view'):
             options = _set_view(el, options)
