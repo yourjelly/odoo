@@ -15,7 +15,7 @@ export default {
      * @param {String} route
      */
     _renderTree: async function (active_article_id, route) {
-        const $container = this.$el.find('.o_knowledge_tree');
+        const $container = this.$('.o_knowledge_tree');
         const portalReadonlyMode = $container.data('portalReadonlyMode');
         let unfoldedArticles = localStorage.getItem('unfoldedArticles');
         unfoldedArticles = unfoldedArticles ? unfoldedArticles.split(";").map(Number) : false;
@@ -51,7 +51,7 @@ export default {
      * if something went wrong.
      */
     _setTreeFavoriteListener: function () {
-        const $sortable = this.$el.find('.o_tree_favorite');
+        const $sortable = this.$('.o_tree_favorite');
         $sortable.sortable({
             axis: 'y',
             items: 'li',
