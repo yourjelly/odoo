@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
-import { KnowledgeFormController } from '@knowledge/js/knowledge_controller';
+import { KnowledgeArticleFormController } from '@knowledge/js/knowledge_controller';
 
-KnowledgeFormController.include({
+KnowledgeArticleFormController.include({
     /**
      * @override
      * @returns {Array[String]}
