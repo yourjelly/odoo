@@ -83,8 +83,11 @@ const KnowledgeFormController = FormController.extend({
     },
 
     /**
+     * When the user clicks on a field in readonly mode, a new 'quick_edit' event
+     * will be triggered. To prevent the view from switching to the edit mode when
+     * the article is locked, we will overwrite the `_onQuickEdit` handler. This
+     * function will now ignore the event if the article is locked.
      * @override
-     * The user will not be allowed to edit the article if it is locked.
      */
     _onQuickEdit: function () {
         const { data } = this.model.get(this.handle);
@@ -94,9 +97,14 @@ const KnowledgeFormController = FormController.extend({
         this._super.apply(this, arguments);
     },
 
-    _onRename: async function (e) {
+    /**
+     * Callback function called when the user renames the active article.
+     * The function will update the name of the articles in the aside block.
+     * @param {Event} event
+     */
+    _onRename: async function (event) {
         const id = await this._getId();
-        await this._rename(id, e.currentTarget.value);
+        await this._rename(id, event.currentTarget.value);
     },
 
     /**
