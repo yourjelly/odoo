@@ -124,13 +124,13 @@ class IoTboxHomepage(Home):
         return "<meta http-equiv='refresh' content='20; url=http://" + helpers.get_ip() + ":8069/list_handlers'>"
 
     @http.route('/list_credential', type='http', auth='none', website=True)
-    def list_credential(self):
-        return list_credential_template.render({
-            'title': "Odoo's IoT Box - List credential",
-            'breadcrumb': 'List credential',
-            'db_uuid': helpers.read_file_first_line('odoo-db-uuid.conf'),
-            'enterprise_code': helpers.read_file_first_line('odoo-enterprise-code.conf'),
-        })
+    def list_credential(self, test):
+        if test:
+            subprocess.call(['sudo', 'reboot'])
+        else:
+
+            subprocess.call(['sudo', 'service', 'odoo', 'restart'])
+        return ok
 
     @http.route('/save_credential', type='http', auth='none', cors='*', csrf=False)
     def save_credential(self, db_uuid, enterprise_code):
