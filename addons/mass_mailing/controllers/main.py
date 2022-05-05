@@ -226,3 +226,13 @@ class MassMailController(http.Controller):
                 _("""Requested de-blacklisting via unsubscription page."""))
             return True
         return 'error'
+
+    # ------------------------------------------------------------
+    # MISCELLANEOUS
+    # ------------------------------------------------------------
+
+    @http.route('/mailing/preview/get_styling', type='json', auth='user')
+    def get_mobile_preview_styling(self):
+        """ This route allows a rpc call to get the styling needed for email template conversion.
+        We do this to avoid duplicating the template."""
+        return request.env['ir.qweb']._render('mass_mailing.iframe_css_assets_edit')
