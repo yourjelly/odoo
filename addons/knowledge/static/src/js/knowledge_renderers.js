@@ -42,7 +42,7 @@ const KnowledgeFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin, {
      * if something went wrong.
      */
     _setTreeListener: function () {
-        const $sortable = this.$el.find('.o_tree');
+        const $sortable = this.$('.o_tree');
         $sortable.nestedSortable({
             axis: 'y',
             handle: 'div',
@@ -85,7 +85,7 @@ const KnowledgeFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin, {
                     onSuccess: () => {
                         const id = $li.data('parent-id');
                         if (typeof id !== 'undefined') {
-                            const $parent = this.$el.find(`.o_article[data-article-id="${id}"]`);
+                            const $parent = this.$(`.o_article[data-article-id="${id}"]`);
                             if (!$parent.children('ul').is(':parent')) {
                                 const $caret = $parent.find('> .o_article_handle > .o_article_caret');
                                 $caret.remove();
@@ -120,7 +120,7 @@ const KnowledgeFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin, {
 
         selectors.forEach(selector => {
             // Note: An element can be connected to one selector at most.
-            this.$el.find(selector).nestedSortable(
+            this.$(selector).nestedSortable(
                 'option',
                 'connectWith',
                 `.o_tree:not(${selector})`
@@ -164,7 +164,7 @@ const KnowledgeFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin, {
 
     _renderArticleEmoji: function () {
         const { data } = this.state;
-        const $dropdown = this.$el.find('.o_knowledge_icon > .o_article_emoji_dropdown');
+        const $dropdown = this.$('.o_knowledge_icon > .o_article_emoji_dropdown');
         $dropdown.attr('data-article-id', this.state.res_id);
         $dropdown.find('.o_article_emoji').text(data.icon || '📄');
     },
@@ -194,7 +194,7 @@ const KnowledgeFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin, {
             $li.append($a);
             return $li;
         });
-        const $container = this.$el.find('.breadcrumb');
+        const $container = this.$('.breadcrumb');
         $container.prepend(items);
     },
 
@@ -219,8 +219,8 @@ const KnowledgeFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin, {
      * Renders the permission panel
      */
     _renderPermissionPanel: function () {
-        this.$el.find('.btn-share').one('click', event => {
-            const $container = this.$el.find('.o_knowledge_permission_panel');
+        this.$('.btn-share').one('click', event => {
+            const $container = this.$('.o_knowledge_permission_panel');
             const panel = new PermissionPanelWidget(this, {
                 article_id: this.state.data.id,
                 user_permission: this.state.data.user_permission
@@ -249,7 +249,7 @@ const KnowledgeFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin, {
         const onPointerUp = event => {
             $(document).off('pointermove', onPointerMove);
         };
-        const $resizer = this.$el.find('.o_knowledge_resizer');
+        const $resizer = this.$('.o_knowledge_resizer');
         $resizer.on('pointerdown', event => {
             event.preventDefault();
             $(document).on('pointermove', onPointerMove);
@@ -262,7 +262,7 @@ const KnowledgeFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin, {
      * @param {String} unicode
      */
     _setEmoji: function (id, unicode) {
-        const emojis = this.$el.find(`.o_article_emoji_dropdown[data-article-id="${id}"] > .o_article_emoji`);
+        const emojis = this.$(`.o_article_emoji_dropdown[data-article-id="${id}"] > .o_article_emoji`);
         emojis.text(unicode || '📄');
     },
 
