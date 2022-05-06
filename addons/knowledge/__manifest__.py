@@ -2,9 +2,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
-    'name': "Knowledge",
+    'name': 'Knowledge',
     'summary': 'Centralize, manage, share and grow your knowledge library',
-    'description': "Centralize, manage, share and grow your knowledge library",
+    'description': 'Centralize, manage, share and grow your knowledge library',
     'category': 'Productivity/Knowledge',
     'version': '0.1',
     'depends': [
