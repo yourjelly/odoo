@@ -488,6 +488,12 @@ class ProductTemplate(models.Model):
 
     @api.model
     def get_google_analytics_data(self, combination):
+        """ Get the analytics data for the given combination (& product)
+
+        :param dict combination: result of previous call to _get_combination_info
+        :returns: Google Analytics data
+        :rtype: dict
+        """
         product = self.env['product.product'].browse(combination['product_id'])
         return {
             'item_id': product.barcode or product.id,

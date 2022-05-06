@@ -26,7 +26,8 @@ class WebsiteSaleVariantController(VariantController):
 
         if request.website.google_analytics_key:
             combination_info['product_tracking_info'] = ProductTemplate.get_google_analytics_data(
-                combination)
+                combination_info
+            )
 
         combination_info['carousel'] = request.env['ir.ui.view']._render_template(
             'website_sale.shop_product_carousel',
