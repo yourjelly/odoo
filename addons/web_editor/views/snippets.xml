@@ -462,6 +462,7 @@
                         <we-button data-set-img-shape="web_editor/solid/blob_2_solid_str" data-select-label="Blob Solid 2" />
                         <we-button data-set-img-shape="web_editor/solid/blob_3_solid_rd" data-select-label="Blob Solid 3" />
                         <we-button data-set-img-shape="web_editor/solid/oval_1_solid_rd" data-select-label="Oval Solid"/>
+                        <we-button data-set-img-shape="web_editor/solid/circle" data-select-label="Circle"/>
                         <we-button t-if="not no_animations" data-set-img-shape="web_editor/solid/sld_blob_4" data-select-label="Blob Solid 4" data-animated="true"/>
                         <we-button t-if="not no_animations" data-set-img-shape="web_editor/solid/sld_blob_shadow_1" data-select-label="Blob Shadow 1" data-animated="true"/>
                         <we-button t-if="not no_animations" data-set-img-shape="web_editor/solid/sld_blob_shadow_2" data-select-label="Blob Shadow 2" data-animated="true"/>
