@@ -351,12 +351,12 @@ class AccountMove(models.Model):
                 'view_mode': 'form',
                 'target': 'new',
                 'context': {
-                    'inv_ids': all_inv.ids
+                    'active_ids': all_inv.ids
                 },
             }
         return self.env.ref('account.account_invoices').report_action(self)
 
-    def sort_invoices_for_display(self, active_ids):
+    def _l10n_ch_dispatch_invoices_to_print(self, active_ids):
         all_inv = self.env['account.move'].browse(active_ids)
         classic_inv = self.env['account.move']
         qr_inv = self.env['account.move']
