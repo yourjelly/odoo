@@ -68,6 +68,9 @@ class AccountMove(models.Model):
 
         lot_values = []
         for lot, qty in qties_per_lot.items():
+            # We have to access the lot as a superuser in order to avoid the case
+            # when a user to print an invoice without having the stock access
+            lot = lot.sudo()
             if float_is_zero(invoiced_qties[lot.product_id], precision_rounding=lot.product_uom_id.rounding) \
                     or float_compare(qty, 0, precision_rounding=lot.product_uom_id.rounding) <= 0:
                 continue
