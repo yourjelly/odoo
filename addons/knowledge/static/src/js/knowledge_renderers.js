@@ -13,6 +13,7 @@ const KnowledgeArticleFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin
         'click .btn-chatter': '_onBtnChatterClick',
         'click .btn-duplicate': '_onBtnDuplicateClick',
         'click .btn-move': '_onBtnMoveClick',
+        'click .breadcrumb a[data-controller-id]': '_onBreadcrumbItemClick',
         'click .o_article_caret': '_onFold',
         'click .o_article_name': '_onOpen',
         'click .o_article_create, .o_section_create': '_onCreate',
@@ -183,19 +184,14 @@ const KnowledgeArticleFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin
         return result;
     },
 
+    /**
+     * Renders the breadcrumb
+     */
     _renderBreadcrumb: function () {
         const items = this.breadcrumbs.map(payload => {
-            const $a = $('<a href="#"/>');
-            $a.text(payload.title);
-            $a.click(() => {
-                this.trigger_up('breadcrumb_clicked', payload);
-            });
-            const $li = $('<li class="breadcrumb-item"/>');
-            $li.append($a);
-            return $li;
+            return QWeb.render('knowledge.knowledge_breadcrumb_item', { payload });
         });
-        const $container = this.$('.breadcrumb');
-        $container.prepend(items);
+        this.$('.breadcrumb').prepend(items);
     },
 
     /**
@@ -264,6 +260,16 @@ const KnowledgeArticleFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin
     _setEmoji: function (id, unicode) {
         const emojis = this.$(`.o_article_emoji_dropdown[data-article-id="${id}"] > .o_article_emoji`);
         emojis.text(unicode || '📄');
+    },
+
+    /**
+     * @param {Event} event
+     */
+    _onBreadcrumbItemClick: function (event) {
+        const $target = $(event.target);
+        this.trigger_up('breadcrumb_clicked', {
+            controllerID: $target.data('controller-id'),
+        });
     },
 
     /**

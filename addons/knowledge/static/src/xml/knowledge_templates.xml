@@ -5,6 +5,11 @@
             <i class="align-self-center fa fa-fw fa-caret-down"/>
         </button>
     </t>
+    <t t-name="knowledge.knowledge_breadcrumb_item">
+        <li class="breadcrumb-item">
+            <a href="#" t-out="payload.title" t-att-data-controller-id="payload.controllerID"/>
+        </li>
+    </t>
     <t t-name="knowledge.knowledge_move_article_to_modal">
         <form class="container">
             <div class="mb-3">
