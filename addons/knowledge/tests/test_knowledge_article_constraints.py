@@ -145,7 +145,7 @@ class TestKnowledgeArticleConstraints(KnowledgeCommon):
         with self.assertRaises(exceptions.ValidationError, msg='Cannot remove the last writer on an article'):
             membership_sudo.unlink()
         with self.assertRaises(exceptions.ValidationError, msg='Cannot remove the last writer on an article'):
-            article_private.sudo()._remove_member(membership_sudo.id)
+            article_private.sudo()._remove_member(membership_sudo)
         with self.assertRaises(exceptions.ValidationError, msg='Cannot remove the last writer on an article'):
             article_private.sudo().write({
                 'article_member_ids': self.env['knowledge.article.member']
@@ -157,7 +157,7 @@ class TestKnowledgeArticleConstraints(KnowledgeCommon):
                 'article_member_ids': [(1, membership_sudo.id, {'permission': 'none'})]
             })
         with self.assertRaises(exceptions.ValidationError, msg='Cannot remove the last writer on an article'):
-            article_private._set_member_permission(membership_sudo.id, 'none')
+            article_private._add_members(membership_sudo.partner_id, 'none')
 
     @mute_logger('odoo.sql_db')
     @users('employee')
@@ -194,7 +194,7 @@ class TestKnowledgeArticleConstraints(KnowledgeCommon):
                     'permission': 'write'
                 })]
             })
-        article.invite_members(customer, 'write', send_mail=False)
+        article.invite_members(customer, 'write')
         # check that the permission has been set to "read" instead of "write"
         member = article.article_member_ids.filtered(lambda m: m.partner_id == customer)
         self.assertEqual(member.mapped('permission'), ['read'])
