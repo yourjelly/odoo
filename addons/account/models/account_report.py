@@ -61,6 +61,7 @@ class AccountReport(models.Model):
     ir_filter_ids = fields.Many2many(string="Applicable filters", comodel_name='ir.filters', help="Filters that can be used to filter and group lines on this report. This uses saved filtes on journal items") #TODO OCO REDOC + domaine
 
     # TODO OCO en enterprise, ces trucs ?
+    caret_options_initializer = fields.Char(string="Caret Options Initializer", required=True, default='_get_default_caret_options')
     custom_options_initializer = fields.Char(string="Custom Options Initializer")
     custom_line_postprocessor = fields.Char(string="Custom Line Postprocessor")
     custom_groupby_line_completer = fields.Char(string="Custom Groupby Line Completer")
