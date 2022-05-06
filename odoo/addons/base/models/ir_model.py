@@ -1737,12 +1737,58 @@ class IrModelAccess(models.Model):
         """ % access_mode, [model_name])
         return [('%s/%s' % x) if x[0] else x[1] for x in self._cr.fetchall()]
 
+    @tools.ormcache('0 if self.env.su else self.env.uid')
+    def _acl_map(self):
+        """ Returns a mapping of model names to CRUD access rights.
+        Access rights are a map from a CRUD operation to whether it's allowed.
+        :rtype: dict[str, {'read': bool, 'write': bool, 'create': bool, 'unlink': bool}]
+        """
+        if self.env.su:
+            self._cr.execute('SELECT model FROM ir_model')
+            return dict.fromkeys(
+                [m for [m] in self.env.cr.fetchall()],
+                {'read': True, 'write': True, 'create': True, 'unlink': True}
+            )
+
+        self.flush(self._fields)
+        # note: need a subquery because it's possible to get models with IMA
+        #       with only groups the user doesn't have, in which case we
+        #       generate a bunch of rows with gu.uid != self.env.uid (satisfying
+        #       left joins) which get filtered out afterwards, ending up with no
+        #       row for the model...
+        self._cr.execute("""
+               SELECT model, true, true, true, true FROM ir_model WHERE transient
+        UNION ALL
+               SELECT m.model,
+                      coalesce(acl.perm_read, false),
+                      coalesce(acl.perm_write, false),
+                      coalesce(acl.perm_create, false),
+                      coalesce(acl.perm_unlink, false)
+                 FROM ir_model m
+            LEFT JOIN (
+                       SELECT a.model_id,
+                              bool_or(a.perm_read) AS perm_read,
+                              bool_or(a.perm_write) AS perm_write,
+                              bool_or(a.perm_create) AS perm_create,
+                              bool_or(a.perm_unlink) AS perm_unlink
+                         FROM ir_model_access a
+                    LEFT JOIN res_groups_users_rel gu ON (gu.gid = a.group_id)
+                        WHERE a.active
+                          AND (a.group_id IS NULL OR gu.uid = %s)
+                     GROUP BY a.model_id
+                ) AS acl ON (acl.model_id = m.id)
+                WHERE NOT m.transient
+        """, [self.env.uid])
+        return {
+            m: {'read': r, 'write': w, 'create': c, 'unlink': u}
+            for m, r, w, c, u in self._cr.fetchall()
+        }
+
     # The context parameter is useful when the method translates error messages.
     # But as the method raises an exception in that case,  the key 'lang' might
     # not be really necessary as a cache key, unless the `ormcache_context`
     # decorator catches the exception (it does not at the moment.)
     @api.model
-    @tools.ormcache_context('self.env.uid', 'self.env.su', 'model', 'mode', 'raise_exception', keys=('lang',))
     def check(self, model, mode='read', raise_exception=True):
         if self.env.su:
             # User root have all accesses
@@ -1755,18 +1801,8 @@ class IrModelAccess(models.Model):
         if model not in self.env:
             _logger.error('Missing model %s', model)
 
-        self.flush(self._fields)
-
-        # We check if a specific or generic rule exists
-        self._cr.execute("""SELECT BOOL_OR(perm_{mode})
-                              FROM ir_model_access a
-                              JOIN ir_model m ON (m.id = a.model_id)
-                         LEFT JOIN res_groups_users_rel gu ON (gu.gid = a.group_id)
-                             WHERE m.model = %s
-                               AND (a.group_id IS NULL OR gu.uid = %s)
-                               AND a.active IS TRUE""".format(mode=mode),
-                         (model, self._uid,))
-        r = self._cr.fetchone()[0]
+        acl_map = self._acl_map()
+        r = acl_map.get(model,{}).get(mode, False)
 
         if not r and raise_exception:
             groups = '\n'.join('\t- %s' % g for g in self.group_names_with_access(model, mode))
@@ -1814,7 +1850,7 @@ class IrModelAccess(models.Model):
     @api.model
     def call_cache_clearing_methods(self):
         self.invalidate_cache()
-        self.check.clear_cache(self)    # clear the cache of check function
+        self._acl_map.clear_cache(self)    # clear the cache of check function
         for model, method in self.__cache_clearing_methods:
             if model in self.env:
                 getattr(self.env[model], method)()
