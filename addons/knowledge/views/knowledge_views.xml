@@ -236,13 +236,21 @@
                 <field name="article_url" invisible="1"/>
                 <templates>
                     <t t-name="kanban-box">
+                        <field name="is_user_favorite" invisible="1"/>
                         <div class="oe_kanban_global_click">
                             <div class="o_knowledge_kanban_card d-flex flex-column">
                                 <div class="d-flex align-items-center">
                                     <div class="flex-grow-1 lead text-truncate">
                                         <field name="display_name"/>
                                     </div>
-                                    <field name="is_user_favorite" class="m-0" widget="boolean_favorite" nolabel="1" force_save="1"/>
+                                    <a type="object" name="action_toggle_favorite" class="o_favorite o_field_widget"
+                                        attrs="{'invisible': [('is_user_favorite', '=', False)]}">
+                                        <i class="fa fa-star" title="Remove from favorites"/>
+                                    </a>
+                                    <a type="object" name="action_toggle_favorite" class="o_favorite o_field_widget"
+                                        attrs="{'invisible': [('is_user_favorite', '=', True)]}">
+                                        <i class="fa fa-star-o" title="Add to favorites"/>
+                                    </a>
                                     <div attrs="{'invisible': ['|', ('is_locked', '=', False), ('user_can_write', '=', False)]}">
                                         <i class="fa fa-fw fa-lock" title="locked"/>
                                     </div>
