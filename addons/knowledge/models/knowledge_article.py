@@ -969,7 +969,7 @@ class Article(models.Model):
         self.ensure_one()
         if is_based_on:
             self._desync_access_from_parents(self.article_member_ids.partner_id)
-            self.article_member_ids.filtered(lambda m: m.partner_id == member.partner_id).unlink()
+            self.article_member_ids.filtered(lambda m: m.partner_id == member.partner_id).sudo().unlink()
         else:
             member = self.article_member_ids.filtered(lambda m: m.id == member.id)
             remove_self, upgrade_self = self.env.user.partner_id == member.partner_id, False
@@ -977,14 +977,13 @@ class Article(models.Model):
                 upgrade_self = not member.has_higher_permission
             if not self.user_can_write and upgrade_self:
                 raise AccessError(_("You cannot remove the member '%s' from article '%s'.", member.display_name, self.display_name))
-            member.unlink()
+            member.sudo().unlink()
 
     def invite_members(self, partners, permission):
         """
         Invite new members to the article.
         :param partner_ids (Model<res.partner>): Recordset of res.partner
         :param permission (string): permission ('none', 'read' or 'write')
-        :param send_mail (boolean): Flag indicating whether an email should be sent
         """
         self.ensure_one()
         share_partner_ids = partners.filtered(lambda partner: partner.partner_share)
