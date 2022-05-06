@@ -143,8 +143,8 @@ class PermissionPanel extends Component {
                 params: {
                     article_id: this.props.article_id,
                     permission: newPermission,
-                    member_id: member.id,
-                    partner_id: member.based_on ? member.partner_id: false,
+                    member_id: member.based_on ? false : member.id,
+                    inherited_member_id: member.based_on ? member.id: false,
                 }
             }).then(res => {
                 const reloadArticleId = willLoseWrite && !willLoseAccess ? this.props.article_id : false;
@@ -197,8 +197,8 @@ class PermissionPanel extends Component {
                 route: '/knowledge/article/remove_member',
                 params: {
                     article_id: this.props.article_id,
-                    member_id: member.id,
-                    partner_id: member.based_on ? member.partner_id: false,
+                    member_id: member.based_on ? false : member.id,
+                    inherited_member_id: member.based_on ? member.id: false,
                 }
             }).then(res => {
                 if (this._onChangedPermission(res, willLoseAccess)) {
@@ -304,8 +304,10 @@ class PermissionPanel extends Component {
     * @param {Boolean} lostAccess
     */
     _onChangedPermission (result, reloadAll, reloadArticleId) {
-        if (!result.success) {
-            throw new Error('Error changing permission');
+        if (result.error) {
+            Dialog.alert(this, result.error,{
+              title: _t("Error"),
+            });
         } else if (reloadAll) {
             this.openArticle(reloadArticleId);
             return false;

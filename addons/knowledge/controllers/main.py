@@ -4,7 +4,9 @@
 import werkzeug
 from werkzeug.utils import redirect
 
-from odoo import http, tools
+from odoo import http, tools, _
+from odoo.addons.knowledge.models.tools import ARTICLE_PERMISSION_LEVEL
+from odoo.exceptions import AccessError, ValidationError
 from odoo.http import request
 
 
@@ -224,37 +226,38 @@ class KnowledgeController(http.Controller):
         }
 
     @http.route('/knowledge/article/set_member_permission', type='json', auth='user')
-    def article_set_member_permission(self, article_id, permission, member_id=False, partner_id=False, **post):
+    def article_set_member_permission(self, article_id, permission, member_id=False, inherited_member_id=False):
         """
         Sets the permission of the given member for the given article.
+        The dictionary can also include a `reload_tree` entry that will signify the caller that the aside block
+        listing all articles should be reloaded. This can happen when the article moves from one section to another.
         **Note**: The user needs "write" permission to change the permission of a user.
-        :param article_id: (int) article id
-        :param permission: (string) permission
-        :param member_id: (int) member id
-        :param partner_id: (int) partner id. Typically given when the member is based on a parent article.
+        :param article_id: (int) target article id
+        :param permission: (string) permission to set on member
+        :param member_id: (int) id of the article's member
+        :param inherited_member_id: (int) member id of one of the parent's article (if based on)
         """
-        article = request.env['knowledge.article'].sudo().browse(article_id)
-        if not article.user_can_write:
-            return werkzeug.exceptions.Forbidden()
+        article = request.env['knowledge.article'].browse(article_id).exists()
+        if not article:
+            return {'error': _("The selected article does not exists or has been already deleted.")}
+        member = request.env['knowledge.article.member'].browse(member_id or inherited_member_id).exists()
+        if not member:
+            return {'error': _("The selected member does not exists or has been already deleted.")}
+
         previous_category = article.category
-        if partner_id:  # If based on
-            partner = request.env['res.partner'].browse(partner_id).exists()
-            if not article or not partner:
-                return {'success': False}
-            member = request.env['knowledge.article.member'].browse(member_id).exists()
-            downgrade = bool(member) and member.permission > permission
-            if (not downgrade and not article.invite_members(partner, permission, send_mail=False)) \
-                    or (downgrade and not article._desync_access_from_parents(partner.ids, permission)):
-                return {'success': False}
-        elif not article or not article._set_member_permission(member_id, permission):
-            return {'success': False}
-        result = {'success': True}
+
+        try:
+            article._set_member_permission(member, permission, bool(inherited_member_id))
+        except (AccessError, ValidationError):
+            return {'error': _("You cannot change the permission if this member.")}
+
         if article.category != previous_category:
-            result['reload_tree'] = True
-        return result
+            return {'reload_tree': True}
+
+        return {}
 
     @http.route('/knowledge/article/remove_member', type='json', auth='user')
-    def article_remove_member(self, article_id, member_id, partner_id=False):
+    def article_remove_member(self, article_id, member_id=False, inherited_member_id=False):
         """
         Removes the given member from the given article.
         The function returns a dictionary indicating whether the request succeeds (see: `success` key).
@@ -262,32 +265,31 @@ class KnowledgeController(http.Controller):
         listing all articles should be reloaded. This can happen when the article moves from one section to another.
         **Note**: The user needs "write" permission to remove another member from
         the list. The user can always remove themselves from the list.
-        :param article_id: (int) article id
-        :param member_id: (int) member id
-        :param partner_id: (int) partner id. Typically given when the member is based on a parent article
-            and we need to desync the article from its parent (and ensure the partner to removed is well removed
-            after the desynchronization).
+        :param article_id: (int) target article id
+        :param member_id: (int) id of the article's member
+        :param inherited_member_id: (int) member id of one of the parent's article (if based on)
         """
-        article = request.env['knowledge.article'].sudo().browse(article_id)
-        if not article.user_can_write:
-            return werkzeug.exceptions.Forbidden()
+        article = request.env['knowledge.article'].browse(article_id).exists()
+        if not article:
+            return {'error': _("The selected article does not exists or has been already deleted.")}
+        member = request.env['knowledge.article.member'].browse(member_id or inherited_member_id).exists()
+        if not member:
+            return {'error': _("The selected member does not exists or has been already deleted.")}
+
         previous_category = article.category
-        if partner_id:  # If the permission is based on parent article -> Desync article
-            partner = request.env['res.partner'].browse(partner_id).exists()
-            article_member_partners_ids = article.article_member_ids.partner_id.ids
-            if not article or not partner or not article._desync_access_from_parents(article_member_partners_ids):
-                return {'success': False}
-            # remove the partner if was copied from parent
-            article.article_member_ids.filtered(lambda m: m.partner_id.id == partner_id).unlink()
-        elif not article.exists() or not article._remove_member(member_id):
-            return {'success': False}
-        result = {'success': True}
+
+        try:
+            article._remove_member(member, bool(inherited_member_id))
+        except (AccessError, ValidationError) as e:
+            return {'error': e}
+
         if article.category != previous_category:
-            result['reload_tree'] = True
-        return result
+            return {'reload_tree': True}
+
+        return {}
 
     @http.route('/knowledge/article/set_internal_permission', type='json', auth='user')
-    def article_set_internal_permission(self, article_id, permission, **post):
+    def article_set_internal_permission(self, article_id, permission):
         """
         Sets the internal permission of the given article.
         The function returns a dictionary indicating whether the request succeeds (see: `success` key).
@@ -298,12 +300,17 @@ class KnowledgeController(http.Controller):
         :param permission: (string) permission
         """
         article = request.env['knowledge.article'].browse(article_id)
-        if not article.user_can_write:
-            return werkzeug.exceptions.Forbidden()
+        if not article:
+            return {'error': _("The selected article does not exists or has been already deleted.")}
+
         previous_category = article.category
-        if not article._set_internal_permission(permission):
-            return {'success': False}
-        result = {'success': True}
+
+        try:
+            article._set_internal_permission(permission)
+        except (AccessError, ValidationError):
+            return {'error': _("You cannot change the internal permission of this article.")}
+
         if article.category != previous_category:
-            result['reload_tree'] = True
-        return result
+            return {'reload_tree': True}
+        return {}
+

@@ -864,14 +864,12 @@ class Article(models.Model):
             'is_desynchronized': False
         })
 
-    def _desync_access_from_parents(self, partner_ids=False, member_permission=False, internal_permission=False):
+    def _desync_access_from_parents(self, partners=False, member_permission=False, internal_permission=False):
         """ This method will copy all the inherited access from parents on the article, except for the given partner_id,
         in any, in order to de-synchronize the article from its parents in terms of access.
         If member_permission is given, the method will then create a new member for the given partner_id with the given
         permission. """
         self.ensure_one()
-        if not partner_ids:
-            partner_ids = []
         members_permission = self._get_article_member_permissions()[self.id]
         internal_permission = internal_permission or self.inherited_permission
 
@@ -880,7 +878,7 @@ class Article(models.Model):
             # if member already on self, do not add it.
             if not values['based_on'] or values['based_on'] == self.id:
                 continue
-            if partner_id in partner_ids:
+            if partners and partner_id in partners.ids:
                 if member_permission:
                     members_values.append((0, 0, {
                         'partner_id': partner_id,
@@ -904,8 +902,6 @@ class Article(models.Model):
         :param permission (str): permission ('none', 'read' or 'write')
         """
         self.ensure_one()
-        if not self.user_can_write:
-            return False
         values = {'internal_permission': permission}
         # always add current user as writer if user sets permission != write
         should_invite_self = False
@@ -915,7 +911,7 @@ class Article(models.Model):
         if not self.is_desynchronized and self.parent_id \
                 and ARTICLE_PERMISSION_LEVEL[self.parent_id.inherited_permission] > ARTICLE_PERMISSION_LEVEL[permission]:
             if should_invite_self:
-                self._invite_members(self.env.user.partner_id, 'write', send_mail=False)
+                self._add_members(self.env.user.partner_id, 'write')
             return self._desync_access_from_parents(internal_permission=permission)
         # Resyncro Internal permission if we set same permission as parent.
         if permission == self.parent_id.inherited_permission and not self.article_member_ids:
@@ -924,36 +920,44 @@ class Article(models.Model):
                 'is_desynchronized': False
             })
         if should_invite_self:
-            self.sudo()._invite_members(self.env.user.partner_id, 'write', send_mail=False)
+            self._add_members(self.env.user.partner_id, 'write')
         return self.write(values)
 
-    def _set_member_permission(self, member_id, permission):
-        """
-        Set the permission of the given member on the article.
-        :param member_id (int): member id
-        :param permission (str): permission ('none', 'read' or 'write')
-        """
+    def _set_member_permission(self, member, permission, is_based_on=False):
+        """ Set the given permission to the given member.
+        If the member was based on a parent article:
+            If the new permission is downgrading the member's access:
+                the current article will be desynchronized form its parent.
+            Else:
+                We add a new member with the given permission on the target article. """
         self.ensure_one()
-        if not self.user_can_write:
-            return False
-        member = self.article_member_ids.filtered(lambda member: member.id == member_id)
-        return member.sudo().write({'permission': permission})
+        if is_based_on:
+            downgrade = ARTICLE_PERMISSION_LEVEL[member.permission] > ARTICLE_PERMISSION_LEVEL[permission]
+            if downgrade:
+                self._desync_access_from_parents(member.partner_id, permission)
+            else:
+                self._add_members(member.partner_id, permission)
+        else:
+            member.write({'permission': permission})
 
-    def _remove_member(self, member_id):
-        """
-        Remove a member from the article.
-        :param member_id (int): member id
-        """
+    def _remove_member(self, member, is_based_on=False):
+        """ Remove a member from the article.
+        If the member was based on a parent article, the current article will be desynchronized form its parent.
+        We also ensure the partner to removed is removed after the desynchronization (if was copied from parent). """
         self.ensure_one()
-        member = self.article_member_ids.filtered(lambda member: member.id == member_id)
-        remove_self, upgrade_self = self.env.user.partner_id == member.partner_id, False
-        if remove_self:
-            upgrade_self = not member.has_higher_permission
-        if not self.user_can_write and upgrade_self:
-            return False
-        return member.unlink()
+        if is_based_on:
+            self._desync_access_from_parents(self.article_member_ids.partner_id)
+            self.article_member_ids.filtered(lambda m: m.partner_id == member.partner_id).unlink()
+        else:
+            member = self.article_member_ids.filtered(lambda m: m.id == member.id)
+            remove_self, upgrade_self = self.env.user.partner_id == member.partner_id, False
+            if remove_self:
+                upgrade_self = not member.has_higher_permission
+            if not self.user_can_write and upgrade_self:
+                raise AccessError(_("You cannot remove the member '%s' from article '%s'.", member.display_name, self.display_name))
+            member.unlink()
 
-    def invite_members(self, partner_ids, permission, send_mail=True):
+    def invite_members(self, partners, permission):
         """
         Invite new members to the article.
         :param partner_ids (Model<res.partner>): Recordset of res.partner
@@ -961,42 +965,45 @@ class Article(models.Model):
         :param send_mail (boolean): Flag indicating whether an email should be sent
         """
         self.ensure_one()
-        if not self.user_can_write:
-            raise AccessError(_("You cannot give access to the article '%s' as you are not editor.", self.display_name))
-        share_partner_ids = partner_ids.filtered(lambda partner: partner.partner_share)
-        article = self.sudo()
+        share_partner_ids = partners.filtered(lambda partner: partner.partner_share)
         if permission != 'none':
-            article._invite_members(share_partner_ids, 'read', send_mail=send_mail)
-            article._invite_members(partner_ids - share_partner_ids, permission, send_mail=send_mail)
+            self._add_members(share_partner_ids, 'read')
+            self._add_members(partners - share_partner_ids, permission)
             # prevent the invited user to get access to children articles the current user has no access to
-            article._get_descendants().filtered(lambda c: not c.user_can_write)._invite_members(partner_ids, 'none')
+            descendants = self._get_descendants().filtered(lambda c: not c.user_can_write)
+            if descendants:
+                descendants._add_members(partners, 'none')
         else:
-            article._invite_members(partner_ids, permission, send_mail=send_mail)
+            self._add_members(partners, permission)
+
+        if permission != 'none':
+            for partner in partners:
+                self._send_invite_mail(partner)
+
         return True
 
-    def _invite_members(self, partner_ids, permission, send_mail=True):
-        """
-        :param partner_ids (Model<res.partner>): Recordset of res.partner
+    def _add_members(self, partners, permission):
+        """ This method will add a new member to the current article with the given permission.
+        If the given partner was already member on the current article, the permission is updated instead.
+        :param partners (Model<res.partner>): Recordset of res.partner
         :param permission (string): permission ('none', 'read' or 'write')
-        :param send_mail (boolean): Flag indicating whether an email should be sent
         """
-        if not partner_ids:
-            return
-        members = self.article_member_ids.filtered_domain([('partner_id', 'in', partner_ids.ids)])
-        if members:
-            members.sudo().write({'permission': permission})
-        partners = partner_ids - members.mapped('partner_id')
-        if not partners:
-            return
+        self.ensure_one()
+        if not self.user_can_write:
+            raise AccessError(
+                _("You cannot give access to the article '%s' as you are not editor.", self.name))
+
+        members_to_update = self.article_member_ids.filtered_domain([('partner_id', 'in', partners.ids)])
+        if members_to_update:
+            members_to_update.sudo().write({'permission': permission})
+
+        remaining_partners = partners - members_to_update.mapped('partner_id')
         self.sudo().write({
             'article_member_ids': [(0, 0, {
                 'partner_id': partner.id,
                 'permission': permission
-            }) for partner in partners]
+            }) for partner in remaining_partners]
         })
-        if permission != 'none' and send_mail:
-            for partner in partners:
-                self._send_invite_mail(partner)
 
     @api.model
     def _get_internal_permission(self, filter_article_ids=False, check_access=False, check_write=False):
