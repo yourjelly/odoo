@@ -208,10 +208,10 @@ const KnowledgeArticleFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin
         $container = $container || this.$el;
         $container.find('.o_article_emoji_dropdown').one('click', event => {
             const $dropdown = $(event.currentTarget);
-            const $picker = new EmojiPickerWidget(this, {
+            const picker = new EmojiPickerWidget(this, {
                 article_id: $dropdown.data('article-id')
             });
-            $picker.attachTo($dropdown);
+            picker.attachTo($dropdown);
         });
     },
 

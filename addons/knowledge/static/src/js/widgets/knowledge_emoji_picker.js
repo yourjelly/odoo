@@ -6,16 +6,17 @@ import EmojiPicker from '../../components/emoji_picker/emoji_picker.js';
 
 const EmojiPickerWidget = Widget.extend(WidgetAdapterMixin, {
     events: {
-        'click .dropdown-menu': '_onClick'
+        'click .dropdown-menu': '_onDropdownClick'
     },
 
     /**
      * @override
      * @param {Object} parent
      * @param {Object} options
+     * @param {integer} options.article_id
      */
     init: function (parent, options) {
-        this._super(...arguments);
+        this._super.apply(this, arguments);
         this.options = options;
     },
 
@@ -32,8 +33,8 @@ const EmojiPickerWidget = Widget.extend(WidgetAdapterMixin, {
                     articleId: this.options.article_id,
                     unicode: unicode || false,
                 });
-                this.close()
-            }
+                this.close();
+            },
         });
         const menu = this.el.querySelector('.dropdown-menu');
         return this.component.mount(menu);
@@ -43,13 +44,13 @@ const EmojiPickerWidget = Widget.extend(WidgetAdapterMixin, {
      * Closes the dropdown
      */
     close: function () {
-        this.$el.dropdown('toggle');
+        this.$('.dropdown-menu').removeClass('show');
     },
 
     /**
      * @param {Event} event
      */
-    _onClick: function (event) {
+    _onDropdownClick: function (event) {
         event.preventDefault();
         event.stopPropagation();
     },

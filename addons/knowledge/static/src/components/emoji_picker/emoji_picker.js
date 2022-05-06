@@ -1,15 +1,15 @@
 /** @odoo-module **/
 
 import emojis from '@mail/js/emojis';
-const { Component } = owl;
+const { Component, useSubEnv } = owl;
 
-class EmojiPicker extends Component {
+class Emoji extends Component {
     /**
      * @override
      */
     setup () {
         super.setup();
-        this.emojis = emojis;
+        // Mock the template variables:
         this.className = '';
         this.emojiListView = {
             /**
@@ -17,15 +17,46 @@ class EmojiPicker extends Component {
              */
             onClickEmoji: event => {
                 const $target = $(event.target);
-                if (this.props.onClickEmoji) {
-                    this.props.onClickEmoji($target.data('unicode'));
-                }
-            }
-        }
+                this.env.onClickEmoji($target.data('unicode'));
+            },
+        };
+    }
+}
+
+Emoji.template = 'mail.Emoji';
+Emoji.props =  {
+    emoji: Object,
+    emojiListViewLocalId: String,
+};
+
+class EmojiPicker extends Component {
+    /**
+     * @override
+     */
+    setup () {
+        super.setup();
+        // Mock the template variables:
+        this.emojis = emojis;
+        this.className = '';
+        this.emojiListView = {
+            localId: '',
+        };
+        // Set up sub-environment variables:
+        useSubEnv({
+            onClickEmoji: this.props.onClickEmoji
+        });
+    }
+
+    /**
+     * @param {Event} event
+     */
+    onRemoveEmoji (event) {
+        this.props.onClickEmoji(false);
     }
 }
 
 EmojiPicker.template = 'knowledge.EmojiList';
 EmojiPicker.props = ['onClickEmoji'];
+EmojiPicker.components = { Emoji };
 
 export default EmojiPicker;
