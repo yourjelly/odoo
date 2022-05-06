@@ -108,7 +108,7 @@
 
     // = Resizer
     // --------------------------------------------------------------------------
-    .o_knowledge_resizer {
+    .o_knowledge_article_form_resizer {
         // Use '$spacers' measures to match surrounding elements padding
         $-resizer-spacing: map-get($spacers, 3);
         $-resizer-line-width: map-get($spacers, 1);

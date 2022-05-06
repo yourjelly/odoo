@@ -249,7 +249,7 @@ const KnowledgeArticleFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin
         const onPointerUp = event => {
             $(document).off('pointermove', onPointerMove);
         };
-        const $resizer = this.$('.o_knowledge_resizer');
+        const $resizer = this.$('.o_knowledge_article_form_resizer');
         $resizer.on('pointerdown', event => {
             event.preventDefault();
             $(document).on('pointermove', onPointerMove);

@@ -40,7 +40,7 @@
                         </div>
                     </aside>
                     <div class="flex-grow-1 position-relative">
-                        <div class="o_knowledge_resizer d-none d-sm-block" />
+                        <div class="o_knowledge_article_form_resizer d-none d-sm-block" />
                         <div class="d-flex flex-column h-100">
                             <!-- Article header -->
                             <div class="o_knowledge_header d-sm-flex border-bottom justify-content-between">
@@ -200,7 +200,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="o_knowledge_resizer d-print-none d-none d-sm-block px-3 opacity-75 opacity-100-hover">
+                        <div class="o_knowledge_article_form_resizer d-print-none d-none d-sm-block px-3 opacity-75 opacity-100-hover">
                             <span class="bg-300 pl-1"/>
                         </div>
                     </div>
