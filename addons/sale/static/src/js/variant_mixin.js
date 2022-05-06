@@ -57,6 +57,8 @@ var VariantMixin = {
         const combination = this.getSelectedVariantValues($parent);
         let parentCombination;
 
+        // TODO VFE fetch optional products information
+        // together with main get_combination_info call
         if ($parent.hasClass('main_product')) {
             parentCombination = $parent.find('ul[data-attribute_exclusions]').data('attribute_exclusions').parent_combination;
             const $optProducts = $parent.parent().find(`[data-parent-unique-id='${$parent.data('uniqueId')}']`);

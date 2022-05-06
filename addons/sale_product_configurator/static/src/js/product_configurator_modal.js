@@ -378,6 +378,7 @@ var OptionalProductsModal = Dialog.extend(ServicesMixin, VariantMixin, {
             ajax.jsonRpc(self._getUri("/sale_product_configurator/optional_product_items"), 'call', {
                 'product_id': productId,
                 'pricelist_id': self.pricelistId || false,
+                // TODO VFE make sure to pass the context here as well.
             }).then(function (addedItem) {
                 var $addedItem = $(addedItem);
                 $modal.find('tr:last').after($addedItem);
