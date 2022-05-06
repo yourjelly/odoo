@@ -252,11 +252,21 @@ class PermissionPanel extends Component {
      * @param {Proxy} member
      */
     async _onMemberAvatarClick (event, member) {
-        if (member.user_ids.length === 1) {
-            const messaging = await Component.env.services.messaging.get();
-            messaging.openChat({
-                userId: member.user_ids[0]
+        if (!member.partner_share) {
+            const partnerRead = await this.rpc({
+                model: 'res.partner',
+                method: 'read',
+                args: [member.partner_id, ['user_ids']],
             });
+            const userIds = partnerRead && partnerRead.length === 1 ? partnerRead[0]['user_ids'] : false;
+            const userId = userIds && userIds.length === 1 ? userIds[0] : false;
+
+            if (userId) {
+                const messaging = await Component.env.services.messaging.get();
+                messaging.openChat({
+                    userId: userId
+                });
+            }
         }
     }
 

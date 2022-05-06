@@ -160,63 +160,51 @@ class KnowledgeController(http.Controller):
         Returns a dictionnary containing all values required to render the permission panel.
         :param article_id: (int) article id
         """
-        Article = request.env['knowledge.article']
         article = self._fetch_article(article_id)
         if not article:
             return werkzeug.exceptions.Forbidden()
         is_sync = not article.is_desynchronized
         # Get member permission info
         members_values = []
-        members_permission = article._get_article_member_permissions()[article.id]
+        members_permission = article._get_article_member_permissions(additional_fields={
+            'res.partner': [
+                ('name', 'partner_name'),
+                ('email', 'partner_email'),
+                ('partner_share', 'partner_share'),
+            ],
+            'knowledge.article': [('name', 'based_on_name')],
+        })[article.id]
 
-        # retrieve all involved partners info
-        results = request.env['res.partner'].search_read([('id', 'in', list(members_permission.keys()))],
-                                                         fields=['id', 'name', 'user_ids', 'partner_share'])
-        partners_info = {
-            partner['id']: {'name': partner['name'], 'user_ids': partner['user_ids'], 'share': partner['partner_share']}
-            for partner in results}
-
-        # retrieve all member browse records
-        Members = request.env['knowledge.article.member']
-        member_partner_rel = {member["member_id"]: partner_id for partner_id, member in members_permission.items() if
-                              partner_id}
-        members = Members.browse(list(member_partner_rel.keys())).exists() if member_partner_rel else Members
-        write_members = members.filtered(lambda m: m.permission == 'write')
-
-        # retrieve all involved "based on" articles info
-        based_on_article_ids = [members_permission[partner_id]['based_on'] for partner_id in partners_info.keys()]
-        results = Article.search_read([('id', 'in', based_on_article_ids)], fields=['id', 'display_name'])
-        based_on_articles = {article['id']: {'name': article['display_name']} for article in results}
-
-        for member in members:
-            partner_id = member_partner_rel[member.id]
-            permission = members_permission[partner_id]['permission']
-            # if share partner and permission = none, don't show it in the permisison panel.
-            if permission == 'none' and partners_info[partner_id]['share']:
+        for partner_id, member in members_permission.items():
+            # empty member added by '_get_article_member_permissions', don't show it in the panel
+            if not member['member_id']:
                 continue
-            based_on_id = members_permission[partner_id]['based_on']
-            based_on_article = based_on_articles.get(based_on_id, {})
+
+            # if share partner and permission = none, don't show it in the permission panel.
+            if member['permission'] == 'none' and member['partner_share']:
+                continue
+
             # if article is desyncronized, don't show members based on parent articles.
-            if not is_sync and based_on_article:
+            if not is_sync and member['based_on']:
                 continue
-            user_ids = partners_info[partner_id]['user_ids']
+
             member_values = {
-                'id': member.id,
+                'id': member['member_id'],
                 'partner_id': partner_id,
-                'partner_name': partners_info[partner_id]['name'],
-                'permission': permission,
-                'based_on': based_on_article.get('name'),
-                'based_on_id': based_on_id,
-                'has_higher_permission': member.has_higher_permission,
-                'user_ids': user_ids,
-                'is_external': not user_ids,
-                'is_unique_writer': len(
-                    write_members) == 1 and member == write_members and article.inherited_permission != "write",
+                'partner_name': member['partner_name'],
+                'partner_email': member['partner_email'],
+                'permission': member['permission'],
+                'based_on': member['based_on_name'],
+                'based_on_id': member['based_on'],
+                'partner_share': member['partner_share'],
+                'is_unique_writer': member['permission'] == "write" and article.inherited_permission != "write" and not any(
+                    other_member['permission'] == 'write'
+                    for partner_id, other_member in members_permission.items()
+                    if other_member['member_id'] != member['member_id']
+                ),
             }
-            # Optional values:
-            if member.partner_id.email:
-                member_values['email'] = member.partner_id.email
             members_values.append(member_values)
+
         internal_permission_field = request.env['knowledge.article']._fields['internal_permission']
         permission_field = request.env['knowledge.article.member']._fields['permission']
         user_is_admin = request.env.user.has_group('base.group_system')

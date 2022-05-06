@@ -1093,9 +1093,30 @@ class Article(models.Model):
         self._cr.execute(sql, args)
         return dict(self._cr.fetchall())
 
-    def _get_article_member_permissions(self):
+    def _get_article_member_permissions(self, additional_fields=False):
         """ Retrieve the permission for all the members that apply to the target article.
-        Members that apply are not only the ones on the article but can also come from parent articles."""
+        Members that apply are not only the ones on the article but can also come from parent articles.
+
+        The caller can pass additional fields to retrieve from the following models:
+        - res.partner, joined on the partner_id of the membership
+        - knowledge.article, joined on the 'origin' of the membership
+          (when the membership is based on one of its parent article)
+          to retrieve more fields on the origin of the membership
+        - knowledge.article.member to retrieve more fields on the membership
+
+        The expected format is:
+        {'model': [('field', 'field_alias')]}
+
+        e.g: {
+            'res.partner': [
+                ('name', 'partner_name'),
+                ('email', 'partner_email'),
+            ]
+        }
+
+        Please note that these additional fields are not sanitized, the caller has the
+        responsability to check that user can access those fields and that no injection is possible. """
+
         # TDE FIXME: replacing sys.maxsize temporarily
         MAXSIZE = 99999  # should not have more, sys.maxsize is probably a bit too much
         domain = "WHERE partner_id is not null"
@@ -1103,48 +1124,120 @@ class Article(models.Model):
         if self.ids:
             args = [tuple(self.ids)]
             domain += " AND article_id in %s"
+
+        additional_select_fields = ''
+        join_clause = ''
+        if additional_fields:
+            supported_additional_models = [
+                'res.partner',
+                'knowledge.article',
+                'knowledge.article.member',
+            ]
+
+            # 1. build the join clause based on the given models (additional_fields keys)
+            join_clauses = []
+            for model in additional_fields.keys():
+                if model not in supported_additional_models:
+                    continue
+
+                table_name = self.env[model]._table
+                join_condition = ''
+                if model == 'res.partner':
+                    join_condition = f'{table_name}.id = partner_id'
+                elif model == 'knowledge.article':
+                    join_condition = f'{table_name}.id = origin_id'
+                elif model == 'knowledge.article.member':
+                    join_condition = f'{table_name}.id = member_id'
+
+                join_clauses.append(f'LEFT OUTER JOIN {table_name} ON {join_condition}')
+
+            join_clause = ' '.join(join_clauses)
+
+            # 2. build the select clause based on the given fields/aliases pairs
+            # (additional_fields values)
+            select_fields = []
+            for model, fields_list in additional_fields.items():
+                if model not in supported_additional_models:
+                    continue
+
+                table_name = self.env[model]._table
+                for (field, field_alias) in fields_list:
+                    select_fields.append(f'{table_name}.{field} as {field_alias}')
+
+            additional_select_fields = ', %s' % ', '.join(select_fields)
+
         sql = '''
-    WITH RECURSIVE article_perms as (
-        SELECT a.id, a.parent_id, m.id as member_id, m.partner_id, m.permission
-          FROM knowledge_article a
-     LEFT JOIN knowledge_article_member m
-            ON a.id = m.article_id
-    ), article_rec as (
-        SELECT perms1.id, perms1.id as article_id, perms1.parent_id, perms1.member_id,
-               perms1.partner_id, perms1.permission, perms1.id as origin, 0 as level
-          FROM article_perms as perms1
-         UNION
-        SELECT perms2.id, perms_rec.article_id, perms2.parent_id, perms2.member_id,
-               perms2.partner_id, perms2.permission, perms2.id as origin, perms_rec.level + 1
-          FROM article_perms as perms2
-    INNER JOIN article_rec perms_rec
-            ON perms_rec.parent_id=perms2.id
+    WITH article_permission as (
+        WITH RECURSIVE article_perms as (
+            SELECT a.id, a.parent_id, m.id as member_id, m.partner_id, m.permission
+            FROM knowledge_article a
+        LEFT JOIN knowledge_article_member m
+                ON a.id = m.article_id
+        ), article_rec as (
+            SELECT perms1.id, perms1.id as article_id, perms1.parent_id, perms1.member_id,
+                perms1.partner_id, perms1.permission, perms1.id as origin_id, 0 as level
+            FROM article_perms as perms1
+            UNION
+            SELECT perms2.id, perms_rec.article_id, perms2.parent_id, perms2.member_id,
+                perms2.partner_id, perms2.permission, perms2.id as origin_id, perms_rec.level + 1
+            FROM article_perms as perms2
+        INNER JOIN article_rec perms_rec
+                ON perms_rec.parent_id=perms2.id
+        )
+        SELECT article_id, origin_id, member_id, partner_id, permission, min(level) as min_level
+        FROM article_rec
+            %(where_clause)s
+        GROUP BY article_id, origin_id, member_id, partner_id, permission
     )
-    SELECT article_id, origin, member_id, partner_id, permission, min(level)
-      FROM article_rec
-           %s
-  GROUP BY article_id, origin, member_id, partner_id, permission''' % domain
+    SELECT article_id, origin_id, member_id, partner_id, permission, min_level
+           %(additional_select_fields)s
+    FROM article_permission
+    %(join_clause)s
+        ''' % {
+            'additional_select_fields': additional_select_fields,
+            'where_clause': domain,
+            'join_clause': join_clause,
+        }
 
         self._cr.execute(sql, args)
-        results = self._cr.fetchall()
+        results = self._cr.dictfetchall()
         # Now that we have, for each article, all the members found on themselves and their parents.
         # We need to keep only the first partners found (lowest level) for each article
         article_members = defaultdict(dict)
         min_level_dict = defaultdict(dict)
         for result in results:
-            [article_id, origin_id, member_id, partner_id, permission, level] = result
+            article_id = result['article_id']
+            origin_id = result['origin_id']
+            partner_id = result['partner_id']
+            level = result['min_level']
             min_level = min_level_dict[article_id].get(partner_id, MAXSIZE)
             if level < min_level:
                 article_members[article_id][partner_id] = {
-                    'member_id': member_id,
+                    'member_id': result['member_id'],
                     'based_on': origin_id if origin_id != article_id else False,
-                    'permission': permission
+                    'permission': result['permission']
                 }
                 min_level_dict[article_id][partner_id] = level
+
+                if additional_fields:
+                    # update our resulting dict based on additional fields
+                    article_members[article_id][partner_id].update({
+                        field_alias: result[field_alias] if model != 'knowledge.article' or origin_id != article_id else False
+                        for model, fields_list in additional_fields.items()
+                        for (field, field_alias) in fields_list
+                    })
         # add empty member for each article that doesn't have any.
         for article in self:
             if article.id not in article_members:
                 article_members[article.id][None] = {'based_on': False, 'member_id': False, 'permission': None}
+
+                if additional_fields:
+                    # update our resulting dict based on additional fields
+                    article_members[article.id][None].update({
+                        field_alias: False
+                        for model, fields_list in additional_fields.items()
+                        for (field, field_alias) in fields_list
+                    })
 
         return article_members
 
