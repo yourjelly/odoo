@@ -8,12 +8,12 @@
         <field name="context">{'default_article_id': active_id}</field>
     </record>
 
-    <record id="knowledge_article_view_dashboard" model="ir.ui.view">
+    <record id="knowledge_article_view_form" model="ir.ui.view">
         <field name="name">knowledge.article.view.form</field>
         <field name="model">knowledge.article</field>
         <field name="type">form</field>
         <field name="arch" type="xml">
-            <form class="h-100" js_class="knowledge_view_form">
+            <form class="h-100" js_class="knowledge_article_view_form">
                 <field name="icon" invisible="1"/>
                 <field name="category" invisible="1"/>
                 <field name="is_locked" invisible="1" readonly="1"/>
@@ -54,7 +54,7 @@
                                                        type="button" data-toggle="dropdown" aria-expanded="true"
                                                        attrs="{'invisible': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}"/>
                                                     <p class="o_article_editable_emoji o_article_emoji o-no-caret"
-                                                       attrs="{'invisible': ['&amp;', ('is_locked', '=', False), ('user_can_write', '=', True)]}"/>
+                                                       attrs="{'invisible': [('is_locked', '=', False), ('user_can_write', '=', True)]}"/>
                                                     <div class="o_article_emoji_dropdown_panel dropdown-menu rounded p-0" role="menu"
                                                         aria-labelledby="o_article_emoji" />
                                                 </div>
@@ -123,7 +123,7 @@
                                                     <label for="full_width" class="m-0"/>
                                                 </div>
                                                 <div class="dropdown-divider"
-                                                    attrs="{'invisible': ['&amp;', ('last_edition_uid', '=', False), ('last_edition_date', '=', False)]}"/>
+                                                    attrs="{'invisible': [('last_edition_uid', '=', False), ('last_edition_date', '=', False)]}"/>
                                                 <div class="px-4 py-2 mx-1" attrs="{'invisible': [('last_edition_uid', '=', False)]}">
                                                     <h6 class="small font-weight-bold m-0">Last Edited by:</h6>
                                                     <div class="mb-2 text-nowrap">
@@ -172,7 +172,7 @@
                                                                type="button" data-toggle="dropdown" aria-expanded="true"
                                                                attrs="{'invisible': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}"/>
                                                             <p class="o_article_emoji o-no-caret"
-                                                               attrs="{'invisible': ['&amp;', ('is_locked', '=', False), ('user_can_write', '=', True)]}"/>
+                                                               attrs="{'invisible': [('is_locked', '=', False), ('user_can_write', '=', True)]}"/>
                                                             <div class="o_article_emoji_dropdown_panel dropdown-menu rounded p-0" role="menu"
                                                                 aria-labelledby="o_article_emoji" />
                                                         </div>
@@ -220,7 +220,6 @@
                 <field name="main_article_id"/>
                 <field name="last_edition_uid" widget="many2one_avatar_user"/>
                 <field name="last_edition_date"/>
-
                 <field name="owner_id" widget="many2one_avatar_user" groups="base.group_system"/>
             </tree>
         </field>
@@ -230,7 +229,7 @@
         <field name="name">knowledge.article.view.kanban</field>
         <field name="model">knowledge.article</field>
         <field name="arch" type="xml">
-            <kanban class="o_knowledge_kanban_view">
+            <kanban class="o_knowledge_article_kanban_view">
                 <field name="icon" invisible="1"/>
                 <field name="is_locked" invisible="1"/>
                 <field name="user_can_write" invisible="1"/>
@@ -304,7 +303,7 @@
         <field name="name">Articles</field>
         <field name="res_model">knowledge.article</field>
         <field name="view_mode">form</field>
-        <field name="view_id" ref="knowledge.knowledge_article_view_dashboard"/>
+        <field name="view_id" ref="knowledge.knowledge_article_view_form"/>
     </record>
 
     <record id="action_home_page" model="ir.actions.server">

@@ -2,15 +2,15 @@
 
 import FormView from 'web.FormView';
 import viewRegistry from 'web.view_registry';
-import { KnowledgeFormController } from './knowledge_controller.js';
-import { KnowledgeFormRenderer } from './knowledge_renderers.js';
-import { KnowledgeFormModel } from './knowledge_model.js';
+import { KnowledgeArticleFormController } from './knowledge_controller.js';
+import { KnowledgeArticleFormRenderer } from './knowledge_renderers.js';
+import { KnowledgeArticleFormModel } from './knowledge_model.js';
 
-const KnowledgeFormView = FormView.extend({
+const KnowledgeArticleFormView = FormView.extend({
     config: _.extend({}, FormView.prototype.config, {
-        Controller: KnowledgeFormController,
-        Model: KnowledgeFormModel,
-        Renderer: KnowledgeFormRenderer,
+        Controller: KnowledgeArticleFormController,
+        Model: KnowledgeArticleFormModel,
+        Renderer: KnowledgeArticleFormRenderer,
     }),
     /**
      * For the knowledge module, we want to display a headless layout.
@@ -29,8 +29,8 @@ const KnowledgeFormView = FormView.extend({
     },
 });
 
-viewRegistry.add('knowledge_view_form', KnowledgeFormView);
+viewRegistry.add('knowledge_article_view_form', KnowledgeArticleFormView);
 
 export {
-    KnowledgeFormView,
+    KnowledgeArticleFormView,
 };

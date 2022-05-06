@@ -9,7 +9,7 @@ import emojis from '@mail/js/emojis';
 const emojisBlacklist = ['💩', '👎', '💔', '😭', '😢', '😐', '😕', '😞', '😢'];
 const safeEmojis = emojis.filter(emoji => !emojisBlacklist.includes(emoji.unicode));
 
-const KnowledgeFormController = FormController.extend({
+const KnowledgeArticleFormController = FormController.extend({
     events: Object.assign({}, FormController.prototype.events, {
         'click .o_knowledge_add_icon': '_onAddRandomIcon',
         'click .o_knowledge_add_cover': '_onAddCover',
@@ -433,5 +433,5 @@ const KnowledgeFormController = FormController.extend({
 });
 
 export {
-    KnowledgeFormController,
+    KnowledgeArticleFormController,
 };

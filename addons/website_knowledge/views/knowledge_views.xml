@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- Form view: -->
-    <record id="knowledge_article_view_dashboard" model="ir.ui.view">
+    <record id="knowledge_article_view_form" model="ir.ui.view">
         <field name="name">knowledge.article.form.inherit</field>
         <field name="model">knowledge.article</field>
-        <field name="inherit_id" ref="knowledge.knowledge_article_view_dashboard"/>
+        <field name="inherit_id" ref="knowledge.knowledge_article_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//div[hasclass('o_knowledge_share_panel')]/*[1]" position="before">
                 <field name="user_can_write" invisible="1"/>

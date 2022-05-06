@@ -7,7 +7,7 @@ import KnowledgeTreePanelMixin from '@knowledge/js/tools/tree_panel_mixin';
 import { qweb as QWeb } from 'web.core';
 
 
-const KnowledgeFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin, {
+const KnowledgeArticleFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin, {
     className: 'o_knowledge_form_view',
     events: _.extend({}, FormRenderer.prototype.events, {
         'click .btn-chatter': '_onBtnChatterClick',
@@ -304,5 +304,5 @@ const KnowledgeFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin, {
 });
 
 export {
-    KnowledgeFormRenderer,
+    KnowledgeArticleFormRenderer,
 };

@@ -2,8 +2,8 @@
 
 import BasicModel from 'web.BasicModel';
 
-const KnowledgeFormModel = BasicModel.extend({});
+const KnowledgeArticleFormModel = BasicModel.extend({});
 
 export {
-    KnowledgeFormModel,
+    KnowledgeArticleFormModel,
 };
