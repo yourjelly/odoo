@@ -32,16 +32,22 @@ publicWidget.registry.KnowledgeWidget = publicWidget.Widget.extend(KnowledgeTree
         const $tree = $('.o_tree');
         const keyword = $input.val().toLowerCase();
         this._traverse($tree, $li => {
-            if ($li.text().toLowerCase().indexOf(keyword) >= 0) {
-                $li.show();
+            if ($li.text().toLowerCase().includes(keyword)) {
+                $li.removeClass('d-none');
+                return true;
             } else {
-                $li.hide();
+                $li.addClass('d-none');
+                return false;
             }
-        })
+        });
     },
 
     /**
-     * Helper function to traverse the article hierarchy (using dfs)
+     * Helper function to traverse the dom hierarchy of the aside tree menu.
+     * The function will call the given callback function with the article item
+     * beeing visited (i.e: a JQuery dom element). The provided callback function
+     * should return a boolean indicating whether the algorithm should explore
+     * the children of the current article item.
      * @param {jQuery} $tree
      * @param {Function} callback
      */
@@ -49,9 +55,8 @@ publicWidget.registry.KnowledgeWidget = publicWidget.Widget.extend(KnowledgeTree
         const stack = $tree.children('li').toArray();
         while (stack.length > 0) {
             const $li = $(stack.shift());
-            const $ul = $li.children('ul');
-            callback($li);
-            if ($ul.length > 0) {
+            if (callback($li)) {
+                const $ul = $li.children('ul');
                 stack.unshift(...$ul.children('li').toArray());
             }
         }
