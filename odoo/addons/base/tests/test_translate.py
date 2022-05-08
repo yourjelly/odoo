@@ -579,17 +579,17 @@ class TestTranslationWrite(TransactionCase):
         belgium.with_context(lang='fr_FR').write({'vat_label': 'TVA'})
         belgium.with_context(lang='en_US').write({'vat_label': 'VAT'})
         self.env['ir.translation'].translate_fields('res.country', belgium.id, 'vat_label')
-        en_translation = self.env['ir.translation'].search([
+        fr_translation = self.env['ir.translation'].search([
             ('name', '=', 'res.country,vat_label'),
             ('res_id', '=', belgium.id),
-            ('lang', '=', 'en_US'),
+            ('lang', '=', 'fr_FR'),
         ])
-        en_translation.write({'value': ''})
+        fr_translation.write({'value': empty_value})
 
         # should recover the initial value from db
         self.assertEqual(
-            "TVA", belgium.with_context(lang='fr_FR').vat_label,
-            "French translation was not kept"
+            "VAT", belgium.with_context(lang='fr_FR').vat_label,
+            "Did not fallback to source when reset"
         )
         self.assertEqual(
             "VAT", belgium.with_context(lang='en_US').vat_label,
