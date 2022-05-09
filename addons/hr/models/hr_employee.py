@@ -70,6 +70,12 @@ class HrEmployeePrivate(models.Model):
     place_of_birth = fields.Char('Place of Birth', groups="hr.group_hr_user", tracking=True)
     country_of_birth = fields.Many2one('res.country', string="Country of Birth", groups="hr.group_hr_user", tracking=True)
     birthday = fields.Date('Date of Birth', groups="hr.group_hr_user", tracking=True)
+    hr_birthday_wishlist = fields.Boolean(compute="_compute_hr_birthday_wishlist", store=True, readonly=True)
+    birthday_consent = fields.Boolean("Birthday's consent", tracking=True,
+                                           help="""
+                                                Your profile won't be displayed on the Birthday Wishlist
+                                                unless you consented for it here.
+                                           """)
     ssnid = fields.Char('SSN No', help='Social Security Number', groups="hr.group_hr_user", tracking=True)
     sinid = fields.Char('SIN No', help='Social Insurance Number', groups="hr.group_hr_user", tracking=True)
     identification_id = fields.Char(string='Identification No', groups="hr.group_hr_user", tracking=True)

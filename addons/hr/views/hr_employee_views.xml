@@ -180,9 +180,12 @@
                                             <field name="identification_id" groups="hr.group_hr_user"/>
                                             <field name="passport_id" groups="hr.group_hr_user"/>
                                         </group>
-                                        <group col="4" colspan="2" name="gender_birthday">
+                                        <group colspan="2">
                                             <field name="gender"/>
+                                        </group>
+                                        <group col="4" colspan="2" name="gender_birthday">
                                             <field name="birthday"/>
+                                            <field name="birthday_consent"/>
                                         </group>
                                         <group colspan="2">
                                             <field name="place_of_birth" groups="hr.group_hr_user"/>

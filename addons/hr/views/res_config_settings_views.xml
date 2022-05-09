@@ -66,6 +66,17 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-12 col-lg-6 o_setting_box" id="birthday_wishlist">
+                            <div class="o_setting_left_pane">
+                                <field name="hr_birthday_wishlist"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="hr_birthday_wishlist"/>
+                                <div class="text-muted">
+                                    Display a filter based on employee's birthdate
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <h2>Work Organization</h2>
                     <div class="row mt16 o_settings_container" name="work_organization_setting_container">

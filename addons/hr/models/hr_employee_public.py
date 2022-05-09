@@ -31,6 +31,8 @@ class HrEmployeePublic(models.Model):
     tz = fields.Selection(readonly=True)
     color = fields.Integer(readonly=True)
     employee_type = fields.Selection(readonly=True)
+    birthday_consent = fields.Boolean(readonly=True)
+    hr_birthday_wishlist = fields.Boolean(readonly=True)
 
     employee_id = fields.Many2one('hr.employee', 'Employee', compute="_compute_employee_id", search="_search_employee_id", compute_sudo=True)
     # hr.employee.public specific fields

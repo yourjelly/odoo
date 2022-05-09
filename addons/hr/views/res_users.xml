@@ -156,7 +156,10 @@
                                 <field name="identification_id" attrs="{'readonly': [('can_edit', '=', False)]}"/>
                                 <field name="passport_id" attrs="{'readonly': [('can_edit', '=', False)]}"/>
                                 <field name="gender" attrs="{'readonly': [('can_edit', '=', False)]}"/>
-                                <field name="birthday" attrs="{'readonly': [('can_edit', '=', False)]}"/>
+                                <group col="4" colspan="2" name="gender_birthday">
+                                    <field name="birthday" attrs="{'readonly': [('can_edit', '=', False)]}"/>
+                                    <field name="birthday_consent" attrs="{'readonly': [('can_edit', '=', False)]}"/>
+                                </group>
                                 <field name="place_of_birth" attrs="{'readonly': [('can_edit', '=', False)]}"/>
                                 <field name="country_of_birth" attrs="{'readonly': [('can_edit', '=', False)]}"/>
                             </group>
