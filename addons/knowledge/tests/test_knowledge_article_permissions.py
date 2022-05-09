@@ -358,14 +358,14 @@ class TestKnowledgeArticleSearch(KnowledgeArticlePermissionsCase):
         article_roots = self.article_roots.with_env(self.env)
 
         articles_write = (self.article_write_contents + self.article_write_contents_children).with_env(self.env)
-        self.assertEqual(articles_write.main_article_id, article_roots[0])
+        self.assertEqual(articles_write.root_article_id, article_roots[0])
 
         articles_write = self.article_read_contents.with_env(self.env)
-        self.assertEqual(articles_write.main_article_id, article_roots[1])
+        self.assertEqual(articles_write.root_article_id, article_roots[1])
 
         # desynchornized still have a root (do as sudo)
-        self.assertEqual(self.article_cornercases[0].main_article_id, article_roots[1])
-        self.assertEqual(self.article_cornercases[1:].main_article_id, article_roots[0])
+        self.assertEqual(self.article_cornercases[0].root_article_id, article_roots[1])
+        self.assertEqual(self.article_cornercases[1:].root_article_id, article_roots[0])
 
     @users('employee')
     def test_article_search_employee(self):
@@ -378,7 +378,7 @@ class TestKnowledgeArticleSearch(KnowledgeArticlePermissionsCase):
                          ((articles - expected).mapped('name'), (expected - articles).mapped('name'))
                         )
 
-        articles = self.env['knowledge.article'].search([('main_article_id', '=', self.article_roots[0].id)])
+        articles = self.env['knowledge.article'].search([('root_article_id', '=', self.article_roots[0].id)])
         # TDE FIXME: 2 desynchronized are considered as writeable, should not (membership should not propagate)
         # expected = self.article_roots[0] + self.article_headers[0] + \
         #            self.article_write_contents + self.article_write_contents_children

@@ -81,8 +81,8 @@ class TestKnowledgeArticleSequence(KnowledgeCommon):
         self.assertEqual(article_children[2].parent_id, article_children[1])
         self.assertFalse(article_private2.parent_id)
         # ancestors
-        self.assertEqual((article_private + article_children).main_article_id, article_private)
-        self.assertEqual(article_private2.main_article_id, article_private2)
+        self.assertEqual((article_private + article_children).root_article_id, article_private)
+        self.assertEqual(article_private2.root_article_id, article_private2)
         # categories
         self.assertEqual(article_private.category, 'private')
         self.assertEqual(set(article_children.mapped('category')), set(['private']))

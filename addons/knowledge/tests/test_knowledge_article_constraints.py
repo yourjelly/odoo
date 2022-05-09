@@ -114,7 +114,7 @@ class TestKnowledgeArticleConstraints(KnowledgeCommon):
         })
         self.assertEqual(article_child.category, 'workspace')
         self.assertFalse(article_child.internal_permission)
-        self.assertEqual(article_child.main_article_id, article)
+        self.assertEqual(article_child.root_article_id, article)
         with self.assertRaises(IntegrityError, msg='An internal permission should be set for root article'):
             with self.cr.savepoint():
                 article_child.sudo().write({'parent_id': False})
