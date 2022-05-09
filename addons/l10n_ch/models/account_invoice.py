@@ -350,28 +350,15 @@ class AccountMove(models.Model):
                 'view_type': 'form',
                 'view_mode': 'form',
                 'target': 'new',
-                'context': {
-                    'active_ids': all_inv.ids
-                },
+                'context': {'active_ids': all_inv.ids},
             }
         return self.env.ref('account.account_invoices').report_action(self)
 
-    def _l10n_ch_dispatch_invoices_to_print(self, active_ids):
-        all_inv = self.env['account.move'].browse(active_ids)
-        classic_inv = self.env['account.move']
-        qr_inv = self.env['account.move']
-        isr_inv = self.env['account.move']
-        for invoice in all_inv:
-            all_inv |= all_inv
-            if invoice.l10n_ch_is_qr_valid:
-                qr_inv |= invoice
-            elif invoice.l10n_ch_isr_valid:
-                isr_inv |= invoice
-            else:
-                classic_inv |= invoice
+    def _l10n_ch_dispatch_invoices_to_print(self):
+        qr_invs = self.filtered('l10n_ch_is_qr_valid')
+        isr_invs = self.filtered('l10n_ch_isr_valid')
         return {
-            'classic_inv_ids': classic_inv.ids,
-            'qr_inv_ids': qr_inv.ids,
-            'all_inv_ids': all_inv.ids,
-            'isr_inv_ids': isr_inv.ids,
+            'qr': qr_invs,
+            'isr': isr_invs,
+            'others': self - qr_invs - isr_invs,
         }

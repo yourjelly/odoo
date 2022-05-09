@@ -12,7 +12,6 @@
                     <field name="qr_inv_text"/>
                     <field name="isr_inv_text"/>
                     <field name="classic_inv_text"/>
-
                 </p>
                 <p>
                     To be able to print all invoices in the QR format, you might need to : <br/>
