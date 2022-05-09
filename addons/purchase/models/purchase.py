@@ -983,6 +983,16 @@ class PurchaseOrderLine(models.Model):
             else:
                 line.qty_to_invoice = 0
 
+    def name_get(self):
+        return [(poline.id, '%s - %s %s %s' % (poline.order_id.name, poline.name, poline.product_qty, poline.product_uom.name)) for poline in self]
+
+    @api.model
+    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
+        args = list(args or [])
+        if name:
+            args += ['|', ('name', operator, name), ('order_id.name', operator, name)]
+        return self._search(args, limit=limit, access_rights_uid=name_get_uid)
+
     def _get_invoice_lines(self):
         self.ensure_one()
         if self._context.get('accrual_entry_date'):

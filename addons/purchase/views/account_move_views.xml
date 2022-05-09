@@ -27,7 +27,9 @@
             </field>
             <!-- Add link to purchase_line_id to account.move.line -->
             <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='company_id']" position="after">
-                <field name="purchase_line_id" invisible="1"/>
+                <field name="purchase_line_id" optional="hide" domain="[('order_id.partner_id', '=', parent.partner_id),
+                ('order_id.state', '!=', 'draft'), ('product_id', '=?', product_id), ('display_type', '=', False)]"
+                    options="{'no_create':True}" attrs="{'column_invisible': [('parent.move_type', '!=', 'in_invoice')]}"/>
                 <field name="purchase_order_id" attrs="{'column_invisible': [('parent.move_type', '!=', 'in_invoice')]}" optional="hide"/>
             </xpath>
             <xpath expr="//field[@name='line_ids']/tree/field[@name='company_id']" position="after">
