@@ -1282,7 +1282,7 @@ class Article(models.Model):
         exclude_ids |= self
         return self.search_read(
             domain=['&', ['name', '=ilike', '%%%s%%' % term], ['id', 'not in', exclude_ids.ids]],
-            fields=['id', 'icon', 'name'],
+            fields=['id', 'icon', 'name', 'category'],
         )
 
     def _get_descendants(self):
