@@ -20,6 +20,8 @@ class ResConfigSettings(models.TransientModel):
     hr_presence_control_email_amount = fields.Integer(related="company_id.hr_presence_control_email_amount", readonly=False)
     hr_presence_control_ip_list = fields.Char(related="company_id.hr_presence_control_ip_list", readonly=False)
     hr_employee_self_edit = fields.Boolean(string="Employee Editing", config_parameter='hr.hr_employee_self_edit')
+    hr_birthday_wishlist = fields.Boolean(string="Birthday's Wishlist", config_parameter='hr.hr_birthday_wishlist', help="""
+        Will only filter Employees who agreed on their profile to share their birthday's date""")
 
     @api.constrains('module_hr_presence', 'hr_presence_control_email', 'hr_presence_control_ip')
     def _check_advanced_presence(self):
