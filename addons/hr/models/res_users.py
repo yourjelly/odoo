@@ -147,6 +147,12 @@ class User(models.Model):
 
     can_edit = fields.Boolean(compute='_compute_can_edit')
     is_system = fields.Boolean(compute="_compute_is_system")
+    hr_birthday_wishlist = fields.Boolean(compute="_compute_hr_birthday_wishlist")
+
+    def _compute_hr_birthday_wishlist(self):
+        hr_birthday_wishlist = self.env['ir.config_parameter'].sudo().get_param('hr.hr_birthday_wishlist')
+        for user in self:
+            user.hr_birthday_wishlist = hr_birthday_wishlist
 
     @api.depends_context('uid')
     def _compute_is_system(self):

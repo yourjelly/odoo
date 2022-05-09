@@ -133,6 +133,11 @@ class HrEmployeePrivate(models.Model):
         ('user_uniq', 'unique (user_id, company_id)', "A user cannot be linked to multiple employees in the same company.")
     ]
 
+    def _compute_hr_birthday_wishlist(self):
+        hr_birthday_wishlist = self.env['ir.config_parameter'].sudo().get_param('hr.hr_birthday_wishlist')
+        for employee in self:
+            employee.hr_birthday_wishlist = hr_birthday_wishlist
+
     @api.depends('name', 'user_id.avatar_1920', 'image_1920')
     def _compute_avatar_1920(self):
         super()._compute_avatar_1920()
