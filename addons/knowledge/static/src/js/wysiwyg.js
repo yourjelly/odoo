@@ -201,7 +201,7 @@ Wysiwyg.include({
     _insertArticleLink: function () {
         const restoreSelection = preserveCursor(this.odooEditor.document);
         const dialog = new KnowledgeArticleLinkModal(this, {});
-        dialog.on('save', this, data => {
+        dialog.on('confirm', this, data => {
             restoreSelection();
             const articleLinkFragment = new DocumentFragment();
             const articleLinkBlock = $(QWeb.render('knowledge.wysiwyg_article_link', {

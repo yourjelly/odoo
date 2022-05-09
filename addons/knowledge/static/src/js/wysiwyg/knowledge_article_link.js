@@ -17,7 +17,7 @@ const KnowledgeArticleLinkModal = Dialog.extend({
         options.buttons = options.buttons || [{
             text: _t('Ok'),
             classes: 'btn-primary',
-            click: this.save.bind(this)
+            click: this._onConfirmButtonClick,
         }, {
             text: _t('Cancel'),
             close: true
@@ -31,19 +31,15 @@ const KnowledgeArticleLinkModal = Dialog.extend({
      */
     start: function () {
         return this._super.apply(this, arguments).then(() => {
-            this.initSelect2();
+            this._initSelect2();
         });
     },
 
     /**
-     * @returns {JQuery}
+     * Initializes the Select2 library on the input dropdown.
      */
-    getInput: function () {
-        return this.$el.find('input');
-    },
-
-    initSelect2: function () {
-        const $input = this.getInput();
+    _initSelect2: function () {
+        const $input = this.$('input');
         $input.select2({
             containerCssClass: 'o_knowledge_select2',
             dropdownCssClass: 'o_knowledge_select2',
@@ -108,10 +104,12 @@ const KnowledgeArticleLinkModal = Dialog.extend({
         });
     },
 
-    save: function () {
-        const $input = this.getInput();
-        const data = $input.select2('data');
-        this.trigger('save', data);
+    /**
+     * Callback function called when the user clicks on the confirm button of the dialog.
+     */
+    _onConfirmButtonClick: function () {
+        const $input = this.$('input');
+        this.trigger('confirm', $input.select2('data'));
     },
 });
 
