@@ -8,7 +8,6 @@
             <form class="h-100" js_class="knowledge_article_view_form">
                 <field name="active" invisible="1"/>
                 <field name="icon" invisible="1"/>
-                <field name="category" invisible="1"/>
                 <field name="is_locked" invisible="1" readonly="1"/>
                 <field name="is_user_favorite" invisible="1"/>
                 <field name="user_has_write_access" invisible="1"/>

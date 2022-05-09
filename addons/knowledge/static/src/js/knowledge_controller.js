@@ -132,7 +132,7 @@ const KnowledgeArticleFormController = FormController.extend({
     },
 
     /**
-     * @param {Event} event
+     * @param {OdooEvent} event
      */
     _onMove: function (event) {
         this._confirmMove(event.data);
@@ -146,26 +146,27 @@ const KnowledgeArticleFormController = FormController.extend({
         const id = await this._getId();
         const state = this.model.get(this.handle);
         const dialog = new MoveArticleToDialog(this, {}, {
-            state: state,
-            /**
-             * @param {String} value
-             */
-            onSave: async value => {
-                const params = { article_id: id };
-                if (typeof value === 'number') {
-                    params.target_parent_id = value;
-                } else {
-                    params.newCategory = value;
-                    params.oldCategory = state.data.category;
-                }
-                this._confirmMove({...params,
-                    onSuccess: () => {
-                        dialog.close();
-                        this.reload();
-                    },
-                    onReject: () => {}
-                });
+            article: {
+                id,
+                name: state.data.name
             }
+        });
+        dialog.on('confirm', this, value => {
+            const data = {
+                id,
+                from: { category: state.data.category },
+                to: { category: value.category }
+            };
+            if (typeof value.id === 'number') {
+                data.to.parent = value.id;
+            }
+            this._confirmMove({...data,
+                onSuccess: () => {
+                    dialog.close();
+                    this.reload();
+                },
+                onReject: () => {}
+            });
         });
         dialog.open();
     },
@@ -273,67 +274,75 @@ const KnowledgeArticleFormController = FormController.extend({
 
     /**
      * @param {Object} data
-     * @param {integer} data.article_id
-     * @param {String} data.oldCategory
-     * @param {String} data.newCategory
-     * @param {integer} [data.target_parent_id]
-     * @param {integer} [data.before_article_id]
-     * @param {Function} data.onSuccess
-     * @param {Function} data.onReject
+     * @param {integer} data.id - Id of the article
+     * @param {Object} data.from
+     * @param {String} data.from.category - Former category of the article
+     * @param {integer} [data.from.parent] - Former parent id of the article
+     * @param {Object} data.to
+     * @param {String} data.to.category - New category of the article
+     * @param {integer} [data.to.parent] - New parent id of the article
+     * @param {integer} [data.to.successor] - New successor of the article
+     * @param {Function} data.onSuccess - Function called when the user confirms the move
+     * @param {Function} data.onReject - Function called when the user cancels the move
      */
     _confirmMove: async function (data) {
-        data['params'] = {
-            is_private: data.newCategory === 'private'
-        };
-        if (typeof data.target_parent_id !== 'undefined') {
-            data['params'].parent_id = data.target_parent_id;
-        }
-        if (typeof data.before_article_id !== 'undefined') {
-            data['params'].before_article_id = data.before_article_id;
-        }
-        if (data.newCategory === data.oldCategory) {
+        if (data.from.category === data.to.category) {
             await this._move(data);
-        } else {
-            let message, confirmation_message;
-            if (data.newCategory === 'workspace') {
-                message = _t("Are you sure you want to move this to workspace? It will be accessible by everyone in the company.");
-                confirmation_message = _t("Move to Workspace");
-            } else if (data.newCategory === 'private') {
-                message = _t("Are you sure you want to move this to private? Only you will be able to access it.");
-                confirmation_message = _t("Set as Private");
-            }
-            Dialog.confirm(this, message, {
-                cancel_callback: data.onReject,
-                buttons: [{
-                    text: confirmation_message,
-                    classes: 'btn-primary',
-                    close: true,
-                    click: async () => {
-                        await this._move(data);
-                    }
-                }, {
-                    text: _t("Discard"),
-                    close: true,
-                    click: data.onReject,
-                }],
-            });
+            return;
         }
+        let message, confirmation_message;
+        if (data.to.category === 'workspace') {
+            message = _t('Are you sure you want to move this to workspace? It will be accessible by everyone in the company.');
+            confirmation_message = _t('Move to Workspace');
+        } else if (data.to.category === 'private') {
+            message = _t('Are you sure you want to move this to private? Only you will be able to access it.');
+            confirmation_message = _t('Set as Private');
+        }
+        Dialog.confirm(this, message, {
+            cancel_callback: data.onReject,
+            buttons: [{
+                text: confirmation_message,
+                classes: 'btn-primary',
+                close: true,
+                click: async () => {
+                    await this._move(data);
+                },
+            }, {
+                text: _t('Discard'),
+                close: true,
+                click: data.onReject,
+            }],
+        });
     },
 
     /**
      * @param {Object} data
-     * @param {integer} data.article_id
-     * @param {Function} data.onSuccess
-     * @param {Function} data.onReject
-     * @param {Object} data.params
-     * @return {Promise}
+     * @param {integer} data.id - Id of the article
+     * @param {Object} data.from
+     * @param {String} data.from.category - Former category of the article
+     * @param {integer} [data.from.parent] - Former parent id of the article
+     * @param {Object} data.to
+     * @param {String} data.to.category - New category of the article
+     * @param {integer} [data.to.parent] - New parent id of the article
+     * @param {integer} [data.to.successor] - New successor of the article
+     * @param {Function} data.onSuccess - Function called when the user confirms the move
+     * @param {Function} data.onReject - Function called when the user cancels the move
      */
     _move: function (data) {
+        const kwargs = {
+            is_private: data.to.category === 'private',
+        };
+        if (typeof data.to.parent !== 'undefined') {
+            kwargs.parent_id = data.to.parent;
+        }
+        if (typeof data.to.successor !== 'undefined') {
+            kwargs.before_article_id = data.to.successor;
+        }
         return this._rpc({
             model: 'knowledge.article',
             method: 'move_to',
-            args: [data.article_id],
-            kwargs: data.params
+            args: [data.id],
+            kwargs
         }).then(result => {
             if (result) {
                 data.onSuccess();
@@ -342,7 +351,7 @@ const KnowledgeArticleFormController = FormController.extend({
             }
         }).catch(error => {
             data.onReject();
-        })
+        });
     },
 
     /**

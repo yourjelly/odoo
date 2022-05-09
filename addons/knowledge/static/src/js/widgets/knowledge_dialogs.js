@@ -10,24 +10,21 @@ const MoveArticleToDialog = Dialog.extend({
      * @override
      * @param {Widget} parent
      * @param {Object} options
-     * @param {Object} props
+     * @param {Object} data
      */
-    init: function (parent, options, props) {
+    init: function (parent, options, data) {
         // Set default options:
         options.title = options.title || _t('Move an Article');
         options.buttons = options.buttons || [{
             text: _t('Ok'),
             classes: 'btn-primary',
-            click: this.save.bind(this)
+            click: this._onConfirmButtonClick
         }, {
             text: _t('Cancel'),
             close: true
         }];
         this._super(...arguments);
-        this.props = props;
-        // Set template variables:
-        const { state } = props;
-        this.article_name = state.data.display_name;
+        this.data = data;
     },
 
     /**
@@ -36,40 +33,39 @@ const MoveArticleToDialog = Dialog.extend({
      */
     start: function () {
         return this._super.apply(this, arguments).then(() => {
-            this.initSelect2();
+            this._initSelect2();
         });
     },
 
     /**
-     * @returns {JQuery}
-     */
-    getInput: function () {
-        return this.$el.find('input');
-    },
-
-    /**
+     * Returns the url of the logged in user's picture.
      * @returns {String}
      */
     getLoggedUserPicture: function () {
         return `/web/image?model=res.users&field=avatar_128&id=${session.uid}`;
     },
 
-    initSelect2: function () {
+    /**
+     * Initializes the Select2 library on the input dropdown.
+     */
+    _initSelect2: function () {
         const cache = {
             results: [{
                 text: _t('Categories'),
                 children: [{
                     id: 'private',
                     text: _t('Private'),
+                    category: 'private',
                     selected: true
                 }, {
                     id: 'workspace',
-                    text: _t('Workspace')
+                    text: _t('Workspace'),
+                    category: 'workspace'
                 }]
             }]
         };
 
-        const $input = this.getInput();
+        const $input = this.$('input');
         $input.select2({
             containerCssClass: 'o_knowledge_select2',
             dropdownCssClass: 'o_knowledge_select2',
@@ -83,23 +79,27 @@ const MoveArticleToDialog = Dialog.extend({
                     return { term };
                 },
                 /**
-                 * @param {Object} params - parameters
+                 * Function called to fetch the data from the server.
+                 * @param {Object} params - request parameters
                  */
                 transport: async params => {
-                    const { term } = params.data;
-                    const { state } = this.props;
-                    const results = await this._rpc({
+                    const { term } = params.data; // search term of the user
+                    this._rpc({
                         model: 'knowledge.article',
                         method: 'get_valid_parent_options',
-                        args: [state.data.id],
+                        args: [this.data.article.id],
                         kwargs: {
                             term
                         }
+                    }).then(results => {
+                        params.success({ term, results });
                     });
-                    params.success({ term, results });
                 },
                 /**
-                 * @param {Object} data
+                 * Function used to process the results fetched by the server.
+                 * @param {Object} data - JSON object passed by the `transport` function (see the `success` callback)
+                 * @param {String} data.term - search term of the user
+                 * @param {Object} data.results - records fetched by the server
                  * @returns {Object}
                  */
                 processResults: function (data) {
@@ -126,6 +126,7 @@ const MoveArticleToDialog = Dialog.extend({
                                     id: record.id,
                                     icon: record.icon,
                                     text: record.name,
+                                    category: record.category
                                 }
                             })
                         });
@@ -134,6 +135,7 @@ const MoveArticleToDialog = Dialog.extend({
                 },
             },
             /**
+             * Function used to format the selection of the dropdown.
              * @param {Object} data
              * @param {JQuery} container
              * @param {Function} escapeMarkup
@@ -151,6 +153,7 @@ const MoveArticleToDialog = Dialog.extend({
                 return markup.join('');
             },
             /**
+             * Function used to format the results of the dropdown items.
              * @param {Object} result
              * @param {JQuery} container
              * @param {Object} query
@@ -173,12 +176,11 @@ const MoveArticleToDialog = Dialog.extend({
     },
 
     /**
-     * @override
+     * Callback function called when the user clicks on the confirm button of the dialog.
      */
-    save: function () {
-        const $input = this.getInput();
-        const data = $input.select2('data');
-        this.props.onSave(data.id);
+    _onConfirmButtonClick: function () {
+        const $input = this.$('input');
+        this.trigger('confirm', $input.select2('data'));
     },
 });
 

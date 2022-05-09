@@ -1456,7 +1456,7 @@ class Article(models.Model):
                     ['name', '=ilike', '%%%s%%' % term],
                     ['id', 'not in', (self._get_descendants() + self).ids]
                    ],
-            fields=['id', 'icon', 'name'],
+            fields=['id', 'icon', 'name', 'category'],
             limit=15,
         )
 

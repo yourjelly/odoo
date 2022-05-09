@@ -65,54 +65,61 @@ const KnowledgeArticleFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin
              */
             stop: (event, ui) => {
                 $sortable.sortable('disable');
-
                 const $li = $(ui.item);
                 const $section = $li.closest('section');
-                const $parent = $li.parentsUntil('.o_tree', 'li');
-
                 const data = {
-                    article_id: $li.data('article-id'),
-                    oldCategory: $li.data('category'),
-                    newCategory: $section.data('section')
+                    id: $li.data('article-id'),
+                    from: { category: $li.data('category') },
+                    to: { category: $section.data('section') }
                 };
-
+                if ($li.data('parent-id')) {
+                    data.from.parent = $li.data('parent-id');
+                }
+                const $parent = $li.parentsUntil('.o_tree', 'li');
                 if ($parent.length > 0) {
-                    data.target_parent_id = $parent.data('article-id');
+                    data.to.parent = $parent.data('article-id');
                 }
-                const $next = $li.next();
-                if ($next.length > 0) {
-                    data.before_article_id = $next.data('article-id');
+                const $successor = $li.next();
+                if ($successor.length > 0) {
+                    data.to.successor = $successor.data('article-id');
                 }
-
                 this.trigger_up('move', {...data,
+                    /**
+                     * Callback function called when the server validates the operation.
+                     */
                     onSuccess: () => {
-                        const id = $li.data('parent-id');
-                        if (typeof id !== 'undefined') {
-                            const $parent = this.$(`.o_article[data-article-id="${id}"]`);
-                            if (!$parent.children('ul').is(':parent')) {
-                                const $caret = $parent.find('> .o_article_handle > .o_article_caret');
-                                $caret.remove();
-                            }
-                        }
-                        if ($parent.length > 0) {
+                        // Add a caret to the new parent:
+                        if (typeof data.to.parent !== 'undefined') {
                             const $handle = $parent.children('.o_article_handle:first');
                             if ($handle.children('.o_article_caret').length === 0) {
                                 const $caret = $(QWeb.render('knowledge.knowledge_article_caret', {}));
                                 $handle.prepend($caret);
                             }
                         }
+                        // Remove the caret from the former parent:
+                        if (typeof data.from.parent !== 'undefined') {
+                            const $parent = this.$(`.o_article[data-article-id="${data.from.parent}"]`);
+                            if (!$parent.children('ul').is(':parent')) {
+                                const $caret = $parent.find('> .o_article_handle > .o_article_caret');
+                                $caret.remove();
+                            }
+                        }
                         $li.data('parent-id', $parent.data('article-id'));
-                        $li.data('category', data.newCategory);
-                        let $children = $li.find('.o_article');
-                        $children.each((_, child) => {
-                            $(child).data('category', data.newCategory);
+                        $li.data('category', data.to.category);
+                        $li.find('.o_article').each((_, child) => {
+                            $(child).data('category', data.to.category);
                         });
                         $sortable.sortable('enable');
                     },
+                    /**
+                     * Callback function called when the user dismisses the
+                     * confirmation dialog (if any) or the server does not
+                     * validate the move operation.
+                     */
                     onReject: () => {
-                        $sortable.sortable('cancel');
+                        $sortable.sortable('cancel'); // undo the change
                         $sortable.sortable('enable');
-                    }
+                    },
                 });
             },
         });
