@@ -5612,6 +5612,7 @@ Fields:
 
         stack = []
         for leaf in reversed(domain):
+            is_multivalued = False
             if leaf == '|':
                 stack.append(stack.pop() | stack.pop())
             elif leaf == '!':
@@ -5640,6 +5641,7 @@ Fields:
                     for fname in key.split('.'):
                         field = model._fields[fname]
                         model = model[fname]
+                        is_multivalued |= field.type in ('one2many', 'many2many')
 
                 if comparator in ('like', 'ilike', '=like', '=ilike', 'not ilike', 'not like'):
                     value_esc = value.replace('_', '?').replace('%', '*').replace('[', '?')
@@ -5663,20 +5665,24 @@ Fields:
                         if isinstance(v, str):
                             data = data.mapped('display_name')
                         else:
-                            data = data and data.ids or [False]
+                            data = data and data.ids or []
                     elif field and field.type in ('date', 'datetime'):
                         data = [Datetime.to_datetime(d) for d in data]
+
+                    original_data = data
+                    if len(data) == 0 and not is_multivalued:
+                        data = [False]
 
                     if comparator == '=':
                         ok = value in data
                     elif comparator in ('!=', '<>'):
-                        ok = value not in data
+                        ok = any(x != value for x in data)
                     elif comparator == '=?':
                         ok = not value or (value in data)
                     elif comparator == 'in':
                         ok = value and any(x in value for x in data)
                     elif comparator == 'not in':
-                        ok = not (value and any(x in value for x in data))
+                        ok = not value or any(x not in value for x in data)
                     elif comparator == '<':
                         ok = any(x is not None and x < value for x in data)
                     elif comparator == '>':
@@ -5686,22 +5692,29 @@ Fields:
                     elif comparator == '>=':
                         ok = any(x is not None and x >= value for x in data)
                     elif comparator == 'ilike':
-                        data = [(x or "").lower() for x in data]
-                        ok = fnmatch.filter(data, '*' + (value_esc or '').lower() + '*')
+                        data = [x.lower() for x in original_data]
+                        matches = fnmatch.filter(data, '*' + value_esc.lower() + '*')
+                        ok = len(matches) > 0
                     elif comparator == 'not ilike':
-                        value = value.lower()
-                        ok = not any(value in (x or "").lower() for x in data)
+                        data = [x.lower() for x in original_data]
+                        matches = fnmatch.filter(data, '*' + value_esc.lower() + '*')
+                        ok = len(matches) < len(data) or not is_multivalued and not data
                     elif comparator == 'like':
-                        data = [(x or "") for x in data]
-                        ok = fnmatch.filter(data, value and '*' + value_esc + '*')
+                        data = original_data
+                        matches = fnmatch.filter(data, value and '*' + value_esc + '*')
+                        ok = len(matches) > 0
                     elif comparator == 'not like':
-                        ok = not any(value in (x or "") for x in data)
+                        data = original_data
+                        matches = fnmatch.filter(data, value and '*' + value_esc + '*')
+                        ok = len(matches) < len(data) or not is_multivalued and not data
                     elif comparator == '=like':
-                        data = [(x or "") for x in data]
-                        ok = fnmatch.filter(data, value_esc)
+                        data = original_data
+                        matches = fnmatch.filter(data, value and value_esc)
+                        ok = len(matches) > 0
                     elif comparator == '=ilike':
-                        data = [(x or "").lower() for x in data]
-                        ok = fnmatch.filter(data, value and value_esc.lower())
+                        data = [x.lower() for x in original_data]
+                        matches = fnmatch.filter(data, value and value_esc.lower())
+                        ok = len(matches) > 0
                     else:
                         raise ValueError(f"Invalid term domain '{leaf}', operator '{comparator}' doesn't exist.")
 

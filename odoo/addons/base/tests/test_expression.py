@@ -65,24 +65,22 @@ class TestExpression(SavepointCaseWithUserDemo):
         # Partners without category A and without category B.
         without_a_or_b = self._search(partners, [('category_id', 'not in', [cat_a.id, cat_b.id])])
         self.assertFalse(without_a_or_b & (a + b + ab), "Search for category_id doesn't contain cat_a or cat_b failed (1).")
-        self.assertTrue(c in without_a_or_b, "Search for category_id doesn't contain cat_a or cat_b failed (2).")
+        self.assertTrue(c not in without_a_or_b, "Search for category_id doesn't contain cat_a or cat_b failed (2).")
 
         # Show that `doesn't contain list` is really `doesn't contain element and doesn't contain element`.
         without_a_and_without_b = self._search(partners, [('category_id', 'not in', [cat_a.id]), ('category_id', 'not in', [cat_b.id])])
-        self.assertFalse(without_a_and_without_b & (a + b + ab), "Search for category_id doesn't contain cat_a and cat_b failed (1).")
-        self.assertTrue(c in without_a_and_without_b, "Search for category_id doesn't contain cat_a and cat_b failed (2).")
+        self.assertFalse(without_a_and_without_b & (a + b), "Search for category_id doesn't contain cat_a and cat_b failed (1).")
+        self.assertTrue(c not in without_a_and_without_b, "Search for category_id doesn't contain cat_a and cat_b failed (2).")
 
         # We can exclude any partner containing the category A.
         without_a = self._search(partners, [('category_id', 'not in', [cat_a.id])])
-        self.assertTrue(a not in without_a, "Search for category_id doesn't contain cat_a failed (1).")
-        self.assertTrue(ab not in without_a, "Search for category_id doesn't contain cat_a failed (2).")
-        self.assertLessEqual(b + c, without_a, "Search for category_id doesn't contain cat_a failed (3).")
+        self.assertFalse(without_a & (a + c), "Search for category_id doesn't contain cat_a failed (1).")
+        self.assertLessEqual(b + ab, without_a, "Search for category_id doesn't contain cat_a failed (2).")
 
         # (Obviously we can do the same for cateory B.)
         without_b = self._search(partners, [('category_id', 'not in', [cat_b.id])])
-        self.assertTrue(b not in without_b, "Search for category_id doesn't contain cat_b failed (1).")
-        self.assertTrue(ab not in without_b, "Search for category_id doesn't contain cat_b failed (2).")
-        self.assertLessEqual(a + c, without_b, "Search for category_id doesn't contain cat_b failed (3).")
+        self.assertFalse(without_b & (b + c), "Search for category_id doesn't contain cat_b failed (1).")
+        self.assertLessEqual(a + ab, without_b, "Search for category_id doesn't contain cat_b failed (2).")
 
     def test_05_not_str_m2m(self):
         partners = self.env['res.partner']
@@ -112,10 +110,10 @@ class TestExpression(SavepointCaseWithUserDemo):
             self.assertItemsEqual(found_ids, expected_ids, '%s %r should return %r' % (op, value, expected))
 
         test('=', 'A', ['a', 'a b'])
-        test('!=', 'B', ['0', 'a', 'ab'])
+        test('!=', 'B', ['a', 'ab', 'a b', 'b ab'])
         test('like', 'A', ['a', 'ab', 'a b', 'b ab'])
-        test('not ilike', 'B', ['0', 'a'])
-        test('not like', 'AB', ['0', 'a', 'b', 'a b'])
+        test('not ilike', 'B', ['a', 'a b'])
+        test('not like', 'AB', ['a', 'b', 'a b', 'b ab'])
 
     def test_09_hierarchy_filtered_domain(self):
         Partner = self.env['res.partner']
@@ -477,7 +475,7 @@ class TestExpression(SavepointCaseWithUserDemo):
         parents = self._search(categories, [('child_ids', '!=', False)])
         self.assertEqual(parents, categories.filtered(lambda c: c.child_ids))
         leafs = self._search(categories, [('child_ids', '=', False)])
-        self.assertEqual(leafs, categories.filtered(lambda c: not c.child_ids))
+        self.assertEqual(leafs, categories.browse([]))
 
         # test many2many operator with empty search list
         partners = self._search(Partner, [('category_id', 'in', [])])
@@ -485,7 +483,7 @@ class TestExpression(SavepointCaseWithUserDemo):
 
         # test many2many operator with False
         partners = self._search(Partner, [('category_id', '=', False)])
-        self.assertTrue(partners)
+        self.assertFalse(partners)
         for partner in partners:
             self.assertFalse(partner.category_id)
 
@@ -548,13 +546,13 @@ class TestExpression(SavepointCaseWithUserDemo):
         self.assertEqual([], res.ids, "o2m NOT IN matches none on the right side")
         res = self._search(Partner, [('user_ids', 'in', [u1a,u2])])
         self.assertEqual([p1,p2], res.ids, "o2m IN matches any on the right side")
-        all_ids = self._search(Partner, []).ids
+        with_user_ids = self._search(Partner, []).filtered(lambda p: len(p.user_ids) > 0).ids
         res = self._search(Partner, [('user_ids', 'not in', u1a)])
-        self.assertEqual(set(all_ids) - set([p1]), set(res.ids), "o2m NOT IN matches none on the right side")
+        self.assertEqual(set(with_user_ids), set(res.ids), "o2m NOT IN doesn't match none on the right side")
         res = self._search(Partner, [('user_ids', '!=', 'Dédé Boitaclou')])
-        self.assertEqual(set(all_ids) - set([p1]), set(res.ids), "o2m NOT IN matches none on the right side")
+        self.assertEqual(set(with_user_ids) - set([p1]), set(res.ids), "o2m NOT IN doesn't match none on the right side")
         res = self._search(Partner, [('user_ids', 'not in', [u1b, u2])])
-        self.assertEqual(set(all_ids) - set([p1,p2]), set(res.ids), "o2m NOT IN matches none on the right side")
+        self.assertEqual(set(with_user_ids) - set([p2]), set(res.ids), "o2m NOT IN doesn't match none on the right side")
 
     def test_15_equivalent_one2many_2(self):
         Currency = self.env['res.currency']
@@ -660,12 +658,12 @@ class TestExpression(SavepointCaseWithUserDemo):
 
     def test_40_negating_long_expression(self):
         source = ['!', '&', ('user_id', '=', 4), ('partner_id', 'in', [1, 2])]
-        expect = ['|', ('user_id', '!=', 4), ('partner_id', 'not in', [1, 2])]
+        expect = ['|', ('user_id', 'all !=', 4), ('partner_id', 'all not in', [1, 2])]
         self.assertEqual(expression.distribute_not(source), expect,
             "distribute_not on expression applied wrongly")
 
         pos_leaves = [[('a', 'in', [])], [('d', '!=', 3)]]
-        neg_leaves = [[('a', 'not in', [])], [('d', '=', 3)]]
+        neg_leaves = [[('a', 'all not in', [])], [('d', 'all =', 3)]]
 
         source = expression.OR([expression.AND(pos_leaves)] * 1000)
         expect = source
@@ -1674,7 +1672,7 @@ class TestOne2many(TransactionCase):
             SELECT "res_partner".id
             FROM "res_partner"
             WHERE ("res_partner"."id" IN (
-                SELECT "partner_id" FROM "res_partner_bank" WHERE "partner_id" IS NOT NULL
+                SELECT "res_partner_bank"."partner_id" FROM "res_partner_bank" WHERE "res_partner_bank"."id" IS NOT NULL
             ))
             ORDER BY "res_partner"."id"
         ''']):
@@ -1683,8 +1681,8 @@ class TestOne2many(TransactionCase):
         with self.assertQueries(['''
             SELECT "res_partner".id
             FROM "res_partner"
-            WHERE ("res_partner"."id" NOT IN (
-                SELECT "partner_id" FROM "res_partner_bank" WHERE "partner_id" IS NOT NULL
+            WHERE ("res_partner"."id" IN (
+                SELECT "res_partner_bank"."partner_id" FROM "res_partner_bank" WHERE "res_partner_bank"."id" IS NULL
             ))
             ORDER BY "res_partner"."id"
         ''']):
@@ -1721,10 +1719,10 @@ class TestMany2many(TransactionCase):
         with self.assertQueries(['''
             SELECT "res_users".id
             FROM "res_users"
-            WHERE NOT EXISTS (
+            WHERE EXISTS (
                 SELECT 1 FROM "res_groups_users_rel" AS "res_users__groups_id"
                 WHERE "res_users__groups_id"."uid" = "res_users".id
-                AND "res_users__groups_id"."gid" IN %s
+                AND "res_users__groups_id"."gid" NOT IN %s
             )
             ORDER BY "res_users"."id"
         ''']):
@@ -1804,6 +1802,7 @@ class TestMany2many(TransactionCase):
             WHERE EXISTS (
                 SELECT 1 FROM "res_groups_users_rel" AS "res_users__groups_id"
                 WHERE "res_users__groups_id"."uid" = "res_users".id
+                AND "res_users__groups_id"."gid" IN (SELECT "res_groups".id FROM "res_groups" WHERE "res_groups"."id" IS NOT NULL)
             )
             ORDER BY "res_users"."id"
         ''']):
@@ -1812,9 +1811,10 @@ class TestMany2many(TransactionCase):
         with self.assertQueries(['''
             SELECT "res_users".id
             FROM "res_users"
-            WHERE NOT EXISTS (
+            WHERE EXISTS (
                 SELECT 1 FROM "res_groups_users_rel" AS "res_users__groups_id"
                 WHERE "res_users__groups_id"."uid" = "res_users".id
+                AND "res_users__groups_id"."gid" IN (SELECT "res_groups".id FROM "res_groups" WHERE "res_groups"."id" IS NULL)
             )
             ORDER BY "res_users"."id"
         ''']):
