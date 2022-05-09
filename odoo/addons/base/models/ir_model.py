@@ -1777,7 +1777,6 @@ class IrModelAccess(models.Model):
                           AND (a.group_id IS NULL OR gu.uid = %s)
                      GROUP BY a.model_id
                 ) AS acl ON (acl.model_id = m.id)
-                WHERE NOT m.transient
         """, [self.env.uid])
         return {
             m: {'read': r, 'write': w, 'create': c, 'unlink': u}
