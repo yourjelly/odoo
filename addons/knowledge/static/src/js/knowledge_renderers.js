@@ -168,7 +168,7 @@ const KnowledgeArticleFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin
         this.do_action('knowledge.action_home_page', {
             stackPosition: 'replaceCurrentAction',
             additional_context: {
-                res_id: $li.data('article-id')
+                active_article_id: $li.data('article-id')
             }
         });
     },

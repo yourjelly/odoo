@@ -101,7 +101,7 @@ commandProviderRegistry.add("knowledge", {
 
                         env.services.action.doAction('knowledge.action_home_page', {
                             additionalContext: {
-                                res_id: articleId,
+                                active_article_id: articleId,
                             }
                         });
                     },
@@ -121,7 +121,7 @@ commandProviderRegistry.add("knowledge", {
             action() {
                 env.services.action.doAction('knowledge.action_home_page', {
                     additionalContext: {
-                        res_id: article.id,
+                        active_article_id: article.id,
                     }
                 });
 

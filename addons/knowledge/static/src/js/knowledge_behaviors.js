@@ -146,7 +146,7 @@ const ArticleBehavior = KnowledgeBehavior.extend({
             event.preventDefault();
             const actionPromise = this.handler.do_action('knowledge.action_home_page', {
                 additional_context: {
-                    res_id: res_id
+                    active_article_id: res_id
                 }
             });
             await actionPromise.catch(() => {

@@ -72,7 +72,7 @@ class PermissionPanel extends Component {
             action: 'knowledge.action_home_page',
             options: {
                 additional_context: {
-                    res_id: id
+                    active_article_id: id
                 }
             }
         });

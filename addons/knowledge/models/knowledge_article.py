@@ -596,8 +596,8 @@ class Article(models.Model):
     # ------------------------------------------------------------
 
     def action_home_page(self):
-        res_id = self.env.context.get('res_id', False)
-        if not res_id:
+        active_article_id = self.env.context.get('active_article_id', False)
+        if not active_article_id:
             article = self.env['knowledge.article.favorite'].search([
                 ('user_id', '=', self.env.uid), ('article_id.active', '=', True)
             ], limit=1).article_id
@@ -607,11 +607,12 @@ class Article(models.Model):
                     ('parent_id', '=', False)
                 ], limit=1, order='sequence, internal_permission desc')
         else:
-            article = self.browse(res_id)
+            article = self.browse(active_article_id)
         mode = 'edit' if article.user_can_write else 'readonly'
         action = self.env['ir.actions.act_window']._for_xml_id('knowledge.knowledge_article_dashboard_action')
-        action['res_id'] = article.id
+        action['active_article_id'] = article.id
         action['context'] = dict(ast.literal_eval(action.get('context')), form_view_initial_mode=mode)
+        action['res_id'] = article.id if article else False
         return action
 
     def action_set_lock(self):
@@ -639,7 +640,7 @@ class Article(models.Model):
 
     def action_archive(self):
         super(Article, self | self._get_descendants()).action_archive()
-        return self.with_context(res_id=False).action_home_page()
+        return self.with_context(active_article_id=False).action_home_page()
 
     # ------------------------------------------------------------
     # SEQUENCE / ORDERING
