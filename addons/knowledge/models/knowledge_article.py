@@ -21,7 +21,7 @@ class Article(models.Model):
     _order = "favorite_count, create_date desc, id desc"  # Ordering : Most popular first, then newest articles.
 
     active = fields.Boolean(default=True)
-    name = fields.Char(string="Title", default=lambda self: _('New Article'), required=True)
+    name = fields.Char(string="Title", default=lambda self: _('New Article'), required=True, tracking=20)
     body = fields.Html(string="Article Body")
     icon = fields.Char(string='Article Icon')
     cover = fields.Binary(string='Cover Image')
@@ -35,7 +35,7 @@ class Article(models.Model):
              "Otherwise, the body will have large horizontal margins.")
     article_url = fields.Char('Article Url', compute='_compute_article_url', readonly=True)
     # Hierarchy and sequence
-    parent_id = fields.Many2one("knowledge.article", string="Parent Article")
+    parent_id = fields.Many2one("knowledge.article", string="Parent Article", tracking=30)
     child_ids = fields.One2many("knowledge.article", "parent_id", string="Child Articles")
     is_desynchronized = fields.Boolean(
         string="Desyncronized with parents",
@@ -46,7 +46,7 @@ class Article(models.Model):
         help="The sequence is computed only among the articles that have the same parent.")
     root_article_id = fields.Many2one(
         'knowledge.article', string="Subject", recursive=True,
-        compute="_compute_root_article_id", store=True, compute_sudo=True,
+        compute="_compute_root_article_id", store=True, compute_sudo=True, tracking=10,
         help="The subject is the title of the highest parent in the article hierarchy.")
     # Access rules and members + implied category
     internal_permission = fields.Selection(
