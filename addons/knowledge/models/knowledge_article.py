@@ -859,30 +859,30 @@ class Article(models.Model):
         })
 
     def _set_internal_permission(self, permission):
-        """
-        Set the internal permission of the article.
-        :param permission (str): permission ('none', 'read' or 'write')
-        """
+        """ Set the internal permission of the article.
+        Special cases:
+        - To ensure the user still has write access after modification,
+          add the user as write member if given permission != write
+        - When downgrading internal permission on a child article:
+            Desync it from parent.
+        - if we set same permission as parent and the article has no specific member:
+            Resync if on parent.
+        :param permission (str): permission ('none', 'read' or 'write') """
         self.ensure_one()
-        values = {'internal_permission': permission}
-        # always add current user as writer if user sets permission != write
-        should_invite_self = False
         if self.user_can_write and permission != "write":
-            should_invite_self = True
-        # when downgrading internal permission on a child article, desync it from parent
-        if not self.is_desynchronized and self.parent_id \
-                and ARTICLE_PERMISSION_LEVEL[self.parent_id.inherited_permission] > ARTICLE_PERMISSION_LEVEL[permission]:
-            if should_invite_self:
-                self._add_members(self.env.user.partner_id, 'write')
+            self._add_members(self.env.user.partner_id, 'write')
+
+        downgrade = not self.is_desynchronized and self.parent_id and \
+                    ARTICLE_PERMISSION_LEVEL[self.parent_id.inherited_permission] > ARTICLE_PERMISSION_LEVEL[permission]
+        if downgrade:
             return self._desync_access_from_parents(internal_permission=permission)
-        # Resyncro Internal permission if we set same permission as parent.
+
+        values = {'internal_permission': permission}
         if permission == self.parent_id.inherited_permission and not self.article_member_ids:
             values.update({
                 'internal_permission': False,
                 'is_desynchronized': False
             })
-        if should_invite_self:
-            self._add_members(self.env.user.partner_id, 'write')
         return self.write(values)
 
     def _set_member_permission(self, member, permission, is_based_on=False):
