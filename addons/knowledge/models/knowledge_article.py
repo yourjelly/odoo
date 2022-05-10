@@ -876,7 +876,8 @@ class Article(models.Model):
                 'permission': new_member_permission
             }))
 
-        return self.write({
+        # TODO REMOVE SUDO if can write on member based on can_write on article
+        return self.sudo().write({
             'internal_permission': internal_permission,
             'article_member_ids': members_values,
             'is_desynchronized': True
@@ -924,7 +925,8 @@ class Article(models.Model):
             else:
                 self._add_members(member.partner_id, permission)
         else:
-            member.write({'permission': permission})
+            # TODO REMOVE SUDO if can write on member based on can_write on article
+            member.sudo().write({'permission': permission})
 
     def _remove_member(self, member, is_based_on=False):
         """ Remove a member from the article.
@@ -941,6 +943,7 @@ class Article(models.Model):
                 upgrade_self = not member.has_higher_permission
             if not self.user_can_write and upgrade_self:
                 raise AccessError(_("You cannot remove the member '%s' from article '%s'.", member.display_name, self.display_name))
+            # TODO REMOVE SUDO if can write on member based on can_write on article
             member.sudo().unlink()
 
     def invite_members(self, partners, permission):
