@@ -281,7 +281,7 @@ class AccountReportLine(models.Model):
 
 
 class AccountReportExpression(models.Model):
-    _name = 'account.report.expression' #TODO OCO ou rebaptiser line.cell pour éviter la confusion avec le champ formula ?
+    _name = 'account.report.expression'
     _description = "Accounting Report Expression"
 
     # TODO OCO repasser sur le phrasing
