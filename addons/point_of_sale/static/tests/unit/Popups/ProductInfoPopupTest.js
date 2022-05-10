@@ -4,7 +4,7 @@ import ProductInfoPopup from 'point_of_sale.ProductInfoPopup';
 const { useBus } = require('@web/core/utils/hooks');
 import { makePosTestEnv } from '../utils/test_env';
 import { posServerData } from '../utils/test_server_data';
-import { removeSpace, Root, overrideRoot } from '../utils/test_utils';
+import { removeSpace, Root } from '../utils/test_utils';
 import testUtils from 'web.test_utils';
 import { mount, click } from '@web/../tests/helpers/utils';
 import { patchWithCleanup } from "@web/../tests/helpers/utils";

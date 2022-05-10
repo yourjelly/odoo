@@ -8,7 +8,7 @@ import { patchWithCleanup } from "@web/../tests/helpers/utils";
 import testUtils from 'web.test_utils';
 import { mount, click } from '@web/../tests/helpers/utils';
 import { PosGlobalState } from 'point_of_sale.models';
-import { overrideRoot, Root } from '@point_of_sale/../tests/unit/utils/test_utils';
+import { Root } from '@point_of_sale/../tests/unit/utils/test_utils';
 
 let savedData = {};
 
