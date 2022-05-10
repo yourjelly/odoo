@@ -222,7 +222,7 @@ class Article(models.Model):
         articles_permissions = {}
         if not self.env.user.share:
             articles_permissions = self._get_internal_permission()
-        member_permissions = self._get_partner_member_permissions(self.env.user.partner_id.id)
+        member_permissions = self._get_partner_member_permissions(self.env.user.partner_id)
         for article in self:
             article_id = article.ids[0]
             if self.env.user.share:
@@ -268,7 +268,7 @@ class Article(models.Model):
         articles_with_access = {}
         if not self.env.user.share:
             articles_with_access = self._get_internal_permission(check_access=True)
-        member_permissions = self._get_partner_member_permissions(self.env.user.partner_id.id)
+        member_permissions = self._get_partner_member_permissions(self.env.user.partner_id)
         articles_with_no_member_access = [article_id for article_id, perm in member_permissions.items() if perm == 'none']
         articles_with_member_access = list(set(member_permissions.keys() - set(articles_with_no_member_access)))
 
@@ -330,7 +330,7 @@ class Article(models.Model):
             return expression.TRUE_DOMAIN
 
         articles_with_access = self._get_internal_permission(check_write=True)
-        member_permissions = self._get_partner_member_permissions(self.env.user.partner_id.id)
+        member_permissions = self._get_partner_member_permissions(self.env.user.partner_id)
         articles_with_member_access = [article_id for article_id, perm in member_permissions.items() if perm == 'write']
         articles_with_no_member_access = list(set(member_permissions.keys() - set(articles_with_member_access)))
 
@@ -1015,14 +1015,14 @@ class Article(models.Model):
         return dict(self._cr.fetchall())
 
     @api.model
-    def _get_partner_member_permissions(self, partner_id):
+    def _get_partner_member_permissions(self, partner):
         """ Retrieve the permission for the given partner for all articles.
         The articles can be filtered using the article_ids param.
 
         The member model is fully flushed before running the request. """
         self.env['knowledge.article'].flush()
         self.env['knowledge.article.member'].flush()
-        args = [partner_id]
+        args = [partner.id]
 
         base_where_domain = ''
         if self.ids:
