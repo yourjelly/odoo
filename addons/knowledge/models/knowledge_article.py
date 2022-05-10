@@ -768,16 +768,18 @@ class Article(models.Model):
 
         return self.create(values).id
 
-    def get_user_sorted_articles(self, search_query, fields, order_by, limit):
+    def get_user_sorted_articles(self, search_query):
         """ Called when using the Command palette to search for articles matching the search_query.
         As the article should be sorted also in function of the current user's favorite sequence, a search_read rpc
         won't be enough to returns the articles in the correct order.
         This method returns a list of article proposal matching the search_query sorted by:
-            - is_user_favorite
-            - Favorite sequence
+            - is_user_favorite - by Favorite sequence
             - Favorite count
         and returned result mimic a search_read result structure.
         """
+        fields = ['id', 'name', 'is_user_favorite', 'favorite_count', 'root_article_id', 'icon']
+        order_by = "is_user_favorite, favorite_count desc"
+        limit = 10
         search_domain = ["|", ("name", "ilike", search_query), ("root_article_id.name", "ilike", search_query)]
         articles = self.search(search_domain, order=order_by, limit=limit)
         sorted_articles = articles.sorted(

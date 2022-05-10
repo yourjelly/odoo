@@ -71,9 +71,6 @@ commandProviderRegistry.add("knowledge", {
             args: [[]],
             kwargs: {
                 search_query: options.searchValue,
-                fields: ['id', 'name', 'is_user_favorite', 'favorite_count', 'root_article_id', 'icon'],
-                order_by: "is_user_favorite, favorite_count desc",
-                limit: 10,
             }
         });
 
