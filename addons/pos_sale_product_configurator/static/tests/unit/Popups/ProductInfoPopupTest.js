@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import PosComponent from 'point_of_sale.PosComponent';
 import ProductInfoPopup from 'point_of_sale.ProductInfoPopup';
 const { useBus } = require('@web/core/utils/hooks');
 import { makePosTestEnv } from '@point_of_sale/../tests/unit/utils/test_env';
@@ -9,7 +8,7 @@ import { patchWithCleanup } from "@web/../tests/helpers/utils";
 import testUtils from 'web.test_utils';
 import { mount, click } from '@web/../tests/helpers/utils';
 import { PosGlobalState } from 'point_of_sale.models';
-import { createDummyComponent, ReactiveRoot } from '@point_of_sale/../tests/unit/utils/test_utils';
+import { overrideRoot, Root } from '@point_of_sale/../tests/unit/utils/test_utils';
 
 let savedData = {};
 
@@ -39,7 +38,7 @@ QUnit.module('ProductInfoPopup pos_sale_product_configurator Test', {
         this.product = Object.values(this.env.pos.db.product_by_id)[0];
         this.props = { product: this.product, quantity: 1 };
 
-        this.rootClass = ReactiveRoot; // there's not really any need to make pos reactive
+        this.rootClass = Root; // there's not really any need to make pos reactive
         this.rootClass.template = owl.xml/* html */ `
             <t>
                 <ProductInfoPopup t-props='props'/>
@@ -106,13 +105,13 @@ QUnit.test('Optional product section not displayed', async function (assert) {
 QUnit.test('Search/filter optional products', async function (assert) {
     // When clicking on an optional products, it performs a search on the products list, the popup should then be closed
     const closeStep = 'close-popup';
-    const ExtendedRoot = createDummyComponent(ReactiveRoot => class ExtendedRoot extends ReactiveRoot {
+    const ExtendedRoot =  class ExtendedRoot extends Root {
         setup() {
             super.setup();
             useBus(this.env.posbus, 'search-product-from-info-popup', ({ detail }) => assert.strictEqual(detail, 'Conference Chair'));
             useBus(this.env.posbus, 'close-popup', () => assert.step(closeStep));
         }
-    });
+    };
     assert.expect(3);
 
     await mount(ExtendedRoot, this.target, {env: this.env, props: this.props});

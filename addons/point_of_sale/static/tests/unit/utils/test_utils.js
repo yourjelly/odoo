@@ -19,6 +19,4 @@ export class ReactiveRoot extends PosComponent {
     }
 }
 
-export const createDummyComponent = (mixin) => {
-  return mixin(ReactiveRoot);
-}
+export class Root extends PosComponent {}

@@ -4,7 +4,7 @@ import ProductInfoPopup from 'point_of_sale.ProductInfoPopup';
 const { useBus } = require('@web/core/utils/hooks');
 import { makePosTestEnv } from '../utils/test_env';
 import { posServerData } from '../utils/test_server_data';
-import { removeSpace, ReactiveRoot, createDummyComponent } from '../utils/test_utils';
+import { removeSpace, Root, overrideRoot } from '../utils/test_utils';
 import testUtils from 'web.test_utils';
 import { mount, click } from '@web/../tests/helpers/utils';
 import { patchWithCleanup } from "@web/../tests/helpers/utils";
@@ -41,7 +41,7 @@ QUnit.module('ProductInfoPopup Test', {
         this.product = Object.values(this.env.pos.db.product_by_id)[0];
         // we don't know which product we'll have so to make sure it has everything, we override some info
         this.props = { product: this.product, quantity: 1 };
-        this.rootClass = ReactiveRoot; //Todo to remove not needed to be reactive for this component
+        this.rootClass = Root; //Todo to remove not needed to be reactive for this component
         this.rootClass.template = owl.xml/* html */ `
             <t>
                 <ProductInfoPopup t-props='props'/>
@@ -258,13 +258,13 @@ QUnit.test('Variants section not displayed', async function (assert) {
 QUnit.test('Search/filter product variant', async function (assert) {
     // When clicking on a product variant, it performs a search on the products list, the popup should then be closed
     const closeStep = 'close-popup';
-    const ExtendedRoot = createDummyComponent(ReactiveRoot => class ExtendedRoot extends ReactiveRoot {
+    const ExtendedRoot = class ExtendedRoot extends Root {
         setup() {
             super.setup();
             useBus(this.env.posbus, 'search-product-from-info-popup', ({detail}) => assert.strictEqual(detail, 'Conference Chair Steel'));
             useBus(this.env.posbus, 'close-popup', () => assert.step(closeStep));
         }
-    });
+    };
     assert.expect(3);
 
     await mount(ExtendedRoot, this.target, {env: this.env, props: this.props});
