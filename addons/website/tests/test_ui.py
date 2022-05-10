@@ -104,7 +104,8 @@ class TestUiHtmlEditor(odoo.tests.HttpCase):
                 self.env.ref('website.group_website_designer').id
             ])]
         })
-        self.start_tour("/", 'test_html_editor_scss', login='admin', timeout=120)
+        self.start_tour("/web", 'test_html_editor_scss', login='admin')
+        self.start_tour("/web", 'test_html_editor_scss_2', login='demo')
 
     def media_dialog_undraw(self):
         self.start_tour("/", 'website_media_dialog_undraw', login='admin')
@@ -118,7 +119,7 @@ class TestUiTranslate(odoo.tests.HttpCase):
             'iso_code': 'pa_GB',
             'url_code': 'pa_GB',
         })
-        self.start_tour("/", 'rte_translator', login='admin', timeout=120)
+        self.start_tour("/web", 'rte_translator', login='admin', timeout=120)
 
 
 @odoo.tests.common.tagged('post_install', '-at_install')
@@ -207,17 +208,17 @@ class TestUi(odoo.tests.HttpCase):
                 </xpath>
             """,
         }])
-        self.start_tour("/", 'snippet_version', login='admin')
+        self.start_tour("/web", 'snippet_version', login='admin')
 
     def test_08_website_style_custo(self):
         self.start_tour("/", "website_style_edition", login="admin")
 
     def test_09_website_edit_link_popover(self):
-        self.start_tour("/", "edit_link_popover", login="admin")
+        self.start_tour("/web", "edit_link_popover", login="admin")
 
     def test_10_website_conditional_visibility(self):
-        self.start_tour('/', 'conditional_visibility_1', login='admin')
-        self.start_tour('/', 'conditional_visibility_2', login='admin')
+        self.start_tour('/web', 'conditional_visibility_1', login='admin')
+        self.start_tour('/web', 'conditional_visibility_2', login='admin')
 
     def test_11_website_snippet_background_edition(self):
         self.env['ir.attachment'].create({
@@ -227,7 +228,7 @@ class TestUi(odoo.tests.HttpCase):
             'name': 'test.png',
             'mimetype': 'image/png',
         })
-        self.start_tour('/', 'snippet_background_edition', login='admin')
+        self.start_tour('/web', 'snippet_background_edition', login='admin')
 
     def test_12_edit_translated_page_redirect(self):
         lang = self.env['res.lang']._activate_lang('nl_NL')
@@ -289,13 +290,13 @@ class TestUi(odoo.tests.HttpCase):
         self.start_tour("/", "carousel_content_removal", login='admin')
 
     def test_15_website_link_tools(self):
-        self.start_tour("/", "link_tools", login="admin")
+        self.start_tour("/web", "link_tools", login="admin")
 
     def test_16_website_edit_megamenu(self):
-        self.start_tour("/", "edit_megamenu", login="admin")
+        self.start_tour("/web", "edit_megamenu", login="admin")
 
     def test_17_website_edit_menus(self):
-        self.start_tour("/", "edit_menus", login="admin")
+        self.start_tour("/web", "edit_menus", login="admin")
 
     def test_18_website_snippets_menu_tabs(self):
         self.start_tour("/?enable_editor=1", "website_snippets_menu_tabs", login="admin")
