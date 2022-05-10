@@ -405,10 +405,10 @@ class Article(models.Model):
             to_unfav.favorite_ids.filtered(lambda u: u.user_id == self.env.user).unlink()
 
     def _search_is_user_favorite(self, operator, value):
-        if operator != "=":
+        if operator not in ('=', '!='):
             raise NotImplementedError("Unsupported search operation on favorite articles")
 
-        if value:
+        if (value and operator == '=') or (not value and operator == '!='):
             return [('favorite_ids.user_id', 'in', [self.env.uid])]
         return [('favorite_ids.user_id', 'not in', [self.env.uid])]
 
