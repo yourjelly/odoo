@@ -628,15 +628,6 @@ class Article(models.Model):
         article.is_user_favorite = not article.is_user_favorite
         return self[0].is_user_favorite if self else False
 
-    def action_set_favorite_sequence(self, sequence):
-        self.ensure_one()
-        favorite = self.env["knowledge.article.favorite"].search([
-            ('user_id', '=', self.env.uid), ('article_id', '=', self.id)
-        ])
-        if not favorite:
-            raise UserError(_("You don't have the article '%s' in your favorites.", self.display_name))
-        return favorite._set_sequence(sequence)
-
     def action_archive(self):
         super(Article, self | self._get_descendants()).action_archive()
         return self.with_context(res_id=False).action_home_page()

@@ -64,17 +64,17 @@ export default {
              */
             stop: (event, ui) => {
                 const $li = $(ui.item);
-                let sequence = false;
-                const $next = $li.next();
-                if ($next.length > 0) {
-                    sequence = $next.data('favorite-sequence') || 0;
-                }
+                const favorite_ids = $sortable.find('.o_article').map(function () {
+                    return $(this).data('favorite-article-id');
+                }).get();
                 $sortable.sortable('disable');
                 this._rpc({
-                    model: 'knowledge.article',
-                    method: 'action_set_favorite_sequence',
-                    args: [[$li.data('article-id')]],
-                    kwargs: {sequence: sequence},
+                    route: '/web/dataset/resequence',
+                    params: {
+                        model: "knowledge.article.favorite",
+                        ids: favorite_ids,
+                        offset: 1,
+                    }
                 }).then(() => {
                     $sortable.sortable('enable');
                 }).catch(() => {
