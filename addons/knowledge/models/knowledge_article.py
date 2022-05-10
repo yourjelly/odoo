@@ -91,6 +91,7 @@ class Article(models.Model):
         string="Is Favorited?",
         compute="_compute_is_user_favorite", search="_search_is_user_favorite",
         inverse="_inverse_is_user_favorite")
+    user_favorite_sequence = fields.Integer(string="User Favorite Sequence", compute="_compute_is_user_favorite")
     favorite_ids = fields.One2many(
         'knowledge.article.favorite', 'article_id',
         string='Favorite Articles', copy=False)
@@ -390,7 +391,9 @@ class Article(models.Model):
     @api.depends('favorite_ids.user_id')
     def _compute_is_user_favorite(self):
         for article in self:
-            article.is_user_favorite = self.env.user in article.favorite_ids.user_id
+            favorite = article.favorite_ids.filtered(lambda f: f.user_id == self.env.user)
+            article.is_user_favorite = bool(favorite)
+            article.user_favorite_sequence = favorite.sequence if favorite else -1
 
     def _inverse_is_user_favorite(self):
         to_fav = self.filtered(lambda article: self.env.user not in article.favorite_ids.user_id)
@@ -777,13 +780,10 @@ class Article(models.Model):
         """
         search_domain = ["|", ("name", "ilike", search_query), ("root_article_id.name", "ilike", search_query)]
         articles = self.search(search_domain, order=order_by, limit=limit)
-
-        favorite_articles = articles.filtered(
-            lambda a: a.is_user_favorite).sorted(
-                key=lambda a: a.favorite_ids.filtered(
-                    lambda f: f.user_id == self.env.user
-                ).sequence)
-        sorted_articles = favorite_articles | (articles - favorite_articles)
+        sorted_articles = articles.sorted(
+            key=lambda a: (a.is_user_favorite, -1 * a.user_favorite_sequence),
+            reverse=True
+        )
 
         # TODO DBE: don't we have something that does that already ?
         def get_field_info(article, field_name):
