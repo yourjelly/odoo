@@ -36,7 +36,7 @@ class KnowledgePerformanceCase(KnowledgeCommonWData):
     @users('employee')
     @warmup
     def test_article_creation_single_workspace(self):
-        with self.assertQueryCount(employee=15):
+        with self.assertQueryCount(employee=17):
             _article = self.env['knowledge.article'].create({
                 'body': '<p>Hello</p>',
                 'name': 'Article in workspace',
@@ -48,7 +48,7 @@ class KnowledgePerformanceCase(KnowledgeCommonWData):
     @users('employee')
     @warmup
     def test_article_creation_multi_roots(self):
-        with self.assertQueryCount(employee=22):
+        with self.assertQueryCount(employee=33):
             _article = self.env['knowledge.article'].create([
                 {'body': '<p>Hello</p>',
                  'internal_permission': 'write',
@@ -60,7 +60,7 @@ class KnowledgePerformanceCase(KnowledgeCommonWData):
     @users('employee')
     @warmup
     def test_article_creation_multi_shared_grandchild(self):
-        with self.assertQueryCount(employee=47):
+        with self.assertQueryCount(employee=56):
             _article = self.env['knowledge.article'].create([
                 {'body': '<p>Hello</p>',
                  'name': f'Article {index} in workspace',
