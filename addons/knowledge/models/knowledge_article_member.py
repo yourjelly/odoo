@@ -14,7 +14,7 @@ class ArticleMember(models.Model):
 
     article_id = fields.Many2one(
         'knowledge.article', 'Article',
-        ondelete='cascade', required=True)
+        ondelete='cascade', required=True, index=True)
     partner_id = fields.Many2one(
         'res.partner', 'Partner',
         index=True, ondelete='cascade', required=True)
@@ -28,9 +28,8 @@ class ArticleMember(models.Model):
         readonly=True, store=True)
     has_higher_permission = fields.Boolean(
         compute='_compute_has_higher_permission',
-        help="If True, the member has a higher permission then the one set on the article. "
-             "Used to check if user will upgrade its own permission (should not) "
-             "and remove the 'Remove Member' button in the permission panel if this is not the case.")
+        help="If True, the member has a higher permission than the one set on the article. "
+             "Used to check if user will upgrade its own permission.")
 
     _sql_constraints = [
         ('partner_unique', 'unique(article_id, partner_id)', 'You already added this partner on this article.')

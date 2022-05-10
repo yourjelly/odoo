@@ -940,8 +940,7 @@ class Article(models.Model):
             self._add_members(partners, permission)
 
         if permission != 'none':
-            for partner in partners:
-                self._send_invite_mail(partner)
+            self._send_invite_mail(partners)
 
         return True
 
@@ -1215,20 +1214,20 @@ class Article(models.Model):
     # MAILING
     # ------------------------------------------------------------
 
-    def _send_invite_mail(self, partner):
-        # TODO: only send one email if user is invited to multiple articles?
-        for article in self:
-            subject = _("Invitation to access %s", article.name)
+    def _send_invite_mail(self, partners):
+        self.ensure_one()
+        for partner in partners:
+            subject = _("Invitation to access %s", self.name)
             partner_lang = get_lang(self.env, lang_code=partner.lang).code
             body = self.env['ir.qweb'].with_context(lang=partner_lang)._render(
                 'knowledge.knowledge_article_mail_invite', {
-                    'record': article,
+                    'record': self,
                     'user': self.env.user,
                     'recipient': partner,
-                    'link': article._get_invite_url(partner),
-            })
+                    'link': self._get_invite_url(partner),
+                })
 
-            article.with_context(lang=partner_lang).message_notify(
+            self.with_context(lang=partner_lang).message_notify(
                 partner_ids=partner.ids, body=body, subject=subject,
                 email_layout_xmlid='mail.mail_notification_light'
             )
