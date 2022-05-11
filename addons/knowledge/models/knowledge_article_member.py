@@ -9,7 +9,7 @@ from odoo.addons.knowledge.models.tools import ARTICLE_PERMISSION_LEVEL
 
 class ArticleMember(models.Model):
     _name = 'knowledge.article.member'
-    _description = 'Article Members'
+    _description = 'Article Member'
     _rec_name = 'partner_id'
 
     article_id = fields.Many2one(

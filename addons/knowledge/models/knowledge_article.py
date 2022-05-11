@@ -17,7 +17,7 @@ from odoo.addons.knowledge.models.tools import ARTICLE_PERMISSION_LEVEL
 
 class Article(models.Model):
     _name = "knowledge.article"
-    _description = "Knowledge Articles"
+    _description = "Knowledge Article"
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = "favorite_count, create_date desc, id desc"  # Ordering : Most popular first, then newest articles.
 
