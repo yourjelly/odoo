@@ -14,6 +14,21 @@ class TestKnowledgeSecurity(KnowledgeArticlePermissionsCase):
     we rely on them to check the create/read/write/unlink access checks. """
 
     @mute_logger('odoo.addons.base.models.ir_model', 'odoo.addons.base.models.ir_rule')
+    @users('user_public')
+    def test_models_as_public(self):
+        # ARTICLE
+        with self.assertRaises(exceptions.AccessError, msg='ACLs: No article access to public'):
+            self.env['knowledge.article'].search([])
+
+        # FAVORITES
+        with self.assertRaises(exceptions.AccessError, msg='ACLs: No favorite access to public'):
+            self.env['knowledge.article.favorite'].search([])
+
+        # MEMBERS
+        with self.assertRaises(exceptions.AccessError, msg='ACLs: No member access to public'):
+            self.env['knowledge.article.member'].search([])
+
+    @mute_logger('odoo.addons.base.models.ir_model', 'odoo.addons.base.models.ir_rule')
     @users('portal_test')
     def test_models_as_portal(self):
         article_root = self.article_roots[0].with_env(self.env)
