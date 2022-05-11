@@ -13,16 +13,6 @@ class KnowledgeWebsiteController(KnowledgeController):
     def redirect_to_article(self, **kwargs):
         return super().redirect_to_article(**kwargs)
 
-    def _get_root_articles(self, limit=None):
-        """ As public users don't have access to article model, get root articles
-        in sudo with adapted domain. Public users only have access to website_published
-        articles. Other users rely on standard ACLs that include both user_has_access
-        and website_published fields. """
-        if request.env.user._is_public():
-            _order = 'sequence' if limit is not None else None
-            return request.env["knowledge.article"].sudo().search(
-                [("parent_id", "=", False), ('website_published', '=', True)],
-                limit=limit,
-                order=_order
-            )
-        return super()._get_root_articles(limit=limit)
+    @http.route('/knowledge/article', type='http', auth='public', website=True)
+    def access_knowledge_home(self):
+        return super().access_knowledge_home()
