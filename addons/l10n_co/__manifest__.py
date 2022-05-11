@@ -22,7 +22,6 @@
         'l10n_latam_base',
     ],
     'data': [
-        #'data/l10n_co_chart_data.xml',
         'data/account_chart_template_data.xml',
         'data/account.account.template.csv',
         'data/account.tax.group.csv',
