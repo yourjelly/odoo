@@ -118,14 +118,16 @@
                                                     attrs="{'invisible': [('last_edition_uid', '=', False), ('last_edition_date', '=', False)]}"/>
                                                 <div class="px-4 py-2 mx-1" attrs="{'invisible': [('last_edition_uid', '=', False)]}">
                                                     <h6 class="small font-weight-bold m-0">Last Edited by:</h6>
-                                                    <div class="mb-2 text-nowrap">
-                                                        <field name="last_edition_uid" readonly="1"/> -
-                                                        <field name="last_edition_date" widget="datetime" readonly="1"/>
+                                                    <div class="d-flex">
+                                                        <field name="last_edition_uid" readonly="1" class="text-truncate"/>
+                                                        <span class="mx-1">-</span>
+                                                        <field name="last_edition_date" widget="datetime" readonly="1" class="text-nowrap"/>
                                                     </div>
                                                     <h6 class="small font-weight-bold m-0">Created by:</h6>
-                                                    <div class="text-nowrap">
-                                                        <field name="create_uid" readonly="1"/> - 
-                                                        <field name="create_date" widget="datetime" readonly="1"/>
+                                                    <div class="d-flex">
+                                                        <field name="create_uid" readonly="1" class="text-truncate"/>
+                                                        <span class="mx-1">-</span>
+                                                        <field name="create_date" widget="datetime" readonly="1" class="text-nowrap"/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -147,11 +149,14 @@
                                                     <span class="o_knowledge_article_view_form_dynamic_width d-none" attrs="{'invisible': [('full_width', '=', False)]}"/>
 
                                                     <!-- Icon and Cover buttons -->
-                                                    <div class="text-primary bg-white o_knowledge_icon_cover_buttons mt-2" attrs="{'invisible': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}">
-                                                        <a type="button" role="button" attrs="{'invisible': [('icon', '!=', False)]}" class="btn btn-secondary btn-outline-secondary mr-2 pl-1 o_knowledge_add_icon">
+                                                    <div class="text-primary bg-white o_knowledge_icon_cover_buttons mt-2"
+                                                         attrs="{'invisible': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}">
+                                                        <a type="button" role="button" attrs="{'invisible': [('icon', '!=', False)]}"
+                                                           class="btn btn-secondary btn-outline-secondary mr-2 pl-1 o_knowledge_add_icon">
                                                             <i class="fa fa-fw fa-smile-o" style="font-size: 1.5em;" title="Add icon"/> Add icon
                                                         </a>
-                                                        <a type="button" role="button" attrs="{'invisible': [('cover', '!=', False)]}" class="btn btn-secondary btn-outline-secondary o_knowledge_add_cover">
+                                                        <a type="button" role="button" attrs="{'invisible': [('cover', '!=', False)]}"
+                                                           class="btn btn-secondary btn-outline-secondary o_knowledge_add_cover">
                                                             <i class="fa fa-fw fa-picture-o" style="font-size: 1.5em;" title="Add cover"/> Add cover
                                                         </a>
                                                     </div>
