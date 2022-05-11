@@ -118,14 +118,16 @@
                                                     attrs="{'invisible': [('last_edition_uid', '=', False), ('last_edition_date', '=', False)]}"/>
                                                 <div class="px-4 py-2 mx-1" attrs="{'invisible': [('last_edition_uid', '=', False)]}">
                                                     <h6 class="small font-weight-bold m-0">Last Edited by:</h6>
-                                                    <div class="mb-2 text-nowrap">
-                                                        <field name="last_edition_uid" widget="many2one_avatar_user" readonly="1"/> -
-                                                        <field name="last_edition_date" widget="datetime" readonly="1"/>
+                                                    <div class="d-flex">
+                                                        <field name="last_edition_uid" widget="many2one_avatar_user" readonly="1" class="text-truncate"/>
+                                                        <span class="mx-1">-</span>
+                                                        <field name="last_edition_date" widget="datetime" readonly="1" class="text-nowrap"/>
                                                     </div>
                                                     <h6 class="small font-weight-bold m-0">Created by:</h6>
-                                                    <div class="text-nowrap">
-                                                        <field name="create_uid" widget="many2one_avatar_user" readonly="1"/> -
-                                                        <field name="create_date" widget="datetime" readonly="1"/>
+                                                    <div class="d-flex">
+                                                        <field name="create_uid" widget="many2one_avatar_user" readonly="1" class="text-truncate"/>
+                                                        <span class="mx-1">-</span>
+                                                        <field name="create_date" widget="datetime" readonly="1" class="text-nowrap"/>
                                                     </div>
                                                 </div>
                                             </div>
