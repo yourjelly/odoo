@@ -5,7 +5,7 @@
          https://www.plangeneralcontable.com/?tit=listado-de-contenidos&name=GeTia&contentId=mod_list&contGroupId=ctg_74
     -->
         <record id="account_group_1" model="account.group.template">
-            <field name="chart_template_id" ref="l10n_co.l10n_co.l10n_co_chart_template_generic"/>
+            <field name="chart_template_id" ref="l10n_co.l10n_co_chart_template_generic"/>
             <field name="code_prefix_start">1</field>
             <field name="name">Activo</field>
         </record>
