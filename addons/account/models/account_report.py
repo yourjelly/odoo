@@ -25,22 +25,25 @@ class AccountReport(models.Model):
     filter_multi_company = fields.Selection(
         string="Multi-Company",
         selection=[('disabled', "Disabled"), ('selector', "Use Company Selector"), ('tax_units', "Use Tax Units")],
-        default='disabled',
         required=True,
-    ) # TODO OCO on pourrait en faire un champ sélection (no, with_selector, with_tax_units)
-    filter_date_range = fields.Boolean(string="Use Date Range", default=True) # TODO OCO remplace filter_date > True si range, False si date unique.
-    allow_showing_draft = fields.Boolean(string="Allow Showing Draft Entries", default=True) #TODO OCO remplace filter_all_entries (qui n'est jamais passé à True, dirait-on)
-    filter_unreconciled = fields.Boolean(string="Allow Filtering Unreconciled Entries")
-    filter_unfold_all = fields.Boolean(string="Allow Unfolding All Lines") # TODO OCO on pourrait le calculer: si le rapport compte au moins une ligne unfoldable, on l'affiche (why not ?)
-    allow_comparison = fields.Boolean(string="Allow Comparison", default=True)
-    allow_growth_comparison = fields.Boolean(string="Growth Comparison", default=True)
-    filter_journals = fields.Boolean(string="Allow Filtering by Journal")
-    filter_analytic = fields.Boolean(string="Allow Analytic Filters")
-    filter_hierarchy = fields.Selection(string="Hierarchy", selection=[('by_default', "Enabled by Default"), ('optional', "Optional"), ('never', "Never")], required=True, default='never')
-    filter_account_type = fields.Selection(string="Filter Account Type", selection=[('payable', "Payable"), ('receivable', "Receivable"), ('payable_receivable', "Payable and Receivable")])
-    filter_partner = fields.Boolean(string="Filter Partner")
-    filter_fiscal_position = fields.Boolean(string="Use Foreign VAT Fiscal Positions", default=False) # TODO OCO renommer ce truc serait bien
-    strict_date = fields.Boolean(string="Strict Date", default=True) # TODO OCO remplace le strict_range ===> meilleur nom ? Peut-être en inversant le booléen ?
+        compute='_compute_report_option_filters',
+        readonly=False,
+        store=True,
+    )
+
+    filter_date_range = fields.Boolean(string="Use Date Range", compute='_compute_report_option_filters', readonly=False, store=True)
+    allow_showing_draft = fields.Boolean(string="Allow Showing Draft Entries", compute='_compute_report_option_filters', readonly=False, store=True)
+    filter_unreconciled = fields.Boolean(string="Allow Filtering Unreconciled Entries", compute='_compute_report_option_filters', readonly=False, store=True)
+    filter_unfold_all = fields.Boolean(string="Allow Unfolding All Lines", compute='_compute_report_option_filters', readonly=False, store=True)
+    allow_comparison = fields.Boolean(string="Allow Comparison", compute='_compute_report_option_filters', readonly=False, store=True)
+    allow_growth_comparison = fields.Boolean(string="Growth Comparison", compute='_compute_report_option_filters', readonly=False, store=True)
+    filter_journals = fields.Boolean(string="Allow Filtering by Journal", compute='_compute_report_option_filters', readonly=False, store=True)
+    filter_analytic = fields.Boolean(string="Allow Analytic Filters", compute='_compute_report_option_filters', readonly=False, store=True)
+    filter_hierarchy = fields.Selection(string="Hierarchy", selection=[('by_default', "Enabled by Default"), ('optional', "Optional"), ('never', "Never")], required=True, compute='_compute_report_option_filters', readonly=False, store=True)
+    filter_account_type = fields.Selection(string="Filter Account Type", selection=[('payable', "Payable"), ('receivable', "Receivable"), ('payable_receivable', "Payable and Receivable")], compute='_compute_report_option_filters', readonly=False, store=True)
+    filter_partner = fields.Boolean(string="Filter Partner", compute='_compute_report_option_filters', readonly=False, store=True)
+    filter_fiscal_position = fields.Boolean(string="Use Foreign VAT Fiscal Positions", compute='_compute_report_option_filters', readonly=False, store=True) # TODO OCO renommer ce truc serait bien
+    strict_date = fields.Boolean(string="Strict Date", compute='_compute_report_option_filters', readonly=False, store=True) # TODO OCO remplace le strict_range ===> meilleur nom ? Peut-être en inversant le booléen ? Ou virer, en fait ?
     # TODO OCO le special_date changer va être chiant avec ça. Genre, très. => On pourrait en mettre un sur le rapport directement qui sert de valeur par défaut à ses lignes ? Et les lignes peuvent spécifier le leur au besoin. (champ calculé éditable sur les lignes)
     # TODO OCO  ajouter un champ default_options ou default_filters ??? Genre avec un dict en str, qui permette de dire par exemple pour le tax report qu'il s'ouvre par défaut sur le mois passé ? => Ou un modèle ???
     line_ids = fields.One2many(string="Lines", comodel_name='account.report.line', inverse_name='report_id')
@@ -50,7 +53,7 @@ class AccountReport(models.Model):
     root_report_id = fields.Many2one(string="Root Report", comodel_name='account.report') # TODO OCO DOC + il faudra créer le menuitem comme avec les financial reports
     variant_report_ids = fields.One2many(string="Variants", comodel_name='account.report', inverse_name='root_report_id')# TODO OCO contrainte pour empêcher de remplire ça s'il y a un root
     country_id = fields.Many2one(string="Country", comodel_name='res.country')
-    country_group_id = fields.Many2one(string="Country Group", comodel_name='res.country.group') # TODO OCO rentre mutuellement exclusif avec le pays ? => Le pays prime, en tout cas. ===> Je ne sais pas si ça vaut la peine de le garder pour le moment. A voir. Pour intrastat ?
+    country_group_id = fields.Many2one(string="Country Group", comodel_name='res.country.group') # TODO OCO rendre mutuellement exclusif avec le pays ? => Le pays prime, en tout cas. ===> Je ne sais pas si ça vaut la peine de le garder pour le moment. A voir. Pour intrastat ?
     availability_condition = fields.Selection(
         string="Available if",
         selection=[('country', "Country Matches"), ('always', "Always")], #TODO OCO ajouter using_oss dans OSS
@@ -60,13 +63,36 @@ class AccountReport(models.Model):
     filter_tax_exigible = fields.Boolean(string="Only Tax Exigible Lines", default=False, required=True)
     ir_filter_ids = fields.Many2many(string="Applicable filters", comodel_name='ir.filters', help="Filters that can be used to filter and group lines on this report. This uses saved filtes on journal items") #TODO OCO REDOC + domaine
 
-    # TODO OCO en enterprise, ces trucs ?
     caret_options_initializer = fields.Char(string="Caret Options Initializer", required=True, default='_get_default_caret_options')
     custom_options_initializer = fields.Char(string="Custom Options Initializer")
     custom_line_postprocessor = fields.Char(string="Custom Line Postprocessor")
     custom_groupby_line_completer = fields.Char(string="Custom Groupby Line Completer")
 
     #TODO OCO réordonner les déclarations de champs (et décider d'un standard sur ce qu'on préfixe filter_)
+
+    @api.depends('root_report_id')
+    def _compute_report_option_filters(self):
+        # We don't depend on the different filter fields on the root report, as we don't want a manual change on it to be reflected on all the reports
+        # using it as their root (would create confusion). The root report filters are only used as some kind of default values.
+        option_filter_fields = [
+            'filter_multi_company', 'filter_date_range', 'allow_showing_draft', 'filter_all_entries', 'filter_unreconciled',
+            'filter_unfold_all', 'allow_comparison', 'allow_growth_comparison', 'filter_journals', 'filter_analytic', 'filter_hierarchy',
+            'filter_account_type', 'filter_partner', 'filter_fiscal_position', 'strict_date'
+        ]
+        for record in self:
+            if record.root_report_id:
+                # Default filters are the same as the root report's
+                for field in option_filter_fields:
+                    record[field] = record.root_report_id[field]
+            else:
+                # Default values for root reports (unspecified fields are None/False)
+                record.filter_multi_company = 'disabled'
+                record.filter_date_range = True
+                record.allow_showing_draft = True
+                record.allow_comparison = True
+                record.allow_growth_comparison = True
+                record.filter_hierarchy = 'never'
+                record.strict_date = True
 
     def write(self, vals):
         #TODO OCO reDOC: tax tag management
