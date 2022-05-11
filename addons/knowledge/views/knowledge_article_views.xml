@@ -11,7 +11,6 @@
                 <field name="is_locked" invisible="1" readonly="1"/>
                 <field name="is_user_favorite" invisible="1"/>
                 <field name="user_can_write" invisible="1"/>
-                <field name="user_permission" invisible="1"/>
                 <div class="d-sm-flex h-100 bg-white">
                     <aside class="o_knowledge_aside d-print-none flex-shrink-0 p-0">
                         <div class="d-flex flex-column h-100">

@@ -73,7 +73,7 @@ class ArticleMember(models.Model):
 
             if not parent_write_members:
                 raise ValidationError(
-                    _("Article '%s' should always be available for update: inherit write permission, or have a member with write access)",
+                    _("Article '%s' should always be available for update: inherit write permission, or have a member with write access",
                       article.display_name)
                 )
 

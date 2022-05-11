@@ -12,7 +12,7 @@
 
     <template id="website_knowledge_article_tree_frontend" name="Website Knowledge Article Tree" inherit_id="knowledge.knowledge_article_tree_frontend">
         <xpath expr="//section[1]" position="replace">
-            <t t-set="all_articles" t-value="(workspace_articles | shared_articles)"/>
+            <t t-set="all_articles" t-value="workspace_articles"/>
             <t t-set="published_articles" t-value="all_articles.filtered(lambda a: a.website_published)"/>
             <t t-set="visible_articles" t-value="all_articles.filtered(lambda a: not a.website_published)"/>
             <section t-if="published_articles">
