@@ -51,9 +51,7 @@ FieldHtml.include({
          * In particular, the content to drop in the editor would be inserted
          * after the refreshInjector without setTimeout.
          */
-        const refreshInjector = () => setTimeout(function () {
-            this.refreshInjector();
-        }.bind(this));
+        const refreshInjector = () => setTimeout(this.refreshInjector.bind(this));
         this.wysiwyg.odooEditor.addEventListener('historyUndo', refreshInjector);
         this.wysiwyg.odooEditor.addEventListener('historyRedo', refreshInjector);
         this.$content[0].addEventListener('paste', refreshInjector);

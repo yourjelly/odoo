@@ -34,7 +34,7 @@ class Article(models.Model):
         string='Full width',
         help="When set, the article body will take the full width available on the article page. "
              "Otherwise, the body will have large horizontal margins.")
-    article_url = fields.Char('Article Url', compute='_compute_article_url', readonly=True)
+    article_url = fields.Char('Article URL', compute='_compute_article_url', readonly=True)
     # Hierarchy and sequence
     parent_id = fields.Many2one("knowledge.article", string="Parent Article", tracking=30)
     child_ids = fields.One2many("knowledge.article", "parent_id", string="Child Articles")

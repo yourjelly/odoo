@@ -87,6 +87,9 @@ class PermissionPanel extends Component {
         const index = this.state.members.findIndex(current => {
             return current.partner_id === session.partner_id;
         });
+        if (index < 0) {
+            return;
+        }
         const newPermission = $select.val();
         const oldPermission = this.state.internal_permission;
         const willRestrict = this.state.based_on && permissionLevel[newPermission] < permissionLevel[oldPermission]
@@ -125,9 +128,7 @@ class PermissionPanel extends Component {
      * @param {Proxy} member
      */
     _onChangeMemberPermission (event, member) {
-        const index = this.state.members.findIndex(current => {
-            return current.id === member.id;
-        });
+        const index = this.state.members.indexOf(member);
         if (index < 0) {
             return;
         }
@@ -183,10 +184,7 @@ class PermissionPanel extends Component {
      * @param {Proxy} member
      */
     _onRemoveMember (event, member) {
-        const index = this.state.members.findIndex(current => {
-            return current.id === member.id;
-        });
-        if (index < 0) {
+        if (!this.state.members.includes(member)) {
             return;
         }
         const willRestrict = member.based_on ? true : false;
