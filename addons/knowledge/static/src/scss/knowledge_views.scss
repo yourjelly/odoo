@@ -181,11 +181,7 @@
 @include media-breakpoint-up(lg) {
     .o_knowledge_form_view {
         .o_scroll_view_lg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            @include o-position-absolute(0, 0, 0, 0);
             overflow-y: auto;
             overflow-x: hidden;
         }
@@ -209,11 +205,7 @@
 @include media-breakpoint-up(sm) {
     .o_knowledge_form_view {
         .o_scroll_view {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            @include o-position-absolute(0, 0, 0, 0);
             overflow-y: auto;
             overflow-x: hidden;
         }
