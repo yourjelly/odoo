@@ -268,8 +268,7 @@ const KnowledgeArticleFormController = FormController.extend({
      * @param {string} name - Target Name
      */
     _rename: async function (id, name) {
-        const $li = this.$(`.o_knowledge_tree li[data-article-id="${id}"]`);
-        $li.find('.o_article_name').text(name);
+        this.$(`.o_knowledge_tree .o_article[data-article-id="${id}"] > .o_article_handle > .o_article_name`).text(name);
     },
 
     /**
