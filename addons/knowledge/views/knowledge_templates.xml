@@ -9,7 +9,7 @@
             <div class="o_section_header d-flex h4 mb-0">
                 <div class="flex-grow-1 text-truncate">Workspace</div>
                 <button class="o_section_create btn btn-link text-secondary rounded p-0" type="button">
-                    <i class="fa fa-fw fa-plus" title="Create a new article" />
+                    <i class="fa fa-fw fa-plus" title="Create a new article in workspace" />
                 </button>
             </div>
             <ul class="o_tree">
@@ -34,7 +34,7 @@
             <div class="o_section_header d-flex h4 mb-0">
                 <div class="flex-grow-1 text-truncate">Private</div>
                 <button class="o_section_create btn btn-link text-secondary rounded p-0" type="button">
-                    <i class="fa fa-fw fa-plus" title="Create a new article" />
+                    <i class="fa fa-fw fa-plus" title="Create a new private article" />
                 </button>
             </div>
             <ul class="o_tree">
