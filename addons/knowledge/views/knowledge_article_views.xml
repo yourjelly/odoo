@@ -35,17 +35,17 @@
                         <div class="o_knowledge_article_form_resizer d-none d-sm-block" />
                         <div class="d-flex flex-column h-100">
                             <!-- Article header -->
-                            <div class="o_knowledge_header d-sm-flex border-bottom justify-content-between">
+                            <div class="o_knowledge_header d-sm-flex border-bottom justify-content-between px-3 py-2">
                                 <div class="d-flex align-items-center">
                                     <!-- Breadcrumbs -->
-                                    <ol class="breadcrumb align-items-center p-3" role="navigation">
+                                    <ol class="breadcrumb" role="navigation">
                                         <li class="breadcrumb-item d-flex align-items-center">
                                             <div class="o_knowledge_icon pr-1" attrs="{'invisible': [('icon', '=', False)]}">
                                                 <div class="o_article_emoji_dropdown dropdown">
                                                     <a href="#" class="o_article_editable_emoji o_article_emoji dropdown-toggle o-no-caret"
                                                        type="button" data-toggle="dropdown" aria-expanded="true"
                                                        attrs="{'invisible': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}"/>
-                                                    <p class="o_article_editable_emoji o_article_emoji o-no-caret mb-1"
+                                                    <p class="o_article_editable_emoji o_article_emoji o-no-caret m-0"
                                                        attrs="{'invisible': [('is_locked', '=', False), ('user_can_write', '=', True)]}"/>
                                                     <div class="o_article_emoji_dropdown_panel dropdown-menu rounded p-0" role="menu"
                                                         aria-labelledby="o_article_emoji" />
@@ -54,15 +54,13 @@
                                             <field attrs="{'readonly': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}" class="o_breadcrumb_article_name o_input" name="name"/>
                                         </li>
                                     </ol>
-                                    <i class="fa fa-star o_toggle_favorite o_cursor_pointer" attrs="{'invisible': [('is_user_favorite', '=', False)]}" title="Remove from favorites"/>
-                                    <i class="fa fa-star-o o_toggle_favorite o_cursor_pointer" attrs="{'invisible': [('is_user_favorite', '=', True)]}" title="Add to favorites"/>
-                                    <div attrs="{'invisible': ['|', ('is_locked', '=', False), ('user_can_write', '=', False)]}">
-                                        <i class="fa fa-fw fa-lock" title="locked"/>
-                                    </div>
+                                    <i class="fa fa-fw fa-star o_toggle_favorite o_cursor_pointer" attrs="{'invisible': [('is_user_favorite', '=', False)]}" title="Remove from favorites"/>
+                                    <i class="fa fa-fw fa-star-o o_toggle_favorite o_cursor_pointer" attrs="{'invisible': [('is_user_favorite', '=', True)]}" title="Add to favorites"/>
+                                    <i class="fa fa-fw fa-lock" attrs="{'invisible': ['|', ('is_locked', '=', False), ('user_can_write', '=', False)]}" title="Article locked"/>
                                 </div>
                                 <!-- Buttons -->
                                 <div class="d-flex flex-shrink-0 align-items-center pr-2">
-                                    <a type="button" role="button" class="btn btn-secondary btn-create text-capitalize mr-1">
+                                    <a type="button" role="button" class="btn btn-secondary btn-create text-capitalize mr-1" data-hotkey="c">
                                         <i class="fa fa-plus-circle"/> Create
                                     </a>
                                     <div class="btn-group" role="toolbar" aria-label="options">
@@ -162,7 +160,7 @@
                                                             <a href="#" class="o_article_emoji dropdown-toggle o-no-caret"
                                                                type="button" data-toggle="dropdown" aria-expanded="true"
                                                                attrs="{'invisible': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}"/>
-                                                            <p class="o_article_emoji o-no-caret"
+                                                            <span class="o_article_emoji o-no-caret"
                                                                attrs="{'invisible': [('is_locked', '=', False), ('user_can_write', '=', True)]}"/>
                                                             <div class="o_article_emoji_dropdown_panel dropdown-menu rounded p-0" role="menu"
                                                                 aria-labelledby="o_article_emoji" />

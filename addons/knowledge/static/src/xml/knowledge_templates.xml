@@ -6,7 +6,7 @@
         </button>
     </t>
     <t t-name="knowledge.knowledge_breadcrumb_item">
-        <li class="breadcrumb-item">
+        <li class="breadcrumb-item d-flex align-items-center">
             <a href="#" t-out="payload.title" t-att-data-controller-id="payload.controllerID"/>
         </li>
     </t>
