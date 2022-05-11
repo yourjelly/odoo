@@ -190,8 +190,7 @@ class PermissionPanel extends Component {
             return;
         }
         const willRestrict = member.based_on ? true : false;
-        const willLoseAccess = this.isLoggedUser(member) && this.state.internal_permission === 'none';
-        const willLoseWrite = this.isLoggedUser(member) && this.state.internal_permission !== 'write' && member.permission === 'write';
+        const willLoseAccess = this.isLoggedUser(member);
         const confirm = () => {
             this.rpc({
                 route: '/knowledge/article/remove_member',
@@ -204,19 +203,16 @@ class PermissionPanel extends Component {
                 if (this._onChangedPermission(res, willLoseAccess)) {
                     this.loadPanel();
                 }
-                else {
-                    throw new Error('Error removing member');
-                }
             });
         };
 
-        if (!willLoseAccess && !willRestrict && !willLoseWrite) {
+        if (!willLoseAccess && !willRestrict) {
             confirm();
             return;
         }
 
-        const loseAccessMessage = _t('Are you sure you want to withdraw from the members? If you do, you will no longer have access to the article.');
-        const message = willLoseAccess ? loseAccessMessage : willLoseWrite ? loseWriteMessage : loseAccessMessage;
+        const loseAccessMessage = _t('Are you sure you want to leave this article? If you do, you will no longer have access to the article.');
+        const message = willLoseAccess ? loseAccessMessage : restrictMessage;
         const discard = () => {
             this.loadPanel();
         };
