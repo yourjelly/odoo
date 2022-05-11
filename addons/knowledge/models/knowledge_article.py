@@ -622,14 +622,7 @@ class Article(models.Model):
     def action_home_page(self):
         res_id = self.env.context.get('res_id', False)
         if not res_id:
-            article = self.env['knowledge.article.favorite'].search([
-                ('user_id', '=', self.env.uid), ('article_id.active', '=', True)
-            ], limit=1).article_id
-            if not article:
-                # retrieve workspace articles first, then private/shared ones.
-                article = self.search([
-                    ('parent_id', '=', False)
-                ], limit=1, order='sequence, internal_permission desc')
+            article = self._get_first_accessible_article()
         else:
             article = self.browse(res_id)
         mode = 'edit' if article.user_can_write else 'readonly'
@@ -1307,6 +1300,21 @@ class Article(models.Model):
         self.ensure_one()
         member = self.env['knowledge.article.member'].search([('article_id', '=', self.id), ('partner_id', '=', partner.id)])
         return url_join(self.get_base_url(), "/knowledge/article/invite/%s/%s" % (member.id, member._get_invitation_hash()))
+    
+    def _get_first_accessible_article(self):
+        """ Returns the first accessible article for the current user.
+        If user has favorites, return first favorite article. """
+        article = self.env['knowledge.article']
+        if not self.env.user._is_public():
+            article = self.env['knowledge.article.favorite'].search([
+                ('user_id', '=', self.env.uid), ('article_id.active', '=', True)
+            ], limit=1).article_id
+        if not article:
+            # retrieve workspace articles first, then private/shared ones.
+            article = self.search([
+                ('parent_id', '=', False)
+            ], limit=1, order='sequence, internal_permission desc')
+        return article
 
     def get_valid_parent_options(self, term=""):
         """ Returns the list of articles that can be set as parent for the

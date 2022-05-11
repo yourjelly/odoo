@@ -15,6 +15,30 @@ class KnowledgeController(http.Controller):
     # Article Access Routes
     # ------------------------
 
+    @http.route('/knowledge/home', type='http', auth='user')
+    def access_knowledge_home(self):
+        """ This route will redirect internal users to the backend view of the article and the share users to the
+        frontend view instead."""
+        article = request.env["knowledge.article"]._get_first_accessible_article()
+        if request.env.user.has_group('base.group_user') and not article:
+            self._redirect_to_backend_view()
+        elif not article:
+            self._redirect_to_portal_view(False, hide_side_bar=True)
+        else:
+            return redirect("/knowledge/article/%s" % article.id)
+
+    @http.route('/knowledge/article/<int:article_id>', type='http', auth='user')
+    def redirect_to_article(self, article_id):
+        """ This route will redirect internal users to the backend view of the article and the share users to the
+        frontend view instead."""
+        article = self._fetch_article(article_id)
+        if request.env.user.has_group('base.group_user'):
+            if not article:
+                return werkzeug.exceptions.Forbidden()
+            self._redirect_to_backend_view(article)
+        else:
+            self._redirect_to_portal_view(article)
+
     @http.route('/knowledge/article/invite/<int:member_id>/<string:invitation_hash>', type='http', auth='public')
     def article_invite(self, member_id, invitation_hash):
         """ This route will check if the given parameter allows the client to access the article via the invite token.
@@ -42,25 +66,6 @@ class KnowledgeController(http.Controller):
 
         return redirect('/web/login?redirect=/knowledge/article/%s' % article.id)
 
-    @http.route('/knowledge/article/<int:article_id>', type='http', auth='user')
-    def redirect_to_article(self, article_id):
-        """ This route will redirect internal users to the backend view of the article and the share users to the
-        frontend view instead."""
-        article = self._fetch_article(article_id)
-        if request.env.user.has_group('base.group_user'):
-            if not article:
-                return werkzeug.exceptions.Forbidden()
-            return redirect("/web#id=%s&model=knowledge.article&action=%s&menu_id=%s" % (
-                article.id,
-                request.env.ref("knowledge.knowledge_article_action_form").id,
-                request.env.ref('knowledge.knowledge_menu_root').id
-            ))
-        return request.render('knowledge.knowledge_article_view_frontend', {
-            'article': article,
-            'portal_readonly_mode': True,  # used to bypass access check (to speed up loading)
-            'show_sidebar': bool(self._get_root_articles(limit=1))
-        })
-
     def _fetch_article(self, article_id):
         """ Check the access of the given article for the current user. """
         article = request.env['knowledge.article'].browse(int(article_id)).exists()
@@ -72,6 +77,20 @@ class KnowledgeController(http.Controller):
         except AccessError:
             return request.env['knowledge.article']
         return article
+
+    def _redirect_to_backend_view(self, article):
+        return redirect("/web#id=%s&model=knowledge.article&action=%s&menu_id=%s" % (
+            article.id if article else '',
+            request.env.ref("knowledge.knowledge_article_action_form").id,
+            request.env.ref('knowledge.knowledge_menu_root').id
+        ))
+
+    def _redirect_to_portal_view(self, article, hide_side_bar=False):
+        return request.render('knowledge.knowledge_article_view_frontend', {
+            'article': article,
+            'portal_readonly_mode': True,  # used to bypass access check (to speed up loading)
+            'show_sidebar': not hide_side_bar and bool(self._get_root_articles(limit=1))
+        })
 
     # ------------------------
     # Articles tree generation
