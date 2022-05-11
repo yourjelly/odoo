@@ -16,7 +16,7 @@
                     <aside class="o_knowledge_aside d-print-none flex-shrink-0 p-0">
                         <div class="d-flex flex-column h-100">
                             <!-- Search bar -->
-                            <div id="knowledge_search_bar" class="d-flex align-items-center border bg-light rounded m-3 o_cursor_pointer">
+                            <div id="knowledge_search_bar" class="d-flex align-items-center border bg-light rounded m-3 o_cursor_pointer" data-hotkey="f">
                                 <div class="flex-grow-1 px-2 py-1">Search an article...</div>
                                 <i class="oi oi-search pr-2" title="search"/>
                             </div>
@@ -63,17 +63,17 @@
                                 </div>
                                 <!-- Buttons -->
                                 <div class="d-flex flex-shrink-0 align-items-center pr-2">
-                                    <a type="button" role="button" class="btn btn-secondary btn-create text-capitalize mr-1">
+                                    <a type="button" role="button" class="btn btn-secondary btn-create text-capitalize mr-1" data-hotkey="c">
                                         <i class="fa fa-plus-circle"/> Create
                                     </a>
                                     <div class="btn-group" role="toolbar" aria-label="options">
                                         <div class="o-dropdown dropdown o-dropdown--no-caret">
                                             <a type="button" role="button" class="btn btn-secondary btn-share dropdown-toggle mr-1"
-                                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-hotkey="s"
                                                attrs="{'invisible': [('id', '=', False)]}">
                                                 <i class="fa fa-share-alt"/> Share
                                             </a>
-                                            <a type="button" role="button" class="btn btn-secondary btn-chatter mr-1">
+                                            <a type="button" role="button" class="btn btn-secondary btn-chatter mr-1" data-hotkey="d">
                                                 <i class="rounded-circle text-center fa fa-comments" title="Open chatter"/>
                                             </a>
                                             <div class="o_knowledge_share_panel dropdown-menu" role="menu">
@@ -88,7 +88,7 @@
                                     </div>
                                     <div class="btn-group" role="toolbar" aria-label="options">
                                         <div class="o-dropdown dropdown o-dropdown--no-caret">
-                                            <a type="button" role="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <a type="button" role="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-hotkey="p">
                                                 <i class="fa fa-ellipsis-v"/>
                                             </a>
                                             <div class="o_knowledge_more_options_panel dropdown-menu" role="menu">
