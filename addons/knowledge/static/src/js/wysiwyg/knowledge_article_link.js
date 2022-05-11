@@ -13,9 +13,9 @@ const KnowledgeArticleLinkModal = Dialog.extend({
      */
     init: function (parent, options) {
         // Set default options:
-        options.title = options.title || _t('Choose an Article');
+        options.title = options.title || _t('Link an Article');
         options.buttons = options.buttons || [{
-            text: _t('Ok'),
+            text: _t('Insert Link'),
             classes: 'btn-primary',
             click: this.save.bind(this)
         }, {
