@@ -966,7 +966,7 @@ class Article(models.Model):
         # belongs to current article members
         current_membership = self.article_member_ids.filtered(lambda m: m == member)
         if current_membership:
-            if member.partner_id == self.env.user.partner_id:
+            if current_membership.partner_id == self.env.user.partner_id:
                 # TODO REMOVE SUDO if can write on member based on can_write on article
                 self.sudo().write({'article_member_ids': [(1, current_membership.id, {'permission': 'none'})]})
             elif not self.user_can_write:
@@ -984,6 +984,8 @@ class Article(models.Model):
             self._desync_access_from_parents(self.article_member_ids.partner_id)
             current_membership = self.article_member_ids.filtered(lambda m: m.partner_id == member.partner_id)
             if current_membership:
+                # TODO : Either block removing if user grant higher access rights, either add user with permission none
+                # self.sudo().write({'article_member_ids': [(1, current_membership.id, {'permission': 'none'})]})
                 self.sudo().write({'article_member_ids': [(2, current_membership.id)]})
 
     def invite_members(self, partners, permission):
