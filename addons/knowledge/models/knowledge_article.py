@@ -51,12 +51,12 @@ class Article(models.Model):
         help="The subject is the title of the highest parent in the article hierarchy.")
     # Access rules and members + implied category
     internal_permission = fields.Selection(
-        [('none', 'No access'), ('read', 'Can read'), ('write', 'Can write')],
+        [('write', 'Can write'), ('read', 'Can read'), ('none', 'No access')],
         string='Internal Permission', required=False,
         help="Default permission for all internal users. "
              "(External users can still have access to this article if they are added to its members)")
     inherited_permission = fields.Selection(
-        [('none', 'No access'), ('read', 'Can read'), ('write', 'Can write')],
+        [('write', 'Can write'), ('read', 'Can read'), ('none', 'No access')],
         string='Article Inherited Permission',
         compute="_compute_inherited_permission", compute_sudo=True, recursive=True)
     inherited_permission_parent_id = fields.Many2one(
@@ -70,7 +70,7 @@ class Article(models.Model):
         string='Can Write',
         compute="_compute_user_can_write", search="_search_user_can_write")
     user_permission = fields.Selection(
-        [('none', 'none'), ('read', 'read'), ('write', 'write')],
+        [('write', 'write'), ('read', 'read'), ('none', 'none')],
         string='User permission',
         compute='_compute_user_permission')
     # categories and ownership

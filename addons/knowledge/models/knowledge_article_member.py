@@ -19,9 +19,9 @@ class ArticleMember(models.Model):
         'res.partner', 'Partner',
         index=True, ondelete='cascade', required=True)
     permission = fields.Selection(
-        [('none', 'No access'),
+        [('write', 'Can write'),
          ('read', 'Can read'),
-         ('write', 'Can write')],
+         ('none', 'No access')],
         required=True, default='read')
     article_permission = fields.Selection(
         related='article_id.inherited_permission',
