@@ -177,7 +177,7 @@ const KnowledgeArticleFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin
         const { data } = this.state;
         const $dropdown = this.$('.o_knowledge_icon > .o_article_emoji_dropdown');
         $dropdown.attr('data-article-id', this.state.res_id);
-        $dropdown.find('.o_article_emoji').text(data.icon || '📄');
+        $dropdown.find('.o_article_emoji').text(data.icon);
     },
 
     /**
