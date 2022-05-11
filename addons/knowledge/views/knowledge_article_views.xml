@@ -58,7 +58,7 @@
                                     <i class="fa fa-star o_toggle_favorite o_cursor_pointer" attrs="{'invisible': [('is_user_favorite', '=', False)]}" title="Remove from favorites"/>
                                     <i class="fa fa-star-o o_toggle_favorite o_cursor_pointer" attrs="{'invisible': [('is_user_favorite', '=', True)]}" title="Add to favorites"/>
                                     <div attrs="{'invisible': ['|', ('is_locked', '=', False), ('user_can_write', '=', False)]}">
-                                        <i class="fa fa-fw fa-lock" title="locked"/>
+                                        <i class="fa fa-fw fa-lock" title="This article is locked"/>
                                     </div>
                                 </div>
                                 <!-- Buttons -->
@@ -119,12 +119,12 @@
                                                 <div class="px-4 py-2 mx-1" attrs="{'invisible': [('last_edition_uid', '=', False)]}">
                                                     <h6 class="small font-weight-bold m-0">Last Edited by:</h6>
                                                     <div class="mb-2 text-nowrap">
-                                                        <field name="last_edition_uid" readonly="1"/> -
+                                                        <field name="last_edition_uid" widget="many2one_avatar_user" readonly="1"/> -
                                                         <field name="last_edition_date" widget="datetime" readonly="1"/>
                                                     </div>
                                                     <h6 class="small font-weight-bold m-0">Created by:</h6>
                                                     <div class="text-nowrap">
-                                                        <field name="create_uid" readonly="1"/> - 
+                                                        <field name="create_uid" widget="many2one_avatar_user" readonly="1"/> -
                                                         <field name="create_date" widget="datetime" readonly="1"/>
                                                     </div>
                                                 </div>
@@ -141,7 +141,7 @@
                                                 <!-- Article body -->
                                                 <div class="o_knowledge_body d-flex flex-column">
                                                     <!-- Article Cover -->
-                                                    <field name="cover" widget="image" class="o_knowledge_cover_image" attrs="{'invisible': [('cover', '=', False)]}"/>
+                                                    <field name="cover" widget="image" class="o_knowledge_cover_image" attrs="{'invisible': [('cover', '=', False)], 'readonly': [('is_locked', '=', True)]}"/>
 
                                                     <!-- Full Width handling -->
                                                     <span class="o_knowledge_article_view_form_dynamic_width d-none" attrs="{'invisible': [('full_width', '=', False)]}"/>
@@ -208,7 +208,6 @@
             <tree default_order="is_user_favorite desc, favorite_count desc">
                 <field name="display_name"/>
                 <field name="is_user_favorite" widget="boolean_favorite" nolabel="1" force_save="1" options="{'allow_order': '1'}"/>
-                <field name="favorite_count"/>
                 <field name="root_article_id"/>
                 <field name="last_edition_uid" widget="many2one_avatar_user"/>
                 <field name="last_edition_date"/>

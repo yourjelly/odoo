@@ -1,12 +1,12 @@
 .o_command_palette {
     $-app-icon-size: 1.8rem;
-    
+
     > .modal-body {
         padding: 0;
     }
 
     &_listbox {
-        max-height: 50vh;   
+        max-height: 50vh;
 
         .o_command {
             &.focused {
@@ -38,5 +38,13 @@
     .o_app_icon {
         height: $-app-icon-size;
         width: $-app-icon-size;
+    }
+    .o_command{
+        cursor: pointer;
+        .test-ellipsis {
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
     }
 }
