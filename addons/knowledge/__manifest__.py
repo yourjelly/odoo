@@ -85,7 +85,7 @@
             'knowledge/static/tests/tours/*.js',
         ],
         'web.qunit_suite_tests': [
-            'knowledge/static/src/tests/test_services.js',
+            'knowledge/static/tests/test_services.js',
         ],
     },
 }
