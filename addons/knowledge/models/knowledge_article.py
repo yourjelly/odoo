@@ -1405,6 +1405,7 @@ class Article(models.Model):
                     ['id', 'not in', (self._get_descendants() + self).ids]
                    ],
             fields=['id', 'icon', 'name'],
+            limit=15,
         )
 
     def _get_descendants(self):
