@@ -2615,8 +2615,6 @@ class Selection(Field):
     def convert_to_cache(self, value, record, validate=True):
         if not validate:
             return value or None
-        if value and self.column_type[0] == 'int4':
-            value = int(value)
         if value in self.get_values(record.env):
             return value
         elif not value:
