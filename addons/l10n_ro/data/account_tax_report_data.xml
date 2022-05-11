@@ -486,18 +486,63 @@
                         <field name="code">tax_ro_baza_rd24</field>
                         <field name="tag_name" eval="None"/>
                         <field name="sequence" eval="70"/>
+                        <field name="formula">tax_ro_baza_rd241 + 0.5 * tax_ro_baza_rd242</field>
+                        <field name="children_line_ids">
+                            <record id="account_tax_report_ro_baza_rd241" model="account.tax.report.line">
+                                <field name="name">24.1 - BAZA - Achiziţii de bunuri şi servicii taxabile cu cota de 19%, altele decat cele de la rd.27</field>
+                                <field name="tag_name">24_1 - BAZA</field>
+                                <field name="code">tax_ro_baza_rd241</field>
+                                <field name="sequence" eval="72"/>
+                            </record>
+                            <record id="account_tax_report_ro_baza_rd242" model="account.tax.report.line">
+                                <field name="name">24.2 - BAZA - Achiziţii de bunuri şi servicii taxabile cu cota de 19%, nedeductibile 50%</field>
+                                <field name="tag_name">24_2 - BAZA</field>
+                                <field name="code">tax_ro_baza_rd242</field>
+                                <field name="sequence" eval="74"/>
+                            </record>
+                        </field>
                     </record>
                     <record id="account_tax_report_ro_baza_rd25" model="account.tax.report.line">
                         <field name="name">25 - BAZA - Achiziţii de bunuri şi servicii taxabile cu cota de 9%</field>
                         <field name="tag_name" eval="None"/>
                         <field name="code">tax_ro_baza_rd25</field>
                         <field name="sequence" eval="76"/>
+                        <field name="formula">tax_ro_baza_rd251 + 0.5 * tax_ro_baza_rd252</field>
+                        <field name="children_line_ids">
+                            <record id="account_tax_report_ro_baza_rd251" model="account.tax.report.line">
+                                <field name="name">25.1 - BAZA - Achiziţii de bunuri şi servicii taxabile cu cota de 9%</field>
+                                <field name="tag_name">25_1 - BAZA</field>
+                                <field name="code">tax_ro_baza_rd251</field>
+                                <field name="sequence" eval="78"/>
+                            </record>
+                            <record id="account_tax_report_ro_baza_rd252" model="account.tax.report.line">
+                                <field name="name">25.2 - BAZA - Achiziţii de bunuri şi servicii taxabile cu cota de 9%, nedeductibile 50%</field>
+                                <field name="tag_name">25_2 - BAZA</field>
+                                <field name="code">tax_ro_baza_rd252</field>
+                                <field name="sequence" eval="80"/>
+                            </record>
+                        </field>
                     </record>
                     <record id="account_tax_report_ro_baza_rd26" model="account.tax.report.line">
                         <field name="name">26 - BAZA - Achiziţii de bunuri taxabile cu cota de 5%</field>
                         <field name="tag_name" eval="None"/>
                         <field name="code">tax_ro_baza_rd26</field>
                         <field name="sequence" eval="82"/>
+                        <field name="formula">tax_ro_baza_rd261 + 0.5 * tax_ro_baza_rd262</field>
+                        <field name="children_line_ids">
+                            <record id="account_tax_report_ro_baza_rd261" model="account.tax.report.line">
+                                <field name="name">26.1 - BAZA - Achiziţii de bunuri taxabile cu cota de 5%</field>
+                                <field name="tag_name">26_1 - BAZA</field>
+                                <field name="code">tax_ro_baza_rd261</field>
+                                <field name="sequence" eval="84"/>
+                            </record>
+                            <record id="account_tax_report_ro_baza_rd262" model="account.tax.report.line">
+                                <field name="name">26.2 - BAZA - Achiziţii de bunuri taxabile cu cota de 5%, nedeductibile 50%</field>
+                                <field name="tag_name">26_2 - BAZA</field>
+                                <field name="code">tax_ro_baza_rd262</field>
+                                <field name="sequence" eval="86"/>
+                            </record>
+                        </field>
                     </record>
                     <record id="account_tax_report_ro_baza_rd27" model="account.tax.report.line">
                         <field name="name">27 - BAZA - Achiziţii de bunuri şi servicii supuse masurilor de simplificare pentru care beneficiarul este obligat la plata TVA (taxare inversa),din care (rd.25=rd.12)</field>
@@ -703,57 +748,6 @@
                 <field name="tag_name">43 - TVA</field>
                 <field name="code">tax_ro_tva_rd43</field>
                 <field name="sequence" eval="111"/>
-            </record>
-        </field>
-    </record>
-    <record id="account_tax_report_ro_baza_rd24" model="account.tax.report.line">
-        <field name="formula">tax_ro_baza_rd241 + 0.5 * tax_ro_baza_rd242</field>
-        <field name="children_line_ids">
-            <record id="account_tax_report_ro_baza_rd241" model="account.tax.report.line">
-                <field name="name">24.1 - BAZA - Achiziţii de bunuri şi servicii taxabile cu cota de 19%, altele decat cele de la rd.27</field>
-                <field name="tag_name">24_1 - BAZA</field>
-                <field name="code">tax_ro_baza_rd241</field>
-                <field name="sequence" eval="72"/>
-            </record>
-            <record id="account_tax_report_ro_baza_rd242" model="account.tax.report.line">
-                <field name="name">24.2 - BAZA - Achiziţii de bunuri şi servicii taxabile cu cota de 19%, nedeductibile 50%</field>
-                <field name="tag_name">24_2 - BAZA</field>
-                <field name="code">tax_ro_baza_rd242</field>
-                <field name="sequence" eval="74"/>
-            </record>
-        </field>
-    </record>
-    <record id="account_tax_report_ro_baza_rd25" model="account.tax.report.line">
-        <field name="formula">tax_ro_baza_rd251 + 0.5 * tax_ro_baza_rd252</field>
-        <field name="children_line_ids">
-            <record id="account_tax_report_ro_baza_rd251" model="account.tax.report.line">
-                <field name="name">25.1 - BAZA - Achiziţii de bunuri şi servicii taxabile cu cota de 9%</field>
-                <field name="tag_name">25_1 - BAZA</field>
-                <field name="code">tax_ro_baza_rd251</field>
-                <field name="sequence" eval="78"/>
-            </record>
-            <record id="account_tax_report_ro_baza_rd252" model="account.tax.report.line">
-                <field name="name">25.2 - BAZA - Achiziţii de bunuri şi servicii taxabile cu cota de 9%, nedeductibile 50%</field>
-                <field name="tag_name">25_2 - BAZA</field>
-                <field name="code">tax_ro_baza_rd252</field>
-                <field name="sequence" eval="80"/>
-            </record>
-        </field>
-    </record>
-    <record id="account_tax_report_ro_baza_rd26" model="account.tax.report.line">
-        <field name="formula">tax_ro_baza_rd261 + 0.5 * tax_ro_baza_rd262</field>
-        <field name="children_line_ids">
-            <record id="account_tax_report_ro_baza_rd261" model="account.tax.report.line">
-                <field name="name">26.1 - BAZA - Achiziţii de bunuri taxabile cu cota de 5%</field>
-                <field name="tag_name">26_1 - BAZA</field>
-                <field name="code">tax_ro_baza_rd261</field>
-                <field name="sequence" eval="84"/>
-            </record>
-            <record id="account_tax_report_ro_baza_rd262" model="account.tax.report.line">
-                <field name="name">26.2 - BAZA - Achiziţii de bunuri taxabile cu cota de 5%, nedeductibile 50%</field>
-                <field name="tag_name">26_2 - BAZA</field>
-                <field name="code">tax_ro_baza_rd262</field>
-                <field name="sequence" eval="86"/>
             </record>
         </field>
     </record>
