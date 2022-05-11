@@ -186,7 +186,6 @@
                 <field name="name">Comparison</field>
                 <field name="tag_name" eval="False"/>
                 <field name="sequence" eval="301"/>
-                <field name="parent_id" eval="False"/>
                 <field name="formula">None</field>
                 <field name="children_line_ids">
                     <record id="account_tax_report_gstrpt_comparison_worksheet" model="account.tax.report.line">
