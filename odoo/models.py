@@ -3953,6 +3953,10 @@ Fields:
             # In this situation, the total amount must be recomputed on *both*
             # sales order: the line's order before the modification, and the
             # line's order after the modification.
+            # FIXME This is wrong, as relational fields can also depend on
+            # non-relational fields. Instead of filtering out non-relational
+            # roots, we need to use the complete dependency tree and filter
+            # out non-relational leaves.
             self.modified(relational_names, before=True)
 
             real_recs = self.filtered('id')
@@ -5668,12 +5672,18 @@ Fields:
                             v = next(iter(value))
                         if isinstance(v, str):
                             data = data.mapped('display_name')
-                        else:
+                        elif comparator not in ('any', 'all'):
                             data = data and data.ids or [False]
                     elif field and field.type in ('date', 'datetime'):
                         data = [Datetime.to_datetime(d) for d in data]
 
-                    if comparator == '=':
+                    if comparator == 'any':
+                        matches = data.filtered_domain(value)
+                        ok = len(matches) > 0
+                    elif comparator == 'all':
+                        matches = data.filtered_domain(value)
+                        ok = len(matches) == len(data)
+                    elif comparator == '=':
                         ok = value in data
                     elif comparator in ('!=', '<>'):
                         ok = value not in data
@@ -6231,6 +6241,9 @@ Fields:
                     real_records = self - new_records
                     records = model.browse()
                     if real_records:
+                        # FIXME Using the new relational field syntax here
+                        # would break cache invalidation, since the following
+                        # line depends on ignoring the field domain.
                         records = model.search([(key.name, 'in', real_records.ids)], order='id')
                     if new_records:
                         cache_records = self.env.cache.get_records(model, key)
