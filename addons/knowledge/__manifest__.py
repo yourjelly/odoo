@@ -87,5 +87,8 @@
         'web.qunit_suite_tests': [
             'knowledge/static/tests/test_services.js',
         ],
+        'web.qunit_mobile_suite_tests': [
+            'knowledge/static/tests/test_services.js',
+        ],
     },
 }
