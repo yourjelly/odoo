@@ -6,6 +6,7 @@
         <field name="type">form</field>
         <field name="arch" type="xml">
             <form class="h-100" js_class="knowledge_article_view_form">
+                <field name="active" invisible="1"/>
                 <field name="icon" invisible="1"/>
                 <field name="category" invisible="1"/>
                 <field name="is_locked" invisible="1" readonly="1"/>
@@ -103,8 +104,11 @@
                                                 <a class="dropdown-item btn-duplicate" href="#" role="button">
                                                     <i class="fa fa-fw fa-copy"/> Duplicate
                                                 </a>
-                                                <button class="dropdown-item btn-archive" type="object" name="action_archive">
+                                                <button class="dropdown-item" type="object" name="action_archive" attrs="{'invisible': [('active', '=', False)]}">
                                                     <i class="fa fa-fw fa-archive"/> Archive
+                                                </button>
+                                                <button class="dropdown-item" type="object" name="action_unarchive" attrs="{'invisible': [('active', '=', True)]}">
+                                                    <i class="fa fa-fw fa-archive"/> UnArchive
                                                 </button>
                                                 <div class="dropdown-divider" attrs="{'invisible': [('user_can_write', '=', False)]}"/>
                                                 <div class="px-3" attrs="{'invisible': [('user_can_write', '=', False)]}">
@@ -275,7 +279,7 @@
                 <field name="root_article_id"/>
                 <field name="last_edition_uid"/>
 
-                <filter name="filter_active" string="Archived"  domain="[('active', '=' ,False)]"/>
+                <filter name="filter_active" string="Archived" domain="[('active', '=', False)]"/>
                 <filter name="filter_favorites" string="My Favorites" domain="[('is_user_favorite', '=', True)]"/>
                 <filter name="filter_own_privates" string="My Private Articles" domain="[('category', '=', 'private'), ('user_can_write', '=', True)]"/>
                 <filter name="filter_shared_articles" string="My Shared Articles" domain="[('category', '=', 'shared')]"/>
