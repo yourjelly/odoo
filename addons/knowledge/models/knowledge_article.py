@@ -912,13 +912,14 @@ class Article(models.Model):
         if permission == 'none':
             self._add_members(partners, permission)
         else:
-            share_partner_ids = partners.filtered(lambda partner: partner.partner_share)
-            self._add_members(share_partner_ids, 'read')
-            self._add_members(partners - share_partner_ids, permission)
             # prevent the invited user to get access to children articles the current user has no access to
             unreachable_children = self.sudo().child_ids.filtered(lambda c: not c.user_can_write)
             for child in unreachable_children:
                 child._add_members(partners, 'none', force_update=False)
+
+            share_partner_ids = partners.filtered(lambda partner: partner.partner_share)
+            self._add_members(share_partner_ids, 'read')
+            self._add_members(partners - share_partner_ids, permission)
 
         if permission != 'none':
             self._send_invite_mail(partners)
