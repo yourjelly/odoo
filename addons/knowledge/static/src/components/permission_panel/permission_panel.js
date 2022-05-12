@@ -9,7 +9,7 @@ const { Component, onWillStart, useState } = owl;
 const permissionLevel = {'none': 0, 'read': 1, 'write': 2}
 const restrictMessage = _t("Are you sure you want to restrict this role and restrict access ? "
 + "This article will no longer inherit access settings from the parent page.");
-const looseWriteMessage = _t('Are you sure you want to remove you own "Write" access ?');
+const loseWriteMessage = _t('Are you sure you want to remove you own "Write" access ?');
 
 class PermissionPanel extends Component {
     /**
@@ -94,7 +94,7 @@ class PermissionPanel extends Component {
         const oldPermission = this.state.internal_permission;
         const willRestrict = this.state.based_on && permissionLevel[newPermission] < permissionLevel[oldPermission]
                                 && permissionLevel[newPermission] < permissionLevel[this.state.parent_permission];
-        const willLooseAccess = $select.val() === 'none' && (index >= 0 && this.state.members[index].permission === 'none');
+        const willLoseAccess = $select.val() === 'none' && (index >= 0 && this.state.members[index].permission === 'none');
         const confirm = () => {
             this.rpc({
                 route: '/knowledge/article/set_internal_permission',
@@ -103,13 +103,13 @@ class PermissionPanel extends Component {
                     permission: newPermission,
                 }
             }).then(res => {
-                if (this._onChangedPermission(res, willLooseAccess)) {
+                if (this._onChangedPermission(res, willLoseAccess)) {
                     this.loadPanel();
                 }
             });
         };
 
-        if (!willLooseAccess && !willRestrict) {
+        if (!willLoseAccess && !willRestrict) {
             confirm();
             return;
         }
@@ -118,8 +118,8 @@ class PermissionPanel extends Component {
             $select.val(oldPermission);
             this.loadPanel();
         };
-        const looseAccessMessage = _t('Are you sure you want to set the internal permission to "none" ? If you do, you will no longer have access to the article.');
-        this._showConfirmDialog(willLooseAccess ? looseAccessMessage : restrictMessage, confirm, discard);
+        const loseAccessMessage = _t('Are you sure you want to set the internal permission to "none" ? If you do, you will no longer have access to the article.');
+        this._showConfirmDialog(willLoseAccess ? loseAccessMessage : restrictMessage, confirm, discard);
     }
 
     /**
@@ -135,9 +135,9 @@ class PermissionPanel extends Component {
         const $select = $(event.target);
         const newPermission = $select.val();
         const oldPermission = member.permission;
-        const willLooseAccess = this.isLoggedUser(member) && newPermission === 'none';
+        const willLoseAccess = this.isLoggedUser(member) && newPermission === 'none';
         const willRestrict = this.state.based_on && permissionLevel[newPermission] < permissionLevel[oldPermission];
-        const willLooseWrite = this.isLoggedUser(member) && newPermission !== 'write' && oldPermission === 'write';
+        const willLoseWrite = this.isLoggedUser(member) && newPermission !== 'write' && oldPermission === 'write';
         const confirm = () => {
             this.rpc({
                 route: '/knowledge/article/set_member_permission',
@@ -148,14 +148,14 @@ class PermissionPanel extends Component {
                     inherited_member_id: member.based_on ? member.id: false,
                 }
             }).then(res => {
-                const reloadArticleId = willLooseWrite && !willLooseAccess ? this.props.article_id : false;
-                if (this._onChangedPermission(res, willLooseAccess||willLooseWrite, reloadArticleId)) {
+                const reloadArticleId = willLoseWrite && !willLoseAccess ? this.props.article_id : false;
+                if (this._onChangedPermission(res, willLoseAccess||willLoseWrite, reloadArticleId)) {
                     this.loadPanel();
                 }
             });
         };
 
-        if (!willLooseAccess && !willRestrict && !willLooseWrite) {
+        if (!willLoseAccess && !willRestrict && !willLoseWrite) {
             confirm();
             return;
         }
@@ -164,8 +164,8 @@ class PermissionPanel extends Component {
             $select.val(this.state.members[index].permission);
             this.loadPanel();
         };
-        const looseAccessMessage = _t('Are you sure you want to set your permission to "none"? If you do, you will no longer have access to the article.');
-        const message = willLooseAccess ? looseAccessMessage : willLooseWrite ? looseWriteMessage : looseAccessMessage;
+        const loseAccessMessage = _t('Are you sure you want to set your permission to "none"? If you do, you will no longer have access to the article.');
+        const message = willLoseAccess ? loseAccessMessage : willLoseWrite ? loseWriteMessage : loseAccessMessage;
         this._showConfirmDialog(message, confirm, discard);
     }
 
@@ -188,7 +188,7 @@ class PermissionPanel extends Component {
             return;
         }
         const willRestrict = member.based_on ? true : false;
-        const willLooseAccess = this.isLoggedUser(member);
+        const willLoseAccess = this.isLoggedUser(member);
         const confirm = () => {
             this.rpc({
                 route: '/knowledge/article/remove_member',
@@ -198,19 +198,19 @@ class PermissionPanel extends Component {
                     inherited_member_id: member.based_on ? member.id: false,
                 }
             }).then(res => {
-                if (this._onChangedPermission(res, willLooseAccess)) {
+                if (this._onChangedPermission(res, willLoseAccess)) {
                     this.loadPanel();
                 }
             });
         };
 
-        if (!willLooseAccess && !willRestrict) {
+        if (!willLoseAccess && !willRestrict) {
             confirm();
             return;
         }
 
-        const looseAccessMessage = _t('Are you sure you want to leave this article? If you do, you will no longer have access to the article.');
-        const message = willLooseAccess ? looseAccessMessage : restrictMessage;
+        const loseAccessMessage = _t('Are you sure you want to leave this article? If you do, you will no longer have access to the article.');
+        const message = willLoseAccess ? loseAccessMessage : restrictMessage;
         const discard = () => {
             this.loadPanel();
         };
@@ -266,7 +266,7 @@ class PermissionPanel extends Component {
 
   /**
     * This method is called before each permission change rpc when the user needs to confirm the change as them
-    * would loose them access to the article if them do confirm.
+    * would lose them access to the article if them do confirm.
     * @param {str} message
     * @param {function} confirm
     * @param {function} discard
@@ -302,10 +302,10 @@ class PermissionPanel extends Component {
             Dialog.alert(this, result.error,{
               title: _t("Error"),
             });
-        } else if (reloadAll && reloadArticleId) {  // Loose write access
+        } else if (reloadAll && reloadArticleId) {  // Lose write access
             this.openArticle(reloadArticleId);
             return false;
-        } else if (reloadAll) {  // Loose access -> Hard Reload
+        } else if (reloadAll) {  // Lose access -> Hard Reload
             window.location.replace('/knowledge/home');
         } else if (result.reload_tree) {
             this.env.bus.trigger('reload_tree', {});
