@@ -25,7 +25,7 @@
         # Chart of Account
         'data/account_chart_template_data.xml',
         'data/account.account.template.csv',
-        'data/account.group.template.xml',
+        'data/account.group.template.csv',
 
         # Taxes
         'data/account.tax.group.csv',
