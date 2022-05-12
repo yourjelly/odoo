@@ -79,6 +79,8 @@ FieldHtml.include({
      * and KnowledgeBehavior where it is needed.
      */
     refreshInjector: function () {
-        this.$content.trigger('refresh_injector');
+        if (this.$content) {
+            this.$content.trigger('refresh_injector');
+        }
     },
 });
