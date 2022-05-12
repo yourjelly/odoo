@@ -21,7 +21,8 @@
                 t-ref="iframefallback"/>
             <iframe t-att-src="initialUrl"
                 class="o_iframe"
-                t-ref="iframe"/>
+                t-ref="iframe"
+                is-ready="false"/>
         </div>
         <WebsiteEditorComponent t-if="websiteContext.edition"
             reloadIframe.bind="this.reloadIframe"/>
