@@ -306,7 +306,7 @@ class PermissionPanel extends Component {
             this.openArticle(reloadArticleId);
             return false;
         } else if (reloadAll) {  // Loose access -> Hard Reload
-            window.location('/knowledge/article');
+            window.location.replace('/knowledge/home');
         } else if (result.reload_tree) {
             this.env.bus.trigger('reload_tree', {});
         }
