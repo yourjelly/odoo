@@ -879,6 +879,8 @@ class Article(models.Model):
         self.ensure_one()
         if not self.parent_id:
             return False
+        if not self.env.su and not self.user_can_write:
+            raise AccessError(_('You cannot restore the article %s.' % self.display_name))
         member_permission = (self | self.parent_id)._get_article_member_permissions()
         article_members_permission = member_permission[self.id]
         parents_members_permission = member_permission[self.parent_id.id]
@@ -891,7 +893,7 @@ class Article(models.Model):
                 continue
             members_values.append((3, values['member_id']))
 
-        return self.write({
+        return self.sudo().write({
             'internal_permission': False,
             'article_member_ids': members_values,
             'is_desynchronized': False
