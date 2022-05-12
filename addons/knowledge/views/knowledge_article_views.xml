@@ -109,7 +109,7 @@
                                                 <button class="dropdown-item btn-archive" type="object" name="action_article_archive">
                                                     <i class="fa fa-fw fa-archive"/> Archive
                                                 </button>
-                                                <div class="dropdown-divider"/>
+                                                <div class="dropdown-divider" attrs="{'invisible': [('user_can_write', '=', False)]}"/>
                                                 <div class="px-3" attrs="{'invisible': [('user_can_write', '=', False)]}">
                                                     <field name="full_width" widget="boolean_toggle" force_save="1"/>
                                                     <label for="full_width" class="m-0"/>
