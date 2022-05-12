@@ -201,17 +201,19 @@ Wysiwyg.include({
     _insertArticleLink: function () {
         const restoreSelection = preserveCursor(this.odooEditor.document);
         const dialog = new KnowledgeArticleLinkModal(this, {});
-        dialog.on('save', this, data => {
+        dialog.on('save', this, article => {
             restoreSelection();
-            const articleLinkFragment = new DocumentFragment();
-            const articleLinkBlock = $(QWeb.render('knowledge.wysiwyg_article_link', {
-                display_name: data.display_name,
-                href: '/knowledge/article/' + data.id,
-                article_id: data.id,
-            }))[0];
-            articleLinkFragment.append(articleLinkBlock);
-            const [anchor] = this.odooEditor.execCommand('insertFragment', articleLinkFragment);
-            this._notifyNewBehaviors(anchor);
+            if (article) {
+                const articleLinkFragment = new DocumentFragment();
+                const articleLinkBlock = $(QWeb.render('knowledge.wysiwyg_article_link', {
+                    display_name: article.display_name,
+                    href: '/knowledge/article/' + article.id,
+                    article_id: article.id,
+                }))[0];
+                articleLinkFragment.append(articleLinkBlock);
+                const [anchor] = this.odooEditor.execCommand('insertFragment', articleLinkFragment);
+                this._notifyNewBehaviors(anchor);
+            }
             dialog.close();
         });
         dialog.on('closed', this, () => {
