@@ -34,6 +34,9 @@
 
         'data/account_chart_post_data.xml',
         'data/account_chart_template_try_loading.xml',
+
+        # Views
+        'views/menuitem_data.xml'
     ],
     'demo': [
         'demo/demo_company.xml',
