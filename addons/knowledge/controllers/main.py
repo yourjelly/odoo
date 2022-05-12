@@ -21,7 +21,7 @@ class KnowledgeController(http.Controller):
         frontend view instead."""
         article = request.env["knowledge.article"]._get_first_accessible_article()
         if request.env.user.has_group('base.group_user') and not article:
-            return self._redirect_to_backend_view()
+            return self._redirect_to_backend_view(article)
         if not article:
             return self._redirect_to_portal_view(False, hide_side_bar=True)
         return redirect("/knowledge/article/%s" % article.id)
