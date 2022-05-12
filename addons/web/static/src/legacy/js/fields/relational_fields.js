@@ -115,7 +115,7 @@ var FieldMany2One = AbstractField.extend({
         this.can_write = 'can_write' in this.attrs ? JSON.parse(this.attrs.can_write) : true;
 
         this.nodeOptions = _.defaults(this.nodeOptions, {
-            quick_create: true,
+            no_quick_create: false,
         });
         this.noOpen = 'noOpen' in options ? options.noOpen : this.nodeOptions.no_open;
         this.m2o_value = this._formatValue(this.value);
@@ -382,7 +382,7 @@ var FieldMany2One = AbstractField.extend({
         if (field === undefined) {
             field = "name";
         }
-        if (field !== false && name && this.nodeOptions.quick_create !== false) {
+        if (field !== false && name) {
             tmp["default_" + field] = name;
         }
         return tmp;
@@ -537,7 +537,7 @@ var FieldMany2One = AbstractField.extend({
                 var dialog = self._searchCreatePopup("form", false, self._createContext(name));
                 dialog.on('closed', self, createDone);
             };
-            if (self.nodeOptions.quick_create) {
+            if (!self.nodeOptions.no_quick_create) {
                 const prom = self.reinitialize({id: false, display_name: name});
                 prom.guardedCatch(reason => {
                     reason.event.preventDefault();
