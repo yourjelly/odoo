@@ -46,7 +46,7 @@
                                                     <a href="#" class="o_article_editable_emoji o_article_emoji dropdown-toggle o-no-caret"
                                                        type="button" data-toggle="dropdown" aria-expanded="true"
                                                        attrs="{'invisible': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}"/>
-                                                    <p class="o_article_editable_emoji o_article_emoji o-no-caret mb-1"
+                                                    <span class="o_article_editable_emoji o_article_emoji o-no-caret"
                                                        attrs="{'invisible': [('is_locked', '=', False), ('user_can_write', '=', True)]}"/>
                                                     <div class="o_article_emoji_dropdown_panel dropdown-menu rounded p-0" role="menu"
                                                         aria-labelledby="o_article_emoji" />
