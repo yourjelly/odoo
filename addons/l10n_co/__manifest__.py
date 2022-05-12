@@ -30,8 +30,10 @@
         # Taxes
         'data/account.tax.group.csv',
         'data/account_tax_template_data.xml',
-        'data/account_chart_template_configure_data.xml',
         'data/l10n_latam.identification.type.csv',
+
+        'data/account_chart_post_data.xml',
+        'data/account_chart_template_try_loading.xml',
     ],
     'demo': [
         'demo/demo_company.xml',
