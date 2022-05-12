@@ -55,6 +55,14 @@ var VariantMixin = {
 
         const $parent = $(ev.target).closest('.js_product');
         const combination = this.getSelectedVariantValues($parent);
+
+        const rpcData = {
+            'pricelist_id': this.pricelistId || false,
+        };
+        if (this.context) {
+            rpcData.context = this.context;
+        }
+        debugger;
         let parentCombination;
 
         if ($parent.hasClass('main_product')) {
@@ -65,14 +73,15 @@ var VariantMixin = {
                 const $currentOptionalProduct = $(optionalProduct);
                 const childCombination = this.getSelectedVariantValues($currentOptionalProduct);
                 const productTemplateId = parseInt($currentOptionalProduct.find('.product_template_id').val());
-                ajax.jsonRpc(this._getUri('/sale/get_combination_info'), 'call', {
-                    'product_template_id': productTemplateId,
-                    'product_id': this._getProductId($currentOptionalProduct),
-                    'combination': childCombination,
-                    'add_qty': parseInt($currentOptionalProduct.find('input[name="add_qty"]').val()),
-                    'pricelist_id': this.pricelistId || false,
-                    'parent_combination': combination,
-                }).then((combinationData) => {
+                ajax.jsonRpc(this._getUri('/sale/get_combination_info'), 'call',
+                    Object.assign({}, {
+                        'product_template_id': productTemplateId,
+                        'product_id': this._getProductId($currentOptionalProduct),
+                        'combination': childCombination,
+                        'add_qty': parseInt($currentOptionalProduct.find('input[name="add_qty"]').val()),
+                        'parent_combination': combination,
+                    }, rpcData)
+                ).then((combinationData) => {
                     this._onChangeCombination(ev, $currentOptionalProduct, combinationData);
                     this._checkExclusions($currentOptionalProduct, childCombination, combinationData.parent_exclusions);
                 });
@@ -83,14 +92,15 @@ var VariantMixin = {
             );
         }
 
-        return ajax.jsonRpc(this._getUri('/sale/get_combination_info'), 'call', {
-            'product_template_id': parseInt($parent.find('.product_template_id').val()),
-            'product_id': this._getProductId($parent),
-            'combination': combination,
-            'add_qty': parseInt($parent.find('input[name="add_qty"]').val()),
-            'pricelist_id': this.pricelistId || false,
-            'parent_combination': parentCombination,
-        }).then((combinationData) => {
+        return ajax.jsonRpc(this._getUri('/sale/get_combination_info'), 'call',
+            Object.assign({}, {
+                'product_template_id': parseInt($parent.find('.product_template_id').val()),
+                'product_id': this._getProductId($parent),
+                'combination': combination,
+                'add_qty': parseInt($parent.find('input[name="add_qty"]').val()),
+                'parent_combination': parentCombination,
+            }, rpcData)
+        ).then((combinationData) => {
             this._onChangeCombination(ev, $parent, combinationData);
             this._checkExclusions($parent, combination, combinationData.parent_exclusions);
         });
