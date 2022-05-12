@@ -343,12 +343,17 @@ class TestKnowledgeArticleBusiness(KnowledgeCommonWData):
         self.assertEqual(workspace_children[1].parent_id, workspace_children[0])
         self.assertEqual(workspace_children[0].parent_id, article_workspace)
 
+        # Test that desynced articles are resynced when moved to root
+        workspace_children[0]._desync_access_from_parents()
+        self.assertTrue(workspace_children[0].is_desynchronized)
+
         # other valid move: first child is moved to private section
         workspace_children[0].move_to(parent_id=False, is_private=True)
         workspace_children.flush()
         self.assertMembers(workspace_children[0], 'none', {self.partner_employee: 'write'})
         self.assertEqual(workspace_children[0].category, 'private')
         self.assertEqual(workspace_children[0].internal_permission, 'none')
+        self.assertFalse(workspace_children[0].is_desynchronized)
         self.assertFalse(workspace_children[0].parent_id)
         self.assertEqual(workspace_children.root_article_id, workspace_children[0])
 

@@ -697,7 +697,10 @@ class Article(models.Model):
         if not parent_id:
             # be sure to have an internal permission on the article if moved outside
             # of an hierarchy
-            values['internal_permission'] = 'none' if is_private else 'write'
+            values.update({
+                'internal_permission': 'none' if is_private else 'write',
+                'is_desynchronized': False
+            })
 
         # if set as standalone private: remove members, ensure current user is the
         # only member -> require sudo to bypass member ACLs
