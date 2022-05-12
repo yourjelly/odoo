@@ -21,11 +21,10 @@ class KnowledgeController(http.Controller):
         frontend view instead."""
         article = request.env["knowledge.article"]._get_first_accessible_article()
         if request.env.user.has_group('base.group_user') and not article:
-            self._redirect_to_backend_view()
-        elif not article:
-            self._redirect_to_portal_view(False, hide_side_bar=True)
-        else:
-            return redirect("/knowledge/article/%s" % article.id)
+            return self._redirect_to_backend_view()
+        if not article:
+            return self._redirect_to_portal_view(False, hide_side_bar=True)
+        return redirect("/knowledge/article/%s" % article.id)
 
     @http.route('/knowledge/article/<int:article_id>', type='http', auth='user')
     def redirect_to_article(self, article_id):
@@ -35,9 +34,8 @@ class KnowledgeController(http.Controller):
         if request.env.user.has_group('base.group_user'):
             if not article:
                 return werkzeug.exceptions.Forbidden()
-            self._redirect_to_backend_view(article)
-        else:
-            self._redirect_to_portal_view(article)
+            return self._redirect_to_backend_view(article)
+        return self._redirect_to_portal_view(article)
 
     @http.route('/knowledge/article/invite/<int:member_id>/<string:invitation_hash>', type='http', auth='public')
     def article_invite(self, member_id, invitation_hash):
