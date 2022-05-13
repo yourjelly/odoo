@@ -472,24 +472,6 @@ export class ListRenderer extends Component {
         return classNames.join(" ");
     }
 
-    getCellTitle(column, record) {
-        const fieldName = column.name;
-        const fieldType = this.fields[fieldName].type;
-        if (fieldType === "boolean") {
-            return "";
-        }
-        const formatter = formatterRegistry.get(fieldType, (val) => val);
-        const formatOptions = {
-            escape: false,
-            data: record.data,
-            isPassword: "password" in column.attrs,
-            digits: column.attrs.digits && JSON.parse(column.attrs.digits),
-            field: record.fields[fieldName],
-            timezone: true,
-        };
-        return formatter(record.data[fieldName], formatOptions);
-    }
-
     getCellValue(column, record) {
         const fieldName = column.name;
         const field = this.fields[fieldName];
