@@ -1186,7 +1186,7 @@ class AccountTaxRepartitionLineTemplate(models.Model):
             except UserError:
                 #TODO OCO tester => on garde comme ça, ou on conserve le message de la UserError ? (je ne veux pas de traceback; mais garder son texte aurait le mérite d'être plus clair)
                 raise ValidationError(_("Some tags could not be retrieved from formula %s, please check it does not contain any typo, "
-                                        "and make sure all tag names in it are prefixed with '+', '-' or '~'.", record.tags_formula))
+                                        "and make sure all tag names in it are prefixed with '+', '-' or '~'.", record.tags_formula)) #TODO OCO ~ pour les tags non signés, c'est pas ouf; '|' ?
 
     def _retrieve_tags_from_formula(self):
        # TODO OCO DOC
