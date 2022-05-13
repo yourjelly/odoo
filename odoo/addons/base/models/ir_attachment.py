@@ -15,6 +15,7 @@ from PIL import Image
 
 from odoo import api, fields, models, tools, _
 from odoo.exceptions import AccessError, ValidationError, UserError
+from odoo.osv.query import Query
 from odoo.tools import config, human_size, ImageProcess, str2bool
 from odoo.tools.mimetypes import guess_mimetype
 from odoo.osv import expression
@@ -562,9 +563,9 @@ class IrAttachment(models.Model):
 
         return len(result) if count else list(result)
 
-    def _read(self, fields):
+    def _read(self, fields, query: Query=None):
         self.check('read')
-        return super(IrAttachment, self)._read(fields)
+        return super()._read(fields, query)
 
     def write(self, vals):
         self.check('write', values=vals)
@@ -622,7 +623,7 @@ class IrAttachment(models.Model):
                 ))
 
             # 'check()' only uses res_model and res_id from values, and make an exists.
-            # We can group the values by model, res_id to make only one query when 
+            # We can group the values by model, res_id to make only one query when
             # creating multiple attachments on a single record.
             record_tuple = (values.get('res_model'), values.get('res_id'))
             record_tuple_set.add(record_tuple)

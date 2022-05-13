@@ -29,6 +29,7 @@ from odoo.addons.base.models.ir_model import MODULE_UNINSTALL_FLAG
 from odoo.exceptions import AccessDenied, AccessError, UserError, ValidationError
 from odoo.http import request, DEFAULT_LANG
 from odoo.osv import expression
+from odoo.osv.query import Query
 from odoo.service.db import check_super
 from odoo.tools import is_html_empty, partition, collections, frozendict, lazy_property
 
@@ -440,8 +441,8 @@ class Users(models.Model):
     def onchange_parent_id(self):
         return self.partner_id.onchange_parent_id()
 
-    def _read(self, fields):
-        super(Users, self)._read(fields)
+    def _read(self, fields, query: Query=None):
+        self = super()._read(fields, query)
         canwrite = self.check_access_rights('write', raise_exception=False)
         if not canwrite and set(USER_PRIVATE_FIELDS).intersection(fields):
             for record in self:
@@ -452,6 +453,7 @@ class Users(models.Model):
                     except Exception:
                         # skip SpecialValue (e.g. for missing record or access right)
                         pass
+        return self
 
     @api.constrains('company_id', 'company_ids')
     def _check_company(self):

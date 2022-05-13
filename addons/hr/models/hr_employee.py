@@ -178,14 +178,17 @@ class HrEmployeePrivate(models.Model):
             return super(HrEmployeePrivate, self).name_get()
         return self.env['hr.employee.public'].browse(self.ids).name_get()
 
-    def _read(self, fields):
+    def _read(self, fields, query: Query=None):
         if self.check_access_rights('read', raise_exception=False):
-            return super(HrEmployeePrivate, self)._read(fields)
+            return super()._read(fields, query)
+        if isinstance(query, Query):
+            self = self.browse(query)
 
         res = self.env['hr.employee.public'].browse(self.ids).read(fields)
         for r in res:
             record = self.browse(r['id'])
             record._update_cache({k:v for k,v in r.items() if k in fields}, validate=False)
+        return self
 
     @api.model
     def _cron_check_work_permit_validity(self):
@@ -345,7 +348,7 @@ class HrEmployeePrivate(models.Model):
             if account_id:
                 self.env['res.partner.bank'].browse(account_id).partner_id = vals['address_home_id']
         if vals.get('user_id'):
-            # Update the profile pictures with user, except if provided 
+            # Update the profile pictures with user, except if provided
             vals.update(self._sync_user(self.env['res.users'].browse(vals['user_id']),
                                         (bool(self.image_1920))))
         if 'work_permit_expiration_date' in vals:

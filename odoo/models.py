@@ -3329,7 +3329,10 @@ Fields:
         :raise ValueError: if a requested field does not exist
         """
         fields = self.check_field_access_rights('read', fields)
+        self._read(self._get_read_stored_field(fields))
+        return self._read_format(fnames=fields, load=load)
 
+    def _get_read_stored_field(self, fields):
         # fetch stored fields from the database to the cache
         stored_fields = OrderedSet()
         for name in fields:
@@ -3344,9 +3347,7 @@ Fields:
                     f = self._fields[dotname.split('.')[0]]
                     if f.prefetch is True and (not f.groups or self.user_has_groups(f.groups)):
                         stored_fields.add(f.name)
-        self._read(stored_fields)
-
-        return self._read_format(fnames=fields, load=load)
+        return stored_fields
 
     def _read_format(self, fnames, load='_classic_read'):
         """Returns a list of dictionaries mapping field names to their values,
@@ -3369,9 +3370,7 @@ Fields:
                     vals[name] = convert(record[name], record, use_name_get)
                 except MissingError:
                     vals.clear()
-        result = [vals for record, vals in data if vals]
-
-        return result
+        return [vals for record, vals in data if vals]
 
     def _fetch_field(self, field):
         """ Read from the database in order to fetch ``field`` (:class:`Field`
@@ -3397,23 +3396,23 @@ Fields:
             fnames = [field.name]
         self._read(fnames)
 
-    def _read(self, fields):
+    def _read(self, fields, query: Query=None):
         """ Read the given fields of the records in ``self`` from the database,
             and store them in cache. Access errors are also stored in cache.
             Skip fields that are not stored.
 
             :param field_names: list of column names of model ``self``; all those
                 fields are guaranteed to be read
-            :param inherited_field_names: list of column names from parent
-                models; some of those fields may not be read
+            :param query: if the self is empty we can pass a query to _read with a
+            particular query
         """
-        if not self:
+        if not self and not isinstance(query, Query):
             return
         self.check_access_rights('read')
 
         # if a read() follows a write(), we must flush updates, as read() will
         # fetch from database and overwrites the cache (`test_update_with_id`)
-        self.flush(fields, self)
+        self.flush(fields, self if not isinstance(query, Query) else None)
 
         field_names = []
         inherited_field_names = []
@@ -3425,7 +3424,7 @@ Fields:
                 elif field.base_field.store:
                     inherited_field_names.append(name)
             else:
-                _logger.warning("%s.read() with unknown field '%s'", self._name, name)
+                _logger.warning("%s._read() with unknown field '%s'", self._name, name)
 
         # determine the fields that are stored as columns in tables; ignore 'id'
         fields_pre = [
@@ -3436,29 +3435,31 @@ Fields:
             if not (field.inherited and callable(field.base_field.translate))
         ]
 
-        if fields_pre:
-            env = self.env
-            cr, user, context, su = env.args
+        cr, user, context, su = self.env.args
 
-            # make a query object for selecting ids, and apply security rules to it
-            query = Query(self.env.cr, self._table, self._table_query)
-            self._apply_ir_rules(query, 'read')
+        # the query may involve several tables: we need fully-qualified names
+        def qualify(field, query):
+            col = field.name
+            res = self._inherits_join_calc(self._table, field.name, query)
+            if field.type == 'binary' and (context.get('bin_size') or context.get('bin_size_' + col)):
+                # PG 9.2 introduces conflicting pg_size_pretty(numeric) -> need ::cast
+                res = 'pg_size_pretty(length(%s)::bigint)' % res
+            return '%s as "%s"' % (res, col)
 
-            # the query may involve several tables: we need fully-qualified names
-            def qualify(field):
-                col = field.name
-                res = self._inherits_join_calc(self._table, field.name, query)
-                if field.type == 'binary' and (context.get('bin_size') or context.get('bin_size_' + col)):
-                    # PG 9.2 introduces conflicting pg_size_pretty(numeric) -> need ::cast
-                    res = 'pg_size_pretty(length(%s)::bigint)' % res
-                return '%s as "%s"' % (res, col)
-
-            # selected fields are: 'id' followed by fields_pre
-            qual_names = [qualify(name) for name in [self._fields['id']] + fields_pre]
-
-            # determine the actual query to execute (last parameter is added below)
-            query.add_where('"%s".id IN %%s' % self._table)
+        if isinstance(query, Query):
+            qual_names = [qualify(name, query) for name in [self._fields['id']] + fields_pre]
             query_str, params = query.select(*qual_names)
+            cr.execute(query_str, params)
+            result = list(cr.fetchall())
+        elif fields_pre:
+            # make a query object for selecting ids, and apply security rules to it
+            query_read = Query(cr, self._table, self._table_query)
+            self._apply_ir_rules(query_read, 'read')
+            # determine the actual query to execute (last parameter is added below)
+            query_read.add_where('"%s".id IN %%s' % self._table)
+            qual_names = [qualify(name, query_read) for name in [self._fields['id']] + fields_pre]
+            # selected fields are: 'id' followed by fields_pre
+            query_str, params = query_read.select(*qual_names)
 
             result = []
             for sub_ids in cr.split_for_in_conditions(self.ids):
@@ -3491,18 +3492,20 @@ Fields:
                     field.read(fetched)
 
         # possibly raise exception for the records that could not be read
-        missing = self - fetched
-        if missing:
-            extras = fetched - self
-            if extras:
-                raise AccessError(
-                    _("Database fetch misses ids ({}) and has extra ids ({}), may be caused by a type incoherence in a previous request").format(
-                        missing._ids, extras._ids,
-                    ))
-            # mark non-existing records in missing
-            forbidden = missing.exists()
-            if forbidden:
-                raise self.env['ir.rule']._make_access_error('read', forbidden)
+        if isinstance(query, Query):
+            missing = self - fetched
+            if missing:
+                extras = fetched - self
+                if extras:
+                    raise AccessError(
+                        _("Database fetch misses ids ({}) and has extra ids ({}), may be caused by a type incoherence in a previous request").format(
+                            missing._ids, extras._ids,
+                        ))
+                # mark non-existing records in missing
+                forbidden = missing.exists()
+                if forbidden:
+                    raise self.env['ir.rule']._make_access_error('read', forbidden)
+        return fetched
 
     def get_metadata(self):
         """Return some metadata about the given records.
@@ -4840,7 +4843,7 @@ Fields:
 
         :param access_rights_uid: optional user ID to use when checking access rights
                                   (not for ir.rules, this is only for ir.model.access)
-        :return: a list of record ids or an integer (if count is True)
+        :return: A Query object or a list of record ids or an integer (if count is True)
         """
         model = self.with_user(access_rights_uid) if access_rights_uid else self
         model.check_access_rights('read')
@@ -4860,8 +4863,7 @@ Fields:
             # hurt performance
             query_str, params = query.select("count(1)")
             self._cr.execute(query_str, params)
-            res = self._cr.fetchone()
-            return res[0]
+            return self._cr.fetchone()[0]
 
         query.order = self._generate_order_by(order, query).replace('ORDER BY ', '')
         query.limit = limit
@@ -5180,13 +5182,12 @@ Fields:
         :return: List of dictionaries containing the asked fields.
         :rtype: list(dict).
         """
-        records = self.search(domain or [], offset=offset, limit=limit, order=order)
-        if not records:
-            return []
+        fields = self.check_field_access_rights('read', fields)
+        query_or_ids = self._search(domain or [], offset=offset, limit=limit, order=order)
 
         if fields and fields == ['id']:
             # shortcut read if we only want the ids
-            return [{'id': record.id} for record in records]
+            return [{'id': record.id} for record in query_or_ids]
 
         # read() ignores active_test, but it would forward it to any downstream search call
         # (e.g. for x2m or function fields), and this is not the desired behavior, the flag
@@ -5195,15 +5196,24 @@ Fields:
         if 'active_test' in self._context:
             context = dict(self._context)
             del context['active_test']
-            records = records.with_context(context)
+            self = self.with_context(context)
 
-        result = records.read(fields, **read_kwargs)
+        if isinstance(query_or_ids, Query):
+            records = self._read(self._get_read_stored_field(fields), query=query_or_ids, **read_kwargs)
+        else:
+            records = self.browse(query_or_ids)
+            records._read(self._get_read_stored_field(fields), **read_kwargs)
+
+        result = records._read_format(fnames=fields, **read_kwargs)
         if len(result) <= 1:
             return result
 
         # reorder read
         index = {vals['id']: vals for vals in result}
         return [index[record.id] for record in records if record.id in index]
+
+    def _search_read(self, domain=None, fields=None, offset=0, limit=None, order=None):
+        return self.search_read(domain, fields, offset, limit, order, load=False)
 
     def toggle_active(self):
         "Inverses the value of :attr:`active` on the records in ``self``."

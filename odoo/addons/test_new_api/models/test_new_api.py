@@ -5,6 +5,7 @@ import logging
 
 from odoo import models, fields, api, _, Command
 from odoo.exceptions import AccessError, ValidationError
+from odoo.osv.query import Query
 
 
 class Category(models.Model):
@@ -67,13 +68,13 @@ class Category(models.Model):
             # assign name of last category, and reassign display_name (to normalize it)
             cat.name = names[-1].strip()
 
-    def _read(self, fields):
+    def _read(self, fields, query: Query=None):
         # DLE P45: `test_31_prefetch`,
         # with self.assertRaises(AccessError):
         #     cat1.name
+        self = super()._read(fields, query)
         if self.search_count([('id', 'in', self._ids), ('name', '=', 'NOACCESS')]):
             raise AccessError('Sorry')
-        return super(Category, self)._read(fields)
 
 
 class Discussion(models.Model):

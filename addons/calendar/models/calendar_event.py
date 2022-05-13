@@ -15,6 +15,7 @@ from odoo.osv.expression import AND
 from odoo.addons.base.models.res_partner import _tz_get
 from odoo.addons.calendar.models.calendar_attendee import Attendee
 from odoo.addons.calendar.models.calendar_recurrence import weekday_to_field, RRULE_TYPE_SELECTION, END_TYPE_SELECTION, MONTH_BY_SELECTION, WEEKDAY_SELECTION, BYDAY_SELECTION
+from odoo.osv.query import Query
 from odoo.tools.translate import _
 from odoo.tools.misc import get_lang
 from odoo.tools import pycompat, html2plaintext, is_html_empty, single_email_re
@@ -463,19 +464,17 @@ class Meeting(models.Model):
 
         return events
 
-    def _read(self, fields):
+    def _read(self, fields, query: Query=None):
         if self.env.is_system():
-            super()._read(fields)
-            return
+            return super()._read(fields, query)
 
         fields = set(fields)
         private_fields = fields - self._get_public_fields()
         if not private_fields:
-            super()._read(fields)
-            return
+            return super()._read(fields, query)
 
         private_fields.add('partner_ids')
-        super()._read(fields | {'privacy', 'user_id', 'partner_ids'})
+        self = super()._read(fields | {'privacy', 'user_id', 'partner_ids'}, query)
         current_partner_id = self.env.user.partner_id
         others_private_events = self.filtered(
             lambda e: e.privacy == 'private' \
@@ -483,7 +482,7 @@ class Meeting(models.Model):
                   and current_partner_id not in e.partner_ids
         )
         if not others_private_events:
-            return
+            return self
 
         for field_name in private_fields:
             field = self._fields[field_name]
@@ -491,6 +490,8 @@ class Meeting(models.Model):
                 _('Busy') if field_name == 'name' else False,
                 others_private_events)
             self.env.cache.update(others_private_events, field, repeat(replacement))
+
+        return self
 
     def write(self, values):
         detached_events = self.env['calendar.event']

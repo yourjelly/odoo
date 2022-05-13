@@ -4,6 +4,7 @@
 from odoo import api, fields, models, tools, SUPERUSER_ID
 
 from odoo.addons.base.models.res_partner import _tz_get
+from odoo.osv.query import Query
 
 
 class LeaveReportCalendar(models.Model):
@@ -36,7 +37,7 @@ class LeaveReportCalendar(models.Model):
     def init(self):
         tools.drop_view_if_exists(self._cr, 'hr_leave_report_calendar')
         self._cr.execute("""CREATE OR REPLACE VIEW hr_leave_report_calendar AS
-        (SELECT 
+        (SELECT
             hl.id AS id,
             CONCAT(em.name, ': ', hl.duration_display) AS name,
             hl.date_from AS start_datetime,
@@ -65,18 +66,18 @@ class LeaveReportCalendar(models.Model):
                 ON co.id = em.company_id
             LEFT JOIN resource_calendar cc
                 ON cc.id = co.resource_calendar_id
-        WHERE 
+        WHERE
             hl.state IN ('confirm', 'validate', 'validate1')
         );
         """)
 
-    def _read(self, fields):
-        res = super()._read(fields)
+    def _read(self, fields, query: Query=None):
+        self = super()._read(fields, query)
         if self.env.context.get('hide_employee_name') and 'employee_id' in self.env.context.get('group_by', []):
             name_field = self._fields['name']
             for record in self.with_user(SUPERUSER_ID):
                 self.env.cache.set(record, name_field, record.name.split(':')[-1].strip())
-        return res
+        return self
 
     @api.model
     def get_unusual_days(self, date_from, date_to=None):
