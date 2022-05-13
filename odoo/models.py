@@ -3313,9 +3313,9 @@ Fields:
 
         return fields
 
-    def _get_read_fields_name(self, fields):
+    def _get_read_fields(self, field_names):
         stored_fields = OrderedSet()
-        for name in fields:
+        for name in field_names:
             field = self._fields.get(name)
             if not field:
                 raise ValueError("Invalid field %r on model %r" % (name, self._name))
@@ -3325,7 +3325,7 @@ Fields:
                 # optimization: prefetch direct field dependencies
                 for dotname in self.pool.field_depends[field]:
                     f = self._fields[dotname.split('.')[0]]
-                    if f.prefetch is True and (not f.groups or self.user_has_groups(f.groups)):
+                    if f.prefetch == field.prefetch and (not f.groups or self.user_has_groups(f.groups)):
                         stored_fields.add(f.name)
         return stored_fields
 
@@ -3347,7 +3347,7 @@ Fields:
         fields = self.check_field_access_rights('read', fields)
 
         # fetch stored fields from the database to the cache
-        self._read(self._get_read_fields_name(fields))
+        self._read(self._get_read_fields(fields))
 
         return self._read_format(fnames=fields, load=load)
 
@@ -3372,9 +3372,7 @@ Fields:
                     vals[name] = convert(record[name], record, use_name_get)
                 except MissingError:
                     vals.clear()
-        result = [vals for record, vals in data if vals]
-
-        return result
+        return [vals for record, vals in data if vals]
 
     def _fetch_field(self, field):
         """ Read from the database in order to fetch ``field`` (:class:`Field`
@@ -3444,7 +3442,7 @@ Fields:
 
             for field in fields_pre:
                 values = next(cols)
-                if context.get('lang') and not field.inherited and callable(field.translate):
+                if self.env.context.get('lang') and not field.inherited and callable(field.translate):
                     if any(values):
                         translate = field.get_trans_func(fetched)
                         values = [translate(id_, value) for id_, value in zip(ids, values)]
@@ -3475,7 +3473,7 @@ Fields:
                 raise self.env['ir.rule']._make_access_error('read', forbidden)
         return fetched
 
-    def _read(self, fields):
+    def _read(self, fields, query=None):
         """ Read the given fields of the records in ``self`` from the database,
             and store them in cache. Access errors are also stored in cache.
             Skip fields that are not stored.
@@ -3496,13 +3494,13 @@ Fields:
         fields_pre = self._get_read_column_fields(fields)
 
         if fields_pre:
+            if not query:
+                # make a query object for selecting ids, and apply security rules to it
+                query = Query(self.env.cr, self._table, self._table_query)
+                self._apply_ir_rules(query, 'read')
+                # determine the actual query to execute (last parameter is added below)
+                query.add_where('"%s".id IN %%s' % self._table)
 
-            # make a query object for selecting ids, and apply security rules to it
-            query = Query(self.env.cr, self._table, self._table_query)
-            self._apply_ir_rules(query, 'read')
-
-            # determine the actual query to execute (last parameter is added below)
-            query.add_where('"%s".id IN %%s' % self._table)
             query_str, params = query.select(*self._qualify_field_query(fields_pre, query))
 
             result = []
@@ -3513,7 +3511,7 @@ Fields:
             self.check_access_rule('read')
             result = [(id_,) for id_ in self.ids]
 
-        self._process_result_read(result, fields_pre, fields)
+        return self._process_result_read(result, fields_pre, fields)
 
     def get_metadata(self):
         """Return some metadata about the given records.
@@ -5191,7 +5189,7 @@ Fields:
         :return: List of dictionaries containing the asked fields.
         :rtype: list(dict).
         """
-        query = self._search(domain or [], offset=offset, limit=limit, order=order)
+        ids_or_query = self._search(domain or [], offset=offset, limit=limit, order=order)
 
         # read() ignores active_test, but it would forward it to any downstream search call
         # (e.g. for x2m or function fields), and this is not the desired behavior, the flag
@@ -5202,8 +5200,8 @@ Fields:
             del context['active_test']
             self = self.with_context(context)
 
-        if not isinstance(query, Query):  # if _search returning ids instead of a query
-            records = self.browse(query)
+        if not isinstance(ids_or_query, Query):  # if _search returning ids instead of a query
+            records = self.browse(ids_or_query)
 
             result = records.read(fields, **read_kwargs)
             if len(result) <= 1:
@@ -5214,13 +5212,13 @@ Fields:
             return [index[record.id] for record in records if record.id in index]
 
         fields = self.check_field_access_rights('read', fields)
-        field_names = self._get_read_fields_name(fields)
+        field_names = self._get_read_fields(fields)
 
         self.flush(field_names)
 
         fields_pre = self._get_read_column_fields(field_names)
 
-        query_str, params = query.select(*self._qualify_field_query(fields_pre, query))
+        query_str, params = ids_or_query.select(*self._qualify_field_query(fields_pre, ids_or_query))
         self.env.cr.execute(query_str, params)
         result = self.env.cr.fetchall()
         records = self._process_result_read(result, fields_pre, field_names)
