@@ -231,7 +231,7 @@ export const formatInteger = (value, options = {}) => {
         return "";
     }
     if (options.isPassword) {
-        return "*".repeat(value.length);
+        return new Array(value.length + 1).join("*");
     }
     if (options.humanReadable) {
         return humanNumber(value, options);
@@ -376,8 +376,7 @@ export const formatReference = (value, options) => {
  */
 export const formatSelection = (value, options = {}) => {
     const selection = options.selection || (options.field && options.field.selection) || [];
-    const v = selection.find((s) => s[0] === value);
-    return (v && v[1]) || "";
+    return Object.fromEntries(selection)[value] || "";
 };
 
 /**
