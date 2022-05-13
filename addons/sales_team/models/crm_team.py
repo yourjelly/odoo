@@ -52,7 +52,7 @@ class CrmTeam(models.Model):
         team = self.env['crm.team']
         teams = self.env['crm.team'].search([
             ('company_id', 'in', valid_cids),
-            '|', ('user_id', '=', user.id), ('member_ids', 'in', [user.id]),
+            '|', ('user_id', '=', user.id), ('member_ids', 'any', [('id', 'in', [user.id])]),
         ])
         if teams and domain:
             team = teams.filtered_domain(domain)[:1]
