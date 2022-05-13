@@ -231,8 +231,8 @@ export class View extends Component {
                 }
             }
             this.env.config.views = views;
-            fields = fields || result.fields;
-            relatedModels = relatedModels || result.relatedModels;
+            fields = fields || owl.markRaw(result.fields);
+            relatedModels = relatedModels || owl.markRaw(result.relatedModels);
         }
 
         if (!arch) {
