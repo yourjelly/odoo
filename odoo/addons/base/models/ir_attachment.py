@@ -15,6 +15,7 @@ from PIL import Image
 
 from odoo import api, fields, models, tools, _
 from odoo.exceptions import AccessError, ValidationError, UserError
+from odoo.osv.query import Query
 from odoo.tools import config, human_size, ImageProcess, str2bool
 from odoo.tools.mimetypes import guess_mimetype
 from odoo.osv import expression
@@ -495,20 +496,19 @@ class IrAttachment(models.Model):
             discard_binary_fields_attachments = True
             args.insert(0, ('res_field', '=', False))
 
-        ids = super(IrAttachment, self)._search(args, offset=offset, limit=limit, order=order,
+        query_ids = super(IrAttachment, self)._search(args, offset=offset, limit=limit, order=order,
                                                 count=False, access_rights_uid=access_rights_uid)
 
         if self.env.is_superuser():
             # rules do not apply for the superuser
-            return len(ids) if count else ids
+            return len(query_ids) if count else query_ids
 
-        if not ids:
+        if not query_ids:
             return 0 if count else []
 
         # Work with a set, as list.remove() is prohibitive for large lists of documents
         # (takes 20+ seconds on a db with 100k docs during search_count()!)
-        orig_ids = ids
-        ids = set(ids)
+        ids = set(query_ids)
 
         # For attachments, the permissions of the document they are attached to
         # apply, so we must remove attachments for which the user cannot access
@@ -546,7 +546,7 @@ class IrAttachment(models.Model):
                 ids.difference_update(targets[res_id])
 
         # sort result according to the original sort ordering
-        result = [id for id in orig_ids if id in ids]
+        result = [id for id in query_ids if id in ids]
 
         # If the original search reached the limit, it is important the
         # filtered record set does so too. When a JS view receive a
@@ -554,13 +554,13 @@ class IrAttachment(models.Model):
         # reached the last page. To avoid an infinite recursion due to the
         # permission checks the sub-call need to be aware of the number of
         # expected records to retrieve
-        if len(orig_ids) == limit and len(result) < self._context.get('need', limit):
+        if len(query_ids) == limit and len(result) < self._context.get('need', limit):
             need = self._context.get('need', limit) - len(result)
             result.extend(self.with_context(need=need)._search(args, offset=offset + len(orig_ids),
                                        limit=limit, order=order, count=count,
                                        access_rights_uid=access_rights_uid)[:limit - len(result)])
 
-        return len(result) if count else list(result)
+        return len(result) if count else Query.from_records(self.browse(result))
 
     def _read(self, fields):
         self.check('read')
@@ -622,7 +622,7 @@ class IrAttachment(models.Model):
                 ))
 
             # 'check()' only uses res_model and res_id from values, and make an exists.
-            # We can group the values by model, res_id to make only one query when 
+            # We can group the values by model, res_id to make only one query when
             # creating multiple attachments on a single record.
             record_tuple = (values.get('res_model'), values.get('res_id'))
             record_tuple_set.add(record_tuple)

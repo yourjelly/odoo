@@ -14,6 +14,7 @@ from odoo.addons.mail.tools import mail_validation
 from odoo.addons.phone_validation.tools import phone_validation
 from odoo.exceptions import UserError, AccessError
 from odoo.osv import expression
+from odoo.osv.query import Query
 from odoo.tools.translate import _
 from odoo.tools import date_utils, email_re, email_split, is_html_empty, groupby
 
@@ -729,7 +730,7 @@ class Lead(models.Model):
         return write_result
 
     @api.model
-    def search(self, args, offset=0, limit=None, order=None, count=False):
+    def _search(self, args, offset=0, limit=None, order=None, count=False):
         """ Override to support ordering on my_activity_date_deadline.
 
         Ordering through web client calls search_read with an order parameter set.
@@ -760,7 +761,7 @@ class Lead(models.Model):
         side effects. Search_count is not affected by this override.
         """
         if count or not order or 'my_activity_date_deadline' not in order:
-            return super(Lead, self).search(args, offset=offset, limit=limit, order=order, count=count)
+            return super()._search(args, offset=offset, limit=limit, order=order, count=count)
         order_items = [order_item.strip().lower() for order_item in (order or self._order).split(',')]
 
         # Perform a read_group on my activities to get a mapping lead_id / deadline
@@ -789,7 +790,7 @@ class Lead(models.Model):
 
         # do not go further if limit is achieved
         if limit and len(my_lead_ids_keep) >= limit:
-            return self.browse(my_lead_ids_keep)
+            return Query.from_records(self.browse(my_lead_ids_keep))
 
         # Fill with remaining leads. If a limit is given, simply remove count of
         # already fetched. Otherwise keep none. If an offset is set we have to
@@ -802,11 +803,11 @@ class Lead(models.Model):
             lead_offset = 0
         lead_order = ', '.join(item for item in order_items if 'my_activity_date_deadline' not in item)
 
-        other_lead_res = super(Lead, self).search(
+        other_lead_res = super().search(
             expression.AND([[('id', 'not in', my_lead_ids_skip)], args]),
             offset=lead_offset, limit=lead_limit, order=lead_order, count=count
         )
-        return self.browse(my_lead_ids_keep) + other_lead_res
+        return Query.from_records(self.browse(my_lead_ids_keep) + other_lead_res)
 
     def _handle_won_lost(self, vals):
         """ This method handle the state changes :

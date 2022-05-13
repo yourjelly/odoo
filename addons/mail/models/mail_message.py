@@ -10,6 +10,7 @@ from binascii import Error as binascii_error
 from odoo import _, api, Command, fields, models, modules, tools
 from odoo.exceptions import AccessError
 from odoo.osv import expression
+from odoo.osv.query import Query
 from odoo.tools.misc import clean_context
 
 _logger = logging.getLogger(__name__)
@@ -275,13 +276,13 @@ class Message(models.Model):
         if not self.env['res.users'].has_group('base.group_user'):
             args = expression.AND([self._get_search_domain_share(), args])
         # Perform a super with count as False, to have the ids, not a counter
-        ids = super(Message, self)._search(
+        query_ids = super(Message, self)._search(
             args, offset=offset, limit=limit, order=order,
             count=False, access_rights_uid=access_rights_uid)
-        if not ids and count:
+        if not query_ids and count:
             return 0
-        elif not ids:
-            return ids
+        elif not query_ids:
+            return query_ids
 
         pid = self.env.user.partner_id.id
         author_ids, partner_ids, allowed_ids = set([]), set([]), set([])
@@ -292,7 +293,7 @@ class Message(models.Model):
 
         self.flush(['model', 'res_id', 'author_id', 'message_type', 'partner_ids'])
         self.env['mail.notification'].flush(['mail_message_id', 'res_partner_id'])
-        for sub_ids in self._cr.split_for_in_conditions(ids):
+        for sub_ids in self._cr.split_for_in_conditions(query_ids):
             self._cr.execute("""
                 SELECT DISTINCT m.id, m.model, m.res_id, m.author_id, m.message_type,
                                 COALESCE(partner_rel.res_partner_id, needaction_rel.res_partner_id)
@@ -318,8 +319,7 @@ class Message(models.Model):
             return len(final_ids)
         else:
             # re-construct a list based on ids, because set did not keep the original order
-            id_list = [id for id in ids if id in final_ids]
-            return id_list
+            return Query.from_records(self.browse([id for id in query_ids if id in final_ids]))
 
     @api.model
     def _find_allowed_model_wise(self, doc_model, doc_dict):

@@ -10,6 +10,7 @@ from collections import defaultdict
 
 from odoo import api, fields, models
 from odoo.osv import expression
+from odoo.osv.query import Query
 from odoo.tools import format_date
 from odoo.tools.translate import _
 from odoo.tools.float_utils import float_round
@@ -140,7 +141,7 @@ class HolidaysType(models.Model):
             alloc.employee_id = %s AND
             alloc.active = True AND alloc.state = 'validate' AND
             (alloc.date_to >= %s OR alloc.date_to IS NULL) AND
-            alloc.date_from <= %s 
+            alloc.date_from <= %s
         '''
 
         self._cr.execute(query, (employee_id or None, date_to, date_from))
@@ -435,11 +436,11 @@ class HolidaysType(models.Model):
         """
         employee_id = self._get_contextual_employee_id()
         post_sort = (not count and not order and employee_id)
-        leave_ids = super(HolidaysType, self)._search(args, offset=offset, limit=(None if post_sort else limit), order=order, count=count, access_rights_uid=access_rights_uid)
-        leaves = self.browse(leave_ids)
+        leave_query = super(HolidaysType, self)._search(args, offset=offset, limit=(None if post_sort else limit), order=order, count=count, access_rights_uid=access_rights_uid)
         if post_sort:
-            return leaves.sorted(key=self._model_sorting_key, reverse=True).ids[:limit or None]
-        return leave_ids
+            leaves = self.browse(leave_query)
+            return Query.from_records(leaves.sorted(key=self._model_sorting_key, reverse=True).ids[:limit or None])
+        return leave_query
 
     def action_see_days_allocated(self):
         self.ensure_one()

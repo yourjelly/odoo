@@ -77,6 +77,12 @@ class Query(object):
         self.limit = None
         self.offset = None
 
+    @classmethod
+    def from_records(cls, records):
+        query = Query(records.env.cr, records._table)
+        query.add_where(f'"{records._table}"."id" IN %s', [records._ids])
+        return query
+
     def add_table(self, alias, table=None):
         """ Add a table with a given alias to the from clause. """
         assert alias not in self._tables and alias not in self._joins, "Alias %r already in %s" % (alias, str(self))
@@ -182,7 +188,8 @@ class Query(object):
         if self.limit or self.offset:
             # in this case, the ORDER BY clause is necessary
             return self.select(*args)
-
+        if not args and self._where_clauses == f'"{next(iter(self._tables))}"."id" IN %s':
+            return self._where_params[0]
         from_clause, where_clause, params = self.get_sql()
         query_str = 'SELECT {} FROM {} WHERE {}'.format(
             ", ".join(args or [f'"{next(iter(self._tables))}".id']),

@@ -11,6 +11,7 @@ from odoo.exceptions import ValidationError
 from odoo.http import request
 from odoo.modules import get_module_resource
 from odoo.osv import expression
+from odoo.osv.query import Query
 
 MENU_ITEM_SEPARATOR = "/"
 NUMBER_PARENS = re.compile(r"\(([0-9]+)\)")
@@ -128,28 +129,11 @@ class IrUiMenu(models.Model):
 
         return set(visible.ids)
 
-    @api.returns('self')
-    def _filter_visible_menus(self):
-        """ Filter `self` to only keep the menu items that should be visible in
-            the menu hierarchy of the current user.
-            Uses a cache for speeding up the computation.
-        """
-        visible_ids = self._visible_menu_ids(request.session.debug if request else False)
-        return self.filtered(lambda menu: menu.id in visible_ids)
-
     @api.model
-    def _search(self, args, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
-        menu_ids = super(IrUiMenu, self)._search(args, offset=0, limit=None, order=order, count=False, access_rights_uid=access_rights_uid)
-        menus = self.browse(menu_ids)
-        if menus:
-            # menu filtering is done only on main menu tree, not other menu lists
-            if not self._context.get('ir.ui.menu.full_list'):
-                menus = menus._filter_visible_menus()
-            if offset:
-                menus = menus[offset:]
-            if limit:
-                menus = menus[:limit]
-        return len(menus) if count else menus.ids
+    def _search(self, domain, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
+        if not self._context.get('ir.ui.menu.full_list'):
+            domain += [('id', 'in', self._visible_menu_ids(request.session.debug if request else False))]
+        return super(IrUiMenu, self)._search(domain, offset=offset, limit=limit, order=order, count=count, access_rights_uid=access_rights_uid)
 
     def name_get(self):
         return [(menu.id, menu._get_full_name()) for menu in self]

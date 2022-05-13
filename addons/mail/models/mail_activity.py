@@ -9,6 +9,7 @@ from dateutil.relativedelta import relativedelta
 
 from odoo import api, exceptions, fields, models, _, Command
 from odoo.osv import expression
+from odoo.osv.query import Query
 from odoo.tools.misc import clean_context
 
 
@@ -348,20 +349,20 @@ class MailActivity(models.Model):
                 args, offset=offset, limit=limit, order=order,
                 count=count, access_rights_uid=access_rights_uid)
         # Perform a super with count as False, to have the ids, not a counter
-        ids = super(MailActivity, self)._search(
+        query_ids = super(MailActivity, self)._search(
             args, offset=offset, limit=limit, order=order,
             count=False, access_rights_uid=access_rights_uid)
-        if not ids and count:
+        if not query_ids and count:
             return 0
-        elif not ids:
-            return ids
+        elif not query_ids:
+            return query_ids
 
         # check read access rights before checking the actual rules on the given ids
         super(MailActivity, self.with_user(access_rights_uid or self._uid)).check_access_rights('read')
 
         self.flush(['res_model', 'res_id'])
         activities_to_check = []
-        for sub_ids in self._cr.split_for_in_conditions(ids):
+        for sub_ids in self._cr.split_for_in_conditions(query_ids):
             self._cr.execute("""
                 SELECT DISTINCT activity.id, activity.res_model, activity.res_id
                 FROM "%s" activity
@@ -393,8 +394,7 @@ class MailActivity(models.Model):
             return len(allowed_ids)
         else:
             # re-construct a list based on ids, because 'allowed_ids' does not keep the original order
-            id_list = [id for id in ids if id in allowed_ids]
-            return id_list
+            return Query.from_records(self.browse([id for id in query_ids if id in allowed_ids]))
 
     @api.model
     def _read_group_raw(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
