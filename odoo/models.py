@@ -3371,6 +3371,111 @@ class BaseModel(metaclass=MetaModel):
 
         return self._read_format(fnames=fields, load=load)
 
+    def update_field_translations(self, fname, translations):
+        """ update translations for model and model terms
+        :param str fname: field name
+        :param str lang: language
+        :param dict translations:
+            for model: {lang: new_value}
+            for model term: {lang: {term_old_value: term_new_value}}
+        """
+
+        # TODO CWG: check write access right and rules:
+        # check all languages are active
+        self.ensure_one()
+
+        field = self._fields[fname]
+
+        if not field.translate:
+            return False  # or raise error
+
+        if not field.store and not field.related and field.compute:
+            # a non-related non-stored computed field cannot be translated, even if it has inverse function
+            return False
+
+        if field.translate is True:
+            for lang, translation in translations.items():
+                if translation is not None:
+                    self.with_context(lang=lang)[fname] = translation
+        else:
+            # TODO CWG: Strictly speaking, a translated related/computed field cannot be stored
+            # because the compute function only support one language
+            # `not field.store` is a redundant logic.
+            # But some developers store translated related fields.
+            # In these cases, only all translations of the first stored translation field will be updated
+            # For other stored related translated field, the translation for the flush language will be updated
+            if field.related and not field.store:
+                related_path, fname = field.related.rsplit(".", 1)
+                return self.mapped(related_path).update_field_translations(fname, translations)
+
+            self.check_access_rights('write')
+            self.check_field_access_rights('write', [fname])
+            self.check_access_rule('write')
+
+            # Note:
+            # update terms in 'en_US' will not change its value other translated values
+            # record_en = Model_en.create({'html': '<div>English 1</div><div>English 2<div/>'
+            # record_en.update_field_translations('html', {'fr_FR': {'English 2': 'French 2'}}
+            # record_en.update_field_translations('html', {'en_US': {'English 1': 'English 3'}}
+            # assert record_en                            == '<div>English 3</div><div>English 2<div/>'
+            # assert record_fr.with_context(lang='fr_FR') == '<div>English 1</div><div>French 2<div/>'
+            # assert record_nl.with_context(lang='nl_NL') == '<div>English 3</div><div>English 2<div/>'
+
+            old_translations = field._get_stored_translations(self)
+            if not old_translations:
+                return False
+            new_translations = old_translations
+            for lang, translation in translations.items():
+                old_value = new_translations.get(lang) or new_translations.get('en_US')
+                translation_safe = {}
+                for key, value in translation.items():
+                    new_term = field.translate.term_converter(value)
+                    # if len(field.get_trans_terms(new_term)) == 1:  # drop illegal new terms
+                        # TODO CWG: reckeck term_converter for key
+                    translation_safe[field.translate.term_converter(key)] = new_term
+                new_translations[lang] = field.translate(lambda term: translation_safe.get(term) if term in translation_safe else None, old_value)
+            self.env.cache.set(self, field, new_translations, dirty=True)
+            self.modified([fname])
+        return True
+
+    def get_field_translations(self, fname, langs=None):
+        """ get model/model_term translations for records
+        :param str fname: field name
+        :param list langs: languages
+
+        :return dict translations: [(lang, val_en, val_lang)]
+        In the UI, translation_dialog.js
+        for model: val_en will be shown as the translation
+        for model term: val_en will be shown as the src
+        """
+        self.ensure_one()
+        field = self._fields[fname]
+        # We don't forbid reading inactive/non-existing languages,
+        langs = set(langs or [l[0] for l in self.env['res.lang'].get_installed()])
+        val_en = self.with_context(lang='en_US')[fname]
+        if not callable(field.translate):
+            val_lang_func = lambda val_lang: val_lang if val_lang != val_en else ''
+            translations = [{
+                'lang': lang,
+                'src': val_en,
+                'value': val_lang_func(self.with_context(lang=lang)[fname])
+            } for lang in langs]
+        else:
+            translation_dictionary = field.get_translation_dictionary(val_en, {lang: self.with_context(lang=lang)[fname] for lang in langs})
+            translations = [{
+                'lang': lang,
+                'src': term_en,
+                'value': term_lang if term_lang != term_en else ''
+            } for term_en, translations in translation_dictionary.items()
+                for lang, term_lang in translations.items()]
+        context = {}
+        context['translation_type'] = 'text' if field.type in ['text', 'html'] else 'char'
+        context['translation_show_src'] = False
+        if callable(field.translate):
+            context['translation_show_src'] = True
+
+        return translations, context
+
     def _read_format(self, fnames, load='_classic_read'):
         """Returns a list of dictionaries mapping field names to their values,
         with one dictionary per record that exists.
