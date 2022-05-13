@@ -1436,3 +1436,36 @@ class Prisoner(models.Model):
 
     name = fields.Char('Name')
     ship_ids = fields.Many2many('test_new_api.ship', 'test_new_api_crew', 'prisoner_id', 'ship_id')
+
+
+class NoLA(models.Model):
+    _name = 'test_new_api.nola'
+    _description = 'No LogAccess'
+
+    _log_access = False
+
+    name = fields.Char()
+
+
+class NoLA_inherit(models.Model):
+    _inherit = 'test_new_api.nola'
+    _name = 'test_new_api.nola.inherit'
+
+    _description = 'No LogAccess too'
+
+
+class AutoFalse(models.Model):
+    _name = 'test_new_api.auto.false'
+    _description = 'Auto false'
+
+    _auto = False
+
+    _table_query = "SELECT 1 as id, 'Alice' as name"
+
+    name = fields.Char()
+
+class AutoFalseInherit(models.Model):
+    _inherit = 'test_new_api.auto.false'
+    _name = 'test_new_api.auto.false.inherit'
+
+    _table_query = "SELECT 2 as id, 'Bob' as name"

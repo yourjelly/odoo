@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo.models import MetaModel
+from odoo.models import MetaModel, LOG_ACCESS_COLUMNS
 from odoo.tests import common
 from odoo.addons.base.models.ir_model import model_xmlid, field_xmlid, selection_xmlid
 
@@ -90,6 +90,14 @@ class TestReflection(common.TransactionCase):
                 elif field.store and field.column_type:
                     self.assertTrue(field_description['sortable'])
 
+    def test_log_access(self):
+        for suffix in {"nola", "nola.inherit", "auto.false", "auto.false.inherit"}:
+            model_name = f"test_new_api.{suffix}"
+
+            Model = self.env[model_name]
+
+            for col in LOG_ACCESS_COLUMNS:
+                self.assertNotIn(col, Model._fields, f"{col} shouldn't be declared in model {model_name}")
 
 class TestSchema(common.TransactionCase):
 
