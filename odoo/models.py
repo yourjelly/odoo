@@ -3403,7 +3403,7 @@ class BaseModel(metaclass=MetaModel):
             fnames = [field.name]
         self._read(fnames)
 
-    def _read(self, fields):
+    def _read(self, fields, query=None):
         """ Read the given fields of the records in ``self`` from the database,
             and store them in cache. Access errors are also stored in cache.
             Skip fields that are not stored.
@@ -3413,13 +3413,18 @@ class BaseModel(metaclass=MetaModel):
             :param inherited_field_names: list of column names from parent
                 models; some of those fields may not be read
         """
-        if not self:
-            return
+        no_query = query is None
+
+        if not self and no_query:
+            return self
         self.check_access_rights('read')
 
         # if a read() follows a write(), we must flush updates, as read() will
         # fetch from database and overwrites the cache (`test_update_with_id`)
-        self.flush(fields, self)
+        if no_query:
+            self.flush(fields)
+        else:
+            self.flush(fields, self)
 
         field_names = []
         inherited_field_names = []
@@ -3446,9 +3451,10 @@ class BaseModel(metaclass=MetaModel):
             env = self.env
             cr, user, context, su = env.args
 
-            # make a query object for selecting ids, and apply security rules to it
-            query = Query(self.env.cr, self._table, self._table_query)
-            self._apply_ir_rules(query, 'read')
+            if no_query:
+                # make a query object for selecting ids, and apply security rules to it
+                query = Query(self.env.cr, self._table, self._table_query)
+                self._apply_ir_rules(query, 'read')
 
             # the query may involve several tables: we need fully-qualified names
             def qualify(field):
@@ -3462,17 +3468,28 @@ class BaseModel(metaclass=MetaModel):
             # selected fields are: 'id' followed by fields_pre
             qual_names = [qualify(name) for name in [self._fields['id']] + fields_pre]
 
-            # determine the actual query to execute (last parameter is added below)
-            query.add_where('"%s".id IN %%s' % self._table)
-            query_str, params = query.select(*qual_names)
+            if no_query:
+                # determine the actual query to execute (last parameter is added below)
+                query.add_where('"%s".id IN %%s' % self._table)
+                query_str, params = query.select(*qual_names)
 
-            result = []
-            for sub_ids in cr.split_for_in_conditions(self.ids):
-                cr.execute(query_str, params + [sub_ids])
-                result += cr.fetchall()
+                result = []
+                for sub_ids in cr.split_for_in_conditions(self.ids):
+                    cr.execute(query_str, params + [sub_ids])
+                    result += cr.fetchall()
+            else:
+                query_str, params = query.select(*qual_names)
+                cr.execute(query_str, params)
+                result = cr.fetchall()
+
         else:
-            self.check_access_rule('read')
-            result = [(id_,) for id_ in self.ids]
+            if no_query:
+                self.check_access_rule('read')
+                result = [(id_,) for id_ in self.ids]
+            else:
+                query_str, params = query.select()
+                self.env.cr.execute(query_str, params)
+                result = self.env.cr.fetchall()
 
         fetched = self.browse()
         if result:
@@ -3497,20 +3514,23 @@ class BaseModel(metaclass=MetaModel):
                     field.read(fetched)
 
         # possibly raise exception for the records that could not be read
-        missing = self - fetched
-        if missing:
-            extras = fetched - self
-            if extras:
-                raise AccessError(_(
-                    "Database fetch misses ids (%(missing)s) and has extra ids (%(extra)s),"
-                    " may be caused by a type incoherence in a previous request",
-                    missing=missing._ids,
-                    extra=extras._ids,
-                ))
-            # mark non-existing records in missing
-            forbidden = missing.exists()
-            if forbidden:
-                raise self.env['ir.rule']._make_access_error('read', forbidden)
+        if no_query:
+            missing = self - fetched
+            if missing:
+                extras = fetched - self
+                if extras:
+                    raise AccessError(_(
+                        "Database fetch misses ids (%(missing)s) and has extra ids (%(extra)s),"
+                        " may be caused by a type incoherence in a previous request",
+                        missing=missing._ids,
+                        extra=extras._ids,
+                    ))
+                # mark non-existing records in missing
+                forbidden = missing.exists()
+                if forbidden:
+                    raise self.env['ir.rule']._make_access_error('read', forbidden)
+
+        return fetched
 
     def get_metadata(self):
         """Return some metadata about the given records.
