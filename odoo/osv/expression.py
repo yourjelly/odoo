@@ -1042,13 +1042,6 @@ class expression(object):
                 params = subparams
             elif isinstance(right, (list, tuple)):
                 field = model._fields[left]
-                if field.type == "boolean":
-                    params = [it for it in (True, False) if it in right]
-                    check_null = False in right
-                else:
-                    params = [it for it in right if it != False]
-                    check_null = len(params) < len(right)
-
                 # Optimization for selection fields
                 if operator == 'not in' and params and field.type == 'selection' and isinstance(field.selection, list):
                     # Inverse the fixed selection to help postgresql to plan
@@ -1063,6 +1056,13 @@ class expression(object):
 
                     params = new_params
                     operator = 'in'
+
+                if field.type == "boolean":
+                    params = [it for it in (True, False) if it in right]
+                    check_null = False in right
+                else:
+                    params = [it for it in right if it != False]
+                    check_null = len(params) < len(right)
 
                 if params:
                     if left != 'id':
