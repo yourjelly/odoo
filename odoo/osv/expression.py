@@ -993,7 +993,7 @@ class expression(object):
         where_clause, where_params = self.result
         self.query.add_where(where_clause, where_params)
         if self.selection_inversion:
-            print("".join(traceback.format_stack(limit=10)))
+            # print("".join(traceback.format_stack(limit=10)))
             print(self.query)
             print("\n --------------------------------")
 
@@ -1042,20 +1042,6 @@ class expression(object):
                 params = subparams
             elif isinstance(right, (list, tuple)):
                 field = model._fields[left]
-                # Optimization for selection fields
-                if operator == 'not in' and params and field.type == 'selection' and isinstance(field.selection, list):
-                    # Inverse the fixed selection to help postgresql to plan
-                    params = set(params)
-                    all_values = field.get_values(model.env)
-                    if not field.required:
-                        all_values.append(False)
-                    new_params = [value for value in all_values if value not in params]
-                    # TO remove
-                    self.selection_inversion = True
-                    print(f"Inverse selection of {model} / {left}: NOT IN {params} -> IN {new_params}")
-
-                    params = new_params
-                    operator = 'in'
 
                 if field.type == "boolean":
                     params = [it for it in (True, False) if it in right]
@@ -1076,6 +1062,43 @@ class expression(object):
                     query = '(%s OR %s."%s" IS NULL)' % (query, table_alias, left)
                 elif operator == 'not in' and check_null:
                     query = '(%s AND %s."%s" IS NOT NULL)' % (query, table_alias, left)  # needed only for TRUE.
+
+                # Optimization for selection fields
+                if operator == 'not in' and params and field.type == 'selection' and isinstance(field.selection, list):
+                    self.selection_inversion = True
+                    old_query = query
+                    old_params = params
+
+                    # Inverse the fixed selection to help postgresql to plan
+                    right_params = set(right)
+                    all_values = field.get_values(model.env)
+                    if not field.required:
+                        all_values.append(False)
+                    right = [value for value in all_values if value not in right_params]
+                    operator = 'in'
+
+                    if field.type == "boolean":
+                        params = [it for it in (True, False) if it in right]
+                        check_null = False in right
+                    else:
+                        params = [it for it in right if it != False]
+                        check_null = len(params) < len(right)
+
+                    if params:
+                        if left != 'id':
+                            params = [field.convert_to_column(p, model, validate=False) for p in params]
+                        query = f'({table_alias}."{left}" {operator} %s)'
+                        params = [tuple(params)]
+                    else:
+                        # The case for (left, 'in', []) or (left, 'not in', []).
+                        query = 'FALSE' if operator == 'in' else 'TRUE'
+                    if (operator == 'in' and check_null) or (operator == 'not in' and not check_null):
+                        query = '(%s OR %s."%s" IS NULL)' % (query, table_alias, left)
+                    elif operator == 'not in' and check_null:
+                        query = '(%s AND %s."%s" IS NOT NULL)' % (query, table_alias, left)  # needed only for TRUE.
+
+                    print(f"Inverse selection of {model} / {left}: before {old_query} | {old_params} -> after {query} | {params}")
+
             else:  # Must not happen
                 raise ValueError("Invalid domain term %r" % (leaf,))
 
