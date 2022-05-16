@@ -3,7 +3,7 @@
 import re
 
 from odoo.exceptions import AccessError
-from odoo import api, fields, models, Command, _
+from odoo import api, fields, models, Command, _, osv
 from odoo import SUPERUSER_ID
 from odoo.exceptions import UserError, ValidationError
 from odoo.http import request
@@ -1154,8 +1154,15 @@ class AccountTaxRepartitionLineTemplate(models.Model):
     account_id = fields.Many2one(string="Account", comodel_name='account.account.template', help="Account on which to post the tax amount")
     invoice_tax_id = fields.Many2one(comodel_name='account.tax.template', help="The tax set to apply this distribution on invoices. Mutually exclusive with refund_tax_id")
     refund_tax_id = fields.Many2one(comodel_name='account.tax.template', help="The tax set to apply this distribution on refund invoices. Mutually exclusive with invoice_tax_id")
+    tag_ids = fields.Many2many(string="Financial Tags", relation='account_tax_repartition_financial_tags', comodel_name='account.account.tag', copy=True, help="Additional tags that will be assigned by this repartition line for use in domains")
     use_in_tax_closing = fields.Boolean(string="Tax Closing Entry")
-    tags_formula = fields.Char(string="Tags Formula") #TODO OCO DOC
+
+
+    # These last two fields are helpers used to ease the declaration of account.account.tag objects in XML.
+    # They are directly linked to account.tax.report.expression objects, which create corresponding + and - tags
+    # at creation. This way, we avoid declaring + and - separately every time.
+    plus_report_expression_ids = fields.Many2many(string="Plus Tax Report Expressions", relation='account_tax_repartition_plus_report_expression', comodel_name='account.tax.report.line', copy=True, help="Tax report expressions whose '+' tag will be assigned to move lines by this repartition line")
+    minus_report_expression_ids = fields.Many2many(string="Minus Report Expressions", relation='account_tax_repartition_minus_report_expression', comodel_name='account.tax.report.line', copy=True, help="Tax report expressions whose '-' tag will be assigned to move lines by this repartition line")
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -1175,18 +1182,11 @@ class AccountTaxRepartitionLineTemplate(models.Model):
             if record.invoice_tax_id and record.refund_tax_id:
                 raise ValidationError(_("Tax distribution line templates should apply to either invoices or refunds, not both at the same time. invoice_tax_id and refund_tax_id should not be set together."))
 
-    @api.constrains('tags_formula')
-    def validate_tags_formula(self):
+    @api.constrains('plus_report_expression_ids', 'minus_report_expression_ids')
+    def _validate_report_expressions(self):
         for record in self:
-            if not record.tags_formula:
-                continue
-
-            try:
-                record._retrieve_tags_from_formula()
-            except UserError:
-                #TODO OCO tester => on garde comme ça, ou on conserve le message de la UserError ? (je ne veux pas de traceback; mais garder son texte aurait le mérite d'être plus clair)
-                raise ValidationError(_("Some tags could not be retrieved from formula %s, please check it does not contain any typo, "
-                                        "and make sure all tag names in it are prefixed with '+', '-' or '~'.", record.tags_formula)) #TODO OCO ~ pour les tags non signés, c'est pas ouf; '|' ?
+            if (record.plus_report_expression_ids + record_minus_expression_ids).mapped('engine') != ['tax_tags']:
+                raise ValidationError(_("Only 'tax_tags' expressions can be linked to a tax repartition line template."))
 
     def _retrieve_tags_from_formula(self):
        # TODO OCO DOC
@@ -1221,11 +1221,30 @@ class AccountTaxRepartitionLineTemplate(models.Model):
             rslt.append(Command.create({
                 'factor_percent': record.factor_percent,
                 'repartition_type': record.repartition_type,
-                'tag_ids': [Command.set(record._retrieve_tags_from_formula().ids)],
+                'tag_ids': [Command.set(record._get_tags_to_add().ids)],
                 'company_id': company.id,
                 'use_in_tax_closing': record.use_in_tax_closing
             }))
         return rslt
+
+    def _get_tags_to_add(self):
+        self.ensure_one()
+        tags_to_add = self.env["account.account.tag"]
+        tags_to_add += self._search_expression_tags(self.plus_report_expression_ids, '+')
+        tags_to_add += self._search_expression_tags(self.minus_report_expression_ids, '-')
+        tags_to_add += self.tag_ids
+        return tags_to_add
+
+    def _search_expression_tags(self, report_expressions, sign):
+        domains = []
+        for report_expression in report_expressions:
+            country = report.expression.report_id.country_id
+            domains.append(self.env['account.account.tag']._get_tax_tags_domain(report_expression, report_expression.formula, country.id, sign=sign))
+
+        if domains:
+            return self.env['account.account.tag'].search(osv.expression.OR(domains))
+
+        return self.env['account.account.tag']
 
 # Fiscal Position Templates
 

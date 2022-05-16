@@ -17,22 +17,22 @@ class AccountAccountTag(models.Model):
 
     #TODO OCO bouger sur expression, à priori
     @api.model
-    def _get_tax_tags(self, tag_name, country_id):
+    def _get_tax_tags(self, tag_name, country_id, sign=None):
         """ Returns all the tax tags corresponding to the tag name given in parameter
         in the specified country.
         """
-        domain = self._get_tax_tags_domain(tag_name, country_id)
+        domain = self._get_tax_tags_domain(tag_name, country_id, sign=sign)
         return self.env['account.account.tag'].search(domain)
 
     @api.model
-    def _get_tax_tags_domain(self, tag_name, country_id):
+    def _get_tax_tags_domain(self, tag_name, country_id, sign=None):
         """ Returns a domain to search for all the tax tags corresponding to the tag name given in parameter
         in the specified country.
         """
         escaped_tag_name = tag_name.replace('\\', '\\\\').replace('%', '\%').replace('_', '\_')
         return [
             '&', '&', # Explicit '&' to ease domain concatenation
-            ('name', '=like', '_' + escaped_tag_name),
+            ('name', '=like', (sign or '_') + escaped_tag_name),
             ('country_id', '=', country_id),
             ('applicability', '=', 'taxes')
         ]
