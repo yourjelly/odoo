@@ -2480,7 +2480,7 @@ QUnit.module('fields', {}, function () {
                 arch:
                     '<form>' +
                     '<sheet>' +
-                    '<field name="product_id" options="{\'quick_create\': False}"/>' +
+                    '<field name="product_id" options="{\'no_quick_create\': 1}"/>' +
                     '</sheet>' +
                     '</form>',
                 archs: {
