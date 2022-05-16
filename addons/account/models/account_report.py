@@ -367,18 +367,19 @@ class AccountReportExpression(models.Model):
             for expr in tax_tags_expressions:
                 formulas_by_country[expr.report_line_id.report_id.country_id].append(expr.formula)
 
-            for country, formula in formulas_by_country.items():
-                tax_tags = self.env['account.account.tag']._get_tax_tags(formula, country.id)
+            for country, formulas_list in formulas_by_country.items():
+                for formula in formulas_list:
+                    tax_tags = self.env['account.account.tag']._get_tax_tags(formula, country.id)
 
-                if all(tag_expr in self for tag_expr in tax_tags._get_related_tax_report_expressions()):
-                    # If we're changing the formula of all the expressions using that tag, rename the tag
-                    negative_tags = tax_tags.filtered(lambda x: x.tax_negate)
-                    negative_tags.write({'name': '-%s' % formula})
-                    (tax_tags - negative_tags).write({'name': '+%s' % formula})
-                else:
-                    # Else, create a new tag. Its the compute functions will make sure it is properly linked to the expressions
-                    tag_vals = self.env['account.report.expression']._get_tags_create_vals(formula, country.id)
-                    self.env['account.account.tag'].create(tag_vals)
+                    if all(tag_expr in self for tag_expr in tax_tags._get_related_tax_report_expressions()):
+                        # If we're changing the formula of all the expressions using that tag, rename the tag
+                        negative_tags = tax_tags.filtered(lambda x: x.tax_negate)
+                        negative_tags.write({'name': '-%s' % formula})
+                        (tax_tags - negative_tags).write({'name': '+%s' % formula})
+                    else:
+                        # Else, create a new tag. Its the compute functions will make sure it is properly linked to the expressions
+                        tag_vals = self.env['account.report.expression']._get_tags_create_vals(formula, country.id)
+                        self.env['account.account.tag'].create(tag_vals)
 
         return rslt
 

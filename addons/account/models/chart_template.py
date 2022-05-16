@@ -1161,12 +1161,18 @@ class AccountTaxRepartitionLineTemplate(models.Model):
     # These last two fields are helpers used to ease the declaration of account.account.tag objects in XML.
     # They are directly linked to account.tax.report.expression objects, which create corresponding + and - tags
     # at creation. This way, we avoid declaring + and - separately every time.
-    plus_report_expression_ids = fields.Many2many(string="Plus Tax Report Expressions", relation='account_tax_repartition_plus_report_expression', comodel_name='account.tax.report.line', copy=True, help="Tax report expressions whose '+' tag will be assigned to move lines by this repartition line")
-    minus_report_expression_ids = fields.Many2many(string="Minus Report Expressions", relation='account_tax_repartition_minus_report_expression', comodel_name='account.tax.report.line', copy=True, help="Tax report expressions whose '-' tag will be assigned to move lines by this repartition line")
+    plus_report_expression_ids = fields.Many2many(string="Plus Tax Report Expressions", relation='account_tax_rep_template_plus', comodel_name='account.report.expression', copy=True, help="Tax report expressions whose '+' tag will be assigned to move lines by this repartition line")
+    minus_report_expression_ids = fields.Many2many(string="Minus Report Expressions", relation='account_tax_rep_template_minus', comodel_name='account.report.expression', copy=True, help="Tax report expressions whose '-' tag will be assigned to move lines by this repartition line")
 
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
+            if vals.get('plus_report_line_ids'):
+                vals['plus_report_line_ids'] = self._convert_tag_syntax_to_orm(vals['plus_report_line_ids'])
+
+            if vals.get('minus_report_line_ids'):
+                vals['minus_report_line_ids'] = self._convert_tag_syntax_to_orm(vals['minus_report_line_ids'])
+
             if vals.get('use_in_tax_closing') is None:
                 if not vals.get('account_id'):
                     vals['use_in_tax_closing'] = False
@@ -1175,6 +1181,17 @@ class AccountTaxRepartitionLineTemplate(models.Model):
                     vals['use_in_tax_closing'] = not (internal_group == 'income' or internal_group == 'expense')
 
         return super().create(vals_list)
+
+    @api.model
+    def _convert_tag_syntax_to_orm(self, tags_list):
+        """ Repartition lines give the possibility to directly give
+        a list of ids to create for tags instead of a list of ORM commands.
+        This function checks that tags_list uses this syntactic sugar and returns
+        an ORM-compliant version of it if it does.
+        """
+        if tags_list and all(isinstance(elem, int) for elem in tags_list):
+            return [(6, False, tags_list)]
+        return
 
     @api.constrains('invoice_tax_id', 'refund_tax_id')
     def validate_tax_template_link(self):
@@ -1185,7 +1202,8 @@ class AccountTaxRepartitionLineTemplate(models.Model):
     @api.constrains('plus_report_expression_ids', 'minus_report_expression_ids')
     def _validate_report_expressions(self):
         for record in self:
-            if (record.plus_report_expression_ids + record_minus_expression_ids).mapped('engine') != ['tax_tags']:
+            all_engines = set((record.plus_report_expression_ids + record.minus_report_expression_ids).mapped('engine'))
+            if all_engines and all_engines != {'tax_tags'}:
                 raise ValidationError(_("Only 'tax_tags' expressions can be linked to a tax repartition line template."))
 
     def _retrieve_tags_from_formula(self):
@@ -1238,8 +1256,8 @@ class AccountTaxRepartitionLineTemplate(models.Model):
     def _search_expression_tags(self, report_expressions, sign):
         domains = []
         for report_expression in report_expressions:
-            country = report.expression.report_id.country_id
-            domains.append(self.env['account.account.tag']._get_tax_tags_domain(report_expression, report_expression.formula, country.id, sign=sign))
+            country = report_expression.report_line_id.report_id.country_id
+            domains.append(self.env['account.account.tag']._get_tax_tags_domain(report_expression.formula, country.id, sign=sign))
 
         if domains:
             return self.env['account.account.tag'].search(osv.expression.OR(domains))
