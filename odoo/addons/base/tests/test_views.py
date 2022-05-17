@@ -653,11 +653,6 @@ class TestApplyInheritanceMoveSpecs(ViewCase):
         )
 
 
-class TestApplyInheritedArchs(ViewCase):
-    """ Applies a sequence of modificator archs to a base view
-    """
-
-
 class TestNoModel(ViewCase):
     def test_create_view_nomodel(self):
         view = self.View.create({
@@ -3168,3 +3163,60 @@ class TestRenderAllViews(common.TransactionCase):
 
         _logger.info('Rendered %d views as %s using (best of 5) %ss',
             count, self.env.user.name, elapsed)
+
+
+@common.tagged('post_install', '-at_install')
+class TestAllViewsDFS(common.TransactionCase):
+
+    def test_views_do_not_rely_on_siblings(self):
+        """Make sure a view is not hooked on content of siblings
+
+        It works with the view inheritance logic, but is still a bad practice.
+        Indeeed, if a view is removed/archived/..., the views depending on it
+        should be clearly indicated, and removed/archived at the same time,
+        otherwise it leads to broken view architecture.
+
+        By enforcing a clean inheritance tree, we improve the stability
+        and maintainability of the code (especially during migrations)
+        """
+        all_base_views = self.env['ir.ui.view'].search([
+            ('mode', '=', 'primary'),
+            ('inherit_id', '=', False),
+        ])
+        for base_view in all_base_views:
+            self._test_view(base_view)
+
+    def _log_error(self, view, error):
+        _logger.warning(
+            "View %s depends on content not directly available in its parent view."
+            "\nIt is probably specified in one of its siblings or siblings children."
+            "\n%s",
+            view.xml_id,
+            error,
+        )
+
+    def _test_view(self, view):
+        # print("verifying view", view.xml_id, view.inherit_id.xml_id)
+        checked = False
+        if not view.active:
+            checked = True
+            try:
+                view.active = True
+            except ValidationError as e:
+                self._log_error(view, e)
+                return  # If parent view is erroneous, do not test children views
+
+        children = view.inherit_children_ids
+        if not children:
+            if not checked:  # Do not revalidate a given view if already checked during action_unarchive
+                try:
+                    view._validate_fields(['arch_db'])
+                except ValidationError as e:
+                    self._log_error(view, e)
+            return
+
+        for child in children:
+            # Archive other children to make sure view content
+            # does not rely on siblings
+            (children - child).action_archive()
+            self._test_view(child)

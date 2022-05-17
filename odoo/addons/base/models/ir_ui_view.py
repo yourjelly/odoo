@@ -613,7 +613,11 @@ actual arch.
         from_clause, where_clause, where_params = e.query.get_sql()
         assert from_clause == '"ir_ui_view"', f"Unexpected from clause: {from_clause}"
 
-        self._flush_search(domain, fields=['inherit_id', 'priority', 'model', 'mode'], order='id')
+        self._flush_search(
+            domain,
+            fields=['inherit_id', 'priority', 'model', 'mode', 'active'],
+            order='id',
+        )
         query = f"""
             WITH RECURSIVE ir_ui_view_inherits AS (
                 SELECT id, inherit_id, priority, mode, model
