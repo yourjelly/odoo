@@ -561,22 +561,24 @@ registerModel({
         /**
          * @private
          * @param {Object} param0
-         * @param {integer[]} param0.message_ids
          * @param {boolean} param0.starred
+         * @param {integer} param0.starred_counter
+         * @param {Object} data
          */
-        _handleNotificationPartnerToggleStar({ message_ids = [], starred }) {
+        _handleNotificationPartnerToggleStar({ starred, starred_counter, data }) {
             const starredMailbox = this.messaging.starred;
-            for (const messageId of message_ids) {
-                const message = this.messaging.models['Message'].findFromIdentifyingData({
-                    id: messageId,
-                });
-                if (!message) {
-                    continue;
-                }
+            for (const messageData of data) {
+                const message = this.messaging.models['Message'].insert(
+                    this.messaging.models['Message'].convertData(messageData)
+                );
                 message.update({ isStarred: starred });
-                starredMailbox.update({
-                    counter: starred ? increment() : decrement(),
-                });
+                starredMailbox.update({ counter: starred_counter });
+                if (starredMailbox.counter > starredMailbox.cache.fetchedMessages.length) {
+                    // Force refresh Starred because depending on what was starred
+                    // the cache might become empty even though there are more
+                    // messages on the server.
+                    starredMailbox.cache.update({ hasToLoadMessages: true });
+                }
             }
         },
         /**

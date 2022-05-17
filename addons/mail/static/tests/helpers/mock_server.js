@@ -1583,8 +1583,9 @@ MockServer.include({
                 { starred_partner_ids: [[wasStared ? 3 : 4, this.currentPartnerId]] }
             );
             this.pyEnv['bus.bus']._sendone(this.currentPartner, 'mail.message/toggle_star', {
-                'message_ids': [message.id],
                 'starred': !wasStared,
+                'starred_counter': this._getRecords('mail.message', [['starred_partner_ids', 'in', this.currentPartnerId]]).length,
+                'data': this._mockMailMessageMessageFormat(message.id),
             });
         }
     },
@@ -1602,8 +1603,9 @@ MockServer.include({
             { starred_partner_ids: [[3, this.currentPartnerId]] }
         );
         this.pyEnv['bus.bus']._sendone(this.currentPartner, 'mail.message/toggle_star', {
-            'message_ids': messages.map(message => message.id),
             'starred': false,
+            'starred_counter': this._getRecords('mail.message', [['starred_partner_ids', 'in', this.currentPartnerId]]).length,
+            'data': this._mockMailMessageMessageFormat(messages.map(message => message.id)),
         });
     },
     /**

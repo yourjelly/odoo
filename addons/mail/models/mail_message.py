@@ -749,8 +749,9 @@ class Message(models.Model):
 
         ids = [m.id for m in starred_messages]
         self.env['bus.bus']._sendone(self.env.user.partner_id, 'mail.message/toggle_star', {
-            'message_ids': ids,
             'starred': False,
+            'starred_counter': 0,
+            'data': starred_messages.message_format(),
         })
 
     def toggle_message_starred(self):
@@ -766,8 +767,9 @@ class Message(models.Model):
             self.sudo().write({'starred_partner_ids': [Command.unlink(self.env.user.partner_id.id)]})
 
         self.env['bus.bus']._sendone(self.env.user.partner_id, 'mail.message/toggle_star', {
-            'message_ids': [self.id],
             'starred': starred,
+            'starred_counter': self.env.user.partner_id._get_starred_count(),
+            'data': self.message_format(),
         })
 
     def _message_add_reaction(self, content):
