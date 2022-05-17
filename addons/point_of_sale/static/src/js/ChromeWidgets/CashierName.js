@@ -6,13 +6,15 @@ odoo.define('point_of_sale.CashierName', function(require) {
 
     // Previously UsernameWidget
     class CashierName extends PosComponent {
+        static props = {
+            cashier: { type: Object },
+        }
         get username() {
-            const { name } = this.env.pos.get_cashier();
+            const { name } = this.props.cashier;
             return name ? name : '';
         }
         get avatar() {
-            const user_id = this.env.pos.get_cashier_user_id();
-            const id = user_id ? user_id : -1;
+            const { id } = this.props.cashier; // in point_of_sale, cashier = user
             return `/web/image/res.users/${id}/avatar_128`;
         }
     }

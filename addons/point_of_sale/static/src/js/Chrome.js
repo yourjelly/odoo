@@ -75,7 +75,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
             this.previous_touch_y_coordinate = -1;
 
             const pos = reactive(this.env.pos, batched(() => this.render(true)))
-            useSubEnv({ pos });
+            // useSubEnv({ pos });
 
             onMounted(() => {
                 // remove default webclient handlers that induce click delay

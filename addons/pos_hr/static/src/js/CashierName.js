@@ -15,7 +15,7 @@ odoo.define('pos_hr.CashierName', function (require) {
             //@Override
             get avatar() {
                 if (this.env.pos.config.module_pos_hr) {
-                    const cashier = this.env.pos.get_cashier();
+                    const { id } = this.props.cashier;
                     return `/web/image/hr.employee/${cashier.id}/avatar_128`;
                 }
                 return super.avatar;

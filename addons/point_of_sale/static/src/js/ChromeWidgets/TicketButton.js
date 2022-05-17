@@ -5,18 +5,15 @@ odoo.define('point_of_sale.TicketButton', function (require) {
     const Registries = require('point_of_sale.Registries');
 
     class TicketButton extends PosComponent {
+        static props = {
+            orderCount: Number,
+            isTicketScreenShown: Boolean,
+        }
         onClick() {
             if (this.props.isTicketScreenShown) {
                 this.env.posbus.trigger('ticket-button-clicked');
             } else {
                 this.showScreen('TicketScreen');
-            }
-        }
-        get count() {
-            if (this.env.pos) {
-                return this.env.pos.get_order_list().length;
-            } else {
-                return 0;
             }
         }
     }

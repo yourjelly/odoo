@@ -12,6 +12,12 @@ odoo.define('point_of_sale.CashMoveButton', function (require) {
     };
 
     class CashMoveButton extends PosComponent {
+        static props = {
+            sessionId: { type: Number },
+            printer: { type: Object, optional: true },
+            cashier: { type: Object, optional: true }, // mandatory if there's printer
+            company: { type: Object, optional: true }, // mandatory if there's printer
+        }
         async onClick() {
             const { confirmed, payload } = await this.showPopup('CashMovePopup');
             if (!confirmed) return;
@@ -28,13 +34,13 @@ odoo.define('point_of_sale.CashMoveButton', function (require) {
             await this.rpc({
                 model: 'pos.session',
                 method: 'try_cash_in_out',
-                args: [[this.env.pos.pos_session.id], type, amount, reason, extras],
+                args: [[this.props.sessionId], type, amount, reason, extras],
             });
-            if (this.env.proxy.printer) {
+            if (this.props.printer) {
                 const renderedReceipt = renderToString('point_of_sale.CashMoveReceipt', {
                     _receipt: this._getReceiptInfo({ ...payload, translatedType, formattedAmount }),
                 });
-                const printResult = await this.env.proxy.printer.print_receipt(renderedReceipt);
+                const printResult = await this.props.printer.print_receipt(renderedReceipt);
                 if (!printResult.successful) {
                     this.showPopup('ErrorPopup', { title: printResult.message.title, body: printResult.message.body });
                 }
@@ -46,8 +52,8 @@ odoo.define('point_of_sale.CashMoveButton', function (require) {
         }
         _getReceiptInfo(payload) {
             const result = { ...payload };
-            result.cashier = this.env.pos.get_cashier();
-            result.company = this.env.pos.company;
+            result.cashier = this.props.cashier;
+            result.company = this.props.company;
             return result;
         }
     }
