@@ -84,7 +84,7 @@ class AccruedExpenseRevenue(models.TransientModel):
     def _compute_preview_data(self):
         for record in self:
             preview_vals = [self.env['account.move']._move_dict_to_preview_vals(
-                record._compute_move_vals()[0],
+                record._compute_move_vals(),
                 record.company_id.currency_id,
             )]
             preview_columns = [
@@ -131,7 +131,6 @@ class AccruedExpenseRevenue(models.TransientModel):
         if orders.filtered(lambda o: o.company_id != self.company_id):
             raise UserError(_('Entries can only be created for a single company at a time.'))
 
-        orders_with_entries = []
         fnames = []
         total_balance = 0.0
         for order in orders:
@@ -197,7 +196,7 @@ class AccruedExpenseRevenue(models.TransientModel):
             'date': self.date,
             'line_ids': move_lines,
         }
-        return move_vals, orders_with_entries
+        return move_vals
 
     def create_entries(self):
         self.ensure_one()
@@ -205,7 +204,7 @@ class AccruedExpenseRevenue(models.TransientModel):
         if self.reversal_date <= self.date:
             raise UserError(_('Reversal date must be posterior to date.'))
 
-        move_vals, orders_with_entries = self._compute_move_vals()
+        move_vals = self._compute_move_vals()
         move = self.env['account.move'].create(move_vals)
         move._post()
         reverse_move = move._reverse_moves(default_values_list=[{
@@ -213,15 +212,6 @@ class AccruedExpenseRevenue(models.TransientModel):
             'date': self.reversal_date,
         }])
         reverse_move._post()
-        for order in orders_with_entries:
-            body = _(
-                'Accrual entry created on %(date)s: %(accrual_entry)s.\
-                    And its reverse entry: %(reverse_entry)s.',
-                date=self.date,
-                accrual_entry=move._get_html_link(),
-                reverse_entry=reverse_move._get_html_link(),
-            )
-            order.message_post(body=body)
         return {
             'name': _('Accrual Moves'),
             'type': 'ir.actions.act_window',
