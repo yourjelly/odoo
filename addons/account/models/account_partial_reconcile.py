@@ -186,10 +186,10 @@ class AccountPartialReconcile(models.Model):
 
                 if move_values['currency'] == move.company_id.currency_id:
                     # Percentage made on company's currency.
-                    percentage = partial_amount / move_values['total_balance']
+                    percentage = partial_amount / move_values['total_balance'] if not move_values['currency'].is_zero(move_values['total_balance']) else 1.0
                 else:
                     # Percentage made on foreign currency.
-                    percentage = partial_amount_currency / move_values['total_amount_currency']
+                    percentage = partial_amount_currency / move_values['total_amount_currency'] if not move_values['currency'].is_zero(move_values['total_amount_currency']) else 1.0
 
                 if source_line.currency_id != counterpart_line.currency_id:
                     # When the invoice and the payment are not sharing the same foreign currency, the rate is computed
