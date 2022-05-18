@@ -164,18 +164,15 @@ class AccountReportLine(models.Model):
         ondelete='cascade'
     )
     parent_id = fields.Many2one(string="Parent Line", comodel_name='account.report.line', ondelete='cascade')
-    children_ids = fields.One2many(string="Child Lines", comodel_name='account.report.line', inverse_name='parent_id') #TODO OCO child_ids ?
-    groupby = fields.Char(string="Group By") # TODO OCO la valeur du group by doit être acceptée par le moteur de la formule (en cas de multi colonnes, par les moteurs de chaque formule de la ligne => ce sera marrant ...)
+    children_ids = fields.One2many(string="Child Lines", comodel_name='account.report.line', inverse_name='parent_id')
+    groupby = fields.Char(string="Group By")
     sequence = fields.Integer(string="Sequence", required=True)
-    hierarchy_level = fields.Integer(string="Level", default=1, required=True)
+    hierarchy_level = fields.Integer(string="Level", default=1, required=True) # TODO OCO en faire un champ caclulé éditable + dans le script des rapports, le virer quand pas root line
     code = fields.Char(string="Code")
     foldable = fields.Boolean(string="Foldable", help="By default, we always unfold the lines that can be. If this is checked; the line won't be unfolded by default, and a folding button will be displayed")
     print_on_new_page = fields.Boolean('Print On New Page', help='When checked this line and everything after it will be printed on a new page.')
     action_id = fields.Many2one('ir.actions.actions')
     hide_if_zero = fields.Boolean(string="Hide if Zero", help="This line and its children will be hidden when all its columns are 0.")
-
-    # TODO OCO ajouter invisible ?
-    # TODO OCO ajouter la caret_option ici comme un champ, je dirais => sélection ??
 
     _sql_constraints = [
         ('code_uniq', 'unique (code)', "A report line with the same code already exists."),
@@ -190,12 +187,11 @@ class AccountReportLine(models.Model):
     @api.constrains('expression_ids', 'groupby')
     def _validate_formula(self):
         # TODO OCO vérifier l'impact sur le temps d'installation :/
-        # TODO OCO compléter pour les autres moteurs serait pas mal
         aggregation_to_check = []
         for expression in self.expression_ids:
             if expression.engine == 'aggregation':
                 if expression.report_line_id.groupby:
-                    raise ValidationError(_("Groupby feature isn't supported by aggregation engine.")) # TODO OCO sans doute trop limitatif; à voir.
+                    raise ValidationError(_("Groupby feature isn't supported by aggregation engine."))
 
                 term_line_codes = expression._get_aggregation_terms_details()
                 aggregation_to_check.append((expression, term_line_codes))
@@ -384,7 +380,7 @@ class AccountReportExpression(models.Model):
         return rslt
 
     def _expand_aggregations(self):
-        # TODO OCO DOC: retoure self + toutes les expressions dont les aggregations dépendent (enfin, tout ce qui a été trouvé de legit, en cas de cross_report)
+        # TODO OCO DOC: retourne self + toutes les expressions dont les aggregations dépendent (enfin, tout ce qui a été trouvé de legit, en cas de cross_report)
         rslt = self
 
         to_expand = self.filtered(lambda x: x.engine == 'aggregation')
