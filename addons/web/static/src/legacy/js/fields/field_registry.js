@@ -1,3 +1,5 @@
+window.fields = [];
+
 odoo.define('web.field_registry', function (require) {
     "use strict";
 
@@ -5,10 +7,21 @@ odoo.define('web.field_registry', function (require) {
 
     const { Component } = owl;
 
-    return new Registry(
+    let r = new Registry(
         null,
         (value) => !(value.prototype instanceof Component)
     );
+
+    const { patch } = require('web.utils');
+
+    patch(r, 'field_registry', {
+        add(...args) {
+            window.fields.push(args[0])
+            return this._super(...args);
+        }
+    })
+
+    return r;
 });
 
 odoo.define('web._field_registry', function (require) {
