@@ -363,27 +363,20 @@ export function applyInlineStyle(editor, applyStyle, style, shouldApply=true) {
 }
 const styles = {
     bold: {
-        is: editable => isSelectionFormat(editable, 'bold'),
         name: 'fontWeight',
         value: 'bolder',
     },
     italic: {
-        is: editable => isSelectionFormat(editable, 'italic'),
         name: 'fontStyle',
         value: 'italic',
     },
     underline: {
-        is: editable => isSelectionFormat(editable, 'underline'),
         name: 'textDecorationLine',
         value: 'underline',
     },
     strikeThrough: {
-        is: editable => isSelectionFormat(editable, 'strikeThrough'),
         name: 'textDecorationLine',
         value: 'line-through',
-    },
-    switchDirection: {
-        is: editable => isSelectionFormat(editable, 'switchDirection'),
     },
 }
 export function toggleFormat(editor, format) {
@@ -404,7 +397,7 @@ export function toggleFormat(editor, format) {
     const style = styles[format];
     const selectedTextNodes = getSelectedNodes(editor.editable)
         .filter(n => n.nodeType === Node.TEXT_NODE && n.nodeValue.trim().length);
-    const isAlreadyFormatted = style.is(editor.editable);
+    const isAlreadyFormatted = isSelectionFormat(editor.editable, format);
     let changedElements = [];
     if (isAlreadyFormatted && style.name === 'textDecorationLine') {
         const decoratedPairs = new Set(selectedTextNodes.map(n => [closestElement(n, `[style*="text-decoration-line: ${style.value}"]`), n]));
@@ -454,7 +447,7 @@ export function toggleFormat(editor, format) {
         changedElements = applyInlineStyle(editor, el => {
             if (isAlreadyFormatted) {
                 const block = closestBlock(el);
-                el.style[style.name] = style.is(block) ? 'normal' : getComputedStyle(block)[style.name];
+                el.style[style.name] = isSelectionFormat(block, format) ? 'normal' : getComputedStyle(block)[style.name];
             } else if (style.name === 'textDecorationLine' && el.style[style.name]) {
                 // The <span> (el) has a text decoration and we want to set
                 // another. We don't want to replace the old with the new, we
