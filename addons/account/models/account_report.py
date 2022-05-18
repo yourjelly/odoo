@@ -17,7 +17,7 @@ FIGURE_TYPE_SELECTION_VALUES = [
 ]
 
 class AccountReport(models.Model):
-    _name = 'account.report'
+    _name = "account.report"
     _description = "Accounting Report"
 
     #TODO OCO garder filter_ en préfixe ?? => Nettoyer les noms de ces champs
@@ -147,7 +147,7 @@ class AccountReport(models.Model):
 
 
 class AccountReportLine(models.Model):
-    _name = 'account.report.line'
+    _name = "account.report.line"
     _description = "Accounting Report Line"
     _order = 'sequence, id'
 
@@ -294,7 +294,7 @@ class AccountReportLine(models.Model):
 
 
 class AccountReportExpression(models.Model):
-    _name = 'account.report.expression'
+    _name = "account.report.expression"
     _description = "Accounting Report Expression"
 
     # TODO OCO repasser sur le phrasing
@@ -329,6 +329,7 @@ class AccountReportExpression(models.Model):
     ) #TODO OCO j'ai donc changé le default ; ce n'est plus 'normal'
     figure_type = fields.Selection(string="Figure Type", selection=FIGURE_TYPE_SELECTION_VALUES)
     green_on_positive = fields.Boolean('Is Growth Good when Positive', default=True)
+    blank_if_zero = fields.Boolean("Blank if Zero")
 
     # Carryover fields
     carryover_target = fields.Char(string="Carry Over To")# TODO OCO formule: code.label_de_total + contrainte=> seulement possible de la set si le label ne commence pas par _carryover
@@ -470,7 +471,7 @@ class AccountReportExpression(models.Model):
 
 
 class AccountReportColumn(models.Model):
-    _name = 'account.report.column'
+    _name = "account.report.column"
     _description = "Accounting Report Column"
     _order = 'sequence, id'
 
@@ -480,10 +481,11 @@ class AccountReportColumn(models.Model):
     report_id = fields.Many2one(string="Report", comodel_name='account.report')
     sortable = fields.Boolean(string="Sortable")
     figure_type = fields.Selection(string="Figure Type", selection=FIGURE_TYPE_SELECTION_VALUES, default="monetary", required=True)
+    blank_if_zero = fields.Boolean(string="Blank if Zero")
 
 
 class AccountReportExternalValue(models.Model):
-    _name = 'account.report.external.value'
+    _name = "account.report.external.value"
     _description = 'Accounting Report External Value'
 
     name = fields.Char(required=True)
