@@ -7,7 +7,7 @@
         <record id="generic_tax_report" model="account.report"> <!--TODO OCO et la création du menu ?? Comment gérer ça ?-->
             <field name="name">Generic Tax report</field>
             <field name="filter_multi_company">tax_units</field>
-            <field name="filter_tax_exigible" eval="True"/>
+            <field name="only_tax_exigible" eval="True"/>
             <field name="dynamic_lines_generator">_generic_tax_report_default_grouping</field> <!--TODO OCO pareil: ça, c'est à ajouter en enterprise. Le champ aussi ?-->
             <field name="column_ids" eval="[(5, 0, 0),
                 (0, 0, {'name': 'NET', 'expression_label': 'net', 'sequence': 1}),
@@ -22,7 +22,7 @@
             <field name="name">Group by: Account &gt; Tax </field>
             <field name="root_report_id" ref="generic_tax_report"/>
             <field name="filter_multi_company">tax_units</field>
-            <field name="filter_tax_exigible" eval="True"/>
+            <field name="only_tax_exigible" eval="True"/>
             <field name="dynamic_lines_generator">_generic_tax_report_account_tax_grouping</field>
             <field name="column_ids" eval="[(5, 0, 0),
                 (0, 0, {'name': 'NET', 'expression_label': 'net', 'sequence': 1}),
@@ -34,7 +34,7 @@
             <field name="name">Group by: Tax &gt; Account </field>
             <field name="root_report_id" ref="generic_tax_report"/>
             <field name="filter_multi_company">tax_units</field>
-            <field name="filter_tax_exigible" eval="True"/>
+            <field name="only_tax_exigible" eval="True"/>
             <field name="dynamic_lines_generator">_generic_tax_report_tax_account_grouping</field>
             <field name="column_ids" eval="[(5, 0, 0),
                 (0, 0, {'name': 'NET', 'expression_label': 'net', 'sequence': 1}),
@@ -60,7 +60,7 @@
             <field name="name">Test Report (with generic tax report dynamic lines)</field>
             <field name="root_report_id" ref="generic_tax_report"/>
             <field name="filter_multi_company">tax_units</field>
-            <field name="filter_tax_exigible" eval="True"/>
+            <field name="only_tax_exigible" eval="True"/>
             <field name="filter_unfold_all" eval="True"/>
             <field name="filter_analytic" eval="True"/>
             <field name="filter_hierarchy">by_default</field>
