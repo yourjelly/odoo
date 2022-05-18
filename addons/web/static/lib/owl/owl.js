@@ -4315,16 +4315,10 @@
             }
             const key = `key + \`${this.generateComponentKey()}\``;
             if (isDynamic) {
-<<<<<<< HEAD
                 const templateVar = generateId("template");
                 if (!this.staticDefs.find((d) => d.id === "call")) {
                     this.staticDefs.push({ id: "call", expr: `app.callTemplate.bind(app)` });
                 }
-||||||| parent of 53511704ef3 (Update owl)
-                const templateVar = this.generateId("template");
-=======
-                const templateVar = generateId("template");
->>>>>>> 53511704ef3 (Update owl)
                 this.define(templateVar, subTemplate);
                 block = this.createBlock(block, "multi", ctx);
                 this.insertBlock(`call(this, ${templateVar}, ctx, node, ${key})`, block, {
@@ -4333,18 +4327,8 @@
                 });
             }
             else {
-<<<<<<< HEAD
                 const id = generateId(`callTemplate_`);
                 this.staticDefs.push({ id, expr: `app.getTemplate(${subTemplate})` });
-||||||| parent of 53511704ef3 (Update owl)
-                const id = this.generateId(`callTemplate_`);
-                this.helpers.add("getTemplate");
-                this.staticDefs.push({ id, expr: `getTemplate(${subTemplate})` });
-=======
-                const id = generateId(`callTemplate_`);
-                this.helpers.add("getTemplate");
-                this.staticDefs.push({ id, expr: `getTemplate(${subTemplate})` });
->>>>>>> 53511704ef3 (Update owl)
                 block = this.createBlock(block, "multi", ctx);
                 this.insertBlock(`${id}.call(this, ctx, node, ${key})`, block, {
                     ...ctx,
@@ -5370,7 +5354,6 @@
                         if (isSelf) {
                             continue;
                         }
-<<<<<<< HEAD
                         else {
                             return stopped;
                         }
@@ -5383,224 +5366,6 @@
                             ev.stopPropagation();
                         stopped = true;
                         continue;
-||||||| parent of 53511704ef3 (Update owl)
-                        throw error;
-                    });
-                }
-                return result;
-            }
-            catch (cause) {
-                if (cause instanceof Error) {
-                    error.message += `"${cause.message}"`;
-                }
-                throw error;
-            }
-        };
-    }
-    // -----------------------------------------------------------------------------
-    //  hooks
-    // -----------------------------------------------------------------------------
-    function onWillStart(fn) {
-        const node = getCurrent();
-        const decorate = node.app.dev ? wrapError : (fn) => fn;
-        node.willStart.push(decorate(fn.bind(node.component), "onWillStart"));
-    }
-    function onWillUpdateProps(fn) {
-        const node = getCurrent();
-        const decorate = node.app.dev ? wrapError : (fn) => fn;
-        node.willUpdateProps.push(decorate(fn.bind(node.component), "onWillUpdateProps"));
-    }
-    function onMounted(fn) {
-        const node = getCurrent();
-        const decorate = node.app.dev ? wrapError : (fn) => fn;
-        node.mounted.push(decorate(fn.bind(node.component), "onMounted"));
-    }
-    function onWillPatch(fn) {
-        const node = getCurrent();
-        const decorate = node.app.dev ? wrapError : (fn) => fn;
-        node.willPatch.unshift(decorate(fn.bind(node.component), "onWillPatch"));
-    }
-    function onPatched(fn) {
-        const node = getCurrent();
-        const decorate = node.app.dev ? wrapError : (fn) => fn;
-        node.patched.push(decorate(fn.bind(node.component), "onPatched"));
-    }
-    function onWillUnmount(fn) {
-        const node = getCurrent();
-        const decorate = node.app.dev ? wrapError : (fn) => fn;
-        node.willUnmount.unshift(decorate(fn.bind(node.component), "onWillUnmount"));
-    }
-    function onWillDestroy(fn) {
-        const node = getCurrent();
-        const decorate = node.app.dev ? wrapError : (fn) => fn;
-        node.willDestroy.push(decorate(fn.bind(node.component), "onWillDestroy"));
-    }
-    function onWillRender(fn) {
-        const node = getCurrent();
-        const renderFn = node.renderFn;
-        const decorate = node.app.dev ? wrapError : (fn) => fn;
-        fn = decorate(fn.bind(node.component), "onWillRender");
-        node.renderFn = () => {
-            fn();
-            return renderFn();
-        };
-    }
-    function onRendered(fn) {
-        const node = getCurrent();
-        const renderFn = node.renderFn;
-        const decorate = node.app.dev ? wrapError : (fn) => fn;
-        fn = decorate(fn.bind(node.component), "onRendered");
-        node.renderFn = () => {
-            const result = renderFn();
-            fn();
-            return result;
-        };
-    }
-    function onError(callback) {
-        const node = getCurrent();
-        let handlers = nodeErrorHandlers.get(node);
-        if (!handlers) {
-            handlers = [];
-            nodeErrorHandlers.set(node, handlers);
-        }
-        handlers.push(callback.bind(node.component));
-    }
-
-    class Component {
-        constructor(props, env, node) {
-            this.props = props;
-            this.env = env;
-            this.__owl__ = node;
-        }
-        setup() { }
-        render(deep = false) {
-            this.__owl__.render(deep === true);
-        }
-    }
-    Component.template = "";
-
-    const VText = text("").constructor;
-    class VPortal extends VText {
-        constructor(selector, realBDom) {
-            super("");
-            this.target = null;
-            this.selector = selector;
-            this.realBDom = realBDom;
-        }
-        mount(parent, anchor) {
-            super.mount(parent, anchor);
-            this.target = document.querySelector(this.selector);
-            if (!this.target) {
-                let el = this.el;
-                while (el && el.parentElement instanceof HTMLElement) {
-                    el = el.parentElement;
-                }
-                this.target = el && el.querySelector(this.selector);
-                if (!this.target) {
-                    throw new Error("invalid portal target");
-=======
-                        throw error;
-                    });
-                }
-                return result;
-            }
-            catch (cause) {
-                if (cause instanceof Error) {
-                    error.message += `"${cause.message}"`;
-                }
-                throw error;
-            }
-        };
-    }
-    // -----------------------------------------------------------------------------
-    //  hooks
-    // -----------------------------------------------------------------------------
-    function onWillStart(fn) {
-        const node = getCurrent();
-        const decorate = node.app.dev ? wrapError : (fn) => fn;
-        node.willStart.push(decorate(fn.bind(node.component), "onWillStart"));
-    }
-    function onWillUpdateProps(fn) {
-        const node = getCurrent();
-        const decorate = node.app.dev ? wrapError : (fn) => fn;
-        node.willUpdateProps.push(decorate(fn.bind(node.component), "onWillUpdateProps"));
-    }
-    function onMounted(fn) {
-        const node = getCurrent();
-        const decorate = node.app.dev ? wrapError : (fn) => fn;
-        node.mounted.push(decorate(fn.bind(node.component), "onMounted"));
-    }
-    function onWillPatch(fn) {
-        const node = getCurrent();
-        const decorate = node.app.dev ? wrapError : (fn) => fn;
-        node.willPatch.unshift(decorate(fn.bind(node.component), "onWillPatch"));
-    }
-    function onPatched(fn) {
-        const node = getCurrent();
-        const decorate = node.app.dev ? wrapError : (fn) => fn;
-        node.patched.push(decorate(fn.bind(node.component), "onPatched"));
-    }
-    function onWillUnmount(fn) {
-        const node = getCurrent();
-        const decorate = node.app.dev ? wrapError : (fn) => fn;
-        node.willUnmount.unshift(decorate(fn.bind(node.component), "onWillUnmount"));
-    }
-    function onWillDestroy(fn) {
-        const node = getCurrent();
-        const decorate = node.app.dev ? wrapError : (fn) => fn;
-        node.willDestroy.push(decorate(fn.bind(node.component), "onWillDestroy"));
-    }
-    function onWillRender(fn) {
-        const node = getCurrent();
-        const renderFn = node.renderFn;
-        const decorate = node.app.dev ? wrapError : (fn) => fn;
-        fn = decorate(fn.bind(node.component), "onWillRender");
-        node.renderFn = () => {
-            fn();
-            return renderFn();
-        };
-    }
-    function onRendered(fn) {
-        const node = getCurrent();
-        const renderFn = node.renderFn;
-        const decorate = node.app.dev ? wrapError : (fn) => fn;
-        fn = decorate(fn.bind(node.component), "onRendered");
-        node.renderFn = () => {
-            const result = renderFn();
-            fn();
-            return result;
-        };
-    }
-    function onError(callback) {
-        const node = getCurrent();
-        let handlers = nodeErrorHandlers.get(node);
-        if (!handlers) {
-            handlers = [];
-            nodeErrorHandlers.set(node, handlers);
-        }
-        handlers.push(callback.bind(node.component));
-    }
-
-    const VText = text("").constructor;
-    class VPortal extends VText {
-        constructor(selector, realBDom) {
-            super("");
-            this.target = null;
-            this.selector = selector;
-            this.realBDom = realBDom;
-        }
-        mount(parent, anchor) {
-            super.mount(parent, anchor);
-            this.target = document.querySelector(this.selector);
-            if (!this.target) {
-                let el = this.el;
-                while (el && el.parentElement instanceof HTMLElement) {
-                    el = el.parentElement;
-                }
-                this.target = el && el.querySelector(this.selector);
-                if (!this.target) {
-                    throw new Error("invalid portal target");
->>>>>>> 53511704ef3 (Update owl)
                 }
             }
         }
