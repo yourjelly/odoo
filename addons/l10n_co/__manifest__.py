@@ -21,13 +21,21 @@
         'l10n_latam_base',
     ],
     'data': [
-        'data/l10n_co_chart_data.xml',
-        'data/account.account.template.csv',
+        # Chart of Accounts
         'data/account_chart_template_data.xml',
+        'data/account.account.template.csv',
+        'data/account.group.template.csv',
+
+        # Taxes
         'data/account.tax.group.csv',
-        'data/account_tax_template.xml',
-        'data/account_chart_template_configure_data.xml',
+        'data/account_tax_template_data.xml',
         'data/l10n_latam.identification.type.csv',
+
+        'data/account_chart_post_data.xml',
+        'data/account_chart_template_try_loading.xml',
+
+        # Views
+        'views/menuitem_data.xml'
     ],
     'demo': [
         'demo/demo_company.xml',

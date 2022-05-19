@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Chart Template: default accounts -->
+    <record id="l10n_co_chart_template_generic" model="account.chart.template">
+        <field name="property_account_receivable_id" ref="co_puc_130500"/>
+        <field name="property_account_payable_id" ref="co_puc_220500"/>
+        <field name="default_pos_receivable_account_id" ref="co_puc_130505" />
+
+        <field name="property_account_expense_categ_id" ref="co_puc_617000"/>
+        <field name="property_account_income_categ_id" ref="co_puc_420500"/>
+
+        <field name="income_currency_exchange_account_id" ref="co_puc_421000"/>  <!-- "Currency Exchange Difference (revenue)" -->
+        <field name="expense_currency_exchange_account_id" ref="co_puc_530505"/> <!-- "Currency Exchange Difference (expense)" -->
+    </record>
+</odoo>
