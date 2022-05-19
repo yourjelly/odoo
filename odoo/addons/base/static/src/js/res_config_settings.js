@@ -393,7 +393,6 @@ var BaseSettingController = FormController.extend({
                     text: _t('Discard'),
                     close: true,
                     click: () => {
-                        resolve(true);
                         reset();
                     },
                 }, {
