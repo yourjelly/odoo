@@ -16,8 +16,6 @@ patch(NavBar.prototype, 'website_navbar', {
     setup() {
         this._super();
         this.websiteService = useService('website');
-        this.dialogService = useService('dialog');
-        this.user = useService('user');
         this.websiteContext = useState(this.websiteService.context);
         this.aceEditor = WebsiteAceEditor;
 
@@ -33,11 +31,11 @@ patch(NavBar.prototype, 'website_navbar', {
 
         this.websiteEditingMenus = {
             'website.menu_edit_menu': {
-                component: EditMenuDialog,
+                Component: EditMenuDialog,
                 isDisplayed: () => !!this.websiteService.currentWebsite,
             },
             'website.menu_optimize_seo': {
-                component: OptimizeSEODialog,
+                Component: OptimizeSEODialog,
                 isDisplayed: () => this.websiteService.currentWebsite && !!this.websiteService.currentWebsite.metadata.mainObject,
             },
             'website.menu_ace_editor': {
@@ -51,7 +49,7 @@ patch(NavBar.prototype, 'website_navbar', {
         };
 
         onWillStart(async () => {
-            this.isWebsitePublisher = await this.user.hasGroup('website.group_website_publisher');
+            this.isWebsitePublisher = await this.websiteService.isPublisher();
         });
     },
 
@@ -102,7 +100,7 @@ patch(NavBar.prototype, 'website_navbar', {
     onNavBarDropdownItemSelection(menu) {
         const websiteMenu = this.websiteEditingMenus[menu.xmlid];
         if (websiteMenu) {
-            return websiteMenu.openWidget ? websiteMenu.openWidget() : this.dialogService.add(websiteMenu.component, websiteMenu.props, websiteMenu.options);
+            return websiteMenu.openWidget ? websiteMenu.openWidget() : this.websiteService.openMenuDialog(websiteMenu.Component, websiteMenu.props);
         }
         return this._super(menu);
     },
