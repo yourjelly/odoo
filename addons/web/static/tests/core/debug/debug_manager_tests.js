@@ -10,7 +10,7 @@ import { uiService } from "@web/core/ui/ui_service";
 import { useSetupView } from "@web/views/helpers/view_hook";
 import { ActionDialog } from "@web/webclient/actions/action_dialog";
 import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
-import { makeTestEnv, prepareRegistriesWithCleanup } from "../../helpers/mock_env";
+import { makeTestEnv, utils } from "../../helpers/mock_env";
 import {
     fakeCommandService,
     makeFakeDialogService,
@@ -29,6 +29,7 @@ import { openViewItem } from "@web/webclient/debug_items";
 import { editSearchView, editView } from "@web/views/debug_items";
 
 const { Component, xml } = owl;
+const { prepareRegistriesWithCleanup } = utils;
 
 export class DebugMenuParent extends Component {
     setup() {
