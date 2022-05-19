@@ -1,10 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data noupdate="0">
         <record id="ua_psbp_6412" model="account.account.template">
             <field name="tag_ids" eval="[(6,0,[ref('l10n_ua.acc_tag_vat')])]"/>
         </record>
-
         <!-- Tax template for VAT -->
         <record id="sale_tax_template_vat20_psbo" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_psbo_chart_template"/>
@@ -16,8 +15,8 @@
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
                 (0, 0, {
                     'factor_percent': 100,
-                    'repartition_type': 'base'
-                }),
+                    'repartition_type': 'base'                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -29,6 +28,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -50,6 +50,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -61,6 +62,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -79,8 +81,8 @@
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
                 (0, 0, {
                     'factor_percent': 100,
-                    'repartition_type': 'base'
-                }),
+                    'repartition_type': 'base'                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -92,6 +94,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -113,6 +116,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -124,6 +128,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -144,6 +149,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -155,6 +161,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -176,6 +183,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -187,6 +195,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -207,6 +216,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -217,6 +227,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -235,6 +246,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -245,6 +257,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -263,6 +276,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -273,13 +287,13 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                 }),
             ]"/>
         </record>
-
         <record id="purchase_tax_template_vat20_psbo" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_psbo_chart_template"/>
             <field name="sequence">19</field>
@@ -292,6 +306,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -303,6 +318,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -324,6 +340,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -335,6 +352,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -355,6 +373,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -366,6 +385,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -387,6 +407,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -398,6 +419,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -418,6 +440,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -429,6 +452,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -450,6 +474,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -461,6 +486,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -481,6 +507,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -491,6 +518,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -509,6 +537,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -519,6 +548,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -537,6 +567,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -547,6 +578,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -620,12 +652,10 @@
             <field name="amount">0</field>
             <field name="type_tax_use">purchase</field>
         </record>
-
         <!-- IAS -->
         <record id="ua_ias_1203" model="account.account.template">
             <field name="tag_ids" eval="[(6,0,[ref('l10n_ua.acc_tag_vat')])]"/>
         </record>
-
         <!-- Tax template for VAT -->
         <record id="sale_tax_template_vat20" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_ias_chart_template"/>
@@ -639,6 +669,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -650,6 +681,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -671,6 +703,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -682,6 +715,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -702,6 +736,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -713,6 +748,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -734,6 +770,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -745,6 +782,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -765,6 +803,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -776,6 +815,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -797,6 +837,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -808,6 +849,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -828,6 +870,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -838,6 +881,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -856,6 +900,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -866,6 +911,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -884,6 +930,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -894,13 +941,13 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                 }),
             ]"/>
         </record>
-
         <record id="purchase_tax_template_vat20" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_ias_chart_template"/>
             <field name="sequence">19</field>
@@ -913,6 +960,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -924,6 +972,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -945,6 +994,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -956,6 +1006,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -976,6 +1027,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -987,6 +1039,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -1008,6 +1061,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -1019,6 +1073,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -1039,6 +1094,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -1050,6 +1106,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -1071,6 +1128,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -1082,6 +1140,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -1102,6 +1161,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -1112,6 +1172,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -1130,6 +1191,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -1140,6 +1202,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -1158,6 +1221,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -1168,6 +1232,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0, 0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',

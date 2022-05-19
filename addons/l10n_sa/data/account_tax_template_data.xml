@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
         <record id="sa_sales_tax_15" model="account.tax.template">
@@ -12,26 +13,28 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_standard_rated_15_base')],
+                'plus_report_expression_ids': [ref('tax_report_line_standard_rated_15_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('sa_account_201017'),
-                'plus_report_line_ids': [ref('tax_report_line_standard_rated_15_tax')],
+                'plus_report_expression_ids': [ref('tax_report_line_standard_rated_15_tax_tag')],
             }),
         ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_line_standard_rated_15_base')],
+                'minus_report_expression_ids': [ref('tax_report_line_standard_rated_15_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('sa_account_201017'),
-                'minus_report_line_ids': [ref('tax_report_line_standard_rated_15_tax')],
+                'minus_report_expression_ids': [ref('tax_report_line_standard_rated_15_tax_tag')],
             }),
         ]"/>
         </record>
@@ -47,24 +50,26 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_local_sales_subject_to_0_base')],
+                'plus_report_expression_ids': [ref('tax_report_line_local_sales_subject_to_0_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'plus_report_line_ids': [ref('tax_report_line_local_sales_subject_to_0_tax')],
+                'plus_report_expression_ids': [ref('tax_report_line_local_sales_subject_to_0_tax_tag')],
             }),
         ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_line_local_sales_subject_to_0_base')],
+                'minus_report_expression_ids': [ref('tax_report_line_local_sales_subject_to_0_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'minus_report_line_ids': [ref('tax_report_line_local_sales_subject_to_0_tax')],
+                'minus_report_expression_ids': [ref('tax_report_line_local_sales_subject_to_0_tax_tag')],
             }),
         ]"/>
         </record>
@@ -80,24 +85,26 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_export_sales_base')],
+                'plus_report_expression_ids': [ref('tax_report_line_export_sales_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'plus_report_line_ids': [ref('tax_report_line_export_sales_tax')],
+                'plus_report_expression_ids': [ref('tax_report_line_export_sales_tax_tag')],
             }),
         ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_line_export_sales_base')],
+                'minus_report_expression_ids': [ref('tax_report_line_export_sales_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'minus_report_line_ids': [ref('tax_report_line_export_sales_tax')],
+                'minus_report_expression_ids': [ref('tax_report_line_export_sales_tax_tag')],
             }),
         ]"/>
         </record>
@@ -113,24 +120,26 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_exempt_sales_base')],
+                'plus_report_expression_ids': [ref('tax_report_line_exempt_sales_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'plus_report_line_ids': [ref('tax_report_line_exempt_sales_tax')],
+                'plus_report_expression_ids': [ref('tax_report_line_exempt_sales_tax_tag')],
             }),
         ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_line_exempt_sales_base')],
+                'minus_report_expression_ids': [ref('tax_report_line_exempt_sales_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'minus_report_line_ids': [ref('tax_report_line_exempt_sales_tax')],
+                'minus_report_expression_ids': [ref('tax_report_line_exempt_sales_tax_tag')],
             }),
         ]"/>
         </record>
@@ -146,26 +155,28 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_standard_rated_15_purchases_base')],
+                'plus_report_expression_ids': [ref('tax_report_line_standard_rated_15_purchases_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('sa_account_104041'),
-                'plus_report_line_ids': [ref('tax_report_line_standard_rated_15_purchases_tax')],
+                'plus_report_expression_ids': [ref('tax_report_line_standard_rated_15_purchases_tax_tag')],
             }),
         ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_line_standard_rated_15_purchases_base')],
+                'minus_report_expression_ids': [ref('tax_report_line_standard_rated_15_purchases_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('sa_account_104041'),
-                'minus_report_line_ids': [ref('tax_report_line_standard_rated_15_purchases_tax')],
+                'minus_report_expression_ids': [ref('tax_report_line_standard_rated_15_purchases_tax_tag')],
             }),
         ]"/>
         </record>
@@ -182,26 +193,28 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_imports_subject_tp_reverse_charge_mechanism_base')],
+                'plus_report_expression_ids': [ref('tax_report_line_imports_subject_tp_reverse_charge_mechanism_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('sa_account_104041'),
-                'plus_report_line_ids': [ref('tax_report_line_imports_subject_tp_reverse_charge_mechanism_tax')],
+                'plus_report_expression_ids': [ref('tax_report_line_imports_subject_tp_reverse_charge_mechanism_tax_tag')],
             }),
         ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_line_imports_subject_tp_reverse_charge_mechanism_base')],
+                'minus_report_expression_ids': [ref('tax_report_line_imports_subject_tp_reverse_charge_mechanism_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('sa_account_104041'),
-                'minus_report_line_ids': [ref('tax_report_line_imports_subject_tp_reverse_charge_mechanism_tax')],
+                'minus_report_expression_ids': [ref('tax_report_line_imports_subject_tp_reverse_charge_mechanism_tax_tag')],
             }),
         ]"/>
         </record>
@@ -217,26 +230,28 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_taxable_imports_15_paid_to_customs_base')],
+                'plus_report_expression_ids': [ref('tax_report_line_taxable_imports_15_paid_to_customs_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('sa_account_101060'),
-                'plus_report_line_ids': [ref('tax_report_line_taxable_imports_15_paid_to_customs_tax')],
+                'plus_report_expression_ids': [ref('tax_report_line_taxable_imports_15_paid_to_customs_tax_tag')],
             }),
         ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_line_taxable_imports_15_paid_to_customs_base')],
+                'minus_report_expression_ids': [ref('tax_report_line_taxable_imports_15_paid_to_customs_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('sa_account_101060'),
-                'minus_report_line_ids': [ref('tax_report_line_taxable_imports_15_paid_to_customs_tax')],
+                'minus_report_expression_ids': [ref('tax_report_line_taxable_imports_15_paid_to_customs_tax_tag')],
             }),
         ]"/>
         </record>
@@ -252,24 +267,26 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_zero_rated_purchases_base')],
+                'plus_report_expression_ids': [ref('tax_report_line_zero_rated_purchases_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'plus_report_line_ids': [ref('tax_report_line_zero_rated_purchases_tax')],
+                'plus_report_expression_ids': [ref('tax_report_line_zero_rated_purchases_tax_tag')],
             }),
         ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_line_zero_rated_purchases_base')],
+                'minus_report_expression_ids': [ref('tax_report_line_zero_rated_purchases_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'minus_report_line_ids': [ref('tax_report_line_zero_rated_purchases_tax')],
+                'minus_report_expression_ids': [ref('tax_report_line_zero_rated_purchases_tax_tag')],
             }),
         ]"/>
         </record>
@@ -285,24 +302,26 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_exempt_purchases_base')],
+                'plus_report_expression_ids': [ref('tax_report_line_exempt_purchases_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'plus_report_line_ids': [ref('tax_report_line_exempt_purchases_tax')],
+                'plus_report_expression_ids': [ref('tax_report_line_exempt_purchases_tax_tag')],
             }),
         ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_line_exempt_purchases_base')],
+                'minus_report_expression_ids': [ref('tax_report_line_exempt_purchases_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'minus_report_line_ids': [ref('tax_report_line_exempt_purchases_tax')],
+                'minus_report_expression_ids': [ref('tax_report_line_exempt_purchases_tax_tag')],
             }),
         ]"/>
         </record>
@@ -319,14 +338,16 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_withholding_tax_5_rental_base')],
+                'plus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_rental_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'account_id': ref('sa_account_400073'),
                 'repartition_type': 'tax',
-                'plus_report_line_ids': [ref('tax_report_line_withholding_tax_5_rental_tax')],
+                'plus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_rental_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'account_id': ref('sa_account_201020'),
@@ -337,14 +358,16 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_line_withholding_tax_5_rental_base')],
+                'minus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_rental_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('sa_account_400073'),
-                'minus_report_line_ids': [ref('tax_report_line_withholding_tax_5_rental_tax')],
+                'minus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_rental_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'account_id': ref('sa_account_201020'),
@@ -365,14 +388,16 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_withholding_tax_5_tickets_or_air_freight_base')],
+                'plus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_tickets_or_air_freight_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'account_id': ref('sa_account_400073'),
                 'repartition_type': 'tax',
-                'plus_report_line_ids': [ref('tax_report_line_withholding_tax_5_tickets_or_air_freight_tax')],
+                'plus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_tickets_or_air_freight_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'account_id': ref('sa_account_201020'),
@@ -383,14 +408,16 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_line_withholding_tax_5_tickets_or_air_freight_base')],
+                'minus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_tickets_or_air_freight_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('sa_account_400073'),
-                'minus_report_line_ids': [ref('tax_report_line_withholding_tax_5_tickets_or_air_freight_tax')],
+                'minus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_tickets_or_air_freight_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'account_id': ref('sa_account_201020'),
@@ -411,14 +438,16 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_withholding_tax_5_tickets_or_sea_freight_base')],
+                'plus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_tickets_or_sea_freight_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'account_id': ref('sa_account_400073'),
                 'repartition_type': 'tax',
-                'plus_report_line_ids': [ref('tax_report_line_withholding_tax_5_tickets_or_sea_freight_tax')],
+                'plus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_tickets_or_sea_freight_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'account_id': ref('sa_account_201020'),
@@ -429,14 +458,16 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_line_withholding_tax_5_tickets_or_sea_freight_base')],
+                'minus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_tickets_or_sea_freight_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('sa_account_400073'),
-                'minus_report_line_ids': [ref('tax_report_line_withholding_tax_5_tickets_or_sea_freight_tax')],
+                'minus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_tickets_or_sea_freight_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'account_id': ref('sa_account_201020'),
@@ -457,14 +488,16 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_withholding_tax_5_international_telecommunication_base')],
+                'plus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_international_telecommunication_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'account_id': ref('sa_account_400073'),
                 'repartition_type': 'tax',
-                'plus_report_line_ids': [ref('tax_report_line_withholding_tax_5_international_telecommunication_tax')],
+                'plus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_international_telecommunication_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'account_id': ref('sa_account_201020'),
@@ -475,14 +508,16 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_line_withholding_tax_5_international_telecommunication_base')],
+                'minus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_international_telecommunication_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('sa_account_400073'),
-                'minus_report_line_ids': [ref('tax_report_line_withholding_tax_5_international_telecommunication_tax')],
+                'minus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_international_telecommunication_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'account_id': ref('sa_account_201020'),
@@ -503,14 +538,16 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_withholding_tax_5_distributed_profits_base')],
+                'plus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_distributed_profits_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'account_id': ref('sa_account_400073'),
                 'repartition_type': 'tax',
-                'plus_report_line_ids': [ref('tax_report_line_withholding_tax_5_distributed_profits_tax')],
+                'plus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_distributed_profits_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'account_id': ref('sa_account_201020'),
@@ -521,14 +558,16 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_line_withholding_tax_5_distributed_profits_tax')],
+                'minus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_distributed_profits_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('sa_account_400073'),
-                'minus_report_line_ids': [ref('tax_report_line_withholding_tax_5_distributed_profits_base')],
+                'minus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_distributed_profits_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'account_id': ref('sa_account_201020'),
@@ -549,14 +588,16 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_withholding_tax_5_consulting_and_technical_base')],
+                'plus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_consulting_and_technical_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'account_id': ref('sa_account_400073'),
                 'repartition_type': 'tax',
-                'plus_report_line_ids': [ref('tax_report_line_withholding_tax_5_consulting_and_technical_tax')],
+                'plus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_consulting_and_technical_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'account_id': ref('sa_account_201020'),
@@ -567,14 +608,16 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_line_withholding_tax_5_consulting_and_technical_base')],
+                'minus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_consulting_and_technical_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('sa_account_400073'),
-                'minus_report_line_ids': [ref('tax_report_line_withholding_tax_5_consulting_and_technical_tax')],
+                'minus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_consulting_and_technical_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'account_id': ref('sa_account_201020'),
@@ -595,14 +638,16 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_withholding_tax_5_return_from_loans_base')],
+                'plus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_return_from_loans_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'account_id': ref('sa_account_400073'),
                 'repartition_type': 'tax',
-                'plus_report_line_ids': [ref('tax_report_line_withholding_tax_5_return_from_loans_tax')],
+                'plus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_return_from_loans_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'account_id': ref('sa_account_201020'),
@@ -613,14 +658,16 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_line_withholding_tax_5_return_from_loans_base')],
+                'minus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_return_from_loans_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('sa_account_400073'),
-                'minus_report_line_ids': [ref('tax_report_line_withholding_tax_5_return_from_loans_tax')],
+                'minus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_return_from_loans_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'account_id': ref('sa_account_201020'),
@@ -641,14 +688,16 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_withholding_tax_5_insurance_and_reinsurance_base')],
+                'plus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_insurance_and_reinsurance_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'account_id': ref('sa_account_400073'),
                 'repartition_type': 'tax',
-                'plus_report_line_ids': [ref('tax_report_line_withholding_tax_5_insurance_and_reinsurance_tax')],
+                'plus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_insurance_and_reinsurance_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'account_id': ref('sa_account_201020'),
@@ -659,14 +708,16 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_line_withholding_tax_5_insurance_and_reinsurance_base')],
+                'minus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_insurance_and_reinsurance_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('sa_account_400073'),
-                'minus_report_line_ids': [ref('tax_report_line_withholding_tax_5_insurance_and_reinsurance_tax')],
+                'minus_report_expression_ids': [ref('tax_report_line_withholding_tax_5_insurance_and_reinsurance_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'account_id': ref('sa_account_201020'),
@@ -687,14 +738,16 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_withholding_tax_15_royalties_base')],
+                'plus_report_expression_ids': [ref('tax_report_line_withholding_tax_15_royalties_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'account_id': ref('sa_account_400073'),
                 'repartition_type': 'tax',
-                'plus_report_line_ids': [ref('tax_report_line_withholding_tax_15_royalties_tax')],
+                'plus_report_expression_ids': [ref('tax_report_line_withholding_tax_15_royalties_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'account_id': ref('sa_account_201020'),
@@ -705,14 +758,16 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_line_withholding_tax_15_royalties_base')],
+                'minus_report_expression_ids': [ref('tax_report_line_withholding_tax_15_royalties_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('sa_account_400073'),
-                'minus_report_line_ids': [ref('tax_report_line_withholding_tax_15_royalties_tax')],
+                'minus_report_expression_ids': [ref('tax_report_line_withholding_tax_15_royalties_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'account_id': ref('sa_account_201020'),
@@ -733,14 +788,16 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_withholding_tax_15_paid_services_from_main_branch_base')],
+                'plus_report_expression_ids': [ref('tax_report_line_withholding_tax_15_paid_services_from_main_branch_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'account_id': ref('sa_account_400073'),
                 'repartition_type': 'tax',
-                'plus_report_line_ids': [ref('tax_report_line_withholding_tax_15_paid_services_from_main_branch_tax')],
+                'plus_report_expression_ids': [ref('tax_report_line_withholding_tax_15_paid_services_from_main_branch_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'account_id': ref('sa_account_201020'),
@@ -751,14 +808,16 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_line_withholding_tax_15_paid_services_from_main_branch_base')],
+                'minus_report_expression_ids': [ref('tax_report_line_withholding_tax_15_paid_services_from_main_branch_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('sa_account_400073'),
-                'minus_report_line_ids': [ref('tax_report_line_withholding_tax_15_paid_services_from_main_branch_tax')],
+                'minus_report_expression_ids': [ref('tax_report_line_withholding_tax_15_paid_services_from_main_branch_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'account_id': ref('sa_account_201020'),
@@ -779,14 +838,16 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_withholding_tax_15_paid_services_from_another_branch_base')],
+                'plus_report_expression_ids': [ref('tax_report_line_withholding_tax_15_paid_services_from_another_branch_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'account_id': ref('sa_account_400073'),
                 'repartition_type': 'tax',
-                'plus_report_line_ids': [ref('tax_report_line_withholding_tax_15_paid_services_from_another_branch_tax')],
+                'plus_report_expression_ids': [ref('tax_report_line_withholding_tax_15_paid_services_from_another_branch_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'account_id': ref('sa_account_201020'),
@@ -797,14 +858,16 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_line_withholding_tax_15_paid_services_from_another_branch_base')],
+                'minus_report_expression_ids': [ref('tax_report_line_withholding_tax_15_paid_services_from_another_branch_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('sa_account_400073'),
-                'minus_report_line_ids': [ref('tax_report_line_withholding_tax_15_paid_services_from_another_branch_tax')],
+                'minus_report_expression_ids': [ref('tax_report_line_withholding_tax_15_paid_services_from_another_branch_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'account_id': ref('sa_account_201020'),
@@ -825,14 +888,16 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_withholding_tax_15_others_base')],
+                'plus_report_expression_ids': [ref('tax_report_line_withholding_tax_15_others_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'account_id': ref('sa_account_400073'),
                 'repartition_type': 'tax',
-                'plus_report_line_ids': [ref('tax_report_line_withholding_tax_15_others_tax')],
+                'plus_report_expression_ids': [ref('tax_report_line_withholding_tax_15_others_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'account_id': ref('sa_account_201020'),
@@ -843,14 +908,16 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_line_withholding_tax_15_others_base')],
+                'minus_report_expression_ids': [ref('tax_report_line_withholding_tax_15_others_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('sa_account_400073'),
-                'minus_report_line_ids': [ref('tax_report_line_withholding_tax_15_others_tax')],
+                'minus_report_expression_ids': [ref('tax_report_line_withholding_tax_15_others_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'account_id': ref('sa_account_201020'),
@@ -871,14 +938,16 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_withholding_tax_20_managerial_base')],
+                'plus_report_expression_ids': [ref('tax_report_line_withholding_tax_20_managerial_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'account_id': ref('sa_account_400073'),
                 'repartition_type': 'tax',
-                'plus_report_line_ids': [ref('tax_report_line_withholding_tax_20_managerial_tax')],
+                'plus_report_expression_ids': [ref('tax_report_line_withholding_tax_20_managerial_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'account_id': ref('sa_account_201020'),
@@ -889,14 +958,16 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_line_withholding_tax_20_managerial_base')],
+                'minus_report_expression_ids': [ref('tax_report_line_withholding_tax_20_managerial_base_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('sa_account_400073'),
-                'minus_report_line_ids': [ref('tax_report_line_withholding_tax_20_managerial_tax')],
+                'minus_report_expression_ids': [ref('tax_report_line_withholding_tax_20_managerial_tax_tag')],
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'account_id': ref('sa_account_201020'),

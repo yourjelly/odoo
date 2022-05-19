@@ -98,8 +98,32 @@
         <field name="amount">5</field>
         <field name="tax_group_id" ref="cess_group"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11235'),                 'plus_report_line_ids': [ref('tax_report_line_cess')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10055'),                 'minus_report_line_ids': [ref('tax_report_line_cess')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11235'),
+                'plus_report_expression_ids': [ref('tax_report_line_cess_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10055'),
+                'minus_report_expression_ids': [ref('tax_report_line_cess_tag')],
+            }),
+        ]"/>
     </record>
     <record id="cess_sale_1591" model="account.tax.template">
         <field name="name">CESS Sale 1591 Per Thousand</field>
@@ -109,8 +133,32 @@
         <field name="amount">1.591</field>
         <field name="tax_group_id" ref="cess_group"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11235'),                 'plus_report_line_ids': [ref('tax_report_line_cess')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10055'),                 'minus_report_line_ids': [ref('tax_report_line_cess')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11235'),
+                'plus_report_expression_ids': [ref('tax_report_line_cess_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10055'),
+                'minus_report_expression_ids': [ref('tax_report_line_cess_tag')],
+            }),
+        ]"/>
     </record>
     <record id="cess_5_plus_1591_sale" model="account.tax.template">
         <field name="name">CESS 5% + RS.1591/THOUSAND</field>
@@ -133,8 +181,32 @@ tax=quantity * 4.17
 if tax &gt; result:result=tax</field>
         <field name="tax_group_id" ref="cess_group"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11235'),                 'plus_report_line_ids': [ref('tax_report_line_cess')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10055'),                 'minus_report_line_ids': [ref('tax_report_line_cess')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11235'),
+                'plus_report_expression_ids': [ref('tax_report_line_cess_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10055'),
+                'minus_report_expression_ids': [ref('tax_report_line_cess_tag')],
+            }),
+        ]"/>
     </record>
     <record id="exempt_sale" model="account.tax.template">
         <field name="name">Exempt Sale</field>
@@ -144,8 +216,30 @@ if tax &gt; result:result=tax</field>
         <field name="amount">0</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="exempt_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',                 'plus_report_line_ids': [ref('tax_report_line_exempt')],              }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',              }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',                 'minus_report_line_ids': [ref('tax_report_line_exempt')],             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',              }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('tax_report_line_exempt_tag')],
+             }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+             }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('tax_report_line_exempt_tag')],
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+             }),
+        ]"/>
     </record>
     <record id="nil_rated_sale" model="account.tax.template">
         <field name="name">Nil Rated</field>
@@ -155,10 +249,31 @@ if tax &gt; result:result=tax</field>
         <field name="amount">0</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="nil_rated_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',                 'plus_report_line_ids': [ref('tax_report_line_nil_rated')],              }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',              }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',                 'minus_report_line_ids': [ref('tax_report_line_nil_rated')],             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',              }),         ]"/>
-    </record>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('tax_report_line_nil_rated_tag')],
+             }),
 
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+             }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('tax_report_line_nil_rated_tag')],
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+             }),
+        ]"/>
+    </record>
     <record id="non_gst_supplies_sale" model="account.tax.template">
         <field name="name">Non GST Supplies</field>
         <field name="description">Non GST Supplies</field>
@@ -171,8 +286,9 @@ if tax &gt; result:result=tax</field>
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_non_gst_supplies')],
+                'plus_report_expression_ids': [ref('tax_report_line_non_gst_supplies_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -182,15 +298,15 @@ if tax &gt; result:result=tax</field>
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_line_non_gst_supplies')],
+                'minus_report_expression_ids': [ref('tax_report_line_non_gst_supplies_tag')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
             }),
         ]"/>
     </record>
-
     <record id="igst_sale_0" model="account.tax.template">
         <field name="name">IGST 0%</field>
         <field name="description">IGST 0%</field>
@@ -199,8 +315,30 @@ if tax &gt; result:result=tax</field>
         <field name="amount">0</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',                 'plus_report_line_ids': [ref('tax_report_line_zero_rated')],             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',                 'minus_report_line_ids': [ref('tax_report_line_zero_rated')],             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('tax_report_line_zero_rated_tag')],
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('tax_report_line_zero_rated_tag')],
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
     </record>
     <record id="igst_sale_1" model="account.tax.template">
         <field name="name">IGST 1%</field>
@@ -210,8 +348,32 @@ if tax &gt; result:result=tax</field>
         <field name="amount">1</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11234'),                 'plus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10053'),                 'minus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11234'),
+                'plus_report_expression_ids': [ref('tax_report_line_igst_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10053'),
+                'minus_report_expression_ids': [ref('tax_report_line_igst_tag')],
+            }),
+        ]"/>
     </record>
     <record id="igst_sale_2" model="account.tax.template">
         <field name="name">IGST 2%</field>
@@ -221,8 +383,32 @@ if tax &gt; result:result=tax</field>
         <field name="amount">2</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11234'),                 'plus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10053'),                 'minus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11234'),
+                'plus_report_expression_ids': [ref('tax_report_line_igst_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10053'),
+                'minus_report_expression_ids': [ref('tax_report_line_igst_tag')],
+            }),
+        ]"/>
     </record>
     <record id="igst_sale_28" model="account.tax.template">
         <field name="name">IGST 28%</field>
@@ -232,8 +418,32 @@ if tax &gt; result:result=tax</field>
         <field name="amount">28</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11234'),                 'plus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10053'),                 'minus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11234'),
+                'plus_report_expression_ids': [ref('tax_report_line_igst_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10053'),
+                'minus_report_expression_ids': [ref('tax_report_line_igst_tag')],
+            }),
+        ]"/>
     </record>
     <record id="igst_sale_18" model="account.tax.template">
         <field name="name">IGST 18%</field>
@@ -243,8 +453,32 @@ if tax &gt; result:result=tax</field>
         <field name="amount">18</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11234'),                 'plus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10053'),                 'minus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11234'),
+                'plus_report_expression_ids': [ref('tax_report_line_igst_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10053'),
+                'minus_report_expression_ids': [ref('tax_report_line_igst_tag')],
+            }),
+        ]"/>
     </record>
     <record id="igst_sale_12" model="account.tax.template">
         <field name="name">IGST 12%</field>
@@ -254,8 +488,32 @@ if tax &gt; result:result=tax</field>
         <field name="amount">12</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11234'),                 'plus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10053'),                 'minus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11234'),
+                'plus_report_expression_ids': [ref('tax_report_line_igst_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10053'),
+                'minus_report_expression_ids': [ref('tax_report_line_igst_tag')],
+            }),
+        ]"/>
     </record>
     <record id="igst_sale_5" model="account.tax.template">
         <field name="name">IGST 5%</field>
@@ -265,8 +523,32 @@ if tax &gt; result:result=tax</field>
         <field name="amount">5</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11234'),                 'plus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10053'),                 'minus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11234'),
+                'plus_report_expression_ids': [ref('tax_report_line_igst_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10053'),
+                'minus_report_expression_ids': [ref('tax_report_line_igst_tag')],
+            }),
+        ]"/>
     </record>
     <record id="sgst_sale_0_5" model="account.tax.template">
         <field name="name">SGST Sale 0.5%</field>
@@ -276,8 +558,31 @@ if tax &gt; result:result=tax</field>
         <field name="amount">0.5</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11232'),                 'plus_report_line_ids': [ref('tax_report_line_sgst')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10051'),                 'minus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11232'),
+                'plus_report_expression_ids': [ref('tax_report_line_sgst_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10051'),
+                'minus_report_expression_ids': [ref('tax_report_line_sgst_tag')],
+            })         ]"/>
     </record>
     <record id="cgst_sale_0_5" model="account.tax.template">
         <field name="name">CGST Sale 0.5%</field>
@@ -287,8 +592,30 @@ if tax &gt; result:result=tax</field>
         <field name="amount">0.5</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11233'),                 'plus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10052'),                 'minus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11233'),
+                'plus_report_expression_ids': [ref('tax_report_line_cgst_tag')],
+            })         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10052'),
+                'minus_report_expression_ids': [ref('tax_report_line_cgst_tag')],
+            })         ]"/>
     </record>
     <record id="sgst_sale_1" model="account.tax.template">
         <field name="name">GST 1%</field>
@@ -308,8 +635,30 @@ if tax &gt; result:result=tax</field>
         <field name="amount">1</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11232'),                 'plus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10051'),                 'minus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11232'),
+                'plus_report_expression_ids': [ref('tax_report_line_sgst_tag')],
+            })         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10051'),
+                'minus_report_expression_ids': [ref('tax_report_line_sgst_tag')],
+            })         ]"/>
     </record>
     <record id="cgst_sale_1_2" model="account.tax.template">
         <field name="name">CGST Sale 1%</field>
@@ -319,8 +668,30 @@ if tax &gt; result:result=tax</field>
         <field name="amount">1</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11233'),                 'plus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10052'),                 'minus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11233'),
+                'plus_report_expression_ids': [ref('tax_report_line_cgst_tag')],
+            })         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10052'),
+                'minus_report_expression_ids': [ref('tax_report_line_cgst_tag')],
+            })         ]"/>
     </record>
     <record id="sgst_sale_2" model="account.tax.template">
         <field name="name">GST 2%</field>
@@ -340,8 +711,30 @@ if tax &gt; result:result=tax</field>
         <field name="amount">14</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11232'),                 'plus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10051'),                 'minus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11232'),
+                'plus_report_expression_ids': [ref('tax_report_line_sgst_tag')],
+            })         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10051'),
+                'minus_report_expression_ids': [ref('tax_report_line_sgst_tag')],
+            })         ]"/>
     </record>
     <record id="cgst_sale_14" model="account.tax.template">
         <field name="name">CGST Sale 14%</field>
@@ -351,8 +744,30 @@ if tax &gt; result:result=tax</field>
         <field name="amount">14</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11233'),                 'plus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10052'),                 'minus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11233'),
+                'plus_report_expression_ids': [ref('tax_report_line_cgst_tag')],
+            })         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10052'),
+                'minus_report_expression_ids': [ref('tax_report_line_cgst_tag')],
+            })         ]"/>
     </record>
     <record id="sgst_sale_28" model="account.tax.template">
         <field name="name">GST 28%</field>
@@ -372,8 +787,30 @@ if tax &gt; result:result=tax</field>
         <field name="amount">9</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11232'),                 'plus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10051'),                 'minus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11232'),
+                'plus_report_expression_ids': [ref('tax_report_line_sgst_tag')],
+            })         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10051'),
+                'minus_report_expression_ids': [ref('tax_report_line_sgst_tag')],
+            })         ]"/>
     </record>
     <record id="cgst_sale_9" model="account.tax.template">
         <field name="name">CGST Sale 9%</field>
@@ -383,8 +820,30 @@ if tax &gt; result:result=tax</field>
         <field name="amount">9</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11233'),                 'plus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10052'),                 'minus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11233'),
+                'plus_report_expression_ids': [ref('tax_report_line_cgst_tag')],
+            })         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10052'),
+                'minus_report_expression_ids': [ref('tax_report_line_cgst_tag')],
+            })         ]"/>
     </record>
     <record id="sgst_sale_18" model="account.tax.template">
         <field name="name">GST 18%</field>
@@ -404,8 +863,30 @@ if tax &gt; result:result=tax</field>
         <field name="amount">6</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11232'),                 'plus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10051'),                 'minus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11232'),
+                'plus_report_expression_ids': [ref('tax_report_line_sgst_tag')],
+            })         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10051'),
+                'minus_report_expression_ids': [ref('tax_report_line_sgst_tag')],
+            })         ]"/>
     </record>
     <record id="cgst_sale_6" model="account.tax.template">
         <field name="name">CGST Sale 6%</field>
@@ -415,8 +896,31 @@ if tax &gt; result:result=tax</field>
         <field name="amount">6</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11233'),                 'plus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10052'),                 'minus_report_line_ids': [ref('tax_report_line_cgst')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11233'),
+                'plus_report_expression_ids': [ref('tax_report_line_cgst_tag')],
+            })         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10052'),
+                'minus_report_expression_ids': [ref('tax_report_line_cgst_tag')],
+            }),
+        ]"/>
     </record>
     <record id="sgst_sale_12" model="account.tax.template">
         <field name="name">GST 12%</field>
@@ -436,8 +940,30 @@ if tax &gt; result:result=tax</field>
         <field name="amount">2.5</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11232'),                 'plus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10051'),                 'minus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11232'),
+                'plus_report_expression_ids': [ref('tax_report_line_sgst_tag')],
+            })         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10051'),
+                'minus_report_expression_ids': [ref('tax_report_line_sgst_tag')],
+            })         ]"/>
     </record>
     <record id="cgst_sale_2_5" model="account.tax.template">
         <field name="name">CGST Sale 2.5%</field>
@@ -447,8 +973,30 @@ if tax &gt; result:result=tax</field>
         <field name="amount">2.5</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11233'),                 'plus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10052'),                 'minus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11233'),
+                'plus_report_expression_ids': [ref('tax_report_line_cgst_tag')],
+            })         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10052'),
+                'minus_report_expression_ids': [ref('tax_report_line_cgst_tag')],
+            })         ]"/>
     </record>
     <record id="sgst_sale_5" model="account.tax.template">
         <field name="name">GST 5%</field>
@@ -469,8 +1017,32 @@ if tax &gt; result:result=tax</field>
         <field name="amount">5</field>
         <field name="tax_group_id" ref="cess_group"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10055'),                 'minus_report_line_ids': [ref('tax_report_line_cess')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11235'),                 'plus_report_line_ids': [ref('tax_report_line_cess')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10055'),
+                'minus_report_expression_ids': [ref('tax_report_line_cess_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11235'),
+                'plus_report_expression_ids': [ref('tax_report_line_cess_tag')],
+            }),
+        ]"/>
     </record>
     <record id="cess_purchase_1591" model="account.tax.template">
         <field name="name">CESS Purchase 1591 Per Thousand</field>
@@ -480,8 +1052,32 @@ if tax &gt; result:result=tax</field>
         <field name="amount">1.591</field>
         <field name="tax_group_id" ref="cess_group"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10055'),                 'minus_report_line_ids': [ref('tax_report_line_cess')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11235'),                 'plus_report_line_ids': [ref('tax_report_line_cess')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10055'),
+                'minus_report_expression_ids': [ref('tax_report_line_cess_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11235'),
+                'plus_report_expression_ids': [ref('tax_report_line_cess_tag')],
+            }),
+        ]"/>
     </record>
     <record id="cess_5_plus_1591_purchase" model="account.tax.template">
         <field name="name">CESS 5% + RS.1591/THOUSAND</field>
@@ -504,8 +1100,32 @@ tax=quantity * 4.17
 if tax &gt; result:result=tax</field>
         <field name="tax_group_id" ref="cess_group"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10055'),                 'minus_report_line_ids': [ref('tax_report_line_cess')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11235'),                 'plus_report_line_ids': [ref('tax_report_line_cess')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10055'),
+                'minus_report_expression_ids': [ref('tax_report_line_cess_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11235'),
+                'plus_report_expression_ids': [ref('tax_report_line_cess_tag')],
+            }),
+        ]"/>
     </record>
     <record id="exempt_purchase" model="account.tax.template">
         <field name="name">Exempt purchase</field>
@@ -515,8 +1135,30 @@ if tax &gt; result:result=tax</field>
         <field name="amount">0</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="exempt_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',                 'minus_report_line_ids': [ref('tax_report_line_exempt')],              }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',                 'plus_report_line_ids': [ref('tax_report_line_exempt')],             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('tax_report_line_exempt_tag')],
+             }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('tax_report_line_exempt_tag')],
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
     </record>
     <record id="nil_rated_purchase" model="account.tax.template">
         <field name="name">Nil Rated</field>
@@ -526,8 +1168,30 @@ if tax &gt; result:result=tax</field>
         <field name="amount">0</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="nil_rated_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',                 'minus_report_line_ids': [ref('tax_report_line_nil_rated')],              }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',              }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',                 'plus_report_line_ids': [ref('tax_report_line_nil_rated')],             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',              }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('tax_report_line_nil_rated_tag')],
+             }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+             }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('tax_report_line_nil_rated_tag')],
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+             }),
+        ]"/>
     </record>
     <record id="igst_purchase_0" model="account.tax.template">
         <field name="name">IGST 0%</field>
@@ -537,8 +1201,30 @@ if tax &gt; result:result=tax</field>
         <field name="amount">0</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',                 'minus_report_line_ids': [ref('tax_report_line_zero_rated')],             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',                 'plus_report_line_ids': [ref('tax_report_line_zero_rated')],             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('tax_report_line_zero_rated_tag')],
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('tax_report_line_zero_rated_tag')],
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
     </record>
     <record id="igst_purchase_1" model="account.tax.template">
         <field name="name">IGST 1%</field>
@@ -548,8 +1234,32 @@ if tax &gt; result:result=tax</field>
         <field name="amount">1</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10053'),                 'minus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11234'),                 'plus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10053'),
+                'minus_report_expression_ids': [ref('tax_report_line_igst_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11234'),
+                'plus_report_expression_ids': [ref('tax_report_line_igst_tag')],
+            }),
+        ]"/>
     </record>
     <record id="igst_purchase_2" model="account.tax.template">
         <field name="name">IGST 2%</field>
@@ -559,8 +1269,32 @@ if tax &gt; result:result=tax</field>
         <field name="amount">2</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10053'),                 'minus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11234'),                 'plus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10053'),
+                'minus_report_expression_ids': [ref('tax_report_line_igst_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11234'),
+                'plus_report_expression_ids': [ref('tax_report_line_igst_tag')],
+            }),
+        ]"/>
     </record>
     <record id="igst_purchase_28" model="account.tax.template">
         <field name="name">IGST 28%</field>
@@ -570,8 +1304,32 @@ if tax &gt; result:result=tax</field>
         <field name="amount">28</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10053'),                 'minus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11234'),                 'plus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10053'),
+                'minus_report_expression_ids': [ref('tax_report_line_igst_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11234'),
+                'plus_report_expression_ids': [ref('tax_report_line_igst_tag')],
+            }),
+        ]"/>
     </record>
     <record id="igst_purchase_18" model="account.tax.template">
         <field name="name">IGST 18%</field>
@@ -581,8 +1339,32 @@ if tax &gt; result:result=tax</field>
         <field name="amount">18</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10053'),                 'minus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11234'),                 'plus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10053'),
+                'minus_report_expression_ids': [ref('tax_report_line_igst_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11234'),
+                'plus_report_expression_ids': [ref('tax_report_line_igst_tag')],
+            }),
+        ]"/>
     </record>
     <record id="igst_purchase_12" model="account.tax.template">
         <field name="name">IGST 12%</field>
@@ -592,8 +1374,32 @@ if tax &gt; result:result=tax</field>
         <field name="amount">12</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10053'),                 'minus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11234'),                 'plus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10053'),
+                'minus_report_expression_ids': [ref('tax_report_line_igst_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11234'),
+                'plus_report_expression_ids': [ref('tax_report_line_igst_tag')],
+            }),
+        ]"/>
     </record>
     <record id="igst_purchase_5" model="account.tax.template">
         <field name="name">IGST 5%</field>
@@ -603,8 +1409,32 @@ if tax &gt; result:result=tax</field>
         <field name="amount">5</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10053'),                 'minus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11234'),                 'plus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10053'),
+                'minus_report_expression_ids': [ref('tax_report_line_igst_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11234'),
+                'plus_report_expression_ids': [ref('tax_report_line_igst_tag')],
+            }),
+        ]"/>
     </record>
     <record id="sgst_purchase_0_5" model="account.tax.template">
         <field name="name">SGST Purchase 0.5%</field>
@@ -614,8 +1444,30 @@ if tax &gt; result:result=tax</field>
         <field name="amount">0.5</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10051'),                 'minus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11232'),                 'plus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10051'),
+                'minus_report_expression_ids': [ref('tax_report_line_sgst_tag')],
+            })         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11232'),
+                'plus_report_expression_ids': [ref('tax_report_line_sgst_tag')],
+            })         ]"/>
     </record>
     <record id="cgst_purchase_0_5" model="account.tax.template">
         <field name="name">CGST Purchase 0.5%</field>
@@ -625,8 +1477,30 @@ if tax &gt; result:result=tax</field>
         <field name="amount">0.5</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10052'),                 'minus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11233'),                 'plus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10052'),
+                'minus_report_expression_ids': [ref('tax_report_line_cgst_tag')],
+            })         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11233'),
+                'plus_report_expression_ids': [ref('tax_report_line_cgst_tag')],
+            })         ]"/>
     </record>
     <record id="sgst_purchase_1" model="account.tax.template">
         <field name="name">GST 1%</field>
@@ -646,8 +1520,30 @@ if tax &gt; result:result=tax</field>
         <field name="amount">1</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10051'),                 'minus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11232'),                 'plus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10051'),
+                'minus_report_expression_ids': [ref('tax_report_line_sgst_tag')],
+            })         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11232'),
+                'plus_report_expression_ids': [ref('tax_report_line_sgst_tag')],
+            })         ]"/>
     </record>
     <record id="cgst_purchase_1_2" model="account.tax.template">
         <field name="name">CGST Purchase 1%</field>
@@ -657,8 +1553,30 @@ if tax &gt; result:result=tax</field>
         <field name="amount">1</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10052'),                 'minus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11233'),                 'plus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10052'),
+                'minus_report_expression_ids': [ref('tax_report_line_cgst_tag')],
+            })         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11233'),
+                'plus_report_expression_ids': [ref('tax_report_line_cgst_tag')],
+            })         ]"/>
     </record>
     <record id="sgst_purchase_2" model="account.tax.template">
         <field name="name">GST 2%</field>
@@ -678,8 +1596,30 @@ if tax &gt; result:result=tax</field>
         <field name="amount">14</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10051'),                 'minus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11232'),                 'plus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10051'),
+                'minus_report_expression_ids': [ref('tax_report_line_sgst_tag')],
+            })         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11232'),
+                'plus_report_expression_ids': [ref('tax_report_line_sgst_tag')],
+            })         ]"/>
     </record>
     <record id="cgst_purchase_14" model="account.tax.template">
         <field name="name">CGST Purchase 14%</field>
@@ -689,8 +1629,30 @@ if tax &gt; result:result=tax</field>
         <field name="amount">14</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10052'),                 'minus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11233'),                 'plus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10052'),
+                'minus_report_expression_ids': [ref('tax_report_line_cgst_tag')],
+            })         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11233'),
+                'plus_report_expression_ids': [ref('tax_report_line_cgst_tag')],
+            })         ]"/>
     </record>
     <record id="sgst_purchase_28" model="account.tax.template">
         <field name="name">GST 28%</field>
@@ -710,8 +1672,30 @@ if tax &gt; result:result=tax</field>
         <field name="amount">9</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10051'),                 'minus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11232'),                 'plus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10051'),
+                'minus_report_expression_ids': [ref('tax_report_line_sgst_tag')],
+            })         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11232'),
+                'plus_report_expression_ids': [ref('tax_report_line_sgst_tag')],
+            })         ]"/>
     </record>
     <record id="cgst_purchase_9" model="account.tax.template">
         <field name="name">CGST Purchase 9%</field>
@@ -721,8 +1705,30 @@ if tax &gt; result:result=tax</field>
         <field name="amount">9</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10052'),                 'minus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11233'),                 'plus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10052'),
+                'minus_report_expression_ids': [ref('tax_report_line_cgst_tag')],
+            })         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11233'),
+                'plus_report_expression_ids': [ref('tax_report_line_cgst_tag')],
+            })         ]"/>
     </record>
     <record id="sgst_purchase_18" model="account.tax.template">
         <field name="name">GST 18%</field>
@@ -742,8 +1748,30 @@ if tax &gt; result:result=tax</field>
         <field name="amount">6</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10051'),                 'minus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11232'),                 'plus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10051'),
+                'minus_report_expression_ids': [ref('tax_report_line_sgst_tag')],
+            })         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11232'),
+                'plus_report_expression_ids': [ref('tax_report_line_sgst_tag')],
+            })         ]"/>
     </record>
     <record id="cgst_purchase_6" model="account.tax.template">
         <field name="name">CGST Purchase 6%</field>
@@ -753,8 +1781,31 @@ if tax &gt; result:result=tax</field>
         <field name="amount">6</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10052'),                 'minus_report_line_ids': [ref('tax_report_line_cgst')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11233'),                 'plus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10052'),
+                'minus_report_expression_ids': [ref('tax_report_line_cgst_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11233'),
+                'plus_report_expression_ids': [ref('tax_report_line_cgst_tag')],
+            })         ]"/>
     </record>
     <record id="sgst_purchase_12" model="account.tax.template">
         <field name="name">GST 12%</field>
@@ -774,8 +1825,30 @@ if tax &gt; result:result=tax</field>
         <field name="amount">2.5</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10051'),                 'minus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11232'),                 'plus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10051'),
+                'minus_report_expression_ids': [ref('tax_report_line_sgst_tag')],
+            })         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11232'),
+                'plus_report_expression_ids': [ref('tax_report_line_sgst_tag')],
+            })         ]"/>
     </record>
     <record id="cgst_purchase_2_5" model="account.tax.template">
         <field name="name">CGST Purchase 2.5%</field>
@@ -785,8 +1858,30 @@ if tax &gt; result:result=tax</field>
         <field name="amount">2.5</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10052'),                 'minus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11233'),                 'plus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10052'),
+                'minus_report_expression_ids': [ref('tax_report_line_cgst_tag')],
+            })         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11233'),
+                'plus_report_expression_ids': [ref('tax_report_line_cgst_tag')],
+            })         ]"/>
     </record>
     <record id="sgst_purchase_5" model="account.tax.template">
         <field name="name">GST 5%</field>
@@ -808,8 +1903,44 @@ if tax &gt; result:result=tax</field>
         <field name="tax_group_id" ref="cess_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p11235'),                 'minus_report_line_ids': [ref('tax_report_line_cess_rc')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p10055'),                 'plus_report_line_ids': [ref('tax_report_line_cess_rc')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11235'),
+                'minus_report_expression_ids': [ref('tax_report_line_cess_rc_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10055'),
+                'plus_report_expression_ids': [ref('tax_report_line_cess_rc_tag')],
+            }),
+        ]"/>
     </record>
     <record id="cess_purchase_1591_rc" model="account.tax.template">
         <field name="name">CESS Purchase 1591 Per Thousand (RC)</field>
@@ -820,8 +1951,44 @@ if tax &gt; result:result=tax</field>
         <field name="tax_group_id" ref="cess_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p11235'),                 'minus_report_line_ids': [ref('tax_report_line_cess_rc')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p10055'),                 'plus_report_line_ids': [ref('tax_report_line_cess_rc')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11235'),
+                'minus_report_expression_ids': [ref('tax_report_line_cess_rc_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10055'),
+                'plus_report_expression_ids': [ref('tax_report_line_cess_rc_tag')],
+            }),
+        ]"/>
     </record>
     <record id="cess_5_plus_1591_purchase_rc" model="account.tax.template">
         <field name="name">CESS 5% + RS.1591/THOUSAND (RC)</field>
@@ -846,8 +2013,44 @@ if tax &gt; result:result=tax</field>
         <field name="tax_group_id" ref="cess_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p11235'),                 'minus_report_line_ids': [ref('tax_report_line_cess_rc')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p10055'),                 'plus_report_line_ids': [ref('tax_report_line_cess_rc')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11235'),
+                'minus_report_expression_ids': [ref('tax_report_line_cess_rc_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10055'),
+                'plus_report_expression_ids': [ref('tax_report_line_cess_rc_tag')],
+            }),
+        ]"/>
     </record>
     <record id="igst_purchase_1_rc" model="account.tax.template">
         <field name="name">IGST 1% (RC)</field>
@@ -858,8 +2061,44 @@ if tax &gt; result:result=tax</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p11234'),                 'minus_report_line_ids': [ref('tax_report_line_igst_rc')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p10053'),                 'plus_report_line_ids': [ref('tax_report_line_igst'), ref('tax_report_line_igst_rc')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11234'),
+                'minus_report_expression_ids': [ref('tax_report_line_igst_rc_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10053'),
+                'plus_report_expression_ids': [ref('tax_report_line_igst_tag'), ref('tax_report_line_igst_rc_tag')],
+            }),
+        ]"/>
     </record>
     <record id="igst_purchase_2_rc" model="account.tax.template">
         <field name="name">IGST 2% (RC)</field>
@@ -870,8 +2109,44 @@ if tax &gt; result:result=tax</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p11234'),                 'minus_report_line_ids': [ref('tax_report_line_igst_rc')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p10053'),                 'plus_report_line_ids': [ref('tax_report_line_igst_rc')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11234'),
+                'minus_report_expression_ids': [ref('tax_report_line_igst_rc_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10053'),
+                'plus_report_expression_ids': [ref('tax_report_line_igst_rc_tag')],
+            }),
+        ]"/>
     </record>
     <record id="igst_purchase_28_rc" model="account.tax.template">
         <field name="name">IGST 28% (RC)</field>
@@ -882,8 +2157,44 @@ if tax &gt; result:result=tax</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p11234'),                 'minus_report_line_ids': [ref('tax_report_line_igst_rc')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p10053'),                 'plus_report_line_ids': [ref('tax_report_line_igst'), ref('tax_report_line_igst_rc')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11234'),
+                'minus_report_expression_ids': [ref('tax_report_line_igst_rc_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10053'),
+                'plus_report_expression_ids': [ref('tax_report_line_igst_tag'), ref('tax_report_line_igst_rc_tag')],
+            }),
+        ]"/>
     </record>
     <record id="igst_purchase_18_rc" model="account.tax.template">
         <field name="name">IGST 18% (RC)</field>
@@ -894,8 +2205,44 @@ if tax &gt; result:result=tax</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p11234'),                 'minus_report_line_ids': [ref('tax_report_line_igst_rc')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p10053'),                 'plus_report_line_ids': [ref('tax_report_line_igst_rc')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11234'),
+                'minus_report_expression_ids': [ref('tax_report_line_igst_rc_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10053'),
+                'plus_report_expression_ids': [ref('tax_report_line_igst_rc_tag')],
+            }),
+        ]"/>
     </record>
     <record id="igst_purchase_12_rc" model="account.tax.template">
         <field name="name">IGST 12% (RC)</field>
@@ -906,8 +2253,44 @@ if tax &gt; result:result=tax</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p11234'),                 'minus_report_line_ids': [ref('tax_report_line_igst_rc')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p10053'),                 'plus_report_line_ids': [ref('tax_report_line_igst_rc')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11234'),
+                'minus_report_expression_ids': [ref('tax_report_line_igst_rc_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10053'),
+                'plus_report_expression_ids': [ref('tax_report_line_igst_rc_tag')],
+            }),
+        ]"/>
     </record>
     <record id="igst_purchase_5_rc" model="account.tax.template">
         <field name="name">IGST 5% (RC)</field>
@@ -918,8 +2301,44 @@ if tax &gt; result:result=tax</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p11234'),                 'minus_report_line_ids': [ref('tax_report_line_igst_rc')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p10053'),                 'plus_report_line_ids': [ref('tax_report_line_igst_rc')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11234'),
+                'minus_report_expression_ids': [ref('tax_report_line_igst_rc_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10053'),
+                'plus_report_expression_ids': [ref('tax_report_line_igst_rc_tag')],
+            }),
+        ]"/>
     </record>
     <record id="sgst_purchase_0_5_rc" model="account.tax.template">
         <field name="name">SGST Purchase 0.5% (RC)</field>
@@ -930,8 +2349,42 @@ if tax &gt; result:result=tax</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p11232'),                 'minus_report_line_ids': [ref('tax_report_line_sgst_rc')],             })         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p10051'),                 'plus_report_line_ids': [ref('tax_report_line_sgst_rc')],             })         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11232'),
+                'minus_report_expression_ids': [ref('tax_report_line_sgst_rc_tag')],
+            })         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10051'),
+                'plus_report_expression_ids': [ref('tax_report_line_sgst_rc_tag')],
+            })         ]"/>
     </record>
     <record id="cgst_purchase_0_5_rc" model="account.tax.template">
         <field name="name">CGST Purchase 0.5% (RC)</field>
@@ -942,8 +2395,42 @@ if tax &gt; result:result=tax</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p11233'),                 'minus_report_line_ids': [ref('tax_report_line_cgst_rc')],             })         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p10052'),                 'plus_report_line_ids': [ref('tax_report_line_cgst_rc')],             })         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11233'),
+                'minus_report_expression_ids': [ref('tax_report_line_cgst_rc_tag')],
+            })         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10052'),
+                'plus_report_expression_ids': [ref('tax_report_line_cgst_rc_tag')],
+            })         ]"/>
     </record>
     <record id="sgst_purchase_1_rc" model="account.tax.template">
         <field name="name">GST 1% (RC)</field>
@@ -965,8 +2452,42 @@ if tax &gt; result:result=tax</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p11232'),                 'minus_report_line_ids': [ref('tax_report_line_sgst_rc')],             })         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p10051'),                 'plus_report_line_ids': [ref('tax_report_line_sgst_rc')],             })         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11232'),
+                'minus_report_expression_ids': [ref('tax_report_line_sgst_rc_tag')],
+            })         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10051'),
+                'plus_report_expression_ids': [ref('tax_report_line_sgst_rc_tag')],
+            })         ]"/>
     </record>
     <record id="cgst_purchase_1_2_rc" model="account.tax.template">
         <field name="name">CGST Purchase 1% (RC)</field>
@@ -977,8 +2498,42 @@ if tax &gt; result:result=tax</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p11233'),                 'minus_report_line_ids': [ref('tax_report_line_cgst_rc')],             })         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p10052'),                 'plus_report_line_ids': [ref('tax_report_line_cgst_rc')],             })         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11233'),
+                'minus_report_expression_ids': [ref('tax_report_line_cgst_rc_tag')],
+            })         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10052'),
+                'plus_report_expression_ids': [ref('tax_report_line_cgst_rc_tag')],
+            })         ]"/>
     </record>
     <record id="sgst_purchase_2_rc" model="account.tax.template">
         <field name="name">GST 2% (RC)</field>
@@ -1000,8 +2555,44 @@ if tax &gt; result:result=tax</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p11232'),                 'minus_report_line_ids': [ref('tax_report_line_sgst_rc')],             }),          ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p10051'),                 'plus_report_line_ids': [ref('tax_report_line_sgst_rc')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11232'),
+                'minus_report_expression_ids': [ref('tax_report_line_sgst_rc_tag')],
+            }),
+         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10051'),
+                'plus_report_expression_ids': [ref('tax_report_line_sgst_rc_tag')],
+            }),
+        ]"/>
     </record>
     <record id="cgst_purchase_14_rc" model="account.tax.template">
         <field name="name">CGST Purchase 14% (RC)</field>
@@ -1012,8 +2603,44 @@ if tax &gt; result:result=tax</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p11233'),                 'minus_report_line_ids': [ref('tax_report_line_cgst_rc')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p10052'),                 'plus_report_line_ids': [ref('tax_report_line_cgst_rc')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11233'),
+                'minus_report_expression_ids': [ref('tax_report_line_cgst_rc_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10052'),
+                'plus_report_expression_ids': [ref('tax_report_line_cgst_rc_tag')],
+            }),
+        ]"/>
     </record>
     <record id="sgst_purchase_28_rc" model="account.tax.template">
         <field name="name">GST 28% (RC)</field>
@@ -1035,8 +2662,44 @@ if tax &gt; result:result=tax</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p11232'),                 'minus_report_line_ids': [ref('tax_report_line_sgst_rc')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p10051'),                 'plus_report_line_ids': [ref('tax_report_line_sgst_rc')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11232'),
+                'minus_report_expression_ids': [ref('tax_report_line_sgst_rc_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10051'),
+                'plus_report_expression_ids': [ref('tax_report_line_sgst_rc_tag')],
+            }),
+        ]"/>
     </record>
     <record id="cgst_purchase_9_rc" model="account.tax.template">
         <field name="name">CGST Purchase 9% (RC)</field>
@@ -1047,8 +2710,44 @@ if tax &gt; result:result=tax</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p11233'),                 'minus_report_line_ids': [ref('tax_report_line_cgst_rc')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p10052'),                 'plus_report_line_ids': [ref('tax_report_line_cgst_rc')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11233'),
+                'minus_report_expression_ids': [ref('tax_report_line_cgst_rc_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10052'),
+                'plus_report_expression_ids': [ref('tax_report_line_cgst_rc_tag')],
+            }),
+        ]"/>
     </record>
     <record id="sgst_purchase_18_rc" model="account.tax.template">
         <field name="name">GST 18% (RC)</field>
@@ -1070,8 +2769,44 @@ if tax &gt; result:result=tax</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p11232'),                 'minus_report_line_ids': [ref('tax_report_line_sgst_rc')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p10051'),                 'plus_report_line_ids': [ref('tax_report_line_sgst_rc')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11232'),
+                'minus_report_expression_ids': [ref('tax_report_line_sgst_rc_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10051'),
+                'plus_report_expression_ids': [ref('tax_report_line_sgst_rc_tag')],
+            }),
+        ]"/>
     </record>
     <record id="cgst_purchase_6_rc" model="account.tax.template">
         <field name="name">CGST Purchase 6% (RC)</field>
@@ -1082,8 +2817,44 @@ if tax &gt; result:result=tax</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p11233'),                 'minus_report_line_ids': [ref('tax_report_line_cgst_rc')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p10052'),                 'plus_report_line_ids': [ref('tax_report_line_cgst_rc')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11233'),
+                'minus_report_expression_ids': [ref('tax_report_line_cgst_rc_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10052'),
+                'plus_report_expression_ids': [ref('tax_report_line_cgst_rc_tag')],
+            }),
+        ]"/>
     </record>
     <record id="sgst_purchase_12_rc" model="account.tax.template">
         <field name="name">GST 12% (RC)</field>
@@ -1105,8 +2876,43 @@ if tax &gt; result:result=tax</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p11232'),                 'minus_report_line_ids': [ref('tax_report_line_sgst_rc')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p10051'),                 'plus_report_line_ids': [ref('tax_report_line_sgst_rc')],             })         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11232'),
+                'minus_report_expression_ids': [ref('tax_report_line_sgst_rc_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+             (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10051'),
+                'plus_report_expression_ids': [ref('tax_report_line_sgst_rc_tag')],
+            })         ]"/>
     </record>
     <record id="cgst_purchase_2_5_rc" model="account.tax.template">
         <field name="name">CGST Purchase 2.5% (RC)</field>
@@ -1117,8 +2923,44 @@ if tax &gt; result:result=tax</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p11233'),                 'minus_report_line_ids': [ref('tax_report_line_cgst_rc')],             }),         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10057'),             }),             (0,0, {                 'factor_percent': -100,                 'repartition_type': 'tax',                 'account_id': ref('p10052'),                 'plus_report_line_ids': [ref('tax_report_line_cgst_rc')],             }),         ]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p11233'),
+                'minus_report_expression_ids': [ref('tax_report_line_cgst_rc_tag')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10057'),
+            }),
+
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('p10052'),
+                'plus_report_expression_ids': [ref('tax_report_line_cgst_rc_tag')],
+            }),
+        ]"/>
     </record>
     <record id="sgst_purchase_5_rc" model="account.tax.template">
         <field name="name">GST 5% (RC)</field>

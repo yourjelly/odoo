@@ -5,7 +5,6 @@
         <field name="applicability">taxes</field>
         <field name="country_id" ref="base.id"/>
     </record>
-
     <record id="tax_ST1" model="account.tax.template">
         <field name="description">ST1</field>
         <field name="chart_template_id" ref="l10n_id_chart"/>
@@ -19,6 +18,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [(4, ref('ppn_tag'))],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -31,6 +31,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [(4, ref('ppn_tag'))],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -38,7 +39,6 @@
             }),
         ]"/>
     </record>
-
     <record id="tax_PT1" model="account.tax.template">
         <field name="description">PT1</field>
         <field name="chart_template_id" ref="l10n_id_chart"/>
@@ -52,6 +52,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [(4, ref('ppn_tag'))],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -64,6 +65,7 @@
                 'repartition_type': 'base',
                 'tag_ids': [(4, ref('ppn_tag'))],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -71,7 +73,6 @@
             }),
         ]"/>
     </record>
-
     <record id="tax_ST0" model="account.tax.template">
         <field name="description">ST0</field>
         <field name="chart_template_id" ref="l10n_id_chart"/>
@@ -84,6 +85,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -95,14 +97,14 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('a_2_122101'),
             }),
         ]"/>
-        </record>
-
+    </record>
     <record id="tax_ST2" model="account.tax.template">
         <field name="description">ST2</field>
         <field name="chart_template_id" ref="l10n_id_chart"/>
@@ -115,6 +117,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -126,6 +129,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -133,7 +137,6 @@
             }),
         ]"/>
     </record>
-
     <record id="tax_PT0" model="account.tax.template">
         <field name="description">PT0</field>
         <field name="chart_template_id" ref="l10n_id_chart"/>
@@ -146,6 +149,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -157,6 +161,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -164,7 +169,6 @@
             }),
         ]"/>
     </record>
-
     <record id="tax_PT2" model="account.tax.template">
         <field name="description">PT2</field>
         <field name="chart_template_id" ref="l10n_id_chart"/>
@@ -177,6 +181,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -188,6 +193,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -195,5 +201,4 @@
             }),
         ]"/>
     </record>
-
 </odoo>

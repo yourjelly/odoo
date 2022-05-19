@@ -14,6 +14,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -25,6 +26,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -45,6 +47,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -56,6 +59,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -76,6 +80,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -87,6 +92,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -107,6 +113,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -118,6 +125,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -138,6 +146,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -149,6 +158,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -169,6 +179,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -180,6 +191,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -200,6 +212,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -211,6 +224,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -231,6 +245,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -242,6 +257,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -262,6 +278,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -273,6 +290,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -293,6 +311,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -304,6 +323,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -324,6 +344,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -335,6 +356,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -355,6 +377,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -366,6 +389,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -386,6 +410,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -397,6 +422,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -417,6 +443,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -428,6 +455,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -448,6 +476,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -459,6 +488,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -479,6 +509,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -490,6 +521,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -510,6 +542,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -521,6 +554,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -541,6 +575,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -552,6 +587,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -572,6 +608,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -583,6 +620,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -603,6 +641,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -614,6 +653,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -634,6 +674,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -645,6 +686,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -665,6 +707,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -676,6 +719,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -696,6 +740,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -707,6 +752,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -727,6 +773,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -738,6 +785,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -758,6 +806,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -769,6 +818,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -789,6 +839,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -800,6 +851,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -820,6 +872,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -831,6 +884,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -851,6 +905,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -862,6 +917,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -882,6 +938,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -893,6 +950,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -913,6 +971,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -924,6 +983,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -944,6 +1004,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -955,6 +1016,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -975,6 +1037,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -986,6 +1049,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -1006,6 +1070,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -1017,6 +1082,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -1037,6 +1103,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -1048,6 +1115,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -1068,6 +1136,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -1079,6 +1148,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -1099,6 +1169,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -1110,6 +1181,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -1130,6 +1202,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -1141,6 +1214,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -1161,6 +1235,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
@@ -1172,6 +1247,7 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                 }),
+
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
