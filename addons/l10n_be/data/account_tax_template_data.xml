@@ -1,62 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-  <record id="test_oco_tag" model="account.account.tag"> <!--TODO OCO-->
-      <field name="name">test_tag</field>
-      <field name="applicability">taxes</field>
-      <field name="country_id" ref="base.be"/>
-  </record>
-
-  <record id="test_tax_oco" model="account.tax.template"> <!--TODO OCO to test, so that I don't have to convert the whole report yet-->
-      <field name="sequence">42</field>
-      <field name="description">Test tax oco</field>
-      <field name="name">Test tax oco</field>
-      <field name="amount">21</field>
-      <field name="amount_type">percent</field>
-      <field name="type_tax_use">sale</field>
-      <field name="chart_template_id" ref="l10nbe_chart_template"/>
-      <field name="tax_group_id" ref="tax_group_tva_21"/>
-      <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-          (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
-              'tags_formula': '+01+02-03 '
-          }),
-
-          (0,0, {
-              'factor_percent': 50,
-              'repartition_type': 'tax',
-              'tags_formula': '+03-46L~test_tag'
-          }),
-
-          (0,0, {
-              'factor_percent': 50,
-              'repartition_type': 'tax',
-              'account_id': ref('a411'),
-              'tags_formula': '-47+03+46T'
-          }),
-      ]"/>
-      <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-          (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
-          }),
-
-          (0,0, {
-              'factor_percent': 50,
-              'repartition_type': 'tax',
-          }),
-
-          (0,0, {
-              'factor_percent': 50,
-              'repartition_type': 'tax',
-              'account_id': ref('a411'),
-          }),
-      ]"/>
-  </record>
-
-<!--
-  TODO OCO
         <record id="attn_VAT-OUT-21-L" model="account.tax.template">
             <field name="sequence">10</field>
             <field name="description">TVA 21%</field>
@@ -3206,7 +3150,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V83-06-ROW-CC" model="account.tax.template">
+        <record id="attn_VAT-IN-V83-06-ROW-CC" model="account.tax.template"> <!--merged group-->
             <field name="sequence">2330</field>
             <field name="description">TVA 6% Non EU</field>
             <field name="name">6% Non EU - Biens d'investissement</field>
@@ -3297,6 +3241,5 @@
                 }),
             ]"/>
         </record>
--->
 
 </odoo>
