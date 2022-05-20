@@ -288,6 +288,47 @@
             <field name="sequence">15</field>
         </record>
 
+        <record id="oco_test_sum_children" model="account.report.line">
+            <field name="name">test sum children</field>
+            <field name="report_id" ref="test_report"/>
+            <field name="sequence">16</field>
+            <field name="expression_ids">
+                <record id="oco_test_sum_children_balance" model="account.report.expression">
+                    <field name="total">main</field>
+                    <field name="engine">aggregation</field>
+                    <field name="formula">sum_children</field>
+                </record>
+            </field>
+            <field name="children_ids">
+                <record id="oco_test_sum_children_1" model="account.report.line">
+                    <field name="name">sum children child 1</field>
+                    <field name="report_id" ref="test_report"/>
+                    <field name="sequence">17</field>
+                    <field name="expression_ids">
+                        <record id="oco_test_sum_children_1_balance" model="account.report.expression">
+                            <field name="total">main</field>
+                            <field name="engine">domain</field>
+                            <field name="formula">[('account_id.user_type_id.internal_group', '=', 'income')]</field>
+                            <field name="subformula">sum</field>
+                        </record>
+                    </field>
+                </record>
+                <record id="oco_test_sum_children_2" model="account.report.line">
+                    <field name="name">sum children child 2</field>
+                    <field name="report_id" ref="test_report"/>
+                    <field name="sequence">18</field>
+                    <field name="expression_ids">
+                        <record id="oco_test_sum_children_2_balance" model="account.report.expression">
+                            <field name="total">main</field>
+                            <field name="engine">domain</field>
+                            <field name="formula">[('account_id.user_type_id.internal_group', '=', 'income')]</field>
+                            <field name="subformula">sum</field>
+                        </record>
+                    </field>
+                </record>
+            </field>
+        </record>
+
         <!--TODO OCO le print du test report déconne complet (les colonnes sont bonnes, mais les lignes viennent du rapport générique) => sans doute un souci de passage d'options-->
     </data>
 </odoo>
