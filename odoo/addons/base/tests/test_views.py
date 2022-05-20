@@ -3196,27 +3196,31 @@ class TestAllViewsDFS(common.TransactionCase):
         )
 
     def _test_view(self, view):
-        # print("verifying view", view.xml_id, view.inherit_id.xml_id)
-        checked = False
-        if not view.active:
-            checked = True
+        children = view.inherit_children_ids
+
+        if view.inherit_id:
+            # If the current view is a 'base' view
+            # there is no need to validate it as it was already
+            # validated when first created.
+            children.action_archive()
+
             try:
-                view.active = True
+                if not view.active:
+                    view.active = True
+                else:
+                    view._validate_fields(['arch_db'])
             except ValidationError as e:
                 self._log_error(view, e)
-                return  # If parent view is erroneous, do not test children views
+                # Do not try to validate children views
+                # if parent view is already invalid
+                return
 
-        children = view.inherit_children_ids
-        if not children:
-            if not checked:  # Do not revalidate a given view if already checked during action_unarchive
-                try:
-                    view._validate_fields(['arch_db'])
-                except ValidationError as e:
-                    self._log_error(view, e)
-            return
-
+        # For all the children views,
+        # recursively verify that the combined arch
+        # given by the parent and the unique child is valid
+        # and does not depend on content of siblings view
+        # (which was previously green on runbot only because of modules installation order
+        # be it because of dependencies or other factors)
         for child in children:
-            # Archive other children to make sure view content
-            # does not rely on siblings
             (children - child).action_archive()
             self._test_view(child)
