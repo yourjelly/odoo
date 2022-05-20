@@ -23,7 +23,7 @@ class AccountReport(models.Model):
     #  CORE ==========================================================================================================================================
 
     name = fields.Char(string="Name", required=True) #TODO OCO traductions en multilan
-    strict_date = fields.Boolean(string="Strict Date", compute='_compute_report_option_filters', default=True, readonly=False, store=True) # TODO OCO remplace le strict_range ===> meilleur nom ? Peut-être en inversant le booléen ? Ou virer, en fait ?
+    strict_date = fields.Boolean(string="Strict Date", compute=lambda x: x._compute_report_option_filter('strict_date', True), readonly=False, store=True, depends=['root_report_id'],) # TODO OCO remplace le strict_range ===> meilleur nom ? Peut-être en inversant le booléen ? Ou virer, en fait ?
     line_ids = fields.One2many(string="Lines", comodel_name='account.report.line', inverse_name='report_id')
     column_ids = fields.One2many(string="Columns", comodel_name='account.report.column', inverse_name='report_id')
     # TODO OCO ajouter un genre de séquence pour dans le sélecteur de layout ===> 2.1 serait "2ème bloc, 1ère ligne", comme ça on garde les spérateurs (si besoin) => Ou bien une catégorie de rapport ??? => default = '0.0' => Ou juste placer d'abord les rapports sans pays, avant le séparateur ?
@@ -46,63 +46,57 @@ class AccountReport(models.Model):
     filter_multi_company = fields.Selection(
         string="Multi-Company",
         selection=[('disabled', "Disabled"), ('selector', "Use Company Selector"), ('tax_units', "Use Tax Units")],
-        compute='_compute_report_option_filters', readonly=False, store=True,
-        default='disabled',
+        compute=lambda x: x._compute_report_option_filter('filter_multi_company', 'disabled'), readonly=False, store=True, depends=['root_report_id'],
     ) # TODO OCO required dans la vue
     filter_date_range = fields.Boolean(
         string="Use Date Range",
-        compute='_compute_report_option_filters', readonly=False, store=True,
-        default=True,
+        compute=lambda x: x._compute_report_option_filter('filter_date_range', True), readonly=False, store=True, depends=['root_report_id'],
     )
     filter_show_draft = fields.Boolean(
         string="Allow Showing Draft Entries",
-        compute='_compute_report_option_filters', readonly=False, store=True,
-        default=True,
+        compute=lambda x: x._compute_report_option_filter('filter_show_draft', True), readonly=False, store=True, depends=['root_report_id'],
     )
     filter_unreconciled = fields.Boolean(
         string="Allow Filtering Unreconciled Entries",
-        compute='_compute_report_option_filters', readonly=False, store=True,
+        compute=lambda x: x._compute_report_option_filter('filter_unreconciled', True), readonly=False, store=True, depends=['root_report_id'],
     )
     filter_unfold_all = fields.Boolean(
         string="Allow Unfolding All Lines",
-        compute='_compute_report_option_filters', readonly=False, store=True,
+        compute=lambda x: x._compute_report_option_filter('filter_unfold_all'), readonly=False, store=True, depends=['root_report_id'],
     )
     filter_period_comparison = fields.Boolean(
         string="Allow Comparison",
-        compute='_compute_report_option_filters', readonly=False, store=True,
-        default=True,
+        compute=lambda x: x._compute_report_option_filter('filter_period_comparison', True), readonly=False, store=True, depends=['root_report_id'],
     )
     filter_growth_comparison = fields.Boolean(
         string="Growth Comparison",
-        compute='_compute_report_option_filters', readonly=False, store=True,
-        default=True,
+        compute=lambda x: x._compute_report_option_filter('filter_growth_comparison', True), readonly=False, store=True, depends=['root_report_id'],
     )
     filter_journals = fields.Boolean(
         string="Allow Filtering by Journal",
-        compute='_compute_report_option_filters', readonly=False, store=True,
+        compute=lambda x: x._compute_report_option_filter('filter_journals'), readonly=False, store=True, depends=['root_report_id'],
     )
     filter_analytic = fields.Boolean(
         string="Allow Analytic Filters",
-        compute='_compute_report_option_filters', readonly=False, store=True,
+        compute=lambda x: x._compute_report_option_filter('filter_analytic'), readonly=False, store=True, depends=['root_report_id'],
     )
     filter_hierarchy = fields.Selection(
         string="Hierarchy",
         selection=[('by_default', "Enabled by Default"), ('optional', "Optional"), ('never', "Never")],
-        compute='_compute_report_option_filters', readonly=False, store=True,
-        default='never',
+        compute=lambda x: x._compute_report_option_filter('filter_hierarchy', 'never'), readonly=False, store=True, depends=['root_report_id'],
     ) # TODO OCO required dans la vue
     filter_account_type = fields.Selection(
         string="Filter Account Type",
         selection=[('payable', "Payable"), ('receivable', "Receivable"), ('payable_receivable', "Payable and Receivable")],
-        compute='_compute_report_option_filters', readonly=False, store=True,
+        compute=lambda x: x._compute_report_option_filter('filter_account_type'), readonly=False, store=True, depends=['root_report_id'],
     )
     filter_partner = fields.Boolean(
         string="Filter Partner",
-        compute='_compute_report_option_filters', readonly=False, store=True,
+        compute=lambda x: x._compute_report_option_filter('filter_partner'), readonly=False, store=True, depends=['root_report_id'],
     )
     filter_fiscal_position = fields.Boolean(
         string="Use Foreign VAT Fiscal Positions",
-        compute='_compute_report_option_filters', readonly=False, store=True,
+        compute=lambda x: x._compute_report_option_filter('filter_fiscal_position'), readonly=False, store=True, depends=['root_report_id'],
     )
 
     #  CUSTOM REPORTS ================================================================================================================================
@@ -113,20 +107,14 @@ class AccountReport(models.Model):
     custom_line_postprocessor = fields.Char(string="Custom Line Postprocessor")
     custom_groupby_line_completer = fields.Char(string="Custom Groupby Line Completer")
 
-    @api.depends('root_report_id')
-    def _compute_report_option_filters(self):
+    def _compute_report_option_filter(self, field_name, default_value=False):
         # We don't depend on the different filter fields on the root report, as we don't want a manual change on it to be reflected on all the reports
         # using it as their root (would create confusion). The root report filters are only used as some kind of default values.
-        option_filter_fields = [
-            'filter_multi_company', 'filter_date_range', 'filter_show_draft', 'filter_unreconciled',
-            'filter_unfold_all', 'filter_period_comparison', 'filter_growth_comparison', 'filter_journals', 'filter_analytic', 'filter_hierarchy',
-            'filter_account_type', 'filter_partner', 'filter_fiscal_position', 'strict_date'
-        ]
         for record in self:
             if record.root_report_id:
-                # Default filters are the same as the root report's
-                for field in option_filter_fields:
-                    record[field] = record.root_report_id[field]
+                record[field_name] = record.root_report_id[field_name]
+            else:
+                record[field_name] = default_value
 
     def write(self, vals):
         #TODO OCO reDOC: tax tag management
@@ -200,7 +188,7 @@ class AccountReportLine(models.Model):
     children_ids = fields.One2many(string="Child Lines", comodel_name='account.report.line', inverse_name='parent_id')
     groupby = fields.Char(string="Group By")
     sequence = fields.Integer(string="Sequence", required=True)
-    hierarchy_level = fields.Integer(string="Level", default=1, required=True) # TODO OCO en faire un champ caclulé éditable + dans le script des rapports, le virer quand pas root line
+    hierarchy_level = fields.Integer(string="Level", compute='_compute_hierarchy_level', store=True, readonly=False, recursive=True) # TODO OCO requis dans la vue
     code = fields.Char(string="Code")
     foldable = fields.Boolean(string="Foldable", help="By default, we always unfold the lines that can be. If this is checked; the line won't be unfolded by default, and a folding button will be displayed")
     print_on_new_page = fields.Boolean('Print On New Page', help='When checked this line and everything after it will be printed on a new page.')
@@ -210,6 +198,14 @@ class AccountReportLine(models.Model):
     _sql_constraints = [
         ('code_uniq', 'unique (code)', "A report line with the same code already exists."),
     ]
+
+    @api.depends('parent_id.hierarchy_level')
+    def _compute_hierarchy_level(self):
+        for record in self:
+            if record.parent_id:
+                record.hierarchy_level = record.parent_id.hierarchy_level + 2
+            else:
+                record.hierarchy_level = 1
 
     @api.constrains('groupby', 'children_ids')
     def _validate_groupby(self):
