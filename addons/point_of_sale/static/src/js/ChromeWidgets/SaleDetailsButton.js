@@ -6,6 +6,11 @@ odoo.define('point_of_sale.SaleDetailsButton', function(require) {
     const { renderToString } = require('@web/core/utils/render');
 
     class SaleDetailsButton extends PosComponent {
+        static props = {
+            companyLogoBase64: { type: String, optional: true },
+            companyName: { type: String, optional: true }, // if no logo, this is mandatory
+            decimalPrecision: Number,
+        }
         async onClick() {
             // IMPROVEMENT: Perhaps put this logic in a parent component
             // so that for unit testing, we can check if this simple
@@ -19,7 +24,8 @@ odoo.define('point_of_sale.SaleDetailsButton', function(require) {
                 'SaleDetailsReport',
                 Object.assign({}, saleDetails, {
                     date: new Date().toLocaleString(),
-                    pos: this.env.pos,
+                    pos: this.env.pos, //todo this is special case where it needs the pos for utils too, need to change
+                    props: this.props,
                 })
             );
             const printResult = await this.env.proxy.printer.print_receipt(report);

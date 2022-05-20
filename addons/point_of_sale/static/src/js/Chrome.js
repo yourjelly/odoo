@@ -74,8 +74,8 @@ odoo.define('point_of_sale.Chrome', function(require) {
 
             this.previous_touch_y_coordinate = -1;
 
-            const pos = reactive(this.env.pos, batched(() => this.render(true)))
-            // useSubEnv({ pos });
+            const pos = reactive(this.env.pos, batched(() => this.render()))
+            useSubEnv({ pos });
 
             onMounted(() => {
                 // remove default webclient handlers that induce click delay
@@ -129,7 +129,12 @@ odoo.define('point_of_sale.Chrome', function(require) {
                     `Accessing startScreen of Chrome component before 'state.uiState' to be 'READY' is not recommended.`
                 );
             }
-            return { name: 'ProductScreen' };
+            return {
+                name: 'ProductScreen',
+                props: {
+                    order: this.env.pos.get_order(),
+                },
+            };
         }
 
         // CONTROL METHODS //

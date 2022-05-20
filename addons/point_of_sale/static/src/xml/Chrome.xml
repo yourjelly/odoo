@@ -25,11 +25,14 @@
                     <div class="search-bar-portal" />
                     <div class="status-buttons" t-if="state.uiState === 'READY'" t-att-class="{ oe_hidden: state.mobileSearchBarIsShown }">
                         <CashierName cashier="env.pos.get_cashier()"/>
-                        <SaleDetailsButton t-if="env.proxy.printer" />
-                        <ProxyStatus t-if="env.pos.config.use_proxy" />
-                        <CustomerFacingDisplayButton t-if="customerFacingDisplayButtonIsShown" />
-                        <SyncNotification />
-                        <HeaderButton />
+                        <!--TODO we cannot assume that Product Unit of Measure exists-->
+                        <SaleDetailsButton companyLogoBase64="env.pos.company_logo_base64" companyName="env.pos.company.name"
+                                           decimalPrecision="env.pos.dp['Product Unit of Measure']" t-if="env.proxy.printer"
+                        />
+                        <ProxyStatus t-if="env.pos.config.use_proxy"/>
+                        <CustomerFacingDisplayButton t-if="customerFacingDisplayButtonIsShown"/>
+                        <SyncNotification sync="env.pos.synch"/>
+                        <HeaderButton/>
                     </div>
                 </div>
             </div>

@@ -9,10 +9,16 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
     const { useBarcodeReader } = require('point_of_sale.custom_hooks');
     const { isConnectionError } = require('point_of_sale.utils');
     const { parse } = require('web.field_utils');
+    const { Order } = require('point_of_sale.models');
 
     const { onMounted, useState } = owl;
 
     class ProductScreen extends ControlButtonsMixin(PosComponent) {
+        static props = {
+            order: Order,
+            mobileSearchBarIsShown: Boolean,
+            isShown: Boolean,
+        }
         setup() {
             super.setup();
             useListener('update-selected-orderline', this._updateSelectedOrderline);
