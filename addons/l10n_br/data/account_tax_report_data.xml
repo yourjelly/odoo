@@ -1,568 +1,1479 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="tax_report" model="account.tax.report">
+    <record id="tax_report" model="account.report">
         <field name="name">Tax Report</field>
+        <field name="root_report_id" ref="account.generic_tax_report"/>
         <field name="country_id" ref="base.br"/>
-        <field name="root_line_ids">
-            <record id="tax_report_icmsst" model="account.tax.report.line">
+        <field name="filter_fiscal_position" eval="True"/>
+        <field name="availability_condition">country</field>
+        <field name="column_ids">
+            <record id="tax_report_balance" model="account.report.column">
+                <field name="name">Balance</field>
+                <field name="expression_label">balance</field>
+                <field name="sequence" eval="1"/>
+            </record>
+        </field>
+        <field name="line_ids">
+            <record id="tax_report_icmsst" model="account.report.line">
                 <field name="name">ICMSST</field>
                 <field name="sequence" eval="1"/>
-                <field name="children_line_ids">
-                    <record id="tax_report_icmsst_1" model="account.tax.report.line">
+                <field name="expression_ids">
+                    <record id="tax_report_icmsst_formula" model="account.report.expression">
+                        <field name="total">balance</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">ICMSST_1.balance + ICMSST_2.balance</field>
+                    </record>
+                </field>
+                <field name="children_ids">
+                    <record id="tax_report_icmsst_1" model="account.report.line">
                         <field name="name">ICMSST_1</field>
-                        <field name="tag_name">ICMSST_1</field>
-                        <field name="sequence" eval="1"/>
+                        <field name="code">ICMSST_1</field>
+                        <field name="sequence" eval="2"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_icmsst_1_tag" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">ICMSST_1</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_icmsst_2" model="account.tax.report.line">
+                    <record id="tax_report_icmsst_2" model="account.report.line">
                         <field name="name">ICMSST_2</field>
-                        <field name="tag_name">ICMSST_2</field>
-                        <field name="sequence" eval="2"/>
+                        <field name="code">ICMSST_2</field>
+                        <field name="sequence" eval="3"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_icmsst_2_tag" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">ICMSST_2</field>
+                            </record>
+                        </field>
                     </record>
                 </field>
             </record>
-            <record id="tax_report_irpj" model="account.tax.report.line">
+            <record id="tax_report_irpj" model="account.report.line">
                 <field name="name">IRPJ</field>
-                <field name="sequence" eval="2"/>
-                <field name="children_line_ids">
-                    <record id="tax_report_irpj_1" model="account.tax.report.line">
-                        <field name="name">IRPJ_1</field>
-                        <field name="tag_name">IRPJ_1</field>
-                        <field name="sequence" eval="1"/>
-                    </record>
-                    <record id="tax_report_irpj_2" model="account.tax.report.line">
-                        <field name="name">IRPJ_2</field>
-                        <field name="tag_name">IRPJ_2</field>
-                        <field name="sequence" eval="2"/>
-                    </record>
-                </field>
-            </record>
-            <record id="tax_report_ir" model="account.tax.report.line">
-                <field name="name">IR</field>
-                <field name="sequence" eval="3"/>
-                <field name="children_line_ids">
-                    <record id="tax_report_ir_1" model="account.tax.report.line">
-                        <field name="name">IR_1</field>
-                        <field name="tag_name">IR_1</field>
-                        <field name="sequence" eval="1"/>
-                    </record>
-                    <record id="tax_report_ir_2" model="account.tax.report.line">
-                        <field name="name">IR_2</field>
-                        <field name="tag_name">IR_2</field>
-                        <field name="sequence" eval="2"/>
-                    </record>
-                </field>
-            </record>
-            <record id="tax_report_issqn" model="account.tax.report.line">
-                <field name="name">ISSQN</field>
                 <field name="sequence" eval="4"/>
-                <field name="children_line_ids">
-                    <record id="tax_report_issqn_1" model="account.tax.report.line">
-                        <field name="name">ISSQN_1</field>
-                        <field name="tag_name">ISSQN_1</field>
-                        <field name="sequence" eval="1"/>
-                    </record>
-                    <record id="tax_report_issqn_2" model="account.tax.report.line">
-                        <field name="name">ISSQN_2</field>
-                        <field name="tag_name">ISSQN_2</field>
-                        <field name="sequence" eval="2"/>
+                <field name="expression_ids">
+                    <record id="tax_report_irpj_formula" model="account.report.expression">
+                        <field name="total">balance</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">IRPJ_1.balance + IRPJ_2.balance</field>
                     </record>
                 </field>
-            </record>
-            <record id="tax_report_csll" model="account.tax.report.line">
-                <field name="name">CSLL</field>
-                <field name="sequence" eval="5"/>
-                <field name="children_line_ids">
-                    <record id="tax_report_csll_1" model="account.tax.report.line">
-                        <field name="name">CSLL_1</field>
-                        <field name="tag_name">CSLL_1</field>
-                        <field name="sequence" eval="1"/>
-                    </record>
-                    <record id="tax_report_csll_2" model="account.tax.report.line">
-                        <field name="name">CSLL_2</field>
-                        <field name="tag_name">CSLL_2</field>
-                        <field name="sequence" eval="2"/>
-                    </record>
-                </field>
-            </record>
-            <record id="tax_report_cofins" model="account.tax.report.line">
-                <field name="name">COFINS</field>
-                <field name="sequence" eval="6"/>
-                <field name="children_line_ids">
-                    <record id="tax_report_cofins_oper_bas" model="account.tax.report.line">
-                        <field name="name">Operação Tributável com Alíquota Básica</field>
-                        <field name="sequence" eval="1"/>
-                        <field name="children_line_ids">
-                            <record id="tax_report_cofins_1" model="account.tax.report.line">
-                                <field name="name">COFINS_1</field>
-                                <field name="tag_name">COFINS_1</field>
-                                <field name="sequence" eval="1"/>
-                            </record>
-                            <record id="tax_report_cofins_2" model="account.tax.report.line">
-                                <field name="name">COFINS_2</field>
-                                <field name="tag_name">COFINS_2</field>
-                                <field name="sequence" eval="2"/>
+                <field name="children_ids">
+                    <record id="tax_report_irpj_1" model="account.report.line">
+                        <field name="name">IRPJ_1</field>
+                        <field name="code">IRPJ_1</field>
+                        <field name="sequence" eval="5"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_irpj_1_tag" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">IRPJ_1</field>
                             </record>
                         </field>
                     </record>
-                    <record id="tax_report_cofins_oper_dif" model="account.tax.report.line">
-                        <field name="name">Operação Tributável com Alíquota Diferenciada</field>
-                        <field name="sequence" eval="2"/>
-                    </record>
-                    <record id="tax_report_cofins_oper_uni" model="account.tax.report.line">
-                        <field name="name">Operação Tributável com Alíquota por Unidade de Medida de Produto</field>
-                        <field name="sequence" eval="3"/>
-                    </record>
-                    <record id="tax_report_cofins_line12" model="account.tax.report.line">
-                        <field name="name">Operação Tributável Monofásica - Revenda a Alíquota Zero</field>
-                        <field name="sequence" eval="4"/>
-                    </record>
-                    <record id="tax_report_cofins_oper_sub" model="account.tax.report.line">
-                        <field name="name">Operação Tributável por Substituição Tributária</field>
-                        <field name="sequence" eval="5"/>
-                    </record>
-                    <record id="tax_report_cofins_oper_tri" model="account.tax.report.line">
-                        <field name="name">Operação Tributável a Alíquota zero</field>
+                    <record id="tax_report_irpj_2" model="account.report.line">
+                        <field name="name">IRPJ_2</field>
+                        <field name="code">IRPJ_2</field>
                         <field name="sequence" eval="6"/>
-                    </record>
-                    <record id="tax_report_cofins_oper_isenta" model="account.tax.report.line">
-                        <field name="name">Operação Isenta da Contribuição</field>
-                        <field name="sequence" eval="7"/>
-                    </record>
-                    <record id="tax_report_cofins_oper_sem" model="account.tax.report.line">
-                        <field name="name">Operação sem Incidência da Contribuição</field>
-                        <field name="sequence" eval="8"/>
-                    </record>
-                    <record id="tax_report_cofins_oper_com" model="account.tax.report.line">
-                        <field name="name">Operação com Suspensão da Contribuição</field>
-                        <field name="sequence" eval="9"/>
-                    </record>
-                    <record id="tax_report_cofins_outras_oper_saida" model="account.tax.report.line">
-                        <field name="name">Outras Operações de Saída</field>
-                        <field name="sequence" eval="10"/>
-                    </record>
-                    <record id="tax_report_cofins_oper_mercado" model="account.tax.report.line">
-                        <field name="name">Operação com Direito a Crédito - Vinculada Exclusivamente a Receita Tributada no Mercado Interno</field>
-                        <field name="sequence" eval="11"/>
-                    </record>
-                    <record id="tax_report_cofins_oper_no_mercado" model="account.tax.report.line">
-                        <field name="name">Operação com Direito a Crédito - Vinculada Exclusivamente a Receita Não-Tributada no Mercado Interno</field>
-                        <field name="sequence" eval="12"/>
-                    </record>
-                    <record id="tax_report_cofins_oper_receita" model="account.tax.report.line">
-                        <field name="name">Operação com Direito a Crédito - Vinculada Exclusivamente a Receita de Exportação</field>
-                        <field name="sequence" eval="13"/>
-                    </record>
-                    <record id="tax_report_cofins_oper_nao_tri" model="account.tax.report.line">
-                        <field name="name">Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno</field>
-                        <field name="sequence" eval="14"/>
-                    </record>
-                    <record id="tax_report_cofins_oper_export" model="account.tax.report.line">
-                        <field name="name">Operação com Direito a Crédito - Vinculada a Receitas Tributadas no Mercado Interno e de Exportação </field>
-                        <field name="sequence" eval="15"/>
-                    </record>
-                    <record id="tax_report_oper_interno_export" model="account.tax.report.line">
-                        <field name="name">Operação com Direito a Crédito - Vinculada a Receitas Não Tributadas no Mercado Interno e de Exportação</field>
-                        <field name="sequence" eval="16"/>
-                    </record>
-                    <record id="tax_report_oper_no_marcado_interno_export" model="account.tax.report.line">
-                        <field name="name">Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno e de Exportação</field>
-                        <field name="sequence" eval="17"/>
-                    </record>
-                    <record id="tax_report_credito_oper_no_marcado" model="account.tax.report.line">
-                        <field name="name">Crédito Presumido - Operação de Aquisição Vinculada Exclusivamente a Receita Tributada no Mercado Interno</field>
-                        <field name="sequence" eval="18"/>
-                    </record>
-                    <record id="tax_report_credito_oper_tri" model="account.tax.report.line">
-                        <field name="name">Crédito Presumido - Operação de Aquisição Vinculada Exclusivamente a Receita Não-Tributada no Mercado Interno</field>
-                        <field name="sequence" eval="19"/>
-                    </record>
-                    <record id="tax_report_credito_oper_export" model="account.tax.report.line">
-                        <field name="name">Crédito Presumido - Operação de Aquisição Vinculada Exclusivamente a Receita de Exportação</field>
-                        <field name="sequence" eval="20"/>
-                    </record>
-                    <record id="tax_report_credito_oper_nao_tributadas" model="account.tax.report.line">
-                        <field name="name">Crédito Presumido - Operação de Aquisição Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno</field>
-                        <field name="sequence" eval="21"/>
-                    </record>
-                    <record id="tax_report_credito_oper_tributadas" model="account.tax.report.line">
-                        <field name="name">Crédito Presumido - Operação de Aquisição Vinculada a Receitas Tributadas no Mercado Interno e de Exportação</field>
-                        <field name="sequence" eval="22"/>
-                    </record>
-                    <record id="tax_report_credito_nao_oper_tributadas" model="account.tax.report.line">
-                        <field name="name">Crédito Presumido - Operação de Aquisição Vinculada a Receitas Não-Tributadas no Mercado Interno e de Exportação</field>
-                        <field name="sequence" eval="23"/>
-                    </record>
-                    <record id="tax_report_credito_oper_receitas" model="account.tax.report.line">
-                        <field name="name">Crédito Presumido - Operação de Aquisição Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno e de Exportação</field>
-                        <field name="sequence" eval="24"/>
-                    </record>
-                    <record id="tax_report_credito_outras_oper" model="account.tax.report.line">
-                        <field name="name">Crédito Presumido - Outras Operações</field>
-                        <field name="sequence" eval="25"/>
-                    </record>
-                    <record id="tax_report_oper_aqui_sem" model="account.tax.report.line">
-                        <field name="name">Operação de Aquisição sem Direito a Crédito</field>
-                        <field name="sequence" eval="26"/>
-                    </record>
-                    <record id="tax_report_oper_aqui_com" model="account.tax.report.line">
-                        <field name="name">Operação de Aquisição com Isenção</field>
-                        <field name="sequence" eval="27"/>
-                    </record>
-                    <record id="tax_report_oper_aqui_com_sus" model="account.tax.report.line">
-                        <field name="name">Operação de Aquisição com Suspensão</field>
-                        <field name="sequence" eval="28"/>
-                    </record>
-                    <record id="tax_report_oper_aqui_zero" model="account.tax.report.line">
-                        <field name="name">Operação de Aquisição a Alíquota Zero</field>
-                        <field name="sequence" eval="29"/>
-                    </record>
-                    <record id="tax_report_oper_aqui_contri" model="account.tax.report.line">
-                        <field name="name">Operação de Aquisição sem Incidência da Contribuição</field>
-                        <field name="sequence" eval="30"/>
-                    </record>
-                    <record id="tax_report_oper_aqui_sub" model="account.tax.report.line">
-                        <field name="name">Operação de Aquisição por Substituição Tributária</field>
-                        <field name="sequence" eval="31"/>
-                    </record>
-                    <record id="tax_report_outras_oper_entrada" model="account.tax.report.line">
-                        <field name="name">Outras Operações de Entrada</field>
-                        <field name="sequence" eval="32"/>
-                    </record>
-                    <record id="tax_report_cofins_outras_oper" model="account.tax.report.line">
-                        <field name="name">Outras Operações</field>
-                        <field name="sequence" eval="33"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_irpj_2_tag" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">IRPJ_2</field>
+                            </record>
+                        </field>
                     </record>
                 </field>
             </record>
-            <record id="tax_report_pis" model="account.tax.report.line">
-                <field name="name">PIS</field>
+            <record id="tax_report_ir" model="account.report.line">
+                <field name="name">IR</field>
                 <field name="sequence" eval="7"/>
-                <field name="children_line_ids">
-                    <record id="tax_report_pis_oper_tri_basica" model="account.tax.report.line">
-                        <field name="name">Operação Tributável com Alíquota Básica</field>
-                        <field name="sequence" eval="1"/>
-                        <field name="children_line_ids">
-                            <record id="tax_report_pis_1" model="account.tax.report.line">
-                                <field name="name">PIS_1</field>
-                                <field name="tag_name">PIS_1</field>
-                                <field name="sequence" eval="1"/>
-                            </record>
-                            <record id="tax_report_pis_2" model="account.tax.report.line">
-                                <field name="name">PIS_2</field>
-                                <field name="tag_name">PIS_2</field>
-                                <field name="sequence" eval="2"/>
+                <field name="expression_ids">
+                    <record id="tax_report_ir_formula" model="account.report.expression">
+                        <field name="total">balance</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">IR_1.balance + IR_2.balance</field>
+                    </record>
+                </field>
+                <field name="children_ids">
+                    <record id="tax_report_ir_1" model="account.report.line">
+                        <field name="name">IR_1</field>
+                        <field name="code">IR_1</field>
+                        <field name="sequence" eval="8"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_ir_1_tag" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">IR_1</field>
                             </record>
                         </field>
                     </record>
-                    <record id="tax_report_pis_oper_tri_diferenciada" model="account.tax.report.line">
-                        <field name="name">Operação Tributável com Alíquota Diferenciada</field>
-                        <field name="sequence" eval="2"/>
-                    </record>
-                    <record id="tax_report_pis_oper_tri_produto" model="account.tax.report.line">
-                        <field name="name">Operação Tributável com Alíquota por Unidade de Medida de Produto</field>
-                        <field name="sequence" eval="3"/>
-                    </record>
-                    <record id="tax_report_pis_oper_tri_zero" model="account.tax.report.line">
-                        <field name="name">Operação Tributável Monofásica - Revenda a Alíquota Zero</field>
-                        <field name="sequence" eval="4"/>
-                    </record>
-                    <record id="tax_report_pis_oper_tri_sub" model="account.tax.report.line">
-                        <field name="name">Operação Tributável por Substituição Tributária</field>
-                        <field name="sequence" eval="5"/>
-                    </record>
-                    <record id="tax_report_pis_oper_tri_ali_zero" model="account.tax.report.line">
-                        <field name="name">Operação Tributável a Alíquota Zero</field>
-                        <field name="sequence" eval="6"/>
-                    </record>
-                    <record id="tax_report_pis_oper_isenta" model="account.tax.report.line">
-                        <field name="name">Operação Isenta da Contribuição</field>
-                        <field name="sequence" eval="7"/>
-                    </record>
-                    <record id="tax_report_pis_oper_sem" model="account.tax.report.line">
-                        <field name="name">Operação sem Incidência da Contribuição</field>
-                        <field name="sequence" eval="8"/>
-                    </record>
-                    <record id="tax_report_pis_oper_com" model="account.tax.report.line">
-                        <field name="name">Operação com Suspensão da Contribuição</field>
+                    <record id="tax_report_ir_2" model="account.report.line">
+                        <field name="name">IR_2</field>
+                        <field name="code">IR_2</field>
                         <field name="sequence" eval="9"/>
-                    </record>
-                    <record id="tax_report_pis_outras_oper_saida" model="account.tax.report.line">
-                        <field name="name">Outras Operações de Saída</field>
-                        <field name="sequence" eval="10"/>
-                    </record>
-                    <record id="tax_report_pis_oper_com_direito" model="account.tax.report.line">
-                        <field name="name">Operação com Direito a Crédito - Vinculada Exclusivamente a Receita Tributada no Mercado Interno</field>
-                        <field name="sequence" eval="11"/>
-                    </record>
-                    <record id="tax_report_pis_oper_com_credito" model="account.tax.report.line">
-                        <field name="name">Operação com Direito a Crédito - Vinculada Exclusivamente a Receita Não Tributada no Mercado Interno</field>
-                        <field name="sequence" eval="12"/>
-                    </record>
-                    <record id="tax_report_pis_oper_com_vinculada_ex" model="account.tax.report.line">
-                        <field name="name">Operação com Direito a Crédito - Vinculada Exclusivamente a Receita de Exportação</field>
-                        <field name="sequence" eval="13"/>
-                    </record>
-                    <record id="tax_report_pis_oper_com_vinculada_rec" model="account.tax.report.line">
-                        <field name="name">Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno</field>
-                        <field name="sequence" eval="14"/>
-                    </record>
-                    <record id="tax_report_pis_oper_com_export" model="account.tax.report.line">
-                        <field name="name">Operação com Direito a Crédito - Vinculada a Receitas Tributadas no Mercado Interno e de Exportação</field>
-                        <field name="sequence" eval="15"/>
-                    </record>
-                    <record id="tax_report_pis_oper_com_nao_tri" model="account.tax.report.line">
-                        <field name="name">Operação com Direito a Crédito - Vinculada a Receitas Não-Tributadas no Mercado Interno e de Exportação</field>
-                        <field name="sequence" eval="16"/>
-                    </record>
-                    <record id="tax_report_pis_oper_com_tri_" model="account.tax.report.line">
-                        <field name="name">Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno, e de Exportação</field>
-                        <field name="sequence" eval="17"/>
-                    </record>
-                    <record id="tax_report_pis_credito_presumido_tributada" model="account.tax.report.line">
-                        <field name="name">Crédito Presumido - Operação de Aquisição Vinculada Exclusivamente a Receita Tributada no Mercado Interno</field>
-                        <field name="sequence" eval="18"/>
-                    </record>
-                    <record id="tax_report_pis_credito_presumido_nao_tributada" model="account.tax.report.line">
-                        <field name="name">Crédito Presumido - Operação de Aquisição Vinculada Exclusivamente a Receita Não-Tributada no Mercado Interno</field>
-                        <field name="sequence" eval="19"/>
-                    </record>
-                    <record id="tax_report_pis_credito_presumido_export" model="account.tax.report.line">
-                        <field name="name">Crédito Presumido - Operação de Aquisição Vinculada Exclusivamente a Receita de Exportação</field>
-                        <field name="sequence" eval="20"/>
-                    </record>
-                    <record id="tax_report_pis_credito_presumido_interno" model="account.tax.report.line">
-                        <field name="name">Crédito Presumido - Operação de Aquisição Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno</field>
-                        <field name="sequence" eval="21"/>
-                    </record>
-                    <record id="tax_report_pis_credito_presumido_interno_export" model="account.tax.report.line">
-                        <field name="name">Crédito Presumido - Operação de Aquisição Vinculada a Receitas Tributadas no Mercado Interno e de Exportação</field>
-                        <field name="sequence" eval="22"/>
-                    </record>
-                    <record id="tax_report_pis_credito_presumido_oper_nao_tri" model="account.tax.report.line">
-                        <field name="name">Crédito Presumido - Operação de Aquisição Vinculada a Receitas Não-Tributadas no Mercado Interno e de Exportação</field>
-                        <field name="sequence" eval="23"/>
-                    </record>
-                    <record id="tax_report_pis_credito_presumido_oper_tri" model="account.tax.report.line">
-                        <field name="name">Crédito Presumido - Operação de Aquisição Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno, e de Exportação</field>
-                        <field name="sequence" eval="24"/>
-                    </record>
-                    <record id="tax_report_pis_credito_presumido_outras_oper" model="account.tax.report.line">
-                        <field name="name">Crédito Presumido - Outras Operações</field>
-                        <field name="sequence" eval="25"/>
-                    </record>
-                    <record id="tax_report_pis_oper_aqui_sem" model="account.tax.report.line">
-                        <field name="name">Operação de Aquisição sem Direito a Crédito</field>
-                        <field name="sequence" eval="26"/>
-                    </record>
-                    <record id="tax_report_pis_oper_com_ise" model="account.tax.report.line">
-                        <field name="name">Operação de Aquisição com Isenção</field>
-                        <field name="sequence" eval="27"/>
-                    </record>
-                    <record id="tax_report_pis_oper_aqui_com" model="account.tax.report.line">
-                        <field name="name">Operação de Aquisição com Suspensão</field>
-                        <field name="sequence" eval="28"/>
-                    </record>
-                    <record id="tax_report_pis_oper_aqui_zero" model="account.tax.report.line">
-                        <field name="name">Operação de Aquisição a Alíquota Zero</field>
-                        <field name="sequence" eval="29"/>
-                    </record>
-                    <record id="tax_report_pis_oper_aqui_inc" model="account.tax.report.line">
-                        <field name="name">Operação de Aquisição sem Incidência da Contribuição</field>
-                        <field name="sequence" eval="30"/>
-                    </record>
-                    <record id="tax_report_pis_oper_aqui_sub" model="account.tax.report.line">
-                        <field name="name">Operação de Aquisição por Substituição Tributária</field>
-                        <field name="sequence" eval="31"/>
-                    </record>
-                    <record id="tax_report_pis_outras_oper_entrada" model="account.tax.report.line">
-                        <field name="name">Outras Operações de Entrada</field>
-                        <field name="sequence" eval="32"/>
-                    </record>
-                    <record id="tax_report_pis_outras_oper" model="account.tax.report.line">
-                        <field name="name">Outras Operações</field>
-                        <field name="sequence" eval="33"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_ir_2_tag" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">IR_2</field>
+                            </record>
+                        </field>
                     </record>
                 </field>
             </record>
-            <record id="tax_report_ipi" model="account.tax.report.line">
+            <record id="tax_report_issqn" model="account.report.line">
+                <field name="name">ISSQN</field>
+                <field name="sequence" eval="10"/>
+                <field name="expression_ids">
+                    <record id="tax_report_issqn_formula" model="account.report.expression">
+                        <field name="total">balance</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">ISSQN_1.balance + ISSQN_2.balance</field>
+                    </record>
+                </field>
+                <field name="children_ids">
+                    <record id="tax_report_issqn_1" model="account.report.line">
+                        <field name="name">ISSQN_1</field>
+                        <field name="code">ISSQN_1</field>
+                        <field name="sequence" eval="11"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_issqn_1_tag" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">ISSQN_1</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_issqn_2" model="account.report.line">
+                        <field name="name">ISSQN_2</field>
+                        <field name="code">ISSQN_2</field>
+                        <field name="sequence" eval="12"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_issqn_2_tag" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">ISSQN_2</field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_csll" model="account.report.line">
+                <field name="name">CSLL</field>
+                <field name="sequence" eval="13"/>
+                <field name="expression_ids">
+                    <record id="tax_report_csll_formula" model="account.report.expression">
+                        <field name="total">balance</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">CSLL_1.balance + CSLL_2.balance</field>
+                    </record>
+                </field>
+                <field name="children_ids">
+                    <record id="tax_report_csll_1" model="account.report.line">
+                        <field name="name">CSLL_1</field>
+                        <field name="code">CSLL_1</field>
+                        <field name="sequence" eval="14"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_csll_1_tag" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">CSLL_1</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_csll_2" model="account.report.line">
+                        <field name="name">CSLL_2</field>
+                        <field name="code">CSLL_2</field>
+                        <field name="sequence" eval="15"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_csll_2_tag" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">CSLL_2</field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_cofins" model="account.report.line">
+                <field name="name">COFINS</field>
+                <field name="sequence" eval="16"/>
+                <field name="expression_ids">
+                    <record id="tax_report_cofins_formula" model="account.report.expression">
+                        <field name="total">balance</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">OPERACAO_TRIBUTAVEL_COM_ALIQUOTA_BASICA.balance + OPERACAO_TRIBUTAVEL_COM_ALIQUOTA_DIFERENCIADA.balance + OPERACAO_TRIBUTAVEL_COM_ALIQUOTA_POR_UNIDADE_DE_MEDIDA_DE_PRODUTO.balance + OPERACAO_TRIBUTAVEL_MONOFASICA__REVENDA_A_ALIQUOTA_ZERO.balance + OPERACAO_TRIBUTAVEL_POR_SUBSTITUICAO_TRIBUTARIA.balance + OPERACAO_TRIBUTAVEL_A_ALIQUOTA_ZERO.balance + OPERACAO_ISENTA_DA_CONTRIBUICAO.balance + OPERACAO_SEM_INCIDENCIA_DA_CONTRIBUICAO.balance + OPERACAO_COM_SUSPENSAO_DA_CONTRIBUICAO.balance + OUTRAS_OPERACOES_DE_SAIDA.balance + OPERACAO_COM_DIREITO_A_CREDITO__VINCULADA_EXCLUSIVAMENTE_A_RECEITA_TRIBUTADA_NO_MERCADO_INTERNO.balance + OPERACAO_COM_DIREITO_A_CREDITO__VINCULADA_EXCLUSIVAMENTE_A_RECEITA_NAOTRIBUTADA_NO_MERCADO_INTERNO.balance + OPERACAO_COM_DIREITO_A_CREDITO__VINCULADA_EXCLUSIVAMENTE_A_RECEITA_DE_EXPORTACAO.balance + OPERACAO_COM_DIREITO_A_CREDITO__VINCULADA_A_RECEITAS_TRIBUTADAS_E_NAOTRIBUTADAS_NO_MERCADO_INTERNO.balance + OPERACAO_COM_DIREITO_A_CREDITO__VINCULADA_A_RECEITAS_TRIBUTADAS_NO_MERCADO_INTERNO_E_DE_EXPORTACAO_.balance + OPERACAO_COM_DIREITO_A_CREDITO__VINCULADA_A_RECEITAS_NAO_TRIBUTADAS_NO_MERCADO_INTERNO_E_DE_EXPORTACAO.balance + OPERACAO_COM_DIREITO_A_CREDITO__VINCULADA_A_RECEITAS_TRIBUTADAS_E_NAOTRIBUTADAS_NO_MERCADO_INTERNO_E_DE_EXPORTACAO.balance + CREDITO_PRESUMIDO__OPERACAO_DE_AQUISICAO_VINCULADA_EXCLUSIVAMENTE_A_RECEITA_TRIBUTADA_NO_MERCADO_INTERNO.balance + CREDITO_PRESUMIDO__OPERACAO_DE_AQUISICAO_VINCULADA_EXCLUSIVAMENTE_A_RECEITA_NAOTRIBUTADA_NO_MERCADO_INTERNO.balance + CREDITO_PRESUMIDO__OPERACAO_DE_AQUISICAO_VINCULADA_EXCLUSIVAMENTE_A_RECEITA_DE_EXPORTACAO.balance + CREDITO_PRESUMIDO__OPERACAO_DE_AQUISICAO_VINCULADA_A_RECEITAS_TRIBUTADAS_E_NAOTRIBUTADAS_NO_MERCADO_INTERNO.balance + CREDITO_PRESUMIDO__OPERACAO_DE_AQUISICAO_VINCULADA_A_RECEITAS_TRIBUTADAS_NO_MERCADO_INTERNO_E_DE_EXPORTACAO.balance + CREDITO_PRESUMIDO__OPERACAO_DE_AQUISICAO_VINCULADA_A_RECEITAS_NAOTRIBUTADAS_NO_MERCADO_INTERNO_E_DE_EXPORTACAO.balance + CREDITO_PRESUMIDO__OPERACAO_DE_AQUISICAO_VINCULADA_A_RECEITAS_TRIBUTADAS_E_NAOTRIBUTADAS_NO_MERCADO_INTERNO_E_DE_EXPORTACAO.balance + CREDITO_PRESUMIDO__OUTRAS_OPERACOES.balance + OPERACAO_DE_AQUISICAO_SEM_DIREITO_A_CREDITO.balance + OPERACAO_DE_AQUISICAO_COM_ISENCAO.balance + OPERACAO_DE_AQUISICAO_COM_SUSPENSAO.balance + OPERACAO_DE_AQUISICAO_A_ALIQUOTA_ZERO.balance + OPERACAO_DE_AQUISICAO_SEM_INCIDENCIA_DA_CONTRIBUICAO.balance + OPERACAO_DE_AQUISICAO_POR_SUBSTITUICAO_TRIBUTARIA.balance + OUTRAS_OPERACOES_DE_ENTRADA.balance + OUTRAS_OPERACOES.balance</field>
+                    </record>
+                </field>
+                <field name="children_ids">
+                    <record id="tax_report_cofins_oper_bas" model="account.report.line">
+                        <field name="name">Operação Tributável com Alíquota Básica</field>
+                        <field name="code">OPERACAO_TRIBUTAVEL_COM_ALIQUOTA_BASICA</field>
+                        <field name="sequence" eval="17"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_cofins_oper_bas_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">COFINS_1.balance + COFINS_2.balance</field>
+                            </record>
+                        </field>
+                        <field name="children_ids">
+                            <record id="tax_report_cofins_1" model="account.report.line">
+                                <field name="name">COFINS_1</field>
+                                <field name="code">COFINS_1</field>
+                                <field name="sequence" eval="18"/>
+                                <field name="expression_ids">
+                                    <record id="tax_report_cofins_1_tag" model="account.report.expression">
+                                        <field name="total">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">COFINS_1</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="tax_report_cofins_2" model="account.report.line">
+                                <field name="name">COFINS_2</field>
+                                <field name="code">COFINS_2</field>
+                                <field name="sequence" eval="19"/>
+                                <field name="expression_ids">
+                                    <record id="tax_report_cofins_2_tag" model="account.report.expression">
+                                        <field name="total">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">COFINS_2</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_cofins_oper_dif" model="account.report.line">
+                        <field name="name">Operação Tributável com Alíquota Diferenciada</field>
+                        <field name="code">OPERACAO_TRIBUTAVEL_COM_ALIQUOTA_DIFERENCIADA</field>
+                        <field name="sequence" eval="20"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_cofins_oper_dif_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_cofins_oper_uni" model="account.report.line">
+                        <field name="name">Operação Tributável com Alíquota por Unidade de Medida de Produto</field>
+                        <field name="code">OPERACAO_TRIBUTAVEL_COM_ALIQUOTA_POR_UNIDADE_DE_MEDIDA_DE_PRODUTO</field>
+                        <field name="sequence" eval="21"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_cofins_oper_uni_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_cofins_line12" model="account.report.line">
+                        <field name="name">Operação Tributável Monofásica - Revenda a Alíquota Zero</field>
+                        <field name="code">OPERACAO_TRIBUTAVEL_MONOFASICA__REVENDA_A_ALIQUOTA_ZERO</field>
+                        <field name="sequence" eval="22"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_cofins_line12_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_cofins_oper_sub" model="account.report.line">
+                        <field name="name">Operação Tributável por Substituição Tributária</field>
+                        <field name="code">OPERACAO_TRIBUTAVEL_POR_SUBSTITUICAO_TRIBUTARIA</field>
+                        <field name="sequence" eval="23"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_cofins_oper_sub_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_cofins_oper_tri" model="account.report.line">
+                        <field name="name">Operação Tributável a Alíquota zero</field>
+                        <field name="code">OPERACAO_TRIBUTAVEL_A_ALIQUOTA_ZERO</field>
+                        <field name="sequence" eval="24"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_cofins_oper_tri_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_cofins_oper_isenta" model="account.report.line">
+                        <field name="name">Operação Isenta da Contribuição</field>
+                        <field name="code">OPERACAO_ISENTA_DA_CONTRIBUICAO</field>
+                        <field name="sequence" eval="25"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_cofins_oper_isenta_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_cofins_oper_sem" model="account.report.line">
+                        <field name="name">Operação sem Incidência da Contribuição</field>
+                        <field name="code">OPERACAO_SEM_INCIDENCIA_DA_CONTRIBUICAO</field>
+                        <field name="sequence" eval="26"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_cofins_oper_sem_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_cofins_oper_com" model="account.report.line">
+                        <field name="name">Operação com Suspensão da Contribuição</field>
+                        <field name="code">OPERACAO_COM_SUSPENSAO_DA_CONTRIBUICAO</field>
+                        <field name="sequence" eval="27"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_cofins_oper_com_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_cofins_outras_oper_saida" model="account.report.line">
+                        <field name="name">Outras Operações de Saída</field>
+                        <field name="code">OUTRAS_OPERACOES_DE_SAIDA</field>
+                        <field name="sequence" eval="28"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_cofins_outras_oper_saida_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_cofins_oper_mercado" model="account.report.line">
+                        <field name="name">Operação com Direito a Crédito - Vinculada Exclusivamente a Receita Tributada no Mercado Interno</field>
+                        <field name="code">OPERACAO_COM_DIREITO_A_CREDITO__VINCULADA_EXCLUSIVAMENTE_A_RECEITA_TRIBUTADA_NO_MERCADO_INTERNO</field>
+                        <field name="sequence" eval="29"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_cofins_oper_mercado_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_cofins_oper_no_mercado" model="account.report.line">
+                        <field name="name">Operação com Direito a Crédito - Vinculada Exclusivamente a Receita Não-Tributada no Mercado Interno</field>
+                        <field name="code">OPERACAO_COM_DIREITO_A_CREDITO__VINCULADA_EXCLUSIVAMENTE_A_RECEITA_NAOTRIBUTADA_NO_MERCADO_INTERNO</field>
+                        <field name="sequence" eval="30"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_cofins_oper_no_mercado_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_cofins_oper_receita" model="account.report.line">
+                        <field name="name">Operação com Direito a Crédito - Vinculada Exclusivamente a Receita de Exportação</field>
+                        <field name="code">OPERACAO_COM_DIREITO_A_CREDITO__VINCULADA_EXCLUSIVAMENTE_A_RECEITA_DE_EXPORTACAO</field>
+                        <field name="sequence" eval="31"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_cofins_oper_receita_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_cofins_oper_nao_tri" model="account.report.line">
+                        <field name="name">Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno</field>
+                        <field name="code">OPERACAO_COM_DIREITO_A_CREDITO__VINCULADA_A_RECEITAS_TRIBUTADAS_E_NAOTRIBUTADAS_NO_MERCADO_INTERNO</field>
+                        <field name="sequence" eval="32"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_cofins_oper_nao_tri_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_cofins_oper_export" model="account.report.line">
+                        <field name="name">Operação com Direito a Crédito - Vinculada a Receitas Tributadas no Mercado Interno e de Exportação </field>
+                        <field name="code">OPERACAO_COM_DIREITO_A_CREDITO__VINCULADA_A_RECEITAS_TRIBUTADAS_NO_MERCADO_INTERNO_E_DE_EXPORTACAO_</field>
+                        <field name="sequence" eval="33"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_cofins_oper_export_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_oper_interno_export" model="account.report.line">
+                        <field name="name">Operação com Direito a Crédito - Vinculada a Receitas Não Tributadas no Mercado Interno e de Exportação</field>
+                        <field name="code">OPERACAO_COM_DIREITO_A_CREDITO__VINCULADA_A_RECEITAS_NAO_TRIBUTADAS_NO_MERCADO_INTERNO_E_DE_EXPORTACAO</field>
+                        <field name="sequence" eval="34"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_oper_interno_export_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_oper_no_marcado_interno_export" model="account.report.line">
+                        <field name="name">Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno e de Exportação</field>
+                        <field name="code">OPERACAO_COM_DIREITO_A_CREDITO__VINCULADA_A_RECEITAS_TRIBUTADAS_E_NAOTRIBUTADAS_NO_MERCADO_INTERNO_E_DE_EXPORTACAO</field>
+                        <field name="sequence" eval="35"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_oper_no_marcado_interno_export_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_credito_oper_no_marcado" model="account.report.line">
+                        <field name="name">Crédito Presumido - Operação de Aquisição Vinculada Exclusivamente a Receita Tributada no Mercado Interno</field>
+                        <field name="code">CREDITO_PRESUMIDO__OPERACAO_DE_AQUISICAO_VINCULADA_EXCLUSIVAMENTE_A_RECEITA_TRIBUTADA_NO_MERCADO_INTERNO</field>
+                        <field name="sequence" eval="36"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_credito_oper_no_marcado_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_credito_oper_tri" model="account.report.line">
+                        <field name="name">Crédito Presumido - Operação de Aquisição Vinculada Exclusivamente a Receita Não-Tributada no Mercado Interno</field>
+                        <field name="code">CREDITO_PRESUMIDO__OPERACAO_DE_AQUISICAO_VINCULADA_EXCLUSIVAMENTE_A_RECEITA_NAOTRIBUTADA_NO_MERCADO_INTERNO</field>
+                        <field name="sequence" eval="37"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_credito_oper_tri_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_credito_oper_export" model="account.report.line">
+                        <field name="name">Crédito Presumido - Operação de Aquisição Vinculada Exclusivamente a Receita de Exportação</field>
+                        <field name="code">CREDITO_PRESUMIDO__OPERACAO_DE_AQUISICAO_VINCULADA_EXCLUSIVAMENTE_A_RECEITA_DE_EXPORTACAO</field>
+                        <field name="sequence" eval="38"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_credito_oper_export_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_credito_oper_nao_tributadas" model="account.report.line">
+                        <field name="name">Crédito Presumido - Operação de Aquisição Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno</field>
+                        <field name="code">CREDITO_PRESUMIDO__OPERACAO_DE_AQUISICAO_VINCULADA_A_RECEITAS_TRIBUTADAS_E_NAOTRIBUTADAS_NO_MERCADO_INTERNO</field>
+                        <field name="sequence" eval="39"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_credito_oper_nao_tributadas_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_credito_oper_tributadas" model="account.report.line">
+                        <field name="name">Crédito Presumido - Operação de Aquisição Vinculada a Receitas Tributadas no Mercado Interno e de Exportação</field>
+                        <field name="code">CREDITO_PRESUMIDO__OPERACAO_DE_AQUISICAO_VINCULADA_A_RECEITAS_TRIBUTADAS_NO_MERCADO_INTERNO_E_DE_EXPORTACAO</field>
+                        <field name="sequence" eval="40"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_credito_oper_tributadas_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_credito_nao_oper_tributadas" model="account.report.line">
+                        <field name="name">Crédito Presumido - Operação de Aquisição Vinculada a Receitas Não-Tributadas no Mercado Interno e de Exportação</field>
+                        <field name="code">CREDITO_PRESUMIDO__OPERACAO_DE_AQUISICAO_VINCULADA_A_RECEITAS_NAOTRIBUTADAS_NO_MERCADO_INTERNO_E_DE_EXPORTACAO</field>
+                        <field name="sequence" eval="41"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_credito_nao_oper_tributadas_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_credito_oper_receitas" model="account.report.line">
+                        <field name="name">Crédito Presumido - Operação de Aquisição Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno e de Exportação</field>
+                        <field name="code">CREDITO_PRESUMIDO__OPERACAO_DE_AQUISICAO_VINCULADA_A_RECEITAS_TRIBUTADAS_E_NAOTRIBUTADAS_NO_MERCADO_INTERNO_E_DE_EXPORTACAO</field>
+                        <field name="sequence" eval="42"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_credito_oper_receitas_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_credito_outras_oper" model="account.report.line">
+                        <field name="name">Crédito Presumido - Outras Operações</field>
+                        <field name="code">CREDITO_PRESUMIDO__OUTRAS_OPERACOES</field>
+                        <field name="sequence" eval="43"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_credito_outras_oper_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_oper_aqui_sem" model="account.report.line">
+                        <field name="name">Operação de Aquisição sem Direito a Crédito</field>
+                        <field name="code">OPERACAO_DE_AQUISICAO_SEM_DIREITO_A_CREDITO</field>
+                        <field name="sequence" eval="44"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_oper_aqui_sem_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_oper_aqui_com" model="account.report.line">
+                        <field name="name">Operação de Aquisição com Isenção</field>
+                        <field name="code">OPERACAO_DE_AQUISICAO_COM_ISENCAO</field>
+                        <field name="sequence" eval="45"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_oper_aqui_com_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_oper_aqui_com_sus" model="account.report.line">
+                        <field name="name">Operação de Aquisição com Suspensão</field>
+                        <field name="code">OPERACAO_DE_AQUISICAO_COM_SUSPENSAO</field>
+                        <field name="sequence" eval="46"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_oper_aqui_com_sus_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_oper_aqui_zero" model="account.report.line">
+                        <field name="name">Operação de Aquisição a Alíquota Zero</field>
+                        <field name="code">OPERACAO_DE_AQUISICAO_A_ALIQUOTA_ZERO</field>
+                        <field name="sequence" eval="47"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_oper_aqui_zero_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_oper_aqui_contri" model="account.report.line">
+                        <field name="name">Operação de Aquisição sem Incidência da Contribuição</field>
+                        <field name="code">OPERACAO_DE_AQUISICAO_SEM_INCIDENCIA_DA_CONTRIBUICAO</field>
+                        <field name="sequence" eval="48"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_oper_aqui_contri_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_oper_aqui_sub" model="account.report.line">
+                        <field name="name">Operação de Aquisição por Substituição Tributária</field>
+                        <field name="code">OPERACAO_DE_AQUISICAO_POR_SUBSTITUICAO_TRIBUTARIA</field>
+                        <field name="sequence" eval="49"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_oper_aqui_sub_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_outras_oper_entrada" model="account.report.line">
+                        <field name="name">Outras Operações de Entrada</field>
+                        <field name="code">OUTRAS_OPERACOES_DE_ENTRADA</field>
+                        <field name="sequence" eval="50"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_outras_oper_entrada_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_cofins_outras_oper" model="account.report.line">
+                        <field name="name">Outras Operações</field>
+                        <field name="code">OUTRAS_OPERACOES</field>
+                        <field name="sequence" eval="51"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_cofins_outras_oper_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_pis" model="account.report.line">
+                <field name="name">PIS</field>
+                <field name="sequence" eval="52"/>
+                <field name="expression_ids">
+                    <record id="tax_report_pis_formula" model="account.report.expression">
+                        <field name="total">balance</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">OPERACAO_TRIBUTAVEL_COM_ALIQUOTA_BASICA.balance + OPERACAO_TRIBUTAVEL_COM_ALIQUOTA_DIFERENCIADA.balance + OPERACAO_TRIBUTAVEL_COM_ALIQUOTA_POR_UNIDADE_DE_MEDIDA_DE_PRODUTO.balance + OPERACAO_TRIBUTAVEL_MONOFASICA__REVENDA_A_ALIQUOTA_ZERO.balance + OPERACAO_TRIBUTAVEL_POR_SUBSTITUICAO_TRIBUTARIA.balance + OPERACAO_TRIBUTAVEL_A_ALIQUOTA_ZERO.balance + OPERACAO_ISENTA_DA_CONTRIBUICAO.balance + OPERACAO_SEM_INCIDENCIA_DA_CONTRIBUICAO.balance + OPERACAO_COM_SUSPENSAO_DA_CONTRIBUICAO.balance + OUTRAS_OPERACOES_DE_SAIDA.balance + OPERACAO_COM_DIREITO_A_CREDITO__VINCULADA_EXCLUSIVAMENTE_A_RECEITA_TRIBUTADA_NO_MERCADO_INTERNO.balance + OPERACAO_COM_DIREITO_A_CREDITO__VINCULADA_EXCLUSIVAMENTE_A_RECEITA_NAO_TRIBUTADA_NO_MERCADO_INTERNO.balance + OPERACAO_COM_DIREITO_A_CREDITO__VINCULADA_EXCLUSIVAMENTE_A_RECEITA_DE_EXPORTACAO.balance + OPERACAO_COM_DIREITO_A_CREDITO__VINCULADA_A_RECEITAS_TRIBUTADAS_E_NAOTRIBUTADAS_NO_MERCADO_INTERNO.balance + OPERACAO_COM_DIREITO_A_CREDITO__VINCULADA_A_RECEITAS_TRIBUTADAS_NO_MERCADO_INTERNO_E_DE_EXPORTACAO.balance + OPERACAO_COM_DIREITO_A_CREDITO__VINCULADA_A_RECEITAS_NAOTRIBUTADAS_NO_MERCADO_INTERNO_E_DE_EXPORTACAO.balance + OPERACAO_COM_DIREITO_A_CREDITO__VINCULADA_A_RECEITAS_TRIBUTADAS_E_NAOTRIBUTADAS_NO_MERCADO_INTERNO_E_DE_EXPORTACAO.balance + CREDITO_PRESUMIDO__OPERACAO_DE_AQUISICAO_VINCULADA_EXCLUSIVAMENTE_A_RECEITA_TRIBUTADA_NO_MERCADO_INTERNO.balance + CREDITO_PRESUMIDO__OPERACAO_DE_AQUISICAO_VINCULADA_EXCLUSIVAMENTE_A_RECEITA_NAOTRIBUTADA_NO_MERCADO_INTERNO.balance + CREDITO_PRESUMIDO__OPERACAO_DE_AQUISICAO_VINCULADA_EXCLUSIVAMENTE_A_RECEITA_DE_EXPORTACAO.balance + CREDITO_PRESUMIDO__OPERACAO_DE_AQUISICAO_VINCULADA_A_RECEITAS_TRIBUTADAS_E_NAOTRIBUTADAS_NO_MERCADO_INTERNO.balance + CREDITO_PRESUMIDO__OPERACAO_DE_AQUISICAO_VINCULADA_A_RECEITAS_TRIBUTADAS_NO_MERCADO_INTERNO_E_DE_EXPORTACAO.balance + CREDITO_PRESUMIDO__OPERACAO_DE_AQUISICAO_VINCULADA_A_RECEITAS_NAOTRIBUTADAS_NO_MERCADO_INTERNO_E_DE_EXPORTACAO.balance + CREDITO_PRESUMIDO__OPERACAO_DE_AQUISICAO_VINCULADA_A_RECEITAS_TRIBUTADAS_E_NAOTRIBUTADAS_NO_MERCADO_INTERNO_E_DE_EXPORTACAO.balance + CREDITO_PRESUMIDO__OUTRAS_OPERACOES.balance + OPERACAO_DE_AQUISICAO_SEM_DIREITO_A_CREDITO.balance + OPERACAO_DE_AQUISICAO_COM_ISENCAO.balance + OPERACAO_DE_AQUISICAO_COM_SUSPENSAO.balance + OPERACAO_DE_AQUISICAO_A_ALIQUOTA_ZERO.balance + OPERACAO_DE_AQUISICAO_SEM_INCIDENCIA_DA_CONTRIBUICAO.balance + OPERACAO_DE_AQUISICAO_POR_SUBSTITUICAO_TRIBUTARIA.balance + OUTRAS_OPERACOES_DE_ENTRADA.balance + OUTRAS_OPERACOES.balance</field>
+                    </record>
+                </field>
+                <field name="children_ids">
+                    <record id="tax_report_pis_oper_tri_basica" model="account.report.line">
+                        <field name="name">Operação Tributável com Alíquota Básica</field>
+                        <field name="code">OPERACAO_TRIBUTAVEL_COM_ALIQUOTA_BASICA</field>
+                        <field name="sequence" eval="53"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_oper_tri_basica_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">PIS_1.balance + PIS_2.balance</field>
+                            </record>
+                        </field>
+                        <field name="children_ids">
+                            <record id="tax_report_pis_1" model="account.report.line">
+                                <field name="name">PIS_1</field>
+                                <field name="code">PIS_1</field>
+                                <field name="sequence" eval="54"/>
+                                <field name="expression_ids">
+                                    <record id="tax_report_pis_1_tag" model="account.report.expression">
+                                        <field name="total">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">PIS_1</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="tax_report_pis_2" model="account.report.line">
+                                <field name="name">PIS_2</field>
+                                <field name="code">PIS_2</field>
+                                <field name="sequence" eval="55"/>
+                                <field name="expression_ids">
+                                    <record id="tax_report_pis_2_tag" model="account.report.expression">
+                                        <field name="total">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">PIS_2</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_oper_tri_diferenciada" model="account.report.line">
+                        <field name="name">Operação Tributável com Alíquota Diferenciada</field>
+                        <field name="code">OPERACAO_TRIBUTAVEL_COM_ALIQUOTA_DIFERENCIADA</field>
+                        <field name="sequence" eval="56"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_oper_tri_diferenciada_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_oper_tri_produto" model="account.report.line">
+                        <field name="name">Operação Tributável com Alíquota por Unidade de Medida de Produto</field>
+                        <field name="code">OPERACAO_TRIBUTAVEL_COM_ALIQUOTA_POR_UNIDADE_DE_MEDIDA_DE_PRODUTO</field>
+                        <field name="sequence" eval="57"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_oper_tri_produto_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_oper_tri_zero" model="account.report.line">
+                        <field name="name">Operação Tributável Monofásica - Revenda a Alíquota Zero</field>
+                        <field name="code">OPERACAO_TRIBUTAVEL_MONOFASICA__REVENDA_A_ALIQUOTA_ZERO</field>
+                        <field name="sequence" eval="58"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_oper_tri_zero_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_oper_tri_sub" model="account.report.line">
+                        <field name="name">Operação Tributável por Substituição Tributária</field>
+                        <field name="code">OPERACAO_TRIBUTAVEL_POR_SUBSTITUICAO_TRIBUTARIA</field>
+                        <field name="sequence" eval="59"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_oper_tri_sub_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_oper_tri_ali_zero" model="account.report.line">
+                        <field name="name">Operação Tributável a Alíquota Zero</field>
+                        <field name="code">OPERACAO_TRIBUTAVEL_A_ALIQUOTA_ZERO</field>
+                        <field name="sequence" eval="60"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_oper_tri_ali_zero_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_oper_isenta" model="account.report.line">
+                        <field name="name">Operação Isenta da Contribuição</field>
+                        <field name="code">OPERACAO_ISENTA_DA_CONTRIBUICAO</field>
+                        <field name="sequence" eval="61"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_oper_isenta_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_oper_sem" model="account.report.line">
+                        <field name="name">Operação sem Incidência da Contribuição</field>
+                        <field name="code">OPERACAO_SEM_INCIDENCIA_DA_CONTRIBUICAO</field>
+                        <field name="sequence" eval="62"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_oper_sem_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_oper_com" model="account.report.line">
+                        <field name="name">Operação com Suspensão da Contribuição</field>
+                        <field name="code">OPERACAO_COM_SUSPENSAO_DA_CONTRIBUICAO</field>
+                        <field name="sequence" eval="63"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_oper_com_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_outras_oper_saida" model="account.report.line">
+                        <field name="name">Outras Operações de Saída</field>
+                        <field name="code">OUTRAS_OPERACOES_DE_SAIDA</field>
+                        <field name="sequence" eval="64"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_outras_oper_saida_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_oper_com_direito" model="account.report.line">
+                        <field name="name">Operação com Direito a Crédito - Vinculada Exclusivamente a Receita Tributada no Mercado Interno</field>
+                        <field name="code">OPERACAO_COM_DIREITO_A_CREDITO__VINCULADA_EXCLUSIVAMENTE_A_RECEITA_TRIBUTADA_NO_MERCADO_INTERNO</field>
+                        <field name="sequence" eval="65"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_oper_com_direito_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_oper_com_credito" model="account.report.line">
+                        <field name="name">Operação com Direito a Crédito - Vinculada Exclusivamente a Receita Não Tributada no Mercado Interno</field>
+                        <field name="code">OPERACAO_COM_DIREITO_A_CREDITO__VINCULADA_EXCLUSIVAMENTE_A_RECEITA_NAO_TRIBUTADA_NO_MERCADO_INTERNO</field>
+                        <field name="sequence" eval="66"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_oper_com_credito_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_oper_com_vinculada_ex" model="account.report.line">
+                        <field name="name">Operação com Direito a Crédito - Vinculada Exclusivamente a Receita de Exportação</field>
+                        <field name="code">OPERACAO_COM_DIREITO_A_CREDITO__VINCULADA_EXCLUSIVAMENTE_A_RECEITA_DE_EXPORTACAO</field>
+                        <field name="sequence" eval="67"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_oper_com_vinculada_ex_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_oper_com_vinculada_rec" model="account.report.line">
+                        <field name="name">Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno</field>
+                        <field name="code">OPERACAO_COM_DIREITO_A_CREDITO__VINCULADA_A_RECEITAS_TRIBUTADAS_E_NAOTRIBUTADAS_NO_MERCADO_INTERNO</field>
+                        <field name="sequence" eval="68"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_oper_com_vinculada_rec_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_oper_com_export" model="account.report.line">
+                        <field name="name">Operação com Direito a Crédito - Vinculada a Receitas Tributadas no Mercado Interno e de Exportação</field>
+                        <field name="code">OPERACAO_COM_DIREITO_A_CREDITO__VINCULADA_A_RECEITAS_TRIBUTADAS_NO_MERCADO_INTERNO_E_DE_EXPORTACAO</field>
+                        <field name="sequence" eval="69"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_oper_com_export_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_oper_com_nao_tri" model="account.report.line">
+                        <field name="name">Operação com Direito a Crédito - Vinculada a Receitas Não-Tributadas no Mercado Interno e de Exportação</field>
+                        <field name="code">OPERACAO_COM_DIREITO_A_CREDITO__VINCULADA_A_RECEITAS_NAOTRIBUTADAS_NO_MERCADO_INTERNO_E_DE_EXPORTACAO</field>
+                        <field name="sequence" eval="70"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_oper_com_nao_tri_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_oper_com_tri_" model="account.report.line">
+                        <field name="name">Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno, e de Exportação</field>
+                        <field name="code">OPERACAO_COM_DIREITO_A_CREDITO__VINCULADA_A_RECEITAS_TRIBUTADAS_E_NAOTRIBUTADAS_NO_MERCADO_INTERNO_E_DE_EXPORTACAO</field>
+                        <field name="sequence" eval="71"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_oper_com_tri__formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_credito_presumido_tributada" model="account.report.line">
+                        <field name="name">Crédito Presumido - Operação de Aquisição Vinculada Exclusivamente a Receita Tributada no Mercado Interno</field>
+                        <field name="code">CREDITO_PRESUMIDO__OPERACAO_DE_AQUISICAO_VINCULADA_EXCLUSIVAMENTE_A_RECEITA_TRIBUTADA_NO_MERCADO_INTERNO</field>
+                        <field name="sequence" eval="72"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_credito_presumido_tributada_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_credito_presumido_nao_tributada" model="account.report.line">
+                        <field name="name">Crédito Presumido - Operação de Aquisição Vinculada Exclusivamente a Receita Não-Tributada no Mercado Interno</field>
+                        <field name="code">CREDITO_PRESUMIDO__OPERACAO_DE_AQUISICAO_VINCULADA_EXCLUSIVAMENTE_A_RECEITA_NAOTRIBUTADA_NO_MERCADO_INTERNO</field>
+                        <field name="sequence" eval="73"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_credito_presumido_nao_tributada_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_credito_presumido_export" model="account.report.line">
+                        <field name="name">Crédito Presumido - Operação de Aquisição Vinculada Exclusivamente a Receita de Exportação</field>
+                        <field name="code">CREDITO_PRESUMIDO__OPERACAO_DE_AQUISICAO_VINCULADA_EXCLUSIVAMENTE_A_RECEITA_DE_EXPORTACAO</field>
+                        <field name="sequence" eval="74"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_credito_presumido_export_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_credito_presumido_interno" model="account.report.line">
+                        <field name="name">Crédito Presumido - Operação de Aquisição Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno</field>
+                        <field name="code">CREDITO_PRESUMIDO__OPERACAO_DE_AQUISICAO_VINCULADA_A_RECEITAS_TRIBUTADAS_E_NAOTRIBUTADAS_NO_MERCADO_INTERNO</field>
+                        <field name="sequence" eval="75"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_credito_presumido_interno_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_credito_presumido_interno_export" model="account.report.line">
+                        <field name="name">Crédito Presumido - Operação de Aquisição Vinculada a Receitas Tributadas no Mercado Interno e de Exportação</field>
+                        <field name="code">CREDITO_PRESUMIDO__OPERACAO_DE_AQUISICAO_VINCULADA_A_RECEITAS_TRIBUTADAS_NO_MERCADO_INTERNO_E_DE_EXPORTACAO</field>
+                        <field name="sequence" eval="76"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_credito_presumido_interno_export_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_credito_presumido_oper_nao_tri" model="account.report.line">
+                        <field name="name">Crédito Presumido - Operação de Aquisição Vinculada a Receitas Não-Tributadas no Mercado Interno e de Exportação</field>
+                        <field name="code">CREDITO_PRESUMIDO__OPERACAO_DE_AQUISICAO_VINCULADA_A_RECEITAS_NAOTRIBUTADAS_NO_MERCADO_INTERNO_E_DE_EXPORTACAO</field>
+                        <field name="sequence" eval="77"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_credito_presumido_oper_nao_tri_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_credito_presumido_oper_tri" model="account.report.line">
+                        <field name="name">Crédito Presumido - Operação de Aquisição Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno, e de Exportação</field>
+                        <field name="code">CREDITO_PRESUMIDO__OPERACAO_DE_AQUISICAO_VINCULADA_A_RECEITAS_TRIBUTADAS_E_NAOTRIBUTADAS_NO_MERCADO_INTERNO_E_DE_EXPORTACAO</field>
+                        <field name="sequence" eval="78"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_credito_presumido_oper_tri_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_credito_presumido_outras_oper" model="account.report.line">
+                        <field name="name">Crédito Presumido - Outras Operações</field>
+                        <field name="code">CREDITO_PRESUMIDO__OUTRAS_OPERACOES</field>
+                        <field name="sequence" eval="79"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_credito_presumido_outras_oper_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_oper_aqui_sem" model="account.report.line">
+                        <field name="name">Operação de Aquisição sem Direito a Crédito</field>
+                        <field name="code">OPERACAO_DE_AQUISICAO_SEM_DIREITO_A_CREDITO</field>
+                        <field name="sequence" eval="80"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_oper_aqui_sem_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_oper_com_ise" model="account.report.line">
+                        <field name="name">Operação de Aquisição com Isenção</field>
+                        <field name="code">OPERACAO_DE_AQUISICAO_COM_ISENCAO</field>
+                        <field name="sequence" eval="81"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_oper_com_ise_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_oper_aqui_com" model="account.report.line">
+                        <field name="name">Operação de Aquisição com Suspensão</field>
+                        <field name="code">OPERACAO_DE_AQUISICAO_COM_SUSPENSAO</field>
+                        <field name="sequence" eval="82"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_oper_aqui_com_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_oper_aqui_zero" model="account.report.line">
+                        <field name="name">Operação de Aquisição a Alíquota Zero</field>
+                        <field name="code">OPERACAO_DE_AQUISICAO_A_ALIQUOTA_ZERO</field>
+                        <field name="sequence" eval="83"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_oper_aqui_zero_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_oper_aqui_inc" model="account.report.line">
+                        <field name="name">Operação de Aquisição sem Incidência da Contribuição</field>
+                        <field name="code">OPERACAO_DE_AQUISICAO_SEM_INCIDENCIA_DA_CONTRIBUICAO</field>
+                        <field name="sequence" eval="84"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_oper_aqui_inc_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_oper_aqui_sub" model="account.report.line">
+                        <field name="name">Operação de Aquisição por Substituição Tributária</field>
+                        <field name="code">OPERACAO_DE_AQUISICAO_POR_SUBSTITUICAO_TRIBUTARIA</field>
+                        <field name="sequence" eval="85"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_oper_aqui_sub_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_outras_oper_entrada" model="account.report.line">
+                        <field name="name">Outras Operações de Entrada</field>
+                        <field name="code">OUTRAS_OPERACOES_DE_ENTRADA</field>
+                        <field name="sequence" eval="86"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_outras_oper_entrada_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pis_outras_oper" model="account.report.line">
+                        <field name="name">Outras Operações</field>
+                        <field name="code">OUTRAS_OPERACOES</field>
+                        <field name="sequence" eval="87"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_pis_outras_oper_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_ipi" model="account.report.line">
                 <field name="name">IPI</field>
                 <field name="code">BRTAX07</field>
-                <field name="sequence" eval="8"/>
-                <field name="children_line_ids">
-                    <record id="tax_report_ipi_extrada_com" model="account.tax.report.line">
+                <field name="sequence" eval="88"/>
+                <field name="expression_ids">
+                    <record id="tax_report_ipi_formula" model="account.report.expression">
+                        <field name="total">balance</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">ENTRADA_COM_RECUPERACAO_DE_CREDITO.balance + ENTRADA_TRIBUTADA_COM_ALIQUOTA_ZERO.balance + ENTRADA_ISENTA.balance + EENTRADA_NAOTRIBUTADA.balance + ENTRADA_IMUNE.balance + ENTRADA_COM_SUSPENSAO.balance + OUTRAS_ENTRADAS.balance + SAIDA_TRIBUTADA.balance + SAIDA_TRIBUTADA_COM_ALIQUOTA_ZERO.balance + SAIDA_ISENTA.balance + SAIDA_NAOTRIBUTADA.balance + SAIDA_IMUNE.balance + SAIDA_COM_SUSPENSAO.balance + OUTRAS_SAIDAS.balance</field>
+                    </record>
+                </field>
+                <field name="children_ids">
+                    <record id="tax_report_ipi_extrada_com" model="account.report.line">
                         <field name="name">Entrada com recuperação de crédito</field>
-                        <field name="sequence" eval="1"/>
-                        <field name="children_line_ids">
-                            <record id="tax_report_ipi_1" model="account.tax.report.line">
+                        <field name="code">ENTRADA_COM_RECUPERACAO_DE_CREDITO</field>
+                        <field name="sequence" eval="89"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_ipi_extrada_com_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">BRTAX07_1.balance</field>
+                            </record>
+                        </field>
+                        <field name="children_ids">
+                            <record id="tax_report_ipi_1" model="account.report.line">
                                 <field name="name">IPI_1</field>
-                                <field name="tag_name">IPI_1</field>
                                 <field name="code">BRTAX07_1</field>
-                                <field name="sequence" eval="1"/>
+                                <field name="sequence" eval="90"/>
+                                <field name="expression_ids">
+                                    <record id="tax_report_ipi_1_tag" model="account.report.expression">
+                                        <field name="total">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">IPI_1</field>
+                                    </record>
+                                </field>
                             </record>
                         </field>
                     </record>
-                    <record id="tax_report_ipi_extrada_tributada" model="account.tax.report.line">
+                    <record id="tax_report_ipi_extrada_tributada" model="account.report.line">
                         <field name="name">Entrada tributada com alíquota zero</field>
-                        <field name="sequence" eval="2"/>
-                        <field name="children_line_ids">
-                            <record id="tax_report_ipi_2" model="account.tax.report.line">
+                        <field name="code">ENTRADA_TRIBUTADA_COM_ALIQUOTA_ZERO</field>
+                        <field name="sequence" eval="91"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_ipi_extrada_tributada_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">IPI_2.balance</field>
+                            </record>
+                        </field>
+                        <field name="children_ids">
+                            <record id="tax_report_ipi_2" model="account.report.line">
                                 <field name="name">IPI_2</field>
-                                <field name="tag_name">IPI_2</field>
-                                <field name="sequence" eval="1"/>
+                                <field name="code">IPI_2</field>
+                                <field name="sequence" eval="92"/>
+                                <field name="expression_ids">
+                                    <record id="tax_report_ipi_2_tag" model="account.report.expression">
+                                        <field name="total">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">IPI_2</field>
+                                    </record>
+                                </field>
                             </record>
                         </field>
                     </record>
-                    <record id="tax_report_ipi_entrada_isenta" model="account.tax.report.line">
+                    <record id="tax_report_ipi_entrada_isenta" model="account.report.line">
                         <field name="name">Entrada isenta</field>
-                        <field name="sequence" eval="3"/>
+                        <field name="code">ENTRADA_ISENTA</field>
+                        <field name="sequence" eval="93"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_ipi_entrada_isenta_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_ipi_entrada_nao_tributada" model="account.tax.report.line">
+                    <record id="tax_report_ipi_entrada_nao_tributada" model="account.report.line">
                         <field name="name">EEntrada não-tributada</field>
-                        <field name="sequence" eval="4"/>
+                        <field name="code">EENTRADA_NAOTRIBUTADA</field>
+                        <field name="sequence" eval="94"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_ipi_entrada_nao_tributada_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_ipi_entrada_imune" model="account.tax.report.line">
+                    <record id="tax_report_ipi_entrada_imune" model="account.report.line">
                         <field name="name">Entrada imune</field>
-                        <field name="sequence" eval="5"/>
+                        <field name="code">ENTRADA_IMUNE</field>
+                        <field name="sequence" eval="95"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_ipi_entrada_imune_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_ipi_entrada_com_suspensao" model="account.tax.report.line">
+                    <record id="tax_report_ipi_entrada_com_suspensao" model="account.report.line">
                         <field name="name">Entrada com suspensão</field>
-                        <field name="sequence" eval="6"/>
+                        <field name="code">ENTRADA_COM_SUSPENSAO</field>
+                        <field name="sequence" eval="96"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_ipi_entrada_com_suspensao_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_ipi_outras_entradas" model="account.tax.report.line">
+                    <record id="tax_report_ipi_outras_entradas" model="account.report.line">
                         <field name="name">Outras entradas</field>
-                        <field name="sequence" eval="7"/>
+                        <field name="code">OUTRAS_ENTRADAS</field>
+                        <field name="sequence" eval="97"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_ipi_outras_entradas_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_ipi_saida_tributada" model="account.tax.report.line">
+                    <record id="tax_report_ipi_saida_tributada" model="account.report.line">
                         <field name="name">Saída tributada</field>
-                        <field name="sequence" eval="8"/>
+                        <field name="code">SAIDA_TRIBUTADA</field>
+                        <field name="sequence" eval="98"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_ipi_saida_tributada_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_ipi_saida_tributada_com" model="account.tax.report.line">
+                    <record id="tax_report_ipi_saida_tributada_com" model="account.report.line">
                         <field name="name">Saída tributada com alíquota zero</field>
-                        <field name="sequence" eval="9"/>
+                        <field name="code">SAIDA_TRIBUTADA_COM_ALIQUOTA_ZERO</field>
+                        <field name="sequence" eval="99"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_ipi_saida_tributada_com_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_ipi_saida_isenta" model="account.tax.report.line">
+                    <record id="tax_report_ipi_saida_isenta" model="account.report.line">
                         <field name="name">Saída isenta</field>
-                        <field name="sequence" eval="10"/>
+                        <field name="code">SAIDA_ISENTA</field>
+                        <field name="sequence" eval="100"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_ipi_saida_isenta_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_ipi_saida_nao_tributada" model="account.tax.report.line">
+                    <record id="tax_report_ipi_saida_nao_tributada" model="account.report.line">
                         <field name="name">Saída não-tributada</field>
-                        <field name="sequence" eval="11"/>
+                        <field name="code">SAIDA_NAOTRIBUTADA</field>
+                        <field name="sequence" eval="101"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_ipi_saida_nao_tributada_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_ipi_saida_imune" model="account.tax.report.line">
+                    <record id="tax_report_ipi_saida_imune" model="account.report.line">
                         <field name="name">Saída imune</field>
-                        <field name="sequence" eval="12"/>
+                        <field name="code">SAIDA_IMUNE</field>
+                        <field name="sequence" eval="102"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_ipi_saida_imune_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_ipi_saida_com" model="account.tax.report.line">
+                    <record id="tax_report_ipi_saida_com" model="account.report.line">
                         <field name="name">Saída com suspensão</field>
-                        <field name="sequence" eval="13"/>
+                        <field name="code">SAIDA_COM_SUSPENSAO</field>
+                        <field name="sequence" eval="103"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_ipi_saida_com_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_ipi_outras_saidas" model="account.tax.report.line">
+                    <record id="tax_report_ipi_outras_saidas" model="account.report.line">
                         <field name="name">Outras saídas</field>
-                        <field name="sequence" eval="14"/>
+                        <field name="code">OUTRAS_SAIDAS</field>
+                        <field name="sequence" eval="104"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_ipi_outras_saidas_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
                 </field>
             </record>
-            <record id="tax_report_icms" model="account.tax.report.line">
+            <record id="tax_report_icms" model="account.report.line">
                 <field name="name">ICMS</field>
-                <field name="sequence" eval="9"/>
-                <field name="children_line_ids">
-                    <record id="tax_report_icms_tributada" model="account.tax.report.line">
+                <field name="sequence" eval="105"/>
+                <field name="expression_ids">
+                    <record id="tax_report_icms_formula" model="account.report.expression">
+                        <field name="total">balance</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">TRIBUTADA_INTEGRALMENTE.balance + TRIBUTADA_E_COM_COBRANCA_DO_ICMS_POR_SUBSTITUICAO_TRIBUTARIA.balance + COM_REDUCAO_DE_BASE_DE_CALCULO.balance + ISENTA_OU_NAO_TRIBUTADA_E_COM_COBRANCA_DO_ICMS_POR_SUBSTITUICAO_TRIBUTARIA.balance + ISENTA.balance + NAO_TRIBUTADA.balance + SUSPENSAO.balance + DIFERIMENTO.balance + ICMS_COBRADO_ANTERIORMENTE_POR_SUBSTITUICAO_TRIBUTARIA.balance + COM_REDUCAO_DE_BASE_DE_CALCULO_E_COBRANCA_DO_ICMS_POR_SUBSTITUICAO_TRIBUTARIA.balance + OUTRAS.balance + SIMPLES_NACIONAL__TRIBUTADA_PELO_SIMPLES_NACIONAL_COM_PERMISSAO_DE_CREDITO.balance + SIMPLES_NACIONAL__TRIBUTADA_PELO_SIMPLES_NACIONAL_SEM_PERMISSAO_DE_CREDITO.balance + SIMPLES_NACIONAL__ISENCAO_DO_ICMS_NO_SIMPLES_NACIONAL_PARA_FAIXA_DE_RECEITA_BRUTA.balance + SIMPLES_NACIONAL__TRIBUTADA_PELO_SIMPLES_NACIONAL_COM_PERMISSAO_DE_CREDITO_E_COM_COBRANCA_DO_ICMS_POR_SUBSTITUICAO_TRIBUTARIA.balance + SIMPLES_NACIONAL__TRIBUTADA_PELO_SIMPLES_NACIONAL_SEM_PERMISSAO_DE_CREDITO_E_COM_COBRANCA_DO_ICMS_POR_SUBSTITUICAO_TRIBUTARIA.balance + SIMPLES_NACIONAL__ISENCAO_DO_ICMS_NO_SIMPLES_NACIONAL_PARA_FAIXA_DE_RECEITA_BRUTA_E_COM_COBRANCA_DO_ICMS_POR_SUBSTITUICAO_TRIBUTARIA.balance + SIMPLES_NACIONAL__IMUNE.balance + SIMPLES_NACIONAL__NAO_TRIBUTADA_PELO_SIMPLES_NACIONAL.balance + SIMPLES_NACIONAL__ICMS_COBRADO_ANTERIORMENTE_POR_SUBSTITUICAO_TRIBUTARIA_SUBSTITUIDO_OU_POR_ANTECIPACAO.balance + SIMPLES_NACIONAL__OUTROS.balance</field>
+                    </record>
+                </field>
+                <field name="children_ids">
+                    <record id="tax_report_icms_tributada" model="account.report.line">
                         <field name="name">Tributada integralmente</field>
-                        <field name="sequence" eval="1"/>
-                        <field name="children_line_ids">
-                            <record id="tax_report_icms_1" model="account.tax.report.line">
+                        <field name="code">TRIBUTADA_INTEGRALMENTE</field>
+                        <field name="sequence" eval="106"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_icms_tributada_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ICMS_1.balance</field>
+                            </record>
+                        </field>
+                        <field name="children_ids">
+                            <record id="tax_report_icms_1" model="account.report.line">
                                 <field name="name">ICMS_1</field>
-                                <field name="tag_name">ICMS_1</field>
-                                <field name="sequence" eval="1"/>
+                                <field name="code">ICMS_1</field>
+                                <field name="sequence" eval="107"/>
+                                <field name="expression_ids">
+                                    <record id="tax_report_icms_1_tag" model="account.report.expression">
+                                        <field name="total">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">ICMS_1</field>
+                                    </record>
+                                </field>
                             </record>
                         </field>
                     </record>
-                    <record id="tax_report_icms_tributada_com" model="account.tax.report.line">
+                    <record id="tax_report_icms_tributada_com" model="account.report.line">
                         <field name="name">Tributada e com cobrança do ICMS por substituição tributária</field>
-                        <field name="sequence" eval="2"/>
-                        <field name="children_line_ids">
-                            <record id="tax_report_icms_2" model="account.tax.report.line">
+                        <field name="code">TRIBUTADA_E_COM_COBRANCA_DO_ICMS_POR_SUBSTITUICAO_TRIBUTARIA</field>
+                        <field name="sequence" eval="108"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_icms_tributada_com_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ICMS_2.balance</field>
+                            </record>
+                        </field>
+                        <field name="children_ids">
+                            <record id="tax_report_icms_2" model="account.report.line">
                                 <field name="name">ICMS_2</field>
-                                <field name="tag_name">ICMS_2</field>
-                                <field name="sequence" eval="1"/>
+                                <field name="code">ICMS_2</field>
+                                <field name="sequence" eval="109"/>
+                                <field name="expression_ids">
+                                    <record id="tax_report_icms_2_tag" model="account.report.expression">
+                                        <field name="total">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">ICMS_2</field>
+                                    </record>
+                                </field>
                             </record>
                         </field>
                     </record>
-                    <record id="tax_report_icms_com_red" model="account.tax.report.line">
+                    <record id="tax_report_icms_com_red" model="account.report.line">
                         <field name="name">Com redução de base de cálculo</field>
-                        <field name="sequence" eval="3"/>
+                        <field name="code">COM_REDUCAO_DE_BASE_DE_CALCULO</field>
+                        <field name="sequence" eval="110"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_icms_com_red_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_icms_isenta_tributada" model="account.tax.report.line">
+                    <record id="tax_report_icms_isenta_tributada" model="account.report.line">
                         <field name="name">Isenta ou não tributada e com cobrança do ICMS por substituição tributária</field>
-                        <field name="sequence" eval="4"/>
+                        <field name="code">ISENTA_OU_NAO_TRIBUTADA_E_COM_COBRANCA_DO_ICMS_POR_SUBSTITUICAO_TRIBUTARIA</field>
+                        <field name="sequence" eval="111"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_icms_isenta_tributada_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_icms_isenta" model="account.tax.report.line">
+                    <record id="tax_report_icms_isenta" model="account.report.line">
                         <field name="name">Isenta</field>
-                        <field name="sequence" eval="5"/>
+                        <field name="code">ISENTA</field>
+                        <field name="sequence" eval="112"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_icms_isenta_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_icms_nao_tributada" model="account.tax.report.line">
+                    <record id="tax_report_icms_nao_tributada" model="account.report.line">
                         <field name="name">Não tributada</field>
-                        <field name="sequence" eval="6"/>
+                        <field name="code">NAO_TRIBUTADA</field>
+                        <field name="sequence" eval="113"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_icms_nao_tributada_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_icms_suspensao" model="account.tax.report.line">
+                    <record id="tax_report_icms_suspensao" model="account.report.line">
                         <field name="name">Suspensão</field>
-                        <field name="sequence" eval="7"/>
+                        <field name="code">SUSPENSAO</field>
+                        <field name="sequence" eval="114"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_icms_suspensao_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_icms_diferimento" model="account.tax.report.line">
+                    <record id="tax_report_icms_diferimento" model="account.report.line">
                         <field name="name">Diferimento</field>
-                        <field name="sequence" eval="8"/>
+                        <field name="code">DIFERIMENTO</field>
+                        <field name="sequence" eval="115"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_icms_diferimento_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_icms_cobrado" model="account.tax.report.line">
+                    <record id="tax_report_icms_cobrado" model="account.report.line">
                         <field name="name">ICMS cobrado anteriormente por substituição tributária</field>
-                        <field name="sequence" eval="9"/>
+                        <field name="code">ICMS_COBRADO_ANTERIORMENTE_POR_SUBSTITUICAO_TRIBUTARIA</field>
+                        <field name="sequence" eval="116"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_icms_cobrado_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_icms_reducao" model="account.tax.report.line">
+                    <record id="tax_report_icms_reducao" model="account.report.line">
                         <field name="name">Com redução de base de cálculo e cobrança do ICMS por substituição tributária</field>
-                        <field name="sequence" eval="10"/>
+                        <field name="code">COM_REDUCAO_DE_BASE_DE_CALCULO_E_COBRANCA_DO_ICMS_POR_SUBSTITUICAO_TRIBUTARIA</field>
+                        <field name="sequence" eval="117"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_icms_reducao_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_icms_outras" model="account.tax.report.line">
+                    <record id="tax_report_icms_outras" model="account.report.line">
                         <field name="name">Outras</field>
-                        <field name="sequence" eval="11"/>
+                        <field name="code">OUTRAS</field>
+                        <field name="sequence" eval="118"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_icms_outras_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_icms_simples_nacional_com" model="account.tax.report.line">
+                    <record id="tax_report_icms_simples_nacional_com" model="account.report.line">
                         <field name="name">Simples Nacional - Tributada pelo Simples Nacional com permissão de crédito</field>
-                        <field name="sequence" eval="12"/>
+                        <field name="code">SIMPLES_NACIONAL__TRIBUTADA_PELO_SIMPLES_NACIONAL_COM_PERMISSAO_DE_CREDITO</field>
+                        <field name="sequence" eval="119"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_icms_simples_nacional_com_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_icms_simples_nacional_sem" model="account.tax.report.line">
+                    <record id="tax_report_icms_simples_nacional_sem" model="account.report.line">
                         <field name="name">Simples Nacional - Tributada pelo Simples Nacional sem permissão de crédito</field>
-                        <field name="sequence" eval="13"/>
+                        <field name="code">SIMPLES_NACIONAL__TRIBUTADA_PELO_SIMPLES_NACIONAL_SEM_PERMISSAO_DE_CREDITO</field>
+                        <field name="sequence" eval="120"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_icms_simples_nacional_sem_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_icms_simples_nacional_isencao" model="account.tax.report.line">
+                    <record id="tax_report_icms_simples_nacional_isencao" model="account.report.line">
                         <field name="name">Simples Nacional - Isenção do ICMS no Simples Nacional para faixa de receita bruta</field>
-                        <field name="sequence" eval="14"/>
+                        <field name="code">SIMPLES_NACIONAL__ISENCAO_DO_ICMS_NO_SIMPLES_NACIONAL_PARA_FAIXA_DE_RECEITA_BRUTA</field>
+                        <field name="sequence" eval="121"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_icms_simples_nacional_isencao_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_icms_simples_nacional_tributada" model="account.tax.report.line">
+                    <record id="tax_report_icms_simples_nacional_tributada" model="account.report.line">
                         <field name="name">Simples Nacional - Tributada pelo Simples Nacional com permissão de crédito e com cobrança do ICMS por substituição tributária</field>
-                        <field name="sequence" eval="15"/>
+                        <field name="code">SIMPLES_NACIONAL__TRIBUTADA_PELO_SIMPLES_NACIONAL_COM_PERMISSAO_DE_CREDITO_E_COM_COBRANCA_DO_ICMS_POR_SUBSTITUICAO_TRIBUTARIA</field>
+                        <field name="sequence" eval="122"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_icms_simples_nacional_tributada_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_icms_simples_nacional_tributada_pelo" model="account.tax.report.line">
+                    <record id="tax_report_icms_simples_nacional_tributada_pelo" model="account.report.line">
                         <field name="name">Simples Nacional - Tributada pelo Simples Nacional sem permissão de crédito e com cobrança do ICMS por substituição tributária</field>
-                        <field name="sequence" eval="16"/>
+                        <field name="code">SIMPLES_NACIONAL__TRIBUTADA_PELO_SIMPLES_NACIONAL_SEM_PERMISSAO_DE_CREDITO_E_COM_COBRANCA_DO_ICMS_POR_SUBSTITUICAO_TRIBUTARIA</field>
+                        <field name="sequence" eval="123"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_icms_simples_nacional_tributada_pelo_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_icms_simples_nacional_isencao_icms" model="account.tax.report.line">
+                    <record id="tax_report_icms_simples_nacional_isencao_icms" model="account.report.line">
                         <field name="name">Simples Nacional - Isenção do ICMS no Simples Nacional para faixa de receita bruta e com cobrança do ICMS por substituição tributária</field>
-                        <field name="sequence" eval="17"/>
+                        <field name="code">SIMPLES_NACIONAL__ISENCAO_DO_ICMS_NO_SIMPLES_NACIONAL_PARA_FAIXA_DE_RECEITA_BRUTA_E_COM_COBRANCA_DO_ICMS_POR_SUBSTITUICAO_TRIBUTARIA</field>
+                        <field name="sequence" eval="124"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_icms_simples_nacional_isencao_icms_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_icms_simples_nacional_imune" model="account.tax.report.line">
+                    <record id="tax_report_icms_simples_nacional_imune" model="account.report.line">
                         <field name="name">Simples Nacional - Imune</field>
-                        <field name="sequence" eval="18"/>
+                        <field name="code">SIMPLES_NACIONAL__IMUNE</field>
+                        <field name="sequence" eval="125"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_icms_simples_nacional_imune_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_icms_simples_nacional_nao_tributada" model="account.tax.report.line">
+                    <record id="tax_report_icms_simples_nacional_nao_tributada" model="account.report.line">
                         <field name="name">Simples Nacional - Não tributada pelo Simples Nacional</field>
-                        <field name="sequence" eval="19"/>
+                        <field name="code">SIMPLES_NACIONAL__NAO_TRIBUTADA_PELO_SIMPLES_NACIONAL</field>
+                        <field name="sequence" eval="126"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_icms_simples_nacional_nao_tributada_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_icms_simples_nacional_icms" model="account.tax.report.line">
+                    <record id="tax_report_icms_simples_nacional_icms" model="account.report.line">
                         <field name="name">Simples Nacional - ICMS cobrado anteriormente por substituição tributária (substituído) ou por antecipação</field>
-                        <field name="sequence" eval="20"/>
+                        <field name="code">SIMPLES_NACIONAL__ICMS_COBRADO_ANTERIORMENTE_POR_SUBSTITUICAO_TRIBUTARIA_SUBSTITUIDO_OU_POR_ANTECIPACAO</field>
+                        <field name="sequence" eval="127"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_icms_simples_nacional_icms_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
-                    <record id="tax_report_icms_simples_nacional_outras" model="account.tax.report.line">
+                    <record id="tax_report_icms_simples_nacional_outras" model="account.report.line">
                         <field name="name">Simples Nacional - Outros</field>
-                        <field name="sequence" eval="21"/>
+                        <field name="code">SIMPLES_NACIONAL__OUTROS</field>
+                        <field name="sequence" eval="128"/>
+                        <field name="expression_ids">
+                            <record id="tax_report_icms_simples_nacional_outras_formula" model="account.report.expression">
+                                <field name="total">balance</field>
+                                <field name="engine">aggregation</field>
+                            </record>
+                        </field>
                     </record>
                 </field>
             </record>
