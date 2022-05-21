@@ -207,11 +207,11 @@ class AccountReportLine(models.Model):
             else:
                 record.hierarchy_level = 1
 
-    @api.constrains('groupby', 'children_ids')
-    def _validate_groupby(self):
+    @api.constrains('parent_id')
+    def _validate_groupby_no_child(self):
         for record in self:
-            if record.groupby and record.children_ids:
-                raise ValidationError(_("A line cannot have both children and a groupby value (line '%s').", line.name))
+            if record.parent_id.groupby:
+                raise ValidationError(_("A line cannot have both children and a groupby value (line '%s').", record.parent_id.name))
 
     @api.constrains('expression_ids', 'groupby')
     def _validate_formula(self):
