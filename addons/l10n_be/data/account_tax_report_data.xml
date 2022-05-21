@@ -216,12 +216,34 @@
                                 <field name="name">81 - Marchandises, matières premières et auxiliaires</field>
                                 <field name="code">c81</field>
                                 <field name="sequence" eval="19"/>
-                                <field name="carry_over_condition_method">no_negative_amount_carry_over_condition</field>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_81_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="total">tag</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">81</field>
+                                    </record>
+                                    <record id="tax_report_line_81_applied_carryover" model="account.report.expression">
+                                        <field name="total">_applied_carryover_balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="date_scope">to_beginning_of_period</field>
+                                    </record>
+                                    <record id="tax_report_line_81_balance_unbounded" model="account.report.expression">
+                                        <field name="total">balance_unbounded</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">c81._applied_carryover_balance + c81.tag</field>
+                                    </record>
+                                    <record id="tax_report_line_81_carryover" model="account.report.expression">
+                                        <field name="total">_carryover_balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">c81.balance_unbounded</field>
+                                        <field name="subformula">if_below(EUR(0))</field>
+                                    </record>
+                                    <record id="tax_report_line_81_balance" model="account.report.expression">
+                                        <field name="total">balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">c81.balance_unbounded</field>
+                                        <field name="subformula">if_above(EUR(0))</field>
                                     </record>
                                 </field>
                             </record>
@@ -229,12 +251,34 @@
                                 <field name="name">82 - Services et biens divers</field>
                                 <field name="code">c82</field>
                                 <field name="sequence" eval="20"/>
-                                <field name="carry_over_condition_method">no_negative_amount_carry_over_condition</field>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_82_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="total">tag</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">82</field>
+                                    </record>
+                                    <record id="tax_report_line_82_applied_carryover" model="account.report.expression">
+                                        <field name="total">_applied_carryover_balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="date_scope">to_beginning_of_period</field>
+                                    </record>
+                                    <record id="tax_report_line_82_balance_unbounded" model="account.report.expression">
+                                        <field name="total">balance_unbounded</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">c82._applied_carryover_balance + c82.tag</field>
+                                    </record>
+                                    <record id="tax_report_line_82_carryover" model="account.report.expression">
+                                        <field name="total">_carryover_balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">c82.balance_unbounded</field>
+                                        <field name="subformula">if_below(EUR(0))</field>
+                                    </record>
+                                    <record id="tax_report_line_82_balance" model="account.report.expression">
+                                        <field name="total">balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">c82.balance_unbounded</field>
+                                        <field name="subformula">if_above(EUR(0))</field>
                                     </record>
                                 </field>
                             </record>
@@ -242,12 +286,34 @@
                                 <field name="name">83 - Biens d'investissement</field>
                                 <field name="code">c83</field>
                                 <field name="sequence" eval="21"/>
-                                <field name="carry_over_condition_method">no_negative_amount_carry_over_condition</field>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_83_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="total">tag</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">83</field>
+                                    </record>
+                                    <record id="tax_report_line_83_applied_carryover" model="account.report.expression">
+                                        <field name="total">_applied_carryover_balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="date_scope">to_beginning_of_period</field>
+                                    </record>
+                                    <record id="tax_report_line_83_balance_unbounded" model="account.report.expression">
+                                        <field name="total">balance_unbounded</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">c83._applied_carryover_balance + c83.tag</field>
+                                    </record>
+                                    <record id="tax_report_line_83_carryover" model="account.report.expression">
+                                        <field name="total">_carryover_balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">c83.balance_unbounded</field>
+                                        <field name="subformula">if_below(EUR(0))</field>
+                                    </record>
+                                    <record id="tax_report_line_83_balance" model="account.report.expression">
+                                        <field name="total">balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">c83.balance_unbounded</field>
+                                        <field name="subformula">if_above(EUR(0))</field>
                                     </record>
                                 </field>
                             </record>
@@ -279,12 +345,34 @@
                                 <field name="name">86 - Acquisition intra-communautaires et ventes ABC</field>
                                 <field name="code">c86</field>
                                 <field name="sequence" eval="24"/>
-                                <field name="carry_over_condition_method">no_negative_amount_carry_over_condition</field>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_86_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="total">tag</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">86</field>
+                                    </record>
+                                    <record id="tax_report_line_86_applied_carryover" model="account.report.expression">
+                                        <field name="total">_applied_carryover_balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="date_scope">to_beginning_of_period</field>
+                                    </record>
+                                    <record id="tax_report_line_86_balance_unbounded" model="account.report.expression">
+                                        <field name="total">balance_unbounded</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">c86._applied_carryover_balance + c86.tag</field>
+                                    </record>
+                                    <record id="tax_report_line_86_carryover" model="account.report.expression">
+                                        <field name="total">_carryover_balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">c86.balance_unbounded</field>
+                                        <field name="subformula">if_below(EUR(0))</field>
+                                    </record>
+                                    <record id="tax_report_line_86_balance" model="account.report.expression">
+                                        <field name="total">balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">c86.balance_unbounded</field>
+                                        <field name="subformula">if_above(EUR(0))</field>
                                     </record>
                                 </field>
                             </record>
@@ -292,12 +380,34 @@
                                 <field name="name">87 - Autres opérations</field>
                                 <field name="code">c87</field>
                                 <field name="sequence" eval="25"/>
-                                <field name="carry_over_condition_method">no_negative_amount_carry_over_condition</field>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_87_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="total">tag</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">87</field>
+                                    </record>
+                                    <record id="tax_report_line_87_applied_carryover" model="account.report.expression">
+                                        <field name="total">_applied_carryover_balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="date_scope">to_beginning_of_period</field>
+                                    </record>
+                                    <record id="tax_report_line_87_balance_unbounded" model="account.report.expression">
+                                        <field name="total">balance_unbounded</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">c87._applied_carryover_balance + c87.tag</field>
+                                    </record>
+                                    <record id="tax_report_line_87_carryover" model="account.report.expression">
+                                        <field name="total">_carryover_balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">c87.balance_unbounded</field>
+                                        <field name="subformula">if_below(EUR(0))</field>
+                                    </record>
+                                    <record id="tax_report_line_87_balance" model="account.report.expression">
+                                        <field name="total">balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">c87.balance_unbounded</field>
+                                        <field name="subformula">if_above(EUR(0))</field>
                                     </record>
                                 </field>
                             </record>
@@ -305,12 +415,34 @@
                                 <field name="name">88 - Acquisition services intra-communautaires</field>
                                 <field name="code">c88</field>
                                 <field name="sequence" eval="26"/>
-                                <field name="carry_over_condition_method">no_negative_amount_carry_over_condition</field>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_88_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="total">tag</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">88</field>
+                                    </record>
+                                    <record id="tax_report_line_88_applied_carryover" model="account.report.expression">
+                                        <field name="total">_applied_carryover_balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="date_scope">to_beginning_of_period</field>
+                                    </record>
+                                    <record id="tax_report_line_88_balance_unbounded" model="account.report.expression">
+                                        <field name="total">balance_unbounded</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">c88._applied_carryover_balance + c88.tag</field>
+                                    </record>
+                                    <record id="tax_report_line_88_carryover" model="account.report.expression">
+                                        <field name="total">_carryover_balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">c88.balance_unbounded</field>
+                                        <field name="subformula">if_below(EUR(0))</field>
+                                    </record>
+                                    <record id="tax_report_line_88_balance" model="account.report.expression">
+                                        <field name="total">balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">c88.balance_unbounded</field>
+                                        <field name="subformula">if_above(EUR(0))</field>
                                     </record>
                                 </field>
                             </record>
@@ -453,7 +585,8 @@
                                     <record id="tax_report_line_71_formula" model="account.report.expression">
                                         <field name="total">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">(c54.balance + c55.balance + c56.balance + c57.balance + c61.balance + c63)&gt;(c59.balance + c62.balance + c64) and (c54.balance + c55.balance + c56.balance + c57.balance + c61.balance + c63).balance-(c59.balance + c62.balance + c64) or 0.balance</field>
+                                        <field name="formula">(c54.balance + c55.balance + c56.balance + c57.balance + c61.balance + c63.balance) - (c59.balance + c62.balance + c64.balance)</field>
+                                        <field name="subformula">if_above(EUR(0))</field>
                                     </record>
                                 </field>
                             </record>
@@ -464,7 +597,8 @@
                                     <record id="tax_report_line_72_formula" model="account.report.expression">
                                         <field name="total">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">(c54.balance + c55.balance + c56.balance + c57.balance + c61.balance + c63)&lt;(c59.balance + c62.balance + c64) and (c59.balance + c62.balance + c64).balance-(c54.balance + c55.balance + c56.balance + c57.balance + c61.balance + c63) or 0.balance</field>
+                                        <field name="formula">(c59.balance + c62.balance + c64.balance) - (c54.balance + c55.balance + c56.balance + c57.balance + c61.balance + c63.balance)</field>
+                                        <field name="subformula">if_above(EUR(0))</field>
                                     </record>
                                 </field>
                             </record>

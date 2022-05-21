@@ -219,11 +219,23 @@
                                 <field name="carry_over_destination_line_id" ref="tax_report_line_vp7"/>
                                 <field name="is_carryover_persistent">False</field>
                                 <field name="expression_ids">
+                                    <record id="tax_report_line_vp14a_vp4_vp5_dif_pos" model="account.report.expression">
+                                        <field name="total">vp4_vp5_dif_pos</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">VP4.balance - VP5.balance</field>
+                                        <field name="subformula">if_above(EUR(0))</field>
+                                    </record>
+                                    <record id="tax_report_line_vp14a_vp4_vp5_dif_neg" model="account.report.expression">
+                                        <field name="total">vp4_vp5_dif_neg</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">VP4.balance - VP5.balance</field>
+                                        <field name="subformula">if_below(EUR(0))</field>
+                                    </record>
                                     <record id="tax_report_line_vp14a_formula" model="account.report.expression">
                                         <field name="total">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">max(((VP4&gt;VP5 and VP4.balance-VP5 or 0).balance + VP7.balance + VP12).balance - ((VP5&gt;VP4 and VP5.balance-VP4 or 0).balance + VP8.balance +
-            VP9.balance + VP10.balance + VP11.balance + VP13), 0).balance </field>
+                                        <field name="formula">(vp4_vp5_dif_pos.balance + VP7.balance + VP12.balance) - (-vp4_vp5_dif_neg + VP8.balance + VP9.balance + VP10.balance + VP11.balance + VP13)</field>
+                                        <field name="subformula">if_above(EUR(0))</field>
                                     </record>
                                 </field>
                             </record>
@@ -235,11 +247,23 @@
                                 <field name="carry_over_destination_line_id" ref="tax_report_line_vp8"/>
                                 <field name="is_carryover_persistent">False</field>
                                 <field name="expression_ids">
+                                    <record id="tax_report_line_vp14b_vp4_vp5_dif_pos" model="account.report.expression">
+                                        <field name="total">vp4_vp5_dif_pos</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">VP4.balance - VP5.balance</field>
+                                        <field name="subformula">if_above(EUR(0))</field>
+                                    </record>
+                                    <record id="tax_report_line_vp14b_vp4_vp5_dif_neg" model="account.report.expression">
+                                        <field name="total">vp4_vp5_dif_neg</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">VP4.balance - VP5.balance</field>
+                                        <field name="subformula">if_below(EUR(0))</field>
+                                    </record>
                                     <record id="tax_report_line_vp14b_formula" model="account.report.expression">
                                         <field name="total">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">max(((VP5&gt;VP4 and VP5.balance-VP4 or 0).balance + VP8.balance + VP9.balance + VP10.balance + VP11.balance + VP13).balance - ((VP4&gt;VP5 and
-            VP4.balance-VP5 or 0).balance + VP7.balance + VP12), 0).balance </field>
+                                        <field name="formula">(-vp4_vp5_dif_neg + VP8.balance + VP9.balance + VP10.balance + VP11.balance + VP13) - (vp4_vp5_dif_pos.balance + VP7.balance + VP12.balance)</field>
+                                        <field name="subformula">if_above(EUR(0))</field>
                                     </record>
                                 </field>
                             </record>

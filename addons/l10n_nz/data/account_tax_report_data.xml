@@ -67,7 +67,7 @@
                             <record id="tax_report_box8_formula" model="account.report.expression">
                                 <field name="total">balance</field>
                                 <field name="engine">aggregation</field>
-                                <field name="formula">((NZBOX5.balance - NZBOX6).balance * 3).balance/23.balance</field>
+                                <field name="formula">((NZBOX5.balance - NZBOX6.balance) * 3)/23</field>
                             </record>
                         </field>
                     </record>
@@ -90,7 +90,7 @@
                             <record id="tax_report_box10_formula" model="account.report.expression">
                                 <field name="total">balance</field>
                                 <field name="engine">aggregation</field>
-                                <field name="formula">(((NZBOX5.balance - NZBOX6).balance * 3).balance/23).balance + NZBOX9.balance</field>
+                                <field name="formula">(((NZBOX5.balance - NZBOX6.balance) * 3)/23) + NZBOX9.balance</field>
                             </record>
                         </field>
                     </record>
@@ -126,7 +126,7 @@
                             <record id="tax_report_box12_formula" model="account.report.expression">
                                 <field name="total">balance</field>
                                 <field name="engine">aggregation</field>
-                                <field name="formula">(NZBOX11.balance * 3).balance/23.balance</field>
+                                <field name="formula">(NZBOX11.balance * 3)/23</field>
                             </record>
                         </field>
                     </record>
@@ -148,7 +148,7 @@
                             <record id="tax_report_box14_formula" model="account.report.expression">
                                 <field name="total">balance</field>
                                 <field name="engine">aggregation</field>
-                                <field name="formula">((NZBOX11.balance * 3).balance/23).balance</field>
+                                <field name="formula">((NZBOX11.balance * 3)/23)</field>
                             </record>
                         </field>
                     </record>
@@ -161,7 +161,7 @@
                     <record id="tax_report_box15_formula" model="account.report.expression">
                         <field name="total">balance</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">((((NZBOX5.balance - NZBOX6).balance * 3).balance/23).balance + NZBOX9).balance - ((NZBOX11.balance * 3).balance/23).balance</field>
+                        <field name="formula">((((NZBOX5.balance - NZBOX6.balance) * 3)/23) + NZBOX9.balance) - ((NZBOX11.balance * 3)/23)</field>
                     </record>
                 </field>
             </record>

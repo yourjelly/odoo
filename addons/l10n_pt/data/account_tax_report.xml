@@ -542,7 +542,7 @@
                     </record>
                 </field>
             </record>
-            <record id="tax_report_pt_tax_total_pagar" model="account.report.line">
+            <record id="tax_report_pt_tax_total_pagar" model="account.report.line"> <!--TODO OCO vérifier comment l'audit de ce genre d'expression avec if_above se comporte ; ça marche bien ? -->
                 <field name="name">TOTAL IVA A PAGAR</field>
                 <field name="code">tax_report_pt_tax_total_pagar</field>
                 <field name="sequence" eval="47"/>
@@ -550,7 +550,8 @@
                     <record id="tax_report_pt_tax_total_pagar_formula" model="account.report.expression">
                         <field name="total">balance</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">max(0, tax_report_pt_tax_vendas_faturas.balance - tax_report_pt_tax_vendas_notas_credito.balance - tax_report_pt_tax_despesas_faturas.balance + tax_report_pt_tax_despesas_notas_credito).balance</field>
+                        <field name="formula">tax_report_pt_tax_vendas_faturas.balance - tax_report_pt_tax_vendas_notas_credito.balance - tax_report_pt_tax_despesas_faturas.balance + tax_report_pt_tax_despesas_notas_credito.balance</field>
+                        <field name="subformula">if_above(EUR(0))</field>
                     </record>
                 </field>
             </record>
@@ -561,7 +562,8 @@
                     <record id="tax_report_pt_tax_total_receber_formula" model="account.report.expression">
                         <field name="total">balance</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">max(0,.balance -tax_report_pt_tax_vendas_faturas.balance + tax_report_pt_tax_vendas_notas_credito.balance + tax_report_pt_tax_despesas_faturas.balance - tax_report_pt_tax_despesas_notas_credito).balance</field>
+                        <field name="formula">-tax_report_pt_tax_vendas_faturas.balance + tax_report_pt_tax_vendas_notas_credito.balance + tax_report_pt_tax_despesas_faturas.balance - tax_report_pt_tax_despesas_notas_credito.balance</field>
+                        <field name="subformula">if_above(EUR(0))</field>
                     </record>
                 </field>
             </record>

@@ -45,7 +45,7 @@
                                     <record id="tax_report_de_tag_18_formula" model="account.report.expression">
                                         <field name="total">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">STEUERFREIE_UMSATZE_MIT_VORSTEUERABZUG_ZEILE_19.balance + 48.balance + STEUERPFLICHTIGE_UMSATZE_ZEILE_25.balance</field>
+                                        <field name="formula">STEUERFREIE_UMSATZE_MIT_VORSTEUERABZUG_ZEILE_19.balance + DE_48.balance + STEUERPFLICHTIGE_UMSATZE_ZEILE_25.balance</field>
                                     </record>
                                 </field>
                                 <field name="children_ids">
@@ -57,13 +57,13 @@
                                             <record id="tax_report_de_tag_19_formula" model="account.report.expression">
                                                 <field name="total">balance</field>
                                                 <field name="engine">aggregation</field>
-                                                <field name="formula">41.balance + 44.balance + 49.balance + 43.balance</field>
+                                                <field name="formula">DE_41.balance + DE_44.balance + DE_49.balance + DE_43.balance</field>
                                             </record>
                                         </field>
                                         <field name="children_ids">
                                             <record id="tax_report_de_tag_41" model="account.report.line">
                                                 <field name="name">41. an Abnehmer mit USt-IdNr (zeile 20)</field>
-                                                <field name="code">41</field>
+                                                <field name="code">DE_41</field>
                                                 <field name="sequence" eval="5"/>
                                                 <field name="expression_ids">
                                                     <record id="tax_report_de_tag_41_tag" model="account.report.expression">
@@ -75,7 +75,7 @@
                                             </record>
                                             <record id="tax_report_de_tag_44" model="account.report.line">
                                                 <field name="name">44. neuer Fahrzeuge an Abnehmer ohne USt-IdNr (zeile 21)</field>
-                                                <field name="code">44</field>
+                                                <field name="code">DE_44</field>
                                                 <field name="sequence" eval="6"/>
                                                 <field name="expression_ids">
                                                     <record id="tax_report_de_tag_44_tag" model="account.report.expression">
@@ -87,7 +87,7 @@
                                             </record>
                                             <record id="tax_report_de_tag_49" model="account.report.line">
                                                 <field name="name">49. neuer Fahrzeuge außerhalb eines Unternehmens (zeile 22)</field>
-                                                <field name="code">49</field>
+                                                <field name="code">DE_49</field>
                                                 <field name="sequence" eval="7"/>
                                                 <field name="expression_ids">
                                                     <record id="tax_report_de_tag_49_tag" model="account.report.expression">
@@ -99,7 +99,7 @@
                                             </record>
                                             <record id="tax_report_de_tag_43" model="account.report.line">
                                                 <field name="name">43. Weitere steuerfreie Umsätze mit Vorsteuerabzug (zeile 23)</field>
-                                                <field name="code">43</field>
+                                                <field name="code">DE_43</field>
                                                 <field name="sequence" eval="8"/>
                                                 <field name="expression_ids">
                                                     <record id="tax_report_de_tag_43_tag" model="account.report.expression">
@@ -113,7 +113,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_24" model="account.report.line">
                                         <field name="name">48. Steuerfreie Umsätze ohne Vorsteuerabzug (zeile 24)</field>
-                                        <field name="code">48</field>
+                                        <field name="code">DE_48</field>
                                         <field name="sequence" eval="9"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_24_tag" model="account.report.expression">
@@ -131,13 +131,13 @@
                                             <record id="tax_report_de_tag_25_formula" model="account.report.expression">
                                                 <field name="total">balance</field>
                                                 <field name="engine">aggregation</field>
-                                                <field name="formula">81_BASE.balance + 86_BASE.balance + 35.balance + 77.balance + 76.balance</field>
+                                                <field name="formula">DE_81_BASE.balance + DE_86_BASE.balance + DE_35.balance + DE_77.balance + DE_76.balance</field>
                                             </record>
                                         </field>
                                         <field name="children_ids">
                                             <record id="tax_report_de_tag_81" model="account.report.line">
                                                 <field name="name">81. zum Steuersatz von 19 % (zeile 26)</field>
-                                                <field name="code">81_BASE</field>
+                                                <field name="code">DE_81_BASE</field>
                                                 <field name="sequence" eval="11"/>
                                                 <field name="expression_ids">
                                                     <record id="tax_report_de_tag_81_tag" model="account.report.expression">
@@ -149,7 +149,7 @@
                                             </record>
                                             <record id="tax_report_de_tag_86" model="account.report.line">
                                                 <field name="name">86. zum Steuersatz von 7 % (zeile 27)</field>
-                                                <field name="code">86_BASE</field>
+                                                <field name="code">DE_86_BASE</field>
                                                 <field name="sequence" eval="12"/>
                                                 <field name="expression_ids">
                                                     <record id="tax_report_de_tag_86_tag" model="account.report.expression">
@@ -161,7 +161,7 @@
                                             </record>
                                             <record id="tax_report_de_tag_35" model="account.report.line">
                                                 <field name="name">35. zu anderen Steuersätzen (zeile 28)</field>
-                                                <field name="code">35</field>
+                                                <field name="code">DE_35</field>
                                                 <field name="sequence" eval="13"/>
                                                 <field name="expression_ids">
                                                     <record id="tax_report_de_tag_35_tag" model="account.report.expression">
@@ -173,7 +173,7 @@
                                             </record>
                                             <record id="tax_report_de_tag_77" model="account.report.line">
                                                 <field name="name">77. Lieferungen land- und forstwirtschaftlicher Betriebe nach § 24 UStG an Abnehmer mit USt-IdNr. (zeile 29)</field>
-                                                <field name="code">77</field>
+                                                <field name="code">DE_77</field>
                                                 <field name="sequence" eval="14"/>
                                                 <field name="expression_ids">
                                                     <record id="tax_report_de_tag_77_tag" model="account.report.expression">
@@ -185,7 +185,7 @@
                                             </record>
                                             <record id="tax_report_de_tag_76" model="account.report.line">
                                                 <field name="name">76. Umsätze, für die eine Steuer nach § 24 UStG zu entrichten ist (zeile 30)</field>
-                                                <field name="code">76</field>
+                                                <field name="code">DE_76</field>
                                                 <field name="sequence" eval="15"/>
                                                 <field name="expression_ids">
                                                     <record id="tax_report_de_tag_76_tag" model="account.report.expression">
@@ -207,13 +207,13 @@
                                     <record id="tax_report_de_tag_31_formula" model="account.report.expression">
                                         <field name="total">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">91.balance + 89_BASE.balance + 93_BASE.balance + 95.balance + 94.balance</field>
+                                        <field name="formula">DE_91.balance + DE_89_BASE.balance + DE_93_BASE.balance + DE_95.balance + DE_94.balance</field>
                                     </record>
                                 </field>
                                 <field name="children_ids">
                                     <record id="tax_report_de_tag_91" model="account.report.line">
                                         <field name="name">91. Steuerfreie innergemeinschaftliche Erwerbe (zeile 32)</field>
-                                        <field name="code">91</field>
+                                        <field name="code">DE_91</field>
                                         <field name="sequence" eval="17"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_91_tag" model="account.report.expression">
@@ -225,7 +225,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_89" model="account.report.line">
                                         <field name="name">89. Steuerpflichtige innergemeinschaftliche Erwerbe zum Steuersatz von 19 % (zeile 33)</field>
-                                        <field name="code">89_BASE</field>
+                                        <field name="code">DE_89_BASE</field>
                                         <field name="sequence" eval="18"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_89_tag" model="account.report.expression">
@@ -237,7 +237,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_93" model="account.report.line">
                                         <field name="name">93. zum Steuersatz von 7 % (zeile 34)</field>
-                                        <field name="code">93_BASE</field>
+                                        <field name="code">DE_93_BASE</field>
                                         <field name="sequence" eval="19"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_93_tag" model="account.report.expression">
@@ -249,7 +249,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_95" model="account.report.line">
                                         <field name="name">95. zu anderen Steuersätzen (zeile 35)</field>
-                                        <field name="code">95</field>
+                                        <field name="code">DE_95</field>
                                         <field name="sequence" eval="20"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_95_tag" model="account.report.expression">
@@ -261,7 +261,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_94" model="account.report.line">
                                         <field name="name">94. neuer Fahrzeuge von Lieferern ohne (zeile 36)</field>
-                                        <field name="code">94</field>
+                                        <field name="code">DE_94</field>
                                         <field name="sequence" eval="21"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_94_tag" model="account.report.expression">
@@ -281,13 +281,13 @@
                                     <record id="tax_report_de_tag_37_formula" model="account.report.expression">
                                         <field name="total">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">42.balance + 68.balance + 60.balance + 21.balance + 45_BASE.balance</field>
+                                        <field name="formula">DE_42.balance + DE_68.balance + DE_60.balance + DE_21.balance + DE_45_BASE.balance</field>
                                     </record>
                                 </field>
                                 <field name="children_ids">
                                     <record id="tax_report_de_tag_42" model="account.report.line">
                                         <field name="name">42. Dreiecksgeschäften (zeile 38)</field>
-                                        <field name="code">42</field>
+                                        <field name="code">DE_42</field>
                                         <field name="sequence" eval="23"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_42_tag" model="account.report.expression">
@@ -299,7 +299,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_68" model="account.report.line">
                                         <field name="name">68. Steuerpflichtige Umsätze, für die der Leistungsempfänger die Steuer nach § 13b Abs. 5 Satz 1 i.V.m. Abs. 2 Nr. 10 UStG schuldet (zeile 39)</field>
-                                        <field name="code">68</field>
+                                        <field name="code">DE_68</field>
                                         <field name="sequence" eval="24"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_68_tag" model="account.report.expression">
@@ -311,7 +311,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_60" model="account.report.line">
                                         <field name="name">60. Übrige steuerpflichtige Umsätze, für die der Leistungsempfänger die Steuer nach § 13b Abs. 5 UStG schuldet (zeile 40)</field>
-                                        <field name="code">60</field>
+                                        <field name="code">DE_60</field>
                                         <field name="sequence" eval="25"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_60_tag" model="account.report.expression">
@@ -323,7 +323,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_21" model="account.report.line">
                                         <field name="name">21. Nicht steuerbare sonstige Leistungen (zeile 41)</field>
-                                        <field name="code">21</field>
+                                        <field name="code">DE_21</field>
                                         <field name="sequence" eval="26"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_21_tag" model="account.report.expression">
@@ -335,7 +335,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_45" model="account.report.line">
                                         <field name="name">45. Übrige nicht steuerbare Umsätze (zeile 42)</field>
-                                        <field name="code">45_BASE</field>
+                                        <field name="code">DE_45_BASE</field>
                                         <field name="sequence" eval="27"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_45_tag" model="account.report.expression">
@@ -355,13 +355,13 @@
                                     <record id="tax_report_de_tag_46_formula" model="account.report.expression">
                                         <field name="total">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">46.balance + 52.balance + 73.balance + 78.balance + 84.balance</field>
+                                        <field name="formula">DE_46.balance + DE_52.balance + DE_73.balance + DE_78.balance + DE_84.balance</field>
                                     </record>
                                 </field>
                                 <field name="children_ids">
                                     <record id="tax_report_de_tag_48" model="account.report.line">
                                         <field name="name">46. Steuerpflichtige sonstige Leistungen eines im übrigen Gemeinschaftsgebiet ansässigen Unternehmers (zeile 48)</field>
-                                        <field name="code">46</field>
+                                        <field name="code">DE_46</field>
                                         <field name="sequence" eval="29"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_48_tag" model="account.report.expression">
@@ -373,7 +373,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_52" model="account.report.line">
                                         <field name="name">52. Andere Leistungen eines im Ausland ansässigen Unternehmers (zeile 49)</field>
-                                        <field name="code">52</field>
+                                        <field name="code">DE_52</field>
                                         <field name="sequence" eval="30"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_52_tag" model="account.report.expression">
@@ -385,7 +385,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_73" model="account.report.line">
                                         <field name="name">73. Lieferungen sicherungsübereigneter Gegenstände und Umsätze, die unter das GrEStG fallen (zeile 50)</field>
-                                        <field name="code">73</field>
+                                        <field name="code">DE_73</field>
                                         <field name="sequence" eval="31"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_73_tag" model="account.report.expression">
@@ -397,7 +397,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_78" model="account.report.line">
                                         <field name="name">78. Lieferungen von Mobilfunkgeräten, Tablet-Computern, Spielekonsolen und integrierten Schaltkreisen (zeile 51)</field>
-                                        <field name="code">78</field>
+                                        <field name="code">DE_78</field>
                                         <field name="sequence" eval="32"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_78_tag" model="account.report.expression">
@@ -409,7 +409,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_84" model="account.report.line">
                                         <field name="name">84. Andere Leistungen (zeile 52)</field>
-                                        <field name="code">84</field>
+                                        <field name="code">DE_84</field>
                                         <field name="sequence" eval="33"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_84_tag" model="account.report.expression">
@@ -456,13 +456,13 @@
                                     <record id="tax_report_de_tax_tag_18_formula" model="account.report.expression">
                                         <field name="total">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">81.balance + 86.balance + 36.balance + 80.balance</field>
+                                        <field name="formula">DE_81.balance + DE_86.balance + DE_36.balance + DE_80.balance</field>
                                     </record>
                                 </field>
                                 <field name="children_ids">
                                     <record id="tax_report_de_tag_26" model="account.report.line">
                                         <field name="name">81. zum Steuersatz von 19 % (zeile 26)</field>
-                                        <field name="code">81</field>
+                                        <field name="code">DE_81</field>
                                         <field name="sequence" eval="37"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_26_tag" model="account.report.expression">
@@ -474,7 +474,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_27" model="account.report.line">
                                         <field name="name">86. zum Steuersatz von 7 % (zeile 27)</field>
-                                        <field name="code">86</field>
+                                        <field name="code">DE_86</field>
                                         <field name="sequence" eval="38"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_27_tag" model="account.report.expression">
@@ -486,7 +486,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_36" model="account.report.line">
                                         <field name="name">36. zu anderen Steuersatzen (zeile 28)</field>
-                                        <field name="code">36</field>
+                                        <field name="code">DE_36</field>
                                         <field name="sequence" eval="39"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_36_tag" model="account.report.expression">
@@ -498,7 +498,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_80" model="account.report.line">
                                         <field name="name">80. Umsatze, fur die eine Steuer nach § 24 UStG zu entrichten ist (zeile 30)</field>
-                                        <field name="code">80</field>
+                                        <field name="code">DE_80</field>
                                         <field name="sequence" eval="40"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_80_tag" model="account.report.expression">
@@ -518,13 +518,13 @@
                                     <record id="tax_report_de_tax_tag_31_formula" model="account.report.expression">
                                         <field name="total">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">89.balance + 93.balance + 98.balance + 96.balance</field>
+                                        <field name="formula">DE_89.balance + DE_93.balance + DE_98.balance + DE_96.balance</field>
                                     </record>
                                 </field>
                                 <field name="children_ids">
                                     <record id="tax_report_de_tag_33" model="account.report.line">
                                         <field name="name">89. zum Steuersatz von 19 % (zeile 33)</field>
-                                        <field name="code">89</field>
+                                        <field name="code">DE_89</field>
                                         <field name="sequence" eval="42"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_33_tag" model="account.report.expression">
@@ -536,7 +536,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_34" model="account.report.line">
                                         <field name="name">93. zum Steuersatz von 7 % (zeile 34)</field>
-                                        <field name="code">93</field>
+                                        <field name="code">DE_93</field>
                                         <field name="sequence" eval="43"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_34_tag" model="account.report.expression">
@@ -548,7 +548,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_98" model="account.report.line">
                                         <field name="name">98. zu anderen Steuersatzen (zeile 35)</field>
-                                        <field name="code">98</field>
+                                        <field name="code">DE_98</field>
                                         <field name="sequence" eval="44"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_98_tag" model="account.report.expression">
@@ -560,7 +560,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_96" model="account.report.line">
                                         <field name="name">96. neuer Fahrzeuge von Lieferern ohne USt-IdNr. zum allgemeinen Steuersatz (zeile 36)</field>
-                                        <field name="code">96</field>
+                                        <field name="code">DE_96</field>
                                         <field name="sequence" eval="45"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_96_tag" model="account.report.expression">
@@ -580,13 +580,13 @@
                                     <record id="tax_report_de_tax_tag_37_formula" model="account.report.expression">
                                         <field name="total">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">45.balance</field>
+                                        <field name="formula">DE_45.balance</field>
                                     </record>
                                 </field>
                                 <field name="children_ids">
                                     <record id="tax_report_de_tax_tag_45" model="account.report.line">
                                         <field name="name">45. Ubertrag (zeile 45)</field>
-                                        <field name="code">45</field>
+                                        <field name="code">DE_45</field>
                                         <field name="sequence" eval="47"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tax_tag_45_tag" model="account.report.expression">
@@ -606,13 +606,13 @@
                                     <record id="tax_report_de_tax_tag_46_formula" model="account.report.expression">
                                         <field name="total">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">47.balance + 53.balance + 74.balance + 79.balance + 85.balance + 65.balance</field>
+                                        <field name="formula">DE_47.balance + DE_53.balance + DE_74.balance + DE_79.balance + DE_85.balance + DE_65.balance</field>
                                     </record>
                                 </field>
                                 <field name="children_ids">
                                     <record id="tax_report_de_tag_47" model="account.report.line">
                                         <field name="name">47. Steuerpflichtige sonstige Leistungen eines im übrigen Gemeinschaftsgebietansässigen Unternehmers (zeile 48)</field>
-                                        <field name="code">47</field>
+                                        <field name="code">DE_47</field>
                                         <field name="sequence" eval="49"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_47_tag" model="account.report.expression">
@@ -624,7 +624,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_53" model="account.report.line">
                                         <field name="name">53. Andere Leistungen eines im Ausland ansässigen Unternehmers (zeile 49)</field>
-                                        <field name="code">53</field>
+                                        <field name="code">DE_53</field>
                                         <field name="sequence" eval="50"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_53_tag" model="account.report.expression">
@@ -636,7 +636,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_74" model="account.report.line">
                                         <field name="name">74. Lieferungen sicherungsübereigneter Gegenstände und Umsätze, die unter das GrEStG fallen (zeile 50)</field>
-                                        <field name="code">74</field>
+                                        <field name="code">DE_74</field>
                                         <field name="sequence" eval="51"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_74_tag" model="account.report.expression">
@@ -648,7 +648,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_79" model="account.report.line">
                                         <field name="name">79. Lieferungen von Mobilfunkgeräten, Tablet-Computern, Spielekonsolen und integrierten Schaltkreisen (zeile 51)</field>
-                                        <field name="code">79</field>
+                                        <field name="code">DE_79</field>
                                         <field name="sequence" eval="52"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_79_tag" model="account.report.expression">
@@ -660,7 +660,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_85" model="account.report.line">
                                         <field name="name">85. Andere Leistungen (zeile 52)</field>
-                                        <field name="code">85</field>
+                                        <field name="code">DE_85</field>
                                         <field name="sequence" eval="53"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_85_tag" model="account.report.expression">
@@ -672,7 +672,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_65" model="account.report.line">
                                         <field name="name">65. Steuer infolge Wechsels der Besteuerungsform sowie Nachsteuer auf versteuerte Anzahlungen u. ä. wegen Steuersatzänderung (zeile 53)</field>
-                                        <field name="code">65</field>
+                                        <field name="code">DE_65</field>
                                         <field name="sequence" eval="54"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_65_tag" model="account.report.expression">
@@ -692,13 +692,13 @@
                                     <record id="tax_report_de_tax_tag_55_formula" model="account.report.expression">
                                         <field name="total">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">66.balance + 61.balance + 62.balance + 67.balance + 63.balance + 64.balance + 59.balance</field>
+                                        <field name="formula">DE_66.balance + DE_61.balance + DE_62.balance + DE_67.balance + DE_63.balance + DE_64.balance + DE_59.balance</field>
                                     </record>
                                 </field>
                                 <field name="children_ids">
                                     <record id="tax_report_de_tag_66" model="account.report.line">
                                         <field name="name">66. Vorsteuerbeträge aus Rechnungen von anderen Unternehmern (zeile 56)</field>
-                                        <field name="code">66</field>
+                                        <field name="code">DE_66</field>
                                         <field name="sequence" eval="56"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_66_tag" model="account.report.expression">
@@ -710,7 +710,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_61" model="account.report.line">
                                         <field name="name">61. Vorsteuerbeträge aus dem innergemeinschaftlichen Erwerb von Gegenständen (zeile 57)</field>
-                                        <field name="code">61</field>
+                                        <field name="code">DE_61</field>
                                         <field name="sequence" eval="57"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_61_tag" model="account.report.expression">
@@ -722,7 +722,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_62" model="account.report.line">
                                         <field name="name">62. Entstandene Einfuhrumsatzsteuer (zeile 58)</field>
-                                        <field name="code">62</field>
+                                        <field name="code">DE_62</field>
                                         <field name="sequence" eval="58"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_62_tag" model="account.report.expression">
@@ -734,7 +734,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_67" model="account.report.line">
                                         <field name="name">67. Vorsteuerbeträge aus Leistungen im Sinne des § 13b UStG (zeile 59)</field>
-                                        <field name="code">67</field>
+                                        <field name="code">DE_67</field>
                                         <field name="sequence" eval="59"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_67_tag" model="account.report.expression">
@@ -746,7 +746,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_63" model="account.report.line">
                                         <field name="name">63. Vorsteuerbeträge, die nach allgemeinen Durchschnittssätzen berechnet sind (zeile 60)</field>
-                                        <field name="code">63</field>
+                                        <field name="code">DE_63</field>
                                         <field name="sequence" eval="60"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_63_tag" model="account.report.expression">
@@ -758,7 +758,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_64" model="account.report.line">
                                         <field name="name">64. Berichtigung des Vorsteuerabzugs (zeile 61)</field>
-                                        <field name="code">64</field>
+                                        <field name="code">DE_64</field>
                                         <field name="sequence" eval="61"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_64_tag" model="account.report.expression">
@@ -770,7 +770,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_59" model="account.report.line">
                                         <field name="name">59. Vorsteuerabzug für innergemeinschaftliche Lieferungen neuer Fahrzeuge außerhalb eines Unternehmens (zeile 62)</field>
-                                        <field name="code">59</field>
+                                        <field name="code">DE_59</field>
                                         <field name="sequence" eval="62"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_59_tag" model="account.report.expression">
@@ -790,13 +790,13 @@
                                     <record id="tax_report_de_tax_tag_64_formula" model="account.report.expression">
                                         <field name="total">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">69.balance</field>
+                                        <field name="formula">DE_69.balance</field>
                                     </record>
                                 </field>
                                 <field name="children_ids">
                                     <record id="tax_report_de_tag_69" model="account.report.line">
                                         <field name="name">69. In Rechnungen unrichtig oder unberechtigt ausgewiesene Steuerbeträge (zeile 65)</field>
-                                        <field name="code">69</field>
+                                        <field name="code">DE_69</field>
                                         <field name="sequence" eval="64"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_69_tag" model="account.report.expression">
@@ -816,13 +816,13 @@
                                     <record id="tax_report_de_tax_tag_66_formula" model="account.report.expression">
                                         <field name="total">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">39.balance + 83.balance</field>
+                                        <field name="formula">DE_39.balance + DE_83.balance</field>
                                     </record>
                                 </field>
                                 <field name="children_ids">
                                     <record id="tax_report_de_tag_39" model="account.report.line">
                                         <field name="name">39. Abzug der festgesetzten Sondervorauszahlung für Dauerfristverlängerung (zeile 67)</field>
-                                        <field name="code">39</field>
+                                        <field name="code">DE_39</field>
                                         <field name="sequence" eval="66"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_39_tag" model="account.report.expression">
@@ -834,7 +834,7 @@
                                     </record>
                                     <record id="tax_report_de_tag_83" model="account.report.line">
                                         <field name="name">83. Verbleibende Umsatzsteuer-Vorauszahlung (zeile 68)</field>
-                                        <field name="code">83</field>
+                                        <field name="code">DE_83</field>
                                         <field name="sequence" eval="67"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_de_tag_83_tag" model="account.report.expression">

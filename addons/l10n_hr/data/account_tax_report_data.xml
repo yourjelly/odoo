@@ -45,7 +45,7 @@
                     <record id="account_tax_report_line_pdv_formula" model="account.report.expression">
                         <field name="total">balance</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">(((koje.balance + (izvozne.balance + isporuke.balance + tuzemne.balance + ostale).balance + isporuke_po).balance + (izdani_10.balance + izdani_25)).balance + (pretporez_10.balance + (0.7.balance * pretporez_25_70.balance + 0.3.balance * pretporez_25_30).balance + placeni_uvozu.balance + placeni_usluge_10.balance + placeni_usluge_25.balance + pretporez_0)).balance + (((izdani_racuni.balance + izdani_racuni_25).balance + (pretporez_10_tax.balance + pretporez_25_tax.balance + placeni_uvozu_tax.balance + placeni_usluge_10_tax.balance + placeni_usluge_25_ta))).balance + ((nepriznati_pretporez_25_other.balance + (0.3.balance * nepriznati_pretporez_25_30).balance + (0.7.balance * nepriznati_pretporez_25_70)).balance + pretporez_koji.balance + (nepriznati_pretporez_25_tax).balance + (pretporez_koji_neplaceni.balance + pretporez_koji_neplaceni_25.balance + pretporez_koji_neplaceni_usluge_25)).balance</field>
+                        <field name="formula">(((koje.balance + (izvozne.balance + isporuke.balance + tuzemne.balance + ostale.balance) + isporuke_po.balance) + (izdani_10.balance + izdani_25.balance)) + (pretporez_10.balance + (0.7 * pretporez_25_70.balance + 0.3 * pretporez_25_30.balance) + placeni_uvozu.balance + placeni_usluge_10.balance + placeni_usluge_25.balance + pretporez_0.balance)) + (((izdani_racuni.balance + izdani_racuni_25.balance) + (pretporez_10_tax.balance + pretporez_25_tax.balance + placeni_uvozu_tax.balance + placeni_usluge_10_tax.balance + placeni_usluge_25_ta.balance))) + ((nepriznati_pretporez_25_other.balance + (0.3 * nepriznati_pretporez_25_30.balance) + (0.7 * nepriznati_pretporez_25_70.balance)) + pretporez_koji.balance + (nepriznati_pretporez_25_tax.balance) + (pretporez_koji_neplaceni.balance + pretporez_koji_neplaceni_25.balance + pretporez_koji_neplaceni_usluge_25.balance))</field>
                     </record>
                 </field>
                 <field name="children_ids">
@@ -56,7 +56,7 @@
                             <record id="account_tax_report_line_obrazac_pdv_formula" model="account.report.expression">
                                 <field name="total">balance</field>
                                 <field name="engine">aggregation</field>
-                                <field name="formula">(((koje.balance + (izvozne.balance + isporuke.balance + tuzemne.balance + ostale).balance + isporuke_po).balance + (izdani_10.balance + izdani_25)).balance + (pretporez_10.balance + (0.7.balance * pretporez_25_70.balance + 0.3.balance * pretporez_25_30).balance + placeni_uvozu.balance + placeni_usluge_10.balance + placeni_usluge_25.balance + pretporez_0)).balance + (((izdani_racuni.balance + izdani_racuni_25).balance + (pretporez_10_tax.balance + pretporez_25_tax.balance + placeni_uvozu_tax.balance + placeni_usluge_10_tax.balance + placeni_usluge_25_ta))).balance</field>
+                                <field name="formula">(((koje.balance + (izvozne.balance + isporuke.balance + tuzemne.balance + ostale.balance) + isporuke_po.balance) + (izdani_10.balance + izdani_25.balance)) + (pretporez_10.balance + (0.7 * pretporez_25_70.balance + 0.3 * pretporez_25_30.balance) + placeni_uvozu.balance + placeni_usluge_10.balance + placeni_usluge_25.balance + pretporez_0.balance)) + (((izdani_racuni.balance + izdani_racuni_25.balance) + (pretporez_10_tax.balance + pretporez_25_tax.balance + placeni_uvozu_tax.balance + placeni_usluge_10_tax.balance + placeni_usluge_25_ta.balance)))</field>
                             </record>
                         </field>
                         <field name="children_ids">
@@ -67,7 +67,7 @@
                                     <record id="account_tax_report_line_osnovica_formula" model="account.report.expression">
                                         <field name="total">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">((koje.balance + (izvozne.balance + isporuke.balance + tuzemne.balance + ostale).balance + isporuke_po).balance + (izdani_10.balance + izdani_25)).balance + (pretporez_10.balance + (0.7.balance * pretporez_25_70.balance + 0.3.balance * pretporez_25_30).balance + placeni_uvozu.balance + placeni_usluge_10.balance + placeni_usluge_25.balance + pretporez_0).balance</field>
+                                        <field name="formula">((koje.balance + (izvozne.balance + isporuke.balance + tuzemne.balance + ostale.balance) + isporuke_po.balance) + (izdani_10.balance + izdani_25.balance)) + (pretporez_10.balance + (0.7 * pretporez_25_70.balance + 0.3 * pretporez_25_30.balance) + placeni_uvozu.balance + placeni_usluge_10.balance + placeni_usluge_25.balance + pretporez_0.balance)</field>
                                     </record>
                                 </field>
                                 <field name="children_ids">
@@ -262,7 +262,7 @@
                                             <record id="account_tax_report_line_obracunani_formula" model="account.report.expression">
                                                 <field name="total">balance</field>
                                                 <field name="engine">aggregation</field>
-                                                <field name="formula">pretporez_10.balance + (0.7.balance * pretporez_25_70.balance + 0.3.balance * pretporez_25_30).balance + placeni_uvozu.balance + placeni_usluge_10.balance + placeni_usluge_25.balance + pretporez_0.balance</field>
+                                                <field name="formula">pretporez_10.balance + (0.7 * pretporez_25_70.balance + 0.3 * pretporez_25_30.balance) + placeni_uvozu.balance + placeni_usluge_10.balance + placeni_usluge_25.balance + pretporez_0.balance</field>
                                             </record>
                                         </field>
                                         <field name="children_ids">
@@ -296,7 +296,7 @@
                                                     <record id="account_tax_report_line_pretporez_25_formula" model="account.report.expression">
                                                         <field name="total">balance</field>
                                                         <field name="engine">aggregation</field>
-                                                        <field name="formula">0.3.balance * pretporez_25_30.balance + 0.7.balance * pretporez_25_70.balance</field>
+                                                        <field name="formula">0.3 * pretporez_25_30.balance + 0.7 * pretporez_25_70.balance</field>
                                                     </record>
                                                 </field>
                                                 <field name="children_ids">
@@ -614,7 +614,7 @@
                             <record id="account_tax_report_line_pdv_ostalo_formula" model="account.report.expression">
                                 <field name="total">balance</field>
                                 <field name="engine">aggregation</field>
-                                <field name="formula">(nepriznati_pretporez_25_other.balance + (0.3.balance * nepriznati_pretporez_25_30).balance + (0.7.balance * nepriznati_pretporez_25_70)).balance + pretporez_koji.balance + (nepriznati_pretporez_25_tax).balance + (pretporez_koji_neplaceni.balance + pretporez_koji_neplaceni_25.balance + pretporez_koji_neplaceni_usluge_25).balance</field>
+                                <field name="formula">(nepriznati_pretporez_25_other.balance + (0.3 * nepriznati_pretporez_25_30.balance) + (0.7 * nepriznati_pretporez_25_70.balance)) + pretporez_koji.balance + (nepriznati_pretporez_25_tax.balance) + (pretporez_koji_neplaceni.balance + pretporez_koji_neplaceni_25.balance + pretporez_koji_neplaceni_usluge_25.balance)</field>
                             </record>
                         </field>
                         <field name="children_ids">
@@ -762,7 +762,7 @@
                                     <record id="account_tax_report_line_nepriznati_pretporez_formula" model="account.report.expression">
                                         <field name="total">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">0.3.balance * nepriznati_pretporez_25_30.balance + 0.7.balance * nepriznati_pretporez_25_70.balance + nepriznati_pretporez_25_other.balance + pretporez_koji.balance</field>
+                                        <field name="formula">0.3 * nepriznati_pretporez_25_30.balance + 0.7 * nepriznati_pretporez_25_70.balance + nepriznati_pretporez_25_other.balance + pretporez_koji.balance</field>
                                     </record>
                                 </field>
                                 <field name="children_ids">
@@ -773,7 +773,7 @@
                                             <record id="account_tax_report_line_nepriznati_pretporez_osnovica_3070_formula" model="account.report.expression">
                                                 <field name="total">balance</field>
                                                 <field name="engine">aggregation</field>
-                                                <field name="formula">0.3.balance * nepriznati_pretporez_25_30.balance + 0.7.balance * nepriznati_pretporez_25_70.balance + nepriznati_pretporez_25_other.balance</field>
+                                                <field name="formula">0.3 * nepriznati_pretporez_25_30.balance + 0.7 * nepriznati_pretporez_25_70.balance + nepriznati_pretporez_25_other.balance</field>
                                             </record>
                                         </field>
                                         <field name="children_ids">
@@ -804,7 +804,7 @@
                                                     <record id="account_tax_report_line_nepriznati_pretporez_25_formula" model="account.report.expression">
                                                         <field name="total">balance</field>
                                                         <field name="engine">aggregation</field>
-                                                        <field name="formula">0.3.balance * nepriznati_pretporez_25_30.balance + 0.7.balance * nepriznati_pretporez_25_70.balance + nepriznati_pretporez_25_other.balance</field>
+                                                        <field name="formula">0.3 * nepriznati_pretporez_25_30.balance + 0.7 * nepriznati_pretporez_25_70.balance + nepriznati_pretporez_25_other.balance</field>
                                                     </record>
                                                 </field>
                                                 <field name="children_ids">

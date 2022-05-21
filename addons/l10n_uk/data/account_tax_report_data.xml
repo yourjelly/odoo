@@ -92,13 +92,13 @@
                     <record id="account_tax_report_line_exd_vat_formula" model="account.report.expression">
                         <field name="total">balance</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">6.balance + 7.balance</field>
+                        <field name="formula">UKTAX_6.balance + UKTAX_7.balance</field>
                     </record>
                 </field>
                 <field name="children_ids">
                     <record id="account_tax_report_line_exd_vat_box6" model="account.report.line">
                         <field name="name">[BOX 6] Total value of sales and other outputs excluding VAT (including EC supplies)</field>
-                        <field name="code">6</field>
+                        <field name="code">UKTAX_6</field>
                         <field name="sequence" eval="8"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_exd_vat_box6_tag" model="account.report.expression">
@@ -110,7 +110,7 @@
                     </record>
                     <record id="account_tax_report_line_exd_vat_box7" model="account.report.line">
                         <field name="name">[BOX 7] Total value of purchases and inputs excluding VAT (including EC acquisitions)</field>
-                        <field name="code">7</field>
+                        <field name="code">UKTAX_7</field>
                         <field name="sequence" eval="9"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_exd_vat_box7_tag" model="account.report.expression">

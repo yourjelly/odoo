@@ -37,13 +37,13 @@
                             <record id="account_tax_report_line_chtax_289_formula" model="account.report.expression">
                                 <field name="total">balance</field>
                                 <field name="engine">aggregation</field>
-                                <field name="formula">220.balance + 221.balance + 225.balance + 230.balance + 235.balance + 280.balance</field>
+                                <field name="formula">tax_ch_220.balance + tax_ch_221.balance + tax_ch_225.balance + tax_ch_230.balance + tax_ch_235.balance + tax_ch_280.balance</field>
                             </record>
                         </field>
                         <field name="children_ids">
                             <record id="account_tax_report_line_chtax_220_289" model="account.report.line">
                                 <field name="name">220 Supplies exempt from the tax (e.g. export, art. 23) and supplies provided to institutional and individual beneficiaries that are exempt from liability for tax (art. 107 para. 1 lit. a)</field>
-                                <field name="code">220</field>
+                                <field name="code">tax_ch_220</field>
                                 <field name="sequence" eval="4"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_chtax_220_289_tag" model="account.report.expression">
@@ -55,7 +55,7 @@
                             </record>
                             <record id="account_tax_report_line_chtax_221" model="account.report.line">
                                 <field name="name">221 Supplies provided abroad (place of supply is abroad)</field>
-                                <field name="code">221</field>
+                                <field name="code">tax_ch_221</field>
                                 <field name="sequence" eval="5"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_chtax_221_tag" model="account.report.expression">
@@ -67,7 +67,7 @@
                             </record>
                             <record id="account_tax_report_line_chtax_225" model="account.report.line">
                                 <field name="name">225 Transfer of supplies according to the notification procedure (art. 38, please submit Form 764)</field>
-                                <field name="code">225</field>
+                                <field name="code">tax_ch_225</field>
                                 <field name="sequence" eval="6"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_chtax_225_tag" model="account.report.expression">
@@ -79,7 +79,7 @@
                             </record>
                             <record id="account_tax_report_line_chtax_230" model="account.report.line">
                                 <field name="name">230 Supplies provided on Swiss territory exempt from the tax without credit (art. 21) and where the option for their taxation according to art. 22 has not been exercised</field>
-                                <field name="code">230</field>
+                                <field name="code">tax_ch_230</field>
                                 <field name="sequence" eval="7"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_chtax_230_tag" model="account.report.expression">
@@ -91,7 +91,7 @@
                             </record>
                             <record id="account_tax_report_line_chtax_235" model="account.report.line">
                                 <field name="name">235 Reduction of consideration (discounts, rebates etc.)</field>
-                                <field name="code">235</field>
+                                <field name="code">tax_ch_235</field>
                                 <field name="sequence" eval="8"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_chtax_235_tag" model="account.report.expression">
@@ -103,7 +103,7 @@
                             </record>
                             <record id="account_tax_report_line_chtax_280" model="account.report.line">
                                 <field name="name">280 Miscellaneous (e.g. land value, purchase prices in case of margin taxation)</field>
-                                <field name="code">280</field>
+                                <field name="code">tax_ch_280</field>
                                 <field name="sequence" eval="9"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_chtax_280_tag" model="account.report.expression">
@@ -188,13 +188,13 @@
                             <record id="account_tax_report_line_calc_impot_base_formula" model="account.report.expression">
                                 <field name="total">balance</field>
                                 <field name="engine">aggregation</field>
-                                <field name="formula">381A.balance + 382A.balance</field>
+                                <field name="formula">tax_ch_381A.balance + tax_ch_382A.balance</field>
                             </record>
                         </field>
                         <field name="children_ids">
                             <record id="account_tax_report_line_chtax_381a" model="account.report.line">
                                 <field name="name">381a Acquisition tax</field>
-                                <field name="code">381A</field>
+                                <field name="code">tax_ch_381A</field>
                                 <field name="sequence" eval="17"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_chtax_381a_tag" model="account.report.expression">
@@ -206,7 +206,7 @@
                             </record>
                             <record id="account_tax_report_line_chtax_382a" model="account.report.line">
                                 <field name="name">382a Acquisition tax</field>
-                                <field name="code">382A</field>
+                                <field name="code">tax_ch_382A</field>
                                 <field name="sequence" eval="18"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_chtax_382a_tag" model="account.report.expression">
@@ -226,13 +226,13 @@
                             <record id="account_tax_report_line_chtax_399_formula" model="account.report.expression">
                                 <field name="total">balance</field>
                                 <field name="engine">aggregation</field>
-                                <field name="formula">302B.balance + 312B.balance + 342B.balance + 381B.balance + 382B.balance</field>
+                                <field name="formula">tax_ch_302B.balance + tax_ch_312B.balance + tax_ch_342B.balance + tax_ch_381B.balance + tax_ch_382B.balance</field>
                             </record>
                         </field>
                         <field name="children_ids">
                             <record id="account_tax_report_line_chtax_302b" model="account.report.line">
                                 <field name="name">302b Tax due at 7.7% (TS)</field>
-                                <field name="code">302B</field>
+                                <field name="code">tax_ch_302B</field>
                                 <field name="sequence" eval="20"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_chtax_302b_tag" model="account.report.expression">
@@ -244,7 +244,7 @@
                             </record>
                             <record id="account_tax_report_line_chtax_312b" model="account.report.line">
                                 <field name="name">312b Tax due at 2.5% (TR)</field>
-                                <field name="code">312B</field>
+                                <field name="code">tax_ch_312B</field>
                                 <field name="sequence" eval="21"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_chtax_312b_tag" model="account.report.expression">
@@ -256,7 +256,7 @@
                             </record>
                             <record id="account_tax_report_line_chtax_342b" model="account.report.line">
                                 <field name="name">342b Tax due at 3.7% (TS)</field>
-                                <field name="code">342B</field>
+                                <field name="code">tax_ch_342B</field>
                                 <field name="sequence" eval="22"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_chtax_342b_tag" model="account.report.expression">
@@ -268,7 +268,7 @@
                             </record>
                             <record id="account_tax_report_line_chtax_381b" model="account.report.line">
                                 <field name="name">381b Acquisition tax</field>
-                                <field name="code">381B</field>
+                                <field name="code">tax_ch_381B</field>
                                 <field name="sequence" eval="23"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_chtax_381b_tag" model="account.report.expression">
@@ -280,7 +280,7 @@
                             </record>
                             <record id="account_tax_report_line_chtax_382b" model="account.report.line">
                                 <field name="name">382b Acquisition tax</field>
-                                <field name="code">382B</field>
+                                <field name="code">tax_ch_382B</field>
                                 <field name="sequence" eval="24"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_chtax_382b_tag" model="account.report.expression">
@@ -302,13 +302,13 @@
                     <record id="account_tax_report_line_chtax_479_formula" model="account.report.expression">
                         <field name="total">balance</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">400.balance + 405.balance + 410.balance + 415.balance + 420.balance</field>
+                        <field name="formula">tax_ch_400.balance + tax_ch_405.balance + tax_ch_410.balance + tax_ch_415.balance + tax_ch_420.balance</field>
                     </record>
                 </field>
                 <field name="children_ids">
                     <record id="account_tax_report_line_chtax_400" model="account.report.line">
                         <field name="name">400 Input tax on cost of materials and supplies of services</field>
-                        <field name="code">400</field>
+                        <field name="code">tax_ch_400</field>
                         <field name="sequence" eval="26"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_chtax_400_tag" model="account.report.expression">
@@ -320,7 +320,7 @@
                     </record>
                     <record id="account_tax_report_line_chtax_405" model="account.report.line">
                         <field name="name">405 Input tax on investments and other operating costs</field>
-                        <field name="code">405</field>
+                        <field name="code">tax_ch_405</field>
                         <field name="sequence" eval="27"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_chtax_405_tag" model="account.report.expression">
@@ -332,7 +332,7 @@
                     </record>
                     <record id="account_tax_report_line_chtax_410" model="account.report.line">
                         <field name="name">410 De-taxation (art. 32, please enclose a detailed list)</field>
-                        <field name="code">410</field>
+                        <field name="code">tax_ch_410</field>
                         <field name="sequence" eval="28"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_chtax_410_tag" model="account.report.expression">
@@ -344,7 +344,7 @@
                     </record>
                     <record id="account_tax_report_line_chtax_415" model="account.report.line">
                         <field name="name">415 Correction of the input tax deduction: mixed use (art. 30), own use (art. 31)</field>
-                        <field name="code">415</field>
+                        <field name="code">tax_ch_415</field>
                         <field name="sequence" eval="29"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_chtax_415_tag" model="account.report.expression">
@@ -356,7 +356,7 @@
                     </record>
                     <record id="account_tax_report_line_chtax_420" model="account.report.line">
                         <field name="name">420 Reduction of the input tax deduction: Flow of funds, which are not deemed to be consideration, such as subsidies, tourist charges (art. 33 para. 2)</field>
-                        <field name="code">420</field>
+                        <field name="code">tax_ch_420</field>
                         <field name="sequence" eval="30"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_chtax_420_tag" model="account.report.expression">
@@ -385,7 +385,8 @@
                             <record id="account_tax_report_line_chtax_500_formula" model="account.report.expression">
                                 <field name="total">balance</field>
                                 <field name="engine">aggregation</field>
-                                <field name="formula">tax_ch_399.balance - tax_ch_479 &gt; 0 and tax_ch_399.balance - tax_ch_479 or 0.0.balance</field>
+                                <field name="formula">tax_ch_399.balance - tax_ch_479.balance</field>
+                                <field name="subformula">if_above(CHF(0))</field>
                             </record>
                         </field>
                     </record>
@@ -396,7 +397,8 @@
                             <record id="account_tax_report_line_chtax_510_formula" model="account.report.expression">
                                 <field name="total">balance</field>
                                 <field name="engine">aggregation</field>
-                                <field name="formula">tax_ch_479.balance - tax_ch_399 &gt; 0 and tax_ch_479.balance - tax_ch_399 or 0.0.balance</field>
+                                <field name="formula">tax_ch_479.balance - tax_ch_399.balance</field>
+                                <field name="subformula">if_above(CHF(0))</field>
                             </record>
                         </field>
                     </record>
@@ -409,13 +411,13 @@
                     <record id="account_tax_report_line_chtax_autres_mouv_formula" model="account.report.expression">
                         <field name="total">balance</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">900.balance + 910.balance</field>
+                        <field name="formula">tax_ch_900.balance + tax_ch_910.balance</field>
                     </record>
                 </field>
                 <field name="children_ids">
                     <record id="account_tax_report_line_chtax_900" model="account.report.line">
                         <field name="name">900 Subsidies, tourist funds collected by tourist offices, contributions from cantonal water, sewage or waste funds (art. 18 para. 2 lit. a to c)</field>
-                        <field name="code">900</field>
+                        <field name="code">tax_ch_900</field>
                         <field name="sequence" eval="35"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_chtax_900_tag" model="account.report.expression">
@@ -427,7 +429,7 @@
                     </record>
                     <record id="account_tax_report_line_chtax_910" model="account.report.line">
                         <field name="name">910 Donations, dividends, payments of damages etc. (art. 18 para. 2 lit. d to l)</field>
-                        <field name="code">910</field>
+                        <field name="code">tax_ch_910</field>
                         <field name="sequence" eval="36"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_chtax_910_tag" model="account.report.expression">

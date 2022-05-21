@@ -68,7 +68,7 @@
                             <record id="tax_report_out_tax_taxable_sales_amount_formula" model="account.report.expression">
                                 <field name="total">balance</field>
                                 <field name="engine">aggregation</field>
-                                <field name="formula">OUTPUTTAX_SALEAMOUNT.balance-(OUTPUTTAX_SALE_ZERO.balance+OUTPUTTAX_EXEMPTED).balance</field>
+                                <field name="formula">OUTPUTTAX_SALEAMOUNT.balance-(OUTPUTTAX_SALE_ZERO.balance+OUTPUTTAX_EXEMPTED.balance)</field>
                             </record>
                         </field>
                     </record>

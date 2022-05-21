@@ -126,7 +126,7 @@
                             <record id="account_tax_report_gstrpt_g9_formula" model="account.report.expression">
                                 <field name="total">balance</field>
                                 <field name="engine">aggregation</field>
-                                <field name="formula">G8.balance/11.balance</field>
+                                <field name="formula">G8.balance/11</field>
                             </record>
                         </field>
                     </record>
@@ -268,7 +268,7 @@
                             <record id="account_tax_report_gstrpt_g20a_formula" model="account.report.expression">
                                 <field name="total">balance</field>
                                 <field name="engine">aggregation</field>
-                                <field name="formula">G19.balance/11.balance</field>
+                                <field name="formula">G19.balance/11</field>
                             </record>
                         </field>
                     </record>

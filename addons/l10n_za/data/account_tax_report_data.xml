@@ -21,7 +21,7 @@
                     <record id="total_vat_payable_formula" model="account.report.expression">
                         <field name="total">balance</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">(VAT4.balance + VAT4A.balance + (SEC6.balance * 60.balance/100.balance + SEC7).balance + VAT11.balance + VAT12).balance - (VAT14.balance + VAT14A.balance + VAT15.balance + VAT16.balance + VAT17.balance + VAT18).balance</field>
+                        <field name="formula">(VAT4.balance + VAT4A.balance + (SEC6.balance * 0.6 + SEC7.balance) + VAT11.balance + VAT12.balance) - (VAT14.balance + VAT14A.balance + VAT15.balance + VAT16.balance + VAT17.balance + VAT18.balance)</field>
                     </record>
                 </field>
                 <field name="children_ids">
@@ -32,7 +32,7 @@
                             <record id="total_output_tax_formula" model="account.report.expression">
                                 <field name="total">balance</field>
                                 <field name="engine">aggregation</field>
-                                <field name="formula">VAT4.balance + VAT4A.balance + (SEC6.balance * 60.balance/100.balance + SEC7).balance + VAT11.balance + VAT12.balance</field>
+                                <field name="formula">VAT4.balance + VAT4A.balance + (SEC6.balance * 0.6 + SEC7.balance) + VAT11.balance + VAT12.balance</field>
                             </record>
                         </field>
                         <field name="children_ids">
@@ -139,7 +139,7 @@
                                     <record id="accomodation_exceeding_28_days_60_percent_formula" model="account.report.expression">
                                         <field name="total">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">VAT5.balance * 60.balance / 100.balance</field>
+                                        <field name="formula">VAT5.balance * 0.6</field>
                                     </record>
                                 </field>
                             </record>
@@ -162,7 +162,7 @@
                                     <record id="accomodation_28_days_formula" model="account.report.expression">
                                         <field name="total">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">(VAT5.balance * 60.balance / 100).balance + VAT7.balance</field>
+                                        <field name="formula">(VAT5.balance * 0.6) + VAT7.balance</field>
                                     </record>
                                 </field>
                             </record>
@@ -173,7 +173,7 @@
                                     <record id="vat_on_accomodation_28_days_formula" model="account.report.expression">
                                         <field name="total">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">SEC6.balance * 60.balance/100.balance + SEC7.balance </field>
+                                        <field name="formula">SEC6.balance * 0.6 + SEC7.balance </field>
                                     </record>
                                 </field>
                                 <field name="children_ids">

@@ -243,7 +243,7 @@
                             <record id="tax_report_vat_return_net_3_formula" model="account.report.expression">
                                 <field name="total">balance</field>
                                 <field name="engine">aggregation</field>
-                                <field name="formula">STD_SALE_T.balance + ZERO_SALE_T.balance + EXM_SALE_T.balance - (STD_PUR_T.balance + ZERO_PUR_T.balance + EXM_PUR_T).balance</field>
+                                <field name="formula">STD_SALE_T.balance + ZERO_SALE_T.balance + EXM_SALE_T.balance - (STD_PUR_T.balance + ZERO_PUR_T.balance + EXM_PUR_T.balance)</field>
                             </record>
                         </field>
                     </record>
