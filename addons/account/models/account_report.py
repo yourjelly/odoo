@@ -37,7 +37,7 @@ class AccountReport(models.Model):
         string="Available if",
         selection=[('country', "Country Matches"), ('always', "Always")], #TODO OCO ajouter using_oss dans OSS
         required=True,
-        default='always',
+        compute='_compute_default_availability_condition', readonly=False, store=True,
     )
 
     #  FILTERS =======================================================================================================================================
@@ -115,6 +115,14 @@ class AccountReport(models.Model):
                 record[field_name] = record.root_report_id[field_name]
             else:
                 record[field_name] = default_value
+
+    @api.depends('root_report_id', 'country_id')
+    def _compute_default_availability_condition(self):
+        for record in self:
+            if record.root_report_id and record.country_id:
+                record.availability_condition = 'country'
+            else:
+                record.availability_condition = 'always'
 
     def write(self, vals):
         #TODO OCO reDOC: tax tag management
