@@ -335,7 +335,7 @@ class AccountReportExpression(models.Model):
 
     # TODO OCO repasser sur le phrasing
     report_line_id = fields.Many2one(string="Report Line", comodel_name='account.report.line', required=True, ondelete='cascade')
-    total = fields.Char(string="Total", required=True)
+    total = fields.Char(string="Label", required=True)
     engine = fields.Selection(
         string="Computation Engine",
         selection = [
@@ -348,7 +348,7 @@ class AccountReportExpression(models.Model):
         ],
         required=True
     )
-    formula = fields.Char(string="Formula")
+    formula = fields.Char(string="Formula", required=True)
     subformula = fields.Char(string="Subformula")
     date_scope = fields.Selection(
         string="Date Scope",
