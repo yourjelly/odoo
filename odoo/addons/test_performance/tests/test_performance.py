@@ -107,17 +107,13 @@ class TestPerformance(SavepointCaseWithUserDemo):
         self.assertEqual(len(result), 5)
 
         with self.assertQueries(['''
-            SELECT "test_performance_base".id
-            FROM "test_performance_base"
-            WHERE TRUE
-            ORDER BY "test_performance_base"."id"
-        ''', '''
             SELECT "test_performance_base"."id" AS "id",
                 "test_performance_base"."name" AS "name",
                 "test_performance_base"."value" AS "value",
                 "test_performance_base"."partner_id" AS "partner_id"
             FROM "test_performance_base"
-            WHERE "test_performance_base".id IN %s
+            WHERE TRUE
+            ORDER BY "test_performance_base"."id"
         ''']):
             model.search_read([], fnames)
 

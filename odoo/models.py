@@ -5215,30 +5215,21 @@ class BaseModel(metaclass=MetaModel):
         :return: List of dictionaries containing the asked fields.
         :rtype: list(dict).
         """
-        records = self.search(domain or [], offset=offset, limit=limit, order=order)
-        if not records:
-            return []
+        fields = self.check_field_access_rights('read', fields)
+        records = self._search_read(domain or [], fields, offset=offset, limit=limit, order=order)
+        return records._read_format(fields, **read_kwargs)
 
-        if fields and fields == ['id']:
-            # shortcut read if we only want the ids
-            return [{'id': record.id} for record in records]
+    def _search_read(self, domain, fields, offset=0, limit=None, order=None):
+        """ Perform a search and also fetch the given fields, and return the
+        records found by search.  The fetched fields are put in cache.
+        """
+        query = self._search(domain, offset=offset, limit=limit, order=order)
+        if not isinstance(query, Query):
+            ids = list(query)
+            query = self.sudo()._where_calc([('id', 'in', ids)], active_test=False)
 
-        # read() ignores active_test, but it would forward it to any downstream search call
-        # (e.g. for x2m or function fields), and this is not the desired behavior, the flag
-        # was presumably only meant for the main search().
-        # TODO: Move this to read() directly?
-        if 'active_test' in self._context:
-            context = dict(self._context)
-            del context['active_test']
-            records = records.with_context(context)
-
-        result = records.read(fields, **read_kwargs)
-        if len(result) <= 1:
-            return result
-
-        # reorder read
-        index = {vals['id']: vals for vals in result}
-        return [index[record.id] for record in records if record.id in index]
+        fields = self.check_field_access_rights('read', fields)
+        return self._read(fields, query)
 
     def toggle_active(self):
         "Inverses the value of :attr:`active` on the records in ``self``."
