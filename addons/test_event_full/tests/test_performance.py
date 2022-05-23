@@ -379,12 +379,13 @@ class TestRegistrationPerformance(EventPerformanceCase):
         event = self.env['event.event'].browse(self.test_event.ids)
 
         # website customer data
-        with freeze_time(self.reference_now), self.assertQueryCount(event_user=147):  # tef only: 142 - com runbot: 143 - ent runbot: 147
-            self.env.cr._now = self.reference_now  # force create_date to check schedulers
-            registration_values = dict(
-                self.website_customer_data[0],
-                event_id=event.id)
-            _registration = self.env['event.registration'].create([registration_values])
+        with self.profile(collectors=["sql"]):
+            with freeze_time(self.reference_now), self.assertQueryCount(event_user=147):  # tef only: 142 - com runbot: 143 - ent runbot: 147
+                self.env.cr._now = self.reference_now  # force create_date to check schedulers
+                registration_values = dict(
+                    self.website_customer_data[0],
+                    event_id=event.id)
+                _registration = self.env['event.registration'].create([registration_values])
 
 
 @tagged('event_performance', 'event_online', 'post_install', '-at_install')
