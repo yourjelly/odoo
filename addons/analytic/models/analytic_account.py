@@ -166,9 +166,9 @@ class AccountAnalyticLine(models.Model):
         return self.env.context.get('user_id', self.env.user.id)
 
     name = fields.Char('Description', required=True)
-    date = fields.Date('Date', required=True, index=True, default=fields.Date.context_today)
+    date = fields.Date('Date', required=True, index=True, default=fields.Date.context_today, help="Date on which this activity has been performed. You can block the creation of timesheets in the past by enabling the 'lock dates' feature in the settings of the Timesheets application.")
     amount = fields.Monetary('Amount', required=True, default=0.0)
-    unit_amount = fields.Float('Quantity', default=0.0)
+    unit_amount = fields.Float('Quantity', default=0.0, help="Duration of the timesheet entry; can be expressed in hours or in days.")
     product_uom_id = fields.Many2one('uom.uom', string='Unit of Measure', domain="[('category_id', '=', product_uom_category_id)]")
     product_uom_category_id = fields.Many2one(related='product_uom_id.category_id', string='UoM Category', readonly=True)
     account_id = fields.Many2one('account.analytic.account', 'Analytic Account', required=True, ondelete='restrict', index=True, check_company=True)

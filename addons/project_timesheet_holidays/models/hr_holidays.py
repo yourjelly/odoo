@@ -19,13 +19,14 @@ class HolidaysType(models.Model):
     timesheet_generate = fields.Boolean(
         'Generate Timesheet', compute='_compute_timesheet_generate', store=True, readonly=False,
         help="If checked, when validating a time off, timesheet will be generated in the Vacation Project of the company.")
-    timesheet_project_id = fields.Many2one('project.project', string="Project", default=_default_project_id, domain="[('company_id', '=', company_id)]", help="The project will contain the timesheet generated when a time off is validated.")
+    timesheet_project_id = fields.Many2one('project.project', string="Project", default=_default_project_id, domain="[('company_id', '=', company_id)]", help="When validating time off of this type, corresponding timesheets will automatically be logged in this project.")
     timesheet_task_id = fields.Many2one(
         'project.task', string="Task", compute='_compute_timesheet_task_id',
         store=True, readonly=False, default=_default_task_id,
         domain="[('project_id', '=', timesheet_project_id),"
                 "('project_id', '!=', False),"
-                "('company_id', '=', company_id)]")
+                "('company_id', '=', company_id)]",
+        help="When validating time off of this type, corresponding timesheets will automatically be logged in this task.")
 
     @api.depends('timesheet_task_id', 'timesheet_project_id')
     def _compute_timesheet_generate(self):

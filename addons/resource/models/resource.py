@@ -929,7 +929,7 @@ class ResourceResource(models.Model):
     active = fields.Boolean(
         'Active', default=True,
         help="If the active field is set to False, it will allow you to hide the resource record without removing it.")
-    company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)
+    company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company, help="Company linked to the material resource. Leave empty for the resource to be available in every company.")
     resource_type = fields.Selection([
         ('user', 'Human'),
         ('material', 'Material')], string='Type',
@@ -942,11 +942,11 @@ class ResourceResource(models.Model):
         "resource.calendar", string='Working Time',
         default=lambda self: self.env.company.resource_calendar_id,
         required=True, domain="[('company_id', '=', company_id)]",
-        help="Define the schedule of resource")
+        help="Working hours on which the default hours and allocated hours of this material resource's shifts will be based.")
     tz = fields.Selection(
         _tz_get, string='Timezone', required=True,
         default=lambda self: self._context.get('tz') or self.env.user.tz or 'UTC',
-        help="This field is used in order to define in which timezone the resources will work.")
+        help="Timezone used as a reference to calculate the working hours of this resource.")
 
     _sql_constraints = [
         ('check_time_efficiency', 'CHECK(time_efficiency>0)', 'Time efficiency must be strictly positive'),

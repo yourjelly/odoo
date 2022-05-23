@@ -38,14 +38,14 @@ class Rating(models.Model):
     parent_ref = fields.Reference(
         string='Parent Ref', selection='_selection_target_model',
         compute='_compute_parent_ref', readonly=True)
-    rated_partner_id = fields.Many2one('res.partner', string="Rated Operator", help="Owner of the rated resource")
+    rated_partner_id = fields.Many2one('res.partner', string="Rated Operator", help="User that has been rated; corresponds to the user assigned to the record for which a rating request has been sent.")
     rated_partner_name = fields.Char(related="rated_partner_id.name")
-    partner_id = fields.Many2one('res.partner', string='Customer', help="Author of the rating")
+    partner_id = fields.Many2one('res.partner', string='Customer', help="Customer that has submitted this rating.")
     rating = fields.Float(string="Rating Value", group_operator="avg", default=0, help="Rating value: 0=Unhappy, 5=Happy")
     rating_image = fields.Binary('Image', compute='_compute_rating_image')
     rating_image_url = fields.Char('Image URL', compute='_compute_rating_image')
-    rating_text = fields.Selection(rating_data.RATING_TEXT, string='Rating', store=True, compute='_compute_rating_text', readonly=True)
-    feedback = fields.Text('Comment', help="Reason of the rating")
+    rating_text = fields.Selection(rating_data.RATING_TEXT, string='Rating', store=True, compute='_compute_rating_text', readonly=True, help="Rating left by the customer. It can be either satisfied, okay or dissatisfied.")
+    feedback = fields.Text('Comment', help="Feedback left by the customer who has submitted this rating.")
     message_id = fields.Many2one(
         'mail.message', string="Message",
         index=True, ondelete='cascade',
