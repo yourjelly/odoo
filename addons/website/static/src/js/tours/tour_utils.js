@@ -240,7 +240,7 @@ function prepend_trigger(steps, prepend_text='') {
 }
 
 function getClientActionUrl(path, edition) {
-    let url = `/web#action=website.website_editor&path=${encodeURI(path)}`;
+    let url = `/web#action=website.website_editor&path=${encodeURIComponent(path)}`;
     if (edition) {
         url += '&enable_editor=1';
     }
