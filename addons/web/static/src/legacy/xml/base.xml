@@ -260,7 +260,7 @@
                         <main class="modal-body">
                             <t t-slot="default"/>
                         </main>
-                        <footer t-if="props.renderFooter" class="modal-footer" t-ref="modal-footer">
+                        <footer t-if="props.renderFooter" class="modal-footer justify-content-around justify-content-sm-start flex-wrap gap-1" t-ref="modal-footer">
                             <t t-slot="buttons" close="_close" >
                                 <button class="btn btn-primary" t-on-click.prevent="_close">
                                     <t>Ok</t>
@@ -371,7 +371,7 @@
             <li t-foreach="state.sources" t-as="src" t-key="src.id"
                 t-att-id="src.id"
                 class="o_menu_item dropdown-item"
-                t-att-class="{ o_indent: src.parent and !src.parent.selection, o_selection_focus: src_index === state.focusedItem }"
+                t-att-class="{ o_indent: src.parent and !src.parent.selection, focus: src_index === state.focusedItem}"
                 t-on-click="()=>this._selectSource(src)"
                 t-on-mousemove="()=>this._onSourceMousemove(src_index)"
                 >
@@ -1225,6 +1225,9 @@
         t-att-src='url'
         t-att-border="widget.readonly ? 0 : 1"
         t-att-name="widget.name"/>
+</t>
+<t t-name="CopyClipboardButton">
+    <button class="btn btn-secondary o_clipboard_button o_btn_button_copy">Copy</button>
 </t>
 <t t-name="CopyClipboardText">
     <button class="btn btn-sm btn-primary o_clipboard_button o_btn_text_copy">
