@@ -34,7 +34,7 @@ class AccountReport(models.Model):
     only_tax_exigible = fields.Boolean(string="Only Tax Exigible Lines", default=False, required=True)
     caret_options_initializer = fields.Char(string="Caret Options Initializer", required=True, default='_get_default_caret_options')
     availability_condition = fields.Selection(
-        string="Available if",
+        string="Availability",
         selection=[('country', "Country Matches"), ('always', "Always")], #TODO OCO ajouter using_oss dans OSS
         compute='_compute_default_availability_condition', readonly=False, store=True,
     ) #TODO OCO required in view
@@ -48,23 +48,23 @@ class AccountReport(models.Model):
         compute=lambda x: x._compute_report_option_filter('filter_multi_company', 'disabled'), readonly=False, store=True, depends=['root_report_id'],
     ) # TODO OCO required dans la vue
     filter_date_range = fields.Boolean(
-        string="Use Date Range",
+        string="Date Range",
         compute=lambda x: x._compute_report_option_filter('filter_date_range', True), readonly=False, store=True, depends=['root_report_id'],
     )
     filter_show_draft = fields.Boolean(
-        string="Allow Showing Draft Entries",
+        string="Draft Entries",
         compute=lambda x: x._compute_report_option_filter('filter_show_draft', True), readonly=False, store=True, depends=['root_report_id'],
     )
     filter_unreconciled = fields.Boolean(
-        string="Allow Filtering Unreconciled Entries",
+        string="Unreconciled Entries",
         compute=lambda x: x._compute_report_option_filter('filter_unreconciled', True), readonly=False, store=True, depends=['root_report_id'],
     )
     filter_unfold_all = fields.Boolean(
-        string="Allow Unfolding All Lines",
+        string="Unfold All",
         compute=lambda x: x._compute_report_option_filter('filter_unfold_all'), readonly=False, store=True, depends=['root_report_id'],
     )
     filter_period_comparison = fields.Boolean(
-        string="Allow Comparison",
+        string="Period Comparison",
         compute=lambda x: x._compute_report_option_filter('filter_period_comparison', True), readonly=False, store=True, depends=['root_report_id'],
     )
     filter_growth_comparison = fields.Boolean(
@@ -72,29 +72,29 @@ class AccountReport(models.Model):
         compute=lambda x: x._compute_report_option_filter('filter_growth_comparison', True), readonly=False, store=True, depends=['root_report_id'],
     )
     filter_journals = fields.Boolean(
-        string="Allow Filtering by Journal",
+        string="Journals",
         compute=lambda x: x._compute_report_option_filter('filter_journals'), readonly=False, store=True, depends=['root_report_id'],
     )
     filter_analytic = fields.Boolean(
-        string="Allow Analytic Filters",
+        string="Filter Analytic",
         compute=lambda x: x._compute_report_option_filter('filter_analytic'), readonly=False, store=True, depends=['root_report_id'],
     )
     filter_hierarchy = fields.Selection(
-        string="Hierarchy",
+        string="Account Groups", # TODO OCO si t'as le temps, rebaptiser le champ
         selection=[('by_default', "Enabled by Default"), ('optional', "Optional"), ('never', "Never")],
         compute=lambda x: x._compute_report_option_filter('filter_hierarchy', 'never'), readonly=False, store=True, depends=['root_report_id'],
     ) # TODO OCO required dans la vue
     filter_account_type = fields.Selection(
-        string="Filter Account Type",
+        string="Account Types",
         selection=[('payable', "Payable"), ('receivable', "Receivable"), ('payable_receivable', "Payable and Receivable")],
         compute=lambda x: x._compute_report_option_filter('filter_account_type'), readonly=False, store=True, depends=['root_report_id'],
     )
     filter_partner = fields.Boolean(
-        string="Filter Partner",
+        string="Partners",
         compute=lambda x: x._compute_report_option_filter('filter_partner'), readonly=False, store=True, depends=['root_report_id'],
     )
     filter_fiscal_position = fields.Boolean(
-        string="Use Foreign VAT Fiscal Positions",
+        string="Filter Multivat",
         compute=lambda x: x._compute_report_option_filter('filter_fiscal_position'), readonly=False, store=True, depends=['root_report_id'],
     )
 
@@ -118,7 +118,7 @@ class AccountReport(models.Model):
     @api.depends('root_report_id', 'country_id')
     def _compute_default_availability_condition(self):
         for record in self:
-            if record.root_report_id and record.country_id:
+            if record.root_report_id:
                 record.availability_condition = 'country'
             else:
                 record.availability_condition = 'always'

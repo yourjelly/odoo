@@ -228,21 +228,21 @@
                                         <field name="formula">sum</field>
                                         <field name="date_scope">to_beginning_of_period</field>
                                     </record>
-                                    <record id="tax_report_line_81_balance_unbounded" model="account.report.expression">
-                                        <field name="total">balance_unbounded</field>
+                                    <record id="tax_report_line_81_balance_unbound" model="account.report.expression">
+                                        <field name="total">balance_unbound</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">c81._applied_carryover_balance + c81.tag</field>
                                     </record>
                                     <record id="tax_report_line_81_carryover" model="account.report.expression">
                                         <field name="total">_carryover_balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">c81.balance_unbounded</field>
+                                        <field name="formula">c81.balance_unbound</field>
                                         <field name="subformula">if_below(EUR(0))</field>
                                     </record>
                                     <record id="tax_report_line_81_balance" model="account.report.expression">
                                         <field name="total">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">c81.balance_unbounded</field>
+                                        <field name="formula">c81.balance_unbound</field>
                                         <field name="subformula">if_above(EUR(0))</field>
                                     </record>
                                 </field>
@@ -263,21 +263,21 @@
                                         <field name="formula">sum</field>
                                         <field name="date_scope">to_beginning_of_period</field>
                                     </record>
-                                    <record id="tax_report_line_82_balance_unbounded" model="account.report.expression">
-                                        <field name="total">balance_unbounded</field>
+                                    <record id="tax_report_line_82_balance_unbound" model="account.report.expression">
+                                        <field name="total">balance_unbound</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">c82._applied_carryover_balance + c82.tag</field>
                                     </record>
                                     <record id="tax_report_line_82_carryover" model="account.report.expression">
                                         <field name="total">_carryover_balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">c82.balance_unbounded</field>
+                                        <field name="formula">c82.balance_unbound</field>
                                         <field name="subformula">if_below(EUR(0))</field>
                                     </record>
                                     <record id="tax_report_line_82_balance" model="account.report.expression">
                                         <field name="total">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">c82.balance_unbounded</field>
+                                        <field name="formula">c82.balance_unbound</field>
                                         <field name="subformula">if_above(EUR(0))</field>
                                     </record>
                                 </field>
@@ -298,21 +298,21 @@
                                         <field name="formula">sum</field>
                                         <field name="date_scope">to_beginning_of_period</field>
                                     </record>
-                                    <record id="tax_report_line_83_balance_unbounded" model="account.report.expression">
-                                        <field name="total">balance_unbounded</field>
+                                    <record id="tax_report_line_83_balance_unbound" model="account.report.expression">
+                                        <field name="total">balance_unbound</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">c83._applied_carryover_balance + c83.tag</field>
                                     </record>
                                     <record id="tax_report_line_83_carryover" model="account.report.expression">
                                         <field name="total">_carryover_balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">c83.balance_unbounded</field>
+                                        <field name="formula">c83.balance_unbound</field>
                                         <field name="subformula">if_below(EUR(0))</field>
                                     </record>
                                     <record id="tax_report_line_83_balance" model="account.report.expression">
                                         <field name="total">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">c83.balance_unbounded</field>
+                                        <field name="formula">c83.balance_unbound</field>
                                         <field name="subformula">if_above(EUR(0))</field>
                                     </record>
                                 </field>
@@ -357,21 +357,21 @@
                                         <field name="formula">sum</field>
                                         <field name="date_scope">to_beginning_of_period</field>
                                     </record>
-                                    <record id="tax_report_line_86_balance_unbounded" model="account.report.expression">
-                                        <field name="total">balance_unbounded</field>
+                                    <record id="tax_report_line_86_balance_unbound" model="account.report.expression">
+                                        <field name="total">balance_unbound</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">c86._applied_carryover_balance + c86.tag</field>
                                     </record>
                                     <record id="tax_report_line_86_carryover" model="account.report.expression">
                                         <field name="total">_carryover_balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">c86.balance_unbounded</field>
+                                        <field name="formula">c86.balance_unbound</field>
                                         <field name="subformula">if_below(EUR(0))</field>
                                     </record>
                                     <record id="tax_report_line_86_balance" model="account.report.expression">
                                         <field name="total">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">c86.balance_unbounded</field>
+                                        <field name="formula">c86.balance_unbound</field>
                                         <field name="subformula">if_above(EUR(0))</field>
                                     </record>
                                 </field>
@@ -392,21 +392,21 @@
                                         <field name="formula">sum</field>
                                         <field name="date_scope">to_beginning_of_period</field>
                                     </record>
-                                    <record id="tax_report_line_87_balance_unbounded" model="account.report.expression">
-                                        <field name="total">balance_unbounded</field>
+                                    <record id="tax_report_line_87_balance_unbound" model="account.report.expression">
+                                        <field name="total">balance_unbound</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">c87._applied_carryover_balance + c87.tag</field>
                                     </record>
                                     <record id="tax_report_line_87_carryover" model="account.report.expression">
                                         <field name="total">_carryover_balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">c87.balance_unbounded</field>
+                                        <field name="formula">c87.balance_unbound</field>
                                         <field name="subformula">if_below(EUR(0))</field>
                                     </record>
                                     <record id="tax_report_line_87_balance" model="account.report.expression">
                                         <field name="total">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">c87.balance_unbounded</field>
+                                        <field name="formula">c87.balance_unbound</field>
                                         <field name="subformula">if_above(EUR(0))</field>
                                     </record>
                                 </field>
@@ -427,21 +427,21 @@
                                         <field name="formula">sum</field>
                                         <field name="date_scope">to_beginning_of_period</field>
                                     </record>
-                                    <record id="tax_report_line_88_balance_unbounded" model="account.report.expression">
-                                        <field name="total">balance_unbounded</field>
+                                    <record id="tax_report_line_88_balance_unbound" model="account.report.expression">
+                                        <field name="total">balance_unbound</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">c88._applied_carryover_balance + c88.tag</field>
                                     </record>
                                     <record id="tax_report_line_88_carryover" model="account.report.expression">
                                         <field name="total">_carryover_balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">c88.balance_unbounded</field>
+                                        <field name="formula">c88.balance_unbound</field>
                                         <field name="subformula">if_below(EUR(0))</field>
                                     </record>
                                     <record id="tax_report_line_88_balance" model="account.report.expression">
                                         <field name="total">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">c88.balance_unbounded</field>
+                                        <field name="formula">c88.balance_unbound</field>
                                         <field name="subformula">if_above(EUR(0))</field>
                                     </record>
                                 </field>
