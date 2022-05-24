@@ -634,7 +634,6 @@ var ModelFieldSelectorPopOver = Widget.extend({
     _onKeydown: function (e) {
         if (!this.$el.is(":visible")) return;
         var inputHasFocus = this.$input.is(":focus");
-        var searchInputHasFocus = this.$searchInput.is(":focus");
         let name = this.$("li.o_field_selector_item.active").data("name");
 
         switch (e.which) {
