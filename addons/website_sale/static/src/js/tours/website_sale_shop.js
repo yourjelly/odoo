@@ -74,5 +74,6 @@ odoo.define("website_sale.tour_shop", function (require) {
         trigger: "a[data-menu-xmlid='website.menu_website_dashboard']",
         content: _t("Let's now take a look at your eCommerce dashboard to get your eCommerce website ready in no time."),
         position: "bottom",
+        run: "click",
     }]);
 });
