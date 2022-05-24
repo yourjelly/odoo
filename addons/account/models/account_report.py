@@ -88,7 +88,7 @@ class AccountReport(models.Model):
         string="Account Types",
         selection=[('payable', "Payable"), ('receivable', "Receivable"), ('payable_receivable', "Payable and Receivable")],
         compute=lambda x: x._compute_report_option_filter('filter_account_type'), readonly=False, store=True, depends=['root_report_id'],
-    )
+    ) # TODO OCO on pourrait pas en faire un booléen ?(<qdp)
     filter_partner = fields.Boolean(
         string="Partners",
         compute=lambda x: x._compute_report_option_filter('filter_partner'), readonly=False, store=True, depends=['root_report_id'],
