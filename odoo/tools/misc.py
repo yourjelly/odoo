@@ -1255,8 +1255,11 @@ def format_date(env, value, lang_code=False, date_format=False):
     locale = babel_locale_parse(lang.code)
     if not date_format:
         date_format = posix_to_ldml(lang.date_format, locale=locale)
-
-    return babel.dates.format_date(value, format=date_format, locale=locale)
+    if isinstance(value, datetime.date):
+        return babel.dates.format_date(value, format=date_format, locale=locale)
+    tz = pytz.timezone(env.user.tz or 'UTC')
+    date_time_value = value.replace(tzinfo=pytz.utc).astimezone(tz)
+    return babel.dates.format_date(date_time_value, format=date_format, locale=locale)
 
 def parse_date(env, value, lang_code=False):
     '''
