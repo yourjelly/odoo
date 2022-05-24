@@ -275,7 +275,7 @@
                             <t t-call="website_sale.products_breadcrumb">
                                 <t t-set="_classes" t-valuef="w-100"/>
                             </t>
-                            <div class="products_header form-inline flex-md-nowrap justify-content-end mb-4">
+                            <div class="products_header d-flex flex-md-nowrap justify-content-end mb-4">
                                 <t t-call="website_sale.search">
                                     <t t-set="_classes" t-valuef="w-100 w-md-auto mr-auto mb-2"/>
                                     <t t-set="search" t-value="original_search or search"/>
