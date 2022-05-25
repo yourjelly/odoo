@@ -515,10 +515,10 @@ class TestSharedMemoryLRU(BaseCase):
         """
 
         class TestingSharedMemoryLRU(SharedMemoryLRU):
-            def _malloc(self, data):
-                if b'test2' in data:
+            def _malloc(self, data_key, data_value):
+                if b'test2' in data_key:
                     time.sleep(10)  # Force to take more time to test the kill
-                super()._malloc(data)
+                super()._malloc(data_key, data_value)
 
         def method_p1(lru):
             lru['test1'] = "abc" # Step 1
@@ -711,7 +711,7 @@ class TestSharedMemoryLRU(BaseCase):
 
         nb_write = 10_000
         nb_read = 100_000
-        nb_process = 20
+        nb_process = 10
         long_random_string = ''.join(random.choice(string.ascii_lowercase) for _ in range(max(size_sample) * 2))
         size_sample_i = [random.choice(size_sample) for _ in range(nb_write)]
         begin_sample_i = [random.randint(0, max(size_sample)) for _ in range(nb_write)]

@@ -99,6 +99,17 @@ class _Entry(Structure):
 class _DataIndex(Structure):
     _fields_ = [
         ("position", c_int64),
+        ("size_key", c_int64),
+        ("size", c_int64),  # TODO: maybe `end` instead, to avoid useless concat
+    ]
+
+    def __str__(self) -> str:
+        return f"position={self.position}, size={self.size}"
+    __repr__ = __str__
+
+class _FreeIndex(Structure):
+    _fields_ = [
+        ("position", c_int64),
         ("size", c_int64),  # TODO: maybe `end` instead, to avoid useless concat
     ]
 
@@ -138,8 +149,8 @@ class SharedMemoryLRU:
         self._consistent = RawValue(c_bool, True)  # Allow to know if the SharedMemory is corrupted
         self._head = RawArray(c_int32, [-1, 0, 1])  # root, length, free_len (see property below)
         self._entry_table = RawArray(_Entry, [(0, -1, -1)] * size)
-        self._data_idx = RawArray(_DataIndex, [(-1, -1)] * size)
-        self._data_free = RawArray(_DataIndex, [(-1, -1)] * size)
+        self._data_idx = RawArray(_DataIndex, [(-1, -1, -1)] * size)
+        self._data_free = RawArray(_FreeIndex, [(-1, -1)] * size)
         self._data_free[0] = (0, self._sm.size)
         self._data = self._sm.buf
 
@@ -159,7 +170,7 @@ class SharedMemoryLRU:
             _logger.info("Shared Memory not consistent, clean it")
             self._head[:] = [-1, 0, 1]
             self._entry_table[:] = [(0, -1, -1)] * self._size
-            self._data_idx[:] = [(-1, -1)] * self._size
+            self._data_idx[:] = [(-1, -1, -1)] * self._size
             self._data_free[0] = (0, self._sm.size)
             self._consistent.value = True
 
@@ -187,7 +198,7 @@ class SharedMemoryLRU:
         self._free_len = 1
         _logger.debug("Defragment the shared memory in %.4f ms, remaining free space : %s", (time() - s), self._data_free[0])
 
-    def _malloc(self, data):
+    def _malloc(self, data_key, data_value):
         """
         Reserved a free slot of shared memory for the root entry,
         insert data into and keep track of this spot.
@@ -197,7 +208,8 @@ class SharedMemoryLRU:
 
         :param bytes data: (key, value) marshalled
         """
-        size = len(data)
+        size_key = len(data_key)
+        size = size_key + len(data_value)
         nb_free_byte = 0
         for i in range(self._free_len):
             data_free_entry = self._data_free[i]
@@ -221,10 +233,11 @@ class SharedMemoryLRU:
             data_free_entry = self._data_free[0]
 
         mem_pos = data_free_entry.position
-        self._data[mem_pos:(mem_pos + size)] = data
+        self._data[mem_pos:(mem_pos + size_key)] = data_key
+        self._data[(mem_pos + size_key):(mem_pos + size)] = data_value
         # We restrict _malloc for the root entry only,
         # because a index can already change because of the lru_pop before
-        self._data_idx[self._root] = (mem_pos, size)
+        self._data_idx[self._root] = (mem_pos, size_key, size)
         data_free_entry.size -= size
         data_free_entry.position += size
 
@@ -240,7 +253,7 @@ class SharedMemoryLRU:
         :param int index: entry index of the data to free
         """
         last = self._free_len
-        self._data_free[last] = self._data_idx[index]
+        self._data_free[last] = self._data_idx[index].position, self._data_idx[index].size
         free_size = self._data_free[last].size
         new_free_len = last + 1
         self._data_idx[index] = (-1, -1)
@@ -336,8 +349,9 @@ class SharedMemoryLRU:
         ! Need lock !
         """
         data_id = self._data_idx[index]
-        # TODO: Load the value outside of the lock
-        return marshal.loads(self._data[data_id.position:data_id.position + data_id.size])
+        # Because the value is load outside the lock, I need to copy the data (with `bytes`) to ensure that marshal.loads point in the right data
+        # TODO it is worth it now ?
+        return marshal.loads(self._data[data_id.position:data_id.position + data_id.size_key]), bytes(self._data[data_id.position + data_id.size_key:data_id.position + data_id.size])
 
     def _lookup(self, key, hash_: int) -> tuple:
         """
@@ -389,13 +403,14 @@ class SharedMemoryLRU:
                 self._entry_table[self._root].prev = index
                 self._root = index
             self._consistent.value = True
-        return val
+        return marshal.loads(val)
 
     def __setitem__(self, key, value):
         hash_ = hash(key)
-        data = marshal.dumps((key, value))
-        if len(data) > self._max_size_one_data:
-            raise MemoryError(f"Too big object ({len(data)}) to put in the Shared Memory (max {self._max_size_one_data} bytes by entry)")
+        data_key = marshal.dumps(key)
+        data_value = marshal.dumps(value)
+        if len(data_key) + len(data_value) > self._max_size_one_data:
+            raise MemoryError(f"Too big object ({len(data_key) + len(data_value)}) to put in the Shared Memory (max {self._max_size_one_data} bytes by entry)")
 
         with self._lock:
             self._check_consistence()
@@ -420,7 +435,7 @@ class SharedMemoryLRU:
                 self._length += 1
             else:
                 self._free(index)
-            self._malloc(data)  # Malloc use root entry to find index
+            self._malloc(data_key, data_value)  # Malloc use root entry to find index
 
             if self._length > self._max_length:
                 self._lru_pop()  # Make it after to avoid modifying index
@@ -476,7 +491,9 @@ class SharedMemoryLRU:
             return
         node_index = self._root
         for _ in range(self._length + 1):
-            yield self._data_get(node_index)
+            key, val = self._data_get(node_index)
+            val = marshal.loads(val)
+            yield key, val
             node_index = self._entry_table[node_index].next
             if node_index == self._root:
                 break
@@ -493,10 +510,11 @@ class SharedMemoryLRU:
         for _ in range(self._length + 1):
             hash_key, nxt = self._entry_table[node_index].hash, self._entry_table[node_index].next
             try:
-                data = self._data_get(node_index)
+                key, val = self._data_get(node_index)
+                val = marshal.loads(val)
             except (ValueError, EOFError):
-                data = ("<unable to read>", "<unable to read>")
-            result.append(f'key: {data[0]}, hash % size: {hash_key % self._size}, index: {node_index}, {self._entry_table[node_index]}, data_pos={self._data_idx[node_index].position} - data_size={self._data_idx[node_index].size}: {reprlib.repr(data[1])}')
+                key, val = ("<unable to read>", "<unable to read>")
+            result.append(f'key: {key}, hash % size: {hash_key % self._size}, index: {node_index}, {self._entry_table[node_index]}, data_pos={self._data_idx[node_index].position} - data_size={self._data_idx[node_index].size}: {reprlib.repr(val)}')
             node_index = nxt
             if node_index == self._root:
                 return f'hashtable size: {self._size}, len: {str(self._length)}, {self._root=}\n' + \
