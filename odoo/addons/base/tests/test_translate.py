@@ -912,3 +912,20 @@ class TestXMLTranslation(TransactionCase):
         view.write({"arch_db": "<form><i>content</i></form>"})
         self.assertIn("<i>", view.arch_db)
         self.assertIn("<i>", view_fr.arch_db)
+
+    def test_cache_consistency_2(self):
+        """ Check translations of 'arch' after xml tags changes in source terms. """
+        archf = '<form string="X">%s</form>'
+        terms_en = ('Bread and cheese',)
+        terms_fr = ('Pain et fromage',)
+        view = self.create_view(archf, terms_en, en_US=terms_en, fr_FR=terms_fr)
+
+        self.assertEqual(view.with_context(lang='fr_FR').arch, '<form string="X">Pain et fromage</form>')
+        translation = self.env['ir.translation'].search([
+            ('type', '=', 'model_terms'),
+            ('name', '=', "ir.ui.view,arch_db"),
+            ('res_id', '=', view.id),
+            ('lang', '=', 'fr_FR'),
+        ])
+        translation.value = 'Nouveau pain et fromage'
+        self.assertEqual(view.with_context(lang='fr_FR').arch, '<form string="X">Nouveau pain et fromage</form>')
