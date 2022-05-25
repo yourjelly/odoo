@@ -352,13 +352,12 @@ class AccountReportExpression(models.Model):
     subformula = fields.Char(string="Subformula")
     date_scope = fields.Selection(
         string="Date Scope",
-        #TODO OCO rename, redoc selection ? This all could be clearer IMO :p
         selection=[
-            ('from_beginning', 'From the beginning'),
+            ('from_beginning', 'From the very start'),
+            ('from_fiscalyear', 'From the start of the fiscal year'),
             ('to_beginning_of_period', 'At the beginning of the period'),
-            ('normal', 'Use the dates that should normally be used, depending on the account types'),
-            ('strict_range', 'Force given dates for all accounts and account types'),
-            ('from_fiscalyear', 'From the beginning of the fiscal year'),
+            ('normal', 'According to each type of account'),
+            ('strict_range', 'Strictly on the given dates'),
         ],
         required=True,
         default='strict_range',
