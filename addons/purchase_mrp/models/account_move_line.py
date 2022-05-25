@@ -19,7 +19,7 @@ class AccountMoveLine(models.Model):
         # proportionally to their initial cost.
         lines_for_kit_product = self.filtered(lambda aml: aml.product_id.is_kits)
         for line in lines_for_kit_product:
-            if line.move_id._skip_move_for_price_diff() or line._is_not_eligible_for_price_difference():
+            if line.product_id.type != 'product':
                 continue
             move = line.move_id.with_company(line.move_id.company_id)
 

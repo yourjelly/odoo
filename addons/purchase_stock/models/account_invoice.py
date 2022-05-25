@@ -177,9 +177,9 @@ class AccountMove(models.Model):
         if self._context.get('move_reverse_cancel'):
             return super()._post(soft)
         account_move_line_vals = self._stock_account_prepare_anglo_saxon_in_lines_vals()
-        stock_valuation_layer_vals = self.invoice_line_ids._get_price_difference_svl_values()
+        # stock_valuation_layer_vals = self.invoice_line_ids._get_price_difference_svl_values()
         self.env['account.move.line'].create(account_move_line_vals)
-        self.env['stock.valuation.layer'].create(stock_valuation_layer_vals)
+        # self.env['stock.valuation.layer'].create(stock_valuation_layer_vals)
         self.invoice_line_ids._update_qty_waiting_for_receipt()
         return super()._post(soft)
 

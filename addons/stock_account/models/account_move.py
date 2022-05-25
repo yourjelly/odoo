@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from collections import defaultdict
+from email.policy import default
 from odoo import fields, models
 
 
@@ -44,12 +46,29 @@ class AccountMove(models.Model):
         # Don't change anything on moves used to cancel another ones.
         if self._context.get('move_reverse_cancel'):
             return super()._post(soft)
+        # Create correction layer if invoice price is different
+        stock_valuation_layers = self.env['stock.valuation.layer']
+        valued_lines = defaultdict(lambda: self.env['account.move.line'])
+        for invoice in self:
+            if invoice.stock_valuation_layer_ids:
+                continue
+            valued_type = invoice.move_type
+            if valued_type == 'in_invoice':
+                valued_lines[valued_type] |= invoice.invoice_line_ids
+        for valued_type in ['in_invoice']:
+            todo_valued_lines = valued_lines[valued_type]
+            if todo_valued_lines:
+                stock_valuation_layers |= getattr(todo_valued_lines, '_create_%s_svl' % valued_type)()
+
 
         # Create additional COGS lines for customer invoices.
         self.env['account.move.line'].create(self._stock_account_prepare_anglo_saxon_out_lines_vals())
 
         # Post entries.
         posted = super()._post(soft)
+
+        for layer in stock_valuation_layers:
+            layer.description = layer.description.replace('/', layer.account_move_line_id.move_id.name)
 
         # Reconcile COGS lines in case of anglo-saxon accounting with perpetual valuation.
         posted._stock_account_anglo_saxon_reconcile_valuation()
@@ -220,6 +239,24 @@ class AccountMoveLine(models.Model):
 
     is_anglo_saxon_line = fields.Boolean(help="Technical field used to retrieve the anglo-saxon lines.")
 
+    def _create_in_invoice_svl(self):
+        svl_vals_list = []
+        for line in self:
+            line = line.with_company(line.company_id)
+            valued_moves = line._get_valued_in_moves()
+            price_difference = line._get_price_difference(valued_moves)
+            # TODO float_compare
+            if not price_difference:
+                continue
+            svl_vals = line.product_id._prepare_in_svl_vals(price_difference, line.quantity)
+            svl_vals['quantity'] = 0
+            svl_vals['remaining_qty'] = 0
+            svl_vals.update(line._prepare_common_svl_vals())
+            svl_vals['description'] += svl_vals.pop('rounding_adjustment', '')
+            svl_vals_list.append(svl_vals)
+        return self.env['stock.valuation.layer'].sudo().create(svl_vals_list)
+
+
     def _get_computed_account(self):
         # OVERRIDE to use the stock input account by default on vendor bills when dealing
         # with anglo-saxon accounting.
@@ -234,9 +271,26 @@ class AccountMoveLine(models.Model):
                 return accounts['stock_input']
         return super(AccountMoveLine, self)._get_computed_account()
 
+    def _get_price_difference(self, valued_moves):
+        layers = valued_moves.stock_valuation_layer_ids
+        layers_price_unit = sum(layers.mapped('value')) / sum(layers.mapped('quantity'))
+        return self.price_unit - layers_price_unit
+        
+    def _get_valued_in_moves(self):
+        return self.env['stock.move']
+
     def _eligible_for_cogs(self):
         self.ensure_one()
         return self.product_id.type == 'product' and self.product_id.valuation == 'real_time'
+
+    def _prepare_common_svl_vals(self):
+        self.ensure_one()
+        return {
+            'account_move_line_id': self.id,
+            'company_id': self.company_id.id,
+            'product_id': self.product_id.id,
+            'description': self.move_id.name and '%s - %s' % (self.move_id.name, self.product_id.name) or self.product_id.name,
+        }
 
     def _stock_account_get_anglo_saxon_price_unit(self):
         self.ensure_one()

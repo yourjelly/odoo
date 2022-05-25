@@ -13,6 +13,10 @@ class AccountMoveLine(models.Model):
     qty_waiting_for_receipt = fields.Float(
         default=0, help="Quantity invoiced but not received yet.")
 
+    def _get_valued_in_moves(self):
+        self.ensure_one()
+        return self.purchase_line_id.move_ids.filtered(lambda m: m._is_in())
+
     def _get_price_difference_svl_values(self):
         svl_vals_list = []
         cost_to_add_byproduct = defaultdict(lambda: {'qty': 0, 'cost': 0})
