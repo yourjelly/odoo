@@ -122,12 +122,13 @@ class SharedMemoryLRU:
     # byte size allocate for each entry for data (key, value). A data entry can still take more space
     # but this value should match as most as possible the average size of data entry to avoid
     # losing too much memory (if too high) or losing too much number entries (if too low)
-    AVG_SIZE_OF_DATA = 4096
+    AVG_SIZE_OF_DATA = 4000
+    USABLE_FRACTION = 2 / 3 # USABLE_FRACTION is the maximum sm lru load (same than python dict)
 
-    def __init__(self, size: int=8000):
+    def __init__(self, size: int):
         """ Init a Shared Memory which acts as a dict with a lru.
 
-        :param int size: number of entry in the hash table, defaults to 4096
+        :param int size: number of entry in the hash table should be > 2
         """
         byte_size = size * self.AVG_SIZE_OF_DATA
         _logger.debug("Create Shared Memory of %d bytes", byte_size)
@@ -143,7 +144,7 @@ class SharedMemoryLRU:
         self._max_size_one_data = byte_size // 10
         # `self._max_length` should be always < than size.
         # bigger it is, more there are hash conflict, and then slow down the `_lookup` but decrease the memory cost
-        self._max_length = size // 2
+        self._max_length = int(size * self.USABLE_FRACTION)
 
         self._consistent = RawValue(c_bool, True)  # Allow to know if the SharedMemory is corrupted
         self._head = RawArray(c_int32, [-1, 0, 1])  # root, length, free_len (see property below)
@@ -157,7 +158,7 @@ class SharedMemoryLRU:
     _length = property(lambda self: self._head[1], lambda self, x: self._head.__setitem__(1, x))
     _free_len = property(lambda self: self._head[2], lambda self, x: self._head.__setitem__(2, x))
 
-    def _hook_process_killed(self, pid):
+    def hook_process_killed(self, pid):
         self._lock.force_release_if_mandatory(pid)
 
     def _check_consistence(self):

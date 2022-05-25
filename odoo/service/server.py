@@ -23,7 +23,7 @@ from werkzeug.debug import DebuggedApplication
 
 import odoo
 from odoo.modules import get_modules
-from odoo.modules.registry import Registry, create_shared_memory, shared_memory
+from odoo.modules.registry import Registry, create_shared_memory, unlink_shared_memory, release_lock_shared_memory, close_shared_memory
 from odoo.release import nt_service_name
 from odoo.tools import config
 from odoo.tools import stripped_sys_argv, dumpstacks, log_ormcache_stats
@@ -541,8 +541,7 @@ class ThreadedServer(CommonServer):
                     time.sleep(0.05)
 
         odoo.sql_db.close_all()
-        if shared_memory is not None:
-            shared_memory.unlink()
+        unlink_shared_memory()
 
         _logger.debug('--')
         logging.shutdown()
@@ -763,7 +762,7 @@ class PreforkServer(CommonServer):
         if pid == self.long_polling_pid:
             self.long_polling_pid = None
         if pid in self.workers:
-            shared_memory._lock.release_if_mandatory(pid)
+            release_lock_shared_memory(pid)
             _logger.debug("Worker (%s) unregistered", pid)
             try:
                 self.workers_http.pop(pid, None)
@@ -905,7 +904,7 @@ class PreforkServer(CommonServer):
             self.worker_kill(pid, signal.SIGTERM)
         if self.socket:
             self.socket.close()
-        shared_memory.unlink()
+        unlink_shared_memory()
 
     def run(self, preload, stop):
         self.start()
@@ -1033,7 +1032,7 @@ class Worker(object):
         signal.set_wakeup_fd(self.wakeup_fd_w)
 
     def stop(self):
-        shared_memory.close()
+        close_shared_memory()
 
     def run(self):
         try:

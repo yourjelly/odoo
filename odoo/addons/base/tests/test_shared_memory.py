@@ -53,7 +53,7 @@ class TestSharedMemoryLRU(BaseCase):
 
     def test_sm_basic_functionality(self):
         """ Test basic set/get feature of the SharedMemoryLRU """
-        with SharedMemoryLRU(size=16) as lru:  # max_length for LRU == 8
+        with SharedMemoryLRU(16) as lru:
             self.assertEqual(list(lru), [])
             lru["key"] = 10
             self.assertEqual(lru["key"], 10)
@@ -62,21 +62,21 @@ class TestSharedMemoryLRU(BaseCase):
 
             del lru["key"]
 
-            for i in range(8):
+            for i in range(lru._max_length):
                 lru[i] = f"code_{i}"
                 self.assertEqual(lru[i], f"code_{i}")
 
             lru[0]  # 0 index become the first of LRU
 
-            lru[8] = "code_8"
-            lru[9] = "code_9"
+            lru[lru._max_length] = "code_8"
+            lru[lru._max_length + 1] = "code_9"
 
             with self.assertRaises(KeyError):
                 lru[1]  # Should be pop because of LRU
             with self.assertRaises(KeyError):
                 lru[2]  # Should be pop because of LRU
 
-            for i in range(3, 10):
+            for i in range(3, lru._max_length + 2):
                 del lru[i]
                 with self.assertRaises(KeyError):
                     lru[i]
@@ -84,7 +84,7 @@ class TestSharedMemoryLRU(BaseCase):
 
     def test_sm_datastructure_hashtable(self):
         """ Test internal structure of the SharedMemoryLRU """
-        with SharedMemoryLRU(16) as lru:  # max_length for LRU == 8
+        with SharedMemoryLRU(16) as lru:
 
             # TODO: hash of key == 0 doesn't work now
             lru[lru._size] = "test"  # hash & mask = 0, should be at index 0
@@ -120,7 +120,7 @@ class TestSharedMemoryLRU(BaseCase):
 
     def test_sm_delete_1(self):
         """ Test the deletion (to ensure than _pop_lru() works correctly internally) of the SharedMemoryLRU """
-        with SharedMemoryLRU(16) as lru:  # max_length for LRU == 8
+        with SharedMemoryLRU(16) as lru:
             lru[lru._size] = "test0"  # index 0
             lru[lru._size * 2] = "test1"  # index 1
             lru[lru._size * 3] = "test2"  # index 2
@@ -244,7 +244,7 @@ class TestSharedMemoryLRU(BaseCase):
 
     def test_sm_datastructure_lru_1(self):
         """ Test the LRU feature of the SharedMemory """
-        with SharedMemoryLRU(32) as lru:
+        with SharedMemoryLRU(16) as lru:
             lru['a'] = "test_a"
             lru['b'] = "test_b"
 
@@ -259,7 +259,7 @@ class TestSharedMemoryLRU(BaseCase):
             self.assertEqual(list(lru), [('d', "test_d"), ('c', "test_c"), ('a', "test_a"), ('b', "test_b")])
 
     def test_sm_datastructure_lru_2(self):
-        with SharedMemoryLRU(32) as lru:
+        with SharedMemoryLRU(16) as lru:
             lru['key1'] = 'test1'
             lru['key2'] = 'test2'
             self.assertEqual(lru['key2'], 'test2')
@@ -280,10 +280,10 @@ class TestSharedMemoryLRU(BaseCase):
             with self.assertRaises(MemoryError):
                 lru['test'] = "a" * lru._max_size_one_data
 
-    def test_sm_long_run(self):
+    def test_sm_free_data_coherence(self):
         random.seed(42)
-        with SharedMemoryLRU(100) as lru:
-            for i in range(10_000):
+        with SharedMemoryLRU(30) as lru:
+            for i in range(5_000):
                 key = str(i)
                 value = (str(i) * random.randint(1, 2000))[:(lru._max_size_one_data - 20)]
                 prev = OrderedDict(lru)
@@ -317,10 +317,10 @@ class TestSharedMemoryLRU(BaseCase):
                     else:
                         data_entry = None
 
-    def test_sm_long_run_2(self):
+    def test_sm_long_run_1(self):
         random.seed(42)
-        with SharedMemoryLRU(100) as lru:
-            for i in range(10_000):
+        with SharedMemoryLRU(50) as lru:
+            for i in range(5_000):
                 if random.random() < 0.8 and lru._length > 1:
                     # read
                     index = random.randint(0, lru._length - 1)
@@ -333,11 +333,11 @@ class TestSharedMemoryLRU(BaseCase):
                     lru[key] = value
                     self.assertEqual(lru[key], value)
 
-    def test_sm_long_run_3(self):
+    def test_sm_long_run_2(self):
         random.seed("test_multi")
 
-        with SharedMemoryLRU(4096 * 2) as lru:
-            for i in range(10_000):
+        with SharedMemoryLRU(10_000) as lru:
+            for i in range(5_000):
                 key = f'dbname_template_{i % 1500}'
                 try:
                     if random.random() > 0.8:
@@ -388,7 +388,7 @@ class TestSharedMemoryLRU(BaseCase):
                     <span class="o_matrix_cell o_matrix_text_muted o_matrix_nocontent_container"> Not available </span>
                     def blabla():
                         return {key}
-                    """ * random.randint(1, 1000))[:lru._max_size_one_data - len(key) - 20]
+                    """ * random.randint(1, 200))[:lru._max_size_one_data - len(key) - 20]
 
 
         with SharedMemoryLRU(10_000) as lru:
@@ -432,7 +432,7 @@ class TestSharedMemoryLRU(BaseCase):
                     <span class="o_matrix_cell o_matrix_text_muted o_matrix_nocontent_container"> Not available </span>
                     def blabla():
                         return {key}
-                    """ * random.randint(1, 1000))[:lru._max_size_one_data - len(key) - 20]
+                    """ * random.randint(1, 200))[:lru._max_size_one_data - len(key) - 20]
 
 
         with SharedMemoryLRU(10_000) as lru:
@@ -475,7 +475,7 @@ class TestSharedMemoryLRU(BaseCase):
         """ Simulate "real" environment where some process is killed by the PreforkServer
         during the usage of SM
         """
-        nb_process = 100
+        nb_process = 50
         operation_by_worker = 1000
 
         random.seed("test_multi")
@@ -491,10 +491,10 @@ class TestSharedMemoryLRU(BaseCase):
                     <th class="text-left">
                         <strong>{key}</strong>
                     </th>
-                    """,) * random.randint(1, 50)
+                    """,) * random.randint(1, 5)
 
-        for _ in range(20):
-            with SharedMemoryLRU(1_000) as lru:
+        for _ in range(10):
+            with SharedMemoryLRU(100) as lru:
                 processes = [Process(target=simulate_usage, args=(lru, f"{i}")) for i in range(nb_process)]
                 for p in processes:
                     p.start()
@@ -502,12 +502,12 @@ class TestSharedMemoryLRU(BaseCase):
                 for i, p in enumerate(random.sample(processes, len(processes))):
                     p.kill()
                     p.join()
-                    lru._hook_process_killed(p.pid)
+                    lru.hook_process_killed(p.pid)
                     if i % (len(processes) // 5):
                         with lru._lock:
                             lru._check_consistence()
                             rep_lru = repr(lru)
-                            self.assertTrue('<unable to read>' not in rep_lru, rep_lru)
+                            self.assertFalse('<unable to read>' in rep_lru, rep_lru)
 
     def test_sm_multi_process_killed_consistent(self):
         """ Test that kill a process when it uses the SharedMemory doesn't let
@@ -538,7 +538,7 @@ class TestSharedMemoryLRU(BaseCase):
 
             time.sleep(0.2)
             process_1.kill() # Step 3
-            lru._hook_process_killed(process_1.pid)
+            lru.hook_process_killed(process_1.pid)
 
             process_1.join()
             process_2.join()
@@ -559,8 +559,6 @@ class TestSharedMemoryLRU(BaseCase):
 
             with self.assertRaises(KeyError):
                 lru["test4"]
-
-
 
     # ------------------- PERFORMANCE TESTING
 
@@ -601,69 +599,70 @@ class TestSharedMemoryLRU(BaseCase):
 
     def test_performance_multi_process(self):
         nb_process = 8
-        size_by_process = 1024
+        nb_operation = 20_000
 
-        def write_on_lru(lru, prefix):
-            for i in range(size_by_process):
+        def write_on_lru(lru, prefix, nb):
+            for i in range(nb):
                 lru[prefix + str(i)] = i
 
-        def read_on_lru(lru, prefix):
-            for i in range(size_by_process):
+        def read_on_lru(lru, prefix, nb):
+            for i in range(nb):
                 lru[prefix + str(i)]
 
-        def delete_on_lru(lru, prefix):
-            for i in range(size_by_process):
+        def delete_on_lru(lru, prefix, nb):
+            for i in range(nb):
                 del lru[prefix + str(i)]
 
-        with SharedMemoryLRU(size_by_process * nb_process * 2) as lru:
+        with SharedMemoryLRU(int(nb_operation * (1 / SharedMemoryLRU.USABLE_FRACTION))) as lru:
             start = time.time()
-            processes = [Process(target=write_on_lru, args=(lru, f"{i}_",)) for i in range(nb_process)]
+            processes = [
+                Process(target=write_on_lru, args=(lru, f"{i}_", lru._max_length // nb_process)) for i in range(nb_process)]
             for p in processes:
                 p.start()
             for p in processes:
                 p.join()
             _logger.info(
                 "Write without lru_pop: %s ms by write (%s)",
-                (time.time() - start) * 1000 / (size_by_process * nb_process), (size_by_process * nb_process)
+                (time.time() - start) * 1000 / lru._max_length, lru._max_length
             )
 
             self.assertEqual(lru._length, lru._max_length)
 
             start = time.time()
-            processes = [Process(target=write_on_lru, args=(lru, f"_{i}_",)) for i in range(nb_process)]
+            processes = [Process(target=write_on_lru, args=(lru, f"_{i}_", lru._max_length // nb_process)) for i in range(nb_process)]
             for p in processes:
                 p.start()
             for p in processes:
                 p.join()
             _logger.info(
                 "Write with lru_pop: %s ms by write (%s)",
-                (time.time() - start) * 1000 / (size_by_process * nb_process), (size_by_process * nb_process)
+                (time.time() - start) * 1000 / lru._max_length, lru._max_length
             )
 
             self.assertEqual(lru._length, lru._max_length)
 
             start = time.time()
-            processes = [Process(target=read_on_lru, args=(lru, f"_{i}_",)) for i in range(nb_process)]
+            processes = [Process(target=read_on_lru, args=(lru, f"_{i}_", lru._max_length // nb_process)) for i in range(nb_process)]
             for p in processes:
                 p.start()
             for p in processes:
                 p.join()
             _logger.info(
                 "Read (existing): %s ms by read (%s)",
-                (time.time() - start) * 1000 / (size_by_process * nb_process), (size_by_process * nb_process)
+                (time.time() - start) * 1000 / lru._max_length, lru._max_length
             )
 
             self.assertEqual(lru._length, lru._max_length)
 
             start = time.time()
-            processes = [Process(target=delete_on_lru, args=(lru, f"_{i}_",)) for i in range(nb_process)]
+            processes = [Process(target=delete_on_lru, args=(lru, f"_{i}_", lru._max_length // nb_process)) for i in range(nb_process)]
             for p in processes:
                 p.start()
             for p in processes:
                 p.join()
             _logger.info(
                 "Delete (existing): %s ms by delete (%s)",
-                (time.time() - start) * 1000 / (size_by_process * nb_process), (size_by_process * nb_process)
+                (time.time() - start) * 1000 / lru._max_length, lru._max_length
             )
 
             self.assertEqual(lru._length, 0)
@@ -685,7 +684,7 @@ class TestSharedMemoryLRU(BaseCase):
             ((f"dbname_template_blablabla_{i}", i), long_random_string[begin_sample_i[i]:begin_sample_i[i] + size_sample_i[i]])
             for i in range(nb_write)
         ]
-        with SharedMemoryLRU(nb_write * 2) as lru:
+        with SharedMemoryLRU(int(nb_write * (1 / SharedMemoryLRU.USABLE_FRACTION))) as lru:
             start = time.time()
             for _ in range(nb_write):
                 key, value = random.choice(values)
@@ -712,7 +711,7 @@ class TestSharedMemoryLRU(BaseCase):
 
         nb_write = 10_000
         nb_read = 100_000
-        nb_process = 10
+        nb_process = 20
         long_random_string = ''.join(random.choice(string.ascii_lowercase) for _ in range(max(size_sample) * 2))
         size_sample_i = [random.choice(size_sample) for _ in range(nb_write)]
         begin_sample_i = [random.randint(0, max(size_sample)) for _ in range(nb_write)]
@@ -735,7 +734,7 @@ class TestSharedMemoryLRU(BaseCase):
                 except KeyError:
                     pass
 
-        with SharedMemoryLRU(nb_write * 2) as lru:
+        with SharedMemoryLRU(int(nb_write * (1 / SharedMemoryLRU.USABLE_FRACTION))) as lru:
             start = time.time()
             processes = [Process(target=write_on_lru, args=(lru,)) for i in range(nb_process)]
             for p in processes:
