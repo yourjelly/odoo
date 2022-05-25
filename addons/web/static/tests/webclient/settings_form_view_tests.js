@@ -384,7 +384,7 @@ QUnit.module("SettingsFormView", (hooks) => {
             "checkbox should not be checked"
         );
         assert.containsNone(target, ".o_dirty_warning", "warning message should not be shown");
-        await click(target.querySelector("input.custom-control-input[id='field_bar_1']"));
+        await click(target.querySelector("input.custom-control-input[id=bar]"));
         assert.containsOnce(target, ".o_field_boolean input:checked", "checkbox should be checked");
 
         window.dispatchEvent(new Event("beforeunload"));
