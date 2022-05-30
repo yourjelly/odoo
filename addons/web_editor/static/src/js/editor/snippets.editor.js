@@ -3415,7 +3415,7 @@ var SnippetsMenu = Widget.extend({
                 editor.toggleOverlay(false);
             });
             this.trigger_up('request_cancel', {onReject: after});
-        }, this.$el[0].querySelector('button[data-action=cancel]'));
+        }, this.$el[0].querySelector('button[data-action=cancel]'), false);
     },
     /**
      * Preview on mobile.
@@ -3464,18 +3464,23 @@ var SnippetsMenu = Widget.extend({
             }
         });
     },
-    async _buttonClick(action, button) {
+    async _buttonClick(action, button, addLoadingEffect = true) {
         if (this._buttonAction) {
             return;
         }
         this._buttonAction = true;
-        const removeLoadingEffect = dom.addButtonLoadingEffect(button);
+        let removeLoadingEffect;
+        if (addLoadingEffect) {
+            removeLoadingEffect = dom.addButtonLoadingEffect(button);
+        }
         const actionButtons = this.$el[0].querySelectorAll('[data-action]');
         for (const actionButton of actionButtons) {
             actionButton.disabled = true;
         }
-        const after = () =>  {
-            removeLoadingEffect();
+        const after = () => {
+            if (removeLoadingEffect) {
+                removeLoadingEffect();
+            }
             for (const actionButton of actionButtons) {
                 actionButton.disabled = false;
             }
