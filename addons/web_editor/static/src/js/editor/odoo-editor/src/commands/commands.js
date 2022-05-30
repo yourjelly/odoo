@@ -45,6 +45,7 @@ import {
     parseHTML,
     formatSelection,
     isVisibleEmpty,
+    formatSelection,
 } from '../utils/utils.js';
 
 const TEXT_CLASSES_REGEX = /\btext-[^\s]*\b/g;
