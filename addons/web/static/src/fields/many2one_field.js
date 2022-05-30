@@ -10,6 +10,7 @@ import { standardFieldProps } from "./standard_field_props";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
 import { SelectCreateDialog } from "../views/view_dialogs/select_create_dialog";
 import { Domain } from "@web/core/domain";
+import { makeContext } from "@web/core/context";
 
 const { Component, onWillDestroy, onWillUpdateProps, useRef, useState } = owl;
 
@@ -187,10 +188,10 @@ export class Many2OneField extends Component {
                 this.dialog.add(
                     FormViewDialog,
                     {
-                        context: {
-                            ...this.props.getContext(),
-                            default_name: value,
-                        },
+                        context: makeContext([
+                            this.props.getContext(),
+                            { [`default_${this.props.createNameField}`]: value },
+                        ]),
                         mode: this.props.canWrite ? "edit" : "readonly",
                         resId: false,
                         resModel: this.props.relation,
@@ -332,6 +333,7 @@ Many2OneField.props = {
     canWrite: { type: Boolean, optional: true },
     canQuickCreate: { type: Boolean, optional: true },
     canCreateEdit: { type: Boolean, optional: true },
+    createNameField: { type: String, optional: true },
     searchLimit: { type: Number, optional: true },
     relation: String,
     string: { type: String, optional: true },
@@ -344,6 +346,7 @@ Many2OneField.defaultProps = {
     canWrite: true,
     canQuickCreate: true,
     canCreateEdit: true,
+    createNameField: "name",
     searchLimit: 7,
     string: "",
     getContext: () => ({}),
@@ -372,6 +375,7 @@ Many2OneField.extractProps = (fieldName, record, attrs) => {
         string: attrs.string || record.fields[fieldName].string,
         getContext: () => record.getFieldContext(fieldName),
         getDomain: () => record.getFieldDomain(fieldName),
+        createNameField: attrs.options.create_name_field,
     };
 };
 
