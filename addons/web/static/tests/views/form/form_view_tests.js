@@ -7610,9 +7610,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipWOWL("translation alerts preserved on reverse breadcrumb", async function (assert) {
-        assert.expect(2);
-
+    QUnit.test("translation alerts preserved on reverse breadcrumb", async function (assert) {
         serverData.models["ir.translation"] = {
             fields: {
                 name: { string: "name", type: "char" },
@@ -7625,15 +7623,9 @@ QUnit.module("Views", (hooks) => {
         serverData.models.partner.fields.foo.translate = true;
 
         serverData.views = {
-            "partner,false,form":
-                "<form>" + "<sheet>" + '<field name="foo"/>' + "</sheet>" + "</form>",
+            "partner,false,form": `<form><sheet><field name="foo"/></sheet></form>`,
             "partner,false,search": "<search></search>",
-            "ir.translation,false,list":
-                "<tree>" +
-                '<field name="name"/>' +
-                '<field name="source"/>' +
-                '<field name="value"/>' +
-                "</tree>",
+            "ir.translation,false,list": `<tree><field name="name"/><field name="source"/><field name="value"/></tree>`,
             "ir.translation,false,search": "<search></search>",
         };
 
@@ -7641,7 +7633,7 @@ QUnit.module("Views", (hooks) => {
             1: {
                 id: 1,
                 name: "Partner",
-                resModel: "partner",
+                res_model: "partner",
                 type: "ir.actions.act_window",
                 views: [[false, "form"]],
             },
@@ -7657,30 +7649,21 @@ QUnit.module("Views", (hooks) => {
         };
 
         const webClient = await createWebClient({ serverData });
-        patchWithCleanup(_t.database, {
-            multi_lang: true,
+        patchWithCleanup(localization, {
+            multiLang: true,
         });
+
         await doAction(webClient, 1);
-        $(webClient.el).find('.o_field_widget[name="foo"] input').val("test").trigger("input");
+        await editInput(target, `[name="foo"] input`, "test");
 
-        await click(webClient.el.querySelector(".o_form_button_save"));
-        await legacyExtraNextTick();
+        await clickSave(target);
 
-        assert.containsOnce(
-            webClient,
-            ".o_form_view .alert > div",
-            "should have a translation alert"
-        );
+        assert.containsOnce(target, ".alert .o_field_translate", "should have a translation alert");
 
         await doAction(webClient, 2);
 
-        await click($(".o_control_panel .breadcrumb a:first"));
-        await legacyExtraNextTick();
-        assert.containsOnce(
-            webClient,
-            ".o_form_view .alert > div",
-            "should have a translation alert"
-        );
+        await click(target.querySelector(".o_control_panel .breadcrumb a:nth-child(1)"));
+        assert.containsOnce(target, ".alert .o_field_translate", "should have a translation alert");
     });
 
     QUnit.skipWOWL(
