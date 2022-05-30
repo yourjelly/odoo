@@ -1103,11 +1103,11 @@
                                             <i class="fa fa-minus"></i>
                                         </a>
                                         <input type="text" class="js_quantity form-control quantity" t-att-data-line-id="line.id" t-att-data-product-id="line.product_id.id" t-att-value="int(line.product_uom_qty) == line.product_uom_qty and int(line.product_uom_qty) or line.product_uom_qty" />
-                                        <div t-if="line._get_shop_warning(clear=False)" class="input-group-append">
+                                        <t t-if="line._get_shop_warning(clear=False)">
                                             <a t-attf-href="#" class="btn btn-link">
                                             <i class='fa fa-warning text-warning' t-att-title="line._get_shop_warning()" role="img" aria-label="Warning"/>
                                             </a>
-                                        </div>
+                                        </t>
                                         <a t-else='' t-attf-href="#" class="btn btn-link float_left js_add_cart_json d-none d-md-inline-block" aria-label="Add one" title="Add one">
                                             <i class="fa fa-plus"></i>
                                         </a>
@@ -1298,9 +1298,7 @@
             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
             <div class="input-group w-100">
                 <input name="promo" class="form-control" type="text" placeholder="code..." t-att-value="website_sale_order.pricelist_id.code or None"/>
-                <div class="input-group-append">
-                    <a href="#" role="button" class="btn btn-secondary a-submit">Apply</a>
-                </div>
+                <a href="#" role="button" class="btn btn-secondary a-submit">Apply</a>
             </div>
         </form>
         <t t-if="request.params.get('code_not_available')" name="code_not_available">

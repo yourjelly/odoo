@@ -5,14 +5,12 @@
 <!-- Editor custom -->
 <!-- helper -->
 <template id="show_flag_validator">
-    <div id="flag_validator" t-attf-class="input-group-append #{'ml-1' if object.state == 'flagged' else 'd-none'}">
-        <a href="#" t-att-data-post-id="object.id" t-attf-data-action="validate" class="badge badge-light my-2 mr-2 o_wforum_flag_validator" title="Validate" data-toggle="tooltip">
-            <i class="fa fa-check text-success"/>
-        </a>
-        <a href="#" t-attf-data-action="/forum/#{object.id}/ask_for_mark_as_offensive" class="badge badge-light my-2 mr-2 o_wforum_flag_mark_as_offensive" title="Mark as Offensive"  data-toggle="tooltip">
-            <i class="fa fa-times text-danger"/>
-        </a>
-    </div>
+    <a href="#" t-att-data-post-id="object.id" t-attf-data-action="validate" t-attf-class="#{'' if object.state == 'flagged' else 'd-none'} flag_validator badge badge-light my-2 mr-2 o_wforum_flag_validator" title="Validate" data-bs-toggle="tooltip">
+        <i class="fa fa-check text-success"/>
+    </a>
+    <a href="#" t-attf-data-action="/forum/#{object.id}/ask_for_mark_as_offensive" t-attf-class="#{'' if object.state == 'flagged' else 'd-none'} flag_validator badge badge-light my-2 mr-2 o_wforum_flag_mark_as_offensive" title="Mark as Offensive"  data-bs-toggle="tooltip">
+        <i class="fa fa-times text-danger"/>
+    </a>
 </template>
 
 <template id="link_button">

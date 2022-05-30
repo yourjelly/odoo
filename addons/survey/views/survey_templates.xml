@@ -381,9 +381,7 @@
                    t-att-name="question.id" t-att-placeholder="question.question_placeholder"
                    t-att-value="format_date(answer_lines[0].value_date) if answer_lines else None"
                    t-att-data-question-type="question.question_type"/>
-            <div t-if="not survey_form_readonly" class="input-group-append position-absolute" t-attf-data-target="#datetimepicker_#{question.id}" data-toggle="datetimepicker">
-                <div class="input-group-text text-primary border-0 bg-transparent p-0"><i class="fa fa-calendar"></i></div>
-            </div>
+            <div t-if="not survey_form_readonly" class="position-absolute input-group-text text-primary border-0 bg-transparent p-0" t-attf-data-target="#datetimepicker_#{question.id}" data-toggle="datetimepicker"><i class="fa fa-calendar"></i></div>
         </div>
     </template>
 
@@ -396,9 +394,7 @@
                    t-att-name="question.id" t-att-placeholder="question.question_placeholder"
                    t-att-value="format_datetime(answer_lines[0].value_datetime) if answer_lines else None"
                    t-att-data-question-type="question.question_type"/>
-            <div t-if="not survey_form_readonly" class="input-group-append position-absolute" t-attf-data-target="#datetimepicker_#{question.id}" data-toggle="datetimepicker">
-                <div class="input-group-text text-primary border-0 bg-transparent p-0"><i class="fa fa-calendar"></i></div>
-            </div>
+            <div t-if="not survey_form_readonly" class="position-absolute input-group-text text-primary border-0 bg-transparent p-0" t-attf-data-target="#datetimepicker_#{question.id}" data-toggle="datetimepicker"><i class="fa fa-calendar"></i></div>
         </div>
     </template>
 
