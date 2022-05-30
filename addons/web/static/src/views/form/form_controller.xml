@@ -53,7 +53,7 @@
     <t t-name="web.MissingTranslationNotificationBanner" owl="1">
         <div class="alert alert-info alert-dismissible" role="alertdialog">
             Please update translations of :
-            <t t-foreach="translatableFieldsInNotification" t-as="field" t-key="field.name">
+            <t t-foreach="Array.from(this.cachedMultiResIdtranslatableFieldsInNotification[this.model.root.resId])" t-as="field" t-key="field.name">
                 <strong><a class="o_field_translate" t-att-name="field.name" href="#"><t t-esc="field.string"/><t t-if="!field_last">, </t></a></strong>
             </t>
             <button t-on-click="() => this.closeTranslatableFieldReminderNotificationBanner()" type="button" class="close" aria-label="Close">
