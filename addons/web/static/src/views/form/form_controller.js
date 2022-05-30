@@ -15,7 +15,7 @@ import { isX2Many } from "@web/views/helpers/view_utils";
 import { useViewButtons } from "@web/views/view_button/hook";
 import { localization } from "@web/core/l10n/localization";
 
-const { Component, onWillStart, useEffect, useRef, onRendered, useState } = owl;
+const { Component, onWillStart, useEffect, useRef, onRendered, useState, toRaw } = owl;
 
 const viewRegistry = registry.category("views");
 
@@ -165,7 +165,17 @@ export class FormController extends Component {
             beforeUnload: () => this.beforeUnload(),
             getLocalState: () => {
                 // TODO: export the whole model?
-                return { resId: this.model.root.resId };
+                return {
+                    resId: this.model.root.resId,
+
+                    // translate notification banner stufff
+                    showingTranslatableFieldReminderNotification: toRaw(
+                        this.showingTranslatableFieldReminderNotification
+                    ),
+                    cachedMultiResIdtranslatableFieldsInNotification: toRaw(
+                        this.cachedMultiResIdtranslatableFieldsInNotification
+                    ),
+                };
             },
         });
 
@@ -226,9 +236,18 @@ export class FormController extends Component {
             );
         }
 
-        // translate notification banner stufff
-        this.showingTranslatableFieldReminderNotification = useState({});
-        this.cachedMultiResIdtranslatableFieldsInNotification = useState({});
+        // translate notification banner stuff
+        if (this.props.state) {
+            this.showingTranslatableFieldReminderNotification = useState(
+                this.props.state.showingTranslatableFieldReminderNotification || {}
+            );
+            this.cachedMultiResIdtranslatableFieldsInNotification = useState(
+                this.props.state.cachedMultiResIdtranslatableFieldsInNotification || {}
+            );
+        } else {
+            this.showingTranslatableFieldReminderNotification = useState({});
+            this.cachedMultiResIdtranslatableFieldsInNotification = useState({});
+        }
     }
 
     beforeUnload() {
@@ -321,7 +340,7 @@ export class FormController extends Component {
     async save(params = {}) {
         const disabledButtons = this.disableButtons();
 
-        this.showTranslatableFieldReminderNotificationBanner();
+        this.computeTranslatableFieldReminderNotificationBanner();
 
         if (this.props.saveRecord) {
             await this.props.saveRecord(this.model.root, params);
@@ -329,6 +348,8 @@ export class FormController extends Component {
             await this.model.root.save();
         }
         this.enableButtons(disabledButtons);
+
+        this.showTranslatableFieldReminderNotificationBanner();
     }
 
     async discard() {
@@ -346,23 +367,28 @@ export class FormController extends Component {
         return localization.multiLang && this.model.root.dirtyTranslatableFields.length;
     }
 
-    showTranslatableFieldReminderNotificationBanner() {
+    computeTranslatableFieldReminderNotificationBanner(show) {
         // This piece of code handles the notification displayed
         // when a translatable field is edited.
         // The banner doesn't go away unless close button is clicked.
         if (this.shouldShowTranslatableFieldReminderNotification) {
+            this.cachedMultiResIdtranslatableFieldsInNotification[this.model.root.resId] = new Set([
+                ...(this.cachedMultiResIdtranslatableFieldsInNotification[this.model.root.resId] ||
+                    []),
+                ...this.model.root.dirtyTranslatableFields,
+            ]);
+        }
+    }
+
+    showTranslatableFieldReminderNotificationBanner() {
+        if (this.cachedMultiResIdtranslatableFieldsInNotification[false]) {
+            this.cachedMultiResIdtranslatableFieldsInNotification[
+                this.model.root.resId
+            ] = this.cachedMultiResIdtranslatableFieldsInNotification[false];
+            delete this.cachedMultiResIdtranslatableFieldsInNotification[false];
+        }
+        if (this.cachedMultiResIdtranslatableFieldsInNotification[this.model.root.resId]) {
             this.showingTranslatableFieldReminderNotification[this.model.root.resId] = true;
-            this.cachedMultiResIdtranslatableFieldsInNotification = {
-                [this.model.root.resId]: new Set([
-                    ...(this.cachedMultiResIdtranslatableFieldsInNotification[
-                        this.model.root.resId
-                    ] || []),
-                    ...this.model.root.dirtyTranslatableFields,
-                ]),
-            };
-            this.translatableFieldsInNotification = [
-                ...this.cachedMultiResIdtranslatableFieldsInNotification[this.model.root.resId],
-            ];
         }
     }
 
