@@ -8,7 +8,6 @@ import {
     editInput,
     getFixture,
     getNodesTextContent,
-    legacyExtraNextTick,
     makeDeferred,
     mouseEnter,
     nextTick,
@@ -36,7 +35,7 @@ const serviceRegistry = registry.category("services");
 const widgetRegistry = registry.category("view_widgets");
 
 // WOWL remove after adapting tests
-let createView, testUtils, _t, ViewDialogs, Widget, RamStorage, AbstractStorageService, clickLast;
+let createView, testUtils, Widget, RamStorage, AbstractStorageService, clickLast;
 
 let target, serverData;
 QUnit.module("Views", (hooks) => {
@@ -7666,45 +7665,33 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".alert .o_field_translate", "should have a translation alert");
     });
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "translate event correctly handled with multiple controllers",
         async function (assert) {
             assert.expect(3);
 
             serverData.models.product.fields.name.translate = true;
             serverData.models.partner.records[0].product_id = 37;
-            var nbTranslateCalls = 0;
+            let nbTranslateCalls = 0;
 
-            var multi_lang = _t.database.multi_lang;
-            _t.database.multi_lang = true;
+            patchWithCleanup(localization, {
+                multiLang: true,
+            });
+
+            serverData.views = {
+                "product,false,form": `<form><sheet><group><field name="name"/><field name="partner_type_id"/></group></sheet></form>`,
+            };
 
             await makeView({
                 type: "form",
-                resModel: "partner",
                 serverData,
-                arch:
-                    "<form>" +
-                    "<sheet>" +
-                    "<group>" +
-                    '<field name="product_id"/>' +
-                    "</group>" +
-                    "</sheet>" +
-                    "</form>",
-                archs: {
-                    "product,false,form":
-                        "<form>" +
-                        "<sheet>" +
-                        "<group>" +
-                        '<field name="name"/>' +
-                        '<field name="partner_type_id"/>' +
-                        "</group>" +
-                        "</sheet>" +
-                        "</form>",
-                },
+                resModel: "partner",
                 resId: 1,
+                arch: `<form><sheet><group><field name="product_id"/></group></sheet></form>`,
+
                 mockRPC(route, args) {
                     if (route === "/web/dataset/call_kw/product/get_formview_id") {
-                        return Promise.resolve(false);
+                        return false;
                     }
                     if (
                         route === "/web/dataset/call_button" &&
@@ -7716,65 +7703,29 @@ QUnit.module("Views", (hooks) => {
                             'should call "call_button" route'
                         );
                         nbTranslateCalls++;
-                        return Promise.resolve({
+                        return {
                             domain: [],
                             context: { search_default_name: "partnes,foo" },
-                        });
+                        };
                     }
                     if (route === "/web/dataset/call_kw/res.lang/get_installed") {
-                        return Promise.resolve([["en_US"], ["fr_BE"]]);
+                        return [["en_US"], ["fr_BE"]];
                     }
-                    return this._super.apply(this, arguments);
                 },
             });
 
-            await click(target.querySelector(".o_form_button_edit"));
+            await clickEdit(target);
             await click(target.querySelector('[name="product_id"] .o_external_button'));
             assert.containsOnce(
-                $(".modal-body"),
+                target.querySelector(".modal-body"),
                 "span.o_field_translate",
                 "there should be a translate button in the modal"
             );
 
-            await click($(".modal-body span.o_field_translate"));
+            await click(target.querySelector(".modal-body span.o_field_translate"));
             assert.strictEqual(nbTranslateCalls, 1, "should call_button translate once");
-            _t.database.multi_lang = multi_lang;
         }
     );
-
-    QUnit.skipWOWL("check the translate alert in the wizard", async function (assert) {
-        assert.expect(1);
-
-        // Check whether it is alert before the dialog closes
-        testUtils.mock.patch(ViewDialogs.FormViewDialog, {
-            close() {
-                assert.containsNone(this.$el, ".o_notification_box");
-                this._super(...arguments);
-            },
-        });
-
-        this.data.product.fields.name.translate = true;
-
-        const multi_lang = _t.database.multi_lang;
-        _t.database.multi_lang = true;
-
-        await makeView({
-            type: "form",
-            resModel: "partner",
-            serverData,
-            arch: `<form><field name="product_id"/></form>`,
-            archs: {
-                "product,false,form": `<form><field name="name"/></form>`,
-            },
-            resId: 1,
-        });
-
-        await click(target.querySelector(".o_form_button_edit"));
-        await testUtils.fields.many2one.createAndEdit("product_id", "Ralts");
-        await click($(".modal-footer button.btn-primary"));
-        testUtils.mock.unpatch(ViewDialogs.FormViewDialog);
-        _t.database.multi_lang = multi_lang;
-    });
 
     QUnit.test("buttons are disabled until status bar action is resolved", async function (assert) {
         const def = makeDeferred();
