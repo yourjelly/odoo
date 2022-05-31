@@ -12,10 +12,6 @@ export class CopyButton extends Component {
         });
     }
 
-    get isInline() {
-        return ["char", "url"].includes(this.props.type);
-    }
-
     async onClick() {
         // any kind of content can be copied into the clipboard using
         // the appropriate native methods
@@ -36,5 +32,5 @@ CopyButton.props = {
     className: { type: String, optional: true },
     copyText: { type: String, optional: true },
     successText: { type: String, optional: true },
-    content: {},
+    content: { type: [String, Object], optional: true },
 };
