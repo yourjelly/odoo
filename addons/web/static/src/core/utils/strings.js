@@ -317,15 +317,3 @@ export function unaccent(str, caseSensitive) {
     });
     return caseSensitive ? str : str.toLowerCase();
 }
-
-let idCounter = 0;
-/**
- * Generates a globally-unique id, with a given `prefix` if any.
- *
- * @param {string} [prefix]
- * @returns {string}
- */
-export const uniqueId = (prefix) => {
-    const id = String(++idCounter);
-    return prefix ? prefix + id : id;
-};

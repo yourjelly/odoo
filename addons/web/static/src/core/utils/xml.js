@@ -63,16 +63,18 @@ export class XMLParser {
  * @param {boolean} [falsyIfUndefined]
  * @returns {boolean}
  */
-export const isFalsy = (value, falsyIfUndefined) =>
-    (value ? /^false|0$/i.test(value) : falsyIfUndefined) || false;
+export function isFalsy(value, falsyIfUndefined) {
+    return (value ? /^false|0$/i.test(value) : falsyIfUndefined) || false;
+}
 
 /**
  * @param {string} value
  * @param {boolean} [truthyIfUndefined]
  * @returns {boolean}
  */
-export const isTruthy = (value, truthyIfUndefined) =>
-    (value ? !/^false|0$/i.test(value) : truthyIfUndefined) || false;
+export function isTruthy(value, truthyIfUndefined) {
+    return (value ? !/^false|0$/i.test(value) : truthyIfUndefined) || false;
+}
 
 /**
  * Removes the given attributes on the given element and returns them as a dictionnary.
@@ -80,14 +82,14 @@ export const isTruthy = (value, truthyIfUndefined) =>
  * @param {string[]} attributes
  * @returns {Record<string, string>}
  */
-export const extractAttributes = (el, attributes) => {
+export function extractAttributes(el, attributes) {
     const attrs = Object.create(null);
     for (const attr of attributes) {
         attrs[attr] = el.getAttribute(attr) || "";
         el.removeAttribute(attr);
     }
     return attrs;
-};
+}
 
 /**
  * Combines the existing value of a node attribute with new given parts. The glue
@@ -98,14 +100,14 @@ export const extractAttributes = (el, attributes) => {
  * @param {string | string[]} parts
  * @param {string} [glue=" "]
  */
-export const combineAttributes = (el, attr, parts, glue = " ") => {
+export function combineAttributes(el, attr, parts, glue = " ") {
     const allValues = [];
     if (el.hasAttribute(attr)) {
         allValues.push(el.getAttribute(attr));
     }
     allValues.push(...(Array.isArray(parts) ? parts : [parts]));
     el.setAttribute(attr, allValues.join(glue));
-};
+}
 
 /**
  * XML equivalent of `document.createElement`.
@@ -114,7 +116,7 @@ export const combineAttributes = (el, attr, parts, glue = " ") => {
  * @param {...(Iterable<Element> | Record<string, string>)} args
  * @returns {Element}
  */
-export const createElement = (tagName, ...args) => {
+export function createElement(tagName, ...args) {
     const el = xmlDocument.createElement(tagName);
     for (const arg of args) {
         if (!arg) {
@@ -131,7 +133,7 @@ export const createElement = (tagName, ...args) => {
         }
     }
     return el;
-};
+}
 
 /**
  * XML equivalent of `document.createTextNode`.
@@ -139,7 +141,9 @@ export const createElement = (tagName, ...args) => {
  * @param {string} data
  * @returns {Text}
  */
-export const createTextNode = (data) => xmlDocument.createTextNode(data);
+export function createTextNode(data) {
+    return xmlDocument.createTextNode(data);
+}
 
 /**
  * @param {any} string

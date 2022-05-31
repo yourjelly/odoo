@@ -156,6 +156,16 @@
         </div>
     </t>
 
+    <t t-name="web.KanbanColorPicker" owl="1">
+        <ul class="oe_kanban_colorpicker">
+            <t t-foreach="colors" t-as="color" t-key="color">
+                <li role="menuitem" t-on-click="() => this.selectColor(record, color_index)" t-att-title="color" t-att-aria-label="color">
+                    <a href="#" t-attf-class="oe_kanban_color_{{ color_index }}" />
+                </li>
+            </t>
+        </ul>
+    </t>
+
     <t t-name="web.KanbanCoverImageDialog" owl="1">
         <SimpleDialog t-props="props" title="'Set a Cover Image'" size="'modal-lg'">
             <div t-if="attachments.length" class="o_kanban_cover_container bg-100">

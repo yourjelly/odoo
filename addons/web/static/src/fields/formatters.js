@@ -46,7 +46,7 @@ function insertThousandsSep(number, thousandsSep = ",", grouping = []) {
  *    represented as 4321 otherwise it will be down to one digit (4k))
  * @returns {string}
  */
-const humanNumber = (number, options = { decimals: 0, minDigits: 1 }) => {
+function humanNumber(number, options = { decimals: 0, minDigits: 1 }) {
     const decimals = options.decimals || 0;
     const minDigits = options.minDigits || 1;
     const d2 = Math.pow(10, decimals);
@@ -85,7 +85,7 @@ const humanNumber = (number, options = { decimals: 0, minDigits: 1 }) => {
         return int + symbol;
     }
     return int + decimalPoint + decimalPart + symbol;
-};
+}
 
 // -----------------------------------------------------------------------------
 // Exports
@@ -95,7 +95,9 @@ const humanNumber = (number, options = { decimals: 0, minDigits: 1 }) => {
  * @param {boolean} value
  * @returns {string}
  */
-export const formatBoolean = (value) => (value ? _t("True") : _t("False"));
+export function formatBoolean(value) {
+    return value ? _t("True") : _t("False");
+}
 
 /**
  * Returns a string representing a char.  If the value is false, then we return
@@ -108,7 +110,7 @@ export const formatBoolean = (value) => (value ? _t("True") : _t("False"));
  *   instead of the formatted value
  * @returns {string}
  */
-export const formatChar = (value, options) => {
+export function formatChar(value, options) {
     value = typeof value === "string" ? value : "";
     if (options && options.isPassword) {
         return "*".repeat(value ? value.length : 0);
@@ -117,7 +119,7 @@ export const formatChar = (value, options) => {
         value = escape(value);
     }
     return value;
-};
+}
 
 /**
  * Returns a string representing a float.  The result takes into account the
@@ -137,7 +139,7 @@ export const formatChar = (value, options) => {
  *   won't contain unnecessary trailing zeros.
  * @returns {string}
  */
-export const formatFloat = (value, options = {}) => {
+export function formatFloat(value, options = {}) {
     if (value === false) {
         return "";
     }
@@ -159,7 +161,7 @@ export const formatFloat = (value, options = {}) => {
         formatted[1] = formatted[1].replace(/0+$/, "");
     }
     return formatted[1] ? formatted.join(decimalPoint) : formatted[0];
-};
+}
 
 /**
  * Returns a string representing a float value, from a float converted with a
@@ -170,13 +172,13 @@ export const formatFloat = (value, options = {}) => {
  * @param {number} [options.factor=1.0] conversion factor
  * @returns {string}
  */
-export const formatFloatFactor = (value, options = {}) => {
+export function formatFloatFactor(value, options = {}) {
     if (value === false) {
         return "";
     }
     const factor = options.factor || 1;
     return formatFloat(value * factor, options);
-};
+}
 
 /**
  * Returns a string representing a time value, from a float.  The idea is that
@@ -189,7 +191,7 @@ export const formatFloatFactor = (value, options = {}) => {
  *   otherwise, format like 01:30
  * @returns {string}
  */
-export const formatFloatTime = (value, options = {}) => {
+export function formatFloatTime(value, options = {}) {
     if (value === false) {
         return "";
     }
@@ -208,9 +210,11 @@ export const formatFloatTime = (value, options = {}) => {
         hour = `${hour}`.padStart(2, "0");
     }
     return `${isNegative ? "-" : ""}${hour}:${min}`;
-};
+}
 
-export const formatHtml = (value) => markup(value);
+export function formatHtml(value) {
+    return markup(value);
+}
 
 /**
  * Returns a string representing an integer.  If the value is false, then we
@@ -226,7 +230,7 @@ export const formatHtml = (value) => markup(value);
  *   insert `thousandsSep`. See `insertThousandsSep` method.
  * @returns {string}
  */
-export const formatInteger = (value, options = {}) => {
+export function formatInteger(value, options = {}) {
     if (value === false || value === null) {
         return "";
     }
@@ -239,7 +243,7 @@ export const formatInteger = (value, options = {}) => {
     const grouping = options.grouping || l10n.grouping;
     const thousandsSep = "thousandsSep" in options ? options.thousandsSep : l10n.thousandsSep;
     return insertThousandsSep(value.toFixed(0), thousandsSep, grouping);
-};
+}
 
 /**
  * Returns a string representing a many2one value. The value is expected to be
@@ -252,7 +256,7 @@ export const formatInteger = (value, options = {}) => {
  * @param {boolean} [options.escape=false] if true, escapes the formatted value
  * @returns {string}
  */
-export const formatMany2one = (value, options) => {
+export function formatMany2one(value, options) {
     if (!value) {
         value = "";
     } else {
@@ -262,7 +266,7 @@ export const formatMany2one = (value, options) => {
         value = encodeURIComponent(value);
     }
     return value;
-};
+}
 
 /**
  * Returns a string representing a one2many or many2many value. The value is
@@ -272,7 +276,7 @@ export const formatMany2one = (value, options) => {
  * @param {number[] | false} value
  * @returns {string}
  */
-export const formatX2many = (value) => {
+export function formatX2many(value) {
     const count = value.currentIds.length;
     if (count === 0) {
         return _t("No records");
@@ -281,7 +285,7 @@ export const formatX2many = (value) => {
     } else {
         return sprintf(_t("%s records"), count);
     }
-};
+}
 
 /**
  * Returns a string representing a monetary value. The result takes into account
@@ -306,7 +310,7 @@ export const formatX2many = (value) => {
  *   number is always ignored (legacy constraint)
  * @returns {string}
  */
-export const formatMonetary = (value, options = {}) => {
+export function formatMonetary(value, options = {}) {
     // Monetary fields want to display nothing when the value is unset.
     // You wouldn't want a value of 0 euro if nothing has been provided.
     if (value === false) {
@@ -337,7 +341,7 @@ export const formatMonetary = (value, options = {}) => {
         formatted.reverse();
     }
     return formatted.join(nbsp);
-};
+}
 
 /**
  * Returns a string representing the given value (multiplied by 100)
@@ -348,12 +352,12 @@ export const formatMonetary = (value, options = {}) => {
  * @param {boolean} [options.noSymbol] if true, doesn't concatenate with "%"
  * @returns {string}
  */
-export const formatPercentage = (value, options = {}) => {
+export function formatPercentage(value, options = {}) {
     value = value || 0;
     options = Object.assign({ noTrailingZeros: true, thousandsSep: "" }, options);
     const formatted = formatFloat(value * 100, options);
     return `${formatted}${options.noSymbol ? "" : "%"}`;
-};
+}
 
 /**
  * Returns a string representing the value of the reference field.
@@ -362,9 +366,9 @@ export const formatPercentage = (value, options = {}) => {
  * @param {Object} [options={}]
  * @returns {string}
  */
-export const formatReference = (value, options) => {
+export function formatReference(value, options) {
     return formatMany2one(value ? [value.resId, value.displayName] : false, options);
-};
+}
 
 /**
  * Returns a string of the value of the selection.
@@ -374,11 +378,11 @@ export const formatReference = (value, options) => {
  * @param {Object} [options.field]
  * @returns {string}
  */
-export const formatSelection = (value, options = {}) => {
+export function formatSelection(value, options = {}) {
     const selection = options.selection || (options.field && options.field.selection) || [];
     const option = selection.find((option) => option[0] === value);
     return option ? option[1] : "";
-};
+}
 
 /**
  * Returns the value or an empty string if it's falsy.
@@ -386,9 +390,9 @@ export const formatSelection = (value, options = {}) => {
  * @param {string | false} value
  * @returns {string}
  */
-export const formatText = (value) => {
+export function formatText(value) {
     return value || "";
-};
+}
 
 registry
     .category("formatters")

@@ -16,7 +16,7 @@ let target;
  * @param {Object} props
  * @returns {Promise<ColorPicker>}
  */
-const mountPicker = async (Picker, props) => {
+async function mountPicker(Picker, props) {
     serviceRegistry.add("ui", uiService);
     target = getFixture();
 
@@ -31,7 +31,7 @@ const mountPicker = async (Picker, props) => {
     }
     const parent = await mount(Parent, target, { env, props: { Picker, props } });
     return parent;
-};
+}
 
 QUnit.module("Components", () => {
     QUnit.module("ColorPicker");

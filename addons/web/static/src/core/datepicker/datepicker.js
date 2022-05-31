@@ -27,39 +27,41 @@ let datePickerId = 0;
  * @param {DateTime} date
  * @returns {moment}
  */
-const luxonDateToMomentDate = (date) => {
+function luxonDateToMomentDate(date) {
     return window.moment(String(date));
-};
+}
 
 /**
  * @param {string} format
  * @returns {string}
  */
-const luxonFormatToMomentFormat = (format) => {
+function luxonFormatToMomentFormat(format) {
     return format.replace(/[dy]/g, (x) => x.toUpperCase());
-};
+}
 
 /**
  * @param {string} format
  * @returns {boolean}
  */
-const isValidStaticFormat = (format) => {
+function isValidStaticFormat(format) {
     return /^[\d\s/:-]+$/.test(DateTime.local().toFormat(format));
-};
+}
 
 /**
  * @param {Function} fn
  * @returns {[any, null] | [null, Error]}
  */
-const wrapError = (fn) => (...args) => {
-    const result = [null, null];
-    try {
-        result[0] = fn(...args);
-    } catch (_err) {
-        result[1] = _err;
-    }
-    return result;
-};
+function wrapError(fn) {
+    return (...args) => {
+        const result = [null, null];
+        try {
+            result[0] = fn(...args);
+        } catch (_err) {
+            result[1] = _err;
+        }
+        return result;
+    };
+}
 
 /**
  * Date picker
