@@ -1,9 +1,10 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
+
 import { TagsList } from "../many2many_tags/tags_list";
-import { AutoComplete } from "@web/core/autocomplete/autocomplete";
-import { Many2ManyTagsField } from "../many2many_tags/many2many_tags_field";
+import { Many2XAutocomplete } from "@web/fields/relational_utils";
+import { Many2ManyTagsField } from "@web/fields/many2many_tags/many2many_tags_field";
 
 export class Many2ManyTagsAvatarField extends Many2ManyTagsField {
     get tags() {
@@ -18,7 +19,7 @@ export class Many2ManyTagsAvatarField extends Many2ManyTagsField {
 
 Many2ManyTagsAvatarField.template = "web.Many2ManyTagsAvatarField";
 Many2ManyTagsAvatarField.components = {
-    AutoComplete,
+    Many2XAutocomplete,
     TagsList,
 };
 

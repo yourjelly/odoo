@@ -4,18 +4,20 @@
     <t t-name="web.Many2ManyTagsField" owl="1">
         <TagsList tags="tags">
             <div t-if="showM2OSelectionField" class="o_field_many2many_selection">
-                <div class="o_input_dropdown">
-                    <AutoComplete
-                        value="''"
-                        id="props.id"
-                        placeholder="props.placeholder"
-                        sources="sources"
-                        autoSelect="true"
-                        onSelect.bind="onSelect"
-                        shouldForceClose="forceCloseAutocomplete"
-                    />
-                    <a role="button" class="o_dropdown_button" draggable="false" />
-                </div>
+                <Many2XAutocomplete
+                    id="props.id"
+                    placeholder="props.placeholder"
+                    resModel="props.relation"
+                    autoSelect="true"
+                    fieldString="fieldString"
+                    activeActions="activeActions"
+                    update="update"
+                    quickCreate="quickCreate"
+                    context="context"
+                    getDomain.bind="getDomain"
+                    isToMany="true"
+                    nameCreateField="props.nameCreateField"
+                />
             </div>
         </TagsList>
     </t>
