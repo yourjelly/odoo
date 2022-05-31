@@ -6,7 +6,7 @@ import { standardFieldProps } from "../standard_field_props";
 
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import { ColorList } from "@web/core/colorlist/colorlist";
-import { TagsList } from "@web/core/tags/tags_list";
+import { TagsList } from "./tags_list";
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { Domain } from "@web/core/domain";
 import { useService } from "@web/core/utils/hooks";
@@ -348,6 +348,7 @@ Many2ManyTagsField.props = {
     context: { type: Object },
     searchLimit: { type: Number, optional: true },
     nameCreateField: { type: String, optional: true },
+    itemsVisible: { type: Number, optional: true },
 };
 Many2ManyTagsField.defaultProps = {
     canEditColor: true,
