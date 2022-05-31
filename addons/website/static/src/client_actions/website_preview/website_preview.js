@@ -60,7 +60,6 @@ export class WebsitePreview extends Component {
         this.websiteContext = useState(this.websiteService.context);
 
         onWillStart(async () => {
-            this.isWebsitePublisher = await this.user.hasGroup('website.group_website_publisher');
             await this.websiteService.fetchWebsites();
             if (this.websiteDomain && this.websiteDomain !== window.location.origin) {
                 window.location.href = `${this.websiteDomain}/web#action=website.website_preview&path=${this.path}&website_id=${this.websiteId}`;
@@ -140,7 +139,7 @@ export class WebsitePreview extends Component {
     }
 
     addWelcomeMessage() {
-        if (this.isWebsitePublisher) {
+        if (this.websiteService.isPublisher) {
             const $wrap = $(this.iframe.el.contentDocument.querySelector('#wrapwrap.homepage')).find('#wrap');
             if ($wrap.length && $wrap.html().trim() === '') {
                 this.$welcomeMessage = $(core.qweb.render('website.homepage_editor_welcome_message'));
