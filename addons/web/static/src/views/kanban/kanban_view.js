@@ -20,30 +20,18 @@ export const kanbanView = {
 
     props: (genericProps, view) => {
         const { ArchParser } = view;
-        const { arch, fields, limit, relatedModels, resModel, searchMenuTypes } = genericProps;
+        const { arch, relatedModels, resModel } = genericProps;
         const archInfo = new ArchParser().parse(arch, relatedModels, resModel);
-        const { activeFields, defaultGroupBy, onCreate, quickCreateView } = archInfo;
-        const modelParams = {
-            activeFields,
-            progressAttributes: archInfo.progressAttributes,
-            fields,
-            resModel,
-            limit: archInfo.limit || limit,
-            onCreate,
-            quickCreateView,
-            defaultGroupBy: searchMenuTypes.includes("groupBy") && defaultGroupBy,
-            viewMode: "kanban",
-            openGroupsByDefault: true,
-            tooltipInfo: archInfo.tooltipInfo,
-        };
+        const defaultGroupBy =
+            genericProps.searchMenuTypes.includes("groupBy") && archInfo.defaultGroupBy;
 
         return {
             ...genericProps,
             Model: view.Model,
-            modelParams,
             Renderer: view.Renderer,
             buttonTemplate: view.buttonTemplate,
             archInfo,
+            defaultGroupBy,
         };
     },
 };
