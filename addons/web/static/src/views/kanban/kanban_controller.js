@@ -16,7 +16,21 @@ const { Component, useRef } = owl;
 export class KanbanController extends Component {
     setup() {
         this.actionService = useService("action");
-        this.model = useModel(this.props.Model, this.props.modelParams);
+        const { Model, resModel, fields, archInfo, limit, defaultGroupBy } = this.props;
+        this.model = useModel(Model, {
+            activeFields: archInfo.activeFields,
+            progressAttributes: archInfo.progressAttributes,
+            fields,
+            resModel,
+            handleField: archInfo.handleField,
+            limit: archInfo.limit || limit,
+            onCreate: archInfo.onCreate,
+            quickCreateView: archInfo.quickCreateView,
+            defaultGroupBy,
+            viewMode: "kanban",
+            openGroupsByDefault: true,
+            tooltipInfo: archInfo.tooltipInfo,
+        });
 
         const rootRef = useRef("root");
         useViewButtons(this.model, rootRef);
@@ -68,10 +82,10 @@ KanbanController.components = { Layout, KanbanRenderer };
 KanbanController.props = {
     ...standardViewProps,
     Model: Function,
-    modelParams: Object,
     Renderer: Function,
     buttonTemplate: String,
     archInfo: Object,
+    defaultGroupBy: { validate: (dgb) => !dgb || typeof dgb === "string", optional: true },
 };
 
 KanbanController.defaultProps = {
