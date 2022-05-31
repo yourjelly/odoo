@@ -12,7 +12,7 @@ import { useSortable } from "@web/core/utils/ui";
 import { url } from "@web/core/utils/urls";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { Field } from "@web/fields/field";
-import { fileTypeMagicWordMap } from "@web/fields/image_field";
+import { fileTypeMagicWordMap } from "@web/fields/image/image_field";
 import { session } from "@web/session";
 import { useViewCompiler } from "@web/views/helpers/view_compiler";
 import { useBounceButton } from "@web/views/helpers/view_hook";
