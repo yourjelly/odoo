@@ -9,13 +9,13 @@ const { Component } = owl;
  * @param {Object} params
  * @returns {Object}
  */
-export const extractLayoutComponents = (params) => {
+export function extractLayoutComponents(params) {
     return {
         ControlPanel: params.ControlPanel || ControlPanel,
         SearchPanel: params.SearchPanel || SearchPanel,
         Banner: params.Banner || false,
     };
-};
+}
 
 export class Layout extends Component {
     setup() {

@@ -58,12 +58,12 @@ const DEFAULT_QUICK_CREATE_VIEW = {
  * @param {Object} groupByField
  * @returns {boolean}
  */
-export const isAllowedDateField = (groupByField) => {
+export function isAllowedDateField(groupByField) {
     return (
         ["date", "datetime"].includes(groupByField.type) &&
         isTruthy(groupByField.attrs.allow_group_range_value)
     );
-};
+}
 
 /**
  * @typedef {Object} OrderTerm ?
@@ -326,11 +326,11 @@ class DataPoint {
 
 markRaw(DataPoint.prototype);
 
-const clearObject = (obj) => {
+function clearObject(obj) {
     for (const key in obj) {
         delete obj[key];
     }
-};
+}
 
 export class Record extends DataPoint {
     setup(params, state) {
@@ -2409,19 +2409,19 @@ export class Group extends DataPoint {
     }
 }
 
-const add = (arr, el) => {
+function add(arr, el) {
     const index = arr.indexOf(el);
     if (index === -1) {
         arr.push(el);
     }
-};
+}
 
-const remove = (arr, el) => {
+function remove(arr, el) {
     const index = arr.indexOf(el);
     if (index > -1) {
         arr.splice(index, 1);
     }
-};
+}
 
 const symbolValues = Symbol("values");
 
