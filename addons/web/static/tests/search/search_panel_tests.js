@@ -29,7 +29,7 @@ const serviceRegistry = registry.category("services");
 // Helpers
 //-----------------------------------------------------------------------------
 
-const getValues = (el, type) => {
+function getValues(el, type) {
     switch (type) {
         case "category": {
             return [...el.querySelectorAll(".o_search_panel_category_value header")];
@@ -44,9 +44,9 @@ const getValues = (el, type) => {
             return [...el.getElementsByClassName("o_search_panel_group_header")];
         }
     }
-};
+}
 
-const getValue = (el, type, content = 0, additionalSelector = null) => {
+function getValue(el, type, content = 0, additionalSelector = null) {
     const values = getValues(el, type);
     let match = null;
     if (Number.isInteger(content) && content < values.length) {
@@ -59,33 +59,51 @@ const getValue = (el, type, content = 0, additionalSelector = null) => {
         match = match.querySelector(additionalSelector);
     }
     return match;
-};
+}
 
-const parseContent = ([value, counter]) => (counter ? `${value}: ${counter}` : value);
-const getContent = (el, type, parse = parseContent) => {
+function parseContent([value, counter]) {
+    return counter ? `${value}: ${counter}` : value;
+}
+
+function getContent(el, type, parse = parseContent) {
     return getValues(el, type)
         .map((v) => parse(v.innerText.trim().split(/\s+/)))
         .filter((v) => v !== null);
-};
+}
 
 // Categories
-const getCategory = (el, ...args) => getValue(el, "category", ...args);
-const getCategoriesContent = (el, ...args) => getContent(el, "category", ...args);
+function getCategory(el, ...args) {
+    return getValue(el, "category", ...args);
+}
+
+function getCategoriesContent(el, ...args) {
+    return getContent(el, "category", ...args);
+}
 
 // Filters
-const getFilter = (el, ...args) => getValue(el, "filter", ...args);
-const getFiltersContent = (el, ...args) => getContent(el, "filter", ...args);
+function getFilter(el, ...args) {
+    return getValue(el, "filter", ...args);
+}
+
+function getFiltersContent(el, ...args) {
+    return getContent(el, "filter", ...args);
+}
 
 // Filter groups
-const getFilterGroup = (el, ...args) => getValue(el, "filterGroup", ...args);
-const getFilterGroupContent = (el, ...args) => {
+function getFilterGroup(el, ...args) {
+    return getValue(el, "filterGroup", ...args);
+}
+
+function getFilterGroupContent(el, ...args) {
     const group = getFilterGroup(el, ...args);
     return [getContent(group, "groupHeader")[0], getFiltersContent(group)];
-};
+}
 
-const getCounters = (v) => (isNaN(v[1]) ? null : Number(v[1]));
+function getCounters(v) {
+    return isNaN(v[1]) ? null : Number(v[1]);
+}
 
-const makeTestComponent = ({ onWillStart, onWillUpdateProps } = {}) => {
+function makeTestComponent({ onWillStart, onWillUpdateProps } = {}) {
     let domain;
     class TestComponent extends Component {
         setup() {
@@ -113,7 +131,7 @@ const makeTestComponent = ({ onWillStart, onWillUpdateProps } = {}) => {
         </div>`;
 
     return { TestComponent, getDomain: () => domain };
-};
+}
 
 let serverData;
 let target;
