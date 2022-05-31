@@ -1,7 +1,6 @@
 .o_field_CopyClipboardText, .o_field_CopyClipboardURL, .o_field_CopyClipboardChar {
     display: flex !important;
     flex-wrap: nowrap;
-    align-items: center;
     width: fit-content !important;
     border-radius: 5px;
     border: 1px solid $primary;
