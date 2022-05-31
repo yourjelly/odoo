@@ -4,16 +4,19 @@
     <t t-name="web.Many2ManyTagsAvatarField" owl="1">
         <TagsList tags="tags" itemsVisible="props.itemsVisible">
             <div t-if="showM2OSelectionField" class="o_field_many2many_selection">
-                <div class="o_input_dropdown">
-                    <AutoComplete
-                        value="''"
-                        placeholder="props.placeholder"
-                        sources="sources"
-                        autoSelect="true"
-                        onSelect.bind="onSelect"
-                    />
-                    <a role="button" class="o_dropdown_button" draggable="false" />
-                </div>
+                <Many2XAutocomplete
+                    id="props.id"
+                    placeholder="props.placeholder"
+                    resModel="props.relation"
+                    autoSelect="true"
+                    fieldString="fieldString"
+                    activeActions="activeActions"
+                    update="update"
+                    createRecord="createRecord"
+                    context="context"
+                    getDomain.bind="getDomain"
+                    isToMany="true"
+                />
             </div>
         </TagsList>
     </t>

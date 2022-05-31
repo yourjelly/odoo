@@ -34,14 +34,12 @@ export class AutoComplete extends Component {
         this.hotkey = useService("hotkey");
         this.hotkeysToRemove = [];
 
-        if (this.props.shouldForceClose) {
-            owl.onWillRender(() => {
-                if (this.isOpened && this.props.shouldForceClose()) {
-                    this.inputRef.el.value = this.props.value;
-                    this.close();
-                }
-            });
-        }
+        owl.onWillUpdateProps((nextProps) => {
+            if (nextProps.forceClose) {
+                this.inputRef.el.value = nextProps.value;
+                this.close();
+            }
+        });
 
         // position and size
         const sourcesListRef = useRef("sourcesList");
@@ -160,11 +158,6 @@ export class AutoComplete extends Component {
 
         const option = this.sources[indices[0]].options[indices[1]];
         if (option.unselectable) {
-            if (option.action) {
-                const res = option.action();
-                this.close();
-                return res;
-            }
             return;
         }
 
@@ -326,7 +319,7 @@ Object.assign(AutoComplete, {
         onInput: { type: Function, optional: true },
         onChange: { type: Function, optional: true },
         onBlur: { type: Function, optional: true },
-        shouldForceClose: { type: Function, optional: true },
+        forceClose: { type: Boolean, optional: true },
     },
     defaultProps: {
         placeholder: "",
@@ -334,6 +327,7 @@ Object.assign(AutoComplete, {
         onInput: () => {},
         onChange: () => {},
         onBlur: () => {},
+        forceClose: false,
     },
     timeout: 250,
 });

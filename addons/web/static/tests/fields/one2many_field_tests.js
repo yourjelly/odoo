@@ -420,7 +420,7 @@ QUnit.module("Fields", (hooks) => {
 
         await clickOpenM2ODropdown(target, "parent_id");
         await editInput(target, ".o_field_widget[name=parent_id] input", "ABC");
-        await clickOpenedDropdownItem(target, "parent_id", "Create and Edit...");
+        await clickOpenedDropdownItem(target, "parent_id", "Create and edit...");
 
         await click(target, ".modal:not(.o_inactive_modal) .modal-footer .o_form_button_save");
         await click(target, ".modal:not(.o_inactive_modal) .o_form_button_save_new");
@@ -9269,7 +9269,7 @@ QUnit.module("Fields", (hooks) => {
 
         await clickOpenM2ODropdown(target, "turtle_trululu");
         await editInput(target, "[name=turtle_trululu] input", "ABC");
-        await clickOpenedDropdownItem(target, "turtle_trululu", "Create and Edit...");
+        await clickOpenedDropdownItem(target, "turtle_trululu", "Create and edit...");
 
         assert.containsOnce(target, ".modal .o_form_view");
 
