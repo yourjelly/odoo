@@ -59,6 +59,7 @@ export class ListController extends Component {
             fields,
             activeFields: this.archInfo.activeFields,
             fieldNodes: this.archInfo.fieldNodes,
+            handleField: this.archInfo.handleField,
             viewMode: "list",
             groupByInfo: this.archInfo.groupBy.fields,
             limit: this.archInfo.limit || this.props.limit,

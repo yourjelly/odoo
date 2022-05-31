@@ -42,6 +42,7 @@ export class ListArchParser extends XMLParser {
         const groupListArchParser = new GroupListArchParser();
         let buttonGroup;
         let handleField = null;
+        let defaultOrder = stringToOrderBy(xmlDoc.getAttribute("default_order") || null);
         const treeAttr = {};
         let nextId = 0;
         this.visitXML(arch, (node) => {
@@ -135,14 +136,15 @@ export class ListArchParser extends XMLParser {
                 const groupsLimitAttr = node.getAttribute("groups_limit");
                 treeAttr.groupsLimit = groupsLimitAttr && parseInt(groupsLimitAttr, 10);
 
-                treeAttr.defaultOrder = stringToOrderBy(
-                    xmlDoc.getAttribute("default_order") || null
-                );
                 treeAttr.noOpen = archParseBoolean(node.getAttribute("no_open") || "");
                 treeAttr.expand = archParseBoolean(xmlDoc.getAttribute("expand") || "");
                 treeAttr.decorations = getDecoration(xmlDoc);
             }
         });
+
+        if (!defaultOrder.length && handleField) {
+            defaultOrder = stringToOrderBy(handleField);
+        }
 
         return {
             creates,
@@ -152,6 +154,7 @@ export class ListArchParser extends XMLParser {
             activeFields: fieldNodes, // TODO: process
             columns,
             groupBy,
+            defaultOrder,
             __rawArch: arch,
             ...treeAttr,
         };

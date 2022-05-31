@@ -7982,7 +7982,7 @@ QUnit.module("Views", (hooks) => {
                 if (route === "/web/dataset/resequence") {
                     assert.strictEqual(
                         args.offset,
-                        -4,
+                        9,
                         "should write the sequence starting from the lowest current one"
                     );
                     assert.strictEqual(
@@ -7992,7 +7992,7 @@ QUnit.module("Views", (hooks) => {
                     );
                     assert.deepEqual(
                         args.ids,
-                        [4, 2, 3],
+                        [3, 2, 1],
                         "should write the sequence in correct order"
                     );
                     return Promise.resolve();
@@ -8003,8 +8003,8 @@ QUnit.module("Views", (hooks) => {
         let rows = target.querySelectorAll(".o_data_row");
         assert.strictEqual(
             rows[0].querySelector("[name='amount']").textContent,
-            "1200",
-            "default first record should have amount 1200"
+            "0",
+            "default fourth record should have amount 0"
         );
         assert.strictEqual(
             rows[1].querySelector("[name='amount']").textContent,
@@ -8013,13 +8013,13 @@ QUnit.module("Views", (hooks) => {
         );
         assert.strictEqual(
             rows[2].querySelector("[name='amount']").textContent,
-            "300",
-            "default third record should have amount 300"
+            "1200",
+            "default first record should have amount 1200"
         );
         assert.strictEqual(
             rows[3].querySelector("[name='amount']").textContent,
-            "0",
-            "default fourth record should have amount 0"
+            "300",
+            "default third record should have amount 300"
         );
 
         // Drag and drop the fourth line in second position
@@ -8028,13 +8028,13 @@ QUnit.module("Views", (hooks) => {
         rows = target.querySelectorAll(".o_data_row");
         assert.strictEqual(
             rows[0].querySelector("[name='amount']").textContent,
-            "1200",
-            "new first record should have amount 1200"
+            "0",
+            "new second record should have amount 0"
         );
         assert.strictEqual(
             rows[1].querySelector("[name='amount']").textContent,
-            "0",
-            "new second record should have amount 0"
+            "300",
+            "new fourth record should have amount 300"
         );
         assert.strictEqual(
             rows[2].querySelector("[name='amount']").textContent,
@@ -8043,8 +8043,8 @@ QUnit.module("Views", (hooks) => {
         );
         assert.strictEqual(
             rows[3].querySelector("[name='amount']").textContent,
-            "300",
-            "new fourth record should have amount 300"
+            "1200",
+            "new first record should have amount 1200"
         );
     });
 

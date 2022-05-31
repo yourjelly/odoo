@@ -1,29 +1,30 @@
 /* @odoo-module */
 
-import BasicModel from "web.BasicModel";
-import fieldRegistry from "web.field_registry";
-import { parse } from "web.field_utils";
-import { parseArch } from "web.viewUtils";
-import { traverse } from "web.utils";
-import Context from "web.Context";
-import { mapDoActionOptionAPI } from "@web/legacy/backend_utils";
-
 import { makeContext } from "@web/core/context";
+import { Domain } from "@web/core/domain";
+import { WarningDialog } from "@web/core/errors/error_dialogs";
 import {
     deserializeDate,
     deserializeDateTime,
     serializeDate,
     serializeDateTime,
 } from "@web/core/l10n/dates";
-import { WarningDialog } from "@web/core/errors/error_dialogs";
-import { Domain } from "@web/core/domain";
-import { Model } from "@web/views/helpers/model";
-import { evalDomain } from "@web/views/helpers/utils";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { escape } from "@web/core/utils/strings";
+import { mapDoActionOptionAPI } from "@web/legacy/backend_utils";
+import { Model } from "@web/views/helpers/model";
+import { evalDomain } from "@web/views/helpers/utils";
+import BasicModel from "web.BasicModel";
+import Context from "web.Context";
+import fieldRegistry from "web.field_registry";
+import { parse } from "web.field_utils";
+import { traverse } from "web.utils";
+import { parseArch } from "web.viewUtils";
 
 const { date: parseDate, datetime: parseDateTime } = parse;
 const { markup, toRaw } = owl;
+
+const DEFAULT_HANDLE_FIELD = "sequence";
 
 function mapWowlValueToLegacy(value, type) {
     switch (type) {
@@ -835,6 +836,10 @@ export class StaticList extends DataPoint {
         this.model.notify();
     }
 
+    canResequence() {
+        return this.handleField || DEFAULT_HANDLE_FIELD in this.fields;
+    }
+
     removeRecord(record) {
         // if (true) { see _onRemoveRecord in rel fields
         this.delete(record.id);
@@ -950,67 +955,70 @@ export class StaticList extends DataPoint {
      * @param {RecordId | null} targetId // id of the record (if any) that must be before moved record after operation is done
      */
     async resequence(movedId, targetId) {
+        if (!this.canResequence()) {
+            // There is no handle field on the current model
+            return;
+        }
+
         if (this.__viewType === "list") {
             await this.model.__bm__.save(this.__bm_handle__, { savePoint: true });
             this.model.__bm__.freezeOrder(this.__bm_handle__);
         }
 
-        const handleField = this.handleField || "sequence";
-        const fromIndex = this.records.findIndex((r) => r.id === movedId);
-        let targetIndex = null;
-        let toIndex = 0;
-        if (targetId !== null) {
-            targetIndex = this.records.findIndex((r) => r.id === targetId);
-            toIndex = fromIndex > targetIndex ? targetIndex + 1 : targetIndex;
-        }
-
-        const record = this.records[fromIndex];
-
-        const lowerIndex = Math.min(fromIndex, toIndex);
-        const upperIndex = Math.max(fromIndex, toIndex) + 1;
-
+        const handleField = this.handleField || DEFAULT_HANDLE_FIELD;
+        const records = [...this.records];
         const order = this.orderBy.find((o) => o.name === handleField);
         const asc = !order || order.asc;
 
-        // determine if we need to reorder all records
-        let reorderAll = false;
-        let sequence = (asc ? -1 : 1) * Infinity;
+        // Find indices
+        const fromIndex = records.findIndex((r) => r.id === movedId);
+        let toIndex = 0;
+        if (targetId !== null) {
+            const targetIndex = records.findIndex((r) => r.id === targetId);
+            toIndex = fromIndex > targetIndex ? targetIndex + 1 : targetIndex;
+        }
 
-        // determine if we need to reorder all records
-        for (let index = 0; index < this.records.length; index++) {
-            const { data } = this.records[index];
-            const handleFieldValue = data[handleField];
+        const getSequence = (rec) => rec && rec.data[handleField];
+
+        // Determine what records need to be modified
+        const firstIndex = Math.min(fromIndex, toIndex);
+        const lastIndex = Math.max(fromIndex, toIndex) + 1;
+        let reorderAll = false;
+        let lastSequence = (asc ? -1 : 1) * Infinity;
+        for (let index = 0; index < records.length; index++) {
+            const sequence = getSequence(records[index]);
             if (
-                ((index < lowerIndex || index >= upperIndex) &&
-                    ((asc && sequence >= handleFieldValue) ||
-                        (!asc && sequence <= handleFieldValue))) ||
-                (index >= lowerIndex && index < upperIndex && sequence === handleFieldValue)
+                ((index < firstIndex || index >= lastIndex) &&
+                    ((asc && lastSequence >= sequence) || (!asc && lastSequence <= sequence))) ||
+                (index >= firstIndex && index < lastIndex && lastSequence === sequence)
             ) {
                 reorderAll = true;
             }
-            sequence = handleFieldValue;
+            lastSequence = sequence;
         }
 
-        this.records = this.records.filter((r) => r.id !== movedId);
-        this.records.splice(toIndex, 0, record);
+        // Perform the resequence in the list of records
+        const [record] = records.splice(fromIndex, 1);
+        records.splice(toIndex, 0, record);
 
-        let records = this.records;
+        // Creates the list of to modify
+        let toReorder = records;
         if (!reorderAll) {
-            records = records.slice(lowerIndex, upperIndex).filter((r) => r.id !== movedId);
+            toReorder = toReorder.slice(firstIndex, lastIndex).filter((r) => r.id !== movedId);
             if (fromIndex < toIndex) {
-                records.push(record);
+                toReorder.push(record);
             } else {
-                records.unshift(record);
+                toReorder.unshift(record);
             }
         }
         if (!asc) {
-            records.reverse();
+            toReorder.reverse();
         }
 
-        const sequences = records.map((r) => r.data[handleField]);
-        const offset = Math.min(...sequences);
+        const sequences = toReorder.map(getSequence);
+        const offset = sequences.length && Math.min(...sequences);
 
-        const operations = records.map((record, i) => ({
+        const operations = toReorder.map((record, i) => ({
             operation: "UPDATE",
             id: record.__bm_handle__,
             data: { [handleField]: offset + i },
@@ -1038,6 +1046,8 @@ export class StaticList extends DataPoint {
                 await this.model.__bm__.setSort(this.__bm_handle__, handleField);
             }
         }
+
+        this.records = records;
 
         this.__syncData();
         this.model.notify();
