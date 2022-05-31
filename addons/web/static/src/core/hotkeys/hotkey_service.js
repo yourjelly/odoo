@@ -23,6 +23,44 @@ const NAV_KEYS = [
 const MODIFIERS = ["alt", "control", "shift"];
 const AUTHORIZED_KEYS = [...ALPHANUM_KEYS, ...NAV_KEYS, "escape"];
 
+/**
+ * Get the actual hotkey being pressed.
+ *
+ * @param {KeyboardEvent} ev
+ * @returns {string} the active hotkey, in lowercase
+ */
+export function getActiveHotkey(ev) {
+    const hotkey = [];
+
+    // ------- Modifiers -------
+    // Modifiers are pushed in ascending order to the hotkey.
+    if (isMacOS() ? ev.ctrlKey : ev.altKey) {
+        hotkey.push("alt");
+    }
+    if (isMacOS() ? ev.metaKey : ev.ctrlKey) {
+        hotkey.push("control");
+    }
+    if (ev.shiftKey) {
+        hotkey.push("shift");
+    }
+
+    // ------- Key -------
+    let key = ev.key.toLowerCase();
+    // Identify if the user has tapped on the number keys above the text keys.
+    if (ev.code && ev.code.indexOf("Digit") === 0) {
+        key = ev.code.slice(-1);
+    }
+    // Prefer physical keys for non-latin keyboard layout.
+    if (!AUTHORIZED_KEYS.includes(key) && ev.code && ev.code.indexOf("Key") === 0) {
+        key = ev.code.slice(-1).toLowerCase();
+    }
+    // Make sure we do not duplicate a modifier key
+    if (!MODIFIERS.includes(key)) {
+        hotkey.push(key);
+    }
+    return hotkey.join("+");
+}
+
 export const hotkeyService = {
     dependencies: ["ui"],
     // Be aware that all odoo hotkeys are designed with this modifier in mind,
@@ -270,44 +308,6 @@ export const hotkeyService = {
                 overlay.remove();
             }
             overlaysVisible = false;
-        }
-
-        /**
-         * Get the actual hotkey being pressed.
-         *
-         * @param {KeyboardEvent} ev
-         * @returns {string} the active hotkey, in lowercase
-         */
-        function getActiveHotkey(ev) {
-            const hotkey = [];
-
-            // ------- Modifiers -------
-            // Modifiers are pushed in ascending order to the hotkey.
-            if (isMacOS() ? ev.ctrlKey : ev.altKey) {
-                hotkey.push("alt");
-            }
-            if (isMacOS() ? ev.metaKey : ev.ctrlKey) {
-                hotkey.push("control");
-            }
-            if (ev.shiftKey) {
-                hotkey.push("shift");
-            }
-
-            // ------- Key -------
-            let key = ev.key.toLowerCase();
-            // Identify if the user has tapped on the number keys above the text keys.
-            if (ev.code && ev.code.indexOf("Digit") === 0) {
-                key = ev.code.slice(-1);
-            }
-            // Prefer physical keys for non-latin keyboard layout.
-            if (!AUTHORIZED_KEYS.includes(key) && ev.code && ev.code.indexOf("Key") === 0) {
-                key = ev.code.slice(-1).toLowerCase();
-            }
-            // Make sure we do not duplicate a modifier key
-            if (!MODIFIERS.includes(key)) {
-                hotkey.push(key);
-            }
-            return hotkey.join("+");
         }
 
         /**

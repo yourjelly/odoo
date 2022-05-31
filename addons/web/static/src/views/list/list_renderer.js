@@ -9,12 +9,13 @@ import { Pager } from "@web/core/pager/pager";
 import { evaluateExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
-import { useService } from "@web/core/utils/hooks";
+import { useBus, useService } from "@web/core/utils/hooks";
 import { useSortable } from "@web/core/utils/ui";
 import { Field } from "@web/fields/field";
 import { ViewButton } from "@web/views/view_button/view_button";
 import { useBounceButton } from "../helpers/view_hook";
 import { getTooltipInfo } from "../../fields/field_tooltip";
+import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 
 const {
     Component,
@@ -50,6 +51,14 @@ const FIXED_FIELD_COLUMN_WIDTHS = {
     monetary: "104px",
     handle: "33px",
 };
+
+let FOCUSABLE_SELECTOR = "button, input, select, textarea,".split(",").join(":not(:disabled),");
+FOCUSABLE_SELECTOR = FOCUSABLE_SELECTOR.slice(0, FOCUSABLE_SELECTOR.length - 1);
+function getElementToFocus(cell) {
+    let toFocus = cell.querySelector(".o_focusable");
+    toFocus = toFocus || cell.querySelector(FOCUSABLE_SELECTOR);
+    return toFocus || cell;
+}
 
 export class ListRenderer extends Component {
     setup() {
@@ -127,6 +136,19 @@ export class ListRenderer extends Component {
                 element.classList.add("o_row_draggable");
             },
         });
+
+        if (this.env.searchModel) {
+            useBus(this.env.searchModel, "focus-view", () => {
+                if (this.props.list.model.useSampleModel || !this.showTable) {
+                    return;
+                }
+
+                const nextTh = this.tableRef.el.querySelector("thead th");
+                const toFocus = getElementToFocus(nextTh);
+                toFocus.focus();
+                this.tableRef.el.querySelector("tbody").classList.add("o_keyboard_navigation");
+            });
+        }
         useBounceButton(this.rootRef, () => {
             return this.showNoContentHelper;
         });
@@ -820,6 +842,133 @@ export class ListRenderer extends Component {
         this.props.activeActions.onDelete(record);
     }
 
+    /**
+     * @param {KeyboardEvent} ev
+     * @param {Record | Group} dataPoint
+     */
+    async onCellKeydown(ev, dataPoint) {
+        if (this.props.list.editedRecord) {
+            return;
+        }
+        if (this.props.list.model.useSampleModel) {
+            return;
+        }
+
+        const hotkey = getActiveHotkey(ev);
+        // const isInBody = this.tableRef.el.querySelector("tbody").contains(ev.target);
+        const closestCell = ev.target.closest("td, th");
+        const closestRow = closestCell.parentElement;
+        const isGroup = closestRow.classList.contains("o_group_header");
+
+        let futureCell;
+        switch (hotkey) {
+            case "arrowup": {
+                let nextRow = closestRow.previousElementSibling;
+                nextRow =
+                    nextRow ||
+                    (closestRow.parentElement.previousElementSibling &&
+                        closestRow.parentElement.previousElementSibling.lastElementChild);
+
+                if (nextRow) {
+                    const nextIsGroup = nextRow.classList.contains("o_group_header");
+                    const index =
+                        isGroup !== nextIsGroup ? 0 : [...closestRow.children].indexOf(closestCell);
+                    futureCell = nextRow && nextRow.children[index];
+                } else {
+                    // todo? maybe cycle through row instead of focusing the search
+                    this.env.searchModel.trigger("focus-search");
+                    this.tableRef.el
+                        .querySelector("tbody")
+                        .classList.remove("o_keyboard_navigation");
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    return;
+                }
+                break;
+            }
+            case "arrowdown": {
+                let nextRow = closestRow.nextElementSibling;
+                nextRow =
+                    nextRow ||
+                    (closestRow.parentElement.nextElementSibling &&
+                        closestRow.parentElement.nextElementSibling.firstElementChild);
+                if (nextRow) {
+                    const nextIsGroup = nextRow.classList.contains("o_group_header");
+                    const index =
+                        isGroup !== nextIsGroup ? 0 : [...closestRow.children].indexOf(closestCell);
+                    futureCell = nextRow && nextRow.children[index];
+                }
+                break;
+            }
+            case "shift+tab":
+            case "arrowleft": {
+                if (isGroup && !dataPoint.isFolded) {
+                    this.toggleGroup(dataPoint);
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    return;
+                }
+                const children = [...closestRow.children];
+                const index = children.indexOf(closestCell);
+                futureCell = children[index - 1];
+                break;
+            }
+            case "tab":
+            case "arrowright": {
+                if (isGroup && dataPoint.isFolded) {
+                    this.toggleGroup(dataPoint);
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    return;
+                }
+                const children = [...closestRow.children];
+                const index = children.indexOf(closestCell);
+                futureCell = children[index + 1];
+                break;
+            }
+            case "enter": {
+                const isRemoveTd = closestCell.classList.contains("o_list_record_remove");
+                if (isRemoveTd) {
+                    this.onDeleteRecord(dataPoint);
+                }
+
+                if (isGroup) {
+                    this.toggleGroup(dataPoint);
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    return;
+                }
+
+                if (this.props.editable) {
+                    // TODO: we need to refactor switchMode and unselectRecord!!!
+                    if (
+                        this.props.list.editedRecord &&
+                        this.props.list.editedRecord.checkValidity()
+                    ) {
+                        await this.props.list.unselectRecord();
+                        if (this.props.list.records.length === 1) {
+                            // TODO put more logic here see _moveToSideLine in list_editable_renderer
+                            // we are sure there is no other records --> add a line
+                            this.props.onAdd();
+                        }
+                    }
+                } else if (!this.props.archInfo.noOpen && dataPoint) {
+                    this.props.openRecord(dataPoint);
+                }
+                ev.preventDefault();
+                ev.stopPropagation();
+                return;
+            }
+        }
+        if (futureCell) {
+            const toFocus = getElementToFocus(futureCell);
+            toFocus.focus();
+            this.tableRef.el.querySelector("tbody").classList.add("o_keyboard_navigation");
+            ev.preventDefault();
+            ev.stopPropagation();
+        }
+    }
+
     saveOptionalActiveFields() {
         browser.localStorage[this.keyOptionalFields] = Object.keys(
             this.optionalActiveFields
@@ -878,6 +1027,11 @@ export class ListRenderer extends Component {
         if (!this.props.list.editedRecord) {
             return; // there's no row in edition
         }
+
+        // WOWL: see if a test exists?
+        const tbody = this.tableRef.el.querySelector("tbody");
+        tbody.classList.remove("o_keyboard_navigation");
+
         if (this.tableRef.el.contains(ev.target)) {
             return; // ignore clicks inside the table, they are handled directly by the renderer
         }

@@ -32,6 +32,7 @@ import {
     selectDropdownItem,
     triggerEvent,
     triggerEvents,
+    triggerHotkey,
 } from "../helpers/utils";
 import {
     getButtons,
@@ -5151,8 +5152,9 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, "th", 3);
     });
 
-    QUnit.skipWOWL("empty list with sample data: keyboard navigation", async function (assert) {
+    QUnit.test("empty list with sample data: keyboard navigation", async function (assert) {
         await makeView({
+            type: "list",
             arch: `
                 <tree sample="1">
                     <field name="foo"/>
@@ -5171,12 +5173,12 @@ QUnit.module("Views", (hooks) => {
             target.querySelector(".o_list_table > thead .o_list_record_selector"),
             "o_sample_data_disabled"
         );
-        assert.containsNone(target.querySelector(".o_list_renderer"), 'input:not([tabindex="-1"])');
 
         // From search bar
         assert.hasClass(document.activeElement, "o_searchview_input");
 
-        await testUtils.fields.triggerKeydown(document.activeElement, "down");
+        triggerHotkey("arrowdown");
+        await nextTick();
 
         assert.hasClass(document.activeElement, "o_searchview_input");
 
@@ -5185,11 +5187,13 @@ QUnit.module("Views", (hooks) => {
 
         assert.hasClass(document.activeElement, "o_list_button_add");
 
-        await testUtils.fields.triggerKeydown(document.activeElement, "down");
+        triggerHotkey("arrowdown");
+        await nextTick();
 
         assert.hasClass(document.activeElement, "o_list_button_add");
 
-        await testUtils.fields.triggerKeydown(document.activeElement, "tab");
+        triggerHotkey("tab");
+        await nextTick();
 
         assert.containsNone(document.body, ".o-tooltip--string");
 
@@ -5198,7 +5202,8 @@ QUnit.module("Views", (hooks) => {
 
         assert.ok(document.activeElement.dataset.name === "foo");
 
-        await testUtils.fields.triggerKeydown(document.activeElement, "down");
+        triggerHotkey("arrowdown");
+        await nextTick();
 
         assert.ok(document.activeElement.dataset.name === "foo");
     });
