@@ -1,27 +1,27 @@
 /* @odoo-module */
 
-import { ORM, x2ManyCommands } from "@web/core/orm_service";
-import { Deferred, KeepLast, Mutex } from "@web/core/utils/concurrency";
+import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { makeContext } from "@web/core/context";
+import { Domain } from "@web/core/domain";
+import { WarningDialog } from "@web/core/errors/error_dialogs";
 import {
     deserializeDate,
     deserializeDateTime,
     serializeDate,
     serializeDateTime,
 } from "@web/core/l10n/dates";
-import { WarningDialog } from "@web/core/errors/error_dialogs";
-import { Domain } from "@web/core/domain";
-import { evalDomain } from "@web/views/helpers/utils";
-import { isNumeric, isRelational, isX2Many } from "@web/views/helpers/view_utils";
-import { unique } from "@web/core/utils/arrays";
-import { isTruthy } from "@web/core/utils/xml";
-import { makeContext } from "@web/core/context";
-import { Model } from "@web/views/helpers/model";
+import { ORM, x2ManyCommands } from "@web/core/orm_service";
 import { evaluateExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
+import { unique } from "@web/core/utils/arrays";
+import { Deferred, KeepLast, Mutex } from "@web/core/utils/concurrency";
 import { escape } from "@web/core/utils/strings";
+import { isTruthy } from "@web/core/utils/xml";
 import { session } from "@web/session";
+import { Model } from "@web/views/helpers/model";
+import { evalDomain } from "@web/views/helpers/utils";
+import { isNumeric, isRelational, isX2Many } from "@web/views/helpers/view_utils";
 import { ListConfirmationDialog } from "@web/views/list/list_confirmation_dialog";
-import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 
 const { DateTime } = luxon;
 const { markRaw, markup, toRaw } = owl;
@@ -30,6 +30,7 @@ const preloadedDataRegistry = registry.category("preloadedData");
 
 const { CREATE, UPDATE, DELETE, FORGET, LINK_TO, DELETE_ALL, REPLACE_WITH } = x2ManyCommands;
 const QUICK_CREATE_FIELD_TYPES = ["char", "boolean", "many2one", "selection"];
+const DEFAULT_HANDLE_FIELD = "sequence";
 const DEFAULT_QUICK_CREATE_FIELDS = {
     display_name: { string: "Display name", type: "char" },
 };
@@ -124,7 +125,7 @@ class RequestBatcherORM extends ORM {
             };
             this.batches[key] = batch;
         }
-        batch.ids = [...new Set([...batch.ids, ...ids])];
+        batch.ids = unique([...batch.ids, ...ids]);
 
         if (!batch.scheduled) {
             batch.scheduled = true;
@@ -234,8 +235,6 @@ class DataPoint {
         this.rawContext = params.rawContext;
         this.defaultContext = params.defaultContext;
         this.setup(params, state);
-
-        markRaw(this);
     }
 
     // -------------------------------------------------------------------------
@@ -324,6 +323,8 @@ class DataPoint {
         return parsedValues;
     }
 }
+
+markRaw(DataPoint.prototype);
 
 const clearObject = (obj) => {
     for (const key in obj) {
@@ -1357,6 +1358,10 @@ class DynamicList extends DataPoint {
         );
     }
 
+    canResequence() {
+        return this.model.handleField || DEFAULT_HANDLE_FIELD in this.fields;
+    }
+
     exportState() {
         return {
             limit: this.limit,
@@ -1497,107 +1502,109 @@ class DynamicList extends DataPoint {
     }
 
     /**
-     * Calls the method 'resequence' on the current resModel.
-     * If 'movedId' is provided, the record matching that ID will be resequenced
-     * in the current list of IDs, at the start of the list or after the record
-     * matching 'targetId' if given as well.
+     * Calls the method 'resequence' on the given resModel.
+     * The record matching that 'moveId' will be resequenced in the given list of
+     * records, at the start of the list or after the record matching 'targetId' (if any).
      *
-     * @param {(Group | Record)[]} list
-     * @param {string} idProperty property on the given list used to determine each ID
-     * @param {string} [movedId]
+     * @param {(Group | Record)[]} originalList
+     * @param {string} resModel
+     * @param {string} movedId
      * @param {string} [targetId]
-     * @param {Object} [options={}]
-     * @param {string} [options.handleField]
-     * @param {string} [options.preventSwap]
      * @returns {Promise<(Group | Record)[]>}
      */
-    async _resequence(list, idProperty, movedId, targetId, options = {}) {
-        const handleField = options.handleField || "sequence";
-        const fromIndex = list.findIndex((r) => r.id === movedId);
-        let targetIndex = null;
-        let toIndex = 0;
-        if (targetId !== null) {
-            targetIndex = list.findIndex((r) => r.id === targetId);
-            toIndex = fromIndex > targetIndex ? targetIndex + 1 : targetIndex;
+    async _resequence(originalList, resModel, movedId, targetId) {
+        if (this.resModel === resModel && !this.canResequence()) {
+            // There is no handle field on the current model
+            return originalList;
         }
 
-        const record = list[fromIndex];
-
-        const lowerIndex = Math.min(fromIndex, toIndex);
-        const upperIndex = Math.max(fromIndex, toIndex) + 1;
-
+        const handleField = this.model.handleField || DEFAULT_HANDLE_FIELD;
+        const records = [...originalList];
         const order = this.orderBy.find((o) => o.name === handleField);
         const asc = !order || order.asc;
 
-        // determine if we need to reorder all records
-        let reorderAll = false;
-        let sequence = (asc ? -1 : 1) * Infinity;
+        // Find indices
+        const fromIndex = records.findIndex((r) => r.id === movedId);
+        let toIndex = 0;
+        if (targetId !== null) {
+            const targetIndex = records.findIndex((r) => r.id === targetId);
+            toIndex = fromIndex > targetIndex ? targetIndex + 1 : targetIndex;
+        }
 
-        // determine if we need to reorder all records
-        for (let index = 0; index < list.length; index++) {
-            const { data } = list[index];
-            const handleFieldValue = data[handleField];
+        const getSequence = (rec) => rec && rec.data[handleField];
+
+        // Determine what records need to be modified
+        const firstIndex = Math.min(fromIndex, toIndex);
+        const lastIndex = Math.max(fromIndex, toIndex) + 1;
+        let reorderAll = false;
+        let lastSequence = (asc ? -1 : 1) * Infinity;
+        for (let index = 0; index < records.length; index++) {
+            const sequence = getSequence(records[index]);
             if (
-                ((index < lowerIndex || index >= upperIndex) &&
-                    ((asc && sequence >= handleFieldValue) ||
-                        (!asc && sequence <= handleFieldValue))) ||
-                (index >= lowerIndex && index < upperIndex && sequence === handleFieldValue)
+                ((index < firstIndex || index >= lastIndex) &&
+                    ((asc && lastSequence >= sequence) || (!asc && lastSequence <= sequence))) ||
+                (index >= firstIndex && index < lastIndex && lastSequence === sequence)
             ) {
                 reorderAll = true;
             }
-            sequence = handleFieldValue;
-        }
-        if (!options.preventSwap) {
-            list = list.filter((r) => r.id !== movedId);
-            list.splice(toIndex, 0, record);
+            lastSequence = sequence;
         }
 
-        let records = [...list];
+        // Perform the resequence in the list of records
+        const [record] = records.splice(fromIndex, 1);
+        records.splice(toIndex, 0, record);
+
+        // Creates the list of to modify
+        let toReorder = records;
         if (!reorderAll) {
-            records = records.slice(lowerIndex, upperIndex).filter((r) => r.id !== movedId);
+            toReorder = toReorder.slice(firstIndex, lastIndex).filter((r) => r.id !== movedId);
             if (fromIndex < toIndex) {
-                records.push(record);
+                toReorder.push(record);
             } else {
-                records.unshift(record);
+                toReorder.unshift(record);
             }
         }
         if (!asc) {
-            records.reverse();
+            toReorder.reverse();
         }
 
-        const ids = [];
-        const sequences = [];
-        for (const r of records) {
-            if (r[idProperty]) {
-                ids.push(r[idProperty]);
-                sequences.push(r.data[handleField]);
-            }
+        const ids = toReorder.map((r) => r.resId).filter((s) => s === 0 || (s && !isNaN(s)));
+        const sequences = toReorder.map(getSequence);
+        const offset = sequences.length && Math.min(...sequences);
+
+        // Assemble the params
+        const params = { model: resModel, ids, context: this.context };
+        if (offset) {
+            params.offset = offset;
         }
-        const offset = Math.min(...sequences);
+        if (this.model.handleField) {
+            params.field = handleField;
+        }
 
-        // FIMME: can't go though orm, so no context given
-        const wasResequenced = await this.model.rpc("/web/dataset/resequence", {
-            model: this.resModel,
-            ids,
-            field: handleField,
-            offset,
-            context: this.context,
-        });
+        // Try to write new sequences on the affected records
+        const wasResequenced = await this.model.keepLast.add(
+            this.model.rpc("/web/dataset/resequence", params)
+        );
+        if (!wasResequenced) {
+            return originalList;
+        }
 
-        if (wasResequenced) {
-            const result = await this.model.orm.read(this.resModel, ids, [handleField], {
-                context: this.context,
-            });
-            for (const record of list) {
-                const change = result.find((el) => el.id === record.resId);
-                if (change) {
-                    record.update({ [handleField]: change[handleField] });
-                }
+        // Read the actual values set by the server and update the records
+        const result = await this.model.keepLast.add(
+            this.model.orm.read(resModel, ids, [handleField], this.context)
+        );
+        for (const recordData of result) {
+            const record = records.find((r) => r.resId === recordData.id);
+            const value = { [handleField]: recordData[handleField] };
+            if (record instanceof Record) {
+                record.update(value);
+            } else {
+                Object.assign(record.data, value);
             }
         }
 
         this.model.notify();
-        return list;
+        return records;
     }
 
     async unselectRecord() {
@@ -1758,7 +1765,7 @@ export class DynamicRecordList extends DynamicList {
     }
 
     async resequence() {
-        this.records = await this._resequence(this.records, "resId", ...arguments);
+        this.records = await this._resequence(this.records, this.resModel, ...arguments);
     }
 
     // -------------------------------------------------------------------------
@@ -2050,7 +2057,10 @@ export class DynamicGroupList extends DynamicList {
     }
 
     async resequence() {
-        this.groups = await this._resequence(this.groups, "value", ...arguments);
+        const resModel = isRelational(this.groupByField)
+            ? this.groupByField.relation
+            : this.resModel;
+        this.groups = await this._resequence(this.groups, resModel, ...arguments);
     }
 
     // ------------------------------------------------------------------------
@@ -2219,6 +2229,10 @@ export class Group extends DataPoint {
             // If the groupBy field is a relational field, the group model must
             // then be the relation of that field.
             this.resModel = this.groupByField.relation;
+            this.resId = params.value || false;
+            this.data = {};
+        } else {
+            this.data = null;
         }
         const listParams = {
             data: params.data,
@@ -3061,6 +3075,7 @@ export class RelationalModel extends Model {
         this.quickCreateView = params.quickCreateView;
         this.defaultGroupBy = params.defaultGroupBy || false;
         this.defaultOrderBy = params.defaultOrder;
+        this.handleField = params.handleField;
         this.rootType = params.rootType || "list";
         this.rootParams = {
             activeFields: params.activeFields || {},

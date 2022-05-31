@@ -418,16 +418,17 @@ export class KanbanDynamicGroupList extends DynamicGroupList {
             return; // Groups have been re-rendered, old ids are ignored
         }
 
-        this.model.transaction.start();
-
-        // Quick update: moves the record at the right position and notifies components
         const record = sourceGroup.list.records.find((r) => r.id === dataRecordId);
-        const refIndex = targetGroup.list.records.findIndex((r) => r.id === refId);
-        targetGroup.addRecord(sourceGroup.removeRecord(record), refIndex + 1);
+
+        this.model.transaction.start();
 
         // Move from one group to another
         try {
             if (dataGroupId !== targetGroupId) {
+                // Quick update: moves the record at the right position and notifies components
+                const refIndex = targetGroup.list.records.findIndex((r) => r.id === refId);
+                targetGroup.addRecord(sourceGroup.removeRecord(record), refIndex + 1);
+
                 const value = isRelational(this.groupByField)
                     ? [targetGroup.value]
                     : targetGroup.value;
@@ -439,14 +440,13 @@ export class KanbanDynamicGroupList extends DynamicGroupList {
                     record.load(),
                 ]);
             }
-            await targetGroup.list.resequence(dataRecordId, refId, { preventSwap: true });
+            await targetGroup.list.resequence(dataRecordId, refId);
+            this.model.transaction.commit();
         } catch (err) {
             this.model.transaction.abort();
             this.model.notify();
             throw err;
         }
-        this.model.transaction.commit();
-        this.model.notify();
 
         return record;
     }
@@ -495,18 +495,14 @@ export class KanbanDynamicRecordList extends DynamicRecordList {
     async moveRecord(dataRecordId, _dataGroupId, refId) {
         this.model.transaction.start();
 
-        // Quick update: moves the record at the right position and notifies components
-        const record = this.records.find((r) => r.id === dataRecordId);
-        const refIndex = this.records.findIndex((r) => r.id === refId);
-        this.addRecord(this.removeRecord(record), refIndex >= 0 ? refIndex + 1 : 0);
-
         try {
-            await this.resequence(dataRecordId, refId, { preventSwap: true });
+            await this.resequence(dataRecordId, refId);
         } catch (err) {
             this.model.transaction.abort();
             this.model.notify();
             throw err;
         }
+
         this.model.transaction.commit();
     }
 }

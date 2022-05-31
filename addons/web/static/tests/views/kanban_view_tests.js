@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { browser } from "@web/core/browser/browser";
 import { makeFakeDialogService } from "@web/../tests/helpers/mock_services";
 import {
     click,
@@ -22,18 +21,19 @@ import {
 } from "@web/../tests/search/helpers";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
+import { browser } from "@web/core/browser/browser";
 import { dialogService } from "@web/core/dialog/dialog_service";
 import { registry } from "@web/core/registry";
 import { indexBy } from "@web/core/utils/arrays";
 import { nbsp } from "@web/core/utils/strings";
+import { getNextTabableElement } from "@web/core/utils/ui";
 import { session } from "@web/session";
 import { KanbanAnimatedNumber } from "@web/views/kanban/kanban_animated_number";
 import { kanbanView } from "@web/views/kanban/kanban_view";
 import AbstractField from "web.AbstractField";
+import legacyFieldRegistry from "web.field_registry";
 import Widget from "web.Widget";
 import widgetRegistry from "web.widget_registry";
-import legacyFieldRegistry from "web.field_registry";
-import { getNextTabableElement } from "@web/core/utils/ui";
 
 const { Component, markup } = owl;
 
@@ -149,6 +149,7 @@ QUnit.module("Views", (hooks) => {
                             type: "many2many",
                             relation: "category",
                         },
+                        sequence: { type: "integer" },
                         state: {
                             string: "State",
                             type: "selection",
@@ -4254,7 +4255,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL("delete a column in grouped on m2o", async (assert) => {
+    QUnit.test("delete a column in grouped on m2o", async (assert) => {
         assert.expect(36);
 
         let resequencedIDs = [];
@@ -4265,17 +4266,22 @@ QUnit.module("Views", (hooks) => {
             dialogProps = props;
         });
 
-        const kanban = await makeView({
+        await makeView({
             type: "kanban",
             resModel: "partner",
             serverData,
-            arch:
-                '<kanban on_create="quick_create">' +
-                '<field name="product_id"/>' +
-                '<templates><t t-name="kanban-box">' +
-                '<div><field name="foo"/></div>' +
-                "</t></templates>" +
-                "</kanban>",
+            arch: /* xml */ `
+                <kanban class="o_kanban_test" on_create="quick_create">
+                    <field name="product_id"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div>
+                                <field name="foo"/>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            `,
             groupBy: ["product_id"],
             async mockRPC(route, { ids, method }) {
                 if (route === "/web/dataset/resequence") {
@@ -4399,8 +4405,9 @@ QUnit.module("Views", (hooks) => {
             "web_search_read",
             "web_search_read",
         ]);
-        assert.strictEqual(
-            kanban.model.root.groups.length,
+        assert.containsN(
+            target,
+            ".o_kanban_group",
             2,
             "the old groups should have been correctly deleted"
         );
@@ -6396,8 +6403,10 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipWOWL("resequence columns in grouped by m2o", async (assert) => {
+    QUnit.test("resequence columns in grouped by m2o", async (assert) => {
         assert.expect(7);
+
+        serverData.models.product.fields.sequence = { type: "integer" };
 
         await makeView({
             type: "kanban",
@@ -7583,10 +7592,7 @@ QUnit.module("Views", (hooks) => {
         assert.expect(3);
 
         // Add a sequence number and initialize
-        serverData.models.partner.fields.sequence = { type: "integer" };
-        serverData.models.partner.records.forEach((el, i) => {
-            el.sequence = i;
-        });
+        serverData.models.partner.records.forEach((el, i) => (el.sequence = i));
 
         await makeView({
             type: "kanban",
@@ -8965,7 +8971,7 @@ QUnit.module("Views", (hooks) => {
     );
 
     QUnit.test("filtered column is reloaded when dragging out its last record", async (assert) => {
-        assert.expect(33);
+        assert.expect(34);
 
         await makeView({
             type: "kanban",
@@ -9048,6 +9054,7 @@ QUnit.module("Views", (hooks) => {
             "read", // read happens is delayed by the ORM batcher
             "web_search_read",
             "/web/dataset/resequence",
+            "read",
         ]);
     });
 
