@@ -1990,7 +1990,6 @@ class MailThread(models.AbstractModel):
             model = False
             res_id = False
 
-        Model = model if issubclass(type(model), self.env.registry['mail.thread']) else self.env[self._name]
         values = {
             'parent_id': parent_id,
             'model': self._name if self else model,
@@ -2004,12 +2003,12 @@ class MailThread(models.AbstractModel):
             'subtype_id': self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note'),
             'is_internal': True,
             'record_name': False,
-            'reply_to': list(Model._notify_get_reply_to(default=email_from, records=None).values())[0],
+            'reply_to': list(self._notify_get_reply_to(default=email_from, records=None).values())[0],
             'message_id': tools.generate_tracking_message_id('message-notify'),
         }
         values.update(msg_kwargs)
-        new_message = Model._message_create(values)
-        Model._notify_thread(new_message, values, **notif_kwargs)
+        new_message = self._message_create(values)
+        self._notify_thread(new_message.sudo(), values, **notif_kwargs)
         return new_message
 
     def _message_log_with_view(self, views_or_xmlid, **kwargs):
@@ -2578,7 +2577,11 @@ class MailThread(models.AbstractModel):
         """
         # keep a local copy of msg_vals as it may be modified to include more information about groups or links
         local_msg_vals = dict(msg_vals) if msg_vals else {}
-        groups = self._notify_get_groups(msg_vals=local_msg_vals)
+
+        # _notify_get_groups expected a singleton
+        rec = self or self.env['mail.thread']
+        groups = rec._notify_get_groups(msg_vals=local_msg_vals)
+
         access_link = self._notify_get_action_link('view', **local_msg_vals)
 
         if model_name:

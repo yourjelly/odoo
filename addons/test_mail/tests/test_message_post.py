@@ -508,7 +508,7 @@ class TestMessagePost(TestMailCommon, TestRecipients):
         # todo xdo add test message_notify on thread with followers and stuff
 
     @patch('odoo.addons.test_mail.models.test_mail_models.MailTestSimple._notify_get_reply_to')
-    def test_message_nofity_inheritance(self, _notify_get_reply_to):
+    def _test_message_nofity_inheritance(self, _notify_get_reply_to):
         """ Test that message_notify correctly calls overridden methods"""
         # mail.test.simple inherits from mail.thread, and overrides _notify_by_email_prepare_rendering_context
         # which is called by message_notify.
