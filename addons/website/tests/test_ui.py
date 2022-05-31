@@ -138,7 +138,7 @@ class TestUi(odoo.tests.HttpCase):
                     self.ref('website.group_website_publisher')
                 ])]
         })
-        self.start_tour("/", 'restricted_editor', login='restricted')
+        self.start_tour("/web", 'restricted_editor', login='restricted')
 
     def test_03_backend_dashboard(self):
         self.start_tour("/", 'backend_dashboard', login='admin')

@@ -35,6 +35,7 @@ WebsiteSwitcherSystray.components = {
 
 export const systrayItem = {
     Component: WebsiteSwitcherSystray,
+    isDisplayed: env => env.services.website.hasMultiWebsites,
 };
 
 registry.category("website_systray").add("WebsiteSwitcher", systrayItem, { sequence: 11 });

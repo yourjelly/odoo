@@ -49,7 +49,7 @@ patch(NavBar.prototype, 'website_navbar', {
         };
 
         onWillStart(async () => {
-            this.isWebsitePublisher = await this.websiteService.isPublisher();
+            await this.websiteService.fetchUserGroups();
         });
     },
 
@@ -57,7 +57,7 @@ patch(NavBar.prototype, 'website_navbar', {
         const filteredSections = [];
         for (const section of sections) {
             const isWebsiteCustomMenu = this.websiteEditingMenus[section.xmlid];
-            const displayWebsiteCustomMenu = isWebsiteCustomMenu && this.isWebsitePublisher && this.websiteEditingMenus[section.xmlid].isDisplayed();
+            const displayWebsiteCustomMenu = isWebsiteCustomMenu && this.websiteService.isPublisher && this.websiteEditingMenus[section.xmlid].isDisplayed();
             if (!isWebsiteCustomMenu || displayWebsiteCustomMenu) {
                 let subSections = [];
                 if (section.childrenTree.length) {
@@ -73,7 +73,7 @@ patch(NavBar.prototype, 'website_navbar', {
      * @override
      */
     get systrayItems() {
-        if (this.websiteService.currentWebsite && this.isWebsitePublisher) {
+        if (this.websiteService.currentWebsite && this.websiteService.isPublisher) {
             return websiteSystrayRegistry
                 .getEntries()
                 .map(([key, value], index) => ({ key, ...value, index }))
