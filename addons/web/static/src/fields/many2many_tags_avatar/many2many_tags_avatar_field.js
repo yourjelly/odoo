@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { TagsList } from "@web/core/tags/tags_list";
+import { TagsList } from "../many2many_tags/tags_list";
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { Many2ManyTagsField } from "../many2many_tags/many2many_tags_field";
 
@@ -36,11 +36,6 @@ Many2ManyTagsAvatarField.extractProps = (fieldName, record, attrs) => {
 registry.category("fields").add("many2many_tags_avatar", Many2ManyTagsAvatarField);
 
 class ListKanbanMany2ManyTagsAvatarField extends Many2ManyTagsAvatarField {
-    setup() {
-        super.setup();
-        this.visibleTags =
-            this.props.record.activeFields[this.props.name].viewType === "list" ? 5 : 3;
-    }
     get tags() {
         return this.props.value.records.map((record) => ({
             id: record.id, // datapoint_X
@@ -49,6 +44,16 @@ class ListKanbanMany2ManyTagsAvatarField extends Many2ManyTagsAvatarField {
         }));
     }
 }
+
+ListKanbanMany2ManyTagsAvatarField.extractProps = (fieldName, record, attrs) => {
+    return {
+        itemsVisible: record.activeFields[fieldName].viewType === "list" ? 5 : 3,
+        relation: record.activeFields[fieldName].relation,
+        domain: record.getFieldDomain(fieldName),
+        context: record.getFieldContext(fieldName),
+        canQuickCreate: !attrs.options.no_quick_create,
+    };
+};
 
 registry.category("fields").add("list.many2many_tags_avatar", ListKanbanMany2ManyTagsAvatarField);
 registry.category("fields").add("kanban.many2many_tags_avatar", ListKanbanMany2ManyTagsAvatarField);
