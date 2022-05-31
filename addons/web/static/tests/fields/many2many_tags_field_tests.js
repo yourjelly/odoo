@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
-import { Many2ManyTagsField } from "@web/fields/many2many_tags_field";
+import { Many2ManyTagsField } from "@web/fields/many2many_tags/many2many_tags_field";
 import {
     click,
     clickDropdown,

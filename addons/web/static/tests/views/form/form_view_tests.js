@@ -22,7 +22,7 @@ import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
 import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import { tooltipService } from "@web/core/tooltip/tooltip_service";
-import { CharField } from "@web/fields/char_field";
+import { CharField } from "@web/fields/char/char_field";
 import { FormController } from "@web/views/form/form_controller";
 import { session } from "@web/session";
 import legacySession from "web.session";
