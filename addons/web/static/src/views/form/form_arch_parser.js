@@ -29,11 +29,9 @@ export class FormArchParser extends XMLParser {
                     autofocusFieldId = fieldId;
                 }
                 return false;
-            } else if (node.tagName === "div") {
-                // TODO TO FIX WITH MAIL
-                if (node.className === "oe_chatter") {
-                    return false;
-                }
+            } else if (node.tagName === "div" && node.classList.contains("oe_chatter")) {
+                // remove this when chatter fields are declared as attributes on the root node
+                return false;
             }
         });
         // TODO: generate activeFields for the model based on fieldNodes (merge duplicated fields)

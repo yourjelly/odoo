@@ -280,10 +280,6 @@ export class ViewCompiler {
         if (isComment(node)) {
             return;
         }
-        // TODO TO FIX WITH MAIL
-        if (node.nodeName === "div" && node.className === "oe_chatter") {
-            return;
-        }
         if (isRelevantTextNode(node)) {
             return createTextNode(node.nodeValue);
         } else if (isTextNode(node)) {
