@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="web.Many2ManyTagsAvatarField" owl="1">
-        <TagsList tags="tags" visibleTags="visibleTags">
+        <TagsList tags="tags" itemsVisible="props.itemsVisible">
             <div t-if="showM2OSelectionField" class="o_field_many2many_selection">
                 <div class="o_input_dropdown">
                     <AutoComplete
