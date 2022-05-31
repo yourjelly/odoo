@@ -10,13 +10,17 @@ const NUMERIC_TYPES = ["integer", "float", "monetary"];
  * @param {any} field
  * @returns {boolean}
  */
-export const isRelational = (field) => field && RELATIONAL_TYPES.includes(field.type);
+export function isRelational(field) {
+    return field && RELATIONAL_TYPES.includes(field.type);
+}
 
 /**
  * @param {any} field
  * @returns {boolean}
  */
-export const isX2Many = (field) => field && X2M_TYPES.includes(field.type);
+export function isX2Many(field) {
+    return field && X2M_TYPES.includes(field.type);
+}
 
 /**
  * @param {Object} field
@@ -30,7 +34,7 @@ export function isNumeric(field) {
  * @param {number | number[]} idsList
  * @returns {number[]}
  */
-export const getIds = (idsList) => {
+export function getIds(idsList) {
     if (Array.isArray(idsList)) {
         if (idsList.length === 2 && typeof idsList[1] === "string") {
             return [idsList[0]];
@@ -42,7 +46,7 @@ export const getIds = (idsList) => {
     } else {
         return [];
     }
-};
+}
 
 export function processButton(node) {
     return {

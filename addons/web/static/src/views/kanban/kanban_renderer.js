@@ -5,12 +5,12 @@ import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_d
 import { SimpleDialog } from "@web/core/dialog/dialog";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
-import { sprintf, uniqueId } from "@web/core/utils/strings";
+import { sprintf } from "@web/core/utils/strings";
 import { useSortable } from "@web/core/utils/ui";
 import { url } from "@web/core/utils/urls";
-import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { Field } from "@web/fields/field";
 import { fileTypeMagicWordMap } from "@web/fields/image/image_field";
 import { session } from "@web/session";
@@ -29,18 +29,24 @@ import { KanbanRecordQuickCreate } from "./kanban_record_quick_create";
 const { Component, markup, useState, useRef, onWillDestroy, onWillStart, onMounted } = owl;
 const { COLORS } = ColorList;
 
+const formatters = registry.category("formatters");
+
 const DRAGGABLE_GROUP_TYPES = ["many2one"];
 const MOVABLE_RECORD_TYPES = ["char", "boolean", "integer", "selection", "many2one"];
 const GLOBAL_CLICK_CANCEL_SELECTORS = ["a", ".dropdown", ".oe_kanban_action"];
+let nextDialogId = 1;
 
-const isBinSize = (value) => /^\d+(\.\d*)? [^0-9]+$/.test(value);
-const isNull = (value) => [null, undefined].includes(value);
+function isBinSize(value) {
+    return /^\d+(\.\d*)? [^0-9]+$/.test(value);
+}
 
-const formatters = registry.category("formatters");
+function isNull(value) {
+    return [null, undefined].includes(value);
+}
 
 class KanbanCoverImageDialog extends Component {
     setup() {
-        this.id = uniqueId("o_cover_image_upload");
+        this.id = `o_cover_image_upload_${nextDialogId++}`;
         this.orm = useService("orm");
         const { record, fieldName } = this.props;
         this.coverId = record && record.data[fieldName];

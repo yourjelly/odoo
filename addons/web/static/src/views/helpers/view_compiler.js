@@ -22,7 +22,7 @@ const templateIds = Object.create(null);
  * @param {Element} parent
  * @param {Node | Node[] | void} node
  */
-export const append = (parent, node) => {
+export function append(parent, node) {
     if (!node) {
         return;
     }
@@ -31,40 +31,40 @@ export const append = (parent, node) => {
     } else {
         parent.append(node);
     }
-};
+}
 
-const appendAttf = (el, attr, string) => {
+function appendAttf(el, attr, string) {
     const attrKey = `t-attf-${attr}`;
     const attrVal = el.getAttribute(attrKey);
     el.setAttribute(attrKey, appendToExpr(attrVal, string));
-};
+}
 
-const appendToExpr = (expr, string) => {
+function appendToExpr(expr, string) {
     const re = /{{.*}}/;
     const oldString = re.exec(expr);
     if (oldString) {
         string = `${oldString} ${string}`;
     }
     return `{{${string} }}`;
-};
+}
 
 /**
  * @param {Element} el
  * @param {string} attr
  * @param {string} string
  */
-const appendAttr = (el, attr, string) => {
+function appendAttr(el, attr, string) {
     const attrKey = `t-att-${attr}`;
     const attrVal = el.getAttribute(attrKey);
     el.setAttribute(attrKey, appendToStringifiedObject(attrVal, string));
-};
+}
 
 /**
  * @param {string} originalTattr
  * @param {string} string
  * @returns {string}
  */
-const appendToStringifiedObject = (originalTattr, string) => {
+function appendToStringifiedObject(originalTattr, string) {
     const re = /{(.*)}/;
     const oldString = re.exec(originalTattr);
 
@@ -72,7 +72,7 @@ const appendToStringifiedObject = (originalTattr, string) => {
         string = `${oldString[1]},${string}`;
     }
     return `{${string}}`;
-};
+}
 
 /**
  * @param {any} invisible
@@ -80,7 +80,7 @@ const appendToStringifiedObject = (originalTattr, string) => {
  * @param {Record<string, any>} params
  * @returns {Element}
  */
-const applyInvisible = (invisible, compiled, params) => {
+function applyInvisible(invisible, compiled, params) {
     if (!invisible) {
         return compiled;
     }
@@ -104,14 +104,14 @@ const applyInvisible = (invisible, compiled, params) => {
         appendAttr(compiled, "class", `o_invisible_modifier:${expr}`);
     }
     return compiled;
-};
+}
 
 /**
  * @param {Element} target
  * @param  {...Element} sources
  * @returns {Element}
  */
-export const assignOwlDirectives = (target, ...sources) => {
+export function assignOwlDirectives(target, ...sources) {
     for (const source of sources) {
         for (const { name, value } of source.attributes) {
             if (name.startsWith("t-")) {
@@ -120,37 +120,41 @@ export const assignOwlDirectives = (target, ...sources) => {
         }
     }
     return target;
-};
+}
 
 /**
  * Encodes an object into a string usable inside a pre-compiled template
  * @param  {Object}
  * @return {string}
  */
-export const encodeObjectForTemplate = (obj) => `"${encodeURI(JSON.stringify(obj))}"`;
+export function encodeObjectForTemplate(obj) {
+    return `"${encodeURI(JSON.stringify(obj))}"`;
+}
 
 /**
  * Decodes a string within an attribute into an Object
  * @param  {string} str
  * @return {Object}
  */
-export const decodeObjectForTemplate = (str) => JSON.parse(decodeURI(str));
+export function decodeObjectForTemplate(str) {
+    return JSON.parse(decodeURI(str));
+}
 
 /**
  * @param {Record<string, any>} obj
  * @returns {string}
  */
-const objectToString = (obj) => {
+function objectToString(obj) {
     return `{${Object.entries(obj)
         .map((t) => t.join(":"))
         .join(",")}}`;
-};
+}
 
 /**
  * @param {Element} el
  * @param {Element} compiled
  */
-const copyAttributes = (el, compiled) => {
+function copyAttributes(el, compiled) {
     if (getTagName(el) === "button") {
         return;
     }
@@ -173,76 +177,90 @@ const copyAttributes = (el, compiled) => {
             compiled.setAttribute(attName, att);
         }
     }
-};
+}
 
 /**
  * @param {Element} el
  * @param {string} modifierName
  * @returns {boolean | boolean[]}
  */
-const getModifier = (el, modifierName) => {
+function getModifier(el, modifierName) {
     // cf python side def transfer_node_to_modifiers
     // modifiers' string are evaluated to their boolean or array form
     const modifiers = JSON.parse(el.getAttribute("modifiers") || "{}");
     const mod = modifierName in modifiers ? modifiers[modifierName] : false;
     return Array.isArray(mod) ? mod : !!mod;
-};
+}
 
 /**
  * @param {any} node
  * @returns {string}
  */
-const getTagName = (node) => node.tagName || "";
+function getTagName(node) {
+    return node.tagName || "";
+}
 
 /**
  * @param {any} node
  * @returns {string}
  */
-const getTitleTagName = (node) => getTagName(node)[0].toUpperCase() + getTagName(node).slice(1);
+function getTitleTagName(node) {
+    return getTagName(node)[0].toUpperCase() + getTagName(node).slice(1);
+}
 
 /**
  * @param {any} invisibleModifer
  * @param {{ enableInvisible?: boolean }} params
  * @returns {boolean}
  */
-const isAlwaysInvisible = (invisibleModifer, params) =>
-    !params.enableInvisible && typeof invisibleModifer === "boolean" && invisibleModifer;
+function isAlwaysInvisible(invisibleModifer, params) {
+    return !params.enableInvisible && typeof invisibleModifer === "boolean" && invisibleModifer;
+}
 
 /**
  * @param {Node} node
  * @returns {boolean}
  */
-const isComment = (node) => node.nodeType === 8;
+function isComment(node) {
+    return node.nodeType === 8;
+}
 
 /**
  * @param {Element} el
  * @returns {boolean}
  */
-export const isComponentNode = (el) =>
-    el.tagName === getTitleTagName(el) || (el.tagName === "t" && "t-component" in el.attributes);
+export function isComponentNode(el) {
+    return (
+        el.tagName === getTitleTagName(el) || (el.tagName === "t" && "t-component" in el.attributes)
+    );
+}
 
 /**
  * @param {Node} node
  * @returns {boolean}
  */
-const isRelevantTextNode = (node) => isTextNode(node) && !!node.nodeValue.trim();
+function isRelevantTextNode(node) {
+    return isTextNode(node) && !!node.nodeValue.trim();
+}
 
 /**
  * @param {Node} node
  * @returns {boolean}
  */
-const isTextNode = (node) => node.nodeType === 3;
+function isTextNode(node) {
+    return node.nodeType === 3;
+}
 
 /**
  * @param {string} title
  * @returns {Element}
  */
-const makeSeparator = (title) => {
+function makeSeparator(title) {
     const separator = createElement("div");
     separator.className = "o_horizontal_separator";
     separator.textContent = title;
     return separator;
-};
+}
 
 export class ViewCompiler {
     constructor() {
@@ -887,7 +905,7 @@ export class ViewCompiler {
  * @param {Record<string, any>} [params]
  * @returns {string}
  */
-export const useViewCompiler = (ViewCompiler, templateKey, xmlDoc, params) => {
+export function useViewCompiler(ViewCompiler, templateKey, xmlDoc, params) {
     const component = useComponent();
 
     // Assigns special functions to the current component.
@@ -912,4 +930,4 @@ export const useViewCompiler = (ViewCompiler, templateKey, xmlDoc, params) => {
         // DEBUG -- end
     }
     return templateIds[templateKey];
-};
+}

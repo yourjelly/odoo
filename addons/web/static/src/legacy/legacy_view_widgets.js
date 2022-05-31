@@ -63,7 +63,7 @@ class ViewWidgetAdapter extends ComponentAdapter {
 // Register legacy widgets to the wowl widget registry (wrapped in a Component)
 // ----------------------------------------------------------------------------
 
-const registerWidget = (name, LegacyWidgetWidget) => {
+function registerWidget(name, LegacyWidgetWidget) {
     class LegacyViewWidget extends Component {
         setup() {
             this.ViewWidget = LegacyWidgetWidget;
@@ -89,7 +89,7 @@ const registerWidget = (name, LegacyWidgetWidget) => {
         console.log(`View widgets: using legacy ${name} Widget`);
         viewWidgetRegistry.add(name, LegacyViewWidget);
     }
-};
+}
 
 // register widgets already in the legacy registry, and listens to future registrations
 for (const [name, Widget] of Object.entries(legacyWidgetRegistry.entries())) {

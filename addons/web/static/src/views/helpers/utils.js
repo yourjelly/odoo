@@ -11,9 +11,9 @@ import { _t } from "@web/core/l10n/translation";
  * @param {string} str
  * @returns {boolean}
  */
-export const archParseBoolean = (str) => {
+export function archParseBoolean(str) {
     return str !== "False" && str !== "false" && str !== "0" && str !== "";
-};
+}
 
 /**
  * TODO: doc
@@ -93,12 +93,12 @@ export const computeReportMeasures = (
  * @param {any | any[]} [measures]
  * @returns {any}
  */
-export const processMeasure = (measure) => {
+export function processMeasure(measure) {
     if (Array.isArray(measure)) {
         return measure.map(processMeasure);
     }
     return measure === "__count__" ? "__count" : measure;
-};
+}
 
 /**
  * @param {Array[] | boolean} modifier

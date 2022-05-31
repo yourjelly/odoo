@@ -52,9 +52,11 @@ const TRANSPILED_EXPRESSIONS = [
 // These classes determine whether a click on a record should open it.
 const KANBAN_CLICK_CLASSES = ["oe_kanban_global_click", "oe_kanban_global_click_edit"];
 
-const isValidBox = (el) => el.tagName !== "t" || el.hasAttribute("t-component");
+function isValidBox(el) {
+    return el.tagName !== "t" || el.hasAttribute("t-component");
+}
 
-const hasClass = (el, ...classes) => {
+function hasClass(el, ...classes) {
     const classAttribute = el.getAttribute("class") || "";
     const attfClassAttribute = el.getAttribute("t-attf-class") || "";
     const elClasses = [
@@ -62,9 +64,9 @@ const hasClass = (el, ...classes) => {
         ...attfClassAttribute.replace(/{{[^}]+}}/g, "").split(/\s+/),
     ];
     return classes.some((cls) => elClasses.includes(cls));
-};
+}
 
-const applyDefaultAttributes = (kanbanBox) => {
+function applyDefaultAttributes(kanbanBox) {
     kanbanBox.setAttribute("t-att-tabindex", "isSample ? -1 : 0");
     kanbanBox.setAttribute("role", "article");
     kanbanBox.setAttribute("t-att-class", "getRecordClasses(record,groupOrRecord.group)");
@@ -73,7 +75,7 @@ const applyDefaultAttributes = (kanbanBox) => {
         kanbanBox.setAttribute("t-on-click", "(ev) => this.onRecordClick(record, ev)");
     }
     return kanbanBox;
-};
+}
 
 export class KanbanArchParser extends XMLParser {
     parse(arch, models, modelName) {

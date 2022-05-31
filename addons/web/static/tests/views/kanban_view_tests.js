@@ -24,7 +24,6 @@ import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
 import { browser } from "@web/core/browser/browser";
 import { dialogService } from "@web/core/dialog/dialog_service";
 import { registry } from "@web/core/registry";
-import { indexBy } from "@web/core/utils/arrays";
 import { nbsp } from "@web/core/utils/strings";
 import { getNextTabableElement } from "@web/core/utils/ui";
 import { session } from "@web/session";
@@ -44,70 +43,90 @@ const viewWidgetRegistry = registry.category("view_widgets");
 // Helpers
 // ----------------------------------------------------------------------------
 
-const patchDialog = (addDialog) => {
+function patchDialog(addDialog) {
     serviceRegistry.add("dialog", makeFakeDialogService(addDialog), { force: true });
-};
+}
 
 // Kanban
 // WOWL remove this helper and user the control panel instead
-const reload = async (kanban, params = {}) => {
+async function reload(kanban, params = {}) {
     kanban.env.searchModel.reload(params);
     kanban.env.searchModel.search();
     await nextTick();
-};
-const getCard = (cardIndex = 0) =>
-    target.querySelectorAll(".o_kanban_record:not(.o_kanban_ghost)")[cardIndex];
-const getColumn = (groupIndex = 0) => target.querySelectorAll(".o_kanban_group")[groupIndex];
-const getCardTexts = (groupIndex) => {
+}
+
+function getCard(cardIndex = 0) {
+    return target.querySelectorAll(".o_kanban_record:not(.o_kanban_ghost)")[cardIndex];
+}
+
+function getColumn(groupIndex = 0) {
+    return target.querySelectorAll(".o_kanban_group")[groupIndex];
+}
+
+function getCardTexts(groupIndex) {
     const root = groupIndex >= 0 ? getColumn(groupIndex) : target;
     return [...root.querySelectorAll(".o_kanban_record:not(.o_kanban_ghost)")]
         .map((card) => card.innerText.trim())
         .filter(Boolean);
-};
-const getCounters = () =>
-    [...target.querySelectorAll(".o_kanban_counter_side")].map((counter) => counter.innerText);
-const getTooltips = (groupIndex) => {
+}
+
+function getCounters() {
+    return [...target.querySelectorAll(".o_kanban_counter_side")].map(
+        (counter) => counter.innerText
+    );
+}
+
+function getTooltips(groupIndex) {
     const root = groupIndex >= 0 ? getColumn(groupIndex) : target;
     return [...root.querySelectorAll(".o_kanban_counter_progress .progress-bar")]
         .map((card) => card.dataset.tooltip)
         .filter(Boolean);
-};
+}
 
 // Record
-const createRecord = async () => {
+async function createRecord() {
     await click(target, "button.o-kanban-button-new");
-};
-const quickCreateRecord = async (groupIndex) => {
+}
+
+async function quickCreateRecord(groupIndex) {
     await click(getColumn(groupIndex), ".o_kanban_quick_add");
-};
-const editQuickCreateInput = async (field, value) => {
+}
+
+async function editQuickCreateInput(field, value) {
     await editInput(target, `.o_kanban_quick_create .o_field_widget[name=${field}] input`, value);
-};
-const validateRecord = async () => {
+}
+
+async function validateRecord() {
     await click(target, ".o_kanban_quick_create .o_kanban_add");
-};
-const editRecord = async () => {
+}
+
+async function editRecord() {
     await click(target, ".o_kanban_quick_create .o_kanban_edit");
-};
-const discardRecord = async () => {
+}
+
+async function discardRecord() {
     await click(target, ".o_kanban_quick_create .o_kanban_cancel");
-};
-const toggleRecordDropdown = async (recordIndex) => {
+}
+
+async function toggleRecordDropdown(recordIndex) {
     const group = target.querySelectorAll(`.o_kanban_record`)[recordIndex];
     await click(group, ".o_dropdown_kanban .dropdown-toggle");
-};
+}
 
 // Column
-const createColumn = async () => {
+async function createColumn() {
     await click(target, ".o_column_quick_create > .o_quick_create_folded");
-};
-const editColumnName = async (value) => {
+}
+
+async function editColumnName(value) {
     await editInput(target, ".o_column_quick_create input", value);
-};
-const validateColumn = async () => {
+}
+
+async function validateColumn() {
     await click(target, ".o_column_quick_create .o_kanban_add");
-};
-const toggleColumnActions = async (columnIndex) => {
+}
+
+async function toggleColumnActions(columnIndex) {
     const group = target.querySelectorAll(`.o_kanban_group`)[columnIndex];
     await click(group, ".o_kanban_config .dropdown-toggle");
     const buttons = group.querySelectorAll(".o_kanban_config .dropdown-menu .dropdown-item");
@@ -116,11 +135,12 @@ const toggleColumnActions = async (columnIndex) => {
         const button = [...buttons].find((b) => re.test(b.innerText));
         return click(button);
     };
-};
-const loadMore = async (columnIndex) => {
+}
+
+async function loadMore(columnIndex) {
     const group = target.querySelectorAll(`.o_kanban_group`)[columnIndex];
     await click(group, ".o_kanban_load_more a");
-};
+}
 
 // /!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\
 // TODO: do not forget KanbanModel tests
@@ -8632,9 +8652,11 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("kanban view with monetary and currency fields without widget", async (assert) => {
         assert.expect(1);
 
-        patchWithCleanup(session, {
-            currencies: indexBy(serverData.models.currency.records, "id"),
-        });
+        const currencies = {};
+        for (const record of serverData.models.currency.records) {
+            currencies[record.id] = record;
+        }
+        patchWithCleanup(session, { currencies });
 
         await makeView({
             type: "kanban",
