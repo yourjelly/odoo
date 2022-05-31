@@ -33,10 +33,10 @@ export const hotkeyService = {
         let nextToken = 0;
         let overlaysVisible = false;
 
-        browser.addEventListener("keydown", onKeydown, { capture: true });
-        browser.addEventListener("keyup", removeHotkeyOverlays, { capture: true });
-        browser.addEventListener("blur", removeHotkeyOverlays, { capture: true });
-        browser.addEventListener("click", removeHotkeyOverlays, { capture: true });
+        browser.addEventListener("keydown", onKeydown);
+        browser.addEventListener("keyup", removeHotkeyOverlays);
+        browser.addEventListener("blur", removeHotkeyOverlays);
+        browser.addEventListener("click", removeHotkeyOverlays);
 
         /**
          * Handler for keydown events.
