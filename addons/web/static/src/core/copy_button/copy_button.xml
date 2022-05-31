@@ -4,11 +4,16 @@
     <t t-name="web.CopyButton" owl="1">
         <button
             t-attf-class="btn btn-sm btn-primary o_clipboard_button {{ props.className || '' }} {{state.isCopied ? 'bg-success' : ''}}"
-            t-ref="copyBtn"
-            t-att-data-clipboard-text="props.value"
+            t-on-click.stop="onClick"
         >
-            <span t-if="!state.isCopied"><span class="fa fa-clipboard mx-1"></span>Copy</span>
-            <span t-else=""><span class="fa fa-check mx-1"></span>Copied</span>
+            <t t-if="!state.isCopied">
+                <span class="fa fa-clipboard mx-1"/>
+                <span t-esc="props.copyText"/>
+            </t>
+            <t t-else="">
+                <span class="fa fa-check mx-1"/>
+                <span t-esc="props.successText"/>
+            </t>
         </button>
     </t>
 
