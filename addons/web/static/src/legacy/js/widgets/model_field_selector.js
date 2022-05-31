@@ -66,12 +66,6 @@ var ModelFieldSelector = Widget.extend({
 
         if (!this.options.readonly) {
             _.extend(this.events, this.editionEvents);
-            this.popOver.appendTo($("<div/>"));
-            this.popOver.on("field_selector_render", undefined, this._render.bind(this));
-            this.popOver.on("field_selector_started", undefined, () => {
-                this.$el.append(this.popOver.$el);
-                this.$popover = this.$(".o_field_selector_popover");
-            });
         }
     },
     /**
@@ -94,6 +88,25 @@ var ModelFieldSelector = Widget.extend({
         }
 
         return this._super.apply(this, arguments);
+    },
+
+    /**
+     * @see Widget.appendTo
+     */
+    appendTo: async function () {
+        await this._super.apply(this, arguments);
+        if (!this.options.readonly) {
+            let popOverReadyPromiseResolve;
+            const popOverReadyPromise = new Promise((resolve) => popOverReadyPromiseResolve = resolve);
+            this.popOver.appendTo($("<div/>"));
+            this.popOver.on("field_selector_render", undefined, this._render.bind(this));
+            this.popOver.on("field_selector_started", undefined, () => {
+                this.$el.append(this.popOver.$el);
+                this.$popover = this.$(".o_field_selector_popover");
+                popOverReadyPromiseResolve();
+            });
+            await popOverReadyPromise;
+        }
     },
 
     //--------------------------------------------------------------------------

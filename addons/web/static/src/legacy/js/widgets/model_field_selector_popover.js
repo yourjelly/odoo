@@ -130,7 +130,6 @@ var ModelFieldSelectorPopOver = Widget.extend({
      * @returns {Promise}
      */
     start: function () {
-        // this.$popover = this.$(".o_field_selector_popover");
         this.$input = this.$el.find(".o_field_selector_popover_footer > input");
         this.$searchInput = this.$el.find(".o_field_selector_search > input");
         this.$defaultValueInput = this.$el.find(".o_field_selector_default_value_input > input");
