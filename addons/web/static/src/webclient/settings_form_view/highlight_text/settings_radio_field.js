@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { RadioField } from "@web/fields/radio_field";
+import { RadioField } from "@web/fields/radio/radio_field";
 import { FormLabelHighlightText } from "./form_label_highlight_text";
 
 export class SettingsRadioField extends RadioField {}
