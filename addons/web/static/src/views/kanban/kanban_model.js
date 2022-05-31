@@ -21,7 +21,7 @@ const { EventBus, markRaw } = owl;
 
 const FALSE = Symbol("false");
 
-const useTransaction = () => {
+function makeTransactionManager() {
     const bus = new EventBus();
     let started = false;
     return {
@@ -53,7 +53,7 @@ const useTransaction = () => {
             bus.addEventListener("ABORT", () => onAbort && onAbort(currentData));
         },
     };
-};
+}
 
 class KanbanGroup extends Group {
     setup(_params, state = {}) {
@@ -515,7 +515,7 @@ export class KanbanModel extends RelationalModel {
 
         this.progressAttributes = params.progressAttributes;
         this.tooltipInfo = params.tooltipInfo;
-        this.transaction = useTransaction();
+        this.transaction = makeTransactionManager();
     }
 
     get hasProgressBars() {
