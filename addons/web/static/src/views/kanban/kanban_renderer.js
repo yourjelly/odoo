@@ -111,6 +111,7 @@ export class KanbanRenderer extends Component {
         let dataGroupId;
         const rootRef = useRef("root");
         useSortable({
+            // TODO: change name
             isActive: () => this.canResequenceRecords,
             // Params
             ref: rootRef,
