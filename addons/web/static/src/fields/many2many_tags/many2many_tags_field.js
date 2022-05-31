@@ -7,21 +7,13 @@ import { standardFieldProps } from "../standard_field_props";
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import { ColorList } from "@web/core/colorlist/colorlist";
 import { TagsList } from "./tags_list";
-import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { Domain } from "@web/core/domain";
 import { useService } from "@web/core/utils/hooks";
-import { sprintf } from "@web/core/utils/strings";
 import { usePopover } from "@web/core/popover/popover_hook";
 
-import {
-    useX2ManyCrud,
-    useActiveActions,
-    useSelectCreate,
-    useOpenMany2XRecord,
-} from "../relational_utils";
-import { makeContext } from "@web/core/context";
+import { useX2ManyCrud, useActiveActions, Many2XAutocomplete } from "../relational_utils";
 
-const { Component, onWillUpdateProps, useEffect } = owl;
+const { Component } = owl;
 
 class Many2ManyTagsFieldColorListPopover extends Component {}
 Many2ManyTagsFieldColorListPopover.template = "web.Many2ManyTagsFieldColorListPopover";
@@ -29,20 +21,6 @@ Many2ManyTagsFieldColorListPopover.components = {
     CheckBox,
     ColorList,
 };
-
-function useForceCloseAutocomplete(onShouldClose = () => {}) {
-    let forceCloseAutocomplete = false;
-    onWillUpdateProps(() => {
-        onShouldClose();
-        forceCloseAutocomplete = true;
-    });
-
-    useEffect(() => {
-        forceCloseAutocomplete = false;
-    });
-
-    return () => forceCloseAutocomplete;
-}
 
 export class Many2ManyTagsField extends Component {
     setup() {
@@ -57,40 +35,43 @@ export class Many2ManyTagsField extends Component {
         const activeField = this.props.record.activeFields[this.props.name];
 
         this.activeActions = useActiveActions({
-            isMany2Many: true,
+            fieldType: "many2many",
             crudOptions: {
                 create: this.props.canQuickCreate && activeField.options.create,
                 onDelete: removeRecord,
             },
-            getEvalParams: () => {
+            getEvalParams: (props) => {
                 return {
-                    evalContext: this.props.record.evalContext,
-                    readonly: this.props.readonly,
+                    evalContext: props.record.evalContext,
+                    readonly: props.readonly,
                 };
             },
         });
 
-        const resModel = this.props.relation;
-        this.openMany2X = useOpenMany2XRecord({
-            resModel,
-            onRecordSaved: saveRecord,
-            activeField,
-            activeActions: this.activeActions,
-            isToMany: true,
-        });
+        this.fieldString = activeField.string;
 
-        this.selectCreate = useSelectCreate({
-            resModel,
-            activeActions: this.activeActions,
-            onCreateEdit: () => {
-                const context = this.props.record.getFieldContext(this.props.name);
-                return this.openMany2X({ context });
-            },
-            onSelected: (resIds) => saveRecord(resIds),
-        });
+        this.update = (recordlist) => {
+            if (Array.isArray(recordlist)) {
+                const resIds = recordlist.map((rec) => rec.id);
+                return saveRecord(resIds);
+            }
+            return saveRecord(recordlist);
+        };
 
-        this.forceCloseAutocomplete = useForceCloseAutocomplete();
+        if (this.props.canQuickCreate) {
+            this.quickCreate = async (name) => {
+                const created = await this.orm.call(this.props.relation, "name_create", [name], {
+                    context: this.props.context,
+                });
+                return saveRecord([created[0]]);
+            };
+        }
     }
+
+    get context() {
+        return this.props.record.getFieldContext(this.props.name);
+    }
+
     get tags() {
         return this.props.value.records.map((record) => ({
             id: record.id, // datapoint_X
@@ -132,121 +113,11 @@ export class Many2ManyTagsField extends Component {
         this.popoverCloseFn = null;
     }
 
-    get sources() {
-        return [this.tagsSource];
-    }
-    get tagsSource() {
-        return {
-            placeholder: this.env._t("Loading..."),
-            options: this.loadTagsSource.bind(this),
-        };
-    }
-
     getDomain() {
         return Domain.and([
             this.props.domain,
             Domain.not([["id", "in", this.props.value.currentIds]]),
         ]).toList(this.props.context);
-    }
-
-    async loadTagsSource(request) {
-        const records = await this.orm.call(this.props.relation, "name_search", [], {
-            name: request,
-            operator: "ilike",
-            args: this.getDomain(),
-            limit: this.props.searchLimit + 1,
-            context: this.props.context,
-        });
-
-        const options = records.map((result) => ({
-            value: result[0],
-            label: result[1],
-        }));
-
-        if (
-            this.activeActions.canCreate &&
-            request.length &&
-            !this.tagExist(
-                request,
-                options.map((o) => o.label)
-            )
-        ) {
-            options.push({
-                label: sprintf(this.env._t(`Create "%s"`), request), // LPE FIXME: escape make spaces look like %20;
-                classList: "o_m2o_dropdown_option o_m2o_dropdown_option_create",
-                action: async () => {
-                    let created;
-                    try {
-                        created = await this.orm.call(
-                            this.props.relation,
-                            "name_create",
-                            [request],
-                            {
-                                context: this.props.context,
-                            }
-                        );
-                    } catch {
-                        const context = makeContext([
-                            this.props.context,
-                            { [`default_${this.props.nameCreateField}`]: request },
-                        ]);
-                        return this.openMany2X({ context });
-                    }
-                    const ids = [...this.props.value.currentIds, created[0]];
-                    this.props.value.replaceWith(ids);
-                },
-                unselectable: true,
-            });
-        }
-
-        if (this.props.searchLimit < records.length) {
-            options.push({
-                label: this.env._t("Search More..."),
-                action: this.onSearchMore.bind(this, request),
-                classList: "o_m2o_dropdown_option o_m2o_dropdown_option_search_more",
-                unselectable: true,
-            });
-        }
-
-        if (!request.length && this.props.canQuickCreate) {
-            options.push({
-                label: this.env._t("Start typing..."),
-                classList: "o_m2o_start_typing",
-                unselectable: true,
-            });
-        }
-
-        if (request.length && this.activeActions.canCreate) {
-            const context = makeContext([{ default_name: request }]);
-            options.push({
-                label: this.env._t("Create and edit..."),
-                classList: "o_m2o_dropdown_option",
-                unselectable: true,
-                action: () => this.openMany2X({ context }),
-            });
-        }
-
-        if (!records.length && !this.activeActions.canCreate) {
-            options.push({
-                label: this.env._t("No records"),
-                classList: "o_m2o_no_result",
-                unselectable: true,
-            });
-        }
-
-        return options;
-    }
-
-    tagExist(name, additionalTagNames) {
-        return [
-            ...this.props.value.records.map((r) => r.data.display_name),
-            ...additionalTagNames,
-        ].some((n) => n === name);
-    }
-
-    onSelect(option) {
-        const ids = [...this.props.value.currentIds, option.value];
-        this.props.value.replaceWith(ids);
     }
 
     onDelete(id) {
@@ -281,40 +152,6 @@ export class Many2ManyTagsField extends Component {
             );
         }
     }
-
-    async onSearchMore(request) {
-        const domain = this.getDomain();
-        const context = this.props.record.getFieldContext(this.props.name);
-
-        let dynamicFilters = [];
-        if (request.length) {
-            const nameGets = await this.orm.call(this.props.relation, "name_search", [], {
-                name: request,
-                args: domain,
-                operator: "ilike",
-                limit: this.constructor.SEARCH_MORE_LIMIT,
-                context,
-            });
-
-            dynamicFilters = [
-                {
-                    description: sprintf(this.env._t("Quick search: %s"), request),
-                    domain: [["id", "in", nameGets.map((nameGet) => nameGet[0])]],
-                },
-            ];
-        }
-
-        const title = sprintf(
-            this.env._t("Search: %s"),
-            this.props.record.activeFields[this.props.name].string
-        );
-        this.selectCreate({
-            domain,
-            context,
-            filters: dynamicFilters,
-            title,
-        });
-    }
 }
 
 Many2ManyTagsField.RECORD_COLORS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
@@ -322,9 +159,9 @@ Many2ManyTagsField.SEARCH_MORE_LIMIT = 320;
 
 Many2ManyTagsField.template = "web.Many2ManyTagsField";
 Many2ManyTagsField.components = {
-    AutoComplete,
     Popover: Many2ManyTagsFieldColorListPopover,
     TagsList,
+    Many2XAutocomplete,
 };
 
 Many2ManyTagsField.props = {
@@ -336,14 +173,12 @@ Many2ManyTagsField.props = {
     relation: { type: String },
     domain: { type: Domain },
     context: { type: Object },
-    searchLimit: { type: Number, optional: true },
     nameCreateField: { type: String, optional: true },
     itemsVisible: { type: Number, optional: true },
 };
 Many2ManyTagsField.defaultProps = {
     canEditColor: true,
     canQuickCreate: true,
-    searchLimit: 7,
     nameCreateField: "name",
 };
 

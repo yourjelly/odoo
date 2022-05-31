@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { useOwnedDialogs, useService } from "@web/core/utils/hooks";
+import { useForwardRefToParent, useOwnedDialogs, useService } from "@web/core/utils/hooks";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
 import { sprintf } from "@web/core/utils/strings";
@@ -14,6 +14,7 @@ import { createElement } from "../core/utils/xml";
 import { Dialog } from "../core/dialog/dialog";
 import { FormRenderer } from "../views/form/form_renderer";
 import { ViewButton } from "../views/view_button/view_button";
+import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 
 //
 // Commons
@@ -26,7 +27,7 @@ export function useSelectCreate({ resModel, activeActions, onSelected, onCreateE
         addDialog(SelectCreateDialog, {
             title: title || env._t("Select records"),
             noCreate: !activeActions.canCreate,
-            multiSelect: activeActions.canLink, // LPE Fixme
+            multiSelect: "canLink" in activeActions ? activeActions.canLink : false, // LPE Fixme
             resModel,
             context,
             domain,
@@ -38,15 +39,324 @@ export function useSelectCreate({ resModel, activeActions, onSelected, onCreateE
     return selectCreate;
 }
 
+const STANDARD_ACTIVE_ACTIONS = ["create", "delete", "link", "unlink", "write"];
+export function useActiveActions({
+    subViewActiveActions = {},
+    crudOptions = {},
+    fieldType,
+    getEvalParams = (props) => ({}),
+}) {
+    const props = owl.useComponent().props;
+
+    const evals = {};
+    const makeEvalAction = (actionName, defaultBool = true) => {
+        let evalFn;
+        if (crudOptions[actionName] !== undefined) {
+            const action = crudOptions[actionName];
+            evalFn = (evalContext) => evalDomain(action, evalContext);
+        } else {
+            evalFn = () => defaultBool;
+        }
+
+        if (actionName in subViewActiveActions) {
+            const viewActiveAction = subViewActiveActions[actionName];
+            evals[actionName] = (evalContext) => viewActiveAction && evalFn(evalContext);
+            return;
+        }
+        evals[actionName] = evalFn;
+    };
+
+    function evalAction(actionName, evalContext) {
+        return evals[actionName](evalContext);
+    }
+
+    for (const actionName of STANDARD_ACTIVE_ACTIONS) {
+        makeEvalAction(actionName, actionName !== "write");
+    }
+
+    const isMany2Many = fieldType === "many2many";
+    const isMany2One = fieldType === "many2one";
+
+    function compute({ evalContext = {}, readonly = true }) {
+        // activeActions computed by getActiveActions is of the form
+        // interface ActiveActions {
+        //     edit: Boolean;
+        //     create: Boolean;
+        //     delete: Boolean;
+        //     duplicate: Boolean;
+        // }
+
+        // options set on field is of the form
+        // interface Options {
+        //     create: Boolean;
+        //     delete: Boolean;
+        //     link: Boolean;
+        //     unlink: Boolean;
+        // }
+
+        // We need to take care of tags "control" and "create" to set create stuff
+        const canCreate = !readonly && evalAction("create", evalContext);
+        const canDelete = !readonly && evalAction("delete", evalContext);
+
+        const canLink = !readonly && evalAction("link", evalContext);
+        const canUnlink = !readonly && evalAction("unlink", evalContext);
+
+        const result = { canCreate, canDelete };
+
+        if (isMany2Many) {
+            const canWrite = evalAction("write", evalContext);
+            Object.assign(result, { canLink, canUnlink, canWrite });
+        }
+
+        if (isMany2One) {
+            Object.assign(result, {
+                canWrite: evalAction("write", evalContext),
+                canCreateEdit: evalAction("createEdit", evalContext),
+            });
+        }
+
+        if ((isMany2Many && canUnlink) || (!isMany2Many && canDelete)) {
+            result.onDelete = crudOptions.onDelete;
+        }
+        return result;
+    }
+
+    let activeActions = compute(getEvalParams(props));
+
+    owl.onWillUpdateProps((nextProps) => {
+        activeActions = compute(getEvalParams(nextProps));
+    });
+
+    return new Proxy(
+        {},
+        {
+            get(target, k) {
+                return activeActions[k];
+            },
+            has(target, k) {
+                return k in activeActions;
+            },
+        }
+    );
+}
+
 //
 // Many2X
 //
+
+export class Many2XAutocomplete extends owl.Component {
+    setup() {
+        this.orm = useService("orm");
+
+        const autoCompleteContainer = useForwardRefToParent("autocomplete_container");
+
+        this.state = owl.useState({
+            autocompleteValue: this.props.value,
+        });
+
+        const { activeActions, resModel, update, isToMany, fieldString } = this.props;
+
+        this.openMany2X = useOpenMany2XRecord({
+            resModel,
+            activeActions,
+            isToMany,
+            onRecordSaved: (record) => {
+                return update([record.data]);
+            },
+            onRecordDiscarded: () => {
+                autoCompleteContainer.el.querySelector("input").focus();
+            },
+            fieldString,
+        });
+
+        this.selectCreate = useSelectCreate({
+            resModel,
+            activeActions,
+            onSelected: (resIds) => {
+                const values = resIds.map((id) => ({ id }));
+                return update(values);
+            },
+            onCreateEdit: ({ context }) => this.openMany2X({ context }),
+        });
+
+        this.forceClose = false;
+        owl.onWillUpdateProps((nextProps) => {
+            this.state.autocompleteValue = nextProps.value;
+            if (this.preventClose) {
+                return;
+            }
+            this.forceClose = true;
+        });
+        owl.useEffect(() => {
+            this.forceClose = false;
+            this.preventClose = false;
+        });
+    }
+
+    get sources() {
+        return [this.optionsSource];
+    }
+    get optionsSource() {
+        return {
+            placeholder: this.env._t("Loading..."),
+            options: this.loadOptionsSource.bind(this),
+        };
+    }
+
+    get activeActions() {
+        return this.props.activeActions;
+    }
+
+    getCreationContext(value) {
+        return makeContext([
+            this.props.context,
+            { [`default_${this.props.nameCreateField}`]: value },
+        ]);
+    }
+    onInput({ inputValue }) {
+        if (!this.props.value || this.props.value !== inputValue) {
+            this.preventClose = true;
+            this.props.setInputFloats(true);
+        }
+    }
+
+    onSelect(option, params = {}) {
+        if (option.action) {
+            return option.action(params);
+        }
+        this.state.autocompleteValue = "";
+        const record = {
+            id: option.value,
+            name: option.label,
+        };
+        this.props.update([record], params);
+    }
+
+    async loadOptionsSource(request) {
+        const records = await this.orm.call(this.props.resModel, "name_search", [], {
+            name: request,
+            operator: "ilike",
+            args: this.props.getDomain(),
+            limit: this.props.searchLimit + 1,
+            context: this.props.context,
+        });
+
+        const options = records.map((result) => ({
+            value: result[0],
+            label: result[1],
+        }));
+
+        if (this.props.quickCreate && request.length) {
+            options.push({
+                label: sprintf(this.env._t(`Create "%s"`), request),
+                classList: "o_m2o_dropdown_option o_m2o_dropdown_option_create",
+                action: async (params) => {
+                    try {
+                        await this.props.quickCreate(request, params);
+                    } catch {
+                        const context = this.getCreationContext(request);
+                        return this.openMany2X({ context });
+                    }
+                },
+            });
+        }
+
+        if (this.props.searchLimit < records.length) {
+            options.push({
+                label: this.env._t("Search More..."),
+                action: this.onSearchMore.bind(this, request),
+                classList: "o_m2o_dropdown_option o_m2o_dropdown_option_search_more",
+            });
+        }
+
+        const activeActions = this.activeActions;
+        const canCreateEdit =
+            "canCreateEdit" in activeActions
+                ? activeActions.canCreateEdit
+                : activeActions.canCreate;
+        if (!request.length && !this.props.value && (this.props.quickCreate || canCreateEdit)) {
+            options.push({
+                label: this.env._t("Start typing..."),
+                classList: "o_m2o_start_typing",
+                unselectable: true,
+            });
+        }
+
+        if (request.length && canCreateEdit) {
+            const context = this.getCreationContext(request);
+            options.push({
+                label: this.env._t("Create and edit..."),
+                classList: "o_m2o_dropdown_option o_m2o_dropdown_option_create_edit",
+                action: () => this.openMany2X({ context }),
+            });
+        }
+
+        if (!records.length && !activeActions.canCreate) {
+            options.push({
+                label: this.env._t("No records"),
+                classList: "o_m2o_no_result",
+                unselectable: true,
+            });
+        }
+
+        return options;
+    }
+
+    async onSearchMore(request) {
+        const { resModel, getDomain, context, fieldString } = this.props;
+
+        const domain = getDomain();
+        let dynamicFilters = [];
+        if (request.length) {
+            const nameGets = await this.orm.call(resModel, "name_search", [], {
+                name: request,
+                args: domain,
+                operator: "ilike",
+                limit: this.props.searchMoreLimit,
+                context,
+            });
+
+            dynamicFilters = [
+                {
+                    description: sprintf(this.env._t("Quick search: %s"), request),
+                    domain: [["id", "in", nameGets.map((nameGet) => nameGet[0])]],
+                },
+            ];
+        }
+
+        const title = sprintf(this.env._t("Search: %s"), fieldString);
+        this.selectCreate({
+            domain,
+            context,
+            filters: dynamicFilters,
+            title,
+        });
+    }
+
+    onChange({ inputValue }) {
+        if (!inputValue.length) {
+            this.props.update(false);
+        }
+    }
+}
+Many2XAutocomplete.template = "web.Many2XAutocomplete";
+Many2XAutocomplete.components = { AutoComplete };
+Many2XAutocomplete.defaultProps = {
+    searchLimit: 7,
+    searchMoreLimit: 320,
+    nameCreateField: "name",
+    value: "",
+    setInputFloats: () => {},
+};
+
 export function useOpenMany2XRecord({
     resModel,
     onRecordSaved,
-    activeField,
+    onRecordDiscarded,
+    fieldString,
     activeActions,
     isToMany,
+    onClose = (isNew) => {},
 }) {
     const env = owl.useEnv();
     const addDialog = useOwnedDialogs();
@@ -60,10 +370,10 @@ export function useOpenMany2XRecord({
             });
         }
 
-        let onClose = () => {};
+        let resolve = () => {};
         if (!title) {
-            title = resId ? env._t("Open %s") : env._t("Create %s");
-            title = sprintf(title, activeField.string);
+            title = resId ? env._t("Open: %s") : env._t("Create %s");
+            title = sprintf(title, fieldString);
         }
 
         const { canCreate, canWrite } = activeActions;
@@ -73,22 +383,30 @@ export function useOpenMany2XRecord({
         addDialog(
             FormViewDialog,
             {
+                preventCreate: !activeActions.canCreate,
+                preventEdit: !activeActions.canWrite,
+                title,
                 context,
                 mode,
                 resId,
                 resModel,
                 viewId,
                 onRecordSaved,
+                onRecordDiscarded,
                 isToMany,
             },
             {
-                onClose: () => onClose(),
+                onClose: () => {
+                    resolve();
+                    const isNew = !resId;
+                    onClose(isNew);
+                },
             }
         );
 
         if (!immediate) {
-            return new Promise((resolve) => {
-                onClose = resolve;
+            return new Promise((_resolve) => {
+                resolve = _resolve;
             });
         }
     };
@@ -209,89 +527,6 @@ async function getFormViewInfo({ list, activeField, viewService, userService, en
     );
 
     return formViewInfo;
-}
-
-export function useActiveActions({
-    subViewActiveActions,
-    crudOptions = {},
-    isMany2Many,
-    getEvalParams,
-}) {
-    const makeEvalAction = (actionName, subViewActiveActions, defaultBool = true) => {
-        let evalFn;
-        if (crudOptions[actionName] !== undefined) {
-            const action = crudOptions[actionName];
-            evalFn = (evalContext) => evalDomain(action, evalContext);
-        } else {
-            evalFn = () => defaultBool;
-        }
-
-        if (subViewActiveActions) {
-            const viewActiveAction = subViewActiveActions[actionName];
-            return (evalContext) => viewActiveAction && evalFn(evalContext);
-        }
-        return evalFn;
-    };
-
-    const evalCreate = makeEvalAction("create", subViewActiveActions);
-    const evalDelete = makeEvalAction("delete", subViewActiveActions);
-    const evalLink = makeEvalAction("link");
-    const evalUnlink = makeEvalAction("unlink");
-    const evalWrite = makeEvalAction("write", null, false);
-
-    function compute({ evalContext, readonly = true }) {
-        // activeActions computed by getActiveActions is of the form
-        // interface ActiveActions {
-        //     edit: Boolean;
-        //     create: Boolean;
-        //     delete: Boolean;
-        //     duplicate: Boolean;
-        // }
-
-        // options set on field is of the form
-        // interface Options {
-        //     create: Boolean;
-        //     delete: Boolean;
-        //     link: Boolean;
-        //     unlink: Boolean;
-        // }
-
-        // We need to take care of tags "control" and "create" to set create stuff
-        const canCreate = !readonly && evalCreate(evalContext);
-        const canDelete = !readonly && evalDelete(evalContext);
-
-        const canLink = !readonly && evalLink(evalContext);
-        const canUnlink = !readonly && evalUnlink(evalContext);
-
-        const result = { canCreate, canDelete };
-
-        if (isMany2Many) {
-            Object.assign(result, { canLink, canUnlink, canWrite: evalWrite(evalContext) });
-        }
-
-        if ((isMany2Many && canUnlink) || (!isMany2Many && canDelete)) {
-            result.onDelete = crudOptions.onDelete;
-        }
-        return result;
-    }
-
-    let activeActions = null;
-
-    owl.onWillRender(() => {
-        activeActions = compute(getEvalParams());
-    });
-
-    return new Proxy(
-        {},
-        {
-            get(target, k) {
-                return activeActions[k];
-            },
-            has(target, k) {
-                return k in activeActions;
-            },
-        }
-    );
 }
 
 export function useAddInlineRecord({ position, addNew }) {

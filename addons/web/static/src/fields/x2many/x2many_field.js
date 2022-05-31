@@ -46,12 +46,12 @@ export class X2ManyField extends Component {
             crudOptions: Object.assign({}, this.activeField.options, {
                 onDelete: removeRecord,
             }),
-            isMany2Many: this.isMany2Many,
+            fieldType: this.isMany2Many ? "many2many" : "one2many",
             subViewActiveActions,
-            getEvalParams: () => {
+            getEvalParams: (props) => {
                 return {
-                    evalContext: this.props.record.evalContext,
-                    readonly: this.props.readonly,
+                    evalContext: props.record.evalContext,
+                    readonly: props.readonly,
                 };
             },
         });
