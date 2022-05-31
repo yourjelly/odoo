@@ -321,7 +321,7 @@ QUnit.module("ViewDialogs", (hooks) => {
         await click(target, ".o_field_x2many_list_row_add a");
 
         await editInput(target, ".o_field_widget[name=instrument] input", "ABC");
-        await selectDropdownItem(target, "instrument", "Create and Edit...");
+        await selectDropdownItem(target, "instrument", "Create and edit...");
 
         assert.containsOnce(target, ".modal .modal-lg");
 

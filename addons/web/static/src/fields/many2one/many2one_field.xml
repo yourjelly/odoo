@@ -40,19 +40,22 @@
         </t>
         <t t-else="">
             <div class="o_field_many2one_selection">
-                <div class="o_input_dropdown" t-ref="autocomplete_container">
-                    <AutoComplete
-                        value="displayName"
-                        id="props.id"
-                        placeholder="props.placeholder"
-                        sources="sources"
-                        autoSelect="true"
-                        onSelect.bind="onSelect"
-                        onInput.bind="onInput"
-                        onChange.bind="onChange"
-                    />
-                    <a role="button" class="o_dropdown_button" draggable="false" />
-                </div>
+                <Many2XAutocomplete
+                    value="displayName"
+                    id="props.id"
+                    placeholder="props.placeholder"
+                    resModel="props.relation"
+                    autoSelect="true"
+                    fieldString="props.string"
+                    activeActions="state.activeActions"
+                    update="update"
+                    quickCreate="quickCreate"
+                    context="props.getContext()"
+                    getDomain.bind="getDomain"
+                    nameCreateField="props.nameCreateField"
+                    setInputFloats="setFloating"
+                    autocomplete_container="autocompleteContainerRef"
+                />
                 <t t-if="hasExternalButton">
                     <button
                         type="button"
