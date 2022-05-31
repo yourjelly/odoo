@@ -73,17 +73,17 @@ const SORTABLE_PARAMS = {
  * Cancels the default behavior and propagation of a given event.
  * @param {Event} ev
  */
-const cancelEvent = (ev) => {
+function cancelEvent(ev) {
     ev.stopPropagation();
     ev.stopImmediatePropagation();
     ev.preventDefault();
-};
+}
 
 /**
  * @param {SortableParams} params
  * @returns {[string, string | boolean][]}
  */
-const computeParams = (params) => {
+function computeParams(params) {
     const computedParams = { isActive: true };
     for (const prop in SORTABLE_PARAMS) {
         if (prop in params) {
@@ -94,21 +94,23 @@ const computeParams = (params) => {
         }
     }
     return Object.entries(computedParams);
-};
+}
 
 /**
  * Converts a CSS pixel value to a number, removing the 'px' part.
  * @param {string} val
  * @returns {number}
  */
-const cssValueToNumber = (val) => Number(val.slice(0, -2));
+function cssValueToNumber(val) {
+    return Number(val.slice(0, -2));
+}
 
 /**
  * @param {Document} activeElement
  * @param {DOMString} selector
  * @returns all selected and visible elements present in the activeElement
  */
-export const getVisibleElements = (activeElement, selector) => {
+export function getVisibleElements(activeElement, selector) {
     const visibleElements = [];
     for (const el of activeElement.querySelectorAll(selector)) {
         const isVisible = el.offsetWidth > 0 && el.offsetHeight > 0;
@@ -117,14 +119,16 @@ export const getVisibleElements = (activeElement, selector) => {
         }
     }
     return visibleElements;
-};
+}
 
 /**
  * Basic error builder for the sortable hook.
  * @param {string} reason
  * @returns {Error}
  */
-const sortableError = (reason) => new Error(`Unable to use sortable feature: ${reason}.`);
+function sortableError(reason) {
+    return new Error(`Unable to use sortable feature: ${reason}.`);
+}
 
 /**
  * Returns the square distance between 2 points (defined by x1,y1 and x2,y2).
@@ -134,7 +138,9 @@ const sortableError = (reason) => new Error(`Unable to use sortable feature: ${r
  * @param {number} y2
  * @returns {number}
  */
-const squareDistance = (x1, y1, x2, y2) => (x2 - x1) ** 2 + (y2 - y1) ** 2;
+function squareDistance(x1, y1, x2, y2) {
+    return (x2 - x1) ** 2 + (y2 - y1) ** 2;
+}
 
 /**
  * Sortable feature hook.
@@ -154,7 +160,7 @@ const squareDistance = (x1, y1, x2, y2) => (x2 - x1) ** 2 + (y2 - y1) ** 2;
  *
  * @param {SortableParams} params
  */
-export const useSortable = (params) => {
+export function useSortable(params) {
     if (useEnv().isSmall) {
         return;
     }
@@ -586,7 +592,7 @@ export const useSortable = (params) => {
     useExternalListener(window, "mouseup", onMouseup, true);
     useExternalListener(window, "keydown", onKeydown, true);
     onWillUnmount(() => dragStop(true));
-};
+}
 
 // -----------------------------------------------------------------------------
 // Get Tabable Elements
@@ -601,7 +607,7 @@ let TABABLE_SELECTOR = "[tabindex], a, area, button, frame, iframe, input, objec
     .join(':not([tabindex="-1"]):not(:disabled),');
 TABABLE_SELECTOR = TABABLE_SELECTOR.slice(0, TABABLE_SELECTOR.length - 1);
 
-export const getTabableElements = (container = document.body) => {
+export function getTabableElements(container = document.body) {
     const elements = container.querySelectorAll(TABABLE_SELECTOR);
     const byTabIndex = {};
     for (const el of [...elements]) {
@@ -614,18 +620,18 @@ export const getTabableElements = (container = document.body) => {
     const withTabIndexZero = byTabIndex[0] || [];
     delete byTabIndex[0];
     return [...Object.values(byTabIndex).flat(), ...withTabIndexZero];
-};
+}
 
-export const getNextTabableElement = (container = document.body) => {
+export function getNextTabableElement(container = document.body) {
     const tabableElements = getTabableElements(container);
     const index = tabableElements.indexOf(document.activeElement);
     return index === -1 ? tabableElements[0] : tabableElements[index + 1] || null;
-};
+}
 
-export const getPreviousTabableElement = (container = document.body) => {
+export function getPreviousTabableElement(container = document.body) {
     const tabableElements = getTabableElements(container);
     const index = tabableElements.indexOf(document.activeElement);
     return index === -1
         ? tabableElements[tabableElements.length - 1]
         : tabableElements[index - 1] || null;
-};
+}

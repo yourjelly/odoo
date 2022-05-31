@@ -2,9 +2,9 @@
 
 import { browser } from "@web/core/browser/browser";
 import { isMacOS } from "@web/core/browser/feature_detection";
+import { download } from "@web/core/network/download";
 import { patch, unpatch } from "@web/core/utils/patch";
 import { registerCleanup } from "./cleanup";
-import { download } from "@web/core/network/download";
 
 const { App, onMounted, onPatched, useComponent } = owl;
 
@@ -177,42 +177,55 @@ function findElement(el, selector) {
     return target;
 }
 
-const keyboardEventBubble = (args) =>
-    Object.assign({}, args, { bubbles: true, keyCode: args.which });
+function keyboardEventBubble(args) {
+    return Object.assign({}, args, { bubbles: true, keyCode: args.which });
+}
 
-const mouseEventMapping = (args) => ({
-    clientX: args ? args.pageX : undefined,
-    clientY: args ? args.pageY : undefined,
-    ...args,
-    bubbles: true,
-    cancelable: true,
-    view: window,
-});
+function mouseEventMapping(args) {
+    return {
+        clientX: args ? args.pageX : undefined,
+        clientY: args ? args.pageY : undefined,
+        ...args,
+        bubbles: true,
+        cancelable: true,
+        view: window,
+    };
+}
 
-const mouseEventNoBubble = (args) => ({
-    clientX: args ? args.pageX : undefined,
-    clientY: args ? args.pageY : undefined,
-    ...args,
-    bubbles: false,
-    cancelable: false,
-    view: window,
-});
+function mouseEventNoBubble(args) {
+    return {
+        clientX: args ? args.pageX : undefined,
+        clientY: args ? args.pageY : undefined,
+        ...args,
+        bubbles: false,
+        cancelable: false,
+        view: window,
+    };
+}
 
-const touchEventMapping = (args) => ({
-    ...args,
-    bubbles: true,
-    cancelable: true,
-    touches: args.touches ? [...args.touches.map((e) => new Touch(e))] : undefined,
-});
+function touchEventMapping(args) {
+    return {
+        ...args,
+        bubbles: true,
+        cancelable: true,
+        touches: args.touches ? [...args.touches.map((e) => new Touch(e))] : undefined,
+    };
+}
 
-const touchEventCancelMapping = (args) => ({
-    ...touchEventMapping(args),
-    cancelable: false,
-});
+function touchEventCancelMapping(args) {
+    return {
+        ...touchEventMapping(args),
+        cancelable: false,
+    };
+}
 
-const noBubble = (args) => Object.assign({}, args, { bubbles: false });
+function noBubble(args) {
+    return Object.assign({}, args, { bubbles: false });
+}
 
-const onlyBubble = (args) => Object.assign({}, args, { bubbles: true });
+function onlyBubble(args) {
+    return Object.assign({}, args, { bubbles: true });
+}
 
 // TriggerEvent constructor/args processor mapping
 const EVENT_TYPES = {
@@ -665,7 +678,7 @@ export function useLogLifeCycle(logFn, name = "") {
  * @param {Node} n2
  * @returns {Node[]}
  */
-const getDifferentParents = (n1, n2) => {
+function getDifferentParents(n1, n2) {
     const parents = [n2];
     while (parents[0].parentNode) {
         const parent = parents[0].parentNode;
@@ -675,7 +688,7 @@ const getDifferentParents = (n1, n2) => {
         parents.unshift(parent);
     }
     return parents;
-};
+}
 
 /**
  * Helper performing a drag and drop sequence.
@@ -702,7 +715,7 @@ const getDifferentParents = (n1, n2) => {
  * @param {string} [position] "top" | "bottom" | "left" | "right"
  * @returns {Promise<void>}
  */
-export const dragAndDrop = async (from, to, position) => {
+export async function dragAndDrop(from, to, position) {
     const fixture = getFixture();
     from = from instanceof Element ? from : fixture.querySelector(from);
     to = to instanceof Element ? to : fixture.querySelector(to);
@@ -750,7 +763,7 @@ export const dragAndDrop = async (from, to, position) => {
     triggerEvent(from, null, "mouseup", toPos);
     await triggerEvent(from, null, "click", toPos, true);
     await nextTick();
-};
+}
 
 export async function clickDropdown(target, fieldName) {
     const dropdownInput = target.querySelector(`[name='${fieldName}'] .dropdown input`);

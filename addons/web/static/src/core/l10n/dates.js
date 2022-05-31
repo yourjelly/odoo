@@ -56,9 +56,9 @@ const smartDateRegex = new RegExp(`^([+-])(\\d+)([${Object.keys(smartDateUnits).
  * @param {any} d2
  * @returns {boolean}
  */
-export const areDateEquals = (d1, d2) => {
+export function areDateEquals(d1, d2) {
     return d1 instanceof DateTime && d2 instanceof DateTime ? d1.equals(d2) : d1 === d2;
-};
+}
 
 /**
  * Smart date inputs are shortcuts to write dates quicker.
@@ -344,45 +344,45 @@ export function parseDateTime(value, options = {}) {
  * @param {string} value
  * @returns {DateTime | false}
  */
-export const deserializeDate = (value) => {
+export function deserializeDate(value) {
     return parseDate(value, {
         format: SERVER_DATE_FORMAT,
         numberingSystem: "latn",
     });
-};
+}
 
 /**
  * Returns a datetime object parsed from the given serialized string.
  * @param {string} value
  * @returns {DateTime | false}
  */
-export const deserializeDateTime = (value) => {
+export function deserializeDateTime(value) {
     return parseDateTime(value, {
         format: `${SERVER_DATE_FORMAT} ${SERVER_TIME_FORMAT}`,
         numberingSystem: "latn",
     });
-};
+}
 
 /**
  * Returns a serialized string representing the given date.
  * @param {DateTime} value
  * @returns {string}
  */
-export const serializeDate = (value) => {
+export function serializeDate(value) {
     return formatDate(value, {
         format: SERVER_DATE_FORMAT,
         numberingSystem: "latn",
     });
-};
+}
 
 /**
  * Returns a serialized string representing the given datetime.
  * @param {DateTime} value
  * @returns {string}
  */
-export const serializeDateTime = (value) => {
+export function serializeDateTime(value) {
     return formatDateTime(value, {
         format: `${SERVER_DATE_FORMAT} ${SERVER_TIME_FORMAT}`,
         numberingSystem: "latn",
     });
-};
+}

@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { applyFilter, toggleMenu } from "@web/../tests/search/helpers";
 import { DatePicker, DateTimePicker } from "@web/core/datepicker/datepicker";
 import { registry } from "@web/core/registry";
 import { uiService } from "@web/core/ui/ui_service";
@@ -11,7 +12,6 @@ import { registerCleanup } from "../helpers/cleanup";
 import { makeTestEnv } from "../helpers/mock_env";
 import { makeFakeLocalizationService } from "../helpers/mock_services";
 import { click, getFixture, mount, triggerEvent } from "../helpers/utils";
-import { applyFilter, toggleMenu } from "@web/../tests/search/helpers";
 
 const { Component, useState, xml } = owl;
 const { DateTime } = luxon;
@@ -25,7 +25,7 @@ let target;
  * @param {Object} props
  * @returns {Promise<DatePicker>}
  */
-const mountPicker = async (Picker, props) => {
+async function mountPicker(Picker, props) {
     serviceRegistry
         .add(
             "localization",
@@ -54,9 +54,9 @@ const mountPicker = async (Picker, props) => {
 
     const env = await makeTestEnv();
     await mount(Parent, target, { env, props: { Picker } });
-};
+}
 
-const useFRLocale = () => {
+function useFRLocale() {
     if (!window.moment.locales().includes("fr")) {
         // Mocks the FR locale if not loaded
         const originalLocale = window.moment.locale();
@@ -76,9 +76,9 @@ const useFRLocale = () => {
         registerCleanup(() => window.moment.updateLocale("fr", null));
     }
     return "fr";
-};
+}
 
-const useNOLocale = () => {
+function useNOLocale() {
     if (!window.moment.locales().includes("nb")) {
         const originalLocale = window.moment.locale();
         window.moment.defineLocale("nb", {
@@ -97,7 +97,7 @@ const useNOLocale = () => {
         registerCleanup(() => window.moment.updateLocale("nb", null));
     }
     return "nb";
-};
+}
 
 QUnit.module("Components", ({ beforeEach }) => {
     beforeEach(() => {
