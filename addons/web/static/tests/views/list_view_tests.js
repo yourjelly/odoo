@@ -60,9 +60,6 @@ let target;
 
 // WOWL remove after adapting tests
 let testUtils,
-    Widget,
-    widgetRegistry,
-    widgetRegistryOwl,
     ListView,
     ListRenderer,
     core,
@@ -10388,63 +10385,6 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipWOWL("basic support for widgets", async function (assert) {
-        // This test could be removed as soon as we drop the support of legacy widgets (see test
-        // below, which is a duplicate of this one, but with an Owl Component instead).
-        assert.expect(1);
-
-        var MyWidget = Widget.extend({
-            init: function (parent, dataPoint) {
-                serverData.models = dataPoint.data;
-            },
-            start: function () {
-                this.$el.text(JSON.stringify(serverData.models));
-            },
-        });
-        widgetRegistry.add("test", MyWidget);
-
-        await makeView({
-            type: "list",
-            resModel: "foo",
-            serverData,
-            arch: '<tree><field name="foo"/><field name="int_field"/><widget name="test"/></tree>',
-        });
-
-        assert.strictEqual(
-            $(target).find(".o_widget").first().text(),
-            '{"foo":"yop","int_field":10,"id":1}',
-            "widget should have been instantiated"
-        );
-
-        delete widgetRegistry.map.test;
-    });
-
-    QUnit.skipWOWL("basic support for widgets (being Owl Components)", async function (assert) {
-        assert.expect(1);
-
-        class MyComponent extends owl.Component {
-            get value() {
-                return JSON.stringify(this.props.record.data);
-            }
-        }
-        MyComponent.template = owl.xml`<div t-esc="value"/>`;
-        widgetRegistryOwl.add("test", MyComponent);
-
-        await makeView({
-            type: "list",
-            resModel: "foo",
-            serverData,
-            arch: '<tree><field name="foo"/><field name="int_field"/><widget name="test"/></tree>',
-        });
-
-        assert.strictEqual(
-            $(target).find(".o_widget").first().text(),
-            '{"foo":"yop","int_field":10,"id":1}'
-        );
-
-        delete widgetRegistryOwl.map.test;
-    });
-
     QUnit.test("use the limit attribute in arch", async function (assert) {
         assert.expect(4);
 
@@ -10922,51 +10862,6 @@ QUnit.module("Views", (hooks) => {
             $(document.activeElement).is('input[type="checkbox"]'),
             "enabled checkbox is focused after click"
         );
-    });
-
-    QUnit.skipWOWL("grouped list with async widget", async function (assert) {
-        assert.expect(4);
-
-        var prom = testUtils.makeTestPromise();
-        var AsyncWidget = Widget.extend({
-            willStart: function () {
-                return prom;
-            },
-            start: function () {
-                this.$el.text("ready");
-            },
-        });
-        widgetRegistry.add("asyncWidget", AsyncWidget);
-
-        await makeView({
-            type: "list",
-            resModel: "foo",
-            serverData,
-            arch: '<tree><widget name="asyncWidget"/></tree>',
-            groupBy: ["int_field"],
-        });
-
-        assert.containsNone(target, ".o_data_row", "no group should be open");
-
-        await click($(target).find(".o_group_header:first"));
-
-        assert.containsNone(
-            target,
-            ".o_data_row",
-            "should wait for async widgets before opening the group"
-        );
-
-        prom.resolve();
-        await testUtils.nextTick();
-
-        assert.containsN(target, ".o_data_row", 1, "group should be open");
-        assert.strictEqual(
-            $(target).find(".o_data_row .o_data_cell").text(),
-            "ready",
-            "async widget should be correctly displayed"
-        );
-
-        delete widgetRegistry.map.asyncWidget;
     });
 
     QUnit.test("grouped lists with groups_limit attribute", async function (assert) {
@@ -13406,35 +13301,6 @@ QUnit.module("Views", (hooks) => {
             );
         }
     );
-
-    QUnit.skipWOWL("enter edition in editable list with <widget>", async function (assert) {
-        assert.expect(1);
-
-        // var MyWidget = Widget.extend({
-        //     start: function () {
-        //         this.$el.ht--removethis--ml('<i class="fa fa-info"/>');
-        //     },
-        // });
-        // widgetRegistry.add("some_widget", MyWidget);
-
-        await makeView({
-            type: "list",
-            resModel: "foo",
-            serverData,
-            arch:
-                '<tree editable="top">' +
-                '<widget name="some_widget"/>' +
-                '<field name="int_field"/>' +
-                '<field name="qux"/>' +
-                "</tree>",
-        });
-
-        // click on int_field cell of first row
-        await click($(target).find(".o_data_row:first .o_data_cell:nth(1)"));
-        assert.strictEqual(document.activeElement.name, "int_field");
-
-        delete widgetRegistry.map.test;
-    });
 
     QUnit.test("enter edition in editable list with multi_edit = 0", async function (assert) {
         await makeView({
