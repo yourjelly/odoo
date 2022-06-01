@@ -3,7 +3,7 @@
 import { registry } from "@web/core/registry";
 import { Many2ManyTagsField } from "./many2many_tags_field";
 
-class KanbanMany2ManyTagsField extends Many2ManyTagsField {
+export class KanbanMany2ManyTagsField extends Many2ManyTagsField {
     get tags() {
         return super.tags.filter((tag) => tag.colorIndex !== 0);
     }
