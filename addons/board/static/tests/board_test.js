@@ -62,8 +62,8 @@ QUnit.module("Views", (hooks) => {
             },
             views: {
                 "partner,100000001,form": "<form/>",
-                "partner,100000002,search": "<search/>"
-            }
+                "partner,100000002,search": "<search/>",
+            },
         };
         setupViewRegistries();
     });
@@ -88,7 +88,7 @@ QUnit.module("Views", (hooks) => {
 
     QUnit.test("basic functionality, with one sub action", async function (assert) {
         assert.expect(21);
-        serverData.views["partner,4,list"] =  '<tree string="Partner"><field name="foo"/></tree>';
+        serverData.views["partner,4,list"] = '<tree string="Partner"><field name="foo"/></tree>';
         await makeView({
             serverData,
             type: "form",
@@ -97,7 +97,7 @@ QUnit.module("Views", (hooks) => {
                 <form string="My Dashboard" js_class="board">
                     <board style="2-1">
                         <column>
-                            <action context="{&quot;orderedBy&quot;: [{&quot;name&quot;: &quot;foo&quot;, &quot;asc&quot;: True}]}" view_mode="list" string="ABC" name="51" domain="[[\'foo\', \'!=\', \'False\']]"></action>
+                            <action context="{&quot;orderedBy&quot;: [{&quot;name&quot;: &quot;foo&quot;, &quot;asc&quot;: True}]}" view_mode="list" string="ABC" name="51" domain="[['foo', '!=', 'False']]"></action>
                         </column>
                     </board>
                 </form>
@@ -134,23 +134,28 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-
         assert.containsOnce(target, ".o-dashboard-header", "should have rendered a header");
-        assert.containsOnce(target, 'div.o-dashboard-layout-2-1', "should have rendered a div with layout");
+        assert.containsOnce(
+            target,
+            "div.o-dashboard-layout-2-1",
+            "should have rendered a div with layout"
+        );
         assert.containsNone(
             target,
             "td.o_list_record_selector",
             "td should not have a list selector"
         );
-        assert.containsOnce(target, "h3 span:contains(ABC)",
+        assert.containsOnce(
+            target,
+            "h3 span:contains(ABC)",
             "should have rendered a header with action string"
         );
         assert.containsN(target, "tr.o_data_row", 3, "should have rendered 3 data rows");
 
         assert.containsOnce(target, ".o-dashboard-action .o_list_view");
-        
+
         await click(target, "h3 i.fa-window-minimize");
-        
+
         assert.containsNone(target, ".o-dashboard-action .o_list_view");
 
         await click(target, "h3 i.fa-window-maximize");
@@ -160,20 +165,29 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["load action", "edit custom", "edit custom"]);
 
         // header should have dropdown with correct image
-        assert.containsOnce(target, ".o-dashboard-header .dropdown img[data-src='/board/static/img/layout_2-1.png']");
+        assert.containsOnce(
+            target,
+            ".o-dashboard-header .dropdown img[data-src='/board/static/img/layout_2-1.png']"
+        );
 
         // change layout to 1-1
         await click(target, ".o-dashboard-header .dropdown img");
         await click(target, ".o-dashboard-header .dropdown-item:nth-child(2)");
-        assert.containsOnce(target, ".o-dashboard-header .dropdown img[data-src='/board/static/img/layout_1-1.png']");
-        assert.containsOnce(target, 'div.o-dashboard-layout-1-1', "should have rendered a div with layout");
+        assert.containsOnce(
+            target,
+            ".o-dashboard-header .dropdown img[data-src='/board/static/img/layout_1-1.png']"
+        );
+        assert.containsOnce(
+            target,
+            "div.o-dashboard-layout-1-1",
+            "should have rendered a div with layout"
+        );
 
         assert.verifySteps(["edit custom"]);
     });
 
-
     QUnit.test("views in the dashboard do not have a control panel", async function (assert) {
-        serverData.views["partner,4,list"] =  '<tree string="Partner"><field name="foo"/></tree>';
+        serverData.views["partner,4,list"] = '<tree string="Partner"><field name="foo"/></tree>';
 
         await makeView({
             serverData,
@@ -183,7 +197,7 @@ QUnit.module("Views", (hooks) => {
                 <form string="My Dashboard" js_class="board">
                     <board style="2-1">
                         <column>
-                            <action context="{&quot;orderedBy&quot;: [{&quot;name&quot;: &quot;foo&quot;, &quot;asc&quot;: True}]}" view_mode="list" string="ABC" name="51" domain="[[\'foo\', \'!=\', \'False\']]"></action>
+                            <action context="{&quot;orderedBy&quot;: [{&quot;name&quot;: &quot;foo&quot;, &quot;asc&quot;: True}]}" view_mode="list" string="ABC" name="51" domain="[['foo', '!=', 'False']]"></action>
                         </column>
                     </board>
                 </form>
@@ -192,7 +206,10 @@ QUnit.module("Views", (hooks) => {
                 if (route === "/web/action/load") {
                     return Promise.resolve({
                         res_model: "partner",
-                        views: [[4, "list"], [5, "form"]],
+                        views: [
+                            [4, "list"],
+                            [5, "form"],
+                        ],
                     });
                 }
             },
@@ -210,7 +227,7 @@ QUnit.module("Views", (hooks) => {
         // action's params (like context or domain), as the dashboard can directly
         // retrieve them from the action. Same applies for the view_type, as the
         // first view of the action can be used, by default.
-        serverData.views["partner,4,list"] =  '<tree string="Partner"><field name="foo"/></tree>';
+        serverData.views["partner,4,list"] = '<tree string="Partner"><field name="foo"/></tree>';
 
         await makeView({
             serverData,
@@ -220,7 +237,7 @@ QUnit.module("Views", (hooks) => {
                 <form string="My Dashboard" js_class="board">
                     <board style="2-1">
                         <column>
-                            <action context="{&quot;orderedBy&quot;: [{&quot;name&quot;: &quot;foo&quot;, &quot;asc&quot;: True}]}" string="ABC" name="51" domain="[[\'foo\', \'!=\', \'False\']]"></action>
+                            <action context="{&quot;orderedBy&quot;: [{&quot;name&quot;: &quot;foo&quot;, &quot;asc&quot;: True}]}" string="ABC" name="51" domain="[['foo', '!=', 'False']]"></action>
                         </column>
                     </board>
                 </form>
@@ -229,7 +246,10 @@ QUnit.module("Views", (hooks) => {
                 if (route === "/web/action/load") {
                     return Promise.resolve({
                         res_model: "partner",
-                        views: [[4, "list"], [false, "form"]],
+                        views: [
+                            [4, "list"],
+                            [false, "form"],
+                        ],
                     });
                 }
             },
@@ -238,9 +258,8 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o-dashboard-action .o_list_view");
     });
 
-
     QUnit.test("can sort a sub list", async function (assert) {
-        serverData.views["partner,4,list"] =  '<tree string="Partner"><field name="foo"/></tree>';
+        serverData.views["partner,4,list"] = '<tree string="Partner"><field name="foo"/></tree>';
         serverData.models.partner.fields.foo.sortable = true;
 
         await makeView({
@@ -251,7 +270,7 @@ QUnit.module("Views", (hooks) => {
                 <form string="My Dashboard" js_class="board">
                     <board style="2-1">
                         <column>
-                            <action context="{&quot;orderedBy&quot;: [{&quot;name&quot;: &quot;foo&quot;, &quot;asc&quot;: True}]}" string="ABC" name="51" domain="[[\'foo\', \'!=\', \'False\']]"></action>
+                            <action context="{&quot;orderedBy&quot;: [{&quot;name&quot;: &quot;foo&quot;, &quot;asc&quot;: True}]}" string="ABC" name="51" domain="[['foo', '!=', 'False']]"></action>
                         </column>
                     </board>
                 </form>
@@ -280,15 +299,13 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-
     QUnit.test("can open a record", async function (assert) {
-        assert.expect(1)
+        assert.expect(1);
         const fakeActionService = {
             start() {
                 return {
                     doAction(action) {
-                        assert.deepEqual(action, 
-                                                {
+                        assert.deepEqual(action, {
                             res_id: 1,
                             res_model: "partner",
                             type: "ir.actions.act_window",
@@ -301,7 +318,7 @@ QUnit.module("Views", (hooks) => {
         };
         serviceRegistry.add("action", fakeActionService, { force: true });
 
-        serverData.views["partner,4,list"] =  '<tree string="Partner"><field name="foo"/></tree>';
+        serverData.views["partner,4,list"] = '<tree string="Partner"><field name="foo"/></tree>';
         serverData.models.partner.fields.foo.sortable = true;
 
         await makeView({
@@ -312,7 +329,7 @@ QUnit.module("Views", (hooks) => {
                 <form string="My Dashboard" js_class="board">
                     <board style="2-1">
                         <column>
-                            <action context="{&quot;orderedBy&quot;: [{&quot;name&quot;: &quot;foo&quot;, &quot;asc&quot;: True}]}" string="ABC" name="51" domain="[[\'foo\', \'!=\', \'False\']]"></action>
+                            <action context="{&quot;orderedBy&quot;: [{&quot;name&quot;: &quot;foo&quot;, &quot;asc&quot;: True}]}" string="ABC" name="51" domain="[['foo', '!=', 'False']]"></action>
                         </column>
                     </board>
                 </form>
@@ -330,15 +347,13 @@ QUnit.module("Views", (hooks) => {
         await click($(target).find("tr.o_data_row td:contains(yop)")[0]);
     });
 
-
     QUnit.test("can open record using action form view", async function (assert) {
-        assert.expect(1)
+        assert.expect(1);
         const fakeActionService = {
             start() {
                 return {
                     doAction(action) {
-                        assert.deepEqual(action, 
-                                                {
+                        assert.deepEqual(action, {
                             res_id: 1,
                             res_model: "partner",
                             type: "ir.actions.act_window",
@@ -351,8 +366,9 @@ QUnit.module("Views", (hooks) => {
         };
         serviceRegistry.add("action", fakeActionService, { force: true });
 
-        serverData.views["partner,4,list"] =  '<tree string="Partner"><field name="foo"/></tree>';
-        serverData.views["partner,5,form"] = '<form string="Partner"><field name="display_name"/></form>';
+        serverData.views["partner,4,list"] = '<tree string="Partner"><field name="foo"/></tree>';
+        serverData.views["partner,5,form"] =
+            '<form string="Partner"><field name="display_name"/></form>';
 
         serverData.models.partner.fields.foo.sortable = true;
 
@@ -364,7 +380,7 @@ QUnit.module("Views", (hooks) => {
                 <form string="My Dashboard" js_class="board">
                     <board style="2-1">
                         <column>
-                            <action context="{&quot;orderedBy&quot;: [{&quot;name&quot;: &quot;foo&quot;, &quot;asc&quot;: True}]}" string="ABC" name="51" domain="[[\'foo\', \'!=\', \'False\']]"></action>
+                            <action context="{&quot;orderedBy&quot;: [{&quot;name&quot;: &quot;foo&quot;, &quot;asc&quot;: True}]}" string="ABC" name="51" domain="[['foo', '!=', 'False']]"></action>
                         </column>
                     </board>
                 </form>
@@ -373,7 +389,10 @@ QUnit.module("Views", (hooks) => {
                 if (route === "/web/action/load") {
                     return Promise.resolve({
                         res_model: "partner",
-                        views: [[4, "list"], [5, "form"]],
+                        views: [
+                            [4, "list"],
+                            [5, "form"],
+                        ],
                     });
                 }
             },
@@ -383,7 +402,7 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.skip("can drag and drop a view", async function (assert) {
-        serverData.views["partner,4,list"] =  '<tree string="Partner"><field name="foo"/></tree>';
+        serverData.views["partner,4,list"] = '<tree string="Partner"><field name="foo"/></tree>';
 
         await makeView({
             serverData,
@@ -393,7 +412,7 @@ QUnit.module("Views", (hooks) => {
                 <form string="My Dashboard" js_class="board">
                     <board style="2-1">
                         <column>
-                            <action context="{&quot;orderedBy&quot;: [{&quot;name&quot;: &quot;foo&quot;, &quot;asc&quot;: True}]}" view_mode="list" string="ABC" name="51" domain="[[\'foo\', \'!=\', \'False\']]"></action>
+                            <action context="{&quot;orderedBy&quot;: [{&quot;name&quot;: &quot;foo&quot;, &quot;asc&quot;: True}]}" view_mode="list" string="ABC" name="51" domain="[['foo', '!=', 'False']]"></action>
                         </column>
                     </board>
                 </form>
@@ -412,18 +431,33 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-        assert.strictEqual(target.querySelectorAll('.o-dashboard-column[data-idx="0"] .o-dashboard-action').length, 1);
-        assert.strictEqual(target.querySelectorAll('.o-dashboard-column[data-idx="1"] .o-dashboard-action').length, 0);
+        assert.strictEqual(
+            target.querySelectorAll('.o-dashboard-column[data-idx="0"] .o-dashboard-action').length,
+            1
+        );
+        assert.strictEqual(
+            target.querySelectorAll('.o-dashboard-column[data-idx="1"] .o-dashboard-action').length,
+            0
+        );
 
-        await dragAndDrop('.o-dashboard-column[data-idx="0"] .o-dashboard-action-header', '.o-dashboard-column[data-idx="1"]');
+        await dragAndDrop(
+            '.o-dashboard-column[data-idx="0"] .o-dashboard-action-header',
+            '.o-dashboard-column[data-idx="1"]'
+        );
 
-        assert.strictEqual(target.querySelectorAll('.o-dashboard-column[data-idx="0"] .o-dashboard-action').length, 0);
-        assert.strictEqual(target.querySelectorAll('.o-dashboard-column[data-idx="1"] .o-dashboard-action').length, 1);
+        assert.strictEqual(
+            target.querySelectorAll('.o-dashboard-column[data-idx="0"] .o-dashboard-action').length,
+            0
+        );
+        assert.strictEqual(
+            target.querySelectorAll('.o-dashboard-column[data-idx="1"] .o-dashboard-action').length,
+            1
+        );
         assert.verifySteps(["edit custom"]);
     });
 
     QUnit.test("twice the same action in a dashboard", async function (assert) {
-        serverData.views["partner,4,list"] =  '<tree string="Partner"><field name="foo"/></tree>';
+        serverData.views["partner,4,list"] = '<tree string="Partner"><field name="foo"/></tree>';
         serverData.views["partner,5,kanban"] = `
             <kanban>
                 <templates>
@@ -451,17 +485,18 @@ QUnit.module("Views", (hooks) => {
                 if (route === "/web/action/load") {
                     return Promise.resolve({
                         res_model: "partner",
-                        views: [[4, "list"], [5, "kanban"]],
+                        views: [
+                            [4, "list"],
+                            [5, "kanban"],
+                        ],
                     });
                 }
                 if (route === "/web/view/edit_custom") {
                     assert.step("edit custom");
                     return Promise.resolve(true);
                 }
-
             },
         });
-
 
         var $firstAction = $(".o-dashboard-action:eq(0)");
         assert.strictEqual(
@@ -478,7 +513,6 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("clicking on a kanban's button should trigger the action", async function (assert) {
-
         await makeView({
             serverData,
             type: "form",
@@ -487,7 +521,7 @@ QUnit.module("Views", (hooks) => {
                 <form string="My Dashboard" js_class="board">
                     <board style="2-1">
                         <column>
-                            <action context="{&quot;orderedBy&quot;: [{&quot;name&quot;: &quot;foo&quot;, &quot;asc&quot;: True}]}" view_mode="list" string="ABC" name="51" domain="[[\'foo\', \'!=\', \'False\']]"></action>
+                            <action context="{&quot;orderedBy&quot;: [{&quot;name&quot;: &quot;foo&quot;, &quot;asc&quot;: True}]}" view_mode="list" string="ABC" name="51" domain="[['foo', '!=', 'False']]"></action>
                         </column>
                     </board>
                 </form>
@@ -554,14 +588,13 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-
         await click(document.querySelector(".btn.oe_kanban_action"));
     });
 
     QUnit.test("Views should be loaded in the user's language", async function (assert) {
-        assert.expect(2)
+        assert.expect(2);
         patchWithCleanup(session.user_context, { lang: "fr_FR" });
-        serverData.views["partner,4,list"] =  '<tree string="Partner"><field name="foo"/></tree>';
+        serverData.views["partner,4,list"] = '<tree string="Partner"><field name="foo"/></tree>';
 
         await makeView({
             serverData,
@@ -571,7 +604,7 @@ QUnit.module("Views", (hooks) => {
                 <form string="My Dashboard" js_class="board">
                     <board style="2-1">
                         <column>
-                        <action context="{\'lang\': \'en_US\'}" view_mode="list" string="ABC" name="51" domain="[]"></action>
+                        <action context="{'lang': 'en_US'}" view_mode="list" string="ABC" name="51" domain="[]"></action>
                         </column>
                     </board>
                 </form>
@@ -586,14 +619,13 @@ QUnit.module("Views", (hooks) => {
                 if (args.method === "get_views") {
                     assert.strictEqual(args.kwargs.context.lang, "fr_FR");
                 }
-
             },
         });
     });
 
     QUnit.test("Dashboard should use correct groupby", async function (assert) {
         assert.expect(1);
-        serverData.views["partner,4,list"] =  '<tree string="Partner"><field name="foo"/></tree>';
+        serverData.views["partner,4,list"] = '<tree string="Partner"><field name="foo"/></tree>';
 
         await makeView({
             serverData,
@@ -603,7 +635,7 @@ QUnit.module("Views", (hooks) => {
                 <form string="My Dashboard" js_class="board">
                     <board style="2-1">
                         <column>
-                            <action context="{\'group_by\': [\'bar\']}" string="ABC" name="51"></action>
+                            <action context="{'group_by': ['bar']}" string="ABC" name="51"></action>
                         </column>
                     </board>
                 </form>
@@ -616,45 +648,50 @@ QUnit.module("Views", (hooks) => {
                     });
                 }
                 if (args.method === "web_read_group") {
-                    assert.deepEqual(args.kwargs.groupby, ['bar']);
+                    assert.deepEqual(args.kwargs.groupby, ["bar"]);
                 }
             },
         });
     });
 
-    QUnit.test("Dashboard should use correct groupby when defined as a string of one field", async function (assert) {
-        assert.expect(1);
-        serverData.views["partner,4,list"] =  '<tree string="Partner"><field name="foo"/></tree>';
+    QUnit.test(
+        "Dashboard should use correct groupby when defined as a string of one field",
+        async function (assert) {
+            assert.expect(1);
+            serverData.views["partner,4,list"] =
+                '<tree string="Partner"><field name="foo"/></tree>';
 
-        await makeView({
-            serverData,
-            type: "form",
-            resModel: "board",
-            arch: `
+            await makeView({
+                serverData,
+                type: "form",
+                resModel: "board",
+                arch: `
                 <form string="My Dashboard" js_class="board">
                     <board style="2-1">
                         <column>
-                            <action context="{\'group_by\': \'bar\'}" string="ABC" name="51"></action>
+                            <action context="{'group_by': 'bar'}" string="ABC" name="51"></action>
                         </column>
                     </board>
                 </form>
             `,
-            mockRPC(route, args) {
-                if (route === "/web/action/load") {
-                    return Promise.resolve({
-                        res_model: "partner",
-                        views: [[4, "list"]],
-                    });
-                }
-                if (args.method === "web_read_group") {
-                    assert.deepEqual(args.kwargs.groupby, ['bar']);
-                }
-            },
-        });
-    });
+                mockRPC(route, args) {
+                    if (route === "/web/action/load") {
+                        return Promise.resolve({
+                            res_model: "partner",
+                            views: [[4, "list"]],
+                        });
+                    }
+                    if (args.method === "web_read_group") {
+                        assert.deepEqual(args.kwargs.groupby, ["bar"]);
+                    }
+                },
+            });
+        }
+    );
 
     QUnit.test("click on a cell of pivot view inside dashboard", async function (assert) {
-        serverData.views["partner,4,pivot"] =  '<pivot><field name="int_field" type="measure"/></pivot>';
+        serverData.views["partner,4,pivot"] =
+            '<pivot><field name="int_field" type="measure"/></pivot>';
         const fakeActionService = {
             start() {
                 return {
@@ -687,7 +724,7 @@ QUnit.module("Views", (hooks) => {
                     });
                 }
                 if (args.method === "web_read_group") {
-                    assert.deepEqual(args.kwargs.groupby, ['bar']);
+                    assert.deepEqual(args.kwargs.groupby, ["bar"]);
                 }
             },
         });
@@ -698,5 +735,4 @@ QUnit.module("Views", (hooks) => {
 
         assert.verifySteps(["do action"]);
     });
-
 });
