@@ -19,7 +19,7 @@ import { getDefaultConfig } from "@web/views/view";
 import { viewService } from "@web/views/view_service";
 import { actionService } from "@web/webclient/actions/action_service";
 
-const { Component } = owl;
+const { Component, xml } = owl;
 const serviceRegistry = registry.category("services");
 const favoriteMenuRegistry = registry.category("favoriteMenu");
 
@@ -52,14 +52,39 @@ export async function makeWithSearch(params) {
     delete props.serverData;
     delete props.mockRPC;
     delete props.config;
+    const componentProps = props.componentProps;
+    delete props.componentProps;
+    delete props.Component;
+
+    class Parent extends Component {
+        setup() {
+            this.withSearchProps = props;
+            this.componentProps = componentProps;
+        }
+    }
+    Parent.template = xml`
+        <WithSearch t-props="withSearchProps" t-slot-scope="search">
+            <Component 
+                t-props="componentProps"
+                context="search.context"
+                domain="search.domain"
+                groupBy="search.groupBy"
+                orderBy="search.orderBy"
+                comparison="search.comparison" />
+        </WithSearch>`;
+    Parent.components = { Component: params.Component, WithSearch };
 
     const env = await makeTestEnv({ serverData, mockRPC, config });
-    const withSearch = await mount(WithSearch, getFixture(), { env, props });
-    const withSearchNode = withSearch.__owl__;
-    const componentNode = Object.values(withSearchNode.children)[0];
+    const parent = await mount(Parent, getFixture(), { env, props });
+    const parentNode = parent.__owl__;
+    const withSearchNode = getUniqueChild(parentNode);
+    const componentNode = getUniqueChild(withSearchNode);
     const component = componentNode.component;
-
     return component;
+}
+
+function getUniqueChild(node) {
+    return Object.values(node.children)[0];
 }
 
 function getNode(target) {
