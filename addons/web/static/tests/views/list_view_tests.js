@@ -7612,15 +7612,16 @@ QUnit.module("Views", (hooks) => {
                 resId: 1,
             });
 
-            await click($(target).find("td:contains(gnap)"));
+            await click(target.querySelector(".o_field_cell[name=foo]"));
             assert.strictEqual(
-                $(target).find('input[name="foo"]')[0],
+                target.querySelector(".o_field_cell[name=foo] input"),
                 document.activeElement,
                 "foo should be focused"
             );
-            await testUtils.fields.triggerKeydown($(target).find('input[name="foo"]'), "tab");
+            triggerHotkey("tab");
+            await nextTick();
             assert.strictEqual(
-                $(target).find('input[name="int_field"]')[0],
+                target.querySelector(".o_field_cell[name=int_field] input"),
                 document.activeElement,
                 "int_field should be focused"
             );
@@ -7650,10 +7651,8 @@ QUnit.module("Views", (hooks) => {
                 document.activeElement,
                 "foo should be focused"
             );
-            await testUtils.fields.triggerKeydown(
-                $(target).find('tbody tr:eq(2) input[name="foo"]'),
-                "tab"
-            );
+            triggerHotkey("tab");
+            await nextTick();
             assert.strictEqual(
                 $(target).find('tbody tr:eq(3) input[name="foo"]')[0],
                 document.activeElement,
@@ -7688,10 +7687,8 @@ QUnit.module("Views", (hooks) => {
                 document.activeElement,
                 "foo should be focused"
             );
-            await testUtils.fields.triggerKeydown(
-                $(target).find('tbody tr:eq(2) input[name="foo"]'),
-                "tab"
-            );
+            triggerHotkey("tab");
+            await nextTick();
             assert.strictEqual(
                 $(target).find('tbody tr:eq(2) input[name="int_field"]')[0],
                 document.activeElement,
@@ -7700,9 +7697,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL("navigation: not moving down with keydown", async function (assert) {
-        assert.expect(2);
-
+    QUnit.test("navigation: not moving down with keydown", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -7710,21 +7705,11 @@ QUnit.module("Views", (hooks) => {
             arch: '<tree editable="bottom"><field name="foo"/></tree>',
         });
 
-        await click($(target).find("td:contains(yop)"));
-        assert.hasClass(
-            $(target).find("tr.o_data_row:eq(0)"),
-            "o_selected_row",
-            "1st row should be selected"
-        );
-        await testUtils.fields.triggerKeydown(
-            $(target).find('tr.o_selected_row input[name="foo"]'),
-            "down"
-        );
-        assert.hasClass(
-            $(target).find("tr.o_data_row:eq(0)"),
-            "o_selected_row",
-            "1st row should still be selected"
-        );
+        await click(target.querySelector(".o_field_cell[name=foo]"));
+        assert.hasClass(target.querySelector(".o_data_row"), "o_selected_row");
+        triggerHotkey("arrowdown");
+        await nextTick();
+        assert.hasClass(target.querySelector(".o_data_row"), "o_selected_row");
     });
 
     QUnit.skipWOWL(
