@@ -200,12 +200,17 @@ export function useService(serviceName) {
 }
 
 export function useChildRef() {
+    let defined = false;
     return function ref(value) {
+        if (defined) {
+            return;
+        }
         Object.defineProperty(ref, "el", {
             get() {
                 return value.el;
             },
         });
+        defined = true;
     };
 }
 
@@ -227,6 +232,7 @@ export function useOwnedDialogs() {
     const addDialog = (...args) => {
         const close = dialogService.add(...args);
         cbs.push(close);
+        return close;
     };
     return addDialog;
 }
