@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from collections import defaultdict
 from odoo import api, fields, models
 
 
@@ -114,8 +115,13 @@ class ProjectProductEmployeeMap(models.Model):
 
     def write(self, values):
         res = super(ProjectProductEmployeeMap, self).write(values)
-        self._update_project_timesheet()
+        if any(field in values for field in ['employee_id', 'sale_line_id']):
+            self._update_project_timesheet()
         return res
 
     def _update_project_timesheet(self):
-        self.filtered(lambda l: l.sale_line_id).project_id._update_timesheets_sale_line_id()
+        sale_line_per_employee_id_per_project = defaultdict(dict)
+        for mapping in self:
+            sale_line_per_employee_id_per_project[mapping.project_id][mapping.employee_id.id] = mapping.sale_line_id
+        for project, sale_line_per_employee_id in sale_line_per_employee_id_per_project.items():
+            project._update_timesheets_sale_line_id(sale_line_per_employee_id)
