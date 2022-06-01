@@ -348,98 +348,79 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".int_field_2 input");
     });
 
-    QUnit.skipWOWL("duplicate fields rendered properly (one2many)", async function (assert) {
-        assert.expect(7);
+    QUnit.test("duplicate fields rendered properly (one2many)", async function (assert) {
         serverData.models.partner.records.push({
             id: 6,
             p: [1],
         });
         await makeView({
             type: "form",
-            viewOptions: { mode: "edit" },
             resModel: "partner",
             serverData,
-            arch:
-                "<form>" +
-                "<notebook>" +
-                "<page>" +
-                '<field name="p">' +
-                '<tree editable="True">' +
-                '<field name="foo"/>' +
-                "</tree>" +
-                "<form/>" +
-                "</field>" +
-                "</page>" +
-                "<page>" +
-                '<field name="p" readonly="True">' +
-                '<tree editable="True">' +
-                '<field name="foo"/>' +
-                "</tree>" +
-                "<form/>" +
-                "</field>" +
-                "</page>" +
-                "</notebook>" +
-                "</form>",
+            arch: `
+                <form>
+                    <field name="p">
+                        <tree editable="bottom">
+                            <field name="foo"/>
+                        </tree>
+                        <form/>
+                    </field>
+                    <field name="p" readonly="True">
+                        <tree editable="bottom">
+                            <field name="foo"/>
+                        </tree>
+                        <form/>
+                    </field>
+                </form>`,
             resId: 6,
         });
-        assert.containsOnce(
-            target,
-            "div.o_field_one2many:eq(0):not(.o_readonly_modifier)",
-            "first one2many widget should not be readonly"
+
+        await click(target.querySelector(".o_form_button_edit"));
+
+        assert.containsN(target, ".o_field_one2many", 2);
+        assert.doesNotHaveClass(
+            target.querySelectorAll(".o_field_one2many")[0],
+            "o_readonly_modifier"
         );
-        assert.hasClass(
-            target.querySelector("div.o_field_one2many:eq(1)"),
-            "o_readonly_modifier",
-            "second one2many widget should be readonly"
-        );
-        await click(
-            target.querySelector(
-                "div.tab-content table.o_list_table:eq(0) tr.o_data_row td.o_data_cell:eq(0)"
-            )
-        );
+        assert.hasClass(target.querySelectorAll(".o_field_one2many")[1], "o_readonly_modifier");
+
+        await click(target.querySelector(".o_field_one2many .o_data_cell"));
+        assert.containsOnce(target.querySelector(".o_field_one2many"), ".o_selected_row");
         assert.strictEqual(
             target.querySelector(
-                'div.tab-content table.o_list_table tr.o_selected_row .o_field_widget[name="foo"] input'
+                ".o_field_one2many .o_selected_row .o_field_widget[name=foo] input"
             ).value,
-            "yop",
-            "first line in one2many of first tab contains yop"
+            "yop"
         );
         assert.strictEqual(
-            target.querySelector(
-                "div.tab-content table.o_list_table:eq(1) tr.o_data_row td.o_data_cell:eq(0)"
-            ).textContent,
-            "yop",
-            "first line in one2many of second tab contains yop"
+            target
+                .querySelectorAll(".o_field_one2many")[1]
+                .querySelector(".o_data_row .o_field_widget[name=foo] input").value, // FIXME: ideally, this row should not be in edition
+            "yop"
         );
         await editInput(
-            target.querySelector(
-                'div.tab-content table.o_list_table tr.o_selected_row .o_field_widget[name="foo"] input'
-            ),
+            target.querySelector(".o_field_one2many"),
+            ".o_selected_row .o_field_widget[name=foo] input",
             "hello"
         );
         assert.strictEqual(
-            target.querySelector(
-                "div.tab-content table.o_list_table:eq(1) tr.o_data_row td.o_data_cell:eq(0)"
-            ).textContent,
-            "hello",
-            "first line in one2many of second tab contains hello"
+            target
+                .querySelectorAll(".o_field_one2many")[1]
+                .querySelector(".o_data_row .o_field_widget[name=foo] input").value, // FIXME: ideally, this row should not be in edition
+            "hello"
         );
-        await click(
-            target.querySelector("div.tab-content table.o_list_table:eq(0) a:contains(Add a line)")
-        );
+        await click(target.querySelector(".o_field_one2many .o_field_x2many_list_row_add a"));
         assert.strictEqual(
             target.querySelector(
-                'div.tab-content table.o_list_table tr.o_selected_row .o_field_widget[name="foo"] input'
+                '.o_field_one2many .o_selected_row .o_field_widget[name="foo"] input'
             ).value,
-            "My little Foo Value",
-            "second line in one2many of first tab contains 'My little Foo Value'"
+            "My little Foo Value"
         );
         assert.strictEqual(
-            target.querySelector(
-                "div.tab-content table.o_list_table:eq(1) tr.o_data_row:eq(1) td.o_data_cell:eq(0)"
-            ).textContent,
-            "My little Foo Value",
-            "first line in one2many of second tab contains hello"
+            target
+                .querySelectorAll(".o_field_one2many")[1]
+                .querySelector(".o_data_row .o_field_widget[name=foo] input").value, // FIXME: ideally, this row should not be in edition
+            "My little Foo Value"
         );
     });
 
