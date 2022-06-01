@@ -6,15 +6,14 @@
             <div t-if="showM2OSelectionField" class="o_field_many2many_selection">
                 <div class="o_input_dropdown">
                     <AutoComplete
-                        value="state.autocompleteValue"
+                        value="''"
                         placeholder="props.placeholder"
                         sources="sources"
                         autoSelect="true"
                         onSelect.bind="onSelect"
-                        onInput.bind="onInput"
                     />
                     <a role="button" class="o_dropdown_button" draggable="false" />
-                </div>    
+                </div>
             </div>
         </TagsList>
     </t>
