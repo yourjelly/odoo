@@ -14,7 +14,7 @@
                 t-on-change="onChange"
                 t-ref="textarea"
             />
-            <t t-if="isTranslatable">
+            <t t-if="props.isTranslatable">
                 <TranslationButton
                     fieldName="props.name"
                     resId="props.resId"
