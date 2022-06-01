@@ -1,11 +1,6 @@
 /** @odoo-module **/
-import { registry } from "@web/core/registry";
-import { makeFakeDialogService } from "../helpers/mock_services";
-import { click, getFixture, makeDeferred } from "../helpers/utils";
+import { click, editInput, getFixture } from "../helpers/utils";
 import { makeView, setupViewRegistries } from "../views/helpers";
-import { ColorPickerDialog } from "@web/core/colorpicker/colorpicker_dialog";
-
-const serviceRegistry = registry.category("services");
 
 let serverData;
 let target;
@@ -22,7 +17,6 @@ QUnit.module("Fields", (hooks) => {
                     records: [
                         {
                             id: 1,
-                            hex_color: "#ff0000",
                         },
                         {
                             id: 2,
@@ -37,22 +31,7 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.module("ColorField");
 
-    QUnit.test("it opens a color picker dialog", async function (assert) {
-        assert.expect(4);
-
-        const dialogOpenedDeffered = makeDeferred();
-
-        serviceRegistry.add(
-            "dialog",
-            makeFakeDialogService((dialogClass, props) => {
-                assert.strictEqual(dialogClass, ColorPickerDialog);
-                assert.strictEqual(props.color, serverData.models.partner.records[0].hex_color);
-                assert.step("dialog opened");
-                dialogOpenedDeffered.resolve();
-            }),
-            { force: true }
-        );
-
+    QUnit.test("field contains a color input", async function (assert) {
         await makeView({
             type: "form",
             serverData,
@@ -66,41 +45,48 @@ QUnit.module("Fields", (hooks) => {
                 </form>
             `,
         });
+        assert.containsOnce(
+            target,
+            ".o_field_color input[type='color']",
+            "native color input is used by the field"
+        );
+        // style returns the value in the rgb format
+        assert.strictEqual(
+            target.querySelector(".o_field_color div").style.backgroundColor,
+            "rgb(0, 0, 0)",
+            "field has the default color set as background if no value has been selected"
+        );
 
-        await click(target.querySelector(".o_field_color button"));
-
-        await dialogOpenedDeffered;
-
-        assert.verifySteps(["dialog opened"]);
+        await editInput(target, ".o_field_color input", "#fefefe");
+        assert.strictEqual(
+            target.querySelector(".o_field_color div").style.backgroundColor,
+            "rgb(254, 254, 254)",
+            "field has the new color set as background"
+        );
     });
 
-    QUnit.test("in list, it doesn't open the form view when clicked", async function (assert) {
+    QUnit.test("color field in editable list view", async function (assert) {
         assert.expect(2);
-
-        const dialogOpenedDeffered = makeDeferred();
-
-        serviceRegistry.add(
-            "dialog",
-            makeFakeDialogService(() => {
-                assert.step("clicked");
-                dialogOpenedDeffered.resolve();
-            }),
-            { force: true }
-        );
 
         await makeView({
             type: "list",
             serverData,
             resModel: "partner",
             arch: `
-                <tree>
+                <tree editable="bottom">
                     <field name="hex_color" widget="color" />
                 </tree>
             `,
         });
 
-        await click(target.querySelector(".o_field_color button"));
-        await dialogOpenedDeffered;
-        assert.verifySteps(["clicked"]);
+        assert.containsN(
+            target,
+            ".o_field_color input[type='color']",
+            2,
+            "native color input is used on each row"
+        );
+
+        await click(target.querySelector(".o_field_color input"));
+        assert.doesNotHaveClass(target.querySelector(".o_data_row"), "o_selected_row");
     });
 });
