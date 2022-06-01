@@ -11,6 +11,20 @@ import {
 import { Field } from "@web/fields/field";
 import { getActiveActions } from "@web/views/helpers/view_utils";
 
+/**
+ * NOTE ON 't-name="kanban-box"':
+ *
+ * Multiple roots are supported in kanban box template definitions, however there
+ * are a few things to keep in mind when doing so:
+ *
+ * - each root will generate its own card, so it would be preferable to make the
+ * roots mutually exclusive to avoid rendering multiple cards for the same record;
+ *
+ * - certain fields such as the kanban 'color' or the 'handle' field are based on
+ * the last encountered node, so it is advisde to keep the same values for those
+ * fields within all roots to avoid inconsistencies.
+ */
+
 const KANBAN_BOX_ATTRIBUTE = "kanban-box";
 const ACTION_TYPES = ["action", "object"];
 const SPECIAL_TYPES = [...ACTION_TYPES, "edit", "open", "delete", "url", "set_cover"];
@@ -66,17 +80,6 @@ function hasClass(el, ...classes) {
     return classes.some((cls) => elClasses.includes(cls));
 }
 
-function applyDefaultAttributes(kanbanBox) {
-    kanbanBox.setAttribute("t-att-tabindex", "isSample ? -1 : 0");
-    kanbanBox.setAttribute("role", "article");
-    kanbanBox.setAttribute("t-att-class", "getRecordClasses(record,groupOrRecord.group)");
-    kanbanBox.setAttribute("t-att-data-id", "canResequenceRecords and record.id");
-    if (hasClass(kanbanBox, ...KANBAN_CLICK_CLASSES)) {
-        kanbanBox.setAttribute("t-on-click", "(ev) => this.onRecordClick(record, ev)");
-    }
-    return kanbanBox;
-}
-
 export class KanbanArchParser extends XMLParser {
     parse(arch, models, modelName) {
         const fields = models[modelName];
@@ -99,7 +102,7 @@ export class KanbanArchParser extends XMLParser {
             (xmlDoc.getAttribute("on_create") || "quick_create");
         const quickCreateView = xmlDoc.getAttribute("quick_create_view");
         const tooltipInfo = {};
-        let kanbanBoxTemplate = createElement("t");
+        let boxTemplate;
         let colorField = "color";
         let cardColorField = null;
         let handleField = null;
@@ -113,7 +116,7 @@ export class KanbanArchParser extends XMLParser {
         this.visitXML(xmlDoc, (node) => {
             if (node.getAttribute("t-name") === KANBAN_BOX_ATTRIBUTE) {
                 node.removeAttribute("t-name");
-                kanbanBoxTemplate = node;
+                boxTemplate = node;
                 return;
             }
             // Case: field node
@@ -159,16 +162,21 @@ export class KanbanArchParser extends XMLParser {
             }
         });
 
-        // Concrete kanban box element in the template
-        let kanbanBox = kanbanBoxTemplate;
-        while (!isValidBox(kanbanBox)) {
-            const validChildren = [...kanbanBox.children].filter(isValidBox);
-            if (validChildren.length !== 1) {
-                throw new Error(
-                    `Expected a single element to generate the kanban card template, got ${validChildren.length}.`
-                );
+        if (!boxTemplate) {
+            throw new Error(`Missing 'kanban-box' template.`);
+        }
+
+        // Concrete kanban box elements in the template
+        const validBoxes = isValidBox(boxTemplate) ? [boxTemplate] : boxTemplate.children;
+        const box = createElement("t", validBoxes);
+        for (const child of box.children) {
+            child.setAttribute("t-att-tabindex", "isSample ? -1 : 0");
+            child.setAttribute("role", "article");
+            child.setAttribute("t-att-class", "getRecordClasses(record,groupOrRecord.group)");
+            child.setAttribute("t-att-data-id", "canResequenceRecords and record.id");
+            if (hasClass(child, ...KANBAN_CLICK_CLASSES)) {
+                child.setAttribute("t-on-click", "(ev) => this.onRecordClick(record, ev)");
             }
-            kanbanBox = validChildren[0];
         }
 
         // Generates dropdown element
@@ -191,7 +199,7 @@ export class KanbanArchParser extends XMLParser {
         }
 
         // Dropdown element
-        for (const el of kanbanBox.getElementsByClassName("dropdown")) {
+        for (const el of box.getElementsByClassName("dropdown")) {
             const classes = el.className.split(/\s+/).filter((cls) => cls && cls !== "dropdown");
             combineAttributes(dropdown, "class", classes);
             if (!dropdownInserted) {
@@ -201,7 +209,7 @@ export class KanbanArchParser extends XMLParser {
         }
 
         // Dropdown menu content
-        for (const el of kanbanBox.getElementsByClassName("dropdown-menu")) {
+        for (const el of box.getElementsByClassName("dropdown-menu")) {
             menuClass.push(el.getAttribute("class"));
             dropdown.append(...el.children);
             if (dropdownInserted) {
@@ -213,9 +221,7 @@ export class KanbanArchParser extends XMLParser {
         }
 
         // Dropdown toggler content
-        for (const el of kanbanBox.querySelectorAll(
-            ".dropdown-toggle,.o_kanban_manage_toggle_button"
-        )) {
+        for (const el of box.querySelectorAll(".dropdown-toggle,.o_kanban_manage_toggle_button")) {
             togglerClass.push(el.getAttribute("class"));
             const togglerSlot = createElement("t", { "t-set-slot": "toggler" }, el.children);
             dropdown.appendChild(togglerSlot);
@@ -230,11 +236,13 @@ export class KanbanArchParser extends XMLParser {
         transfers.forEach((transfer) => transfer());
 
         // Color and color picker
-        const { color } = extractAttributes(kanbanBox, ["color"]);
-        if (color) {
-            cardColorField = color;
+        for (const child of box.children) {
+            const { color } = extractAttributes(child, ["color"]);
+            if (color) {
+                cardColorField = color;
+            }
         }
-        for (const el of kanbanBox.getElementsByClassName("oe_kanban_colorpicker")) {
+        for (const el of box.getElementsByClassName("oe_kanban_colorpicker")) {
             const field = el.getAttribute("data-field");
             if (field) {
                 colorField = field;
@@ -243,7 +251,7 @@ export class KanbanArchParser extends XMLParser {
         }
 
         // Special actions
-        for (const el of kanbanBox.querySelectorAll("a[type],button[type]")) {
+        for (const el of box.querySelectorAll("a[type],button[type]")) {
             const type = el.getAttribute("type");
             const tag = el.tagName.toLowerCase();
             combineAttributes(el, "class", `oe_kanban_action oe_kanban_action_${tag}`);
@@ -297,7 +305,7 @@ export class KanbanArchParser extends XMLParser {
             limit: limit && parseInt(limit, 10),
             progressAttributes,
             cardColorField,
-            xmlDoc: applyDefaultAttributes(kanbanBox),
+            xmlDoc: box,
             tooltipInfo,
             examples: xmlDoc.getAttribute("examples"),
             __rawArch: arch,
