@@ -75,7 +75,7 @@ QUnit.module("UI", ({ beforeEach }) => {
             useSortable({
                 ref: {},
                 elements: ".item",
-                isActive: false,
+                enable: false,
             });
         }, false);
         await mountListAndAssert(() => {
@@ -208,7 +208,7 @@ QUnit.module("UI", ({ beforeEach }) => {
                 useSortable({
                     ref: useRef("root"),
                     elements: ".item",
-                    isActive: () => this.state.enableSortable,
+                    enable: () => this.state.enableSortable,
                     onStart() {
                         assert.step("start");
                     },
