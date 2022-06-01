@@ -9776,35 +9776,6 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.skipWOWL(
-        "if the focus is on the save button, hitting ESCAPE should discard",
-        async function (assert) {
-            assert.expect(0);
-
-            await makeView({
-                type: "form",
-                resModel: "partner",
-                serverData,
-                arch: `<form><field name="foo"/></form>`,
-                viewOptions: {
-                    mode: "edit",
-                },
-                mockRPC(route, args) {
-                    if (args.method === "create") {
-                        throw new Error("Create should not be called");
-                    }
-                    return this._super(route, args);
-                },
-            });
-
-            target
-                .querySelector(".o_form_button_save")
-                .focus()
-                .trigger($.Event("keydown", { which: $.ui.keyCode.ESCAPE }));
-            await testUtils.nextTick();
-        }
-    );
-
-    QUnit.skipWOWL(
         "resequence list lines when discardable lines are present",
         async function (assert) {
             assert.expect(8);
@@ -9886,35 +9857,6 @@ QUnit.module("Views", (hooks) => {
                 "2",
                 "onchange worked there is 2 lines"
             );
-        }
-    );
-
-    QUnit.skipWOWL(
-        "if the focus is on the discard button, hitting ESCAPE should discard",
-        async function (assert) {
-            assert.expect(0);
-
-            await makeView({
-                type: "form",
-                resModel: "partner",
-                serverData,
-                arch: `<form><field name="foo"/></form>`,
-                viewOptions: {
-                    mode: "edit",
-                },
-                mockRPC(route, args) {
-                    if (args.method === "create") {
-                        throw new Error("Create should not be called");
-                    }
-                    return this._super(route, args);
-                },
-            });
-
-            target
-                .querySelector(".o_form_button_cancel")
-                .focus()
-                .trigger($.Event("keydown", { which: $.ui.keyCode.ESCAPE }));
-            await testUtils.nextTick();
         }
     );
 
