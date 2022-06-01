@@ -54,9 +54,8 @@ function registerView(name, LegacyView) {
 
             // always add user context to the action context
             this.user = useService("user");
-            const action = Object.assign({}, this.props.action, {
-                context: Object.assign({}, this.user.context, this.props.action.context),
-            });
+            const action = Object.assign({}, this.props.action);
+            action.context = Object.assign({}, this.user.context, action.context);
 
             const { actionFlags, breadcrumbs, noBreadcrumbs } = this.env.config;
             if (noBreadcrumbs) {
@@ -106,7 +105,7 @@ function registerView(name, LegacyView) {
         async onWillStart() {
             const params = {
                 resModel: this.props.resModel,
-                views: this.props.views,
+                views: this.props.views || this.env.config.views,
                 context: this.props.context,
             };
             const options = {
@@ -116,13 +115,13 @@ function registerView(name, LegacyView) {
             };
             const viewDescriptions = await this.vm.loadViews(params, options);
             const result = viewDescriptions.__legacy__;
-            const fieldsInfo = result.fields_views[this.props.type];
+            const fieldsInfo = result.fields_views[this.props.type || this.env.config.viewType];
             const jsClass = getJsClassWidget(fieldsInfo);
             this.View = jsClass || this.View;
             this.viewInfo = Object.assign({}, fieldsInfo, {
                 fields: result.fields,
                 viewFields: fieldsInfo.fields,
-                type: this.props.type,
+                type: this.props.type || this.env.config.viewType,
             });
             let controlPanelFieldsView;
             if (result.fields_views.search) {
@@ -133,7 +132,8 @@ function registerView(name, LegacyView) {
                 });
             }
             const { viewSwitcherEntries = [] } = this.env.config;
-            const views = this.viewParams.action.views
+            const _views = this.viewParams.action.views || this.env.config.views;
+            const views = _views
                 .filter(([, vtype]) => vtype !== "search")
                 .map(([vid, vtype]) => {
                     const view = viewSwitcherEntries.find((v) => v.type === vtype);
@@ -149,7 +149,7 @@ function registerView(name, LegacyView) {
                 });
             this.viewParams.action = Object.assign({}, this.viewParams.action, {
                 controlPanelFieldsView,
-                _views: this.viewParams.action.views,
+                _views,
                 views,
             });
         }
