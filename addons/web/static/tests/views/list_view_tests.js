@@ -11760,110 +11760,119 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL("cell-level keyboard navigation in non-editable list", async function (assert) {
-        assert.expect(16);
-
+    QUnit.test("cell-level keyboard navigation in non-editable list", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
             serverData,
             arch: '<tree><field name="foo" required="1"/></tree>',
-            intercepts: {
-                switch_view: function (event) {
-                    assert.strictEqual(
-                        event.data.res_id,
-                        3,
-                        "'switch_view' event has been triggered"
-                    );
-                },
+            selectRecord: (resId) => {
+                assert.step(`resId: ${resId}`);
             },
         });
 
-        assert.ok(
-            document.activeElement.classList.contains("o_searchview_input"),
-            "default focus should be in search view"
-        );
-        await testUtils.fields.triggerKeydown($(document.activeElement), "down");
+        assert.strictEqual(document.activeElement, target.querySelector(".o_searchview_input"));
+
+        triggerHotkey("ArrowDown");
+        await nextTick();
         assert.strictEqual(
-            document.activeElement.tagName,
-            "INPUT",
-            "focus should now be on the record selector"
+            document.activeElement,
+            target.querySelector("thead .o_list_record_selector input")
         );
-        await testUtils.fields.triggerKeydown($(document.activeElement), "up");
-        assert.ok(
-            document.activeElement.classList.contains("o_searchview_input"),
-            "focus should have come back to the search view"
-        );
-        await testUtils.fields.triggerKeydown($(document.activeElement), "down");
-        await testUtils.fields.triggerKeydown($(document.activeElement), "down");
+
+        triggerHotkey("ArrowUp");
+        await nextTick();
+        assert.strictEqual(document.activeElement, target.querySelector(".o_searchview_input"));
+
+        triggerHotkey("ArrowDown");
+        triggerHotkey("ArrowDown");
+        await nextTick();
         assert.strictEqual(
-            document.activeElement.tagName,
-            "INPUT",
-            "focus should now be in first row input"
+            document.activeElement,
+            target.querySelector("tbody tr:first-child .o_list_record_selector input")
         );
-        await testUtils.fields.triggerKeydown($(document.activeElement), "right");
-        assert.strictEqual(document.activeElement.tagName, "TD", "focus should now be in field TD");
+
+        triggerHotkey("ArrowRight");
+        await nextTick();
         assert.strictEqual(
-            document.activeElement.textContent,
-            "yop",
-            "focus should now be in first row field"
+            document.activeElement,
+            target.querySelector("tbody tr:first-child .o_field_cell[name=foo]")
         );
-        await testUtils.fields.triggerKeydown($(document.activeElement), "right");
+        assert.strictEqual(document.activeElement.textContent, "yop");
+
+        triggerHotkey("ArrowRight");
+        await nextTick();
         assert.strictEqual(
-            document.activeElement.textContent,
-            "yop",
-            "should not cycle at end of line"
+            document.activeElement,
+            target.querySelector("tbody tr:first-child .o_field_cell[name=foo]")
         );
-        await testUtils.fields.triggerKeydown($(document.activeElement), "down");
+
+        triggerHotkey("ArrowDown");
+        await nextTick();
         assert.strictEqual(
-            document.activeElement.textContent,
-            "blip",
-            "focus should now be in second row field"
+            document.activeElement,
+            target.querySelector("tbody tr:nth-child(2) .o_field_cell[name=foo]")
         );
-        await testUtils.fields.triggerKeydown($(document.activeElement), "down");
+        assert.strictEqual(document.activeElement.textContent, "blip");
+
+        triggerHotkey("ArrowDown");
+        await nextTick();
         assert.strictEqual(
-            document.activeElement.textContent,
-            "gnap",
-            "focus should now be in third row field"
+            document.activeElement,
+            target.querySelector("tbody tr:nth-child(3) .o_field_cell[name=foo]")
         );
-        await testUtils.fields.triggerKeydown($(document.activeElement), "down");
+        assert.strictEqual(document.activeElement.textContent, "gnap");
+
+        triggerHotkey("ArrowDown");
+        await nextTick();
         assert.strictEqual(
-            document.activeElement.textContent,
-            "blip",
-            "focus should now be in last row field"
+            document.activeElement,
+            target.querySelector("tbody tr:nth-child(4) .o_field_cell[name=foo]")
         );
-        await testUtils.fields.triggerKeydown($(document.activeElement), "down");
+        assert.strictEqual(document.activeElement.textContent, "blip");
+
+        triggerHotkey("ArrowDown");
+        await nextTick();
         assert.strictEqual(
-            document.activeElement.textContent,
-            "blip",
-            "focus should still be in last row field (arrows do not cycle)"
+            document.activeElement,
+            target.querySelector("tbody tr:nth-child(4) .o_field_cell[name=foo]")
         );
-        await testUtils.fields.triggerKeydown($(document.activeElement), "right");
+        assert.strictEqual(document.activeElement.textContent, "blip");
+
+        triggerHotkey("ArrowRight");
+        await nextTick();
         assert.strictEqual(
-            document.activeElement.textContent,
-            "blip",
-            "focus should still be in last row field (arrows still do not cycle)"
+            document.activeElement,
+            target.querySelector("tbody tr:nth-child(4) .o_field_cell[name=foo]")
         );
-        await testUtils.fields.triggerKeydown($(document.activeElement), "left");
+        assert.strictEqual(document.activeElement.textContent, "blip");
+
+        triggerHotkey("ArrowLeft");
+        await nextTick();
         assert.strictEqual(
-            document.activeElement.tagName,
-            "INPUT",
-            "focus should now be in last row input"
+            document.activeElement,
+            target.querySelector("tbody tr:nth-child(4) .o_list_record_selector input")
         );
-        await testUtils.fields.triggerKeydown($(document.activeElement), "left");
+
+        triggerHotkey("ArrowLeft");
+        await nextTick();
         assert.strictEqual(
-            document.activeElement.tagName,
-            "INPUT",
-            "should not cycle at start of line"
+            document.activeElement,
+            target.querySelector("tbody tr:nth-child(4) .o_list_record_selector input")
         );
-        await testUtils.fields.triggerKeydown($(document.activeElement), "up");
-        await testUtils.fields.triggerKeydown($(document.activeElement), "right");
+
+        triggerHotkey("ArrowUp");
+        triggerHotkey("ArrowRight");
+        await nextTick();
         assert.strictEqual(
-            document.activeElement.textContent,
-            "gnap",
-            "focus should now be in third row field"
+            document.activeElement,
+            target.querySelector("tbody tr:nth-child(3) .o_field_cell[name=foo]")
         );
-        await testUtils.fields.triggerKeydown($(document.activeElement), "enter");
+        assert.strictEqual(document.activeElement.textContent, "gnap");
+
+        triggerHotkey("Enter");
+        await nextTick();
+        assert.verifySteps(["resId: 3"]);
     });
 
     QUnit.skipWOWL("removing a groupby while adding a line from list", async function (assert) {
