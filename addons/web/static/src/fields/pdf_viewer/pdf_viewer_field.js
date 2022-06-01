@@ -37,8 +37,8 @@ export class PdfViewerField extends Component {
                 encodeURIComponent(
                     this.state.objectUrl ||
                         url("/web/content", {
-                            model: this.props.record.resModel,
-                            id: this.props.record.resId,
+                            model: this.props.resModel,
+                            id: this.props.resId,
                             field: this.props.previewImage || this.props.name,
                         })
                 ) +

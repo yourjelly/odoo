@@ -87,6 +87,7 @@ ReferenceField.props = {
     },
     getContext: { type: Function, optional: true },
     getDomain: { type: Function, optional: true },
+    string: { type: String, optional: true },
 };
 ReferenceField.defaultProps = {
     getContext: () => ({}),
@@ -118,6 +119,7 @@ ReferenceField.extractProps = (fieldName, record, attrs) => {
         ...props,
         getContext: () => record.getFieldContext(fieldName),
         getDomain: () => record.getFieldDomain(fieldName),
+        string: attrs.string || record.fields[fieldName].string,
     };
 };
 
