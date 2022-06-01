@@ -7712,11 +7712,9 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass(target.querySelector(".o_data_row"), "o_selected_row");
     });
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "navigation: moving right with keydown from text field does not move the focus",
         async function (assert) {
-            assert.expect(6);
-
             serverData.models.foo.fields.foo.type = "text";
             await makeView({
                 type: "list",
@@ -7729,35 +7727,17 @@ QUnit.module("Views", (hooks) => {
                     "</tree>",
             });
 
-            await click($(target).find("td:contains(yop)"));
-            var textarea = $(target).find('textarea[name="foo"]')[0];
-            assert.strictEqual(document.activeElement, textarea, "textarea should be focused");
-            assert.strictEqual(
-                textarea.selectionStart,
-                0,
-                "textarea selection start should be at the beginning"
-            );
-            assert.strictEqual(
-                textarea.selectionEnd,
-                3,
-                "textarea selection end should be at the end"
-            );
+            await click(target.querySelector(".o_field_cell[name=foo]"));
+            const textarea = target.querySelector(".o_field_widget[name=foo] textarea");
+            assert.strictEqual(document.activeElement, textarea);
+            assert.strictEqual(textarea.selectionStart, 0);
+            assert.strictEqual(textarea.selectionEnd, 3);
             textarea.selectionStart = 3; // Simulate browser keyboard right behavior (unselect)
-            assert.strictEqual(
-                document.activeElement,
-                textarea,
-                "textarea should still be focused"
-            );
-            assert.ok(
-                textarea.selectionStart === 3 && textarea.selectionEnd === 3,
-                "textarea value ('yop') should not be selected and cursor should be at the end"
-            );
-            await testUtils.fields.triggerKeydown($(textarea), "right");
-            assert.strictEqual(
-                document.activeElement,
-                $(target).find('textarea[name="foo"]')[0],
-                "next field (checkbox) should now be focused"
-            );
+            assert.strictEqual(document.activeElement, textarea);
+            assert.ok(textarea.selectionStart === 3 && textarea.selectionEnd === 3);
+            triggerHotkey("arrowright");
+            await nextTick();
+            assert.strictEqual(document.activeElement, textarea);
         }
     );
 
