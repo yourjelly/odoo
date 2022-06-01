@@ -1,11 +1,11 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { BooleanToggleField } from "../boolean_toggle/boolean_toggle_field";
+import { BooleanToggleField } from "./boolean_toggle_field";
 
 const { Component } = owl;
 
-class ListBooleanToggleField extends Component {
+export class ListBooleanToggleField extends Component {
     onClick() {
         if (!this.props.readonly) {
             this.props.update(!this.props.value);
