@@ -21,7 +21,7 @@ import { getActiveActions } from "@web/views/helpers/view_utils";
  * roots mutually exclusive to avoid rendering multiple cards for the same record;
  *
  * - certain fields such as the kanban 'color' or the 'handle' field are based on
- * the last encountered node, so it is advisde to keep the same values for those
+ * the last encountered node, so it is advised to keep the same values for those
  * fields within all roots to avoid inconsistencies.
  */
 
