@@ -33,7 +33,7 @@ export function getVisibleElements(activeElement, selector) {
  *
  * OPTIONAL
  *
- * @property {boolean | () => boolean} [isActive] whether the sortable system should
+ * @property {boolean | () => boolean} [enable] whether the sortable system should
  *  be enabled.
  * @property {string | () => string} [groups] defines parent groups of sortable
  *  elements. This allows to add `onGroupEnter` and `onGroupLeave` callbacks to
@@ -80,7 +80,7 @@ const LEFT_CLICK = 0;
 const MOUSEMOVE_DEBOUNCE = 6;
 const MANDATORY_SORTABLE_PARAMS = ["ref", "elements"];
 const SORTABLE_PARAMS = {
-    isActive: ["boolean", "function"],
+    enable: ["boolean", "function"],
     ref: ["object"],
     elements: ["string"],
     groups: ["string", "function"],
@@ -104,7 +104,7 @@ function cancelEvent(ev) {
  * @returns {[string, string | boolean][]}
  */
 function computeParams(params) {
-    const computedParams = { isActive: true };
+    const computedParams = { enable: true };
     for (const prop in SORTABLE_PARAMS) {
         if (prop in params) {
             computedParams[prop] = params[prop];
@@ -555,7 +555,7 @@ export function useSortable(params) {
     useEffect(
         (...deps) => {
             const actualParams = Object.fromEntries(deps);
-            enabled = Boolean(ref.el && actualParams.isActive);
+            enabled = Boolean(ref.el && actualParams.enable);
             if (!enabled) {
                 return;
             }

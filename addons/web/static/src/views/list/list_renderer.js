@@ -101,7 +101,7 @@ export class ListRenderer extends Component {
         let dataRowId;
         this.rootRef = useRef("root");
         useSortable({
-            isActive: () => this.canResequenceRows,
+            enable: () => this.canResequenceRows,
             // Params
             ref: this.rootRef,
             elements: ".o_row_draggable",

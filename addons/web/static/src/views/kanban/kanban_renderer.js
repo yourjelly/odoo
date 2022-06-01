@@ -112,13 +112,13 @@ export class KanbanRenderer extends Component {
         this.colors = COLORS;
         this.exampleData = registry.category("kanban_examples").get(examples, null);
         this.ghostColumns = this.generateGhostColumns();
-        // Draggable
+
+        // Sortable
         let dataRecordId;
         let dataGroupId;
         const rootRef = useRef("root");
         useSortable({
-            // TODO: change name
-            isActive: () => this.canResequenceRecords,
+            enable: () => this.canResequenceRecords,
             // Params
             ref: rootRef,
             elements: ".o_record_draggable",
@@ -145,7 +145,7 @@ export class KanbanRenderer extends Component {
             },
         });
         useSortable({
-            isActive: () => this.canResequenceGroups,
+            enable: () => this.canResequenceGroups,
             // Params
             ref: rootRef,
             elements: ".o_group_draggable",
@@ -164,6 +164,7 @@ export class KanbanRenderer extends Component {
                 element.classList.add("o_group_draggable");
             },
         });
+
         useBounceButton(rootRef, (clickedEl) => {
             if (!this.props.list.count || this.props.list.model.useSampleModel) {
                 return clickedEl.matches(
