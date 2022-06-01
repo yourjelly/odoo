@@ -159,8 +159,8 @@ export class View extends Component {
 
         this.handleActionLinks = useActionLinks({ resModel });
 
-        onWillStart(this.onWillStart);
         onWillUpdateProps(this.onWillUpdateProps);
+        onWillStart(this.onWillStart);
     }
 
     async onWillStart() {
@@ -263,10 +263,18 @@ export class View extends Component {
             noBreadcrumbs: this.props.noBreadcrumbs,
             ...extractLayoutComponents(descr),
         });
+        const info = {
+            actionMenus,
+            mode: this.props.display.mode,
+            irFilters,
+            searchViewArch,
+            searchViewFields,
+            searchViewId,
+        };
 
         // prepare the view props
         const viewProps = {
-            info: { actionMenus, mode: this.props.display.mode },
+            info,
             arch,
             fields,
             relatedModels,
@@ -305,12 +313,12 @@ export class View extends Component {
 
         const finalProps = descr.props ? descr.props(viewProps, descr, this.env.config) : viewProps;
         // prepare the WithSearch component props
+        this.Controller = descr.Controller;
+        this.componentProps = finalProps;
         this.withSearchProps = {
             ...toRaw(this.props),
             searchMenuTypes,
-            Component: descr.Controller,
             SearchModel: descr.SearchModel,
-            componentProps: finalProps,
         };
 
         if (searchViewId !== undefined) {
@@ -347,7 +355,7 @@ export class View extends Component {
         }
     }
 
-    async onWillUpdateProps(nextProps) {
+    onWillUpdateProps(nextProps) {
         // we assume that nextProps can only vary in the search keys:
         // comparison, context, domain, groupBy, orderBy
         const { comparison, context, domain, groupBy, orderBy } = nextProps;
