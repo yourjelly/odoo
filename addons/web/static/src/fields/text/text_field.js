@@ -20,10 +20,6 @@ export class TextField extends Component {
         });
     }
 
-    get isTranslatable() {
-        return this.props.record.fields[this.props.name].translate;
-    }
-
     resize() {
         const textarea = this.textareaRef.el;
         let heightOffset = 0;
@@ -52,6 +48,7 @@ TextField.components = {
 };
 TextField.props = {
     ...standardFieldProps,
+    isTranslatable: { type: Boolean, optional: true },
     placeholder: { type: String, optional: true },
     resId: { type: [Number, Boolean], optional: true },
     resModel: { type: String, optional: true },
@@ -62,6 +59,7 @@ TextField.supportedTypes = ["html", "text"];
 
 TextField.extractProps = (fieldName, record, attrs) => {
     return {
+        isTranslatable: record.fields[fieldName].translate,
         placeholder: attrs.placeholder,
         resId: record.resId,
         resModel: record.resModel,
