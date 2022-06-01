@@ -223,7 +223,12 @@ export class AutoComplete extends Component {
 
     onInputBlur() {
         const value = this.inputRef.el.value;
-        if (this.props.autoSelect && this.state.activeSourceOption && value.length > 0) {
+        if (
+            this.props.autoSelect &&
+            this.state.activeSourceOption &&
+            value.length > 0 &&
+            value !== this.props.value
+        ) {
             this.selectOption(this.state.activeSourceOption, { triggeredOnBlur: true });
         } else {
             this.props.onBlur({
