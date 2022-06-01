@@ -1,4 +1,27 @@
 
+odoo.define('pos_epson_printer.communication_failed', function(require) {
+    'use strict';
+
+    const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
+    const Registries = require('point_of_sale.Registries');
+
+    class EpsonPrinterErrorPopup extends AbstractAwaitablePopup {
+        mounted() {
+            this.playSound('error');
+        }
+    }
+    EpsonPrinterErrorPopup.template = 'EpsonPrinterErrorPopup';
+    EpsonPrinterErrorPopup.defaultProps = {
+        confirmText: 'Ok',
+        cancelText: 'Cancel',
+        title: 'Error',
+    };
+
+    Registries.Component.add(EpsonPrinterErrorPopup);
+
+    return EpsonPrinterErrorPopup;
+});
+
 odoo.define('pos_epson_printer.Printer', function (require) {
 "use strict";
 
@@ -22,9 +45,10 @@ var EpsonPrinter = core.Class.extend(PrinterMixin, {
         if ((resultConnect == 'OK') || (resultConnect == 'SSL_CONNECT_OK')) {
             this.ePOSDevice.createDevice(deviceId, this.ePOSDevice.DEVICE_TYPE_PRINTER, options, this.callback_createDevice.bind(this));
         } else {
-            Gui.showPopup('ErrorPopup', {
-                'title': _t('Connection to the printer failed'),
-                'body':  _t('Please check if the printer is still connected, if the configured IP address is correct and if your printer supports the ePOS protocol.'),
+            Gui.showPopup('EpsonPrinterErrorPopup', {
+                title: _t('Connection to printer failed'),
+                url: this.ePOSDevice.conectionObj.address_p,
+                is_http: window.location.protocol === 'http:',
             });
         }
     },
