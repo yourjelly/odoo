@@ -21,7 +21,7 @@ import {
 } from "../relational_utils";
 import { makeContext } from "@web/core/context";
 
-const { Component, useState, useEffect } = owl;
+const { Component, useEffect } = owl;
 
 class Many2ManyTagsFieldColorListPopover extends Component {}
 Many2ManyTagsFieldColorListPopover.template = "web.Many2ManyTagsFieldColorListPopover";
@@ -46,9 +46,6 @@ function useForceCloseAutocomplete(onShouldClose = () => {}) {
 
 export class Many2ManyTagsField extends Component {
     setup() {
-        this.state = useState({
-            autocompleteValue: "",
-        });
         this.orm = useService("orm");
         this.previousColorsMap = {};
         this.popover = usePopover();
@@ -92,9 +89,7 @@ export class Many2ManyTagsField extends Component {
             onSelected: (resIds) => saveRecord(resIds),
         });
 
-        this.forceCloseAutocomplete = useForceCloseAutocomplete(() => {
-            this.state.autocompleteValue = "";
-        });
+        this.forceCloseAutocomplete = useForceCloseAutocomplete();
     }
     get tags() {
         return this.props.value.records.map((record) => ({
@@ -249,12 +244,7 @@ export class Many2ManyTagsField extends Component {
         ].some((n) => n === name);
     }
 
-    onInput({ inputValue }) {
-        this.state.autocompleteValue = inputValue;
-    }
-
     onSelect(option) {
-        this.state.autocompleteValue = "";
         const ids = [...this.props.value.currentIds, option.value];
         this.props.value.replaceWith(ids);
     }
