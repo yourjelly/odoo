@@ -167,10 +167,7 @@ export class Many2OneField extends Component {
                 viewId,
                 preventCreate: !this.props.canCreate,
                 preventEdit: !this.props.canWrite,
-                title: sprintf(
-                    this.env._t("Open: %s"),
-                    this.props.record.activeFields[this.props.name].string
-                ),
+                title: sprintf(this.env._t("Open: %s"), this.props.string),
                 onRecordSaved: async () => {
                     await this.props.record.load();
                     await this.props.update(this.props.value);
@@ -196,10 +193,7 @@ export class Many2OneField extends Component {
                         resId: false,
                         resModel: this.props.relation,
                         viewId: false,
-                        title: sprintf(
-                            this.env._t("Create: %s"),
-                            this.props.record.activeFields[this.props.name].string
-                        ),
+                        title: sprintf(this.env._t("Create: %s"), this.props.string),
                         onRecordSaved: (record) => {
                             const id = record.data.id;
                             let name;
@@ -262,10 +256,7 @@ export class Many2OneField extends Component {
                 resModel: this.props.relation,
                 domain,
                 context,
-                title: sprintf(
-                    this.env._t("Search: %s"),
-                    this.props.record.activeFields[this.props.name].string
-                ),
+                title: sprintf(this.env._t("Search: %s"), this.props.string),
                 multiSelect: false,
                 onSelected: ([resId]) => {
                     this.props.update([resId]);
