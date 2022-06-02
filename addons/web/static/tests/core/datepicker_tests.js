@@ -4,6 +4,7 @@ import { applyFilter, toggleMenu } from "@web/../tests/search/helpers";
 import { DatePicker, DateTimePicker } from "@web/core/datepicker/datepicker";
 import { registry } from "@web/core/registry";
 import { uiService } from "@web/core/ui/ui_service";
+import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import ActionModel from "web.ActionModel";
 import CustomFilterItem from "web.CustomFilterItem";
 import { createComponent } from "web.test_utils";
@@ -34,7 +35,8 @@ async function mountPicker(Picker, props) {
                 dateTimeFormat: "dd/MM/yyyy HH:mm:ss",
             })
         )
-        .add("ui", uiService);
+        .add("ui", uiService)
+        .add("hotkey", hotkeyService);
 
     class Parent extends Component {
         setup() {

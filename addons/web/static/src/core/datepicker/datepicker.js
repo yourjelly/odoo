@@ -8,7 +8,7 @@ import {
     parseDateTime,
 } from "@web/core/l10n/dates";
 import { localization } from "@web/core/l10n/localization";
-import { useAutofocus } from "@web/core/utils/hooks";
+import { useAutofocus, useService } from "@web/core/utils/hooks";
 
 const {
     Component,
@@ -81,6 +81,8 @@ export class DatePicker extends Component {
         this.root = useRef("root");
         this.inputRef = useRef("input");
         this.state = useState({ warning: false });
+        this.hotkey = useService("hotkey");
+        this.unregisterHotkey = undefined;
 
         this.datePickerId = `o_datepicker_${datePickerId++}`;
         // Manually keep track of the "open" state to write the date in the
@@ -105,9 +107,13 @@ export class DatePicker extends Component {
         window.$(this.root.el).on("show.datetimepicker", () => {
             this.datePickerShown = true;
             this.inputRef.el.select();
+            this.unregisterHotkey = this.hotkey.add("escape", this.onEscapeKey.bind(this), {
+                area: () => this.inputRef.el,
+            });
         });
         window.$(this.root.el).on("hide.datetimepicker", () => {
             this.datePickerShown = false;
+            this.unregisterHotkey();
             this.onDateChange({ useStatic: true });
         });
         window.$(this.root.el).on("error.datetimepicker", () => false);
@@ -129,7 +135,6 @@ export class DatePicker extends Component {
 
     onWillUnmount() {
         window.$(this.root.el).off(); // Removes all jQuery events
-
         this.bootstrapDateTimePicker("destroy");
     }
 
@@ -240,6 +245,11 @@ export class DatePicker extends Component {
         if (!areDateEquals(this.date, parsedDate)) {
             this.props.onDateTimeChanged(parsedDate);
         }
+    }
+
+    onEscapeKey() {
+        this.bootstrapDateTimePicker("hide");
+        this.inputRef.el.select();
     }
 
     /**
