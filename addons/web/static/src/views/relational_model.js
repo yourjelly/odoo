@@ -680,7 +680,7 @@ export class Record extends DataPoint {
             }
         }
 
-        if (this.isVirtual) {
+        if (!(params.values || !this.isVirtual)) {
             const changes = params.changes || (await this._onChange());
             await this._load({ changes });
         } else {
@@ -3097,6 +3097,7 @@ export class RelationalModel extends Model {
             this.rootParams.expand = params.expand;
             this.rootParams.groupsLimit = params.groupsLimit;
         }
+        this.initialValues = params.initialValues;
 
         // this.db = Object.create(null);
         this.root = null;
@@ -3139,7 +3140,7 @@ export class RelationalModel extends Model {
         };
         const state = this.root ? this.root.exportState() : {};
         const newRoot = this.createDataPoint(this.rootType, rootParams, state);
-        await this.keepLast.add(newRoot.load());
+        await this.keepLast.add(newRoot.load({ values: this.initialValues }));
         this.root = newRoot;
         this.rootParams = rootParams;
         this.notify();
