@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import {CheckBox} from '@web/core/checkbox/checkbox';
-import {useService} from "@web/core/utils/hooks";
+import {useService, useAutofocus} from "@web/core/utils/hooks";
 import {useWowlService} from '@web/legacy/utils';
 import {WebsiteDialog} from './dialog';
 import {FormViewDialog} from 'web.view_dialogs';
@@ -112,6 +112,7 @@ export class DuplicatePageDialog extends Component {
     setup() {
         this.orm = useService('orm');
         this.website = useService('website');
+        useAutofocus();
 
         this.state = useState({
             name: '',
@@ -138,7 +139,7 @@ DuplicatePageDialog.template = xml`
             Page Name
         </label>
         <div class="col-md-9">
-            <input type="text" t-model="state.name" class="form-control" required="required"/>
+            <input type="text" t-model="state.name" class="form-control" required="required" t-ref="autofocus"/>
         </div>
     </div>
 </WebsiteDialog>
