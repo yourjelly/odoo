@@ -6,7 +6,7 @@ import { usePager } from "@web/search/pager_hook";
 import { useModel } from "@web/views/helpers/model";
 import { standardViewProps } from "@web/views/helpers/standard_view_props";
 import { useSetupView } from "@web/views/helpers/view_hook";
-import { useViewButtons } from "@web/views/view_button/hook";
+import { useViewButtons } from "@web/views/view_button/view_button_hook";
 import { KanbanRenderer } from "./kanban_renderer";
 
 const { Component, useRef } = owl;
@@ -85,10 +85,12 @@ KanbanController.props = {
     Renderer: Function,
     buttonTemplate: String,
     archInfo: Object,
+    forceGlobalClick: { type: Boolean, optional: true },
     defaultGroupBy: { validate: (dgb) => !dgb || typeof dgb === "string", optional: true },
 };
 
 KanbanController.defaultProps = {
     createRecord: () => {},
     selectRecord: () => {},
+    forceGlobalClick: false,
 };

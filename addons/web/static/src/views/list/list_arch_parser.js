@@ -1,9 +1,13 @@
 /** @odoo-module */
 
-import { isFalsy, isTruthy, stringToOrderBy, XMLParser } from "@web/core/utils/xml";
+import { stringToOrderBy, XMLParser } from "@web/core/utils/xml";
 import { Field } from "@web/fields/field";
-import { archParseBoolean } from "@web/views/helpers/utils";
-import { getActiveActions, getDecoration, processButton } from "../helpers/view_utils";
+import {
+    archParseBoolean,
+    getActiveActions,
+    getDecoration,
+    processButton,
+} from "@web/views/helpers/utils";
 
 export class GroupListArchParser extends XMLParser {
     parse(arch, models, modelName, jsClass) {
@@ -69,12 +73,13 @@ export class ListArchParser extends XMLParser {
                 }
             } else if (node.tagName === "field") {
                 const fieldInfo = Field.parseFieldNode(node, models, modelName, "list");
+                const invisible = node.getAttribute("invisible");
                 fieldNodes[fieldInfo.name] = fieldInfo;
                 node.setAttribute("field_id", fieldInfo.name);
                 if (fieldInfo.widget === "handle") {
                     handleField = fieldInfo.name;
                 }
-                if (isFalsy(node.getAttribute("invisible"), true)) {
+                if (!invisible || !archParseBoolean(invisible)) {
                     const displayName = fieldInfo.FieldComponent.displayName;
                     columns.push({
                         ...fieldInfo,
@@ -121,7 +126,7 @@ export class ListArchParser extends XMLParser {
             } else if (["tree", "list"].includes(node.tagName)) {
                 const activeActions = {
                     ...getActiveActions(xmlDoc),
-                    exportXlsx: isTruthy(xmlDoc.getAttribute("export_xlsx"), true),
+                    exportXlsx: archParseBoolean(xmlDoc.getAttribute("export_xlsx"), true),
                 };
                 treeAttr.activeActions = activeActions;
 

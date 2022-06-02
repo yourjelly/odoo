@@ -11,6 +11,7 @@
                     list="model.root"
                     archInfo="props.archInfo"
                     readonly="true"
+                    forceGlobalClick="props.forceGlobalClick"
                     openRecord.bind="openRecord"
                     noContentHelp="props.info.noContentHelp"
                 />
