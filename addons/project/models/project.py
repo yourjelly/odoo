@@ -360,6 +360,19 @@ class Project(models.Model):
         return project
 
     def write(self, vals):
+        if self._context.get("prout"):
+            raise RedirectWarning(
+                message='coucou',
+                action={
+                    'type': 'ir.actions.act_window',
+                    'target': 'current',
+                    'res_model': 'project.task',
+                    'views': [(False, 'list'), [False, 'form']],
+                    'domain': [('project_id', 'in', self.ids)],
+                    'context': {'create': False},
+                },
+                button_text=_('See Tasks'),
+            )
         allowed_users_changed = 'allowed_portal_user_ids' in vals or 'allowed_internal_user_ids' in vals
         if allowed_users_changed:
             allowed_users = {project: project.allowed_user_ids for project in self}
@@ -1174,7 +1187,7 @@ class Task(models.Model):
                 if task.project_id.partner_id:
                     task.partner_id = task.project_id.partner_id
             else:
-                task.partner_id = task.project_id.partner_id or task.parent_id.partner_id 
+                task.partner_id = task.project_id.partner_id or task.parent_id.partner_id
 
     @api.depends('partner_id.email', 'parent_id.email_from')
     def _compute_email_from(self):
