@@ -5,7 +5,13 @@ import { Many2ManyTagsField } from "./many2many_tags_field";
 
 export class KanbanMany2ManyTagsField extends Many2ManyTagsField {
     get tags() {
-        return super.tags.filter((tag) => tag.colorIndex !== 0);
+        return super.tags.reduce((kanbanTags, tag) => {
+            if (tag.colorIndex !== 0) {
+                delete tag.onClick;
+                kanbanTags.push(tag);
+            }
+            return kanbanTags;
+        }, []);
     }
 }
 

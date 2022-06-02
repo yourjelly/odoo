@@ -21,7 +21,7 @@ import {
 } from "../relational_utils";
 import { makeContext } from "@web/core/context";
 
-const { Component, useEffect } = owl;
+const { Component, onWillUpdateProps, useEffect } = owl;
 
 class Many2ManyTagsFieldColorListPopover extends Component {}
 Many2ManyTagsFieldColorListPopover.template = "web.Many2ManyTagsFieldColorListPopover";
@@ -32,7 +32,7 @@ Many2ManyTagsFieldColorListPopover.components = {
 
 function useForceCloseAutocomplete(onShouldClose = () => {}) {
     let forceCloseAutocomplete = false;
-    owl.onWillUpdateProps(() => {
+    onWillUpdateProps(() => {
         onShouldClose();
         forceCloseAutocomplete = true;
     });
