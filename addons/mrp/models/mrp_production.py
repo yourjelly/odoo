@@ -1200,8 +1200,24 @@ class MrpProduction(models.Model):
         orders_to_plan = self.filtered(lambda order: not order.is_planned)
         orders_to_confirm = orders_to_plan.filtered(lambda mo: mo.state == 'draft')
         orders_to_confirm.action_confirm()
-        for order in orders_to_plan:
+        # Plan the manufacturing orders using their topologically sorted order
+        edge_counts = {order: order.mrp_production_child_count for order in orders_to_plan}
+        queued_orders = set(order for order, count in edge_counts.items() if count == 0)
+        while len(queued_orders) > 0:
+            # Take a queued order and schedule it
+            order = queued_orders.pop()
             order._plan_workorders()
+            # Retrieve its dependent manufacturing orders
+            stock_moves = order.procurement_group_id.mrp_production_ids.move_dest_ids
+            dependents = stock_moves.group_id.mrp_production_ids - order
+            # Add dependents to the queued orders if this order is their last
+            # dependency to be fulfilled. Mark the dependency on the current
+            # order as fulfilled by decreasing the edge count of the dependent.
+            for dependent in dependents.filtered(lambda order: order in orders_to_plan):
+                dependent.date_planned_start = max(dependent.date_planned_start, order.date_planned_finished)
+                if edge_counts[dependent] == 1:
+                    queued_orders.add(dependent)
+                edge_counts[dependent] -= 1
         return True
 
     def _plan_workorders(self, replan=False):
