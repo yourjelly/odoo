@@ -7,9 +7,12 @@ export class CopyButton extends Component {
         this.state = useState({
             isCopied: false,
         });
-        useEffect(() => {
-            return () => clearTimeout(this.timeoutId), () => [this.state.isCopied];
-        });
+        useEffect(
+            () => {
+                return () => clearTimeout(this.timeoutId);
+            },
+            () => [this.state.isCopied]
+        );
     }
 
     async onClick() {
