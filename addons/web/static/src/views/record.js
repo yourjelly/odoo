@@ -7,9 +7,8 @@ const { Component, xml, onWillStart, onWillUpdateProps } = owl;
 
 class _Record extends Component {
     setup() {
-        const fieldnames = this.props.info.fields;
         const activeFields = Object.fromEntries(
-            fieldnames.map((f) => [f, { attrs: {}, options: {}, domain: "[]" }])
+            this.props.info.fieldNames.map((f) => [f, { attrs: {}, options: {}, domain: "[]" }])
         );
 
         this.model = useModel(RelationalModel, {
@@ -20,9 +19,13 @@ class _Record extends Component {
             rootType: "record",
             activeFields,
             mode: this.props.info.mode === "edit" ? "edit" : undefined,
+            initialValues: this.props.info.initialValues,
         });
         onWillUpdateProps(async (nextProps) => {
-            await this.model.load({ resId: nextProps.info.resId, mode: nextProps.info.mode });
+            await this.model.load({
+                resId: nextProps.info.resId,
+                mode: nextProps.info.mode,
+            });
         });
     }
 }
@@ -30,12 +33,21 @@ _Record.template = xml`<t t-slot="default" record="model.root"/>`;
 
 export class Record extends Component {
     setup() {
-        const orm = useService("orm");
-        onWillStart(async () => {
-            this.fields = await orm.call(this.props.resModel, "fields_get", [], {});
-        });
+        if (this.props.fields) {
+            this.fields = this.props.fields;
+        } else {
+            const orm = useService("orm");
+            onWillStart(async () => {
+                this.fields = await orm.call(
+                    this.props.resModel,
+                    "fields_get",
+                    [this.props.fieldNames],
+                    {}
+                );
+            });
+        }
     }
 }
 Record.template = xml`<_Record fields="fields" slots="props.slots" info="props" />`;
 Record.components = { _Record };
-Record.props = ["resModel", "resId", "fields", "slots", "mode?"];
+Record.props = ["slots", "resModel", "fieldNames", "fields?", "resId?", "mode?", "initialValues?"];
