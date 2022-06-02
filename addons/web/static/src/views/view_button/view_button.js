@@ -33,12 +33,10 @@ function iconFromString(iconString) {
 
 export class ViewButton extends Component {
     setup() {
-        this.className = this.getButtonClassName();
-
         if (this.props.icon) {
             this.icon = iconFromString(this.props.icon);
         }
-        const { debounce } = this.props.clickParams;
+        const { debounce } = this.clickParams;
         if (debounce) {
             this.onClick = debounceFn(this.onClick.bind(this), debounce, true);
         }
@@ -46,12 +44,12 @@ export class ViewButton extends Component {
             debug: Boolean(odoo.debug),
             button: {
                 string: this.props.string,
-                help: this.props.clickParams && this.props.clickParams.help,
-                context: this.props.clickParams && this.props.clickParams.context,
-                modifiers: this.props.clickParams && this.props.clickParams.modifiers,
-                special: this.props.clickParams && this.props.clickParams.special,
-                type: this.props.clickParams && this.props.clickParams.type,
-                name: this.props.clickParams && this.props.clickParams.name,
+                help: this.clickParams.help,
+                context: this.clickParams.context,
+                modifiers: this.clickParams.modifiers,
+                special: this.clickParams.special,
+                type: this.clickParams.type,
+                name: this.clickParams.name,
                 title: this.props.title,
             },
             context: this.props.record && this.props.record.context,
@@ -59,8 +57,12 @@ export class ViewButton extends Component {
         });
     }
 
+    get clickParams() {
+        return { context: this.props.context, ...this.props.clickParams };
+    }
+
     get hasBigTooltip() {
-        return Boolean(odoo.debug) || (this.props.clickParams && this.props.clickParams.help);
+        return Boolean(odoo.debug) || this.clickParams.help;
     }
 
     get hasSmallToolTip() {
@@ -68,42 +70,53 @@ export class ViewButton extends Component {
     }
 
     get disabled() {
-        const { name, type, special } = this.props.clickParams;
+        const { name, type, special } = this.clickParams;
         return (!name && !type && !special) || this.props.disabled;
     }
 
-    onClick() {
+    /**
+     * @param {MouseEvent} ev
+     */
+    onClick(ev) {
+        if (this.props.tag === "a") {
+            ev.preventDefault();
+        }
         this.env.onClickViewButton({
-            clickParams: this.props.clickParams,
+            clickParams: this.clickParams,
             record: this.props.record,
         });
     }
 
-    getButtonClassName() {
+    getClassName() {
         const classNames = [];
-        let hasExplicitRank = false;
-        for (let cls of this.props.className.split(" ")) {
-            if (cls in odooToBootstrapClasses) {
-                cls = odooToBootstrapClasses[cls];
+        if (this.props.tag === "button") {
+            classNames.push("btn");
+            let hasExplicitRank = false;
+            for (let cls of this.props.className.split(" ")) {
+                if (cls in odooToBootstrapClasses) {
+                    cls = odooToBootstrapClasses[cls];
+                }
+                classNames.push(cls);
+                if (!hasExplicitRank && explicitRankClasses.includes(cls)) {
+                    hasExplicitRank = true;
+                }
             }
-            classNames.push(cls);
-            if (!hasExplicitRank && explicitRankClasses.includes(cls)) {
-                hasExplicitRank = true;
+            if (!hasExplicitRank) {
+                classNames.push(this.props.defaultRank || "btn-secondary");
             }
-        }
-        if (!hasExplicitRank) {
-            classNames.push(this.props.defaultRank || "btn-secondary");
-        }
-        if (this.props.size) {
-            classNames.push(`btn-${this.props.size}`);
+            if (this.props.size) {
+                classNames.push(`btn-${this.props.size}`);
+            }
         }
         return classNames.join(" ");
     }
 }
 ViewButton.template = "views.ViewButton";
 ViewButton.props = [
+    "tag?",
     "record?",
     "className?",
+    "context?",
     "clickParams?",
     "icon?",
     "defaultRank?",
@@ -114,6 +127,7 @@ ViewButton.props = [
     "slots?",
 ];
 ViewButton.defaultProps = {
+    tag: "button",
     className: "",
     clickParams: {},
 };

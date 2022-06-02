@@ -6971,11 +6971,7 @@ QUnit.module("Views", (hooks) => {
 
         const actionService = {
             start() {
-                return {
-                    async doAction(action) {
-                        assert.strictEqual(action, "42");
-                    },
-                };
+                return { doActionButton: (action) => assert.strictEqual(action.name, "42") };
             },
         };
         registry.category("services").add("action", actionService, { force: true });

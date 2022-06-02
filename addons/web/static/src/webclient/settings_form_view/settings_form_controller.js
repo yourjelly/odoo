@@ -2,7 +2,7 @@
 
 import { useAutofocus } from "@web/core/utils/hooks";
 import { formView } from "@web/views/form/form_view";
-import { useViewButtons } from "@web/views/view_button/hook";
+import { useViewButtons } from "@web/views/view_button/view_button_hook";
 import { SettingsConfirmationDialog } from "./settings_confirmation_dialog";
 import { SettingsFormRenderer } from "./settings_form_renderer";
 
