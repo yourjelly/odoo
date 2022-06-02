@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { Domain } from "@web/core/domain";
-import { isRelational } from "@web/views/helpers/view_utils";
+import { isRelational } from "@web/views/helpers/utils";
 import {
     DynamicGroupList,
     DynamicRecordList,

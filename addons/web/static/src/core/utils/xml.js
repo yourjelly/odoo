@@ -59,39 +59,6 @@ export class XMLParser {
 }
 
 /**
- * @param {string} value
- * @param {boolean} [falsyIfUndefined]
- * @returns {boolean}
- */
-export function isFalsy(value, falsyIfUndefined) {
-    return (value ? /^false|0$/i.test(value) : falsyIfUndefined) || false;
-}
-
-/**
- * @param {string} value
- * @param {boolean} [truthyIfUndefined]
- * @returns {boolean}
- */
-export function isTruthy(value, truthyIfUndefined) {
-    return (value ? !/^false|0$/i.test(value) : truthyIfUndefined) || false;
-}
-
-/**
- * Removes the given attributes on the given element and returns them as a dictionnary.
- * @param {Element} el
- * @param {string[]} attributes
- * @returns {Record<string, string>}
- */
-export function extractAttributes(el, attributes) {
-    const attrs = Object.create(null);
-    for (const attr of attributes) {
-        attrs[attr] = el.getAttribute(attr) || "";
-        el.removeAttribute(attr);
-    }
-    return attrs;
-}
-
-/**
  * Combines the existing value of a node attribute with new given parts. The glue
  * is the string used to join the parts.
  *
@@ -146,6 +113,31 @@ export function createTextNode(data) {
 }
 
 /**
+ * Removes the given attributes on the given element and returns them as a dictionnary.
+ * @param {Element} el
+ * @param {string[]} attributes
+ * @returns {Record<string, string>}
+ */
+export function extractAttributes(el, attributes) {
+    const attrs = Object.create(null);
+    for (const attr of attributes) {
+        attrs[attr] = el.getAttribute(attr) || "";
+        el.removeAttribute(attr);
+    }
+    return attrs;
+}
+
+/**
+ * @param {Node} [node]
+ * @param {boolean} [lower=false]
+ * @returns {string}
+ */
+export function getTag(node, lower = false) {
+    const tag = (node && node.nodeName) || "";
+    return lower ? tag.toLowerCase() : tag;
+}
+
+/**
  * @param {any} string
  * @return {OrderTerm[]}
  */
@@ -181,7 +173,5 @@ export function stringToOrderBy(string) {
  * @return {string}     the valid string to be injected into a component's node props.
  */
 export function toStringExpression(str) {
-    const delimiter = `"`;
-    const newStr = str.replaceAll(delimiter, `\\${delimiter}`);
-    return `${delimiter}${newStr}${delimiter}`;
+    return `"${str.replaceAll(`"`, `\\"`)}"`;
 }

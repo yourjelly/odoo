@@ -2,10 +2,23 @@
 <templates xml:space="preserve">
 
   <t t-name="views.ViewButton" owl="1">
-    <button class="btn" t-att-class="className" t-att-disabled="disabled" t-att-name="props.clickParams and props.clickParams.name" t-att-special="props.clickParams and props.clickParams.special" t-att="{'data-tooltip-template': hasBigTooltip ? 'views.ViewButtonTooltip' : false, 'data-tooltip-info': hasBigTooltip ? tooltip : false, 'data-tooltip': hasSmallToolTip ? props.title : false }" t-on-click.stop="onClick">
+    <t t-tag="props.tag"
+        t-att-class="getClassName()"
+        t-att-disabled="disabled"
+        t-att-name="props.clickParams.name"
+        t-att-special="props.clickParams.special"
+        t-att="{
+            href: props.tag === 'a' and '#',
+            type: clickParams.type,
+            'data-tooltip-template': hasBigTooltip ? 'views.ViewButtonTooltip' : false,
+            'data-tooltip-info': hasBigTooltip ? tooltip : false,
+            'data-tooltip': hasSmallToolTip ? props.title : false,
+        }"
+        t-on-click.stop="onClick"
+    >
       <t t-if="icon" t-tag="icon.tag" t-att-class="icon.class" t-att-src="icon.src"/>
       <t t-slot="contents"><t t-esc="props.string"/></t>
-    </button>
+    </t>
   </t>
 
   <t t-name="views.ViewButtonTooltip" owl="1">

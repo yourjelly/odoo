@@ -4,12 +4,12 @@ import {
     combineAttributes,
     createElement,
     extractAttributes,
-    isTruthy,
     stringToOrderBy,
+    toStringExpression,
     XMLParser,
 } from "@web/core/utils/xml";
 import { Field } from "@web/fields/field";
-import { getActiveActions } from "@web/views/helpers/view_utils";
+import { archParseBoolean, getActiveActions } from "@web/views/helpers/utils";
 
 /**
  * NOTE ON 't-name="kanban-box"':
@@ -54,7 +54,7 @@ const TRANSPILED_EXPRESSIONS = [
     { regex: /\bkanban_color\(([^)]*)\)/g, value: `getColorClass($1)` },
     // `kanban_getcolor(value)` => `getColorIndex(record)`
     { regex: /\bkanban_getcolor\(([^)]*)\)/g, value: `getColorIndex($1)` },
-    // `bkanban_getcolorname(value)` => `getColorName(record)`
+    // `kanban_getcolorname(value)` => `getColorName(record)`
     { regex: /\bkanban_getcolorname\(([^)]*)\)/g, value: `getColorName($1)` },
     // `record.prop.value` => `getValue(record,'prop')`
     { regex: /\brecord\.(\w+)\.value\b/g, value: `getValue(record,'$1')` },
@@ -62,22 +62,12 @@ const TRANSPILED_EXPRESSIONS = [
     { regex: /\brecord\.(\w+)\.raw_value\b/g, value: `getRawValue(record,'$1')` },
     // `record.prop` => `record.data.prop`
     { regex: /\brecord\.(\w+)\b/g, value: `record.data.$1` },
+    // `selection_mode` => `isInSelectMode`
+    { regex: /\bselection_mode\b/g, value: `isInSelectMode` },
 ];
-// These classes determine whether a click on a record should open it.
-const KANBAN_CLICK_CLASSES = ["oe_kanban_global_click", "oe_kanban_global_click_edit"];
 
 function isValidBox(el) {
     return el.tagName !== "t" || el.hasAttribute("t-component");
-}
-
-function hasClass(el, ...classes) {
-    const classAttribute = el.getAttribute("class") || "";
-    const attfClassAttribute = el.getAttribute("t-attf-class") || "";
-    const elClasses = [
-        ...classAttribute.split(/\s+/),
-        ...attfClassAttribute.replace(/{{[^}]+}}/g, "").split(/\s+/),
-    ];
-    return classes.some((cls) => elClasses.includes(cls));
 }
 
 export class KanbanArchParser extends XMLParser {
@@ -88,17 +78,17 @@ export class KanbanArchParser extends XMLParser {
         let defaultOrder = stringToOrderBy(xmlDoc.getAttribute("default_order") || null);
         const defaultGroupBy = xmlDoc.getAttribute("default_group_by");
         const limit = xmlDoc.getAttribute("limit");
-        const recordsDraggable = isTruthy(xmlDoc.getAttribute("records_draggable"), true);
+        const recordsDraggable = archParseBoolean(xmlDoc.getAttribute("records_draggable"), true);
         const activeActions = {
             ...getActiveActions(xmlDoc),
-            groupArchive: isTruthy(xmlDoc.getAttribute("archivable"), true),
-            groupCreate: isTruthy(xmlDoc.getAttribute("group_create"), true),
-            groupDelete: isTruthy(xmlDoc.getAttribute("group_delete"), true),
-            groupEdit: isTruthy(xmlDoc.getAttribute("group_edit"), true),
+            groupArchive: archParseBoolean(xmlDoc.getAttribute("archivable"), true),
+            groupCreate: archParseBoolean(xmlDoc.getAttribute("group_create"), true),
+            groupDelete: archParseBoolean(xmlDoc.getAttribute("group_delete"), true),
+            groupEdit: archParseBoolean(xmlDoc.getAttribute("group_edit"), true),
         };
         const onCreate =
             activeActions.create &&
-            isTruthy(xmlDoc.getAttribute("quick_create"), true) &&
+            archParseBoolean(xmlDoc.getAttribute("quick_create"), true) &&
             (xmlDoc.getAttribute("on_create") || "quick_create");
         const quickCreateView = xmlDoc.getAttribute("quick_create_view");
         const tooltipInfo = {};
@@ -174,20 +164,65 @@ export class KanbanArchParser extends XMLParser {
             child.setAttribute("role", "article");
             child.setAttribute("t-att-class", "getRecordClasses(record,groupOrRecord.group)");
             child.setAttribute("t-att-data-id", "canResequenceRecords and record.id");
-            if (hasClass(child, ...KANBAN_CLICK_CLASSES)) {
-                child.setAttribute("t-on-click", "(ev) => this.onRecordClick(record, ev)");
+            child.setAttribute("t-on-click", "(ev) => this.onRecordClick(record, ev)");
+
+            // Generate a dropdown for the current box
+            const dropdown = createElement("Dropdown", {
+                position: toStringExpression("bottom-end"),
+            });
+            const togglerClass = [];
+            const menuClass = [];
+            const transfers = [];
+            let dropdownInserted = false;
+
+            // Dropdown element
+            for (const el of child.querySelectorAll(".dropdown,.o_kanban_manage_button_section")) {
+                const classes = el.className
+                    .split(/\s+/)
+                    .filter((cls) => cls && cls !== "dropdown");
+                combineAttributes(dropdown, "class", classes);
+                if (!dropdownInserted) {
+                    transfers.push(() => el.replaceWith(dropdown));
+                    dropdownInserted = true;
+                }
             }
+
+            // Dropdown toggler content
+            for (const el of child.querySelectorAll(
+                ".dropdown-toggle,.o_kanban_manage_toggle_button"
+            )) {
+                togglerClass.push("btn", el.getAttribute("class"));
+                const togglerSlot = createElement("t", { "t-set-slot": "toggler" }, el.children);
+                dropdown.appendChild(togglerSlot);
+                if (dropdownInserted) {
+                    transfers.push(() => el.remove());
+                } else {
+                    transfers.push(() => el.replaceWith(dropdown));
+                    dropdownInserted = true;
+                }
+            }
+
+            // Dropdown menu content
+            for (const el of child.getElementsByClassName("dropdown-menu")) {
+                menuClass.push(el.getAttribute("class"));
+                dropdown.append(...el.children);
+                if (dropdownInserted) {
+                    transfers.push(() => el.remove());
+                } else {
+                    transfers.push(() => el.replaceWith(dropdown));
+                    dropdownInserted = true;
+                }
+            }
+
+            // Apply DOM transfers
+            transfers.forEach((transfer) => transfer());
+
+            dropdown.setAttribute("menuClass", toStringExpression(menuClass.join(" ")));
+            dropdown.setAttribute("togglerClass", toStringExpression(togglerClass.join(" ")));
         }
 
-        // Generates dropdown element
-        const dropdown = createElement("Dropdown", { position: "'bottom-end'" });
-        const togglerClass = [];
-        const menuClass = [];
-        const transfers = [];
-        let progressAttributes = false;
-        let dropdownInserted = false;
-
         // Progressbar
+        let progressAttributes = false;
         for (const el of xmlDoc.getElementsByTagName("progressbar")) {
             const attrs = extractAttributes(el, ["field", "colors", "sum_field", "help"]);
             progressAttributes = {
@@ -198,43 +233,6 @@ export class KanbanArchParser extends XMLParser {
             };
         }
 
-        // Dropdown element
-        for (const el of box.getElementsByClassName("dropdown")) {
-            const classes = el.className.split(/\s+/).filter((cls) => cls && cls !== "dropdown");
-            combineAttributes(dropdown, "class", classes);
-            if (!dropdownInserted) {
-                transfers.push(() => el.replaceWith(dropdown));
-                dropdownInserted = true;
-            }
-        }
-
-        // Dropdown menu content
-        for (const el of box.getElementsByClassName("dropdown-menu")) {
-            menuClass.push(el.getAttribute("class"));
-            dropdown.append(...el.children);
-            if (dropdownInserted) {
-                transfers.push(() => el.remove());
-            } else {
-                transfers.push(() => el.replaceWith(dropdown));
-                dropdownInserted = true;
-            }
-        }
-
-        // Dropdown toggler content
-        for (const el of box.querySelectorAll(".dropdown-toggle,.o_kanban_manage_toggle_button")) {
-            togglerClass.push(el.getAttribute("class"));
-            const togglerSlot = createElement("t", { "t-set-slot": "toggler" }, el.children);
-            dropdown.appendChild(togglerSlot);
-            if (dropdownInserted) {
-                transfers.push(() => el.remove());
-            } else {
-                transfers.push(() => el.replaceWith(dropdown));
-                dropdownInserted = true;
-            }
-        }
-
-        transfers.forEach((transfer) => transfer());
-
         // Color and color picker
         for (const child of box.children) {
             const { color } = extractAttributes(child, ["color"]);
@@ -242,7 +240,7 @@ export class KanbanArchParser extends XMLParser {
                 cardColorField = color;
             }
         }
-        for (const el of box.getElementsByClassName("oe_kanban_colorpicker")) {
+        for (const el of [...box.getElementsByClassName("oe_kanban_colorpicker")]) {
             const field = el.getAttribute("data-field");
             if (field) {
                 colorField = field;
@@ -253,36 +251,40 @@ export class KanbanArchParser extends XMLParser {
         // Special actions
         for (const el of box.querySelectorAll("a[type],button[type]")) {
             const type = el.getAttribute("type");
-            const tag = el.tagName.toLowerCase();
-            combineAttributes(el, "class", `oe_kanban_action oe_kanban_action_${tag}`);
-            if (ACTION_TYPES.includes(type)) {
-                // action buttons are debounced in kanban records
-                el.setAttribute("debounce", 300);
-                // Action buttons will be compiled in compileButton, no further
-                // processing is needed here
-            } else if (SPECIAL_TYPES.includes(type)) {
-                el.removeAttribute("type");
-                const params = { type };
-                if (type === "set_cover") {
-                    const { "data-field": fieldName, "auto-open": autoOpen } = extractAttributes(
-                        el,
-                        ["data-field", "auto-open"]
-                    );
-                    const widget = fieldNodes[fieldName].widget;
-                    Object.assign(params, { fieldName, widget, autoOpen });
-                }
-                const strParams = Object.keys(params)
-                    .map((k) => `${k}:"${params[k]}"`)
-                    .join(",");
-                el.setAttribute(
-                    "t-on-click",
-                    `() => this.triggerAction(record,group,{${strParams}})`
-                );
+            if (!SPECIAL_TYPES.includes(type)) {
+                // Not a supported action type.
+                continue;
             }
-        }
 
-        dropdown.setAttribute("menuClass", `'${menuClass.join(" ")}'`);
-        dropdown.setAttribute("togglerClass", `'${togglerClass.join(" ")}'`);
+            combineAttributes(el, "class", [
+                "oe_kanban_action",
+                `oe_kanban_action_${el.tagName.toLowerCase()}`,
+            ]);
+
+            if (ACTION_TYPES.includes(type)) {
+                if (!el.hasAttribute("debounce")) {
+                    // action buttons are debounced in kanban records
+                    el.setAttribute("debounce", 300);
+                }
+                // View buttons will be compiled in compileButton, no further processing
+                // is needed here.
+                continue;
+            }
+
+            const params = extractAttributes(el, ["type"]);
+            if (type === "set_cover") {
+                const { "data-field": fieldName, "auto-open": autoOpen } = extractAttributes(el, [
+                    "data-field",
+                    "auto-open",
+                ]);
+                const widget = fieldNodes[fieldName].widget;
+                Object.assign(params, { fieldName, widget, autoOpen });
+            }
+            const strParams = Object.keys(params)
+                .map((k) => `${k}:"${params[k]}"`)
+                .join(",");
+            el.setAttribute("t-on-click", `() => this.triggerAction(record,group,{${strParams}})`);
+        }
 
         if (!defaultOrder.length && handleField) {
             defaultOrder = stringToOrderBy(handleField);

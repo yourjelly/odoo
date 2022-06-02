@@ -5,6 +5,7 @@ import {
     combineAttributes,
     createElement,
     createTextNode,
+    getTag,
     toStringExpression,
 } from "@web/core/utils/xml";
 
@@ -18,19 +19,37 @@ const { useComponent, xml } = owl;
 
 const templateIds = Object.create(null);
 
+const BUTTON_CLICK_PARAMS = [
+    "name",
+    "type",
+    "args",
+    "context",
+    "close",
+    "confirm",
+    "special",
+    "effect",
+    "help",
+    "modifiers",
+    // WOWL SAD: is adding the support for debounce attribute here justified or should we
+    // just override compileButton in kanban compiler to add the debounce?
+    "debounce",
+];
+const BUTTON_STRING_PROPS = ["string", "size", "title", "icon"];
+
 /**
  * @param {Element} parent
  * @param {Node | Node[] | void} node
  */
 export function append(parent, node) {
     if (!node) {
-        return;
+        return parent;
     }
     if (Array.isArray(node)) {
         parent.append(...node.filter(Boolean));
     } else {
         parent.append(node);
     }
+    return parent;
 }
 
 /**
@@ -99,7 +118,21 @@ export function applyInvisible(invisible, compiled, params) {
 export function assignOwlDirectives(target, ...sources) {
     for (const source of sources) {
         for (const { name, value } of source.attributes) {
-            if (name.startsWith("t-")) {
+            if (name.startsWith("t-attf-")) {
+                const propName = name.slice(7);
+                const tAttf = value
+                    .split("}}")
+                    .map((leftAndExpr) => {
+                        const [left, expr] = leftAndExpr.split("{{");
+                        const part = toStringExpression(left);
+                        return expr ? part + `+${expr}+` : part;
+                    })
+                    .join("");
+                target.setAttribute(propName, tAttf);
+            } else if (name.startsWith("t-att-")) {
+                const propName = name.slice(6);
+                target.setAttribute(propName, value);
+            } else if (name.startsWith("t-")) {
                 target.setAttribute(name, value);
             }
         }
@@ -108,39 +141,11 @@ export function assignOwlDirectives(target, ...sources) {
 }
 
 /**
- * Encodes an object into a string usable inside a pre-compiled template
- * @param  {Object}
- * @return {string}
- */
-export function encodeObjectForTemplate(obj) {
-    return `"${encodeURI(JSON.stringify(obj))}"`;
-}
-
-/**
- * Decodes a string within an attribute into an Object
- * @param  {string} str
- * @return {Object}
- */
-export function decodeObjectForTemplate(str) {
-    return JSON.parse(decodeURI(str));
-}
-
-/**
- * @param {Record<string, any>} obj
- * @returns {string}
- */
-export function objectToString(obj) {
-    return `{${Object.entries(obj)
-        .map((t) => t.join(":"))
-        .join(",")}}`;
-}
-
-/**
  * @param {Element} el
  * @param {Element} compiled
  */
 export function copyAttributes(el, compiled) {
-    if (getTagName(el) === "button") {
+    if (getTag(el, true) === "button") {
         return;
     }
 
@@ -165,6 +170,24 @@ export function copyAttributes(el, compiled) {
 }
 
 /**
+ * Decodes a string within an attribute into an Object
+ * @param  {string} str
+ * @return {Object}
+ */
+export function decodeObjectForTemplate(str) {
+    return JSON.parse(decodeURI(str));
+}
+
+/**
+ * Encodes an object into a string usable inside a pre-compiled template
+ * @param  {Object}
+ * @return {string}
+ */
+export function encodeObjectForTemplate(obj) {
+    return `"${encodeURI(JSON.stringify(obj))}"`;
+}
+
+/**
  * @param {Element} el
  * @param {string} modifierName
  * @returns {boolean | boolean[]}
@@ -181,16 +204,8 @@ export function getModifier(el, modifierName) {
  * @param {any} node
  * @returns {string}
  */
-export function getTagName(node) {
-    return node.tagName || "";
-}
-
-/**
- * @param {any} node
- * @returns {string}
- */
-function getTitleTagName(node) {
-    return getTagName(node)[0].toUpperCase() + getTagName(node).slice(1);
+function getTitleTag(node) {
+    return getTag(node)[0].toUpperCase() + getTag(node).slice(1);
 }
 
 /**
@@ -216,7 +231,8 @@ function isComment(node) {
  */
 export function isComponentNode(el) {
     return (
-        el.tagName === getTitleTagName(el) || (el.tagName === "t" && "t-component" in el.attributes)
+        getTag(el) === getTitleTag(el) ||
+        (getTag(el, true) === "t" && "t-component" in el.attributes)
     );
 }
 
@@ -266,9 +282,7 @@ export class ViewCompiler {
     compile(xmlElement, params = {}) {
         const newRoot = createElement("t");
         const child = this.compileNode(xmlElement, params);
-        child.setAttribute("t-ref", "compiled_view_root");
-        append(newRoot, child);
-        return newRoot;
+        return append(newRoot, child);
     }
 
     /**
@@ -295,11 +309,13 @@ export class ViewCompiler {
         }
 
         const registryCompiler = this.compilers.find(
-            (cp) => cp.tag === getTagName(node) && (!cp.class || node.classList.contains(cp.class))
+            (cp) =>
+                cp.tag === getTag(node, true) && (!cp.class || node.classList.contains(cp.class))
         );
+        const titleTag = getTitleTag(node);
         const compiler =
             (registryCompiler && registryCompiler.fn) ||
-            this[`compile${getTitleTagName(node)}`] ||
+            this[`compile${titleTag === "A" ? "Button" : titleTag}`] ||
             this.compileGenericNode;
 
         let compiledNode = compiler.call(this, node, params);
@@ -324,36 +340,35 @@ export class ViewCompiler {
      * @returns {Element}
      */
     compileButton(el, params) {
-        const button = createElement("ViewButton", { record: "record" });
-
-        // Props
-        const clickParams = {};
-        const stringPropsAttributes = ["string", "size", "title", "icon"];
-        const clickParamsAttributes = [
-            "name",
-            "type",
-            "args",
-            "context",
-            "close",
-            "confirm",
-            "special",
-            "effect",
-            "help",
-            "modifiers",
-            // WOWL SAD: is adding the support for debounce attribute here justified or should we
-            // just override compileButton in kanban compiler to add the debounce?
-            "debounce",
-        ];
-        for (const { name, value } of el.attributes) {
-            if (stringPropsAttributes.includes(name)) {
-                button.setAttribute(name, `\`${value}\``);
-            } else if (clickParamsAttributes.includes(name)) {
-                clickParams[name] = value;
+        let tag = getTag(el, true);
+        const type = el.getAttribute("type");
+        if (tag === "a") {
+            if (!type) {
+                return this.compileGenericNode(el, params);
+            } else if (type === "url") {
+                tag = "button";
             }
         }
-        button.setAttribute("clickParams", JSON.stringify(clickParams));
-        button.setAttribute("className", `'${el.className}'`);
+        const button = createElement("ViewButton", {
+            tag: toStringExpression(tag),
+            record: "record",
+        });
+
         assignOwlDirectives(button, el);
+
+        const clickParams = {};
+        for (const { name, value } of el.attributes) {
+            if (BUTTON_CLICK_PARAMS.includes(name)) {
+                clickParams[name] = value;
+            } else if (BUTTON_STRING_PROPS.includes(name)) {
+                button.setAttribute(name, toStringExpression(value));
+            }
+        }
+
+        button.setAttribute("clickParams", JSON.stringify(clickParams));
+        button.setAttribute("className", toStringExpression(el.className));
+        el.removeAttribute("class");
+        button.removeAttribute("class");
 
         // Button's body
         const buttonContent = [];
@@ -407,7 +422,7 @@ export class ViewCompiler {
      * @returns {Element}
      */
     compileGenericNode(el, params) {
-        const compiled = createElement(el.tagName);
+        const compiled = createElement(el.nodeName);
         const metaAttrs = ["modifiers", "attrs", "invisible", "readonly"];
         for (const attr of el.attributes) {
             if (metaAttrs.includes(attr.name)) {
@@ -417,6 +432,10 @@ export class ViewCompiler {
         }
         for (const child of el.childNodes) {
             append(compiled, this.compileNode(child, params));
+        }
+        if (el.hasAttribute("t-foreach") && !el.hasAttribute("t-key")) {
+            compiled.setAttribute("t-key", `${el.getAttribute("t-as")}_index`);
+            console.warn(`Missing attribute "t-key" in "t-foreach" statement.`);
         }
         return compiled;
     }

@@ -1,4 +1,4 @@
-/* @odoo-module */
+/** @odoo-module **/
 
 import { useService } from "@web/core/utils/hooks";
 import { evaluateExpr } from "@web/core/py_js/py";
@@ -46,11 +46,15 @@ export function useViewButtons(model, ref, options = {}) {
                 const resIds = record.resIds || model.resIds;
                 let buttonContext = {};
                 if (clickParams.context) {
-                    const valuesForEval = Object.assign({}, record.data, {
-                        active_id: resId,
-                        active_ids: resIds,
-                    });
-                    buttonContext = evaluateExpr(clickParams.context, valuesForEval);
+                    if (typeof clickParams.context === "string") {
+                        const valuesForEval = Object.assign({}, record.data, {
+                            active_id: resId,
+                            active_ids: resIds,
+                        });
+                        buttonContext = evaluateExpr(clickParams.context, valuesForEval);
+                    } else {
+                        buttonContext = clickParams.context;
+                    }
                 }
                 if (clickParams.buttonContext) {
                     Object.assign(buttonContext, clickParams.buttonContext);

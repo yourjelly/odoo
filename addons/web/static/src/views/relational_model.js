@@ -16,11 +16,16 @@ import { registry } from "@web/core/registry";
 import { unique } from "@web/core/utils/arrays";
 import { Deferred, KeepLast, Mutex } from "@web/core/utils/concurrency";
 import { escape } from "@web/core/utils/strings";
-import { isTruthy } from "@web/core/utils/xml";
 import { session } from "@web/session";
+import { FormArchParser } from "@web/views/form/form_arch_parser";
 import { Model } from "@web/views/helpers/model";
-import { evalDomain } from "@web/views/helpers/utils";
-import { isNumeric, isRelational, isX2Many } from "@web/views/helpers/view_utils";
+import {
+    archParseBoolean,
+    evalDomain,
+    isNumeric,
+    isRelational,
+    isX2Many,
+} from "@web/views/helpers/utils";
 import { ListConfirmationDialog } from "@web/views/list/list_confirmation_dialog";
 
 const { DateTime } = luxon;
@@ -61,7 +66,7 @@ const DEFAULT_QUICK_CREATE_VIEW = {
 export function isAllowedDateField(groupByField) {
     return (
         ["date", "datetime"].includes(groupByField.type) &&
-        isTruthy(groupByField.attrs.allow_group_range_value)
+        archParseBoolean(groupByField.attrs.allow_group_range_value)
     );
 }
 
@@ -1198,8 +1203,8 @@ export class Record extends DataPoint {
         }
         this.isInQuickCreation = false;
         if (shouldReload) {
-            this.model.trigger("record-updated", { record: this });
             await this.load();
+            this.model.trigger("record-updated", { record: this });
             this.model.notify();
         }
         if (!options.stayInEdition) {
@@ -2162,7 +2167,9 @@ export class DynamicGroupList extends DynamicList {
                 if (openGroups >= this.constructor.DEFAULT_LOAD_LIMIT) {
                     break;
                 }
-                if (!("isFolded" in { ...params, ...state })) {
+                const finalState = { ...params, ...state };
+                const hasValue = isRelational(this.groupByField) ? finalState.value : true;
+                if (hasValue && !("isFolded" in finalState)) {
                     params.isFolded = false;
                     openGroups++;
                 }
@@ -2180,7 +2187,6 @@ export class DynamicGroupList extends DynamicList {
         }
         this.isLoadingQuickCreate = true;
         const { quickCreateView: viewRef } = this.model;
-        const { ArchParser } = registry.category("views").get("form");
         let quickCreateFields = DEFAULT_QUICK_CREATE_FIELDS;
         let quickCreateForm = DEFAULT_QUICK_CREATE_VIEW;
         let quickCreateRelatedModels = {};
@@ -2201,7 +2207,7 @@ export class DynamicGroupList extends DynamicList {
             ...quickCreateRelatedModels,
             [this.modelName]: quickCreateFields,
         };
-        return new ArchParser().parse(quickCreateForm.arch, models, this.modelName);
+        return new FormArchParser().parse(quickCreateForm.arch, models, this.modelName);
     }
 }
 

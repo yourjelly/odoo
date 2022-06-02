@@ -10,12 +10,14 @@ export class SelectCreateDialog extends Component {
     setup() {
         this.viewService = useService("view");
         this.state = useState({ resIds: [] });
+        const type = this.props.type;
+        const contextKey = type === "list" ? "tree_view_ref" : "kanban_view_ref";
         this.viewProps = {
-            viewId: (this.props.context && this.props.context.tree_view_ref) || false,
+            viewId: (this.props.context && this.props.context[contextKey]) || false,
             resModel: this.props.resModel,
             domain: this.props.domain,
             context: this.props.context,
-            type: "list", // could be kanban
+            type, // "list" or "kanban"
             editable: false, // readonly
             showButtons: false,
             hasSelectors: this.props.multiSelect,
@@ -34,6 +36,9 @@ export class SelectCreateDialog extends Component {
             noContentHelp: markup(`<p>${this.env._t("No records found!")}</p>`),
             dynamicFilters: this.props.dynamicFilters || [],
         };
+        if (this.props.type === "kanban") {
+            this.viewProps.forceGlobalClick = true;
+        }
     }
 
     async select() {
@@ -54,6 +59,7 @@ SelectCreateDialog.template = "web.SelectCreateDialog";
 
 SelectCreateDialog.defaultProps = {
     multiSelect: true,
+    type: "list",
 };
 
 /**
@@ -64,4 +70,5 @@ SelectCreateDialog.defaultProps = {
  * context
  * title
  * onSelected
+ * type
  */

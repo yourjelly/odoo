@@ -2,7 +2,7 @@
 
 import { _lt } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { isTruthy } from "@web/core/utils/xml";
+import { archParseBoolean } from "@web/views/helpers/utils";
 import { standardFieldProps } from "../standard_field_props";
 
 const { Component } = owl;
@@ -32,7 +32,7 @@ StatInfoField.extractProps = (fieldName, record, attrs) => {
         label: attrs.options.label_field
             ? record.data[attrs.options.label_field]
             : record.activeFields[fieldName].string,
-        noLabel: isTruthy(attrs.nolabel),
+        noLabel: archParseBoolean(attrs.nolabel),
         digits:
             (attrs.digits ? JSON.parse(attrs.digits) : attrs.options.digits) ||
             record.fields[fieldName].digits,

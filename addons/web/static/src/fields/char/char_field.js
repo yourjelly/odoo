@@ -2,7 +2,7 @@
 
 import { _lt } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { isTruthy } from "@web/core/utils/xml";
+import { archParseBoolean } from "@web/views/helpers/utils";
 import { formatChar } from "../formatters";
 import { useInputField } from "../input_field_hook";
 import { standardFieldProps } from "../standard_field_props";
@@ -61,7 +61,7 @@ CharField.extractProps = (fieldName, record, attrs) => {
         resId: record.resId,
         resModel: record.resModel,
         autocomplete: attrs.autocomplete,
-        isPassword: isTruthy(attrs.password),
+        isPassword: archParseBoolean(attrs.password),
         placeholder: attrs.placeholder,
     };
 };
