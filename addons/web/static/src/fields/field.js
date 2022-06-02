@@ -2,9 +2,7 @@
 
 import { evaluateExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
-import { isTruthy } from "@web/core/utils/xml";
-import { evalDomain } from "@web/views/helpers/utils";
-import { X2M_TYPES } from "@web/views/helpers/view_utils";
+import { archParseBoolean, evalDomain, X2M_TYPES } from "@web/views/helpers/utils";
 import { getTooltipInfo } from "./field_tooltip";
 
 const { Component, xml } = owl;
@@ -215,10 +213,10 @@ Field.parseFieldNode = function (node, models, modelName, viewType, jsClass) {
         string: node.getAttribute("string") || field.string,
         widget,
         modifiers: JSON.parse(node.getAttribute("modifiers") || "{}"),
-        onChange: isTruthy(node.getAttribute("on_change")),
+        onChange: archParseBoolean(node.getAttribute("on_change")),
         FieldComponent: getFieldClassFromRegistry(fields[name].type, widget, viewType, jsClass),
         decorations: {}, // populated below
-        noLabel: isTruthy(node.getAttribute("nolabel")),
+        noLabel: archParseBoolean(node.getAttribute("nolabel")),
         props: {},
         rawAttrs: {},
         options: evaluateExpr(node.getAttribute("options") || "{}"),

@@ -1,19 +1,19 @@
 /** @odoo-module **/
 
-import { evalDomain } from "@web/views/helpers/utils";
-import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
-import { ListRenderer } from "@web/views/list/list_renderer";
 import { makeContext } from "@web/core/context";
 import { Pager } from "@web/core/pager/pager";
 import { registry } from "@web/core/registry";
-import { standardFieldProps } from "@web/fields/standard_field_props";
 import {
-    useSelectCreate,
-    useX2ManyCrud,
+    useActiveActions,
     useAddInlineRecord,
     useOpenX2ManyRecord,
-    useActiveActions,
+    useSelectCreate,
+    useX2ManyCrud,
 } from "@web/fields/relational_utils";
+import { standardFieldProps } from "@web/fields/standard_field_props";
+import { evalDomain } from "@web/views/helpers/utils";
+import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
+import { ListRenderer } from "@web/views/list/list_renderer";
 
 const { Component } = owl;
 

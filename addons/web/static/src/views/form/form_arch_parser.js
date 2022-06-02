@@ -2,8 +2,7 @@
 
 import { XMLParser } from "@web/core/utils/xml";
 import { Field } from "@web/fields/field";
-import { archParseBoolean } from "@web/views/helpers/utils";
-import { getActiveActions } from "@web/views/helpers/view_utils";
+import { archParseBoolean, getActiveActions } from "@web/views/helpers/utils";
 
 export class FormArchParser extends XMLParser {
     parse(arch, models, modelName) {
