@@ -1,20 +1,20 @@
 /** @odoo-module */
 
-import { useForwardRefToParent, useOwnedDialogs, useService } from "@web/core/utils/hooks";
-import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
-import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
-import { sprintf } from "@web/core/utils/strings";
+import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { makeContext } from "@web/core/context";
+import { useForwardRefToParent, useOwnedDialogs, useService } from "@web/core/utils/hooks";
+import { sprintf } from "@web/core/utils/strings";
 import { FormArchParser } from "@web/views/form/form_arch_parser";
 import { loadSubViews } from "@web/views/form/form_controller";
 import { evalDomain } from "@web/views/helpers/utils";
-import { useBus, useChildRef } from "../core/utils/hooks";
-import { useViewButtons } from "../views/view_button/hook";
-import { createElement } from "../core/utils/xml";
+import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
+import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
 import { Dialog } from "../core/dialog/dialog";
+import { useBus, useChildRef } from "../core/utils/hooks";
+import { createElement } from "../core/utils/xml";
 import { FormRenderer } from "../views/form/form_renderer";
 import { ViewButton } from "../views/view_button/view_button";
-import { AutoComplete } from "@web/core/autocomplete/autocomplete";
+import { useViewButtons } from "../views/view_button/view_button_hook";
 
 //
 // Commons

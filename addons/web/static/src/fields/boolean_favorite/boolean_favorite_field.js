@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
-import { registry } from "@web/core/registry";
 import { _lt } from "@web/core/l10n/translation";
-import { isFalsy } from "@web/core/utils/xml";
+import { registry } from "@web/core/registry";
+import { archParseBoolean } from "@web/views/helpers/utils";
 import { standardFieldProps } from "../standard_field_props";
 
 const { Component } = owl;
@@ -24,7 +24,7 @@ BooleanFavoriteField.supportedTypes = ["boolean"];
 BooleanFavoriteField.isEmpty = () => false;
 BooleanFavoriteField.extractProps = (fieldName, record, attrs) => {
     return {
-        noLabel: isFalsy(attrs.nolabel),
+        noLabel: archParseBoolean(attrs.nolabel),
     };
 };
 

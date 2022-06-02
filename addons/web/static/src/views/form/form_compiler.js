@@ -1,24 +1,23 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { ViewCompiler } from "../helpers/view_compiler";
 import {
     combineAttributes,
     createElement,
     createTextNode,
     toStringExpression,
+    getTag,
 } from "@web/core/utils/xml";
 import {
     append,
     applyInvisible,
     copyAttributes,
+    getModifier,
     isAlwaysInvisible,
     isComponentNode,
-    getModifier,
-    getTagName,
     makeSeparator,
-    objectToString,
 } from "@web/views/helpers/view_compiler";
+import { ViewCompiler } from "../helpers/view_compiler";
 
 const compilersRegistry = registry.category("form_compilers");
 
@@ -37,6 +36,16 @@ function appendToExpr(expr, string) {
     return `{{${string} }}`;
 }
 
+/**
+ * @param {Record<string, any>} obj
+ * @returns {string}
+ */
+function objectToString(obj) {
+    return `{${Object.entries(obj)
+        .map((t) => t.join(":"))
+        .join(",")}}`;
+}
+
 export class FormCompiler extends ViewCompiler {
     setup() {
         this.encounteredFields = {};
@@ -44,6 +53,52 @@ export class FormCompiler extends ViewCompiler {
         this.labels = {};
         this.compilers = compilersRegistry.getAll();
     }
+
+    compile() {
+        const compiled = super.compile(...arguments);
+        compiled.children[0].setAttribute("t-ref", "compiled_view_root");
+        return compiled;
+    }
+
+    createLabelFromField(fieldId, fieldName, fieldString, label, params) {
+        const props = {
+            id: `'${fieldId}'`,
+            fieldName: `'${fieldName}'`,
+            record: "record",
+            fieldInfo: `fieldNodes['${fieldId}']`,
+        };
+        let labelText = label.textContent || fieldString;
+        labelText = labelText
+            ? toStringExpression(labelText)
+            : `record.fields['${fieldName}'].string`;
+        return createElement("FormLabel", {
+            "t-props": objectToString(props),
+            string: labelText,
+        });
+    }
+
+    /**
+     * @param {string} fieldName
+     * @returns {Element[]}
+     */
+    getLabels(fieldName) {
+        const labels = this.labels[fieldName] || [];
+        this.labels[fieldName] = null;
+        return labels;
+    }
+
+    /**
+     * @param {string} fieldName
+     * @param {Element} label
+     */
+    pushLabel(fieldName, label) {
+        this.labels[fieldName] = this.labels[fieldName] || [];
+        this.labels[fieldName].push(label);
+    }
+
+    // ------------------------------------------------------------------------
+    // Compilers
+    // ------------------------------------------------------------------------
 
     /**
      * @param {Element} el
@@ -70,31 +125,6 @@ export class FormCompiler extends ViewCompiler {
         }
 
         return buttonBox;
-    }
-
-    /**
-     * @param {Element} el
-     * @param {Record<string, any>} params
-     * @returns {Element}
-     */
-    compileForm(el, params) {
-        const form = createElement("div");
-        form.setAttribute(
-            `t-attf-class`,
-            "{{props.record.isInEdition ? 'o_form_editable' : 'o_form_readonly'}}"
-        );
-        if (params.className) {
-            form.setAttribute("t-att-class", params.className);
-        }
-        let hasSheet = false;
-        for (const child of el.childNodes) {
-            hasSheet = hasSheet || getTagName(child) === "sheet";
-            append(form, this.compileNode(child, params));
-        }
-        if (!hasSheet) {
-            form.className = "o_form_nosheet";
-        }
-        return form;
     }
 
     /**
@@ -132,9 +162,34 @@ export class FormCompiler extends ViewCompiler {
      * @param {Record<string, any>} params
      * @returns {Element}
      */
+    compileForm(el, params) {
+        const form = createElement("div");
+        form.setAttribute(
+            `t-attf-class`,
+            "{{props.record.isInEdition ? 'o_form_editable' : 'o_form_readonly'}}"
+        );
+        if (params.className) {
+            form.setAttribute("t-att-class", params.className);
+        }
+        let hasSheet = false;
+        for (const child of el.childNodes) {
+            hasSheet = hasSheet || getTag(child, true) === "sheet";
+            append(form, this.compileNode(child, params));
+        }
+        if (!hasSheet) {
+            form.className = "o_form_nosheet";
+        }
+        return form;
+    }
+
+    /**
+     * @param {Element} el
+     * @param {Record<string, any>} params
+     * @returns {Element}
+     */
     compileGenericNode(el, params) {
         if (
-            el.nodeName === "div" &&
+            getTag(el, true) === "div" &&
             el.getAttribute("name") === "button_box" &&
             el.children.length
         ) {
@@ -149,7 +204,7 @@ export class FormCompiler extends ViewCompiler {
      * @returns {Element}
      */
     compileGroup(el, params) {
-        const isOuterGroup = [...el.children].some((c) => getTagName(c) === "group");
+        const isOuterGroup = [...el.children].some((c) => getTag(c, true) === "group");
         const formGroup = createElement(isOuterGroup ? "OuterGroup" : "InnerGroup");
 
         let slotId = 0;
@@ -168,9 +223,7 @@ export class FormCompiler extends ViewCompiler {
 
         let forceNewline = false;
         for (const child of el.children) {
-            const tagName = getTagName(child);
-
-            if (tagName === "newline") {
+            if (getTag(child, true) === "newline") {
                 forceNewline = true;
                 continue;
             }
@@ -194,7 +247,7 @@ export class FormCompiler extends ViewCompiler {
             }
 
             let slotContent;
-            if (tagName === "field") {
+            if (getTag(child, true) === "field") {
                 const addLabel = child.hasAttribute("nolabel")
                     ? child.getAttribute("nolabel") !== "1"
                     : true;
@@ -224,7 +277,7 @@ export class FormCompiler extends ViewCompiler {
                     mainSlot.setAttribute("subType", "'item_component'");
                 }
             } else {
-                if (child.classList.contains("o_td_label") || child.tagName === "label") {
+                if (child.classList.contains("o_td_label") || getTag(child, true) === "label") {
                     mainSlot.setAttribute("subType", "'label'");
                     child.classList.remove("o_td_label");
                 }
@@ -244,7 +297,7 @@ export class FormCompiler extends ViewCompiler {
 
                 const groupClassExpr = `scope && scope.className`;
                 if (isComponentNode(slotContent)) {
-                    if (child.tagName !== "button") {
+                    if (getTag(child, true) !== "button") {
                         if (slotContent.hasAttribute("class")) {
                             mainSlot.prepend(
                                 createElement("t", {
@@ -287,10 +340,10 @@ export class FormCompiler extends ViewCompiler {
             if (!compiled) {
                 continue;
             }
-            if (child.nodeName === "button") {
+            if (getTag(child, true) === "button") {
                 buttons.push(compiled);
             } else {
-                if (child.nodeName === "field") {
+                if (getTag(child, true) === "field") {
                     compiled.setAttribute("showTooltip", true);
                 }
                 others.push(compiled);
@@ -350,7 +403,7 @@ export class FormCompiler extends ViewCompiler {
         }
 
         for (const child of el.children) {
-            if (child.nodeName !== "page") {
+            if (getTag(child, true) !== "page") {
                 continue;
             }
             const invisible = getModifier(child, "invisible");
@@ -444,47 +497,11 @@ export class FormCompiler extends ViewCompiler {
             if (!compiled) {
                 continue;
             }
-            if (child.nodeName === "field") {
+            if (getTag(child, true) === "field") {
                 compiled.setAttribute("showTooltip", true);
             }
             append(sheetFG, compiled);
         }
         return sheetBG;
-    }
-
-    createLabelFromField(fieldId, fieldName, fieldString, label, params) {
-        const props = {
-            id: `'${fieldId}'`,
-            fieldName: `'${fieldName}'`,
-            record: "record",
-            fieldInfo: `fieldNodes['${fieldId}']`,
-        };
-        let labelText = label.textContent || fieldString;
-        labelText = labelText
-            ? toStringExpression(labelText)
-            : `record.fields['${fieldName}'].string`;
-        return createElement("FormLabel", {
-            "t-props": objectToString(props),
-            string: labelText,
-        });
-    }
-
-    /**
-     * @param {string} fieldName
-     * @returns {Element[]}
-     */
-    getLabels(fieldName) {
-        const labels = this.labels[fieldName] || [];
-        this.labels[fieldName] = null;
-        return labels;
-    }
-
-    /**
-     * @param {string} fieldName
-     * @param {Element} label
-     */
-    pushLabel(fieldName, label) {
-        this.labels[fieldName] = this.labels[fieldName] || [];
-        this.labels[fieldName].push(label);
     }
 }
