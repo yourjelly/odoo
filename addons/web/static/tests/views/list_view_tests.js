@@ -1063,98 +1063,73 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL(
-        "editable list datetimepicker destroy widget (edition)",
-        async function (assert) {
-            assert.expect(7);
-            var eventPromise = makeDeferred();
+    QUnit.test("editable list datepicker destroy widget (edition)", async function (assert) {
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: `<tree editable="top"><field name="date"/></tree>`,
+        });
 
-            await makeView({
-                type: "list",
-                resModel: "foo",
-                serverData,
-                arch: '<tree editable="top">' + '<field name="date"/>' + "</tree>",
-            });
-            $(target).findel.on({
-                "show.datetimepicker": async function () {
-                    assert.containsOnce(target, ".o_selected_row");
-                    assert.containsOnce($("body"), ".bootstrap-datetimepicker-widget");
+        await click(target.querySelector(".o_data_cell"));
+        assert.containsOnce(target, ".o_selected_row");
 
-                    await testUtils.fields.triggerKeydown(
-                        $(target).find(".o_datepicker_input"),
-                        "escape"
-                    );
+        await click(target, ".o_datepicker input");
+        assert.containsOnce(
+            document.body,
+            ".bootstrap-datetimepicker-widget",
+            "datepicker should be opened"
+        );
+        triggerEvent(document.activeElement, null, "keydown", { key: "Escape" });
 
-                    assert.containsOnce(target, ".o_selected_row");
-                    assert.containsNone($("body"), ".bootstrap-datetimepicker-widget");
+        await nextTick();
+        assert.containsOnce(target, ".o_selected_row", "the row is still in edition");
+        assert.containsNone(
+            document.body,
+            ".bootstrap-datetimepicker-widget",
+            "the datepicker is no longer visible"
+        );
+        triggerEvent(document.activeElement, null, "keydown", { key: "Escape" });
 
-                    await testUtils.fields.triggerKeydown($(document.activeElement), "escape");
+        await nextTick();
+        assert.containsNone(target, ".o_selected_row", "the row is no longer in edition");
+        assert.containsN(target, ".o_data_row", 4);
+    });
 
-                    assert.containsNone(target, ".o_selected_row");
+    QUnit.skipWOWL("editable list datepicker destroy widget (new line)", async function (assert) {
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: `<tree editable="top"><field name="date"/></tree>`,
+        });
 
-                    eventPromise.resolve();
-                },
-            });
+        assert.containsN(target, ".o_data_row", 4, "There should be 4 rows");
 
-            assert.containsN(target, ".o_data_row", 4);
-            assert.containsNone(target, ".o_selected_row");
+        await click(target.querySelector(".o_list_button_add"));
+        assert.containsOnce(target, ".o_selected_row");
 
-            await click(target.querySelector(".o_data_cell"));
-            await testUtils.dom.openDatepicker($(target).find(".o_datepicker"));
+        await click(target, ".o_datepicker input");
+        assert.containsOnce(
+            document.body,
+            ".bootstrap-datetimepicker-widget",
+            "datepicker should be opened"
+        );
+        triggerEvent(document.activeElement, null, "keydown", { key: "Escape" });
 
-            await eventPromise;
-        }
-    );
+        await nextTick();
+        assert.containsOnce(target, ".o_selected_row", "the row is still in edition");
+        assert.containsNone(
+            document.body,
+            ".bootstrap-datetimepicker-widget",
+            "the datepicker is no longer visible"
+        );
+        triggerEvent(document.activeElement, null, "keydown", { key: "Escape" });
 
-    QUnit.skipWOWL(
-        "editable list datetimepicker destroy widget (new line)",
-        async function (assert) {
-            assert.expect(10);
-            var eventPromise = testUtils.makeTestPromise();
-
-            await makeView({
-                type: "list",
-                resModel: "foo",
-                serverData,
-                arch: '<tree editable="top">' + '<field name="date"/>' + "</tree>",
-            });
-            $(target).findel.on({
-                "show.datetimepicker": async function () {
-                    assert.containsOnce($("body"), ".bootstrap-datetimepicker-widget");
-                    assert.containsN(target, ".o_data_row", 5);
-                    assert.containsOnce(target, ".o_selected_row");
-
-                    await testUtils.fields.triggerKeydown(
-                        $(target).find(".o_datepicker_input"),
-                        "escape"
-                    );
-
-                    assert.containsNone($("body"), ".bootstrap-datetimepicker-widget");
-                    assert.containsN(target, ".o_data_row", 5);
-                    assert.containsOnce(target, ".o_selected_row");
-
-                    await testUtils.fields.triggerKeydown($(document.activeElement), "escape");
-
-                    assert.containsN(target, ".o_data_row", 4);
-                    assert.containsNone(target, ".o_selected_row");
-
-                    eventPromise.resolve();
-                },
-            });
-            assert.equal($(target).find(".o_data_row").length, 4, "There should be 4 rows");
-
-            assert.equal(
-                $(target).find(".o_selected_row").length,
-                0,
-                "No row should be in edit mode"
-            );
-
-            await click(target.querySelector(".o_list_button_add"));
-            await testUtils.dom.openDatepicker($(target).find(".o_datepicker"));
-
-            await eventPromise;
-        }
-    );
+        await nextTick();
+        assert.containsNone(target, ".o_selected_row", "the row is no longer in edition");
+        assert.containsN(target, ".o_data_row", 4, "There should still be 4 rows");
+    });
 
     QUnit.test("at least 4 rows are rendered, even if less data", async function (assert) {
         assert.expect(1);
