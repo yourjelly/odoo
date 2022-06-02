@@ -288,6 +288,20 @@
             <field name="sequence">15</field>
         </record>
 
+        <record id="oco_test_line_financial_group_single" model="account.report.line">
+            <field name="name">test line financial single groupby</field>
+            <field name="report_id" ref="test_report"/>
+            <field name="expression_ids" eval="[(5, 0, 0),
+                (0, 0, {'total': 'main', 'engine': 'domain', 'formula': &quot;[('account_id.user_type_id.internal_group', '=', 'income')]&quot;, 'subformula': 'count_rows', 'figure_type': 'integer'}),
+                (0, 0, {'total': 'forty_two', 'engine': 'domain', 'formula': &quot;[('account_id.user_type_id.internal_group', '=', 'income')]&quot;, 'subformula': 'sum'}),
+            ]"/>
+            <!--TODO OCO BUG: le count_rows ici ne marche pas bien: il devrait afficher le nombre d'éléments du groupby >< Donc, 2 ici, pas 11 qui est le nombre d'amls (avec les demo data) ===> un moteur count_rows-->
+            <!--TODO OCO AUTRE BUG: les éléments du groupby, à l'audit, donnent le même résultat que leur ligne parente :/ => On oublie d'ajouter la clé du groupby dans ce qui appelle la db.-->
+            <field name="foldable" eval="True"/>
+            <field name="groupby">partner_id</field>
+            <field name="sequence">16</field>
+        </record>
+
         <!--TODO OCO le print du test report déconne complet (les colonnes sont bonnes, mais les lignes viennent du rapport générique) => sans doute un souci de passage d'options-->
     </data>
 </odoo>
