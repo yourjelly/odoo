@@ -1,8 +1,9 @@
 /** @odoo-module **/
 
-import { registry } from "@web/core/registry";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { makeContext } from "@web/core/context";
+import { localization } from "@web/core/l10n/localization";
+import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { createElement } from "@web/core/utils/xml";
 import { ActionMenus } from "@web/search/action_menus/action_menus";
@@ -11,9 +12,8 @@ import { usePager } from "@web/search/pager_hook";
 import { useModel } from "@web/views/helpers/model";
 import { standardViewProps } from "@web/views/helpers/standard_view_props";
 import { useSetupView } from "@web/views/helpers/view_hook";
-import { isX2Many } from "@web/views/helpers/view_utils";
-import { useViewButtons } from "@web/views/view_button/hook";
-import { localization } from "@web/core/l10n/localization";
+import { isX2Many } from "@web/views/helpers/utils";
+import { useViewButtons } from "@web/views/view_button/view_button_hook";
 
 const { Component, onWillStart, useEffect, useRef, onRendered, useState, toRaw } = owl;
 

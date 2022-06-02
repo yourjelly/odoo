@@ -59,8 +59,12 @@ function getCard(cardIndex = 0) {
     return target.querySelectorAll(".o_kanban_record:not(.o_kanban_ghost)")[cardIndex];
 }
 
-function getColumn(groupIndex = 0) {
-    return target.querySelectorAll(".o_kanban_group")[groupIndex];
+function getColumn(groupIndex = 0, ignoreFolded = false) {
+    let selector = ".o_kanban_group";
+    if (ignoreFolded) {
+        selector += ":not(.o_column_folded)";
+    }
+    return target.querySelectorAll(selector)[groupIndex];
 }
 
 function getCardTexts(groupIndex) {
@@ -127,7 +131,7 @@ async function validateColumn() {
 }
 
 async function toggleColumnActions(columnIndex) {
-    const group = target.querySelectorAll(`.o_kanban_group`)[columnIndex];
+    const group = getColumn(columnIndex);
     await click(group, ".o_kanban_config .dropdown-toggle");
     const buttons = group.querySelectorAll(".o_kanban_config .dropdown-menu .dropdown-item");
     return (buttonText) => {
@@ -138,8 +142,7 @@ async function toggleColumnActions(columnIndex) {
 }
 
 async function loadMore(columnIndex) {
-    const group = target.querySelectorAll(`.o_kanban_group`)[columnIndex];
-    await click(group, ".o_kanban_load_more a");
+    await click(getColumn(columnIndex), ".o_kanban_load_more a");
 }
 
 // /!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\
@@ -568,7 +571,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test(
         "m2m grouped rendering with active field and archive enabled (archivable true)",
         async (assert) => {
-            assert.expect(7);
+            assert.expect(6);
 
             // add active field on partner model and make all records active
             serverData.models.partner.fields.active = {
@@ -599,7 +602,6 @@ QUnit.module("Views", (hooks) => {
             });
 
             assert.containsN(target, ".o_kanban_group", 3);
-            assert.containsOnce(target, ".o_kanban_group:first-child .o_kanban_record");
             assert.containsN(target, ".o_kanban_group:nth-child(2) .o_kanban_record", 2);
             assert.containsN(target, ".o_kanban_group:nth-child(3) .o_kanban_record", 2);
 
@@ -607,9 +609,10 @@ QUnit.module("Views", (hooks) => {
                 [...target.querySelectorAll(".o_kanban_group")].map((el) =>
                     el.innerText.replace(/\s/g, " ")
                 ),
-                ["None blork", "gold yopblip", "silver yopgnap"]
+                ["None (1)", "gold yopblip", "silver yopgnap"]
             );
 
+            await click(getColumn(0));
             await toggleColumnActions(0);
 
             // check archive/restore all actions in kanban header's config dropdown
@@ -4388,11 +4391,12 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_group", 2, "should still have two columns");
         assert.strictEqual(
             getColumn(0).querySelector(".o_column_title").innerText,
-            "None",
+            "None (2)",
             "first column should have no id (Undefined column)"
         );
 
         // check available actions on 'Undefined' column
+        await click(getColumn(0));
         await toggleColumnActions(0);
         assert.containsOnce(
             getColumn(0),
@@ -6353,7 +6357,7 @@ QUnit.module("Views", (hooks) => {
         }
     });
 
-    QUnit.test("rendering date and datetime", async (assert) => {
+    QUnit.test("rendering date and datetime (value)", async (assert) => {
         assert.expect(2);
 
         serverData.models.partner.records[0].date = "2017-01-25";
@@ -6380,6 +6384,81 @@ QUnit.module("Views", (hooks) => {
 
         assert.strictEqual(getCard(0).querySelector(".date").innerText, "01/25/2017");
         assert.strictEqual(getCard(1).querySelector(".datetime").innerText, "12/12/2016 10:55:05");
+    });
+
+    QUnit.test("rendering date and datetime (raw value)", async (assert) => {
+        assert.expect(2);
+
+        serverData.models.partner.records[0].date = "2017-01-25";
+        serverData.models.partner.records[1].datetime = "2016-12-12 10:55:05";
+
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch:
+                "<kanban>" +
+                '<field name="date"/>' +
+                '<field name="datetime"/>' +
+                '<templates><t t-name="kanban-box">' +
+                "<div>" +
+                '<span class="date" t-esc="record.date.raw_value"/>' +
+                '<span class="datetime" t-esc="record.datetime.raw_value"/>' +
+                "</div>" +
+                "</t></templates>" +
+                "</kanban>",
+        });
+
+        patchWithCleanup(luxon.Settings, { defaultLocale: "en" });
+
+        assert.ok(getCard(0).querySelector(".date").innerText.startsWith("Wed Jan 25 2017"));
+        assert.ok(getCard(1).querySelector(".datetime").innerText.startsWith("Mon Dec 12 2016"));
+    });
+
+    QUnit.test("rendering many2one (value)", async (assert) => {
+        assert.expect(1);
+
+        serverData.models.partner.records[1].product_id = false;
+
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch:
+                "<kanban>" +
+                '<field name="product_id"/>' +
+                '<templates><t t-name="kanban-box">' +
+                "<div>" +
+                '<span class="product_id" t-esc="record.product_id.value"/>' +
+                "</div>" +
+                "</t></templates>" +
+                "</kanban>",
+        });
+
+        assert.deepEqual(getCardTexts(), ["hello", "hello", "xmo"]);
+    });
+
+    QUnit.test("rendering many2one (raw value)", async (assert) => {
+        assert.expect(1);
+
+        serverData.models.partner.records[1].product_id = false;
+
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch:
+                "<kanban>" +
+                '<field name="product_id"/>' +
+                '<templates><t t-name="kanban-box">' +
+                "<div>" +
+                '<span class="product_id" t-esc="record.product_id.raw_value"/>' +
+                "</div>" +
+                "</t></templates>" +
+                "</kanban>",
+        });
+
+        assert.deepEqual(getCardTexts(), ["3", "false", "3", "5"]);
     });
 
     QUnit.test("evaluate conditions on relational fields", async (assert) => {
@@ -7524,6 +7603,9 @@ QUnit.module("Views", (hooks) => {
                 "</kanban>",
             groupBy: ["product_id"],
         });
+
+        // Unfold first column
+        await click(getColumn(0));
 
         assert.deepEqual(getCounters(), ["1", "1", "2"]);
 
@@ -9122,7 +9204,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.test("action/type attributes on kanban arch, type='object'", async function (assert) {
+    QUnit.test("action/type attributes on kanban arch, type='object'", async (assert) => {
         const kanban = await makeView({
             type: "kanban",
             resModel: "partner",
@@ -9130,7 +9212,7 @@ QUnit.module("Views", (hooks) => {
             arch: `
                 <kanban action="a1" type="object">
                     <templates><t t-name="kanban-box">
-                        <div class="oe_kanban_global_click">
+                        <div>
                             <p>some value</p><field name="foo"/>
                         </div>
                     </t></templates>
@@ -9151,7 +9233,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["doActionButton type object name a1", "web_search_read"]);
     });
 
-    QUnit.test("action/type attributes on kanban arch, type='action'", async function (assert) {
+    QUnit.test("action/type attributes on kanban arch, type='action'", async (assert) => {
         const kanban = await makeView({
             type: "kanban",
             resModel: "partner",
@@ -9159,7 +9241,7 @@ QUnit.module("Views", (hooks) => {
             arch: `
                 <kanban action="a1" type="action">
                     <templates><t t-name="kanban-box">
-                        <div class="oe_kanban_global_click">
+                        <div>
                             <p>some value</p><field name="foo"/>
                         </div>
                     </t></templates>
@@ -9178,5 +9260,100 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["get_views", "web_search_read"]);
         await click(target.querySelector(".o_kanban_record p"));
         assert.verifySteps(["doActionButton type action name a1", "web_search_read"]);
+    });
+
+    QUnit.test("Missing t-key is automatically filled with a warning", async (assert) => {
+        assert.expect(3);
+
+        patchWithCleanup(console, { warn: () => assert.step("warning") });
+
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch: /* xml */ `
+                <kanban>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div>
+                                <span t-foreach="[1, 2, 3]" t-as="i" t-esc="i" />
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>`,
+        });
+
+        assert.verifySteps(["warning"]);
+        assert.strictEqual(getCard(0).innerText, "123");
+    });
+
+    QUnit.test("Quick created record is rendered after load", async (assert) => {
+        assert.expect(7);
+
+        let def;
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch: /* xml */ `
+                <kanban on_create="quick_create">
+                    <field name="category_ids" />
+                    <progressbar field="foo" colors='{"yop": "success", "gnap": "warning", "blip": "danger"}' sum_field="int_field"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div>
+                                <span t-esc="record.category_ids.raw_value.length" />
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>`,
+            groupBy: ["product_id"],
+            async mockRPC(_route, { method }) {
+                if (method === "read") {
+                    await def;
+                }
+                if (["name_create", "read"].includes(method)) {
+                    assert.step(method);
+                }
+            },
+        });
+
+        assert.deepEqual(getCardTexts(0), ["0", "1"]);
+        assert.verifySteps(["read"]);
+
+        def = makeDeferred();
+
+        await quickCreateRecord(0);
+        await editQuickCreateInput("display_name", "Test");
+        await validateRecord();
+
+        def.resolve();
+        await nextTick();
+
+        assert.deepEqual(getCardTexts(0), ["0", "1", "0"]);
+        assert.verifySteps(["name_create", "read"]);
+    });
+
+    QUnit.test("Allow use of 'editable'/'deletable' in ungrouped kanban", async (assert) => {
+        assert.expect(1);
+
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch: /* xml */ `
+                <kanban on_create="quick_create">
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div>
+                                <button t-if="canEditRecord()">EDIT</button>
+                                <button t-if="canDeleteRecord()">DELETE</button>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>`,
+        });
+
+        assert.deepEqual(getCardTexts(), ["EDITDELETE", "EDITDELETE", "EDITDELETE", "EDITDELETE"]);
     });
 });

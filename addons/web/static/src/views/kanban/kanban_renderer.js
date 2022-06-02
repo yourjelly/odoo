@@ -16,7 +16,7 @@ import { fileTypeMagicWordMap } from "@web/fields/image/image_field";
 import { session } from "@web/session";
 import { useViewCompiler } from "@web/views/helpers/view_compiler";
 import { useBounceButton } from "@web/views/helpers/view_hook";
-import { isRelational } from "@web/views/helpers/view_utils";
+import { isRelational } from "@web/views/helpers/utils";
 import { isAllowedDateField } from "@web/views/relational_model";
 import { ViewButton } from "@web/views/view_button/view_button";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
@@ -31,11 +31,6 @@ const { COLORS } = ColorList;
 
 const formatters = registry.category("formatters");
 
-const DRAGGABLE_GROUP_TYPES = ["many2one"];
-const MOVABLE_RECORD_TYPES = ["char", "boolean", "integer", "selection", "many2one"];
-const GLOBAL_CLICK_CANCEL_SELECTORS = ["a", ".dropdown", ".oe_kanban_action"];
-let nextDialogId = 1;
-
 function isBinSize(value) {
     return /^\d+(\.\d*)? [^0-9]+$/.test(value);
 }
@@ -43,6 +38,19 @@ function isBinSize(value) {
 function isNull(value) {
     return [null, undefined].includes(value);
 }
+
+const DRAGGABLE_GROUP_TYPES = ["many2one"];
+const MOVABLE_RECORD_TYPES = ["char", "boolean", "integer", "selection", "many2one"];
+
+// These classes determine whether a click on a record should open it.
+const CANCEL_GLOBAL_CLICK = ["a", ".dropdown", ".oe_kanban_action"].join(",");
+const ALLOW_GLOBAL_CLICK = [
+    "o-global-click",
+    ".oe_kanban_global_click",
+    ".oe_kanban_global_click_edit",
+].join(",");
+
+let nextDialogId = 1;
 
 class KanbanCoverImageDialog extends Component {
     setup() {
@@ -236,9 +244,12 @@ export class KanbanRenderer extends Component {
             case "many2many": {
                 return value.count ? value.currentIds : [];
             }
+            case "many2one": {
+                return (value && value[0]) || false;
+            }
             case "date":
             case "datetime": {
-                return value && value.toJSDate().toDateString();
+                return value && value.toJSDate();
             }
             case "html": {
                 return markup(value);
@@ -436,7 +447,10 @@ export class KanbanRenderer extends Component {
 
     canDeleteRecord() {
         const { activeActions } = this.props.archInfo;
-        return activeActions.delete && !this.props.list.groupedBy("m2m");
+        return (
+            activeActions.delete &&
+            (!this.props.list.groupedBy || !this.props.list.groupedBy("m2m"))
+        );
     }
 
     canEditGroup(group) {
@@ -562,22 +576,13 @@ export class KanbanRenderer extends Component {
         const { type } = params;
         switch (type) {
             case "edit": {
-                this.props.openRecord(record, "edit");
-                break;
+                return this.props.openRecord(record, "edit");
             }
             case "open": {
-                this.props.openRecord(record);
-                break;
+                return this.props.openRecord(record);
             }
             case "delete": {
-                this.deleteRecord(record, group);
-                break;
-            }
-            case "action":
-            case "object": {
-                // TODO
-                console.warn("TODO: Button clicked for record", record.id, { params });
-                break;
+                return this.deleteRecord(record, group);
             }
             case "set_cover": {
                 const { fieldName, widget, autoOpen } = params;
@@ -601,7 +606,7 @@ export class KanbanRenderer extends Component {
                 break;
             }
             default: {
-                this.notification.add(this.env._t("Kanban: no action for type: ") + type, {
+                return this.notification.add(this.env._t("Kanban: no action for type: ") + type, {
                     type: "danger",
                 });
             }
@@ -618,14 +623,19 @@ export class KanbanRenderer extends Component {
         }
     }
 
+    /**
+     * @param {Record} record
+     * @param {MouseEvent} ev
+     */
     onRecordClick(record, ev) {
-        if (ev.target.closest(GLOBAL_CLICK_CANCEL_SELECTORS.join(","))) {
+        if (ev.target.closest(CANCEL_GLOBAL_CLICK)) {
             return;
         }
-        if (this.props.archInfo.openAction) {
+        const { archInfo, forceGlobalClick } = this.props;
+        if (!forceGlobalClick && archInfo.openAction) {
             this.action.doActionButton({
-                name: this.props.archInfo.openAction.action,
-                type: this.props.archInfo.openAction.type,
+                name: archInfo.openAction.action,
+                type: archInfo.openAction.type,
                 resModel: record.resModel,
                 resId: record.resId,
                 resIds: record.resIds,
@@ -635,7 +645,7 @@ export class KanbanRenderer extends Component {
                     record.model.notify();
                 },
             });
-        } else {
+        } else if (forceGlobalClick || ev.target.closest(ALLOW_GLOBAL_CLICK)) {
             this.props.openRecord(record);
         }
     }

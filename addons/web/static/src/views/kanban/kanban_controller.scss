@@ -3,6 +3,10 @@
     display: flex;
     align-content: stretch;
 
+    .dropdown, .o_kanban_manage_button_section {
+        position: inherit;
+    }
+
     @include media-breakpoint-down(sm) {
         padding: 0px!important;
     }
