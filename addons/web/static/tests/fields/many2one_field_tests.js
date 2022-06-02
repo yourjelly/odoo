@@ -14,6 +14,7 @@ import {
     getFixture,
     getNodesTextContent,
     makeDeferred,
+    mount,
     nextTick,
     patchWithCleanup,
     selectDropdownItem,
@@ -33,14 +34,14 @@ import {
 import { makeView, setupViewRegistries } from "../views/helpers";
 import { registry } from "@web/core/registry";
 import { session } from "@web/session";
+import { Record } from "@web/views/record";
+import { makeTestEnv } from "../helpers/mock_env";
+import { Field } from "@web/fields/field";
 
 const serviceRegistry = registry.category("services");
 
 let serverData;
 let target;
-
-// WOWL remove after adapting tests
-let testUtils, Widget, BasicModel, StandaloneFieldManagerMixin, relationalFields;
 
 QUnit.module("Fields", (hooks) => {
     hooks.beforeEach(() => {
@@ -1454,58 +1455,44 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.skipWOWL("standalone many2one field", async function (assert) {
+    QUnit.test("standalone many2one field", async function (assert) {
         assert.expect(4);
 
-        var model = await testUtils.createModel({
-            Model: BasicModel,
-            serverData,
-        });
-        var record;
-        model
-            .makeRecord("coucou", [
-                {
-                    name: "partner_id",
-                    relation: "partner",
-                    type: "many2one",
-                    value: [1, "first partner"],
+        class Comp extends owl.Component {
+            setup() {
+                this.fields = {
+                    partner_id: {
+                        name: "partner_id",
+                        type: "many2one",
+                        relation: "partner",
+                    },
+                };
+                this.values = {
+                    partner_id: [1, "first partner"],
+                };
+            }
+        }
+        Comp.components = { Record, Field };
+        Comp.template = owl.xml`
+            <Record resModel="'coucou'" fields="fields" fieldNames="['partner_id']" initialValues="values" mode="'edit'" t-slot-scope="scope">
+                <Field name="'partner_id'" record="scope.record" canOpen="false" />
+            </Record>
+        `;
+
+        await mount(Comp, target, {
+            env: await makeTestEnv({
+                serverData,
+                mockRPC(route, { method }) {
+                    assert.step(method);
                 },
-            ])
-            .then(function (recordID) {
-                record = model.get(recordID);
-            });
-        await nextTick();
-        // create a new widget that uses the StandaloneFieldManagerMixin
-        var StandaloneWidget = Widget.extend(StandaloneFieldManagerMixin, {
-            init: function (parent) {
-                this._super.apply(this, arguments);
-                StandaloneFieldManagerMixin.init.call(this, parent);
-            },
-        });
-        var parent = new StandaloneWidget(model);
-        model.setParent(parent);
-        await testUtils.mock.addMockEnvironment(parent, {
-            // data: self.data,
-            mockRPC(route, args) {
-                assert.step(args.method);
-                return this._super.apply(this, arguments);
-            },
+            }),
         });
 
-        var relField = new relationalFields.FieldMany2One(parent, "partner_id", record, {
-            mode: "edit",
-            noOpen: true,
-        });
-
-        relField.appendTo(target);
-        await nextTick();
-        await testUtils.fields.editInput($("input.o_input"), "xyzzrot");
-
-        await testUtils.fields.many2one.clickItem("partner_id", "Create");
-
+        await editInput(target, ".o_field_widget input", "xyzzrot");
+        await click(target.querySelector(".o_field_widget .ui-menu-item"));
         assert.containsNone(
-            relField,
-            ".o_external_button",
+            target,
+            ".o_field_widget .o_external_button",
             "should not have the button to open the record"
         );
         assert.verifySteps(["name_search", "name_create"]);
