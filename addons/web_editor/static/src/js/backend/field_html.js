@@ -64,11 +64,13 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
      */
     init: function () {
         this._super(...arguments);
-        if (this.nodeOptions && this.nodeOptions.dynamic_placeholder) {
-            // When the dynamic placeholder is active,
-            // the recordData need to be updated when `mailing_model_real` change
-            this.resetOnAnyFieldChange = true;
-        }
+        // TODO this break the mass_mailing editor tour ( the content of the field html is reset )
+        //      why was this code here in the first place ?
+        // if (this.nodeOptions && this.nodeOptions.dynamic_placeholder) {
+        //     // When the dynamic placeholder is active,
+        //     // the recordData need to be updated when `mailing_model_real` change
+        //     this.resetOnAnyFieldChange = true;
+        // }
     },
 
     openDynamicPlaceholder: async function (baseModel, chain = []) {
