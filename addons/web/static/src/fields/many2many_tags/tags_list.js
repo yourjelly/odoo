@@ -20,9 +20,11 @@ export class TagsList extends Component {
 TagsList.template = "web.TagsList";
 TagsList.defaultProps = {
     className: "",
+    displayBadge: true,
 };
 TagsList.props = {
     className: { type: String, optional: true },
+    displayBadge: { type: Boolean, optional: true },
     name: { type: String, optional: true },
     itemsVisible: { type: Number, optional: true },
     slots: { type: Object, optional: true },
