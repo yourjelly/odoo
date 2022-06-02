@@ -764,12 +764,17 @@ class Module(models.Model):
         known_mods_names = {mod.name: mod for mod in known_mods}
 
         # iterate through detected modules and update/create them in db
+        mod_value_to_create = []
+        mods = []
+        terp_by_mod_name = {}
         for mod_name in modules.get_modules():
             mod = known_mods_names.get(mod_name)
             terp = self.get_module_info(mod_name)
+            terp_by_mod_name[mod_name] = terp
             values = self.get_values_from_terp(terp)
 
             if mod:
+                mods.append(mod.id)
                 updated_values = {}
                 for key in values:
                     old = getattr(mod, key)
@@ -786,12 +791,14 @@ class Module(models.Model):
                 if not mod_path or not terp:
                     continue
                 state = "uninstalled" if terp.get('installable', True) else "uninstallable"
-                mod = self.create(dict(name=mod_name, state=state, **values))
+                mod_value_to_create.append((dict(name=mod_name, state=state, **values)))
                 res[1] += 1
 
-            mod._update_dependencies(terp.get('depends', []), terp.get('auto_install'))
-            mod._update_exclusions(terp.get('excludes', []))
-            mod._update_category(terp.get('category', 'Uncategorized'))
+        mods.extend(self.create(mod_value_to_create)._ids)
+        mods = self.browse(mods)
+        mods._update_dependencies(terp_by_mod_name)
+        mods._update_exclusions(terp_by_mod_name)
+        mods._update_category(terp_by_mod_name)
 
         return res
 
@@ -899,20 +906,28 @@ class Module(models.Model):
     def get_apps_server(self):
         return tools.config.get('apps_server', 'https://apps.odoo.com/apps')
 
-    def _update_dependencies(self, depends=None, auto_install_requirements=()):
+    def _update_dependencies(self, terp_by_mod_name):
         self.env['ir.module.module.dependency'].flush_model()
-        existing = set(dep.name for dep in self.dependencies_id)
-        needed = set(depends or [])
-        for dep in (needed - existing):
-            self._cr.execute('INSERT INTO ir_module_module_dependency (module_id, name) values (%s, %s)', (self.id, dep))
-        for dep in (existing - needed):
-            self._cr.execute('DELETE FROM ir_module_module_dependency WHERE module_id = %s and name = %s', (self.id, dep))
-        self._cr.execute('UPDATE ir_module_module_dependency SET auto_install_required = (name = any(%s)) WHERE module_id = %s',
-                         (list(auto_install_requirements or ()), self.id))
+        to_insert : list = []  # list of tuple (module_id, name)
+        to_delete : list = []  # list of tuple (module_id, name)
+        for mod in self:
+            terp = terp_by_mod_name[mod.name]
+            depends, auto_install_requirements = terp.get('depends', []), terp.get('auto_install', [])
+            existing = set(dep.name for dep in self.dependencies_id)
+            needed = set(depends or [])
+            to_insert.extend((mod.id, dep) for dep in (needed - existing))
+            to_delete.extend((mod.id, dep) for dep in (existing - needed))
+            # update ?
+            self._cr.execute('UPDATE ir_module_module_dependency SET auto_install_required = (name = any(%s)) WHERE module_id = %s',
+                            (list(auto_install_requirements or ()), self.id))
+
+        self._cr.execute('INSERT INTO ir_module_module_dependency (module_id, name) VALUES %s', [to_insert])
+        self._cr.execute('DELETE FROM ir_module_module_dependency WHERE (module_id, name) IN %s', [to_delete])
+
         self.env['ir.module.module.dependency'].invalidate_model(['auto_install_required'])
         self.invalidate_recordset(['dependencies_id'])
 
-    def _update_exclusions(self, excludes=None):
+    def _update_exclusions(self, terp_by_mod_name):
         self.env['ir.module.module.exclusion'].flush_model()
         existing = set(excl.name for excl in self.exclusion_ids)
         needed = set(excludes or [])
@@ -922,7 +937,7 @@ class Module(models.Model):
             self._cr.execute('DELETE FROM ir_module_module_exclusion WHERE module_id=%s AND name=%s', (self.id, name))
         self.invalidate_recordset(['exclusion_ids'])
 
-    def _update_category(self, category='Uncategorized'):
+    def _update_category(self, terp_by_mod_name):
         current_category = self.category_id
         current_category_path = []
         while current_category:
