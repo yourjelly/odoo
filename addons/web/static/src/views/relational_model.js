@@ -102,7 +102,6 @@ async function toggleArchive(model, resModel, resIds, doArchive) {
     if (action && Object.keys(action).length !== 0) {
         model.action.doAction(action);
     }
-    //todo fge _invalidateCache
 }
 
 // WOWL FIXME: all calls to the ORM that are not calling a method should give a context, this is currently not the case
@@ -291,6 +290,32 @@ class DataPoint {
      * @param {Object} state
      */
     setup() {}
+
+    /**
+     * TODO WOWL: adapt this comment to new system
+     * Also, is datapoint the best place ? Could be in record.
+     *
+     * Invalidates the DataManager's cache if the main model (i.e. the model of
+     * its root parent) of the given dataPoint is a model in 'noCacheModels'.
+     *
+     * Reloads the currencies if the main model is 'res.currency'.
+     * Reloads the webclient if we modify a res.company, to (un)activate the
+     * multi-company environment if we are not in a tour test.
+     *
+     */
+    invalidateCache() {
+        if (this.resModel === "res.currency") {
+            // TODO WOWL: this needs to be ported from basic model for the list view to have it.
+            // session.reloadCurrencies();
+            // There is a test in form view but it uses the basic model for now.
+        }
+        if (this.resModel === "res.company") {
+            this.model.action.doAction("reload_context");
+        }
+        if (this.model.noCacheModels.includes(this.resModel)) {
+            this.model.env.bus.trigger("CLEAR-CACHES");
+        }
+    }
 
     // -------------------------------------------------------------------------
     // Protected
@@ -512,6 +537,7 @@ export class Record extends DataPoint {
         await toggleArchive(this.model, this.resModel, [this.resId], true);
         await this.load();
         this.model.notify();
+        this.invalidateCache();
     }
 
     checkValidity() {
@@ -558,6 +584,7 @@ export class Record extends DataPoint {
             this._changes = {};
             this.preloadedData = {};
         }
+        this.invalidateCache();
     }
 
     discard() {
@@ -836,6 +863,7 @@ export class Record extends DataPoint {
         await toggleArchive(this.model, this.resModel, [this.resId], false);
         await this.load();
         this.model.notify();
+        this.invalidateCache();
     }
 
     async update(changes) {
@@ -1198,6 +1226,7 @@ export class Record extends DataPoint {
             delete this.virtualId;
             this.data.id = this.resId;
             this.resIds.push(this.resId);
+            this.invalidateCache();
         } else if (keys.length > 0) {
             try {
                 await this.model.orm.write(this.resModel, [this.resId], changes, this.context);
@@ -1208,7 +1237,9 @@ export class Record extends DataPoint {
                 }
                 throw e;
             }
+            this.invalidateCache();
         }
+
         // Switch to the parent active fields
         if (this.parentActiveFields) {
             this.activeFields = this.parentActiveFields;
@@ -1363,8 +1394,8 @@ class DynamicList extends DataPoint {
         const resIds = await this.getResIds(isSelected);
         await toggleArchive(this.model, this.resModel, resIds, true);
         await this.model.load();
+        this.invalidateCache();
         return resIds;
-        //todo fge _invalidateCache
     }
 
     canQuickCreate() {
@@ -1439,8 +1470,8 @@ class DynamicList extends DataPoint {
         const resIds = await this.getResIds(isSelected);
         await toggleArchive(this.model, this.resModel, resIds, false);
         await this.model.load();
+        this.invalidateCache();
         return resIds;
-        //todo fge _invalidateCache
     }
 
     // -------------------------------------------------------------------------
@@ -1484,6 +1515,7 @@ class DynamicList extends DataPoint {
                     const resIds = validSelection.map((r) => r.resId);
                     try {
                         await this.model.orm.write(this.resModel, resIds, changes, this.context);
+                        this.invalidateCache();
                         validSelection.forEach((record) => {
                             record.selected = false;
                         });
@@ -3132,6 +3164,9 @@ export class RelationalModel extends Model {
         this.root = null;
 
         this.nextId = 1;
+
+        // list of models for which the DataManager's cache should be cleared on create, update and delete operations
+        this.noCacheModels = ["ir.actions.act_window", "ir.filters", "ir.ui.view", "res.currency"];
 
         // debug
         window.basicmodel = this;
