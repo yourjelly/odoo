@@ -1027,6 +1027,8 @@ $o-form-label-margin-right: 0px;
     display: flex;
     flex: 0 1 auto;
     flex-flow: row wrap;
+    padding: 0;
+    margin: auto 0 auto 0;
 
     .o_form_label.o_light_label, .o_light_label .o_form_label {
         font-weight: $font-weight-normal;
