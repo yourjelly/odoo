@@ -1869,19 +1869,6 @@
     }
     Component.template = "";
 
-    class Component {
-        constructor(props, env, node) {
-            this.props = props;
-            this.env = env;
-            this.__owl__ = node;
-        }
-        setup() { }
-        render(deep = false) {
-            this.__owl__.render(deep === true);
-        }
-    }
-    Component.template = "";
-
     // Maps fibers to thrown errors
     const fibersInError = new WeakMap();
     const nodeErrorHandlers = new WeakMap();
