@@ -6,10 +6,82 @@ import reprlib
 from ctypes import Structure, c_bool, c_int32, c_int64, c_ssize_t
 from multiprocessing import Lock, RawValue, RawArray
 from multiprocessing.shared_memory import SharedMemory
-from time import time, time_ns
+from time import sleep, time, time_ns
+
+from odoo.tools.func import lazy_property
 
 
 _logger = logging.getLogger(__name__)
+
+
+
+# Fault tolerant mutual exclusion locks for shared memory systems: https://patents.google.com/patent/US7493618
+# We need a atomic (CAS COmpare-And-Swap + Event multiprocessing) operation to a have a completly correct
+# It doesn't exist in Python, it isn't possible to do it in ctypes because atomic_method are compile 'in-place'.
+# Maybe 'atomics' libs or 'cffi'.
+
+import atomics
+
+class LockIdentifyAtomics:
+
+    def __init__(self) -> None:
+        self.shmem = SharedMemory(create=True, size=4)
+        self.buf = self.shmem.buf[:]
+        self._atomic = atomics.atomicview(buffer=self.buf, atype=atomics.INT)
+        self._lock = self._atomic.__enter__()
+        self._lock.store(-1)
+
+    # @lazy_property
+    # def pid(self):
+    #     return os.getpid()
+
+    # def hook_before_fork(self):
+    #     lazy_property.reset_all(self)
+
+    def __enter__(self):
+        # TODO: Event multiprocessing
+        # TODO: Test Multi-Threading fail ones :o
+        # Next line is very slow ? why this ? lot of check into atomics libraries
+        while not self._lock.cmpxchg_strong(-1, os.getpid()):
+            sleep(0.00001)
+        return
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+
+        # Next line is very slow ? why this ? lot of check into atomics libraries
+        exited = self._lock.cmpxchg_strong(os.getpid(), -1)
+        if not exited:
+            _logger.error("One process has release the lock when it was used.")
+
+    def __del__(self):
+        self._atomic._exited = True
+        self._atomic.release()
+        del self.buf
+        self.shmem.unlink()
+
+    def force_release_if_mandatory(self, pid: int):
+        force_exited = self._lock.cmpxchg_strong(pid, -1)
+        if force_exited:
+            _logger.warning("Atomic PID was be force to release")
+
+# from cffi import FFI
+
+# ffibuilder = FFI()
+# ffibuilder.cdef("""
+# _Bool atomic_compare_exchange_strong(volatile A* obj, C* expected, C desired);
+# """)
+# # set_source() gives the name of the python extension module to
+# # produce, and some C source code as a string.  This C code needs
+# # to make the declarated functions, types and globals available,
+# # so it is often just the "#include".
+# ffibuilder.set_source("_pi_cffi",
+# """
+# #include "stdatomics.h"   // the C header of the library
+# """)
+
+
+
+
 
 
 class SharedMemoryNotAvailable(Exception):
@@ -134,7 +206,7 @@ class SharedMemoryLRU:
         _logger.debug("Create Shared Memory of %d bytes", byte_size)
 
         # The lock to ensure that only one process access to critical section in the time
-        self._lock = LockIdentify()
+        self._lock = LockIdentifyAtomics()
         # The Raw Shared Memory, will contain only data (key, value)
         self._sm = SharedMemory(size=byte_size, create=True)
 
