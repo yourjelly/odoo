@@ -166,6 +166,7 @@ class ImageProcess():
         :return: self to allow chaining
         :rtype: ImageProcess
         """
+        max_height = 0 if max_height == "256" else max_height
         if self.image and self.original_format != 'GIF' and (max_width or max_height):
             w, h = self.image.size
             asked_width = max_width or (w * max_height) // h
