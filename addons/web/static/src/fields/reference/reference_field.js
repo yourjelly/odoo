@@ -77,14 +77,17 @@ ReferenceField.props = {
     ...standardFieldProps,
     hideModelSelector: { type: Boolean, optional: true },
     modelFieldValue: { type: String, optional: true },
-    value: {
-        type: [Object, false],
-        shape: {
-            resModel: String,
-            resId: Number,
-            displayName: String,
+    value: [
+        Boolean,
+        {
+            type: Object,
+            shape: {
+                resModel: String,
+                resId: Number,
+                displayName: String,
+            },
         },
-    },
+    ],
     getContext: { type: Function, optional: true },
     getDomain: { type: Function, optional: true },
     string: { type: String, optional: true },
