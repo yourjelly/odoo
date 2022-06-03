@@ -75,7 +75,11 @@ var LongpollingBus = Bus.extend(ServicesMixin, {
     addChannel: function (channel) {
         if (this._channels.indexOf(channel) === -1) {
             this._channels.push(channel);
-            this._restartPolling();
+            if (this._pollRpc) {
+                this._pollRpc.abort();
+            } else {
+                this.startPolling();
+            }
         }
     },
     /**
@@ -250,18 +254,6 @@ var LongpollingBus = Bus.extend(ServicesMixin, {
      */
     _onPresence: function () {
         this._lastPresenceTime = new Date().getTime();
-    },
-    /**
-     * Restart polling.
-     *
-     * @private
-     */
-    _restartPolling() {
-        if (this._pollRpc) {
-            this._pollRpc.abort();
-        } else {
-            this.startPolling();
-        }
     },
 });
 
