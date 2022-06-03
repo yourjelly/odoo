@@ -96,8 +96,10 @@ export function useSetupAction(params = {}) {
                 if (scrolling) {
                     const searchPanelEl = rootRef.el.querySelector(".o_content .o_search_panel");
                     if (searchPanelEl) {
-                        searchPanelEl.scrollLeft = scrolling.searchPanel.left || 0;
-                        searchPanelEl.scrollTop = scrolling.searchPanel.top || 0;
+                        searchPanelEl.scrollLeft =
+                            (scrolling.searchPanel && scrolling.searchPanel.left) || 0;
+                        searchPanelEl.scrollTop =
+                            (scrolling.searchPanel && scrolling.searchPanel.top) || 0;
                     }
                 }
             });
@@ -127,8 +129,8 @@ export function useSetupAction(params = {}) {
                 if (scrolling) {
                     const contentEl = rootRef.el.querySelector(".o_content");
                     if (contentEl) {
-                        contentEl.scrollTop = scrolling.content.top || 0;
-                        contentEl.scrollLeft = scrolling.content.left || 0;
+                        contentEl.scrollTop = (scrolling.content && scrolling.content.top) || 0;
+                        contentEl.scrollLeft = (scrolling.content && scrolling.content.left) || 0;
                     }
                 }
             });
