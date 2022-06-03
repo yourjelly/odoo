@@ -24,7 +24,6 @@
         'views/subcontracting_portal_views.xml',
         'views/subcontracting_portal_templates.xml',
         'wizard/stock_picking_return_views.xml',
-        'report/mrp_report_bom_structure.xml',
     ],
     'demo': [
         'data/mrp_subcontracting_demo.xml',
@@ -32,6 +31,12 @@
     'assets': {
         'web.assets_tests': [
             'mrp_subcontracting/static/tests/tours/subcontracting_portal_tour.js',
+        ],
+        'web.assets_backend': [
+            'mrp_subcontracting/static/src/components/**/*.js',
+        ],
+        'web.assets_qweb': [
+            'mrp_subcontracting/static/**/*.xml',
         ],
         'mrp_subcontracting.assets_qweb': [
             ('include', 'web.assets_qweb'),
