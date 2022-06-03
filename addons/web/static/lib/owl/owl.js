@@ -1310,9 +1310,12 @@
                 this.afterNode = afterNode;
                 this.child.mount(parent, afterNode);
                 for (let i = 0; i < n; i++) {
-                    let origFn = this.handlers[i][0];
+                    let handler = this.handlers[i];
+                    // handler = [...mods, fn, comp], so we need to replace second to last elem
+                    let idx = handler.length - 2;
+                    let origFn = handler[idx];
                     const self = this;
-                    this.handlers[i][0] = function (ev) {
+                    handler[idx] = function (ev) {
                         const target = ev.target;
                         let currentNode = self.child.firstNode();
                         const afterNode = self.afterNode;
@@ -2177,15 +2180,15 @@
     }
     /**
      * Apply default props (only top level).
-     *
-     * Note that this method does modify in place the props
      */
     function applyDefaultProps(props, defaultProps) {
+        const result = Object.assign({}, props);
         for (let propName in defaultProps) {
             if (props[propName] === undefined) {
-                props[propName] = defaultProps[propName];
+                result[propName] = defaultProps[propName];
             }
         }
+        return result;
     }
     // -----------------------------------------------------------------------------
     // Integration with reactivity system (useState)
@@ -2238,7 +2241,7 @@
                 node.forceNextRender = false;
             }
             else {
-                const currentProps = node.component.props;
+                const currentProps = node.props;
                 shouldRender = parentFiber.deep || arePropsDifferent(currentProps, props);
             }
             if (shouldRender) {
@@ -2285,11 +2288,12 @@
             currentNode = this;
             this.app = app;
             this.parent = parent;
+            this.props = props;
             this.parentKey = parentKey;
             this.level = parent ? parent.level + 1 : 0;
             const defaultProps = C.defaultProps;
             if (defaultProps) {
-                applyDefaultProps(props, defaultProps);
+                props = applyDefaultProps(props, defaultProps);
             }
             const env = (parent && parent.childEnv) || app.env;
             this.childEnv = env;
@@ -2400,13 +2404,14 @@
             this.status = 2 /* DESTROYED */;
         }
         async updateAndRender(props, parentFiber) {
+            const rawProps = props;
             // update
             const fiber = makeChildFiber(this, parentFiber);
             this.fiber = fiber;
             const component = this.component;
             const defaultProps = component.constructor.defaultProps;
             if (defaultProps) {
-                applyDefaultProps(props, defaultProps);
+                props = applyDefaultProps(props, defaultProps);
             }
             currentNode = this;
             for (const key in props) {
@@ -2422,6 +2427,7 @@
                 return;
             }
             component.props = props;
+            this.props = rawProps;
             fiber.render();
             const parentRoot = parentFiber.root;
             if (this.willPatch.length) {
@@ -5694,8 +5700,8 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
 
 
     __info__.version = '2.0.0-beta-8';
-    __info__.date = '2022-05-31T12:26:01.261Z';
-    __info__.hash = 'b56a9c2';
+    __info__.date = '2022-06-03T13:51:45.156Z';
+    __info__.hash = '34ef4ed';
     __info__.url = 'https://github.com/odoo/owl';
 
 
