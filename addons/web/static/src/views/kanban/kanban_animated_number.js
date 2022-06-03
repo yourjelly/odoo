@@ -42,7 +42,7 @@ KanbanAnimatedNumber.props = {
     value: Number,
     duration: Number,
     animationClass: { type: String, optional: true },
-    currency: { type: [Object, false], optional: true },
+    currency: { type: [Object, Boolean], optional: true },
     title: { type: String, optional: true },
 };
 KanbanAnimatedNumber.enableAnimations = true;
