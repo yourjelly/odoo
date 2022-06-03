@@ -3008,8 +3008,8 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.skipWOWL("slow create on a many2one", async function (assert) {
-        assert.expect(11);
+    QUnit.test("slow create on a many2one", async function (assert) {
+        assert.expect(10);
 
         serverData.views = {
             "product,false,form": `
@@ -3026,7 +3026,7 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <sheet>
-                        <field name="product_id" options="{'quick_create': 0}" />
+                        <field name="product_id" options="{'no_quick_create': 1}" />
                     </sheet>
                 </form>
             `,
@@ -3075,17 +3075,14 @@ QUnit.module("Fields", (hooks) => {
         await click(target, ".modal .modal-footer .btn:not(.btn-primary)");
         assert.strictEqual(
             target.querySelector(".o_field_many2one input").value,
-            "xphone",
-            "should have restored the many2one with its previous selected value (xphone)"
+            "",
+            "should have reset the many2one"
         );
 
         // confirm the many2one creation
         await editInput(target, ".o_field_many2one input", "new product");
         await triggerEvent(target, ".o_field_many2one input", "blur");
 
-        assert.containsOnce(target, ".modal", "there should be one opened modal");
-
-        await click(target, ".modal .modal-footer .btn-primary");
         assert.containsOnce(
             target,
             ".modal .o_form_view",
