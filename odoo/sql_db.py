@@ -9,6 +9,7 @@ the ORM does, in fact.
 """
 
 from contextlib import contextmanager
+from datetime import datetime, timedelta
 import itertools
 import logging
 import os
@@ -58,7 +59,6 @@ if pv(psycopg2.__version__) < pv('2.7'):
 
     psycopg2.extensions.register_adapter(str, adapt_string)
 
-from datetime import timedelta
 import threading
 from inspect import currentframe
 
@@ -547,8 +547,7 @@ class Cursor(BaseCursor):
     def now(self):
         """ Return the transaction's timestamp ``NOW() AT TIME ZONE 'UTC'``. """
         if self._now is None:
-            self.execute("SELECT (now() AT TIME ZONE 'UTC')")
-            self._now = self.fetchone()[0]
+            self._now = datetime.now()
         return self._now
 
 
