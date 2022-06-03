@@ -647,8 +647,8 @@ function makeActionManager(env) {
                 } else {
                     if (this.env.isSmall) {
                         const el = document.firstElementChild;
-                        el.scrollLeft = controller.scrolling.left || 0;
-                        el.scrollTop = controller.scrolling.top || 0;
+                        el.scrollLeft = (controller.scrolling && controller.scrolling.left) || 0;
+                        el.scrollTop = (controller.scrolling && controller.scrolling.top) || 0;
                     }
                     controller.getGlobalState = () => {
                         const exportFns = this.__getGlobalState__.callbacks;
