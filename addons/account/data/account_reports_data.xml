@@ -296,7 +296,6 @@
                 (0, 0, {'total': 'forty_two', 'engine': 'domain', 'formula': &quot;[('account_id.user_type_id.internal_group', '=', 'income')]&quot;, 'subformula': 'sum'}),
             ]"/>
             <!--TODO OCO BUG: le count_rows ici ne marche pas bien: il devrait afficher le nombre d'éléments du groupby >< Donc, 2 ici, pas 11 qui est le nombre d'amls (avec les demo data) ===> un moteur count_rows-->
-            <!--TODO OCO AUTRE BUG: les éléments du groupby, à l'audit, donnent le même résultat que leur ligne parente :/ => On oublie d'ajouter la clé du groupby dans ce qui appelle la db.-->
             <field name="foldable" eval="True"/>
             <field name="groupby">partner_id</field>
             <field name="sequence">16</field>
