@@ -19,7 +19,7 @@
                 <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="tax_report_ventilation_chiffre_affaires_imposable_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">MATAXB_1.balance + MATAXB_2.balance + MATAXB_3.balance + MATAXB_4.balance + MATAXB_5.balance + MATAXB_6.balance + MATAXB_7.balance + MATAXB_8.balance</field>
                     </record>
@@ -31,7 +31,7 @@
                         <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="tax_report_taux_normal_20_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">TAUX NORMAL DE 20% (Base HT)</field>
                             </record>
@@ -43,7 +43,7 @@
                         <field name="sequence" eval="3"/>
                         <field name="expression_ids">
                             <record id="tax_report_taux_normal_tva_20_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">TAUX NORMAL DE 20% (TVA exigible)</field>
                             </record>
@@ -55,7 +55,7 @@
                         <field name="sequence" eval="4"/>
                         <field name="expression_ids">
                             <record id="tax_report_tauz_reduit_ht_14_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">TAUX REDUIT DE 14% (Base HT)</field>
                             </record>
@@ -67,7 +67,7 @@
                         <field name="sequence" eval="5"/>
                         <field name="expression_ids">
                             <record id="tax_report_taux_rediut_tva_14_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">TAUX REDUIT DE 14% (TVA exigible)</field>
                             </record>
@@ -79,7 +79,7 @@
                         <field name="sequence" eval="6"/>
                         <field name="expression_ids">
                             <record id="account_report_taux_reduit_base_ht_10_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">TAUX REDUIT DE 1O% (Base HT)</field>
                             </record>
@@ -91,7 +91,7 @@
                         <field name="sequence" eval="7"/>
                         <field name="expression_ids">
                             <record id="tax_report_taux_reduit_tva_10_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">TAUX REDUIT DE 1O% (TVA exigible)</field>
                             </record>
@@ -103,7 +103,7 @@
                         <field name="sequence" eval="8"/>
                         <field name="expression_ids">
                             <record id="tax_report_taux_reduit_ht_7_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">TAUX REDUIT DE 7% (Base HT)</field>
                             </record>
@@ -115,7 +115,7 @@
                         <field name="sequence" eval="9"/>
                         <field name="expression_ids">
                             <record id="tax_report_taux_reduit_tva_7_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">TAUX REDUIT DE 7% (TVA exigible)</field>
                             </record>
@@ -128,7 +128,7 @@
                 <field name="sequence" eval="10"/>
                 <field name="expression_ids">
                     <record id="tax_report_ventilation_des_deductions_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">1ACHATS_NON_IMMOBILISES_BASE_HT.balance + 1ACHATS_NON_IMMOBILISES_TVA_DEDUCTIBLE.balance + IMMOBILISATIONS_BASE_HT.balance + IMMOBILISATIONS_TVA_DEDUCTIBLE.balance</field>
                     </record>
@@ -140,7 +140,7 @@
                         <field name="sequence" eval="11"/>
                         <field name="expression_ids">
                             <record id="tax_report_achats_non_immobilises_ht_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">TRAVAUX_A_FACONS_HT.balance + SOUSTRAITANCE_TRAVAUX_IMMOBILIERS_HT.balance + BIENS_MATERIELS_BASE_HT.balance + PRESTATIONS_DE_SERVICES_BASE_HT.balance</field>
                             </record>
@@ -152,7 +152,7 @@
                                 <field name="sequence" eval="12"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_travaux_facons_ht_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                     </record>
                                 </field>
@@ -163,7 +163,7 @@
                                 <field name="sequence" eval="13"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_sous_traitance_immobiliers_ht_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                     </record>
                                 </field>
@@ -174,7 +174,7 @@
                                 <field name="sequence" eval="14"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_biens_materiels_ht_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">ACHATS_A_LIMPORTATION_20_HT.balance + ACHATS_A_LINTERIEUR_20_HT.balance + ACHATS_A_LIMPORTATION_14_HT.balance + ACHATS_A_LINTERIEUR_14_HT.balance + ACHATS_A_LIMPORTATION_10_HT.balance + ACHATS_A_LINTERIEUR_10_HT.balance + ACHAT_A_LIMPORTATION_7_HT.balance + ACHAT_A_LINTERIEUR_7_HT.balance</field>
                                     </record>
@@ -186,7 +186,7 @@
                                         <field name="sequence" eval="15"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_achats_importation_ht_20_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">Achats à l'importation (20%) (HT)</field>
                                             </record>
@@ -198,7 +198,7 @@
                                         <field name="sequence" eval="16"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_achats_interieur_ht_20_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">Achats à l'intérieur (20%) (HT)</field>
                                             </record>
@@ -210,7 +210,7 @@
                                         <field name="sequence" eval="17"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_achats_importation_ht_14_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">Achats à l'importation (14%) (HT)</field>
                                             </record>
@@ -222,7 +222,7 @@
                                         <field name="sequence" eval="18"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_achats_interieur_ht_14_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">Achats à l'intérieur (14%) (HT)</field>
                                             </record>
@@ -234,7 +234,7 @@
                                         <field name="sequence" eval="19"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_achats_importation_ht_10_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">Achats à l'importation (10%) (HT)</field>
                                             </record>
@@ -246,7 +246,7 @@
                                         <field name="sequence" eval="20"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_achats_interieur_ht_10_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">Achats à l'intérieur (10%) (HT)</field>
                                             </record>
@@ -258,7 +258,7 @@
                                         <field name="sequence" eval="21"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_achat_importation_ht_7_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">Achat à l'importation (7%) (HT)</field>
                                             </record>
@@ -270,7 +270,7 @@
                                         <field name="sequence" eval="22"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_achats_interieur_ht_7_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">Achat à l'intérieur (7%) (HT)</field>
                                             </record>
@@ -284,7 +284,7 @@
                                 <field name="sequence" eval="23"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_prestations_services_ht_1_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                     </record>
                                 </field>
@@ -297,7 +297,7 @@
                         <field name="sequence" eval="24"/>
                         <field name="expression_ids">
                             <record id="tax_report_achats_immobilises_deductible_tva_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">TRAVAUX_A_FACONS_TVA_DEDUCTIBLE.balance + SOUSTRAITANCE_TRAVAUX_IMMOBILIERS_TVA_DEDUCTIBLE.balance + BIENS_MATERIELS_TVA_DEDUCTIBLE.balance + PRESTATIONS_DE_SERVICES_TVA_DEDUCTIBLE.balance</field>
                             </record>
@@ -309,7 +309,7 @@
                                 <field name="sequence" eval="25"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_travaux_facons_tva_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                     </record>
                                 </field>
@@ -320,7 +320,7 @@
                                 <field name="sequence" eval="26"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_sous_traitance_immobiliers_tva_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                     </record>
                                 </field>
@@ -331,7 +331,7 @@
                                 <field name="sequence" eval="27"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_biens_materiels_tva_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">ACHATS_A_LIMPORTATION_20_TVA.balance + ACHATS_A_LINTERIEUR_20_TVA.balance + ACHATS_A_LIMPORTATION_14_TVA.balance + ACHATS_A_LINTERIEUR_14_TVA.balance + ACHATS_A_LIMPORTATION_10_TVA.balance + ACHATS_A_LINTERIEUR_10_TVA.balance + ACHAT_A_LIMPORTATION_7_TVA.balance + ACHAT_A_LINTERIEUR_7_TVA.balance</field>
                                     </record>
@@ -343,7 +343,7 @@
                                         <field name="sequence" eval="28"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_achats_importation_tva_20_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">Achats à l'importation (20%) (TVA)</field>
                                             </record>
@@ -355,7 +355,7 @@
                                         <field name="sequence" eval="29"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_achats_interieur_tva_20_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">Achats à l'intérieur (20%) (TVA)</field>
                                             </record>
@@ -367,7 +367,7 @@
                                         <field name="sequence" eval="30"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_achats_importation_tva_14_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">Achats à l'importation (14%) (TVA)</field>
                                             </record>
@@ -379,7 +379,7 @@
                                         <field name="sequence" eval="31"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_achats_interieur_tva_14_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">Achats à l'intérieur (14%) (TVA)</field>
                                             </record>
@@ -391,7 +391,7 @@
                                         <field name="sequence" eval="32"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_achats_importation_tva_10_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">Achats à l'importation (10%) (TVA)</field>
                                             </record>
@@ -403,7 +403,7 @@
                                         <field name="sequence" eval="33"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_achats_interieur_tva_10_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">Achats à l'intérieur (10%) (TVA)</field>
                                             </record>
@@ -415,7 +415,7 @@
                                         <field name="sequence" eval="34"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_achats_importation_tva_7_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">Achat à l'importation (7%) (TVA)</field>
                                             </record>
@@ -427,7 +427,7 @@
                                         <field name="sequence" eval="35"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_achats_interieur_tva_7_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">Achat à l'intérieur (7%) (TVA)</field>
                                             </record>
@@ -441,7 +441,7 @@
                                 <field name="sequence" eval="36"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_prestations_service_deductible_tva_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                     </record>
                                 </field>
@@ -454,7 +454,7 @@
                         <field name="sequence" eval="37"/>
                         <field name="expression_ids">
                             <record id="tax_report_immobilisations_base_ht_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Immobilisations (Base HT)</field>
                             </record>
@@ -466,7 +466,7 @@
                         <field name="sequence" eval="38"/>
                         <field name="expression_ids">
                             <record id="tax_report_immobilisations_deductible_tva_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Immobilisations (TVA déductible)</field>
                             </record>

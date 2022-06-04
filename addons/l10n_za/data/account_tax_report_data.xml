@@ -19,7 +19,7 @@
                 <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="total_vat_payable_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">(VAT4.balance + VAT4A.balance + (SEC6.balance * 0.6 + SEC7.balance) + VAT11.balance + VAT12.balance) - (VAT14.balance + VAT14A.balance + VAT15.balance + VAT16.balance + VAT17.balance + VAT18.balance)</field>
                     </record>
@@ -30,7 +30,7 @@
                         <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="total_output_tax_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">VAT4.balance + VAT4A.balance + (SEC6.balance * 0.6 + SEC7.balance) + VAT11.balance + VAT12.balance</field>
                             </record>
@@ -42,7 +42,7 @@
                                 <field name="sequence" eval="3"/>
                                 <field name="expression_ids">
                                     <record id="standard_rate_exclude_capital_goods_service_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">[1] Standard Rate (Excluding Capital goods and/or services and accomodation)</field>
                                     </record>
@@ -54,7 +54,7 @@
                                 <field name="sequence" eval="4"/>
                                 <field name="expression_ids">
                                     <record id="vat_on_standard_rate_exclude_capital_goods_service_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">[4] x 15/ (100 + 15)</field>
                                     </record>
@@ -66,7 +66,7 @@
                                 <field name="sequence" eval="5"/>
                                 <field name="expression_ids">
                                     <record id="standard_rate_only_capital_goods_service_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">[1A] Standard Rate (Only Capital goods and/or services)</field>
                                     </record>
@@ -78,7 +78,7 @@
                                 <field name="sequence" eval="6"/>
                                 <field name="expression_ids">
                                     <record id="vat_on_standard_rate_only_capital_goods_service_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">[4A] x 15/ (100 + 15)</field>
                                     </record>
@@ -90,7 +90,7 @@
                                 <field name="sequence" eval="7"/>
                                 <field name="expression_ids">
                                     <record id="zero_rate_exclude_goods_exported_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">[2] Zero Rate (excluding goods exported)</field>
                                     </record>
@@ -102,7 +102,7 @@
                                 <field name="sequence" eval="8"/>
                                 <field name="expression_ids">
                                     <record id="zero_rate_only_goods_exported_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">[2A] Zero Rate (Only goods exported)</field>
                                     </record>
@@ -114,7 +114,7 @@
                                 <field name="sequence" eval="9"/>
                                 <field name="expression_ids">
                                     <record id="exempt_and_non_supplies_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">[3] Exempt and Non supplies</field>
                                     </record>
@@ -126,7 +126,7 @@
                                 <field name="sequence" eval="10"/>
                                 <field name="expression_ids">
                                     <record id="accomodation_exceeding_28_days_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">[5] Accomodation exceeding 28 days</field>
                                     </record>
@@ -137,7 +137,7 @@
                                 <field name="sequence" eval="11"/>
                                 <field name="expression_ids">
                                     <record id="accomodation_exceeding_28_days_60_percent_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">VAT5.balance * 0.6</field>
                                     </record>
@@ -149,7 +149,7 @@
                                 <field name="sequence" eval="12"/>
                                 <field name="expression_ids">
                                     <record id="accomodation_under_28_days_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">[7] Accomodation under 28 days</field>
                                     </record>
@@ -160,7 +160,7 @@
                                 <field name="sequence" eval="13"/>
                                 <field name="expression_ids">
                                     <record id="accomodation_28_days_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">(VAT5.balance * 0.6) + VAT7.balance</field>
                                     </record>
@@ -171,7 +171,7 @@
                                 <field name="sequence" eval="14"/>
                                 <field name="expression_ids">
                                     <record id="vat_on_accomodation_28_days_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">SEC6.balance * 0.6 + SEC7.balance </field>
                                     </record>
@@ -183,7 +183,7 @@
                                         <field name="sequence" eval="15"/>
                                         <field name="expression_ids">
                                             <record id="vat_on_accomodation_exceeding_28_days_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">VAT on Accomodation exceeding 28 days</field>
                                             </record>
@@ -195,7 +195,7 @@
                                         <field name="sequence" eval="16"/>
                                         <field name="expression_ids">
                                             <record id="vat_on_accomodation_under_28_days_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">VAT on Accomodation under 28 days</field>
                                             </record>
@@ -208,7 +208,7 @@
                                 <field name="sequence" eval="17"/>
                                 <field name="expression_ids">
                                     <record id="vat_plus_base_of_second_hand_goods_export_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">VAT10a.balance + VAT11.balance</field>
                                     </record>
@@ -220,7 +220,7 @@
                                         <field name="sequence" eval="18"/>
                                         <field name="expression_ids">
                                             <record id="second_hand_goods_export_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">[10] Change in use and export of second-hand goods</field>
                                             </record>
@@ -234,7 +234,7 @@
                                 <field name="sequence" eval="19"/>
                                 <field name="expression_ids">
                                     <record id="vat_on_second_hand_goods_export_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">[11] x 15 / (100 + 15)</field>
                                     </record>
@@ -246,7 +246,7 @@
                                 <field name="sequence" eval="20"/>
                                 <field name="expression_ids">
                                     <record id="other_imported_services_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">[12] Other and imported services</field>
                                     </record>
@@ -259,7 +259,7 @@
                         <field name="sequence" eval="21"/>
                         <field name="expression_ids">
                             <record id="total_input_tax_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">VAT14.balance + VAT14A.balance + VAT15.balance + VAT16.balance + VAT17.balance + VAT18.balance</field>
                             </record>
@@ -271,7 +271,7 @@
                                 <field name="sequence" eval="22"/>
                                 <field name="expression_ids">
                                     <record id="capital_goods_services_supplied_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">[14] Capital Goods and/or services supplied to you</field>
                                     </record>
@@ -283,7 +283,7 @@
                                 <field name="sequence" eval="23"/>
                                 <field name="expression_ids">
                                     <record id="capital_goods_imported_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">[14A] Capital Goods imported by you</field>
                                     </record>
@@ -295,7 +295,7 @@
                                 <field name="sequence" eval="24"/>
                                 <field name="expression_ids">
                                     <record id="other_goods_services_supplied_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">[15] Other goods and/or services supplied to you (not Capital Goods)</field>
                                     </record>
@@ -307,7 +307,7 @@
                                 <field name="sequence" eval="25"/>
                                 <field name="expression_ids">
                                     <record id="other_goods_imported_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">[15A] Other goods imported by you (not Capital Goods)</field>
                                     </record>
@@ -319,7 +319,7 @@
                                 <field name="sequence" eval="26"/>
                                 <field name="expression_ids">
                                     <record id="change_in_use_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">[16] Change in Use</field>
                                     </record>
@@ -331,7 +331,7 @@
                                 <field name="sequence" eval="27"/>
                                 <field name="expression_ids">
                                     <record id="bad_debts_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">[17] Bad Debts</field>
                                     </record>
@@ -343,7 +343,7 @@
                                 <field name="sequence" eval="28"/>
                                 <field name="expression_ids">
                                     <record id="others_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">[18] Other</field>
                                     </record>

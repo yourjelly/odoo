@@ -19,7 +19,7 @@
                 <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="tax_report_line_gst_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">SGST.balance + CGST.balance + SGST_RC.balance + CGST_RC.balance</field>
                     </record>
@@ -31,7 +31,7 @@
                         <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_sgst_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">SGST</field>
                             </record>
@@ -43,7 +43,7 @@
                         <field name="sequence" eval="3"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_cgst_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">CGST</field>
                             </record>
@@ -55,7 +55,7 @@
                         <field name="sequence" eval="4"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_sgst_rc_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">SGST (RC)</field>
                             </record>
@@ -67,7 +67,7 @@
                         <field name="sequence" eval="5"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_cgst_rc_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">CGST (RC)</field>
                             </record>
@@ -80,7 +80,7 @@
                 <field name="sequence" eval="6"/>
                 <field name="expression_ids">
                     <record id="tax_report_line_igst_root_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">IGST.balance + IGST_RC.balance</field>
                     </record>
@@ -92,7 +92,7 @@
                         <field name="sequence" eval="7"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_igst_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">IGST</field>
                             </record>
@@ -104,7 +104,7 @@
                         <field name="sequence" eval="8"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_igst_rc_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">IGST (RC)</field>
                             </record>
@@ -117,7 +117,7 @@
                 <field name="sequence" eval="9"/>
                 <field name="expression_ids">
                     <record id="tax_report_line_gst_others_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">CESS.balance + CESS_RC.balance + EXEMPT.balance + NIL_RATED.balance + ZERO_RATED.balance + NON_GST_SUPPLIES.balance + STATE_CESS.balance</field>
                     </record>
@@ -129,7 +129,7 @@
                         <field name="sequence" eval="10"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_cess_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">CESS</field>
                             </record>
@@ -141,7 +141,7 @@
                         <field name="sequence" eval="11"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_cess_rc_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">CESS (RC)</field>
                             </record>
@@ -153,7 +153,7 @@
                         <field name="sequence" eval="12"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_exempt_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Exempt</field>
                             </record>
@@ -165,7 +165,7 @@
                         <field name="sequence" eval="13"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_nil_rated_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Nil Rated</field>
                             </record>
@@ -177,7 +177,7 @@
                         <field name="sequence" eval="14"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_zero_rated_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Zero Rated</field>
                             </record>
@@ -189,7 +189,7 @@
                         <field name="sequence" eval="15"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_non_gst_supplies_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Non GST Supplies</field>
                             </record>
@@ -201,7 +201,7 @@
                         <field name="sequence" eval="16"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_state_cess_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">State CESS</field>
                             </record>

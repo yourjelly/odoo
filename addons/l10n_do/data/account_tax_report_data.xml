@@ -19,7 +19,7 @@
                 <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_total_operaciones_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">IIA_INGRESOS_POR_EXPORTACIONES_DE_BIENES_O_SERVICIOS_EXENTOS.balance + IIB_GRAVADAS.balance</field>
                     </record>
@@ -31,7 +31,7 @@
                         <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_2A_ingrs_exprt_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">IIA2_INGRESOS_POR_EXPORTACIONES_DE_BIENES_O_SERVICIOS_EXENTOS.balance + DOTAX010102.balance</field>
                             </record>
@@ -43,7 +43,7 @@
                                 <field name="sequence" eval="3"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_2A2_ingrs_exprt_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                     </record>
                                 </field>
@@ -54,7 +54,7 @@
                                 <field name="sequence" eval="4"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_2A3_ingrs_local_vnts_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">II.A.3</field>
                                     </record>
@@ -68,7 +68,7 @@
                         <field name="sequence" eval="5"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_2b_grvd_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">DOTAX010201.balance + IIB7_OPERACIONES_GRAVADAS_AL_11.balance</field>
                             </record>
@@ -80,7 +80,7 @@
                                 <field name="sequence" eval="6"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_2b6_grvd_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">II.B.6</field>
                                     </record>
@@ -92,7 +92,7 @@
                                 <field name="sequence" eval="7"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_2b7_grvd_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                     </record>
                                 </field>
@@ -106,7 +106,7 @@
                 <field name="sequence" eval="8"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_3_liquidacion_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">III10_TOTAL_ITBIS_COBRADO_SUMAR_CASILLAS_89.balance + III14_TOTAL_ITBIS_PAGADO_SUMAR_CASILLAS_111213.balance</field>
                     </record>
@@ -118,7 +118,7 @@
                         <field name="sequence" eval="9"/>
                         <field name="expression_ids">
                             <record id="account_financial_report_line_02_01_do_account_tax_report_total_itbs_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">DOTAX020101.balance + III9_TBIS_COBRADO_11_DE_LA_CASILLA_7.balance</field>
                             </record>
@@ -130,7 +130,7 @@
                                 <field name="sequence" eval="10"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_itbs_18_casilla_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">III.8</field>
                                     </record>
@@ -142,7 +142,7 @@
                                 <field name="sequence" eval="11"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_tbs_11_casilla_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                     </record>
                                 </field>
@@ -155,7 +155,7 @@
                         <field name="sequence" eval="12"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_total_itbs_pgdo_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">DOTAX020201.balance + DOTAX020202.balance + DOTAX020203.balance</field>
                             </record>
@@ -167,7 +167,7 @@
                                 <field name="sequence" eval="13"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_itbs_pgdo_locales_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">III.11</field>
                                     </record>
@@ -179,7 +179,7 @@
                                 <field name="sequence" eval="14"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_itbs_pgdo_dedubl_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">III.12</field>
                                     </record>
@@ -191,7 +191,7 @@
                                 <field name="sequence" eval="15"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_itbs_pgdo_imptcn_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">III.13</field>
                                     </record>
@@ -206,7 +206,7 @@
                 <field name="sequence" eval="16"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_itbs_rntnd_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">DOTAX0301.balance + DOTAX0302.balance</field>
                     </record>
@@ -218,7 +218,7 @@
                         <field name="sequence" eval="17"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_retcn_prsn_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">A.25</field>
                             </record>
@@ -230,7 +230,7 @@
                         <field name="sequence" eval="18"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_itbs_retcn_prsn_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">A.30</field>
                             </record>

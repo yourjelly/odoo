@@ -19,7 +19,7 @@
                 <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="tax_report_line_vat_all_sales_base_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">STD_SALE_B.balance + SPCL_SALE_B.balance + ZERO_SALE_B.balance + EXP_SALE_B.balance + EXM_SALE_B.balance</field>
                     </record>
@@ -31,7 +31,7 @@
                         <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_standard_rated_15_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">1. Standard Rates 15% (Base)</field>
                             </record>
@@ -43,7 +43,7 @@
                         <field name="sequence" eval="3"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_special_sales_to_locals_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">2. Special Sales to Locals (Base)</field>
                             </record>
@@ -55,7 +55,7 @@
                         <field name="sequence" eval="4"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_local_sales_subject_to_0_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">3. Local Sales Subject to 0% (Base)</field>
                             </record>
@@ -67,7 +67,7 @@
                         <field name="sequence" eval="5"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_export_sales_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">4. Export Sales (Base)</field>
                             </record>
@@ -79,7 +79,7 @@
                         <field name="sequence" eval="6"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_exempt_sales_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">5. Exempt Sales (Base)</field>
                             </record>
@@ -90,7 +90,7 @@
                         <field name="sequence" eval="7"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_net_sales_base_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">STD_SALE_B.balance + SPCL_SALE_B.balance + ZERO_SALE_B.balance + EXP_SALE_B.balance + EXM_SALE_B.balance</field>
                             </record>
@@ -103,7 +103,7 @@
                 <field name="sequence" eval="8"/>
                 <field name="expression_ids">
                     <record id="tax_report_line_vat_all_sales_tax_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">STD_SALE_T.balance + SPCL_SALE_T.balance + ZERO_SALE_T.balance + EXP_SALE_T.balance + EXM_SALE_T.balance</field>
                     </record>
@@ -115,7 +115,7 @@
                         <field name="sequence" eval="9"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_standard_rated_15_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">1. Standard Rates 15% (Tax)</field>
                             </record>
@@ -127,7 +127,7 @@
                         <field name="sequence" eval="10"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_special_sales_to_locals_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">2. Special Sales to Locals (Tax)</field>
                             </record>
@@ -139,7 +139,7 @@
                         <field name="sequence" eval="11"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_local_sales_subject_to_0_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">3. Local Sales Subject to 0% (Tax)</field>
                             </record>
@@ -151,7 +151,7 @@
                         <field name="sequence" eval="12"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_export_sales_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">4. Export Sales (Tax)</field>
                             </record>
@@ -163,7 +163,7 @@
                         <field name="sequence" eval="13"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_exempt_sales_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">5. Exempt Sales (Tax)</field>
                             </record>
@@ -174,7 +174,7 @@
                         <field name="sequence" eval="14"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_net_sales_tax_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">STD_SALE_T.balance + SPCL_SALE_T.balance + ZERO_SALE_T.balance + EXP_SALE_T.balance + EXM_SALE_T.balance</field>
                             </record>
@@ -187,7 +187,7 @@
                 <field name="sequence" eval="15"/>
                 <field name="expression_ids">
                     <record id="tax_report_line_vat_all_expenses_base_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">STD_PUR_B.balance + CUST_PUR_B.balance + RCM_PUR_B.balance + ZER_PUR_B.balance + EXM_PUR_B.balance</field>
                     </record>
@@ -199,7 +199,7 @@
                         <field name="sequence" eval="16"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_standard_rated_15_purchases_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">7. Standard rated 15% Purchases (Base)</field>
                             </record>
@@ -211,7 +211,7 @@
                         <field name="sequence" eval="17"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_taxable_imports_15_paid_to_customs_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">8. Taxable Imports 15% Paid to Customs (Base)</field>
                             </record>
@@ -223,7 +223,7 @@
                         <field name="sequence" eval="18"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_imports_subject_tp_reverse_charge_mechanism_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">9. Imports subject to reverse charge mechanism (Base)</field>
                             </record>
@@ -235,7 +235,7 @@
                         <field name="sequence" eval="19"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_zero_rated_purchases_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">10. Zero Rated Purchases (Base)</field>
                             </record>
@@ -247,7 +247,7 @@
                         <field name="sequence" eval="20"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_exempt_purchases_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">11. Exempt Purchases (Base)</field>
                             </record>
@@ -258,7 +258,7 @@
                         <field name="sequence" eval="21"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_net_purchases_base_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">STD_PUR_B.balance + CUST_PUR_B.balance + RCM_PUR_B.balance + ZER_PUR_B.balance + EXM_PUR_B.balance</field>
                             </record>
@@ -271,7 +271,7 @@
                 <field name="sequence" eval="22"/>
                 <field name="expression_ids">
                     <record id="tax_report_line_vat_all_expenses_tax_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">STD_PUR_T.balance + CUST_PUR_T.balance + RCM_PUR_T.balance + ZER_PUR_T.balance + EXM_PUR_T.balance</field>
                     </record>
@@ -283,7 +283,7 @@
                         <field name="sequence" eval="23"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_standard_rated_15_purchases_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">7. Standard rated 15% Purchases (Tax)</field>
                             </record>
@@ -295,7 +295,7 @@
                         <field name="sequence" eval="24"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_taxable_imports_15_paid_to_customs_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">8. Taxable Imports 15% Paid to Customs (Tax)</field>
                             </record>
@@ -307,7 +307,7 @@
                         <field name="sequence" eval="25"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_imports_subject_tp_reverse_charge_mechanism_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">9. Imports subject to reverse charge mechanism (Tax)</field>
                             </record>
@@ -319,7 +319,7 @@
                         <field name="sequence" eval="26"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_zero_rated_purchases_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">10. Zero Rated Purchases (Tax)</field>
                             </record>
@@ -331,7 +331,7 @@
                         <field name="sequence" eval="27"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_exempt_purchases_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">11. Exempt Purchases (Tax)</field>
                             </record>
@@ -342,7 +342,7 @@
                         <field name="sequence" eval="28"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_net_purchases_tax_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">STD_PUR_T.balance + CUST_PUR_T.balance + RCM_PUR_T.balance + ZER_PUR_T.balance + EXM_PUR_T.balance</field>
                             </record>
@@ -355,7 +355,7 @@
                 <field name="sequence" eval="29"/>
                 <field name="expression_ids">
                     <record id="tax_report_line_net_vat_due_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                     </record>
                 </field>
@@ -365,7 +365,7 @@
                         <field name="sequence" eval="30"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_total_value_of_due_tax_for_the_period_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">STD_SALE_T.balance + SPCL_SALE_T.balance + ZERO_SALE_T.balance + EXP_SALE_T.balance + EXM_SALE_T.balance</field>
                             </record>
@@ -376,7 +376,7 @@
                         <field name="sequence" eval="31"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_total_value_of_recoverable_tax_for_the_period_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">STD_PUR_T.balance + CUST_PUR_T.balance + RCM_PUR_T.balance + ZER_PUR_T.balance + EXM_PUR_T.balance</field>
                             </record>
@@ -387,7 +387,7 @@
                         <field name="sequence" eval="32"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_net_vat_due_or_reclaimed_for_the_period_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">STD_SALE_T.balance + SPCL_SALE_T.balance + ZERO_SALE_T.balance + EXP_SALE_T.balance + EXM_SALE_T.balance - (STD_PUR_T.balance + CUST_PUR_T.balance + RCM_PUR_T.balance + ZER_PUR_T.balance + EXM_PUR_T.balance)</field>
                             </record>
@@ -416,7 +416,7 @@
                 <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="tax_report_line_withholding_tax_on_purchased_services_base_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">RENTB.balance + AIRB.balance + SEAB.balance + TELEB.balance + DIVB.balance + CONB.balance + ROLB.balance + INSB.balance + ROYB.balance + MAIB.balance + BRAB.balance + OTHB.balance + MAGB.balance</field>
                     </record>
@@ -428,7 +428,7 @@
                         <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_withholding_tax_5_rental_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Withholding Tax 5% (Rental) (Base)</field>
                             </record>
@@ -440,7 +440,7 @@
                         <field name="sequence" eval="3"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_withholding_tax_5_tickets_or_air_freight_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Withholding Tax 5% (Tickets or Air Freight) (Base)</field>
                             </record>
@@ -452,7 +452,7 @@
                         <field name="sequence" eval="4"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_withholding_tax_5_tickets_or_sea_freight_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Withholding Tax 5% (Tickets or Sea Freight)(Base)</field>
                             </record>
@@ -464,7 +464,7 @@
                         <field name="sequence" eval="5"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_withholding_tax_5_international_telecommunication_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Withholding Tax 5% (International Telecommunication)(Base)</field>
                             </record>
@@ -476,7 +476,7 @@
                         <field name="sequence" eval="6"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_withholding_tax_5_distributed_profits_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Withholding Tax 5% (Distributed Profits) (Base)</field>
                             </record>
@@ -488,7 +488,7 @@
                         <field name="sequence" eval="7"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_withholding_tax_5_consulting_and_technical_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Withholding Tax 5% (Consulting and Technical) (Base)</field>
                             </record>
@@ -500,7 +500,7 @@
                         <field name="sequence" eval="8"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_withholding_tax_5_return_from_loans_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Withholding Tax 5% (Return from Loans) (Base)</field>
                             </record>
@@ -512,7 +512,7 @@
                         <field name="sequence" eval="9"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_withholding_tax_5_insurance_and_reinsurance_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Withholding Tax 5% (Insurance &amp; Reinsurance) (Base)</field>
                             </record>
@@ -524,7 +524,7 @@
                         <field name="sequence" eval="10"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_withholding_tax_15_royalties_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Withholding Tax 15% (Royalties)(Base)</field>
                             </record>
@@ -536,7 +536,7 @@
                         <field name="sequence" eval="11"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_withholding_tax_15_paid_services_from_main_branch_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Withholding Tax 15% (Paid Services from Main Branch)(Base)</field>
                             </record>
@@ -548,7 +548,7 @@
                         <field name="sequence" eval="12"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_withholding_tax_15_paid_services_from_another_branch_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Withholding Tax 15% (Paid Services from another branch)(Base)</field>
                             </record>
@@ -560,7 +560,7 @@
                         <field name="sequence" eval="13"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_withholding_tax_15_others_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Withholding Tax 15% (Others)(Base)</field>
                             </record>
@@ -572,7 +572,7 @@
                         <field name="sequence" eval="14"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_withholding_tax_20_managerial_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Withholding Tax 20% (Managerial)(Base)</field>
                             </record>
@@ -583,7 +583,7 @@
                         <field name="sequence" eval="15"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_withholding_tax_total_base_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">RENTB.balance+AIRB.balance+SEAB.balance+TELEB.balance+DIVB.balance+CONB.balance+ROLB.balance+INSB.balance+ROYB.balance+MAIB.balance+BRAB.balance+OTHB.balance+MAGB.balance</field>
                             </record>
@@ -596,7 +596,7 @@
                 <field name="sequence" eval="16"/>
                 <field name="expression_ids">
                     <record id="tax_report_line_withholding_tax_on_purchased_services_tax_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">RENTT.balance + AIRT.balance + SEAT.balance + TELET.balance + DIVT.balance + CONT.balance + ROLT.balance + INST.balance + ROYT.balance + MAIT.balance + BRAT.balance + OTHT.balance + MAGT.balance</field>
                     </record>
@@ -608,7 +608,7 @@
                         <field name="sequence" eval="17"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_withholding_tax_5_rental_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Withholding Tax 5% (Rental) (Tax)</field>
                             </record>
@@ -620,7 +620,7 @@
                         <field name="sequence" eval="18"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_withholding_tax_5_tickets_or_air_freight_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Withholding Tax 5% (Tickets or Air Freight) (Tax)</field>
                             </record>
@@ -632,7 +632,7 @@
                         <field name="sequence" eval="19"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_withholding_tax_5_tickets_or_sea_freight_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Withholding Tax 5% (Tickets or Sea Freight)(Tax)</field>
                             </record>
@@ -644,7 +644,7 @@
                         <field name="sequence" eval="20"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_withholding_tax_5_international_telecommunication_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Withholding Tax 5% (International Telecommunication)(Tax)</field>
                             </record>
@@ -656,7 +656,7 @@
                         <field name="sequence" eval="21"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_withholding_tax_5_distributed_profits_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Withholding Tax 5% (Distributed Profits) (Tax)</field>
                             </record>
@@ -668,7 +668,7 @@
                         <field name="sequence" eval="22"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_withholding_tax_5_consulting_and_technical_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Withholding Tax 5% (Consulting and Technical) (Tax)</field>
                             </record>
@@ -680,7 +680,7 @@
                         <field name="sequence" eval="23"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_withholding_tax_5_return_from_loans_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Withholding Tax 5% (Return from Loans) (Tax)</field>
                             </record>
@@ -692,7 +692,7 @@
                         <field name="sequence" eval="24"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_withholding_tax_5_insurance_and_reinsurance_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Withholding Tax 5% (Insurance &amp; Reinsurance) (Tax)</field>
                             </record>
@@ -704,7 +704,7 @@
                         <field name="sequence" eval="25"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_withholding_tax_15_royalties_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Withholding Tax 15% (Royalties)(Tax)</field>
                             </record>
@@ -716,7 +716,7 @@
                         <field name="sequence" eval="26"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_withholding_tax_15_paid_services_from_main_branch_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Withholding Tax 15% (Paid Services from Main Branch)(Tax)</field>
                             </record>
@@ -728,7 +728,7 @@
                         <field name="sequence" eval="27"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_withholding_tax_15_paid_services_from_another_branch_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Withholding Tax 15% (Paid Services from another branch)(Tax)</field>
                             </record>
@@ -740,7 +740,7 @@
                         <field name="sequence" eval="28"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_withholding_tax_15_others_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Withholding Tax 15% (Others)(Tax)</field>
                             </record>
@@ -752,7 +752,7 @@
                         <field name="sequence" eval="29"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_withholding_tax_20_managerial_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Withholding Tax 20% (Managerial)(Tax)</field>
                             </record>
@@ -763,7 +763,7 @@
                         <field name="sequence" eval="30"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_withholding_tax_total_tax_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">RENTT.balance+AIRT.balance+SEAT.balance+TELET.balance+DIVT.balance+CONT.balance+ROLT.balance+INST.balance+ROYT.balance+MAIT.balance+BRAT.balance+OTHT.balance+MAGT.balance</field>
                             </record>

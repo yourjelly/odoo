@@ -19,7 +19,7 @@
                 <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_samlet_omsetning_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">NOTAX_01.balance</field>
                     </record>
@@ -31,7 +31,7 @@
                         <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_1_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Post 1</field>
                             </record>
@@ -43,7 +43,7 @@
                         <field name="sequence" eval="3"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_2_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">NOTAX_03.balance+NOTAX_04.balance+NOTAX_05.balance+NOTAX_06.balance+NOTAX_07.balance+NOTAX_08.balance</field>
                             </record>
@@ -56,7 +56,7 @@
                 <field name="sequence" eval="4"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_innenlands_omsetning_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">NOTAX_03.balance + NOTAX_03_1.balance + NOTAX_04.balance + NOTAX_04_1.balance + NOTAX_05.balance + NOTAX_05_1.balance + NOTAX_06.balance + NOTAX_07.balance</field>
                     </record>
@@ -68,7 +68,7 @@
                         <field name="sequence" eval="5"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_3_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Post 3 Base</field>
                             </record>
@@ -80,7 +80,7 @@
                         <field name="sequence" eval="6"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_3_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Post 3 Tax</field>
                             </record>
@@ -92,7 +92,7 @@
                         <field name="sequence" eval="7"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_4_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Post 4 Base</field>
                             </record>
@@ -104,7 +104,7 @@
                         <field name="sequence" eval="8"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_4_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Post 4 Tax</field>
                             </record>
@@ -116,7 +116,7 @@
                         <field name="sequence" eval="9"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_5_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Post 5 Base</field>
                             </record>
@@ -128,7 +128,7 @@
                         <field name="sequence" eval="10"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_5_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Post 5 Tax</field>
                             </record>
@@ -140,7 +140,7 @@
                         <field name="sequence" eval="11"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_6_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Post 6</field>
                             </record>
@@ -152,7 +152,7 @@
                         <field name="sequence" eval="12"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_7_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Post 7</field>
                             </record>
@@ -165,7 +165,7 @@
                 <field name="sequence" eval="13"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_utforsel_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">NOTAX_08.balance</field>
                     </record>
@@ -177,7 +177,7 @@
                         <field name="sequence" eval="14"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_8_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Post 8</field>
                             </record>
@@ -190,7 +190,7 @@
                 <field name="sequence" eval="15"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_innforsel_av_varer_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">NOTAX_09.balance + NOTAX_09_1.balance + NOTAX_10.balance + NOTAX_10_1.balance + NOTAX_11.balance</field>
                     </record>
@@ -202,7 +202,7 @@
                         <field name="sequence" eval="16"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_9_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Post 9 Base</field>
                             </record>
@@ -214,7 +214,7 @@
                         <field name="sequence" eval="17"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_9_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Post 9 Tax</field>
                             </record>
@@ -226,7 +226,7 @@
                         <field name="sequence" eval="18"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_10_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Post 10 Base</field>
                             </record>
@@ -238,7 +238,7 @@
                         <field name="sequence" eval="19"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_10_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Post 10 Tax</field>
                             </record>
@@ -250,7 +250,7 @@
                         <field name="sequence" eval="20"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_11_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Post 11</field>
                             </record>
@@ -263,7 +263,7 @@
                 <field name="sequence" eval="21"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_kjop_med_omvendt_avgiftsplikt_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">NOTAX_12.balance + NOTAX_12_1.balance + NOTAX_13.balance + NOTAX_13_1.balance</field>
                     </record>
@@ -275,7 +275,7 @@
                         <field name="sequence" eval="22"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_12_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Post 12 Base</field>
                             </record>
@@ -287,7 +287,7 @@
                         <field name="sequence" eval="23"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_12_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Post 12 Tax</field>
                             </record>
@@ -299,7 +299,7 @@
                         <field name="sequence" eval="24"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_13_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Post 13 Base</field>
                             </record>
@@ -311,7 +311,7 @@
                         <field name="sequence" eval="25"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_13_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Post 13 Tax</field>
                             </record>
@@ -324,7 +324,7 @@
                 <field name="sequence" eval="26"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_fradragsberettigen_innenlands_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">NOTAX_14.balance + NOTAX_15.balance + NOTAX_16.balance</field>
                     </record>
@@ -336,7 +336,7 @@
                         <field name="sequence" eval="27"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_14_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Post 14</field>
                             </record>
@@ -348,7 +348,7 @@
                         <field name="sequence" eval="28"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_15_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Post 15</field>
                             </record>
@@ -360,7 +360,7 @@
                         <field name="sequence" eval="29"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_16_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Post 16</field>
                             </record>
@@ -373,7 +373,7 @@
                 <field name="sequence" eval="30"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_fradragsberettiget_innforselsmerverdiavgift_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">NOTAX_17.balance + NOTAX_18.balance</field>
                     </record>
@@ -385,7 +385,7 @@
                         <field name="sequence" eval="31"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_17_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Post 17</field>
                             </record>
@@ -397,7 +397,7 @@
                         <field name="sequence" eval="32"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_18_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Post 18</field>
                             </record>
@@ -410,7 +410,7 @@
                 <field name="sequence" eval="33"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_sum_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                     </record>
                 </field>
@@ -421,7 +421,7 @@
                         <field name="sequence" eval="34"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_19_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">NOTAX_03_1.balance+NOTAX_04_1.balance+NOTAX_05_1.balance+NOTAX_09_1.balance+NOTAX_10_1.balance+NOTAX_12_1.balance+NOTAX_13_1.balance-NOTAX_14.balance-NOTAX_15.balance-NOTAX_16.balance-NOTAX_17.balance-NOTAX_18.balance</field>
                             </record>

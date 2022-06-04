@@ -19,7 +19,7 @@
                 <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_purch_vt_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">TAXABLE_PURCHASE_VAT_OUT_OF_SCOPE.balance + TAXABLE_PURCHASE_VAT_EXEMPT.balance + TAXABLE_PURCHASE_VAT_RATED_0.balance + TAXABLE_PURCHASE_VAT_RATED_15.balance</field>
                     </record>
@@ -31,7 +31,7 @@
                         <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_purch_vt_out_scope_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Taxable Purchase VAT Out of Scope</field>
                             </record>
@@ -43,7 +43,7 @@
                         <field name="sequence" eval="3"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_purch_vt_exmpt_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Taxable Purchase VAT Exempt</field>
                             </record>
@@ -55,7 +55,7 @@
                         <field name="sequence" eval="4"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_purch_vt_ratd_0_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Taxable Purchase VAT Rated 0%</field>
                             </record>
@@ -67,7 +67,7 @@
                         <field name="sequence" eval="5"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_purch_vt_ratd_15_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Taxable Purchase VAT Rated 15%</field>
                             </record>
@@ -80,7 +80,7 @@
                 <field name="sequence" eval="6"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_purch_withholding_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">TAXABLE_2_WITHHOLDING_ON_PURCHASES.balance + TAXABLE_35_WITHHOLDING_ON_PURCHASES.balance</field>
                     </record>
@@ -92,7 +92,7 @@
                         <field name="sequence" eval="7"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_purch_withholding_2_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Taxable 2% Withholding on Purchases</field>
                             </record>
@@ -104,7 +104,7 @@
                         <field name="sequence" eval="8"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_purch_withholding_35_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Taxable 35% Withholding on Purchases</field>
                             </record>
@@ -117,7 +117,7 @@
                 <field name="sequence" eval="9"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_sale_vat_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">TAXABLE_SALES_VAT_OUT_OF_SCOPE_SALES.balance + TAXABLE_SALES_VAT_EXEMPT.balance + TAXABLE_SALES_VAT_RATED_0.balance + TAXABLE_SALES_VAT_RATED_15.balance</field>
                     </record>
@@ -129,7 +129,7 @@
                         <field name="sequence" eval="10"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_sale_vat_out_scope_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Taxable Sales VAT Out of Scope (Sales)</field>
                             </record>
@@ -141,7 +141,7 @@
                         <field name="sequence" eval="11"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_sale_vat_exmpt_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Taxable Sales VAT Exempt</field>
                             </record>
@@ -153,7 +153,7 @@
                         <field name="sequence" eval="12"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_sale_vat_rated_0_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Taxable Sales VAT Rated 0%</field>
                             </record>
@@ -165,7 +165,7 @@
                         <field name="sequence" eval="13"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_sale_vat_rated_15_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Taxable Sales VAT Rated 15%</field>
                             </record>
@@ -178,7 +178,7 @@
                 <field name="sequence" eval="14"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_sale_withholding_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">TAXABLE_2_WITHHOLDING_ON_SALES.balance + TAXABLE_35_WITHHOLDING_ON_SALES.balance + TAXABLE_VAT_WITHHOLDING_ON_SALES.balance</field>
                     </record>
@@ -190,7 +190,7 @@
                         <field name="sequence" eval="15"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_sale_withholding_2_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Taxable 2% Withholding on Sales</field>
                             </record>
@@ -202,7 +202,7 @@
                         <field name="sequence" eval="16"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_sale_withholding_35_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Taxable 35% Withholding on Sales</field>
                             </record>
@@ -214,7 +214,7 @@
                         <field name="sequence" eval="17"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_sale_vat_withholding_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Taxable VAT Withholding on Sales</field>
                             </record>
@@ -227,7 +227,7 @@
                 <field name="sequence" eval="18"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_net_vat_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">PURCHASE_VAT.balance + SALES_VAT.balance</field>
                     </record>
@@ -239,7 +239,7 @@
                         <field name="sequence" eval="19"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_purch_vat_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">PURCHASE_VAT_RATED_15.balance</field>
                             </record>
@@ -251,7 +251,7 @@
                                 <field name="sequence" eval="20"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_purch_vat_rated_15_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">Purchase VAT Rated 15%</field>
                                     </record>
@@ -265,7 +265,7 @@
                         <field name="sequence" eval="21"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_net_sale_vat_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">SALES_VAT_RATED_15.balance</field>
                             </record>
@@ -277,7 +277,7 @@
                                 <field name="sequence" eval="22"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_net_sale_vat_15_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">Sales VAT Rated 15%</field>
                                     </record>
@@ -292,7 +292,7 @@
                 <field name="sequence" eval="23"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_net_purch_witholding_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">2_WITHHOLDING_ON_PURCHASES.balance + 35_WITHHOLDING_ON_PURCHASES.balance</field>
                     </record>
@@ -304,7 +304,7 @@
                         <field name="sequence" eval="24"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_net_purch_witholding_2_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">2% Withholding on Purchases</field>
                             </record>
@@ -316,7 +316,7 @@
                         <field name="sequence" eval="25"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_net_purch_witholding_35_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">35% Withholding on Purchases</field>
                             </record>
@@ -329,7 +329,7 @@
                 <field name="sequence" eval="26"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_net_sale_witholding_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">2_WITHHELD_ON_SALES.balance + 35_WITHHELD_ON_SALES.balance + VAT_WITHHELD_ON_SALES.balance</field>
                     </record>
@@ -341,7 +341,7 @@
                         <field name="sequence" eval="27"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_net_sale_witheld_2_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">2% Withheld on Sales</field>
                             </record>
@@ -353,7 +353,7 @@
                         <field name="sequence" eval="28"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_net_sale_witheld_35_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">35% Withheld on Sales</field>
                             </record>
@@ -365,7 +365,7 @@
                         <field name="sequence" eval="29"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_net_sale_vat_witheld_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">VAT Withheld on Sales</field>
                             </record>

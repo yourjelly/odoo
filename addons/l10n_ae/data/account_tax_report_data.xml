@@ -19,7 +19,7 @@
                 <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="tax_report_line_base_all_sales_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">1_STANDARD_RATED_SUPPLIES_BASE.balance + TAX_REF_TOUR_SCHEME_BASE.balance + REVERSE_CHARGE_PRO_BASE.balance + ZERO_RATE_SUPP_BASE.balance + EXAMPT_SUPP_BASE.balance + OUT_OF_SCOPE_BASE_0.balance + GOODS_IMPORT_IN_UAE_BASE.balance + ADJUST_GOODS_IMPORT_IN_UAE_BASE.balance</field>
                     </record>
@@ -31,7 +31,7 @@
                         <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_standard_rated_supplies_base_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">STD_RATE_SUPP_BASE_AB.balance + STD_RATE_SUPP_BASE_DB.balance + STD_RATE_SUPP_BASE_SJ.balance + STD_RATE_SUPP_BASE_AJ.balance + STD_RATE_SUPP_BASE_UM.balance + STD_RATE_SUPP_BASE_RA.balance + STD_RATE_SUPP_BASE_FU.balance</field>
                             </record>
@@ -43,7 +43,7 @@
                                 <field name="sequence" eval="3"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_base_abu_dhabi_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">a. Abu Dhabi (Base)</field>
                                     </record>
@@ -55,7 +55,7 @@
                                 <field name="sequence" eval="4"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_base_dubai_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">b. Dubai (Base)</field>
                                     </record>
@@ -67,7 +67,7 @@
                                 <field name="sequence" eval="5"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_base_sharjah_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">c. Sharjah (Base)</field>
                                     </record>
@@ -79,7 +79,7 @@
                                 <field name="sequence" eval="6"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_base_ajman_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">d. Ajman (Base)</field>
                                     </record>
@@ -91,7 +91,7 @@
                                 <field name="sequence" eval="7"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_base_umm_al_quwain_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">e. Umm Al Quwain (Base)</field>
                                     </record>
@@ -103,7 +103,7 @@
                                 <field name="sequence" eval="8"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_base_ras_al_khaima_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">f. Ras Al-Khaima (Base)</field>
                                     </record>
@@ -115,7 +115,7 @@
                                 <field name="sequence" eval="9"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_base_fujairah_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">g. Fujairah (Base)</field>
                                     </record>
@@ -126,7 +126,7 @@
                                 <field name="sequence" eval="10"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_base_subtotal_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">STD_RATE_SUPP_BASE_AB.balance + STD_RATE_SUPP_BASE_DB.balance + STD_RATE_SUPP_BASE_SJ.balance + STD_RATE_SUPP_BASE_AJ.balance + STD_RATE_SUPP_BASE_UM.balance + STD_RATE_SUPP_BASE_RA.balance + STD_RATE_SUPP_BASE_FU.balance</field>
                                     </record>
@@ -140,7 +140,7 @@
                         <field name="sequence" eval="11"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_tax_refund_tourist_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">2. Tax Refunds provided to Tourists under the Tax Refunds for Tourists Scheme (Base)</field>
                             </record>
@@ -152,7 +152,7 @@
                         <field name="sequence" eval="12"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_supplies_reverse_charge_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">3. Supplies subject to reverse charge provisions (Base)</field>
                             </record>
@@ -164,7 +164,7 @@
                         <field name="sequence" eval="13"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_zero_rated_supplies_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">4. Zero rated supplies (Base)</field>
                             </record>
@@ -176,7 +176,7 @@
                         <field name="sequence" eval="14"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_exempt_supplies_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">5. Exempt supplies (Base)</field>
                             </record>
@@ -188,7 +188,7 @@
                         <field name="sequence" eval="15"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_supplies_out_of_scope_base_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                             </record>
                         </field>
@@ -199,7 +199,7 @@
                         <field name="sequence" eval="16"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_import_uae_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">7. Goods imported into the UAE (Base)</field>
                             </record>
@@ -211,7 +211,7 @@
                         <field name="sequence" eval="17"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_adjustment_import_uae_base_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                             </record>
                         </field>
@@ -221,7 +221,7 @@
                         <field name="sequence" eval="18"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_base_all_sales_total_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">ADJUST_GOODS_IMPORT_IN_UAE_BASE.balance + GOODS_IMPORT_IN_UAE_BASE.balance + OUT_OF_SCOPE_BASE_0.balance + EXAMPT_SUPP_BASE.balance + ZERO_RATE_SUPP_BASE.balance + REVERSE_CHARGE_PRO_BASE.balance + TAX_REF_TOUR_SCHEME_BASE.balance + (STD_RATE_SUPP_BASE_AB.balance + STD_RATE_SUPP_BASE_DB.balance + STD_RATE_SUPP_BASE_SJ.balance + STD_RATE_SUPP_BASE_AJ.balance + STD_RATE_SUPP_BASE_UM.balance + STD_RATE_SUPP_BASE_RA.balance + STD_RATE_SUPP_BASE_FU.balance)</field>
                             </record>
@@ -234,7 +234,7 @@
                 <field name="sequence" eval="19"/>
                 <field name="expression_ids">
                     <record id="tax_report_line_base_all_expense_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">STD_RATE_EXPENSES_BASE.balance + SUPP_REV_CHARGE_PRO_BASE.balance + OUT_OF_SCOPE_1_BASE.balance</field>
                     </record>
@@ -246,7 +246,7 @@
                         <field name="sequence" eval="20"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_standard_rated_expense_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">10. Standard rated expenses (Base)</field>
                             </record>
@@ -258,7 +258,7 @@
                         <field name="sequence" eval="21"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_expense_supplies_reverse_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">11. Supplies subject to the reverse charge provisions (Base)</field>
                             </record>
@@ -270,7 +270,7 @@
                         <field name="sequence" eval="22"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_expense_out_of_scope_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                             </record>
                         </field>
@@ -280,7 +280,7 @@
                         <field name="sequence" eval="23"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_base_all_expense_total_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">OUT_OF_SCOPE_1_BASE.balance + SUPP_REV_CHARGE_PRO_BASE.balance + STD_RATE_EXPENSES_BASE.balance</field>
                             </record>
@@ -293,7 +293,7 @@
                 <field name="sequence" eval="24"/>
                 <field name="expression_ids">
                     <record id="tax_report_line_vat_all_sales_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">1_STANDARD_RATED_SUPPLIES_TAX.balance + TAX_REF_TOUR_SCHEME_TAX.balance + REVERSE_CHARGE_PRO_TAX.balance + ZERO_RATE_SUPP_TAX.balance + EXAMPT_SUPP_TAX.balance + OUT_OF_SCOPE_TAX_0.balance + GOODS_IMPORT_IN_UAE_TAX.balance + ADJUST_GOODS_IMPORT_IN_UAE_TAX.balance</field>
                     </record>
@@ -305,7 +305,7 @@
                         <field name="sequence" eval="25"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_standard_rated_supplies_vat_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">STD_RATE_SUPP_TAX_AB.balance + STD_RATE_SUPP_TAX_DB.balance + STD_RATE_SUPP_TAX_SJ.balance + STD_RATE_SUPP_TAX_AJ.balance + STD_RATE_SUPP_TAX_UM.balance + STD_RATE_SUPP_TAX_RA.balance + STD_RATE_SUPP_TAX_FU.balance</field>
                             </record>
@@ -317,7 +317,7 @@
                                 <field name="sequence" eval="26"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_vat_abu_dhabi_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">a. Abu Dhabi (Tax)</field>
                                     </record>
@@ -329,7 +329,7 @@
                                 <field name="sequence" eval="27"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_vat_dubai_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">b. Dubai (Tax)</field>
                                     </record>
@@ -341,7 +341,7 @@
                                 <field name="sequence" eval="28"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_vat_sharjah_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">c. Sharjah (Tax)</field>
                                     </record>
@@ -353,7 +353,7 @@
                                 <field name="sequence" eval="29"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_vat_ajman_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">d. Ajman (Tax)</field>
                                     </record>
@@ -365,7 +365,7 @@
                                 <field name="sequence" eval="30"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_vat_umm_al_quwain_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">e. Umm Al Quwain (Tax)</field>
                                     </record>
@@ -377,7 +377,7 @@
                                 <field name="sequence" eval="31"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_vat_ras_al_khaima_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">f. Ras Al-Khaima (Tax)</field>
                                     </record>
@@ -389,7 +389,7 @@
                                 <field name="sequence" eval="32"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_vat_fujairah_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">g. Fujairah (Tax)</field>
                                     </record>
@@ -400,7 +400,7 @@
                                 <field name="sequence" eval="33"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_vat_subtotal_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">STD_RATE_SUPP_TAX_AB.balance + STD_RATE_SUPP_TAX_DB.balance + STD_RATE_SUPP_TAX_SJ.balance + STD_RATE_SUPP_TAX_AJ.balance + STD_RATE_SUPP_TAX_UM.balance + STD_RATE_SUPP_TAX_RA.balance + STD_RATE_SUPP_TAX_FU.balance</field>
                                     </record>
@@ -414,7 +414,7 @@
                         <field name="sequence" eval="34"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_tax_refund_tourist_vat_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">2. Tax Refunds provided to Tourists under the Tax Refunds for Tourists Scheme (Tax)</field>
                             </record>
@@ -426,7 +426,7 @@
                         <field name="sequence" eval="35"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_supplies_reverse_charge_vat_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">3. Supplies subject to reverse charge provisions (Tax)</field>
                             </record>
@@ -438,7 +438,7 @@
                         <field name="sequence" eval="36"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_zero_rated_supplies_vat_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">4. Zero rated supplies (Tax)</field>
                             </record>
@@ -450,7 +450,7 @@
                         <field name="sequence" eval="37"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_exempt_supplies_vat_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">5. Exempt supplies (Tax)</field>
                             </record>
@@ -462,7 +462,7 @@
                         <field name="sequence" eval="38"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_supplies_out_of_scope_vat_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                             </record>
                         </field>
@@ -473,7 +473,7 @@
                         <field name="sequence" eval="39"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_import_uae_vat_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">7. Goods imported into the UAE (Tax)</field>
                             </record>
@@ -485,7 +485,7 @@
                         <field name="sequence" eval="40"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_adjustment_import_uae_vat_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                             </record>
                         </field>
@@ -495,7 +495,7 @@
                         <field name="sequence" eval="41"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_vat_all_sales_total_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">(STD_RATE_SUPP_TAX_AB.balance + STD_RATE_SUPP_TAX_DB.balance + STD_RATE_SUPP_TAX_SJ.balance + STD_RATE_SUPP_TAX_AJ.balance + STD_RATE_SUPP_TAX_UM.balance + STD_RATE_SUPP_TAX_RA.balance + STD_RATE_SUPP_TAX_FU.balance) + OUT_OF_SCOPE_TAX_0.balance + ADJUST_GOODS_IMPORT_IN_UAE_TAX.balance + GOODS_IMPORT_IN_UAE_TAX.balance + EXAMPT_SUPP_TAX.balance + ZERO_RATE_SUPP_TAX.balance + REVERSE_CHARGE_PRO_TAX.balance + TAX_REF_TOUR_SCHEME_TAX.balance</field>
                             </record>
@@ -508,7 +508,7 @@
                 <field name="sequence" eval="42"/>
                 <field name="expression_ids">
                     <record id="tax_report_line_vat_all_expense_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">STD_RATE_EXPENSES_TAX.balance + SUPP_REV_CHARGE_PRO_TAX.balance + OUT_OF_SCOPE_1_TAX.balance</field>
                     </record>
@@ -520,7 +520,7 @@
                         <field name="sequence" eval="43"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_standard_rated_expense_vat_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">10. Standard rated expenses (Tax)</field>
                             </record>
@@ -532,7 +532,7 @@
                         <field name="sequence" eval="44"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_expense_supplies_reverse_vat_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">11. Supplies subject to the reverse charge provisions (Tax)</field>
                             </record>
@@ -544,7 +544,7 @@
                         <field name="sequence" eval="45"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_expense_out_of_scope_vat_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                             </record>
                         </field>
@@ -554,7 +554,7 @@
                         <field name="sequence" eval="46"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_vat_all_expense_total_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">OUT_OF_SCOPE_1_TAX.balance + SUPP_REV_CHARGE_PRO_TAX.balance + STD_RATE_EXPENSES_TAX.balance</field>
                             </record>
@@ -567,7 +567,7 @@
                 <field name="sequence" eval="47"/>
                 <field name="expression_ids">
                     <record id="tax_report_line_net_vat_due_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">((STD_RATE_SUPP_TAX_AB.balance + STD_RATE_SUPP_TAX_DB.balance + STD_RATE_SUPP_TAX_SJ.balance + STD_RATE_SUPP_TAX_AJ.balance + STD_RATE_SUPP_TAX_UM.balance + STD_RATE_SUPP_TAX_RA.balance + STD_RATE_SUPP_TAX_FU.balance) + OUT_OF_SCOPE_TAX_0.balance + ADJUST_GOODS_IMPORT_IN_UAE_TAX.balance + GOODS_IMPORT_IN_UAE_TAX.balance + EXAMPT_SUPP_TAX.balance + ZERO_RATE_SUPP_TAX.balance + REVERSE_CHARGE_PRO_TAX.balance + TAX_REF_TOUR_SCHEME_TAX.balance) - (OUT_OF_SCOPE_1_TAX.balance + SUPP_REV_CHARGE_PRO_TAX.balance + STD_RATE_EXPENSES_TAX.balance)</field>
                     </record>
@@ -578,7 +578,7 @@
                         <field name="sequence" eval="48"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_total_value_due_tax_period_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">(STD_RATE_SUPP_TAX_AB.balance + STD_RATE_SUPP_TAX_DB.balance + STD_RATE_SUPP_TAX_SJ.balance + STD_RATE_SUPP_TAX_AJ.balance + STD_RATE_SUPP_TAX_UM.balance + STD_RATE_SUPP_TAX_RA.balance + STD_RATE_SUPP_TAX_FU.balance) + OUT_OF_SCOPE_TAX_0.balance + ADJUST_GOODS_IMPORT_IN_UAE_TAX.balance + GOODS_IMPORT_IN_UAE_TAX.balance + EXAMPT_SUPP_TAX.balance + ZERO_RATE_SUPP_TAX.balance + REVERSE_CHARGE_PRO_TAX.balance + TAX_REF_TOUR_SCHEME_TAX.balance</field>
                             </record>
@@ -589,7 +589,7 @@
                         <field name="sequence" eval="49"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_total_value_recoverable_tax_period_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">OUT_OF_SCOPE_1_TAX.balance + SUPP_REV_CHARGE_PRO_TAX.balance + STD_RATE_EXPENSES_TAX.balance</field>
                             </record>
@@ -600,7 +600,7 @@
                         <field name="sequence" eval="50"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_net_vat_due_period_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">((STD_RATE_SUPP_TAX_AB.balance + STD_RATE_SUPP_TAX_DB.balance + STD_RATE_SUPP_TAX_SJ.balance + STD_RATE_SUPP_TAX_AJ.balance + STD_RATE_SUPP_TAX_UM.balance + STD_RATE_SUPP_TAX_RA.balance + STD_RATE_SUPP_TAX_FU.balance) + OUT_OF_SCOPE_TAX_0.balance + ADJUST_GOODS_IMPORT_IN_UAE_TAX.balance + GOODS_IMPORT_IN_UAE_TAX.balance + EXAMPT_SUPP_TAX.balance + ZERO_RATE_SUPP_TAX.balance + REVERSE_CHARGE_PRO_TAX.balance + TAX_REF_TOUR_SCHEME_TAX.balance) - (OUT_OF_SCOPE_1_TAX.balance + SUPP_REV_CHARGE_PRO_TAX.balance + STD_RATE_EXPENSES_TAX.balance)</field>
                             </record>

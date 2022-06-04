@@ -19,7 +19,7 @@
                 <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="tax_report_impuesto_25_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                     </record>
                 </field>
@@ -29,7 +29,7 @@
                 <field name="sequence" eval="2"/>
                 <field name="expression_ids">
                     <record id="tax_report_impuesto_trans_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">IMPUESTO_A_LAS_TRANSACCIONES_IT_3.balance</field>
                     </record>
@@ -41,7 +41,7 @@
                         <field name="sequence" eval="3"/>
                         <field name="expression_ids">
                             <record id="tax_report_impuesto_trans_3_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">Impuesto a las Transacciones IT (3%)</field>
                             </record>
@@ -54,7 +54,7 @@
                 <field name="sequence" eval="4"/>
                 <field name="expression_ids">
                     <record id="tax_report_impuesto_ttl_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">IMPUESTO_COBRADO.balance + IMPUESTO_PAGADO.balance</field>
                     </record>
@@ -66,7 +66,7 @@
                         <field name="sequence" eval="5"/>
                         <field name="expression_ids">
                             <record id="tax_report_impuesto_ttl_cob_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">IMPUESTO_COBRADO_FUERA_DE_AMBITO.balance + IMPUESTO_COBRADO_DE_EXONERADOS_AL_IVA.balance + IMPUESTO_COBRADO_IVA.balance</field>
                             </record>
@@ -78,7 +78,7 @@
                                 <field name="sequence" eval="6"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_impuesto_ttl_cob_fuera_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                     </record>
                                 </field>
@@ -89,7 +89,7 @@
                                 <field name="sequence" eval="7"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_impuesto_ttl_cob_exon_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                     </record>
                                 </field>
@@ -100,7 +100,7 @@
                                 <field name="sequence" eval="8"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_impuesto_ttl_cob_iva_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">Impuesto Cobrado IVA</field>
                                     </record>
@@ -114,7 +114,7 @@
                         <field name="sequence" eval="9"/>
                         <field name="expression_ids">
                             <record id="tax_report_impuesto_ttl_pag_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">IMPUESTO_PAGADO_FUERA_DE_AMBITO.balance + IMPUESTO_PAGADO_DE_EXONERADOS_AL_IVA.balance + IMPUESTO_PAGADO_IVA.balance</field>
                             </record>
@@ -126,7 +126,7 @@
                                 <field name="sequence" eval="10"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_impuesto_ttl_pag_fuera_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                     </record>
                                 </field>
@@ -137,7 +137,7 @@
                                 <field name="sequence" eval="11"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_impuesto_ttl_pag_exon_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                     </record>
                                 </field>
@@ -148,7 +148,7 @@
                                 <field name="sequence" eval="12"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_impuesto_ttl_pag_iva_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">Impuesto Pagado IVA</field>
                                     </record>
@@ -163,7 +163,7 @@
                 <field name="sequence" eval="13"/>
                 <field name="expression_ids">
                     <record id="tax_report_base_imponible_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">BASE_IMPONIBLE__COMPRAS.balance + BASE_IMPONIBLE__VENTAS.balance</field>
                     </record>
@@ -175,7 +175,7 @@
                         <field name="sequence" eval="14"/>
                         <field name="expression_ids">
                             <record id="tax_report_base_imponible_compras_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">COMPRAS_GRAVADAS_FUERA_DE_AMBITO.balance + COMPRAS_NO_GRAVADAS_EXONERADAS.balance + COMPRAS_GRAVADAS_CON_IVA.balance</field>
                             </record>
@@ -187,7 +187,7 @@
                                 <field name="sequence" eval="15"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_base_imponible_compras_fuera_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                     </record>
                                 </field>
@@ -198,7 +198,7 @@
                                 <field name="sequence" eval="16"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_base_imponible_compras_gravadas_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                     </record>
                                 </field>
@@ -209,7 +209,7 @@
                                 <field name="sequence" eval="17"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_base_imponible_compras_iva_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">Compras Gravadas con IVA</field>
                                     </record>
@@ -223,7 +223,7 @@
                         <field name="sequence" eval="18"/>
                         <field name="expression_ids">
                             <record id="tax_report_base_imponible_venras_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">VENTAS_GRAVADAS_FUERA_DE_AMBITO.balance + VENTAS_NO_GRAVADAS_EXONERADAS.balance + IMPUESTO_AL_VALOR_AGREGADO_CON_IVA.balance</field>
                             </record>
@@ -235,7 +235,7 @@
                                 <field name="sequence" eval="19"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_base_imponible_venras_fuera_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                     </record>
                                 </field>
@@ -246,7 +246,7 @@
                                 <field name="sequence" eval="20"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_base_imponible_venras_exon_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                     </record>
                                 </field>
@@ -257,7 +257,7 @@
                                 <field name="sequence" eval="21"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_base_imponible_venras_iva_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">Impuesto al Valor Agregado con IVA</field>
                                     </record>

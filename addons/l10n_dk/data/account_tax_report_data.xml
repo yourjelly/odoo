@@ -20,7 +20,7 @@
                 <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_sales_group_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">SALES_VAT.balance + REVERSE_CHARGE_MERCHANDISES_PURCHASED_OUT_DK.balance + REVERSE_CHARGE_SERVICES_PURCHASED_OUT_DK.balance</field>
                     </record>
@@ -32,7 +32,7 @@
                         <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_sales_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">UM</field>
                             </record>
@@ -44,7 +44,7 @@
                         <field name="sequence" eval="3"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_international_purchase_products_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">MVU</field>
                             </record>
@@ -56,7 +56,7 @@
                         <field name="sequence" eval="4"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_international_purchase_services_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">MYUOB</field>
                             </record>
@@ -70,7 +70,7 @@
                 <field name="sequence" eval="5"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_deduction_group_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">PURCHASE_VAT.balance + OIL_AND_BOTTLED_GAS_TAX.balance + ELECTRICITY_TAX.balance + NATURAL_AND_CITY_GAS_TAX.balance + COAL_TAX.balance + CO2_TAX.balance + WATER_TAX.balance</field>
                     </record>
@@ -82,7 +82,7 @@
                         <field name="sequence" eval="6"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_deduction_purchase_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">KM</field>
                             </record>
@@ -94,7 +94,7 @@
                         <field name="sequence" eval="7"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_deduction_oil_bottle_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">OFA</field>
                             </record>
@@ -106,7 +106,7 @@
                         <field name="sequence" eval="8"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_deduction_electrical_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">EA</field>
                             </record>
@@ -118,7 +118,7 @@
                         <field name="sequence" eval="9"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_deduction_gas_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">NOBA</field>
                             </record>
@@ -130,7 +130,7 @@
                         <field name="sequence" eval="10"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_deduction_coal_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">KA</field>
                             </record>
@@ -142,7 +142,7 @@
                         <field name="sequence" eval="11"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_deduction_co2_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">CO2A</field>
                             </record>
@@ -154,7 +154,7 @@
                         <field name="sequence" eval="12"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_deduction_water_tax_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">VA</field>
                             </record>
@@ -167,7 +167,7 @@
                 <field name="sequence" eval="13"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_vat_statement_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">DUE_VAT.balance - VAT_TO_DEDUCED.balance</field>
                     </record>
@@ -182,7 +182,7 @@
                         <field name="sequence" eval="15"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_section_a_products_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">R-A-V</field>
                             </record>
@@ -193,7 +193,7 @@
                         <field name="sequence" eval="16"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_section_a_services_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">R-A-Y</field>
                             </record>
@@ -204,7 +204,7 @@
                         <field name="sequence" eval="17"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_section_b_product_eu_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">R-B-MR</field>
                             </record>
@@ -215,7 +215,7 @@
                         <field name="sequence" eval="18"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_section_b_products_non_eu_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">R-B-UR</field>
                             </record>
@@ -226,7 +226,7 @@
                         <field name="sequence" eval="19"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_section_b_services_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">R-C-MR</field>
                             </record>
@@ -237,7 +237,7 @@
                         <field name="sequence" eval="20"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_section_c_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">R-C-UR</field>
                             </record>

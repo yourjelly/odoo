@@ -25,7 +25,7 @@
                         <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_vp2_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">02</field>
                             </record>
@@ -37,7 +37,7 @@
                         <field name="sequence" eval="3"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_vp3_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">03</field>
                             </record>
@@ -56,7 +56,7 @@
                         <field name="sequence" eval="5"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_vp4_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">4v</field>
                             </record>
@@ -68,7 +68,7 @@
                         <field name="sequence" eval="6"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_vp5_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">5v</field>
                             </record>
@@ -92,7 +92,7 @@
                                 <field name="sequence" eval="9"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_vp6a_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">VP4&gt;VP5 and VP4.balance-VP5 or 0.balance</field>
                                     </record>
@@ -104,7 +104,7 @@
                                 <field name="sequence" eval="10"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_vp6b_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">VP5&gt;VP4 and VP5.balance-VP4 or 0.balance</field>
                                     </record>
@@ -119,7 +119,7 @@
                         <field name="is_carryover_used_in_balance">True</field>
                         <field name="expression_ids">
                             <record id="tax_report_line_vp7_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">vp7</field>
                             </record>
@@ -132,7 +132,7 @@
                         <field name="is_carryover_used_in_balance">True</field>
                         <field name="expression_ids">
                             <record id="tax_report_line_vp8_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">vp8</field>
                             </record>
@@ -145,7 +145,7 @@
                         <field name="is_carryover_used_in_balance">True</field>
                         <field name="expression_ids">
                             <record id="tax_report_line_vp9_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">vp9</field>
                             </record>
@@ -157,7 +157,7 @@
                         <field name="sequence" eval="14"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_vp10_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">vp10</field>
                             </record>
@@ -169,7 +169,7 @@
                         <field name="sequence" eval="15"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_vp11_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">vp11</field>
                             </record>
@@ -181,7 +181,7 @@
                         <field name="sequence" eval="16"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_vp12_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">vp12</field>
                             </record>
@@ -193,7 +193,7 @@
                         <field name="sequence" eval="17"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_vp13_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">vp13</field>
                             </record>
@@ -220,19 +220,19 @@
                                 <field name="is_carryover_persistent">False</field>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_vp14a_vp4_vp5_dif_pos" model="account.report.expression">
-                                        <field name="total">vp4_vp5_dif_pos</field>
+                                        <field name="label">vp4_vp5_dif_pos</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">VP4.balance - VP5.balance</field>
                                         <field name="subformula">if_above(EUR(0))</field>
                                     </record>
                                     <record id="tax_report_line_vp14a_vp4_vp5_dif_neg" model="account.report.expression">
-                                        <field name="total">vp4_vp5_dif_neg</field>
+                                        <field name="label">vp4_vp5_dif_neg</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">VP4.balance - VP5.balance</field>
                                         <field name="subformula">if_below(EUR(0))</field>
                                     </record>
                                     <record id="tax_report_line_vp14a_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">(vp4_vp5_dif_pos.balance + VP7.balance + VP12.balance) - (-vp4_vp5_dif_neg + VP8.balance + VP9.balance + VP10.balance + VP11.balance + VP13)</field>
                                         <field name="subformula">if_above(EUR(0))</field>
@@ -248,19 +248,19 @@
                                 <field name="is_carryover_persistent">False</field>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_vp14b_vp4_vp5_dif_pos" model="account.report.expression">
-                                        <field name="total">vp4_vp5_dif_pos</field>
+                                        <field name="label">vp4_vp5_dif_pos</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">VP4.balance - VP5.balance</field>
                                         <field name="subformula">if_above(EUR(0))</field>
                                     </record>
                                     <record id="tax_report_line_vp14b_vp4_vp5_dif_neg" model="account.report.expression">
-                                        <field name="total">vp4_vp5_dif_neg</field>
+                                        <field name="label">vp4_vp5_dif_neg</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">VP4.balance - VP5.balance</field>
                                         <field name="subformula">if_below(EUR(0))</field>
                                     </record>
                                     <record id="tax_report_line_vp14b_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">(-vp4_vp5_dif_neg + VP8.balance + VP9.balance + VP10.balance + VP11.balance + VP13) - (vp4_vp5_dif_pos.balance + VP7.balance + VP12.balance)</field>
                                         <field name="subformula">if_above(EUR(0))</field>

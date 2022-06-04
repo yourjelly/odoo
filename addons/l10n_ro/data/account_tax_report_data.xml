@@ -20,7 +20,7 @@
                 <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_ro_baza_intracom_eu_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">tax_ro_baza_rd1.balance + tax_ro_baza_rd2.balance + tax_ro_baza_rd3.balance + tax_ro_baza_rd4.balance + tax_ro_baza_rd5.balance + tax_ro_baza_rd6.balance + tax_ro_baza_rd7.balance + tax_ro_baza_rd8.balance</field>
                     </record>
@@ -32,7 +32,7 @@
                         <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_baza_rd1_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">01 - BAZA</field>
                             </record>
@@ -44,7 +44,7 @@
                         <field name="sequence" eval="3"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_baza_rd2_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">02 - BAZA</field>
                             </record>
@@ -56,7 +56,7 @@
                         <field name="sequence" eval="4"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_baza_rd3_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">03 - BAZA</field>
                             </record>
@@ -68,7 +68,7 @@
                                 <field name="sequence" eval="5"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_baza_rd31_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">03_1 - BAZA</field>
                                     </record>
@@ -82,7 +82,7 @@
                         <field name="sequence" eval="6"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_baza_rd4_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">04 - BAZA</field>
                             </record>
@@ -94,7 +94,7 @@
                         <field name="sequence" eval="7"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_baza_rd5_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">05 - BAZA</field>
                             </record>
@@ -106,7 +106,7 @@
                                 <field name="sequence" eval="8"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_baza_rd51_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">05_1 - BAZA</field>
                                     </record>
@@ -120,7 +120,7 @@
                         <field name="sequence" eval="9"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_baza_rd6_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">06 - BAZA</field>
                             </record>
@@ -132,7 +132,7 @@
                         <field name="sequence" eval="10"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_baza_rd7_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">07 - BAZA</field>
                             </record>
@@ -144,7 +144,7 @@
                                 <field name="sequence" eval="11"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_baza_rd71_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">07_1 - BAZA</field>
                                     </record>
@@ -158,7 +158,7 @@
                         <field name="sequence" eval="12"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_baza_rd8_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">08 - BAZA</field>
                             </record>
@@ -172,7 +172,7 @@
                 <field name="sequence" eval="13"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_ro_tva_intracom_eu_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">tax_ro_tva_rd5.balance + tax_ro_tva_rd6.balance + tax_ro_tva_rd7.balance + tax_ro_tva_rd8.balance</field>
                     </record>
@@ -184,7 +184,7 @@
                         <field name="sequence" eval="14"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_tva_rd5_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">05 - TVA</field>
                             </record>
@@ -196,7 +196,7 @@
                                 <field name="sequence" eval="15"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_tva_rd51_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">05_1 - TVA</field>
                                     </record>
@@ -210,7 +210,7 @@
                         <field name="sequence" eval="16"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_tva_rd6_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">06 - TVA</field>
                             </record>
@@ -222,7 +222,7 @@
                         <field name="sequence" eval="17"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_tva_rd7_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">07 - TVA</field>
                             </record>
@@ -234,7 +234,7 @@
                                 <field name="sequence" eval="18"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_tva_rd71_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">07_1 - TVA</field>
                                     </record>
@@ -248,7 +248,7 @@
                         <field name="sequence" eval="19"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_tva_rd8_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">08 - TVA</field>
                             </record>
@@ -262,7 +262,7 @@
                 <field name="sequence" eval="20"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_ro_baza_livrari_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">tax_ro_baza_rd9.balance + tax_ro_baza_rd10.balance + tax_ro_baza_rd11.balance + tax_ro_baza_rd12.balance + tax_ro_baza_rd13.balance + tax_ro_baza_rd14.balance + tax_ro_baza_rd15.balance + tax_ro_baza_rd16.balance + tax_ro_baza_rd17.balance + tax_ro_baza_rd18.balance</field>
                     </record>
@@ -274,7 +274,7 @@
                         <field name="sequence" eval="21"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_baza_rd9_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">09 - BAZA</field>
                             </record>
@@ -286,7 +286,7 @@
                                 <field name="sequence" eval="22"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_baza_rd91_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">09_1 - BAZA</field>
                                     </record>
@@ -298,7 +298,7 @@
                                 <field name="sequence" eval="23"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_baza_rd92_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">0.5 * tax_ro_baza_rd242.balance</field>
                                     </record>
@@ -312,7 +312,7 @@
                         <field name="sequence" eval="24"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_baza_rd10_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">10 - BAZA</field>
                             </record>
@@ -324,7 +324,7 @@
                                 <field name="sequence" eval="25"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_baza_rd101_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">10_1 - BAZA</field>
                                     </record>
@@ -336,7 +336,7 @@
                                 <field name="sequence" eval="26"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_baza_rd102_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">0.5 * tax_ro_baza_rd252.balance</field>
                                     </record>
@@ -350,7 +350,7 @@
                         <field name="sequence" eval="27"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_baza_rd11_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">11 - BAZA</field>
                             </record>
@@ -362,7 +362,7 @@
                                 <field name="sequence" eval="28"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_baza_rd111_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">11_1 - BAZA</field>
                                     </record>
@@ -374,7 +374,7 @@
                                 <field name="sequence" eval="29"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_baza_rd112_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">0.5 * tax_ro_baza_rd262.balance</field>
                                     </record>
@@ -388,7 +388,7 @@
                         <field name="sequence" eval="30"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_baza_rd12_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">12 - BAZA</field>
                             </record>
@@ -400,7 +400,7 @@
                                 <field name="sequence" eval="31"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_baza_rd121_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">12_1 - BAZA</field>
                                     </record>
@@ -412,7 +412,7 @@
                                 <field name="sequence" eval="32"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_baza_rd122_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">12_2 - BAZA</field>
                                     </record>
@@ -424,7 +424,7 @@
                                 <field name="sequence" eval="33"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_baza_rd123_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">12_3 - BAZA</field>
                                     </record>
@@ -438,7 +438,7 @@
                         <field name="sequence" eval="34"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_baza_rd13_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">13 - BAZA</field>
                             </record>
@@ -450,7 +450,7 @@
                         <field name="sequence" eval="35"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_baza_rd14_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">14 - BAZA</field>
                             </record>
@@ -462,7 +462,7 @@
                         <field name="sequence" eval="36"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_baza_rd15_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">15 - BAZA</field>
                             </record>
@@ -474,7 +474,7 @@
                         <field name="sequence" eval="37"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_baza_rd16_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">16 - BAZA</field>
                             </record>
@@ -486,7 +486,7 @@
                         <field name="sequence" eval="38"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_baza_rd17_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">17 - BAZA</field>
                             </record>
@@ -498,7 +498,7 @@
                         <field name="sequence" eval="39"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_baza_rd18_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">18 - BAZA</field>
                             </record>
@@ -512,7 +512,7 @@
                 <field name="sequence" eval="40"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_ro_tva_livrari_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">tax_ro_tva_rd9.balance + tax_ro_tva_rd10.balance + tax_ro_tva_rd11.balance + tax_ro_tva_rd12.balance + tax_ro_tva_rd16.balance + tax_ro_tva_rd17.balance + tax_ro_tva_rd18.balance</field>
                     </record>
@@ -524,7 +524,7 @@
                         <field name="sequence" eval="41"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_tva_rd9_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">09 - TVA</field>
                             </record>
@@ -536,7 +536,7 @@
                                 <field name="sequence" eval="42"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_tva_rd91_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">09_1 - TVA</field>
                                     </record>
@@ -548,7 +548,7 @@
                                 <field name="sequence" eval="43"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_tva_rd92_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">09_2 - TVA</field>
                                     </record>
@@ -562,7 +562,7 @@
                         <field name="sequence" eval="44"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_tva_rd10_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">10 - TVA</field>
                             </record>
@@ -574,7 +574,7 @@
                                 <field name="sequence" eval="45"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_tva_rd101_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">10_1 - TVA</field>
                                     </record>
@@ -586,7 +586,7 @@
                                 <field name="sequence" eval="46"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_tva_rd102_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">10_2 - TVA</field>
                                     </record>
@@ -600,7 +600,7 @@
                         <field name="sequence" eval="47"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_tva_rd11_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">11 - TVA</field>
                             </record>
@@ -612,7 +612,7 @@
                                 <field name="sequence" eval="48"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_tva_rd111_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">11_1 - TVA</field>
                                     </record>
@@ -624,7 +624,7 @@
                                 <field name="sequence" eval="49"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_tva_rd112_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">11_2 - TVA</field>
                                     </record>
@@ -638,7 +638,7 @@
                         <field name="sequence" eval="50"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_tva_rd12_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">12 - TVA</field>
                             </record>
@@ -650,7 +650,7 @@
                                 <field name="sequence" eval="51"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_tva_rd121_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">12_1 - TVA</field>
                                     </record>
@@ -662,7 +662,7 @@
                                 <field name="sequence" eval="52"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_tva_rd122_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">12_2 - TVA</field>
                                     </record>
@@ -674,7 +674,7 @@
                                 <field name="sequence" eval="53"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_tva_rd123_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">12_3 - TVA</field>
                                     </record>
@@ -688,7 +688,7 @@
                         <field name="sequence" eval="54"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_tva_rd16_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">16 - TVA</field>
                             </record>
@@ -700,7 +700,7 @@
                         <field name="sequence" eval="55"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_tva_rd17_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">17 - TVA</field>
                             </record>
@@ -712,7 +712,7 @@
                         <field name="sequence" eval="56"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_tva_rd18_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">18 - TVA</field>
                             </record>
@@ -726,7 +726,7 @@
                 <field name="sequence" eval="57"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_ro_baza_col_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">tax_ro_baza_intracom_eu.balance + tax_ro_baza_livrari.balance</field>
                     </record>
@@ -738,7 +738,7 @@
                 <field name="sequence" eval="58"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_ro_tva_col_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">tax_ro_tva_intracom_eu.balance + tax_ro_tva_livrari.balance</field>
                     </record>
@@ -750,7 +750,7 @@
                 <field name="sequence" eval="59"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_ro_baza_intracom_eu_achiz_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">tax_ro_baza_rd20.balance + tax_ro_baza_rd21.balance + tax_ro_baza_rd22.balance + tax_ro_baza_rd23.balance</field>
                     </record>
@@ -762,7 +762,7 @@
                         <field name="sequence" eval="60"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_baza_rd20_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">20 - BAZA</field>
                             </record>
@@ -774,7 +774,7 @@
                                 <field name="sequence" eval="61"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_baza_rd201_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">20_1 - BAZA</field>
                                     </record>
@@ -788,7 +788,7 @@
                         <field name="sequence" eval="62"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_baza_rd21_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">21 - BAZA</field>
                             </record>
@@ -800,7 +800,7 @@
                         <field name="sequence" eval="63"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_baza_rd22_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">22 - BAZA</field>
                             </record>
@@ -812,7 +812,7 @@
                                 <field name="sequence" eval="64"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_baza_rd221_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">22_1 - BAZA</field>
                                     </record>
@@ -826,7 +826,7 @@
                         <field name="sequence" eval="65"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_baza_rd23_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">23 - BAZA</field>
                             </record>
@@ -840,7 +840,7 @@
                 <field name="sequence" eval="66"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_ro_tva_intracom_eu_achiz_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">tax_ro_tva_rd20.balance + tax_ro_tva_rd21.balance + tax_ro_tva_rd22.balance + tax_ro_tva_rd23.balance</field>
                     </record>
@@ -852,7 +852,7 @@
                         <field name="sequence" eval="67"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_tva_rd20_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">20 - TVA</field>
                             </record>
@@ -864,7 +864,7 @@
                                 <field name="sequence" eval="68"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_tva_rd201_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">20_1 - TVA</field>
                                     </record>
@@ -878,7 +878,7 @@
                         <field name="sequence" eval="69"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_tva_rd21_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">21 - TVA</field>
                             </record>
@@ -890,7 +890,7 @@
                         <field name="sequence" eval="70"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_tva_rd22_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">22 - TVA</field>
                             </record>
@@ -902,7 +902,7 @@
                                 <field name="sequence" eval="71"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_tva_rd221_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">22_1 - TVA</field>
                                     </record>
@@ -916,7 +916,7 @@
                         <field name="sequence" eval="72"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_tva_rd23_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">23 - TVA</field>
                             </record>
@@ -930,7 +930,7 @@
                 <field name="sequence" eval="73"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_ro_baza_achiz_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">tax_ro_baza_rd24.balance + tax_ro_baza_rd25.balance + tax_ro_baza_rd26.balance + tax_ro_baza_rd27.balance + tax_ro_baza_rd30.balance</field>
                     </record>
@@ -942,7 +942,7 @@
                         <field name="sequence" eval="74"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_baza_rd24_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">tax_ro_baza_rd241.balance + 0.5 * tax_ro_baza_rd242.balance</field>
                             </record>
@@ -954,7 +954,7 @@
                                 <field name="sequence" eval="75"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_baza_rd241_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">24_1 - BAZA</field>
                                     </record>
@@ -966,7 +966,7 @@
                                 <field name="sequence" eval="76"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_baza_rd242_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">24_2 - BAZA</field>
                                     </record>
@@ -980,7 +980,7 @@
                         <field name="sequence" eval="77"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_baza_rd25_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">tax_ro_baza_rd251.balance + 0.5 * tax_ro_baza_rd252.balance</field>
                             </record>
@@ -992,7 +992,7 @@
                                 <field name="sequence" eval="78"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_baza_rd251_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">25_1 - BAZA</field>
                                     </record>
@@ -1004,7 +1004,7 @@
                                 <field name="sequence" eval="79"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_baza_rd252_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">25_2 - BAZA</field>
                                     </record>
@@ -1018,7 +1018,7 @@
                         <field name="sequence" eval="80"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_baza_rd26_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">tax_ro_baza_rd261.balance + 0.5 * tax_ro_baza_rd262.balance</field>
                             </record>
@@ -1030,7 +1030,7 @@
                                 <field name="sequence" eval="81"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_baza_rd261_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">26_1 - BAZA</field>
                                     </record>
@@ -1042,7 +1042,7 @@
                                 <field name="sequence" eval="82"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_baza_rd262_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">26_2 - BAZA</field>
                                     </record>
@@ -1056,7 +1056,7 @@
                         <field name="sequence" eval="83"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_baza_rd27_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">27 - BAZA</field>
                             </record>
@@ -1068,7 +1068,7 @@
                                 <field name="sequence" eval="84"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_baza_rd271_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">27_1 - BAZA</field>
                                     </record>
@@ -1080,7 +1080,7 @@
                                 <field name="sequence" eval="85"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_baza_rd272_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">27_2 - BAZA</field>
                                     </record>
@@ -1092,7 +1092,7 @@
                                 <field name="sequence" eval="86"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_baza_rd273_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">27_3 - BAZA</field>
                                     </record>
@@ -1106,7 +1106,7 @@
                         <field name="sequence" eval="87"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_baza_rd30_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">30 - BAZA</field>
                             </record>
@@ -1118,7 +1118,7 @@
                                 <field name="sequence" eval="88"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_baza_rd301_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">30_1 - BAZA</field>
                                     </record>
@@ -1134,7 +1134,7 @@
                 <field name="sequence" eval="89"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_ro_tva_achiz_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">tax_ro_tva_rd24.balance + tax_ro_tva_rd25.balance + tax_ro_tva_rd26.balance + tax_ro_tva_rd27.balance + tax_ro_tva_rd28.balance + tax_ro_tva_rd29.balance</field>
                     </record>
@@ -1146,7 +1146,7 @@
                         <field name="sequence" eval="90"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_tva_rd24_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">tax_ro_tva_rd241.balance + tax_ro_tva_rd242.balance</field>
                             </record>
@@ -1158,7 +1158,7 @@
                                 <field name="sequence" eval="91"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_tva_rd241_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">24_1 - TVA</field>
                                     </record>
@@ -1170,7 +1170,7 @@
                                 <field name="sequence" eval="92"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_tva_rd242_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">24_2 - TVA</field>
                                     </record>
@@ -1184,7 +1184,7 @@
                         <field name="sequence" eval="93"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_tva_rd25_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">25 - TVA</field>
                             </record>
@@ -1196,7 +1196,7 @@
                                 <field name="sequence" eval="94"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_tva_rd251_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">25_1 - TVA</field>
                                     </record>
@@ -1208,7 +1208,7 @@
                                 <field name="sequence" eval="95"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_tva_rd252_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">25_2 - TVA</field>
                                     </record>
@@ -1222,7 +1222,7 @@
                         <field name="sequence" eval="96"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_tva_rd26_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">tax_ro_tva_rd261.balance + tax_ro_tva_rd262.balance</field>
                             </record>
@@ -1234,7 +1234,7 @@
                                 <field name="sequence" eval="97"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_tva_rd261_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">26_1 - TVA</field>
                                     </record>
@@ -1246,7 +1246,7 @@
                                 <field name="sequence" eval="98"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_tva_rd262_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">26_2 - TVA</field>
                                     </record>
@@ -1260,7 +1260,7 @@
                         <field name="sequence" eval="99"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_tva_rd27_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">27 - TVA</field>
                             </record>
@@ -1272,7 +1272,7 @@
                                 <field name="sequence" eval="100"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_tva_rd271_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">27_1 - TVA</field>
                                     </record>
@@ -1284,7 +1284,7 @@
                                 <field name="sequence" eval="101"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_tva_rd272_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">27_2 - TVA</field>
                                     </record>
@@ -1296,7 +1296,7 @@
                                 <field name="sequence" eval="102"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_ro_tva_rd273_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">27_3 - TVA</field>
                                     </record>
@@ -1310,7 +1310,7 @@
                         <field name="sequence" eval="103"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_tva_rd28_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">28 - TVA</field>
                             </record>
@@ -1322,7 +1322,7 @@
                         <field name="sequence" eval="104"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_ro_tva_rd29_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">29 - TVA</field>
                             </record>
@@ -1336,7 +1336,7 @@
                 <field name="sequence" eval="105"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_ro_baza_total_rd31_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">tax_ro_baza_intracom_eu_a.balance + tax_ro_baza_achiz.balance</field>
                     </record>
@@ -1348,7 +1348,7 @@
                 <field name="sequence" eval="106"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_ro_tva_total_rd31_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">tax_ro_tva_intracom_eu_a.balance + tax_ro_tva_achiz.balance</field>
                     </record>
@@ -1360,7 +1360,7 @@
                 <field name="sequence" eval="107"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_ro_tva_rd32_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">tax_ro_tva_intracom_eu_a.balance + tax_ro_tva_achiz.balance</field>
                     </record>
@@ -1372,7 +1372,7 @@
                 <field name="sequence" eval="108"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_ro_tva_rd33_tag" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">tax_tags</field>
                         <field name="formula">33 - TVA</field>
                     </record>
@@ -1384,7 +1384,7 @@
                 <field name="sequence" eval="109"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_ro_baza_rd34_tag" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">tax_tags</field>
                         <field name="formula">34 - BAZA</field>
                     </record>
@@ -1396,7 +1396,7 @@
                 <field name="sequence" eval="110"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_ro_tva_rd34_tag" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">tax_tags</field>
                         <field name="formula">34 - TVA</field>
                     </record>
@@ -1408,7 +1408,7 @@
                 <field name="sequence" eval="111"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_ro_tva_rd35_tag" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">tax_tags</field>
                         <field name="formula">35 - TVA</field>
                     </record>
@@ -1420,7 +1420,7 @@
                 <field name="sequence" eval="112"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_ro_tva_rd36_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">tax_ro_tva_intracom_eu_a.balance + tax_ro_tva_achiz.balance + tax_ro_tva_rd33.balance + tax_ro_tva_rd34.balance + tax_ro_tva_rd35.balance</field>
                     </record>
@@ -1432,7 +1432,7 @@
                 <field name="sequence" eval="113"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_ro_tva_rd40_tag" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">tax_tags</field>
                         <field name="formula">40 - TVA</field>
                     </record>
@@ -1444,7 +1444,7 @@
                 <field name="sequence" eval="114"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_ro_tva_rd43_tag" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">tax_tags</field>
                         <field name="formula">43 - TVA</field>
                     </record>

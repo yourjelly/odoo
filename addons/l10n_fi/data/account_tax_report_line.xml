@@ -19,7 +19,7 @@
                 <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="tax_report_sales_title_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">sale_24.balance + sale_14.balance + sale_10.balance</field>
                     </record>
@@ -31,7 +31,7 @@
                         <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="tax_report_sales_24_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">fi_301</field>
                             </record>
@@ -43,7 +43,7 @@
                         <field name="sequence" eval="3"/>
                         <field name="expression_ids">
                             <record id="tax_report_sales_14_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">fi_302</field>
                             </record>
@@ -55,7 +55,7 @@
                         <field name="sequence" eval="4"/>
                         <field name="expression_ids">
                             <record id="tax_report_sales_10_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">fi_303</field>
                             </record>
@@ -69,7 +69,7 @@
                 <field name="sequence" eval="5"/>
                 <field name="expression_ids">
                     <record id="tax_report_tax_purchase_goods_eu_tag" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">tax_tags</field>
                         <field name="formula">fi_305</field>
                     </record>
@@ -81,7 +81,7 @@
                 <field name="sequence" eval="6"/>
                 <field name="expression_ids">
                     <record id="tax_report_tax_purchase_service_eu_tag" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">tax_tags</field>
                         <field name="formula">fi_tax_306</field>
                     </record>
@@ -93,7 +93,7 @@
                 <field name="sequence" eval="7"/>
                 <field name="expression_ids">
                     <record id="tax_report_tax_import_goods_no_eu_tag" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">tax_tags</field>
                         <field name="formula">fi_340</field>
                     </record>
@@ -105,7 +105,7 @@
                 <field name="sequence" eval="8"/>
                 <field name="expression_ids">
                     <record id="tax_report_tax_purchase_construct_service_tag" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">tax_tags</field>
                         <field name="formula">fi_318</field>
                     </record>
@@ -117,7 +117,7 @@
                 <field name="sequence" eval="9"/>
                 <field name="expression_ids">
                     <record id="tax_report_deductible_tag" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">tax_tags</field>
                         <field name="formula">fi_307</field>
                     </record>
@@ -128,7 +128,7 @@
                 <field name="sequence" eval="10"/>
                 <field name="expression_ids">
                     <record id="vat_report_relief_tag" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">tax_tags</field>
                         <field name="formula">fi_vat_relief</field>
                     </record>
@@ -139,7 +139,7 @@
                 <field name="sequence" eval="11"/>
                 <field name="expression_ids">
                     <record id="tax_report_tax_payable_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">sale_24.balance + sale_14.balance + sale_10.balance + goods_eu.balance + service_eu.balance + goods_no_eu.balance + construct.balance - deductible.balance</field>
                     </record>
@@ -150,7 +150,7 @@
                 <field name="sequence" eval="12"/>
                 <field name="expression_ids">
                     <record id="tax_report_base_turnover_0_vat_tag" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">tax_tags</field>
                         <field name="formula">fi_304</field>
                     </record>
@@ -161,7 +161,7 @@
                 <field name="sequence" eval="13"/>
                 <field name="expression_ids">
                     <record id="tax_report_base_sales_goods_eu_tag" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">tax_tags</field>
                         <field name="formula">fi_311</field>
                     </record>
@@ -172,7 +172,7 @@
                 <field name="sequence" eval="14"/>
                 <field name="expression_ids">
                     <record id="tax_report_base_sales_service_eu_tag" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">tax_tags</field>
                         <field name="formula">fi_312</field>
                     </record>
@@ -183,7 +183,7 @@
                 <field name="sequence" eval="15"/>
                 <field name="expression_ids">
                     <record id="tax_report_base_purchase_goods_eu_tag" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">tax_tags</field>
                         <field name="formula">fi_base_purchase_goods_eu</field>
                     </record>
@@ -194,7 +194,7 @@
                 <field name="sequence" eval="16"/>
                 <field name="expression_ids">
                     <record id="tax_report_base_purchase_service_eu_tag" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">tax_tags</field>
                         <field name="formula">fi_base_306</field>
                     </record>
@@ -205,7 +205,7 @@
                 <field name="sequence" eval="17"/>
                 <field name="expression_ids">
                     <record id="tax_report_base_import_goods_no_eu_tag" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">tax_tags</field>
                         <field name="formula">fi_base_340</field>
                     </record>
@@ -216,7 +216,7 @@
                 <field name="sequence" eval="18"/>
                 <field name="expression_ids">
                     <record id="tax_report_base_sales_construct_service_tag" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">tax_tags</field>
                         <field name="formula">fi_319</field>
                     </record>
@@ -227,7 +227,7 @@
                 <field name="sequence" eval="19"/>
                 <field name="expression_ids">
                     <record id="tax_report_base_purchase_construct_service_tag" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">tax_tags</field>
                         <field name="formula">fi_base_318</field>
                     </record>

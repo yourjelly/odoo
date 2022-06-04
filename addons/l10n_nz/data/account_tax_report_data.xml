@@ -19,7 +19,7 @@
                 <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="tax_report_sale_and_income_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">NZBOX5.balance + NZBOX6.balance + NZBOX9.balance</field>
                     </record>
@@ -31,7 +31,7 @@
                         <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="tax_report_box5_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">BOX 5</field>
                             </record>
@@ -43,7 +43,7 @@
                         <field name="sequence" eval="3"/>
                         <field name="expression_ids">
                             <record id="tax_report_box6_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">BOX 6</field>
                             </record>
@@ -54,7 +54,7 @@
                         <field name="sequence" eval="4"/>
                         <field name="expression_ids">
                             <record id="tax_report_box7_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">NZBOX5.balance - NZBOX6.balance</field>
                             </record>
@@ -65,7 +65,7 @@
                         <field name="sequence" eval="5"/>
                         <field name="expression_ids">
                             <record id="tax_report_box8_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">((NZBOX5.balance - NZBOX6.balance) * 3)/23</field>
                             </record>
@@ -77,7 +77,7 @@
                         <field name="sequence" eval="6"/>
                         <field name="expression_ids">
                             <record id="tax_report_box9_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">BOX 9</field>
                             </record>
@@ -88,7 +88,7 @@
                         <field name="sequence" eval="7"/>
                         <field name="expression_ids">
                             <record id="tax_report_box10_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">(((NZBOX5.balance - NZBOX6.balance) * 3)/23) + NZBOX9.balance</field>
                             </record>
@@ -101,7 +101,7 @@
                 <field name="sequence" eval="8"/>
                 <field name="expression_ids">
                     <record id="tax_report_purchases_and_expenses_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">NZBOX11.balance + [BOX_13]_CREDIT_ADJUSTMENTS_FROM_YOUR_CALCULATION_SHEET.balance</field>
                     </record>
@@ -113,7 +113,7 @@
                         <field name="sequence" eval="9"/>
                         <field name="expression_ids">
                             <record id="tax_report_box11_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">BOX 11</field>
                             </record>
@@ -124,7 +124,7 @@
                         <field name="sequence" eval="10"/>
                         <field name="expression_ids">
                             <record id="tax_report_box12_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">(NZBOX11.balance * 3)/23</field>
                             </record>
@@ -136,7 +136,7 @@
                         <field name="sequence" eval="11"/>
                         <field name="expression_ids">
                             <record id="tax_report_box13_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                             </record>
                         </field>
@@ -146,7 +146,7 @@
                         <field name="sequence" eval="12"/>
                         <field name="expression_ids">
                             <record id="tax_report_box14_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">((NZBOX11.balance * 3)/23)</field>
                             </record>
@@ -159,7 +159,7 @@
                 <field name="sequence" eval="13"/>
                 <field name="expression_ids">
                     <record id="tax_report_box15_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">((((NZBOX5.balance - NZBOX6.balance) * 3)/23) + NZBOX9.balance) - ((NZBOX11.balance * 3)/23)</field>
                     </record>

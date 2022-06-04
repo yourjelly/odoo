@@ -24,7 +24,7 @@
                         <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_2b_intra_community_acqui_of_goods_base_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">LUTAX_049.balance + LUTAX_194.balance + LUTAX_711.balance + LUTAX_713.balance + LUTAX_715.balance + LUTAX_719.balance</field>
                             </record>
@@ -36,7 +36,7 @@
                                 <field name="sequence" eval="3"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2b_base_3_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">049</field>
                                     </record>
@@ -48,7 +48,7 @@
                                 <field name="sequence" eval="4"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2b_base_exempt_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">194</field>
                                     </record>
@@ -60,7 +60,7 @@
                                 <field name="sequence" eval="5"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2b_base_17_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">711</field>
                                     </record>
@@ -72,7 +72,7 @@
                                 <field name="sequence" eval="6"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2b_base_14_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">713</field>
                                     </record>
@@ -84,7 +84,7 @@
                                 <field name="sequence" eval="7"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2b_base_8_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">715</field>
                                     </record>
@@ -96,7 +96,7 @@
                                 <field name="sequence" eval="8"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2b_manufactured_tobacco_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">719</field>
                                     </record>
@@ -110,7 +110,7 @@
                         <field name="sequence" eval="9"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_2d_importation_of_goods_base_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">LUTAX_196.balance + LUTAX_721.balance + LUTAX_723.balance + LUTAX_725.balance + LUTAX_731.balance + LUTAX_733.balance + LUTAX_735.balance + LUTAX_059.balance + LUTAX_063.balance + LUTAX_195.balance + LUTAX_729.balance</field>
                             </record>
@@ -122,7 +122,7 @@
                                 <field name="sequence" eval="10"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2d_2_base_exempt_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">196</field>
                                     </record>
@@ -134,7 +134,7 @@
                                 <field name="sequence" eval="11"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2d_1_base_17_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">721</field>
                                     </record>
@@ -146,7 +146,7 @@
                                 <field name="sequence" eval="12"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2d_1_base_14_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">723</field>
                                     </record>
@@ -158,7 +158,7 @@
                                 <field name="sequence" eval="13"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2d_1_base_8_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">725</field>
                                     </record>
@@ -170,7 +170,7 @@
                                 <field name="sequence" eval="14"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2d_2_base_17_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">731</field>
                                     </record>
@@ -182,7 +182,7 @@
                                 <field name="sequence" eval="15"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2d_2_base_14_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">733</field>
                                     </record>
@@ -194,7 +194,7 @@
                                 <field name="sequence" eval="16"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2d_2_base_8_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">735</field>
                                     </record>
@@ -206,7 +206,7 @@
                                 <field name="sequence" eval="17"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2d_1_base_3_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">059</field>
                                     </record>
@@ -218,7 +218,7 @@
                                 <field name="sequence" eval="18"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2d_2_base_3_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">063</field>
                                     </record>
@@ -230,7 +230,7 @@
                                 <field name="sequence" eval="19"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2d_1_base_exempt_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">195</field>
                                     </record>
@@ -242,7 +242,7 @@
                                 <field name="sequence" eval="20"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2d_1_manufactured_tobacco_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">729</field>
                                     </record>
@@ -256,7 +256,7 @@
                         <field name="sequence" eval="21"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_2c_acquisitions_triangular_transactions_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">152</field>
                             </record>
@@ -268,7 +268,7 @@
                         <field name="sequence" eval="22"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_2e_supply_of_service_for_customer_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">LUTAX_436.balance + LUTAX_435.balance + LUTAX_463.balance + LUTAX_765.balance</field>
                             </record>
@@ -280,7 +280,7 @@
                                 <field name="sequence" eval="23"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2e_1_base_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">LUTAX_431.balance + LUTAX_741.balance + LUTAX_743.balance + LUTAX_745.balance</field>
                                     </record>
@@ -292,7 +292,7 @@
                                         <field name="sequence" eval="24"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_2e_1_a_base_3_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">431</field>
                                             </record>
@@ -304,7 +304,7 @@
                                         <field name="sequence" eval="25"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_2e_1_a_base_17_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">741</field>
                                             </record>
@@ -316,7 +316,7 @@
                                         <field name="sequence" eval="26"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_2e_1_a_base_14_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">743</field>
                                             </record>
@@ -328,7 +328,7 @@
                                         <field name="sequence" eval="27"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_2e_1_a_base_8_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">745</field>
                                             </record>
@@ -342,7 +342,7 @@
                                 <field name="sequence" eval="28"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2e_1_b_exempt_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">435</field>
                                     </record>
@@ -354,7 +354,7 @@
                                 <field name="sequence" eval="29"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2e_2_base_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">LUTAX_441.balance + LUTAX_445.balance + LUTAX_751.balance + LUTAX_753.balance + LUTAX_755.balance</field>
                                     </record>
@@ -366,7 +366,7 @@
                                         <field name="sequence" eval="30"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_2e_2_base_3_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">441</field>
                                             </record>
@@ -378,7 +378,7 @@
                                         <field name="sequence" eval="31"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_2e_2_exempt_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">445</field>
                                             </record>
@@ -390,7 +390,7 @@
                                         <field name="sequence" eval="32"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_2e_2_base_17_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">751</field>
                                             </record>
@@ -402,7 +402,7 @@
                                         <field name="sequence" eval="33"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_2e_2_base_14_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">753</field>
                                             </record>
@@ -414,7 +414,7 @@
                                         <field name="sequence" eval="34"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_2e_2_base_8_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">755</field>
                                             </record>
@@ -428,7 +428,7 @@
                                 <field name="sequence" eval="35"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2e_3_base_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">LUTAX_761.balance</field>
                                     </record>
@@ -440,7 +440,7 @@
                                         <field name="sequence" eval="36"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_2e_3_base_17_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">761</field>
                                             </record>
@@ -456,7 +456,7 @@
                         <field name="sequence" eval="37"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_2a_breakdown_taxable_turnover_base_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">LUTAX_031.balance + LUTAX_033.balance + LUTAX_701.balance + LUTAX_703.balance + LUTAX_705.balance</field>
                             </record>
@@ -468,7 +468,7 @@
                                 <field name="sequence" eval="38"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2a_base_3_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">031</field>
                                     </record>
@@ -480,7 +480,7 @@
                                 <field name="sequence" eval="39"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2a_base_0_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">033</field>
                                     </record>
@@ -492,7 +492,7 @@
                                 <field name="sequence" eval="40"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2a_base_17_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">701</field>
                                     </record>
@@ -504,7 +504,7 @@
                                 <field name="sequence" eval="41"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2a_base_14_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">703</field>
                                     </record>
@@ -516,7 +516,7 @@
                                 <field name="sequence" eval="42"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2a_base_8_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">705</field>
                                     </record>
@@ -530,7 +530,7 @@
                         <field name="sequence" eval="43"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_2f_supply_goods_base_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">LUTAX_763.balance</field>
                             </record>
@@ -542,7 +542,7 @@
                                 <field name="sequence" eval="44"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2f_supply_goods_base_8_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">763</field>
                                     </record>
@@ -556,7 +556,7 @@
                         <field name="sequence" eval="45"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_2f_supply_goods_tax_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">LUTAX_764.balance</field>
                             </record>
@@ -568,7 +568,7 @@
                                 <field name="sequence" eval="46"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2f_supply_goods_tax_8_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">764</field>
                                     </record>
@@ -582,7 +582,7 @@
                         <field name="sequence" eval="47"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_2g_special_arrangement_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">227</field>
                             </record>
@@ -594,7 +594,7 @@
                         <field name="sequence" eval="48"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_2h_total_tax_due_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">LUTAX_103.balance</field>
                             </record>
@@ -606,7 +606,7 @@
                         <field name="sequence" eval="49"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_2a_breakdown_taxable_turnover_tax_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">LUTAX_040.balance + LUTAX_702.balance + LUTAX_704.balance + LUTAX_706.balance</field>
                             </record>
@@ -618,7 +618,7 @@
                                 <field name="sequence" eval="50"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2a_tax_3_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">040</field>
                                     </record>
@@ -630,7 +630,7 @@
                                 <field name="sequence" eval="51"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2a_tax_17_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">702</field>
                                     </record>
@@ -642,7 +642,7 @@
                                 <field name="sequence" eval="52"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2a_tax_14_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">704</field>
                                     </record>
@@ -654,7 +654,7 @@
                                 <field name="sequence" eval="53"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2a_tax_8_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">706</field>
                                     </record>
@@ -668,7 +668,7 @@
                         <field name="sequence" eval="54"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_2b_intra_community_acquisitions_goods_tax_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">LUTAX_054.balance + LUTAX_712.balance + LUTAX_714.balance + LUTAX_716.balance</field>
                             </record>
@@ -680,7 +680,7 @@
                                 <field name="sequence" eval="55"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2b_tax_3_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">054</field>
                                     </record>
@@ -692,7 +692,7 @@
                                 <field name="sequence" eval="56"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2b_tax_17_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">712</field>
                                     </record>
@@ -704,7 +704,7 @@
                                 <field name="sequence" eval="57"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2b_tax_14_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">714</field>
                                     </record>
@@ -716,7 +716,7 @@
                                 <field name="sequence" eval="58"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2b_tax_8_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">716</field>
                                     </record>
@@ -730,7 +730,7 @@
                         <field name="sequence" eval="59"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_2d_importation_of_goods_tax_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">LUTAX_724.balance + LUTAX_726.balance + LUTAX_732.balance + LUTAX_734.balance + LUTAX_736.balance + LUTAX_068.balance + LUTAX_073.balance + LUTAX_722.balance</field>
                             </record>
@@ -742,7 +742,7 @@
                                 <field name="sequence" eval="60"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2d_1_tax_14_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">724</field>
                                     </record>
@@ -754,7 +754,7 @@
                                 <field name="sequence" eval="61"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2d_1_tax_8_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">726</field>
                                     </record>
@@ -766,7 +766,7 @@
                                 <field name="sequence" eval="62"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2d_2_tax_17_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">732</field>
                                     </record>
@@ -778,7 +778,7 @@
                                 <field name="sequence" eval="63"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2d_2_tax_14_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">734</field>
                                     </record>
@@ -790,7 +790,7 @@
                                 <field name="sequence" eval="64"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2d_2_tax_8_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">736</field>
                                     </record>
@@ -802,7 +802,7 @@
                                 <field name="sequence" eval="65"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2d_1_tax_3_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">068</field>
                                     </record>
@@ -814,7 +814,7 @@
                                 <field name="sequence" eval="66"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2d_2_tax_3_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">073</field>
                                     </record>
@@ -826,7 +826,7 @@
                                 <field name="sequence" eval="67"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2d_1_tax_17_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">722</field>
                                     </record>
@@ -840,7 +840,7 @@
                         <field name="sequence" eval="68"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_2e_supply_of_service_for_customer_liable_for_payment_tax_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">LUTAX_462.balance + LUTAX_464.balance + LUTAX_766.balance</field>
                             </record>
@@ -852,7 +852,7 @@
                                 <field name="sequence" eval="69"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2e_1_a_tax_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">LUTAX_432.balance + LUTAX_742.balance + LUTAX_744.balance + LUTAX_746.balance</field>
                                     </record>
@@ -864,7 +864,7 @@
                                         <field name="sequence" eval="70"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_2e_1_a_tax_3_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">432</field>
                                             </record>
@@ -876,7 +876,7 @@
                                         <field name="sequence" eval="71"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_2e_1_a_tax_17_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">742</field>
                                             </record>
@@ -888,7 +888,7 @@
                                         <field name="sequence" eval="72"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_2e_1_a_tax_14_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">744</field>
                                             </record>
@@ -900,7 +900,7 @@
                                         <field name="sequence" eval="73"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_2e_1_a_tax_8_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">746</field>
                                             </record>
@@ -914,7 +914,7 @@
                                 <field name="sequence" eval="74"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2e_2_tax_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">LUTAX_442.balance + LUTAX_752.balance + LUTAX_754.balance + LUTAX_756.balance</field>
                                     </record>
@@ -926,7 +926,7 @@
                                         <field name="sequence" eval="75"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_2e_2_tax_3_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">442</field>
                                             </record>
@@ -938,7 +938,7 @@
                                         <field name="sequence" eval="76"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_2e_2_tax_17_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">752</field>
                                             </record>
@@ -950,7 +950,7 @@
                                         <field name="sequence" eval="77"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_2e_2_tax_14_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">754</field>
                                             </record>
@@ -962,7 +962,7 @@
                                         <field name="sequence" eval="78"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_2e_2_tax_8_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">756</field>
                                             </record>
@@ -976,7 +976,7 @@
                                 <field name="sequence" eval="79"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_2e_3_tax_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">LUTAX_762.balance</field>
                                     </record>
@@ -988,7 +988,7 @@
                                         <field name="sequence" eval="80"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_2e_3_tax_17_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">762</field>
                                             </record>
@@ -1010,7 +1010,7 @@
                         <field name="sequence" eval="82"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_1a_overall_turnover_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">LUTAX_454.balance + LUTAX_455.balance + LUTAX_456.balance</field>
                             </record>
@@ -1022,7 +1022,7 @@
                                 <field name="sequence" eval="83"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_1a_total_sale_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">LUTAX_471.balance + LUTAX_472.balance</field>
                                     </record>
@@ -1034,7 +1034,7 @@
                                         <field name="sequence" eval="84"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_1a_telecom_service_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">471</field>
                                             </record>
@@ -1046,7 +1046,7 @@
                                         <field name="sequence" eval="85"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_1a_other_sales_formula" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">aggregation</field>
                                                 <field name="formula">LUTAX_021.balance + LUTAX_037.balance - LUTAX_456.balance - LUTAX_455.balance - LUTAX_471.balance</field>
                                             </record>
@@ -1060,7 +1060,7 @@
                                 <field name="sequence" eval="86"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_1a_app_goods_non_bus_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">455</field>
                                     </record>
@@ -1072,7 +1072,7 @@
                                 <field name="sequence" eval="87"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_1a_non_bus_gs_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">456</field>
                                     </record>
@@ -1086,7 +1086,7 @@
                         <field name="sequence" eval="88"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_1b_exemptions_deductible_amounts_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">LUTAX_014.balance + LUTAX_457.balance + LUTAX_015.balance + LUTAX_016.balance + LUTAX_017.balance + LUTAX_018.balance + LUTAX_423.balance + LUTAX_424.balance + LUTAX_226.balance + LUTAX_019.balance + LUTAX_419.balance</field>
                             </record>
@@ -1098,7 +1098,7 @@
                                 <field name="sequence" eval="89"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_1b_2_export_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">014</field>
                                     </record>
@@ -1110,7 +1110,7 @@
                                 <field name="sequence" eval="90"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_1b_1_intra_community_goods_pi_vat_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">457</field>
                                     </record>
@@ -1122,7 +1122,7 @@
                                 <field name="sequence" eval="91"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_1b_3_other_exemptions_art_43_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">015</field>
                                     </record>
@@ -1134,7 +1134,7 @@
                                 <field name="sequence" eval="92"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_1b_4_other_exemptions_art_44_et_56quater_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">016</field>
                                     </record>
@@ -1146,7 +1146,7 @@
                                 <field name="sequence" eval="93"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_1b_5_manufactured_tobacco_vat_collected_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">017</field>
                                     </record>
@@ -1158,7 +1158,7 @@
                                 <field name="sequence" eval="94"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_1b_6_a_subsequent_to_intra_community_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">018</field>
                                     </record>
@@ -1170,7 +1170,7 @@
                                 <field name="sequence" eval="95"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_1b_6_b1_non_exempt_customer_vat_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">423</field>
                                     </record>
@@ -1182,7 +1182,7 @@
                                 <field name="sequence" eval="96"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_1b_6_b2_exempt_ms_customer_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">424</field>
                                     </record>
@@ -1194,7 +1194,7 @@
                                 <field name="sequence" eval="97"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_1b_6_c_supplies_scope_special_arrangement_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">226</field>
                                     </record>
@@ -1206,7 +1206,7 @@
                                 <field name="sequence" eval="98"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_1b_6_d_supplies_other_referred_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">019</field>
                                     </record>
@@ -1218,7 +1218,7 @@
                                 <field name="sequence" eval="99"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_1b_7_inland_supplies_for_customer_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">419</field>
                                     </record>
@@ -1232,7 +1232,7 @@
                         <field name="sequence" eval="100"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_1c_taxable_turnover_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">LUTAX_037.balance</field>
                             </record>
@@ -1250,7 +1250,7 @@
                         <field name="sequence" eval="102"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_4c_exceeding_amount_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">LUTAX_103.balance - LUTAX_102.balance</field>
                             </record>
@@ -1262,7 +1262,7 @@
                         <field name="sequence" eval="103"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_4a_total_tax_due_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">LUTAX_702.balance+LUTAX_704.balance+LUTAX_706.balance+LUTAX_040.balance+LUTAX_712.balance+LUTAX_714.balance+LUTAX_716.balance+LUTAX_054.balance+LUTAX_722.balance+LUTAX_724.balance+LUTAX_726.balance+LUTAX_068.balance+LUTAX_732.balance+LUTAX_734.balance+LUTAX_736.balance+LUTAX_073.balance+LUTAX_742.balance+LUTAX_744.balance+LUTAX_746.balance+LUTAX_432.balance+LUTAX_752.balance+LUTAX_754.balance+LUTAX_756.balance+LUTAX_442.balance+LUTAX_762.balance+LUTAX_764.balance+LUTAX_227.balance</field>
                             </record>
@@ -1274,7 +1274,7 @@
                         <field name="sequence" eval="104"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_4a_total_input_tax_deductible_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">LUTAX_102.balance</field>
                             </record>
@@ -1292,7 +1292,7 @@
                         <field name="sequence" eval="106"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_3a_total_input_tax_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">LUTAX_090.balance + LUTAX_092.balance + LUTAX_228.balance + LUTAX_458.balance + LUTAX_459.balance + LUTAX_460.balance + LUTAX_461.balance</field>
                             </record>
@@ -1304,7 +1304,7 @@
                                 <field name="sequence" eval="107"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_3a_4_due_respect_application_goods_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">090</field>
                                     </record>
@@ -1316,7 +1316,7 @@
                                 <field name="sequence" eval="108"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_3a_6_paid_joint_several_guarantee_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">092</field>
                                     </record>
@@ -1328,7 +1328,7 @@
                                 <field name="sequence" eval="109"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_3a_7_adjusted_tax_special_arrangement_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">228</field>
                                     </record>
@@ -1340,7 +1340,7 @@
                                 <field name="sequence" eval="110"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_3a_1_invoiced_by_other_taxable_person_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">458</field>
                                     </record>
@@ -1352,7 +1352,7 @@
                                 <field name="sequence" eval="111"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_3a_2_due_respect_intra_comm_goods_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">459</field>
                                     </record>
@@ -1364,7 +1364,7 @@
                                 <field name="sequence" eval="112"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_3a_3_due_paid_respect_importation_goods_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">460</field>
                                     </record>
@@ -1376,7 +1376,7 @@
                                 <field name="sequence" eval="113"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_3a_5_due_under_reverse_charge_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">461</field>
                                     </record>
@@ -1390,7 +1390,7 @@
                         <field name="sequence" eval="114"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_3b_total_input_tax_nd_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">LUTAX_094.balance + LUTAX_095.balance + LUTAX_096.balance</field>
                             </record>
@@ -1402,7 +1402,7 @@
                                 <field name="sequence" eval="115"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_3b1_rel_trans_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">094</field>
                                     </record>
@@ -1414,7 +1414,7 @@
                                 <field name="sequence" eval="116"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_3b2_ded_prop_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">095</field>
                                     </record>
@@ -1426,7 +1426,7 @@
                                 <field name="sequence" eval="117"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_3b2_input_tax_margin_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">096</field>
                                     </record>
@@ -1440,7 +1440,7 @@
                         <field name="sequence" eval="118"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_3c_total_input_tax_deductible_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">LUTAX_458.balance+LUTAX_459.balance+LUTAX_460.balance+LUTAX_090.balance+LUTAX_461.balance+LUTAX_092.balance+LUTAX_228.balance+LUTAX_094.balance+LUTAX_095.balance</field>
                             </record>

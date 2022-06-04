@@ -19,7 +19,7 @@
                 <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="tax_report_to_pay_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">JIA_SHOU_SHUI_E_.balance + JIA_FU_SHUI_E_.balance</field>
                     </record>
@@ -31,7 +31,7 @@
                         <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="tax_report_to_pay_temp_tx_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">JIA_SHOU_XIAO_FEI_SHUI_8.balance + JIA_SHOU_XIAO_FEI_SHUI_10.balance + MIAN_SHUI_.balance + BU_KE_SHUI__JIA_SHOU_SHUI_E_.balance</field>
                             </record>
@@ -43,7 +43,7 @@
                                 <field name="sequence" eval="3"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_to_pay_temp_tx_output_8_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">仮受消費税(8%)</field>
                                     </record>
@@ -55,7 +55,7 @@
                                 <field name="sequence" eval="4"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_to_pay_temp_tx_output_10_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">仮受消費税(10%)</field>
                                     </record>
@@ -67,7 +67,7 @@
                                 <field name="sequence" eval="5"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_to_pay_temp_tx_duty_free_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">免税</field>
                                     </record>
@@ -79,7 +79,7 @@
                                 <field name="sequence" eval="6"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_to_pay_temp_tx_tax_free_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">不課税 (仮受税額)</field>
                                     </record>
@@ -93,7 +93,7 @@
                         <field name="sequence" eval="7"/>
                         <field name="expression_ids">
                             <record id="tax_report_to_pay_temp_pmt_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">JIA_FU_XIAO_FEI_SHUI_8.balance + JIA_FU_XIAO_FEI_SHUI_10.balance + SHU_RU_.balance + BU_KE_SHUI__JIA_FU_SHUI_E_.balance</field>
                             </record>
@@ -105,7 +105,7 @@
                                 <field name="sequence" eval="8"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_to_pay_temp_pmt_susp_cons_8_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">仮払消費税(8%)</field>
                                     </record>
@@ -117,7 +117,7 @@
                                 <field name="sequence" eval="9"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_to_pay_temp_pmt_susp_cons_10_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">仮払消費税(10%)</field>
                                     </record>
@@ -129,7 +129,7 @@
                                 <field name="sequence" eval="10"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_to_pay_temp_pmt_import_8_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">輸入</field>
                                     </record>
@@ -141,7 +141,7 @@
                                 <field name="sequence" eval="11"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_to_pay_temp_pmt_tax_free_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">不課税 (仮払税額)</field>
                                     </record>
@@ -156,7 +156,7 @@
                 <field name="sequence" eval="12"/>
                 <field name="expression_ids">
                     <record id="tax_report_comp_basis_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">FAN_MAI_JI_ZHUN_E_.balance + GOU_MAI_JI_ZHUN_E_.balance</field>
                     </record>
@@ -168,7 +168,7 @@
                         <field name="sequence" eval="13"/>
                         <field name="expression_ids">
                             <record id="tax_report_comp_basis_sales_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">KE_SHUI_DUI_XIANG_MAI_SHANG_8.balance + KE_SHUI_DUI_XIANG_MAI_SHANG_10.balance + MIAN_SHUI_MAI_SHANG_.balance + BU_KE_SHUI_MAI_SHANG_.balance</field>
                             </record>
@@ -180,7 +180,7 @@
                                 <field name="sequence" eval="14"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_comp_basis_sales_taxable_8_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">課税対象売上(8%)</field>
                                     </record>
@@ -192,7 +192,7 @@
                                 <field name="sequence" eval="15"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_comp_basis_sales_taxable_10_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">課税対象売上(10%)</field>
                                     </record>
@@ -204,7 +204,7 @@
                                 <field name="sequence" eval="16"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_comp_basis_sales_duty_free_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">免税売上</field>
                                     </record>
@@ -216,7 +216,7 @@
                                 <field name="sequence" eval="17"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_comp_basis_sales_tax_free_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">不課税売上</field>
                                     </record>
@@ -230,7 +230,7 @@
                         <field name="sequence" eval="18"/>
                         <field name="expression_ids">
                             <record id="tax_report_comp_basis_purchases_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">KE_SHUI_DUI_XIANG_SHI_RU_8.balance + KE_SHUI_DUI_XIANG_SHI_RU_10.balance + SHU_RU_SHI_RU_.balance + BU_KE_SHUI_SHI_RU_.balance</field>
                             </record>
@@ -242,7 +242,7 @@
                                 <field name="sequence" eval="19"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_comp_basis_purchases_taxable_8_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">課税対象仕入(8%)</field>
                                     </record>
@@ -254,7 +254,7 @@
                                 <field name="sequence" eval="20"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_comp_basis_purchases_taxable_10_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">課税対象仕入(10%)</field>
                                     </record>
@@ -266,7 +266,7 @@
                                 <field name="sequence" eval="21"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_comp_basis_purchases_import_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">輸入仕入</field>
                                     </record>
@@ -278,7 +278,7 @@
                                 <field name="sequence" eval="22"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_comp_basis_purchases_tax_free_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">不課税仕入</field>
                                     </record>

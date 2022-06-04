@@ -19,7 +19,7 @@
                 <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_out_base_title_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">ILTAX_OUT_BASE.balance</field>
                     </record>
@@ -31,7 +31,7 @@
                         <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_out_base_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">VAT SALES (BASE)</field>
                             </record>
@@ -45,7 +45,7 @@
                 <field name="sequence" eval="3"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_vat_sales_tax_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">ILTAX_OUT_BALANCE_00.balance+ILTAX_OUT_BALANCE_PA.balance</field>
                     </record>
@@ -57,7 +57,7 @@
                         <field name="sequence" eval="4"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_out_balance_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">VAT Sales</field>
                             </record>
@@ -69,7 +69,7 @@
                         <field name="sequence" eval="5"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_out_balance_pa_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">VAT PA Sales</field>
                             </record>
@@ -82,7 +82,7 @@
                 <field name="sequence" eval="6"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_out_base_exempt_title_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">ILTAX_OUT_BASE_exempt.balance</field>
                     </record>
@@ -94,7 +94,7 @@
                         <field name="sequence" eval="7"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_out_base_exempt_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">VAT Exempt Sales (BASE)</field>
                             </record>
@@ -108,7 +108,7 @@
                 <field name="sequence" eval="8"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_in_balance_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">ILTAX_IN_BALANCE_17.balance+ILTAX_IN_BALANCE_2_3.balance+ILTAX_IN_BALANCE_1_4.balance+ILTAX_IN_BALANCE_PA.balance</field>
                     </record>
@@ -120,7 +120,7 @@
                         <field name="sequence" eval="9"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_in_balance_17_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">VAT Inputs 17%</field>
                             </record>
@@ -132,7 +132,7 @@
                         <field name="sequence" eval="10"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_in_balance_pa_16_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">VAT Inputs PA 16%</field>
                             </record>
@@ -144,7 +144,7 @@
                         <field name="sequence" eval="11"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_in_balance_2_3_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">VAT Inputs 2/3</field>
                             </record>
@@ -156,7 +156,7 @@
                         <field name="sequence" eval="12"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_in_balance_1_4_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">VAT Inputs 1/4</field>
                             </record>
@@ -169,7 +169,7 @@
                 <field name="sequence" eval="13"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_vat_in_fa_title_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">ILTAX_VAT_IN_FA.balance</field>
                     </record>
@@ -181,7 +181,7 @@
                         <field name="sequence" eval="14"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_vat_in_fa_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">VAT INPUTS (fixed assets)</field>
                             </record>
@@ -195,7 +195,7 @@
                 <field name="sequence" eval="15"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_vat_due_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">(ILTAX_OUT_BALANCE_00.balance + ILTAX_OUT_BALANCE_PA.balance) - (ILTAX_IN_BALANCE_17.balance + ILTAX_IN_BALANCE_2_3.balance + ILTAX_IN_BALANCE_1_4.balance + ILTAX_IN_BALANCE_PA.balance) - ILTAX_VAT_IN_FA.balance</field>
                     </record>

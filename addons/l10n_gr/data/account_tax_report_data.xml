@@ -20,7 +20,7 @@
                 <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_311_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                     </record>
                 </field>
@@ -30,7 +30,7 @@
                         <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_307_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">GRTAX_303.balance</field>
                             </record>
@@ -42,7 +42,7 @@
                                 <field name="sequence" eval="3"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_303_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">303 Πωλήσεις 19-23%</field>
                                     </record>
@@ -58,7 +58,7 @@
                 <field name="sequence" eval="4"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_358_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">GRTAX_353.balance + GRTAX_357.balance</field>
                     </record>
@@ -70,7 +70,7 @@
                         <field name="sequence" eval="5"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_353_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">353 Αγορές ΦΠΑ 19-23%</field>
                             </record>
@@ -82,7 +82,7 @@
                         <field name="sequence" eval="6"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_357_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">357 Δαπάνες/Έξοδα φορολ.</field>
                             </record>
@@ -95,7 +95,7 @@
                 <field name="sequence" eval="7"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_501-511_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                     </record>
                 </field>
@@ -105,7 +105,7 @@
                         <field name="sequence" eval="8"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_337_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">GRTAX_333.balance</field>
                             </record>
@@ -117,7 +117,7 @@
                                 <field name="sequence" eval="9"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_333_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">333 ΦΠΑ 19-23%</field>
                                     </record>
@@ -130,7 +130,7 @@
                         <field name="sequence" eval="10"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_420_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">GRTAX_373.balance+GRTAX_377.balance</field>
                             </record>
@@ -141,7 +141,7 @@
                                 <field name="sequence" eval="11"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_378_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">GRTAX_373.balance+GRTAX_377.balance</field>
                                     </record>
@@ -153,7 +153,7 @@
                                         <field name="sequence" eval="12"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_373_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">373 ΦΠΑ Αγορών 19-23%</field>
                                             </record>
@@ -165,7 +165,7 @@
                                         <field name="sequence" eval="13"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_377_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">377 ΦΠΑ Δαπανών</field>
                                             </record>

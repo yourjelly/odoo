@@ -258,7 +258,7 @@ class AccountReportLine(models.Model):
                         if target_line.report_id != expression.report_line_id.report_id and expression.subformula != 'cross_report':
                             raise ValidationError(_("Term '%s' seems to be cross-report, while expression '%s' is not.", line_code, expression.formula))
 
-                        if not target_line.expression_ids.filtered(lambda x: x.total == total_name):
+                        if not target_line.expression_ids.filtered(lambda x: x.label == total_name):
                             raise ValidationError(_(
                                 "Total '%s', used on term '%s' of expression '%s' is not defined.",
                                 total_name, line_code, expression.formula
@@ -341,7 +341,7 @@ class AccountReportExpression(models.Model):
 
     # TODO OCO repasser sur le phrasing
     report_line_id = fields.Many2one(string="Report Line", comodel_name='account.report.line', required=True, ondelete='cascade')
-    total = fields.Char(string="Label", required=True)
+    label = fields.Char(string="Label", required=True)
     engine = fields.Selection(
         string="Computation Engine",
         selection = [
@@ -437,7 +437,7 @@ class AccountReportExpression(models.Model):
                     cross_report_domain = [('report_line_id.report_id', '=', candidate_expr.report_line_id.report_id.id)]
 
                 for line_code, expr_labels in labels_by_code.items():
-                    dependency_domain = [('report_line_id.code', '=', line_code), ('total', 'in', tuple(expr_labels))] + cross_report_domain
+                    dependency_domain = [('report_line_id.code', '=', line_code), ('label', 'in', tuple(expr_labels))] + cross_report_domain
                     domains.append(dependency_domain)
 
             sub_expressions = self.env['account.report.expression'].search(osv.expression.OR(domains))
@@ -497,16 +497,16 @@ class AccountReportExpression(models.Model):
             line_code, expr_label = self.carryover_target.split('.')
             return self.env['account.report.expression'].search([
                 ('report_line_id.code', '=', line_code),
-                ('total', '=', expr_label),
+                ('label', '=', expr_label),
                 ('report_line_id.report_id', '=', self.report_line_id.report_id.id),
             ])
 
-        main_expr_label = re.sub("^_carryover_", '', self.total)
+        main_expr_label = re.sub("^_carryover_", '', self.label)
         target_label = '_applied_carryover_%s' % main_expr_label
-        auto_chosen_target = self.report_line_id.expression_ids.filtered(lambda x: x.total == target_label)
+        auto_chosen_target = self.report_line_id.expression_ids.filtered(lambda x: x.label == target_label)
 
         if not auto_chosen_target:
-            raise UserError(_("Could not determine carryover target automatically for expression %s.", self.total))
+            raise UserError(_("Could not determine carryover target automatically for expression %s.", self.label))
 
         return auto_chosen_target
 

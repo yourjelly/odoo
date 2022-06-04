@@ -19,7 +19,7 @@
                 <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="tax_report_rub_1_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">1A_OMZET.balance + 1B_OMZET.balance + 1C_OMZET.balance + 1D_OMZET.balance + 1E_OMZET.balance</field>
                     </record>
@@ -31,7 +31,7 @@
                         <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_1a_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">1a (omzet)</field>
                             </record>
@@ -43,7 +43,7 @@
                         <field name="sequence" eval="3"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_1b_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">1b (omzet)</field>
                             </record>
@@ -55,7 +55,7 @@
                         <field name="sequence" eval="4"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_1c_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">1c (omzet)</field>
                             </record>
@@ -67,7 +67,7 @@
                         <field name="sequence" eval="5"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_1d_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">1d (omzet)</field>
                             </record>
@@ -79,7 +79,7 @@
                         <field name="sequence" eval="6"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_1e_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">1e (omzet)</field>
                             </record>
@@ -92,7 +92,7 @@
                 <field name="sequence" eval="7"/>
                 <field name="expression_ids">
                     <record id="tax_report_rub_2_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">2A_OMZET.balance</field>
                     </record>
@@ -104,7 +104,7 @@
                         <field name="sequence" eval="8"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_2a_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">2a (omzet)</field>
                             </record>
@@ -117,7 +117,7 @@
                 <field name="sequence" eval="9"/>
                 <field name="expression_ids">
                     <record id="tax_report_rub_3_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">3A_OMZET.balance + 3B_OMZET.balance + 3C_OMZET.balance</field>
                     </record>
@@ -129,7 +129,7 @@
                         <field name="sequence" eval="10"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_3a_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">3a (omzet)</field>
                             </record>
@@ -141,7 +141,7 @@
                         <field name="sequence" eval="11"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_3b_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">3b (omzet)</field>
                             </record>
@@ -153,7 +153,7 @@
                         <field name="sequence" eval="12"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_3c_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">3c (omzet)</field>
                             </record>
@@ -166,7 +166,7 @@
                 <field name="sequence" eval="13"/>
                 <field name="expression_ids">
                     <record id="tax_report_rub_4_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">4A_OMZET.balance + 4B_OMZET.balance</field>
                     </record>
@@ -178,7 +178,7 @@
                         <field name="sequence" eval="14"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_4a_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">4a (omzet)</field>
                             </record>
@@ -190,7 +190,7 @@
                         <field name="sequence" eval="15"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_4b_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">4b (omzet)</field>
                             </record>
@@ -204,7 +204,7 @@
                 <field name="sequence" eval="16"/>
                 <field name="expression_ids">
                     <record id="tax_report_rub_btw_1_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">1A_BTW.balance + 1B_BTW.balance + 1C_BTW.balance + 1D_BTW.balance + 1E_BTW.balance</field>
                     </record>
@@ -216,7 +216,7 @@
                         <field name="sequence" eval="17"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_1a_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">1a (BTW)</field>
                             </record>
@@ -228,7 +228,7 @@
                         <field name="sequence" eval="18"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_1b_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">1b (BTW)</field>
                             </record>
@@ -240,7 +240,7 @@
                         <field name="sequence" eval="19"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_1c_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">1c (BTW)</field>
                             </record>
@@ -252,7 +252,7 @@
                         <field name="sequence" eval="20"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_1d_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">1d (BTW)</field>
                             </record>
@@ -264,7 +264,7 @@
                         <field name="sequence" eval="21"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_1e_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">1e (BTW)</field>
                             </record>
@@ -277,7 +277,7 @@
                 <field name="sequence" eval="22"/>
                 <field name="expression_ids">
                     <record id="tax_report_rub_btw_2_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">NLTAX_B2.balance</field>
                     </record>
@@ -289,7 +289,7 @@
                         <field name="sequence" eval="23"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_2a_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">2a (BTW)</field>
                             </record>
@@ -302,7 +302,7 @@
                 <field name="sequence" eval="24"/>
                 <field name="expression_ids">
                     <record id="tax_report_rub_btw_4_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">NLTAX_B4a.balance + NLTAX_B4b.balance</field>
                     </record>
@@ -314,7 +314,7 @@
                         <field name="sequence" eval="25"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_4a_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">4a (BTW)</field>
                             </record>
@@ -326,7 +326,7 @@
                         <field name="sequence" eval="26"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_4b_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">4b (BTW)</field>
                             </record>
@@ -339,7 +339,7 @@
                 <field name="sequence" eval="27"/>
                 <field name="expression_ids">
                     <record id="tax_report_rub_btw_5_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">NLTAX_B5b.balance + NLTAX_B5d.balance + NLTAX_B5e.balance + NLTAX_B5f.balance</field>
                     </record>
@@ -350,7 +350,7 @@
                         <field name="sequence" eval="28"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_5a_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">NLTAX_B1.balance + NLTAX_B2.balance + NLTAX_B4a.balance + NLTAX_B4b.balance</field>
                             </record>
@@ -362,7 +362,7 @@
                         <field name="sequence" eval="29"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_5b_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">5b (BTW)</field>
                             </record>
@@ -374,7 +374,7 @@
                         <field name="sequence" eval="30"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_5c_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">NLTAX_B1.balance + NLTAX_B2.balance + NLTAX_B4a.balance + NLTAX_B4b.balance - NLTAX_B5b.balance</field>
                             </record>
@@ -386,7 +386,7 @@
                         <field name="sequence" eval="31"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_5d_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">5d. (BTW)</field>
                             </record>
@@ -398,7 +398,7 @@
                         <field name="sequence" eval="32"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_5e_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">5e. (BTW)</field>
                             </record>
@@ -410,7 +410,7 @@
                         <field name="sequence" eval="33"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_5f_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">5f. (BTW)</field>
                             </record>
@@ -422,7 +422,7 @@
                         <field name="sequence" eval="34"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_5g_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">NLTAX_B1.balance + NLTAX_B2.balance + NLTAX_B4a.balance + NLTAX_B4b.balance - NLTAX_B5b.balance - NLTAX_B5d.balance - NLTAX_B5e.balance - NLTAX_B5f.balance</field>
                             </record>

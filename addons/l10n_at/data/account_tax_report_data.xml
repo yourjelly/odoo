@@ -19,7 +19,7 @@
                 <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="tax_report_line_l10n_at_tva_sale_report_title_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">(AT_022_tax.balance + AT_029_tax.balance + AT_006_tax.balance + AT_037_tax.balance + AT_052_tax.balance + AT_007_tax.balance + AT_056.balance + AT_057.balance + AT_048.balance + AT_044.balance + AT_032.balance + AT_072_tax.balance + AT_073_tax.balance + AT_008_tax.balance + AT_088_tax.balance)</field>
                     </record>
@@ -31,7 +31,7 @@
                         <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_l10n_at_tva_line_4_1_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">KZ 000</field>
                             </record>
@@ -43,7 +43,7 @@
                         <field name="sequence" eval="3"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_l10n_at_tva_line_4_2_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">KZ 001</field>
                             </record>
@@ -55,7 +55,7 @@
                         <field name="sequence" eval="4"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_l10n_at_tva_line_4_3_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">KZ 021</field>
                             </record>
@@ -66,7 +66,7 @@
                         <field name="sequence" eval="5"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_l10n_at_tva_line_4_4_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">AT_000.balance + AT_001.balance - AT_021.balance</field>
                             </record>
@@ -77,7 +77,7 @@
                         <field name="sequence" eval="6"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_l10n_at_tva_sale_01_report_title_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">AT_011.balance + AT_012.balance + AT_015.balance + AT_017.balance + AT_018.balance</field>
                             </record>
@@ -89,7 +89,7 @@
                                 <field name="sequence" eval="7"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_l10n_at_tva_line_4_5_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">KZ 011</field>
                                     </record>
@@ -101,7 +101,7 @@
                                 <field name="sequence" eval="8"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_l10n_at_tva_line_4_6_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">KZ 012</field>
                                     </record>
@@ -113,7 +113,7 @@
                                 <field name="sequence" eval="9"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_l10n_at_tva_line_4_7_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">KZ 015</field>
                                     </record>
@@ -125,7 +125,7 @@
                                 <field name="sequence" eval="10"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_l10n_at_tva_line_4_8_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">KZ 017</field>
                                     </record>
@@ -137,7 +137,7 @@
                                 <field name="sequence" eval="11"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_l10n_at_tva_line_4_9_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">KZ 018</field>
                                     </record>
@@ -150,7 +150,7 @@
                         <field name="sequence" eval="12"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_l10n_at_tva_sale_02_report_title_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">AT_019.balance + AT_016.balance + AT_020.balance</field>
                             </record>
@@ -162,7 +162,7 @@
                                 <field name="sequence" eval="13"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_l10n_at_tva_line_4_10_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">KZ 019</field>
                                     </record>
@@ -174,7 +174,7 @@
                                 <field name="sequence" eval="14"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_l10n_at_tva_line_4_11_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">KZ 016</field>
                                     </record>
@@ -186,7 +186,7 @@
                                 <field name="sequence" eval="15"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_l10n_at_tva_line_4_12_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">KZ 020</field>
                                     </record>
@@ -199,7 +199,7 @@
                         <field name="sequence" eval="16"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_l10n_at_tva_line_4_13_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">(AT_000.balance + AT_001.balance - AT_021.balance) - AT_011.balance - AT_012.balance - AT_015.balance - AT_017.balance - AT_018.balance - AT_019.balance - AT_016.balance - AT_020.balance</field>
                             </record>
@@ -210,7 +210,7 @@
                         <field name="sequence" eval="17"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_at_base_title_umsatz_base_4_14_19_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">AT_022_base.balance + AT_029_base.balance + AT_006_base.balance + AT_037_base.balance + AT_052_base.balance + AT_007_base.balance</field>
                             </record>
@@ -222,7 +222,7 @@
                                 <field name="sequence" eval="18"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_l10n_at_tva_line_4_14_base_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">KZ 022 Bemessungsgrundlage</field>
                                     </record>
@@ -234,7 +234,7 @@
                                 <field name="sequence" eval="19"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_l10n_at_tva_line_4_15_base_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">KZ 029 Bemessungsgrundlage</field>
                                     </record>
@@ -246,7 +246,7 @@
                                 <field name="sequence" eval="20"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_l10n_at_tva_line_4_16_base_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">KZ 006 Bemessungsgrundlage</field>
                                     </record>
@@ -258,7 +258,7 @@
                                 <field name="sequence" eval="21"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_l10n_at_tva_line_4_17_base_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">KZ 037 Bemessungsgrundlage</field>
                                     </record>
@@ -270,7 +270,7 @@
                                 <field name="sequence" eval="22"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_l10n_at_tva_line_4_18_base_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">KZ 052 Bemessungsgrundlage</field>
                                     </record>
@@ -282,7 +282,7 @@
                                 <field name="sequence" eval="23"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_l10n_at_tva_line_4_19_base_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">KZ 007 Bemessungsgrundlage</field>
                                     </record>
@@ -295,7 +295,7 @@
                         <field name="sequence" eval="24"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_at_tax_title_4_14_19_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">AT_022_tax.balance + AT_029_tax.balance + AT_006_tax.balance + AT_037_tax.balance + AT_052_tax.balance + AT_007_tax.balance</field>
                             </record>
@@ -307,7 +307,7 @@
                                 <field name="sequence" eval="25"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_l10n_at_tva_line_4_14_tax_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">KZ 022 Umsatzsteuer</field>
                                     </record>
@@ -319,7 +319,7 @@
                                 <field name="sequence" eval="26"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_l10n_at_tva_line_4_15_tax_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">KZ 029 Umsatzsteuer</field>
                                     </record>
@@ -331,7 +331,7 @@
                                 <field name="sequence" eval="27"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_l10n_at_tva_line_4_16_tax_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">KZ 006 Umsatzsteuer</field>
                                     </record>
@@ -343,7 +343,7 @@
                                 <field name="sequence" eval="28"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_l10n_at_tva_line_4_17_tax_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">KZ 037 Umsatzsteuer</field>
                                     </record>
@@ -355,7 +355,7 @@
                                 <field name="sequence" eval="29"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_l10n_at_tva_line_4_18_tax_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">KZ 052 Umsatzsteuer</field>
                                     </record>
@@ -367,7 +367,7 @@
                                 <field name="sequence" eval="30"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_l10n_at_tva_line_4_19_tax_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">KZ 007 Umsatzsteuer</field>
                                     </record>
@@ -381,7 +381,7 @@
                         <field name="sequence" eval="31"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_l10n_at_tva_line_4_20_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">KZ 056</field>
                             </record>
@@ -393,7 +393,7 @@
                         <field name="sequence" eval="32"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_l10n_at_tva_line_4_21_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">KZ 057</field>
                             </record>
@@ -405,7 +405,7 @@
                         <field name="sequence" eval="33"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_l10n_at_tva_line_4_22_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">KZ 048</field>
                             </record>
@@ -417,7 +417,7 @@
                         <field name="sequence" eval="34"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_l10n_at_tva_line_4_23_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">KZ 044</field>
                             </record>
@@ -429,7 +429,7 @@
                         <field name="sequence" eval="35"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_l10n_at_tva_line_4_24_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">KZ 032</field>
                             </record>
@@ -440,7 +440,7 @@
                         <field name="sequence" eval="36"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_l10n_at_tva_sale_03_report_title_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">AT_070.balance + AT_071.balance</field>
                             </record>
@@ -452,7 +452,7 @@
                                 <field name="sequence" eval="37"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_l10n_at_tva_line_4_25_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">KZ 070</field>
                                     </record>
@@ -464,7 +464,7 @@
                                 <field name="sequence" eval="38"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_l10n_at_tva_line_4_26_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">KZ 071</field>
                                     </record>
@@ -475,7 +475,7 @@
                                 <field name="sequence" eval="39"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_l10n_at_tva_line_4_27_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">AT_070.balance - AT_071.balance</field>
                                     </record>
@@ -488,7 +488,7 @@
                         <field name="sequence" eval="40"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_l10n_at_tva_sale_04_report_title_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">AT_072_base.balance + AT_073_base.balance + AT_008_base.balance + AT_088_base.balance</field>
                             </record>
@@ -499,7 +499,7 @@
                                 <field name="sequence" eval="41"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_at_base_title_umsatz_base_4_28_31_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">AT_072_base.balance + AT_073_base.balance + AT_008_base.balance + AT_088_base.balance</field>
                                     </record>
@@ -511,7 +511,7 @@
                                         <field name="sequence" eval="42"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_l10n_at_tva_line_4_28_base_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">KZ 072 Bemessungsgrundlage</field>
                                             </record>
@@ -523,7 +523,7 @@
                                         <field name="sequence" eval="43"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_l10n_at_tva_line_4_29_base_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">KZ 073 Bemessungsgrundlage</field>
                                             </record>
@@ -535,7 +535,7 @@
                                         <field name="sequence" eval="44"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_l10n_at_tva_line_4_30_base_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">KZ 008 Bemessungsgrundlage</field>
                                             </record>
@@ -547,7 +547,7 @@
                                         <field name="sequence" eval="45"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_l10n_at_tva_line_4_31_base_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">KZ 088 Bemessungsgrundlage</field>
                                             </record>
@@ -560,7 +560,7 @@
                                 <field name="sequence" eval="46"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_at_tax_title_4_28_31_formula" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">AT_072_tax.balance + AT_073_tax.balance + AT_008_tax.balance + AT_088_tax.balance</field>
                                     </record>
@@ -572,7 +572,7 @@
                                         <field name="sequence" eval="47"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_l10n_at_tva_line_4_28_tax_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">KZ 072 Umsatzsteuer</field>
                                             </record>
@@ -584,7 +584,7 @@
                                         <field name="sequence" eval="48"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_l10n_at_tva_line_4_29_tax_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">KZ 073 Umsatzsteuer</field>
                                             </record>
@@ -596,7 +596,7 @@
                                         <field name="sequence" eval="49"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_l10n_at_tva_line_4_30_tax_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">KZ 008 Umsatzsteuer</field>
                                             </record>
@@ -608,7 +608,7 @@
                                         <field name="sequence" eval="50"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_l10n_at_tva_line_4_31_tax_tag" model="account.report.expression">
-                                                <field name="total">balance</field>
+                                                <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
                                                 <field name="formula">KZ 088 Umsatzsteuer</field>
                                             </record>
@@ -623,7 +623,7 @@
                         <field name="sequence" eval="51"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_l10n_at_tva_sale_05_report_title_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">AT_076.balance + AT_077.balance</field>
                             </record>
@@ -635,7 +635,7 @@
                                 <field name="sequence" eval="52"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_l10n_at_tva_line_4_32_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">KZ 076</field>
                                     </record>
@@ -647,7 +647,7 @@
                                 <field name="sequence" eval="53"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_l10n_at_tva_line_4_33_tag" model="account.report.expression">
-                                        <field name="total">balance</field>
+                                        <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">KZ 077</field>
                                     </record>
@@ -662,7 +662,7 @@
                 <field name="sequence" eval="54"/>
                 <field name="expression_ids">
                     <record id="tax_report_line_l10n_at_tva_purchase_report_title_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">AT_060.balance + AT_061.balance + AT_083.balance + AT_065.balance + AT_066.balance + AT_082.balance + AT_087.balance + AT_089.balance + AT_064.balance + AT_062.balance + AT_063.balance + AT_067.balance</field>
                     </record>
@@ -674,7 +674,7 @@
                         <field name="sequence" eval="55"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_l10n_at_tva_line_5_1_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">KZ 060</field>
                             </record>
@@ -686,7 +686,7 @@
                         <field name="sequence" eval="56"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_l10n_at_tva_line_5_2_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">KZ 061</field>
                             </record>
@@ -698,7 +698,7 @@
                         <field name="sequence" eval="57"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_l10n_at_tva_line_5_3_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">KZ 083</field>
                             </record>
@@ -710,7 +710,7 @@
                         <field name="sequence" eval="58"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_l10n_at_tva_line_5_4_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">KZ 065</field>
                             </record>
@@ -722,7 +722,7 @@
                         <field name="sequence" eval="59"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_l10n_at_tva_line_5_5_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">KZ 066</field>
                             </record>
@@ -734,7 +734,7 @@
                         <field name="sequence" eval="60"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_l10n_at_tva_line_5_6_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">KZ 082</field>
                             </record>
@@ -746,7 +746,7 @@
                         <field name="sequence" eval="61"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_l10n_at_tva_line_5_7_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">KZ 087</field>
                             </record>
@@ -758,7 +758,7 @@
                         <field name="sequence" eval="62"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_l10n_at_tva_line_5_8_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">KZ 089</field>
                             </record>
@@ -770,7 +770,7 @@
                         <field name="sequence" eval="63"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_l10n_at_tva_line_5_9_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">KZ 064</field>
                             </record>
@@ -782,7 +782,7 @@
                         <field name="sequence" eval="64"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_l10n_at_tva_line_5_10_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">KZ 062</field>
                             </record>
@@ -794,7 +794,7 @@
                         <field name="sequence" eval="65"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_l10n_at_tva_line_5_11_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">KZ 063</field>
                             </record>
@@ -806,7 +806,7 @@
                         <field name="sequence" eval="66"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_l10n_at_tva_line_5_12_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">KZ 067</field>
                             </record>
@@ -817,7 +817,7 @@
                         <field name="sequence" eval="67"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_l10n_at_tva_line_5_13_formula" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">AT_060.balance + AT_061.balance + AT_083.balance + AT_065.balance + AT_066.balance + AT_082.balance + AT_087.balance + AT_089.balance + AT_064.balance + AT_062.balance + AT_063.balance + AT_067.balance</field>
                             </record>
@@ -830,7 +830,7 @@
                 <field name="sequence" eval="68"/>
                 <field name="expression_ids">
                     <record id="tax_report_line_l10n_at_tva_final_report_title_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">AT_090.balance</field>
                     </record>
@@ -842,7 +842,7 @@
                         <field name="sequence" eval="69"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_l10n_at_tva_line_6_tag" model="account.report.expression">
-                                <field name="total">balance</field>
+                                <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">KZ 090</field>
                             </record>
@@ -855,7 +855,7 @@
                 <field name="sequence" eval="70"/>
                 <field name="expression_ids">
                     <record id="tax_report_line_l10n_at_tva_line_7_formula" model="account.report.expression">
-                        <field name="total">balance</field>
+                        <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">(AT_022_tax.balance + AT_029_tax.balance + AT_006_tax.balance + AT_037_tax.balance + AT_052_tax.balance + AT_007_tax.balance + AT_056.balance + AT_057.balance + AT_048.balance + AT_044.balance + AT_032.balance + AT_072_tax.balance + AT_073_tax.balance + AT_008_tax.balance + AT_088_tax.balance + AT_060.balance + AT_061.balance + AT_083.balance + AT_065.balance + AT_066.balance + AT_082.balance + AT_087.balance + AT_089.balance + AT_064.balance + AT_062.balance + AT_063.balance + AT_067.balance) + AT_090.balance</field>
                     </record>
