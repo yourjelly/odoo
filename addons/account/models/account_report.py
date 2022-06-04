@@ -123,6 +123,12 @@ class AccountReport(models.Model):
             else:
                 record.availability_condition = 'always'
 
+    @api.constrains('root_report_id')
+    def _validate_root_report_id(self):
+        for record in self:
+            if record.root_report_id.root_report_id:
+                raise ValidationError(_("Only a report without a root report of its own can be selected as root report."))
+
     def write(self, vals):
         #TODO OCO reDOC: tax tag management
         # TODO OCO s'assurer que ces changements de pays et leur impact sur le rapport sont testés
