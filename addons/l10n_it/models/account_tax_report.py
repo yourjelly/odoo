@@ -12,7 +12,7 @@ class AccountTaxReportLine(models.AbstractModel):
             ('vp14_debt_carryover_condition', 'Italian line vp14 debt carryover'),
             ('vp14_credit_carryover_condition', 'Italian line vp14 credit carryover'),
         ]
-    )
+    ) #TODO OCO à gérer
 
     def vp14_debt_carryover_condition(self, options, line_amount, carried_over_amount):
         """

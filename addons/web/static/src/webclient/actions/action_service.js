@@ -460,7 +460,7 @@ function makeActionManager(env) {
         // END LEGACY CODE COMPATIBILITY
 
         return {
-            props: viewProps, //TODO OCO
+            props: viewProps,
             config: {
                 actionId: action.id,
                 actionType: "ir.actions.act_window",
@@ -524,7 +524,7 @@ function makeActionManager(env) {
      * @param {number} [options.index]
      * @returns {Promise<Number>}
      */
-    async function _updateUI(controller, options = {}) { //TODO OCO
+    async function _updateUI(controller, options = {}) {
         let resolve;
         let reject;
         let dialogCloseResolve;
@@ -1115,7 +1115,7 @@ function makeActionManager(env) {
      * @param {ActionOptions} options
      * @returns {Promise<number | undefined | void>}
      */
-    async function doAction(actionRequest, options = {}) { //TODO OCO
+    async function doAction(actionRequest, options = {}) {
         const actionProm = _loadAction(actionRequest, options.additionalContext);
         let action = await keepLast.add(actionProm);
         action = _preprocessAction(action, options.additionalContext);
@@ -1127,7 +1127,7 @@ function makeActionManager(env) {
                 if (action.target !== "new") {
                     await clearUncommittedChanges(env);
                 }
-                return _executeActWindowAction(action, options); //TODO OCO
+                return _executeActWindowAction(action, options);
             case "ir.actions.act_window_close":
                 return _executeCloseAction({ onClose: options.onClose, onCloseInfo: action.infos });
             case "ir.actions.client":

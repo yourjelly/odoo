@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
         <!-- account.fiscal.position.tax.template -->
-        <!--
-        TODO OCO (pout tester)
         <record id="afpttn_intracom_1" model="account.fiscal.position.tax.template">
             <field name="position_id" ref="fiscal_position_template_3"/>
             <field name="tax_src_id" ref="attn_VAT-OUT-00-S"/>
@@ -323,5 +321,4 @@
             <field name="tax_src_id" ref="attn_VAT-IN-V83-21"/>
             <field name="tax_dest_id" ref="attn_VAT-IN-V83-21-CC"/>
         </record>
-      -->
 </odoo>

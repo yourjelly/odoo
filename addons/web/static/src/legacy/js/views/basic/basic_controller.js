@@ -468,7 +468,7 @@ var BasicController = AbstractController.extend(FieldManagerMixin, {
      *
      * @returns {Promise}
      */
-    async _executeButtonAction(actionData, recordData) { //TODO OCO
+    async _executeButtonAction(actionData, recordData) {
         const prom = new Promise((resolve, reject) => {
             this.trigger_up('execute_action', {
                 action_data: actionData,

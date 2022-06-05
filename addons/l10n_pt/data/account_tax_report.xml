@@ -542,7 +542,7 @@
                     </record>
                 </field>
             </record>
-            <record id="tax_report_pt_tax_total_pagar" model="account.report.line"> <!--TODO OCO vérifier comment l'audit de ce genre d'expression avec if_above se comporte ; ça marche bien ? -->
+            <record id="tax_report_pt_tax_total_pagar" model="account.report.line">
                 <field name="name">TOTAL IVA A PAGAR</field>
                 <field name="code">tax_report_pt_tax_total_pagar</field>
                 <field name="sequence" eval="47"/>

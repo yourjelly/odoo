@@ -305,6 +305,98 @@
             <field name="sequence">16</field>
         </record>
 
+        <record id="oco_test_line_financial_group_single_sum_if_pos" model="account.report.line">
+            <field name="name">test line financial single groupby sum_if_pos</field>
+            <field name="report_id" ref="test_report"/>
+            <field name="expression_ids" eval="[(5, 0, 0),
+                (0, 0, {'label': 'main', 'engine': 'domain', 'formula': &quot;[('account_id.user_type_id.internal_group', '=', 'income')]&quot;, 'subformula': 'sum_if_pos'}),
+            ]"/>
+            <field name="foldable" eval="True"/>
+            <field name="groupby">partner_id</field>
+            <field name="sequence">17</field>
+        </record>
+
+        <record id="oco_test_line_financial_group_single_sum_if_neg" model="account.report.line">
+            <field name="name">test line financial single groupby sum_if_neg</field>
+            <field name="report_id" ref="test_report"/>
+            <field name="expression_ids" eval="[(5, 0, 0),
+                (0, 0, {'label': 'main', 'engine': 'domain', 'formula': &quot;[('account_id.user_type_id.internal_group', '=', 'income')]&quot;, 'subformula': 'sum_if_neg'}),
+            ]"/>
+            <field name="foldable" eval="True"/>
+            <field name="groupby">partner_id</field>
+            <field name="sequence">18</field>
+        </record>
+
+        <record id="oco_test_line_financial_group_single_sum_if_pos_and_neg" model="account.report.line">
+            <field name="name">test line financial single groupby sum_if_pos and sum_if_neg</field>
+            <field name="report_id" ref="test_report"/>
+            <field name="expression_ids" eval="[(5, 0, 0),
+                (0, 0, {'label': 'main', 'engine': 'domain', 'formula': &quot;[('account_id.user_type_id.internal_group', '=', 'income')]&quot;, 'subformula': 'sum_if_pos'}),
+                (0, 0, {'label': 'forty_two', 'engine': 'domain', 'formula': &quot;[('account_id.user_type_id.internal_group', '=', 'income')]&quot;, 'subformula': 'sum_if_neg'}),
+            ]"/>
+            <field name="foldable" eval="True"/>
+            <field name="groupby">partner_id</field>
+            <field name="sequence">19</field>
+        </record>
+
+        <record id="oco_test_line_financial_group_single_sum_if_pos_and_neg_double_group" model="account.report.line">
+            <field name="name">test line financial single groupby sum_if_pos and sum_if_neg double group</field>
+            <field name="report_id" ref="test_report"/>
+            <field name="expression_ids" eval="[(5, 0, 0),
+                (0, 0, {'label': 'main', 'engine': 'domain', 'formula': &quot;[('account_id.user_type_id.internal_group', '=', 'income')]&quot;, 'subformula': 'sum_if_pos'}),
+                (0, 0, {'label': 'forty_two', 'engine': 'domain', 'formula': &quot;[('account_id.user_type_id.internal_group', '=', 'income')]&quot;, 'subformula': 'sum_if_neg'}),
+            ]"/>
+            <field name="foldable" eval="True"/>
+            <field name="groupby">partner_id, id</field>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="oco_test_line_financial_group_single_code_debit" model="account.report.line">
+            <field name="name">test line financial single groupby code debit</field>
+            <field name="report_id" ref="test_report"/>
+            <field name="expression_ids" eval="[(5, 0, 0),
+                (0, 0, {'label': 'main', 'engine': 'account_codes', 'formula': '7D'}),
+            ]"/>
+            <field name="foldable" eval="True"/>
+            <field name="groupby">partner_id</field>
+            <field name="sequence">21</field>
+        </record>
+
+        <record id="oco_test_line_financial_group_single_code_credit" model="account.report.line">
+            <field name="name">test line financial single groupby code credit</field>
+            <field name="report_id" ref="test_report"/>
+            <field name="expression_ids" eval="[(5, 0, 0),
+                (0, 0, {'label': 'main', 'engine': 'account_codes', 'formula': '7C'}),
+            ]"/>
+            <field name="foldable" eval="True"/>
+            <field name="groupby">partner_id</field>
+            <field name="sequence">22</field>
+        </record>
+
+        <record id="oco_test_line_financial_group_single_code_debit_credit" model="account.report.line">
+            <field name="name">test line financial single groupby code debit + credit</field>
+            <field name="report_id" ref="test_report"/>
+            <field name="expression_ids" eval="[(5, 0, 0),
+                (0, 0, {'label': 'main', 'engine': 'account_codes', 'formula': '7D'}),
+                (0, 0, {'label': 'forty_two', 'engine': 'account_codes', 'formula': '7C'}),
+            ]"/>
+            <field name="foldable" eval="True"/>
+            <field name="groupby">partner_id</field>
+            <field name="sequence">23</field>
+        </record>
+
+        <record id="oco_test_line_financial_group_double_code_debit_credit" model="account.report.line">
+            <field name="name">test line financial double groupby code debit + credit</field>
+            <field name="report_id" ref="test_report"/>
+            <field name="expression_ids" eval="[(5, 0, 0),
+                (0, 0, {'label': 'main', 'engine': 'account_codes', 'formula': '7D'}),
+                (0, 0, {'label': 'forty_two', 'engine': 'account_codes', 'formula': '7C'}),
+            ]"/>
+            <field name="foldable" eval="True"/>
+            <field name="groupby">partner_id,id</field>
+            <field name="sequence">24</field>
+        </record>
+
         <!--TODO OCO le print du test report déconne complet (les colonnes sont bonnes, mais les lignes viennent du rapport générique) => sans doute un souci de passage d'options-->
     </data>
 </odoo>
