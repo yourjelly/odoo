@@ -686,7 +686,7 @@ var ModelFieldSelectorPopOver = Widget.extend({
                 break;
             case $.ui.keyCode.ENTER:
                 e.preventDefault();
-                if (!name) {
+                if (!name && !this._isOnDefaultValuePage()) {
                     this._hidePopover(this.options.cancelOnEscape);
                     break;
                 }

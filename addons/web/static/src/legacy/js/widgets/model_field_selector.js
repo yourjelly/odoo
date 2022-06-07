@@ -79,7 +79,7 @@ var ModelFieldSelector = Widget.extend({
      * @see Widget.start
      * @returns {Promise}
      */
-    start: function () {
+    start: async function () {
         this.$value = this.$(".o_field_selector_value");
         this.$valid = this.$(".o_field_selector_warning");
 
@@ -87,14 +87,8 @@ var ModelFieldSelector = Widget.extend({
             this.popOver._prefill().then(this._render.bind(this));
         }
 
-        return this._super.apply(this, arguments);
-    },
-
-    /**
-     * @see Widget.appendTo
-     */
-    appendTo: async function () {
         await this._super.apply(this, arguments);
+
         if (!this.options.readonly) {
             let popOverReadyPromiseResolve;
             const popOverReadyPromise = new Promise((resolve) => popOverReadyPromiseResolve = resolve);
