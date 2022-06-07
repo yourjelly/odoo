@@ -49,7 +49,7 @@ import {
     toggleMenuItem,
     validateSearch,
 } from "../search/helpers";
-import { createWebClient, doAction } from "../webclient/helpers";
+import { createWebClient, doAction, loadState } from "../webclient/helpers";
 import { makeView, setupViewRegistries } from "./helpers";
 
 const { markup, onWillStart } = owl;
@@ -66,7 +66,6 @@ let testUtils,
     core,
     BasicModel,
     AbstractStorageService,
-    loadState,
     patch,
     unpatch,
     ControlPanel;
@@ -12788,7 +12787,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_optional_columns_dropdown input:checked");
     });
 
-    QUnit.skipWOWL("change the viewType of the current action", async function (assert) {
+    QUnit.test("change the viewType of the current action", async function (assert) {
         assert.expect(25);
 
         serverData.actions = {
@@ -12835,7 +12834,8 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, "th", 3, "should display 3 th (selector + 2 fields)");
 
         // enable optional field
-        await click($(target).find("table .o_optional_columns_dropdown"));
+        await click(target, "table .o_optional_columns_dropdown_toggle");
+
         assert.notOk(
             $(target)
                 .find('div.o_optional_columns_dropdown span.dropdown-item [name="m2o"]')
@@ -12846,7 +12846,8 @@ QUnit.module("Views", (hooks) => {
                 .find('div.o_optional_columns_dropdown span.dropdown-item [name="o2m"]')
                 .is(":checked")
         );
-        await click($(target).find("div.o_optional_columns_dropdown span.dropdown-item:first"));
+
+        await click(target.querySelector("div.o_optional_columns_dropdown span.dropdown-item"));
         assert.containsN(target, "th", 4, "should display 4 th (selector + 3 fields)");
         assert.ok(
             $(target).find("th:contains(M2O field)").is(":visible"),
@@ -12882,7 +12883,7 @@ QUnit.module("Views", (hooks) => {
         ); //m2o field
 
         // disable optional field
-        await click($(target).find("table .o_optional_columns_dropdown"));
+        await click(target, "table .o_optional_columns_dropdown_toggle");
         assert.ok(
             $(target)
                 .find('div.o_optional_columns_dropdown span.dropdown-item [name="m2o"]')
@@ -12894,7 +12895,7 @@ QUnit.module("Views", (hooks) => {
                 .is(":checked")
         );
         await click(
-            $(target).find("div.o_optional_columns_dropdown span.dropdown-item:last input")
+            target.querySelectorAll("div.o_optional_columns_dropdown span.dropdown-item input")[1]
         );
         assert.ok(
             $(target).find("th:contains(M2O field)").is(":visible"),
