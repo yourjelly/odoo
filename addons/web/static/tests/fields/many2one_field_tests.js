@@ -1919,7 +1919,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "item not dropped on discard with empty required field (default_get)",
         async function (assert) {
             // This test simulates discarding a record that has been created with
@@ -2087,7 +2087,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "list in form: item not dropped on discard with empty required field (onchange in default_get)",
         async function (assert) {
             // variant of the test "list in form: discard newly added element with
@@ -2132,18 +2132,18 @@ QUnit.module("Fields", (hooks) => {
             );
             assert.containsOnce(
                 target,
-                "td.o_data_cell .o_required_modifier",
+                "td.o_data_cell.o_required_modifier",
                 "should have a required field on this record"
             );
             assert.strictEqual(
-                target.querySelector("td.o_data_cell .o_required_modifier").textContent,
+                target.querySelector("td.o_data_cell.o_required_modifier").textContent,
                 "",
                 "should have empty string in the required field on this record"
             );
 
             // FIXME: shouldn't we wait for the clicks here??
             // click on empty required field in editable list record
-            click(target.querySelector("td.o_data_cell .o_required_modifier"));
+            click(target.querySelector("td.o_data_cell.o_required_modifier"));
             // click off so that the required field still stay empty
             click(target);
 
@@ -2159,7 +2159,7 @@ QUnit.module("Fields", (hooks) => {
                 "should still have the correct displayed name"
             );
             assert.strictEqual(
-                target.querySelector("td.o_data_cell .o_required_modifier").textContent,
+                target.querySelector("td.o_data_cell.o_required_modifier").textContent,
                 "",
                 "should still have empty string in the required field"
             );
@@ -2210,8 +2210,8 @@ QUnit.module("Fields", (hooks) => {
             assert.containsOnce(target, ".o_data_row");
 
             assert.strictEqual(target.querySelector("td.o_data_cell").textContent, "entry");
-            assert.containsOnce(target, "td.o_invalid_cell");
-            const requiredField = target.querySelector("td.o_invalid_cell");
+            assert.containsOnce(target, "td.o_required_modifier");
+            const requiredField = target.querySelector("td.o_required_modifier");
             assert.strictEqual(requiredField.textContent, "");
 
             // click on empty required field in editable list record
