@@ -562,6 +562,9 @@ export class ListRenderer extends Component {
         const classNames = [...this.cellClassByColumn[column.id]];
         if (column.type === "field") {
             if (record.isRequired(column.name)) {
+                classNames.push("o_required_modifier");
+            }
+            if (record.isInvalid(column.name)) {
                 classNames.push("o_invalid_cell");
             }
             if (this.canUseFormatter(column, record)) {
