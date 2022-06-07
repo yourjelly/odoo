@@ -6,6 +6,7 @@
         <record id="generic_tax_report" model="account.report">
             <field name="name">Generic Tax report</field>
             <field name="filter_multi_company">tax_units</field>
+            <field name="default_opening_date_filter">last_month</field>
             <field name="only_tax_exigible" eval="True"/>
             <field name="dynamic_lines_generator">_generic_tax_report_default_grouping</field>
             <field name="column_ids">

@@ -40,6 +40,16 @@ class AccountReport(models.Model):
     load_more_limit = fields.Integer(string="Load More Limit")
     search_bar = fields.Boolean(string="Search Bar")
 
+    default_opening_date_filter = fields.Selection(
+        string="Default Opening",
+        selection=[
+            ('this_year', "This Year"), ('this_quarter', "This Quarter"), ('this_month', "This Month"), ('today', "Today"),
+            ('last_month', "Last Month"), ('last_quarter', "Last Quarter"), ('last_year', "Last Year"),
+        ],
+        compute=lambda x: x._compute_report_option_filter('default_opening_date_filter', 'last_month'),
+        readonly=False, store=True, depends=['root_report_id'],
+    )
+
     #  FILTERS =======================================================================================================================================
     # Those fields control the display of menus on the report
 
