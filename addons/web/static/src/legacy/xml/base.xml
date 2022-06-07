@@ -942,10 +942,10 @@
         <div class="o_field_selector_title"/>
         <i class="fa fa-times o_field_selector_popover_option o_field_selector_close" title="Close" role="img" aria-label="Close"/>
         <div t-if="widget.options.showSearchInput" class="o_field_selector_search mt-2">
-            <input type="text" placeholder='Search...' class="o_input"/>
+            <input type="text" placeholder='Search a field...' class="o_input"/>
         </div>
         <div t-if="widget.options.needDefaultValue" class="o_field_selector_default_value_input mt-2 d-none">
-            <input type="text" placeholder='Enter default Value...' class="o_input"/>
+            <input type="text" placeholder='type a default text or press ENTER' class="o_input"/>
         </div>
     </div>
     <div class="o_field_selector_popover_body">
