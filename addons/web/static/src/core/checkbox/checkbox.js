@@ -82,4 +82,8 @@ CheckBox.props = {
         type: String,
         optional: true,
     },
+    name: {
+        type: String,
+        optional: true,
+    },
 };
