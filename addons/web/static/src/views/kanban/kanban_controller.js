@@ -60,7 +60,7 @@ export class KanbanController extends Component {
     async createRecord(group) {
         const { onCreate } = this.props.archInfo;
         const { root } = this.model;
-        if (root.canQuickCreate()) {
+        if (onCreate === "quick_create" && root.canQuickCreate()) {
             await root.quickCreate(group);
         } else if (onCreate && onCreate !== "quick_create") {
             await this.actionService.doAction(onCreate, { additionalContext: root.context });
