@@ -99,10 +99,7 @@
                     </t>
                     <t t-if="!group.list.isGrouped and props.editable and props.activeActions['create']">
                         <td t-if="props.hasSelectors"/>
-                        <td t-if="true"
-                            t-att-colspan="state.columns.length + 1"
-                            class="o_group_field_row_add"
-                            >
+                        <td t-att-colspan="state.columns.length + 1" class="o_group_field_row_add">
                             <a href="#" role="button" t-on-click.stop.prevent="() => group.createRecord({}, props.editable === 'top')">
                                 Add a line
                             </a>
