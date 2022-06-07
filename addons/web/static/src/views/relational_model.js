@@ -1358,7 +1358,6 @@ class DynamicList extends DataPoint {
     canQuickCreate() {
         return (
             this.groupByField &&
-            this.model.onCreate === "quick_create" &&
             (isAllowedDateField(this.groupByField) ||
                 QUICK_CREATE_FIELD_TYPES.includes(this.groupByField.type))
         );

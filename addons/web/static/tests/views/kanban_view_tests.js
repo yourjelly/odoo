@@ -1009,6 +1009,44 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
+    QUnit.test("quick_create_view without quick_create option", async (assert) => {
+        serverData.views["partner,some_view_ref,form"] = `
+            <form>
+                <field name="display_name"/>
+            </form>`;
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <kanban quick_create_view="some_view_ref">
+                    <field name="bar"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div><field name="foo"/></div>
+                        </t>
+                    </templates>
+                </kanban>`,
+            groupBy: ["bar"],
+            createRecord() {
+                assert.step("create record");
+            },
+        });
+
+        assert.containsN(target, ".o_kanban_group", 2);
+        assert.containsN(target, ".o_kanban_group .o_kanban_quick_add", 2);
+
+        // click on 'Create' in control panel -> should not open the quick create
+        await createRecord();
+        assert.containsNone(target, ".o_kanban_quick_create");
+        assert.verifySteps(["create record"]);
+
+        // click "+" icon in first column -> should open the quick create
+        await click(target.querySelector(".o_kanban_quick_add"));
+        assert.containsOnce(target.querySelector(".o_kanban_group"), ".o_kanban_quick_create");
+        assert.verifySteps([]);
+    });
+
     QUnit.test("quick create record in grouped on m2o (no quick_create_view)", async (assert) => {
         assert.expect(14);
 
