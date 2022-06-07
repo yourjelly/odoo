@@ -562,7 +562,7 @@ export class ListRenderer extends Component {
         const classNames = [...this.cellClassByColumn[column.id]];
         if (column.type === "field") {
             if (record.isRequired(column.name)) {
-                classNames.push("o_invalid_cell");
+                classNames.push("o_required_modifier");
             }
             if (this.canUseFormatter(column, record)) {
                 // generate field decorations classNames (only if field-specific decorations
