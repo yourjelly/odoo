@@ -1,8 +1,7 @@
 /** @odoo-module */
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
-import { getFixture } from "@web/../tests/helpers/utils";
+import { getFixture, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { toggleActionMenu, toggleMenuItem, pagerNext } from "@web/../tests/search/helpers";
-import { patchWithCleanup } from "@web/../tests/helpers/utils";
 import { browser } from "@web/core/browser/browser";
 
 QUnit.module('Google Drive Integration', (hooks) => {
@@ -107,7 +106,7 @@ QUnit.module('Google Drive Integration', (hooks) => {
         })
 
         let currentRecordId = 1;
-        const form = await makeView({
+        await makeView({
             loadActionMenus: true,
             arch:
                 `<form string="Partners">
