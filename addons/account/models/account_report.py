@@ -23,7 +23,6 @@ class AccountReport(models.Model):
     #  CORE ==========================================================================================================================================
 
     name = fields.Char(string="Name", required=True) #TODO OCO traductions en multilan
-    strict_date = fields.Boolean(string="Strict Date", compute=lambda x: x._compute_report_option_filter('strict_date', True), readonly=False, store=True, depends=['root_report_id'],) # TODO OCO remplace le strict_range ===> meilleur nom ? Peut-être en inversant le booléen ? Ou virer, en fait ?
     line_ids = fields.One2many(string="Lines", comodel_name='account.report.line', inverse_name='report_id')
     column_ids = fields.One2many(string="Columns", comodel_name='account.report.column', inverse_name='report_id')
     # TODO OCO ajouter un genre de séquence pour dans le sélecteur de layout ===> 2.1 serait "2ème bloc, 1ère ligne", comme ça on garde les spérateurs (si besoin) => Ou bien une catégorie de rapport ??? => default = '0.0' => Ou juste placer d'abord les rapports sans pays, avant le séparateur ?
