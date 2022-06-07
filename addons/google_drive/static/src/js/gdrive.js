@@ -4,6 +4,8 @@ odoo.define('google_drive.ActionMenus', function (require) {
     const DropdownMenuItem = require('web.DropdownMenuItem');
     const { registry } = require("@web/core/registry");
 
+    const ActionMenus = require("web.ActionMenus");
+
     /**
      * @typedef {import("@web/env").OdooEnv} OdooEnv
      */
@@ -27,7 +29,7 @@ odoo.define('google_drive.ActionMenus', function (require) {
             return false;
         }
         const items = await env.services.rpc({
-            args: [props.resModel, activeId],
+            args: [env.view.model, activeId],
             context,
             method: 'get_google_drive_config',
             model: 'google.drive.config',
@@ -83,9 +85,9 @@ odoo.define('google_drive.ActionMenus', function (require) {
             element: Object,
         },
     };
-    GoogleDriveMenu.template = 'GoogleDriveMenu';
+    GoogleDriveMenu.template = 'GoogleDriveMenuLegacy';
 
-    registry.category("action_menus").add('google-drive-menu', {
+    ActionMenus.registry.add('google-drive-menu', {
         Component: GoogleDriveMenu,
         getProps: googleDrivePropsGetter,
     });
