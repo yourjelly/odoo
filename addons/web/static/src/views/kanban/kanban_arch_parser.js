@@ -89,7 +89,7 @@ export class KanbanArchParser extends XMLParser {
         const onCreate =
             activeActions.create &&
             archParseBoolean(xmlDoc.getAttribute("quick_create"), true) &&
-            (xmlDoc.getAttribute("on_create") || "quick_create");
+            xmlDoc.getAttribute("on_create");
         const quickCreateView = xmlDoc.getAttribute("quick_create_view");
         const tooltipInfo = {};
         let boxTemplate;
