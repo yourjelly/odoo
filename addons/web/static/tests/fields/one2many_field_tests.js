@@ -6502,8 +6502,8 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.skipWOWL("one2many field with virtual ids with kanban button", async function (assert) {
-        assert.expect(25);
+    QUnit.test("one2many field with virtual ids with kanban button", async function (assert) {
+        assert.expect(36);
 
         // this is a way to avoid the debounce of triggerAction
         patchSetTimeout();
@@ -6535,11 +6535,16 @@ QUnit.module("Fields", (hooks) => {
                     </field>
                 </form>`,
             resId: 1,
-        });
-
-        patchWithCleanup(form.env.services.notification, {
-            add: function (message, options) {
-                assert.step(options.type);
+            mockRPC(route, args) {
+                if (args.method === "write") {
+                    assert.step(args.method);
+                    assert.strictEqual(args.args[1].p.length, 2);
+                    const command = args.args[1].p[1];
+                    assert.strictEqual(command[0], 0);
+                    assert.deepEqual(command[2], {
+                        foo: "My little Foo Value",
+                    });
+                }
             },
         });
 
@@ -6582,14 +6587,20 @@ QUnit.module("Fields", (hooks) => {
 
         // click on the button
         await click(target, btn1Disabled);
+        assert.verifySteps(["button_disabled_partner_4"]);
+
         await click(target, btn1Warn);
+        assert.verifySteps(["button_warn_partner_4"]);
 
         // switch to edit mode
         await clickEdit(target);
 
         // click on existing buttons
         await click(target, btn1Disabled);
+        assert.verifySteps(["button_disabled_partner_4"]);
+
         await click(target, btn1Warn);
+        assert.verifySteps(["button_warn_partner_4"]);
 
         // create new kanban record
         await click(target, ".o_field_widget .o-kanban-button-new");
@@ -6606,34 +6617,35 @@ QUnit.module("Fields", (hooks) => {
         assert.containsN(target, oAllKanbanButton, 4, "should have 4 buttons type object");
         assert.containsN(target, btn1, 2, "should have 2 buttons type object in area 1");
         assert.containsN(target, btn2, 2, "should have 2 buttons type object in area 2");
-        assert.containsOnce(
+        assert.containsNone(
             target,
             oAllKanbanButton + "[disabled]",
             "should have 1 button type object disabled"
         );
 
-        assert.ok(target.querySelector(btn2Disabled).disabled);
+        assert.notOk(target.querySelector(btn2Disabled).disabled);
         assert.notOk(target.querySelector(btn2Warn).disabled);
         assert.strictEqual(
             target.querySelector(btn2Warn).getAttribute("warn"),
-            "warn",
-            "Should have a button type object with warn attr in area 2"
+            null,
+            "the warn attribute is not copied onto the button"
         );
 
         // click all buttons
         await click(target, btn1Disabled);
+        assert.verifySteps(["write", "button_disabled_partner_4"]);
         await click(target, btn1Warn);
         await click(target, btn2Disabled);
         await click(target, btn2Warn);
+        assert.verifySteps([
+            "button_warn_partner_4",
+            "button_disabled_partner_5",
+            "button_warn_partner_5",
+        ]);
 
         // save the form
         await clickSave(target);
-
-        assert.containsNone(
-            form,
-            oAllKanbanButton + "[disabled]",
-            "should not have button type object disabled after save"
-        );
+        assert.verifySteps([]); // the write has already been done
 
         // click all buttons
         await click(target, btn1Disabled);
@@ -6645,20 +6657,10 @@ QUnit.module("Fields", (hooks) => {
             [
                 "button_disabled_partner_4",
                 "button_warn_partner_4",
-
-                "button_disabled_partner_4",
-                "button_warn_partner_4",
-
-                "button_disabled_partner_4",
-                "button_warn_partner_4",
-                "danger", // warn btn8
-
-                "button_disabled_partner_4",
-                "button_warn_partner_4",
                 "button_disabled_partner_5",
                 "button_warn_partner_5",
             ],
-            "should have triggered theses 11 clicks event"
+            "should have clicked once on every button"
         );
     });
 
