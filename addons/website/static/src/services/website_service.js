@@ -32,6 +32,7 @@ export const websiteService = {
         let websiteRootInstance;
         let Wysiwyg;
         let isPublisher;
+        let isDesigner;
         let hasMultiWebsites;
         const context = reactive({
             showNewContentModal: false,
@@ -110,12 +111,16 @@ export const websiteService = {
             get isPublisher() {
                 return isPublisher;
             },
+            get isDesigner() {
+                return isDesigner;
+            },
             get hasMultiWebsites() {
                 return hasMultiWebsites;
             },
             async fetchUserGroups() {
-                [isPublisher, hasMultiWebsites] = await Promise.all([
+                [isPublisher, isDesigner, hasMultiWebsites] = await Promise.all([
                     user.hasGroup('website.group_website_publisher'),
+                    user.hasGroup('website.group_website_designer'),
                     user.hasGroup('website.group_multi_website'),
                 ]);
             },

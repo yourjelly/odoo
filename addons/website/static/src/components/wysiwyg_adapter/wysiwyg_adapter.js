@@ -49,6 +49,13 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                 this.pageOptions[optionName] = new PageOption(pageOptionEl, this.websiteService.pageDocument, optionName);
             }
             this.editableElements(this.$editable).addClass('o_editable');
+
+            let switchableRelatedViews = [];
+            const viewKey = this.websiteService.pageDocument.documentElement.dataset.viewXmlid;
+            if (this.websiteService.isDesigner && viewKey) {
+                switchableRelatedViews = this.rpc('/website/get_switchable_related_views', {key: viewKey});
+            }
+            this.switchableRelatedViews = Promise.resolve(switchableRelatedViews);
         });
 
         useEffect(() => {
@@ -680,6 +687,18 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
     _onMobilePreviewRequest() {
         this.websiteService.context.isMobile = !this.websiteService.context.isMobile;
     }
+    /**
+     * Called when a child needs to know about the views that can
+     * be toggled on or off on a specific view related to the editable.
+     *
+     * @param event
+     * @returns {Promise<void>}
+     * @private
+     */
+    async _onGetSwitchableRelatedViews(event) {
+        const views = await this.switchableRelatedViews;
+        event.data.onSuccess(views);
+    }
 }
 WysiwygAdapterComponent.prototype.events = {
     'widgets_start_request': '_onRootEventRequest',
@@ -698,4 +717,5 @@ WysiwygAdapterComponent.prototype.events = {
     'request_public_widget': '_onPublicWidgetRequest',
     'update_color_previews': '_onColorPreviewsUpdate',
     'request_mobile_preview': '_onMobilePreviewRequest',
+    'get_switchable_related_views': '_onGetSwitchableRelatedViews',
 };
