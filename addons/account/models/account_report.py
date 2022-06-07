@@ -38,6 +38,8 @@ class AccountReport(models.Model):
         selection=[('country', "Country Matches"), ('always', "Always")], #TODO OCO ajouter using_oss dans OSS
         compute='_compute_default_availability_condition', readonly=False, store=True,
     ) #TODO OCO required in view
+    load_more_limit = fields.Integer(string="Load More Limit")
+    search_bar = fields.Boolean(string="Search Bar")
 
     #  FILTERS =======================================================================================================================================
     # Those fields control the display of menus on the report
