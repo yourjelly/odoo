@@ -2404,6 +2404,49 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
+    QUnit.test("selection box is properly displayed (group list)", async function (assert) {
+        assert.expect(10);
+
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: '<tree><field name="foo"/><field name="bar"/></tree>',
+            groupBy: ["foo"],
+        });
+        assert.containsN(target, ".o_group_header", 3);
+        assert.containsNone(target.querySelector(".o_cp_buttons"), ".o_list_selection_box");
+
+        // open first group
+        await click(target.querySelector(".o_group_header"));
+
+        // select a record
+        await click(target.querySelector(".o_data_row .o_list_record_selector input"));
+        assert.containsOnce(target.querySelector(".o_cp_buttons"), ".o_list_selection_box");
+        assert.containsNone(target.querySelector(".o_list_selection_box"), ".o_list_select_domain");
+        assert.strictEqual(
+            target.querySelector(".o_list_selection_box").textContent.trim(),
+            "1 selected"
+        );
+
+        // select all records of first page
+        await click(target.querySelector("thead .o_list_record_selector input"));
+        assert.containsOnce(target.querySelector(".o_cp_buttons"), ".o_list_selection_box");
+        assert.containsOnce(target.querySelector(".o_list_selection_box"), ".o_list_select_domain");
+        assert.strictEqual(
+            target.querySelector(".o_list_selection_box").textContent.replace(/\s+/g, " ").trim(),
+            "2 selected Select all 4"
+        );
+
+        // select all domain
+        await click(target.querySelector(".o_list_selection_box .o_list_select_domain"));
+        assert.containsOnce(target.querySelector(".o_cp_buttons"), ".o_list_selection_box");
+        assert.strictEqual(
+            target.querySelector(".o_list_selection_box").textContent.trim(),
+            "All 4 selected"
+        );
+    });
+
     QUnit.test("selection box is displayed after header buttons", async function (assert) {
         assert.expect(5);
 
