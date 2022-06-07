@@ -4708,9 +4708,8 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    // WOWL Fix typo in test name before merge
     QUnit.test(
-        "quick create column should not be closed on widnow click if there is no column",
+        "quick create column should not be closed on window click if there is no column",
         async (assert) => {
             assert.expect(4);
 
@@ -6396,6 +6395,27 @@ QUnit.module("Views", (hooks) => {
         } catch {
             assert.strictEqual(true, false, "Error triggered at action execution");
         }
+    });
+
+    QUnit.test("field tag with modifiers but no widget", async (assert) => {
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <kanban>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div>
+                                <field name="foo" attrs="{'invisible': [['id', '=', 1]]}"/>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>`,
+        });
+
+        assert.strictEqual(target.querySelector(".o_kanban_record").innerText, "");
+        assert.strictEqual(target.querySelectorAll(".o_kanban_record")[1].innerText, "blip");
     });
 
     QUnit.test("rendering date and datetime (value)", async (assert) => {
