@@ -2021,6 +2021,10 @@ export class DynamicGroupList extends DynamicList {
         }
     }
 
+    get nbTotalRecords() {
+        return this.groups.reduce((acc, group) => acc + group.count, 0);
+    }
+
     async quickCreate(group) {
         if (this.model.useSampleModel) {
             // Empty the groups because they contain sample data
