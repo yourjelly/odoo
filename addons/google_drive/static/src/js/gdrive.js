@@ -2,8 +2,6 @@ odoo.define('google_drive.ActionMenus', function (require) {
     "use strict";
 
     const DropdownMenuItem = require('web.DropdownMenuItem');
-    const { registry } = require("@web/core/registry");
-
     const ActionMenus = require("web.ActionMenus");
 
     /**
