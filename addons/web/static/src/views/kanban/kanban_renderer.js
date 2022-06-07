@@ -25,6 +25,7 @@ import { KanbanAnimatedNumber } from "./kanban_animated_number";
 import { KanbanColumnQuickCreate } from "./kanban_column_quick_create";
 import { KanbanCompiler } from "./kanban_compiler";
 import { KanbanRecordQuickCreate } from "./kanban_record_quick_create";
+import { RPCError } from "@web/core/network/rpc_service";
 
 const { Component, markup, useState, useRef, onWillDestroy, onWillStart, onMounted } = owl;
 const { COLORS } = ColorList;
@@ -477,14 +478,14 @@ export class KanbanRenderer extends Component {
 
     async validateQuickCreate(mode, group) {
         const values = group.list.quickCreateRecord.data;
-        const record = await group.validateQuickCreate();
-        if (record) {
-            if (mode === "edit") {
-                await this.props.openRecord(record, "edit");
-            } else {
-                await this.quickCreate(group);
+        let record;
+        try {
+            record = await group.validateQuickCreate();
+        } catch (e) {
+            // TODO: filter RPC errors more specifically (eg, for access denied, there is no point in opening a dialog)
+            if (!(e instanceof RPCError)) {
+                throw e;
             }
-        } else {
             const context = { ...group.context };
             context[`default_${group.groupByField.name}`] = group.value;
             context.default_name = values.name || values.display_name;
@@ -502,6 +503,14 @@ export class KanbanRenderer extends Component {
                     },
                 })
             );
+        }
+
+        if (record) {
+            if (mode === "edit") {
+                await this.props.openRecord(record, "edit");
+            } else {
+                await this.quickCreate(group);
+            }
         }
     }
 
