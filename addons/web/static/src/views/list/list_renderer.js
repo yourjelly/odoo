@@ -687,9 +687,8 @@ export class ListRenderer extends Component {
 
     getOptionalActiveFields() {
         this.optionalActiveFields = {};
-        let optionalActiveFields = browser.localStorage[this.keyOptionalFields];
+        let optionalActiveFields = browser.localStorage.getItem(this.keyOptionalFields);
         if (optionalActiveFields) {
-            optionalActiveFields = optionalActiveFields.split(",");
             this.allColumns.forEach((col) => {
                 this.optionalActiveFields[col.name] = optionalActiveFields.includes(col.name);
             });
@@ -979,9 +978,12 @@ export class ListRenderer extends Component {
     }
 
     saveOptionalActiveFields() {
-        browser.localStorage[this.keyOptionalFields] = Object.keys(
-            this.optionalActiveFields
-        ).filter((fieldName) => this.optionalActiveFields[fieldName]);
+        browser.localStorage.setItem(
+            this.keyOptionalFields,
+            Object.keys(this.optionalActiveFields).filter(
+                (fieldName) => this.optionalActiveFields[fieldName]
+            )
+        );
     }
 
     get showNoContentHelper() {

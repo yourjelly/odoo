@@ -69,7 +69,8 @@
                             parentClosingMode="'none'"
                             onSelected="() => this.toggleOptionalField(field.name)"
                             value="field.value"
-                            >
+                            name="field.name"
+                        >
                             <t t-esc="field.string"/> <t t-if="env.debug" t-esc="' (' + field.name + ')'" />
                         </CheckBoxDropdownItem>
                     </t>
