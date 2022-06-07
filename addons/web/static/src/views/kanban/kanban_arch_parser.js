@@ -126,7 +126,10 @@ export class KanbanArchParser extends XMLParser {
                 if (!fieldInfo.widget) {
                     // Fields without a specified widget are rendered as simple
                     // spans in kanban records.
-                    const tesc = createElement("span", { "t-esc": `getValue(record,'${name}')` });
+                    const tesc = createElement("span", {
+                        "t-esc": `getValue(record,'${name}')`,
+                        modifiers: node.getAttribute("modifiers") || "{}",
+                    });
                     node.replaceWith(tesc);
                 } else if (fieldInfo.widget === "handle") {
                     handleField = name;
