@@ -1165,23 +1165,15 @@ export class Record extends DataPoint {
 
         if (this.isVirtual) {
             if (keys.length === 1 && keys[0] === "display_name") {
-                try {
-                    const [resId] = await this.model.orm.call(
-                        this.resModel,
-                        "name_create",
-                        [changes.display_name],
-                        { context: this.context }
-                    );
-                    this.resId = resId;
-                } catch (_e) {
-                    return false;
-                }
+                const [resId] = await this.model.orm.call(
+                    this.resModel,
+                    "name_create",
+                    [changes.display_name],
+                    { context: this.context }
+                );
+                this.resId = resId;
             } else {
-                try {
-                    this.resId = await this.model.orm.create(this.resModel, changes, this.context);
-                } catch (_e) {
-                    return false;
-                }
+                this.resId = await this.model.orm.create(this.resModel, changes, this.context);
             }
             delete this.virtualId;
             this.data.id = this.resId;
@@ -1189,12 +1181,12 @@ export class Record extends DataPoint {
         } else if (keys.length > 0) {
             try {
                 await this.model.orm.write(this.resModel, [this.resId], changes, this.context);
-            } catch (_e) {
+            } catch (e) {
                 if (!this.isInEdition) {
                     await this.load();
                     this.model.notify();
                 }
-                return false;
+                throw e;
             }
         }
         // Switch to the parent active fields
