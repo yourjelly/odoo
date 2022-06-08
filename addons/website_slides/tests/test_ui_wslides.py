@@ -162,7 +162,7 @@ class TestUiPublisher(HttpCaseWithUserDemo):
         })
 
         self.browser_js(
-            '/slides',
+            '/web',
             'odoo.__DEBUG__.services["web_tour.tour"].run("course_publisher_standard")',
             'odoo.__DEBUG__.services["web_tour.tour"].tours.course_publisher_standard.ready',
             login=user_demo.login)

@@ -56,6 +56,7 @@ export class WebsiteEditorClientAction extends Component {
 
         this.iframe = useRef('iframe');
         this.iframefallback = useRef('iframefallback');
+        this.container = useRef('container');
         this.websiteContext = useState(this.websiteService.context);
 
         onWillStart(async () => {
@@ -93,9 +94,14 @@ export class WebsiteEditorClientAction extends Component {
                 this.websiteService.pageDocument = this.iframe.el.contentDocument;
                 this.websiteService.contentWindow = this.iframe.el.contentWindow;
 
+                // This is needed for the registerThemeHomepageTour tours
+                this.container.el.dataset.viewXmlid = this.iframe.el.contentDocument.documentElement.dataset.viewXmlid;
+
                 this.iframe.el.contentWindow.addEventListener('beforeunload', () => {
-                    this.iframefallback.el.contentDocument.body.replaceWith(this.iframe.el.contentDocument.body.cloneNode(true));
-                    $().getScrollingElement(this.iframefallback.el.contentDocument)[0].scrollTop = $().getScrollingElement(this.iframe.el.contentDocument)[0].scrollTop;
+                    if (!this.websiteContext.edition) {
+                        this.iframefallback.el.contentDocument.body.replaceWith(this.iframe.el.contentDocument.body.cloneNode(true));
+                        $().getScrollingElement(this.iframefallback.el.contentDocument)[0].scrollTop = $().getScrollingElement(this.iframe.el.contentDocument)[0].scrollTop;
+                    }
                 });
                 this.iframe.el.contentWindow.addEventListener('PUBLIC-ROOT-READY', (event) => {
                     if (!this.websiteContext.edition) {
