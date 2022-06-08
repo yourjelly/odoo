@@ -5,6 +5,7 @@ import { session } from "@web/session";
 import { registry } from "@web/core/registry";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { useService } from "@web/core/utils/hooks";
 
 const { Component, onWillStart, onWillUpdateProps } = owl;
 let registryActionId = 0;
@@ -20,6 +21,7 @@ let registryActionId = 0;
  */
 export class ActionMenus extends Component {
     setup() {
+        this.orm = useService("orm");
         onWillStart(async () => {
             this.actionItems = await this.setActionItems(this.props);
         });
@@ -77,7 +79,7 @@ export class ActionMenus extends Component {
     async executeAction(action) {
         let activeIds = this.props.activeIds;
         if (this.props.isDomainSelected) {
-            activeIds = await this.model.orm.search(this.props.resModel, this.props.domain, {
+            activeIds = await this.orm.search(this.props.resModel, this.props.domain, {
                 limit: session.active_ids_limit,
                 context: this.props.context,
             });
