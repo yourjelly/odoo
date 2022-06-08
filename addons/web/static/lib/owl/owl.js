@@ -1290,27 +1290,30 @@
     }
 
     function createCatcher(eventsSpec) {
-        let setupFns = [];
-        let removeFns = [];
-        for (let name in eventsSpec) {
-            let index = eventsSpec[name];
-            let { setup, remove } = createEventHandler(name);
-            setupFns[index] = setup;
-            removeFns[index] = remove;
-        }
-        let n = setupFns.length;
+        const n = Object.keys(eventsSpec).length;
         class VCatcher {
             constructor(child, handlers) {
+                this.handlerFns = [];
                 this.afterNode = null;
                 this.child = child;
-                this.handlers = handlers;
+                this.handlerData = handlers;
             }
             mount(parent, afterNode) {
                 this.parentEl = parent;
-                this.afterNode = afterNode;
                 this.child.mount(parent, afterNode);
+                this.afterNode = document.createTextNode("");
+                parent.insertBefore(this.afterNode, afterNode);
+                this.wrapHandlerData();
+                for (let name in eventsSpec) {
+                    const index = eventsSpec[name];
+                    const handler = createEventHandler(name);
+                    this.handlerFns[index] = handler;
+                    handler.setup.call(parent, this.handlerData[index]);
+                }
+            }
+            wrapHandlerData() {
                 for (let i = 0; i < n; i++) {
-                    let handler = this.handlers[i];
+                    let handler = this.handlerData[i];
                     // handler = [...mods, fn, comp], so we need to replace second to last elem
                     let idx = handler.length - 2;
                     let origFn = handler[idx];
@@ -1326,18 +1329,21 @@
                             currentNode = currentNode.nextSibling;
                         }
                     };
-                    setupFns[i].call(parent, this.handlers[i]);
                 }
             }
             moveBefore(other, afterNode) {
-                this.afterNode = null;
                 this.child.moveBefore(other ? other.child : null, afterNode);
+                this.parentEl.insertBefore(this.afterNode, afterNode);
             }
             patch(other, withBeforeRemove) {
                 if (this === other) {
                     return;
                 }
-                this.handlers = other.handlers;
+                this.handlerData = other.handlerData;
+                this.wrapHandlerData();
+                for (let i = 0; i < n; i++) {
+                    this.handlerFns[i].update.call(this.parentEl, this.handlerData[i]);
+                }
                 this.child.patch(other.child, withBeforeRemove);
             }
             beforeRemove() {
@@ -1345,9 +1351,10 @@
             }
             remove() {
                 for (let i = 0; i < n; i++) {
-                    removeFns[i].call(this.parentEl);
+                    this.handlerFns[i].remove.call(this.parentEl);
                 }
                 this.child.remove();
+                this.afterNode.remove();
             }
             firstNode() {
                 return this.child.firstNode();
@@ -2930,22 +2937,33 @@
         }
         let safeKey;
         let block;
-        if (value instanceof Markup) {
-            safeKey = `string_safe`;
-            block = html(value);
-        }
-        else if (value instanceof LazyValue) {
-            safeKey = `lazy_value`;
-            block = value.evaluate();
-        }
-        else if (value instanceof String || typeof value === "string") {
-            safeKey = "string_unsafe";
-            block = text(value);
-        }
-        else {
-            // Assuming it is a block
-            safeKey = "block_safe";
-            block = value;
+        switch (typeof value) {
+            case "object":
+                if (value instanceof Markup) {
+                    safeKey = `string_safe`;
+                    block = html(value);
+                }
+                else if (value instanceof LazyValue) {
+                    safeKey = `lazy_value`;
+                    block = value.evaluate();
+                }
+                else if (value instanceof String) {
+                    safeKey = "string_unsafe";
+                    block = text(value);
+                }
+                else {
+                    // Assuming it is a block
+                    safeKey = "block_safe";
+                    block = value;
+                }
+                break;
+            case "string":
+                safeKey = "string_unsafe";
+                block = text(value);
+                break;
+            default:
+                safeKey = "string_unsafe";
+                block = text(String(value));
         }
         return toggler(safeKey, block);
     }
@@ -4406,21 +4424,20 @@
             return `${name}: ${value || undefined}`;
         }
         formatPropObject(obj) {
-            const params = [];
-            for (const [n, v] of Object.entries(obj)) {
-                params.push(this.formatProp(n, v));
+            return Object.entries(obj).map(([k, v]) => this.formatProp(k, v));
+        }
+        getPropString(props, dynProps) {
+            let propString = `{${props.join(",")}}`;
+            if (dynProps) {
+                propString = `Object.assign({}, ${compileExpr(dynProps)}${props.length ? ", " + propString : ""})`;
             }
-            return params.join(", ");
+            return propString;
         }
         compileComponent(ast, ctx) {
             let { block } = ctx;
             // props
             const hasSlotsProp = "slots" in (ast.props || {});
-            const props = [];
-            const propExpr = this.formatPropObject(ast.props || {});
-            if (propExpr) {
-                props.push(propExpr);
-            }
+            const props = ast.props ? this.formatPropObject(ast.props) : [];
             // slots
             let slotDef = "";
             if (ast.slots) {
@@ -4443,7 +4460,7 @@
                         params.push(`__scope: "${scope}"`);
                     }
                     if (ast.slots[slotName].attrs) {
-                        params.push(this.formatPropObject(ast.slots[slotName].attrs));
+                        params.push(...this.formatPropObject(ast.slots[slotName].attrs));
                     }
                     const slotInfo = `{${params.join(", ")}}`;
                     slotStr.push(`'${slotName}': ${slotInfo}`);
@@ -4454,11 +4471,7 @@
                 this.helpers.add("markRaw");
                 props.push(`slots: markRaw(${slotDef})`);
             }
-            const propStr = `{${props.join(",")}}`;
-            let propString = propStr;
-            if (ast.dynamicProps) {
-                propString = `Object.assign({}, ${compileExpr(ast.dynamicProps)}${props.length ? ", " + propStr : ""})`;
-            }
+            let propString = this.getPropString(props, ast.dynamicProps);
             let propVar;
             if ((slotDef && (ast.dynamicProps || hasSlotsProp)) || this.dev) {
                 propVar = generateId("props");
@@ -4530,7 +4543,12 @@
             else {
                 slotName = "'" + ast.name + "'";
             }
-            const scope = ast.attrs ? `{${this.formatPropObject(ast.attrs)}}` : null;
+            const dynProps = ast.attrs ? ast.attrs["t-props"] : null;
+            if (ast.attrs) {
+                delete ast.attrs["t-props"];
+            }
+            const props = ast.attrs ? this.formatPropObject(ast.attrs) : [];
+            const scope = this.getPropString(props, dynProps);
             if (ast.defaultContent) {
                 const name = this.compileInNewTarget("defaultContent", ast.defaultContent, ctx);
                 blockString = `callSlot(ctx, node, key, ${slotName}, ${dynamic}, ${scope}, ${name})`;
@@ -5700,8 +5718,8 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
 
 
     __info__.version = '2.0.0-beta-8';
-    __info__.date = '2022-06-03T13:51:45.156Z';
-    __info__.hash = '34ef4ed';
+    __info__.date = '2022-06-08T07:54:26.105Z';
+    __info__.hash = 'a3111eb';
     __info__.url = 'https://github.com/odoo/owl';
 
 
