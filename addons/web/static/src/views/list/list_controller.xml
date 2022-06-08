@@ -14,6 +14,7 @@
                         <ActionMenus
                             activeIds="model.root.selection.map((r) => r.resId)"
                             context="props.context"
+                            domain="props.domain"
                             items="getActionMenuItems()"
                             isDomainSelected="model.root.isDomainSelected"
                             resModel="model.root.resModel"/>
