@@ -257,8 +257,8 @@ export class ListController extends Component {
     async downloadExport(fields, import_compat, format) {
         const resIds = await this.getSelectedResIds();
         const exportedFields = fields.map((field) => ({
-            name: field.id,
-            label: field.string,
+            name: field.name || field.id,
+            label: field.label || field.string,
             store: field.store,
             type: field.field_type,
         }));

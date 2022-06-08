@@ -268,7 +268,7 @@ QUnit.module("ViewDialogs", (hooks) => {
                 }
                 if (route === "/web/export/namelist") {
                     if (args.export_id === 1) {
-                        return Promise.resolve([{ name: "activity_ids" }]);
+                        return Promise.resolve([{ name: "activity_ids", label: "Activities" }]);
                     }
                     return Promise.resolve([]);
                 }
@@ -303,7 +303,6 @@ QUnit.module("ViewDialogs", (hooks) => {
             "o_inactive",
             "fields already selected cannot be added anymore"
         );
-
         // load a template which contains the activity_ids field
         await editSelect(target, ".o_exported_lists_select", "1");
         assert.containsOnce(
