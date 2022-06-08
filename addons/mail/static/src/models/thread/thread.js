@@ -636,6 +636,7 @@ registerModel({
                 attachments: attachmentsData,
                 followers: followersData,
                 suggestedRecipients: suggestedRecipientsData,
+                hasAccess: hasAccess,
             } = await this.env.services.rpc({
                 route: '/mail/thread/data',
                 params: {
@@ -647,7 +648,7 @@ registerModel({
             if (!this.exists()) {
                 return;
             }
-            const values = {};
+            const values = { hasAccess: hasAccess };
             if (activitiesData) {
                 Object.assign(values, {
                     activities: insertAndReplace(activitiesData.map(activityData =>
@@ -1906,6 +1907,9 @@ registerModel({
         }),
         areAttachmentsLoaded: attr({
             default: false,
+        }),
+        hasAccess: attr({
+            default: true,
         }),
         attachments: many('Attachment', {
             inverse: 'threads',

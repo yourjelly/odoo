@@ -224,6 +224,10 @@ registerModel({
          * @private
          */
         _onThreadIsLoadingAttachmentsChanged() {
+            if (this.thread && !this.thread.hasAccess) {
+                this.update({ isDisabled: true });
+            }
+
             if (!this.thread || !this.thread.isLoadingAttachments) {
                 this._stopAttachmentsLoading();
                 this.update({ isShowingAttachmentsLoading: false });
@@ -377,7 +381,7 @@ registerModel({
             methodName: '_onThreadIdOrThreadModelChanged',
         }),
         new OnChange({
-            dependencies: ['thread.isLoadingAttachments'],
+            dependencies: ['thread.isLoadingAttachments', 'thread.hasAccess'],
             methodName: '_onThreadIsLoadingAttachmentsChanged',
         }),
     ],

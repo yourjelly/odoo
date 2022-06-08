@@ -414,6 +414,9 @@ class DiscussController(http.Controller):
     def mail_thread_data(self, thread_model, thread_id, request_list, **kwargs):
         res = {}
         thread = request.env[thread_model].with_context(active_test=False).search([('id', '=', thread_id)])
+        if not thread:
+            res['hasAccess'] = False
+            return res
         if 'activities' in request_list:
             res['activities'] = thread.activity_ids.activity_format()
         if 'attachments' in request_list:
