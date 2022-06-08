@@ -157,7 +157,7 @@ function makeActionManager(env) {
             if (!actionCache[key]) {
                 actionCache[key] = env.services.rpc("/web/action/load", {
                     action_id: actionRequest,
-                    additional_context,
+                    context,
                 });
                 action = await actionCache[key];
                 if (action.help) {
