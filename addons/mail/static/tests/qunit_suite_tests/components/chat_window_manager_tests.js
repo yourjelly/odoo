@@ -1820,7 +1820,7 @@ QUnit.test('chat window with a thread: keep scroll position in message list on t
             res_id: mailChannelId1,
         });
     }
-    const { afterEvent, click, createMessagingMenuComponent, messaging } = await start();
+    const { afterEvent, click, createMessagingMenuComponent, openDiscuss, openView } = await start();
     await createMessagingMenuComponent();
     await click(`.o_MessagingMenu_toggler`);
     await afterEvent({
@@ -1853,10 +1853,14 @@ QUnit.test('chat window with a thread: keep scroll position in message list on t
     });
     // fold chat window
     await click('.o_ChatWindow_header');
-    await afterNextRender(() => messaging.discuss.open());
+    await openDiscuss();
     assert.containsNone(document.body, '.o_ChatWindow', "should not have any chat window after opening discuss");
 
-    await afterNextRender(() => messaging.discuss.close());
+    await openView({
+        res_id: mailChannelId1,
+        res_model: 'mail.channel',
+        views: [[false, 'form']],
+    });
     // unfold chat window
     await afterEvent({
         eventName: 'o-component-message-list-scrolled',
