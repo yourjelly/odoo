@@ -9635,85 +9635,79 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "form view with inline tree view with optional fields and local storage mock",
         async function (assert) {
-            assert.expect(12);
+            assert.expect(10);
 
-            var Storage = RamStorage.extend({
+            patchWithCleanup(browser.localStorage, {
                 getItem: function (key) {
                     assert.step("getItem " + key);
-                    return this._super.apply(this, arguments);
+                    return this._super(key);
                 },
                 setItem: function (key, value) {
                     assert.step("setItem " + key + " to " + value);
-                    return this._super.apply(this, arguments);
+                    return this._super(key, value);
                 },
-            });
-
-            var RamStorageService = AbstractStorageService.extend({
-                storage: new Storage(),
             });
 
             await makeView({
                 type: "form",
                 resModel: "partner",
                 serverData,
-                arch:
-                    "<form>" +
-                    '<field name="qux"/>' +
-                    '<field name="p">' +
-                    "<tree>" +
-                    '<field name="foo"/>' +
-                    '<field name="bar" optional="hide"/>' +
-                    "</tree>" +
-                    "</field>" +
-                    "</form>",
-                services: {
-                    local_storage: RamStorageService,
-                },
-                view_id: 27,
+                arch: `<form><field name="qux"/><field name="p"><tree><field name="foo"/><field name="bar" optional="hide"/></tree></field></form>`,
             });
 
-            var localStorageKey = "optional_fields,partner,form,27,p,list,undefined,bar,foo";
+            const localStorageKey =
+                "optional_fields,partner,form,100000001,p,list,undefined,bar,foo";
 
-            assert.containsN(target, "th", 2, "should have 2 th, 1 for selector, 1 for foo column");
+            assert.containsN(
+                target,
+                ".o_list_table th",
+                2,
+                "should have 2 th, 1 for selector, 1 for foo column"
+            );
 
             assert.ok(
-                target.querySelector("th:contains(Foo)").is(":visible"),
+                target.querySelector(`th[data-name="foo"]`),
                 "should have a visible foo field"
             );
 
             assert.notOk(
-                target.querySelector("th:contains(Bar)").is(":visible"),
+                target.querySelector(`th[data-name="bar"]`),
                 "should not have a visible bar field"
             );
 
             // optional fields
-            await click(target.querySelector("table .o_optional_columns_dropdown_toggle"));
+            await click(target.querySelector(".o_optional_columns_dropdown .dropdown-toggle"));
             assert.containsN(
                 target,
-                "div.o_optional_columns div.dropdown-item",
+                ".o_optional_columns_dropdown .dropdown-item",
                 1,
                 "dropdown have 1 optional field"
             );
 
             // enable optional field
-            await click(target.querySelector("div.o_optional_columns div.dropdown-item input"));
-
+            await click(target.querySelector(`.o_optional_columns_dropdown input[name="bar"]`));
             assert.verifySteps([
-                "setItem " + localStorageKey + ' to ["bar"]',
                 "getItem " + localStorageKey,
+                "setItem " + localStorageKey + " to bar",
             ]);
-            assert.containsN(target, "th", 3, "should have 3 th, 1 for selector, 2 for columns");
+
+            assert.containsN(
+                target,
+                ".o_list_table th",
+                3,
+                "should have 3 th, 1 for selector, 2 for columns"
+            );
 
             assert.ok(
-                target.querySelector("th:contains(Foo)").is(":visible"),
+                target.querySelector(`th[data-name="foo"]`),
                 "should have a visible foo field"
             );
 
             assert.ok(
-                target.querySelector("th:contains(Bar)").is(":visible"),
+                target.querySelector(`th[data-name="bar"]`),
                 "should have a visible bar field"
             );
         }

@@ -141,6 +141,7 @@ export class X2ManyField extends Component {
             list: this.list,
             openRecord: this.openRecord.bind(this),
             onAdd: this.onAdd.bind(this),
+            nestedKeyOptionalFieldsData: this.nestedKeyOptionalFieldsData,
         };
         if (this.viewMode === "kanban") {
             props.recordsDraggable = !this.props.readonly;
@@ -209,6 +210,15 @@ export class X2ManyField extends Component {
             return this.addInLine({ context });
         }
         return this._openRecord({ context });
+    }
+
+    get nestedKeyOptionalFieldsData() {
+        return {
+            field: this.props.name,
+            model: this.props.record.resModel,
+            viewMode: this.props.record.viewMode || this.props.record.__viewType,
+            viewId: "undefined",
+        };
     }
 }
 
