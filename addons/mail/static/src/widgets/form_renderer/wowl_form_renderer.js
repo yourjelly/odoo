@@ -10,15 +10,36 @@ import { append } from "@web/views/helpers/view_compiler";
 function compileChatter(node, params) {
     node.classList.remove("oe_chatter");
 
+    let hasActivities = false;
+    let hasExternalBorder = true;
+    let hasFollowers = false;
+    let hasMessageList = false;
+    let hasMessageListScrollAdjust = false;
+    let hasParentReloadOnAttachmentsChanged = false;
+    let hasTopbarCloseButton = false;
+    let isAttachmentBoxVisibleInitially = false;
+    for (const childNode of node.children) {
+        switch (childNode.getAttribute('name')) {
+            case 'activity_ids':
+                hasActivities = true;
+                break;
+            case 'message_follower_ids':
+                hasFollowers = true;
+                break;
+            case 'message_ids':
+                hasMessageList = true;
+                break;
+        }
+    }
     const chatterContainerXml = createElement("ChatterContainer");
-    chatterContainerXml.setAttribute("hasActivities", "undefined"); // TODO: activity_ids present in children
-    chatterContainerXml.setAttribute("hasExternalBorder", "undefined"); // TODO enterprise: not aside
-    chatterContainerXml.setAttribute("hasFollowers", "undefined"); // TODO: message_follower_ids present in children
-    chatterContainerXml.setAttribute("hasMessageList", "undefined"); // TODO: message_ids present in children
-    chatterContainerXml.setAttribute("hasMessageListScrollAdjust", "undefined"); // TODO enterprise: aside
-    chatterContainerXml.setAttribute("hasParentReloadOnAttachmentsChanged", "undefined"); // TODO post_refresh === 'always' on message_ids
-    chatterContainerXml.setAttribute("hasTopbarCloseButton", "undefined"); // TODO documents app specific
-    chatterContainerXml.setAttribute("isAttachmentBoxVisibleInitially", "undefined"); // TODO: open_attachments on message_ids or message_follower_ids
+    chatterContainerXml.setAttribute("hasActivities", hasActivities);
+    chatterContainerXml.setAttribute("hasExternalBorder", hasExternalBorder); // TODO enterprise: not aside
+    chatterContainerXml.setAttribute("hasFollowers", hasFollowers);
+    chatterContainerXml.setAttribute("hasMessageList", hasMessageList);
+    chatterContainerXml.setAttribute("hasMessageListScrollAdjust", hasMessageListScrollAdjust); // TODO enterprise: aside
+    chatterContainerXml.setAttribute("hasParentReloadOnAttachmentsChanged", hasParentReloadOnAttachmentsChanged); // TODO post_refresh === 'always' on message_ids
+    chatterContainerXml.setAttribute("hasTopbarCloseButton", hasTopbarCloseButton); // TODO documents app specific
+    chatterContainerXml.setAttribute("isAttachmentBoxVisibleInitially", isAttachmentBoxVisibleInitially); // TODO: open_attachments on message_ids or message_follower_ids
     chatterContainerXml.setAttribute("threadId", "props.record.resId or undefined");
     chatterContainerXml.setAttribute("threadModel", "props.record.resModel");
 
