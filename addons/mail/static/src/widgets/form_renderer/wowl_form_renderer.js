@@ -19,8 +19,6 @@ function compileChatter(node, params) {
     // TODO: pass chatterFields equivalent in props
 
     // chatter.setAttribute("record", "props.record"); // props.record.model.load() to reload the form
-    // in ChatterContainer setup:
-    //   this.messagingService = useService("messaging");
 
     append(container, chatter);
     return container;
