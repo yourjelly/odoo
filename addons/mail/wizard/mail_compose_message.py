@@ -403,7 +403,8 @@ class MailComposer(models.TransientModel):
                 if not self.reply_to_force_new:
                     mail_values.pop('reply_to')
                     if reply_to_value.get(res_id):
-                        mail_values['reply_to'] = reply_to_value[res_id]
+                        # mail_values['reply_to'] = reply_to_value[res_id]
+                        mail_values['reply_to'] = mail_values['email_from']
                 if self.reply_to_force_new and not mail_values.get('reply_to'):
                     mail_values['reply_to'] = mail_values['email_from']
                 # mail_mail values: body -> body_html, partner_ids -> recipient_ids
