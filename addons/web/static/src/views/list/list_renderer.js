@@ -365,12 +365,22 @@ export class ListRenderer extends Component {
     }
 
     createKeyOptionalFields() {
-        const keyParts = {
+        let keyParts = {
             fields: this.props.list.fieldNames,
             model: this.props.list.resModel,
             viewMode: "list",
             viewId: this.env.config.viewId,
         };
+
+        if (this.props.nestedKeyOptionalFieldsData) {
+            keyParts = Object.assign(keyParts, {
+                model: this.props.nestedKeyOptionalFieldsData.model,
+                viewMode: this.props.nestedKeyOptionalFieldsData.viewMode,
+                relationalField: this.props.nestedKeyOptionalFieldsData.field,
+                subViewType: "list",
+                subViewId: this.props.nestedKeyOptionalFieldsData.viewId,
+            });
+        }
 
         const parts = [
             "model",
@@ -1182,5 +1192,6 @@ ListRenderer.props = [
     "hasSelectors?",
     "editable?",
     "noContentHelp?",
+    "nestedKeyOptionalFieldsData?",
 ];
 ListRenderer.defaultProps = { hasSelectors: false };
