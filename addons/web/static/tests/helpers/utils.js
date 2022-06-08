@@ -409,8 +409,14 @@ export function canDefaultBehaviorHappen(el, selector, eventType, eventAttrs = {
     return !isDefaultBehaviorPrevented;
 }
 
-export function click(el, selector) {
-    return triggerEvent(el, selector, "click", { bubbles: true, cancelable: true });
+export function click(el, selector, skipVisibilityCheck = false) {
+    return triggerEvent(
+        el,
+        selector,
+        "click",
+        { bubbles: true, cancelable: true },
+        skipVisibilityCheck
+    );
 }
 
 export function clickCreate(htmlElement) {
