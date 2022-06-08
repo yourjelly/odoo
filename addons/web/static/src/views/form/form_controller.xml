@@ -20,7 +20,9 @@
                             context="props.context"
                             items="getActionMenuItems()"
                             isDomainSelected="model.root.isDomainSelected"
-                            resModel="model.root.resModel"/>
+                            resModel="model.root.resModel"
+                            domain="props.domain"
+                        />
                     </t>
                 </t>
                 <t t-set-slot="control-panel-bottom-right"> </t>

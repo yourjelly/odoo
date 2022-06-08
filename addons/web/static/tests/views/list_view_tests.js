@@ -7,7 +7,8 @@ import { registry } from "@web/core/registry";
 import { uiService } from "@web/core/ui/ui_service";
 import { session } from "@web/session";
 import { ListController } from "@web/views/list/list_controller";
-import { tooltipService } from "../../src/core/tooltip/tooltip_service";
+import { tooltipService } from "@web/core/tooltip/tooltip_service";
+import { actionService } from "@web/webclient/actions/action_service";
 import { makeFakeLocalizationService, makeFakeUserService } from "../helpers/mock_services";
 import {
     addRow,
@@ -6873,10 +6874,22 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "execute ActionMenus actions with correct params (single page)",
         async function (assert) {
             assert.expect(12);
+
+            patchWithCleanup(actionService, {
+                start() {
+                    const result = this._super(...arguments);
+                    return {
+                        ...result,
+                        doAction(id, { additionalContext }) {
+                            assert.step(JSON.stringify({ action_id: id, context: additionalContext }));
+                        },
+                    };
+                }
+            });
 
             await makeView({
                 type: "list",
@@ -6894,12 +6907,6 @@ QUnit.module("Views", (hooks) => {
                         ],
                         print: [],
                     },
-                },
-                mockRPC: function (route, args) {
-                    if (route === "/web/action/load") {
-                        assert.step(JSON.stringify(args));
-                        return Promise.resolve({});
-                    }
                 },
                 actionMenus: {},
                 searchViewArch: `
@@ -6941,48 +6948,60 @@ QUnit.module("Views", (hooks) => {
             await toggleMenuItem(target, "Custom Action");
 
             assert.verifySteps([
-                '{"action_id":44,"context":{"active_id":1,"active_ids":[1,2,3,4],"active_model":"foo","active_domain":[]}}',
-                '{"action_id":44,"context":{"active_id":2,"active_ids":[2,3,4],"active_model":"foo","active_domain":[]}}',
-                '{"action_id":44,"context":{"active_id":1,"active_ids":[1,2],"active_model":"foo","active_domain":[["bar","=",true]]}}',
+                '{"action_id":44,"context":{"lang":"en","uid":7,"tz":"taht","active_id":1,"active_ids":[1,2,3,4],"active_model":"foo","active_domain":[]}}',
+                '{"action_id":44,"context":{"lang":"en","uid":7,"tz":"taht","active_id":2,"active_ids":[2,3,4],"active_model":"foo","active_domain":[]}}',
+                '{"action_id":44,"context":{"lang":"en","uid":7,"tz":"taht","active_id":1,"active_ids":[1,2],"active_model":"foo","active_domain":[["bar","=",true]]}}',
             ]);
         }
     );
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "execute ActionMenus actions with correct params (multi pages)",
         async function (assert) {
             assert.expect(13);
 
-            const list = await makeView({
+            patchWithCleanup(actionService, {
+                start() {
+                    const result = this._super(...arguments);
+                    return {
+                        ...result,
+                        doAction(id, { additionalContext }) {
+                            assert.step(JSON.stringify({ action_id: id, context: additionalContext }));
+                        },
+                    };
+                }
+            });
+
+            await makeView({
                 type: "list",
                 resModel: "foo",
                 serverData,
                 arch: '<tree limit="2"><field name="foo"/></tree>',
-                toolbar: {
-                    action: [
-                        {
-                            id: 44,
-                            name: "Custom Action",
-                            type: "ir.actions.server",
-                        },
-                    ],
-                    print: [],
-                },
-                mockRPC: function (route, args) {
-                    if (route === "/web/action/load") {
-                        assert.step(JSON.stringify(args));
-                        return Promise.resolve({});
-                    }
-                    return this._super(...arguments);
+                info: {
+                    actionMenus: {
+                        action: [
+                            {
+                                id: 44,
+                                name: "Custom Action",
+                                type: "ir.actions.server",
+                            },
+                        ],
+                        print: [],
+                    },
                 },
                 actionMenus: {},
+                searchViewArch: `
+                    <search>
+                        <filter name="bar" domain="[('bar', '=', true)]"/>
+                    </search>
+                `,
             });
 
             assert.containsNone(target, "div.o_control_panel .o_cp_action_menus");
             assert.containsN(target, ".o_data_row", 2);
 
             // select all records
-            await click($(target).find("thead .o_list_record_selector input"));
+            await click(target, "thead .o_list_record_selector input");
             assert.containsN(target, ".o_list_record_selector input:checked", 3);
             assert.containsOnce(target, ".o_list_selection_box .o_list_select_domain");
             assert.containsOnce(target, "div.o_control_panel .o_cp_action_menus");
@@ -6991,19 +7010,20 @@ QUnit.module("Views", (hooks) => {
             await toggleMenuItem(target, "Custom Action");
 
             // select all domain
-            await click($(target).find(".o_list_selection_box .o_list_select_domain"));
+            await click(target, ".o_list_selection_box .o_list_select_domain");
             assert.containsN(target, ".o_list_record_selector input:checked", 3);
 
             await toggleActionMenu(target);
             await toggleMenuItem(target, "Custom Action");
 
             // add a domain
-            await list.reload({ domain: [["bar", "=", true]] });
+            await toggleFilterMenu(target);
+            await toggleMenuItem(target, "bar");
             assert.containsNone(target, ".o_list_selection_box .o_list_select_domain");
 
             // select all domain
-            await click($(target).find("thead .o_list_record_selector input"));
-            await click($(target).find(".o_list_selection_box .o_list_select_domain"));
+            await click(target, "thead .o_list_record_selector input");
+            await click(target, ".o_list_selection_box .o_list_select_domain");
             assert.containsN(target, ".o_list_record_selector input:checked", 3);
             assert.containsNone(target, ".o_list_selection_box .o_list_select_domain");
 
@@ -7011,9 +7031,9 @@ QUnit.module("Views", (hooks) => {
             await toggleMenuItem(target, "Custom Action");
 
             assert.verifySteps([
-                '{"action_id":44,"context":{"active_id":1,"active_ids":[1,2],"active_model":"foo","active_domain":[]}}',
-                '{"action_id":44,"context":{"active_id":1,"active_ids":[1,2,3,4],"active_model":"foo","active_domain":[]}}',
-                '{"action_id":44,"context":{"active_id":1,"active_ids":[1,2,3],"active_model":"foo","active_domain":[["bar","=",true]]}}',
+                '{"action_id":44,"context":{"lang":"en","uid":7,"tz":"taht","active_id":1,"active_ids":[1,2],"active_model":"foo","active_domain":[]}}',
+                '{"action_id":44,"context":{"lang":"en","uid":7,"tz":"taht","active_id":1,"active_ids":[1,2,3,4],"active_model":"foo","active_domain":[]}}',
+                '{"action_id":44,"context":{"lang":"en","uid":7,"tz":"taht","active_id":1,"active_ids":[1,2,3],"active_model":"foo","active_domain":[["bar","=",true]]}}',
             ]);
         }
     );
