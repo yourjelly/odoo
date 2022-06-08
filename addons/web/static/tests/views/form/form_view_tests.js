@@ -35,7 +35,7 @@ const serviceRegistry = registry.category("services");
 const widgetRegistry = registry.category("view_widgets");
 
 // WOWL remove after adapting tests
-let createView, testUtils, Widget, RamStorage, AbstractStorageService;
+let testUtils, RamStorage, AbstractStorageService;
 
 let target, serverData;
 QUnit.module("Views", (hooks) => {
@@ -9100,33 +9100,6 @@ QUnit.module("Views", (hooks) => {
             product_id: 37,
         };
         await click(target.querySelector(".o_form_button_save"));
-    });
-
-    QUnit.skipWOWL("asynchronous rendering of a widget tag", async function (assert) {
-        assert.expect(1);
-
-        var def1 = makeDeferred();
-
-        var MyWidget = Widget.extend({
-            willStart: function () {
-                return def1;
-            },
-        });
-
-        widgetRegistry.add("test", MyWidget);
-
-        createView({
-            type: "form",
-            resModel: "partner",
-            serverData,
-            arch: "<form>" + '<widget name="test"/>' + "</form>",
-        }).then(function (form) {
-            assert.containsOnce(target, "div.o_widget", "there should be a div with widget class");
-            delete widgetRegistry.map.test;
-        });
-
-        def1.resolve();
-        await testUtils.nextTick();
     });
 
     QUnit.test("no deadlock when saving with uncommitted changes", async function (assert) {
