@@ -2,6 +2,7 @@
 
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { makeContext } from "@web/core/context";
+import { useDebugCategory } from "@web/core/debug/debug_context";
 import { localization } from "@web/core/l10n/localization";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
@@ -171,6 +172,7 @@ export class FormController extends Component {
                 };
             },
         });
+        useDebugCategory("form", { component: this });
 
         usePager(() => {
             if (!this.model.root.isVirtual) {
