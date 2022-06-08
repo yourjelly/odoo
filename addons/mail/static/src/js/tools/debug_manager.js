@@ -3,8 +3,8 @@
 import { registry } from "@web/core/registry";
 
 export function manageMessages({ action, component, env }) {
-    const selectedIds = component.widget.getSelectedIds();
-    if (!selectedIds.length) {
+    const resId = component.model.root.resId;
+    if (!resId) {
         return null; // No record
     }
     const description = env._t("Manage Messages");
@@ -21,12 +21,12 @@ export function manageMessages({ action, component, env }) {
                 ],
                 type: "ir.actions.act_window",
                 domain: [
-                    ["res_id", "=", selectedIds[0]],
-                    ["model", "=", action.res_model],
+                    ["res_id", "=", resId],
+                    ["model", "=", component.props.resModel],
                 ],
                 context: {
-                    default_res_model: action.res_model,
-                    default_res_id: selectedIds[0],
+                    default_res_model: component.props.resModel,
+                    default_res_id: resId,
                 },
             });
         },
