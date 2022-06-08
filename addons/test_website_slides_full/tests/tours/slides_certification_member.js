@@ -41,8 +41,8 @@ var initTourSteps = [{
 var buyCertificationSteps = [{
     content: 'eLearning: try to buy course',
     trigger: 'a:contains("Add to Cart")'
-}, 
-    tourUtils.goToCart({}),
+},
+    tourUtils.goToCart(),
 {
     content: 'eCommerce: Process Checkout',
     trigger: 'a:contains("Process Checkout")'
