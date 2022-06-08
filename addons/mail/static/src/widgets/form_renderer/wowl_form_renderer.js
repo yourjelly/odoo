@@ -9,18 +9,28 @@ import { append } from "@web/views/helpers/view_compiler";
 
 function compileChatter(node, params) {
     node.classList.remove("oe_chatter");
-    const container = createElement("div");
-    container.classList.add("o_FormRenderer_chatterContainer");
 
-    const chatter = createElement("ChatterContainer");
-    chatter.setAttribute("threadModel", "props.record.resModel");
-    chatter.setAttribute("threadId", "props.record.resId or 0");
-    // TODO: pass chatterFields equivalent in props
+    const chatterContainerXml = createElement("ChatterContainer");
+    chatterContainerXml.setAttribute("hasActivities", "undefined"); // TODO: activity_ids present in children
+    chatterContainerXml.setAttribute("hasExternalBorder", "undefined"); // TODO enterprise: not aside
+    chatterContainerXml.setAttribute("hasFollowers", "undefined"); // TODO: message_follower_ids present in children
+    chatterContainerXml.setAttribute("hasMessageList", "undefined"); // TODO: message_ids present in children
+    chatterContainerXml.setAttribute("hasMessageListScrollAdjust", "undefined"); // TODO enterprise: aside
+    chatterContainerXml.setAttribute("hasParentReloadOnAttachmentsChanged", "undefined"); // TODO post_refresh === 'always' on message_ids
+    chatterContainerXml.setAttribute("hasTopbarCloseButton", "undefined"); // TODO documents app specific
+    chatterContainerXml.setAttribute("isAttachmentBoxVisibleInitially", "undefined"); // TODO: open_attachments on message_ids or message_follower_ids
+    chatterContainerXml.setAttribute("threadId", "props.record.resId or undefined");
+    chatterContainerXml.setAttribute("threadModel", "props.record.resModel");
+
+    // TODO hasRecordReloadOnMessagePosted to be coded into container (if post_refresh)
+    // TODO hasRecordReloadOnFollowersUpdate to be coded into container (if followers_post_refresh)
 
     // chatter.setAttribute("record", "props.record"); // props.record.model.load() to reload the form
 
-    append(container, chatter);
-    return container;
+    const chatterContainerHookXml = createElement("div");
+    chatterContainerHookXml.classList.add("o_FormRenderer_chatterContainer");
+    append(chatterContainerHookXml, chatterContainerXml);
+    return chatterContainerHookXml;
 }
 
 registry.category("form_compilers").add("chatter_compiler", {
