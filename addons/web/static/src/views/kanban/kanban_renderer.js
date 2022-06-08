@@ -302,6 +302,10 @@ export class KanbanRenderer extends Component {
         );
     }
 
+    get luxon() {
+        return luxon;
+    }
+
     get showNoContentHelper() {
         const { model, isGrouped, groups } = this.props.list;
         if (model.useSampleModel) {
