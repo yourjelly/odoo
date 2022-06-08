@@ -162,6 +162,10 @@ registerModel({
          * @param {string[]} [fieldNames]
          */
         reloadParentView({ fieldNames } = {}) {
+            if (this.webRecord) {
+                this.webRecord.model.load();
+                return;
+            }
             if (this.component) {
                 const options = { keepChanges: true };
                 if (fieldNames) {
@@ -501,6 +505,7 @@ registerModel({
             readonly: true,
             required: true,
         }),
+        webRecord: attr(),
     },
     onChanges: [
         new OnChange({
