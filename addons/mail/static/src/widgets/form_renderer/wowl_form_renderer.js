@@ -2,14 +2,11 @@
 
 import { registry } from "@web/core/registry";
 import { FormRenderer } from "@web/views/form/form_renderer";
-import { getMessagingComponent } from "@mail/utils/messaging_component";
-import "@mail/components/chatter_container/chatter_container";
+import { ChatterContainer } from "@mail/components/chatter_container/chatter_container";
 import {
     createElement,
 } from "@web/core/utils/xml";
 import { append } from "@web/views/helpers/view_compiler";
-
-const ChatterContainer = getMessagingComponent("ChatterContainer");
 
 function compileChatter(node, params) {
     node.classList.remove("oe_chatter");
