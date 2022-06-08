@@ -1,11 +1,10 @@
 /** @odoo-module */
 
-import { registry } from "@web/core/registry";
-import { FormRenderer } from "@web/views/form/form_renderer";
 import { ChatterContainer } from "@mail/components/chatter_container/chatter_container";
-import {
-    createElement,
-} from "@web/core/utils/xml";
+
+import { registry } from "@web/core/registry";
+import { createElement } from "@web/core/utils/xml";
+import { FormRenderer } from "@web/views/form/form_renderer";
 import { append } from "@web/views/helpers/view_compiler";
 
 function compileChatter(node, params) {
