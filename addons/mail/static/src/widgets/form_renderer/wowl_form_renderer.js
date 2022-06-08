@@ -2,6 +2,7 @@
 
 import { ChatterContainer } from "@mail/components/chatter_container/chatter_container";
 
+import { evaluateExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
 import { createElement } from "@web/core/utils/xml";
 import { FormRenderer } from "@web/views/form/form_renderer";
@@ -15,19 +16,27 @@ function compileChatter(node, params) {
     let hasFollowers = false;
     let hasMessageList = false;
     let hasMessageListScrollAdjust = false;
-    let hasParentReloadOnAttachmentsChanged = false;
+    let hasParentReloadOnAttachmentsChanged;
+    let hasParentReloadOnFollowersUpdate = false;
+    let hasParentReloadOnMessagePosted = false;
     let hasTopbarCloseButton = false;
     let isAttachmentBoxVisibleInitially = false;
     for (const childNode of node.children) {
+        const options = evaluateExpr(childNode.getAttribute("options") || "{}");
         switch (childNode.getAttribute('name')) {
             case 'activity_ids':
                 hasActivities = true;
                 break;
             case 'message_follower_ids':
                 hasFollowers = true;
+                hasParentReloadOnFollowersUpdate = Boolean(options['post_refresh']);
+                isAttachmentBoxVisibleInitially = isAttachmentBoxVisibleInitially || Boolean(options['open_attachments']);
                 break;
             case 'message_ids':
                 hasMessageList = true;
+                hasParentReloadOnAttachmentsChanged = options['post_refresh'] === 'always';
+                hasParentReloadOnMessagePosted = Boolean(options['post_refresh']);
+                isAttachmentBoxVisibleInitially = isAttachmentBoxVisibleInitially || Boolean(options['open_attachments']);
                 break;
         }
     }
@@ -37,16 +46,14 @@ function compileChatter(node, params) {
     chatterContainerXml.setAttribute("hasFollowers", hasFollowers);
     chatterContainerXml.setAttribute("hasMessageList", hasMessageList);
     chatterContainerXml.setAttribute("hasMessageListScrollAdjust", hasMessageListScrollAdjust); // TODO enterprise: aside
-    chatterContainerXml.setAttribute("hasParentReloadOnAttachmentsChanged", hasParentReloadOnAttachmentsChanged); // TODO post_refresh === 'always' on message_ids
+    chatterContainerXml.setAttribute("hasParentReloadOnAttachmentsChanged", hasParentReloadOnAttachmentsChanged);
+    chatterContainerXml.setAttribute("hasParentReloadOnFollowersUpdate", hasParentReloadOnFollowersUpdate);
+    chatterContainerXml.setAttribute("hasParentReloadOnMessagePosted", hasParentReloadOnMessagePosted);
     chatterContainerXml.setAttribute("hasTopbarCloseButton", hasTopbarCloseButton); // TODO documents app specific
-    chatterContainerXml.setAttribute("isAttachmentBoxVisibleInitially", isAttachmentBoxVisibleInitially); // TODO: open_attachments on message_ids or message_follower_ids
+    chatterContainerXml.setAttribute("isAttachmentBoxVisibleInitially", isAttachmentBoxVisibleInitially);
     chatterContainerXml.setAttribute("threadId", "props.record.resId or undefined");
     chatterContainerXml.setAttribute("threadModel", "props.record.resModel");
-
-    // TODO hasRecordReloadOnMessagePosted to be coded into container (if post_refresh)
-    // TODO hasRecordReloadOnFollowersUpdate to be coded into container (if followers_post_refresh)
-
-    // chatter.setAttribute("record", "props.record"); // props.record.model.load() to reload the form
+    chatterContainerXml.setAttribute("webRecord", "props.record");
 
     const chatterContainerHookXml = createElement("div");
     chatterContainerHookXml.classList.add("o_FormRenderer_chatterContainer");

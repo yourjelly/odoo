@@ -138,6 +138,10 @@ Object.assign(ChatterContainer, {
             optional: true,
         },
         threadModel: String,
+        webRecord: {
+            type: Object,
+            optional: true,
+        }
     },
     template: 'mail.ChatterContainer',
 });
