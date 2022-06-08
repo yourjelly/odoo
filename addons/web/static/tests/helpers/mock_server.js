@@ -2145,8 +2145,10 @@ export async function makeMockServer(serverData, mockRPC) {
     await mockServer.setup();
     const _mockRPC = async (route, args = {}) => {
         let res;
-        // Simulates that we serialized the call to be passed in a real request
-        args = JSON.parse(JSON.stringify(args));
+        if (args.method !== "POST") {
+            // simulates that we serialized the call to be passed in a real request
+            args = JSON.parse(JSON.stringify(args));
+        }
         const performRPC = (route, args) => mockServer.performRPC(route, args);
         if (mockRPC) {
             res = await mockRPC(route, args, performRPC);
