@@ -36,10 +36,11 @@ QUnit.test('list activity widget with no activity', async function (assert) {
     assert.containsOnce(document.body, '.o_mail_activity .o_activity_color_default');
     assert.strictEqual(document.querySelector('.o_activity_summary').innerText, '');
 
-    assert.verifySteps(['/web/dataset/search_read']);
+    assert.verifySteps(['/web/dataset/call_kw/res.users/web_search_read']);
 });
 
-QUnit.test('list activity widget with activities', async function (assert) {
+QUnit.skipWOWL('list activity widget with activities', async function (assert) {
+    // TODO skip: adapt list_activity
     assert.expect(6);
 
     const pyEnv = await startServer();
@@ -89,10 +90,11 @@ QUnit.test('list activity widget with activities', async function (assert) {
     assert.containsOnce(secondRow, '.o_mail_activity .o_activity_color_planned.fa-clock-o');
     assert.strictEqual(secondRow.querySelector('.o_activity_summary').innerText, 'Type 2');
 
-    assert.verifySteps(['/web/dataset/search_read']);
+    assert.verifySteps(['/web/dataset/call_kw/res.users/web_search_read']);
 });
 
-QUnit.test('list activity widget with exception', async function (assert) {
+QUnit.skipWOWL('list activity widget with exception', async function (assert) {
+    // TODO skip: adapt list_activity
     assert.expect(4);
 
     const pyEnv = await startServer();
@@ -129,10 +131,11 @@ QUnit.test('list activity widget with exception', async function (assert) {
     assert.containsOnce(document.body, '.o_activity_color_today.text-warning.fa-warning');
     assert.strictEqual(document.querySelector('.o_activity_summary').innerText, 'Warning');
 
-    assert.verifySteps(['/web/dataset/search_read']);
+    assert.verifySteps(['/web/dataset/call_kw/res.users/web_search_read']);
 });
 
-QUnit.test('list activity widget: open dropdown', async function (assert) {
+QUnit.skipWOWL('list activity widget: open dropdown', async function (assert) {
+    // TODO skip: adapt list_activity
     assert.expect(9);
 
     const pyEnv = await startServer();
@@ -215,7 +218,7 @@ QUnit.test('list activity widget: open dropdown', async function (assert) {
     assert.strictEqual(document.querySelector('.o_activity_summary').innerText, 'Meet FP');
 
     assert.verifySteps([
-        '/web/dataset/search_read',
+        '/web/dataset/call_kw/res.users/web_search_read',
         'switch_view',
         'open dropdown',
         'activity_format',
@@ -224,7 +227,8 @@ QUnit.test('list activity widget: open dropdown', async function (assert) {
     ]);
 });
 
-QUnit.test('list activity exception widget with activity', async function (assert) {
+QUnit.skipWOWL('list activity exception widget with activity', async function (assert) {
+    // TODO skip: adapt list_activity
     assert.expect(3);
 
     const pyEnv = await startServer();
@@ -281,7 +285,8 @@ QUnit.test('list activity exception widget with activity', async function (asser
         "there is an exception on a record");
 });
 
-QUnit.test('list activity widget: done the activity with "ENTER" keyboard shortcut', async function (assert) {
+QUnit.skipWOWL('list activity widget: done the activity with "ENTER" keyboard shortcut', async function (assert) {
+    // TODO skip: adapt list_activity
     assert.expect(1);
 
     const pyEnv = await startServer();
@@ -331,7 +336,8 @@ QUnit.test('list activity widget: done the activity with "ENTER" keyboard shortc
     assert.containsOnce(document.body, '.o_mail_activity .o_activity_color_default');
 });
 
-QUnit.test('list activity widget: done and schedule the next activity with "ENTER" keyboard shortcut', async function (assert) {
+QUnit.skipWOWL('list activity widget: done and schedule the next activity with "ENTER" keyboard shortcut', async function (assert) {
+    // TODO skip: adapt list_activity
     assert.expect(1);
 
     const pyEnv = await startServer();
@@ -385,7 +391,8 @@ QUnit.test('list activity widget: done and schedule the next activity with "ENTE
 
 QUnit.module('FieldMany2ManyTagsEmail');
 
-QUnit.test('fieldmany2many tags email (edition)', async function (assert) {
+QUnit.skipWOWL('fieldmany2many tags email (edition)', async function (assert) {
+    // TODO skip: adapt many2many_tags_email
     assert.expect(17);
 
     const pyEnv = await startServer();
@@ -457,7 +464,8 @@ QUnit.test('fieldmany2many tags email (edition)', async function (assert) {
     assert.verifySteps([`[${resPartnerId2}]`, `[${resPartnerId2}]`, `[${resPartnerId2}]`]);
 });
 
-QUnit.test('many2many_tags_email widget can load more than 40 records', async function (assert) {
+QUnit.skipWOWL('many2many_tags_email widget can load more than 40 records', async function (assert) {
+    // TODO skip: adapt many2many_tags_email
     assert.expect(3);
 
     const pyEnv = await startServer();
