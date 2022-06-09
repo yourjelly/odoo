@@ -159,13 +159,13 @@ QUnit.module("ActionManager", (hooks) => {
 
         assert.verifySteps(
             [
-                '{"action_id":3,"additional_context":{}}',
-                '{"action_id":3,"additional_context":{"active_id":1}}',
-                '{"action_id":3,"additional_context":{"active_id":2}}',
-                '{"action_id":3,"additional_context":{"active_ids":[1,2]}}',
-                '{"action_id":3,"additional_context":{"active_ids":[1,2,3]}}',
-                '{"action_id":3,"additional_context":{"active_model":"a"}}',
-                '{"action_id":3,"additional_context":{"active_model":"b"}}',
+                '{"action_id":3,"additional_context":{},"context":{}}',
+                '{"action_id":3,"additional_context":{"active_id":1},"context":{"active_id":1}}',
+                '{"action_id":3,"additional_context":{"active_id":2},"context":{"active_id":2}}',
+                '{"action_id":3,"additional_context":{"active_ids":[1,2]},"context":{"active_ids":[1,2]}}',
+                '{"action_id":3,"additional_context":{"active_ids":[1,2,3]},"context":{"active_ids":[1,2,3]}}',
+                '{"action_id":3,"additional_context":{"active_model":"a"},"context":{"active_model":"a"}}',
+                '{"action_id":3,"additional_context":{"active_model":"b"},"context":{"active_model":"b"}}',
             ],
             "should load from server once per active_id/active_ids/active_model change, nothing else"
         );

@@ -135,6 +135,15 @@ QUnit.module("ActionManager", (hooks) => {
                         active_ids: [4, 8],
                         active_model: undefined,
                     },
+                    context: {
+                        active_id: 4,
+                        active_ids: [4, 8],
+                        params: {
+                            action: 1001,
+                            active_id: 4,
+                            active_ids: "4,8",
+                        },
+                    },
                 });
             }
         }
