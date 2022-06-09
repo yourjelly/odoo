@@ -39,7 +39,8 @@
                         <td t-if="withHandleColumn"/>
                         <td t-att-colspan="state.columns.length + 1"
                             class="o_field_x2many_list_row_add"
-                            >
+                            t-on-keydown.synthetic="(ev) => this.onCellKeydown(ev, null)"
+                        >
                             <t t-foreach="creates" t-as="create" t-key="create_index">
                                 <a
                                     href="#"
