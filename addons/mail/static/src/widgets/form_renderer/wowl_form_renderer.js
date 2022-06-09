@@ -24,6 +24,12 @@ function compileChatter(node, params) {
         );
     })();
 
+    // TODO compute size and main attachment id from env, record? directly with render context (check with t-debug)
+    // env in dialog ? (no chatter or preview if dialog?)
+
+    // patch compile, use selectors to find nodes and move them ?
+    // add flex on parent, full height on chatter (existing css selectors are probably broken)
+
     let hasActivities = false;
     let hasExternalBorder = !isAside;
     let hasFollowers = false;
