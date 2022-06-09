@@ -60,11 +60,11 @@ class Article(models.Model):
         [('write', 'Can write'), ('read', 'Can read'), ('none', 'No access')],
         string='Inherited Permission',
         compute="_compute_inherited_permission", compute_sudo=True,
-        store=True, recursive=True)
+        store=False, recursive=True)
     inherited_permission_parent_id = fields.Many2one(
         "knowledge.article", string="Inherited Permission Parent Article",
         compute="_compute_inherited_permission", compute_sudo=True,
-        store=True, recursive=True)
+        store=False, recursive=True)
     article_member_ids = fields.One2many(
         'knowledge.article.member', 'article_id', string='Members Information',
         copy=True)
@@ -1473,7 +1473,7 @@ class Article(models.Model):
             SELECT perms1.id, perms1.id as article_id, perms1.parent_id,
                    perms1.member_id, perms1.partner_id, perms1.permission,
                    perms1.id as origin_id, 0 as level,
-                   perms1.is_desynchronized
+                   perms1.is_desynchronized as article_is_desynchronized
               FROM article_perms as perms1
              UNION
             SELECT perms2.id, perms_rec.article_id, perms2.parent_id,
@@ -1483,7 +1483,7 @@ class Article(models.Model):
               FROM article_perms as perms2
         INNER JOIN article_rec perms_rec
                 ON perms_rec.parent_id=perms2.id
-                   AND perms_rec.is_desynchronized is not true
+                   AND article_is_desynchronized is not true
         )
         SELECT article_id, origin_id, member_id, partner_id,
                permission, min(level) as min_level
