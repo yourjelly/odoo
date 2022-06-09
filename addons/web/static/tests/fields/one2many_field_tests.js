@@ -11760,11 +11760,9 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "navigating through an editable list with custom controls [REQUIRE FOCUS]",
         async function (assert) {
-            assert.expect(5);
-
             await makeView({
                 type: "form",
                 resModel: "partner",
@@ -11786,23 +11784,29 @@ QUnit.module("Fields", (hooks) => {
                 `,
             });
 
-            await clickEdit(target);
-
-            assert.strictEqual(target);
-
             assert.strictEqual(
                 document.activeElement,
                 target.querySelector("[name=display_name] input")
             );
 
+            assert.containsNone(target, "[name=p] .o_selected_row");
+
             // press tab to navigate to the list
-            triggerHotkey("Tab");
+            assert.defaultBehavior(target, "[name=display_name] input", "keydown", { key: "Tab" });
+            getNextTabableElement(target).focus(); // goes inside one2many
             await nextTick();
+
+            assert.containsOnce(target, "[name=p] .o_selected_row");
+            assert.strictEqual(
+                document.activeElement,
+                target.querySelector("[name=p] .o_selected_row input")
+            );
 
             // press ESC to cancel 1st control click (create)
             triggerHotkey("Escape");
             await nextTick();
 
+            assert.containsNone(target, "[name=p] .o_selected_row");
             assert.strictEqual(
                 document.activeElement,
                 target.querySelector(".o_field_x2many_list_row_add a")
@@ -11826,13 +11830,29 @@ QUnit.module("Fields", (hooks) => {
                 target.querySelector(".o_field_x2many_list_row_add a")
             );
 
-            // press tab to leave the list
-            triggerHotkey("Tab");
-            await nextTick();
+            assert.strictEqual(
+                getNextTabableElement(target),
+                target.querySelector(".o_field_x2many_list_row_add a:nth-child(2)")
+            );
+            assert.defaultBehavior(
+                target,
+                ".o_field_x2many_list_row_add a:nth-child(1)",
+                "keydown",
+                {
+                    key: "Tab",
+                }
+            );
+            target.querySelector(".o_field_x2many_list_row_add a:nth-child(2)").focus();
 
             assert.strictEqual(
-                document.activeElement,
+                getNextTabableElement(target),
                 target.querySelector("[name=int_field] input")
+            );
+            assert.defaultBehavior(
+                target,
+                ".o_field_x2many_list_row_add a:nth-child(2)",
+                "keydown",
+                { key: "Tab" }
             );
         }
     );
