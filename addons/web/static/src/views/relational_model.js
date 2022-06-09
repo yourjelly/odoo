@@ -105,6 +105,7 @@ async function toggleArchive(model, resModel, resIds, doArchive) {
     //todo fge _invalidateCache
 }
 
+// WOWL FIXME: all calls to the ORM that are not calling a method should give a context, this is currently not the case
 class RequestBatcherORM extends ORM {
     constructor() {
         super(...arguments);
@@ -2081,7 +2082,8 @@ export class DynamicGroupList extends DynamicList {
                 expand: this.expand,
                 offset: this.offset,
                 limit: this.limit,
-            }
+            },
+            this.context
         );
         this.count = length;
 
