@@ -87,7 +87,9 @@ GoogleDriveMenu.props = {
 GoogleDriveMenu.template = 'GoogleDriveMenu';
 GoogleDriveMenu.components = { DropdownItem };
 
-registry.category("action_menus").add('google-drive-menu', {
+export const googleDriveActionMenu = {
     Component: GoogleDriveMenu,
     getProps: googleDrivePropsGetter,
-});
+};
+
+registry.category("action_menus").add('google-drive-menu', googleDriveActionMenu);
