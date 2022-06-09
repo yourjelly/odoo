@@ -349,10 +349,7 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("duplicate fields rendered properly (one2many)", async function (assert) {
-        serverData.models.partner.records.push({
-            id: 6,
-            p: [1],
-        });
+        serverData.models.partner.records.push({ id: 6, p: [1] });
         await makeView({
             type: "form",
             resModel: "partner",
@@ -375,7 +372,7 @@ QUnit.module("Views", (hooks) => {
             resId: 6,
         });
 
-        await click(target.querySelector(".o_form_button_edit"));
+        await clickEdit(target);
 
         assert.containsN(target, ".o_field_one2many", 2);
         assert.doesNotHaveClass(

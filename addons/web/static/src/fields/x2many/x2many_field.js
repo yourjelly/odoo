@@ -71,12 +71,22 @@ export class X2ManyField extends Component {
             saveRecord,
             updateRecord,
         });
-        this._openRecord = openRecord;
+        this._openRecord = (params) => {
+            const activeElement = document.activeElement;
+            openRecord({
+                ...params,
+                onClose: () => {
+                    if (activeElement) {
+                        activeElement.focus();
+                    }
+                },
+            });
+        };
         const selectCreate = useSelectCreate({
             resModel: this.props.value.resModel,
             activeActions: this.activeActions,
             onSelected: (resIds) => saveRecord(resIds),
-            onCreateEdit: ({ context }) => openRecord({ context }),
+            onCreateEdit: ({ context }) => this._openRecord({ context }),
         });
 
         this.selectCreate = (params) => {
@@ -146,6 +156,8 @@ export class X2ManyField extends Component {
         if (this.viewMode === "kanban") {
             props.recordsDraggable = !this.props.readonly;
             props.readonly = this.props.readonly;
+        } else if (this.viewMode === "list") {
+            props.cycleOnTab = false;
         }
         return props;
     }

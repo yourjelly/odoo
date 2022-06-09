@@ -2,7 +2,13 @@
 <templates xml:space="preserve">
 
     <t t-name="web.ListRenderer" owl="1">
-        <div class="o_list_renderer" t-att-class="{'table-responsive': showTable}" t-ref="root">
+        <div
+            class="o_list_renderer"
+            t-att-class="{'table-responsive': showTable}"
+            t-on-focusin="onFocusIn"
+            tabindex="-1"
+            t-ref="root"
+        >
             <t t-if="showNoContentHelper" t-call="web.ActionHelper">
                 <t t-set="noContentHelp" t-value="props.noContentHelp"/>
             </t>
@@ -39,7 +45,8 @@
                                     href="#"
                                     role="button"
                                     t-att-class="create_index !== 0 ? 'ml16' : ''"
-                                    t-on-click.stop.prevent="() => props.onAdd(create.context)"
+                                    t-att-tabindex="props.list.editedRecord ? '-1' : '0'"
+                                    t-on-click.stop.prevent="() => this.onCreateAction(create.context)"
                                 >
                                     <t t-esc="create.description"/>
                                 </a>
@@ -99,8 +106,14 @@
                     </t>
                     <t t-if="!group.list.isGrouped and props.editable and props.activeActions['create']">
                         <td t-if="props.hasSelectors"/>
-                        <td t-att-colspan="state.columns.length + 1" class="o_group_field_row_add">
-                            <a href="#" role="button" t-on-click.stop.prevent="() => group.createRecord({}, props.editable === 'top')">
+                        <td
+                            t-att-colspan="state.columns.length + 1"
+                            class="o_group_field_row_add"
+                        >
+                            <a href="#"
+                                role="button"
+                                t-on-click.stop.prevent="() => group.createRecord({}, props.editable === 'top')"
+                            >
                                 Add a line
                             </a>
                         </td>

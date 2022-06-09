@@ -1,10 +1,6 @@
 /** @odoo-module **/
 
 import AbstractField from "web.AbstractField";
-import { browser } from "@web/core/browser/browser";
-import BasicModel from "web.BasicModel";
-import fieldRegistry from "web.field_registry";
-import { registerCleanup } from "@web/../tests/helpers/cleanup";
 import {
     addRow,
     click,
@@ -28,19 +24,20 @@ import {
     triggerEvents,
     triggerHotkey,
 } from "@web/../tests/helpers/utils";
+import { AutoComplete } from "@web/core/autocomplete/autocomplete";
+import BasicModel from "web.BasicModel";
+import { browser } from "@web/core/browser/browser";
+import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
+import { FieldOne2Many } from "web.relational_fields";
+import { getNextTabableElement } from "@web/core/utils/ui";
+import fieldRegistry from "web.field_registry";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
+import { registerCleanup } from "@web/../tests/helpers/cleanup";
 import { registry } from "@web/core/registry";
 import { session } from "@web/session";
-import { createWebClient, doAction } from "../webclient/helpers";
-import { FieldOne2Many } from "web.relational_fields";
-import { AutoComplete } from "@web/core/autocomplete/autocomplete";
-import { getNextTabableElement } from "@web/core/utils/ui";
 
 let serverData;
 let target;
-
-// WOWL remove after adapting tests
-let testUtils, relationalFields, makeLegacyDialogMappingTestEnv;
 
 function patchSetTimeout() {
     patchWithCleanup(browser, {
@@ -335,9 +332,7 @@ QUnit.module("Fields", (hooks) => {
             });
             await click(target, ".o_form_button_edit");
 
-            await click(
-                target.querySelector(".o_field_x2many_list .o_field_x2many_list_row_add a")
-            );
+            await addRow(target, ".o_field_x2many_list");
 
             assert.containsN(
                 target,
@@ -1832,7 +1827,7 @@ QUnit.module("Fields", (hooks) => {
         );
 
         // add another m2m subrecord
-        await click(target.querySelector(".modal .o_field_x2many_list_row_add a"));
+        await addRow(target, ".modal");
 
         assert.containsN(target, ".modal", 2, "should have opened a second dialog");
 
@@ -5544,7 +5539,7 @@ QUnit.module("Fields", (hooks) => {
 
             await clickEdit(target);
 
-            await click(target.querySelector(".o_field_one2many .o_field_x2many_list_row_add a"));
+            await addRow(target, ".o_field_one2many");
             assert.containsOnce(target, ".modal");
             await click(target.querySelector(".modal-footer button"));
 
@@ -6132,7 +6127,7 @@ QUnit.module("Fields", (hooks) => {
         await click(target.querySelector(".o_external_button"));
 
         // click on add, to add a new partner in the m2m
-        await click(target.querySelector(".modal .o_field_x2many_list_row_add a"));
+        await addRow(target, ".modal");
 
         // select the partner_type 'gold' (this closes the 2nd modal)
         await click(target.querySelector("div:not(o_inactive_modal) .modal td.o_data_cell")); // select gold
@@ -8912,7 +8907,7 @@ QUnit.module("Fields", (hooks) => {
 
         // click add food
         // check it's empty
-        await click(target.querySelector(".o_field_x2many_list_row_add a"));
+        await addRow(target);
         assert.deepEqual(
             [...target.querySelectorAll(".o_data_cell")].map((el) => el.textContent),
             [""]
@@ -8921,7 +8916,7 @@ QUnit.module("Fields", (hooks) => {
         // click add pizza
         // press enter to save the record
         // check it's pizza
-        await click(target.querySelectorAll(".o_field_x2many_list_row_add a")[1]);
+        await click(target, ".o_field_x2many_list_row_add a:nth-child(2)");
         const input = target.querySelector(
             '.o_field_widget[name="p"] .o_selected_row .o_field_widget[name="display_name"] input'
         );
@@ -8935,7 +8930,7 @@ QUnit.module("Fields", (hooks) => {
         );
 
         // click add pasta
-        await click(target.querySelectorAll(".o_field_x2many_list_row_add a")[2]);
+        await click(target, ".o_field_x2many_list_row_add a:nth-child(3)");
         await clickSave(target);
         assert.deepEqual(
             [...target.querySelectorAll(".o_data_cell")].map((el) => el.textContent),
@@ -8980,7 +8975,7 @@ QUnit.module("Fields", (hooks) => {
 
         // click add food
         // check it's empty
-        await click(target.querySelector(".o_field_x2many_list_row_add a"));
+        await addRow(target);
         await clickSave(target.querySelector(".modal"));
         assert.deepEqual(
             [...target.querySelectorAll(".o_data_cell")].map((el) => el.textContent),
@@ -8990,7 +8985,7 @@ QUnit.module("Fields", (hooks) => {
         // click add pizza
         // save the modal
         // check it's pizza
-        await click(target.querySelectorAll(".o_field_x2many_list_row_add a")[1]);
+        await click(target, ".o_field_x2many_list_row_add a:nth-child(2)");
         await clickSave(target.querySelector(".modal"));
         assert.deepEqual(
             [...target.querySelectorAll(".o_data_cell")].map((el) => el.textContent),
@@ -9000,7 +8995,7 @@ QUnit.module("Fields", (hooks) => {
         // click add pasta
         // save the whole record
         // check it's pizzapasta
-        await click(target.querySelectorAll(".o_field_x2many_list_row_add a")[2]);
+        await click(target, ".o_field_x2many_list_row_add a:nth-child(3)");
         await clickSave(target.querySelector(".modal"));
         assert.deepEqual(
             [...target.querySelectorAll(".o_data_cell")].map((el) => el.textContent),
@@ -9235,8 +9230,6 @@ QUnit.module("Fields", (hooks) => {
     });
 
     QUnit.test("create and edit on m2o in o2m, and press ESCAPE", async function (assert) {
-        assert.expect(4);
-
         patchSetTimeout();
 
         serverData.views = {
@@ -9272,12 +9265,15 @@ QUnit.module("Fields", (hooks) => {
 
         assert.containsOnce(target, ".modal .o_form_view");
 
-        await triggerEvent(target, ".modal [name=display_name] input", "keydown", {
-            key: "Escape",
-        });
+        triggerHotkey("Escape");
+        await nextTick();
 
         assert.containsNone(target, ".modal .o_form_view");
         assert.containsOnce(target, ".o_selected_row");
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_selected_row [name=turtle_trululu] input")
+        );
     });
 
     QUnit.test(
@@ -9321,7 +9317,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "one2many shortcut tab should not crash when there is no input widget",
         async function (assert) {
             // create a one2many view which has no input (only 1 textarea in this case)
@@ -9345,10 +9341,14 @@ QUnit.module("Fields", (hooks) => {
             // add a row, fill it, then trigger the tab shortcut
             await addRow(target);
             await editInput(target, "[name=turtle_foo] textarea", "ninja");
-            let addButton = target.querySelector(".o_field_x2many_list_row_add a");
-            assert.strictEqual(getNextTabableElement(target), addButton);
-            assert.defaultBehavior(addButton, null, "keydown", { key: "Tab" });
-            await triggerEvent(addButton, null, "focusin");
+
+            assert.strictEqual(
+                target.querySelector("[name=turtle_foo] textarea"),
+                document.activeElement
+            );
+
+            triggerHotkey("Tab");
+            await nextTick();
 
             assert.deepEqual(
                 [...target.querySelectorAll(".o_field_text")].map((el) => el.textContent),
@@ -9361,8 +9361,6 @@ QUnit.module("Fields", (hooks) => {
     QUnit.skipWOWL(
         "one2many with onchange, required field, shortcut enter",
         async function (assert) {
-            assert.expect(5);
-
             serverData.models.turtle.onchanges = {
                 turtle_foo: function () {},
             };
@@ -9396,12 +9394,13 @@ QUnit.module("Fields", (hooks) => {
             def = makeDeferred();
 
             // write something in the field
-            const input = target.querySelector("[name=turtle_foo] input");
             await editInput(target, "[name=turtle_foo] input", value);
-            await triggerEvent(input, null, "keydown", { key: "Enter" });
+            assert.strictEqual(target.querySelector("[name=turtle_foo] input").value, value);
+
+            await triggerEvent(target, "[name=turtle_foo] input", "keydown", { key: "Enter" });
 
             // check that nothing changed before the onchange finished
-            assert.strictEqual(input.value, value);
+            assert.strictEqual(target.querySelector("[name=turtle_foo] input").value, value);
             assert.containsOnce(target, ".o_data_row");
 
             // unlock onchange
@@ -11544,17 +11543,12 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL(
-        "when Navigating to a many2one with tabs, it receives the focus and adds a new line",
+    QUnit.test(
+        "when Navigating to a one2many with tabs, it receives the focus and adds a new line",
         async function (assert) {
-            assert.expect(3);
-
-            const form = await makeView({
+            await makeView({
                 type: "form",
                 resModel: "partner",
-                viewOptions: {
-                    mode: "edit",
-                },
                 serverData,
                 arch: `
                     <form>
@@ -11576,82 +11570,23 @@ QUnit.module("Fields", (hooks) => {
                 resId: 1,
             });
 
+            await clickEdit(target);
+
+            assert.strictEqual(target.querySelector("[name=qux] input"), document.activeElement);
+
+            getNextTabableElement(target).focus(); // go inside one2many
+            await nextTick();
+
             assert.strictEqual(
-                form.$el.find('input[name="qux"]')[0],
-                document.activeElement,
-                "initially, the focus should be on the 'qux' field because it is the first input"
-            );
-            await testUtils.fields.triggerKeydown(form.$el.find('input[name="qux"]'), "tab");
-            assert.strictEqual(
-                assert.strictEqual(
-                    form.$el.find('input[name="turtle_foo"]')[0],
-                    document.activeElement,
-                    "after tab, the focus should be on the many2one on the first input of the newly added line"
-                )
+                target.querySelector("[name=turtle_foo] input"),
+                document.activeElement
             );
         }
     );
 
-    QUnit.skipWOWL(
-        "when Navigating to a many to one with tabs, it places the focus on the first visible field",
+    QUnit.test(
+        "when Navigating to a one2many with tabs, not filling any field and hitting tab, we should not add a first line but navigate to the next control",
         async function (assert) {
-            assert.expect(3);
-
-            const form = await makeView({
-                type: "form",
-                resModel: "partner",
-                viewOptions: {
-                    mode: "edit",
-                },
-                serverData,
-                arch: `
-                    <form>
-                        <sheet>
-                            <group>
-                                <field name="qux"/>
-                            </group>
-                            <notebook>
-                                <page string="Partner page">
-                                    <field name="turtles">
-                                        <tree editable="bottom">
-                                            <field name="turtle_foo"/>
-                                        </tree>
-                                    </field>
-                                </page>
-                            </notebook>
-                        </sheet>
-                    </form>`,
-                resId: 1,
-            });
-
-            assert.strictEqual(
-                form.$el.find('input[name="qux"]')[0],
-                document.activeElement,
-                "initially, the focus should be on the 'qux' field because it is the first input"
-            );
-            form.$el.find('input[name="qux"]').trigger(
-                $.Event("keydown", {
-                    which: $.ui.keyCode.TAB,
-                    keyCode: $.ui.keyCode.TAB,
-                })
-            );
-            await testUtils.owlCompatibilityExtraNextTick();
-            await click(document.activeElement);
-            assert.strictEqual(
-                assert.strictEqual(
-                    form.$el.find('input[name="turtle_foo"]')[0],
-                    document.activeElement,
-                    "after tab, the focus should be on the many2one"
-                )
-            );
-        }
-    );
-
-    QUnit.skipWOWL(
-        "when Navigating to a many2one with tabs, not filling any field and hitting tab, we should not add a first line but navigate to the next control",
-        async function (assert) {
-            assert.expect(3);
-
             serverData.models.partner.records[0].turtles = [];
 
             await makeView({
@@ -11684,69 +11619,44 @@ QUnit.module("Fields", (hooks) => {
 
             await clickEdit(target);
 
-            assert.strictEqual(target.querySelector("[name=qux] input"), document.activeElement);
+            assert.strictEqual(document.activeElement, target.querySelector("[name=qux] input"));
 
-            const tabHeader = target.querySelector("a.nav-link");
-            assert.strictEqual(getNextTabableElement(target), tabHeader);
-            assert.defaultBehavior(tabHeader, null, "keydown", { key: "Tab" });
-            tabHeader.focus();
-
-            let addButton = target.querySelector(".o_field_x2many_list_row_add a");
-            assert.strictEqual(getNextTabableElement(target), addButton);
-            assert.defaultBehavior(addButton, null, "keydown", { key: "Tab" });
-            addButton.focus();
+            getNextTabableElement(target).focus(); // go inside one2many
+            await nextTick();
 
             assert.strictEqual(
-                target.querySelector("[name=turtle_foo] input"),
-                document.activeElement
+                document.activeElement,
+                target.querySelector("[name=turtle_foo] input")
             );
 
-            const textarea = target.querySelector("[name=turtle_description] textarea");
-            assert.strictEqual(getNextTabableElement(target), textarea);
-            assert.defaultBehavior(textarea, null, "keydown", { key: "Tab" });
-            textarea.focus();
+            triggerHotkey("Tab"); // go to turtle_description field
+            await nextTick();
 
-            const deleteButton = target.querySelector(
-                ".o_selected_row .o_list_record_remove button"
+            assert.strictEqual(
+                document.activeElement,
+                target.querySelector("[name=turtle_description] textarea")
             );
-            assert.strictEqual(getNextTabableElement(target), deleteButton);
-            assert.defaultBehavior(deleteButton, null, "keydown", { key: "Tab" });
-            deleteButton.focus();
 
-            addButton = target.querySelector(".o_field_x2many_list_row_add a");
-            assert.strictEqual(getNextTabableElement(target), addButton);
-            assert.defaultBehavior(addButton, null, "keydown", { key: "Tab" });
-            addButton.focus();
-
-            // // skips the first field of the one2many
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "tab");
-            // // skips the second (and last) field of the one2many
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "tab");
-            // assert.strictEqual(
-            //     assert.strictEqual(
-            //         form.$el.find('input[name="foo"]')[0],
-            //         document.activeElement,
-            //         "after tab, the focus should be on the many2one"
-            //     )
-            // );
+            assert.strictEqual(
+                getNextTabableElement(target),
+                target.querySelector("[name=foo] input")
+            );
+            // trigger Tab event and check that the default behavior can happen.
+            assert.defaultBehavior(document.activeElement, null, "keydown", { key: "Tab" });
+            await nextTick();
+            // the default behavior happens but the list renderer makes the edited record
+            // pass in readonly mode.
+            assert.containsNone(target, "[name=turtles] .o_selected_row");
         }
     );
 
-    QUnit.skipWOWL(
-        "when Navigating to a many to one with tabs, editing in a popup, the popup should receive the focus then give it back",
+    QUnit.test(
+        "when Navigating to a one2many with tabs, editing in a popup, the popup should receive the focus then give it back",
         async function (assert) {
-            assert.expect(3);
-
-            await makeLegacyDialogMappingTestEnv();
-
             serverData.models.partner.records[0].turtles = [];
-
-            const form = await makeView({
+            await makeView({
                 type: "form",
                 resModel: "partner",
-                viewOptions: {
-                    mode: "edit",
-                },
                 serverData,
                 arch: `
                     <form>
@@ -11754,108 +11664,99 @@ QUnit.module("Fields", (hooks) => {
                             <group>
                                 <field name="qux"/>
                             </group>
-                                <notebook>
-                                    <page string="Partner page">
-                                        <field name="turtles">
-                                            <tree>
+                            <notebook>
+                                <page string="Partner page">
+                                    <field name="turtles">
+                                        <tree>
+                                            <field name="turtle_foo"/>
+                                            <field name="turtle_description"/>
+                                        </tree>
+                                        <form>
+                                            <group>
                                                 <field name="turtle_foo"/>
-                                                <field name="turtle_description"/>
-                                            </tree>
-                                        </field>
-                                    </page>
-                                </notebook>
+                                                <field name="turtle_int"/>
+                                            </group>
+                                        </form>
+                                    </field>
+                                </page>
+                            </notebook>
                             <group>
                                 <field name="foo"/>
                             </group>
                         </sheet>
                     </form>`,
                 resId: 1,
-                archs: {
-                    "turtle,false,form": `
-                        <form>
-                            <group>
-                                <field name="turtle_foo"/>
-                                <field name="turtle_int"/>
-                            </group>
-                        </form>`,
-                },
             });
 
+            await clickEdit(target);
+
+            assert.strictEqual(target.querySelector("[name=qux] input"), document.activeElement);
+
+            getNextTabableElement(target).focus(); // go inside one2many
+            await nextTick();
+
             assert.strictEqual(
-                form.$el.find('input[name="qux"]')[0],
-                document.activeElement,
-                "initially, the focus should be on the 'qux' field because it is the first input"
-            );
-            await testUtils.fields.triggerKeydown(form.$el.find('input[name="qux"]'), "tab");
-            assert.strictEqual(
-                $.find('input[name="turtle_foo"]')[0],
-                document.activeElement,
-                "when the one2many received the focus, the popup should open because it automatically adds a new line"
+                target.querySelector(".modal [name=turtle_foo] input"),
+                document.activeElement
             );
 
-            await testUtils.fields.triggerKeydown($('input[name="turtle_foo"]'), "escape");
+            triggerHotkey("Escape");
+            await nextTick();
+
+            assert.containsNone(target, ".modal");
             assert.strictEqual(
-                form.$el.find(".o_field_x2many_list_row_add a")[0],
-                document.activeElement,
-                "after escape, the focus should be back on the add new line link"
+                target.querySelector(".o_field_x2many_list_row_add a"),
+                document.activeElement
             );
         }
     );
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "when creating a new many2one on a x2many then discarding it immediately with ESCAPE, it should not crash",
         async function (assert) {
-            assert.expect(1);
+            patchSetTimeout();
 
             serverData.models.partner.records[0].turtles = [];
-
-            const form = await makeView({
+            serverData.views = {
+                "partner,false,form": `
+                    <form>
+                        <field name="foo"/>
+                        <field name="bar"/>
+                    </form>
+                `,
+            };
+            await makeView({
                 type: "form",
                 resModel: "partner",
-                viewOptions: {
-                    mode: "edit",
-                },
                 serverData,
                 arch: `
                     <form>
-                        <sheet>
-                            <field name="turtles">
-                                <tree editable="top">
-                                    <field name="turtle_foo"/>
-                                    <field name="turtle_trululu"/>
-                                </tree>
-                            </field>
-                        </sheet>
+                        <field name="turtles">
+                            <tree editable="top">
+                                <field name="turtle_foo"/>
+                                <field name="turtle_trululu"/>
+                            </tree>
+                        </field>
                     </form>`,
                 resId: 1,
-                archs: {
-                    "partner,false,form":
-                        '<form><group><field name="foo"/><field name="bar"/></group></form>',
-                },
             });
 
+            await clickEdit(target);
+
             // add a new line
-            await click(form.$el.find(".o_field_x2many_list_row_add>a"));
+            await addRow(target);
 
-            // open the field turtle_trululu (one2many)
-            var M2O_DELAY = relationalFields.FieldMany2One.prototype.AUTOCOMPLETE_DELAY;
-            relationalFields.FieldMany2One.prototype.AUTOCOMPLETE_DELAY = 0;
-            await click(form.$el.find(".o_input_dropdown>input"));
+            assert.containsOnce(target, ".o_selected_row");
 
-            await testUtils.fields.editInput(form.$(".o_field_many2one input"), "ABC");
-            // click create and edit
-            await click(
-                $(".ui-autocomplete .ui-menu-item a:contains(Create and)").trigger("mouseenter")
-            );
+            await clickOpenM2ODropdown(target, "turtle_trululu");
+            await editInput(target, ".o_field_widget[name=turtle_trululu] input", "ABC");
+            clickOpenedDropdownItem(target, "turtle_trululu", "Create and edit...");
 
-            // hit escape immediately
-            var escapeKey = $.ui.keyCode.ESCAPE;
-            $(document.activeElement).trigger(
-                $.Event("keydown", { which: escapeKey, keyCode: escapeKey })
-            );
+            triggerHotkey("Escape");
+            await nextTick();
 
-            assert.ok("did not crash");
-            relationalFields.FieldMany2One.prototype.AUTOCOMPLETE_DELAY = M2O_DELAY;
+            assert.containsNone(document.body, ".modal");
+            assert.containsNone(target, ".o_selected_row");
         }
     );
 
@@ -11864,7 +11765,7 @@ QUnit.module("Fields", (hooks) => {
         async function (assert) {
             assert.expect(5);
 
-            const form = await makeView({
+            await makeView({
                 type: "form",
                 resModel: "partner",
                 serverData,
@@ -11881,62 +11782,57 @@ QUnit.module("Fields", (hooks) => {
                             </tree>
                         </field>
                         <field name="int_field"/>
-                    </form>`,
-                viewOptions: {
-                    mode: "edit",
-                },
+                    </form>
+                `,
             });
+
+            await clickEdit(target);
+
+            assert.strictEqual(target);
 
             assert.strictEqual(
                 document.activeElement,
-                form.$('.o_field_widget[name="display_name"]')[0],
-                "first input should be focused by default"
+                target.querySelector("[name=display_name] input")
             );
 
             // press tab to navigate to the list
-            await testUtils.fields.triggerKeydown(
-                form.$('.o_field_widget[name="display_name"]'),
-                "tab"
-            );
+            triggerHotkey("Tab");
+            await nextTick();
+
             // press ESC to cancel 1st control click (create)
-            await testUtils.fields.triggerKeydown(form.$(".o_data_cell input"), "escape");
+            triggerHotkey("Escape");
+            await nextTick();
+
             assert.strictEqual(
                 document.activeElement,
-                form.$(".o_field_x2many_list_row_add a:first")[0],
-                "first editable list control should now have the focus"
+                target.querySelector(".o_field_x2many_list_row_add a")
             );
 
             // press right to focus the second control
-            await testUtils.fields.triggerKeydown(
-                form.$(".o_field_x2many_list_row_add a:first"),
-                "right"
-            );
+            triggerHotkey("ArrowRight");
+            await nextTick();
+
             assert.strictEqual(
                 document.activeElement,
-                form.$(".o_field_x2many_list_row_add a:nth(1)")[0],
-                "second editable list control should now have the focus"
+                target.querySelector(".o_field_x2many_list_row_add a:nth-child(2)")
             );
 
             // press left to come back to first control
-            await testUtils.fields.triggerKeydown(
-                form.$(".o_field_x2many_list_row_add a:nth(1)"),
-                "left"
-            );
+            triggerHotkey("ArrowLeft");
+            await nextTick();
+
             assert.strictEqual(
                 document.activeElement,
-                form.$(".o_field_x2many_list_row_add a:first")[0],
-                "first editable list control should now have the focus"
+                target.querySelector(".o_field_x2many_list_row_add a")
             );
 
             // press tab to leave the list
-            await testUtils.fields.triggerKeydown(
-                form.$(".o_field_x2many_list_row_add a:first"),
-                "tab"
-            );
+            triggerHotkey("Tab");
+            await nextTick();
+
             assert.strictEqual(
                 document.activeElement,
-                form.$('.o_field_widget[name="int_field"]')[0],
-                "last input should now be focused"
+                target.querySelector("[name=int_field] input")
             );
         }
     );
