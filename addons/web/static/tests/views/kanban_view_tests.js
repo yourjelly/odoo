@@ -6,6 +6,7 @@ import {
     dragAndDrop,
     editInput,
     getFixture,
+    getNodesTextContent,
     makeDeferred,
     nextTick,
     patchWithCleanup,
@@ -658,6 +659,32 @@ QUnit.module("Views", (hooks) => {
             target,
             ".o_kanban_record span:contains(yop)",
             "condition in the kanban template should have been correctly evaluated"
+        );
+    });
+
+    QUnit.test("kanban with sub-template", async (assert) => {
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <kanban>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div>
+                                <t t-call="another-template"/>
+                            </div>
+                        </t>
+                        <t t-name="another-template">
+                            <span><field name="foo"/></span>
+                        </t>
+                    </templates>
+                </kanban>`,
+        });
+
+        assert.deepEqual(
+            getNodesTextContent(target.querySelectorAll(".o_kanban_record:not(.o_kanban_ghost)")),
+            ["yop", "blip", "gnap", "blip"]
         );
     });
 
