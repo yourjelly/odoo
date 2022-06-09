@@ -30,8 +30,7 @@ export class FormViewDialog extends Component {
             viewId: this.props.viewId || false,
             preventCreate: this.props.preventCreate,
             preventEdit: this.props.preventEdit,
-            discardRecord: async (record) => {
-                await this.props.onRecordDiscarded(record);
+            discardRecord: () => {
                 this.props.close();
             },
             saveRecord: async (record, { saveAndNew }) => {
@@ -76,7 +75,6 @@ FormViewDialog.props = {
         optional: true,
         validate: (m) => ["edit", "readonly"].includes(m),
     },
-    onRecordDiscarded: { type: Function, optional: true },
     onRecordSaved: { type: Function, optional: true },
     resId: { type: [Number, Boolean], optional: true },
     title: { type: String, optional: true },
@@ -86,7 +84,6 @@ FormViewDialog.props = {
     isToMany: { type: Boolean, optional: true },
 };
 FormViewDialog.defaultProps = {
-    onRecordDiscarded: () => {},
     onRecordSaved: () => {},
     preventCreate: false,
     preventEdit: false,

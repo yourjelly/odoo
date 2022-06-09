@@ -16,6 +16,8 @@ import { FormRenderer } from "../views/form/form_renderer";
 import { ViewButton } from "../views/view_button/view_button";
 import { useViewButtons } from "../views/view_button/view_button_hook";
 
+const { useEffect } = owl;
+
 //
 // Commons
 //
@@ -163,10 +165,10 @@ export class Many2XAutocomplete extends owl.Component {
             onRecordSaved: (record) => {
                 return update([record.data]);
             },
-            onRecordDiscarded: () => {
+            fieldString,
+            onClose: () => {
                 autoCompleteContainer.el.querySelector("input").focus();
             },
-            fieldString,
         });
 
         this.selectCreate = useSelectCreate({
@@ -352,7 +354,6 @@ Many2XAutocomplete.defaultProps = {
 export function useOpenMany2XRecord({
     resModel,
     onRecordSaved,
-    onRecordDiscarded,
     fieldString,
     activeActions,
     isToMany,
@@ -392,7 +393,6 @@ export function useOpenMany2XRecord({
                 resModel,
                 viewId,
                 onRecordSaved,
-                onRecordDiscarded,
                 isToMany,
             },
             {
@@ -418,7 +418,6 @@ export function useOpenMany2XRecord({
 
 class X2ManyFieldDialog extends owl.Component {
     setup() {
-        super.setup();
         this.archInfo = this.props.archInfo;
         this.record = this.props.record;
         this.title = this.props.title;
@@ -439,6 +438,32 @@ class X2ManyFieldDialog extends owl.Component {
             this.footerArchInfo.arch = this.footerArchInfo.xmlDoc.outerHTML;
             [...this.archInfo.xmlDoc.querySelectorAll("footer")].forEach((x) => x.remove());
             this.archInfo.arch = this.archInfo.xmlDoc.outerHTML;
+        }
+
+        const { autofocusFieldId, disableAutofocus } = this.archInfo;
+        if (!disableAutofocus) {
+            // to simplify
+            useEffect(
+                (isInEdition) => {
+                    let elementToFocus;
+                    if (isInEdition) {
+                        elementToFocus =
+                            (autofocusFieldId &&
+                                this.modalRef.el.querySelector(`#${autofocusFieldId}`)) ||
+                            this.modalRef.el.querySelector(".o_field_widget input");
+                    } else {
+                        elementToFocus =
+                            this.modalRef.el.querySelector("button.btn-primary") ||
+                            this.modalRef.el.querySelector(".o_control_panel .o_form_button_edit");
+                    }
+                    if (elementToFocus) {
+                        elementToFocus.focus();
+                    } else {
+                        this.modalRef.el.focus();
+                    }
+                },
+                () => [this.record.isInEdition]
+            );
         }
     }
 
@@ -465,7 +490,7 @@ class X2ManyFieldDialog extends owl.Component {
 
     async save({ saveAndNew }) {
         if (this.record.checkValidity()) {
-            this.record = await this.props.save(this.record, { saveAndNew });
+            this.record = (await this.props.save(this.record, { saveAndNew })) || this.record;
         } else {
             return false;
         }
@@ -560,7 +585,7 @@ export function useOpenX2ManyRecord({
     const addDialog = useOwnedDialogs();
     const viewMode = activeField.viewMode;
 
-    async function openRecord({ record, mode, context, title }) {
+    async function openRecord({ record, mode, context, title, onClose }) {
         if (!title) {
             title = record ? env._t("Open: %s") : env._t("Create %s");
             title = sprintf(title, activeField.string);
@@ -595,30 +620,34 @@ export function useOpenX2ManyRecord({
             record = await model.addNewRecord(list, recordParams);
         }
 
-        addDialog(X2ManyFieldDialog, {
-            archInfo: form,
-            record,
-            save: async (rec, { saveAndNew }) => {
-                if (isDuplicate && rec.id === record.id) {
-                    await updateRecord(rec);
-                } else {
-                    await saveRecord(rec);
-                }
-                if (saveAndNew) {
-                    return model.addNewRecord(list, {
-                        context: list.context,
-                        resModel: resModel,
-                        activeFields: form.activeFields,
-                        fields: { ...form.fields },
-                        views: { form },
-                        mode: "edit",
-                        viewType: "form",
-                    });
-                }
+        addDialog(
+            X2ManyFieldDialog,
+            {
+                archInfo: form,
+                record,
+                save: async (rec, { saveAndNew }) => {
+                    if (isDuplicate && rec.id === record.id) {
+                        await updateRecord(rec);
+                    } else {
+                        await saveRecord(rec);
+                    }
+                    if (saveAndNew) {
+                        return model.addNewRecord(list, {
+                            context: list.context,
+                            resModel: resModel,
+                            activeFields: form.activeFields,
+                            fields: { ...form.fields },
+                            views: { form },
+                            mode: "edit",
+                            viewType: "form",
+                        });
+                    }
+                },
+                title,
+                delete: deleteRecord,
             },
-            title,
-            delete: deleteRecord,
-        });
+            { onClose }
+        );
     }
     return openRecord;
 }

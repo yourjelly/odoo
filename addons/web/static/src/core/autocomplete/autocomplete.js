@@ -251,7 +251,7 @@ export class AutoComplete extends Component {
                     this.selectOption(this.state.activeSourceOption);
                 }
                 this.close();
-                break;
+                return;
             case "arrowup":
                 this.navigate(-1);
                 if (!this.isOpened) {
@@ -265,7 +265,7 @@ export class AutoComplete extends Component {
                 }
                 break;
             default:
-                break;
+                return;
         }
 
         ev.stopPropagation();

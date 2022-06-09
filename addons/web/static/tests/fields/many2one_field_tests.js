@@ -20,6 +20,7 @@ import {
     selectDropdownItem,
     triggerEvent,
     triggerEvents,
+    triggerHotkey,
     triggerScroll,
 } from "../helpers/utils";
 import {
@@ -3303,9 +3304,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL("pressing enter in a m2o in an editable list", async function (assert) {
-        assert.expect(8);
-
+    QUnit.test("pressing enter in a m2o in an editable list", async function (assert) {
         await makeView({
             type: "list",
             resModel: "partner",
@@ -3318,47 +3317,49 @@ QUnit.module("Fields", (hooks) => {
         });
 
         await click(target.querySelector("td.o_data_cell"));
-        assert.containsOnce(target, ".o_selected_row", "should have a row in edit mode");
+        assert.containsOnce(target, ".o_selected_row");
 
         // we now write 'a' and press enter to check that the selection is
         // working, and prevent the navigation
-        const input = target.querySelector("td.o_data_cell input");
+        let input = target.querySelector("[name=product_id] input");
         await editInput(input, null, "a");
         assert.containsOnce(
-            target.querySelector(".o_field_many2one"),
-            ".o-autocomplete.dropdown",
-            "autocomplete dropdown should be visible"
+            target.querySelector("[name=product_id]"),
+            ".o-autocomplete--dropdown-menu"
         );
 
         // we now trigger ENTER to select first choice
-        await triggerEvent(input, null, "keydown", { key: "Enter" });
-        assert.strictEqual(input, document.activeElement, "input should still be focused");
+        triggerHotkey("Enter");
+        await nextTick();
+
+        assert.strictEqual(input, document.activeElement);
+        assert.containsNone(
+            target.querySelector("[name=product_id]"),
+            ".o-autocomplete--dropdown-menu"
+        );
 
         // we now trigger again ENTER to make sure we can move to next line
-        await triggerEvent(input, null, "keydown", { key: "Enter" });
-        assert.notOk(document.contains(input), "input should no longer be in dom");
-        assert.hasClass(
-            target.querySelector("tr.o_data_row:nth-child(2)"),
-            "o_selected_row",
-            "second row should now be selected"
-        );
+        triggerHotkey("Enter");
+        await nextTick();
+
+        assert.containsNone(target, "tr.o_data_row:nth-child(1) [name=product_id] input");
+        assert.hasClass(target.querySelector("tr.o_data_row:nth-child(2)"), "o_selected_row");
 
         // we now write again 'a' in the cell to select xpad. We will now
         // test with the tab key
-        await editInput(input, "a");
+        input = target.querySelector("[name=product_id] input");
+        await editInput(input, null, "a");
         assert.containsOnce(
-            target.querySelector(".o_field_many2one"),
-            ".o-autocomplete.dropdown",
-            "autocomplete dropdown should be visible"
+            target.querySelector("tr.o_data_row:nth-child(2) [name=product_id]"),
+            ".o-autocomplete--dropdown-menu"
         );
 
-        await triggerEvent(input, null, "keydown", { key: "tab" });
-        assert.notOk(document.contains(input), "input should no longer be in dom");
-        assert.hasClass(
-            target.querySelector("tr.o_data_row:nth-child(3)"),
-            "o_selected_row",
-            "third row should now be selected"
-        );
+        triggerHotkey("Tab");
+        await nextTick();
+
+        assert.containsNone(target, "tr.o_data_row:nth-child(2) [name=product_id] input");
+
+        assert.hasClass(target.querySelector("tr.o_data_row:nth-child(3)"), "o_selected_row");
     });
 
     QUnit.test(

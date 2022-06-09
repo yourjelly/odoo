@@ -9,7 +9,7 @@ import { Pager } from "@web/core/pager/pager";
 import { evaluateExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
-import { useSortable } from "@web/core/utils/ui";
+import { getTabableElements, useSortable } from "@web/core/utils/ui";
 import { Field } from "@web/fields/field";
 import { Group } from "@web/views/relational_model";
 import { ViewButton } from "@web/views/view_button/view_button";
@@ -52,12 +52,8 @@ const FIXED_FIELD_COLUMN_WIDTHS = {
     handle: "33px",
 };
 
-let FOCUSABLE_SELECTOR = "button, input, select, textarea,".split(",").join(":not(:disabled),");
-FOCUSABLE_SELECTOR = FOCUSABLE_SELECTOR.slice(0, FOCUSABLE_SELECTOR.length - 1);
 function getElementToFocus(cell) {
-    let toFocus = cell.querySelector(".o_focusable");
-    toFocus = toFocus || cell.querySelector(FOCUSABLE_SELECTOR);
-    return toFocus || cell;
+    return getTabableElements(cell)[0] || cell;
 }
 
 export class ListRenderer extends Component {
@@ -838,6 +834,38 @@ export class ListRenderer extends Component {
         }
     }
 
+    findNextFocusableOnRow(row, cell) {
+        const children = [...row.children];
+        const index = children.indexOf(cell);
+        const nextCells = children.slice(index + 1);
+        for (const c of nextCells) {
+            if (!c.classList.contains("o_data_cell")) {
+                break;
+            }
+            const toFocus = getElementToFocus(c);
+            if (toFocus !== c) {
+                return toFocus;
+            }
+        }
+        return null;
+    }
+
+    findPreviousFocusableOnRow(row, cell) {
+        const children = [...row.children];
+        const index = children.indexOf(cell);
+        const previousCells = children.slice(0, index);
+        for (const c of previousCells.reverse()) {
+            if (!c.classList.contains("o_data_cell")) {
+                break;
+            }
+            const toFocus = getElementToFocus(c);
+            if (toFocus !== c) {
+                return toFocus;
+            }
+        }
+        return null;
+    }
+
     /**
      * @param {string} hotkey
      * @param {HTMLTableCellElement} cell
@@ -847,35 +875,113 @@ export class ListRenderer extends Component {
      * @returns {boolean} true if some behavior has been taken
      */
     onCellKeydownEditMode(hotkey, cell, record) {
-        const { editable, list } = this.props;
+        const { activeActions, cycleOnTab, editable, list } = this.props;
         const row = cell.parentElement;
-        const children = [...row.children];
-        const index = children.indexOf(cell);
-        const nextCells = children.slice(index + 1);
         let toFocus = null;
         switch (hotkey) {
             case "tab":
-                for (const c of nextCells) {
-                    if (!c.classList.contains("o_data_cell")) {
-                        break;
-                    }
-                    toFocus = getElementToFocus(c);
-                    if (toFocus !== c) {
-                        break;
-                    } else {
-                        toFocus = null;
-                    }
-                }
+                toFocus = this.findNextFocusableOnRow(row, cell);
                 if (toFocus) {
                     toFocus.focus();
                     this.tableRef.el.querySelector("tbody").classList.add("o_keyboard_navigation");
                 } else {
-                    throw new Error("To implement");
+                    const applyMultiEditBehavior = record.selected && list.model.multiEdit;
+                    if (applyMultiEditBehavior) {
+                        if (!record.isDirty) {
+                            const index = list.selection.indexOf(record);
+                            const futureRecord = list.selection[index + 1] || list.selection[0];
+                            if (record === futureRecord) {
+                                // Refocus first cell of same record
+                                toFocus = this.findNextFocusableOnRow(row);
+                                toFocus.focus();
+                            } else {
+                                futureRecord.switchMode("edit");
+                            }
+                        }
+                    } else {
+                        const index = list.records.indexOf(record);
+                        if (index === list.records.length - 1) {
+                            if (
+                                activeActions &&
+                                (activeActions.canLink || activeActions.canCreate)
+                            ) {
+                                if (record.isNew && !record.isDirty) {
+                                    list.unselectRecord(true);
+                                    return false;
+                                }
+                                // add a line
+                                if (record.checkValidity()) {
+                                    const { context } = this.creates[0];
+                                    this.props.onAdd(context);
+                                }
+                            } else if (record.isDirty) {
+                                if (record.checkValidity()) {
+                                    this.props.onAdd();
+                                }
+                            } else if (cycleOnTab) {
+                                if (record.isNew && !record.isDirty) {
+                                    list.unselectRecord(true);
+                                }
+                                const futureRecord = list.records[0];
+                                if (record === futureRecord) {
+                                    // Refocus first cell of same record
+                                    toFocus = this.findNextFocusableOnRow(row);
+                                    toFocus.focus();
+                                } else {
+                                    futureRecord.switchMode("edit");
+                                }
+                            }
+                        } else {
+                            const futureRecord = list.records[index + 1];
+                            if (record === futureRecord) {
+                                // Refocus first cell of same record
+                                toFocus = this.findNextFocusableOnRow(row);
+                                toFocus.focus();
+                            } else {
+                                futureRecord.switchMode("edit");
+                            }
+                        }
+                    }
+
+                    // if (list.isGrouped || cycleOnTab || index !== list.records.length - 1) {
+                    //     const futureRecord = list.records[index + 1] || list.records[0];
+                    //     if (record === futureRecord) {
+                    //         // Refocus first cell of same record
+                    //         toFocus = this.findNextFocusableOnRow(row);
+                    //         toFocus.focus();
+                    //     } else {
+                    //         futureRecord.switchMode("edit");
+                    //     }
+                    // } else if (
+                    //     !cycleOnTab &&
+                    //     activeActions &&
+                    //     (activeActions.canLink || activeActions.canCreate)
+                    // ) {
+                    //     if (record.isNew && !record.isDirty) {
+                    //         list.unselectRecord(true);
+                    //         return false;
+                    //     }
+                    //     // add a line
+                    //     if (record.checkValidity()) {
+                    //         const { context } = this.creates[0];
+                    //         this.props.onAdd(context);
+                    //     }
+                    // } else {
+                    //     return false;
+                    // }
+                    // }
                 }
                 break;
             case "shift+tab":
+                toFocus = this.findPreviousFocusableOnRow(row, cell);
+                if (toFocus) {
+                    toFocus.focus();
+                    this.tableRef.el.querySelector("tbody").classList.add("o_keyboard_navigation");
+                }
                 break;
             case "enter":
+                // use this.props.list.model.multiEdit somewhere?
+
                 if (!editable && list.selection && list.selection.length === 1) {
                     list.unselectRecord();
                     break;
@@ -980,6 +1086,41 @@ export class ListRenderer extends Component {
         }
 
         return true;
+    }
+
+    async onCreateAction(context) {
+        // TO DISCUSS: is it a use case for owl `batched()` ?
+        if (this.createProm) {
+            return;
+        }
+        this.props.onAdd(context);
+        this.createProm = Promise.resolve();
+        await this.createProm;
+        this.createProm = null;
+    }
+
+    /**
+     * @param {FocusEvent & {
+     *  target: HTMLElement,
+     *  relatedTarget: HTMLElement | null
+     * }} ev
+     */
+    onFocusIn(ev) {
+        const { relatedTarget, target } = ev;
+        const fromOutside = !this.rootRef.el.contains(relatedTarget);
+        if (!fromOutside) {
+            return;
+        }
+
+        const isX2MRowAdder =
+            target.tagName === "A" &&
+            target.parentElement.classList.contains("o_field_x2many_list_row_add");
+        const withinSameUIActiveElement =
+            this.uiService.getActiveElementOf(relatedTarget) === this.activeElement;
+        if (withinSameUIActiveElement && isX2MRowAdder) {
+            const { context } = this.creates[0];
+            this.onCreateAction(context);
+        }
     }
 
     saveOptionalActiveFields() {
@@ -1180,10 +1321,10 @@ ListRenderer.props = [
     "archInfo",
     "openRecord",
     "onAdd?",
-    "creates?",
+    "cycleOnTab?",
     "hasSelectors?",
     "editable?",
     "noContentHelp?",
     "nestedKeyOptionalFieldsData?",
 ];
-ListRenderer.defaultProps = { hasSelectors: false };
+ListRenderer.defaultProps = { hasSelectors: false, cycleOnTab: true };
