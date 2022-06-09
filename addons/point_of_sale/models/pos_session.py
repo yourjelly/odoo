@@ -683,6 +683,8 @@ class PosSession(models.Model):
         invoice_receivable_vals = defaultdict(list)
         invoice_receivable_lines = {}
         for partner, amounts in invoice_receivables.items():
+            if not (amounts['amount'] and amounts['amount_converted']):
+                continue
             commercial_partner = partner.commercial_partner_id
             account_id = commercial_partner.property_account_receivable_id.id
             invoice_receivable_vals[commercial_partner].append(self._get_invoice_receivable_vals(account_id, amounts['amount'], amounts['amount_converted'], partner=commercial_partner))
