@@ -4108,14 +4108,14 @@ QUnit.module('Legacy relational_fields', {
 
         await testUtils.fields.editInput(form.$('.o_field_many2one input'), 'ABC');
         // click create and edit
-        await testUtils.dom.click($('.ui-autocomplete .ui-menu-item a:contains(Create and)').trigger('mouseenter'));
+        testUtils.dom.click($('.ui-autocomplete .ui-menu-item a:contains(Create and)').trigger('mouseenter'));
 
         // hit escape immediately
         var escapeKey = $.ui.keyCode.ESCAPE;
         $(document.activeElement).trigger(
             $.Event('keydown', {which: escapeKey, keyCode: escapeKey}));
 
-        assert.ok('did not crash');
+        assert.containsNone(document.body, ".modal");
         relationalFields.FieldMany2One.prototype.AUTOCOMPLETE_DELAY = M2O_DELAY;
         form.destroy();
     });
