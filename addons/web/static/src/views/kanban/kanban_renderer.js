@@ -508,18 +508,22 @@ export class KanbanRenderer extends Component {
             context[`default_${group.groupByField.name}`] = group.value;
             context.default_name = values.name || values.display_name;
             this.dialogClose.push(
-                this.dialog.add(FormViewDialog, {
-                    resModel: this.props.list.resModel,
-                    context,
-                    title: this.env._t("Create"),
-                    onRecordSaved: (record) => {
-                        group.addRecord(record, 0);
-                        this.props.list.quickCreate(group);
+                this.dialog.add(
+                    FormViewDialog,
+                    {
+                        resModel: this.props.list.resModel,
+                        context,
+                        title: this.env._t("Create"),
+                        onRecordSaved: (record) => {
+                            group.addRecord(record, 0);
+                        },
                     },
-                    onRecordDiscarded: (record) => {
-                        this.props.list.quickCreate(group);
-                    },
-                })
+                    {
+                        onClose: () => {
+                            this.props.list.quickCreate(group);
+                        },
+                    }
+                )
             );
         }
 

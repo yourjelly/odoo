@@ -6730,11 +6730,10 @@ QUnit.module("Views", (hooks) => {
             arch: '<tree editable="bottom"><field name="foo"/><field name="int_field"/></tree>',
             mockRPC: function (route) {
                 assert.step(route);
-                return this._super.apply(this, arguments);
             },
         });
-
-        await click($(target).find("td:contains(blip)").last());
+        const rows = target.querySelectorAll(".o_data_row");
+        await click(rows[3].querySelector(".o_data_cell"));
         assert.strictEqual(
             document.activeElement.name,
             "foo",
@@ -6743,22 +6742,19 @@ QUnit.module("Views", (hooks) => {
 
         //it will not create a new line unless a modification is made
         document.activeElement.value = "blip-changed";
-        $(document.activeElement).trigger({ type: "change" });
+        await triggerEvent(document.activeElement, null, "change");
+        triggerHotkey("Tab");
+        await nextTick();
 
-        await testUtils.fields.triggerKeydown(
-            $(target).find('tr.o_selected_row input[name="foo"]'),
-            "tab"
-        );
         assert.strictEqual(
             document.activeElement.name,
             "int_field",
             "focus should be on an input with name = int_field"
         );
 
-        await testUtils.fields.triggerKeydown(
-            $(target).find('tr.o_selected_row input[name="foo"]'),
-            "tab"
-        );
+        triggerHotkey("Tab");
+        await nextTick();
+
         assert.hasClass(
             $(target).find("tr.o_data_row:eq(4)"),
             "o_selected_row",
@@ -6886,10 +6882,12 @@ QUnit.module("Views", (hooks) => {
                     return {
                         ...result,
                         doAction(id, { additionalContext }) {
-                            assert.step(JSON.stringify({ action_id: id, context: additionalContext }));
+                            assert.step(
+                                JSON.stringify({ action_id: id, context: additionalContext })
+                            );
                         },
                     };
-                }
+                },
             });
 
             await makeView({
@@ -6967,10 +6965,12 @@ QUnit.module("Views", (hooks) => {
                     return {
                         ...result,
                         doAction(id, { additionalContext }) {
-                            assert.step(JSON.stringify({ action_id: id, context: additionalContext }));
+                            assert.step(
+                                JSON.stringify({ action_id: id, context: additionalContext })
+                            );
                         },
                     };
-                }
+                },
             });
 
             await makeView({
@@ -8921,8 +8921,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    // Need keynav Enter
-    QUnit.skipWOWL(
+    QUnit.test(
         "editable list view: non dirty record with required fields",
         async function (assert) {
             await makeView({
@@ -8970,17 +8969,15 @@ QUnit.module("Views", (hooks) => {
             assert.containsOnce(target, ".o_selected_row");
 
             // do not change anything and press Enter key should not allow to discard record
-            await testUtils.fields.triggerKeydown(
-                target.querySelector('tr.o_selected_row input.o_field_widget[name="foo"]'),
-                "enter"
-            );
+            triggerHotkey("Enter");
+            await nextTick();
             assert.containsOnce(target, ".o_selected_row");
 
             // discard row and create new record and keep required field empty and click anywhere
             await click(target.querySelector(".o_list_button_discard"));
             await click(target, ".o_list_button_add");
             assert.containsOnce(target, ".o_selected_row", "row should be selected");
-            await editInput(target, ".o_selected_row .o_field_widget[name=int_field]", 123);
+            await editInput(target, ".o_selected_row [name=int_field] input", 123);
             await click(target, ".o_list_view");
             assert.containsOnce(target, ".o_selected_row", "row should still be selected");
         }
@@ -9022,7 +9019,7 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-        assert.verifySteps(["/web/dataset/search_read"]);
+        assert.verifySteps(["get_views", "web_search_read"]);
 
         // select two records
         const rows = target.querySelectorAll(".o_data_row");
