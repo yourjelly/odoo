@@ -11,7 +11,7 @@ const { Component, useEffect, xml } = owl;
 const fieldRegistry = registry.category("fields");
 
 const legacyFieldTemplate = xml`
-    <FieldAdapter Component="FieldWidget" fieldParams="fieldParams" update.bind="update" />`;
+    <FieldAdapter Component="FieldWidget" fieldParams="fieldParams" update.bind="update" record="props.record"/>`;
 
 // -----------------------------------------------------------------------------
 // FieldAdapter
@@ -101,6 +101,17 @@ class FieldAdapter extends ComponentAdapter {
                 payload.onSuccess();
             }
             // TODO: handle onFailure?
+        } else if (evType === "reload") {
+            const record = this.props.record;
+            if (payload.db_id === record.id) {
+                await record.load();
+            } else {
+                await record.model.root.load();
+            }
+            record.model.notify();
+            if (payload.onSuccess) {
+                payload.onSuccess();
+            }
         }
         super._trigger_up(...arguments);
     }
@@ -141,7 +152,7 @@ function mapDatapoint(datapoint) {
 function mapStaticListDatapoint(staticList) {
     return {
         ...mapDatapoint(staticList),
-        res_ids: staticList.resIds,
+        res_ids: staticList.currentIds,
         data: staticList.records.map(mapRecordDatapoint),
         groupedBy: [],
         orderedBy: staticList.orderBy,
