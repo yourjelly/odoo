@@ -35,7 +35,7 @@ const serviceRegistry = registry.category("services");
 const widgetRegistry = registry.category("view_widgets");
 
 // WOWL remove after adapting tests
-let testUtils, RamStorage, AbstractStorageService;
+let testUtils;
 
 let target, serverData;
 QUnit.module("Views", (hooks) => {
@@ -9658,8 +9658,7 @@ QUnit.module("Views", (hooks) => {
                 arch: `<form><field name="qux"/><field name="p"><tree><field name="foo"/><field name="bar" optional="hide"/></tree></field></form>`,
             });
 
-            const localStorageKey =
-                "optional_fields,partner,form,100000001,p,list,undefined,bar,foo";
+            const localStorageKey = "optional_fields,partner,form,100000001,p,list,bar,foo";
 
             assert.containsN(
                 target,
@@ -9713,89 +9712,91 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "form view with tree_view_ref with optional fields and local storage mock",
         async function (assert) {
-            assert.expect(12);
+            assert.expect(10);
 
-            var Storage = RamStorage.extend({
+            patchWithCleanup(browser.localStorage, {
                 getItem: function (key) {
                     assert.step("getItem " + key);
-                    return this._super.apply(this, arguments);
+                    return this._super(key);
                 },
                 setItem: function (key, value) {
                     assert.step("setItem " + key + " to " + value);
-                    return this._super.apply(this, arguments);
+                    return this._super(key, value);
                 },
             });
 
-            var RamStorageService = AbstractStorageService.extend({
-                storage: new Storage(),
-            });
+            serverData.views = {
+                "partner,nope_not_this_one,list":
+                    "<tree>" + '<field name="foo"/>' + '<field name="bar"/>' + "</tree>",
+                "partner,34,list":
+                    "<tree>" +
+                    '<field name="foo" optional="hide"/>' +
+                    '<field name="bar"/>' +
+                    "</tree>",
+            };
 
             await makeView({
                 type: "form",
                 resModel: "partner",
                 serverData,
-                arch:
-                    "<form>" +
-                    '<field name="qux"/>' +
-                    "<field name=\"p\" context=\"{'tree_view_ref': '34'}\"/>" +
-                    "</form>",
-                archs: {
-                    "partner,nope_not_this_one,list":
-                        "<tree>" + '<field name="foo"/>' + '<field name="bar"/>' + "</tree>",
-                    "partner,34,list":
-                        "<tree>" +
-                        '<field name="foo" optional="hide"/>' +
-                        '<field name="bar"/>' +
-                        "</tree>",
-                },
-                services: {
-                    local_storage: RamStorageService,
-                },
-                view_id: 27,
+                // we add a widget= as a bit of a hack. Without widget, the views are inlined by the server.
+                // the mock server doesn't replicate fully this behavior.
+                // Putting a widget prevent the inlining.
+                arch: `<form><field name="qux"/><field name="p" widget="one2many" context="{'tree_view_ref': '34'}"/></form>`,
             });
 
-            var localStorageKey = "optional_fields,partner,form,27,p,list,34,bar,foo";
+            const localStorageKey = "optional_fields,partner,form,100000001,p,list,bar,foo";
 
-            assert.containsN(target, "th", 2, "should have 2 th, 1 for selector, 1 for foo column");
+            assert.containsN(
+                target,
+                ".o_list_table th",
+                2,
+                "should have 2 th, 1 bar selector, 1 for foo column"
+            );
 
             assert.notOk(
-                target.querySelector("th:contains(Foo)").is(":visible"),
-                "should have a visible foo field"
+                target.querySelector(`th[data-name="foo"]`),
+                "should not have a visible foo field"
             );
 
             assert.ok(
-                target.querySelector("th:contains(Bar)").is(":visible"),
-                "should not have a visible bar field"
+                target.querySelector(`th[data-name="bar"]`),
+                "should have a visible bar field"
             );
 
             // optional fields
-            await click(target.querySelector("table .o_optional_columns_dropdown_toggle"));
+            await click(target.querySelector(".o_optional_columns_dropdown .dropdown-toggle"));
             assert.containsN(
                 target,
-                "div.o_optional_columns div.dropdown-item",
+                ".o_optional_columns_dropdown .dropdown-item",
                 1,
                 "dropdown have 1 optional field"
             );
 
             // enable optional field
-            await click(target.querySelector("div.o_optional_columns div.dropdown-item input"));
-
+            await click(target.querySelector(`.o_optional_columns_dropdown input[name="foo"]`));
             assert.verifySteps([
-                "setItem " + localStorageKey + ' to ["foo"]',
                 "getItem " + localStorageKey,
+                "setItem " + localStorageKey + " to foo",
             ]);
-            assert.containsN(target, "th", 3, "should have 3 th, 1 for selector, 2 for columns");
+
+            assert.containsN(
+                target,
+                ".o_list_table th",
+                3,
+                "should have 3 th, 1 for selector, 2 for columns"
+            );
 
             assert.ok(
-                target.querySelector("th:contains(Foo)").is(":visible"),
+                target.querySelector(`th[data-name="foo"]`),
                 "should have a visible foo field"
             );
 
             assert.ok(
-                target.querySelector("th:contains(Bar)").is(":visible"),
+                target.querySelector(`th[data-name="bar"]`),
                 "should have a visible bar field"
             );
         }
