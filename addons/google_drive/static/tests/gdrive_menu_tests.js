@@ -3,6 +3,8 @@ import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 import { getFixture, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { toggleActionMenu, toggleMenuItem, pagerNext } from "@web/../tests/search/helpers";
 import { browser } from "@web/core/browser/browser";
+import { registry } from "@web/core/registry";
+import { googleDriveActionMenu } from "@google_drive/gdrive_menu";
 
 QUnit.module('Google Drive Integration', (hooks) => {
     let serverData;
@@ -23,6 +25,7 @@ QUnit.module('Google Drive Integration', (hooks) => {
         };
         target = getFixture();
         setupViewRegistries();
+        registry.category("action_menus").add("google-drive-menu", googleDriveActionMenu);
     });
 
     QUnit.module('Google Drive ActionMenus');

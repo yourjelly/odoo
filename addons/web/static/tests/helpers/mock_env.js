@@ -70,6 +70,7 @@ export function prepareRegistriesWithCleanup() {
     clearRegistryWithCleanup(registry.category("user_menuitems"));
     clearRegistryWithCleanup(registry.category("kanban_examples"));
     clearRegistryWithCleanup(registry.category("__processed_archs__"));
+    clearRegistryWithCleanup(registry.category("action_menus"));
     // fun fact: at least one registry is missing... this shows that we need a
     // better design for the way we clear these registries...
 }
