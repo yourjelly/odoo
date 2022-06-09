@@ -519,7 +519,7 @@ import { canDefaultBehaviorHappen } from "./helpers/utils";
 
     QUnit.begin(() => {
         const el = document.createElement("style");
-        el.innerText = "details:not([open]) > :not(summary) { display: none; }";
+        el.innerText = "details:not([open]) > :not(summary) { display: none; } .skipped { display: none !important }";
         document.head.appendChild(el);
     });
 })();
