@@ -34,6 +34,7 @@ class AccountMove(models.Model):
         compute='_compute_edi_show_cancel_button')
     edi_show_abandon_cancel_button = fields.Boolean(
         compute='_compute_edi_show_abandon_cancel_button')
+    edi_tax_detail = fields.Binary(compute='_compute_edi_tax_detail')
 
     @api.depends('edi_document_ids.state')
     def _compute_edi_state(self):
@@ -161,6 +162,10 @@ class AccountMove(models.Model):
         tax_details['tax_amount_currency'] += tax_values['tax_amount_currency']
         tax_details['exemption_reason'] = tax_values['tax_id'].name
         tax_details['group_tax_details'].append(tax_values)
+
+    def _compute_edi_tax_detail(self):
+        for invoice in self:
+            invoice.edi_tax_detail = invoice._prepare_edi_tax_details()
 
     def _prepare_edi_tax_details(self, filter_to_apply=None, filter_invl_to_apply=None, grouping_key_generator=None, compute_mode='tax_details'):
         ''' Compute amounts related to taxes for the current invoice.

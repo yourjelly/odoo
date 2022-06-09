@@ -2822,23 +2822,20 @@ class AccountMove(models.Model):
             if wrong_lines:
                 wrong_lines.write({'partner_id': move.commercial_partner_id.id})
 
-        to_post.write({
-            'state': 'posted',
-            'posted_before': True,
-        })
+        to_post.state = 'posted'
+        to_post.posted_before = True
 
         for move in to_post:
             move.message_subscribe([p.id for p in [move.partner_id] if p not in move.sudo().message_partner_ids])
 
             # Compute 'ref' for 'out_invoice'.
             if move._auto_compute_invoice_reference():
-                to_write = {
-                    'payment_reference': move._get_invoice_computed_reference(),
-                    'line_ids': []
-                }
-                for line in move.line_ids.filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable')):
-                    to_write['line_ids'].append((1, line.id, {'name': to_write['payment_reference']}))
-                move.write(to_write)
+                payment_reference = move._get_invoice_computed_reference()
+                move.payment_reference = payment_reference
+                move.line_ids\
+                    .filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable'))\
+                    .with_context(check_move_validity=False, tracking_disable=False)\
+                    .name = payment_reference
 
         for move in to_post:
             if move.is_sale_document() \
