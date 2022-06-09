@@ -217,7 +217,6 @@ export class X2ManyField extends Component {
             field: this.props.name,
             model: this.props.record.resModel,
             viewMode: this.props.record.viewMode || this.props.record.__viewType,
-            viewId: "undefined",
         };
     }
 }

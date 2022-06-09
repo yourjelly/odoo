@@ -378,18 +378,10 @@ export class ListRenderer extends Component {
                 viewMode: this.props.nestedKeyOptionalFieldsData.viewMode,
                 relationalField: this.props.nestedKeyOptionalFieldsData.field,
                 subViewType: "list",
-                subViewId: this.props.nestedKeyOptionalFieldsData.viewId,
             });
         }
 
-        const parts = [
-            "model",
-            "viewMode",
-            "viewId",
-            "relationalField",
-            "subViewType",
-            "subViewId",
-        ];
+        const parts = ["model", "viewMode", "viewId", "relationalField", "subViewType"];
         const viewIdentifier = ["optional_fields"];
         parts.forEach((partName) => {
             if (partName in keyParts) {
