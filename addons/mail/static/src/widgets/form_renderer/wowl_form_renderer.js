@@ -7,15 +7,28 @@ import { registry } from "@web/core/registry";
 import { createElement } from "@web/core/utils/xml";
 import { FormRenderer } from "@web/views/form/form_renderer";
 import { append } from "@web/views/helpers/view_compiler";
+import config from 'web.config';
 
 function compileChatter(node, params) {
     node.classList.remove("oe_chatter");
 
+    // TODO should be done dynamically instead, these props can't be defined
+    // statically like this as they depend on screen size, presence of
+    // attachment preview, ...
+    const isAside = (() => {
+        const parent = node.parentNode;
+        return (
+            config.device.size_class >= config.device.SIZES.XXL &&
+            !this.attachmentViewer &&
+            !(parent && parent.classList && (parent.classList.contains('o_form_sheet') || parent.classList.contains('tab-pane')))
+        );
+    })();
+
     let hasActivities = false;
-    let hasExternalBorder = true;
+    let hasExternalBorder = !isAside;
     let hasFollowers = false;
     let hasMessageList = false;
-    let hasMessageListScrollAdjust = false;
+    let hasMessageListScrollAdjust = isAside;
     let hasParentReloadOnAttachmentsChanged;
     let hasParentReloadOnFollowersUpdate = false;
     let hasParentReloadOnMessagePosted = false;
@@ -42,10 +55,10 @@ function compileChatter(node, params) {
     }
     const chatterContainerXml = createElement("ChatterContainer");
     chatterContainerXml.setAttribute("hasActivities", hasActivities);
-    chatterContainerXml.setAttribute("hasExternalBorder", hasExternalBorder); // TODO enterprise: not aside
+    chatterContainerXml.setAttribute("hasExternalBorder", hasExternalBorder);
     chatterContainerXml.setAttribute("hasFollowers", hasFollowers);
     chatterContainerXml.setAttribute("hasMessageList", hasMessageList);
-    chatterContainerXml.setAttribute("hasMessageListScrollAdjust", hasMessageListScrollAdjust); // TODO enterprise: aside
+    chatterContainerXml.setAttribute("hasMessageListScrollAdjust", hasMessageListScrollAdjust);
     chatterContainerXml.setAttribute("hasParentReloadOnAttachmentsChanged", hasParentReloadOnAttachmentsChanged);
     chatterContainerXml.setAttribute("hasParentReloadOnFollowersUpdate", hasParentReloadOnFollowersUpdate);
     chatterContainerXml.setAttribute("hasParentReloadOnMessagePosted", hasParentReloadOnMessagePosted);
@@ -57,6 +70,9 @@ function compileChatter(node, params) {
 
     const chatterContainerHookXml = createElement("div");
     chatterContainerHookXml.classList.add("o_FormRenderer_chatterContainer");
+    if (isAside) {
+        chatterContainerHookXml.classList.add("o-aside");
+    }
     append(chatterContainerHookXml, chatterContainerXml);
     return chatterContainerHookXml;
 }
