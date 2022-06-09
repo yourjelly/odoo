@@ -616,7 +616,7 @@ QUnit.test('Mobile: opening a chat window should not update channel state on the
         ],
     });
     patchUiSize({ size: SIZES.SM });
-    const { click, createMessagingMenuComponent } = await start();
+    const { click, createMessagingMenuComponent, env, messaging } = await start();
     await createMessagingMenuComponent();
     await click(`.o_MessagingMenu_toggler`);
     await click(`.o_NotificationList_preview`);
@@ -625,6 +625,7 @@ QUnit.test('Mobile: opening a chat window should not update channel state on the
         '.o_ChatWindow',
         "should have a chat window after clicking on thread preview"
     );
+    console.log('messaging.env.isSmall', messaging.env.isSmall, messaging.device.isSmall, env.isSmall);
     const [member] = pyEnv['mail.channel.partner'].searchRead([['channel_id', '=', mailChannelId1], ['partner_id', '=', pyEnv.currentPartnerId]]);
     assert.strictEqual(
         member.fold_state,

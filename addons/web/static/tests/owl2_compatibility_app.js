@@ -41,10 +41,11 @@
      * @returns {Promise}
      */
     owl.App.afterNextRender = async function afterNextRender(func, timeoutDelay = 5000) {
+        const currentTest = window.currentTest;
         // Define the potential errors outside of the promise to get a proper
         // trace if they happen.
-        const startError = new Error("Timeout: the render didn't start.");
-        const stopError = new Error("Timeout: the render didn't stop.");
+        const startError = new Error(`Timeout: the render didn't start: ${currentTest.name}.`);
+        const stopError = new Error(`Timeout: the render didn't stop:  ${currentTest.name}.`);
         // Set up the timeout to reject if no render happens.
         let timeoutNoRender;
         const timeoutProm = new Promise((resolve, reject) => {
@@ -53,6 +54,9 @@
                 const runningSchedulers = [...schedulers].filter(({ tasks }) => tasks.size > 0);
                 if (runningSchedulers.length) {
                     error = stopError;
+                }
+                if (currentTest !== window.currentTest) {
+                    console.error(`after next render error overlapping between tests ${currentTest.name} != ${window.currentTest.name}`);
                 }
                 console.error(
                     error,
@@ -75,6 +79,9 @@
         // Make them race (first to resolve/reject wins).
         await Promise.race([prom, timeoutProm]);
         clearTimeout(timeoutNoRender);
+        if (currentTest !== window.currentTest) {
+            console.error(`after next render overlapping between tests ${currentTest.name} != ${window.currentTest.name}`);
+        }
         // Wait the end of the function to ensure all potential effects are
         // taken into account during the following verification step.
         await funcRes;
