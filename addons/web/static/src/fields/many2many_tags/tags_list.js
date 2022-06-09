@@ -27,6 +27,5 @@ TagsList.props = {
     displayBadge: { type: Boolean, optional: true },
     name: { type: String, optional: true },
     itemsVisible: { type: Number, optional: true },
-    slots: { type: Object, optional: true },
     tags: { type: Object, optional: true },
 };

@@ -3889,7 +3889,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector('th[data-name="datetime"]').offsetWidth, width);
     });
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "row height and width should not change when switching mode",
         async function (assert) {
             // Warning: this test is css dependant
@@ -3914,18 +3914,19 @@ QUnit.module("Views", (hooks) => {
                 type: "list",
                 resModel: "foo",
                 serverData,
-                arch:
-                    '<tree editable="top">' +
-                    '<field name="foo" required="1"/>' +
-                    '<field name="int_field" readonly="1"/>' +
-                    '<field name="boolean"/>' +
-                    '<field name="date"/>' +
-                    '<field name="text"/>' +
-                    '<field name="amount"/>' +
-                    '<field name="currency_id" invisible="1"/>' +
-                    '<field name="m2o"/>' +
-                    '<field name="m2m" widget="many2many_tags"/>' +
-                    "</tree>",
+                arch: `
+                    <tree editable="top">
+                        <field name="foo" required="1"/>
+                        <field name="int_field" readonly="1"/>
+                        <field name="boolean"/>
+                        <field name="date"/>
+                        <field name="text"/>
+                        <field name="amount"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="m2o"/>
+                        <field name="m2m" widget="many2many_tags"/>
+                    </tree>
+                `,
             });
             const startHeight = target.querySelector(".o_data_row").offsetHeight;
             const startWidth = target.querySelector(".o_data_row").offsetWidth;
