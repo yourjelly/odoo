@@ -83,9 +83,19 @@ class FieldAdapter extends ComponentAdapter {
                 } else if (fieldType === "one2many" || fieldType === "many2many") {
                     // TODO map all operations
                     if (value.operation === "ADD_M2M") {
+                        const valueIds = value.ids; // can be a lot of stuff
+                        let newIds = [];
+                        if (Array.isArray(valueIds)) {
+                            if (typeof valueIds[0] === "number") {
+                                newIds = valueIds; // not sure if it is a real case: a list of ids
+                            } else if (valueIds.length && "id" in valueIds[0]) {
+                                newIds = valueIds.map(r => r.id);
+                            }
+                        } else if ("id" in valueIds) {
+                            newIds = [valueIds.id];
+                        }
                         value = {
-                            // FIXME value.ids could be a lot of stuff :/
-                            resIds: [...record.data[name].res_ids, value.ids.id],
+                            resIds: [...record.data[name].res_ids, ...newIds],
                             operation: "REPLACE_WITH",
                         };
                     }
