@@ -445,8 +445,18 @@ export class Record extends DataPoint {
     }
 
     get isDirty() {
-        // to change (call isDirty on x2many children...) (maybe not)
-        return this._changes ? Object.keys(this._changes).length > 0 : true;
+        const changes = { ...this._changes };
+        for (const fieldName in changes) {
+            const fieldType = this.fields[fieldName].type;
+            if (["one2many", "many2many"].includes(fieldType)) {
+                if (changes[fieldName].getCommands()) {
+                    return true;
+                }
+            } else {
+                return true;
+            }
+        }
+        return false;
     }
 
     get dirtyFields() {
@@ -456,6 +466,11 @@ export class Record extends DataPoint {
 
     get isInEdition() {
         return this.mode === "edit";
+    }
+
+    get isNew() {
+        // WOWL check if it is enough ?
+        return this.isVirtual;
     }
 
     get isVirtual() {
