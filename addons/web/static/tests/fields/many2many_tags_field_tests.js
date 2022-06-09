@@ -1383,168 +1383,163 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL(
-        "LPE: check AAB" + "many2many_tags widget: conditional create/delete actions",
-        async function (assert) {
-            assert.expect(10);
+    QUnit.test("many2many_tags widget: conditional create/delete actions", async function (assert) {
+        assert.expect(10);
 
-            serverData.models.turtle.records[0].partner_ids = [2];
-            for (var i = 1; i <= 10; i++) {
-                serverData.models.partner.records.push({
-                    id: 100 + i,
-                    display_name: "Partner" + i,
-                });
-            }
+        serverData.models.turtle.records[0].partner_ids = [2];
+        for (var i = 1; i <= 10; i++) {
+            serverData.models.partner.records.push({
+                id: 100 + i,
+                display_name: "Partner" + i,
+            });
+        }
 
-            serverData.views = {
-                "partner,false,list": '<tree><field name="name"/></tree>',
-                "partner,false,search": "<search/>",
-            };
+        serverData.views = {
+            "partner,false,list": '<tree><field name="name"/></tree>',
+            "partner,false,search": "<search/>",
+        };
 
-            let nameSearchProm = makeDeferred();
-            await makeView({
-                type: "form",
-                resModel: "turtle",
-                serverData,
-                arch: `
+        let nameSearchProm = makeDeferred();
+        await makeView({
+            type: "form",
+            resModel: "turtle",
+            serverData,
+            arch: `
                 <form>
                     <field name="display_name"/>
                     <field name="turtle_bar"/>
                     <field name="partner_ids" options="{'create': [('turtle_bar', '=', True)], 'delete': [('turtle_bar', '=', True)]}" widget="many2many_tags"/>
                 </form>`,
-                resId: 1,
-                mockRPC(route, args) {
-                    if (args.method === "name_search") {
-                        nameSearchProm.resolve();
-                    }
-                },
-            });
+            resId: 1,
+            mockRPC(route, args) {
+                if (args.method === "name_search") {
+                    nameSearchProm.resolve();
+                }
+            },
+        });
 
-            await clickEdit(target);
+        await clickEdit(target);
 
-            // turtle_bar is true -> create and delete actions are available
-            assert.containsOnce(
-                target,
-                ".o_field_many2many_tags.o_field_widget .badge .o_delete",
-                "X icon on badges should not be available"
-            );
+        // turtle_bar is true -> create and delete actions are available
+        assert.containsOnce(
+            target,
+            ".o_field_many2many_tags.o_field_widget .badge .o_delete",
+            "X icon on badges should not be available"
+        );
 
-            await clickDropdown(target, "partner_ids");
-            await nameSearchProm;
-            await nextTick();
+        await clickDropdown(target, "partner_ids");
+        await nameSearchProm;
+        await nextTick();
 
-            const $dropdown1 = $(target.querySelector(".o-autocomplete.dropdown"));
-            assert.containsOnce(
-                $dropdown1,
-                "li.o_m2o_start_typing a:contains(Start typing...)",
-                "autocomplete should contain Start typing..."
-            );
+        const $dropdown1 = $(target.querySelector(".o-autocomplete.dropdown"));
+        assert.containsOnce(
+            $dropdown1,
+            "li.o_m2o_start_typing a:contains(Start typing...)",
+            "autocomplete should contain Start typing..."
+        );
 
-            await clickOpenedDropdownItem(target, "partner_ids", "Search More...");
+        await clickOpenedDropdownItem(target, "partner_ids", "Search More...");
 
-            assert.containsN(
-                target,
-                ".modal .modal-footer button",
-                3,
-                "there should be 3 buttons (Select, Create and Cancel) available in the modal footer"
-            );
+        assert.containsN(
+            target,
+            ".modal .modal-footer button",
+            3,
+            "there should be 3 buttons (Select, Create and Cancel) available in the modal footer"
+        );
 
-            await click($(".modal .modal-footer .o_form_button_cancel")[0]);
+        await click($(".modal .modal-footer .o_form_button_cancel")[0]);
 
-            // type something that doesn't exist
-            nameSearchProm = makeDeferred();
-            const input = target.querySelector(".o_field_many2many_tags input");
+        // type something that doesn't exist
+        nameSearchProm = makeDeferred();
+        const input = target.querySelector(".o_field_many2many_tags input");
 
-            await triggerEvent(input, null, "focus");
-            await nextTick();
-            input.value = "Something that does not exist";
+        await triggerEvent(input, null, "focus");
+        await nextTick();
+        input.value = "Something that does not exist";
 
-            await triggerEvent(input, null, "keydown", {
-                code: "ArrowDown",
-                key: "ArrowDown",
-                bubbles: true,
-            });
-            await nameSearchProm;
-            await nextTick();
+        await triggerEvent(input, null, "keydown", {
+            code: "ArrowDown",
+            key: "ArrowDown",
+            bubbles: true,
+        });
+        await nameSearchProm;
+        await nextTick();
 
-            assert.containsN(
-                $(target.querySelector(".o-autocomplete.dropdown")),
-                "li.o_m2o_dropdown_option",
-                2,
-                "autocomplete should contain Create and Create and Edit... options"
-            );
+        assert.containsN(
+            $(target.querySelector(".o-autocomplete.dropdown")),
+            "li.o_m2o_dropdown_option",
+            2,
+            "autocomplete should contain Create and Create and Edit... options"
+        );
 
-            // set turtle_bar false -> create and delete actions are no longer available
-            await click(
-                $(target.querySelector('.o_field_widget[name="turtle_bar"] input')).first()[0]
-            );
-            await nextTick();
+        // set turtle_bar false -> create and delete actions are no longer available
+        await click($(target.querySelector('.o_field_widget[name="turtle_bar"] input')).first()[0]);
+        await nextTick();
 
-            // remove icon should still be there as it doesn't delete records but rather remove links
-            assert.containsOnce(
-                target,
-                ".o_field_many2many_tags.o_field_widget .badge .o_delete",
-                "X icon on badge should still be there even after turtle_bar is not checked"
-            );
+        // remove icon should still be there as it doesn't delete records but rather remove links
+        assert.containsOnce(
+            target,
+            ".o_field_many2many_tags.o_field_widget .badge .o_delete",
+            "X icon on badge should still be there even after turtle_bar is not checked"
+        );
 
-            nameSearchProm = makeDeferred();
-            await clickDropdown(target, "partner_ids");
-            await nameSearchProm;
-            await nextTick();
+        nameSearchProm = makeDeferred();
+        await clickDropdown(target, "partner_ids");
+        await nameSearchProm;
+        await nextTick();
 
-            // only Search More option should be available
-            assert.containsOnce(
-                $(target.querySelector(".o-autocomplete.dropdown")),
-                "li.o_m2o_dropdown_option",
-                "autocomplete should contain only one option"
-            );
-            assert.containsOnce(
-                $(target.querySelector(".o-autocomplete.dropdown")),
-                "li.o_m2o_dropdown_option a:contains(Search More...)",
-                "autocomplete option should be Search More"
-            );
+        // only Search More option should be available
+        assert.containsOnce(
+            $(target.querySelector(".o-autocomplete.dropdown")),
+            "li.o_m2o_dropdown_option",
+            "autocomplete should contain only one option"
+        );
+        assert.containsOnce(
+            $(target.querySelector(".o-autocomplete.dropdown")),
+            "li.o_m2o_dropdown_option a:contains(Search More...)",
+            "autocomplete option should be Search More"
+        );
 
-            await clickOpenedDropdownItem(target, "partner_ids", "Search More...");
+        await clickOpenedDropdownItem(target, "partner_ids", "Search More...");
 
-            assert.containsN(
-                document.body,
-                ".modal .modal-footer button",
-                2,
-                "there should be 2 buttons (Select and Cancel) available in the modal footer"
-            );
+        assert.containsN(
+            document.body,
+            ".modal .modal-footer button",
+            2,
+            "there should be 2 buttons (Select and Cancel) available in the modal footer"
+        );
 
-            await click($(".modal .modal-footer .o_form_button_cancel")[0]);
+        await click($(".modal .modal-footer .o_form_button_cancel")[0]);
 
-            // type something that does exist in multiple occurrences
-            // LPE: to check with AAB
-            nameSearchProm = makeDeferred();
+        // type something that does exist in multiple occurrences
+        // LPE: to check with AAB
+        nameSearchProm = makeDeferred();
 
-            await triggerEvent(input, null, "focus");
-            await nextTick();
-            input.value = "Pa";
+        await triggerEvent(input, null, "focus");
+        await nextTick();
+        input.value = "Pa";
 
-            await triggerEvent(input, null, "keydown", {
-                code: "ArrowUp",
-                key: "ArrowUp",
-                bubbles: true,
-            });
-            await nextTick();
-            await nameSearchProm;
-            await nextTick();
+        await triggerEvent(input, null, "keydown", {
+            code: "ArrowUp",
+            key: "ArrowUp",
+            bubbles: true,
+        });
+        await nextTick();
+        await nameSearchProm;
+        await nextTick();
 
-            // only Search More option should be available
-            assert.containsOnce(
-                $(target.querySelector(".o-autocomplete.dropdown")),
-                "li.o_m2o_dropdown_option",
-                "autocomplete should contain only one option"
-            );
-            assert.containsOnce(
-                $(target.querySelector(".o-autocomplete.dropdown")),
-                "li.o_m2o_dropdown_option a:contains(Search More)",
-                "autocomplete option should be Search More"
-            );
-        }
-    );
+        // only Search More option should be available
+        assert.containsOnce(
+            $(target.querySelector(".o-autocomplete.dropdown")),
+            "li.o_m2o_dropdown_option",
+            "autocomplete should contain only one option"
+        );
+        assert.containsOnce(
+            $(target.querySelector(".o-autocomplete.dropdown")),
+            "li.o_m2o_dropdown_option a:contains(Search More)",
+            "autocomplete option should be Search More"
+        );
+    });
 
     QUnit.test("failing many2one quick create in a many2many_tags", async function (assert) {
         assert.expect(5);
