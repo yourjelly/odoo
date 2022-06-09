@@ -227,8 +227,6 @@ class TestUBLDE(TestUBLCommon):
             'urn:cen.eu:en16931:2017#compliant#urn:xoev-de:kosit:standard:xrechnung_2.2#conformant#urn:xoev-de:kosit:extension:xrechnung_2.2'
         )
 
-        journal_id = self.company_data['default_journal_sale']
-        action_vals = journal_id.with_context(default_move_type='in_invoice').create_invoice_from_attachment(
-            attachment.ids)
-        created_bill = self.env['account.move'].browse(action_vals['res_id'])
+        created_bill = self.env['account.move'].create({'move_type': 'in_invoice'})
+        created_bill.message_post(attachment_ids=[attachment.id])
         self.assertTrue(created_bill)

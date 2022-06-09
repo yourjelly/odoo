@@ -32,7 +32,7 @@ class AccountEdiXmlUBLNL(models.AbstractModel):
     def _export_invoice_filename(self, invoice):
         return f"{invoice.name.replace('/', '_')}_nlcius.xml"
 
-    def _export_invoice_ecosio_ids(self):
+    def _export_invoice_ecosio_schematrons(self):
         return {
             'invoice': 'org.simplerinvoicing:invoice:2.0.3.3',
             'credit_note': 'org.simplerinvoicing:creditnote:2.0.3.3',

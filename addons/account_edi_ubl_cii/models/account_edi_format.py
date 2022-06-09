@@ -11,11 +11,11 @@ _logger = logging.getLogger(__name__)
 
 FORMAT_CODES = [
     'facturx_1_0_05',
-    'ubl_2_1',
     'ubl_bis3',
     'ubl_de',
     'nlcius_1',
-    'ehf_3',
+    'efff_1',
+    'ubl_2_1',
 ]
 
 class AccountEdiFormat(models.Model):
@@ -50,11 +50,8 @@ class AccountEdiFormat(models.Model):
         # page 45 -> ubl 2.1 for France seems also supported
         if self.code == 'facturx_1_0_05':
             return self.env['account.edi.xml.cii']
-        if self.code == 'ubl_20':
-            return self.env['account.edi.xml.ubl_20']
-        if self.code == 'ubl_2_1':
-            return self.env['account.edi.xml.ubl_21']
         # if the company's country is not in the EAS mapping, nothing is generated
+        # 'NO' has to be present in COUNTRY_EAS
         if self.code == 'ubl_bis3' and company.country_id.code in COUNTRY_EAS:
             return self.env['account.edi.xml.ubl_bis3']
         # the EDI option will only appear on the journal of dutch companies
@@ -63,8 +60,10 @@ class AccountEdiFormat(models.Model):
         # the EDI option will only appear on the journal of german companies
         if self.code == 'ubl_de' and company.country_id.code == 'DE':
             return self.env['account.edi.xml.ubl_de']
+        if self.code == 'efff_1' and company.country_id.code == 'BE':
+            return self.env['account.edi.xml.ubl_efff']
 
-    def _check_ubl_cii_availability(self, company):
+    def _is_ubl_cii_available(self, company):
         """
         Returns a boolean indicating whether it is possible to generate an xml file using one of the formats from this
         module or not
@@ -78,28 +77,26 @@ class AccountEdiFormat(models.Model):
     def _is_required_for_invoice(self, invoice):
         # EXTENDS account_edi
         self.ensure_one()
-
         if self.code not in FORMAT_CODES:
             return super()._is_required_for_invoice(invoice)
 
-        if invoice.move_type not in ('out_invoice', 'out_refund') or not self._check_ubl_cii_availability(invoice.company_id):
-            return False
-        return True
+        return self._is_ubl_cii_available(invoice.company_id) and invoice.move_type in ('out_invoice', 'out_refund')
 
-    def _check_move_configuration(self, move):
+    def _is_compatible_with_journal(self, journal):
         # EXTENDS account_edi
-        return []
+        # the formats appear on the journal only if they are compatible (e.g. NLCIUS only appear for dutch companies)
+        self.ensure_one()
+        if self.code not in FORMAT_CODES:
+            return super()._is_compatible_with_journal(journal)
+        return self._is_ubl_cii_available(journal.company_id)
 
     def _is_enabled_by_default_on_journal(self, journal):
         # EXTENDS account_edi
+        # only facturx is enabled by default, the other formats aren't
         self.ensure_one()
-
-        # only treat the format created in this module, for the others (like facturx_1_0_05, nlcius_1, ehf_3),
-        # keep the behaviour unchanged
-        if self.code in ['ubl_de', 'ubl_bis3']:
-            return False
-
-        return super()._is_enabled_by_default_on_journal(journal)
+        if self.code not in FORMAT_CODES:
+            return super()._is_enabled_by_default_on_journal(journal)
+        return self.code == 'facturx_1_0_05'
 
     def _post_invoice_edi(self, invoices, test_mode=False):
         # EXTENDS account_edi
@@ -108,31 +105,22 @@ class AccountEdiFormat(models.Model):
         if self.code not in FORMAT_CODES:
             return super()._post_invoice_edi(invoices)
 
-        # if the builder is empty (for instance, Bis 3 cannot be generated if the company is not in EAS)
-        if not self._check_ubl_cii_availability(invoices.company_id):
-            for invoice in invoices:
-                # we don't want the edi_document to appear on the account_move, tab "EDI documents" with state
-                # 'To Send' forever (because it will never be generated), otherwise, we cannot uncheck the edi_format
-                # on the journal ("because some documents are not synchronised", since they are not send)
-                #invoice.edi_document_ids.filtered(lambda doc: doc.edi_format_id == self).state = 'cancelled'
-                pass
-            return super()._post_invoice_edi(invoices)
-
         res = {}
         for invoice in invoices:
             builder = self._get_xml_builder(invoice.company_id)
             xml_content, errors = builder._export_invoice(invoice)
 
             # DEBUG: send directly to the test platform (the one used by ecosio)
-            #response = self.env['account.edi.common']._check_xml_ecosio(invoice, xml_content, builder._export_invoice_ecosio_ids())
+            #response = self.env['account.edi.common']._check_xml_ecosio(invoice, xml_content, builder._export_invoice_ecosio_schematrons())
 
             attachment_create_vals = {
                 'name': builder._export_invoice_filename(invoice),
                 'raw': xml_content,
                 'mimetype': 'application/xml',
             }
-            # we don't want the facturx xml to appear in the attachment of the invoice when confirming it
-            if self.code != 'facturx_1_0_05':
+            # we don't want the Factur-X and E-FFF xml to appear in the attachment of the invoice when confirming it
+            # E-FFF will appear after the pdf is generated, Factur-X will never appear (it's contained in the PDF)
+            if self.code not in ['facturx_1_0_05', 'efff_1']:
                 attachment_create_vals.update({'res_id': invoice.id, 'res_model': 'account.move'})
 
             attachment = self.env['ir.attachment'].create(attachment_create_vals)
@@ -174,13 +162,14 @@ class AccountEdiFormat(models.Model):
                 pdf_writer.convert_to_pdfa()
             except Exception as e:
                 _logger.exception("Error while converting to PDF/A: %s", e)
-            metadata_template = self.env.ref('account_edi_facturx.account_invoice_pdfa_3_facturx_metadata',
+            metadata_template = self.env.ref('account_edi_ubl_cii.account_invoice_pdfa_3_facturx_metadata',
                                              raise_if_not_found=False)
             if metadata_template:
-                pdf_writer.add_file_metadata(metadata_template._render({
+                content = self.env['ir.qweb']._render('account_edi_ubl_cii.account_invoice_pdfa_3_facturx_metadata', {
                     'title': edi_document.move_id.name,
                     'date': fields.Date.context_today(self),
-                }).encode())
+                })
+                pdf_writer.add_file_metadata(content.encode())
 
     ####################################################
     # Import: Account.edi.format override
@@ -196,7 +185,7 @@ class AccountEdiFormat(models.Model):
                 ('company_id', '=', self.env.company.id), ('type', '=', 'purchase')
             ], limit=1)
 
-        if not self._check_ubl_cii_availability(journal.company_id):
+        if not self._is_ubl_cii_available(journal.company_id):
             return super()._create_invoice_from_xml_tree(filename, tree, journal=journal)
 
         # infer the xml builder
@@ -213,7 +202,7 @@ class AccountEdiFormat(models.Model):
         # EXTENDS account_edi
         self.ensure_one()
 
-        if not self._check_ubl_cii_availability(invoice.company_id):
+        if not self._is_ubl_cii_available(invoice.company_id):
             return super()._update_invoice_from_xml_tree(filename, tree, invoice)
 
         # infer the xml builder

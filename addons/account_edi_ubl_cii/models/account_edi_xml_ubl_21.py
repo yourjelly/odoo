@@ -11,10 +11,10 @@ class AccountEdiXmlUBL21(models.AbstractModel):
     # EXPORT
     # -------------------------------------------------------------------------
 
-    def _export_invoice_filename(self):
-        return lambda inv: f"{inv.name.replace('/', '_')}_ubl_21.xml"
+    def _export_invoice_filename(self, invoice):
+        return f"{invoice.name.replace('/', '_')}_ubl_21.xml"
 
-    def _export_invoice_ecosio_ids(self):
+    def _export_invoice_ecosio_schematrons(self):
         return {
             'invoice': 'org.oasis-open:invoice:2.1',
             'credit_note': 'org.oasis-open:creditnote:2.1',

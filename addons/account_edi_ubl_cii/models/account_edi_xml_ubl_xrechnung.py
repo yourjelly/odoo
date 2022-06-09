@@ -14,7 +14,7 @@ class AccountEdiXmlUBLDE(models.AbstractModel):
     def _export_invoice_filename(self, invoice):
         return f"{invoice.name.replace('/', '_')}_ubl_de.xml"
 
-    def _export_invoice_ecosio_ids(self):
+    def _export_invoice_ecosio_schematrons(self):
         return {
             'invoice': 'de.xrechnung:ubl-invoice:2.2.0',
             'credit_note': 'de.xrechnung:ubl-creditnote:2.2.0',

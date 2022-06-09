@@ -23,6 +23,7 @@
         'l10n_fr',
         'l10n_be',
         'l10n_de',
+        'l10n_nl',
     ],
     'installable': True,
     'application': False,

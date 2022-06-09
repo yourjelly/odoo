@@ -9,13 +9,8 @@ class TestCIIFR(TestUBLCommon):
     @classmethod
     def setUpClass(cls,
                    chart_template_ref="l10n_fr.l10n_fr_pcg_chart_template",
-                   edi_format_ref="account_edi_facturx.edi_facturx_1_0_05",
+                   edi_format_ref="account_edi_ubl_cii.edi_facturx_1_0_05",
                    ):
-        """
-            this test will fail if account_edi_facturx is not installed. In order not to duplicate the
-            account.edi.format already installed, we use the existing ones (comprising
-            account_edi_facturx.facturx_1_0_05).
-        """
         super().setUpClass(chart_template_ref=chart_template_ref, edi_format_ref=edi_format_ref)
 
         cls.partner_1 = cls.env['res.partner'].create({
@@ -114,8 +109,8 @@ class TestCIIFR(TestUBLCommon):
             })],
         })
         invoice.action_post()
-        pdf_values = self.edi_format._get_embedding_to_invoice_pdf_values(invoice)
-        self.assertEqual(pdf_values['name'], 'factur-x.xml')
+        pdf_attachment = invoice._get_edi_attachment(self.edi_format)
+        self.assertEqual(pdf_attachment['name'], 'factur-x.xml')
 
     def test_export_import_invoice(self):
         invoice = self._generate_move(
@@ -229,4 +224,4 @@ class TestCIIFR(TestUBLCommon):
             amount_total=108, amount_tax=8, list_line_subtotals=[-5, 10, 60, 28, 7])
         # source: Facture_F20220029_EN_16931_K.pdf, credit note labelled as an invoice with negative amounts
         self._assert_imported_invoice_from_file(subfolder=subfolder, filename='facturx_invoice_negative_amounts.xml',
-            amount_total=90, amount_tax=0, list_line_subtotals=[-5, 10, 0, -10, 60, 30, 5], move_type='in_refund')
+            amount_total=90, amount_tax=0, list_line_subtotals=[-5, 10, 60, 30, 5, 0, -10], move_type='in_refund')

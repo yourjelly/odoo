@@ -7,8 +7,8 @@
 Electronic invoicing module
 ===========================
 
-Allows to export and import formats: UBL 2.1, UBL Bis 3, EHF3 (UBL), NLCIUS (UBL), Factur-X (CII), XRechnung (UBL).
-When generating the PDF on the invoice, it will embed the PDF inside the xml for all UBL formats. This allows the 
+Allows to export and import formats: E-FFF, UBL Bis 3, EHF3, NLCIUS, Factur-X (CII), XRechnung (UBL).
+When generating the PDF on the invoice, the PDF will be embedded inside the xml for all UBL formats. This allows the 
 receiver to retrieve the PDF with only the xml file. Note that EHF3 is fully implemented by UBL Bis 3 (`reference 
 <https://anskaffelser.dev/postaward/g3/spec/current/billing-3.0/norway/#_implementation>`_).
 
@@ -30,6 +30,6 @@ Chorus Pro will automatically detect the "PDF/A-3 (Factur-X)" format.
     ],
     'installable': True,
     'application': False,
-    'auto_install': False,
+    'auto_install': True,
     'license': 'LGPL-3',
 }

@@ -241,10 +241,8 @@ class TestUBLBE(TestUBLCommon):
         self.assertIsNone(xml_etree.find('.//{*}Country/{*}Name'))
 
         # Import:
-        journal_id = self.company_data['default_journal_sale']
-        action_vals = journal_id.with_context(default_move_type='in_invoice').create_invoice_from_attachment(
-            attachment.ids)
-        created_bill = self.env['account.move'].browse(action_vals['res_id'])
+        created_bill = self.env['account.move'].create({'move_type': 'in_invoice'})
+        created_bill.message_post(attachment_ids=[attachment.id])
         self.assertTrue(created_bill)
 
     def test_import_invoice_xml(self):
@@ -256,7 +254,7 @@ class TestUBLBE(TestUBLCommon):
         subfolder = 'tests/test_files/from_peppol-bis-invoice-3_doc'
         # source: Allowance-example.xml
         self._assert_imported_invoice_from_file(subfolder=subfolder, filename='bis3_allowance.xml', amount_total=6125,
-            amount_tax=1225, list_line_subtotals=[200, -200, 0, -1000, 4000, 1000, 900])
+            amount_tax=1225, list_line_subtotals=[200, -200, 4000, 1000, 900, 0, -1000])
         # source: base-creditnote-correction.xml
         self._assert_imported_invoice_from_file(subfolder=subfolder, filename='bis3_credit_note.xml',
             amount_total=1656.25, amount_tax=331.25, list_line_subtotals=[25, 2800, -1500], move_type='in_refund')

@@ -20,7 +20,7 @@ class AccountEdiXmlCII(models.AbstractModel):
     def _export_invoice_filename(self, invoice):
         return "factur-x.xml"
 
-    def _export_invoice_ecosio_ids(self):
+    def _export_invoice_ecosio_schematrons(self):
         return {
             'invoice': 'de.xrechnung:cii:2.2.0',
             'credit_note': 'de.xrechnung:cii:2.2.0',
@@ -193,10 +193,10 @@ class AccountEdiXmlCII(models.AbstractModel):
 
     def _export_invoice(self, invoice):
         vals = self._export_invoice_vals(invoice)
-        template = self.env.ref('account_edi_ubl_cii.account_invoice_facturx_export_22')
         tmp = self._export_invoice_constraints(invoice, vals)
         errors = [constraint for constraint in tmp.values() if constraint]
-        return etree.tostring(cleanup_xml_node(template._render(vals))), set(errors)
+        xml_content = self.env['ir.qweb']._render('account_edi_ubl_cii.account_invoice_facturx_export_22', vals)
+        return etree.tostring(cleanup_xml_node(xml_content)), set(errors)
 
     # -------------------------------------------------------------------------
     # IMPORT

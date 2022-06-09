@@ -20,7 +20,7 @@ class TestUBLCommon(AccountEdiTestCommon):
         # Ensure the testing currency is using a valid ISO code.
         real_usd = cls.env.ref('base.USD')
         real_usd.name = 'FUSD'
-        real_usd.flush(['name'])
+        real_usd.flush_model(['name'])
         cls.currency_data['currency'].name = 'USD'
 
         # remove this tax, otherwise, at import, this tax with children taxes can be selected and the total is wrong

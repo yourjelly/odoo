@@ -18,7 +18,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
     def _export_invoice_filename(self, invoice):
         return f"{invoice.name.replace('/', '_')}_ubl_20.xml"
 
-    def _export_invoice_ecosio_ids(self):
+    def _export_invoice_ecosio_schematrons(self):
         return {
             'invoice': 'org.oasis-open:invoice:2.0',
             'credit_note': 'org.oasis-open:creditnote:2.0',
@@ -448,9 +448,9 @@ class AccountEdiXmlUBL20(models.AbstractModel):
 
     def _export_invoice(self, invoice):
         vals = self._export_invoice_vals(invoice)
-        template = self.env.ref(vals['main_template'])
         errors = [constraint for constraint in self._export_invoice_constraints(invoice, vals).values() if constraint]
-        return etree.tostring(cleanup_xml_node(template._render(vals))), set(errors)
+        xml_content = self.env['ir.qweb']._render(vals['main_template'], vals)
+        return etree.tostring(cleanup_xml_node(xml_content)), set(errors)
 
     # -------------------------------------------------------------------------
     # IMPORT

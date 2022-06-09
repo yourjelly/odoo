@@ -32,7 +32,7 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
     def _export_invoice_filename(self, invoice):
         return f"{invoice.name.replace('/', '_')}_ubl_bis3.xml"
 
-    def _export_invoice_ecosio_ids(self):
+    def _export_invoice_ecosio_schematrons(self):
         return {
             'invoice': 'eu.peppol.bis3:invoice:3.13.0',
             'credit_note': 'eu.peppol.bis3:creditnote:3.13.0',
@@ -151,10 +151,11 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
         # "Intra-community supply" the Actual delivery date (BT-72) or the Invoicing period (BG-14)
         # shall not be blank.
 
+        delivery_partner_id = invoice._get_invoice_delivery_partner_id()
         if 'partner_shipping_id' in invoice._fields:
             partner_shipping = invoice.partner_shipping_id
-        elif partner_id := invoice._get_invoice_delivery_partner_id():
-            partner_shipping = self.env['res.partner'].browse(partner_id)
+        elif delivery_partner_id:
+            partner_shipping = self.env['res.partner'].browse(delivery_partner_id)
         else:
             partner_shipping = customer
 

@@ -75,6 +75,7 @@ COUNTRY_EAS = {
     'VA': 9953,
     'SE': 9955,
     'FR': 9957,
+    'NO':'0192',
 }
 
 
@@ -530,6 +531,8 @@ class AccountEdiCommon(models.AbstractModel):
 
     def _check_xml_ecosio(self, invoice, xml_content, ecosio_formats):
         # see https://peppol.helger.com/public/locale-en_US/menuitem-validation-ws2
+        if not ecosio_formats:
+            return
         soap_client = Client('https://peppol.helger.com/wsdvs?wsdl')
         if invoice.move_type == 'out_invoice':
             ecosio_format = ecosio_formats['invoice']
