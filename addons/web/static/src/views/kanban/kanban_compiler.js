@@ -24,4 +24,20 @@ export class KanbanCompiler extends ViewCompiler {
         compiled.setAttribute("class", classAttrs.join("+"));
         return compiled;
     }
+
+    /**
+     * Override to replace t-call attribute values by the key of the corresponding
+     * sub template.
+     *
+     * @override
+     */
+    compileGenericNode(el, params) {
+        if (el.tagName === "t" && el.getAttribute("t-call")) {
+            const templateKey = params.subTemplateKeys[el.getAttribute("t-call")];
+            if (templateKey) {
+                el.setAttribute("t-call", templateKey);
+            }
+        }
+        return super.compileGenericNode(...arguments);
+    }
 }

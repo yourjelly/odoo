@@ -107,10 +107,28 @@ KanbanCoverImageDialog.components = { SimpleDialog };
 export class KanbanRenderer extends Component {
     setup() {
         this.dialogClose = [];
-        const { arch, cards, className, xmlDoc, examples } = this.props.archInfo;
+        const {
+            arch,
+            cards,
+            className,
+            examples,
+            subTemplateDocs,
+            cardTemplateDoc,
+        } = this.props.archInfo;
         this.cards = cards;
         this.className = className;
-        this.cardTemplate = useViewCompiler(KanbanCompiler, arch, xmlDoc);
+        const subTemplateKeys = {};
+        Object.entries(subTemplateDocs).forEach(([tname, templateDoc]) => {
+            subTemplateKeys[tname] = useViewCompiler(
+                KanbanCompiler,
+                `${tname}_${arch}`,
+                templateDoc,
+                { subTemplateKeys }
+            );
+        });
+        this.cardTemplate = useViewCompiler(KanbanCompiler, arch, cardTemplateDoc, {
+            subTemplateKeys,
+        });
         this.state = useState({
             columnQuickCreateIsFolded:
                 !this.props.list.isGrouped || this.props.list.groups.length > 0,
