@@ -1004,10 +1004,17 @@ export class ListRenderer extends Component {
                     futureRecord.switchMode("edit");
                 }
                 break;
-            case "escape":
+            case "escape": {
                 record.discard();
                 list.unselectRecord(true);
+                const firstAddButton = this.tableRef.el.querySelector(
+                    ".o_field_x2many_list_row_add a"
+                );
+                if (firstAddButton) {
+                    firstAddButton.focus();
+                }
                 break;
+            }
             default:
                 return false;
         }
@@ -1045,6 +1052,13 @@ export class ListRenderer extends Component {
             case "arrowleft":
                 if (isInGroupRow && !dataPoint.isFolded) {
                     this.toggleGroup(dataPoint);
+                } else if (cell.classList.contains("o_field_x2many_list_row_add")) {
+                    // to refactor
+                    const a = document.activeElement;
+                    const futureA = a.previousElementSibling;
+                    if (futureA) {
+                        futureA.focus();
+                    }
                 } else {
                     futureCell = this.findFutureCell(cell, isInGroupRow, "left");
                 }
@@ -1052,6 +1066,13 @@ export class ListRenderer extends Component {
             case "arrowright": {
                 if (isInGroupRow && dataPoint.isFolded) {
                     this.toggleGroup(dataPoint);
+                } else if (cell.classList.contains("o_field_x2many_list_row_add")) {
+                    // to refactor
+                    const a = document.activeElement;
+                    const futureA = a.nextElementSibling;
+                    if (futureA) {
+                        futureA.focus();
+                    }
                 } else {
                     futureCell = this.findFutureCell(cell, isInGroupRow, "right");
                 }
@@ -1071,8 +1092,9 @@ export class ListRenderer extends Component {
 
                 if (!this.props.archInfo.noOpen && dataPoint) {
                     this.props.openRecord(dataPoint);
+                    break;
                 }
-                break;
+                return false;
             }
             default:
                 // Return with no effect (no stop or prevent default...)
