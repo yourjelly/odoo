@@ -92,7 +92,6 @@ export class KanbanArchParser extends XMLParser {
             xmlDoc.getAttribute("on_create");
         const quickCreateView = xmlDoc.getAttribute("quick_create_view");
         const tooltipInfo = {};
-        let boxTemplate;
         let colorField = "color";
         let cardColorField = null;
         let handleField = null;
@@ -101,12 +100,19 @@ export class KanbanArchParser extends XMLParser {
         const action = xmlDoc.getAttribute("action");
         const type = xmlDoc.getAttribute("type");
         const openAction = action && type ? { action, type } : null;
+        const subTemplateDocs = {};
+        let boxTemplateDoc;
 
         // Root level of the template
         this.visitXML(xmlDoc, (node) => {
-            if (node.getAttribute("t-name") === KANBAN_BOX_ATTRIBUTE) {
+            if (node.getAttribute("t-name")) {
+                const tname = node.getAttribute("t-name");
+                if (tname === KANBAN_BOX_ATTRIBUTE) {
+                    boxTemplateDoc = node;
+                } else {
+                    subTemplateDocs[tname] = node;
+                }
                 node.removeAttribute("t-name");
-                boxTemplate = node;
                 return;
             }
             // Case: field node
@@ -155,12 +161,12 @@ export class KanbanArchParser extends XMLParser {
             }
         });
 
-        if (!boxTemplate) {
-            throw new Error(`Missing 'kanban-box' template.`);
+        if (!boxTemplateDoc) {
+            throw new Error(`Missing '${KANBAN_BOX_ATTRIBUTE}' template.`);
         }
 
         // Concrete kanban box elements in the template
-        const validBoxes = isValidBox(boxTemplate) ? [boxTemplate] : boxTemplate.children;
+        const validBoxes = isValidBox(boxTemplateDoc) ? [boxTemplateDoc] : boxTemplateDoc.children;
         const box = createElement("t", validBoxes);
         for (const child of box.children) {
             child.setAttribute("t-att-tabindex", "isSample ? -1 : 0");
@@ -310,7 +316,8 @@ export class KanbanArchParser extends XMLParser {
             limit: limit && parseInt(limit, 10),
             progressAttributes,
             cardColorField,
-            xmlDoc: box,
+            subTemplateDocs,
+            cardTemplateDoc: box,
             tooltipInfo,
             examples: xmlDoc.getAttribute("examples"),
             __rawArch: arch,
