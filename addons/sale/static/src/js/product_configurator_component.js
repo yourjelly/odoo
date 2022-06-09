@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { registry } from "@web/core/registry";
+import { registry } from "@web/core/registry" ;
 import { Many2OneField } from "@web/fields/many2one";
 import { core } from "@web/core";
 import { _t } from "@web/core/l10n/translation";
@@ -125,7 +125,8 @@ export class ProductConfiguratorComponent extends Many2OneField {
                     _.each(recordData.data, function (record) {
                         if (record.ref === resId) {
                             convertedValues.push([0, 0, {
-                                custom_product_template_attribute_value_id: record.data.custom_product_template_attribute_value_id.data.id,
+                                custom_product_template_attribute_value_id:
+                                    record.data.custom_product_template_attribute_value_id.data.id,
                                 custom_value: record.data.custom_value
                             }]);
                         }

@@ -1,34 +1,17 @@
-odoo.define('sale.sales_team_dashboard', function (require) {
-"use strict";
+/** @odoo-module **/
 
-const { FieldProgressBar } = require('web.basic_fields');
-const fieldRegistry = require('web.field_registry');
+import { registry } from "@web/core/registry";
+import { _t } from "@web/core/l10n/translation";
+import { ProgressBarField } from "@web/fields/progress_bar";
 
-var core = require('web.core');
-var _t = core._t;
+export class SalesTeamProgressBar extends ProgressBarField {
+    setup() {
+        super.setup();
+        this.state = useState({
+            isUnset: !this.state.maxValue,
+        });
+    }
+}
 
-const SalesTeamProgressBar = FieldProgressBar.extend({
-    _render() {
-        this._super.apply(this, arguments);
-        const isUnset = !this.recordData[this.nodeOptions.max_value];
-        if (isUnset) {
-            const msg = document.createElement('a');
-            msg.innerText = _t("Click to define an invoicing target");
-            msg.setAttribute('href', '#')
-            msg.addEventListener("click", (ev) => {
-                ev.preventDefault();
-                msg.parentElement.removeChild(msg);
-                for (let child of this.el.children) {
-                    child.classList.remove('d-none') 
-                }
-            });
-            for (let child of this.el.children) {
-                child.classList.add('d-none');
-            }
-            this.el.insertBefore(msg, this.el.firstChild)
-        }
-    },
-});
-
-fieldRegistry.add("sales_team_progressbar", SalesTeamProgressBar);
-});
+SalesTeamProgressBar.template = "sale.SalesTeamProgressBar";
+registry.category('fields').add('sales_team_progressbar', SalesTeamProgressBar);
