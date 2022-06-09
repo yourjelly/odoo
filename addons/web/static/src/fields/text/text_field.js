@@ -20,6 +20,13 @@ export class TextField extends Component {
         });
     }
 
+    get minimumHeight() {
+        return 50;
+    }
+    get rowCount() {
+        return 2;
+    }
+
     resize() {
         const textarea = this.textareaRef.el;
         let heightOffset = 0;
@@ -30,8 +37,20 @@ export class TextField extends Component {
                 parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth);
             heightOffset = borderHeight + paddingHeight;
         }
+        Object.assign(textarea.style, {
+            height: "auto",
+            borderTopWidth: 0,
+            borderBottomWidth: 0,
+            padding: 0,
+        });
         textarea.style.height = "auto";
-        textarea.style.height = `${Math.max(50, textarea.scrollHeight + heightOffset)}px`;
+        const height = Math.max(this.minimumHeight, textarea.scrollHeight + heightOffset);
+        Object.assign(textarea.style, {
+            height: `${height}px`,
+            borderTopWidth: style.borderTopWidth,
+            borderBottomWidth: style.borderBottomWidth,
+            padding: style.padding,
+        });
     }
 
     onInput() {
@@ -64,5 +83,39 @@ TextField.extractProps = (fieldName, record, attrs) => {
 };
 
 registry.category("fields").add("text", TextField);
-registry.category("fields").add("list.text", TextField); // WOWL: because it exists in legacy
 registry.category("fields").add("html", TextField);
+
+class ListTextField extends TextField {
+    get minimumHeight() {
+        return 0;
+    }
+    get rowCount() {
+        return 1;
+    }
+}
+
+ListTextField.template = "web.TextField";
+ListTextField.components = {
+    TranslationButton,
+};
+ListTextField.props = {
+    ...standardFieldProps,
+    isTranslatable: { type: Boolean, optional: true },
+    placeholder: { type: String, optional: true },
+    resId: { type: [Number, Boolean], optional: true },
+    resModel: { type: String, optional: true },
+};
+
+ListTextField.displayName = _lt("Multiline Text");
+ListTextField.supportedTypes = ["html", "text"];
+
+ListTextField.extractProps = (fieldName, record, attrs) => {
+    return {
+        isTranslatable: record.fields[fieldName].translate,
+        placeholder: attrs.placeholder,
+        resId: record.resId,
+        resModel: record.resModel,
+    };
+};
+
+registry.category("fields").add("list.text", ListTextField);
