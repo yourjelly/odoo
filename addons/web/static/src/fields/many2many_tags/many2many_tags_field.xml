@@ -2,24 +2,23 @@
 <templates xml:space="preserve">
 
     <t t-name="web.Many2ManyTagsField" owl="1">
-        <TagsList tags="tags">
-            <div t-if="showM2OSelectionField" class="o_field_many2many_selection">
-                <Many2XAutocomplete
-                    id="props.id"
-                    placeholder="props.placeholder"
-                    resModel="props.relation"
-                    autoSelect="true"
-                    fieldString="fieldString"
-                    activeActions="activeActions"
-                    update="update"
-                    quickCreate="quickCreate"
-                    context="context"
-                    getDomain.bind="getDomain"
-                    isToMany="true"
-                    nameCreateField="props.nameCreateField"
-                />
-            </div>
-        </TagsList>
+        <TagsList tags="tags" />
+        <div t-if="showM2OSelectionField" class="o_field_many2many_selection d-inline-block mw-100">
+            <Many2XAutocomplete
+                id="props.id"
+                placeholder="props.placeholder"
+                resModel="props.relation"
+                autoSelect="true"
+                fieldString="fieldString"
+                activeActions="activeActions"
+                update="update"
+                quickCreate="quickCreate"
+                context="context"
+                getDomain.bind="getDomain"
+                isToMany="true"
+                nameCreateField="props.nameCreateField"
+            />
+        </div>
     </t>
 
     <t t-name="web.Many2ManyTagsFieldColorListPopover" owl="1">
