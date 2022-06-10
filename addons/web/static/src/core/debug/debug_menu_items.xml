@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="web.DebugMenu.SetDefaultDialog" owl="1">
-        <Dialog title="this.constructor.title">
+        <Dialog title="title">
             <table style="width: 100%">
                 <tr>
                     <td>
@@ -30,7 +30,14 @@
                     <td>
                         <select id="formview_default_conditions" class="o_input" t-model="state.condition">
                             <option value=""/>
+<<<<<<< HEAD
                             <option t-foreach="conditions" t-as="cond" t-att-value="cond.name + '=' + cond.value" t-key="cond.name">
+||||||| parent of c4f3606ce93a (adapt set defaults debug item + make debug items work in legacy)
+                            <option t-foreach="conditions" t-as="cond"
+                                    t-att-value="cond.name + '=' + cond.value">
+=======
+                            <option t-foreach="conditions" t-as="cond" t-att-value="cond.name + '=' + cond.value" t-key="cond_index">
+>>>>>>> c4f3606ce93a (adapt set defaults debug item + make debug items work in legacy)
                                 <t t-esc="cond.string"/>=<t t-esc="cond.displayed"/>
                             </option>
                         </select>
@@ -62,7 +69,7 @@
     </t>
 
     <t t-name="web.DebugMenu.GetMetadataDialog" owl="1">
-        <Dialog title="this.constructor.title">
+        <Dialog title="title">
             <table class="table table-sm table-striped">
                 <tr>
                     <th>ID:</th>
@@ -92,7 +99,7 @@
                 </tr>
                 <tr>
                     <th>Creation Date:</th>
-                    <td><t t-esc="state.create_date"/></td>
+                    <td><t t-esc="state.createDate"/></td>
                 </tr>
                 <tr>
                     <th>Latest Modification by:</th>
@@ -100,7 +107,7 @@
                 </tr>
                 <tr>
                     <th>Latest Modification Date:</th>
-                    <td><t t-esc="state.write_date"/></td>
+                    <td><t t-esc="state.writeDate"/></td>
                 </tr>
             </table>
         </Dialog>
