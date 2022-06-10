@@ -125,7 +125,6 @@ class account_journal(models.Model):
             return {'x':short_name,'y': amount, 'name':name}
 
         self.ensure_one()
-        BankStatement = self.env['account.bank.statement']
         data = []
         today = datetime.today()
         last_month = today + timedelta(days=-30)
@@ -134,7 +133,7 @@ class account_journal(models.Model):
         #starting point of the graph is the last statement
         last_stmt = self._get_last_bank_statement(domain=[('move_id.state', '=', 'posted')])
 
-        last_balance = last_stmt and last_stmt.balance_end_real or 0
+        last_balance = last_stmt and last_stmt.balance_end or 0
         data.append(build_graph_data(today, last_balance))
 
         #then we subtract the total amount of bank statement lines per day to get the previous points
@@ -274,20 +273,20 @@ class account_journal(models.Model):
             outstanding_pay_account_balance, nb_lines_outstanding_pay_account_balance = self._get_journal_outstanding_payments_account_balance(
                 domain=[('parent_state', '=', 'posted')])
 
-            self._cr.execute('''
-                SELECT COUNT(st_line.id)
-                FROM account_bank_statement_line st_line
-                JOIN account_move st_line_move ON st_line_move.id = st_line.move_id
-                JOIN account_bank_statement st ON st_line.statement_id = st.id
-                WHERE st_line_move.journal_id IN %s
-                AND st.state = 'posted'
-                AND NOT st_line.is_reconciled
-            ''', [tuple(self.ids)])
-            number_to_reconcile = self.env.cr.fetchone()[0]
+            number_to_reconcile = self.env['account.bank.statement.line'].search_count([
+                ('journal_id', '=', self.id),
+                ('state', '=', 'posted'),
+                ('is_reconciled', '=', False),
+            ])
 
-            to_check_ids = self.to_check_ids()
-            number_to_check = len(to_check_ids)
-            to_check_balance = sum([r.amount for r in to_check_ids])
+            lines_to_check = self.env['account.bank.statement.line'].search([
+                ('journal_id', '=', self.id),
+                ('state', '=', 'posted'),
+                ('to_check', '=', True),
+            ])
+
+            number_to_check = len(lines_to_check)
+            to_check_balance = sum(lines_to_check.mapped('amount'))
         #TODO need to check if all invoices are in the same currency than the journal!!!!
         elif self.type in ['sale', 'purchase']:
             title = _('Bills to pay') if self.type == 'purchase' else _('Invoices owed to you')
@@ -489,21 +488,11 @@ class account_journal(models.Model):
             'views': [[view_id, 'form']],
         }
 
-    def to_check_ids(self):
-        self.ensure_one()
-        return self.env['account.bank.statement.line'].search([
-            ('journal_id', '=', self.id),
-            ('move_id.to_check', '=', True),
-            ('move_id.state', '=', 'posted'),
-        ])
-
     def _select_action_to_open(self):
         self.ensure_one()
         if self._context.get('action_name'):
             return self._context.get('action_name')
-        elif self.type == 'bank':
-            return 'action_bank_statement_tree'
-        elif self.type == 'cash':
+        elif self.type in ('bank', 'cash'):
             return 'action_view_bank_statement_tree'
         elif self.type == 'sale':
             return 'action_move_out_invoice_type'
@@ -609,15 +598,6 @@ class account_journal(models.Model):
                 'expand': 1,
             }
         }
-
-    def create_bank_statement(self):
-        """return action to create a bank statements. This button should be called only on journals with type =='bank'"""
-        action = self.env["ir.actions.actions"]._for_xml_id("account.action_bank_statement_tree")
-        action.update({
-            'views': [[False, 'form']],
-            'context': "{'default_journal_id': " + str(self.id) + "}",
-        })
-        return action
 
     def create_customer_payment(self):
         """return action to create a customer payment"""
