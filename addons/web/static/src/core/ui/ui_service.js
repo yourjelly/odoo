@@ -68,6 +68,11 @@ export const MEDIAS_BREAKPOINTS = [
 }
 
 export const uiService = {
+    getSize() {
+        return this.MEDIAS.findIndex(media => media.matches);
+    },
+    // window size handling
+    MEDIAS: getMediaQueryLists(),
     start(env) {
         let ui = {};
 
@@ -137,20 +142,13 @@ export const uiService = {
             },
         });
 
-        // window size handling
-        const MEDIAS = getMediaQueryLists();
-        function getSize() {
-            return MEDIAS.findIndex((media) => media.matches);
-        }
-
         // listen to media query status changes
         function updateSize() {
-            ui.size = getSize();
+            ui.size = this.getSize();
         }
-        browser.addEventListener("resize", debounce(updateSize, 100));
-
+        browser.addEventListener("resize", debounce(updateSize.bind(this), 100));
         Object.assign(ui, {
-            size: getSize(),
+            size: this.getSize(),
         });
         Object.defineProperty(ui, "isSmall", {
             get() {

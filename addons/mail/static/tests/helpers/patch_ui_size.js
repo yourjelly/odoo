@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { browser } from '@web/core/browser/browser';
-import { getMediaQueryLists, MEDIAS_BREAKPOINTS, SIZES } from '@web/core/ui/ui_service';
+import { MEDIAS_BREAKPOINTS, SIZES, uiService } from '@web/core/ui/ui_service';
 import { patchWithCleanup } from "@web/../tests/helpers/utils";
 
 import config from 'web.config';
@@ -40,9 +40,8 @@ function getSizeFromWidth(width) {
 
 /**
  * Patch legacy objects referring to the ui size. This function must be removed
- * when the wowl env will be available in the form_renderer (currently the form
- * renderer relies on config). This will impact env.browser.innerWidth,
- * env.device.isMobile and config.device.{size_class/isMobile}.
+ * when switching to the new environment in the discuss app. This will impact
+ * env.browser.innerWidth, env.device.isMobile and config.device.{size_class/isMobile}.
  *
  * @param {number} size
  * @param {number} width
@@ -87,15 +86,14 @@ function patchUiSize({ height, size, width }) {
     }
     size = size === undefined ? getSizeFromWidth(width) : size;
     width = width || getWidthFromSize(size);
-    const MEDIAS = getMediaQueryLists();
 
     patchWithCleanup(browser, {
         innerWidth: width,
         innerHeight: height || browser.innerHeight,
     });
-    patchWithCleanup(window.MediaQueryList.prototype, {
-        get matches() {
-            return this.media === MEDIAS[size].media;
+    patchWithCleanup(uiService, {
+        getSize() {
+            return size;
         },
     });
     legacyPatchUiSize(height, size, width);
