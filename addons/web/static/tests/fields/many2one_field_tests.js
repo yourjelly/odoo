@@ -38,6 +38,7 @@ import { session } from "@web/session";
 import { Record } from "@web/views/record";
 import { makeTestEnv } from "../helpers/mock_env";
 import { Field } from "@web/fields/field";
+import { createWebClient, doAction } from "../webclient/helpers";
 
 const serviceRegistry = registry.category("services");
 
@@ -4272,59 +4273,63 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(modal, "tr.o_data_row", "should display 1 record");
     });
 
-    QUnit.skipWOWL("many2one links form view call", async function (assert) {
-        // FIXME: rename into "click on many2one link in list view"
-        // assert.expect(5);
-        // let serverData = {};
-        // serverData.models = this.data;
-        // serverData.models['turtle'].records[1].product_id = 37;
-        // serverData.views= {
-        //     "partner,false,form": '<form string="Partners"> <field name="turtles"/> </form>',
-        //     "partner,false,search": '<search></search>',
-        //     'turtle,false,list':`
-        //             <tree readonly="1">
-        //                 <field name="product_id" widget="many2one"/>
-        //             </tree>`,
-        //     "product,false,search": '<search></search>',
-        //     "product,false,form": '<form></form>',
-        // }
-        // serverData.actions= {
-        //     1: {
-        //         name: 'Partner',
-        //         res_model: 'partner',
-        //         res_id: 1,
-        //         type: 'ir.actions.act_window',
-        //         views: [[false, 'form']],
-        //     }
-        // }
-        // const webClient = await createWebClient({
-        //     serverData,
-        //     legacyParams: { withLegacyMockServer: true },
-        //     mockRPC: function (route, args){
-        //          if (args.method === 'get_formview_action'){
-        //             assert.step('get_formview_action')
-        //             return {
-        //                 type: "ir.actions.act_window",
-        //                 res_model: "product",
-        //                 view_type: "form",
-        //                 view_mode: "form",
-        //                 views: [[false, "form"]],
-        //                 target: "current",
-        //                 res_id: args[0],
-        //             };
-        //          }
-        //     }
-        // });
-        // const target = getFixture();
-        // await doAction(webClient, 1);
-        // assert.containsOnce(target, 'a.o_form_uri',
-        //     "should display 1 m2o link in form");
-        // assert.containsN(target, '.breadcrumb-item', 1,
-        //     "Should only contain one breadcrumb at the start");
-        // await testUtils.dom.click($(target).find('a.o_form_uri'));
-        // await legacyExtraNextTick();
-        // assert.verifySteps(['get_formview_action'])
-        // assert.containsN(target, '.breadcrumb-item', 2,
-        //     "Should contain 2 breadcrumbs after the clicking on the link");
+    QUnit.test("click on many2one link in list view", async function (assert) {
+        assert.expect(5);
+        serverData.models["turtle"].records[1].product_id = 37;
+        serverData.views = {
+            "partner,false,form": '<form string="Partners"> <field name="turtles"/> </form>',
+            "partner,false,search": "<search></search>",
+            "turtle,false,list": `
+                    <tree readonly="1">
+                        <field name="product_id" widget="many2one"/>
+                    </tree>`,
+            "product,false,search": "<search></search>",
+            "product,false,form": "<form></form>",
+        };
+        serverData.actions = {
+            1: {
+                name: "Partner",
+                res_model: "partner",
+                res_id: 1,
+                type: "ir.actions.act_window",
+                views: [[false, "form"]],
+            },
+        };
+        const webClient = await createWebClient({
+            serverData,
+            legacyParams: { withLegacyMockServer: true },
+            mockRPC: function (route, args) {
+                if (args.method === "get_formview_action") {
+                    assert.step("get_formview_action");
+                    return {
+                        type: "ir.actions.act_window",
+                        res_model: "product",
+                        view_type: "form",
+                        view_mode: "form",
+                        views: [[false, "form"]],
+                        target: "current",
+                        res_id: args[0],
+                    };
+                }
+            },
+        });
+        const target = getFixture();
+        await doAction(webClient, 1);
+        assert.containsOnce(target, "a.o_form_uri", "should display 1 m2o link in form");
+        assert.containsN(
+            target,
+            ".breadcrumb-item",
+            1,
+            "Should only contain one breadcrumb at the start"
+        );
+
+        await click(target.querySelector("a.o_form_uri"));
+        assert.verifySteps(["get_formview_action"]);
+        assert.containsN(
+            target,
+            ".breadcrumb-item",
+            2,
+            "Should contain 2 breadcrumbs after the clicking on the link"
+        );
     });
 });
