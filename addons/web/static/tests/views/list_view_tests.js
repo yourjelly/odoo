@@ -61,15 +61,7 @@ let serverData;
 let target;
 
 // WOWL remove after adapting tests
-let testUtils,
-    ListView,
-    ListRenderer,
-    core,
-    BasicModel,
-    AbstractStorageService,
-    patch,
-    unpatch,
-    ControlPanel;
+let testUtils, ListRenderer, core, BasicModel, AbstractStorageService;
 
 async function reloadListView(target) {
     await validateSearch(target);
@@ -13402,42 +13394,6 @@ QUnit.module("Views", (hooks) => {
         });
 
         assert.containsOnce(target, ".o_data_row .text-danger");
-    });
-
-    QUnit.skipWOWL("update control panel while list view is mounting", async function (assert) {
-        let mountedCounterCall = 0;
-
-        patch(ControlPanel.prototype, "test.ControlPanel", {
-            mounted() {
-                mountedCounterCall = mountedCounterCall + 1;
-                assert.step(`mountedCounterCall-${mountedCounterCall}`);
-                this._super(...arguments);
-            },
-        });
-
-        const MyListView = ListView.extend({
-            config: Object.assign({}, ListView.prototype.config, {
-                Controller: ListController.extend({
-                    async start() {
-                        await this._super(...arguments);
-                        this.renderer._updateSelection();
-                    },
-                }),
-            }),
-        });
-
-        assert.expect(2);
-
-        await makeView({
-            View: MyListView,
-            model: "event",
-            serverData,
-            arch: '<tree><field name="name"/></tree>',
-        });
-
-        assert.verifySteps(["mountedCounterCall-1"]);
-
-        unpatch(ControlPanel.prototype, "test.ControlPanel");
     });
 
     QUnit.test("Auto save: add a record and leave action", async function (assert) {
