@@ -8,6 +8,8 @@ var relationalFields = require('web.relational_fields');
 var StandaloneFieldManagerMixin = require('web.StandaloneFieldManagerMixin');
 var testUtils = require('web.test_utils');
 var Widget = require('web.Widget');
+const legacyViewRegistry = require("web.view_registry");
+const { registry } = require("@web/core/registry");
 
 const { triggerScroll } = require("@web/../tests/helpers/utils");
 const { legacyExtraNextTick } = require("@web/../tests/helpers/utils");
@@ -3725,6 +3727,9 @@ QUnit.module('Legacy fields', {}, function () {
 
         QUnit.test('many2one links form view call', async function (assert) {
             assert.expect(5);
+
+            registry.category("views").remove("form"); // remove new form from registry
+            legacyViewRegistry.add("form", FormView); // add legacy form -> will be wrapped and added to new registry
 
             let serverData = {};
             serverData.models = this.data;
