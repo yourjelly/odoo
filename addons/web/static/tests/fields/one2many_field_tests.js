@@ -365,10 +365,9 @@ QUnit.module("Fields", (hooks) => {
     QUnit.test("O2M with parented m2o and domain on parent.m2o", async function (assert) {
         assert.expect(4);
 
-        /* records in an o2m can have a m2o pointing to themselves
-         * in that case, a domain evaluation on that field followed by name_search
-         * shouldn't send virtual_ids to the server
-         */
+        // Records in an o2m can have a m2o pointing to themselves.
+        // In that case, a domain evaluation on that field followed by name_search
+        // shouldn't send virtual_ids to the server.
 
         patchWithCleanup(AutoComplete, {
             delay: 0,
@@ -404,9 +403,6 @@ QUnit.module("Fields", (hooks) => {
             `,
             mockRPC(route, { kwargs }) {
                 if (route === "/web/dataset/call_kw/turtle/name_search") {
-                    // We are going to pass twice here
-                    // First time, we really have nothing
-                    // Second time, a virtual_id has been created
                     assert.deepEqual(kwargs.args, [["id", "in", []]]);
                 }
             },
