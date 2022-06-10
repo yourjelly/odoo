@@ -95,6 +95,7 @@ function patchUiSize({ height, size, width }) {
     });
     patchWithCleanup(window.MediaQueryList.prototype, {
         get matches() {
+            console.log(this)
             return this.media === MEDIAS[size].media;
         },
     });

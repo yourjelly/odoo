@@ -627,6 +627,7 @@ QUnit.test('Mobile: opening a chat window should not update channel state on the
     );
     console.log('messaging.env.isSmall', messaging.env.isSmall, messaging.device.isSmall, env.isSmall);
     const [member] = pyEnv['mail.channel.partner'].searchRead([['channel_id', '=', mailChannelId1], ['partner_id', '=', pyEnv.currentPartnerId]]);
+    console.log(`browser width : ${browser.innerWidth}, uiSize: ${env.services.ui.size}, ui.isSmall: ${env.services.ui.isSmall}`)
     assert.strictEqual(
         member.fold_state,
         'closed',
