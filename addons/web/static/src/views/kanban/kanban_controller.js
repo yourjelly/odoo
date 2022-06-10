@@ -34,7 +34,15 @@ export class KanbanController extends Component {
 
         const rootRef = useRef("root");
         useViewButtons(this.model, rootRef);
-        useSetupView({ rootRef /** TODO **/ });
+        useSetupView({
+            rootRef,
+            getGlobalState: () => {
+                return {
+                    resIds: this.model.root.records.map((rec) => rec.resId),
+                };
+            },
+            /** TODO **/
+        });
         usePager(() => {
             if (!this.model.root.isGrouped) {
                 return {
