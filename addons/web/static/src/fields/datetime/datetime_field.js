@@ -14,7 +14,7 @@ export class DateTimeField extends Component {
     }
 
     onDateTimeChanged(date) {
-        if (!areDateEquals(this.props.value, date)) {
+        if (!areDateEquals(this.props.value || "", date)) {
             this.props.update(date);
         }
     }

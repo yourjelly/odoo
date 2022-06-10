@@ -1087,7 +1087,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_data_row", 4);
     });
 
-    QUnit.skipWOWL("editable list datepicker destroy widget (new line)", async function (assert) {
+    QUnit.test("editable list datepicker destroy widget (new line)", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -1106,18 +1106,16 @@ QUnit.module("Views", (hooks) => {
             ".bootstrap-datetimepicker-widget",
             "datepicker should be opened"
         );
-        triggerEvent(document.activeElement, null, "keydown", { key: "Escape" });
+        await triggerEvent(document.activeElement, null, "keydown", { key: "Escape" });
 
-        await nextTick();
         assert.containsOnce(target, ".o_selected_row", "the row is still in edition");
         assert.containsNone(
             document.body,
             ".bootstrap-datetimepicker-widget",
             "the datepicker is no longer visible"
         );
-        triggerEvent(document.activeElement, null, "keydown", { key: "Escape" });
+        await triggerEvent(document.activeElement, null, "keydown", { key: "Escape" });
 
-        await nextTick();
         assert.containsNone(target, ".o_selected_row", "the row is no longer in edition");
         assert.containsN(target, ".o_data_row", 4, "There should still be 4 rows");
     });
