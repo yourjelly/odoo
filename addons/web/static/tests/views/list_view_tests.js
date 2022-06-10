@@ -1757,7 +1757,9 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, "tr.o_group_header", 3, "list should be grouped");
         await click(target.querySelector("th.o_group_name"));
 
-        click(target.querySelector("tr:not(.o_group_header) td:not(.o_list_record_selector)"));
+        await click(
+            target.querySelector("tr:not(.o_group_header) td:not(.o_list_record_selector)")
+        );
         assert.verifySteps(["openRecord", "openRecord"]);
     });
 
@@ -8330,7 +8332,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipWOWL("editable list with handle widget with slow network", async function (assert) {
+    QUnit.test("editable list with handle widget with slow network", async function (assert) {
         assert.expect(15);
 
         // resequence makes sense on a sequence field, not on arbitrary fields
@@ -8345,50 +8347,46 @@ QUnit.module("Views", (hooks) => {
             type: "list",
             resModel: "foo",
             serverData,
-            arch:
-                '<tree editable="top">' +
-                '<field name="int_field" widget="handle"/>' +
-                '<field name="amount" widget="float" digits="[5,0]"/>' +
-                "</tree>",
-            mockRPC: async function (route, args, performRPC) {
+            arch: `
+                <tree editable="top">
+                    <field name="int_field" widget="handle" />
+                    <field name="amount" widget="float" digits="[5,0]" />
+                </tree>
+            `,
+            mockRPC: async function (route, { field, ids, offset }) {
                 if (route === "/web/dataset/resequence") {
                     assert.strictEqual(
-                        args.offset,
+                        offset,
                         1,
                         "should write the sequence starting from the lowest current one"
                     );
                     assert.strictEqual(
-                        args.field,
+                        field,
                         "int_field",
                         "should write the right field as sequence"
                     );
-                    assert.deepEqual(
-                        args.ids,
-                        [4, 2, 3],
-                        "should write the sequence in correct order"
-                    );
+                    assert.deepEqual(ids, [4, 2, 3], "should write the sequence in correct order");
                     await prom;
-                    return performRPC(route, args);
                 }
             },
         });
         assert.strictEqual(
-            $(target).find("tbody tr:eq(0) td:last").text(),
+            target.querySelector("tbody tr:nth-child(1) td:nth-child(3)").textContent,
             "1200",
             "default first record should have amount 1200"
         );
         assert.strictEqual(
-            $(target).find("tbody tr:eq(1) td:last").text(),
+            target.querySelector("tbody tr:nth-child(2) td:nth-child(3)").textContent,
             "500",
             "default second record should have amount 500"
         );
         assert.strictEqual(
-            $(target).find("tbody tr:eq(2) td:last").text(),
+            target.querySelector("tbody tr:nth-child(3) td:nth-child(3)").textContent,
             "300",
             "default third record should have amount 300"
         );
         assert.strictEqual(
-            $(target).find("tbody tr:eq(3) td:last").text(),
+            target.querySelector("tbody tr:nth-child(4) td:nth-child(3)").textContent,
             "0",
             "default fourth record should have amount 0"
         );
@@ -8396,60 +8394,59 @@ QUnit.module("Views", (hooks) => {
         await dragAndDrop("tbody tr:nth-child(4) .o_handle_cell", "tbody tr:nth-child(2)");
 
         // edit moved row before the end of resequence
-        await click(target, "tbody tr:nth-child(4) [name='amount']");
+        await click(target, "tbody tr:nth-child(4) .o_field_widget[name='amount']");
         await nextTick();
 
-        assert.strictEqual(
-            $(target).find("tbody tr:eq(3) td:last input").length,
-            0,
+        assert.containsNone(
+            target,
+            "tbody tr:nth-child(4) td:nth-child(3) input",
             "shouldn't edit the line before resequence"
         );
 
         prom.resolve();
         await nextTick();
 
-        assert.strictEqual(
-            $(target).find("tbody tr:eq(3) td:last input").length,
-            1,
+        assert.containsOnce(
+            target,
+            "tbody tr:nth-child(4) td:nth-child(3) input",
             "should edit the line after resequence"
         );
 
         assert.strictEqual(
-            $(target).find("tbody tr:eq(3) td:last input").val(),
+            target.querySelector("tbody tr:nth-child(4) td:nth-child(3) input").value,
             "300",
             "fourth record should have amount 300"
         );
 
         await editInput(target, ".o_data_row [name='amount'] input", 301);
-        await click(target, "tbody tr:nth-child(1) [name='amount']");
+        await click(target, "tbody tr:nth-child(1) .o_field_widget[name='amount']");
         await clickSave(target);
 
         assert.strictEqual(
-            $(target).find("tbody tr:eq(0) td:last").text(),
+            target.querySelector("tbody tr:nth-child(1) td:nth-child(3)").textContent,
             "1200",
             "first record should have amount 1200"
         );
         assert.strictEqual(
-            $(target).find("tbody tr:eq(1) td:last").text(),
+            target.querySelector("tbody tr:nth-child(2) td:nth-child(3)").textContent,
             "0",
             "second record should have amount 1"
         );
         assert.strictEqual(
-            $(target).find("tbody tr:eq(2) td:last").text(),
+            target.querySelector("tbody tr:nth-child(3) td:nth-child(3)").textContent,
             "500",
             "third record should have amount 500"
         );
         assert.strictEqual(
-            $(target).find("tbody tr:eq(3) td:last").text(),
+            target.querySelector("tbody tr:nth-child(4) td:nth-child(3)").textContent,
             "301",
             "fourth record should have amount 301"
         );
 
-        // await click($(target).find("tbody tr:eq(3) td:last"));
-        await click(target, "tbody tr:nth-child(4) [name='amount']");
+        await click(target, "tbody tr:nth-child(4) .o_field_widget[name='amount']");
 
         assert.strictEqual(
-            $(target).find("tbody tr:eq(3) td:last input").val(),
+            target.querySelector("tbody tr:nth-child(4) td:nth-child(3) input").value,
             "301",
             "fourth record should have amount 301"
         );
