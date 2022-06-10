@@ -806,25 +806,29 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.skipWOWL("MonetaryField without currency symbol", async function (assert) {
-        // var form = await createView({
-        //     View: FormView,
-        //     model: 'partner',
-        //     data: this.data,
-        //     arch:'<form string="Partners">' +
-        //             '<sheet>' +
-        //                 '<field name="qux" widget="monetary" options="{\'no_symbol\': True}"/>' +
-        //                 '<field name="currency_id" invisible="1"/>' +
-        //             '</sheet>' +
-        //         '</form>',
-        //     res_id: 5,
-        //     session: {
-        //         currencies: _.indexBy(this.data.currency.records, 'id'),
-        //     },
-        // });
-        // await testUtils.form.clickEdit(form);
-        // // Non-breaking space between the currency and the amount
-        // assert.strictEqual(form.$('.o_field_widget[name=qux] input').val(), "9.10", "The currency symbol is not displayed");
-        // form.destroy();
+    QUnit.test("MonetaryField without currency symbol", async function (assert) {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            resId: 5,
+            serverData,
+            arch: `
+                <form>
+                    <sheet>
+                        <field name="float_field" widget="monetary" options="{'no_symbol': True}" />
+                        <field name="currency_id" invisible="1" />
+                    </sheet>
+                </form>
+            `,
+        });
+
+        await clickEdit(target);
+
+        // Non-breaking space between the currency and the amount
+        assert.strictEqual(
+            target.querySelector(".o_field_widget[name=float_field] input").value,
+            "9.10",
+            "The currency symbol is not displayed"
+        );
     });
 });
