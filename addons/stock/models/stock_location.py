@@ -251,6 +251,7 @@ class Location(models.Model):
             categ = categ.parent_id
         if package_type:
             putaway_rules |= self.putaway_rule_ids.filtered(lambda x: not x.product_id and (package_type in x.package_type_ids or package_type == x.package_type_ids))
+        putaway_rules != self.putaway_rule_ids.filtered(lambda x: not x.product_id and not x.category_id and not x.package_type_ids)
 
         putaway_location = None
         locations = self.child_internal_location_ids
