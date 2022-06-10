@@ -53,7 +53,7 @@ export class MonetaryField extends Component {
         return formatMonetary(this.props.value, {
             digits: this.currencyDigits,
             currencyId: this.props.currencyId,
-            noSymbol: !this.props.readonly,
+            noSymbol: !this.props.readonly || this.props.hideSymbol,
         });
     }
 }
@@ -64,10 +64,12 @@ MonetaryField.props = {
     currencyId: { type: Number, optional: true },
     inputType: { type: String, optional: true },
     digits: { type: Array, optional: true },
+    hideSymbol: { type: Boolean, optional: true },
     invalidate: { type: Function, optional: true },
     placeholder: { type: String, optional: true },
 };
 MonetaryField.defaultProps = {
+    hideSymbol: false,
     inputType: "text",
     invalidate: () => {},
 };
@@ -84,6 +86,7 @@ MonetaryField.extractProps = function (fieldName, record, attrs) {
         // Sadly, digits param was available as an option and an attr.
         // The option version could be removed with some xml refactoring.
         digits: attrs.digits ? JSON.parse(attrs.digits) : attrs.options.digits,
+        hideSymbol: attrs.options.no_symbol,
         invalidate: () => record.setInvalidField(fieldName),
         placeholder: attrs.placeholder,
     };
