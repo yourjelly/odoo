@@ -901,7 +901,7 @@ function makeActionManager(env) {
         if (lazyView) {
             updateUIOptions.lazyController = {
                 jsId: `controller_${++id}`,
-                Component: lazyView.isLegacy ? lazyView : View,
+                Component: lazyView.isLegacy ? lazyView.Controller : View,
                 action,
                 view: lazyView,
                 views,
