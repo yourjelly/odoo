@@ -38,6 +38,18 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             const frontendToBackendNavEl = document.createElement('div');
             frontendToBackendNavEl.classList.add('o_frontend_to_backend_nav');
+            frontendToBackendNavEl.addEventListener('click', ev => {
+                frontendToBackendNavEl.classList.add('o_frontend_to_backend_nav_opened');
+                setTimeout(() => {
+                    // TODO find a better way? Useful so that hover effects work
+                    // after the opening.
+                    frontendToBackendNavEl.classList.add('o_frontend_to_backend_nav_fully_opened');
+                }, 600);
+            }, { once: true });
+
+            const loadingIconEl = document.createElement('i');
+            loadingIconEl.classList.add('o_frontend_to_backend_icon', 'fa', 'fa-arrow-right');
+            frontendToBackendNavEl.appendChild(loadingIconEl);
 
             const backendAppsButtonEl = document.createElement('a');
             backendAppsButtonEl.href = '/web';
@@ -46,9 +58,13 @@ document.addEventListener('DOMContentLoaded', () => {
             frontendToBackendNavEl.appendChild(backendAppsButtonEl);
 
             const backendEditButtonEl = document.createElement('a');
-            backendEditButtonEl.href = backendPath;
+            backendEditButtonEl.href = `${backendPath}&enable_editor=1`;
+            backendEditButtonEl.textContent = _t("Edit");
             backendEditButtonEl.title = _t("Edit your page content");
-            backendEditButtonEl.classList.add('o_frontend_to_backend_edit_btn', 'fa', 'fa-cog');
+            backendEditButtonEl.classList.add('o_frontend_to_backend_edit_btn');
+            const backendEditButtonIconEl = document.createElement('i');
+            backendEditButtonIconEl.classList.add('fa', 'fa-pencil');
+            backendEditButtonEl.prepend(backendEditButtonIconEl);
             frontendToBackendNavEl.appendChild(backendEditButtonEl);
 
             document.body.appendChild(frontendToBackendNavEl);

@@ -3,48 +3,99 @@
 /// and the UI components rules.
 ///
 
+$-mini-nav-size: 40px;
+
 .o_frontend_to_backend_nav {
     @include o-position-absolute(0, auto, auto, 0);
     position: fixed;
     z-index: $zindex-modal;
     display: flex;
-    opacity: 0.8;
+    font-size: $o-font-size-base * ($o-root-font-size / 16px);
 
-    &:hover {
-        opacity: 1.0;
+    &::before {
+        content: "";
+        @include o-position-absolute(0, auto, auto, 0);
+        border-top: $-mini-nav-size/2 solid $o-enterprise-color;
+        border-left: $-mini-nav-size/2 solid $o-enterprise-color;
+        border-bottom: $-mini-nav-size/2 solid transparent;
+        border-right: $-mini-nav-size/2 solid transparent;
+        cursor: pointer;
+
+        transform-origin: top left;
+        transition: transform 400ms ease 0s;
     }
 
     > * {
         position: relative;
-        width: 32px;
-        height: 32px;
+        min-width: $-mini-nav-size;
+        height: $-mini-nav-size;
+        padding: 0;
         display: flex;
         justify-content: center;
         align-items: center;
+        cursor: pointer;
+        background-color: $o-enterprise-color;
+        color: transparent;
+        transform-origin: top left;
+        transform: translateX(-250%) scaleY(0.2);
+        transition: transform 400ms ease 0s, background-color 400ms ease 200ms, color 400ms ease 200ms;
 
         &:hover {
-            background-image: radial-gradient(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.15));
+            background-color: darken($o-enterprise-color, 5%);
+            color: white;
+            text-decoration: none;
+        }
+    }
+
+    &:hover {
+        &::before {
+            transform: scale(1.3);
+        }
+        .o_frontend_to_backend_icon {
+            transform: rotateZ(45deg) translateX(#{-$-mini-nav-size / 4 * 0.3});
+        }
+    }
+
+    &.o_frontend_to_backend_nav_opened {
+        &:hover::before {
+            transform: scaleX(1.3);
+            transition: transform 100ms ease 0s;
+        }
+
+        > * {
+            color: white;
+            transform: translateX(-#{$-mini-nav-size});
+        }
+        .o_frontend_to_backend_edit_btn {
+            background-color: $o-enterprise-primary-color;
+
+            &:hover {
+                background-color: darken($o-enterprise-primary-color, 5%);
+            }
+        }
+
+        &.o_frontend_to_backend_nav_fully_opened > * {
+            transition: none;
         }
     }
 }
-.o_frontend_to_backend_apps_btn {
-    background-color: $o-brand-odoo;
+.o_frontend_to_backend_icon {
+    border-radius: 50rem;
+    background-color: transparent;
     color: white;
+    transform-origin: center center;
+    transform: rotateZ(45deg) translateX(#{-$-mini-nav-size/4});
+    transition: transform 100ms ease 0s;
 
     &:hover {
-        color: white;
+        background-color: transparent;
     }
 }
 .o_frontend_to_backend_edit_btn {
-    background-color: $o-white;
-    color: $o-brand-primary;
-    padding-top: 1px;
-    padding-left: 1px;
-    border-right: 1px solid $o-brand-secondary;
-    border-bottom: 1px solid $o-brand-secondary;
+    padding: 0 12px;
 
-    &:hover {
-        color: $o-brand-primary;
+    > .fa {
+        margin-right: 8px;
     }
 }
 
