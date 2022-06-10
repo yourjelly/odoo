@@ -157,8 +157,11 @@ export class Many2OneField extends Component {
         });
     }
 
-    onClick() {
-        this.openAction();
+    onClick(ev) {
+        if (this.props.canOpen && this.props.readonly) {
+            ev.stopPropagation();
+            this.openAction();
+        }
     }
     onExternalBtnClick() {
         this.openDialog(this.resId);
