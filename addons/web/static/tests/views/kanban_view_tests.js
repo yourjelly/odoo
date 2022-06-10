@@ -688,6 +688,34 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
+    QUnit.debug("kanban with kanban-tooltip template", async (assert) => {
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <kanban>
+                    <templates>
+                        <t t-name="kanban-tooltip">
+                            <ul class="oe_kanban_tooltip">
+                                <li><t t-esc="record.display_name.value" /></li>
+                            </ul>
+                        </t>
+                        <t t-name="kanban-box">
+                            <div>
+                                <field name="foo"/>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>`,
+        });
+
+        // assert.deepEqual(
+        //     getNodesTextContent(target.querySelectorAll(".o_kanban_record:not(.o_kanban_ghost)")),
+        //     ["yop", "blip", "gnap", "blip"]
+        // );
+    });
+
     QUnit.test("pager should be hidden in grouped mode", async (assert) => {
         assert.expect(1);
 

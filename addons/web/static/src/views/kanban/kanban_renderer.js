@@ -112,8 +112,9 @@ export class KanbanRenderer extends Component {
             cards,
             className,
             examples,
-            subTemplateDocs,
             cardTemplateDoc,
+            tooltipTemplateDoc,
+            subTemplateDocs,
         } = this.props.archInfo;
         this.cards = cards;
         this.className = className;
@@ -129,6 +130,10 @@ export class KanbanRenderer extends Component {
         this.cardTemplate = useViewCompiler(KanbanCompiler, arch, cardTemplateDoc, {
             subTemplateKeys,
         });
+        if (tooltipTemplateDoc) {
+            const key = `kanban_tooltip_${arch}`;
+            this.tooltipTemplate = useViewCompiler(KanbanCompiler, key, tooltipTemplateDoc);
+        }
         this.state = useState({
             columnQuickCreateIsFolded:
                 !this.props.list.isGrouped || this.props.list.groups.length > 0,
@@ -343,6 +348,12 @@ export class KanbanRenderer extends Component {
 
     get read_only_mode() {
         return this.props.readonly;
+    }
+
+    get tooltipInfo() {
+        return {
+            getValue: (record, fieldName) => this.getValue(record, fieldName),
+        };
     }
 
     /**

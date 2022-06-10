@@ -26,6 +26,7 @@ import { archParseBoolean, getActiveActions } from "@web/views/helpers/utils";
  */
 
 const KANBAN_BOX_ATTRIBUTE = "kanban-box";
+const KANBAN_TOOLTIP_ATTRIBUTE = "kanban-tooltip";
 const ACTION_TYPES = ["action", "object"];
 const SPECIAL_TYPES = [...ACTION_TYPES, "edit", "open", "delete", "url", "set_cover"];
 const TRANSPILED_EXPRESSIONS = [
@@ -102,6 +103,7 @@ export class KanbanArchParser extends XMLParser {
         const openAction = action && type ? { action, type } : null;
         const subTemplateDocs = {};
         let boxTemplateDoc;
+        let tooltipTemplateDoc;
 
         // Root level of the template
         this.visitXML(xmlDoc, (node) => {
@@ -109,6 +111,8 @@ export class KanbanArchParser extends XMLParser {
                 const tname = node.getAttribute("t-name");
                 if (tname === KANBAN_BOX_ATTRIBUTE) {
                     boxTemplateDoc = node;
+                } else if (tname === KANBAN_TOOLTIP_ATTRIBUTE) {
+                    tooltipTemplateDoc = node;
                 } else {
                     subTemplateDocs[tname] = node;
                 }
@@ -316,8 +320,9 @@ export class KanbanArchParser extends XMLParser {
             limit: limit && parseInt(limit, 10),
             progressAttributes,
             cardColorField,
-            subTemplateDocs,
             cardTemplateDoc: box,
+            subTemplateDocs,
+            tooltipTemplateDoc,
             tooltipInfo,
             examples: xmlDoc.getAttribute("examples"),
             __rawArch: arch,
