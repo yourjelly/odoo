@@ -105,6 +105,7 @@ export class ListRenderer extends Component {
         });
         let dataRowId;
         this.rootRef = useRef("root");
+        this.resequencePromise = Promise.resolve();
         useSortable({
             enable: () => this.canResequenceRows,
             // Params
@@ -126,9 +127,10 @@ export class ListRenderer extends Component {
                 }
                 element.classList.remove("o_row_draggable");
                 const refId = previous ? previous.dataset.id : null;
-                await this.props.list.resequence(dataRowId, refId, {
+                this.resequencePromise = this.props.list.resequence(dataRowId, refId, {
                     handleField: this.props.archInfo.handleField,
                 });
+                await this.resequencePromise;
                 element.classList.add("o_row_draggable");
             },
         });
@@ -726,7 +728,15 @@ export class ListRenderer extends Component {
     }
 
     async onCellClicked(record, column) {
+        const recordAfterResequence = async () => {
+            const recordIndex = this.props.list.records.indexOf(record);
+            await this.resequencePromise;
+            // row might have changed record after resequence
+            record = this.props.list.records[recordIndex] || record;
+        };
+
         if (this.props.list.model.multiEdit && record.selected) {
+            await recordAfterResequence();
             await record.switchMode("edit");
             this.cellToFocus = { column, record };
         } else if (this.props.editable) {
@@ -734,6 +744,7 @@ export class ListRenderer extends Component {
                 this.focusCell(column);
                 this.cellToFocus = null;
             } else {
+                await recordAfterResequence();
                 await record.switchMode("edit");
                 this.cellToFocus = { column, record };
             }

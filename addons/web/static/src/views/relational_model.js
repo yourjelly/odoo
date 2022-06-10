@@ -1610,7 +1610,7 @@ class DynamicList extends DataPoint {
             const record = records.find((r) => r.resId === recordData.id);
             const value = { [handleField]: recordData[handleField] };
             if (record instanceof Record) {
-                record.update(value);
+                await record.update(value);
             } else {
                 Object.assign(record.data, value);
             }
