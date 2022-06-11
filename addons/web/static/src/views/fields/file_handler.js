@@ -81,6 +81,9 @@ export class FileUploader extends Component {
             });
             this.state.isUploading = false;
         }
+        if (this.props.multiUpload && this.props.onUploadComplete) {
+            this.props.onUploadComplete({});
+        }
     }
 
     onSelectFileButtonClick() {
