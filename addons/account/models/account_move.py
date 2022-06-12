@@ -3800,6 +3800,15 @@ class AccountMoveLine(models.Model):
     analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Analytic Tags',
         compute="_compute_analytic_tag_ids", store=True, readonly=False, check_company=True, copy=True)
 
+    # ==== New Analytic fields ====
+    # the idea behind these 2 field was to use the data in native js components
+    analytic_account_selector_id = fields.Many2one(comodel_name='account.analytic.account', help="Technical field used to populate analytic_dist_tag_ids onchange")
+    analytic_dist_model_selector_id = fields.Many2one(comodel_name='account.analytic.distribution.model', help="Technical field used to populate analytic_dist_tag_ids onchange")
+    # the following field is a JSON representation of the main o2m field
+    analytic_json = fields.Binary(compute='_compute_analytic_json', inverse='_set_analytic_json')
+    # this field contains the actual distribution tags
+    analytic_dist_tag_ids = fields.One2many(comodel_name='account.analytic.distribution.tag', inverse_name='move_line_id')
+
     # ==== Onchange / display purpose fields ====
     recompute_tax_line = fields.Boolean(store=False, readonly=True,
         help="Technical field used to know on which lines the taxes must be recomputed.")
@@ -3984,6 +3993,33 @@ class AccountMoveLine(models.Model):
             business_vals = self._get_fields_onchange_balance(amount_currency=amount_currency)
             if 'price_unit' in business_vals:
                 self.price_unit = business_vals['price_unit']
+
+    @api.depends('analytic_dist_tag_ids')
+    def _compute_analytic_json(self):
+        for aml in self:
+            data = {
+                'tags': [
+                    {
+                        'name': tag.name_get(),
+                        'analytic_account_id': tag.analytic_account_id.name_get(),
+                        'percentage': tag.percentage,
+                    }
+                    for tag in aml.analytic_dist_tag_ids
+                ],
+            }
+            print(f'read analytic dist tags as {data}')
+            aml.analytic_json = data
+
+    def _set_analytic_json(self):
+        for aml in self:
+            data = [(5, 0, 0)]
+            for tag in aml.analytic_json['tags']:
+                data.append((0, 0, {
+                    'analytic_account_id': tag['analytic_account_id'][0],
+                    'percentage': int(tag['percentage'])
+                }))
+            print(f'setting analytic dist tags to {data}')
+            aml.analytic_dist_tag_ids = data
 
     @api.depends('product_id', 'account_id', 'partner_id', 'date')
     def _compute_analytic_account_id(self):
@@ -4250,6 +4286,37 @@ class AccountMoveLine(models.Model):
     # -------------------------------------------------------------------------
     # ONCHANGE METHODS
     # -------------------------------------------------------------------------
+
+    @api.onchange('analytic_account_selector_id')
+    def _onchange_analytic_account_selector_id(self):
+        # this does not work since the record needs to be created
+        # vals = [(0, 0, {'analytic_account_id': aa.id, 'percentage': 100}) for aa in self.analytic_account_selector_id ]
+        # self.analytic_dist_tag_ids = vals
+
+        # the following replicates the behaviour of the many2many_tags popup and save - create a new distribution tag and link it
+        if self.analytic_account_selector_id:
+            new_tag = self.env['account.analytic.distribution.tag'].create({'analytic_account_id': self.analytic_account_selector_id.id, 'percentage': 100})
+            self.analytic_dist_tag_ids += new_tag
+
+
+    @api.onchange('analytic_dist_model_selector_id')
+    def _onchange_analytic_dist_model_selector_id(self):
+        # this does not work since the record needs to exist
+        # vals = [(5,0,0)] + [
+        #     (0, 0, {'analytic_account_id': tag.analytic_account_id.id, 'percentage': tag.percentage})
+        #     for tag in self.analytic_dist_model_selector_id.distribution_tag_ids]
+        # self.analytic_dist_tag_ids = vals
+
+        # the following replicates the behaviour of the many2many_tags create and edit
+        new_tags = self.env['account.analytic.distribution.tag'].create([
+            {
+                'analytic_account_id': tag.analytic_account_id.id,
+                'percentage': tag.percentage
+            }
+            for tag in self.analytic_dist_model_selector_id.distribution_tag_ids
+        ])
+        self.analytic_dist_tag_ids = new_tags
+
 
     @api.onchange('amount_currency', 'currency_id', 'debit', 'credit', 'tax_ids', 'account_id', 'price_unit', 'quantity')
     def _onchange_mark_recompute_taxes(self):

@@ -2,10 +2,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import defaultdict
+from random import randint
 from odoo import api, fields, models, _
 from odoo.osv import expression
 from odoo.exceptions import ValidationError
-
 
 class AccountAnalyticDistribution(models.Model):
     _name = 'account.analytic.distribution'
@@ -38,6 +38,9 @@ class AccountAnalyticGroup(models.Model):
     _parent_store = True
     _rec_name = 'complete_name'
 
+    def _get_default_color(self):
+        return randint(1, 11)
+
     name = fields.Char(required=True)
     description = fields.Text(string='Description')
     parent_id = fields.Many2one('account.analytic.group', string="Parent", ondelete='cascade', domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
@@ -45,6 +48,8 @@ class AccountAnalyticGroup(models.Model):
     children_ids = fields.One2many('account.analytic.group', 'parent_id', string="Childrens")
     complete_name = fields.Char('Complete Name', compute='_compute_complete_name', recursive=True, store=True)
     company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)
+
+    color = fields.Integer(string='Color', default=_get_default_color)
 
     @api.depends('name', 'parent_id.complete_name')
     def _compute_complete_name(self):
@@ -127,7 +132,7 @@ class AccountAnalyticAccount(models.Model):
     name = fields.Char(string='Analytic Account', index='trigram', required=True, tracking=True)
     code = fields.Char(string='Reference', index='btree', tracking=True)
     active = fields.Boolean('Active', help="If the active field is set to False, it will allow you to hide the account without removing it.", default=True)
-
+    # among other changes to the model, the group_id will change to an analytic plan
     group_id = fields.Many2one('account.analytic.group', string='Group', check_company=True)
 
     line_ids = fields.One2many('account.analytic.line', 'account_id', string="Analytic Lines")
@@ -185,3 +190,43 @@ class AccountAnalyticLine(models.Model):
         for line in self:
             if line.account_id.company_id and line.company_id.id != line.account_id.company_id.id:
                 raise ValidationError(_('The selected account belongs to another company than the one you\'re trying to create an analytic item for'))
+
+class AccountAnalyticDistributionTag(models.Model):
+    _name = 'account.analytic.distribution.tag'
+    _description = 'Analytic Distribution Tag'
+    # check_company_auto = True
+
+    analytic_account_id = fields.Many2one(comodel_name='account.analytic.account', string='Analytic Account', required=True)
+    percentage = fields.Float(string='Percentage')
+
+    # models that use analytic distribution tags will add a column/field like below
+    model_id = fields.Many2one(comodel_name='account.analytic.distribution.model')
+
+    # related fields
+    group_id = fields.Many2one('account.analytic.group', related='analytic_account_id.group_id')
+    color = fields.Integer(related='group_id.color')
+
+    # consider using reference fields instead
+    # res_model = fields.Char('Resource Model', help="The database object this analytic distribution tag is attached to")
+    # res_id = fields.Many2oneReference('Resource ID', model_field='res_model',
+    #                               readonly=True, help="The record id this is attached to.")
+
+    #this doesn't seem to apply when using many2many
+    _sql_constraints = [
+        ('check_percentage', 'CHECK(percentage >= 0 AND percentage <= 100)',
+            'The percentage of an analytic distribution should be between 0 and 100.')
+    ]
+
+    def name_get(self):
+        res = []
+        for tag in self:
+            res.append((tag.id, f"{tag.analytic_account_id.name} {str(tag.percentage) + '%' if tag.percentage and tag.percentage != 100 else ''}"))
+        return res
+
+class AccountAnalyticDistributionModel(models.Model):
+    _name = 'account.analytic.distribution.model'
+    _description = 'Analytic Distribution Model'
+
+    #this should maybe replace account.analytic.default (in accounting)
+    name = fields.Char(required=True)
+    distribution_tag_ids = fields.One2many(comodel_name='account.analytic.distribution.tag', inverse_name='model_id')
