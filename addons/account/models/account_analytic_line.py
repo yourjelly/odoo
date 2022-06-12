@@ -146,3 +146,8 @@ class AccountAnalyticLine(models.Model):
                 account=self.env['account.analytic.account'].browse(self.env.context['account_id']).name
             )
         return super().view_header_get(view_id, view_type)
+
+class AccountAnalyticDistributionTag(models.Model):
+    _inherit = 'account.analytic.distribution.tag'
+
+    move_line_id = fields.Many2one(comodel_name='account.move.line')

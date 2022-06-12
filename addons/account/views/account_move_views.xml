@@ -870,6 +870,16 @@
                                                optional="show"
                                                widget="many2many_tags"/>
                                         <field name="quantity" optional="show"/>
+                                        <!-- These fields should have groups applied -->
+                                        <field name="analytic_account_selector_id"/>
+                                        <field name="analytic_dist_model_selector_id"/>
+                                        <field name="analytic_dist_tag_ids"
+                                               widget="many2many_tags"/>
+                                        <!--<field name="analytic_dist_tag_ids"
+                                               widget="analytic_o2m"
+                                               options="{'search_fields': ['analytic_account_selector_id', 'analytic_dist_model_selector_id']}"/>-->
+                                        <!-- <field name="analytic_json" widget="analytic_json"/> -->
+                                        <field name="quantity"/>
                                         <field name="product_uom_category_id" invisible="1"/>
                                         <field name="product_uom_id" string="UoM" groups="uom.group_uom" optional="show"/>
                                         <field name="price_unit" string="Price"/>
@@ -1071,6 +1081,7 @@
                                                groups="analytic.group_analytic_tags"
                                                widget="many2many_tags"
                                                attrs="{'invisible': [('display_type', 'in', ('line_section', 'line_note'))]}"/>
+                                        <field name="analytic_dist_tag_ids"/>
                                         <field name="date_maturity"
                                                optional="hide"
                                                invisible="context.get('view_no_maturity')"
