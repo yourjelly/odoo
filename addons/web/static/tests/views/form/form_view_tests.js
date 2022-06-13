@@ -5,6 +5,7 @@ import {
     click,
     clickEdit,
     clickSave,
+    dragAndDrop,
     editInput,
     getFixture,
     getNodesTextContent,
@@ -33,9 +34,6 @@ import { localization } from "@web/core/l10n/localization";
 const fieldRegistry = registry.category("fields");
 const serviceRegistry = registry.category("services");
 const widgetRegistry = registry.category("view_widgets");
-
-// WOWL remove after adapting tests
-let testUtils;
 
 let target, serverData;
 QUnit.module("Views", (hooks) => {
@@ -9846,13 +9844,11 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "resequence list lines when discardable lines are present",
         async function (assert) {
-            assert.expect(8);
 
             var onchangeNum = 0;
-
             serverData.models.partner.onchanges = {
                 p: function (obj) {
                     onchangeNum++;
@@ -9860,71 +9856,52 @@ QUnit.module("Views", (hooks) => {
                 },
             };
 
+            serverData.views = {
+                "partner,false,list": `<tree editable="bottom"><field name="int_field" widget="handle"/><field name="display_name" required="1"/></tree>`,
+            };
+
             await makeView({
                 type: "form",
                 resModel: "partner",
                 serverData,
-                arch: "<form>" + '<field name="foo"/>' + '<field name="p"/>' + "</form>",
-                archs: {
-                    "partner,false,list":
-                        '<tree editable="bottom">' +
-                        '<field name="int_field" widget="handle"/>' +
-                        '<field name="display_name" required="1"/>' +
-                        "</tree>",
-                },
+                arch: `<form><field name="foo"/><field name="p"/></form>`,
             });
+
 
             assert.strictEqual(onchangeNum, 1, "one onchange happens when form is opened");
             assert.strictEqual(
-                target.querySelector('[name="foo"]').value,
+                target.querySelector('[name="foo"] input').value,
                 "0",
                 "onchange worked there is 0 line"
             );
-
+            
             // Add one line
             await click(target.querySelector(".o_field_x2many_list_row_add a"));
-            target.querySelector(".o_field_one2many input:first").focus();
-            await testUtils.nextTick();
-            target
-                .querySelector(".o_field_one2many input:first")
-                .val("first line")
-                .trigger("input");
-            await testUtils.nextTick();
-            await click(target.querySelector('.o_field_widget[name="foo"] input'));
+            await editInput(target, `.o_field_cell [name="display_name"] input`, "first line")
             assert.strictEqual(onchangeNum, 2, "one onchange happens when a line is added");
             assert.strictEqual(
-                target.querySelector('[name="foo"]').value,
+                target.querySelector('[name="foo"] input').value,
                 "1",
                 "onchange worked there is 1 line"
             );
 
-            // Drag and drop second line before first one (with 1 draft and invalid line)
             await click(target.querySelector(".o_field_x2many_list_row_add a"));
-            await testUtils.dom.dragAndDrop(
-                target.querySelector(".ui-sortable-handle").eq(0),
-                target.querySelector(".o_data_row").last(),
-                { position: "bottom" }
-            );
+            await nextTick();
+            // Drag and drop second line before first one (with 1 draft and invalid line)
+            await dragAndDrop("tbody.ui-sortable tr:nth-child(1) .o_handle_cell", "tbody.ui-sortable tr:nth-child(2)");
             assert.strictEqual(onchangeNum, 3, "one onchange happens when lines are resequenced");
             assert.strictEqual(
-                target.querySelector('[name="foo"]').value,
+                target.querySelector('[name="foo"] input').value,
                 "1",
                 "onchange worked there is 1 line"
             );
-
             // Add a second line
             await click(target.querySelector(".o_field_x2many_list_row_add a"));
-            target.querySelector(".o_field_one2many input:first").focus();
-            await testUtils.nextTick();
-            target
-                .querySelector(".o_field_one2many input:first")
-                .val("second line")
-                .trigger("input");
-            await testUtils.nextTick();
-            await click(target.querySelector('.o_field_widget[name="foo"] input'));
+            await editInput(target, ".o_selected_row input", "second line");
+         
             assert.strictEqual(onchangeNum, 4, "one onchange happens when a line is added");
             assert.strictEqual(
-                target.querySelector('[name="foo"]').value,
+                target.querySelector('[name="foo"] input').value,
                 "2",
                 "onchange worked there is 2 lines"
             );
