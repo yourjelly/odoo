@@ -230,6 +230,7 @@ class TestSaleMrpKitBom(TransactionCase):
         with Form(so) as so_form:
             with so_form.order_line.edit(0) as order_line_change:
                 # The actual test, there should be no traceback here
+                # sgv todo, does it fail?
                 order_line_change.product_id = product_variant_ids[1]
 
     def test_sale_mrp_kit_cost(self):
