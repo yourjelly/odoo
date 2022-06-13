@@ -9,6 +9,7 @@
             <field name="default_opening_date_filter">last_month</field>
             <field name="only_tax_exigible" eval="True"/>
             <field name="dynamic_lines_generator">_generic_tax_report_default_grouping</field>
+            <field name="custom_options_initializer">_tax_report_custom_options_initializer</field>
             <field name="column_ids">
                 <record id="generic_tax_report_column_net" model="account.report.column">
                     <field name="name">NET</field>

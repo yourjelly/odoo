@@ -113,7 +113,10 @@ class AccountReport(models.Model):
     # Thos fields allow case-by-case fine-tuning or the engine, for custom reports
 
     dynamic_lines_generator = fields.Char(string="Dynamic Lines Generator")
-    custom_options_initializer = fields.Char(string="Custom Options Initializer")
+    custom_options_initializer = fields.Char(
+        string="Custom Options Initializer",
+        compute=lambda x: x._compute_report_option_filter('custom_options_initializer'), readonly=False, store=True, depends=['root_report_id'],
+    )
     custom_line_postprocessor = fields.Char(string="Custom Line Postprocessor")
     custom_groupby_line_completer = fields.Char(string="Custom Groupby Line Completer")
 
