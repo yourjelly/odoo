@@ -8551,7 +8551,7 @@ QUnit.module("Fields", (hooks) => {
 
             assert.deepEqual(
                 getNodesTextContent(target.querySelectorAll(".o_data_cell.o_list_char")),
-                [inputText2, inputText1, ""]
+                [inputText2, inputText1] // empty line has been discarded on the drag and drop
             );
         }
     );

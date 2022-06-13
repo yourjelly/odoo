@@ -123,9 +123,7 @@ export class ListRenderer extends Component {
             onStop: (_group, element) => element.classList.remove("o_dragged"),
             onDrop: async ({ element, previous }) => {
                 if (this.props.list.editedRecord) {
-                    // bof
-                    this.props.list.editedRecord.switchMode("readonly");
-                    // there was more see unselectRow in list_editable_renderer called with no options
+                    this.props.list.unselectRecord(true);
                 }
                 element.classList.remove("o_row_draggable");
                 const refId = previous ? previous.dataset.id : null;

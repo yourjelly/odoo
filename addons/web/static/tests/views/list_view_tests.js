@@ -8352,48 +8352,6 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.test(
-        "list with handle widget, create and move should keep empty lines at last",
-        async function (assert) {
-            // When there are less than 4 records in the table, empty lines are added
-            // to have at least 4 rows. This test ensures that the empty line added
-            // when a new record is discarded is correctly added on the bottom of
-            // the target, even if the discarded record wasn't.
-            assert.expect(11);
-
-            await makeView({
-                type: "list",
-                resModel: "foo",
-                serverData,
-                arch: `
-                <tree editable="bottom">
-                    <field name="int_field" widget="handle"/>
-                    <field name="foo" required="1"/>
-                </tree>`,
-                domain: [["bar", "=", false]],
-            });
-
-            assert.containsOnce(target, ".o_data_row");
-            assert.containsN(target, "tbody tr", 4);
-
-            await click(target.querySelector(".o_list_button_add"));
-            assert.containsN(target, ".o_data_row", 2);
-            assert.doesNotHaveClass($(target).find(".o_data_row:first"), "o_selected_row");
-            assert.hasClass($(target).find(".o_data_row:nth(1)"), "o_selected_row");
-
-            // Drag and drop the first line after creating record row
-            await dragAndDrop("tbody tr:nth-child(1) .o_handle_cell", "tbody tr:nth-child(2)");
-            assert.containsN(target, ".o_data_row", 2);
-            assert.hasClass($(target).find(".o_data_row:first"), "o_selected_row");
-            assert.doesNotHaveClass($(target).find(".o_data_row:nth(1)"), "o_selected_row");
-
-            await clickDiscard(target);
-            assert.containsOnce(target, ".o_data_row");
-            assert.hasClass($(target).find("tbody tr:first"), "o_data_row");
-            assert.containsN(target, "tbody tr", 4);
-        }
-    );
-
     QUnit.test("multiple clicks on Add do not create invalid rows", async function (assert) {
         assert.expect(2);
 
