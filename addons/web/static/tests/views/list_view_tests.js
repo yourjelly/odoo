@@ -62,7 +62,7 @@ let serverData;
 let target;
 
 // WOWL remove after adapting tests
-let testUtils, ListRenderer, core, BasicModel, AbstractStorageService;
+let testUtils, core, BasicModel, AbstractStorageService;
 
 async function reloadListView(target) {
     await validateSearch(target);
@@ -11741,18 +11741,8 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["resId: 3"]);
     });
 
-    QUnit.skipWOWL("removing a groupby while adding a line from list", async function (assert) {
-        assert.expect(1);
-
-        let checkUnselectRow = false;
-        testUtils.mock.patch(ListRenderer, {
-            unselectRow(options = {}) {
-                if (checkUnselectRow) {
-                    assert.step("unselectRow");
-                }
-                return this._super(...arguments);
-            },
-        });
+    QUnit.test("removing a groupby while adding a line from list", async function (assert) {
+        assert.expect(3);
 
         await makeView({
             type: "list",
@@ -11778,11 +11768,11 @@ QUnit.module("Views", (hooks) => {
 
         // expand group
         await click(target.querySelector("th.o_group_name"));
+        assert.containsNone(target, ".o_selected_row");
         await click(target.querySelector("td.o_group_field_row_add a"));
-        checkUnselectRow = true;
+        assert.containsOnce(target, ".o_selected_row");
         await click(target, ".o_searchview_facet .o_facet_remove");
-        assert.verifySteps([]);
-        testUtils.mock.unpatch(ListRenderer);
+        assert.containsNone(target, ".o_selected_row");
     });
 
     QUnit.skipWOWL(
