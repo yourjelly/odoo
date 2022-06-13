@@ -13,6 +13,8 @@ FIGURE_TYPE_SELECTION_VALUES = [
     ('percentage', "Percentage"),
     ('integer', "Integer"),
     ('float', "Float"),
+    ('date', "Date"),
+    ('datetime', "Datetime"),
     ('none', "No Formatting"),
 ]
 
