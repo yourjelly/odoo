@@ -24,6 +24,7 @@ Odoo Web Editor widget.
 
         'web.assets_qweb': [
             'web_editor/static/src/xml/*.xml',
+            'web_editor/static/src/components/**/*.xml',
         ],
         'web_editor.assets_wysiwyg': [
 
@@ -70,7 +71,6 @@ Odoo Web Editor widget.
             'web_editor/static/src/scss/wysiwyg_iframe.scss',
             'web_editor/static/src/scss/wysiwyg_snippets.scss',
 
-            'web_editor/static/src/js/wysiwyg/fonts.js',
             'web_editor/static/src/js/base.js',
             'web_editor/static/src/js/editor/perspective_utils.js',
             'web_editor/static/src/js/editor/image_processing.js',
@@ -91,6 +91,7 @@ Odoo Web Editor widget.
             'web_editor/static/lib/vkbeautify/**/*',
             'web_editor/static/src/js/common/**/*',
             'web_editor/static/lib/odoo-editor/src/utils/utils.js',
+            'web_editor/static/src/js/wysiwyg/fonts.js',
         ],
         'web.assets_backend': [
             'web_editor/static/src/scss/web_editor.common.scss',
@@ -99,6 +100,10 @@ Odoo Web Editor widget.
             'web_editor/static/src/js/wysiwyg/dialog.js',
             'web_editor/static/src/js/frontend/loader.js',
             'web_editor/static/src/js/backend/**/*',
+            'web_editor/static/src/components/media_dialog/*.js',
+            'web_editor/static/src/components/media_dialog/*.scss',
+            'web_editor/static/src/components/upload_progress_toast/*.js',
+            'web_editor/static/src/components/upload_progress_toast/*.scss',
         ],
         'web.assets_frontend_minimal': [
             'web_editor/static/src/js/frontend/loader_loading.js',
