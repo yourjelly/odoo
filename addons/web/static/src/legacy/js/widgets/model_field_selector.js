@@ -53,7 +53,7 @@ var ModelFieldSelector = Widget.extend({
         this._super.apply(this, arguments);
 
         this.model = model;
-        this.popOver = {'chain': chain, 'pages': []};
+        this.chain = chain;
         this.options = _.extend({
             order: 'string',
             readonly: true,
@@ -131,7 +131,7 @@ var ModelFieldSelector = Widget.extend({
      * @returns {Promise} resolved once the re-rendering is finished
      */
     setChain: function (chain) {
-        return this.popOver.setChain(chain);
+        return this.popOver.setChain(chain).then(() => this.chain = this.popOver.chain);
     },
     //--------------------------------------------------------------------------
     // Private
@@ -145,6 +145,7 @@ var ModelFieldSelector = Widget.extend({
      */
     _render: function () {
         // Render the chain value
+        this.chain = this.popOver.chain;
         this.$value.html(core.qweb.render(this.template + ".value", {
             chain: this.popOver.chain,
             pages: this.popOver.pages,
