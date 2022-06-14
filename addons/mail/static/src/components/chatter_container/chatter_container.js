@@ -134,7 +134,7 @@ Object.assign(ChatterContainer, {
             optional: true,
         },
         threadId: {
-            type: Number,
+            type: [Number, Boolean],
             optional: true,
         },
         threadModel: String,
