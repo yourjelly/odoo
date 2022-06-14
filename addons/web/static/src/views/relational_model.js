@@ -1232,7 +1232,7 @@ export class Record extends DataPoint {
                 await this.model.orm.write(this.resModel, [this.resId], changes, this.context);
             } catch (e) {
                 if (!this.isInEdition) {
-                    await this.load();
+                    await Promise.all([this.model.reloadRecords(this.resId), this.load()]);
                     this.model.notify();
                 }
                 throw e;
@@ -1247,7 +1247,7 @@ export class Record extends DataPoint {
         }
         this.isInQuickCreation = false;
         if (shouldReload) {
-            await this.load();
+            await Promise.all([this.model.reloadRecords(this.resId), this.load()]);
             this.model.trigger("record-updated", { record: this });
             this.model.notify();
         }
@@ -2297,7 +2297,7 @@ export class Group extends DataPoint {
         }
         const listParams = {
             data: params.data,
-            domain: Domain.and([params.domain, this.groupDomain]).toList(),
+            domain: this.groupDomain,
             groupBy: params.groupBy,
             rawContext: params.rawContext,
             orderBy: params.orderBy,
@@ -3256,6 +3256,15 @@ export class RelationalModel extends Model {
      */
     getGroups() {
         return this.root.groups && this.root.groups.length ? this.root.groups : null;
+    }
+
+    async reloadRecords(resId) {
+        if (this.rootType !== "form") {
+            const records = this.root.records.filter((r) => r.resId === resId);
+            if (records.length) {
+                await Promise.all(records.map((r) => r.load()));
+            }
+        }
     }
 }
 

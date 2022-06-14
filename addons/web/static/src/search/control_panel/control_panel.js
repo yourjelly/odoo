@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { Pager } from "@web/core/pager/pager";
 import { useService } from "@web/core/utils/hooks";
 import { ComparisonMenu } from "../comparison_menu/comparison_menu";
@@ -23,6 +24,18 @@ export class ControlPanel extends Component {
         this.pagerProps = this.env.config.pagerProps
             ? useState(this.env.config.pagerProps)
             : undefined;
+    }
+
+    /**
+     * @param {KeyboardEvent} ev
+     */
+    onBottomLeftKeydown(ev) {
+        const hotkey = getActiveHotkey(ev);
+        if (hotkey === "arrowdown") {
+            this.env.searchModel.trigger("focus-view");
+            ev.preventDefault();
+            ev.stopPropagation();
+        }
     }
 
     /**
