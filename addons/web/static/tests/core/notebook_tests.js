@@ -5,7 +5,6 @@ import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 import { click, getFixture, mount } from "@web/../tests/helpers/utils";
 
 const { Component, xml } = owl;
-
 let target;
 
 QUnit.module("Components", (hooks) => {
@@ -28,11 +27,11 @@ QUnit.module("Components", (hooks) => {
         Parent.template = xml`<Notebook>
                 <t t-set-slot="page_about" title="'About'" isVisible="true">
                     <h3>About the bird</h3>
-                    <p>Owls are birds from the order Strigiformes which includes over 
+                    <p>Owls are birds from the order Strigiformes which includes over
                     200 species of mostly solitary and nocturnal birds of prey typified by an upright stance, ...</p>
                 </t>
                 <t t-set-slot="page_hunting" title="'Owl Activities'" isVisible="true">
-                    <h3>Their favorite activity: hunting</h3>    
+                    <h3>Their favorite activity: hunting</h3>
                     <p>Owls are called raptors, or birds of prey, which means they use sharp talons and curved bills to hunt, kill, and eat other animals.</p>
                 </t>
                 <t t-set-slot="page_secret" title="'Secret about OWLs'" isVisible="false">
@@ -90,11 +89,11 @@ QUnit.module("Components", (hooks) => {
         Parent.template = xml`<Notebook defaultPage="'page_hunting'">
                 <t t-set-slot="page_about" title="'About'" isVisible="true">
                     <h3>About the bird</h3>
-                    <p>Owls are birds from the order Strigiformes which includes over 
+                    <p>Owls are birds from the order Strigiformes which includes over
                     200 species of mostly solitary and nocturnal birds of prey typified by an upright stance, ...</p>
                 </t>
                 <t t-set-slot="page_hunting" title="'Owl Activities'" isVisible="true">
-                    <h3>Their favorite activity: hunting</h3>    
+                    <h3>Their favorite activity: hunting</h3>
                     <p>Owls are called raptors, or birds of prey, which means they use sharp talons and curved bills to hunt, kill, and eat other animals.</p>
                 </t>
                 <t t-set-slot="page_secret" title="'Secret about OWLs'" isVisible="false">
@@ -124,11 +123,11 @@ QUnit.module("Components", (hooks) => {
         Parent.template = xml`<Notebook defaultPage="'page_secret'">
                 <t t-set-slot="page_about" title="'About'" isVisible="true">
                     <h3>About the bird</h3>
-                    <p>Owls are birds from the order Strigiformes which includes over 
+                    <p>Owls are birds from the order Strigiformes which includes over
                     200 species of mostly solitary and nocturnal birds of prey typified by an upright stance, ...</p>
                 </t>
                 <t t-set-slot="page_hunting" title="'Owl Activities'" isVisible="true">
-                    <h3>Their favorite activity: hunting</h3>    
+                    <h3>Their favorite activity: hunting</h3>
                     <p>Owls are called raptors, or birds of prey, which means they use sharp talons and curved bills to hunt, kill, and eat other animals.</p>
                 </t>
                 <t t-set-slot="page_secret" title="'Secret about OWLs'" isVisible="false">
@@ -165,11 +164,11 @@ QUnit.module("Components", (hooks) => {
         Parent.template = xml`<Notebook orientation="'vertical'">
                 <t t-set-slot="page_about" title="'About'" isVisible="true">
                     <h3>About the bird</h3>
-                    <p>Owls are birds from the order Strigiformes which includes over 
+                    <p>Owls are birds from the order Strigiformes which includes over
                     200 species of mostly solitary and nocturnal birds of prey typified by an upright stance, ...</p>
                 </t>
                 <t t-set-slot="page_hunting" title="'Owl Activities'" isVisible="true">
-                    <h3>Their favorite activity: hunting</h3>    
+                    <h3>Their favorite activity: hunting</h3>
                     <p>Owls are called raptors, or birds of prey, which means they use sharp talons and curved bills to hunt, kill, and eat other animals.</p>
                 </t>
             </Notebook>`;
@@ -194,9 +193,9 @@ QUnit.module("Components", (hooks) => {
 
         class NotebookPageRenderer extends Component {}
         NotebookPageRenderer.template = xml`
-                    <h3 t-esc="props.title"></h3>
-                    <p t-esc="props.text" />
-                `;
+                <h3 t-esc="props.title"></h3>
+                <p t-esc="props.text" />
+            `;
 
         class Parent extends Component {
             setup() {
@@ -218,7 +217,7 @@ QUnit.module("Components", (hooks) => {
                             title: "Page 3",
                             text: "Third page rendered by a template component",
                         },
-                        name: "page_three", // required to be set as default page
+                        id: "page_three", // required to be set as default page
                     },
                 ];
             }
