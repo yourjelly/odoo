@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+    <t t-name="analytic_o2m" owl="1">
+        <div class="analytic_o2m">
+            <TagsList tags="tags"/>
+            <t t-if="!props.readonly">
+                <AutoComplete
+                    value="state.autocompleteValue"
+                    autoSelect="true"
+                    sources="sources"
+                    onSelect="onSelect"
+                    onInput="onInput"
+                    onChange="onChange"/>
+            </t>
+        </div>
+    </t>
+
+</templates>

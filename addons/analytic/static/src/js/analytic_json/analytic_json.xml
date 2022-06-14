@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+    <t t-name="analytic_json" owl="1">
+        <div class="analytic_json">
+            <t t-if="props.value.tags.length">
+                <t t-foreach="props.value.tags" t-as="tag" t-key="tag_key">
+                    <t t-esc="tag.name"/>
+                </t>
+            </t>
+            <t t-else="">
+                <span>No tags</span>
+            </t>
+        </div>
+    </t>
+
+</templates>

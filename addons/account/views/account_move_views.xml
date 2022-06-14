@@ -883,12 +883,13 @@
                                         <field name="quantity" optional="show"/>
                                         <!-- These fields should have groups applied -->
                                         <field name="analytic_account_selector_id"/>
-                                        <field name="analytic_dist_model_selector_id"/>
+                                        <field name="analytic_dist_model_selector_id" invisible="1"/>
+                                        <!-- <field name="analytic_dist_tag_ids"
+                                               widget="many2many_tags"/> -->
                                         <field name="analytic_dist_tag_ids"
-                                               widget="many2many_tags"/>
-                                        <!--<field name="analytic_dist_tag_ids"
                                                widget="analytic_o2m"
-                                               options="{'search_fields': ['analytic_account_selector_id', 'analytic_dist_model_selector_id']}"/>-->
+                                               string="Analytic Distribution"
+                                               options="{'search_fields': ['analytic_account_selector_id', 'analytic_dist_model_selector_id']}"/>
                                         <!-- <field name="analytic_json" widget="analytic_json"/> -->
                                         <field name="quantity"/>
                                         <field name="product_uom_category_id" invisible="1"/>
