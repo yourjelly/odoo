@@ -7,12 +7,12 @@ const { Component, onWillUpdateProps, useEffect, useRef, useState } = owl;
 /**
  * A notebook component that will render only the current page and allow
  * switching between its pages.
- * 
+ *
  * You can also set pages using a template component. Use an array with
  * the `pages` props to do such rendering.
- * 
+ *
  * Pages can also specify their index in the notebook.
- * 
+ *
  *      e.g.:
  *          PageTemplate.template = xml`
                     <h1 t-esc="props.title" />
@@ -36,7 +36,7 @@ const { Component, onWillUpdateProps, useEffect, useRef, useState } = owl;
  *                  isVisible: bool,
  *                  text: "Text Content 2",
  *              },
- *          }, 
+ *          },
  *      ]
  *
  * <Notebook pages="pages">
@@ -112,8 +112,12 @@ export class Notebook extends Component {
                 v.title = v.props.title;
                 v.index = v.props.index;
             }
-            const name = v.name ? v.name : k;
-            v.index ? pagesWithIndex.push([name, v]) : pages.push([name, v]);
+            const id = v.id || k;
+            if (v.index) {
+                pagesWithIndex.push([id, v]);
+            } else {
+                pages.push([id, v]);
+            }
         }
         for (const page of pagesWithIndex) {
             pages.splice(page[1].index, 0, page);

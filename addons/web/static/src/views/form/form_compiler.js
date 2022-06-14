@@ -418,7 +418,7 @@ export class FormCompiler extends ViewCompiler {
                 noteBook.setAttribute("name", `"${el.getAttribute("name")}"`);
                 el.removeAttribute("name");
             }
-            
+
             const pageId = `page_${this.id++}`;
             const pageTitle = toStringExpression(
                 child.getAttribute("string") || child.getAttribute("name") || ""
