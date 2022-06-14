@@ -52,7 +52,7 @@ export async function makeView(params) {
 
     if (props.arch) {
         serverData.views = serverData.views || {};
-        props.viewId = 100000001; // hopefully will not conflict with an id already in views
+        props.viewId = params.viewId || 100000001; // hopefully will not conflict with an id already in views
         serverData.views[`${props.resModel},${props.viewId},${props.type}`] = props.arch;
         delete props.arch;
         props.searchViewId = 100000002; // hopefully will not conflict with an id already in views
