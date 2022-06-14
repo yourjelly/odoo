@@ -793,7 +793,12 @@
             <field name="name">project.project.kanban</field>
             <field name="model">project.project</field>
             <field name="arch" type="xml">
-                <kanban class="oe_background_grey o_kanban_dashboard o_project_kanban o_emphasize_colors" on_create="project.open_create_project" js_class="project_project_kanban" sample="1">
+                <kanban
+                    class="oe_background_grey o_kanban_dashboard o_project_kanban o_emphasize_colors"
+                    on_create="project.open_create_project"
+                    action="action_view_tasks" type="object"
+                    sample="1"
+                >
                     <field name="display_name"/>
                     <field name="partner_id"/>
                     <field name="commercial_partner_id"/>
