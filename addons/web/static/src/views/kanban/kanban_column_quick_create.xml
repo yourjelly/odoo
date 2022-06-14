@@ -37,7 +37,7 @@
             </div>
         </div>
     </t>
-    
+
     <t t-name="web.KanbanExamplesNotebookTemplate" owl="1">
         <div t-if="props.description" class="o_kanban_examples_description" t-out="props.description"/>
         <div class="o_kanban_examples">

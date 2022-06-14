@@ -7,8 +7,8 @@ import { registry } from "@web/core/registry";
 
 const greenBullet = Markup`<span class="o_status d-inline-block o_status_green"></span>`;
 const redBullet = Markup`<span class="o_status d-inline-block o_status_red"></span>`;
-const star = Markup`<a style="color: gold;" class="fa fa-star"/>`;
-const clock = Markup`<a class="fa fa-clock-o"/>`;
+const star = Markup`<a style="color: gold;" class="fa fa-star"></a>`;
+const clock = Markup`<a class="fa fa-clock-o"></a>`;
 
 const _Markup = owl.markup('').constructor.prototype;
 const descriptionActivities = escFormat(_lt('%s Use the %s icon to organize your daily activities.'), '<br/>', clock);

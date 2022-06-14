@@ -72,7 +72,11 @@ export class KanbanColumnQuickCreate extends Component {
 }
 KanbanColumnQuickCreate.template = "web.KanbanColumnQuickCreate";
 
-class KanbanExamplesNotebookTemplate extends Component {}
+class KanbanExamplesNotebookTemplate extends Component {
+    random(min, max) {
+        return new Array(Math.floor(Math.random() * (max - min) + min));
+    }
+}
 KanbanExamplesNotebookTemplate.template = "web.KanbanExamplesNotebookTemplate";
 
 class KanbanColumnExamplesDialog extends Component {
@@ -90,7 +94,7 @@ class KanbanColumnExamplesDialog extends Component {
                     isVisible: true,
                     title: eg.name,
                 },
-                name: eg.name,
+                id: eg.name,
             });
         });
     }
