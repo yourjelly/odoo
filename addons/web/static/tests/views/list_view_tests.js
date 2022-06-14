@@ -62,7 +62,7 @@ let serverData;
 let target;
 
 // WOWL remove after adapting tests
-let testUtils, core, BasicModel, AbstractStorageService;
+let testUtils, core, BasicModel;
 
 async function reloadListView(target) {
     await validateSearch(target);
@@ -12761,36 +12761,22 @@ QUnit.module("Views", (hooks) => {
         ); //m2o field
     });
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "list view with optional fields rendering and local storage mock",
         async function (assert) {
-            assert.expect(12);
+            assert.expect(11);
 
             var forceLocalStorage = true;
 
-            // var Storage = RamStorage.extend({
-            //     getItem: function (key) {
-            //         assert.step("getItem " + key);
-            //         return forceLocalStorage ? '["m2o"]' : this._super.apply(this, arguments);
-            //     },
-            //     setItem: function (key, value) {
-            //         assert.step("setItem " + key + " to " + value);
-            //         return this._super.apply(this, arguments);
-            //     },
-            // });
             patchWithCleanup(browser.localStorage, {
-                getItem: (key) => {
+                getItem(key) {
                     assert.step("getItem " + key);
-                    return forceLocalStorage ? '["m2o"]' : this._super.apply(this, arguments);
+                    return forceLocalStorage ? '["m2o"]' : this._super(arguments);
                 },
-                setItem: (key, value) => {
-                    assert.step("setItem " + key + " to " + value);
-                    return this._super.apply(this, arguments);
+                setItem(key, value) {
+                    assert.step("setItem " + key + " to " + JSON.stringify(value));
+                    return this._super(arguments);
                 },
-            });
-
-            var RamStorageService = AbstractStorageService.extend({
-                storage: new Storage(),
             });
 
             await makeView({
@@ -12803,13 +12789,10 @@ QUnit.module("Views", (hooks) => {
                     '<field name="m2o" optional="hide"/>' +
                     '<field name="reference" optional="show"/>' +
                     "</tree>",
-                services: {
-                    local_storage: RamStorageService,
-                },
-                view_id: 42,
+                viewId: 42,
             });
 
-            var localStorageKey = "optional_fields,foo,target,42,foo,m2o,reference";
+            var localStorageKey = "optional_fields,foo,list,42,foo,m2o,reference";
 
             assert.verifySteps(["getItem " + localStorageKey]);
 
@@ -12826,7 +12809,7 @@ QUnit.module("Views", (hooks) => {
             );
 
             // optional fields
-            await click($(target).find("table .o_optional_columns_dropdown"));
+            await click(target.querySelector("table .o_optional_columns_dropdown button"));
             assert.containsN(
                 target,
                 "div.o_optional_columns_dropdown span.dropdown-item",
@@ -12837,13 +12820,12 @@ QUnit.module("Views", (hooks) => {
             forceLocalStorage = false;
             // enable optional field
             await click(
-                $(target).find("div.o_optional_columns_dropdown span.dropdown-item:eq(1) input")
+                $(target).find("div.o_optional_columns_dropdown span.dropdown-item:eq(1) input")[0]
             );
 
-            assert.verifySteps([
-                "setItem " + localStorageKey + ' to ["m2o","reference"]',
-                "getItem " + localStorageKey,
-            ]);
+            // Only a setItem since the list view maintains its own internal state of toggled
+            // optional columns.
+            assert.verifySteps(["setItem " + localStorageKey + ' to ["m2o","reference"]']);
 
             // 4 th (1 for checkbox, 3 for columns)
             assert.containsN(target, "th", 4, "should have 4 th");
