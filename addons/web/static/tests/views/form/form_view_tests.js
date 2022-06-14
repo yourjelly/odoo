@@ -836,9 +836,9 @@ QUnit.module("Views", (hooks) => {
 
     QUnit.test("notebook name transferred to DOM", async function (assert) {
         await makeView({
-            type: 'form',
+            type: "form",
             serverData,
-            resModel: 'partner',
+            resModel: "partner",
             resId: 1,
             arch: `<form>
                         <sheet>
@@ -850,7 +850,10 @@ QUnit.module("Views", (hooks) => {
                         </sheet>
                     </form>`,
         });
-        assert.hasClass(target.querySelector(".o_notebook .nav .nav-link[name='choucroute']"), 'active');
+        assert.hasClass(
+            target.querySelector(".o_notebook .nav .nav-link[name='choucroute']"),
+            "active"
+        );
     });
 
     QUnit.test("no visible page", async function (assert) {
@@ -5953,9 +5956,9 @@ QUnit.module("Views", (hooks) => {
             "100%",
             'As the only visible char field, "foo" should take 100% of the remaining space'
         );
-       
+
         assert.containsNone(
-            target, 
+            target,
             "th.oe_read_only",
             'the column with "oe_read_only" should not be visible in edit mode'
         );
@@ -5968,7 +5971,7 @@ QUnit.module("Views", (hooks) => {
         await click(target.querySelector(".o_field_x2many_list_row_add a"));
 
         assert.containsNone(
-            target, 
+            target,
             "th.oe_read_only",
             'the column with "oe_read_only" should not be visible in edit mode'
         );
@@ -5976,9 +5979,7 @@ QUnit.module("Views", (hooks) => {
         await clickSave(target);
 
         assert.hasClass(
-            target.querySelector(
-                '[name="display_name"]'
-            ),
+            target.querySelector('[name="display_name"]'),
             "oe_read_only",
             "display_name input should have oe_read_only class"
         );
@@ -6544,80 +6545,60 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL(
-        "no focus set on form when closing many2one modal if lastActivatedFieldIndex is not set",
-        async function (assert) {
-            assert.expect(8);
+    QUnit.test("check scroll on small height screens", async function (assert) {
+        serverData.views = {
+            "partner,false,list": '<tree><field name="display_name"/></tree>',
+            "partner_type,false,list": '<tree><field name="name"/></tree>',
+            "product,false,list": '<tree><field name="name"/></tree>',
+            "partner,false,form": '<form><field name="trululu"/></form>',
+        };
 
-            await makeView({
-                type: "form",
-                resModel: "partner",
-                serverData,
-                arch:
-                    "<form>" +
-                    '<field name="display_name"/>' +
-                    '<field name="foo"/>' +
-                    '<field name="bar"/>' +
-                    '<field name="p"/>' +
-                    '<field name="timmy"/>' +
-                    '<field name="product_ids"/>' +
-                    '<field name="trululu"/>' +
-                    "</form>",
-                resId: 2,
-                archs: {
-                    "partner,false,list": '<tree><field name="display_name"/></tree>',
-                    "partner_type,false,list": '<tree><field name="name"/></tree>',
-                    "partner,false,form": '<form><field name="trululu"/></form>',
-                    "product,false,list": '<tree><field name="name"/></tree>',
-                },
-                mockRPC(route, args) {
-                    if (args.method === "get_formview_id") {
-                        return Promise.resolve(false);
-                    }
-                    return this._super(route, args);
-                },
-            });
+        await makeView({
+            type: "form",
+            serverData,
+            resModel: "partner",
+            resId: 2,
+            arch: `<form>
+                        <sheet><group>
+                        <field name="display_name"/>
+                        <field name="foo"/>
+                        <field name="bar"/>
+                        <field name="p"/>
+                        <field name="timmy"/>
+                        <field name="product_ids"/>
+                        <field name="trululu"/>
+                        </group></sheet>
+                    </form>`,
+            mockRPC(route, args) {
+                if (args.method === "get_formview_id") {
+                    return false;
+                }
+            },
+        });
 
-            // set max-height to have scroll forcefully so that we can test scroll position after modal close
-            $(".o_content").css({ overflow: "auto", "max-height": "300px" });
-            // Open many2one modal, lastActivatedFieldIndex will not set as we directly click on external button
-            await click(target.querySelector(".o_form_button_edit"));
-            assert.strictEqual($(".o_content").scrollTop(), 0, "scroll position should be 0");
+        // we make the content height very small so we can test scrolling.
+        $(".o_content").css({ overflow: "auto", "max-height": "300px" });
 
-            target.querySelector(".o_field_many2one[name='trululu'] .o_input").focus();
-            assert.notStrictEqual(
-                $(".o_content").scrollTop(),
-                0,
-                "scroll position should not be 0"
-            );
+        // Open many2one modal, lastActivatedFieldIndex will not set as we directly click on external button
+        await clickEdit(target);
+        assert.strictEqual($(".o_content").scrollTop(), 0, "scroll position should be 0");
+        // simply triggerEvent focus doesn't do the trick (doesn't scroll).
+        target.querySelector("[name='trululu'] input").focus();
+        assert.notStrictEqual($(".o_content").scrollTop(), 0, "scroll position should not be 0");
 
-            await click(target.querySelector(".o_external_button"));
-            // Close modal
-            await click($(".modal").last().find('button[class="close"]'));
-            assert.notStrictEqual(
-                $(".o_content").scrollTop(),
-                0,
-                "scroll position should not be 0 after closing modal"
-            );
-            assert.containsNone(document.body, ".modal", "There should be no modal");
-            assert.doesNotHaveClass($("body"), "modal-open", "Modal is not said opened");
-            // assert.strictEqual(
-            //     form.renderer.lastActivatedFieldIndex,
-            //     -1,
-            //     "lastActivatedFieldIndex is -1"
-            // );
-            assert.equal(
-                document.activeElement,
-                $("body")[0],
-                "body is focused, should not set focus on form widget"
-            );
-            assert.notStrictEqual(
-                document.activeElement,
-                target.querySelector('.o_field_many2one[name="trululu"] .o_input'),
-                "field widget should not be focused when lastActivatedFieldIndex is -1"
-            );
-        }
-    );
+        await click(target.querySelector(".o_external_button"));
+
+        // Close modal
+        await click(target, '.modal-dialog button[class="close"]');
+        assert.notStrictEqual(
+            $(".o_content").scrollTop(),
+            0,
+            "scroll position should not be 0 after closing modal"
+        );
+
+        assert.containsNone(target, ".modal-dialog", "There should be no modal");
+        assert.doesNotHaveClass(target, "modal-open", "Modal is not said opened");
+    });
 
     QUnit.test("correct amount of buttons", async function (assert) {
         assert.expect(7);
@@ -9844,69 +9825,67 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.test(
-        "resequence list lines when discardable lines are present",
-        async function (assert) {
+    QUnit.test("resequence list lines when discardable lines are present", async function (assert) {
+        var onchangeNum = 0;
+        serverData.models.partner.onchanges = {
+            p: function (obj) {
+                onchangeNum++;
+                obj.foo = obj.p ? obj.p.length.toString() : "0";
+            },
+        };
 
-            var onchangeNum = 0;
-            serverData.models.partner.onchanges = {
-                p: function (obj) {
-                    onchangeNum++;
-                    obj.foo = obj.p ? obj.p.length.toString() : "0";
-                },
-            };
+        serverData.views = {
+            "partner,false,list": `<tree editable="bottom"><field name="int_field" widget="handle"/><field name="display_name" required="1"/></tree>`,
+        };
 
-            serverData.views = {
-                "partner,false,list": `<tree editable="bottom"><field name="int_field" widget="handle"/><field name="display_name" required="1"/></tree>`,
-            };
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `<form><field name="foo"/><field name="p"/></form>`,
+        });
 
-            await makeView({
-                type: "form",
-                resModel: "partner",
-                serverData,
-                arch: `<form><field name="foo"/><field name="p"/></form>`,
-            });
+        assert.strictEqual(onchangeNum, 1, "one onchange happens when form is opened");
+        assert.strictEqual(
+            target.querySelector('[name="foo"] input').value,
+            "0",
+            "onchange worked there is 0 line"
+        );
 
+        // Add one line
+        await click(target.querySelector(".o_field_x2many_list_row_add a"));
+        await editInput(target, `.o_field_cell [name="display_name"] input`, "first line");
+        assert.strictEqual(onchangeNum, 2, "one onchange happens when a line is added");
+        assert.strictEqual(
+            target.querySelector('[name="foo"] input').value,
+            "1",
+            "onchange worked there is 1 line"
+        );
 
-            assert.strictEqual(onchangeNum, 1, "one onchange happens when form is opened");
-            assert.strictEqual(
-                target.querySelector('[name="foo"] input').value,
-                "0",
-                "onchange worked there is 0 line"
-            );
-            
-            // Add one line
-            await click(target.querySelector(".o_field_x2many_list_row_add a"));
-            await editInput(target, `.o_field_cell [name="display_name"] input`, "first line")
-            assert.strictEqual(onchangeNum, 2, "one onchange happens when a line is added");
-            assert.strictEqual(
-                target.querySelector('[name="foo"] input').value,
-                "1",
-                "onchange worked there is 1 line"
-            );
+        await click(target.querySelector(".o_field_x2many_list_row_add a"));
+        await nextTick();
+        // Drag and drop second line before first one (with 1 draft and invalid line)
+        await dragAndDrop(
+            "tbody.ui-sortable tr:nth-child(1) .o_handle_cell",
+            "tbody.ui-sortable tr:nth-child(2)"
+        );
+        assert.strictEqual(onchangeNum, 3, "one onchange happens when lines are resequenced");
+        assert.strictEqual(
+            target.querySelector('[name="foo"] input').value,
+            "1",
+            "onchange worked there is 1 line"
+        );
+        // Add a second line
+        await click(target.querySelector(".o_field_x2many_list_row_add a"));
+        await editInput(target, ".o_selected_row input", "second line");
 
-            await click(target.querySelector(".o_field_x2many_list_row_add a"));
-            await nextTick();
-            // Drag and drop second line before first one (with 1 draft and invalid line)
-            await dragAndDrop("tbody.ui-sortable tr:nth-child(1) .o_handle_cell", "tbody.ui-sortable tr:nth-child(2)");
-            assert.strictEqual(onchangeNum, 3, "one onchange happens when lines are resequenced");
-            assert.strictEqual(
-                target.querySelector('[name="foo"] input').value,
-                "1",
-                "onchange worked there is 1 line"
-            );
-            // Add a second line
-            await click(target.querySelector(".o_field_x2many_list_row_add a"));
-            await editInput(target, ".o_selected_row input", "second line");
-         
-            assert.strictEqual(onchangeNum, 4, "one onchange happens when a line is added");
-            assert.strictEqual(
-                target.querySelector('[name="foo"] input').value,
-                "2",
-                "onchange worked there is 2 lines"
-            );
-        }
-    );
+        assert.strictEqual(onchangeNum, 4, "one onchange happens when a line is added");
+        assert.strictEqual(
+            target.querySelector('[name="foo"] input').value,
+            "2",
+            "onchange worked there is 2 lines"
+        );
+    });
 
     QUnit.test(
         "reload company when creating records of model res.company",

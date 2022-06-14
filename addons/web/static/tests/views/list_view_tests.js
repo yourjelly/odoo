@@ -62,7 +62,7 @@ let serverData;
 let target;
 
 // WOWL remove after adapting tests
-let testUtils, core, BasicModel;
+let testUtils;
 
 async function reloadListView(target) {
     await validateSearch(target);
