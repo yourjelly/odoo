@@ -15,7 +15,7 @@ odoo.define('pos_sale.SaleOrderRow', function (require) {
         }
         get highlighted() {
             const highlightedOrder = this.props.highlightedOrder;
-            return !highlightedOrder ? false : highlightedOrder.backendId === this.props.order.backendId;
+            return !highlightedOrder ? false : highlightedOrder.server_id === this.props.order.server_id;
         }
 
         // Column getters //

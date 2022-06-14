@@ -31,12 +31,13 @@ odoo.define('point_of_sale.SearchBar', function (require) {
      * field of the event.
      */
     class SearchBar extends PosComponent {
+        static props = ['onFilterSelect', 'onSearch', '*'];
         setup() {
             super.setup();
             useAutofocus();
             useExternalListener(window, 'click', this._hideOptions);
-            useListener('click-search-field', this._onClickSearchField);
-            useListener('select-filter', this._onSelectFilter);
+            // useListener('click-search-field', this._onClickSearchField);
+            // useListener('select-filter', this._onSelectFilter);
             this.filterOptionsList = [...this.props.config.filter.options.keys()];
             this.searchFieldsList = [...this.props.config.searchFields.keys()];
             const defaultSearchFieldId = this.searchFieldsList.indexOf(
@@ -50,9 +51,9 @@ odoo.define('point_of_sale.SearchBar', function (require) {
                 selectedFilter: this.props.config.defaultFilter || this.filterOptionsList[0],
             });
         }
-        _onSelectFilter({ detail: key }) {
-            this.state.selectedFilter = key;
-            this.trigger('filter-selected', { filter: this.state.selectedFilter });
+        _selectFilter(filter) {
+            this.state.selectedFilter = filter;
+            this.props.onFilterSelect(filter);
         }
         /**
          * When pressing vertical arrow keys, do not move the input cursor.
@@ -70,7 +71,7 @@ odoo.define('point_of_sale.SearchBar', function (require) {
             if (['ArrowUp', 'ArrowDown'].includes(event.key)) {
                 this.state.selectedSearchFieldId = this._fieldIdToSelect(event.key);
             } else if (event.key === 'Enter' || this.state.searchInput == '') {
-                this._onClickSearchField({ detail: this.searchFieldsList[this.state.selectedSearchFieldId] });
+                this._onClickSearchField(this.searchFieldsList[this.state.selectedSearchFieldId]);
             } else {
                 if (this.state.selectedSearchFieldId === -1 && this.searchFieldsList.length) {
                     this.state.selectedSearchFieldId = 0;
@@ -81,9 +82,10 @@ odoo.define('point_of_sale.SearchBar', function (require) {
         /**
          * Called when a search field is clicked.
          */
-        _onClickSearchField({ detail: fieldName }) {
+        _onClickSearchField(fieldName) {
             this.state.showSearchFields = false;
-            this.trigger('search', { fieldName, searchTerm: this.state.searchInput });
+            this.props.onSearch(fieldName, this.state.searchInput);
+            // this.trigger('search', { fieldName, searchTerm: this.state.searchInput });
         }
         /**
          * Given an arrow key, return the next selectedSearchFieldId.

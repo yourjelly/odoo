@@ -62,7 +62,7 @@ odoo.define('pos_restaurant.TicketScreen', function (require) {
             }
             async settleTips() {
                 // set tip in each order
-                for (const order of this.getFilteredOrderList()) {
+                for (const order of this._getFormattedOrders()) {
                     const tipAmount = parse.float(order.uiState.TipScreen.inputTipAmount || '0');
                     const serverId = this.env.pos.validated_orders_name_server_id_map[order.name];
                     if (!serverId) {
@@ -80,8 +80,8 @@ odoo.define('pos_restaurant.TicketScreen', function (require) {
                 }
             }
             //@override
-            async _onDeleteOrder() {
-                await super._onDeleteOrder(...arguments);
+            async onDeleteOrder(orderUid) {
+                await super.onDeleteOrder(...arguments);
                 if (this.env.pos.config.iface_floorplan) {
                     if (!this.env.pos.table) {
                         this.env.pos._removeOrdersFromServer();
@@ -137,7 +137,7 @@ odoo.define('pos_restaurant.TicketScreen', function (require) {
             _getOrderStates() {
                 const result = super._getOrderStates();
                 if (this.env.pos.config.set_tip_after_payment) {
-                    result.delete('PAYMENT');
+                    result.delete(ORDER_STATE['PAYMENT']);
                     result.set('OPEN', { text: this.env._t('Open'), indented: true });
                     result.set('TIPPING', { text: this.env._t('Tipping'), indented: true });
                 }

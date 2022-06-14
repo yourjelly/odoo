@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="OrderList" owl="1">
+        <t t-if="props.orders.length !== 0">
+            <div class="header-row" t-att-class="{ oe_hidden: env.isMobile }">
+                <div class="col wide">Date</div>
+                <div class="col wide">Receipt Number</div>
+                <div class="col">Customer</div>
+                <div class="col wide" t-if="props.showCardholderName">Cardholder Name</div>
+                <div class="col">Cashier</div>
+                <div class="col end">Total</div>
+                <div class="col narrow">Status</div>
+                <div class="col very-narrow" name="delete"></div>
+            </div>
+            <t t-foreach="props.orders" t-as="order" t-key="order.uid">
+                <div class="order-row" t-att-class="{ highlight: _isOrderSelected(order) }" t-on-click="() => props.onClickOrderDetails(order)">
+                    <div class="col wide">
+                        <div t-if="env.isMobile">Date</div>
+                        <div><t t-esc="order['date']"></t></div>
+                    </div>
+                    <div class="col wide">
+                        <div t-if="env.isMobile">Receipt Number</div>
+                        <div><t t-esc="order['name']"></t></div>
+                    </div>
+                    <div class="col">
+                        <div t-if="env.isMobile">Customer</div>
+                        <div><t t-esc="order['partner']"></t></div>
+                    </div>
+                    <div t-if="props.showCardholderName" class="col">
+                        <div t-if="env.isMobile">Cardholder Name</div>
+                        <div><t t-esc="order['cardholderName']"></t></div>
+                    </div>
+                    <div class="col">
+                        <div t-if="env.isMobile">Cashier</div>
+                        <div><t t-esc="order['cashier']"></t></div>
+                    </div>
+                    <div class="col end">
+                        <div t-if="env.isMobile">Total</div>
+                        <div><t t-esc="order['total']"></t></div>
+                    </div>
+                    <div class="col narrow">
+                        <div t-if="env.isMobile">Status</div>
+                        <div><t t-esc="order['status']"></t></div>
+                    </div>
+                    <div t-if="order['deletable']" class="col very-narrow delete-button" name="delete" t-on-click.stop="() => props.onDeleteOrder(order['uid'])">
+                        <i class="fa fa-trash" aria-hidden="true"/><t t-if="env.isMobile"> Delete</t>
+                    </div>
+                    <div t-else="" class="col very-narrow"></div>
+                </div>
+            </t>
+        </t>
+        <t t-else="">
+            <div class="empty-order-list">
+                <i role="img" aria-label="Shopping cart" title="Shopping cart" class="fa fa-shopping-cart"></i>
+                <h1>No orders found</h1>
+            </div>
+        </t>
+
+    </t>
+
+</templates>

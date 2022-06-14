@@ -813,9 +813,9 @@ class PosOrder(models.Model):
         """Search for 'paid' orders that satisfy the given domain, limit and offset."""
         default_domain = ['&', ('config_id', '=', config_id), '!', '|', ('state', '=', 'draft'), ('state', '=', 'cancelled')]
         real_domain = AND([domain, default_domain])
-        ids = self.search(AND([domain, default_domain]), limit=limit, offset=offset).ids
+        orders = self.search(AND([domain, default_domain]), limit=limit, offset=offset)
         totalCount = self.search_count(real_domain)
-        return {'ids': ids, 'totalCount': totalCount}
+        return {'orders': orders.export_for_ui(), 'totalCount': totalCount}
 
     def _export_for_ui(self, order):
         timezone = pytz.timezone(self._context.get('tz') or self.env.user.tz or 'UTC')
@@ -840,7 +840,7 @@ class PosOrder(models.Model):
             'to_ship': order.to_ship,
             'state': order.state,
             'account_move': order.account_move.id,
-            'id': order.id,
+            'server_id': order.id,
             'is_tipped': order.is_tipped,
             'tip_amount': order.tip_amount,
         }

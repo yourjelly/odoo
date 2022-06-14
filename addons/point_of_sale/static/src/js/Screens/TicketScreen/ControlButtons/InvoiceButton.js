@@ -57,7 +57,7 @@ odoo.define('point_of_sale.InvoiceButton', function (require) {
             const order = this.props.order;
             if (!order) return;
 
-            const orderId = order.backendId;
+            const orderId = order.server_id;
 
             // Part 0.1. If already invoiced, print the invoice.
             if (this.isAlreadyInvoiced) {
@@ -113,7 +113,7 @@ odoo.define('point_of_sale.InvoiceButton', function (require) {
 
             // Part 3: Download invoice.
             await this._downloadInvoice(orderId);
-            this.trigger('order-invoiced', orderId);
+            this.props.onInvoiceOrder();
         }
         async _onClick() {
             try {

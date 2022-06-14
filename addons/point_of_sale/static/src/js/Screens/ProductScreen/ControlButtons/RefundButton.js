@@ -15,19 +15,19 @@ odoo.define('point_of_sale.RefundButton', function (require) {
             const partner = this.env.pos.get_order().get_partner();
             const searchDetails = partner ? { fieldName: 'PARTNER', searchTerm: partner.name } : {};
             this.showScreen('TicketScreen', {
-                ui: { filter: 'SYNCED', searchDetails },
+                ui: { filter: ORDER_STATE['SYNCED'], searchDetails },
                 destinationOrder: this.env.pos.get_order(),
             });
         }
     }
     RefundButton.template = 'point_of_sale.RefundButton';
 
-    ProductScreen.addControlButton({
-        component: RefundButton,
-        condition: function () {
-            return true;
-        },
-    });
+    // ProductScreen.addControlButton({
+    //     component: RefundButton,
+    //     condition: function () {
+    //         return true;
+    //     },
+    // });
 
     Registries.Component.add(RefundButton);
 

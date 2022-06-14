@@ -290,7 +290,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
 
             // 2. Save the screen to the order.
             //  - This screen is shown when the order is selected.
-            if (!(component.prototype instanceof IndependentToOrderScreen) && name !== "ReprintReceiptScreen") {
+            if (name !== 'TicketScreen') {
                 this._setScreenData(name, props);
             }
         }

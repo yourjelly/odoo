@@ -12,7 +12,8 @@ odoo.define('point_of_sale.ReprintReceiptButton', function (require) {
         }
         async _onClick() {
             if (!this.props.order) return;
-            this.showScreen('ReprintReceiptScreen', { order: this.props.order });
+            // this.showScreen('ReprintReceiptScreen', { order: this.props.order });
+            this.showTempScreen('ReprintReceiptScreen', { order: this.props.order });
         }
     }
     ReprintReceiptButton.template = 'ReprintReceiptButton';

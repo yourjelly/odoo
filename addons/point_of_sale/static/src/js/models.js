@@ -129,21 +129,32 @@ class PosGlobalState extends PosModel {
                 selectedSyncedOrderId: null,
                 searchDetails: this.getDefaultSearchDetails(),
                 filter: null,
-                // maps the order's backendId to it's selected orderline
+                // maps the order's server_id to it's selected orderline
                 selectedOrderlineIds: {},
                 highlightHeaderNote: false,
             },
         };
 
         // these dynamic attributes can be watched for change by other models or widgets
-        Object.assign(this, {
-            'synch':            { status:'connected', pending:0 },
-            'orders':           new PosCollection(),
-            'selectedOrder':    null,
-            'selectedPartner':   null,
-            'selectedCategoryId': null,
-        });
+        this.synch = { status:'connected', pending: 0 };
+        this.orders = new PosCollection();
+        // this.paidOrdersMap = {};
+        this.selectedOrder = null;
+        this.selectedPartner = null;
+        this.selectedCategoryId = null;
     }
+
+    // addPaidOrder(order) {
+    //     this.paidOrdersMap[order.server_id] = order;
+    // }
+    //
+    // getPaidOrderByServerId(id){
+    //     return this.paidOrdersMap[id];
+    // }
+
+
+
+
     getDefaultSearchDetails() {
         return {
             fieldName: 'RECEIPT_NUMBER',
@@ -700,12 +711,6 @@ class PosGlobalState extends PosModel {
                 // Reset the refund detail for the orderline.
                 delete this.toRefundLines[refundDetail.orderline.id];
             }
-        }
-        this._invalidateSyncedOrdersCache([...refundedOrderIds]);
-    }
-    _invalidateSyncedOrdersCache(ids) {
-        for (const id of ids) {
-            delete this.TICKET_SCREEN_STATE.syncedOrders.cache[id];
         }
     }
     set_synch(status, pending) {
@@ -2252,7 +2257,6 @@ class Order extends PosModel {
         this.state = json.state;
         this.amount_return = json.amount_return;
         this.account_move = json.account_move;
-        this.backendId = json.id;
         this.isFromClosedSession = json.is_session_closed;
         this.is_tipped = json.is_tipped || false;
         this.tip_amount = json.tip_amount || 0;
