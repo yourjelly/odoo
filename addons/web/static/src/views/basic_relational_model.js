@@ -17,6 +17,7 @@ import { evalDomain } from "@web/views/utils";
 import BasicModel from "web.BasicModel";
 import Context from "web.Context";
 import fieldRegistry from "web.field_registry";
+import { registry } from "@web/core/registry";
 import { parse } from "web.field_utils";
 import { traverse } from "web.utils";
 import { parseArch } from "web.viewUtils";
@@ -94,7 +95,7 @@ function mapActiveFieldsToFieldsInfo(activeFields, fields, viewType, env) {
         const field = fields[fieldName];
         let Widget;
         if (fieldDescr.widget) {
-            Widget = fieldRegistry.getAny([`${viewType}.${fieldDescr.widget}`, fieldDescr.widget]);
+            Widget = fieldRegistry.getAny([`${viewType}.${fieldDescr.widget}`, fieldDescr.widget]) || registry.category('fields').get(fieldDescr.widget, null);
         } else {
             Widget = fieldRegistry.getAny([`${viewType}.${field.type}`, field.type]);
         }
@@ -130,12 +131,13 @@ function mapActiveFieldsToFieldsInfo(activeFields, fields, viewType, env) {
             fieldInfo.__no_fetch = true;
         }
 
-        if (!fieldInfo.__no_fetch && Widget.prototype.fieldsToFetch) {
+        if (!fieldInfo.__no_fetch && (Widget.prototype.fieldsToFetch || Widget.fieldsToFetch)) {
+            console.log('FieldsToFetch is running');
             fieldDescr.fieldsToFetch = fieldDescr.fieldsToFetch || {};
-            fieldInfo.relatedFields = { ...Widget.prototype.fieldsToFetch };
+            fieldInfo.relatedFields = { ...(Widget.prototype.fieldsToFetch || Widget.fieldsToFetch) };
             fieldInfo.viewType = "default";
             const defaultView = {};
-            for (const fieldName of Object.keys(Widget.prototype.fieldsToFetch)) {
+            for (const fieldName of Object.keys(Widget.prototype.fieldsToFetch || Widget.fieldsToFetch)) {
                 defaultView[fieldName] = {};
                 if (fieldDescr.fieldsToFetch[fieldName]) {
                     defaultView[fieldName].__WOWL_FIELD_DESCR__ =
