@@ -82,7 +82,7 @@ try:
         return zobj.decompress(data)
 
     PyPDF2.filters.decompress = _decompress
-except ImportError:
+except (ImportError, AttributeError):
     pass # no fix required
 
 #----------------------------------------------------------
