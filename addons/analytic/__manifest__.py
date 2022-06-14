@@ -23,6 +23,15 @@ that have no counterpart in the general financial accounts.
         'data/analytic_demo.xml',
         'data/analytic_account_demo.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'analytic/static/src/js/analytic_json/**/*',
+            'analytic/static/src/js/analytic_o2m/**/*',
+        ],
+        'web.assets_qweb': [
+            'analytic/static/src/**/*.xml',
+        ],
+    },
     'installable': True,
     'license': 'LGPL-3',
 }
