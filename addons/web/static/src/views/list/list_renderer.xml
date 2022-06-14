@@ -15,19 +15,19 @@
             <table t-if="showTable" t-attf-class="o_list_table table table-sm table-hover table-striped {{props.list.isGrouped ? 'o_list_table_grouped' : 'o_list_table_ungrouped'}}" t-ref="table">
                 <thead>
                     <tr>
-                        <th t-if="props.hasSelectors" class="o_list_record_selector" t-att-class="{o_sample_data_disabled: props.list.model.useSampleModel}" tabindex="-1" t-on-keydown.synthetic="(ev) => this.onCellKeydown(ev, null)" t-on-click.stop="toggleSelection">
+                        <th t-if="props.hasSelectors" class="o_list_record_selector" t-att-class="{o_sample_data_disabled: props.list.model.useSampleModel}" tabindex="-1" t-on-keydown.synthetic="(ev) => this.onCellKeydown(ev)" t-on-click.stop="toggleSelection">
                             <CheckBox disabled="!!props.list.editedRecord or props.list.model.useSampleModel" value="selectAll" onChange.bind="toggleSelection"/>
                         </th>
                         <t t-foreach="state.columns" t-as="column" t-key="column.id">
-                            <th t-if="column.type === 'field'" t-att-data-name="column.name" t-att-class="getColumnClass(column)" t-on-click="() => this.onClickSortColumn(column)" tabindex="-1" t-on-keydown.synthetic="(ev) => this.onCellKeydown(ev, null)"  t-att="{'data-tooltip-template': isDebugMode ? 'web.FieldTooltip' : false, 'data-tooltip-info': isDebugMode ? makeTooltip(column) : false}">
+                            <th t-if="column.type === 'field'" t-att-data-name="column.name" t-att-class="getColumnClass(column)" t-on-click="() => this.onClickSortColumn(column)" tabindex="-1" t-on-keydown.synthetic="(ev) => this.onCellKeydown(ev)"  t-att="{'data-tooltip-template': isDebugMode ? 'web.FieldTooltip' : false, 'data-tooltip-info': isDebugMode ? makeTooltip(column) : false}">
                                 <t t-if="column.hasLabel and column.widget !== 'handle'">
                                     <t t-esc="column.label"/>
                                     <span t-if="!isEmpty" class="o_resize" t-on-click.stop.prevent="" t-on-mousedown.stop.prevent="onStartResize"/>
                                 </t>
                             </th>
-                            <th t-else="" t-on-keydown.synthetic="(ev) => this.onCellKeydown(ev, null)" t-att-class="{o_list_button: column.type === 'button_group'}"/>
+                            <th t-else="" t-on-keydown.synthetic="(ev) => this.onCellKeydown(ev)" t-att-class="{o_list_button: column.type === 'button_group'}"/>
                         </t>
-                        <th t-if="props.activeActions and props.activeActions.onDelete" t-on-keydown.synthetic="(ev) => this.onCellKeydown(ev, null)" class="o_list_record_remove_header" style="width: 32px; min-width: 32px"/>
+                        <th t-if="props.activeActions and props.activeActions.onDelete" t-on-keydown.synthetic="(ev) => this.onCellKeydown(ev)" class="o_list_record_remove_header" style="width: 32px; min-width: 32px"/>
                     </tr>
                 </thead>
                 <tbody class="ui-sortable">
@@ -114,7 +114,7 @@
                             <a href="#"
                                 role="button"
                                 t-on-click.stop.prevent="() => group.createRecord({}, props.editable === 'top')"
-                                t-on-keydown.synthetic="(ev) => this.onCellKeydown(ev, null)"
+                                t-on-keydown.synthetic="(ev) => this.onCellKeydown(ev)"
                             >
                                 Add a line
                             </a>
@@ -137,7 +137,7 @@
                     <t t-foreach="groupByButtons[group.groupByField.name]" t-as="button" t-key="button.id">
                         <t t-if="!evalModifier(button.modifiers.invisible, group.record)">
                             <t t-if="button.clickParams.type === 'edit'">
-                                <button t-att-title="button.title" class="btn" t-on-click="() => this.editGroupRecord(group)">
+                                <button t-att-title="button.title" class="btn" t-on-click="() => this.editGroupRecord(group)" tabindex="-1">
                                     <i t-attf-class="fa fa-fw {{button.icon}} o_button_icon"/>
                                 </button>
                             </t>
@@ -149,6 +149,7 @@
                                     record="group.record"
                                     string="button.string"
                                     title="button.title"
+                                    tabindex="'-1'"
                                 />
                             </t>
                         </t>
@@ -171,12 +172,12 @@
             t-att-class="getRowClass(record)"
             t-att-data-id="record.id"
         >
-            <td t-on-keydown.synthetic="(ev) => this.onCellKeydown(ev, record)" t-if="props.hasSelectors" class="o_list_record_selector" t-on-click.stop="() => this.toggleRecordSelection(record)" tabindex="-1">
+            <td t-on-keydown.synthetic="(ev) => this.onCellKeydown(ev, group, record)" t-if="props.hasSelectors" class="o_list_record_selector" t-on-click.stop="() => this.toggleRecordSelection(record)" tabindex="-1">
                 <CheckBox disabled="!!props.list.editedRecord or props.list.model.useSampleModel" value="record.selected" onChange.bind="() => this.toggleRecordSelection(record)" />
             </td>
             <t t-foreach="state.columns" t-as="column" t-key="column.id">
                 <t t-if="column.type === 'field'">
-                    <td t-on-keydown.synthetic="(ev) => this.onCellKeydown(ev, record)" class="o_data_cell" t-att-name="column.name" t-att-class="getCellClass(column, record)" t-att-data-tooltip="getCellTitle(column, record)" data-tooltip-delay="1000" t-on-click="() => this.onCellClicked(record, column)" tabindex="-1">
+                    <td t-on-keydown.synthetic="(ev) => this.onCellKeydown(ev, group, record)" class="o_data_cell" t-att-name="column.name" t-att-class="getCellClass(column, record)" t-att-data-tooltip="getCellTitle(column, record)" data-tooltip-delay="1000" t-on-click="() => this.onCellClicked(record, column)" tabindex="-1">
                         <t t-if="!evalModifier(column.modifiers.invisible, record)">
                             <t t-if="canUseFormatter(column, record)" t-esc="getFormattedValue(column, record)"/>
                             <Field t-else="" name="column.name" record="record" type="column.widget" fieldInfo="props.archInfo.fieldNodes[column.name]"/>
@@ -184,7 +185,7 @@
                     </td>
                 </t>
                 <t t-if="column.type === 'button_group'">
-                    <td t-on-keydown.synthetic="(ev) => this.onCellKeydown(ev, record)" class="o_data_cell" t-att-class="getCellClass(column, record)" t-on-click="(ev) => this.onButtonCellClicked(record, column, ev)" tabindex="-1">
+                    <td t-on-keydown.synthetic="(ev) => this.onCellKeydown(ev, group, record)" class="o_data_cell" t-att-class="getCellClass(column, record)" t-on-click="(ev) => this.onButtonCellClicked(record, column, ev)" tabindex="-1">
                         <t t-foreach="column.buttons" t-as="button" t-key="button.id">
                             <ViewButton t-if="!evalModifier(button.modifiers.invisible, record)"
                                 className="button.className"
@@ -206,7 +207,7 @@
             <t t-if="activeActions">
                 <t t-set="canDelete" t-value="activeActions.canDelete" />
                 <t t-set="canUnlink" t-value="activeActions.canUnlink" />
-                <td t-on-keydown.synthetic="(ev) => this.onCellKeydown(ev, row)" t-if="'canUnlink' in activeActions ? canUnlink : canDelete" class="o_list_record_remove" t-on-click.stop="() => this.onDeleteRecord(record)" tabindex="-1">
+                <td t-on-keydown.synthetic="(ev) => this.onCellKeydown(ev, group, record)" t-if="'canUnlink' in activeActions ? canUnlink : canDelete" class="o_list_record_remove" t-on-click.stop="() => this.onDeleteRecord(record)" tabindex="-1">
                     <button class="fa"
                         t-att-class="{ 'fa-trash-o': 'canUnlink' in activeActions ? false : canDelete, 'fa-times': 'canUnlink' in activeActions ? canUnlink : false }"
                         name="delete"

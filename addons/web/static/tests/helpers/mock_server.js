@@ -477,7 +477,7 @@ export class MockServer {
             case "copy":
                 return this.mockCopy(args.model, args.args[0]);
             case "create":
-                return this.mockCreate(args.model, args.args[0]);
+                return this.mockCreate(args.model, args.args[0], args.kwargs);
             case "fields_get":
                 return this.mockFieldsGet(args.model);
             case "get_views":
@@ -542,7 +542,7 @@ export class MockServer {
         return newID;
     }
 
-    mockCreate(modelName, values) {
+    mockCreate(modelName, values, kwargs = {}) {
         if ("id" in values) {
             throw new Error("Cannot create a record with a predefinite id");
         }
@@ -550,7 +550,7 @@ export class MockServer {
         const id = this.getUnusedID(modelName);
         const record = { id };
         model.records.push(record);
-        this.applyDefaults(model, values);
+        this.applyDefaults(model, values, kwargs.context);
         this.writeRecord(modelName, values, id);
         this.updateComodelRelationalFields(modelName, record);
         return id;
@@ -2113,14 +2113,16 @@ export class MockServer {
         );
     }
 
-    applyDefaults(model, record) {
+    applyDefaults(model, record, context = {}) {
         record.display_name = record.display_name || record.name;
         for (const fieldName in model.fields) {
             if (fieldName === "id") {
                 continue;
             }
             if (!(fieldName in record)) {
-                if ("default" in model.fields[fieldName]) {
+                if (`default_${fieldName}` in context) {
+                    record[fieldName] = context[`default_${fieldName}`];
+                } else if ("default" in model.fields[fieldName]) {
                     const def = model.fields[fieldName].default;
                     record[fieldName] = typeof def === "function" ? def.call(this) : def;
                 } else if (["one2many", "many2many"].includes(model.fields[fieldName].type)) {

@@ -131,6 +131,7 @@ export class ListController extends Component {
 
     async createRecord() {
         if (this.editable) {
+            // TODO WOWL: cover grouped case?
             // add a new row
             if (this.model.root.editedRecord) {
                 await this.model.root.editedRecord.save();

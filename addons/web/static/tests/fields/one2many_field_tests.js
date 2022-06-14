@@ -9354,19 +9354,17 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL(
-        "one2many with onchange, required field, shortcut enter",
-        async function (assert) {
-            serverData.models.turtle.onchanges = {
-                turtle_foo: function () {},
-            };
+    QUnit.test("one2many with onchange, required field, shortcut enter", async function (assert) {
+        serverData.models.turtle.onchanges = {
+            turtle_foo: function () {},
+        };
 
-            let def;
-            await makeView({
-                type: "form",
-                resModel: "partner",
-                serverData,
-                arch: `
+        let def;
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
                     <form>
                         <field name="turtles">
                             <tree editable="bottom">
@@ -9374,41 +9372,48 @@ QUnit.module("Fields", (hooks) => {
                             </tree>
                         </field>
                     </form>`,
-                async mockRPC(route, args) {
-                    if (args.method === "onchange") {
-                        await Promise.resolve(def);
-                    }
-                },
-            });
+            async mockRPC(route, args) {
+                if (args.method === "onchange") {
+                    await Promise.resolve(def);
+                }
+            },
+        });
 
-            const value = "hello";
+        const value = "hello";
 
-            // add a new line
-            await addRow(target);
+        // add a new line
+        await addRow(target);
 
-            // we want to add a delay to simulate an onchange
-            def = makeDeferred();
+        // we want to add a delay to simulate an onchange
+        def = makeDeferred();
 
-            // write something in the field
-            await editInput(target, "[name=turtle_foo] input", value);
-            assert.strictEqual(target.querySelector("[name=turtle_foo] input").value, value);
+        // write something in the field
+        const input = target.querySelector("[name=turtle_foo] input");
+        input.value = value;
+        await triggerEvent(input, null, "input");
 
-            await triggerEvent(target, "[name=turtle_foo] input", "keydown", { key: "Enter" });
+        triggerHotkey("Enter");
+        await triggerEvent(input, null, "change");
 
-            // check that nothing changed before the onchange finished
-            assert.strictEqual(target.querySelector("[name=turtle_foo] input").value, value);
-            assert.containsOnce(target, ".o_data_row");
+        // check that nothing changed before the onchange finished
+        assert.strictEqual(target.querySelector("[name=turtle_foo] input").value, value);
+        assert.containsOnce(target, ".o_data_row");
 
-            // unlock onchange
-            def.resolve();
-            await nextTick();
+        // unlock onchange
+        def.resolve();
+        await nextTick();
 
-            // check the current line is added with the correct content and a new line is editable
-            assert.strictEqual(target.querySelector("[name=turtle_foo]").innerText, value);
-            assert.strictEqual(target.querySelector("[name=turtle_foo] input").value, "");
-            assert.containsN(target, ".o_data_row", 2);
-        }
-    );
+        // check the current line is added with the correct content and a new line is editable
+        assert.containsN(target, ".o_data_row", 2);
+        assert.strictEqual(
+            target.querySelector(".o_data_row:nth-child(1) [name=turtle_foo]").innerText,
+            value
+        );
+        assert.strictEqual(
+            target.querySelector(".o_data_row:nth-child(2) [name=turtle_foo] input").value,
+            ""
+        );
+    });
 
     QUnit.test(
         "no deadlock when leaving a one2many line with uncommitted changes",

@@ -241,8 +241,6 @@ export class Many2ManyTagsField extends Component {
                 this.deleteTag(id);
                 break;
             }
-            case "enter":
-                break;
             default:
                 return;
         }

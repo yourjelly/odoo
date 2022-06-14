@@ -63,9 +63,6 @@ const serviceRegistry = registry.category("services");
 let serverData;
 let target;
 
-// WOWL remove after adapting tests
-let testUtils;
-
 async function reloadListView(target) {
     await validateSearch(target);
 }
@@ -1490,7 +1487,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "editing a record should change same record in other groups when grouped by m2m field",
         async function (assert) {
             await makeView({
@@ -1518,7 +1515,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "change a record field in readonly should change same record in other groups when grouped by m2m field",
         async function (assert) {
             assert.expect(6);
@@ -6077,9 +6074,8 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    // Need better Domain Normalisation (remove duplicate domain)
-    QUnit.skipWOWL("list view with nested groups", async function (assert) {
-        assert.expect(42);
+    QUnit.test("list view with nested groups", async function (assert) {
+        assert.expect(40);
 
         serverData.models.foo.records.push({ id: 5, foo: "blip", int_field: -7, m2o: 1 });
         serverData.models.foo.records.push({ id: 6, foo: "blip", int_field: 5, m2o: 2 });
@@ -6688,6 +6684,7 @@ QUnit.module("Views", (hooks) => {
         });
 
         assert.verifySteps(["get_views", "web_search_read"]);
+        assert.containsN(target, "tr.o_data_row", 4);
 
         // click on 3rd line
         await click(target.querySelector("tr.o_data_row:nth-child(3) .o_field_cell[name=foo]"));
@@ -9179,10 +9176,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    // Need Update duplicate m2m record
-    QUnit.skipWOWL("multi edition: many2many field in grouped list", async function (assert) {
-        assert.expect(2);
-
+    QUnit.test("multi edition: many2many field in grouped list", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -9201,21 +9195,14 @@ QUnit.module("Views", (hooks) => {
         await click(rows[0], ".o_list_record_selector input");
         await click(rows[0].querySelectorAll(".o_data_cell")[1]);
         await selectDropdownItem(target, "m2m", "Value 3");
-
         assert.strictEqual(
-            $(target)
-                .find("tbody:eq(1) .o_data_row:first .o_data_cell:eq(1)")
-                .text()
-                .replace(/\s/g, ""),
-            "Value1Value2Value3",
+            rows[0].querySelectorAll(".o_data_cell")[1].textContent,
+            "Value 1Value 2Value 3",
             "should have a right value in many2many field"
         );
         assert.strictEqual(
-            $(target)
-                .find("tbody:eq(3) .o_data_row:first .o_data_cell:eq(1)")
-                .text()
-                .replace(/\s/g, ""),
-            "Value1Value2Value3",
+            rows[3].querySelectorAll(".o_data_cell")[1].textContent,
+            "Value 1Value 2Value 3",
             "should have same value in many2many field on all other records with same res_id"
         );
     });
@@ -11321,9 +11308,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL("editing then pressing TAB in editable grouped list", async function (assert) {
-        assert.expect(19);
-
+    QUnit.test("editing then pressing TAB in editable grouped list", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -11331,44 +11316,47 @@ QUnit.module("Views", (hooks) => {
             arch: '<tree editable="bottom"><field name="foo"/></tree>',
             mockRPC: function (route, args) {
                 assert.step(args.method || route);
-                return this._super.apply(this, arguments);
             },
             groupBy: ["bar"],
         });
 
         // open two groups
-        await click($(target).find(".o_group_header:first"));
-        assert.containsN(target, ".o_data_row", 3, "first group contains 3 rows");
-        await click($(target).find(".o_group_header:nth(1)"));
-        assert.containsN(target, ".o_data_row", 4, "first group contains 1 row");
+        await click(getGroup(target, 0));
+        assert.containsN(target, ".o_data_row", 1, "first group contains 1 rows");
+        await click(getGroup(target, 1));
+        assert.containsN(target, ".o_data_row", 4, "first group contains 3 row");
 
         // select and edit last row of first group
-        await click($(target).find(".o_data_row:nth(2) .o_data_cell"));
-        assert.hasClass($(target).find(".o_data_row:nth(2)"), "o_selected_row");
-        await editInput($(target).find('.o_selected_row input[name="foo"]'), "new value");
+        await click(target.querySelector(".o_data_row").querySelector(".o_data_cell"));
+        assert.hasClass($(target).find(".o_data_row:nth(0)"), "o_selected_row");
+        await editInput(target, '.o_selected_row [name="foo"] input', "new value");
 
         // Press 'Tab' -> should create a new record as we edited the previous one
-        await testUtils.fields.triggerKeydown($(target).find(".o_selected_row .o_input"), "tab");
+        triggerHotkey("Tab");
+        await nextTick();
         assert.containsN(target, ".o_data_row", 5);
-        assert.hasClass($(target).find(".o_data_row:nth(3)"), "o_selected_row");
+        assert.hasClass($(target).find(".o_data_row:nth(1)"), "o_selected_row");
 
         // fill foo field for the new record and press 'tab' -> should create another record
-        await editInput($(target).find('.o_selected_row input[name="foo"]'), "new record");
-        await testUtils.fields.triggerKeydown($(target).find(".o_selected_row .o_input"), "tab");
+        await editInput(target, '.o_selected_row [name="foo"] input', "new record");
+        triggerHotkey("Tab");
+        await nextTick();
 
         assert.containsN(target, ".o_data_row", 6);
-        assert.hasClass($(target).find(".o_data_row:nth(4)"), "o_selected_row");
+        assert.hasClass($(target).find(".o_data_row:nth(2)"), "o_selected_row");
 
         // leave this new row empty and press tab -> should discard the new record and move to the
         // next group
-        await testUtils.fields.triggerKeydown($(target).find(".o_selected_row .o_input"), "tab");
+        triggerHotkey("Tab");
+        await nextTick();
         assert.containsN(target, ".o_data_row", 5);
-        assert.hasClass($(target).find(".o_data_row:nth(4)"), "o_selected_row");
+        assert.hasClass($(target).find(".o_data_row:nth(2)"), "o_selected_row");
 
         assert.verifySteps([
+            "get_views",
             "web_read_group",
-            "/web/dataset/search_read",
-            "/web/dataset/search_read",
+            "web_search_read",
+            "web_search_read",
             "write",
             "read",
             "onchange",
@@ -11378,9 +11366,10 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "editing then pressing TAB (with a readonly field) in grouped list",
         async function (assert) {
+            serverData.models.foo.records[0].bar = false;
             await makeView({
                 type: "list",
                 resModel: "foo",
@@ -11392,14 +11381,16 @@ QUnit.module("Views", (hooks) => {
                     </tree>
                 `,
                 mockRPC: function (route, args) {
-                    assert.step(args.method || route);
+                    assert.step(args.method);
                 },
                 groupBy: ["bar"],
             });
 
             await click(target.querySelector(".o_group_header"));
             await click(target.querySelector(".o_data_row [name=foo]"));
+
             await editInput(target, ".o_selected_row [name=foo] input", "new value");
+
             triggerHotkey("Tab");
             await nextTick();
 
@@ -11407,59 +11398,59 @@ QUnit.module("Views", (hooks) => {
                 target.querySelector(".o_data_row [name=foo]").innerText,
                 "new value"
             );
-            assert.verifySteps(["web_read_group", "/web/dataset/search_read", "write", "read"]);
+
+            const secondDataRow = target.querySelectorAll(".o_data_row")[1];
+            assert.strictEqual(
+                document.activeElement,
+                secondDataRow.querySelector(".o_selected_row [name=foo] input")
+            );
+
+            assert.verifySteps(["get_views", "web_read_group", "web_search_read", "write", "read"]);
         }
     );
 
-    QUnit.skipWOWL(
-        'pressing ENTER in editable="bottom" grouped list view',
-        async function (assert) {
-            assert.expect(11);
+    QUnit.test('pressing ENTER in editable="bottom" grouped list view', async function (assert) {
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: '<tree editable="bottom"><field name="foo"/></tree>',
+            mockRPC: function (route, args) {
+                assert.step(args.method || route);
+            },
+            groupBy: ["bar"],
+        });
 
-            await makeView({
-                type: "list",
-                resModel: "foo",
-                serverData,
-                arch: '<tree editable="bottom"><field name="foo"/></tree>',
-                mockRPC: function (route, args) {
-                    assert.step(args.method || route);
-                    return this._super.apply(this, arguments);
-                },
-                groupBy: ["bar"],
-            });
+        await click(getGroup(target, 0)); // open first group
+        await click(getGroup(target, 1)); // open second group
+        assert.containsN(target, "tr.o_data_row", 4);
 
-            await click($(target).find(".o_group_header:first")); // open first group
-            await click($(target).find(".o_group_header:nth(1)")); // open second group
-            assert.containsN(target, "tr.o_data_row", 4);
-            await click($(target).find(".o_data_row:nth(1) .o_data_cell")); // click on second line
-            assert.hasClass($(target).find("tr.o_data_row:eq(1)"), "o_selected_row");
+        const rows = target.querySelectorAll(".o_data_row");
+        await click(rows[2].querySelector(".o_data_cell"));
+        assert.hasClass($(target).find("tr.o_data_row:eq(2)"), "o_selected_row");
 
-            // press enter in input should move to next record
-            await testUtils.fields.triggerKeydown(
-                $(target).find("tr.o_selected_row .o_input"),
-                "enter"
-            );
+        // press enter in input should move to next record
+        triggerHotkey("Enter");
+        await nextTick();
 
-            assert.hasClass($(target).find("tr.o_data_row:eq(2)"), "o_selected_row");
-            assert.doesNotHaveClass($(target).find("tr.o_data_row:eq(1)"), "o_selected_row");
+        assert.hasClass($(target).find("tr.o_data_row:eq(3)"), "o_selected_row");
+        assert.doesNotHaveClass($(target).find("tr.o_data_row:eq(2)"), "o_selected_row");
 
-            // press enter on last row should create a new record
-            await testUtils.fields.triggerKeydown(
-                $(target).find("tr.o_selected_row .o_input"),
-                "enter"
-            );
+        // press enter on last row should create a new record
+        triggerHotkey("Enter");
+        await nextTick();
 
-            assert.containsN(target, "tr.o_data_row", 5);
-            assert.hasClass($(target).find("tr.o_data_row:eq(3)"), "o_selected_row");
+        assert.containsN(target, "tr.o_data_row", 5);
+        assert.hasClass($(target).find("tr.o_data_row:eq(4)"), "o_selected_row");
 
-            assert.verifySteps([
-                "web_read_group",
-                "/web/dataset/search_read",
-                "/web/dataset/search_read",
-                "onchange",
-            ]);
-        }
-    );
+        assert.verifySteps([
+            "get_views",
+            "web_read_group",
+            "web_search_read",
+            "web_search_read",
+            "onchange",
+        ]);
+    });
 
     QUnit.test('pressing ENTER in editable="top" grouped list view', async function (assert) {
         serverData.models.foo.records[2].bar = false;
@@ -11498,7 +11489,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["get_views", "web_read_group", "web_search_read", "web_search_read"]);
     });
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "pressing ENTER in editable grouped list view with create=0",
         async function (assert) {
             await makeView({
@@ -11733,386 +11724,382 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_selected_row");
     });
 
-    QUnit.skipWOWL(
-        "cell-level keyboard navigation in editable grouped list",
-        async function (assert) {
-            serverData.models.foo.records[0].bar = false;
-            serverData.models.foo.records[1].bar = false;
-            serverData.models.foo.records[2].bar = false;
-            serverData.models.foo.records[3].bar = true;
-
-            await makeView({
-                type: "list",
-                resModel: "foo",
-                serverData,
-                arch: `
-                    <tree editable="bottom">
-                        <field name="foo" required="1"/>
-                    </tree>
-                `,
-                groupBy: ["bar"],
-            });
-
-            await click(target.querySelector(".o_group_header"));
-            const secondDataRow = target.querySelectorAll(".o_data_row")[1];
-            await click(secondDataRow, "[name=foo]");
-            assert.hasClass(secondDataRow, "o_selected_row");
-
-            await editInput(secondDataRow, "[name=foo] input", "blipbloup");
-
-            triggerHotkey("Escape");
-            await nextTick();
-
-            assert.containsNone(document.body, ".modal");
-
-            assert.doesNotHaveClass(secondDataRow, "o_selected_row");
-
-            assert.strictEqual(document.activeElement, secondDataRow.querySelector("[name=foo]"));
-
-            assert.strictEqual(document.activeElement.textContent, "blip");
-
-            triggerHotkey("ArrowLeft");
-
-            assert.strictEqual(
-                document.activeElement,
-                secondDataRow.querySelector("input[type=checkbox]")
-            );
-
-            triggerHotkey("ArrowUp");
-            triggerHotkey("ArrowRight");
-
-            const firstDataRow = target.querySelector(".o_data_row");
-            assert.strictEqual(document.activeElement, firstDataRow.querySelector("[name=foo]"));
-
-            triggerHotkey("Enter");
-            await nextTick();
-
-            assert.hasClass(firstDataRow, "o_selected_row");
-            await editInput(firstDataRow, "[name=foo] input", "Zipadeedoodah");
-
-            triggerHotkey("Enter");
-            await nextTick();
-
-            assert.strictEqual(firstDataRow.querySelector("[name=foo]").innerText, "Zipadeedoodah");
-            assert.doesNotHaveClass(firstDataRow, "o_selected_row");
-            assert.hasClass(secondDataRow, "o_selected_row");
-            assert.strictEqual(
-                document.activeElement,
-                secondDataRow.querySelector("[name=foo] input")
-            );
-            assert.strictEqual(document.activeElement.value, "blip");
-
-            triggerHotkey("ArrowUp");
-            triggerHotkey("ArrowRight");
-            await nextTick();
-
-            assert.strictEqual(
-                document.activeElement,
-                secondDataRow.querySelector("[name=foo] input")
-            );
-            assert.strictEqual(document.activeElement.value, "blip");
-
-            triggerHotkey("ArrowDown");
-            triggerHotkey("ArrowLeft");
-            await nextTick();
-
-            assert.strictEqual(
-                document.activeElement,
-                secondDataRow.querySelector("td[name=foo] input")
-            );
-            assert.strictEqual(document.activeElement.value, "blip");
-
-            triggerHotkey("Escape");
-            await nextTick();
-
-            assert.doesNotHaveClass(secondDataRow, "o_selected_row");
-
-            assert.strictEqual(document.activeElement, secondDataRow.querySelector("td[name=foo]"));
-
-            triggerHotkey("ArrowDown");
-            triggerHotkey("ArrowDown");
-
-            assert.strictEqual(
-                document.activeElement,
-                target.querySelector(".o_group_field_row_add a")
-            );
-
-            triggerHotkey("ArrowDown");
-
-            const secondGroupHeader = target.querySelectorAll(".o_group_name")[1];
-            assert.strictEqual(document.activeElement, secondGroupHeader);
-
-            assert.containsN(target, ".o_data_row", 3);
-
-            triggerHotkey("Enter");
-            await nextTick();
-
-            assert.containsN(target, ".o_data_row", 4);
-
-            assert.strictEqual(document.activeElement, secondGroupHeader);
-
-            triggerHotkey("ArrowDown");
-            await nextTick();
-
-            // assert.strictEqual(
-            //     document.activeElement.textContent,
-            //     "blip",
-            //     "second field of last record should be focused"
-            // );
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "down");
-            // assert.strictEqual(
-            //     document.activeElement.tagName,
-            //     "A",
-            //     'should focus the "Add a line" button'
-            // );
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "down");
-            // assert.strictEqual(
-            //     document.activeElement.tagName,
-            //     "A",
-            //     "arrow navigation should not cycle (focus still on last row)"
-            // );
-
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "enter");
-            // await testUtils.fields.editAndTrigger(
-            //     $("tr.o_data_row:eq(4) td:eq(1) input"),
-            //     "cheateur arrete de cheater",
-            //     "input"
-            // );
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "enter");
-            // assert.strictEqual(
-            //     $(target).find("tr.o_data_row").length,
-            //     6,
-            //     "should have 6 rows displayed (new record + new edit line)"
-            // );
-
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "escape");
-            // assert.strictEqual(
-            //     document.activeElement.tagName,
-            //     "A",
-            //     'should focus the "Add a line" button'
-            // );
-
-            // // come back to the top
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "up");
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "up");
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "up");
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "up");
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "up");
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "up");
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "up");
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "up");
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "up");
-
-            // assert.strictEqual(document.activeElement.tagName, "TH", "focus is in table header");
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "left");
-            // assert.strictEqual(document.activeElement.tagName, "INPUT", "focus is in header input");
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "down");
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "down");
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "right");
-            // assert.strictEqual(document.activeElement.tagName, "TD", "focus is in field td");
-            // assert.strictEqual(
-            //     document.activeElement.textContent,
-            //     "Zipadeedoodah",
-            //     "second field of first record should be focused"
-            // );
-
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "up");
-            // assert.strictEqual(
-            //     document.activeElement.textContent,
-            //     "No (3)",
-            //     "focus should be on first group header"
-            // );
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "enter");
-            // assert.strictEqual(
-            //     $(target).find("tr.o_data_row").length,
-            //     2,
-            //     "should have 2 rows displayed (first group should be closed)"
-            // );
-            // assert.strictEqual(
-            //     document.activeElement.textContent,
-            //     "No (3)",
-            //     "focus should still be on first group header"
-            // );
-
-            // assert.strictEqual(
-            //     $(target).find("tr.o_data_row").length,
-            //     2,
-            //     "should have 2 rows displayed"
-            // );
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "right");
-            // assert.strictEqual(
-            //     $(target).find("tr.o_data_row").length,
-            //     5,
-            //     "should have 5 rows displayed"
-            // );
-            // assert.strictEqual(
-            //     document.activeElement.textContent,
-            //     "No (3)",
-            //     "focus is still in header"
-            // );
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "right");
-            // assert.strictEqual(
-            //     $(target).find("tr.o_data_row").length,
-            //     5,
-            //     "should have 5 rows displayed"
-            // );
-            // assert.strictEqual(
-            //     document.activeElement.textContent,
-            //     "No (3)",
-            //     "focus is still in header"
-            // );
-
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "left");
-            // assert.strictEqual(
-            //     $(target).find("tr.o_data_row").length,
-            //     2,
-            //     "should have 2 rows displayed"
-            // );
-            // assert.strictEqual(
-            //     document.activeElement.textContent,
-            //     "No (3)",
-            //     "focus is still in header"
-            // );
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "left");
-            // assert.strictEqual(
-            //     $(target).find("tr.o_data_row").length,
-            //     2,
-            //     "should have 2 rows displayed"
-            // );
-            // assert.strictEqual(
-            //     document.activeElement.textContent,
-            //     "No (3)",
-            //     "focus is still in header"
-            // );
-
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "down");
-            // assert.strictEqual(
-            //     document.activeElement.textContent,
-            //     "Yes (2)",
-            //     "focus should now be on second group header"
-            // );
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "down");
-            // assert.strictEqual(document.activeElement.tagName, "TD", "record td should be focused");
-            // assert.strictEqual(
-            //     document.activeElement.textContent,
-            //     "blip",
-            //     "second field of first record of second group should be focused"
-            // );
-
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "down");
-            // assert.strictEqual(
-            //     document.activeElement.textContent,
-            //     "cheateur arrete de cheater",
-            //     "second field of last record of second group should be focused"
-            // );
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "down");
-            // assert.strictEqual(
-            //     document.activeElement.tagName,
-            //     "A",
-            //     'should focus the "Add a line" button'
-            // );
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "up");
-            // assert.strictEqual(
-            //     document.activeElement.textContent,
-            //     "cheateur arrete de cheater",
-            //     'second field of last record of second group should be focused (special case: the first td of the "Add a line" line was skipped'
-            // );
-            // await testUtils.fields.triggerKeydown($(document.activeElement), "up");
-            // assert.strictEqual(
-            //     document.activeElement.textContent,
-            //     "blip",
-            //     "second field of first record of second group should be focused"
-            // );
-        }
-    );
-
-    QUnit.skipWOWL("execute group header button with keyboard navigation", async function (assert) {
-        assert.expect(13);
+    QUnit.test("cell-level keyboard navigation in editable grouped list", async function (assert) {
+        serverData.models.foo.records[0].bar = false;
+        serverData.models.foo.records[1].bar = false;
+        serverData.models.foo.records[2].bar = false;
+        serverData.models.foo.records[3].bar = true;
 
         await makeView({
             type: "list",
             resModel: "foo",
             serverData,
-            arch:
-                "<tree>" +
-                '<field name="foo"/>' +
-                '<groupby name="m2o">' +
-                '<button type="object" name="some_method" string="Do this"/>' +
-                "</groupby>" +
-                "</tree>",
+            arch: `
+                    <tree editable="bottom">
+                        <field name="foo" required="1"/>
+                    </tree>
+                `,
+            groupBy: ["bar"],
+        });
+
+        await click(target.querySelector(".o_group_name"));
+        const secondDataRow = target.querySelectorAll(".o_data_row")[1];
+        await click(secondDataRow, "[name=foo]");
+        assert.hasClass(secondDataRow, "o_selected_row");
+
+        await editInput(secondDataRow, "[name=foo] input", "blipbloup");
+
+        triggerHotkey("Escape");
+        await nextTick();
+
+        assert.containsNone(document.body, ".modal");
+
+        assert.doesNotHaveClass(secondDataRow, "o_selected_row");
+
+        assert.strictEqual(document.activeElement, secondDataRow.querySelector("[name=foo]"));
+
+        assert.strictEqual(document.activeElement.textContent, "blip");
+
+        triggerHotkey("ArrowLeft");
+
+        assert.strictEqual(
+            document.activeElement,
+            secondDataRow.querySelector("input[type=checkbox]")
+        );
+
+        triggerHotkey("ArrowUp");
+        triggerHotkey("ArrowRight");
+
+        const firstDataRow = target.querySelector(".o_data_row");
+        assert.strictEqual(document.activeElement, firstDataRow.querySelector("[name=foo]"));
+
+        triggerHotkey("Enter");
+        await nextTick();
+
+        assert.hasClass(firstDataRow, "o_selected_row");
+        await editInput(firstDataRow, "[name=foo] input", "Zipadeedoodah");
+
+        triggerHotkey("Enter");
+        await nextTick();
+
+        assert.strictEqual(firstDataRow.querySelector("[name=foo]").innerText, "Zipadeedoodah");
+        assert.doesNotHaveClass(firstDataRow, "o_selected_row");
+        assert.hasClass(secondDataRow, "o_selected_row");
+        assert.strictEqual(document.activeElement, secondDataRow.querySelector("[name=foo] input"));
+        assert.strictEqual(document.activeElement.value, "blip");
+
+        triggerHotkey("ArrowUp");
+        triggerHotkey("ArrowRight");
+        await nextTick();
+
+        assert.strictEqual(document.activeElement, secondDataRow.querySelector("[name=foo] input"));
+        assert.strictEqual(document.activeElement.value, "blip");
+
+        triggerHotkey("ArrowDown");
+        triggerHotkey("ArrowLeft");
+        await nextTick();
+
+        assert.strictEqual(
+            document.activeElement,
+            secondDataRow.querySelector("td[name=foo] input")
+        );
+        assert.strictEqual(document.activeElement.value, "blip");
+
+        triggerHotkey("Escape");
+        await nextTick();
+
+        assert.doesNotHaveClass(secondDataRow, "o_selected_row");
+
+        assert.strictEqual(document.activeElement, secondDataRow.querySelector("td[name=foo]"));
+
+        triggerHotkey("ArrowDown");
+        triggerHotkey("ArrowDown");
+
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_group_field_row_add a")
+        );
+
+        triggerHotkey("ArrowDown");
+
+        const secondGroupHeader = target.querySelectorAll(".o_group_name")[1];
+        assert.strictEqual(document.activeElement, secondGroupHeader);
+
+        assert.containsN(target, ".o_data_row", 3);
+
+        triggerHotkey("Enter");
+        await nextTick();
+
+        assert.containsN(target, ".o_data_row", 4);
+
+        assert.strictEqual(document.activeElement, secondGroupHeader);
+
+        triggerHotkey("ArrowDown");
+
+        const fourthDataRow = target.querySelectorAll(".o_data_row")[3];
+        assert.strictEqual(document.activeElement, fourthDataRow.querySelector("[name=foo]"));
+
+        triggerHotkey("ArrowDown");
+
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelectorAll(".o_group_field_row_add a")[1]
+        );
+
+        triggerHotkey("ArrowDown");
+
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelectorAll(".o_group_field_row_add a")[1]
+        );
+
+        assert.defaultBehavior(
+            target.querySelectorAll(".o_group_field_row_add a")[1],
+            null,
+            "keydown",
+            { key: "Enter" }
+        ); // default Enter on a A tag
+        await click(target.querySelectorAll(".o_group_field_row_add a")[1]);
+
+        const fifthDataRow = target.querySelectorAll(".o_data_row")[4];
+        assert.strictEqual(document.activeElement, fifthDataRow.querySelector("[name=foo] input"));
+
+        await editInput(
+            fifthDataRow.querySelector("[name=foo] input"),
+            null,
+            "cheateur arrete de cheater"
+        );
+
+        triggerHotkey("Enter");
+        await nextTick();
+
+        assert.containsN(target, ".o_data_row", 6);
+
+        triggerHotkey("Escape");
+        await nextTick();
+
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelectorAll(".o_group_field_row_add a")[1]
+        );
+
+        // come back to the top
+        for (let i = 0; i < 9; i++) {
+            triggerHotkey("ArrowUp");
+        }
+
+        assert.strictEqual(document.activeElement, target.querySelector("thead th:nth-child(2)"));
+
+        triggerHotkey("ArrowLeft");
+
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector("thead th.o_list_record_selector input")
+        );
+
+        triggerHotkey("ArrowDown");
+        triggerHotkey("ArrowDown");
+        triggerHotkey("ArrowRight");
+
+        assert.strictEqual(document.activeElement, firstDataRow.querySelector("td[name=foo]"));
+
+        triggerHotkey("ArrowUp");
+
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_group_header:nth-child(1) .o_group_name")
+        );
+
+        assert.containsN(target, ".o_data_row", 5);
+
+        triggerHotkey("Enter");
+        await nextTick();
+
+        assert.containsN(target, ".o_data_row", 2);
+
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_group_header:nth-child(1) .o_group_name")
+        );
+
+        triggerHotkey("ArrowRight");
+        await nextTick();
+
+        assert.containsN(target, ".o_data_row", 5);
+
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_group_header:nth-child(1) .o_group_name")
+        );
+
+        triggerHotkey("ArrowRight");
+        await nextTick();
+
+        assert.containsN(target, ".o_data_row", 5);
+
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_group_header:nth-child(1) .o_group_name")
+        );
+
+        triggerHotkey("ArrowLeft");
+        await nextTick();
+
+        assert.containsN(target, ".o_data_row", 2);
+
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_group_header:nth-child(1) .o_group_name")
+        );
+
+        triggerHotkey("ArrowLeft");
+        await nextTick();
+
+        assert.containsN(target, ".o_data_row", 2);
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_group_header:nth-child(1) .o_group_name")
+        );
+
+        triggerHotkey("ArrowDown");
+
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_group_header:nth-child(2) .o_group_name")
+        );
+
+        triggerHotkey("ArrowDown");
+
+        const firstVisibleDataRow = target.querySelector(".o_data_row");
+        assert.strictEqual(document.activeElement, firstVisibleDataRow.querySelector("[name=foo]"));
+
+        triggerHotkey("ArrowDown");
+
+        const secondVisibleDataRow = target.querySelectorAll(".o_data_row")[1];
+        assert.strictEqual(
+            document.activeElement,
+            secondVisibleDataRow.querySelector("[name=foo]")
+        );
+
+        triggerHotkey("ArrowDown");
+
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_group_field_row_add a")
+        );
+
+        triggerHotkey("ArrowUp");
+
+        assert.strictEqual(
+            document.activeElement,
+            secondVisibleDataRow.querySelector("[name=foo]")
+        );
+
+        triggerHotkey("ArrowUp");
+        assert.strictEqual(document.activeElement, firstVisibleDataRow.querySelector("[name=foo]"));
+    });
+
+    QUnit.test("execute group header button with keyboard navigation", async function (assert) {
+        const list = await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: `
+                <tree>
+                    <field name="foo"/>
+                    <groupby name="m2o">
+                        <button type="object" name="some_method" string="Do this"/>
+                    </groupby>
+                </tree>
+            `,
             groupBy: ["m2o"],
-            intercepts: {
-                execute_action: function (ev) {
-                    assert.strictEqual(ev.data.action_data.name, "some_method");
-                },
+        });
+
+        patchWithCleanup(list.env.services.action, {
+            doActionButton: ({ name }) => {
+                assert.step(name);
             },
         });
 
-        assert.containsNone(target, ".o_data_row", "all groups should be closed");
+        assert.containsNone(target, ".o_data_row");
 
         // focus create button as a starting point
-        $(target).find(".o_list_button_add").focus();
-        assert.ok(document.activeElement.classList.contains("o_list_button_add"));
-        await testUtils.fields.triggerKeydown($(document.activeElement), "down");
+        assert.containsOnce(target, ".o_list_button_add");
+        target.querySelector(".o_list_button_add").focus();
+        assert.strictEqual(document.activeElement, target.querySelector(".o_list_button_add"));
+
+        triggerHotkey("ArrowDown");
+        await nextTick();
+
         assert.strictEqual(
-            document.activeElement.tagName,
-            "INPUT",
-            "focus should now be on the record selector (list header)"
+            document.activeElement,
+            target.querySelector("thead th.o_list_record_selector input")
         );
-        await testUtils.fields.triggerKeydown($(document.activeElement), "down");
+
+        triggerHotkey("ArrowDown");
+        await nextTick();
         assert.strictEqual(
-            document.activeElement.textContent,
-            "Value 1 (3)",
-            "focus should be on first group header"
+            document.activeElement,
+            target.querySelector(".o_group_header:nth-child(1) .o_group_name")
         );
 
         // unfold first group
-        await testUtils.fields.triggerKeydown($(document.activeElement), "enter");
-        assert.containsN(target, ".o_data_row", 3, "first group should be open");
+        triggerHotkey("Enter");
+        await nextTick();
+        assert.containsN(target, ".o_data_row", 3);
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_group_header:nth-child(1) .o_group_name")
+        );
 
         // move to first record of opened group
-        await testUtils.fields.triggerKeydown($(document.activeElement), "down");
+        triggerHotkey("ArrowDown");
+        await nextTick();
         assert.strictEqual(
-            document.activeElement.tagName,
-            "INPUT",
-            "focus should be in first row checkbox"
+            document.activeElement,
+            target.querySelector("tbody .o_data_row td[name=foo]")
         );
 
         // move back to the group header
-        await testUtils.fields.triggerKeydown($(document.activeElement), "up");
-        assert.ok(
-            document.activeElement.classList.contains("o_group_name"),
-            "focus should be back on first group header"
+        triggerHotkey("ArrowUp");
+        await nextTick();
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_group_header:nth-child(1) .o_group_name")
         );
 
         // fold the group
-        await testUtils.fields.triggerKeydown($(document.activeElement), "enter");
-        assert.ok(
-            document.activeElement.classList.contains("o_group_name"),
-            "focus should still be on first group header"
+        triggerHotkey("Enter");
+        await nextTick();
+        assert.containsNone(target, ".o_data_row");
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_group_header:nth-child(1) .o_group_name")
         );
-        assert.containsNone(target, ".o_data_row", "first group should now be folded");
 
         // unfold the group
-        await testUtils.fields.triggerKeydown($(document.activeElement), "enter");
-        assert.ok(
-            document.activeElement.classList.contains("o_group_name"),
-            "focus should still be on first group header"
-        );
-        assert.containsN(target, ".o_data_row", 3, "first group should be open");
-
-        // simulate a move to the group header button with tab (we can't trigger a native event
-        // programmatically, see https://stackoverflow.com/a/32429197)
-        $(target).find(".o_group_header .o_group_buttons button:first").focus();
+        triggerHotkey("Enter");
+        await nextTick();
+        assert.containsN(target, ".o_data_row", 3);
         assert.strictEqual(
-            document.activeElement.tagName,
-            "BUTTON",
-            "focus should be on the group header button"
+            document.activeElement,
+            target.querySelector(".o_group_header:nth-child(1) .o_group_name")
+        );
+
+        // tab to the group header button
+        triggerHotkey("Tab");
+        await nextTick();
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_group_header .o_group_buttons button:first-child")
         );
 
         // click on the button by pressing enter
-        await testUtils.fields.triggerKeydown($(document.activeElement), "enter");
-        assert.containsN(target, ".o_data_row", 3, "first group should still be open");
+        assert.verifySteps([]);
+        triggerHotkey("Enter");
+        await nextTick();
+        assert.containsN(target, ".o_data_row", 3);
+        assert.verifySteps(["some_method"]);
     });
 
     QUnit.test('add a new row in grouped editable="top" list', async function (assert) {
@@ -13490,7 +13477,7 @@ QUnit.module("Views", (hooks) => {
         await nextTick();
     });
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "edition, then navigation with tab (with a readonly re-evaluated field and onchange)",
         async function (assert) {
             // This test makes sure that if we have a cell in a row that will become
@@ -13498,8 +13485,6 @@ QUnit.module("Views", (hooks) => {
             // move over it before it becomes read-only and there are unsaved changes
             // (which will trigger an onchange), the focus of the next activable
             // field will not crash
-            assert.expect(4);
-
             serverData.models.bar.onchanges = {
                 o2m: function () {},
             };
@@ -13510,72 +13495,50 @@ QUnit.module("Views", (hooks) => {
             };
             serverData.models.bar.records[0].o2m = [1, 4];
 
-            var form = await makeView({
+            await makeView({
                 type: "form",
-                model: "bar",
+                resModel: "bar",
                 resId: 1,
                 serverData,
-                arch:
-                    "<form>" +
-                    "<group>" +
-                    '<field name="display_name"/>' +
-                    '<field name="o2m">' +
-                    '<tree editable="bottom">' +
-                    '<field name="foo"/>' +
-                    "<field name=\"date\" attrs=\"{'readonly': [('foo', '!=', 'yop')]}\"/>" +
-                    '<field name="int_field"/>' +
-                    "</tree>" +
-                    "</field>" +
-                    "</group>" +
-                    "</form>",
+                arch: `
+                    <form>
+                        <group>
+                            <field name="display_name"/>
+                            <field name="o2m">
+                                <tree editable="bottom">
+                                    <field name="foo"/>
+                                    <field name="date" attrs="{'readonly': [('foo', '!=', 'yop')]}"/>
+                                    <field name="int_field"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </form>
+                `,
                 mockRPC: function (route, args) {
                     if (args.method === "onchange") {
-                        assert.step(args.method + ":" + args.model);
+                        assert.step(`onchange:${args.model}`);
                     }
-                    return this._super.apply(this, arguments);
-                },
-                fieldDebounce: 1,
-                viewOptions: {
-                    mode: "edit",
                 },
             });
 
-            var jq_evspecial_focus_trigger = $.event.special.focus.trigger;
-            // As KeyboardEvent will be triggered by JS and not from the
-            // User-Agent itself, the focus event will not trigger default
-            // action (event not being trusted), we need to manually trigger
-            // 'change' event on the currently focused element
-            $.event.special.focus.trigger = function () {
-                if (this !== document.activeElement && this.focus) {
-                    var activeElement = document.activeElement;
-                    this.focus();
-                    $(activeElement).trigger("change");
-                }
-            };
+            await clickEdit(target);
 
-            // editable target, click on first td and press TAB
-            await click(form.$(".o_data_cell:contains(yop)"));
+            await click(target.querySelector(".o_data_cell"));
             assert.strictEqual(
                 document.activeElement,
-                form.$('tr.o_selected_row input[name="foo"]')[0],
-                "focus should be on an input with name = foo"
+                target.querySelector(".o_data_cell[name=foo] input")
             );
-            editInput(form.$('tr.o_selected_row input[name="foo"]'), "new value");
-            var tabEvent = $.Event("keydown", { which: $.ui.keyCode.TAB });
-            await testUtils.dom.triggerEvents(form.$('tr.o_selected_row input[name="foo"]'), [
-                tabEvent,
-            ]);
+            await editInput(target, ".o_data_cell[name=foo] input", "new value");
+
+            triggerHotkey("Tab");
+            await nextTick();
+
             assert.strictEqual(
                 document.activeElement,
-                form.$('tr.o_selected_row input[name="int_field"]')[0],
-                "focus should be on an input with name = int_field"
+                target.querySelector(".o_data_cell[name=int_field] input")
             );
 
-            // Restore origin jQuery special trigger for 'focus'
-            $.event.special.focus.trigger = jq_evspecial_focus_trigger;
-
-            assert.verifySteps(["onchange:bar"], "onchange method should have been called");
-            form.destroy();
+            assert.verifySteps(["onchange:bar"]);
         }
     );
 
