@@ -181,11 +181,11 @@ export const ProjectFormRenderer = FormDescriptionExpanderRenderer.extend({
 
 export const ProjectFormView = FormDescriptionExpanderView.extend({
     config: Object.assign({}, FormDescriptionExpanderView.prototype.config, {
-        Controller: ProjectFormController,
+        Controller: ProjectFormController, // NOTE: done in WOWL except the applyChanges for milestones feature. Need fix in statusbar component.
         Renderer: ProjectFormRenderer,
     }),
 });
 
-viewRegistry.add('project_form', ProjectFormView);
+viewRegistry.add('legacy_project_form', ProjectFormView);
 
 viewRegistry.add('form_description_expander', FormDescriptionExpanderView)
