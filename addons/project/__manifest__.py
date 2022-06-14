@@ -69,6 +69,8 @@
             'project/static/src/task_name_with_subtask_count_char_field/*',
             'project/static/src/project_private_task_many2one_field/*',
             'project/static/src/status_color_state_selection_field/*',
+            'project/static/src/form_with_html_expander/*',
+            'project/static/src/project_form/*',
             'project/static/src/project_task_kanban/*',
             'project/static/src/project_task_form/*',
             'project/static/src/project_task_list/*',

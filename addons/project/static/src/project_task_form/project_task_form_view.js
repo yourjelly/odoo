@@ -1,12 +1,12 @@
 /** @odoo-module */
 
 import { registry } from "@web/core/registry";
-import { formView } from '@web/views/form/form_view';
+import { formViewWithHtmlExpander } from '../form_with_html_expander/form_view_with_html_expander';
 import { ProjectTaskFormController } from './project_task_form_controller';
 import { ProjectTaskFormModel } from "./project_task_form_model";
 
 export const projectTaskFormView = {
-    ...formView,
+    ...formViewWithHtmlExpander,
     Controller: ProjectTaskFormController,
     Model: ProjectTaskFormModel,
 };
