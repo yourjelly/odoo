@@ -2,85 +2,95 @@ import logging
 import marshal
 import os
 import reprlib
+from random import random
 
 from ctypes import Structure, c_bool, c_int32, c_int64, c_ssize_t
-from multiprocessing import Lock, RawValue, RawArray
+from multiprocessing import RawValue, RawArray
 from multiprocessing.shared_memory import SharedMemory
-from time import time, time_ns
+from time import sleep, time
 
+from cffi import FFI
 
 _logger = logging.getLogger(__name__)
 
+# Fault tolerant mutual exclusion locks for shared memory systems: https://patents.google.com/patent/US7493618
+# We need a atomic (CAS Compare-And-Swap + Condition multiprocessing) operation to a have a completely correct
+# It doesn't exist in Python, it isn't possible to do it in ctypes because atomic_method are compile 'in-place'.
+# => 'cffi'.
 
-class SharedMemoryNotAvailable(Exception):
-    pass
+# Article about CAS operation https://lwn.net/Articles/844224/
+
+# Max pid is 2**22 = 4,194,304, then a int32_t is enough
+# https://stackoverflow.com/questions/6294133/maximum-pid-in-linux#:~:text=On%2032%2Dbit%20platforms%2C%2032768,PID_MAX_LIMIT%20%2C%20approximately%204%20million).
+
+# TODO : read ATOMIC_INT_LOCK_FREE to be sure to have a lock free atomicity (mandatory here to be fault tolerant)
+
+# https://cffi.readthedocs.io/en/latest/goals.html
 
 
-class LockIdentify:
-    """
-    Lock where the pid process is save into a Shared Value after that the process acquires the lock.
-    It is to be able to release the lock from a other Process (parent process) when the process
-    is killed (the Lock is not release automatically in that case).
-    """
+# TODO : Can I safely cast 'int32_t *' into '_Atomic int32_t *' https://en.cppreference.com/w/c/language/atomic ?
+# -> "7.17.6 Atomic integer and address types
+# -> NOTE The representation of atomic integer and address types need not have the same size as their
+# -> corresponding regular types. They should have the same size whenever possible, as it eases effort required
+# -> to port existing code"
+# NO, I shouldn't cast -> create a method which return the size of a '_Atomic int32_t'
+
+# We can to the stuff in a shared memory: https://stackoverflow.com/questions/18321244/is-c11-atomict-usable-with-mmap
+
+# Maybe check the sizeof of both type
+# TODO : read ATOMIC_INT_LOCK_FREE to be sure to have a lock free atomicity (mandatory here to be fault tolerant),
+# if we don't, use the lock solution to be fault tolerant
+
+c_definition = """
+_Bool cmpxchg_strong(int32_t* object, int32_t excepted, int32_t desired);
+"""
+c_code_atomic = """
+#include <stdatomic.h>
+
+static _Bool cmpxchg_strong(int32_t* object, int32_t excepted, int32_t desired) {
+    _Atomic int32_t* atomic_object = (_Atomic int32_t*) object;
+    return atomic_compare_exchange_strong(atomic_object, &excepted, desired);
+}
+"""
+ffi = FFI()
+ffi.cdef(c_definition)
+atomic_lib = ffi.verify(c_code_atomic)
+
+class LockIdentifyAtomicsCFII:
+
+    max_waiting_time = 50 * (10 ** -5)  # 50 us
+
     def __init__(self) -> None:
-        self._lock = Lock()
-        self._pid = RawValue(c_int64, -1)  # Shared Value to save the pid of the current process using Lock
-        self._last_exit = RawValue(c_int64, time_ns())  # Last usage of the lock (timestamp)
+        # TODO: atomic init
+        self.shmem = SharedMemory(create=True, size=4)
+        self.buf = self.shmem.buf
+        self.address_atomic = ffi.from_buffer("int32_t[]", self.buf)
+        self.address_atomic[0] = -1
 
     def __enter__(self):
-        pid = os.getpid() # Make the call before to minimize the Critical Spot
-
-        # CRITICAL SPOT: if the process is killed after the acquire
-        # but before set the pid, the _lock is locked without knowing
-        # which one take it, then the PreforkServer cannot release it.
-        # See `force_release_if_mandatory` where there is a partial solution to this
-        self._lock.acquire()
-        self._pid.value = pid
+        # TODO: Condition multiprocessing: https://docs.python.org/3/library/threading.html#threading.Condition
+        pid = os.getpid()
+        while not atomic_lib.cmpxchg_strong(self.address_atomic, -1, pid):
+            sleep(random() * self.max_waiting_time)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        # CRITICAL SPOT: if the process is killed after reset the pid
-        # but before release, the _lock is locked without knowing
-        # which one take it, then the PreforkServer cannot release it.
-        # See `force_release_if_mandatory` where there is a partial solution to this
-        self._last_exit.value = time_ns()
-        self._pid.value = -1
-        try:
-            self._lock.release()
-        except ValueError:
-            # One a worst case of the worst case, if we have a ValueError ("release" a already released lock), it seems
-            # that none other process has used the lock between (or it already finished)
+        # Next line is very slow ? why this ? lot of check into atomics libraries
+        exited = atomic_lib.cmpxchg_strong(self.address_atomic, os.getpid(), -1)
+        if not exited:
             _logger.error("One process has release the lock when it was used.")
-            raise SharedMemoryNotAvailable("One process has release the lock when it was used.")
 
+    def __del__(self):
+        # TODO: we shouldn't put in __del__: https://www.youtube.com/watch?v=IFjuQmlwXgU
+        # https://docs.python.org/3/reference/datamodel.html#object.__del__ :
+        # "it is not guaranteed that __del__() methods are called for objects that still exist when the interpreter exits."
+        del self.address_atomic
+        del self.buf
+        self.shmem.unlink()
 
     def force_release_if_mandatory(self, pid: int):
-        """Release the lock if it is locked by the killed process with `pid`
-
-        :param int pid: pid of a killed (mandatory) process
-        """
-        # TODO: it still not a complete safe solution (IMO, there isn't any a complete solution)
-        have_lock = self._lock.acquire(block=False)
-        # Read _pid outside locking section seems "wrong", but we only use it to compare equality,
-        # then the change to get a bad value and take the wrong decision is very "small" (or "inexistant", not sure)
-        if not have_lock and self._pid.value == pid:
-            _logger.info("Force the release of SM lock for pid=%s", pid)
-            self._pid.value = -1
-            self._lock.release()
-        elif not have_lock and self._pid.value == -1:
-            old_last_exit = self._last_exit.value
-            # After 50 msec, if we cannot still acquire and the _last_exit didn't change
-            # We consider into the first worst case, one process take the lock without write
-            # his pid (or after clean it). Then we let the process 50 msec to set or reset
-            # the `self._pid` after/before acquire/release) after that we consider the process dead
-            # (which can be False with the CPU high and the process didn't get a round trip on it => TODO: what can we do ? )
-            have_lock = self._lock.acquire(timeout=0.05)
-            if not have_lock and old_last_exit == self._last_exit.value and self._pid.value == -1:
-                _logger.warning("Force the release of SM lock but there wasn't pid attach to the lock")
-                self._lock.release()
-            elif have_lock:
-                self._lock.release()
-        elif have_lock:
-            self._lock.release()
+        force_exited = atomic_lib.cmpxchg_strong(self.address_atomic, pid, -1)
+        if force_exited:
+            _logger.warning("Atomic PID was be force to release")
 
 class _Entry(Structure):
     """
@@ -134,7 +144,7 @@ class SharedMemoryLRU:
         _logger.debug("Create Shared Memory of %d bytes", byte_size)
 
         # The lock to ensure that only one process access to critical section in the time
-        self._lock = LockIdentify()
+        self._lock = LockIdentifyAtomicsCFII()
         # The Raw Shared Memory, will contain only data (key, value)
         self._sm = SharedMemory(size=byte_size, create=True)
 
