@@ -10253,55 +10253,47 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.skipWOWL('list view on a "noCache" model', async function (assert) {
-        assert.expect(9);
-
-        testUtils.mock.patch(BasicModel, {
-            noCacheModels: BasicModel.prototype.noCacheModels.concat(["foo"]),
-        });
-
-        await makeView({
-            type: "list",
-            resModel: "foo",
-            serverData,
-            arch: '<tree editable="top">' + '<field name="display_name"/>' + "</tree>",
-            mockRPC: function (route, args) {
-                if (_.contains(["create", "unlink", "write"], args.method)) {
-                    assert.step(args.method);
-                }
-                return this._super.apply(this, arguments);
-            },
-            actionMenus: {},
-        });
-        core.bus.on("clear_cache", target, assert.step.bind(assert, "clear_cache"));
-
-        // create a new record
-        await click(target.querySelector(".o_list_button_add"));
-        await editInput($(target).find(".o_selected_row .o_field_widget"), "some value");
-        await click(target.querySelector(".o_list_button_save"));
-
-        // edit an existing record
-        await click($(target).find(".o_data_cell:first"));
-        await editInput($(target).find(".o_selected_row .o_field_widget"), "new value");
-        await click(target.querySelector(".o_list_button_save"));
-
-        // delete a record
-        await click($(target).find(".o_data_row:first .o_list_record_selector input"));
-        await toggleActionMenu(target);
-        await toggleMenuItem(target, "Delete");
-        await click($(".modal-footer .btn-primary"));
-
-        assert.verifySteps([
-            "create",
-            "clear_cache",
-            "write",
-            "clear_cache",
-            "unlink",
-            "clear_cache",
-        ]);
-
-        testUtils.mock.unpatch(BasicModel);
-
-        assert.verifySteps(["clear_cache"]); // triggered by the test environment on destroy
+        // assert.expect(9);
+        // testUtils.mock.patch(BasicModel, {
+        //     noCacheModels: BasicModel.prototype.noCacheModels.concat(["foo"]),
+        // });
+        // await makeView({
+        //     type: "list",
+        //     resModel: "foo",
+        //     serverData,
+        //     arch: '<tree editable="top">' + '<field name="display_name"/>' + "</tree>",
+        //     mockRPC: function (route, args) {
+        //         if (_.contains(["create", "unlink", "write"], args.method)) {
+        //             assert.step(args.method);
+        //         }
+        //         return this._super.apply(this, arguments);
+        //     },
+        //     actionMenus: {},
+        // });
+        // core.bus.on("clear_cache", target, assert.step.bind(assert, "clear_cache"));
+        // // create a new record
+        // await click(target.querySelector(".o_list_button_add"));
+        // await editInput($(target).find(".o_selected_row .o_field_widget"), "some value");
+        // await click(target.querySelector(".o_list_button_save"));
+        // // edit an existing record
+        // await click($(target).find(".o_data_cell:first"));
+        // await editInput($(target).find(".o_selected_row .o_field_widget"), "new value");
+        // await click(target.querySelector(".o_list_button_save"));
+        // // delete a record
+        // await click($(target).find(".o_data_row:first .o_list_record_selector input"));
+        // await toggleActionMenu(target);
+        // await toggleMenuItem(target, "Delete");
+        // await click($(".modal-footer .btn-primary"));
+        // assert.verifySteps([
+        //     "create",
+        //     "clear_cache",
+        //     "write",
+        //     "clear_cache",
+        //     "unlink",
+        //     "clear_cache",
+        // ]);
+        // testUtils.mock.unpatch(BasicModel);
+        // assert.verifySteps(["clear_cache"]); // triggered by the test environment on destroy
     });
 
     QUnit.test(
