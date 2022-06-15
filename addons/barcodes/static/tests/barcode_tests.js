@@ -11,6 +11,26 @@ var testUtils = require('web.test_utils');
 
 var createView = testUtils.createView;
 var triggerKeypressEvent = testUtils.dom.triggerKeypressEvent;
+var triggerEvent = testUtils.dom.triggerEvent;
+var core = require('web.core');
+
+function simulateBarCode(chars) {
+    for (let char of chars) {
+        let keycode;
+        if (char === 'Enter') {
+            keycode = $.ui.keyCode.ENTER;
+        } else if (char === "Tab") {
+            keycode = $.ui.keyCode.TAB;
+        } else {
+            keycode = char.charCodeAt(0);
+        }
+        triggerEvent(document.activeElement, 'keypress', {
+            key: char,
+            keyCode: keycode,
+            which: keycode,
+        });
+    }
+}
 
 QUnit.module('Barcodes', {
     beforeEach: function () {
@@ -39,6 +59,7 @@ QUnit.module('Barcodes', {
                 fields: {
                     name: {string : "Product name", type: "char"},
                     int_field: {string : "Integer", type: "integer"},
+                    int_field_2: {string : "Integer", type: "integer"},
                     barcode: {string: "Barcode", type: "char"},
                 },
                 records: [
@@ -225,16 +246,15 @@ QUnit.test('do no update form twice after a command barcode scanned', async func
 });
 
 QUnit.test('widget field_float_scannable', async function (assert) {
-    var done = assert.async();
-    assert.expect(11);
-
     var delay = barcodeEvents.BarcodeEvents.max_time_between_keys_in_ms;
     barcodeEvents.BarcodeEvents.max_time_between_keys_in_ms = 0;
 
     this.data.product.records[0].int_field = 4;
-    this.data.product.onchanges = {
-        int_field: function () {},
-    };
+
+    function _onBarcodeScanned (code) {
+        assert.step(`barcode scanned ${code}`)
+    }
+    core.bus.on('barcode_scanned', null, _onBarcodeScanned);
 
     var form = await createView({
         View: FormView,
@@ -243,6 +263,7 @@ QUnit.test('widget field_float_scannable', async function (assert) {
         arch: '<form>' +
                     '<field name="display_name"/>' +
                     '<field name="int_field" widget="field_float_scannable"/>' +
+                    '<field name="int_field_2"/>' +
                 '</form>',
         mockRPC: function (route, args) {
             if (args.method === 'onchange') {
@@ -266,34 +287,25 @@ QUnit.test('widget field_float_scannable', async function (assert) {
 
     // simulates keypress events in the input to replace 0.00 by 26 (should not trigger onchanges)
     form.$('.o_field_widget[name=int_field]').focus();
+
+    // we check here that a scan on the fieldflotscannable widget triggers a
+    // barcode event
+    simulateBarCode(["6", "0", "1", "6", "4", "7", "8", "5"])
+    await testUtils.nextTick();
+    assert.verifySteps(['barcode scanned 60164785']);
     assert.strictEqual(form.$('.o_field_widget[name=int_field]').get(0), document.activeElement,
         "int field should be focused");
-    form.$('.o_field_widget[name=int_field]').trigger({type: 'keypress', which: 50, keyCode: 50}); // 2
+
+    // we check here that a scan on the field without widget does not trigger a
+    // barcode event
+    form.$('.o_field_widget[name=int_field_2]').focus();
+    simulateBarCode(["6", "0", "1", "6", "4", "7", "8", "5"])
     await testUtils.nextTick();
-    assert.strictEqual(form.$('.o_field_widget[name=int_field]').get(0), document.activeElement,
-        "int field should still be focused");
-    form.$('.o_field_widget[name=int_field]').trigger({type: 'keypress', which: 54, keyCode: 54}); // 6
-    await testUtils.nextTick();
-    assert.strictEqual(form.$('.o_field_widget[name=int_field]').get(0), document.activeElement,
-        "int field should still be focused");
+    assert.verifySteps([]);
 
-    setTimeout(async function () {
-        assert.strictEqual(form.$('.o_field_widget[name=int_field]').val(), '426',
-            "should display the correct value in edit");
-        assert.strictEqual(form.$('.o_field_widget[name=int_field]').get(0), document.activeElement,
-        "int field should still be focused");
-
-        assert.verifySteps([], 'should not have done any onchange RPC');
-
-        form.$('.o_field_widget[name=int_field]').trigger('change'); // should trigger the onchange
-        await testUtils.nextTick();
-
-        assert.verifySteps(['onchange'], 'should have done the onchange RPC');
-
-        form.destroy();
-        barcodeEvents.BarcodeEvents.max_time_between_keys_in_ms = delay;
-        done();
-    });
+    form.destroy();
+    barcodeEvents.BarcodeEvents.max_time_between_keys_in_ms = delay;
+    core.bus.off('barcode_scanned', null, _onBarcodeScanned)
 });
 
 QUnit.test('widget barcode_handler', async function (assert) {
