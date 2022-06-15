@@ -461,12 +461,14 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
         '''
 
         # Check the initial state of the statement line.
-        self.assertBankStatementLine(self.statement_line, self.expected_st_line,
-                                     [self.expected_counterpart_line, self.expected_bank_line])
+        self.assertBankStatementLine(self.statement_line, self.expected_st_line, [self.expected_counterpart_line, self.expected_bank_line])
 
         # Inverse the amount + change them.
-        inverse_transaction = self.create_bank_transaction(self.bank_journal_2, self.partner_a, -2000.0,
-                                                           amount_currency=-4000., currency_id=self.currency_3)
+        self.statement_line.write({
+            'amount': -2000.0,
+            'amount_currency': -4000.0,
+            'foreign_currency_id': self.currency_3.id,
+        })
 
         self.assertBankStatementLine(self.statement_line, {
             **self.expected_st_line,
@@ -491,10 +493,10 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
         ])
 
         # Check changing the label and the partner.
-        with Form(self.statement) as statement_form:
-            with statement_form.line_ids.edit(0) as st_line_form:
-                st_line_form.payment_ref = 'line_1 (bis)'
-                st_line_form.partner_id = self.partner_b
+        self.statement_line.write({
+            'payment_ref': 'line_1 (bis)',
+            'partner_id': self.partner_b.id,
+        })
 
         self.assertBankStatementLine(self.statement_line, {
             **self.expected_st_line,
@@ -629,7 +631,6 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
         )
 
         statement1 = self.env['account.bank.statement'].create({
-            'last_date': line7.date,
             'line_ids': [Command.set((line7 + line6 + line4).ids)],
         })
 

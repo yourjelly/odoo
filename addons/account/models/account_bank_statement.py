@@ -43,7 +43,7 @@ class AccountBankStatement(models.Model):
         currency_field='currency_id',
     )
     balance_end = fields.Monetary(
-        string="Computed Balance",
+        string="Ending Balance",
         currency_field='currency_id',
     )
 
@@ -121,8 +121,20 @@ class AccountBankStatement(models.Model):
             statement.currency_id = statement.journal_id.currency_id or statement.journal_id.company_id.currency_id
 
     # -------------------------------------------------------------------------
-    # BUSINESS METHODS
+    # LOW-LEVEL METHODS
     # -------------------------------------------------------------------------
+
+    @api.model
+    def default_get(self, fields_list):
+        # EXTENDS base
+        defaults = super().default_get(fields_list)
+        if 'line_ids' in fields_list \
+                and 'line_ids' not in defaults \
+                and self._context.get('active_model') == 'account.bank.statement.line' \
+                and self._context.get('active_id'):
+            active_st_line = self.env['account.bank.statement.line'].browse(self._context.get('active_id'))
+            # TODO continue to suggest the default lines/balances
+        return defaults
 
 
 class AccountBankStatementLine(models.Model):
