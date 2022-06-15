@@ -36,7 +36,7 @@ FieldViewGetDialog.props = {
 };
 FieldViewGetDialog.title = _lt("Fields View Get");
 
-function fieldsViewGet({ component, env }) {
+export function fieldsViewGet({ component, env }) {
     let { arch } = component.props;
     if ("viewInfo" in component.props) {
         //legacy
@@ -169,7 +169,7 @@ class GetMetadataDialog extends Component {
 GetMetadataDialog.template = "web.DebugMenu.GetMetadataDialog";
 GetMetadataDialog.components = { Dialog };
 
-function viewMetadata({ component, env }) {
+export function viewMetadata({ component, env }) {
     const resId = component.model.root.resId;
     if (!resId) {
         return null; // No record
@@ -310,7 +310,7 @@ class SetDefaultDialog extends Component {
 SetDefaultDialog.template = "web.DebugMenu.SetDefaultDialog";
 SetDefaultDialog.components = { Dialog };
 
-function setDefaults({ component, env }) {
+export function setDefaults({ component, env }) {
     return {
         type: "item",
         description: env._t("Set Defaults"),
@@ -329,7 +329,7 @@ debugRegistry.category("form").add("setDefaults", setDefaults);
 // Manage Attachments
 //------------------------------------------------------------------------------
 
-function manageAttachments({ component, env }) {
+export function manageAttachments({ component, env }) {
     const resId = component.model.root.resId;
     if (!resId) {
         return null; // No record
