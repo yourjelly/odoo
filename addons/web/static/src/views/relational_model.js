@@ -3138,6 +3138,7 @@ export class RelationalModel extends Model {
         this.defaultOrderBy = params.defaultOrder;
         this.handleField = params.handleField;
         this.rootType = params.rootType || "list";
+        this.initialRootState = params.rootState;
         this.rootParams = {
             activeFields: params.activeFields || {},
             fields: params.fields || {},
@@ -3202,7 +3203,7 @@ export class RelationalModel extends Model {
                 return makeContext([rootParams.context], {});
             },
         };
-        const state = this.root ? this.root.exportState() : {};
+        const state = this.root ? this.root.exportState() : this.initialRootState;
         const newRoot = this.createDataPoint(this.rootType, rootParams, state);
         await this.keepLast.add(newRoot.load({ values: this.initialValues }));
         this.root = newRoot;
