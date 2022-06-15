@@ -31,14 +31,18 @@ class AccountChartTemplate(models.Model):
                 ifrs_account_ids = [self.env.ref('l10n_sa.sa_account_100101').id,
                                     self.env.ref('l10n_sa.sa_account_100102').id,
                                     self.env.ref('l10n_sa.sa_account_400070').id]
-                ifrs_accounts = self.env['account.account'].browse([account_ref.get(id) for id in ifrs_account_ids])
+                ifrs_accounts = self.env['account.account'].browse([
+                    account_ref[id] for id in ifrs_account_ids if id in account_ref
+                ])
                 for account in ifrs_accounts:
                     account.allowed_journal_ids = [(4, ifrs_journal_id.id, 0)]
             zakat_journal_id = self.env['account.journal'].search([('company_id', '=', company.id), ('code', '=', 'ZAKAT')], limit=1)
             if zakat_journal_id:
                 zakat_account_ids = [self.env.ref('l10n_sa.sa_account_201019').id,
                                     self.env.ref('l10n_sa.sa_account_400072').id]
-                zakat_accounts = self.env['account.account'].browse([account_ref.get(id) for id in zakat_account_ids])
+                zakat_accounts = self.env['account.account'].browse([
+                    account_ref[id] for id in zakat_account_ids if id in account_ref
+                ])
                 for account in zakat_accounts:
                     account.allowed_journal_ids = [(4, zakat_journal_id.id, 0)]
         return account_ref, taxes_ref
