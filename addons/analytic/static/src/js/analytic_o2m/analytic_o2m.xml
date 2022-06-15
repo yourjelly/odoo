@@ -9,8 +9,8 @@
                     value="state.autocompleteValue"
                     autoSelect="true"
                     sources="sources"
-                    onSelect="onSelect"
-                    onInput="onInput"
+                    onSelect.bind="onSelect"
+                    onInput.bind="onInput"
                     onChange="onChange"/>
             </t>
         </div>
