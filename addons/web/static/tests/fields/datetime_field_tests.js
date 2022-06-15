@@ -724,12 +724,10 @@ QUnit.module("Fields", (hooks) => {
     });
 
     QUnit.test("datetime field: hit enter should update value", async function (assert) {
-        /*
-        This test verifies that the field datetime is correctly computed when:
-            - we press enter to validate our entry
-            - we click outside the field to validate our entry
-            - we save
-        */
+        // This test verifies that the field datetime is correctly computed when:
+        //     - we press enter to validate our entry
+        //     - we click outside the field to validate our entry
+        //     - we save
         patchTimeZone(120);
 
         registry.category("services").add(
@@ -745,7 +743,7 @@ QUnit.module("Fields", (hooks) => {
             serverData,
             type: "form",
             resModel: "partner",
-            arch: '<form string="Partners"><field name="datetime"/></form>',
+            arch: '<form><field name="datetime"/></form>',
             resId: 1,
         });
 
@@ -771,4 +769,36 @@ QUnit.module("Fields", (hooks) => {
         const { textContent } = target.querySelector(".o_field_datetime span");
         assert.strictEqual(textContent, datetimeValue);
     });
+
+    QUnit.skipWOWL(
+        "datetime field with date widget: hit enter should update value",
+        async function (assert) {
+            patchTimeZone(120);
+
+            registry
+                .category("services")
+                .add("localization", makeFakeLocalizationService({ dateFormat: "%m/%d/%Y" }), {
+                    force: true,
+                });
+
+            await makeView({
+                serverData,
+                type: "form",
+                resModel: "partner",
+                arch: '<form><field name="datetime" widget="date"/></form>',
+                resId: 1,
+            });
+
+            await click(target, ".o_form_button_edit");
+
+            await editInput(target, ".o_field_widget input", "01/08/22");
+            await triggerEvent(target, ".o_field_widget input", "keydown", { key: "Enter" });
+
+            assert.strictEqual(target.querySelector(".o_field_widget input").value, "01/08/2022");
+
+            // Click outside the field to check that the field is not changed
+            await click(target);
+            assert.strictEqual(target.querySelector(".o_field_widget input").value, "01/08/2022");
+        }
+    );
 });
