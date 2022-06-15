@@ -21,7 +21,8 @@ var BarcodeParser = Class.extend({
         if (!this.nomenclature_id) {
             return this.nomenclature ? Promise.resolve() : Promise.reject();
         }
-        var id = this.nomenclature_id[0];
+        // this.nomenclature_id is either an int, or a pair [int, str]
+        var id = Array.isArray(this.nomenclature_id) ? this.nomenclature_id[0] : this.nomenclature_id;
         return rpc.query({
                 model: 'barcode.nomenclature',
                 method: 'read',
