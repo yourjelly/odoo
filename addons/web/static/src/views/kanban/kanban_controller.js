@@ -16,7 +16,8 @@ const { Component, useRef } = owl;
 export class KanbanController extends Component {
     setup() {
         this.actionService = useService("action");
-        const { Model, resModel, fields, archInfo, limit, defaultGroupBy } = this.props;
+        const { Model, resModel, fields, archInfo, limit, defaultGroupBy, state } = this.props;
+        const { rootState } = state || {};
         this.model = useModel(Model, {
             activeFields: archInfo.activeFields,
             progressAttributes: archInfo.progressAttributes,
@@ -30,6 +31,7 @@ export class KanbanController extends Component {
             viewMode: "kanban",
             openGroupsByDefault: true,
             tooltipInfo: archInfo.tooltipInfo,
+            rootState,
         });
 
         const rootRef = useRef("root");
@@ -38,10 +40,14 @@ export class KanbanController extends Component {
             rootRef,
             getGlobalState: () => {
                 return {
-                    resIds: this.model.root.records.map((rec) => rec.resId),
+                    resIds: this.model.root.records.map((rec) => rec.resId), // WOWL: ask LPE why?
                 };
             },
-            /** TODO **/
+            getLocalState: () => {
+                return {
+                    rootState: this.model.root.exportState(),
+                };
+            },
         });
         usePager(() => {
             if (!this.model.root.isGrouped) {

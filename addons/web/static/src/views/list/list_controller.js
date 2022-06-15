@@ -53,6 +53,7 @@ export class ListController extends Component {
         this.multiEdit = this.archInfo.multiEdit;
         this.activeActions = this.archInfo.activeActions;
         const fields = this.props.fields;
+        const { rootState } = this.props.state || {};
         this.model = useModel(this.props.Model, {
             resModel: this.props.resModel,
             fields,
@@ -66,6 +67,7 @@ export class ListController extends Component {
             expand: this.archInfo.expand,
             groupsLimit: this.archInfo.groupsLimit,
             multiEdit: this.multiEdit,
+            rootState,
         });
 
         onWillStart(async () => {
@@ -82,7 +84,6 @@ export class ListController extends Component {
         useViewButtons(this.model, this.rootRef);
         useSetupView({
             rootRef: this.rootRef,
-            /** TODO **/
             beforeLeave: async () => {
                 const editedRecord = this.model.root.editedRecord;
                 if (editedRecord) {
@@ -96,6 +97,11 @@ export class ListController extends Component {
                 if (editedRecord) {
                     return editedRecord.urgentSave();
                 }
+            },
+            getLocalState: () => {
+                return {
+                    rootState: this.model.root.exportState(),
+                };
             },
         });
 
