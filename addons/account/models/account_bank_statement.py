@@ -129,7 +129,7 @@ class AccountBankStatementLine(models.Model):
     _name = "account.bank.statement.line"
     _inherits = {'account.move': 'move_id'}
     _description = "Bank Statement Line"
-    _order = "statement_name desc, date desc, sequence, id desc"
+    _order = "date desc, sequence, statement_id desc, id desc"
     _check_company_auto = True
 
     @api.model
@@ -162,7 +162,6 @@ class AccountBankStatementLine(models.Model):
         string='Statement',
         index=True,
     )
-    statement_name = fields.Char(related='statement_id.name', store=True)
 
     sequence = fields.Integer(help="Gives the sequence order when displaying a list of bank statement lines.", default=1)
     account_number = fields.Char(string='Bank Account Number', help="Technical field used to store the bank account number before its creation, upon the line's processing")

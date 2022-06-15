@@ -10,7 +10,7 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
-
+# TODO:poma make a populate factory for the stateement lines
 class AccountBankStatement(models.Model):
     """Populate factory part for account.bank.statements."""
 
@@ -35,7 +35,7 @@ class AccountBankStatement(models.Model):
         return [
             ('journal_id', populate.iterate(journal_ids)),
             ('name', populate.constant('statement_{counter}')),
-            ('date', populate.randdatetime(relative_before=relativedelta(years=-4))),
+            ('last_date', populate.randdatetime(relative_before=relativedelta(years=-4))),
         ]
 
 
