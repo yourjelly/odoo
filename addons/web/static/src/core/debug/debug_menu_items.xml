@@ -30,14 +30,7 @@
                     <td>
                         <select id="formview_default_conditions" class="o_input" t-model="state.condition">
                             <option value=""/>
-<<<<<<< HEAD
                             <option t-foreach="conditions" t-as="cond" t-att-value="cond.name + '=' + cond.value" t-key="cond.name">
-||||||| parent of c4f3606ce93a (adapt set defaults debug item + make debug items work in legacy)
-                            <option t-foreach="conditions" t-as="cond"
-                                    t-att-value="cond.name + '=' + cond.value">
-=======
-                            <option t-foreach="conditions" t-as="cond" t-att-value="cond.name + '=' + cond.value" t-key="cond_index">
->>>>>>> c4f3606ce93a (adapt set defaults debug item + make debug items work in legacy)
                                 <t t-esc="cond.string"/>=<t t-esc="cond.displayed"/>
                             </option>
                         </select>
