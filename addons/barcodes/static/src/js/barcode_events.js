@@ -26,13 +26,10 @@ var BarcodeEvents = core.Class.extend({
     inputTimeOut: 800,
 
     init: function() {
-        // Keep a reference of the handler functions to use when adding and removing event listeners
-        this.__keydown_handler = _.bind(this.keydown_handler, this);
-        this.__keyup_handler = _.bind(this.keyup_handler, this);
         this.__handler = _.bind(this.handler, this);
         // Bind event handler once the DOM is loaded
         // TODO: find a way to be active only when there are listeners on the bus
-        $(_.bind(this.start, this, false));
+        $(() => this.start());
 
         // Mobile device detection
         this.isChromeMobile = config.device.isMobileDevice && navigator.userAgent.match(/Chrome/i);
@@ -131,21 +128,6 @@ var BarcodeEvents = core.Class.extend({
         } else {
             return false;
         }
-    },
-
-    // The keydown and keyup handlers are here to disallow key
-    // repeat. When preventDefault() is called on a keydown event
-    // the keypress that normally follows is cancelled.
-    keydown_handler: function(e){
-        if (this.key_pressed[e.which]) {
-            e.preventDefault();
-        } else {
-            this.key_pressed[e.which] = true;
-        }
-    },
-
-    keyup_handler: function(e){
-        this.key_pressed[e.which] = false;
     },
 
     handler: function(e){
@@ -250,7 +232,7 @@ var BarcodeEvents = core.Class.extend({
         this.$barcodeInput.val('').blur();
     },
 
-    start: function(prevent_key_repeat){
+    start: function(){
         // Chrome Mobile isn't triggering keypress event.
         // This is marked as Legacy in the DOM-Level-3 Standard.
         // See: https://www.w3.org/TR/uievents/#legacy-keyboardevent-event-types
@@ -262,16 +244,10 @@ var BarcodeEvents = core.Class.extend({
         } else {
             $('body').bind("keypress", this.__handler);
         }
-        if (prevent_key_repeat === true) {
-            $('body').bind("keydown", this.__keydown_handler);
-            $('body').bind('keyup', this.__keyup_handler);
-        }
     },
 
     stop: function(){
         $('body').off("keypress", this.__handler);
-        $('body').off("keydown", this.__keydown_handler);
-        $('body').off('keyup', this.__keyup_handler);
     },
 });
 
