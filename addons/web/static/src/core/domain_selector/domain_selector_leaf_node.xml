@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="web.DomainSelectorLeafNode" owl="1">
-        <div class="o_domain_node o_domain_leaf o_domain_selector_row">
+        <div class="o_domain_node o_domain_leaf o_domain_selector_row" t-ref="root">
             <t t-if="props.readonly">
                 <div class="o_domain_leaf_info">
                     <ModelFieldSelector fieldName="props.node.operands[0]" resModel="props.resModel" readonly="props.readonly" isDebugMode="props.isDebugMode" />
