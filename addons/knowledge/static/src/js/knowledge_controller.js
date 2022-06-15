@@ -5,6 +5,7 @@ import Dialog from 'web.Dialog';
 import FormController from 'web.FormController';
 import { MoveArticleToDialog } from './widgets/knowledge_dialogs.js';
 import emojis from '@mail/js/emojis';
+import { sprintf } from '@web/core/utils/strings';
 
 const disallowedEmojis = ['💩', '👎', '💔', '😭', '😢', '😐', '😕', '😞', '😢', '💀'];
 const emojisRandomPickerSource = emojis.filter(emoji => !disallowedEmojis.includes(emoji.unicode));
@@ -318,7 +319,7 @@ const KnowledgeArticleFormController = FormController.extend({
      */
     _confirmMove: async function (data) {
         data['params'] = {
-            is_private: data.newCategory === 'private'
+            category: data.newCategory,
         };
         if (typeof data.target_parent_id !== 'undefined') {
             data['params'].parent_id = data.target_parent_id;
@@ -329,13 +330,22 @@ const KnowledgeArticleFormController = FormController.extend({
         if (data.newCategory === data.oldCategory) {
             await this._move(data);
         } else {
-            let message, confirmation_message;
+            let message, confirmation_message, cancel_message;
             if (data.newCategory === 'workspace') {
                 message = _t("Are you sure you want to move this article to the Workspace? It will be shared with all internal users.");
                 confirmation_message = _t("Move to Workspace");
+                cancel_message = _t("Discard");
             } else if (data.newCategory === 'private') {
                 message = _t("Are you sure you want to move this to private? Only you will be able to access it.");
                 confirmation_message = _t("Set as Private");
+                cancel_message = _t("Discard");
+            } else if (data.newCategory === 'shared' && data.target_parent_id) {
+                const article = document.querySelector(`[data-article-id='${data.target_parent_id}']`);
+                const emoji = article.querySelector('.o_article_emoji').textContent || '';
+                const name = article.querySelector('.o_article_name').textContent || '';
+                message = sprintf(_t('Are you sure you want to move this under %s%s? By default it will be shared with the same persons.'), emoji, name);
+                confirmation_message = _t("Confirm");
+                cancel_message = _t("Cancel");
             }
             Dialog.confirm(this, message, {
                 cancel_callback: data.onReject,
@@ -347,7 +357,7 @@ const KnowledgeArticleFormController = FormController.extend({
                         await this._move(data);
                     }
                 }, {
-                    text: _t("Discard"),
+                    text: cancel_message,
                     close: true,
                     click: data.onReject,
                 }],

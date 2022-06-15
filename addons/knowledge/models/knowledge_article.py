@@ -737,37 +737,48 @@ class Article(models.Model):
     # SEQUENCE / ORDERING
     # ------------------------------------------------------------
 
-    def move_to(self, parent_id=False, before_article_id=False, is_private=False):
+    def move_to(self, parent_id=False, before_article_id=False, category=False):
         """ Move an article in the tree.
 
         :param int parent_id: id of an article that will be the new parent;
         :param int before_article_id: id of an article before which the article
           should be moved. Otherwise it is put as last parent children;
-        :param bool is_private: set as private;
+        :param str category: target category ('workspace', 'private', 'shared')
+          can be omitted if the destination can be deduced from parent_id or
+          before_article_id;
         """
         self.ensure_one()
         parent = self.browse(parent_id) if parent_id else self.env['knowledge.article']
         before_article = self.browse(before_article_id)
+        category = parent.category if parent else before_article.category if before_article else category
+        if not category:
+            raise ValidationError(
+                _("Move to target is ambiguous, you should specify the category")
+            )
+        elif category == 'shared' and not parent and (self.parent_id or self.category != 'shared'):
+            raise ValidationError(
+                _("Cannot move an article as a root of the 'shared' section unless it is already one")
+            )
 
         values = {'parent_id': parent_id}
         if before_article:
             values['sequence'] = before_article.sequence
-        if not parent_id:
+        if not parent_id and category != 'shared':
             # be sure to have an internal permission on the article if moved outside
             # of an hierarchy
             values.update({
-                'internal_permission': 'none' if is_private else 'write',
+                'internal_permission': 'none' if category == 'private' else 'write',
                 'is_desynchronized': False
             })
 
         # if set as standalone private: remove members, ensure current user is the
         # only member -> require sudo to bypass member ACLs
-        if not parent and is_private:
+        if not parent and category == 'private':
             # explicitly check for rights before going into sudo
             try:
                 self.check_access_rights('write')
                 (self + parent).check_access_rule('write')
-            except:
+            except AccessError:
                 raise AccessError(
                     _("You are not allowed to move this article under article %(parent_name)s",
                       parent_name=parent.display_name)

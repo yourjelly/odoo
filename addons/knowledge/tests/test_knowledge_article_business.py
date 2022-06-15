@@ -433,7 +433,7 @@ class TestKnowledgeArticleBusiness(KnowledgeCommonWData):
             article_shared[0].move_to(parent_id=article_workspace.id)
         with self.assertRaises(exceptions.AccessError,
                                msg='Cannot move a readonly article (even out of any hierarchy)'):
-            article_shared[0].move_to(parent_id=False)
+            article_shared[0].move_to(category='workspace')
 
         # valid move: put second child of workspace under the first one
         workspace_children[1].move_to(parent_id=workspace_children[0].id)
@@ -449,7 +449,7 @@ class TestKnowledgeArticleBusiness(KnowledgeCommonWData):
         self.assertTrue(workspace_children[0].is_desynchronized)
 
         # other valid move: first child is moved to private section
-        workspace_children[0].move_to(parent_id=False, is_private=True)
+        workspace_children[0].move_to(category='private')
         workspace_children.flush_model()
         self.assertMembers(workspace_children[0], 'none', {self.partner_employee: 'write'})
         self.assertEqual(workspace_children[0].category, 'private')
