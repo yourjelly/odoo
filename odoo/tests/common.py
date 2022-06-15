@@ -935,7 +935,6 @@ class ChromeBrowser:
                 if os.path.exists(bin_):
                     return bin_
 
-        self._logger.warning("Chrome executable not found")
         raise unittest.SkipTest("Chrome executable not found")
 
     def _spawn_chrome(self, cmd):
