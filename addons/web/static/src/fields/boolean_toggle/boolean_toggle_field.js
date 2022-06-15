@@ -7,14 +7,7 @@ import { CheckBox } from "@web/core/checkbox/checkbox";
 
 const { Component } = owl;
 
-export class BooleanToggleField extends Component {
-    /**
-     * @param {boolean} newValue
-     */
-    onChange(newValue) {
-        this.props.update(newValue);
-    }
-}
+export class BooleanToggleField extends Component {}
 
 BooleanToggleField.template = "web.BooleanToggleField";
 BooleanToggleField.components = { CheckBox };
