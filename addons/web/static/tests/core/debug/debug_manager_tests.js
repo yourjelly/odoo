@@ -27,8 +27,7 @@ import {
 } from "../../helpers/utils";
 import { createWebClient, doAction, getActionManagerServerData } from "../../webclient/helpers";
 import { openViewItem } from "@web/webclient/debug_items";
-import { editSearchView, editView } from "@web/views/debug_items";
-import { setDefaults } from "@web/legacy/debug_manager";
+import { editSearchView, editView, setDefaults } from "@web/views/debug_items";
 
 const { Component, xml } = owl;
 
