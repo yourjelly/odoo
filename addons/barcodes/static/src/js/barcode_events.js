@@ -53,7 +53,7 @@ var BarcodeEvents = core.Class.extend({
     },
 
     handle_buffered_keys: function() {
-        var str = this.buffered_key_events.reduce(function(memo, e) { return memo + String.fromCharCode(e.which) }, '');
+        var str = this.buffered_key_events.reduce(function(memo, e) { return memo + e.key }, '');
         var match = str.match(this.regexp);
 
         if (match) {
@@ -86,6 +86,7 @@ var BarcodeEvents = core.Class.extend({
             e.key === "Backspace" || e.key === "Delete" ||
             e.key === "Home" || e.key === "End" ||
             e.key === "PageUp" || e.key === "PageDown" ||
+            e.key === "Shift" ||
             e.key === "Unidentified" || /F\d\d?/.test(e.key)) {
             return true;
         } else {
@@ -112,7 +113,9 @@ var BarcodeEvents = core.Class.extend({
             return;
 
         // Catch and buffer the event
-        this.buffered_key_events.push(e);
+        if (e.key !== "Enter") {
+            this.buffered_key_events.push(e);
+        }
 
         // Handle buffered keys immediately if the keypress marks the end
         // of a barcode or after x milliseconds without a new keypress
@@ -200,12 +203,12 @@ var BarcodeEvents = core.Class.extend({
         if (this.isChromeMobile) {
             $('body').on("keydown", this._listenBarcodeScanner.bind(this));
         } else {
-            $('body').bind("keypress", this.__handler);
+            $('body').bind("keydown", this.__handler);
         }
     },
 
     stop: function(){
-        $('body').off("keypress", this.__handler);
+        $('body').off("keydown", this.__handler);
     },
 });
 
