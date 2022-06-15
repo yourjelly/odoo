@@ -5340,6 +5340,7 @@ class BaseModel(metaclass=MetaModel):
             ids = (ids,)
         else:
             ids = tuple(ids)
+            assert all(isinstance(id_, IdType) for id_ in ids), f"Invalid ids {ids} in browse()"
         return self.__class__(self.env, ids, ids)
 
     #
