@@ -33,7 +33,7 @@ export class CheckBox extends Component {
     }
 
     onClick(ev) {
-        if (["INPUT", "LABEL"].includes(ev.target.tagName)) {
+        if (ev.composedPath().find((el) => ["INPUT", "LABEL"].includes(el.tagName))) {
             // The onChange will handle these cases.
             return;
         }
@@ -43,7 +43,6 @@ export class CheckBox extends Component {
         if (!this.props.disabled) {
             input.checked = !input.checked;
         }
-
         this.props.onChange(input.checked);
     }
 
