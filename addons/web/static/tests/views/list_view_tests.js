@@ -53,6 +53,8 @@ import {
 import { createWebClient, doAction, loadState } from "../webclient/helpers";
 import { makeView, setupViewRegistries } from "./helpers";
 import { getNextTabableElement } from "@web/core/utils/ui";
+import { TextField } from "@web/fields/text/text_field";
+import { registerCleanup } from "../helpers/cleanup";
 
 const { markup, onWillStart } = owl;
 
@@ -10015,6 +10017,13 @@ QUnit.module("Views", (hooks) => {
         "editable form alongside html field: click out to unselect the row",
         async function (assert) {
             assert.expect(5);
+
+            // FIXME WOWL hack: add back the text field as html field removed by web_editor html_field file
+            if (registry.category("fields").contains("html")) {
+                throw new Error("Time to remove this hack!");
+            }
+            registry.category("fields").add("html", TextField);
+            registerCleanup(() => registry.category("fields").remove("html"));
 
             await makeView({
                 type: "form",
