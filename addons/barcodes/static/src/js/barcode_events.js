@@ -33,27 +33,17 @@ var BarcodeEvents = core.Class.extend({
 
         // Mobile device detection
         this.isChromeMobile = config.device.isMobileDevice && navigator.userAgent.match(/Chrome/i);
+    },
 
-        // Creates an input who will receive the barcode scanner value.
-        this.$barcodeInput = $('<input/>', {
-            name: 'barcode',
-            type: 'text',
-            css: {
-                'position': 'fixed',
-                'top': '50%',
-                'transform': 'translateY(-50%)',
-                'z-index': '-1',
-                'opacity': '0',
-            },
-        });
-        // Avoid to show autocomplete for a non appearing input
-        this.$barcodeInput.attr('autocomplete', 'off');
-
-        this.__blurBarcodeInput = _.debounce(this._blurBarcodeInput, this.inputTimeOut);
+    getCurrentString() {
+        if (this.$barcodeInput) {
+            return this.$barcodeInput.val();
+        }
+        return this.buffered_key_events.reduce(function(memo, e) { return memo + e.key }, '');
     },
 
     handle_buffered_keys: function() {
-        var str = this.buffered_key_events.reduce(function(memo, e) { return memo + e.key }, '');
+        let str = this.getCurrentString();
         var match = str.match(this.regexp);
 
         if (match) {
@@ -96,21 +86,20 @@ var BarcodeEvents = core.Class.extend({
 
     handler: function(e){
         // Don't catch non-printable keys for which Firefox triggers a keypress
-        if (this.is_special_key(e))
+        if (this.is_special_key(e)) {
             return;
+        }
         // Don't catch keypresses which could have a UX purpose (like shortcuts)
-        if (e.ctrlKey || e.metaKey || e.altKey)
+        if (e.ctrlKey || e.metaKey || e.altKey) {
             return;
-        // Don't catch Return when nothing is buffered. This way users
-        // can still use Return to 'click' on focused buttons or links.
-        if (e.which === 13 && this.buffered_key_events.length === 0)
-            return;
+        }
         // Don't catch events targeting elements that are editable because we
         // have no way of redispatching 'genuine' key events. Resent events
         // don't trigger native event handlers of elements. So this means that
         // our fake events will not appear in eg. an <input> element.
-        if ((this.element_is_editable(e.target) && !$(e.target).data('enableBarcode')) && e.target.getAttribute("barcode_events") !== "true")
+        if ((this.element_is_editable(e.target) && !$(e.target).data('enableBarcode')) && e.target.getAttribute("barcode_events") !== "true") {
             return;
+        }
 
         // Catch and buffer the event
         if (e.key !== "Enter") {
@@ -146,37 +135,12 @@ var BarcodeEvents = core.Class.extend({
     _listenBarcodeScanner: function (e) {
         if ($(document.activeElement).not('input:text, textarea, [contenteditable], ' +
             '[type="email"], [type="number"], [type="password"], [type="tel"], [type="search"]').length) {
-            $('body').append(this.$barcodeInput);
             this.$barcodeInput.focus();
         }
         if (this.$barcodeInput.is(":focus")) {
-            // Handle buffered keys immediately if the keypress marks the end
-            // of a barcode or after x milliseconds without a new keypress.
-            clearTimeout(this.timeout);
-            // On chrome mobile, e.which only works for some special characters like ENTER or TAB.
-            if (String.fromCharCode(e.which).match(this.suffix)) {
-                this._handleBarcodeValue(e);
-            } else {
-                this.timeout = setTimeout(this._handleBarcodeValue.bind(this, e),
-                    this.max_time_between_keys_in_ms);
-            }
+            this.handler(e);
             // if the barcode input doesn't receive keydown for a while, remove it.
             this.__blurBarcodeInput();
-        }
-    },
-
-    /**
-     * Retrieves the barcode value from the temporary input element.
-     * This checks this value and trigger it on the bus.
-     *
-     * @private
-     * @param  {jQuery.Event} keydown event
-     */
-    _handleBarcodeValue: function (e) {
-        var barcodeValue = this.$barcodeInput.val();
-        if (barcodeValue.match(this.regexp)) {
-            core.bus.trigger('barcode_scanned', barcodeValue, $(e.target).parent()[0]);
-            this._blurBarcodeInput();
         }
     },
 
@@ -201,6 +165,27 @@ var BarcodeEvents = core.Class.extend({
         // all other cases.
         // In master, we could remove the behavior with keypress and only use keydown.
         if (this.isChromeMobile) {
+            // Creates an input who will receive the barcode scanner value.
+            this.$barcodeInput = $('<input/>', {
+                name: 'barcode',
+                type: 'text',
+                css: {
+                    'position': 'fixed',
+                    'top': '50%',
+                    'transform': 'translateY(-50%)',
+                    'z-index': '-1',
+                    'opacity': '0',
+                },
+            });
+            // Avoid to show autocomplete for a non appearing input
+            this.$barcodeInput.attr('autocomplete', 'off');
+
+            this.__blurBarcodeInput = _.debounce(this._blurBarcodeInput, this.inputTimeOut);
+
+
+            $('body').append(this.$barcodeInput);
+            core.bus.on('barcode_scanned', null, () => this._blurBarcodeInput());
+
             $('body').on("keydown", this._listenBarcodeScanner.bind(this));
         } else {
             $('body').bind("keydown", this.__handler);
