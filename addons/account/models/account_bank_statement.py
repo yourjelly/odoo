@@ -19,7 +19,12 @@ class AccountBankStatement(models.Model):
     )
     currency_id = fields.Many2one(
         comodel_name='res.currency',
-        compute='_compute_currency_id',
+        compute='_compute_journal_id_and_currency_id',
+        store=True,
+    )
+    journal_id = fields.Many2one(
+        comodel_name='account.journal',
+        compute='_compute_journal_id_and_currency_id',
         store=True,
     )
     last_date = fields.Date(
@@ -40,6 +45,14 @@ class AccountBankStatement(models.Model):
     balance_end = fields.Monetary(
         string="Computed Balance",
         currency_field='currency_id',
+    )
+
+    is_difference_zero = fields.Boolean(
+        compute='_compute_is_difference_zero',
+    )
+
+    attachment_id = fields.Many2one(
+        comodel_name='ir.attachment',
     )
 
     # -------------------------------------------------------------------------
@@ -89,15 +102,23 @@ class AccountBankStatement(models.Model):
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
 
+    def _compute_is_difference_zero(self):
+        for statement in self:
+            last_statement_balance_end = self.search([('last_date', '<', statement.last_date),
+                                                      ('journal_id', '=', statement.journal_id.id)],
+                                                     limit=1).balance_end
+            statement.is_difference_zero = statement.currency_id and statement.currency_id.is_zero(last_statement_balance_end - statement.balance_start)
+
     @api.depends('line_ids.date')
     def _compute_last_date(self):
         for statement in self:
             statement.last_date = statement.line_ids.sorted()[:1].date
 
     @api.depends('line_ids.journal_id')
-    def _compute_currency_id(self):
+    def _compute_journal_id_and_currency_id(self):
         for statement in self:
-            statement.currency_id = statement.line_ids[:1].journal_id.currency_id
+            statement.journal_id = statement.line_ids[:1].journal_id
+            statement.currency_id = statement.journal_id.currency_id or statement.journal_id.company_id.currency_id
 
     # -------------------------------------------------------------------------
     # BUSINESS METHODS
@@ -108,8 +129,18 @@ class AccountBankStatementLine(models.Model):
     _name = "account.bank.statement.line"
     _inherits = {'account.move': 'move_id'}
     _description = "Bank Statement Line"
-    _order = "statement_id desc, date, sequence, id desc"
+    _order = "statement_name desc, date desc, sequence, id desc"
     _check_company_auto = True
+
+    @api.model
+    def default_get(self, fields_list):
+        # OVERRIDE
+        defaults = super().default_get(fields_list)
+        if 'journal_id' in fields_list:
+            defaults['statement_id'] = self.env['account.bank.statement'].search(
+                [('journal_id', '=', defaults['journal_id'])], limit=1
+            ).id
+        return defaults
 
     def _get_default_journal(self):
         ''' Retrieve the default journal for the account.payment.
@@ -131,6 +162,7 @@ class AccountBankStatementLine(models.Model):
         string='Statement',
         index=True,
     )
+    statement_name = fields.Char(related='statement_id.name', store=True)
 
     sequence = fields.Integer(help="Gives the sequence order when displaying a list of bank statement lines.", default=1)
     account_number = fields.Char(string='Bank Account Number', help="Technical field used to store the bank account number before its creation, upon the line's processing")
@@ -385,7 +417,7 @@ class AccountBankStatementLine(models.Model):
             return
 
         record_by_id = {st_line._origin.id: st_line for st_line in self}
-        domain = [('journal_id', 'in', tuple(journal_ids))]
+        domain = [('journal_id', 'in', tuple(journal_ids)), ('state', '!=', 'cancel')]
         query = self._where_calc(domain)
         tables, where_clause, where_params = query.get_sql()
         order_by = ', '.join(self._generate_order_by_inner(
@@ -395,8 +427,8 @@ class AccountBankStatementLine(models.Model):
             reverse_direction=True,
         ))
 
-        self.statement_id.flush(['last_date', 'date'])
-        self.flush(['amount', 'date', 'journal_id', 'statement_id'])
+        self.statement_id.flush_recordset(['last_date'])
+        self.flush_recordset(['amount', 'date', 'journal_id', 'statement_id'])
         self._cr.execute(f'''
             SELECT
                 *
