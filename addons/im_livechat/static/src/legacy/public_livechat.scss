@@ -14,7 +14,6 @@ $o-mail-thread-window-zindex: $zindex-modal + 1 !default;
     height: 400px;
     max-height: 100%;
     font-size: 12px;
-    background-color: $o-mail-thread-window-bg;
     border-radius: 6px 6px 0 0;
     z-index: $o-mail-thread-window-zindex;
     box-shadow: -5px -5px 10px rgba(black, 0.18);
@@ -112,9 +111,6 @@ $o-mail-thread-window-zindex: $zindex-modal + 1 !default;
 
         .o_thread_date_separator {
             margin: 0px 0px 15px 0px;
-            .o_thread_date {
-                background-color: $o-mail-thread-window-bg;
-            }
         }
         .o_thread_message {
             padding: 4px 5px;

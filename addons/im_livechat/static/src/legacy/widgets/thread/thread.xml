@@ -109,7 +109,7 @@
         <t t-set="current_day" t-value="0"/>
         <t t-foreach="messages" t-as="message">
             <div t-if="current_day !== message.getDateDay()" class="o_thread_date_separator">
-                <span class="o_thread_date">
+                <span class="o_thread_date bg-white">
                     <t t-esc="message.getDateDay()"/>
                 </span>
                 <t t-set="current_day" t-value="message.getDateDay()"/>
