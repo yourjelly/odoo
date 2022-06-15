@@ -3,10 +3,9 @@ odoo.define('barcodes.BarcodeEvents', function(require) {
 
 var config = require('web.config');
 var core = require('web.core');
-var mixins = require('web.mixins');
 var session = require('web.session');
 
-var BarcodeEvents = core.Class.extend(mixins.PropertiesMixin, {
+var BarcodeEvents = core.Class.extend({
     timeout: null,
     key_pressed: {},
     buffered_key_events: [],
@@ -27,7 +26,6 @@ var BarcodeEvents = core.Class.extend(mixins.PropertiesMixin, {
     inputTimeOut: 800,
 
     init: function() {
-        mixins.PropertiesMixin.init.call(this);
         // Keep a reference of the handler functions to use when adding and removing event listeners
         this.__keydown_handler = _.bind(this.keydown_handler, this);
         this.__keyup_handler = _.bind(this.keyup_handler, this);
