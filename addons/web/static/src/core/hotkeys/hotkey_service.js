@@ -196,7 +196,8 @@ export const hotkeyService = {
                     (reg.bypassEditableProtection || !shouldProtectEditable) &&
                     (reg.global || reg.activeElement === activeElement) &&
                     (!reg.validate || reg.validate(target)) &&
-                    (!reg.area || (reg.area() && reg.area().contains(target)))
+                    (!reg.area ||
+                        (target instanceof Node && reg.area() && reg.area().contains(target)))
             );
 
             // Search the closest from target
