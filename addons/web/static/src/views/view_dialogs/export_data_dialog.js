@@ -19,34 +19,28 @@ DeleteExportListDialog.template = "web.DeleteExportListDialog";
 
 class ExportDataItem extends Component {
     setup() {
+        this.subFields = [];
         this.state = useState({
             isExpanded: false,
-            subFields: [],
         });
-    }
-
-    get formattedName() {
-        if (!this.props.field.parent) return this.props.field.string;
-        const path = this.props.field.string.split("/");
-        return this.props.field.parent.string.concat("/", path.pop());
     }
 
     async onClick(ev) {
         if (this.props.isFieldExpandable(this.props.field)) {
-            this.state.subFields = await this.props.onClick(ev);
+            this.subFields = await this.props.onClick(ev);
             this.state.isExpanded = this.props.isFieldExpanded(this.props.field.name);
         }
     }
 
     isFieldSelected(current) {
-        return this.props.exportedFields.find(({ name }) => name === current);
+        return this.props.exportList.find(({ name }) => name === current);
     }
 }
 ExportDataItem.template = "web.ExportDataItem";
 ExportDataItem.components = { ExportDataItem };
 ExportDataItem.props = {
     field: { type: Object, optional: true },
-    exportedFields: { type: Object, optional: true },
+    exportList: { type: Object, optional: true },
     expandedContent: Function,
     isFieldExpanded: Function,
     isFieldExpandable: Function,
@@ -65,18 +59,18 @@ export class ExportDataDialog extends Component {
         this.exportListRef = useRef("exportList");
         this.searchRef = useRef("search");
 
-        this.fieldsAvailableAll = {};
+        this.knownFields = {};
         this.expandedFields = {};
         this.availableFormats = [];
         this.templates = [];
 
         this.state = useState({
-            selectedFormat: 0,
-            compatible: false,
-            templateId: null,
-            exportedFields: [],
+            exportList: [],
+            isCompatible: false,
             isEditingTemplate: false,
             search: [],
+            selectedFormat: 0,
+            templateId: null,
         });
 
         this.title = this.env._t("Export Data");
@@ -94,7 +88,7 @@ export class ExportDataDialog extends Component {
                 const indexes = [element, previous, next].map(
                     (e) =>
                         e &&
-                        Object.values(this.state.exportedFields).findIndex(
+                        Object.values(this.state.exportList).findIndex(
                             ({ name }) => name === e.dataset.field_id
                         )
                 );
@@ -102,7 +96,7 @@ export class ExportDataDialog extends Component {
                 if (indexes[0] < indexes[1]) {
                     target = previous ? indexes[1] : 0;
                 } else {
-                    target = next ? indexes[2] : this.state.exportedFields.length - 1;
+                    target = next ? indexes[2] : this.state.exportList.length - 1;
                 }
                 this.onDraggingEnd([indexes[0], target]);
             },
@@ -126,28 +120,28 @@ export class ExportDataDialog extends Component {
         if (this.searchRef.el && this.searchRef.el.value) {
             return this.state.search.length && Object.values(this.state.search);
         }
-        return Object.values(this.fieldsAvailableAll);
+        return Object.values(this.knownFields);
     }
 
     get rootFields() {
         return this.fieldsAvailable.filter(({ parent }) => !parent);
     }
 
-    handleTemplateEdition() {
-        if (this.state.templateId && !this.state.isEditingTemplate) {
-            this.state.isEditingTemplate = true;
-        }
+    /**
+     * Load fields to display and (re)set the list of available fields
+     */
+    async fetchFields() {
+        this.state.search = [];
+        this.searchRef.el.value = "";
+        this.knownFields = {};
+        await this.loadFields();
+        this.setDefaultExportList();
+        this.state.templateId && this.loadExportList(this.state.templateId);
     }
 
-    defaultExportedFields() {
-        if (this.state.compatible) {
-            this.state.exportedFields = this.state.exportedFields.filter(
-                ({ name }) => this.fieldsAvailableAll[name]
-            );
-        } else {
-            this.state.exportedFields = Object.values(this.fieldsAvailableAll).filter(
-                ({ name }) => name && this.props.root.activeFields[name]
-            );
+    enterTemplateEdition() {
+        if (this.state.templateId && !this.state.isEditingTemplate) {
+            this.state.isEditingTemplate = true;
         }
     }
 
@@ -173,34 +167,72 @@ export class ExportDataDialog extends Component {
             model: this.props.root.resModel,
             export_id: Number(value),
         });
-        this.state.exportedFields = fields;
+        this.state.exportList = fields;
+    }
+
+    async loadFields(id) {
+        let model = this.props.root.resModel;
+        let parentField, parentParams;
+        if (id) {
+            if (this.expandedFields[id]) {
+                // we don't make a new RPC if the value is already known
+                this.expandedFields[id].hidden = !this.expandedFields[id].hidden;
+                return this.expandedFields[id].fields;
+            }
+            parentField = this.knownFields[id];
+            model = parentField.params && parentField.params.model;
+            parentParams = {
+                ...parentField.params,
+                parent_field_type: parentField.field_type,
+                parent_field: parentField,
+                parent_name: parentField.string,
+                exclude: [parentField.relation_field],
+            };
+        }
+        const fields = await this.props.getExportedFields(
+            model,
+            this.state.isCompatible,
+            parentParams
+        );
+        for (const field of fields) {
+            field.name = field.id;
+            field.label = field.string;
+            field.parent = parentField;
+            if (!this.knownFields[field.id]) {
+                this.knownFields[field.id] = field;
+            }
+        }
+        if (id) {
+            this.expandedFields[id] = { fields };
+        }
+        return fields;
     }
 
     onDraggingEnd([item, target]) {
-        this.state.exportedFields.splice(target, 0, this.state.exportedFields.splice(item, 1)[0]);
+        this.state.exportList.splice(target, 0, this.state.exportList.splice(item, 1)[0]);
     }
 
     onAddItemExportList(ev) {
         const field = ev.target.closest(".o_export_tree_item").dataset.field_id;
-        this.state.exportedFields.push(this.fieldsAvailableAll[field]);
+        this.state.exportList.push(this.knownFields[field]);
         this.state.search = [];
         this.searchRef.el.value = "";
-        this.handleTemplateEdition();
+        this.enterTemplateEdition();
     }
 
     onRemoveItemExportList(ev) {
-        const item = this.state.exportedFields.findIndex(
+        const item = this.state.exportList.findIndex(
             ({ name }) => name === ev.target.parentElement.dataset.field_id
         );
-        this.state.exportedFields.splice(item, 1);
-        this.handleTemplateEdition();
+        this.state.exportList.splice(item, 1);
+        this.enterTemplateEdition();
     }
 
     async onChangeExportList(ev) {
         this.loadExportList(ev.target.value);
     }
 
-    async onSaveExportListEdition() {
+    async onSaveExportTemplate() {
         const name = this.exportListRef.el.value;
         if (!name) {
             return this.notification.add(this.env._t("Please enter save field list name"), {
@@ -211,7 +243,7 @@ export class ExportDataDialog extends Component {
             "ir.exports",
             {
                 name,
-                export_fields: this.state.exportedFields.map((field) => [
+                export_fields: this.state.exportList.map((field) => [
                     0,
                     0,
                     {
@@ -227,72 +259,15 @@ export class ExportDataDialog extends Component {
         this.templates.push({ id, name });
     }
 
-    onClearExportListEdition() {
+    onCancelExportTemplate() {
         if (this.state.templateId === "new_template") {
             return (this.state.templateId = null);
         }
         this.loadExportList(this.state.templateId);
     }
 
-    async onCompatibleDataChange(value) {
-        this.state.compatible = value;
-        await this.fetchFields();
-    }
-
-    async onSearch(ev) {
-        this.state.search = fuzzyLookup(
-            ev.target.value,
-            this.fieldsAvailable || Object.values(this.fieldsAvailableAll),
-            (field) => field.string
-        );
-    }
-
-    async loadFields(id) {
-        let model = this.props.root.resModel;
-        let parentField, parentParams;
-        if (id) {
-            if (this.expandedFields[id]) {
-                // we don't make a new RPC if the value is already known
-                this.expandedFields[id].hidden = !this.expandedFields[id].hidden;
-                return this.expandedFields[id].fields;
-            }
-            parentField = this.fieldsAvailableAll[id];
-            model = parentField.params && parentField.params.model;
-            parentParams = {
-                ...parentField.params,
-                parent_field_type: parentField.field_type,
-                parent_field: parentField,
-                parent_name: parentField.string,
-                exclude: [parentField.relation_field],
-            };
-        }
-        const fields = await this.props.getExportedFields(
-            model,
-            this.state.compatible,
-            parentParams
-        );
-        for (const field of fields) {
-            field.name = field.id;
-            field.label = field.string;
-            field.parent = parentField;
-        }
-        if (id) {
-            this.expandedFields[id] = { fields };
-        }
-        return fields;
-    }
-
-    async onToggleExpandField(ev) {
-        const id = ev.target.closest(".o_export_tree_item").dataset.field_id;
-        const fields = await this.loadFields(id);
-        for (const field of fields) {
-            this.fieldsAvailableAll[field.name] = field;
-        }
-        return fields;
-    }
-
-    async onExportButtonClicked() {
-        if (!this.state.exportedFields.length) {
+    async onClickExportButton() {
+        if (!this.state.exportList.length) {
             return this.notification.add(
                 this.env._t("Please select fields to save export list..."),
                 {
@@ -301,13 +276,13 @@ export class ExportDataDialog extends Component {
             );
         }
         await this.props.download(
-            this.state.exportedFields,
-            this.state.compatible,
+            this.state.exportList,
+            this.state.isCompatible,
             this.availableFormats[this.state.selectedFormat].tag
         );
     }
 
-    async onDeleteExportList() {
+    async onDeleteExportTemplate() {
         this.dialog.add(DeleteExportListDialog, {
             text: this.env._t("Do you really want to delete this export template?"),
             delete: async () => {
@@ -318,29 +293,48 @@ export class ExportDataDialog extends Component {
                     1
                 );
                 this.state.templateId = null;
-                this.defaultExportedFields();
+                this.setDefaultExportList();
             },
         });
+    }
+
+    async onSearch(ev) {
+        this.state.search = fuzzyLookup(
+            ev.target.value,
+            this.fieldsAvailable || Object.values(this.knownFields),
+            (field) => field.string
+        );
+    }
+
+    async onToggleCompatibleExport(value) {
+        this.state.isCompatible = value;
+        await this.fetchFields();
+    }
+
+    async onToggleExpandField(ev) {
+        const id = ev.target.closest(".o_export_tree_item").dataset.field_id;
+        const fields = await this.loadFields(id);
+        return fields;
+    }
+
+    setDefaultExportList() {
+        if (this.state.isCompatible) {
+            this.state.exportList = this.state.exportList.filter(
+                ({ name }) => this.knownFields[name]
+            );
+        } else {
+            this.state.exportList = Object.values(this.knownFields).filter(
+                ({ name }) => name && this.props.root.activeFields[name]
+            );
+        }
     }
 
     setFormat(ev) {
         if (ev.target.checked) {
             this.state.selectedFormat = this.availableFormats.findIndex(
-                (i) => i.tag === ev.target.value
+                ({ tag }) => tag === ev.target.value
             );
         }
-    }
-
-    async fetchFields() {
-        this.state.search = [];
-        this.searchRef.el.value = "";
-        const fields = await this.loadFields();
-        this.fieldsAvailableAll = {};
-        for (const field of fields) {
-            this.fieldsAvailableAll[field.id] = field;
-        }
-        this.defaultExportedFields();
-        this.state.templateId && this.loadExportList(this.state.templateId);
     }
 }
 ExportDataDialog.components = { CheckBox, Dialog, ExportDataItem };
