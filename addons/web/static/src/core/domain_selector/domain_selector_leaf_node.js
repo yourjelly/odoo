@@ -5,10 +5,11 @@ import { ModelFieldSelector } from "@web/core/model_field_selector/model_field_s
 import { registry } from "@web/core/registry";
 import { DomainSelectorControlPanel } from "./domain_selector_control_panel";
 
-const { Component, onWillStart, onWillUpdateProps } = owl;
+const { Component, onWillStart, onWillUpdateProps, useRef } = owl;
 
 export class DomainSelectorLeafNode extends Component {
     setup() {
+        this.root = useRef("root");
         this.modelField = useModelField();
         this.fieldInfo = {
             type: "integer",
@@ -80,14 +81,14 @@ export class DomainSelectorLeafNode extends Component {
     }
 
     onHoverDeleteNodeBtn(hovering) {
-        this.el.classList.toggle("o_hover_btns", hovering);
+        this.root.el.classList.toggle("o_hover_btns", hovering);
     }
     onHoverInsertLeafNodeBtn(hovering) {
-        this.el.classList.toggle("o_hover_add_node", hovering);
+        this.root.el.classList.toggle("o_hover_add_node", hovering);
     }
     onHoverInsertBranchNodeBtn(hovering) {
-        this.el.classList.toggle("o_hover_add_node", hovering);
-        this.el.classList.toggle("o_hover_add_inset_node", hovering);
+        this.root.el.classList.toggle("o_hover_add_node", hovering);
+        this.root.el.classList.toggle("o_hover_add_inset_node", hovering);
     }
 }
 
