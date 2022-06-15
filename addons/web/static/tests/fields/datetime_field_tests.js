@@ -770,16 +770,13 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(textContent, datetimeValue);
     });
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "datetime field with date widget: hit enter should update value",
         async function (assert) {
+            /**
+             * Don't think this test is usefull in the new system.
+             */
             patchTimeZone(120);
-
-            registry
-                .category("services")
-                .add("localization", makeFakeLocalizationService({ dateFormat: "%m/%d/%Y" }), {
-                    force: true,
-                });
 
             await makeView({
                 serverData,
