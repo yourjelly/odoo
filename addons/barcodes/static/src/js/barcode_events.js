@@ -66,46 +66,9 @@ var BarcodeEvents = core.Class.extend({
             // Dispatch a barcode_scanned DOM event to elements that have barcode_events="true" set.
             if (this.buffered_key_events[0].target.getAttribute("barcode_events") === "true")
                 $(this.buffered_key_events[0].target).trigger('barcode_scanned', barcode);
-        } else {
-            this.resend_buffered_keys();
         }
 
         this.buffered_key_events = [];
-    },
-
-    resend_buffered_keys: function() {
-        var old_event, new_event;
-        for(var i = 0; i < this.buffered_key_events.length; i++) {
-            old_event = this.buffered_key_events[i];
-
-            if(old_event.which !== 13) { // ignore returns
-                // We do not create a 'real' keypress event through
-                // eg. KeyboardEvent because there are several issues
-                // with them that make them very different from
-                // genuine keypresses. Chrome per example has had a
-                // bug for the longest time that causes keyCode and
-                // charCode to not be set for events created this way:
-                // https://bugs.webkit.org/show_bug.cgi?id=16735
-                var params = {
-                    'bubbles': old_event.bubbles,
-                    'cancelable': old_event.cancelable,
-                };
-                new_event = $.Event('keypress', params);
-                new_event.viewArg = old_event.viewArg;
-                new_event.ctrl = old_event.ctrl;
-                new_event.alt = old_event.alt;
-                new_event.shift = old_event.shift;
-                new_event.meta = old_event.meta;
-                new_event.char = old_event.char;
-                new_event.key = old_event.key;
-                new_event.charCode = old_event.charCode;
-                new_event.keyCode = old_event.keyCode || old_event.which; // Firefox doesn't set keyCode for keypresses, only keyup/down
-                new_event.which = old_event.which;
-                new_event.dispatched_by_barcode_reader = true;
-
-                $(old_event.target).trigger(new_event);
-            }
-        }
     },
 
     element_is_editable: function(element) {
@@ -131,9 +94,6 @@ var BarcodeEvents = core.Class.extend({
     },
 
     handler: function(e){
-        // Don't catch events we resent
-        if (e.dispatched_by_barcode_reader)
-            return;
         // Don't catch non-printable keys for which Firefox triggers a keypress
         if (this.is_special_key(e))
             return;
@@ -153,8 +113,6 @@ var BarcodeEvents = core.Class.extend({
 
         // Catch and buffer the event
         this.buffered_key_events.push(e);
-        e.preventDefault();
-        e.stopImmediatePropagation();
 
         // Handle buffered keys immediately if the keypress marks the end
         // of a barcode or after x milliseconds without a new keypress
