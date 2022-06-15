@@ -4315,14 +4315,16 @@ class AccountMoveLine(models.Model):
         # self.analytic_dist_tag_ids = vals
 
         # the following replicates the behaviour of the many2many_tags create and edit
-        new_tags = self.env['account.analytic.distribution.tag'].create([
-            {
-                'analytic_account_id': tag.analytic_account_id.id,
-                'percentage': tag.percentage
-            }
-            for tag in self.analytic_dist_model_selector_id.distribution_tag_ids
-        ])
-        self.analytic_dist_tag_ids = new_tags
+        # tags are not removed when the field is cleared (this will happen when the tags are modified)
+        if (self.analytic_dist_model_selector_id):
+            new_tags = self.env['account.analytic.distribution.tag'].create([
+                {
+                    'analytic_account_id': tag.analytic_account_id.id,
+                    'percentage': tag.percentage
+                }
+                for tag in self.analytic_dist_model_selector_id.distribution_tag_ids
+            ])
+            self.analytic_dist_tag_ids = new_tags
 
 
     @api.onchange('amount_currency', 'currency_id', 'debit', 'credit', 'tax_ids', 'account_id', 'price_unit', 'quantity')
