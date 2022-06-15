@@ -6,16 +6,6 @@ var core = require('web.core');
 var mixins = require('web.mixins');
 var session = require('web.session');
 
-
-// For IE >= 9, use this, new CustomEvent(), instead of new Event()
-function CustomEvent ( event, params ) {
-    params = params || { bubbles: false, cancelable: false, detail: undefined };
-    var evt = document.createEvent( 'CustomEvent' );
-    evt.initCustomEvent( event, params.bubbles, params.cancelable, params.detail );
-    return evt;
-   }
-CustomEvent.prototype = window.Event.prototype;
-
 var BarcodeEvents = core.Class.extend(mixins.PropertiesMixin, {
     timeout: null,
     key_pressed: {},
