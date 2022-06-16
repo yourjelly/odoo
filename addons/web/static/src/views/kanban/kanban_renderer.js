@@ -2,30 +2,30 @@
 
 import { ColorList } from "@web/core/colorlist/colorlist";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
-import { SimpleDialog } from "@web/core/dialog/dialog";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
-import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
-import { registry } from "@web/core/registry";
-import { useBus, useService } from "@web/core/utils/hooks";
-import { sprintf } from "@web/core/utils/strings";
-import { useSortable } from "@web/core/utils/ui";
-import { url } from "@web/core/utils/urls";
 import { Field } from "@web/fields/field";
 import { fileTypeMagicWordMap } from "@web/fields/image/image_field";
-import { session } from "@web/session";
-import { useViewCompiler } from "@web/views/helpers/view_compiler";
-import { useBounceButton } from "@web/views/helpers/view_hook";
-import { isRelational } from "@web/views/helpers/utils";
-import { isAllowedDateField } from "@web/views/relational_model";
-import { ViewButton } from "@web/views/view_button/view_button";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
-import { Widget } from "@web/views/widgets/widget";
+import { isAllowedDateField } from "@web/views/relational_model";
+import { isRelational } from "@web/views/helpers/utils";
 import { KanbanAnimatedNumber } from "./kanban_animated_number";
 import { KanbanColumnQuickCreate } from "./kanban_column_quick_create";
 import { KanbanCompiler } from "./kanban_compiler";
 import { KanbanRecordQuickCreate } from "./kanban_record_quick_create";
+import { registry } from "@web/core/registry";
 import { RPCError } from "@web/core/network/rpc_service";
+import { session } from "@web/session";
+import { SimpleDialog } from "@web/core/dialog/dialog";
+import { sprintf } from "@web/core/utils/strings";
+import { url } from "@web/core/utils/urls";
+import { useBounceButton } from "@web/views/helpers/view_hook";
+import { useBus, useService } from "@web/core/utils/hooks";
+import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
+import { useSortable } from "@web/core/utils/ui";
+import { useViewCompiler } from "@web/views/helpers/view_compiler";
+import { ViewButton } from "@web/views/view_button/view_button";
+import { Widget } from "@web/views/widgets/widget";
 
 const { Component, markup, useState, useRef, onWillDestroy, onWillStart, onMounted } = owl;
 const { COLORS } = ColorList;
@@ -310,9 +310,6 @@ export class KanbanRenderer extends Component {
     }
 
     get canResequenceRecords() {
-        if (this.props.recordsDraggable === false) {
-            return false;
-        }
         const { isGrouped, orderBy } = this.props.list;
         const { handleField, recordsDraggable } = this.props.archInfo;
         return (
@@ -837,13 +834,21 @@ export class KanbanRenderer extends Component {
 
 KanbanRenderer.template = "web.KanbanRenderer";
 KanbanRenderer.components = {
+    Dropdown,
+    DropdownItem,
     Field,
+    KanbanAnimatedNumber,
     KanbanColumnQuickCreate,
+    KanbanCoverImageDialog,
     KanbanRecordQuickCreate,
     ViewButton,
     Widget,
-    KanbanAnimatedNumber,
-    Dropdown,
-    DropdownItem,
-    KanbanCoverImageDialog,
 };
+KanbanRenderer.props = [
+    "archInfo",
+    "list",
+    "openRecord",
+    "readonly",
+    "forceGlobalClick?",
+    "noContentHelp?",
+];

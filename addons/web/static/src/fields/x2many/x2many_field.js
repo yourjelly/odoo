@@ -1,8 +1,12 @@
 /** @odoo-module **/
 
+import { evalDomain } from "@web/views/helpers/utils";
+import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
+import { ListRenderer } from "@web/views/list/list_renderer";
 import { makeContext } from "@web/core/context";
 import { Pager } from "@web/core/pager/pager";
 import { registry } from "@web/core/registry";
+import { standardFieldProps } from "@web/fields/standard_field_props";
 import {
     useActiveActions,
     useAddInlineRecord,
@@ -10,16 +14,12 @@ import {
     useSelectCreate,
     useX2ManyCrud,
 } from "@web/fields/relational_utils";
-import { standardFieldProps } from "@web/fields/standard_field_props";
-import { evalDomain } from "@web/views/helpers/utils";
-import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
-import { ListRenderer } from "@web/views/list/list_renderer";
 
 const { Component } = owl;
 
 const X2M_RENDERERS = {
-    list: ListRenderer,
     kanban: KanbanRenderer,
+    list: ListRenderer,
 };
 
 export class X2ManyField extends Component {
@@ -96,72 +96,6 @@ export class X2ManyField extends Component {
         };
     }
 
-    get list() {
-        return this.props.value;
-    }
-
-    get rendererProps() {
-        const archInfo = this.activeField.views[this.viewMode];
-        let columns;
-        if (this.viewMode === "list") {
-            // handle column_invisible modifiers
-            // first remove (column_)invisible buttons in button_groups
-            columns = archInfo.columns.map((col) => {
-                if (col.type === "button_group") {
-                    const buttons = col.buttons.filter((button) => {
-                        return !this.evalColumnInvisibleModifier(button.modifiers);
-                    });
-                    return { ...col, buttons };
-                }
-                return col;
-            });
-            // then filter out (column_)invisible fields and empty button_groups
-            columns = columns.filter((col) => {
-                if (col.type === "field") {
-                    return !this.evalColumnInvisibleModifier(col.modifiers);
-                } else if (col.type === "button_group") {
-                    return col.buttons.length > 0;
-                }
-                return true;
-            });
-            // filter out oe_read_only/oe_edit_only columns
-            // note: remove this oe_read/edit_only logic when form view
-            // will always be in edit mode
-            const mode = this.props.record.mode;
-            columns = columns.filter((col) => {
-                if (col.type === "field") {
-                    if (mode === "readonly") {
-                        return !/\boe_edit_only\b/.test(col.className);
-                    } else {
-                        return !/\boe_read_only\b/.test(col.className);
-                    }
-                } else if (col.type === "button_group") {
-                    if (mode === "readonly") {
-                        return col.buttons.some((btn) => !/\boe_edit_only\b/.test(btn.className));
-                    } else {
-                        return col.buttons.some((btn) => !/\boe_read_only\b/.test(btn.className));
-                    }
-                }
-            });
-        }
-        const props = {
-            activeActions: this.activeActions,
-            editable: !this.props.readonly && archInfo.editable,
-            archInfo: { ...archInfo, columns },
-            list: this.list,
-            openRecord: this.openRecord.bind(this),
-            onAdd: this.onAdd.bind(this),
-            nestedKeyOptionalFieldsData: this.nestedKeyOptionalFieldsData,
-        };
-        if (this.viewMode === "kanban") {
-            props.recordsDraggable = !this.props.readonly;
-            props.readonly = this.props.readonly;
-        } else if (this.viewMode === "list") {
-            props.cycleOnTab = false;
-        }
-        return props;
-    }
-
     get displayAddButton() {
         const { canCreate, canLink } = this.activeActions;
         return (
@@ -169,6 +103,18 @@ export class X2ManyField extends Component {
             (canLink !== undefined ? canLink : canCreate) &&
             !this.props.readonly
         );
+    }
+
+    get list() {
+        return this.props.value;
+    }
+
+    get nestedKeyOptionalFieldsData() {
+        return {
+            field: this.props.name,
+            model: this.props.record.resModel,
+            viewMode: this.props.record.viewMode || this.props.record.__viewType,
+        };
     }
 
     get pagerProps() {
@@ -198,15 +144,77 @@ export class X2ManyField extends Component {
         };
     }
 
+    get rendererProps() {
+        const archInfo = this.activeField.views[this.viewMode];
+        const props = {
+            archInfo,
+            list: this.list,
+            openRecord: this.openRecord.bind(this),
+        };
+
+        if (this.viewMode === "kanban") {
+            const recordsDraggable = !this.props.readonly && archInfo.recordsDraggable;
+            props.archInfo = { ...archInfo, recordsDraggable };
+            props.readonly = this.props.readonly;
+            return props;
+        }
+
+        const mode = this.props.record.mode;
+        // handle column_invisible modifiers
+        const columns = archInfo.columns
+            .map((col) => {
+                // first remove (column_)invisible buttons in button_groups
+                if (col.type === "button_group") {
+                    const buttons = col.buttons.filter((button) => {
+                        return !this.evalColumnInvisibleModifier(button.modifiers);
+                    });
+                    return { ...col, buttons };
+                }
+                return col;
+            })
+            .filter((col) => {
+                // filter out (column_)invisible fields and empty button_groups
+                if (col.type === "field") {
+                    return !this.evalColumnInvisibleModifier(col.modifiers);
+                } else if (col.type === "button_group") {
+                    return col.buttons.length > 0;
+                }
+                return true;
+            })
+            .filter((col) => {
+                // filter out oe_read_only/oe_edit_only columns
+                // note: remove this oe_read/edit_only logic when form view
+                // will always be in edit mode
+                if (col.type === "field") {
+                    if (mode === "readonly") {
+                        return !/\boe_edit_only\b/.test(col.className);
+                    } else {
+                        return !/\boe_read_only\b/.test(col.className);
+                    }
+                } else if (col.type === "button_group") {
+                    if (mode === "readonly") {
+                        return col.buttons.some((btn) => !/\boe_edit_only\b/.test(btn.className));
+                    } else {
+                        return col.buttons.some((btn) => !/\boe_read_only\b/.test(btn.className));
+                    }
+                }
+            });
+
+        props.activeActions = this.activeActions;
+        props.archInfo = { ...archInfo, columns };
+        props.cycleOnTab = false;
+        props.editable = !this.props.readonly && archInfo.editable;
+        props.nestedKeyOptionalFieldsData = this.nestedKeyOptionalFieldsData;
+        props.onAdd = this.onAdd.bind(this);
+
+        return props;
+    }
+
     evalColumnInvisibleModifier(modifiers) {
         if ("column_invisible" in modifiers) {
             return evalDomain(modifiers.column_invisible, this.list.evalContext);
         }
         return false;
-    }
-
-    async openRecord(record) {
-        return this._openRecord({ record, mode: this.props.readonly ? "readonly" : "edit" });
     }
 
     async onAdd(context) {
@@ -224,19 +232,16 @@ export class X2ManyField extends Component {
         return this._openRecord({ context });
     }
 
-    get nestedKeyOptionalFieldsData() {
-        return {
-            field: this.props.name,
-            model: this.props.record.resModel,
-            viewMode: this.props.record.viewMode || this.props.record.__viewType,
-        };
+    async openRecord(record) {
+        return this._openRecord({ record, mode: this.props.readonly ? "readonly" : "edit" });
     }
 }
 
 X2ManyField.components = { Pager };
 X2ManyField.props = { ...standardFieldProps };
+X2ManyField.supportedTypes = ["one2many"];
 X2ManyField.template = "web.X2ManyField";
 X2ManyField.useSubView = true;
-X2ManyField.supportedTypes = ["one2many"];
+
 registry.category("fields").add("one2many", X2ManyField);
 registry.category("fields").add("many2many", X2ManyField);
