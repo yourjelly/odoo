@@ -9954,7 +9954,6 @@ QUnit.module("Views", (hooks) => {
     QUnit.test(
         "editable form with many2one: click out does not discard the row",
         async function (assert) {
-            // WOWL Should be moved to form view tests!
             assert.expect(4);
 
             serverData.models.bar.fields.m2o = {
