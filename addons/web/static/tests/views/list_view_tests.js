@@ -2760,34 +2760,30 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    // Will change TASK-ID 2822174
-    QUnit.skipWOWL(
-        "aggregates digits can be set with digits field attribute",
-        async function (assert) {
-            assert.expect(2);
+    QUnit.test("aggregates digits can be set with digits field attribute", async function (assert) {
+        assert.expect(2);
 
-            await makeView({
-                type: "list",
-                resModel: "foo",
-                serverData,
-                arch: `
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: `
                     <tree>
                         <field name="amount" widget="monetary" sum="Sum" digits="[69,3]"/>
                     </tree>`,
-            });
+        });
 
-            assert.strictEqual(
-                target.querySelectorAll(".o_data_row td")[1].textContent,
-                "1200.00",
-                "field should still be formatted based on currency"
-            );
-            assert.strictEqual(
-                target.querySelectorAll("tfoot td")[1].textContent,
-                "2000.000",
-                "aggregates monetary use digits attribute if available"
-            );
-        }
-    );
+        assert.strictEqual(
+            target.querySelectorAll(".o_data_row td")[1].textContent,
+            "1200.00",
+            "field should still be formatted based on currency"
+        );
+        assert.strictEqual(
+            target.querySelectorAll("tfoot td")[1].textContent,
+            "2000.000",
+            "aggregates monetary use digits attribute if available"
+        );
+    });
 
     QUnit.test("groups can be sorted on aggregates", async function (assert) {
         assert.expect(10);

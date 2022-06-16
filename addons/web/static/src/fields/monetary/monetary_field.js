@@ -83,9 +83,7 @@ MonetaryField.extractProps = function (fieldName, record, attrs) {
             ? record.data[attrs.options.currency_field][0]
             : (record.data.currency_id && record.data.currency_id[0]) || undefined,
         inputType: attrs.type,
-        // Sadly, digits param was available as an option and an attr.
-        // The option version could be removed with some xml refactoring.
-        digits: attrs.digits ? JSON.parse(attrs.digits) : attrs.options.digits,
+        digits: [16, 2],
         hideSymbol: attrs.options.no_symbol,
         invalidate: () => record.setInvalidField(fieldName),
         placeholder: attrs.placeholder,

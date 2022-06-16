@@ -502,9 +502,13 @@ export class ListRenderer extends Component {
                 }
 
                 const formatter = formatters.get(widget, false) || formatters.get(type, false);
+                const formatOptions = {
+                    digits: attrs.digits ? JSON.parse(attrs.digits) : undefined,
+                    escape: true,
+                };
                 aggregates[fieldName] = {
                     help: attrs[func],
-                    value: formatter ? formatter(aggregateValue) : aggregateValue,
+                    value: formatter ? formatter(aggregateValue, formatOptions) : aggregateValue,
                 };
             }
         }
