@@ -6,8 +6,8 @@ import { InnerGroup, OuterGroup } from "@web/views/form/form_group/form_group";
 import { useViewCompiler } from "@web/views/helpers/view_compiler";
 import { useBounceButton } from "@web/views/helpers/view_hook";
 import { ViewButton } from "@web/views/view_button/view_button";
-import { ViewWidget } from "@web/views/view_widget";
-import { Notebook } from "../../core/notebook/notebook";
+import { Widget } from "@web/views/widgets/widget";
+import { Notebook } from "@web/core/notebook/notebook";
 import { FormCompiler } from "./form_compiler";
 import { FormLabel } from "./form_label";
 
@@ -42,7 +42,7 @@ FormRenderer.components = {
     FormLabel,
     ButtonBox,
     ViewButton,
-    ViewWidget,
+    Widget,
     Notebook,
     OuterGroup,
     InnerGroup,

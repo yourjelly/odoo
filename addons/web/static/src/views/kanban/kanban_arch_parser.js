@@ -10,6 +10,7 @@ import {
 } from "@web/core/utils/xml";
 import { Field } from "@web/fields/field";
 import { archParseBoolean, getActiveActions } from "@web/views/helpers/utils";
+import { Widget } from "../widgets/widget";
 
 /**
  * NOTE ON 't-name="kanban-box"':
@@ -102,6 +103,7 @@ export class KanbanArchParser extends XMLParser {
         const openAction = action && type ? { action, type } : null;
         const subTemplateDocs = {};
         let boxTemplateDoc;
+        const activeFields = {};
 
         // Root level of the template
         this.visitXML(xmlDoc, (node) => {
@@ -141,6 +143,16 @@ export class KanbanArchParser extends XMLParser {
                     handleField = name;
                 }
             }
+            if (node.tagName === "widget") {
+                const widgetInfo = Widget.parseWidgetNode(node);
+                for (const [name, field] of Object.entries(widgetInfo.fieldDependencies)) {
+                    activeFields[name] = {
+                        name,
+                        type: field.type,
+                    };
+                }
+            }
+
             // Converts server qweb attributes to Owl attributes.
             for (let { name, value: attrValue } of node.attributes) {
                 for (const { regex, value } of TRANSPILED_EXPRESSIONS) {
@@ -299,10 +311,14 @@ export class KanbanArchParser extends XMLParser {
             defaultOrder = stringToOrderBy(handleField);
         }
 
+        for (const [key, field] of Object.entries(fieldNodes)) {
+            activeFields[key] = field; // TODO process
+        }
+
         return {
             arch,
             activeActions,
-            activeFields: fieldNodes, // TODO process
+            activeFields,
             className,
             defaultGroupBy,
             fieldNodes,

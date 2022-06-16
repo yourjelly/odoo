@@ -30,18 +30,21 @@ class ViewWidgetAdapter extends ComponentAdapter {
      * @override
      */
     get widgetArgs() {
-        const { record, node, options } = this.props.viewWidgetParams;
-        return [record, node, options];
+        return this.getParams(this.props);
+    }
+
+    getParams(props) {
+        const { record, node, options, readonly } = props.viewWidgetParams;
+        return [record, node, { mode: readonly ? "readonly" : "edit", ...options }];
     }
 
     updateWidget(nextProps) {
-        const { record, node, options } = nextProps.viewWidgetParams;
         if (this.oldWidget) {
             this.widget.destroy(); // we were already updating -> abort, and start over
         } else {
             this.oldWidget = this.widget;
         }
-        this.widget = new this.props.Component(this, record, node, options);
+        this.widget = new this.props.Component(this, ...this.getParams(nextProps));
         return this.widget._widgetRenderAndInsert(() => {});
     }
 

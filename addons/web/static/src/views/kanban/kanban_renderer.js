@@ -20,7 +20,7 @@ import { isRelational } from "@web/views/helpers/utils";
 import { isAllowedDateField } from "@web/views/relational_model";
 import { ViewButton } from "@web/views/view_button/view_button";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
-import { ViewWidget } from "@web/views/view_widget";
+import { Widget } from "@web/views/widgets/widget";
 import { KanbanAnimatedNumber } from "./kanban_animated_number";
 import { KanbanColumnQuickCreate } from "./kanban_column_quick_create";
 import { KanbanCompiler } from "./kanban_compiler";
@@ -841,7 +841,7 @@ KanbanRenderer.components = {
     KanbanColumnQuickCreate,
     KanbanRecordQuickCreate,
     ViewButton,
-    ViewWidget,
+    Widget,
     KanbanAnimatedNumber,
     Dropdown,
     DropdownItem,
