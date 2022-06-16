@@ -88,7 +88,7 @@ export const tooltipService = {
          * @param {MouseEvent} ev a "mouseenter" event
          */
         function onMouseenter(ev) {
-            let el = ev.target;
+            const el = ev.target;
             if (!el.matches("[data-tooltip], [data-tooltip-template]")) {
                 return;
             }
@@ -123,6 +123,8 @@ export const tooltipService = {
                         { tooltip, template, info },
                         { position }
                     );
+                    // Prevent title from showing on a parent at the same time
+                    target.title = "";
                 }
             }, dataset.tooltipDelay || OPEN_DELAY);
         }
