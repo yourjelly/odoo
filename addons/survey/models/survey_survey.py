@@ -3,11 +3,17 @@
 
 import json
 import random
+import textwrap
 import uuid
 import werkzeug
 
+from base64 import b64decode
+from io import BytesIO
+from PIL import Image, ImageDraw, ImageFont
+
 from odoo import api, exceptions, fields, models, _
 from odoo.exceptions import AccessError, UserError
+from odoo.modules.module import get_module_resource
 from odoo.osv import expression
 from odoo.tools import is_html_empty
 
@@ -1165,3 +1171,71 @@ class Survey(models.Model):
             # delete all challenges and goals because not needed anymore (challenge lines are deleted in cascade)
             challenges_to_delete.unlink()
             goals_to_delete.unlink()
+
+    # ------------------------------------------------------------
+    # PREVIEW
+    # ------------------------------------------------------------
+    def _create_preview_image(self):
+        """Create the image used inside link previews.
+        The image is created on the fly so that we don't need to store it.
+        Note: it is faster to create it from scratch than loading a template
+        and adding survey's data.
+        """
+
+        # Images dimensions: (w)idth, (h)eight, (m)argin, (l)ogo, (p)icture
+        w, h, m = 1200, 630, 10
+        lw, lh = 100, 40
+        pw, ph = 300, 150
+        # Editon tools
+        img = Image.new('RGBA', (w, h), color="white")
+        d = ImageDraw.Draw(img)
+        font = ImageFont.truetype(get_module_resource("survey", "static/src/fonts", "Trueno-wml2.otf"), 40)
+        font_large = ImageFont.truetype(get_module_resource("survey", "static/src/fonts", "Trueno-wml2.otf"), 50)
+        font_small = ImageFont.truetype(get_module_resource("survey", "static/src/fonts", "Trueno-wml2.otf"), 30)
+
+        # Title (top left)
+        title_h = m
+        for line in textwrap.wrap(self.title, width=30):  # Multiline title to not overflow
+            d.text((m, title_h), line, font=font_large, fill="darkgrey")
+            title_h += 60
+        # Background picture (top right)
+        if self.background_image:
+            survey_img = Image.open(BytesIO(b64decode(self.background_image))).resize((pw, ph))
+            img.paste(survey_img, (w-pw-m, m))
+        # Certification trophy (bottom left)
+        if self.certification:
+            trophy_img = Image.open(get_module_resource("survey", "static/src/img", "trophy-light.png")).resize((int(h/2), int(h/2)))
+            img.paste(trophy_img, (int(-h/4), int(h/2)))
+        # Powered by Odoo (bottom right)
+        d.text((w-lw-2*m-font_small.getlength(_("Powered by")), h-lh-m), _("Powered by"), font=font_small, fill="grey")
+        logo = Image.open(get_module_resource("web", "static/img", "logo.png")).resize((lw, lh))
+        img.paste(logo, (w-lw-m, h-lh-m), logo.convert('RGBA'))
+        # User avatar (circle, under the title)
+        if self.user_id.image_128:
+            avatar = b64decode(self.user_id.image_128)
+        else:
+            avatar = self.env['avatar.mixin']._avatar_get_placeholder()
+        user_img = Image.open(BytesIO(avatar)).resize((64, 64))
+        back_color = Image.new(user_img.mode, user_img.size, "white")
+        mask = Image.new("L", user_img.size, 0)
+        d2 = ImageDraw.Draw(mask)
+        d2.ellipse((0, 0, *user_img.size), fill=255)
+        rounded_user = Image.composite(user_img, back_color, mask)
+        img.paste(rounded_user, (m, title_h+20))
+        # Survey creation date (next to user avatar)
+        d.text((100, title_h+25), f"- {self.create_date.strftime('%b %Y')}", font=font, fill="black")
+        # Number of registered users (center left)
+        d.text((180, 430), _("Registered"), font=font, fill="black")
+        d.text((180, 380), str(self.answer_count), font=font_large, fill="deepskyblue")
+        # Number of attempts (center middle)
+        d.text((490, 430), _("Completed"), font=font, fill="black")
+        d.text((490, 380), str(self.answer_done_count), font=font_large, fill="deepskyblue")
+        # Success rate bar and percentage (center right)
+        d.text((800, 430), _("Success Rate"), font=font, fill="black")
+        d.rectangle([(800, 395), (800+2.5*self.success_ratio, 425)], fill="deepskyblue")
+        d.rectangle([(800, 395), (1050, 425)], outline="black", width=2)
+        d.text((1060, 385), f"{self.success_ratio}%", font=font, fill="black")
+
+        output = BytesIO()
+        img.save(output, 'png')
+        return output.getvalue()

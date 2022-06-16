@@ -443,6 +443,15 @@ class Survey(http.Controller):
             suggested_answer, 'value_image'
         ).get_response()
 
+    @http.route('/survey/<string:survey_token>/preview_picture', type='http', auth='public')
+    def survey_get_preview_picture(self, survey_token):
+        """ Route used by meta tags for the link preview picture. """
+        survey_sudo, dummy = self._fetch_from_access_token(survey_token, False)
+        if not survey_sudo:
+            return
+
+        return request.make_response(survey_sudo._create_preview_image(), [('Content-Type', ' image/png')])
+
     # ----------------------------------------------------------------
     # JSON ROUTES to begin / continue survey (ajax navigation) + Tools
     # ----------------------------------------------------------------
