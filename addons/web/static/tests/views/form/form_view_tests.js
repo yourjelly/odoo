@@ -6830,6 +6830,44 @@ QUnit.module("Views", (hooks) => {
         await toggleMenuItem(target, "Action partner");
     });
 
+    QUnit.test("control panel is not present in FormViewDialogs", async function (assert) {
+        serverData.models.partner.records[0].product_id = 37;
+        serverData.views = {
+            "product,false,form": `
+                <form>
+                    <field name="display_name"/>
+                </form>`,
+            "product,false,list": '<tree><field name="display_name"/></tree>',
+        };
+
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            resId: 1,
+            serverData,
+            arch: `<form><field name="product_id"/></form>`,
+            mockRPC(route, args) {
+                if (route === "/web/dataset/call_kw/product/get_formview_id") {
+                    return false;
+                }
+            },
+        });
+
+        await click(target.querySelector(".o_form_button_edit"));
+        await click(target.querySelector(".o_external_button"));
+        assert.containsOnce(target, ".modal");
+        assert.containsOnce(
+            target,
+            ".o_control_panel",
+            "control panel is present in the main form view"
+        );
+        assert.containsNone(
+            target,
+            ".modal .o_control_panel",
+            "control panel is not present in dialogs"
+        );
+    });
+
     QUnit.test("check interactions between multiple FormViewDialogs", async function (assert) {
         assert.expect(8);
 
