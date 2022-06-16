@@ -2,16 +2,38 @@
 <templates xml:space="preserve">
 
     <t t-name="analytic_o2m" owl="1">
-        <div class="analytic_o2m">
-            <TagsList tags="tags"/>
+        <div class="analytic_o2m" t-ref="analyticO2m">
+            <TagsList tags="tags" t-if="!state.isOpened"/>
             <t t-if="!props.readonly">
                 <AutoComplete
                     value="state.autocompleteValue"
-                    autoSelect="true"
                     sources="sources"
                     onSelect.bind="onSelect"
                     onInput.bind="onInput"
-                    onChange="onChange"/>
+                    onChange="onChange"
+                    onBlur.bind="onWidgetBlur"
+                    onFocus.bind="onWidgetFocus"/>
+                    <div class="analytic_o2m_editor_popup o-autocomplete--dropdown-menu dropdown-menu ui-widget ui-autocomplete show" t-if="state.isOpened" t-ref="analyticPop">
+                        <!-- <ListRenderer t-props="rendererProps"/> -->
+                        <table class="o_list_table table table-sm table-hover table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Analytic Account</th>
+                                    <th>Percentage</th>
+                                    <!-- <th>x</th> -->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="props.value.records" t-as="dtag" t-key="dtag.id">
+                                    <tr class="o_data_row">
+                                        <td class="o_data_cell"><t t-esc="dtag.data.analytic_account_id ? dtag.data.analytic_account_id[1] : dtag.data.display_name"/></td>
+                                        <td class="o_data_cell"><input class="o_input" t-on-focus.stop.prevent="focusInput" t-on-blur="blurInput" t-model="dtag.data.percentage"/></td>
+                                        <!-- <td class="o_data_cell"><span class="fa fa-trash" t-on-click="deleteTag(dtag.id)"/></td> -->
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
             </t>
         </div>
     </t>
