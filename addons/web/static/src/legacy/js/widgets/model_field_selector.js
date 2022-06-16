@@ -12,10 +12,13 @@ var ModelFieldSelectorPopOver = require("web.ModelFieldSelectorPopover");
 var ModelFieldSelector = Widget.extend({
     template: "ModelFieldSelector",
     events: {},
-    editionEvents: {
+    edition_events: {
         // Handle popover opening and closing
         "focusin": "_onFocusIn",
-        "focusout": "_onFocusOut",
+        "focusout": "_onFocusOut"
+    },
+    custom_events: {
+        "field_selector_render": "_render"
     },
     /**
      * @constructor
@@ -62,10 +65,10 @@ var ModelFieldSelector = Widget.extend({
         }, options || {});
 
         this.dirty = false;
-        this.popOver = new ModelFieldSelectorPopOver(parent, model, chain, options);
+        this.popOver = new ModelFieldSelectorPopOver(this, model, chain, options);
 
         if (!this.options.readonly) {
-            _.extend(this.events, this.editionEvents);
+            _.extend(this.events, this.edition_events);
         }
     },
     /**
@@ -92,9 +95,13 @@ var ModelFieldSelector = Widget.extend({
         if (!this.options.readonly) {
             let popOverReadyPromiseResolve;
             const popOverReadyPromise = new Promise((resolve) => popOverReadyPromiseResolve = resolve);
+            this.popOver.on("field_chain_changed", undefined, (ev) => {
+                // Ensure the event target is the ModelFieldSelector.
+                ev.stopPropagation();
+                this.trigger_up("field_chain_changed", ev.data);
+            });
             this.popOver.appendTo($("<div/>"));
-            this.popOver.on("field_selector_render", undefined, this._render.bind(this));
-            this.popOver.on("field_selector_started", undefined, () => {
+            this.popOver.once("field_selector_started", undefined, () => {
                 this.$el.append(this.popOver.$el);
                 this.$popover = this.$(".o_field_selector_popover");
                 popOverReadyPromiseResolve();
