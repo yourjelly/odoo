@@ -187,6 +187,9 @@ export class AutoComplete extends Component {
         }
     }
 
+    onInputFocus() {
+        this.props.onFocus();
+    }
     onInputBlur() {
         const value = this.inputRef.el.value;
         if (
@@ -308,6 +311,7 @@ Object.assign(AutoComplete, {
         onInput: { type: Function, optional: true },
         onChange: { type: Function, optional: true },
         onBlur: { type: Function, optional: true },
+        onFocus: {type: Function, optional: true },
     },
     defaultProps: {
         placeholder: "",
@@ -315,6 +319,7 @@ Object.assign(AutoComplete, {
         onInput: () => {},
         onChange: () => {},
         onBlur: () => {},
+        onFocus: () => {},
     },
     timeout: 250,
 });
