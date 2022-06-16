@@ -382,33 +382,3 @@ View.defaultProps = {
 };
 
 View.searchMenuTypes = ["filter", "groupBy", "favorite"];
-
-/** @todo rework doc */
-
-// - create a fakeORM service? --> use sampleServer and mockServer parts?
-
-// - action service uses View comp --> see if things cannot be simplified (we will use also maybe a ClientAction comp similar to view)
-
-// - see if we want to simplify things related to callback recorders --> the class should be put elsewhere too (maybe in core along registry?)
-
-/**
- * To manage (how?):
- *
-  Relate to search
-      searchModel // search model state (searchItems, query)
-      searchPanel // search panel component state (expanded (hierarchy), scrollbar)
-
-  Related to config/display/layout
-      breadcrumbs
-      withBreadcrumbs // 'no_breadcrumbs' in context ? !context.no_breadcrumbs : true,
-      withControlPanel // this.withControlPanel from constructor
-      withSearchBar // 'no_breadcrumbs' in context ? !context.no_breadcrumbs : true,
-      withSearchPanel // this.withSearchPanel from constructor
-      search_panel // = params.search_panel or context.search_panel
-
-  Prepare for concrete view ???
-      activeActions
-
-  Do stuff in View comp ???
-      banner // from arch = this.arch.attrs.banner_route
-*/
