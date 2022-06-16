@@ -79,6 +79,17 @@
             </field>
         </record>
 
+        <record id="account_analytic_distribution_tag_tree_view" model="ir.ui.view">
+            <field name="name">account.analytic.distribution.tag.tree</field>
+            <field name="model">account.analytic.distribution.tag</field>
+            <field name="arch" type="xml">
+                <tree string="Distribution Tags">
+                    <field name="analytic_account_id"/>
+                    <field name="percentage"/>
+                </tree>
+            </field>
+        </record>
+
         <record id="account_analytic_group_tree_view" model="ir.ui.view">
             <field name="name">account.analytic.group.tree</field>
             <field name="model">account.analytic.group</field>
