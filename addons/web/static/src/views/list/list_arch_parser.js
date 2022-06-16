@@ -1,14 +1,14 @@
 /** @odoo-module */
 
 import { stringToOrderBy, XMLParser } from "@web/core/utils/xml";
-import { Field } from "@web/fields/field";
+import { Field } from "@web/views/fields/field";
 import {
     archParseBoolean,
     getActiveActions,
     getDecoration,
     processButton,
-} from "@web/views/helpers/utils";
-import { Widget } from "../widgets/widget";
+} from "@web/views/utils";
+import { Widget } from "@web/views/widgets/widget";
 
 export class GroupListArchParser extends XMLParser {
     parse(arch, models, modelName, jsClass) {

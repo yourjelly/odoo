@@ -2,7 +2,7 @@
 
 import { createElement } from "@web/core/utils/xml";
 import { FormCompiler } from "@web/views/form/form_compiler";
-import { append } from "@web/views/helpers/view_compiler";
+import { append } from "@web/views/view_compiler";
 
 function compileSettingsPage(el, params) {
     const settings = createElement("SettingsPage");

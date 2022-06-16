@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { extractAttributes } from "@web/core/utils/xml";
-import { ViewCompiler } from "@web/views/helpers/view_compiler";
+import { ViewCompiler } from "@web/views/view_compiler";
 
 export class KanbanCompiler extends ViewCompiler {
     /**

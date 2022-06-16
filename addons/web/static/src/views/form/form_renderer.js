@@ -1,10 +1,10 @@
 /** @odoo-module **/
 
-import { Field } from "@web/fields/field";
+import { Field } from "@web/views/fields/field";
 import { ButtonBox } from "@web/views/form/button_box/button_box";
 import { InnerGroup, OuterGroup } from "@web/views/form/form_group/form_group";
-import { useViewCompiler } from "@web/views/helpers/view_compiler";
-import { useBounceButton } from "@web/views/helpers/view_hook";
+import { useViewCompiler } from "@web/views/view_compiler";
+import { useBounceButton } from "@web/views/view_hook";
 import { ViewButton } from "@web/views/view_button/view_button";
 import { Widget } from "@web/views/widgets/widget";
 import { Notebook } from "@web/core/notebook/notebook";

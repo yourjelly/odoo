@@ -6,7 +6,7 @@ import { ChatterContainer } from "@mail/components/chatter_container/chatter_con
 import {
     createElement,
 } from "@web/core/utils/xml";
-import { append } from "@web/views/helpers/view_compiler";
+import { append } from "@web/views/view_compiler";
 
 function compileChatter(node, params) {
     node.classList.remove("oe_chatter");

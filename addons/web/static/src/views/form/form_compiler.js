@@ -16,8 +16,8 @@ import {
     isAlwaysInvisible,
     isComponentNode,
     makeSeparator,
-} from "@web/views/helpers/view_compiler";
-import { ViewCompiler } from "../helpers/view_compiler";
+} from "@web/views/view_compiler";
+import { ViewCompiler } from "../view_compiler";
 
 const compilersRegistry = registry.category("form_compilers");
 

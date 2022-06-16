@@ -3,7 +3,7 @@
 import { Dialog } from "@web/core/dialog/dialog";
 import { FormViewDialog } from "web.view_dialogs";
 import { formatDateTime, parseDateTime } from "@web/core/l10n/dates";
-import { formatMany2one } from "@web/fields/formatters";
+import { formatMany2one } from "@web/views/fields/formatters";
 import { registry } from "@web/core/registry";
 import { standaloneAdapter } from "web.OwlCompatibility";
 

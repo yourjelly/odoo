@@ -7,7 +7,7 @@ import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { useService } from "@web/core/utils/hooks";
 import { renderToString } from "@web/core/utils/render";
 import { useSortable } from "@web/core/utils/ui";
-import { standardViewProps } from "@web/views/helpers/standard_view_props";
+import { standardViewProps } from "@web/views/standard_view_props";
 import { BoardAction } from "./board_action";
 
 const { Component, useState, useRef } = owl;

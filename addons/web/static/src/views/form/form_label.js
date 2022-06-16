@@ -1,8 +1,8 @@
 /**@odoo-module */
 
-import { fieldVisualFeedback } from "@web/fields/field";
+import { fieldVisualFeedback } from "@web/views/fields/field";
 import { session } from "@web/session";
-import { getTooltipInfo } from "@web/fields/field_tooltip";
+import { getTooltipInfo } from "@web/views/fields/field_tooltip";
 
 const { Component, xml } = owl;
 

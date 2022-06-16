@@ -10,10 +10,10 @@ import { createElement } from "@web/core/utils/xml";
 import { ActionMenus } from "@web/search/action_menus/action_menus";
 import { Layout } from "@web/search/layout";
 import { usePager } from "@web/search/pager_hook";
-import { useModel } from "@web/views/helpers/model";
-import { standardViewProps } from "@web/views/helpers/standard_view_props";
-import { useSetupView } from "@web/views/helpers/view_hook";
-import { isX2Many } from "@web/views/helpers/utils";
+import { useModel } from "@web/views/model";
+import { standardViewProps } from "@web/views/standard_view_props";
+import { useSetupView } from "@web/views/view_hook";
+import { isX2Many } from "@web/views/utils";
 import { useViewButtons } from "@web/views/view_button/view_button_hook";
 
 const { Component, onWillStart, useEffect, useRef, onRendered, useState, toRaw } = owl;

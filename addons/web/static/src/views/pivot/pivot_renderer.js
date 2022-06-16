@@ -3,7 +3,7 @@
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import { localization } from "@web/core/l10n/localization";
 import { registry } from "@web/core/registry";
-import { formatPercentage } from "@web/fields/formatters";
+import { formatPercentage } from "@web/views/fields/formatters";
 import { PivotGroupByMenu } from "@web/views/pivot/pivot_group_by_menu";
 import fieldUtils from "web.field_utils";
 
