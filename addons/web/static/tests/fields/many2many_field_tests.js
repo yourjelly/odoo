@@ -19,8 +19,6 @@ QUnit.module("Fields", (hooks) => {
     let serverData;
     hooks.beforeEach(() => {
         target = getFixture();
-        // WOWL
-        // eslint-disable-next-line no-undef
         serverData = {
             models: {
                 partner: {

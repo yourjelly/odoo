@@ -507,7 +507,7 @@ QUnit.module("Fields", (hooks) => {
     });
 
     QUnit.test("PriorityField with readonly attribute", async function (assert) {
-        assert.expect(2);
+        assert.expect(3);
 
         await makeView({
             type: "form",
@@ -529,8 +529,18 @@ QUnit.module("Fields", (hooks) => {
             "stars of priority widget should rendered with span tag if readonly"
         );
 
-        await click(target.querySelectorAll(".o_priority_star.fa-star-o")[1]);
+        await triggerEvent(
+            target.querySelectorAll(".o_priority_star.fa-star-o")[1],
+            null,
+            "mouseenter"
+        );
+        assert.containsNone(
+            target,
+            ".o_field_widget .o_priority a.o_priority_star.fa-star",
+            "should have no full stars on hover since the field is readonly"
+        );
 
+        await click(target.querySelectorAll(".o_priority_star.fa-star-o")[1]);
         assert.containsN(
             target,
             "span.o_priority_star.fa.fa-star-o",

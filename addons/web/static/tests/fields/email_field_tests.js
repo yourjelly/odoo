@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { browser } from "@web/core/browser/browser";
 import { click, editInput, getFixture } from "../helpers/utils";
 import { makeView, setupViewRegistries } from "../views/helpers";
 
@@ -255,34 +254,4 @@ QUnit.module("Fields", (hooks) => {
             );
         }
     );
-
-    QUnit.test("click on email field link don't switch to edit mode", async function (assert) {
-        // WOWL: this is a quick edit test, remove it?
-        // We must avoid the browser to open an email app
-        const linkOnClick = (ev) => {
-            assert.step(ev.target.nodeName + " clicked");
-            ev.preventDefault();
-        };
-        browser.addEventListener("click", linkOnClick, { capture: true });
-
-        await makeView({
-            serverData,
-            type: "form",
-            resModel: "partner",
-            arch: `
-                <form string="Partners">
-                    <sheet>
-                        <group>
-                            <field name="foo" widget="email"/>
-                        </group>
-                    </sheet>
-                </form>
-                `,
-            resId: 1,
-        });
-        await click(target.querySelector(".o_field_email a"));
-        assert.containsOnce(target, ".o_form_readonly", "form view is not in edit mode");
-        await click(target.querySelector(".o_field_email"));
-        assert.verifySteps(["A clicked", "DIV clicked"]);
-    });
 });
