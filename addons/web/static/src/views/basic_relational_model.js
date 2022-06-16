@@ -128,7 +128,6 @@ function mapActiveFieldsToFieldsInfo(activeFields, fields, viewType) {
         }
 
         if (!fieldInfo.__no_fetch && (Widget.prototype.fieldsToFetch || Widget.fieldsToFetch)) {
-            console.log('FieldsToFetch is running');
             fieldDescr.fieldsToFetch = fieldDescr.fieldsToFetch || {};
             fieldInfo.relatedFields = { ...(Widget.prototype.fieldsToFetch || Widget.fieldsToFetch) };
             fieldInfo.viewType = "default";
