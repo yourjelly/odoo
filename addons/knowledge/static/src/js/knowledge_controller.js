@@ -23,6 +23,7 @@ const KnowledgeArticleFormController = FormController.extend({
     custom_events: Object.assign({}, FormController.prototype.custom_events, {
         create: '_onCreate',
         duplicate: '_onDuplicate',
+        invite: '_onInvite',
         move: '_onMove',
         open_move_to_modal: '_onOpenMoveToModal',
         reload_tree: '_onReloadTree',
@@ -215,6 +216,36 @@ const KnowledgeArticleFormController = FormController.extend({
         } else {
             this.onFieldSavedListeners.set(name, [callback]);
         }
+    },
+    /**
+     * @param {OdooEvent} event
+     */
+    _onInvite: function (event) {
+        const { id } = this.getState();
+        this.do_action('knowledge.knowledge_invite_action_from_article', {
+            additional_context: {
+                active_id: id
+            },
+            /**
+             * @param {Object} result
+             */
+            on_close: result => {
+                /**
+                 * In the xml, when we give a "special" attribute (e.g: `<button special="save" .../>`),
+                 * the action service will automatically call the `ir.actions.act_window_close`
+                 * action and pass `{ special: true }` as info (see: action_service.js)
+                 */
+                if (result && result.special) {
+                    // The user clicked on the "Cancel" button
+                    return;
+                }
+                // The user clicks on the "Invite" button.
+                if (result.reload_tree) {
+                    this.renderer._reloadTree();
+                }
+                this.renderer._reloadPanel();
+            }
+        });
     },
     /**
      * When the user clicks on a field in readonly mode, a new 'quick_edit' event

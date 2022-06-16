@@ -135,9 +135,10 @@ tour.register('knowledge_main_flow_tour', {
     // Create the partner
     trigger: '.ui-autocomplete.dropdown-menu a:contains("micheline@knowledge.com")',
     in_modal: false,
+    run: 'click',
 }, {
     // Submit the invite wizard
-    trigger: 'button:contains("Invite")',
+    trigger: 'button[name="action_invite_members"]',
     in_modal: false,
 }, {
     // add to favorite

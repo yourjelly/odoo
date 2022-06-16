@@ -18,7 +18,17 @@ class KnowledgeInvite(models.TransientModel):
     ], required=True, default='write')
 
     def action_invite_members(self):
+        category = self.article_id.category
         self.article_id.invite_members(self.partner_ids, self.permission)
+        # To pass some data to the client, we can return a new `ir.actions.act_window_close`
+        # action and specify an `infos` entry. We will then be able to read those
+        # values from the `on_close` callback of the action opening the wizard.
+        return {
+            'type': 'ir.actions.act_window_close',
+            'infos': {
+                'reload_tree': category != self.article_id.category
+            }
+        }
 
     @api.depends('partner_ids')
     def _compute_have_share_partners(self):

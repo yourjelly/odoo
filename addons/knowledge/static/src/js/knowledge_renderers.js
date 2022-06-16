@@ -18,6 +18,7 @@ const KnowledgeArticleFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin
         'click .btn-chatter:not(.active)': '_onOpenChatter',
         'click .btn-create': '_onBtnCreateClick',
         'click .btn-duplicate': '_onBtnDuplicateClick',
+        'click .btn-invite': '_onBtnInviteClick',
         'click .btn-move': '_onBtnMoveClick',
         'click .breadcrumb a[data-controller-id]': '_onBreadcrumbItemClick',
         'click .o_article_caret': '_onFold',
@@ -116,6 +117,13 @@ const KnowledgeArticleFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin
     _onBtnDuplicateClick: function (event) {
         event.preventDefault();
         this.trigger_up('duplicate', {});
+    },
+    /**
+     * @param {Event} event
+     */
+    _onBtnInviteClick: function (event) {
+        event.preventDefault();
+        this.trigger_up('invite', {});
     },
     /**
      * @param {Event} event
