@@ -54,6 +54,7 @@ export class KanbanColumnQuickCreate extends Component {
     validate() {
         if (this.state.columnTitle.length) {
             this.props.onValidate(this.state.columnTitle);
+            this.state.columnTitle = "";
         }
     }
 
@@ -81,7 +82,6 @@ KanbanExamplesNotebookTemplate.template = "web.KanbanExamplesNotebookTemplate";
 
 class KanbanColumnExamplesDialog extends Component {
     setup() {
-        super.setup(...arguments);
         this.navList = useRef("navList");
         this.pages = [];
         this.activePage = null;

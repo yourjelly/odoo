@@ -3052,7 +3052,7 @@ QUnit.module("Views", (hooks) => {
     );
 
     QUnit.test("quick create record while adding a new column", async (assert) => {
-        assert.expect(10);
+        assert.expect(11);
 
         const prom = makeDeferred();
         await makeView({
@@ -3087,6 +3087,7 @@ QUnit.module("Views", (hooks) => {
         await editColumnName("new column");
         await validateColumn();
 
+        assert.strictEqual(target.querySelector(".o_column_quick_create input").value, "");
         assert.containsN(target, ".o_kanban_group", 2);
 
         // click to add a new record
