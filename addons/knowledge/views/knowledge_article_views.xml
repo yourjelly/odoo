@@ -79,10 +79,6 @@
                                                attrs="{'invisible': [('id', '=', False)]}">
                                                 <i class="fa fa-share-alt"/> Share
                                             </a>
-                                            <a type="button" role="button" class="btn btn-light btn-chatter mr-1" data-hotkey="d"
-                                                attrs="{'invisible': [('id', '=', False)]}">
-                                                <i class="rounded-circle text-center fa fa-comments" title="Open chatter"/>
-                                            </a>
                                             <div class="o_knowledge_share_panel dropdown-menu" role="menu">
                                                 <div class="px-3 pb-2">
                                                     <button type="action" name="%(knowledge_invite_action_from_article)d"
@@ -95,6 +91,10 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <a type="button" role="button" class="btn btn-light btn-chatter mr-1" data-hotkey="d"
+                                        attrs="{'invisible': [('id', '=', False)]}">
+                                        <i class="rounded-circle text-center fa fa-comments" title="Open chatter"/>
+                                    </a>
                                     <div class="btn-group" role="toolbar" aria-label="options">
                                         <div class="o-dropdown dropdown o-dropdown--no-caret">
                                             <a type="button" role="button" class="btn btn-light dropdown-toggle" data-toggle="dropdown"

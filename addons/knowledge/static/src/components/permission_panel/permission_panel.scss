@@ -28,12 +28,10 @@
     }
 
     .o_permission {
-        &.readonly {
-            background: white;
-            cursor: default;
-            color: black;
-            border-color: #787878;
+        width: 100px;
+        cursor: pointer;
+        &[disabled] {
+            cursor: not-allowed;
         }
-        width:100px;
     }
 }

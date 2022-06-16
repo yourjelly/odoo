@@ -187,6 +187,21 @@ const KnowledgeArticleFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin
     _preventDropdownClose: function (event) {
         event.stopPropagation();
     },
+    /**
+     * Reloads the permission panel.
+     */
+    _reloadPanel: function () {
+        this.trigger('reload_panel', {});
+    },
+    /**
+     * Reloads the tree listing all articles.
+     */
+    _reloadTree: async function () {
+        const $container = await this._renderTree();
+        this._renderEmojiPicker($container);
+        this._setTreeListener();
+        this._setTreeFavoriteListener();
+    },
     _renderArticleEmoji: function () {
         const { data } = this.state;
         const $dropdown = this.$('.o_knowledge_icon > .o_article_emoji_dropdown');
@@ -222,7 +237,6 @@ const KnowledgeArticleFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin
         const target = this.el.querySelector('.o_knowledge_chatter_container');
         await this._chatterContainerComponent.mount(target);
     },
-
     /**
      * Attaches an emoji picker widget to every emoji dropdown of the container.
      * Note: The widget will be attached to the view when the user clicks on
@@ -246,11 +260,23 @@ const KnowledgeArticleFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin
         this.$('.btn-share').one('click', event => {
             const $container = this.$('.o_knowledge_permission_panel');
             const panel = new PermissionPanelWidget(this, {
-                article_id: this.state.data.id,
-                user_permission: this.state.data.user_permission
+                article_id: this.state.data.id
             });
             panel.attachTo($container);
+            this.on('reload_panel', this, () => {
+                panel._reloadPanel();
+            });
         });
+    },
+    /**
+     * @override
+     * @returns {Promise}
+     */
+    _renderTree: function () {
+        return KnowledgeTreePanelMixin._renderTree.apply(this, [
+            this.state.res_id,
+            '/knowledge/tree_panel'
+        ]);
     },
     /**
      * @override
@@ -259,10 +285,13 @@ const KnowledgeArticleFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin
     _renderView: async function () {
         const result = await this._super.apply(this, arguments);
         this._renderBreadcrumb();
-        await this._renderTree(this.state.res_id, '/knowledge/tree_panel');
+        await this._renderTree();
         this._renderArticleEmoji();
+        this._renderEmojiPicker();
         this._renderPermissionPanel();
         this._setResizeListener();
+        this._setTreeListener();
+        this._setTreeFavoriteListener();
         return result;
     },
     /**
@@ -390,6 +419,7 @@ const KnowledgeArticleFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin
                 $li.siblings('.o_knowledge_empty_info').addClass('d-none');
                 this.$('.o_knowledge_empty_info:only-child').removeClass('d-none');
                 const confirmMove = () => {
+                    this._reloadPanel();
                     const id = $li.data('parent-id');
                     if (typeof id !== 'undefined') {
                         const $parent = this.$(`.o_article[data-article-id="${id}"]`);
