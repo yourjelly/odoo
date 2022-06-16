@@ -2516,6 +2516,90 @@ QUnit.module("Fields", (hooks) => {
         await clickSave(target);
     });
 
+    QUnit.test("open a record in a one2many kanban (mode 'readonly')", async function (assert) {
+        serverData.views = {
+            "turtle,false,form": `
+                <form>
+                    <field name="display_name"/>
+                </form>
+            `,
+        };
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="turtles">
+                        <kanban>
+                            <field name="display_name"/>
+                            <templates>
+                                <t t-name="kanban-box">
+                                    <div t-att-class="'oe_kanban_global_click'">
+                                        <t t-esc="record.display_name"/>
+                                    </div>
+                                </t>
+                            </templates>
+                        </kanban>
+                    </field>
+                </form>`,
+            resId: 1,
+        });
+
+        assert.strictEqual(target.querySelector(".o_kanban_record").innerText, "donatello");
+
+        await click(target.querySelector(".o_kanban_record"));
+
+        assert.containsOnce(target, ".modal");
+        assert.strictEqual(
+            target.querySelector(".modal div[name=display_name] span").innerText,
+            "donatello"
+        );
+    });
+
+    QUnit.test("open a record in a one2many kanban (mode 'edit')", async function (assert) {
+        serverData.views = {
+            "turtle,false,form": `
+                <form>
+                    <field name="display_name"/>
+                </form>
+            `,
+        };
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="turtles">
+                        <kanban>
+                            <field name="display_name"/>
+                            <templates>
+                                <t t-name="kanban-box">
+                                    <div class="oe_kanban_global_click">
+                                        <t t-esc="record.display_name"/>
+                                    </div>
+                                </t>
+                            </templates>
+                        </kanban>
+                    </field>
+                </form>`,
+            resId: 1,
+        });
+
+        await clickEdit(target);
+
+        assert.strictEqual(target.querySelector(".o_kanban_record ").innerText, "donatello");
+
+        await click(target.querySelector(".o_kanban_record"));
+
+        assert.containsOnce(target, ".modal");
+        assert.strictEqual(
+            target.querySelector(".modal div[name=display_name] input").value,
+            "donatello"
+        );
+    });
+
     QUnit.test(
         "edition of one2many field, with onchange and not inline sub view",
         async function (assert) {
