@@ -112,7 +112,7 @@ class AccountBankStatement(models.Model):
     @api.depends('line_ids.date')
     def _compute_last_date(self):
         for statement in self:
-            statement.last_date = statement.line_ids.sorted()[:1].date
+            statement.last_date = max(statement.line_ids.mapped('date')) if statement.line_ids else None
 
     @api.depends('line_ids.journal_id')
     def _compute_journal_id_and_currency_id(self):
@@ -141,7 +141,7 @@ class AccountBankStatementLine(models.Model):
     _name = "account.bank.statement.line"
     _inherits = {'account.move': 'move_id'}
     _description = "Bank Statement Line"
-    _order = "date desc, sequence, statement_id desc, id desc"
+    _order = "date desc, sequence, statement_id, id desc"
     _check_company_auto = True
 
     @api.model
