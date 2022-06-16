@@ -7,7 +7,7 @@ import { registry } from "@web/core/registry";
 import { useDebugCategory, useOwnDebugContext } from "@web/core/debug/debug_context";
 import { ormService } from "@web/core/orm_service";
 import { uiService } from "@web/core/ui/ui_service";
-import { useSetupView } from "@web/views/helpers/view_hook";
+import { useSetupView } from "@web/views/view_hook";
 import { ActionDialog } from "@web/webclient/actions/action_dialog";
 import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { makeTestEnv, prepareRegistriesWithCleanup } from "../../helpers/mock_env";

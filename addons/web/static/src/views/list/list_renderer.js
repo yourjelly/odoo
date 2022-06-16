@@ -5,16 +5,16 @@ import { CheckBox } from "@web/core/checkbox/checkbox";
 import { Domain } from "@web/core/domain";
 import { CheckBoxDropdownItem } from "@web/core/dropdown/checkbox_dropdown_item";
 import { Dropdown } from "@web/core/dropdown/dropdown";
+import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { Pager } from "@web/core/pager/pager";
 import { evaluateExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { getTabableElements, useSortable } from "@web/core/utils/ui";
-import { Field } from "@web/fields/field";
+import { Field } from "@web/views/fields/field";
+import { getTooltipInfo } from "@web/views/fields/field_tooltip";
+import { useBounceButton } from "@web/views/view_hook";
 import { ViewButton } from "@web/views/view_button/view_button";
-import { useBounceButton } from "../helpers/view_hook";
-import { getTooltipInfo } from "../../fields/field_tooltip";
-import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 
 const {
     Component,

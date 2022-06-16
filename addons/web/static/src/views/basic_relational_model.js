@@ -12,8 +12,8 @@ import {
 import { KeepLast } from "@web/core/utils/concurrency";
 import { escape } from "@web/core/utils/strings";
 import { mapDoActionOptionAPI } from "@web/legacy/backend_utils";
-import { Model } from "@web/views/helpers/model";
-import { evalDomain } from "@web/views/helpers/utils";
+import { Model } from "@web/views/model";
+import { evalDomain } from "@web/views/utils";
 import BasicModel from "web.BasicModel";
 import Context from "web.Context";
 import fieldRegistry from "web.field_registry";

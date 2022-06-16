@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { browser } from "@web/core/browser/browser";
-import { formatInteger } from "@web/fields/formatters";
+import { formatInteger } from "@web/views/fields/formatters";
 
 const { Component, onWillUpdateProps, onWillUnmount, useState } = owl;
 

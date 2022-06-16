@@ -15,7 +15,7 @@ import {
     switchView,
 } from "@web/../tests/search/helpers";
 import { registry } from "@web/core/registry";
-import { useSetupView } from "@web/views/helpers/view_hook";
+import { useSetupView } from "@web/views/view_hook";
 import {
     createWebClient,
     doAction,

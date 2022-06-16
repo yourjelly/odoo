@@ -6,8 +6,8 @@ import { editModelDebug } from "@web/core/debug/debug_utils";
 import { formatDateTime, parseDateTime } from "@web/core/l10n/dates";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { formatMany2one } from "@web/fields/formatters";
-import { evalDomain } from "@web/views/helpers/utils";
+import { formatMany2one } from "@web/views/fields/formatters";
+import { evalDomain } from "@web/views/utils";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
 
 const { Component, onWillStart, useState, xml } = owl;

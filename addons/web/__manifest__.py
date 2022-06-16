@@ -95,7 +95,6 @@ This module provides the core of the Odoo Web Client.
 
             'web/static/src/core/utils/transitions.scss',
             'web/static/src/core/**/*',
-            'web/static/src/fields/**/*',
             'web/static/src/legacy/legacy_fields.scss',
             'web/static/src/search/**/*',
             'web/static/src/views/**/*',
@@ -516,7 +515,6 @@ This module provides the core of the Odoo Web Client.
         'web.qunit_suite_tests': [
             'web/static/tests/env_tests.js',
             'web/static/tests/core/**/*.js',
-            'web/static/tests/fields/**/*.js',
             'web/static/tests/search/**/*.js',
             ('remove', 'web/static/tests/search/helpers.js'),
             'web/static/tests/views/**/*.js',
