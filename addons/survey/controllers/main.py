@@ -445,6 +445,22 @@ class Survey(http.Controller):
             suggested_answer, 'value_image'
         ).get_response()
 
+    def get_preview_picture(self, survey_token, for_results=False):
+        survey_sudo, dummy = self._fetch_from_access_token(survey_token, False)
+        if not survey_sudo:
+            return
+
+        return request.make_response(survey_sudo._create_preview_image(for_results), [('Content-Type', ' image/png')])
+
+    @http.route('/survey/<string:survey_token>/preview_picture', type='http', auth='public')
+    def survey_get_preview_picture(self, survey_token):
+        """ Route used by meta tags for the link preview picture. """
+        return self.get_preview_picture(survey_token)
+
+    @http.route('/survey/<string:survey_token>/results/preview_picture', type='http', auth='public')
+    def survey_get_results_preview_picture(self, survey_token):
+        return self.get_preview_picture(survey_token, True)
+
     # ----------------------------------------------------------------
     # JSON ROUTES to begin / continue survey (ajax navigation) + Tools
     # ----------------------------------------------------------------

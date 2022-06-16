@@ -8,10 +8,15 @@ from collections import defaultdict
 
 import werkzeug
 
+from base64 import b64decode
+from io import BytesIO
+from PIL import Image, ImageDraw, ImageFont
+
 from odoo import api, exceptions, fields, models, _
 from odoo.exceptions import AccessError, UserError
+from odoo.modules.module import get_module_resource
 from odoo.osv import expression
-from odoo.tools import is_html_empty
+from odoo.tools import format_decimalized_number, is_html_empty
 
 
 class Survey(models.Model):
@@ -1200,3 +1205,101 @@ class Survey(models.Model):
             # delete all challenges and goals because not needed anymore (challenge lines are deleted in cascade)
             challenges_to_delete.unlink()
             goals_to_delete.unlink()
+
+    # ------------------------------------------------------------
+    # PREVIEW
+    # ------------------------------------------------------------
+    def _create_preview_image(self, for_results):
+        """Create the image used inside link previews.
+        The image is created on the fly so that we don't need to store it.
+        Note: it is faster to create it from scratch than loading a template
+        and adding survey's data.
+        """
+
+        # Preview dimensions: (w)idth, (h)eight, (m)argin
+        w, h, m = 1200, 630, 10
+        # Editon tools
+        img = Image.new('RGBA', (w, h), color="white")
+        d = ImageDraw.Draw(img)
+        font_size = 42
+        fonst_size_small = 32
+        font = ImageFont.truetype(get_module_resource("web", "static/fonts/google/Roboto", "Roboto-Regular.ttf"), font_size)
+        font_medium = ImageFont.truetype(get_module_resource("web", "static/fonts/google/Roboto", "Roboto-Medium.ttf"), font_size)
+
+        # Background picture (top right)
+        if self.background_image:
+            bg_img_w, bg_img_h = 300, 200
+            survey_img = Image.open(BytesIO(b64decode(self.background_image)))
+            survey_img.thumbnail((bg_img_w, bg_img_h))
+            img.paste(survey_img, (w - survey_img.size[0] - m, m))
+
+        # Title (top left)
+        title_line_h = 60
+        title_font = font.font_variant(size=title_line_h)
+        title_w = w - 2 * m
+        if (self.background_image):
+            # Reduce width to not overlap on the bg picture
+            title_w -= bg_img_w
+        # Break title in multiple lines no not overflow
+        title_lines = ['']
+        for word in self.title.split():
+            line = f"{title_lines[-1]} {word}".strip()
+            if title_font.getlength(line) <= title_w:
+                title_lines[-1] = line
+            elif len(title_lines) == 3:
+                title_lines[-1] += " ..."
+                break
+            else:
+                title_lines.append(word)
+        d.text((m, m), "\n".join(title_lines), font=title_font, fill="darkgrey")
+
+        # User picture and create date
+        x, y = m, title_line_h * len(title_lines) + font_size
+        if self.user_id.image_128:
+            avatar = b64decode(self.user_id.image_128)
+        else:
+            avatar = self.env['avatar.mixin']._avatar_get_placeholder()
+        user_img = Image.open(BytesIO(avatar)).resize((title_line_h, title_line_h))
+        back_color = Image.new(user_img.mode, user_img.size, "white")
+        mask = Image.new("L", user_img.size, 0)
+        d2 = ImageDraw.Draw(mask)
+        d2.ellipse((0, 0, *user_img.size), fill=255)
+        rounded_user = Image.composite(user_img, back_color, mask)
+        img.paste(rounded_user, (x, y))
+        d.text((x + user_img.size[0] + m, y), f"- {self.create_date.strftime('%b %Y')}", font=font_medium, fill="black")
+
+        # Certification trophy (bottom left)
+        if self.certification:
+            trophy_img = Image.open(get_module_resource("survey", "static/src/img", "trophy-light.png")).resize((int(h/2), int(h/2)))
+            img.paste(trophy_img, (int(-h/4), int(h/2)))
+        # "Powered by Odoo" (bottom left)
+        logo_font = font_medium.font_variant(size=fonst_size_small)
+        x, y = 3 * m, h - m - fonst_size_small
+        string = _("Powered by")
+        string_w = int(logo_font.getlength(string))
+        d.text((x, y), string, font=logo_font, fill="dimgrey")
+        logo = Image.open(get_module_resource("web", "static/img", "logo.png"))
+        logo.thumbnail((w, font_size))
+        img.paste(logo, (x + string_w + m, y), logo.convert('RGBA'))
+
+        # Number of registered users (center left)
+        statistics_font = font.font_variant(size=90)
+        statistics_description_font = font.font_variant(size=fonst_size_small)
+        d.text((170, 400), _("Registered"), font=statistics_description_font, fill="dimgrey")
+        d.text((170, 300), format_decimalized_number(self.answer_count), font=statistics_font, fill="deepskyblue")
+        # Number of attempts (center middle)
+        d.text((485, 400), _("Completed"), font=statistics_description_font, fill="dimgrey")
+        d.text((485, 300), format_decimalized_number(self.answer_done_count), font=statistics_font, fill="deepskyblue")
+        # Success rate (center right)
+        d.text((800, 400), _("Success Rate"), font=statistics_description_font, fill="dimgrey")
+        d.text((800, 300), f"{self.success_ratio}%", font=statistics_font, fill="deepskyblue")
+        # Bottom right "button"
+        string = _("See Results") if for_results else _("Take Certification") if self.certification else _("Take Survey")
+        string_w = font.getlength(string)
+        x, y = w - string_w - 5 * m, h - 4 * m - font_size
+        d.rounded_rectangle([(x - 2 * m, y - m), (w - 2 * m, h - 2 * m)], 10, fill="deepskyblue")
+        d.text((x, y), string, font=font_medium, fill="white")
+
+        output = BytesIO()
+        img.save(output, 'png')
+        return output.getvalue()
