@@ -1,9 +1,9 @@
 /** @odoo-module **/
 
 import { XMLParser } from "@web/core/utils/xml";
-import { Field } from "@web/fields/field";
-import { archParseBoolean, getActiveActions } from "@web/views/helpers/utils";
-import { Widget } from "../widgets/widget";
+import { Field } from "@web/views/fields/field";
+import { archParseBoolean, getActiveActions } from "@web/views/utils";
+import { Widget } from "@web/views/widgets/widget";
 
 export class FormArchParser extends XMLParser {
     parse(arch, models, modelName) {

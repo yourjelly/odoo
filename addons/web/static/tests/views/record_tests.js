@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
-import { Field } from "@web/fields/field";
+import { Field } from "@web/views/fields/field";
 import { Record } from "@web/views/record";
 import { click, getFixture, mount } from "../helpers/utils";
 import { setupViewRegistries } from "../views/helpers";

@@ -2,7 +2,7 @@
 
 import { Dialog } from "@web/core/dialog/dialog";
 import { _lt } from "@web/core/l10n/translation";
-import { Field } from "@web/fields/field";
+import { Field } from "@web/views/fields/field";
 
 const { Component } = owl;
 

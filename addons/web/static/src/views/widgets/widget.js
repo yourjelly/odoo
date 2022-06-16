@@ -1,7 +1,7 @@
 /* @odoo-module */
 
 import { registry } from "@web/core/registry";
-import { decodeObjectForTemplate } from "@web/views/helpers/view_compiler";
+import { decodeObjectForTemplate } from "@web/views/view_compiler";
 
 const { Component, xml } = owl;
 const viewWidgetRegistry = registry.category("view_widgets");

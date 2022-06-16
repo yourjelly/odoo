@@ -4,11 +4,10 @@ import { evaluateExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { useService } from "@web/core/utils/hooks";
-import { deepCopy } from "@web/core/utils/objects";
+import { deepCopy, pluck } from "@web/core/utils/objects";
 import { extractLayoutComponents } from "@web/search/layout";
 import { WithSearch } from "@web/search/with_search/with_search";
-import { useActionLinks } from "@web/views/helpers/view_hook";
-import { pluck } from "../core/utils/objects";
+import { useActionLinks } from "@web/views/view_hook";
 
 const { Component, markRaw, onWillUpdateProps, onWillStart, toRaw, useSubEnv } = owl;
 const viewRegistry = registry.category("views");

@@ -53,7 +53,7 @@ import {
 import { createWebClient, doAction, loadState } from "../webclient/helpers";
 import { makeView, setupViewRegistries } from "./helpers";
 import { getNextTabableElement } from "@web/core/utils/ui";
-import { TextField } from "@web/fields/text/text_field";
+import { TextField } from "@web/views/fields/text/text_field";
 import { registerCleanup } from "../helpers/cleanup";
 
 const { markup, onWillStart } = owl;

@@ -18,14 +18,8 @@ import { Deferred, KeepLast, Mutex } from "@web/core/utils/concurrency";
 import { escape } from "@web/core/utils/strings";
 import { session } from "@web/session";
 import { FormArchParser } from "@web/views/form/form_arch_parser";
-import { Model } from "@web/views/helpers/model";
-import {
-    archParseBoolean,
-    evalDomain,
-    isNumeric,
-    isRelational,
-    isX2Many,
-} from "@web/views/helpers/utils";
+import { Model } from "@web/views/model";
+import { archParseBoolean, evalDomain, isNumeric, isRelational, isX2Many } from "@web/views/utils";
 import { ListConfirmationDialog } from "@web/views/list/list_confirmation_dialog";
 
 const { DateTime } = luxon;
