@@ -260,8 +260,10 @@ export class ExportDataDialog extends Component {
     }
 
     onCancelExportTemplate() {
+        this.state.isEditingTemplate = false;
         if (this.state.templateId === "new_template") {
-            return (this.state.templateId = null);
+            this.state.templateId = null;
+            return;
         }
         this.loadExportList(this.state.templateId);
     }
