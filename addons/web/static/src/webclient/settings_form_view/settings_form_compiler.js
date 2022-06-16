@@ -63,95 +63,114 @@ function compileSettingsApp(el, params) {
     return settingsBlock;
 }
 
+function compileSettingsHeader(el, params) {
+    const header = el.cloneNode();
+    for (const child of el.children) {
+        append(header, this.compileNode(child, { ...params, config: null }));
+    }
+    return header;
+}
+
 let groupTitleId = 0;
 
 function compileSettingsGroupTitle(el, params) {
-    groupTitleId++;
     const res = this.compileGenericNode(el, params);
     const groupTitle = res.textContent;
 
-    params.config.groupTitleId = groupTitleId;
-    params.config.groupTitle = groupTitle;
-    params.config.groupTipId = undefined;
-    params.config.groupTip = undefined;
-    params.config.container = undefined;
-    params.config.settingBox = undefined;
     //HighlightText
     const highlight = createElement("HighlightText");
     highlight.setAttribute("originalText", `\`${groupTitle}\``);
     append(res, highlight);
     res.firstChild.remove();
 
-    params.labels.push({
-        label: groupTitle.trim(),
-        ...params.config,
-    });
+    if (params.config) {
+        params.config.groupTitleId = ++groupTitleId;
+        params.config.groupTitle = groupTitle;
+        params.config.groupTipId = undefined;
+        params.config.groupTip = undefined;
+        params.config.container = undefined;
+        params.config.settingBox = undefined;
+        params.labels.push({
+            label: groupTitle.trim(),
+            ...params.config,
+        });
+        res.setAttribute("t-if", `!searchValue.value or search("groupTitleId", ${groupTitleId})`);
+    }
 
-    res.setAttribute("t-if", `!searchValue.value or search("groupTitleId", ${groupTitleId})`);
     return res;
 }
 
 let groupTipId = 0;
 
 function compileSettingsGroupTip(el, params) {
-    groupTipId++;
     const res = this.compileGenericNode(el, params);
     const tip = res.textContent;
 
-    params.config.groupTipId = groupTipId;
-    params.config.groupTip = tip;
-    params.config.container = undefined;
-    params.config.settingBox = undefined;
     //HighlightText
     const highlight = createElement("HighlightText");
     highlight.setAttribute("originalText", `\`${tip}\``);
     append(res, highlight);
     res.firstChild.remove();
 
-    params.labels.push({
-        label: tip.trim(),
-        ...params.config,
-    });
+    if (params.config) {
+        params.config.groupTipId = ++groupTipId;
+        params.config.groupTip = tip;
+        params.config.container = undefined;
+        params.config.settingBox = undefined;
+        params.labels.push({
+            label: tip.trim(),
+            ...params.config,
+        });
+        res.setAttribute("t-if", `!searchValue.value or search("groupTipId", ${groupTipId})`);
+    }
 
-    res.setAttribute("t-if", `!searchValue.value or search("groupTipId", ${groupTipId})`);
     return res;
 }
 
 let containerId = 0;
 
 function compileSettingsContainer(el, params) {
-    containerId++;
-    params.config.container = containerId;
-    params.config.settingBox = undefined;
-    params.containerLabels = [];
+    if (params.config) {
+        params.config.container = ++containerId;
+        params.config.settingBox = undefined;
+        params.containerLabels = [];
+    }
     const res = this.compileGenericNode(el, params);
-    res.setAttribute("t-if", `!searchValue.value or search("container", ${containerId})`);
+    if (params.config) {
+        res.setAttribute("t-if", `!searchValue.value or search("container", ${containerId})`);
+    }
     return res;
 }
 
 let settingBoxId = 0;
 
 function compileSettingBox(el, params) {
-    settingBoxId++;
-    params.config.settingBox = settingBoxId;
+    if (params.config) {
+        settingBoxId++;
+        params.config.settingBox = settingBoxId;
+    }
     const res = this.compileGenericNode(el, params);
-    res.setAttribute("t-if", `!searchValue.value or search("settingBox", ${settingBoxId})`);
+    if (params.config) {
+        res.setAttribute("t-if", `!searchValue.value or search("settingBox", ${settingBoxId})`);
+    }
     return res;
 }
 
 function compileField(el, params) {
     const res = this.compileField(el, params);
-    let widgetName;
-    if (el.hasAttribute("widget")) {
-        widgetName = el.getAttribute("widget");
-    }
-    if (params.getFieldExpr) {
-        const label = params.getFieldExpr(el.getAttribute("name"), widgetName);
-        if (label) {
-            params.labels.push({
-                label,
-                ...params.config,
-            });
+    if (params.config) {
+        let widgetName;
+        if (el.hasAttribute("widget")) {
+            widgetName = el.getAttribute("widget");
+        }
+        if (params.getFieldExpr) {
+            const label = params.getFieldExpr(el.getAttribute("name"), widgetName);
+            if (label) {
+                params.labels.push({
+                    label,
+                    ...params.config,
+                });
+            }
         }
     }
     return res;
@@ -159,7 +178,7 @@ function compileField(el, params) {
 
 function compileLabel(el, params) {
     const res = this.compileLabel(el, params);
-    if (res.textContent && res.tagName !== "FormLabel") {
+    if (res.textContent && res.tagName !== "FormLabel" && params.config) {
         params.labels.push({
             label: res.textContent.trim(),
             ...params.config,
@@ -175,7 +194,7 @@ function compileLabel(el, params) {
 
 function compileGenericLabel(el, params) {
     const res = this.compileGenericNode(el, params);
-    if (res.textContent) {
+    if (res.textContent && params.config) {
         params.labels.push({
             label: res.textContent.trim(),
             ...params.config,
@@ -212,6 +231,11 @@ export class SettingsFormCompiler extends FormCompiler {
                 tag: "div",
                 class: "app_settings_block",
                 fn: compileSettingsApp,
+            },
+            {
+                tag: "div",
+                class: "app_settings_header",
+                fn: compileSettingsHeader,
             },
             // objects to show/hide in the search
             {

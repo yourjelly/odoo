@@ -12,6 +12,7 @@ import {
 /**
  * @typedef Compiler
  * @property {string} tag
+ * @property {string} [class]
  * @property {(el: Element, params: Record<string, any>) => Element} fn
  */
 
