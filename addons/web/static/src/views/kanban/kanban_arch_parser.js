@@ -183,9 +183,16 @@ export class KanbanArchParser extends XMLParser {
         for (const child of box.children) {
             child.setAttribute("t-att-tabindex", "isSample ? -1 : 0");
             child.setAttribute("role", "article");
-            child.setAttribute("t-att-class", "getRecordClasses(record,groupOrRecord.group)");
             child.setAttribute("t-att-data-id", "canResequenceRecords and record.id");
             child.setAttribute("t-on-click", "(ev) => this.onRecordClick(record, ev)");
+
+            const attClass = child.getAttribute("t-att-class");
+            child.setAttribute(
+                "t-att-class",
+                attClass
+                    ? `${attClass} + " " + getRecordClasses(record,groupOrRecord.group)`
+                    : `getRecordClasses(record,groupOrRecord.group)`
+            );
 
             // Generate a dropdown for the current box
             const dropdown = createElement("Dropdown", {
