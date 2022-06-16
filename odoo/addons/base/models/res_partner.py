@@ -359,7 +359,6 @@ class Partner(models.Model):
             p = partner.commercial_partner_id
             partner.commercial_company_name = p.is_company and p.name or partner.company_name
 
-    @api.depends('vat', 'country_id')
     def _compute_company_registry(self):
         # exists to allow overrides
         for company in self:
