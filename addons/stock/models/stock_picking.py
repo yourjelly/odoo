@@ -50,6 +50,7 @@ class PickingType(models.Model):
         'stock.picking.type', 'Operation Type for Returns',
         check_company=True)
     show_entire_packs = fields.Boolean('Move Entire Packages', help="If ticked, you will be able to select entire packages to move")
+    show_warehouse = fields.Boolean(string="check field", compute='_compute_show_warehouse')
     warehouse_id = fields.Many2one(
         'stock.warehouse', 'Warehouse', ondelete='cascade',
         check_company=True)
@@ -121,6 +122,13 @@ class PickingType(models.Model):
                         'company_id': picking_type.env.company.id,
                     })
         return super(PickingType, self).write(vals)
+
+
+    def _compute_show_warehouse(self):
+        count = self.env['stock.warehouse'].with_context(active_test=False).search_count([('company_id', '=', self.env.company.id)])
+        self.show_warehouse = True
+        if count > 1:
+            self.show_warehouse = False
 
     def _compute_picking_count(self):
         # TDE TODO count picking can be done using previous two
