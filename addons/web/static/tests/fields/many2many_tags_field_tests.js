@@ -1594,7 +1594,6 @@ QUnit.module("Fields", (hooks) => {
         );
 
         triggerHotkey("ArrowRight");
-        await nextTick();
 
         assert.strictEqual(
             document.activeElement,
@@ -1627,39 +1626,53 @@ QUnit.module("Fields", (hooks) => {
 
         assert.strictEqual(
             document.activeElement,
-            target.querySelector("[name=timmy] .o-autocomplete--input")
+            row.querySelector("[name=timmy] .o-autocomplete--input")
         );
 
         // press left to focus the rightmost facet
         triggerHotkey("ArrowLeft");
-        await nextTick;
 
         assert.strictEqual(
             document.activeElement,
-            target.querySelector("[name=timmy] .badge:nth-child(2) a")
+            row.querySelector("[name=timmy] .badge:nth-child(2)")
         );
 
         // press left to focus the leftmost facet
         triggerHotkey("ArrowLeft");
-        await nextTick;
+
         assert.strictEqual(
             document.activeElement,
-            target.querySelector("[name=timmy] .badge:nth-child(1) a")
+            row.querySelector("[name=timmy] .badge:nth-child(1)")
         );
 
         // press left to focus the input
         triggerHotkey("ArrowLeft");
-        await nextTick;
+
         assert.strictEqual(
             document.activeElement,
-            target.querySelector("[name=timmy] .o-autocomplete--input")
+            row.querySelector("[name=timmy] .o-autocomplete--input")
         );
         // press left to focus the leftmost facet
         triggerHotkey("ArrowRight");
-        await nextTick;
+
         assert.strictEqual(
             document.activeElement,
-            target.querySelector("[name=timmy] .badge:nth-child(1) a")
+            row.querySelector("[name=timmy] .badge:nth-child(1)")
         );
+        assert.containsN(row, ".o_field_many2many_tags .badge", 2);
+        assert.deepEqual(
+            [...row.querySelectorAll(".o_field_many2many_tags .badge")].map((el) => el.innerText),
+            ["gold", "silver"]
+        );
+
+        triggerHotkey("BackSpace");
+        await nextTick();
+
+        assert.containsOnce(row, ".o_field_many2many_tags .badge");
+        assert.deepEqual(
+            [...row.querySelectorAll(".o_field_many2many_tags .badge")].map((el) => el.innerText),
+            ["silver"]
+        );
+        assert.containsOnce(row, ".o-autocomplete--input");
     });
 });

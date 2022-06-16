@@ -153,7 +153,7 @@ export class Many2ManyTagsField extends Component {
 
     focusTag(index) {
         const tagListEl = this.autoCompleteRef.el.previousElementSibling;
-        const tags = tagListEl.getElementsByClassName("o_delete");
+        const tags = tagListEl.getElementsByClassName("badge");
         if (tags.length) {
             if (index === undefined) {
                 tags[tags.length - 1].focus();
