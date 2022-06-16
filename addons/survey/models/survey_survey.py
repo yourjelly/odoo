@@ -23,7 +23,7 @@ class Survey(models.Model):
     _rec_name = 'title'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    def _get_default_access_token(self):
+    def _get_random_token(self):
         return str(uuid.uuid4())
 
     def _get_default_session_code(self):
@@ -105,7 +105,8 @@ class Survey(models.Model):
         ('public', 'Anyone with the link'),
         ('token', 'Invited people only')], string='Access Mode',
         default='public', required=True)
-    access_token = fields.Char('Access Token', default=lambda self: self._get_default_access_token(), copy=False)
+    access_token = fields.Char('Access Token', default=lambda self: self._get_random_token(), copy=False)
+    results_token = fields.Char('Results Token', copy=False)
     users_login_required = fields.Boolean('Require Login', help="If checked, users have to login before answering even with a valid token.")
     users_can_go_back = fields.Boolean('Users can go back', help="If checked, users can go back to previous pages.")
     users_can_signup = fields.Boolean('Users can signup', compute='_compute_users_can_signup')
@@ -179,6 +180,7 @@ class Survey(models.Model):
     _sql_constraints = [
         ('access_token_unique', 'unique(access_token)', 'Access token should be unique'),
         ('session_code_unique', 'unique(session_code)', 'Session code should be unique'),
+        ('results_token_unique', 'unique(results_token)', 'Results token should be unique'),
         ('certification_check', "CHECK( scoring_type!='no_scoring' OR certification=False )",
             'You can only create certifications for surveys that have a scoring mechanism.'),
         ('scoring_success_min_check', "CHECK( scoring_success_min IS NULL OR (scoring_success_min>=0 AND scoring_success_min<=100) )",
@@ -995,11 +997,13 @@ class Survey(models.Model):
     def action_result_survey(self):
         """ Open the website page with the survey results view """
         self.ensure_one()
+        if not self.results_token:
+            self.write({'results_token': self._get_random_token()})
         return {
             'type': 'ir.actions.act_url',
             'name': "Results of the Survey",
             'target': 'new',
-            'url': '/survey/results/%s' % self.id
+            'url': '/survey/results/%s' % self.results_token,
         }
 
     def action_test_survey(self):
