@@ -826,4 +826,50 @@ QUnit.module("Fields", (hooks) => {
         );
         assert.verifySteps(["test"]);
     });
+
+    QUnit.test("domain field in kanban view", async function (assert) {
+        assert.expect(4);
+
+        serverData.models.partner.records[0].foo = "[]";
+        serverData.views = {
+            "partner_type,false,list": `<tree><field name="display_name" /></tree>`,
+            "partner_type,false,search": `<search><field name="name" string="Name" /></search>`,
+        };
+
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            resId: 1,
+            serverData,
+            arch: `
+                <kanban class="o_kanban_test">
+                    <field name="bar" />
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_global_click">
+                                <field name="foo" widget="domain" options="{'model': 'partner_type'}" />
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>`,
+            selectRecord: (resId) => {
+                assert.step(`open record ${resId}`);
+            },
+        });
+
+        assert.strictEqual(target.querySelector(".o_read_mode").textContent, "Match All records");
+
+        await click(target.querySelector(".o_domain_show_selection_button"));
+        assert.containsOnce(
+            target,
+            ".o_dialog .o_list_view",
+            "selected records are listed in a dialog"
+        );
+
+        await click(target.querySelector(".o_domain_selector"));
+        assert.verifySteps(
+            ["open record 1"],
+            "record should not open when clicked on the 'N record(s)' button"
+        );
+    });
 });
