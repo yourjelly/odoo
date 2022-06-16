@@ -95,6 +95,7 @@ You could use this simplified accounting in case you work with an (external) acc
             'account/static/src/scss/account_reconciliation.scss',
             'account/static/src/scss/account_journal_dashboard.scss',
             'account/static/src/scss/account_dashboard.scss',
+            'account/static/src/scss/account_resequence.scss',
             'account/static/src/scss/account_searchpanel.scss',
             'account/static/src/scss/section_and_note_backend.scss',
             'account/static/src/scss/account_activity.scss',
