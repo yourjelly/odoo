@@ -220,10 +220,24 @@ class PosSession(models.Model):
             if vals.get('name'):
                 pos_name += ' ' + vals['name']
 
+            cash_payment_methods = pos_config.payment_method_ids.filtered(lambda pm: pm.is_cash_count)
+            statement_ids = self.env['account.bank.statement']
+            if self.user_has_groups('point_of_sale.group_pos_user'):
+                statement_ids = statement_ids.sudo()
+            for cash_journal in cash_payment_methods.mapped('journal_id'):
+                ctx['journal_id'] = cash_journal.id if pos_config.cash_control and cash_journal.type == 'cash' else False
+                st_vals = {
+                    'journal_id': cash_journal.id,
+                    'user_id': self.env.user.id,
+                    'name': pos_name,
+                }
+                statement_ids |= statement_ids.with_context(ctx).create(st_vals)
+
             update_stock_at_closing = pos_config.company_id.point_of_sale_update_stock_quantities == "closing"
 
             vals.update({
                 'name': pos_name,
+                'statement_ids': [(6, 0, statement_ids.ids)],
                 'config_id': config_id,
                 'update_stock_at_closing': update_stock_at_closing,
             })
@@ -964,64 +978,41 @@ class PosSession(models.Model):
         MoveLine = data.get('MoveLine')
         split_receivables_cash = data.get('split_receivables_cash')
         combine_receivables_cash = data.get('combine_receivables_cash')
-        journals = set()
 
+        statements_by_journal_id = {statement.journal_id.id: statement for statement in self.statement_ids}
         # handle split cash payments
         split_cash_statement_line_vals = defaultdict(list)
         split_cash_receivable_vals = defaultdict(list)
         for payment, amounts in split_receivables_cash.items():
-            journal = payment.payment_method_id.cash_journal_id
-            journals.add(journal)
-            split_cash_statement_line_vals[journal].append(self._get_split_statement_line_vals(
-                journal,
-                payment.payment_method_id.receivable_account_id,
-                amounts['amount'],
-                date=payment.payment_date,
-                partner=payment.pos_order_id.partner_id,
-            ))
-            split_cash_receivable_vals[journal].append(self._get_split_receivable_vals(
-                payment,
-                amounts['amount'],
-                amounts['amount_converted'],
-            ))
+            statement = statements_by_journal_id[payment.payment_method_id.journal_id.id]
+            split_cash_statement_line_vals[statement].append(self._get_split_statement_line_vals(statement, amounts['amount'], payment))
+            split_cash_receivable_vals[statement].append(self._get_split_receivable_vals(payment, amounts['amount'], amounts['amount_converted']))
         # handle combine cash payments
         combine_cash_statement_line_vals = defaultdict(list)
         combine_cash_receivable_vals = defaultdict(list)
         for payment_method, amounts in combine_receivables_cash.items():
             if not float_is_zero(amounts['amount'] , precision_rounding=self.currency_id.rounding):
-                journal = payment_method.cash_journal_id
-                journals.add(journal)
-                combine_cash_statement_line_vals[journal].append(self._get_split_statement_line_vals(
-                    journal,
-                    payment_method.receivable_account_id,
-                    amounts['amount'],
-                ))
-                combine_cash_receivable_vals[journal].append(self._get_combine_receivable_vals(
-                    payment_method,
-                    amounts['amount'],
-                    amounts['amount_converted'],
-                ))
+                statement = statements_by_journal_id[payment_method.journal_id.id]
+                combine_cash_statement_line_vals[statement].append(self._get_combine_statement_line_vals(statement, amounts['amount'], payment_method))
+                combine_cash_receivable_vals[statement].append(self._get_combine_receivable_vals(payment_method, amounts['amount'], amounts['amount_converted']))
+        # create the statement lines and account move lines
+        BankStatementLine = self.env['account.bank.statement.line']
+        split_cash_statement_lines = {}
+        combine_cash_statement_lines = {}
+        split_cash_receivable_lines = {}
+        combine_cash_receivable_lines = {}
+        for statement in self.statement_ids:
+            split_cash_statement_lines[statement] = BankStatementLine.create(split_cash_statement_line_vals[statement]).mapped('move_id.line_ids').filtered(lambda line: line.account_id.internal_type == 'receivable')
+            combine_cash_statement_lines[statement] = BankStatementLine.create(combine_cash_statement_line_vals[statement]).mapped('move_id.line_ids').filtered(lambda line: line.account_id.internal_type == 'receivable')
+            split_cash_receivable_lines[statement] = MoveLine.create(split_cash_receivable_vals[statement])
+            combine_cash_receivable_lines[statement] = MoveLine.create(combine_cash_receivable_vals[statement])
 
-        bank_statements = self.env['account.bank.statement']
-        move_line_vals_list = []
-        for journal in journals:
-            st_line_vals_list = split_cash_statement_line_vals[journal] + combine_cash_statement_line_vals[journal]
-            st_lines = self.env['account.bank.statement.line'].create(st_line_vals_list)
-            move_line_vals_list += split_cash_receivable_vals[journal] + combine_cash_receivable_vals[journal]
-
-            # Create the bank statement.
-            bank_statements |= bank_statements.create({
-                'name': self.name,
-                'line_ids': [Command.set(st_lines.ids)],
-            })
-
-        self.statement_ids = bank_statements
-
-        data.update({
-            'created_cash_statements': bank_statements,
-            'created_cash_lines': data['MoveLine'].create(move_line_vals_list),
-        })
-
+        data.update(
+            {'split_cash_statement_lines':    split_cash_statement_lines,
+             'combine_cash_statement_lines':  combine_cash_statement_lines,
+             'split_cash_receivable_lines':   split_cash_receivable_lines,
+             'combine_cash_receivable_lines': combine_cash_receivable_lines
+             })
         return data
 
     def _create_invoice_receivable_lines(self, data):
@@ -1072,8 +1063,10 @@ class PosSession(models.Model):
 
     def _reconcile_account_move_lines(self, data):
         # reconcile cash receivable lines
-        created_cash_statements = data.get('created_cash_statements')
-        created_cash_lines = data.get('created_cash_lines')
+        split_cash_statement_lines = data.get('split_cash_statement_lines')
+        combine_cash_statement_lines = data.get('combine_cash_statement_lines')
+        split_cash_receivable_lines = data.get('split_cash_receivable_lines')
+        combine_cash_receivable_lines = data.get('combine_cash_receivable_lines')
         combine_inv_payment_receivable_lines = data.get('combine_inv_payment_receivable_lines')
         split_inv_payment_receivable_lines = data.get('split_inv_payment_receivable_lines')
         combine_invoice_receivable_lines = data.get('combine_invoice_receivable_lines')
@@ -1082,15 +1075,31 @@ class PosSession(models.Model):
         payment_method_to_receivable_lines = data.get('payment_method_to_receivable_lines')
         payment_to_receivable_lines = data.get('payment_to_receivable_lines')
 
-        # Post.
-        moves = created_cash_lines.move_id + created_cash_statements.line_ids.move_id
-        moves.filtered(lambda x: x.state == 'draft').action_post()
-
-        # Reconcile cash journal items.
-        move_lines = (created_cash_statements.line_ids.move_id.line_ids + created_cash_lines)\
-            .filtered(lambda x: x.account_id.reconcile and not x.reconciled)
-        for account in move_lines.account_id:
-            move_lines.filtered(lambda x: x.account_id == account).reconcile()
+        for statement in self.statement_ids:
+            if not self.config_id.cash_control:
+                statement.write({'balance_end_real': statement.balance_end})
+            statement.button_post()
+            all_lines = (
+                  split_cash_statement_lines[statement]
+                | combine_cash_statement_lines[statement]
+                | split_cash_receivable_lines[statement]
+                | combine_cash_receivable_lines[statement]
+            )
+            accounts = all_lines.mapped('account_id')
+            lines_by_account = [all_lines.filtered(lambda l: l.account_id == account and not l.reconciled) for account in accounts if account.reconcile]
+            for lines in lines_by_account:
+                lines.reconcile()
+            # We try to validate the statement after the reconciliation is done
+            # because validating the statement requires each statement line to be
+            # reconciled.
+            # Furthermore, if the validation failed, which is caused by unreconciled
+            # cash difference statement line, we just ignore that. Leaving the statement
+            # not yet validated. Manual reconciliation and validation should be made
+            # by the user in the accounting app.
+            try:
+                statement.button_validate()
+            except UserError:
+                pass
 
         for payment_method, lines in payment_method_to_receivable_lines.items():
             receivable_account = self._get_receivable_account(payment_method)
@@ -1240,13 +1249,24 @@ class PosSession(models.Model):
         partial_args = {'account_id': out_account.id, 'move_id': self.move_id.id}
         return self._credit_amounts(partial_args, amount, amount_converted, force_company_currency=True)
 
-    def _get_split_statement_line_vals(self, journal, amount, payment):
+    def _get_combine_statement_line_vals(self, statement, amount, payment_method):
+        return {
+            'date': fields.Date.context_today(self),
+            'amount': amount,
+            'payment_ref': self.name,
+            'statement_id': statement.id,
+            'journal_id': statement.journal_id.id,
+            'counterpart_account_id': self._get_receivable_account(payment_method).id,
+        }
+
+    def _get_split_statement_line_vals(self, statement, amount, payment):
         accounting_partner = self.env["res.partner"]._find_accounting_partner(payment.partner_id)
         return {
             'date': fields.Date.context_today(self, timestamp=payment.payment_date),
             'amount': amount,
             'payment_ref': self.name,
-            'journal_id': journal.id,
+            'statement_id': statement.id,
+            'journal_id': statement.journal_id.id,
             'counterpart_account_id': accounting_partner.property_account_receivable_id.id,
             'partner_id': accounting_partner.id,
         }

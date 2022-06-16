@@ -4,7 +4,7 @@
 from odoo import fields, models, api, _
 from odoo.exceptions import UserError
 
-
+# TODO:poma check if it is necessary because bank statements are not necessary now
 class AccountBankStatement(models.Model):
     _inherit = 'account.bank.statement'
 
