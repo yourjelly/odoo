@@ -100,7 +100,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
         }
         var _super = this._super.bind(this);
         await this.wysiwyg.cleanForSave();
-        this._setValue(this._getValue());
+        await this._setValue(this._getValue());
         return this.wysiwyg.saveModifiedImages(this.$content).then(() => {
             this._isDirty = this.wysiwyg.isDirty();
             _super();

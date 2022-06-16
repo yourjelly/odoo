@@ -103,7 +103,8 @@ var BasicController = AbstractController.extend(FieldManagerMixin, {
      * @returns {Promise}
      */
     canBeRemoved: function () {
-        return this.saveChanges(this.handle);
+        return this.renderer.commitChanges(this.handle)
+                            .then(() => this.saveChanges(this.handle));
     },
     /**
      * Determines if we can discard the current changes. If the model is not
