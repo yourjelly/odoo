@@ -3,6 +3,7 @@
 import { XMLParser } from "@web/core/utils/xml";
 import { Field } from "@web/fields/field";
 import { archParseBoolean, getActiveActions } from "@web/views/helpers/utils";
+import { Widget } from "../widgets/widget";
 
 export class FormArchParser extends XMLParser {
     parse(arch, models, modelName) {
@@ -13,6 +14,7 @@ export class FormArchParser extends XMLParser {
         const fieldNodes = {};
         const fieldNextIds = {};
         let autofocusFieldId = null;
+        const activeFields = {};
         this.visitXML(xmlDoc, (node) => {
             if (node.tagName === "field") {
                 const fieldInfo = Field.parseFieldNode(node, models, modelName, "form", jsClass);
@@ -31,10 +33,17 @@ export class FormArchParser extends XMLParser {
             } else if (node.tagName === "div" && node.classList.contains("oe_chatter")) {
                 // remove this when chatter fields are declared as attributes on the root node
                 return false;
+            } else if (node.tagName === "widget") {
+                const widgetInfo = Widget.parseWidgetNode(node);
+                for (const [name, field] of Object.entries(widgetInfo.fieldDependencies)) {
+                    activeFields[name] = {
+                        name,
+                        type: field.type,
+                    };
+                }
             }
         });
         // TODO: generate activeFields for the model based on fieldNodes (merge duplicated fields)
-        const activeFields = {};
         for (const fieldNode of Object.values(fieldNodes)) {
             activeFields[fieldNode.name] = fieldNode;
             // const { onChange, modifiers } = fieldNode;

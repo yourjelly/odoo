@@ -512,4 +512,14 @@ export class FormCompiler extends ViewCompiler {
         }
         return sheetBG;
     }
+
+    /**
+     * @param {Element} el
+     * @returns {Element}
+     */
+    compileWidget(el) {
+        const widget = super.compileWidget(el);
+        widget.setAttribute("readonly", "!props.record.isInEdition");
+        return widget;
+    }
 }

@@ -442,7 +442,7 @@ export class ViewCompiler {
      */
     compileWidget(el) {
         const attrs = {};
-        const props = { record: "record", options: "{mode:props.readonly?'readonly':'edit'}" };
+        const props = { record: "record", readonly: "props.readonly" };
         for (const { name, value } of el.attributes) {
             switch (name) {
                 case "class":
@@ -460,8 +460,8 @@ export class ViewCompiler {
             }
         }
         props.node = encodeObjectForTemplate({ attrs });
-        const viewWidget = createElement("ViewWidget", props);
-        return assignOwlDirectives(viewWidget, el);
+        const widget = createElement("Widget", props);
+        return assignOwlDirectives(widget, el);
     }
 }
 

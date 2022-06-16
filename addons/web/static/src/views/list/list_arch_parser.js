@@ -8,6 +8,7 @@ import {
     getDecoration,
     processButton,
 } from "@web/views/helpers/utils";
+import { Widget } from "../widgets/widget";
 
 export class GroupListArchParser extends XMLParser {
     parse(arch, models, modelName, jsClass) {
@@ -49,6 +50,7 @@ export class ListArchParser extends XMLParser {
         let defaultOrder = stringToOrderBy(xmlDoc.getAttribute("default_order") || null);
         const treeAttr = {};
         let nextId = 0;
+        const activeFields = {};
         this.visitXML(arch, (node) => {
             if (node.tagName !== "button") {
                 buttonGroup = undefined;
@@ -92,6 +94,14 @@ export class ListArchParser extends XMLParser {
                             (fieldInfo.widget && displayName && displayName.toString()) ||
                             fieldInfo.string,
                     });
+                }
+            } else if (node.tagName === "widget") {
+                const widgetInfo = Widget.parseWidgetNode(node);
+                for (const [name, field] of Object.entries(widgetInfo.fieldDependencies)) {
+                    activeFields[name] = {
+                        name,
+                        type: field.type,
+                    };
                 }
             } else if (node.tagName === "groupby" && node.getAttribute("name")) {
                 const fieldName = node.getAttribute("name");
@@ -151,12 +161,16 @@ export class ListArchParser extends XMLParser {
             defaultOrder = stringToOrderBy(handleField);
         }
 
+        for (const [key, field] of Object.entries(fieldNodes)) {
+            activeFields[key] = field; // TODO process
+        }
+
         return {
             creates,
             handleField,
             headerButtons,
             fieldNodes,
-            activeFields: fieldNodes, // TODO: process
+            activeFields,
             columns,
             groupBy,
             defaultOrder,
