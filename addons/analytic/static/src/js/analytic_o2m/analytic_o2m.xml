@@ -3,6 +3,13 @@
 
     <t t-name="analytic_o2m" owl="1">
         <div class="analytic_o2m" t-ref="analyticO2m">
+            <div class="popupButtons" t-if="state.isOpened">
+                <button t-if="template_field_value" class="btn" t-on-click="onOpenExisting"><span class="fa fa-external-link o_external_button"/></button>
+                <button class="btn o_button" t-on-click="onSaveNew"><span class="fa fa-save"/></button>
+                <button class="btn" t-on-click="onClear"><span class="fa fa-trash"/></button>
+                <!-- <button class="btn" t-on-click="onRandom"><span class="fa fa-random"/></button> -->
+                <button class="btn" t-on-click="() => this.forceDropdownClose()"><span class="fa fa-close"/></button>
+            </div>
             <TagsList tags="tags" t-if="!state.isOpened"/>
             <t t-if="!props.readonly">
                 <AutoComplete
@@ -11,29 +18,50 @@
                     onSelect.bind="onSelect"
                     onInput.bind="onInput"
                     onChange="onChange"
-                    onBlur.bind="onWidgetBlur"
-                    onFocus.bind="onWidgetFocus"/>
-                    <div class="analytic_o2m_editor_popup o-autocomplete--dropdown-menu dropdown-menu ui-widget ui-autocomplete show" t-if="state.isOpened" t-ref="analyticPop">
-                        <!-- <ListRenderer t-props="rendererProps"/> -->
-                        <table class="o_list_table table table-sm table-hover table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Analytic Account</th>
-                                    <th>Percentage</th>
-                                    <!-- <th>x</th> -->
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <t t-foreach="props.value.records" t-as="dtag" t-key="dtag.id">
+                    onFocus.bind.stop="computeIsOpened"/>
+                <div class="analytic_o2m_editor_popup dropdown-menu show" t-if="state.isOpened" t-ref="analyticPop">
+                    <!-- <ListRenderer t-props="rendererProps"/> -->
+                    <!-- <table class="o_list_table table table-sm table-hover table-striped">
+                        <thead class="d-none">
+                            <th class="first_col"/>
+                            <th class="second_col"/>
+                            <th class="third_col"/>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="groups" t-as="group" t-key="group">
+                                <tr><th colspan="3" class="o_group_name" t-esc="group"/></tr>
+                                <t t-foreach="listByGroup(group)" t-as="dtag" t-key="dtag.id">
                                     <tr class="o_data_row">
-                                        <td class="o_data_cell"><t t-esc="dtag.data.analytic_account_id ? dtag.data.analytic_account_id[1] : dtag.data.display_name"/></td>
-                                        <td class="o_data_cell"><input class="o_input" t-on-focus.stop.prevent="focusInput" t-on-blur="blurInput" t-model="dtag.data.percentage"/></td>
-                                        <!-- <td class="o_data_cell"><span class="fa fa-trash" t-on-click="deleteTag(dtag.id)"/></td> -->
+                                        <td class="o_data_cell"><t t-esc="dtag.data.analytic_account_id and dtag.data.analytic_account_id.data.display_name.length ? dtag.data.analytic_account_id.data.display_name + 'A' : dtag.data.display_name + ' T'"/></td>
+                                        <td class="o_data_cell"><input class="o_input" t-on-click.stop="" t-on-change="(ev) => this.percentage_changed(dtag, ev)" t-att-value="dtag.data.percentage"/></td>
+                                        <td class="o_data_cell"><span class="fa fa-trash" t-on-click="() => this.deleteTag(dtag.id)"/></td>
                                     </tr>
                                 </t>
-                            </tbody>
-                        </table>
-                    </div>
+                                <tr><td colspan="3">Add a Line</td></tr>
+                                <tr><td colspan="3"/></tr>
+                            </t>
+                        </tbody>
+                    </table> -->
+                    <table class="o_list_table table table-sm table-hover table-striped">
+                        <thead>
+                            <tr>
+                                <th>Analytic Account</th>
+                                <th>Percentage</th>
+                                <th t-on-click="forceDropdownClose">x</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="props.value.records" t-as="dtag" t-key="dtag.id">
+                                <!-- <t t-log="dtag"/> -->
+                                <tr class="o_data_row">
+                                    <td class="o_data_cell"><t t-esc="dtag.data.analytic_account_id and dtag.data.analytic_account_id.data.display_name.length ? dtag.data.analytic_account_id.data.display_name + 'A' : dtag.data.display_name + ' T'"/></td>
+                                    <td class="o_data_cell"><input class="o_input" t-on-click.stop="" t-on-change="(ev) => this.percentage_changed(dtag, ev)" t-att-value="dtag.data.percentage"/></td>
+                                    <td class="o_data_cell"><span class="fa fa-trash" t-on-click="() => this.deleteTag(dtag.id)"/></td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
             </t>
         </div>
     </t>

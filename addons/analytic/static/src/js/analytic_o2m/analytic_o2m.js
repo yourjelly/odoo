@@ -4,10 +4,17 @@ import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/fields/standard_field_props";
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { TagsList } from "@web/fields/many2many_tags/tags_list";
-import { useService } from "@web/core/utils/hooks";
+import { useService, useOwnedDialogs } from "@web/core/utils/hooks";
 import { usePosition } from "@web/core/position_hook";
 //import { ListArchParser } from "@web/views/list/list_arch_parser";
 //import { ListRenderer } from "@web/views/list/list_renderer";
+import {
+    useActiveActions,
+    useAddInlineRecord,
+    useOpenMany2XRecord,
+    useSelectCreate,
+    useX2ManyCrud,
+} from "@web/fields/relational_utils";
 
 const { Component, useState, useRef } = owl;
 
@@ -23,21 +30,63 @@ export class AnalyticO2M extends Component {
         usePosition(() => this.widgetRef.el, {
             popper: "analyticPop",
         });
+        console.log('AnalyticO2m props:');
+        console.log(this.props);
+        // const { saveRecord, updateRecord, removeRecord } = useX2ManyCrud(
+        //     () => this.list,
+        //     false
+        // );
+        // this.updateRecord = updateRecord;
+        this.openTemplate = useOpenMany2XRecord({
+            resModel: this.template_field.relation,
+            activeActions: {
+                canCreate: true,
+                canCreateEdit: false,
+                canWrite: true,
+            },
+            isToMany: false,
+            onRecordSaved: async (record) => {
+                // await this.props.record.load();
+                // await this.props.update(m2oTupleFromData(record.data));
+                // if (this.props.record.model.root.id !== this.props.record.id) {
+                //     this.props.record.switchMode("readonly");
+                // }
+                console.log('New Template Saved');
+                console.log(record);
+            },
+            onClose: () => {},
+            fieldString: 'Analytic Distribution Template',
+        });
         //this.activeField = this.props.record.activeFields[this.props.name];
         //this.fetchTreeArch();
     }
 
     //failed attempt to load the arch manually - needs models - 
+    // consider using a full list view instead (it will load the arch etc)
     // async fetchTreeArch(){
     //     let rawArch = await this.orm.call(this.activeField.relation, "get_view", [], {view_type: 'tree'});
-    //     this.treeArch = await new ListArchParser().parse(rawArch.arch);
+    //     this.treeArch = await new ListArchParser().parse(rawArch.arch, models, model);
     // }
+
+    get groups() {
+        let groups = this.tags.map((record) => {return record.group});
+        return [...new Set(groups)]
+    }
+
+    listByGroup(group_name) {
+        return this.list.filter((record) => record.data.group_name === group_name);
+    }
+
+    get list() {
+        return this.props.value.records;
+    }
 
     get tags() {
         return this.props.value.records.map((record) => ({
             id: record.id, // datapoint_X
             text: record.data.display_name,
             colorIndex: record.data.color,
+            group: record.data.group_name,
             // onClick: (ev) => this.onBadgeClick(ev, record),
             onDelete: !this.props.readonly ? () => this.deleteTag(record.id) : undefined,
         }));
@@ -93,7 +142,7 @@ export class AnalyticO2M extends Component {
             const records = await this.orm.call(this.search_field.relation, "name_search", [], {
                 name: request,
                 operator: "ilike",
-                args: [],
+                args: [], //add domain to exclude existing analytic accounts
                 limit: 7,
                 context: [],
             });
@@ -135,9 +184,8 @@ export class AnalyticO2M extends Component {
     onInput({ inputValue }) {
         console.log('onInput');
         console.log(inputValue);
-        if (inputValue.length) {
-            this.onWidgetBlur();
-        } else { this. onWidgetFocus();}
+        this.state.autocompleteValue = inputValue;
+        this.computeIsOpened();
     }
 
     async onSelect(option, params) {
@@ -147,28 +195,77 @@ export class AnalyticO2M extends Component {
         let changes = {};
         changes[selected_option.field_to_update] = [selected_option.value, selected_option.label];
         await this.props.record.update(changes);
-        this.onWidgetFocus();
+        this.state.autocompleteValue = "";
+        this.computeIsOpened();
     }
 
-    onWidgetFocus() {
-        if (this.tags.length) {
-            this.state.isOpened = true;
-        }
-        console.log(this.props.value);
+    get shouldShowEditorDropdown() {
+        console.log('should show editor?');
+        console.log(this.state.autocompleteValue);
+        console.log(!this.props.readonly && !this.state.autocompleteValue.length && !!this.tags.length && this.widgetRef.el.contains(document.activeElement));
+        return !this.props.readonly && !this.state.autocompleteValue.length && !!this.tags.length && this.widgetRef.el.contains(document.activeElement);
     }
 
-    onWidgetBlur() {
-        if (!this.preventClosePopup) {
-            this.state.isOpened = false;
-        }
+    computeIsOpened() {
+        this.state.isOpened = this.shouldShowEditorDropdown;
     }
+
+    // onAutocompleteBlur() {
+    //     this.state.isOpened = this.shouldShowEditorDropdown;
+    // }
 
     focusInput() {
-        this.preventClosePopup = true;
+
     }
 
-    blurInput() {
-        this.preventClosePopup = false;
+    // blurInput() {
+    //     this.state.isOpened = this.shouldShowEditorDropdown;
+    // }
+
+    forceDropdownClose() {
+        console.log('forceDropdownClose');
+        this.state.isOpened = false;
+    }
+
+    async percentage_changed(record, ev) {
+        console.log('percentage changed');
+        await record.update({
+            analytic_account_id: [record.data.acc_id, "whatever"],
+            percentage: ev.target.value
+        });
+        record.save();
+    }
+
+    onOpenExisting() {
+        console.log('open existing');
+        this.openTemplate({ resId: this.template_field_value[0], context: {} })
+    }
+
+    onSaveNew() {
+        let tag_context = this.list.map((tag) => {return [0, 0, {
+            analytic_account_id: tag.data.analytic_account_id ? tag.data.analytic_account_id.res_id : tag.data.acc_id,
+            percentage: tag.data.percentage
+        }];});
+        console.log('save new');
+        console.log(tag_context);
+        this.openTemplate({ resId: false, context: {'default_distribution_tag_ids': tag_context} })
+    }
+
+    async onClear() {
+        console.log('onClear');
+        this.props.value.replaceWith([])
+        let changes = {};
+        changes[this.template_field.name] = false;
+        await this.props.record.update(changes);
+        this.computeIsOpened();
+    }
+
+    async onRandom() {
+        for (let [key, value] of Object.entries(this.props.value.records)) {
+            value.data.percentage = Math.floor(Math.random() * 100);
+            // this.updateRecord(this.props.value.records[key]);
+        }
+        
     }
 
     // get rendererProps() {
@@ -203,7 +300,9 @@ AnalyticO2M.fieldsToFetch = {
     display_name: { name: "display_name", type: "char" },
     percentage: { name: "percentage", type: "float" },
     color: { name: "color", type: "integer" },
-    analytic_account_id: { name: 'analytic_account_id', type: "many2one"}
+    analytic_account_id: { name: 'analytic_account_id', type: "many2one"},
+    acc_id: { name: "acc_id", type: "integer" },
+    group_name: { name: "group_name", type: "char"},
 };
 
 AnalyticO2M.extractProps = (fieldName, record, attrs) => {

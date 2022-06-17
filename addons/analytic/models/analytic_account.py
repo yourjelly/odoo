@@ -204,7 +204,9 @@ class AccountAnalyticDistributionTag(models.Model):
 
     # related fields
     group_id = fields.Many2one('account.analytic.group', related='analytic_account_id.group_id')
+    group_name = fields.Char(related='group_id.name')
     color = fields.Integer(related='group_id.color')
+    acc_id = fields.Integer(related='analytic_account_id.id')
 
     # consider using reference fields instead
     # res_model = fields.Char('Resource Model', help="The database object this analytic distribution tag is attached to")
