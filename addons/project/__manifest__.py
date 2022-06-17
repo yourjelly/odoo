@@ -64,6 +64,7 @@
             'project/static/src/project_control_panel/*',
             'project/static/src/stop_recurrence_confirmation_dialog/*',
             'project/static/src/services/**/*',
+            'project/static/src/subtask_one2many_field/*',
             'project/static/src/project_task_kanban/*',
             'project/static/src/project_task_form/*',
             'project/static/src/project_task_list/*',

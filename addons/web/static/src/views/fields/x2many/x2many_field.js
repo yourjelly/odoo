@@ -33,7 +33,6 @@ export class X2ManyField extends Component {
         this.addButtonText = this.props.addLabel || this.env._t("Add");
 
         this.viewMode = this.activeField.viewMode;
-        this.Renderer = X2M_RENDERERS[this.viewMode];
 
         const { saveRecord, updateRecord, removeRecord } = useX2ManyCrud(
             () => this.list,
@@ -208,6 +207,10 @@ export class X2ManyField extends Component {
         props.onAdd = this.onAdd.bind(this);
 
         return props;
+    }
+
+    get Renderer() {
+        return X2M_RENDERERS[this.viewMode];
     }
 
     evalColumnInvisibleModifier(modifiers) {
