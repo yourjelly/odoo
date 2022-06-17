@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- GST Base tax tag -->
+    <record id="tax_tag_base_sgst" model="account.account.tag">
+        <field name="name">BASE SGST</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_base_cgst" model="account.account.tag">
+        <field name="name">BASE CGST</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_base_igst" model="account.account.tag">
+        <field name="name">BASE IGST</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <!-- CESS Base tax tag -->
+    <record id="tax_tag_base_cess" model="account.account.tag">
+        <field name="name">BASE CESS</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_base_state_cess" model="account.account.tag">
+        <field name="name">BASE STATE CESS</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <!-- Zero Rated tag -->
+    <record id="tax_tag_exempt" model="account.account.tag">
+        <field name="name">EXEMPT</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_nill_rated" model="account.account.tag">
+        <field name="name">NILL-RATED</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_zero_rated" model="account.account.tag">
+        <field name="name">ZERO-RATED</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_non_gst_supplies" model="account.account.tag">
+        <field name="name">NON GST SUPPLIES</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <!-- GST RC Base tax tag -->
+    <record id="tax_tag_base_sgst_rc" model="account.account.tag">
+        <field name="name">BASE SGST (RC)</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_base_cgst_rc" model="account.account.tag">
+        <field name="name">BASE CGST (RC)</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_base_igst_rc" model="account.account.tag">
+        <field name="name">BASE IGST (RC)</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <!-- CESS RC Base tax tag -->
+    <record id="tax_tag_base_cess_rc" model="account.account.tag">
+        <field name="name">BASE CESS (RC)</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <!-- GST tax tag -->
+	<record id="tax_tag_sgst" model="account.account.tag">
+        <field name="name">SGST</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_cgst" model="account.account.tag">
+        <field name="name">CGST</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_igst" model="account.account.tag">
+        <field name="name">IGST</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <!-- CESS tax tag -->
+    <record id="tax_tag_cess" model="account.account.tag">
+        <field name="name">CESS</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_state_cess" model="account.account.tag">
+        <field name="name">STATE CESS</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <!-- GST RC tax tag -->
+    <record id="tax_tag_sgst_rc" model="account.account.tag">
+        <field name="name">SGST (RC)</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_cgst_rc" model="account.account.tag">
+        <field name="name">CGST (RC)</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_igst_rc" model="account.account.tag">
+        <field name="name">IGST (RC)</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <!-- CESS RC tax tag -->
+    <record id="tax_tag_cess_rc" model="account.account.tag">
+        <field name="name">CESS (RC)</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+</odoo>
