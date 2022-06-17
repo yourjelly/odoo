@@ -6363,7 +6363,7 @@ QUnit.module('LegacyViews', {
 
         assert.strictEqual(parseInt(kanban.$('.o_kanban_counter_side').last().text()), 36,
             "counter should display the sum of int_field values");
-        // kanban.destroy();
+        kanban.destroy();
     });
 
     QUnit.test('column progressbars: "false" bar is clickable', async function (assert) {
