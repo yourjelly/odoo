@@ -23,7 +23,7 @@
                     <field name="sequence" widget="handle"/>
                     <field name="name"/>
                     <field name="active" invisible="1"/>
-                    <field name="warehouse_id" groups="stock.group_stock_multi_warehouses"/>
+                    <field name="warehouse_id"/>
                     <field name="sequence_id" groups="base.group_no_one"/>
                     <field name="company_id" groups="base.group_multi_company"/>
                 </tree>
@@ -42,8 +42,7 @@
                                 <field name="name"/>
                                 <field name="sequence_id" groups="base.group_no_one"/>
                                 <field name="sequence_code"/>
-                                <field name="show_warehouse" invisible="1"/>
-                                <field name="warehouse_id" groups="stock.group_stock_multi_warehouses" force_save="1" attrs="{'readonly': [('show_warehouse', '=', True)], 'required': [('show_warehouse', '!=', True)]}"/>
+                                <field name="warehouse_id"  force_save="1"/>
                             </group>
                             <group>
                                 <field name="code"/>
@@ -685,7 +684,7 @@
                                             <div class="o_primary" t-if="selection_mode">
                                                 <field name="name"/>
                                             </div>
-                                            <div class="o_secondary"><field class="o_secondary"  name="warehouse_id" readonly="1" groups="stock.group_stock_multi_warehouses"/></div>
+                                            <div class="o_secondary"><field class="o_secondary"  name="warehouse_id" readonly="1"/></div>
                                         </div>
                                         <div class="o_kanban_manage_button_section" t-if="!selection_mode">
                                             <a class="o_kanban_manage_toggle_button" href="#"><i class="fa fa-ellipsis-v" role="img" aria-label="Manage" title="Manage"/></a>

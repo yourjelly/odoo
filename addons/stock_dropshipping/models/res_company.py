@@ -47,7 +47,7 @@ class ResCompany(models.Model):
             dropship_vals.append({
                 'name': 'Dropship',
                 'company_id': company.id,
-                'warehouse_id': self.env['stock.warehouse'].search([('company_id', '=', company.id)], limit=1).id,
+                'warehouse_id': False,
                 'sequence_id': sequence.id,
                 'code': 'incoming',
                 'default_location_src_id': self.env.ref('stock.stock_location_suppliers').id,
