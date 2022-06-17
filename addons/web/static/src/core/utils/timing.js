@@ -80,6 +80,12 @@ export function debounce(func, delay, immediate = false) {
     );
 }
 
+export function useDebounced(callback, timeout) {
+    const debounced = debounce(callback, timeout);
+    owl.onWillUnmount(() => debounced.cancel());
+    return debounced;
+}
+
 /**
  * Returns a function, that, as long as it continues to be invoked, will be
  * triggered every N milliseconds.

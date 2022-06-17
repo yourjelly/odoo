@@ -6,6 +6,8 @@ import { append } from "@web/views/view_compiler";
 
 function compileSettingsPage(el, params) {
     const settings = createElement("SettingsPage");
+    settings.setAttribute("slots", "props.slots");
+    settings.setAttribute("initialTab", "props.initialApp");
     settings.setAttribute("t-slot-scope", "settings");
 
     //props

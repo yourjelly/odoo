@@ -9,6 +9,7 @@
             </t>
         </div>
         <div class="settings">
+            <t t-slot="NoContentHelper" t-if="props.slots['NoContentHelper'].isVisible"/>
             <t t-slot="default" selectedTab="state.selectedTab"/>
         </div>
     </t>

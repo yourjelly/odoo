@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="web.SettingsFormView" t-inherit="web.FormView" t-inherit-mode="primary" owl="1">
+        <xpath expr="./div[@t-ref='root']" position="attributes">
+            <attribute name="class">o-settings-form-view</attribute>
+        </xpath>
         <xpath expr="//Layout" position="inside">
             <t t-set-slot="control-panel-top-right">
                 <div class="o_cp_searchview" role="search">
@@ -12,7 +15,12 @@
                     </div>
                 </div>
             </t>
-            <t t-if="state.displayNoContent">
+        </xpath>
+        <xpath expr="//Layout/t[@t-component='props.Renderer']" position="attributes">
+            <attribute name="initialApp">initialApp</attribute>
+        </xpath>
+        <xpath expr="//Layout/t[@t-component='props.Renderer']" position="inside">
+            <t t-set-slot="NoContentHelper" isVisible="state.displayNoContent">
                 <t t-call="web.NoContentHelper">
                     <t t-set="title" t-value="'No setting found'"/>
                     <t t-set="description" t-value="'Try searching for another keyword'"/>

@@ -5,6 +5,7 @@ import { formView } from "@web/views/form/form_view";
 import { useViewButtons } from "@web/views/view_button/view_button_hook";
 import { SettingsConfirmationDialog } from "./settings_confirmation_dialog";
 import { SettingsFormRenderer } from "./settings_form_renderer";
+import { useDebounced } from "@web/core/utils/timing";
 
 const { useSubEnv, useState, useRef, useEffect } = owl;
 
@@ -39,10 +40,16 @@ export class SettingsFormController extends formView.Controller {
             }
             return _continue;
         };
+        this.onSearchInput = useDebounced(this.onSearchInput.bind(this));
         useViewButtons(this.model, useRef("root"), { beforeExecuteAction });
         useAutofocus();
+        const searchInputRef = useRef("autofocus");
         this.state = useState({ displayNoContent: false });
         this.searchInput = useState({ value: "" });
+        this.searchInput.reset = () => {
+            this.searchInput.value = "";
+            searchInputRef.el.value = "";
+        };
         this.rootRef = useRef("root");
         useSubEnv({ searchValue: this.searchInput });
         useSubEnv({
@@ -74,6 +81,8 @@ export class SettingsFormController extends formView.Controller {
                 this.env.__getLocalState__.remove(this);
             }
         });
+
+        this.initialApp = "module" in this.props.context && this.props.context.module;
     }
 
     //This is needed to avoid the auto save when unload
