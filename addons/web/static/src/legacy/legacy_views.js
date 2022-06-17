@@ -95,6 +95,11 @@ function registerView(name, LegacyView) {
             this.onReverseBreadcrumb =
                 this.props.state && this.props.state.__on_reverse_breadcrumb__;
             useSetupAction({
+                rootRef: {
+                    get el() {
+                        return legacyRefs.widget && legacyRefs.widget.el;
+                    },
+                },
                 beforeLeave: () => legacyRefs.widget.canBeRemoved(),
                 getGlobalState: () => getGlobalState(legacyRefs.component.exportState()),
                 getLocalState: () => getLocalState(legacyRefs.component.exportState()),
