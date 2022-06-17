@@ -206,8 +206,12 @@ function mouseEventNoBubble(args) {
 function touchEventMapping(args) {
     return {
         ...args,
-        bubbles: true,
         cancelable: true,
+        bubbles: true,
+        composed: true,
+        view: window,
+        rotation: 0.0,
+        zoom: 1.0,
         touches: args.touches ? [...args.touches.map((e) => new Touch(e))] : undefined,
     };
 }

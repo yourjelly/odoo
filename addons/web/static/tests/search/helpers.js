@@ -139,7 +139,7 @@ export function isOptionSelected(el, itemFinder, optionFinder) {
 
 export function getMenuItemTexts(target) {
     const el = getNode(target);
-    return [...el.querySelectorAll(`.dropdown ul .o_menu_item`)].map((e) => e.innerText.trim());
+    return [...el.querySelectorAll(`.dropdown-menu .o_menu_item`)].map((e) => e.innerText.trim());
 }
 
 export function getButtons(el) {
