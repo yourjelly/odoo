@@ -418,9 +418,19 @@ function makeActionManager(env) {
         if (typeof groupBy === "string") {
             groupBy = [groupBy];
         }
-        const viewProps = Object.assign({}, props, {
+        let display;
+        let propsFromFlags;
+        if (action.flags) {
+            display = Object.assign({}, action.flags.display);
+            if (action.flags[view.type]) {
+                Object.assign(display, action.flags[view.type].display);
+                delete action.flags[view.type].display;
+                propsFromFlags = Object.assign({}, action.flags[view.type]);
+            }
+        }
+        const viewProps = Object.assign({}, propsFromFlags, props, {
             context,
-            display: { mode: target === "new" ? "inDialog" : target },
+            display: Object.assign({ mode: target === "new" ? "inDialog" : target }, display),
             domain: action.domain || [],
             groupBy,
             loadActionMenus: target !== "new" && target !== "inline",
@@ -485,7 +495,7 @@ function makeActionManager(env) {
             config: {
                 actionId: action.id,
                 actionType: "ir.actions.act_window",
-                actionFlags: action.flags,
+                actionFlags: action.flags, // remove when legacy is removed
                 views: action.views,
                 viewSwitcherEntries,
             },

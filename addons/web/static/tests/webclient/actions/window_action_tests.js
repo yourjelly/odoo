@@ -1400,8 +1400,9 @@ QUnit.module("ActionManager", (hooks) => {
         ]);
     });
 
-    QUnit.skipWOWL("flags field of ir.actions.act_window is used", async function (assert) {
-        // more info about flags field : https://github.com/odoo/odoo/commit/c9b133813b250e89f1f61816b0eabfb9bee2009d
+    QUnit.test("flags field of ir.actions.act_window is used", async function (assert) {
+        // Only the display key is common to all views
+        // All other props are specific to each view type
         assert.expect(7);
         serverData.actions[44] = {
             id: 33,
@@ -1409,7 +1410,10 @@ QUnit.module("ActionManager", (hooks) => {
             res_model: "partner",
             type: "ir.actions.act_window",
             flags: {
-                withControlPanel: false,
+                display: {
+                    controlPanel: false,
+                },
+                form: { mode: "readonly" },
             },
             views: [[false, "form"]],
         };
@@ -1418,7 +1422,11 @@ QUnit.module("ActionManager", (hooks) => {
         };
         const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 44);
-        assert.containsOnce(target, ".o_form_view", "should display the form view");
+        assert.containsOnce(
+            target,
+            ".o_form_view .o_form_readonly",
+            "should display the form view"
+        );
         assert.containsNone(
             document.body,
             ".o_control_panel",
