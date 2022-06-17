@@ -451,7 +451,7 @@ if tax &gt; result:result=tax</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             'tag_ids': [ref('tax_tag_base_cgst')]}),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11233'),                 'tag_ids': [ref('tax_tag_cgst')],             })         ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             'tag_ids': [ref('tax_tag_base_cgst')]}),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10052'),                 'tag_ids': [ref('tax_tag_base_cgst')],             })         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             'tag_ids': [ref('tax_tag_base_cgst')]}),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10052'),                 'tag_ids': [ref('tax_tag_cgst')],             })         ]"/>
     </record>
     <record id="sgst_sale_28" model="account.tax.template">
         <field name="name">GST 28%</field>
