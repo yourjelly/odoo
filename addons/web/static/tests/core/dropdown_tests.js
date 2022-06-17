@@ -3,6 +3,7 @@
 import { browser } from "@web/core/browser/browser";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { CheckBoxDropdownItem } from "@web/core/dropdown/checkbox_dropdown_item";
 import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { registry } from "@web/core/registry";
 import { uiService } from "@web/core/ui/ui_service";
@@ -19,6 +20,7 @@ import {
     patchWithCleanup,
     triggerHotkey,
 } from "../helpers/utils";
+import { makeParent } from "./tooltip/tooltip_service_tests";
 
 const { App, Component, xml } = owl;
 const serviceRegistry = registry.category("services");
@@ -177,7 +179,7 @@ QUnit.module("Components", ({ beforeEach }) => {
             close() {
                 assert.step("dropdown will close");
                 this._super();
-            }
+            },
         });
         class Parent extends Component {
             clicked() {
@@ -985,5 +987,40 @@ QUnit.module("Components", ({ beforeEach }) => {
             target.querySelector("button.dropdown-toggle").dataset.tooltip,
             "My tooltip"
         );
+    });
+
+    QUnit.test("click on the label of a CheckBoxDropdownItem selects it once", async (assert) => {
+        class Parent extends Component {
+            onSelected() {
+                assert.step("selected");
+            }
+        }
+        Parent.components = { CheckBoxDropdownItem, Dropdown };
+        Parent.template = xml`
+            <Dropdown>
+                <CheckBoxDropdownItem onSelected.bind="onSelected"/>
+            </Dropdown>
+        `;
+        env = await makeTestEnv();
+        await mount(Parent, target, { env });
+        await click(target, "button.dropdown-toggle");
+        await click(target, ".dropdown-item label");
+        assert.verifySteps(["selected"]);
+    });
+
+    QUnit.test("Dropdown with a tooltip", async (assert) => {
+        assert.expect(2);
+
+        class MyComponent extends owl.Component {}
+        MyComponent.template = owl.xml`
+            <Dropdown tooltip="'My tooltip'">
+                <DropdownItem/>
+            </Dropdown>`;
+        MyComponent.components = { Dropdown };
+
+        await makeParent(MyComponent);
+        await mouseEnter(target, "button.dropdown-toggle");
+        assert.containsOnce(target, ".o-tooltip");
+        assert.strictEqual(target.querySelector(".o-tooltip").textContent, "My tooltip");
     });
 });

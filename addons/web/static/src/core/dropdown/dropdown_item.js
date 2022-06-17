@@ -20,10 +20,14 @@ export class DropdownItem extends Component {
      * @param {MouseEvent} ev
      */
     onClick(ev) {
-        const { href, onSelected, parentClosingMode } = this.props;
-        if (href) {
+        if (this.props.href) {
             ev.preventDefault();
         }
+        this.itemSelected();
+    }
+
+    itemSelected() {
+        const { onSelected, parentClosingMode } = this.props;
         if (onSelected) {
             onSelected();
         }
