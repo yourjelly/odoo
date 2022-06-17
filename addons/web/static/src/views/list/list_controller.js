@@ -391,6 +391,12 @@ export class ListController extends Component {
         };
         this.dialogService.add(ConfirmationDialog, dialogProps);
     }
+
+    discardSelection() {
+        this.model.root.records.forEach((record) => {
+            record.toggleSelection(false);
+        });
+    }
 }
 
 ListController.template = `web.ListView`;

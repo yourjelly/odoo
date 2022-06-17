@@ -72,6 +72,9 @@ export class ListRenderer extends Component {
         useExternalListener(document, "click", this.onGlobalClick.bind(this));
         this.tableRef = useRef("table");
 
+        this.longTouchTimer = null;
+        this.touchStartMs = 0;
+
         this.creates = this.props.archInfo.creates.length
             ? this.props.archInfo.creates
             : [{ description: this.env._t("Add a line") }];
@@ -184,6 +187,10 @@ export class ListRenderer extends Component {
         });
     }
 
+    get hasSelectors() {
+        return this.props.hasSelectors && !this.env.isSmall;
+    }
+
     // The following code manipulates the DOM directly to avoid having to wait for a
     // render + patch which would occur on the next frame and cause flickering.
     freezeColumnWidths() {
@@ -229,7 +236,7 @@ export class ListRenderer extends Component {
 
         // 1 because nth-child selectors are 1-indexed, 2 when the first column contains
         // the checkboxes to select records.
-        const columnOffset = this.props.hasSelectors ? 2 : 1;
+        const columnOffset = this.hasSelectors ? 2 : 1;
         widths.forEach(({ type, value }, i) => {
             const headerEl = this.tableRef.el.querySelector(`th:nth-child(${i + columnOffset})`);
             if (type === "absolute") {
@@ -696,7 +703,7 @@ export class ListRenderer extends Component {
         } else {
             colspan = Math.max(1, this.allColumns.length - DEFAULT_GROUP_PAGER_COLSPAN);
         }
-        return this.props.hasSelectors ? colspan + 1 : colspan;
+        return this.hasSelectors ? colspan + 1 : colspan;
     }
     getGroupPagerCellColspan(group) {
         const lastAggregateIndex = this.getLastAggregateIndex(group);
@@ -826,7 +833,7 @@ export class ListRenderer extends Component {
                     const rowTypeSwitched = cellIsInGroupRow !== nextIsGroup;
                     let defaultIndex = 0;
                     if (cellIsInGroupRow) {
-                        defaultIndex = this.props.hasSelectors ? 1 : 0;
+                        defaultIndex = this.hasSelectors ? 1 : 0;
                     }
                     futureCell =
                         addCell ||
@@ -848,7 +855,7 @@ export class ListRenderer extends Component {
                     const rowTypeSwitched = cellIsInGroupRow !== nextIsGroup;
                     let defaultIndex = 0;
                     if (cellIsInGroupRow) {
-                        defaultIndex = this.props.hasSelectors ? 1 : 0;
+                        defaultIndex = this.hasSelectors ? 1 : 0;
                     }
                     futureCell =
                         addCell ||
@@ -1527,6 +1534,38 @@ export class ListRenderer extends Component {
             window.addEventListener(eventType, stopResize);
         }
     }
+
+    resetLongTouchTimer() {
+        if (this.longTouchTimer) {
+            browser.clearTimeout(this.longTouchTimer);
+            this.longTouchTimer = null;
+        }
+    }
+
+    onRowTouchStart(record, ev) {
+        if (this.props.list.selection.length) {
+            // in selection mode, only selection is allowed.
+            ev.preventDefault();
+            this.toggleRecordSelection(record);
+        } else {
+            this.touchStartMs = Date.now();
+            if (this.longTouchTimer === null) {
+                this.longTouchTimer = browser.setTimeout(() => {
+                    this.toggleRecordSelection(record);
+                    this.resetLongTouchTimer();
+                }, this.constructor.LONG_TOUCH_THRESHOLD);
+            }
+        }
+    }
+    onRowTouchEnd(record) {
+        const elapsedTime = Date.now() - this.touchStartMs;
+        if (elapsedTime < this.constructor.LONG_TOUCH_THRESHOLD) {
+            this.resetLongTouchTimer();
+        }
+    }
+    onRowTouchMove(record) {
+        this.resetLongTouchTimer();
+    }
 }
 
 ListRenderer.template = "web.ListRenderer";
@@ -1544,3 +1583,5 @@ ListRenderer.props = [
     "nestedKeyOptionalFieldsData?",
 ];
 ListRenderer.defaultProps = { hasSelectors: false, cycleOnTab: true };
+
+ListRenderer.LONG_TOUCH_THRESHOLD = 400;
