@@ -381,12 +381,12 @@ from odoo import api, models, tools
 from odoo.tools import config, safe_eval, pycompat, SUPPORTED_DEBUGGER
 from odoo.tools.safe_eval import assert_valid_codeobj, _BUILTINS, to_opcodes, _EXPR_OPCODES, _BLACKLIST
 from odoo.tools.json import scriptsafe
-from odoo.tools.misc import get_lang
 from odoo.tools.image import image_data_uri
 from odoo.http import request
 from odoo.modules.module import get_resource_path
 from odoo.tools.profiler import QwebTracker
 from odoo.exceptions import UserError, AccessDenied, AccessError, MissingError, ValidationError
+from odoo.modules.registry import get_shared_cache
 
 from odoo.addons.base.models.assetsbundle import AssetsBundle
 from odoo.addons.base.models.ir_asset import can_aggregate, STYLE_EXTENSIONS, SCRIPT_EXTENSIONS
@@ -548,6 +548,7 @@ class IrQWeb(models.AbstractModel):
             * ``inherit_branding_auto`` (bool) add the branding on fields
             * ``minimal_qcontext``(bool) To use the minimum context and options
                 from ``_prepare_environment``
+            * ``preserve_comments``(bool) To preserve xml comment in the final render
 
         :returns: bytes marked as markup-safe (decode to :class:`markupsafe.Markup`
                   instead of `str`)
@@ -571,17 +572,36 @@ class IrQWeb(models.AbstractModel):
     # assume cache will be invalidated by third party on write to ir.ui.view
     def _get_template_cache_keys(self):
         """ Return the list of context keys to use for caching ``_compile``. """
-        return ['lang', 'inherit_branding', 'edit_translations', 'profile']
+        return ['lang', 'inherit_branding', 'edit_translations', 'profile', 'preserve_comments']
 
     @tools.conditional(
         'xml' not in tools.config['dev_mode'],
         tools.ormcache('template', 'tuple(self.env.context.get(k) for k in self._get_template_cache_keys())'),
     )
-    def _get_view_id(self, template):
+    def _get_view_id_timestamp(self, template):
         try:
-            return self.env['ir.ui.view'].sudo().with_context(load_all_views=True)._get_view_id(template)
+            view_id = self.env['ir.ui.view'].sudo().with_context(load_all_views=True)._get_view_id(template)
+            if not view_id:
+                return None, None
+            self.env["ir.ui.view"].flush_model(['model', 'write_date', 'inherit_id'])
+            query = """
+                WITH RECURSIVE ir_ui_view_inherits AS (
+                    SELECT ir_ui_view.id, ir_ui_view.write_date, ir_ui_view.model
+                    FROM ir_ui_view
+                    WHERE id = %s
+                UNION
+                    SELECT ir_ui_view.id, ir_ui_view.write_date, ir_ui_view.model
+                    FROM ir_ui_view
+                    INNER JOIN ir_ui_view_inherits parent ON parent.id = ir_ui_view.inherit_id
+                    WHERE ir_ui_view.model = parent.model
+                )
+                SELECT SUM(extract(epoch from v.write_date))
+                FROM ir_ui_view_inherits v
+            """
+            self.env.cr.execute(query, [view_id])
+            return view_id, self.env.cr.fetchone()[0]
         except Exception:
-            return None
+            return None, None
 
     @QwebTracker.wrap_compile
     def _compile(self, template):
@@ -589,12 +609,14 @@ class IrQWeb(models.AbstractModel):
             self = self.with_context(is_t_cache_disabled=True)
             ref = None
         else:
-            ref = self._get_view_id(template)
+            ref, timestamp = self._get_view_id_timestamp(template)
 
         # define the base key cache for code in cache and t-cache feature
         base_key_cache = None
         if ref:
-            base_key_cache = self._get_cache_key(tuple([ref] + [self.env.context.get(k) for k in self._get_template_cache_keys()]))
+            base_part = (self.env.cr.dbname, ref, timestamp)
+            context_part = tuple((k, self.env.context[k]) for k in self._get_template_cache_keys() if k in self.env.context)
+            base_key_cache = self._get_cache_key(base_part + context_part)
         self = self.with_context(__qweb_base_key_cache=base_key_cache)
 
         # generate the template functions and the root function name
@@ -613,14 +635,25 @@ class IrQWeb(models.AbstractModel):
                 globals_dict = self._prepare_globals()
                 globals_dict['__builtins__'] = globals_dict # So that unknown/unsafe builtins are never added.
                 unsafe_eval(compiled, globals_dict)
-                return globals_dict['generate_functions'](), def_name
+                return globals_dict['generate_functions'].__code__, def_name
             except QWebException:
                 raise
             except Exception as e:
                 raise QWebException("Error when compiling xml template",
                     self, template, code=code, ref=ref) from e
 
-        return self._load_values(base_key_cache, generate_functions)
+        code_function, def_name = self._load_values(base_key_cache, generate_functions)
+
+        compiled = compile('def generate_functions(): pass', f"<{ref}>", 'exec')
+        globals_dict = self._prepare_globals()
+        globals_dict['__builtins__'] = globals_dict # So that unknown/unsafe builtins are never added.
+        unsafe_eval(compiled, globals_dict)
+
+        function = globals_dict['generate_functions']
+        function.__code__ = code_function
+        template_functions = function()
+
+        return template_functions, def_name
 
     def _generate_code(self, template):
         """ Compile the given template into a rendering function (generator)::
@@ -2433,12 +2466,23 @@ class IrQWeb(models.AbstractModel):
 
     # The cache does not need to be invalidated if the 'base_key_cache'
     # in '_compile' method contains the write_date of all inherited views.
-    @tools.conditional(
-        'xml' not in tools.config['dev_mode'],
-        tools.ormcache('cache_key'),
-    )
     def _get_cached_values(self, cache_key, get_value):
         """ generate value from the function if the result is not cached. """
+        if 'xml' in tools.config['dev_mode']:
+            return get_value()
+        shared_cache = get_shared_cache()
+        if shared_cache is None:  # If there are no shared memory fallback on a ormcache
+            _logger.info("Not shared memory fall back on orm cache")
+            return self.__get_orm_cached_values(cache_key, get_value)
+        try:
+            return shared_cache[cache_key]
+        except KeyError:
+            val = get_value()
+            shared_cache[cache_key] = val
+            return val
+
+    @tools.ormcache('cache_key')
+    def __get_orm_cached_values(self, cache_key, get_value):
         return get_value()
 
     # other methods used for the asset bundles

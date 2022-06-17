@@ -30,30 +30,30 @@ _logger = logging.getLogger(__name__)
 _schema = logging.getLogger('odoo.schema')
 
 
-shared_memory = None
+shared_cache = None
 SIZE_SHARED_MEMORY = 20000
 
-def close_shared_memory():
-    global shared_memory
-    if shared_memory is not None:
-        shared_memory.close()
+def get_shared_cache():
+    return shared_cache
 
-def release_lock_shared_memory(pid):
-    global shared_memory
-    if shared_memory is not None:
-        shared_memory.hook_process_killed(pid)
+def close_shared_cache():
+    if shared_cache is not None:
+        shared_cache.close()
 
-def unlink_shared_memory():
-    global shared_memory
-    if shared_memory is not None:
+def release_lock_shared_cache(pid):
+    if shared_cache is not None:
+        shared_cache.hook_process_killed(pid)
+
+def unlink_shared_cache():
+    if shared_cache is not None:
         _logger.info("Unlink shared memory")
-        shared_memory.unlink()
+        shared_cache.unlink()
 
-def create_shared_memory():
-    global shared_memory
-    if shared_memory is None:
+def create_shared_cache():
+    global shared_cache
+    if shared_cache is None:
         _logger.info("Create shared memory")
-        shared_memory = SharedMemoryLRU(20000)
+        shared_cache = SharedMemoryLRU(SIZE_SHARED_MEMORY)
 
 
 class Registry(Mapping):

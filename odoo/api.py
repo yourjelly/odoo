@@ -879,6 +879,19 @@ class Cache(object):
     def __init__(self):
         # {field: {record_id: value}, field: {context_key: {record_id: value}}}
         self._data = defaultdict(dict)
+        # {model: {record_id: OrderedSet(key_t_cache)}}
+        # It use to rollback t-cache pollution due to a write after a t-cache set value on the shared memory
+        # Example:
+        # The record_1 of model A is used in the t-cache key of template X, in the same transaction:
+        # - write on record_1 : write_date (new) change
+        # - render template X : the render result is put in cache with key C containing the write_date (new) of record_1
+        # - rewrite on record_1 : write_date didn't change because the cr.now() is cached (Also the cache is already not correct)
+        # -> it should be correct here
+        # - rerender template X : it will rerender the same than the first render because the write_date didn't change but the value did
+        # then the template in cache won't be correct anymore (represent the old values)
+
+
+        self._write_for_tcache = defaultdict(lambda: defaultdict(OrderedSet))
 
     def _get_field_cache(self, model, field):
         """ Return the field cache of the given field, but not for modifying it. """
