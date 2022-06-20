@@ -191,8 +191,8 @@ class CustomerPortal(portal.CustomerPortal):
                 'currency': order_sudo.pricelist_id.currency_id,
                 'partner_id': order_sudo.partner_id.id,
                 'access_token': order_sudo.access_token,
-                'transaction_route': order_sudo.get_portal_url(suffix='/transaction'),
-                'landing_route': order_sudo.get_portal_url(),
+                'transaction_route': order_sudo._get_portal_url(suffix='/transaction'),
+                'landing_route': order_sudo._get_portal_url(),
             })
 
         if order_sudo.state in ('draft', 'sent', 'cancel'):
@@ -248,7 +248,7 @@ class CustomerPortal(portal.CustomerPortal):
             query_string += '#allow_payment=yes'
         return {
             'force_refresh': True,
-            'redirect_url': order_sudo.get_portal_url(query_string=query_string),
+            'redirect_url': order_sudo._get_portal_url(query_string=query_string),
         }
 
     @http.route(['/my/orders/<int:order_id>/decline'], type='http', auth="public", methods=['POST'], website=True)
@@ -266,9 +266,9 @@ class CustomerPortal(portal.CustomerPortal):
                 decline_message,
                 token=access_token,
             )
-            redirect_url = order_sudo.get_portal_url()
+            redirect_url = order_sudo._get_portal_url()
         else:
-            redirect_url = order_sudo.get_portal_url(query_string="&message=cant_reject")
+            redirect_url = order_sudo._get_portal_url(message='cant_reject')
 
         return request.redirect(redirect_url)
 

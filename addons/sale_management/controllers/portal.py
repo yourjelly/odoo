@@ -86,7 +86,7 @@ class CustomerPortal(portal.CustomerPortal):
         option_sudo = request.env['sale.order.option'].sudo().browse(option_id)
 
         if order_sudo != option_sudo.order_id:
-            return request.redirect(order_sudo.get_portal_url())
+            return request.redirect(order_sudo._get_portal_url())
 
         option_sudo.add_option_to_order()
         return self._get_order_portal_content(order_sudo)

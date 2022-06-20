@@ -3197,7 +3197,7 @@ class AccountMove(models.Model):
         return {
             'type': 'ir.actions.act_url',
             'target': 'self',
-            'url': self.get_portal_url(),
+            'url': self._get_portal_url(),
         }
 
     def _compute_access_url(self):

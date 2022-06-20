@@ -808,18 +808,16 @@ class PurchaseOrder(models.Model):
         """Create url for confirm reminder or purchase reception email for sending
         in mail."""
         if confirm_type in ['reminder', 'reception']:
-            param = url_encode({
-                'confirm': confirm_type,
-                'confirmed_date': self.date_planned and self.date_planned.date(),
-            })
-            return self.get_portal_url(query_string='&%s' % param)
-        return self.get_portal_url()
+            return self._get_portal_url(
+                confirm=confirm_type,
+                confirmed_date=self.date_planned and self.date_planned.date(),
+            )
+        return self._get_portal_url()
 
     def get_update_url(self):
         """Create portal url for user to update the scheduled date on purchase
         order lines."""
-        update_param = url_encode({'update': 'True'})
-        return self.get_portal_url(query_string='&%s' % update_param)
+        return self._get_portal_url(update='True')
 
     def confirm_reminder_mail(self, confirmed_date=False):
         for order in self:

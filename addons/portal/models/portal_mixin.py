@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import uuid
 from werkzeug.urls import url_encode
-from odoo import api, exceptions, fields, models, _
+from odoo import api, exceptions, fields, models
 
 
 class PortalMixin(models.AbstractModel):
@@ -12,7 +12,7 @@ class PortalMixin(models.AbstractModel):
     access_url = fields.Char(
         'Portal Access URL', compute='_compute_access_url',
         help='Customer Portal URL')
-    access_token = fields.Char('Security Token', copy=False)
+    access_token = fields.Char('Security Token', copy=False, groups="base.group_user")
 
     # to display the warning from specific model
     access_warning = fields.Text("Access warning", compute="_compute_access_warning")
@@ -27,10 +27,11 @@ class PortalMixin(models.AbstractModel):
 
     def _portal_ensure_token(self):
         """ Get the current record access token """
-        if not self.access_token:
+        self_sudo = self.sudo()
+        if not self_sudo.access_token:
             # we use a `write` to force the cache clearing otherwise `return self.access_token` will return False
-            self.sudo().write({'access_token': str(uuid.uuid4())})
-        return self.access_token
+            self_sudo.write({'access_token': str(uuid.uuid4())})
+        return self_sudo.access_token
 
     def _get_share_url(self, redirect=False, signup_partner=False, pid=None, share_token=True):
         """
@@ -148,23 +149,30 @@ class PortalMixin(models.AbstractModel):
                              'active_model': self.env.context['active_model']}
         return action
 
-    def get_portal_url(self, suffix=None, report_type=None, download=None, query_string=None, anchor=None):
-        """
-            Get a portal url for this model, including access_token.
-            The associated route must handle the flags for them to have any effect.
-            - suffix: string to append to the url, before the query string
-            - report_type: report_type query string, often one of: html, pdf, text
-            - download: set the download query string to true
-            - query_string: additional query string
-            - anchor: string to append after the anchor #
+    def _get_portal_url(
+        self, suffix=None, download=None, anchor=None,
+        query_string=None, **query_params
+    ):
+        """Get the portal url for the given record, including access_token.
+
+        The associated route must handle the flags for them to have any effect.
+        :param str suffix: a suffix to append to the url, before the query string
+        :param bool download: set the download query string to true
+        :param dict query_params: additional query parameters to add to the query string
+        :param str query_string: additional query string
+        :param str anchor: string to append after the anchor #
+        :returns: the record portal url, with custom parameters if specified
+        :rtype: str
         """
         self.ensure_one()
-        url = self.access_url + '%s?access_token=%s%s%s%s%s' % (
-            suffix if suffix else '',
-            self._portal_ensure_token(),
-            '&report_type=%s' % report_type if report_type else '',
-            '&download=true' if download else '',
-            query_string if query_string else '',
-            '#%s' % anchor if anchor else ''
-        )
-        return url
+        url = self.access_url + (suffix or '')
+        query = {
+            'access_token': self._portal_ensure_token(),
+        }
+        if download:
+            query['download'] = 'true'
+        if query_params:
+            query.update(query_params)
+        query_string = url_encode(query) + (query_string or '')
+        fragment = '#%s' % anchor if anchor else ''
+        return url + '?' + query_string + fragment

@@ -4,11 +4,11 @@
     <template id="portal_my_home_menu_sale" name="Portal layout : sales menu entries" inherit_id="portal.portal_breadcrumbs" priority="20">
         <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
             <li t-if="page_name == 'quote' or sale_order and sale_order.state in ('sent', 'cancel')" t-attf-class="breadcrumb-item #{'active ' if not sale_order else ''}">
-                <a t-if="sale_order" t-attf-href="/my/quotes?{{ keep_query() }}">Quotations</a>
+                <a t-if="sale_order" t-attf-href="/my/quotes">Quotations</a>
                 <t t-else="">Quotations</t>
             </li>
             <li t-if="page_name == 'order' or sale_order and sale_order.state not in ('sent', 'cancel')" t-attf-class="breadcrumb-item #{'active ' if not sale_order else ''}">
-                <a t-if="sale_order" t-attf-href="/my/orders?{{ keep_query() }}">Sales Orders</a>
+                <a t-if="sale_order" t-attf-href="/my/orders">Sales Orders</a>
                 <t t-else="">Sales Orders</t>
             </li>
             <li t-if="sale_order" class="breadcrumb-item active">
@@ -52,7 +52,7 @@
                 </thead>
                 <t t-foreach="quotations" t-as="quotation">
                     <tr>
-                        <td><a t-att-href="quotation.get_portal_url()"><t t-esc="quotation.name"/></a></td>
+                        <td><a t-att-href="quotation._get_portal_url()"><t t-esc="quotation.name"/></a></td>
                         <td class="text-right"><span t-field="quotation.date_order"/></td>
                         <td class="text-right"><span t-field="quotation.validity_date"/></td>
                         <td class="text-center">
@@ -92,7 +92,7 @@
                 </thead>
                 <t t-foreach="orders" t-as="order">
                     <tr>
-                        <td><a t-att-href="order.get_portal_url()"><t t-esc="order.name"/></a></td>
+                        <td><a t-att-href="order._get_portal_url()"><t t-esc="order.name"/></a></td>
                         <td class="text-right">
                             <span t-field="order.date_order" t-options="{'widget': 'date'}"/>&amp;nbsp;
                             <span class='d-none d-md-inline' t-field="order.date_order" t-options="{'time_only': True}"/>
@@ -137,10 +137,10 @@
                                 </a>
                                 <div class="o_download_pdf btn-toolbar flex-sm-nowrap">
                                     <div class="btn-group flex-grow-1 mr-1 mb-1">
-                                        <a class="btn btn-secondary btn-block o_download_btn" t-att-href="sale_order.get_portal_url(report_type='pdf', download=True)" title="Download"><i class="fa fa-download"/> Download</a>
+                                        <a class="btn btn-secondary btn-block o_download_btn" t-att-href="sale_order._get_portal_url(report_type='pdf', download=True)" title="Download"><i class="fa fa-download"/> Download</a>
                                     </div>
                                     <div class="btn-group flex-grow-1 mb-1">
-                                        <a class="btn btn-secondary btn-block o_print_btn o_portal_invoice_print" t-att-href="sale_order.get_portal_url(report_type='pdf')" id="print_invoice_report" title="Print" target="_blank"><i class="fa fa-print"/> Print</a>
+                                        <a class="btn btn-secondary btn-block o_print_btn o_portal_invoice_print" t-att-href="sale_order._get_portal_url(report_type='pdf')" id="print_invoice_report" title="Print" target="_blank"><i class="fa fa-print"/> Print</a>
                                     </div>
                                 </div>
                             </li>
@@ -224,7 +224,7 @@
                                         </ul>
                                     </p>
                                     <t t-call="portal.signature_form">
-                                        <t t-set="call_url" t-value="sale_order.get_portal_url(suffix='/accept')"/>
+                                        <t t-set="call_url" t-value="sale_order._get_portal_url(suffix='/accept')"/>
                                         <t t-set="default_name" t-value="sale_order.partner_id.name"/>
                                     </t>
                                 </main>
@@ -268,7 +268,10 @@
                     <!-- modal relative to the action reject -->
                     <div role="dialog" class="modal fade" id="modaldecline">
                         <div class="modal-dialog">
-                            <form id="decline" method="POST" t-attf-action="/my/orders/#{sale_order.id}/decline?access_token=#{sale_order.access_token}" class="modal-content">
+                            <form id="decline"
+                                method="POST"
+                                t-att-action="sale_order._get_portal_url(suffix='/decline')"
+                                class="modal-content">
                                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                                 <header class="modal-header">
                                     <h4 class="modal-title">Reject This Quotation</h4>
@@ -430,7 +433,7 @@
                         <strong class="d-block mb-1">Invoices</strong>
                         <ul class="list-group mb-4">
                             <t t-foreach="invoices" t-as="i">
-                                <t t-set="report_url" t-value="i.get_portal_url(report_type='pdf', download=True)"/>
+                                <t t-set="report_url" t-value="i._get_portal_url(report_type='pdf', download=True)"/>
                                 <div class="d-flex flex-wrap align-items-center justify-content-between">
                                     <div>
                                         <a t-att-href="report_url">

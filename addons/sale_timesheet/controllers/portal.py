@@ -109,7 +109,7 @@ class SaleTimesheetCustomerPortal(TimesheetCustomerPortal):
                 values['so_accessible'] = True
                 title = _('Quotation') if task.sale_order_id.state in ['draft', 'sent'] else _('Sales Order')
                 values['task_link_section'].append({
-                    'access_url': task.sale_order_id.get_portal_url(),
+                    'access_url': task.sale_order_id._get_portal_url(),
                     'title': title,
                 })
         except (AccessError, MissingError):
@@ -120,7 +120,7 @@ class SaleTimesheetCustomerPortal(TimesheetCustomerPortal):
             values['invoices_accessible'] = moves.ids
             if moves:
                 if len(moves) == 1:
-                    task_invoice_url = moves.get_portal_url()
+                    task_invoice_url = moves._get_portal_url()
                     title = _('Invoice')
                 else:
                     task_invoice_url = f'/my/tasks/{task.id}/orders/invoices'

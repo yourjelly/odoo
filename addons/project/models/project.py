@@ -2395,7 +2395,7 @@ class Task(models.Model):
                     "url": url,
                 }
             elif self.display_parent_task_button:
-                return self.parent_id.get_portal_url()
+                return self.parent_id._get_portal_url()
             # The portal user has no access to the parent task, so normally the button should be invisible.
             return {}
         action = self.action_open_parent_task()
@@ -2430,10 +2430,15 @@ class Task(models.Model):
                 action['views'] = [(view_id, view_type) for view_id, view_type in action['views'] if view_type == 'form']
                 action['res_id'] = subtasks.id
             return action
+
+        if len(subtasks) > 1:
+            portal_url = f'{self.project_id.access_url}/task/{self.id}/subtasks'
+        else:
+            portal_url = subtasks._get_portal_url(project_sharing=1)
         return {
             'name': 'Portal Sub-tasks',
             'type': 'ir.actions.act_url',
-            'url': f'/my/projects/{self.project_id.id}/task/{self.id}/subtasks' if len(subtasks) > 1 else subtasks.get_portal_url(query_string='project_sharing=1'),
+            'url': portal_url,
         }
 
     def action_dependent_tasks(self):

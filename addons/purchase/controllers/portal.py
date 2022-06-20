@@ -181,10 +181,10 @@ class CustomerPortal(portal.CustomerPortal):
             try:
                 line_id = int(id_str)
             except ValueError:
-                return request.redirect(order_sudo.get_portal_url())
+                return request.redirect(order_sudo._get_portal_url())
             line = order_sudo.order_line.filtered(lambda l: l.id == line_id)
             if not line:
-                return request.redirect(order_sudo.get_portal_url())
+                return request.redirect(order_sudo._get_portal_url())
 
             try:
                 updated_date = line._convert_to_middle_of_day(datetime.strptime(date_str, '%Y-%m-%d'))
