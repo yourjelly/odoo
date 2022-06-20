@@ -89,18 +89,18 @@ export class ViewButton extends Component {
 
     getClassName() {
         const classNames = [];
+        let hasExplicitRank = false;
+        for (let cls of this.props.className.split(" ")) {
+            if (cls in odooToBootstrapClasses) {
+                cls = odooToBootstrapClasses[cls];
+            }
+            classNames.push(cls);
+            if (!hasExplicitRank && explicitRankClasses.includes(cls)) {
+                hasExplicitRank = true;
+            }
+        }
         if (this.props.tag === "button") {
             classNames.push("btn");
-            let hasExplicitRank = false;
-            for (let cls of this.props.className.split(" ")) {
-                if (cls in odooToBootstrapClasses) {
-                    cls = odooToBootstrapClasses[cls];
-                }
-                classNames.push(cls);
-                if (!hasExplicitRank && explicitRankClasses.includes(cls)) {
-                    hasExplicitRank = true;
-                }
-            }
             if (!hasExplicitRank) {
                 classNames.push(this.props.defaultRank || "btn-secondary");
             }

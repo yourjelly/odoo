@@ -7011,7 +7011,7 @@ QUnit.module("Views", (hooks) => {
     );
 
     QUnit.test("support anchor tags with action type", async function (assert) {
-        assert.expect(1);
+        assert.expect(2);
 
         const actionService = {
             start() {
@@ -7026,11 +7026,16 @@ QUnit.module("Views", (hooks) => {
             serverData,
             arch: `
                 <form>
-                    <a type="action" name="42"><i class="fa fa-arrow-right"/> Click me !</a>
+                    <a type="action" name="42" class="btn-primary"><i class="fa fa-arrow-right"/> Click me !</a>
                 </form>`,
             resId: 1,
         });
-        await click(target.querySelector('a[type="action"]'));
+        await click(target.querySelector("a[type='action']"));
+        assert.hasClass(
+            target.querySelector("a[type='action']"),
+            "btn-primary",
+            "classname is given if set on the <a> element"
+        );
     });
 
     QUnit.test(
