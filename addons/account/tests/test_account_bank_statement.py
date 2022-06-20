@@ -35,26 +35,19 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
         cls.currency_3 = cls.currency_data_2['currency']
         cls.currency_4 = cls.currency_data_3['currency']
 
-        cls.statement = cls.env['account.bank.statement'].create({
-            'name': 'test_statement',
-            'last_date': '2019-01-01',
+        cls.statement_line = cls.env['account.bank.statement.line'].create({
             'journal_id': cls.bank_journal_1.id,
-            'line_ids': [
-                (0, 0, {
-                    'date': '2019-01-01',
-                    'payment_ref': 'line_1',
-                    'partner_id': cls.partner_a.id,
-                    'foreign_currency_id': cls.currency_2.id,
-                    'amount': 1250.0,
-                    'amount_currency': 2500.0,
-                }),
-            ],
+            'date': '2019-01-01',
+            'payment_ref': 'line_1',
+            'partner_id': cls.partner_a.id,
+            'foreign_currency_id': cls.currency_2.id,
+            'amount': 1250.0,
+            'amount_currency': 2500.0,
         })
-        cls.statement_line = cls.statement.line_ids
 
         cls.expected_st_line = {
             'date': fields.Date.from_string('2019-01-01'),
-            'journal_id': cls.statement.journal_id.id,
+            'journal_id': cls.statement_line.journal_id.id,
             'payment_ref': 'line_1',
             'partner_id': cls.partner_a.id,
             'currency_id': cls.currency_1.id,
@@ -68,7 +61,7 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
             'name': cls.statement_line.payment_ref,
             'partner_id': cls.statement_line.partner_id.id,
             'currency_id': cls.currency_1.id,
-            'account_id': cls.statement.journal_id.default_account_id.id,
+            'account_id': cls.statement_line.journal_id.default_account_id.id,
             'debit': 1250.0,
             'credit': 0.0,
             'amount_currency': 1250.0,
@@ -78,7 +71,7 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
             'name': cls.statement_line.payment_ref,
             'partner_id': cls.statement_line.partner_id.id,
             'currency_id': cls.currency_2.id,
-            'account_id': cls.statement.journal_id.suspense_account_id.id,
+            'account_id': cls.statement_line.journal_id.suspense_account_id.id,
             'debit': 0.0,
             'credit': 1250.0,
             'amount_currency': -2500.0,
@@ -603,13 +596,14 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
         self.assertRecordValues(
             self.env['account.bank.statement.line'].search([('company_id', '=', self.env.company.id)]),
             [
-                {'amount': 1, 'running_balance_end': 28},
-                {'amount': 2, 'running_balance_end': 27},
-                {'amount': 3, 'running_balance_end': 25},
-                {'amount': 4, 'running_balance_end': 22},
-                {'amount': 5, 'running_balance_end': 18},
-                {'amount': 6, 'running_balance_end': 13},
-                {'amount': 7, 'running_balance_end': 7},
+                # pylint: disable=C0326
+                {'amount': 1,   'running_balance_start': 27,    'running_balance_end': 28,  'statement_id': False},
+                {'amount': 2,   'running_balance_start': 25,    'running_balance_end': 27,  'statement_id': False},
+                {'amount': 3,   'running_balance_start': 22,    'running_balance_end': 25,  'statement_id': False},
+                {'amount': 4,   'running_balance_start': 18,    'running_balance_end': 22,  'statement_id': False},
+                {'amount': 5,   'running_balance_start': 13,    'running_balance_end': 18,  'statement_id': False},
+                {'amount': 6,   'running_balance_start': 7,     'running_balance_end': 13,  'statement_id': False},
+                {'amount': 7,   'running_balance_start': 0,     'running_balance_end': 7,   'statement_id': False},
             ],
         )
 
@@ -623,96 +617,51 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
                 ('amount', '<=', 6),
             ]),
             [
-                {'amount': 3, 'running_balance_end': 25},
-                {'amount': 4, 'running_balance_end': 22},
-                {'amount': 5, 'running_balance_end': 18},
-                {'amount': 6, 'running_balance_end': 13},
+                {'amount': 3, 'running_balance_start': 22, 'running_balance_end': 25},
+                {'amount': 4, 'running_balance_start': 18, 'running_balance_end': 22},
+                {'amount': 5, 'running_balance_start': 13, 'running_balance_end': 18},
+                {'amount': 6, 'running_balance_start': 7, 'running_balance_end': 13},
             ],
         )
 
+        # Put line2 -> line4 inside a statement.
         statement1 = self.env['account.bank.statement'].create({
-            'balance_start': 0.0,
-            'balance_end': 17.0,
-            'line_ids': [Command.set((line7 + line6 + line4).ids)],
+            'start_statement_line_id': line4.id,
+            'end_statement_line_id': line2.id,
         })
 
-        # self.assertRecordValues(
-        #     statement1,
-        #     [{
-        #         'balance_start': 0.0,
-        #         'balance_end': 17.0,
-        #     }],
-        # )
-
+        self.env['account.bank.statement'].flush_model()
         self.env['account.bank.statement.line'].flush_model()
         self.env['account.bank.statement.line'].invalidate_model()
         self.assertRecordValues(
             self.env['account.bank.statement.line'].search([('company_id', '=', self.env.company.id)]),
             [
-                {'amount': 1, 'statement_id': False, 'running_balance_end': 28},
-                {'amount': 2, 'statement_id': False, 'running_balance_end': 27},
-                {'amount': 3, 'statement_id': False, 'running_balance_end': 25},
-                {'amount': 5, 'statement_id': False, 'running_balance_end': 22},
-                {'amount': 4, 'statement_id': statement1.id, 'running_balance_end': 17},
-                {'amount': 6, 'statement_id': statement1.id, 'running_balance_end': 13},
-                {'amount': 7, 'statement_id': statement1.id, 'running_balance_end': 7},
+                # pylint: disable=C0326
+                {'amount': 1,   'running_balance_start': 27,    'running_balance_end': 28,  'statement_id': False},
+                {'amount': 2,   'running_balance_start': 25,    'running_balance_end': 27,  'statement_id': statement1.id},
+                {'amount': 3,   'running_balance_start': 22,    'running_balance_end': 25,  'statement_id': statement1.id},
+                {'amount': 4,   'running_balance_start': 18,    'running_balance_end': 22,  'statement_id': statement1.id},
+                {'amount': 5,   'running_balance_start': 13,    'running_balance_end': 18,  'statement_id': False},
+                {'amount': 6,   'running_balance_start': 7,     'running_balance_end': 13,  'statement_id': False},
+                {'amount': 7,   'running_balance_start': 0,     'running_balance_end': 7,   'statement_id': False},
             ],
         )
 
-        statement2 = self.env['account.bank.statement'].create({
-            'balance_start': 22.0,
-            'balance_end': 27.0,
-            'line_ids': [Command.set((line3 + line2).ids)],
-        })
-
-        # self.assertRecordValues(
-        #     statement2,
-        #     [{
-        #         'balance_start': 22.0,
-        #         'balance_end': 27.0,
-        #     }],
-        # )
+        # line3, line4 and line5 have the same date. Move line5 at the first place using the sequence.
+        line5.sequence -= 1
 
         self.env['account.bank.statement.line'].flush_model()
         self.env['account.bank.statement.line'].invalidate_model()
         self.assertRecordValues(
             self.env['account.bank.statement.line'].search([('company_id', '=', self.env.company.id)]),
             [
-                {'amount': 1, 'statement_id': False, 'running_balance_end': 28},
-                {'amount': 2, 'statement_id': statement2.id, 'running_balance_end': 27},
-                {'amount': 5, 'statement_id': False, 'running_balance_end': 25},
-                {'amount': 3, 'statement_id': statement2.id, 'running_balance_end': 20},
-                {'amount': 4, 'statement_id': statement1.id, 'running_balance_end': 17},
-                {'amount': 6, 'statement_id': statement1.id, 'running_balance_end': 13},
-                {'amount': 7, 'statement_id': statement1.id, 'running_balance_end': 7},
-            ],
-        )
-
-        statement3 = self.env['account.bank.statement'].create({
-            'balance_start': 20.0,
-            'balance_end': 25.0,
-            'line_ids': [Command.set(line5.ids)],
-        })
-
-        # self.assertRecordValues(
-        #     statement3,
-        #     [{
-        #         'balance_start': 20.0,
-        #         'balance_end': 25.0,
-        #     }],
-        # )
-
-        self.env['account.bank.statement.line'].flush_model()
-        self.env['account.bank.statement.line'].invalidate_model()
-        self.assertRecordValues(
-            self.env['account.bank.statement.line'].search([('company_id', '=', self.env.company.id)]),
-            [
-                {'amount': 1, 'statement_id': False, 'running_balance_end': 28},
-                {'amount': 2, 'statement_id': statement2.id, 'running_balance_end': 27},
-                {'amount': 3, 'statement_id': statement2.id, 'running_balance_end': 25},
-                {'amount': 5, 'statement_id': statement3.id, 'running_balance_end': 22},
-                {'amount': 4, 'statement_id': statement1.id, 'running_balance_end': 17},
-                {'amount': 6, 'statement_id': statement1.id, 'running_balance_end': 13},
-                {'amount': 7, 'statement_id': statement1.id, 'running_balance_end': 7},
+                # pylint: disable=C0326
+                {'amount': 1,   'running_balance_start': 27,    'running_balance_end': 28,  'statement_id': False},
+                {'amount': 2,   'running_balance_start': 25,    'running_balance_end': 27,  'statement_id': statement1.id},
+                {'amount': 5,   'running_balance_start': 20,    'running_balance_end': 25,  'statement_id': statement1.id},
+                {'amount': 3,   'running_balance_start': 17,    'running_balance_end': 20,  'statement_id': statement1.id},
+                {'amount': 4,   'running_balance_start': 13,    'running_balance_end': 17,  'statement_id': statement1.id},
+                {'amount': 6,   'running_balance_start': 7,     'running_balance_end': 13,  'statement_id': False},
+                {'amount': 7,   'running_balance_start': 0,     'running_balance_end': 7,   'statement_id': False},
             ],
         )

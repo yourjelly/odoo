@@ -19,24 +19,29 @@ class AccountBankStatement(models.Model):
     )
     currency_id = fields.Many2one(
         comodel_name='res.currency',
-        compute='_compute_journal_id_and_currency_id',
+        compute='_compute_currency_id',
         store=True,
+        required=True,
+        precompute=True,
+    )
+    date = fields.Date(
+        compute='_compute_date',
+        required=True,
+        index=True,
+        precompute=True,
+        store=True,
+        readonly=False,
     )
     journal_id = fields.Many2one(
         comodel_name='account.journal',
-        compute='_compute_journal_id_and_currency_id',
+        compute='_compute_journal_id',
         store=True,
+        required=True,
+        precompute=True,
     )
     last_date = fields.Date(
-        compute='_compute_last_date',
-        store=True,
-        help="Technical field holding the date of the last selected transaction for the current statement. "
-             "We need that in order to ensure lines are well ordered.",
-    )
-    line_ids = fields.One2many(
-        string="Statement lines",
-        comodel_name='account.bank.statement.line',
-        inverse_name='statement_id',
+        string="Last Date",
+        related='end_statement_line_id.date',
     )
     balance_start = fields.Monetary(
         string="Starting Balance",
@@ -46,27 +51,48 @@ class AccountBankStatement(models.Model):
         string="Ending Balance",
         currency_field='currency_id',
     )
+    balance_manually_edited = fields.Boolean(
+        help="Technical field preventing the recomputation of balances if the user forces them.",
+    )
+    start_statement_line_id = fields.Many2one(
+        comodel_name='account.bank.statement.line',
+        required=True,
+    )
+    start_statement_line_date = fields.Date(
+        string="Start Date",
+        related='start_statement_line_id.move_id.date',
+        store=True,
+    )
+    start_statement_line_sequence = fields.Integer(
+        string="Start Sequence",
+        related='start_statement_line_id.sequence',
+        store=True,
+    )
+    end_statement_line_id = fields.Many2one(
+        comodel_name='account.bank.statement.line',
+        required=True,
+    )
+    end_statement_line_date = fields.Date(
+        string="End Date",
+        related='end_statement_line_id.move_id.date',
+        store=True,
+    )
+    end_statement_line_sequence = fields.Integer(
+        string="End Sequence",
+        related='end_statement_line_id.sequence',
+        store=True,
+    )
+    attachment_id = fields.Many2one(
+        comodel_name='ir.attachment',
+    )
 
     is_difference_zero = fields.Boolean(
         compute='_compute_is_difference_zero',
     )
 
-    attachment_id = fields.Many2one(
-        comodel_name='ir.attachment',
-    )
-
     # -------------------------------------------------------------------------
     # CONSTRAINT METHODS
     # -------------------------------------------------------------------------
-
-    @api.constrains('line_ids')
-    def _check_lines_consistency(self):
-        for statement in self:
-            journals = statement.line_ids.journal_id
-            if len(journals) > 1:
-                raise ValidationError(_(
-                    "All bank transactions belonging to the same bank statement must share the same journal"
-                ))
 
     def _constrains_date_sequence(self):
         # Multiple import methods set the name to things that are not sequences:
@@ -99,60 +125,62 @@ class AccountBankStatement(models.Model):
         return "%s %s %04d/%02d/00000" % (self.journal_id.code, _('Statement'), self.date.year, self.date.month)
 
     # -------------------------------------------------------------------------
+    # ONCHANGE METHODS
+    # -------------------------------------------------------------------------
+
+    @api.onchange('balance_start', 'balance_end')
+    def _onchange_balance(self):
+        self.balance_manually_edited = True
+
+    # -------------------------------------------------------------------------
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
 
+    @api.depends('start_statement_line_id', 'end_statement_line_id', 'balance_start', 'balance_end')
     def _compute_is_difference_zero(self):
         for statement in self:
-            last_statement_balance_end = self.search([('last_date', '<', statement.last_date),
-                                                      ('journal_id', '=', statement.journal_id.id)],
-                                                     limit=1).balance_end
-            statement.is_difference_zero = statement.currency_id and statement.currency_id.is_zero(last_statement_balance_end - statement.balance_start)
+            currency = statement.currency_id
+            statement.is_difference_zero = True
+            if currency \
+                    and statement.start_statement_line_id \
+                    and currency.compare_amounts(statement.start_statement_line_id.running_balance_start, statement.balance_start) != 0:
+                statement.is_difference_zero = False
+            if currency \
+                    and statement.end_statement_line_id \
+                    and currency.compare_amounts(statement.end_statement_line_id.running_balance_end, statement.balance_end) != 0:
+                statement.is_difference_zero = False
 
-    @api.depends('line_ids.date')
-    def _compute_last_date(self):
+    @api.depends('end_statement_line_id')
+    def _compute_date(self):
         for statement in self:
-            statement.last_date = max(statement.line_ids.mapped('date')) if statement.line_ids else None
+            statement.date = statement.end_statement_line_id.date
 
-    @api.depends('line_ids.journal_id')
-    def _compute_journal_id_and_currency_id(self):
+    @api.depends('start_statement_line_id')
+    def _compute_journal_id(self):
         for statement in self:
-            statement.journal_id = statement.line_ids[:1].journal_id
+            statement.journal_id = statement.start_statement_line_id.journal_id
+
+    @api.depends('journal_id')
+    def _compute_currency_id(self):
+        for statement in self:
             statement.currency_id = statement.journal_id.currency_id or statement.journal_id.company_id.currency_id
 
-    # -------------------------------------------------------------------------
-    # LOW-LEVEL METHODS
-    # -------------------------------------------------------------------------
-
-    @api.model
-    def default_get(self, fields_list):
-        # EXTENDS base
-        defaults = super().default_get(fields_list)
-        if 'line_ids' in fields_list \
-                and 'line_ids' not in defaults \
-                and self._context.get('active_model') == 'account.bank.statement.line' \
-                and self._context.get('active_id'):
-            active_st_line = self.env['account.bank.statement.line'].browse(self._context.get('active_id'))
-            # TODO continue to suggest the default lines/balances
-        return defaults
+    @api.depends('start_statement_line_id', 'end_statement_line_id')
+    def _compute_balance(self):
+        for statement in self:
+            if not statement.balance_manually_edited:
+                if statement.start_statement_line_id:
+                    statement.balance_start = statement.start_statement_line_id.running_balance_start
+                if statement.end_statement_line_id:
+                    statement.balance_end = statement.end_statement_line_id.running_balance_end
 
 
 class AccountBankStatementLine(models.Model):
     _name = "account.bank.statement.line"
     _inherits = {'account.move': 'move_id'}
     _description = "Bank Statement Line"
-    _order = "date desc, sequence, statement_id, id desc"
+    _order = "date desc, sequence, id desc"
     _check_company_auto = True
-
-    @api.model
-    def default_get(self, fields_list):
-        # OVERRIDE
-        defaults = super().default_get(fields_list)
-        if 'journal_id' in fields_list:
-            defaults['statement_id'] = self.env['account.bank.statement'].search(
-                [('journal_id', '=', defaults['journal_id'])], limit=1
-            ).id
-        return defaults
 
     def _get_default_journal(self):
         ''' Retrieve the default journal for the account.payment.
@@ -169,13 +197,11 @@ class AccountBankStatementLine(models.Model):
         auto_join=True,
         string='Journal Entry', required=True, readonly=True, ondelete='cascade',
         check_company=True)
-    statement_id = fields.Many2one(
-        comodel_name='account.bank.statement',
-        string='Statement',
-        index=True,
-    )
 
-    sequence = fields.Integer(help="Gives the sequence order when displaying a list of bank statement lines.", default=1)
+    sequence = fields.Integer(
+        help="Gives the sequence order when displaying a list of bank statement lines.",
+        default=10,
+    )
     account_number = fields.Char(string='Bank Account Number', help="Technical field used to store the bank account number before its creation, upon the line's processing")
     partner_name = fields.Char(
         help="This field is used to record the third party name when importing bank statement in electronic format, "
@@ -217,11 +243,24 @@ class AccountBankStatementLine(models.Model):
     )
 
     # == Running balances ==
+    statement_id = fields.Many2one(
+        comodel_name='account.bank.statement',
+        string="Statement",
+        store=False,
+        compute='_compute_statement_id',
+    )
+    running_balance_start = fields.Monetary(
+        string="Running Balance Before",
+        store=False,
+        currency_field='currency_id',
+        compute='_compute_running_balance',
+        help="Technical field for keeping running balance before this record",
+    )
     running_balance_end = fields.Monetary(
         string="Running Ending Balance",
         store=False,
         currency_field='currency_id',
-        compute='_compute_running_balance_end',
+        compute='_compute_running_balance',
     )
 
     # == Display purpose fields ==
@@ -413,23 +452,95 @@ class AccountBankStatementLine(models.Model):
         for pay in self:
             pay.currency_id = pay.journal_id.currency_id or pay.journal_id.company_id.currency_id
 
-    @api.depends('statement_id', 'date')
-    def _compute_running_balance_end(self):
-        st_line_ids = []
-        journal_ids = set()
-        for st_line in self:
-            if st_line._origin:
-                st_line_ids.append(st_line._origin.id)
-                journal_ids.add(st_line.journal_id.id)
-            else:
-                st_line.running_balance_end = 0.0
+    @api.depends('date', 'sequence', 'journal_id')
+    def _compute_statement_id(self):
+        st_line_ids = self._ids
+
+        if st_line_ids:
+            # Statement lines are stored inside the database.
+
+            self.flush_recordset(fnames=['amount', 'date', 'sequence', 'journal_id'])
+            self._cr.execute('''
+                SELECT
+                    st_line.id,
+                    st.id
+                FROM account_bank_statement_line st_line
+                JOIN account_move move ON move.statement_line_id = st_line.id
+                JOIN account_bank_statement st ON
+                    st.journal_id = move.journal_id
+                    AND
+                    (
+                        move.date > st.start_statement_line_date
+                        OR (
+                            move.date = st.start_statement_line_date
+                            AND (
+                                st_line.sequence < st.start_statement_line_sequence
+                                OR (
+                                    st_line.sequence = st.start_statement_line_sequence
+                                    AND st_line.id >= st.start_statement_line_id
+                                )
+                            )
+                        )
+                    )
+                    AND
+                    (
+                        move.date < st.end_statement_line_date
+                        OR (
+                            move.date = st.end_statement_line_date
+                            AND (
+                                st_line.sequence > st.end_statement_line_sequence
+                                OR (
+                                    st_line.sequence = st.end_statement_line_sequence
+                                    AND st_line.id <= st.end_statement_line_id
+                                )
+                            )
+                        )
+                    )
+                WHERE st_line.id IN %s
+            ''', [tuple(st_line_ids)])
+
+            st_id_map = {st_line_id: st_id for st_line_id, st_id in self._cr.fetchall()}
+            for st_line in self:
+                st_line.statement_id = st_id_map.get(st_line.id)
+        else:
+            # Statement lines are not stored inside the database.
+            self.statement_id = None
+
+    @api.depends('date', 'sequence', 'journal_id')
+    def _compute_running_balance(self):
+        st_line_ids = self._ids
+        journal_ids = self.journal_id._ids
 
         if not st_line_ids:
+            self.running_balance_start = 0.0
+            self.running_balance_end = 0.0
             return
 
+        base_domain = [('journal_id', 'in', tuple(journal_ids)), ('state', '!=', 'cancel')]
+
+        # Fetch the starting balance to consider to avoid computing the running balance on the whole database.
+        self.flush_recordset(fnames=['amount', 'date', 'sequence', 'journal_id'])
+        min_date = min(self.mapped('date'))
+        query = self._where_calc(base_domain + [('date', '<', min_date)])
+        tables, where_clause, where_params = query.get_sql()
+        self._cr.execute(
+            f'''
+                SELECT
+                    move.journal_id,
+                    SUM(account_bank_statement_line.amount)
+                FROM {tables}
+                JOIN account_move move ON move.id = account_bank_statement_line.move_id
+                WHERE {where_clause}
+                GROUP BY move.journal_id
+            ''',
+            where_params,
+        )
+        starting_balance_per_journal = {r[0]: r[1] for r in self._cr.fetchall()}
+
+        # Compute the running balances.
+        max_date = max(self.mapped('date'))
         record_by_id = {st_line._origin.id: st_line for st_line in self}
-        domain = [('journal_id', 'in', tuple(journal_ids)), ('state', '!=', 'cancel')]
-        query = self._where_calc(domain)
+        query = self._where_calc(base_domain + [('date', '>=', min_date), ('date', '<=', max_date)])
         tables, where_clause, where_params = query.get_sql()
         order_by = ', '.join(self._generate_order_by_inner(
             self._table,
@@ -438,29 +549,30 @@ class AccountBankStatementLine(models.Model):
             reverse_direction=True,
         ))
 
-        self.statement_id.flush_recordset(['last_date'])
-        self.flush_recordset(['amount', 'date', 'journal_id', 'statement_id'])
         self._cr.execute(f'''
             SELECT
                 *
             FROM (
                 SELECT
                     account_bank_statement_line.id,
+                    move.journal_id,
+                    account_bank_statement_line.amount,
                     SUM(account_bank_statement_line.amount) OVER (
                         PARTITION BY account_bank_statement_line__move_id.journal_id
                         ORDER BY {order_by}
                         ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
                     ) AS running_balance_start
                 FROM {tables}
-                LEFT JOIN account_bank_statement account_bank_statement_line__statement_id
-                    ON account_bank_statement_line__statement_id.id = account_bank_statement_line.statement_id
+                JOIN account_move move ON move.id = account_bank_statement_line.move_id
                 WHERE {where_clause}
             ) AS sub
             WHERE sub.id IN %s
         ''', where_params + [tuple(st_line_ids)])
 
-        for st_line_id, balance in self._cr.fetchall():
-            record_by_id[st_line_id].running_balance_end = balance
+        for st_line_id, journal_id, amount, running_balance_start in self._cr.fetchall():
+            starting_journal_balance = starting_balance_per_journal.get(journal_id, 0.0)
+            record_by_id[st_line_id].running_balance_end = starting_journal_balance + running_balance_start
+            record_by_id[st_line_id].running_balance_start = starting_journal_balance + running_balance_start - amount
 
     # -------------------------------------------------------------------------
     # CONSTRAINT METHODS

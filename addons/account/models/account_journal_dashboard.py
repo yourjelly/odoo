@@ -488,27 +488,17 @@ class account_journal(models.Model):
             'views': [[view_id, 'form']],
         }
 
-    def _select_action_to_open(self):
-        self.ensure_one()
-        if self._context.get('action_name'):
-            return self._context.get('action_name')
-        elif self.type in ('bank', 'cash'):
-            return 'action_view_bank_statement_tree'
-        elif self.type == 'sale':
-            return 'action_move_out_invoice_type'
-        elif self.type == 'purchase':
-            return 'action_move_in_invoice_type'
-        else:
-            return 'action_move_journal_line'
-
     def open_action(self):
         """return action based on type for related journals"""
         self.ensure_one()
-        action_name = self._select_action_to_open()
-
-        # Set 'account.' prefix if missing.
-        if not action_name.startswith("account."):
-            action_name = 'account.%s' % action_name
+        if self._context.get('action_name'):
+            action_name = self._context.get('action_name')
+        elif self.type == 'sale':
+            action_name = 'account.action_move_out_invoice_type'
+        elif self.type == 'purchase':
+            action_name = 'account.action_move_in_invoice_type'
+        else:
+            action_name = 'account.action_move_journal_line'
 
         action = self.env["ir.actions.act_window"]._for_xml_id(action_name)
 
