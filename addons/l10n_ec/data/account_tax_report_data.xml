@@ -36,7 +36,6 @@
                             </record>
                             <record id="tax_report_line_104_411" model="account.report.line">
                                 <field name="name">Valor neto(411)</field>
-                                <field name="code">c411</field>
                                 <field name="sequence" eval="4"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_104_411_tag" model="account.report.expression">
@@ -48,7 +47,6 @@
                             </record>
                             <record id="tax_report_line_104_421" model="account.report.line">
                                 <field name="name">Impuesto generado(421)</field>
-                                <field name="code">c421</field>
                                 <field name="sequence" eval="5"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_104_421_tag" model="account.report.expression">
@@ -66,7 +64,6 @@
                         <field name="children_ids">
                             <record id="tax_report_line_104_402" model="account.report.line">
                                 <field name="name">Valor bruto(402)</field>
-                                <field name="code">c402</field>
                                 <field name="sequence" eval="7"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_104_402_tag" model="account.report.expression">
@@ -78,7 +75,6 @@
                             </record>
                             <record id="tax_report_line_104_412" model="account.report.line">
                                 <field name="name">Valor neto(412)</field>
-                                <field name="code">c412</field>
                                 <field name="sequence" eval="8"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_104_412_tag" model="account.report.expression">
@@ -90,7 +86,6 @@
                             </record>
                             <record id="tax_report_line_104_422" model="account.report.line">
                                 <field name="name">Impuesto generado(422)</field>
-                                <field name="code">c422</field>
                                 <field name="sequence" eval="9"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_104_422_tag" model="account.report.expression">
@@ -108,7 +103,6 @@
                         <field name="children_ids">
                             <record id="tax_report_line_104_423" model="account.report.line">
                                 <field name="name">Impuesto generado(423)</field>
-                                <field name="code">c423</field>
                                 <field name="sequence" eval="11"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_104_423_tag" model="account.report.expression">
@@ -126,7 +120,6 @@
                         <field name="children_ids">
                             <record id="tax_report_line_104_424" model="account.report.line">
                                 <field name="name">Impuesto generado(424)</field>
-                                <field name="code">c424</field>
                                 <field name="sequence" eval="13"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_104_424_tag" model="account.report.expression">
@@ -144,7 +137,6 @@
                         <field name="children_ids">
                             <record id="tax_report_line_104_403" model="account.report.line">
                                 <field name="name">Valor bruto(403)</field>
-                                <field name="code">c403</field>
                                 <field name="sequence" eval="15"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_104_403_tag" model="account.report.expression">
@@ -156,7 +148,6 @@
                             </record>
                             <record id="tax_report_line_104_413" model="account.report.line">
                                 <field name="name">Valor neto(413)</field>
-                                <field name="code">c413</field>
                                 <field name="sequence" eval="16"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_104_413_tag" model="account.report.expression">
@@ -174,7 +165,6 @@
                         <field name="children_ids">
                             <record id="tax_report_line_104_404" model="account.report.line">
                                 <field name="name">Valor bruto(404)</field>
-                                <field name="code">c404</field>
                                 <field name="sequence" eval="18"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_104_404_tag" model="account.report.expression">
@@ -186,7 +176,6 @@
                             </record>
                             <record id="tax_report_line_104_414" model="account.report.line">
                                 <field name="name">Valor neto(414)</field>
-                                <field name="code">c414</field>
                                 <field name="sequence" eval="19"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_104_414_tag" model="account.report.expression">
@@ -216,7 +205,6 @@
                             </record>
                             <record id="tax_report_line_104_415" model="account.report.line">
                                 <field name="name">Valor neto(415)</field>
-                                <field name="code">c415</field>
                                 <field name="sequence" eval="22"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_104_415_tag" model="account.report.expression">
@@ -294,7 +282,6 @@
                         <field name="children_ids">
                             <record id="tax_report_line_104_408" model="account.report.line">
                                 <field name="name">Valor bruto(408)</field>
-                                <field name="code">c408</field>
                                 <field name="sequence" eval="30"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_104_408_tag" model="account.report.expression">
@@ -324,7 +311,6 @@
                         <field name="children_ids">
                             <record id="tax_report_line_104_409" model="account.report.line">
                                 <field name="name">Valor bruto(409)</field>
-                                <field name="code">c409</field>
                                 <field name="sequence" eval="33"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_104_409_tag" model="account.report.expression">
@@ -336,7 +322,6 @@
                             </record>
                             <record id="tax_report_line_104_419" model="account.report.line">
                                 <field name="name">Valor neto(419)</field>
-                                <field name="code">c419</field>
                                 <field name="sequence" eval="34"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_104_419_tag" model="account.report.expression">
@@ -348,7 +333,6 @@
                             </record>
                             <record id="tax_report_line_104_429" model="account.report.line">
                                 <field name="name">Impuesto generado(429)</field>
-                                <field name="code">c429</field>
                                 <field name="sequence" eval="35"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_104_429_tag" model="account.report.expression">
@@ -366,7 +350,6 @@
                         <field name="children_ids">
                             <record id="tax_report_line_104_431" model="account.report.line">
                                 <field name="name">Valor bruto(431)</field>
-                                <field name="code">c431</field>
                                 <field name="sequence" eval="37"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_104_431_tag" model="account.report.expression">
@@ -426,7 +409,6 @@
                             </record>
                             <record id="tax_report_line_104_453" model="account.report.line">
                                 <field name="name">Impuesto generado(453)</field>
-                                <field name="code">c453</field>
                                 <field name="sequence" eval="43"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_104_453_tag" model="account.report.expression">
@@ -468,7 +450,6 @@
                             </record>
                             <record id="tax_report_line_104_454" model="account.report.line">
                                 <field name="name">Impuesto generado(454)</field>
-                                <field name="code">c454</field>
                                 <field name="sequence" eval="47"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_104_454_tag" model="account.report.expression">
@@ -488,7 +469,6 @@
                 <field name="children_ids">
                     <record id="tax_report_line_104_480" model="account.report.line">
                         <field name="name">Total transferencias gravadas tarifa diferente de cero a contado este mes(480)</field>
-                        <field name="code">c480</field>
                         <field name="sequence" eval="49"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_104_480_tag" model="account.report.expression">
@@ -500,7 +480,6 @@
                     </record>
                     <record id="tax_report_line_104_481" model="account.report.line">
                         <field name="name">Total transferencias gravadas tarifa diferente de cero a crédito este mes(481)</field>
-                        <field name="code">c481</field>
                         <field name="sequence" eval="50"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_104_481_tag" model="account.report.expression">
@@ -512,7 +491,6 @@
                     </record>
                     <record id="tax_report_line_104_482" model="account.report.line">
                         <field name="name">Total impuesto generado(482)</field>
-                        <field name="code">c482</field>
                         <field name="sequence" eval="51"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_104_482_tag" model="account.report.expression">
@@ -2714,7 +2692,6 @@
                                 <field name="children_ids">
                                     <record id="tax_report_line_103_402" model="account.report.line">
                                         <field name="name">Base imponible(402)</field>
-                                        <field name="code">c402</field>
                                         <field name="sequence" eval="121"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_103_402_tag" model="account.report.expression">
@@ -2744,7 +2721,6 @@
                                 <field name="children_ids">
                                     <record id="tax_report_line_103_403" model="account.report.line">
                                         <field name="name">Base imponible(403)</field>
-                                        <field name="code">c403</field>
                                         <field name="sequence" eval="124"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_103_403_tag" model="account.report.expression">
@@ -2756,7 +2732,6 @@
                                     </record>
                                     <record id="tax_report_line_103_453" model="account.report.line">
                                         <field name="name">Valor retenido(453)</field>
-                                        <field name="code">c453</field>
                                         <field name="sequence" eval="125"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_103_453_tag" model="account.report.expression">
@@ -2774,7 +2749,6 @@
                                 <field name="children_ids">
                                     <record id="tax_report_line_103_404" model="account.report.line">
                                         <field name="name">Base imponible(404)</field>
-                                        <field name="code">c404</field>
                                         <field name="sequence" eval="127"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_103_404_tag" model="account.report.expression">
@@ -2786,7 +2760,6 @@
                                     </record>
                                     <record id="tax_report_line_103_454" model="account.report.line">
                                         <field name="name">Valor retenido(454)</field>
-                                        <field name="code">c454</field>
                                         <field name="sequence" eval="128"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_103_454_tag" model="account.report.expression">
@@ -2894,7 +2867,6 @@
                                 <field name="children_ids">
                                     <record id="tax_report_line_103_408" model="account.report.line">
                                         <field name="name">Base imponible(408)</field>
-                                        <field name="code">c408</field>
                                         <field name="sequence" eval="139"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_103_408_tag" model="account.report.expression">
@@ -2924,7 +2896,6 @@
                                 <field name="children_ids">
                                     <record id="tax_report_line_103_409" model="account.report.line">
                                         <field name="name">Base imponible(409)</field>
-                                        <field name="code">c409</field>
                                         <field name="sequence" eval="142"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_103_409_tag" model="account.report.expression">
@@ -2984,7 +2955,6 @@
                                 <field name="children_ids">
                                     <record id="tax_report_line_103_411" model="account.report.line">
                                         <field name="name">Base imponible(411)</field>
-                                        <field name="code">c411</field>
                                         <field name="sequence" eval="148"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_103_411_tag" model="account.report.expression">
@@ -3014,7 +2984,6 @@
                                 <field name="children_ids">
                                     <record id="tax_report_line_103_412" model="account.report.line">
                                         <field name="name">Base imponible(412)</field>
-                                        <field name="code">c412</field>
                                         <field name="sequence" eval="151"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_103_412_tag" model="account.report.expression">
@@ -3038,7 +3007,6 @@
                                 <field name="children_ids">
                                     <record id="tax_report_line_103_413" model="account.report.line">
                                         <field name="name">Base imponible(413)</field>
-                                        <field name="code">c413</field>
                                         <field name="sequence" eval="154"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_103_413_tag" model="account.report.expression">
@@ -3068,7 +3036,6 @@
                                 <field name="children_ids">
                                     <record id="tax_report_line_103_414" model="account.report.line">
                                         <field name="name">Base imponible(414)</field>
-                                        <field name="code">c414</field>
                                         <field name="sequence" eval="157"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_103_414_tag" model="account.report.expression">
@@ -3098,7 +3065,6 @@
                                 <field name="children_ids">
                                     <record id="tax_report_line_103_415" model="account.report.line">
                                         <field name="name">Base imponible(415)</field>
-                                        <field name="code">c415</field>
                                         <field name="sequence" eval="160"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_103_415_tag" model="account.report.expression">
@@ -3218,7 +3184,6 @@
                                 <field name="children_ids">
                                     <record id="tax_report_line_103_419" model="account.report.line">
                                         <field name="name">Base imponible(419)</field>
-                                        <field name="code">c419</field>
                                         <field name="sequence" eval="172"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_103_419_tag" model="account.report.expression">
@@ -3278,7 +3243,6 @@
                                 <field name="children_ids">
                                     <record id="tax_report_line_103_421" model="account.report.line">
                                         <field name="name">Base imponible(421)</field>
-                                        <field name="code">c421</field>
                                         <field name="sequence" eval="178"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_103_421_tag" model="account.report.expression">
@@ -3308,7 +3272,6 @@
                                 <field name="children_ids">
                                     <record id="tax_report_line_103_422" model="account.report.line">
                                         <field name="name">Base imponible(422)</field>
-                                        <field name="code">c422</field>
                                         <field name="sequence" eval="181"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_103_422_tag" model="account.report.expression">
@@ -3338,7 +3301,6 @@
                                 <field name="children_ids">
                                     <record id="tax_report_line_103_423" model="account.report.line">
                                         <field name="name">Base imponible(423)</field>
-                                        <field name="code">c423</field>
                                         <field name="sequence" eval="184"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_103_423_tag" model="account.report.expression">
@@ -3362,7 +3324,6 @@
                                 <field name="children_ids">
                                     <record id="tax_report_line_103_424" model="account.report.line">
                                         <field name="name">Base imponible(424)</field>
-                                        <field name="code">c424</field>
                                         <field name="sequence" eval="187"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_103_424_tag" model="account.report.expression">
@@ -3512,7 +3473,6 @@
                                 <field name="children_ids">
                                     <record id="tax_report_line_103_429" model="account.report.line">
                                         <field name="name">Base imponible(429)</field>
-                                        <field name="code">c429</field>
                                         <field name="sequence" eval="202"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_103_429_tag" model="account.report.expression">
@@ -3554,7 +3514,6 @@
                                     </record>
                                     <record id="tax_report_line_103_480" model="account.report.line">
                                         <field name="name">Valor retenido(480)</field>
-                                        <field name="code">c480</field>
                                         <field name="sequence" eval="206"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_103_480_tag" model="account.report.expression">
@@ -3572,7 +3531,6 @@
                                 <field name="children_ids">
                                     <record id="tax_report_line_103_431" model="account.report.line">
                                         <field name="name">Base imponible(431)</field>
-                                        <field name="code">c431</field>
                                         <field name="sequence" eval="208"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_103_431_tag" model="account.report.expression">
@@ -3584,7 +3542,6 @@
                                     </record>
                                     <record id="tax_report_line_103_481" model="account.report.line">
                                         <field name="name">Valor retenido(481)</field>
-                                        <field name="code">c481</field>
                                         <field name="sequence" eval="209"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_103_481_tag" model="account.report.expression">
@@ -3614,7 +3571,6 @@
                                     </record>
                                     <record id="tax_report_line_103_482" model="account.report.line">
                                         <field name="name">Valor retenido(482)</field>
-                                        <field name="code">c482</field>
                                         <field name="sequence" eval="212"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_103_482_tag" model="account.report.expression">

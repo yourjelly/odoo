@@ -271,13 +271,13 @@
                     <record id="tax_report_cofins_formula" model="account.report.expression">
                         <field name="label">balance</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">OPERACAO_TRIBUTAVEL_COM_ALIQUOTA_BASICA.balance</field>
+                        <field name="formula">COFINS_OPERACAO_TRIBUTAVEL_COM_ALIQUOTA_BASICA.balance</field>
                     </record>
                 </field>
                 <field name="children_ids">
                     <record id="tax_report_cofins_oper_bas" model="account.report.line">
                         <field name="name">Operação Tributável com Alíquota Básica</field>
-                        <field name="code">OPERACAO_TRIBUTAVEL_COM_ALIQUOTA_BASICA</field>
+                        <field name="code">COFINS_OPERACAO_TRIBUTAVEL_COM_ALIQUOTA_BASICA</field>
                         <field name="sequence" eval="22"/>
                         <field name="expression_ids">
                             <record id="tax_report_cofins_oper_bas_formula" model="account.report.expression">
@@ -322,13 +322,13 @@
                     <record id="tax_report_pis_formula" model="account.report.expression">
                         <field name="label">balance</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">OPERACAO_TRIBUTAVEL_COM_ALIQUOTA_BASICA.balance</field>
+                        <field name="formula">PIS_OPERACAO_TRIBUTAVEL_COM_ALIQUOTA_BASICA.balance</field>
                     </record>
                 </field>
                 <field name="children_ids">
                     <record id="tax_report_pis_oper_tri_basica" model="account.report.line">
                         <field name="name">Operação Tributável com Alíquota Básica</field>
-                        <field name="code">OPERACAO_TRIBUTAVEL_COM_ALIQUOTA_BASICA</field>
+                        <field name="code">PIS_OPERACAO_TRIBUTAVEL_COM_ALIQUOTA_BASICA</field>
                         <field name="sequence" eval="26"/>
                         <field name="expression_ids">
                             <record id="tax_report_pis_oper_tri_basica_formula" model="account.report.expression">

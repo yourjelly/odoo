@@ -80,13 +80,13 @@
                                             <record id="account_tax_report_line_obracun_formula" model="account.report.expression">
                                                 <field name="label">balance</field>
                                                 <field name="engine">aggregation</field>
-                                                <field name="formula">I_ISPORUKE_NE_PODLIJEZU__OSLOBODENE.balance + II_OPOREZIVE_ISPORUKE.balance</field>
+                                                <field name="formula">OBRACUN_I_ISPORUKE_NE_PODLIJEZU__OSLOBODENE.balance + OBRACUN_II_OPOREZIVE_ISPORUKE.balance</field>
                                             </record>
                                         </field>
                                         <field name="children_ids">
                                             <record id="account_tax_report_line_obracun_isporuke" model="account.report.line">
                                                 <field name="name">I. Isporuke ne podliježu / oslobođene</field>
-                                                <field name="code">I_ISPORUKE_NE_PODLIJEZU__OSLOBODENE</field>
+                                                <field name="code">OBRACUN_I_ISPORUKE_NE_PODLIJEZU__OSLOBODENE</field>
                                                 <field name="sequence" eval="7"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_obracun_isporuke_formula" model="account.report.expression">
@@ -186,13 +186,13 @@
                                             </record>
                                             <record id="account_tax_report_line_oporezive" model="account.report.line">
                                                 <field name="name">II. Oporezive isporuke</field>
-                                                <field name="code">II_OPOREZIVE_ISPORUKE</field>
+                                                <field name="code">OBRACUN_II_OPOREZIVE_ISPORUKE</field>
                                                 <field name="sequence" eval="15"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_oporezive_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
                                                         <field name="engine">aggregation</field>
-                                                        <field name="formula">izdani_10.balance + II2_IZDANI_RACUNI_PO_STOPI_22_I_23.balance + izdani_25.balance + II4_NENAPLACENI_IZVOZ.balance + II5_OSLOBODENJE_IZVOZA__PUTNICKI_PROMET.balance</field>
+                                                        <field name="formula">izdani_10.balance + OBRACUN_II2_IZDANI_RACUNI_PO_STOPI_22_I_23.balance + izdani_25.balance + II4_NENAPLACENI_IZVOZ.balance + II5_OSLOBODENJE_IZVOZA__PUTNICKI_PROMET.balance</field>
                                                     </record>
                                                 </field>
                                                 <field name="children_ids">
@@ -210,7 +210,7 @@
                                                     </record>
                                                     <record id="account_tax_report_line_izdani_22_i_23" model="account.report.line">
                                                         <field name="name">II.2 Izdani računi po stopi 22% i 23%</field>
-                                                        <field name="code">II2_IZDANI_RACUNI_PO_STOPI_22_I_23</field>
+                                                        <field name="code">OBRACUN_II2_IZDANI_RACUNI_PO_STOPI_22_I_23</field>
                                                         <field name="sequence" eval="17"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_izdani_22_i_23_formula" model="account.report.expression">
@@ -416,13 +416,13 @@
                                             <record id="account_tax_report_line_porezna_formula" model="account.report.expression">
                                                 <field name="label">balance</field>
                                                 <field name="engine">aggregation</field>
-                                                <field name="formula">I_ISPORUKE_NE_PODLIJEZU__OSLOBODENE.balance + II_OPOREZIVE_ISPORUKE.balance + III_OBRACUNANI_PRETPOREZ.balance</field>
+                                                <field name="formula">POREZNA_I_ISPORUKE_NE_PODLIJEZU__OSLOBODENE.balance + POREZNA_II_OPOREZIVE_ISPORUKE.balance + III_OBRACUNANI_PRETPOREZ.balance</field>
                                             </record>
                                         </field>
                                         <field name="children_ids">
                                             <record id="account_tax_report_line_isporuke_ne" model="account.report.line">
                                                 <field name="name">I. Isporuke ne podliježu / oslobođene</field>
-                                                <field name="code">I_ISPORUKE_NE_PODLIJEZU__OSLOBODENE</field>
+                                                <field name="code">POREZNA_I_ISPORUKE_NE_PODLIJEZU__OSLOBODENE</field>
                                                 <field name="sequence" eval="34"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_isporuke_ne_formula" model="account.report.expression">
@@ -435,13 +435,13 @@
                                             </record>
                                             <record id="account_tax_report_line_oporezive_isporuke" model="account.report.line">
                                                 <field name="name">II. Oporezive isporuke</field>
-                                                <field name="code">II_OPOREZIVE_ISPORUKE</field>
+                                                <field name="code">POREZNA_II_OPOREZIVE_ISPORUKE</field>
                                                 <field name="sequence" eval="35"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_oporezive_isporuke_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
                                                         <field name="engine">aggregation</field>
-                                                        <field name="formula">izdani_racuni.balance + II2_IZDANI_RACUNI_PO_STOPI_22_I_23.balance + izdani_racuni_25.balance + II4_OSLOBODENJE_IZVOZA__PUTNICKI_PROMET.balance</field>
+                                                        <field name="formula">izdani_racuni.balance + POREZNA_II2_IZDANI_RACUNI_PO_STOPI_22_I_23.balance + izdani_racuni_25.balance + II4_OSLOBODENJE_IZVOZA__PUTNICKI_PROMET.balance</field>
                                                     </record>
                                                 </field>
                                                 <field name="children_ids">
@@ -459,7 +459,7 @@
                                                     </record>
                                                     <record id="account_tax_report_line_izdani_racuni_22_i_23" model="account.report.line">
                                                         <field name="name">II.2 Izdani računi po stopi 22% i 23%</field>
-                                                        <field name="code">II2_IZDANI_RACUNI_PO_STOPI_22_I_23</field>
+                                                        <field name="code">POREZNA_II2_IZDANI_RACUNI_PO_STOPI_22_I_23</field>
                                                         <field name="sequence" eval="37"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_izdani_racuni_22_i_23_formula" model="account.report.expression">
