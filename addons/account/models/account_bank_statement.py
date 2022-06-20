@@ -18,20 +18,120 @@ class AccountBankStatement(models.Model):
         if self._context.get('active_model') != 'account.bank.statement.line' or not self._context.get('active_id'):
             return None
 
-        source_st_line = self.env[self._context['active_model']].browse(self._context['active_id'])
-        source_st_line.flush_model(fnames=['amount', 'date', 'sequence', 'journal_id'])
-        # self._cr.execute('''
-        #     SELECT
-        #     FROM account_bank_statement_line
-        # ''')
+        return self.env['account.bank.statement.line'].browse(self._context['active_id'])
 
     @api.model
     def _default_end_statement_id(self):
         if self._context.get('active_model') != 'account.bank.statement.line' or not self._context.get('active_id'):
             return None
 
-        source_st_line = self.env[self._context['active_model']].browse(self._context['active_id'])
+        source_st_line = self.env['account.bank.statement.line'].browse(self._context['active_id'])
+
+        # Find the previous bank statement in the chain.
         source_st_line.flush_model(fnames=['amount', 'date', 'sequence', 'journal_id'])
+        self.flush_model(fnames=['start_statement_line_id', 'end_statement_line_id'])
+        self._cr.execute(
+            '''
+                SELECT
+                    st.start_statement_line_id,
+                    st.start_statement_line_date,
+                    st.start_statement_line_sequence
+                FROM account_bank_statement st
+                WHERE st.journal_id = %s
+                    AND
+                    (
+                        st.start_statement_line_date < %s
+                        OR (
+                            st.start_statement_line_date = %s
+                            AND (
+                                st.start_statement_line_sequence > %s
+                                OR (
+                                    st.start_statement_line_sequence = %s
+                                    AND st.start_statement_line_id < %s
+                                )
+                            )
+                        )
+                    )
+                ORDER BY st.start_statement_line_date
+                LIMIT 1
+            ''',
+            [
+                source_st_line.journal_id.id,
+                source_st_line.date,
+                source_st_line.date,
+                source_st_line.sequence,
+                source_st_line.sequence,
+                source_st_line.id,
+            ],
+        )
+        row = self._cr.fetchone()
+        if row:
+            last_st_line_id, last_st_line_date, last_st_line_sequence = row
+            st_query_clause = '''
+                AND
+                (
+                    move.date > %s
+                    OR (
+                        move.date = %s
+                        AND (
+                            st_line.sequence < %s
+                            OR (
+                                st_line.sequence = %s
+                                AND st_line.id > %s
+                            )
+                        )
+                    )
+                )
+            '''
+            st_query_params = [
+                last_st_line_date,
+                last_st_line_date,
+                last_st_line_sequence,
+                last_st_line_sequence,
+                last_st_line_id,
+            ]
+        else:
+            st_query_clause = ''
+            st_query_params = []
+
+        self._cr.execute(
+            f'''
+                SELECT st_line.id
+                FROM account_bank_statement_line st_line
+                JOIN account_move move ON move.id = st_line.move_id
+                WHERE move.journal_id = %s
+                    AND
+                    (
+                        move.date < %s
+                        OR (
+                            move.date = %s
+                            AND (
+                                st_line.sequence > %s
+                                OR (
+                                    st_line.sequence = %s
+                                    AND st_line.id < %s
+                                )
+                            )
+                        )
+                    )
+                    {st_query_clause}
+                ORDER BY move.date, st_line.sequence DESC, st_line.id
+                LIMIT 1
+            ''',
+            [
+                source_st_line.journal_id.id,
+                source_st_line.date,
+                source_st_line.date,
+                source_st_line.sequence,
+                source_st_line.sequence,
+                source_st_line.id,
+            ] + st_query_params,
+        )
+        row = self._cr.fetchone()
+        if row:
+            return self.env['account.bank.statement.line'].browse(row[0])
+        else:
+            return source_st_line
 
     name = fields.Char(
         string="Reference",
@@ -62,17 +162,21 @@ class AccountBankStatement(models.Model):
     last_date = fields.Date(
         string="Last Date",
         related='end_statement_line_id.date',
+        store=True,
     )
     balance_start = fields.Monetary(
         string="Starting Balance",
         currency_field='currency_id',
+        compute='_compute_balance',
+        store=True,
+        readonly=False,
     )
     balance_end = fields.Monetary(
         string="Ending Balance",
         currency_field='currency_id',
-    )
-    balance_manually_edited = fields.Boolean(
-        help="Technical field preventing the recomputation of balances if the user forces them.",
+        compute='_compute_balance',
+        store=True,
+        readonly=False,
     )
     start_statement_line_id = fields.Many2one(
         comodel_name='account.bank.statement.line',
@@ -92,12 +196,12 @@ class AccountBankStatement(models.Model):
     end_statement_line_id = fields.Many2one(
         comodel_name='account.bank.statement.line',
         required=True,
+        default=_default_end_statement_id,
     )
     end_statement_line_date = fields.Date(
         string="End Date",
         related='end_statement_line_id.move_id.date',
         store=True,
-        default=_default_end_statement_id,
     )
     end_statement_line_sequence = fields.Integer(
         string="End Sequence",
@@ -147,14 +251,6 @@ class AccountBankStatement(models.Model):
         return "%s %s %04d/%02d/00000" % (self.journal_id.code, _('Statement'), self.date.year, self.date.month)
 
     # -------------------------------------------------------------------------
-    # ONCHANGE METHODS
-    # -------------------------------------------------------------------------
-
-    @api.onchange('balance_start', 'balance_end')
-    def _onchange_balance(self):
-        self.balance_manually_edited = True
-
-    # -------------------------------------------------------------------------
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
 
@@ -190,11 +286,8 @@ class AccountBankStatement(models.Model):
     @api.depends('start_statement_line_id', 'end_statement_line_id')
     def _compute_balance(self):
         for statement in self:
-            if not statement.balance_manually_edited:
-                if statement.start_statement_line_id:
-                    statement.balance_start = statement.start_statement_line_id.running_balance_start
-                if statement.end_statement_line_id:
-                    statement.balance_end = statement.end_statement_line_id.running_balance_end
+            statement.balance_end = statement.start_statement_line_id.running_balance_end
+            statement.balance_start = statement.end_statement_line_id.running_balance_start
 
 
 class AccountBankStatementLine(models.Model):
@@ -488,33 +581,33 @@ class AccountBankStatementLine(models.Model):
                     st_line.id,
                     st.id
                 FROM account_bank_statement_line st_line
-                JOIN account_move move ON move.statement_line_id = st_line.id
+                JOIN account_move move ON move.id = st_line.move_id
                 JOIN account_bank_statement st ON
                     st.journal_id = move.journal_id
                     AND
                     (
-                        move.date > st.start_statement_line_date
+                        move.date < st.start_statement_line_date
                         OR (
                             move.date = st.start_statement_line_date
                             AND (
-                                st_line.sequence < st.start_statement_line_sequence
+                                st_line.sequence > st.start_statement_line_sequence
                                 OR (
                                     st_line.sequence = st.start_statement_line_sequence
-                                    AND st_line.id >= st.start_statement_line_id
+                                    AND st_line.id <= st.start_statement_line_id
                                 )
                             )
                         )
                     )
                     AND
                     (
-                        move.date < st.end_statement_line_date
+                        move.date > st.end_statement_line_date
                         OR (
                             move.date = st.end_statement_line_date
                             AND (
-                                st_line.sequence > st.end_statement_line_sequence
+                                st_line.sequence < st.end_statement_line_sequence
                                 OR (
                                     st_line.sequence = st.end_statement_line_sequence
-                                    AND st_line.id <= st.end_statement_line_id
+                                    AND st_line.id >= st.end_statement_line_id
                                 )
                             )
                         )
@@ -530,6 +623,7 @@ class AccountBankStatementLine(models.Model):
             self.statement_id = None
 
     def _inverse_statement_id(self):
+        # TODO
         pass
 
     @api.depends('date', 'sequence', 'journal_id')
