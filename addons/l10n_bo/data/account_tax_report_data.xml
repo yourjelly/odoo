@@ -20,7 +20,9 @@
                 <field name="expression_ids">
                     <record id="tax_report_impuesto_25_formula" model="account.report.expression">
                         <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
+                        <field name="engine">external</field>
+                        <field name="formula">sum</field>
+                        <field name="subformula">editable;rounding=2</field>
                     </record>
                 </field>
             </record>
@@ -79,7 +81,9 @@
                                 <field name="expression_ids">
                                     <record id="tax_report_impuesto_ttl_cob_fuera_formula" model="account.report.expression">
                                         <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=2</field>
                                     </record>
                                 </field>
                             </record>
@@ -90,7 +94,9 @@
                                 <field name="expression_ids">
                                     <record id="tax_report_impuesto_ttl_cob_exon_formula" model="account.report.expression">
                                         <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=2</field>
                                     </record>
                                 </field>
                             </record>
@@ -127,7 +133,9 @@
                                 <field name="expression_ids">
                                     <record id="tax_report_impuesto_ttl_pag_fuera_formula" model="account.report.expression">
                                         <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=2</field>
                                     </record>
                                 </field>
                             </record>
@@ -138,7 +146,9 @@
                                 <field name="expression_ids">
                                     <record id="tax_report_impuesto_ttl_pag_exon_formula" model="account.report.expression">
                                         <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=2</field>
                                     </record>
                                 </field>
                             </record>
@@ -188,7 +198,9 @@
                                 <field name="expression_ids">
                                     <record id="tax_report_base_imponible_compras_fuera_formula" model="account.report.expression">
                                         <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=2</field>
                                     </record>
                                 </field>
                             </record>
@@ -199,7 +211,9 @@
                                 <field name="expression_ids">
                                     <record id="tax_report_base_imponible_compras_gravadas_formula" model="account.report.expression">
                                         <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=2</field>
                                     </record>
                                 </field>
                             </record>
@@ -236,7 +250,9 @@
                                 <field name="expression_ids">
                                     <record id="tax_report_base_imponible_venras_fuera_formula" model="account.report.expression">
                                         <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=2</field>
                                     </record>
                                 </field>
                             </record>
@@ -247,7 +263,9 @@
                                 <field name="expression_ids">
                                     <record id="tax_report_base_imponible_venras_exon_formula" model="account.report.expression">
                                         <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=2</field>
                                     </record>
                                 </field>
                             </record>

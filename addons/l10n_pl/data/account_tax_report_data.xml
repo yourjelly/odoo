@@ -81,7 +81,9 @@
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_towary_art_129_formula" model="account.report.expression">
                                         <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=2</field>
                                     </record>
                                 </field>
                             </record>
@@ -229,7 +231,9 @@
                         <field name="expression_ids">
                             <record id="account_tax_report_line_uslug_s_trwale_formula" model="account.report.expression">
                                 <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
+                                <field name="engine">external</field>
+                                <field name="formula">sum</field>
+                                <field name="subformula">editable;rounding=2</field>
                             </record>
                         </field>
                     </record>
@@ -286,7 +290,9 @@
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_kasy_rejestrujace_formula" model="account.report.expression">
                                                 <field name="label">balance</field>
-                                                <field name="engine">aggregation</field>
+                                                <field name="engine">external</field>
+                                                <field name="formula">sum</field>
+                                                <field name="subformula">editable;rounding=2</field>
                                             </record>
                                         </field>
                                     </record>
@@ -296,7 +302,9 @@
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_zaniechaniem_poboru_formula" model="account.report.expression">
                                                 <field name="label">balance</field>
-                                                <field name="engine">aggregation</field>
+                                                <field name="engine">external</field>
+                                                <field name="formula">sum</field>
+                                                <field name="subformula">editable;rounding=2</field>
                                             </record>
                                         </field>
                                     </record>
@@ -416,7 +424,9 @@
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_podatek_art_14_5_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
-                                                        <field name="engine">aggregation</field>
+                                                        <field name="engine">external</field>
+                                                        <field name="formula">sum</field>
+                                                        <field name="subformula">editable;rounding=2</field>
                                                     </record>
                                                 </field>
                                             </record>
@@ -426,7 +436,9 @@
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_podatek_transp_termin_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
-                                                        <field name="engine">aggregation</field>
+                                                        <field name="engine">external</field>
+                                                        <field name="formula">sum</field>
+                                                        <field name="subformula">editable;rounding=2</field>
                                                     </record>
                                                 </field>
                                             </record>
@@ -451,7 +463,9 @@
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_podatek_deklaracji_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
-                                                        <field name="engine">aggregation</field>
+                                                        <field name="engine">external</field>
+                                                        <field name="formula">sum</field>
+                                                        <field name="subformula">editable;rounding=2</field>
                                                     </record>
                                                 </field>
                                             </record>
@@ -462,7 +476,9 @@
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_pl_03_01_01_04_02_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
-                                                        <field name="engine">aggregation</field>
+                                                        <field name="engine">external</field>
+                                                        <field name="formula">sum</field>
+                                                        <field name="subformula">editable;rounding=2</field>
                                                     </record>
                                                 </field>
                                             </record>
@@ -473,7 +489,9 @@
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_podatek_s_trwale_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
-                                                        <field name="engine">aggregation</field>
+                                                        <field name="engine">external</field>
+                                                        <field name="formula">sum</field>
+                                                        <field name="subformula">editable;rounding=2</field>
                                                     </record>
                                                 </field>
                                             </record>
@@ -496,7 +514,9 @@
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_podatek_s_trwalych_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
-                                                        <field name="engine">aggregation</field>
+                                                        <field name="engine">external</field>
+                                                        <field name="formula">sum</field>
+                                                        <field name="subformula">editable;rounding=2</field>
                                                     </record>
                                                 </field>
                                             </record>
@@ -507,7 +527,9 @@
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_podatek_pozostalych_nabyc_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
-                                                        <field name="engine">aggregation</field>
+                                                        <field name="engine">external</field>
+                                                        <field name="formula">sum</field>
+                                                        <field name="subformula">editable;rounding=2</field>
                                                     </record>
                                                 </field>
                                             </record>
@@ -521,7 +543,9 @@
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_podatek_okresie_formula" model="account.report.expression">
                                         <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=2</field>
                                     </record>
                                 </field>
                             </record>
@@ -545,7 +569,9 @@
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_do_zwrotu_25_dni_formula" model="account.report.expression">
                                         <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=2</field>
                                     </record>
                                 </field>
                             </record>
@@ -556,7 +582,9 @@
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_do_zwrotu_60_dni_formula" model="account.report.expression">
                                         <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=2</field>
                                     </record>
                                 </field>
                             </record>
@@ -567,7 +595,9 @@
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_do_zwrotu_180_dni_formula" model="account.report.expression">
                                         <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=2</field>
                                     </record>
                                 </field>
                             </record>

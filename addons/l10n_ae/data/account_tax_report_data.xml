@@ -189,7 +189,9 @@
                         <field name="expression_ids">
                             <record id="tax_report_line_supplies_out_of_scope_base_formula" model="account.report.expression">
                                 <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
+                                <field name="engine">external</field>
+                                <field name="formula">sum</field>
+                                <field name="subformula">editable;rounding=2</field>
                             </record>
                         </field>
                     </record>
@@ -212,7 +214,9 @@
                         <field name="expression_ids">
                             <record id="tax_report_line_adjustment_import_uae_base_formula" model="account.report.expression">
                                 <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
+                                <field name="engine">external</field>
+                                <field name="formula">sum</field>
+                                <field name="subformula">editable;rounding=2</field>
                             </record>
                         </field>
                     </record>
@@ -271,7 +275,9 @@
                         <field name="expression_ids">
                             <record id="tax_report_line_expense_out_of_scope_formula" model="account.report.expression">
                                 <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
+                                <field name="engine">external</field>
+                                <field name="formula">sum</field>
+                                <field name="subformula">editable;rounding=2</field>
                             </record>
                         </field>
                     </record>
@@ -463,7 +469,9 @@
                         <field name="expression_ids">
                             <record id="tax_report_line_supplies_out_of_scope_vat_formula" model="account.report.expression">
                                 <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
+                                <field name="engine">external</field>
+                                <field name="formula">sum</field>
+                                <field name="subformula">editable;rounding=2</field>
                             </record>
                         </field>
                     </record>
@@ -486,7 +494,9 @@
                         <field name="expression_ids">
                             <record id="tax_report_line_adjustment_import_uae_vat_formula" model="account.report.expression">
                                 <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
+                                <field name="engine">external</field>
+                                <field name="formula">sum</field>
+                                <field name="subformula">editable;rounding=2</field>
                             </record>
                         </field>
                     </record>
@@ -545,7 +555,9 @@
                         <field name="expression_ids">
                             <record id="tax_report_line_expense_out_of_scope_vat_formula" model="account.report.expression">
                                 <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
+                                <field name="engine">external</field>
+                                <field name="formula">sum</field>
+                                <field name="subformula">editable;rounding=2</field>
                             </record>
                         </field>
                     </record>

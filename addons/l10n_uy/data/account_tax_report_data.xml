@@ -205,7 +205,9 @@
                                 <field name="expression_ids">
                                     <record id="account_tax_report_cmprs_exnto_iva_formula" model="account.report.expression">
                                         <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=2</field>
                                     </record>
                                 </field>
                             </record>
@@ -266,7 +268,9 @@
                                 <field name="expression_ids">
                                     <record id="account_tax_report_vnts_iva_formula" model="account.report.expression">
                                         <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=2</field>
                                     </record>
                                 </field>
                             </record>

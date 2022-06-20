@@ -21,7 +21,9 @@
                 <field name="expression_ids">
                     <record id="account_tax_report_line_311_formula" model="account.report.expression">
                         <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
+                        <field name="engine">external</field>
+                        <field name="formula">sum</field>
+                        <field name="subformula">editable;rounding=2</field>
                     </record>
                 </field>
                 <field name="children_ids">
@@ -96,7 +98,9 @@
                 <field name="expression_ids">
                     <record id="account_tax_report_line_501-511_formula" model="account.report.expression">
                         <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
+                        <field name="engine">external</field>
+                        <field name="formula">sum</field>
+                        <field name="subformula">editable;rounding=2</field>
                     </record>
                 </field>
                 <field name="children_ids">

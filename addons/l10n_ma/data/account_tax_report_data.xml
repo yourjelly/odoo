@@ -153,7 +153,9 @@
                                 <field name="expression_ids">
                                     <record id="tax_report_travaux_facons_ht_formula" model="account.report.expression">
                                         <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=2</field>
                                     </record>
                                 </field>
                             </record>
@@ -164,7 +166,9 @@
                                 <field name="expression_ids">
                                     <record id="tax_report_sous_traitance_immobiliers_ht_formula" model="account.report.expression">
                                         <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=2</field>
                                     </record>
                                 </field>
                             </record>
@@ -285,7 +289,9 @@
                                 <field name="expression_ids">
                                     <record id="tax_report_prestations_services_ht_1_formula" model="account.report.expression">
                                         <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=2</field>
                                     </record>
                                 </field>
                             </record>
@@ -310,7 +316,9 @@
                                 <field name="expression_ids">
                                     <record id="tax_report_travaux_facons_tva_formula" model="account.report.expression">
                                         <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=2</field>
                                     </record>
                                 </field>
                             </record>
@@ -321,7 +329,9 @@
                                 <field name="expression_ids">
                                     <record id="tax_report_sous_traitance_immobiliers_tva_formula" model="account.report.expression">
                                         <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=2</field>
                                     </record>
                                 </field>
                             </record>
@@ -442,7 +452,9 @@
                                 <field name="expression_ids">
                                     <record id="tax_report_prestations_service_deductible_tva_formula" model="account.report.expression">
                                         <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=2</field>
                                     </record>
                                 </field>
                             </record>

@@ -44,7 +44,9 @@
                                 <field name="expression_ids">
                                     <record id="account_tax_report_2A2_ingrs_exprt_formula" model="account.report.expression">
                                         <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=2</field>
                                     </record>
                                 </field>
                             </record>
@@ -93,7 +95,9 @@
                                 <field name="expression_ids">
                                     <record id="account_tax_report_2b7_grvd_formula" model="account.report.expression">
                                         <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=2</field>
                                     </record>
                                 </field>
                             </record>
@@ -143,7 +147,9 @@
                                 <field name="expression_ids">
                                     <record id="account_tax_report_tbs_11_casilla_formula" model="account.report.expression">
                                         <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable;rounding=2</field>
                                     </record>
                                 </field>
                             </record>
