@@ -3809,7 +3809,7 @@ class AccountMoveLine(models.Model):
 
     # ==== New Analytic fields ====
     # the idea behind these 2 field was to use the data in native js components
-    analytic_account_selector_id = fields.Many2one(comodel_name='account.analytic.account', help="Technical field used to populate analytic_dist_tag_ids onchange")
+    analytic_account_selector_id = fields.Many2one(comodel_name='account.analytic.account', store=False, help="Technical field used to populate analytic_dist_tag_ids onchange")
     analytic_dist_model_selector_id = fields.Many2one(comodel_name='account.analytic.distribution.model', help="Technical field used to populate analytic_dist_tag_ids onchange")
     # the following field is a JSON representation of the main o2m field
     analytic_json = fields.Binary(compute='_compute_analytic_json', inverse='_set_analytic_json')
@@ -4296,7 +4296,7 @@ class AccountMoveLine(models.Model):
 
     @api.onchange('analytic_account_selector_id')
     def _onchange_analytic_account_selector_id(self):
-        # this does not work since the record needs to be created
+        # this does not work since the record needs to be created  - maybe it will work now that the fields are on the journal items page
         # vals = [(0, 0, {'analytic_account_id': aa.id, 'percentage': 100}) for aa in self.analytic_account_selector_id ]
         # self.analytic_dist_tag_ids = vals
 
@@ -4308,7 +4308,7 @@ class AccountMoveLine(models.Model):
 
     @api.onchange('analytic_dist_model_selector_id')
     def _onchange_analytic_dist_model_selector_id(self):
-        # this does not work since the record needs to exist
+        # this does not work since the record needs to exist - maybe it will work now that the fields are on the journal items page
         # vals = [(5,0,0)] + [
         #     (0, 0, {'analytic_account_id': tag.analytic_account_id.id, 'percentage': tag.percentage})
         #     for tag in self.analytic_dist_model_selector_id.distribution_tag_ids]
