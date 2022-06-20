@@ -6,8 +6,8 @@ import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { TagsList } from "@web/fields/many2many_tags/tags_list";
 import { useService, useOwnedDialogs } from "@web/core/utils/hooks";
 import { usePosition } from "@web/core/position_hook";
-//import { ListArchParser } from "@web/views/list/list_arch_parser";
-//import { ListRenderer } from "@web/views/list/list_renderer";
+// import { ListArchParser } from "@web/views/list/list_arch_parser";
+// import { ListRenderer } from "@web/views/list/list_renderer";
 import {
     useActiveActions,
     useAddInlineRecord,
@@ -25,18 +25,20 @@ export class AnalyticO2M extends Component {
         this.state = useState({
             autocompleteValue: "",
             isOpened: false,
+            addingGroup: "",
+            autocompleteValue2: "",
         });
         this.widgetRef = useRef("analyticO2m");
         usePosition(() => this.widgetRef.el, {
             popper: "analyticPop",
         });
-        console.log('AnalyticO2m props:');
-        console.log(this.props);
-        // const { saveRecord, updateRecord, removeRecord } = useX2ManyCrud(
-        //     () => this.list,
-        //     false
-        // );
-        // this.updateRecord = updateRecord;
+        // console.log('AnalyticO2m props:');
+        // console.log(this.props);
+        const { saveRecord, updateRecord, removeRecord } = useX2ManyCrud(
+            () => this.props.value,
+            false
+        );
+        this.updateRecord = updateRecord;
         this.openTemplate = useOpenMany2XRecord({
             resModel: this.template_field.relation,
             activeActions: {
@@ -57,19 +59,24 @@ export class AnalyticO2M extends Component {
             onClose: () => {},
             fieldString: 'Analytic Distribution Template',
         });
-        //this.activeField = this.props.record.activeFields[this.props.name];
-        //this.fetchTreeArch();
+        this.activeField = this.props.record.activeFields[this.props.name];
+        // this.fetchTreeArch();
+        
     }
 
-    //failed attempt to load the arch manually - needs models - 
-    // consider using a full list view instead (it will load the arch etc)
     // async fetchTreeArch(){
-    //     let rawArch = await this.orm.call(this.activeField.relation, "get_view", [], {view_type: 'tree'});
-    //     this.treeArch = await new ListArchParser().parse(rawArch.arch, models, model);
+        
+    //     // let rawArch = await this.orm.call(this.activeField.relation, "get_view", [], {view_type: 'tree'});
+    //     // This function only needs to execute once - for all the distribution_tag_ids fields
+    //     let dtag_view = await useService('view').loadViews({context: {},
+    //         resModel: 'account.analytic.distribution.tag',
+    //         views: [[false, "tree"]]});
+    //     this.treeArch = await new ListArchParser().parse(dtag_view.views.tree.arch, dtag_view.relatedModels, this.activeField.relation);
+    //     console.log(this.treeArch);
     // }
 
     get groups() {
-        let groups = this.tags.map((record) => {return record.group});
+        let groups = this.list.map((record) => {return record.data.group_name});
         return [...new Set(groups)]
     }
 
@@ -82,7 +89,7 @@ export class AnalyticO2M extends Component {
     }
 
     get tags() {
-        return this.props.value.records.map((record) => ({
+        return this.list.map((record) => ({
             id: record.id, // datapoint_X
             text: record.data.display_name,
             colorIndex: record.data.color,
@@ -93,10 +100,21 @@ export class AnalyticO2M extends Component {
     }
 
     deleteTag(id) {
-        const tagRecord = this.props.value.records.find((record) => record.id === id);
+        const tagRecord = this.list.find((record) => record.id === id);
         const ids = this.props.value.currentIds.filter((id) => id !== tagRecord.resId);
         this.props.value.replaceWith(ids);
     }
+
+    async fetchAllGroups() {
+        const groups = await this.orm.call('analytic.account.group', "name_search", [], {
+            name: request,
+            operator: "ilike",
+            args: [],
+            limit: 7,
+            context: [],
+        });
+        console.log(groups);
+    } 
 
     get sources() {
         return [this.optionsSource];
@@ -121,21 +139,20 @@ export class AnalyticO2M extends Component {
         //     return options;
         // }
 
-        if (!this.tags.length) {
+        
             // search for templates only if there are no existing tags
-            const records = await this.orm.call(this.template_field.relation, "name_search", [], {
-                name: request,
-                operator: "ilike",
-                args: [],
-                limit: 7,
-                context: [],
-            });
-            options = records.map((result) => ({
-                value: result[0],
-                label: result[1],
-                field_to_update: this.template_field.name,
-            }));
-        }
+        const records = await this.orm.call(this.template_field.relation, "name_search", [], {
+            name: request,
+            operator: "ilike",
+            args: [],
+            limit: 7,
+            context: [],
+        });
+        options = records.map((result) => ({
+            value: result[0],
+            label: result[1],
+            field_to_update: this.template_field.name,
+        }));
 
         if (!options.length) {
             // if no template are found - search analytic account (can use this to modify the selected template)
@@ -162,6 +179,53 @@ export class AnalyticO2M extends Component {
         }
 
         return options;
+    }
+
+    get sourcesAnalyticAccount() {
+        return [this.optionsSourceAnalytic];
+    }
+    get optionsSourceAnalytic() {
+        return {
+            placeholder: this.env._t("Loading..."),
+            options: this.loadOptionsSourceAnalytic.bind(this),
+        };
+    }
+
+    async loadOptionsSourceAnalytic(request) {
+        let options = [];
+        console.log('loadOptionsSourceAnalytic');
+        // let group = console.log(this.state.addingGroup);
+        let existing_tags = this.listByGroup(this.state.addingGroup);
+
+        const records = await this.orm.call(this.search_field.relation, "name_search", [], {
+            name: request,
+            operator: "ilike",
+            args: [], //add domain to exclude existing analytic accounts
+            limit: 7,
+            context: [],
+        });
+        options = records.map((result) => ({
+            value: result[0],
+            label: result[1],
+            field_to_update: this.search_field.name,
+        }));
+        
+
+        if (!options.length) {
+            options.push({
+                label: this.env._t("No Analytic Accounts for this plan"),
+                classList: "o_m2o_no_result",
+                unselectable: true,
+            });
+        }
+
+        return options;
+    }
+
+    stopPropagation(ev){
+        // debugger;
+        console.log('stopping propagation');
+        ev.stopPropagation();
     }
 
     get template_field() {
@@ -197,6 +261,7 @@ export class AnalyticO2M extends Component {
         await this.props.record.update(changes);
         this.state.autocompleteValue = "";
         this.computeIsOpened();
+        this.state.addingGroup = "";
     }
 
     get shouldShowEditorDropdown() {
@@ -227,13 +292,28 @@ export class AnalyticO2M extends Component {
         this.state.isOpened = false;
     }
 
-    async percentage_changed(record, ev) {
+    async percentage_changed(record, ev, obj) {
         console.log('percentage changed');
+       
         await record.update({
             analytic_account_id: [record.data.acc_id, "whatever"],
-            percentage: ev.target.value
+            percentage: ev.target.value,
         });
-        record.save();
+        // this.props.value.unselectRecord(true);
+        // await this.updateRecord(record);
+        // console.log(this);
+        await record.save()
+        // await record.save({savePoint: true});
+        // await obj.props.record.save({savePoint: true});
+        // debugger;
+        // this.record.save();
+    }
+
+    async switchMode(record, mode){
+        console.log('switch mode doing nothing');
+        console.log(record);
+        // await record.switchMode(mode);
+        console.log(record);
     }
 
     onOpenExisting() {
@@ -268,15 +348,23 @@ export class AnalyticO2M extends Component {
         
     }
 
-    // get rendererProps() {
-    //     const archInfo = this.activeField.views[this.activeField.viewMode];
+    addLine(group){
+        this.state.addingGroup = group;
+    }
+    addingBlur() {
+        //this.state.addingGroup = "";
+    }
+
+
+    // rendererProps(group) {
+    //     const archInfo = this.treeArch;
 
     //     let columns = archInfo.columns;
     //     const props = {
     //         activeActions: [],
     //         editable: !this.props.readonly,
     //         archInfo: { ...archInfo, columns },
-    //         list: this.props.value,
+    //         list: this.props.value,//this.listByGroup(group),
     //         openRecord: ()=>{},
     //         onAdd: ()=>{}, //this.onAdd.bind(this),
     //     };
