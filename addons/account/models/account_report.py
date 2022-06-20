@@ -66,7 +66,7 @@ class AccountReport(models.Model):
     )
     filter_unreconciled = fields.Boolean(
         string="Unreconciled Entries",
-        compute=lambda x: x._compute_report_option_filter('filter_unreconciled', True), readonly=False, store=True, depends=['root_report_id'],
+        compute=lambda x: x._compute_report_option_filter('filter_unreconciled', False), readonly=False, store=True, depends=['root_report_id'],
     )
     filter_unfold_all = fields.Boolean(
         string="Unfold All",
