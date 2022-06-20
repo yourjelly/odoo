@@ -570,9 +570,10 @@ class AccountBankStatementLine(models.Model):
 
     @api.depends('date', 'sequence', 'journal_id')
     def _compute_statement_id(self):
-        st_line_ids = self._ids
+        stored_lines = self.filtered('id')
 
-        if st_line_ids:
+        st_id_map = {}
+        if stored_lines:
             # Statement lines are stored inside the database.
 
             self.flush_recordset(fnames=['amount', 'date', 'sequence', 'journal_id'])
@@ -613,86 +614,88 @@ class AccountBankStatementLine(models.Model):
                         )
                     )
                 WHERE st_line.id IN %s
-            ''', [tuple(st_line_ids)])
+            ''', [tuple(stored_lines.ids)])
 
-            st_id_map = {st_line_id: st_id for st_line_id, st_id in self._cr.fetchall()}
-            for st_line in self:
-                st_line.statement_id = st_id_map.get(st_line.id)
-        else:
-            # Statement lines are not stored inside the database.
-            self.statement_id = None
+            st_id_map.update({st_line_id: st_id for st_line_id, st_id in self._cr.fetchall()})
+
+        for st_line in self:
+            st_line.statement_id = st_id_map.get(st_line.id)
 
     def _inverse_statement_id(self):
         # TODO
         pass
 
-    @api.depends('date', 'sequence', 'journal_id')
+    @api.depends('date', 'sequence', 'journal_id', 'amount')
     def _compute_running_balance(self):
-        st_line_ids = self._ids
-        journal_ids = self.journal_id._ids
+        stored_lines = self.filtered(lambda x: x._origin)
 
-        if not st_line_ids:
-            self.running_balance_start = 0.0
-            self.running_balance_end = 0.0
-            return
+        balance_map = {}
 
-        base_domain = [('journal_id', 'in', tuple(journal_ids)), ('state', '!=', 'cancel')]
+        if stored_lines:
+            journal_ids = stored_lines.journal_id._origin.ids
+            base_domain = [('journal_id', 'in', tuple(journal_ids)), ('state', '!=', 'cancel')]
 
-        # Fetch the starting balance to consider to avoid computing the running balance on the whole database.
-        self.flush_recordset(fnames=['amount', 'date', 'sequence', 'journal_id'])
-        min_date = min(self.mapped('date'))
-        query = self._where_calc(base_domain + [('date', '<', min_date)])
-        tables, where_clause, where_params = query.get_sql()
-        self._cr.execute(
-            f'''
+            # Fetch the starting balance to consider to avoid computing the running balance on the whole database.
+            self.flush_recordset(fnames=['amount', 'date', 'sequence', 'journal_id'])
+            min_date = min(self.mapped('date'))
+            query = self._where_calc(base_domain + [('date', '<', min_date)])
+            tables, where_clause, where_params = query.get_sql()
+            self._cr.execute(
+                f'''
+                    SELECT
+                        move.journal_id,
+                        SUM(account_bank_statement_line.amount)
+                    FROM {tables}
+                    JOIN account_move move ON move.id = account_bank_statement_line.move_id
+                    WHERE {where_clause}
+                    GROUP BY move.journal_id
+                ''',
+                where_params,
+            )
+            starting_balance_per_journal = {r[0]: r[1] for r in self._cr.fetchall()}
+
+            # Compute the running balances.
+            max_date = max(self.mapped('date'))
+            query = self._where_calc(base_domain + [('date', '>=', min_date), ('date', '<=', max_date)])
+            tables, where_clause, where_params = query.get_sql()
+            order_by = ', '.join(self._generate_order_by_inner(
+                self._table,
+                self._order,
+                query,
+                reverse_direction=True,
+            ))
+
+            self._cr.execute(f'''
                 SELECT
-                    move.journal_id,
-                    SUM(account_bank_statement_line.amount)
-                FROM {tables}
-                JOIN account_move move ON move.id = account_bank_statement_line.move_id
-                WHERE {where_clause}
-                GROUP BY move.journal_id
-            ''',
-            where_params,
-        )
-        starting_balance_per_journal = {r[0]: r[1] for r in self._cr.fetchall()}
+                    *
+                FROM (
+                    SELECT
+                        account_bank_statement_line.id,
+                        move.journal_id,
+                        account_bank_statement_line.amount,
+                        SUM(account_bank_statement_line.amount) OVER (
+                            PARTITION BY account_bank_statement_line__move_id.journal_id
+                            ORDER BY {order_by}
+                            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+                        ) AS running_balance_start
+                    FROM {tables}
+                    JOIN account_move move ON move.id = account_bank_statement_line.move_id
+                    WHERE {where_clause}
+                ) AS sub
+                WHERE sub.id IN %s
+            ''', where_params + [tuple(stored_lines.ids)])
 
-        # Compute the running balances.
-        max_date = max(self.mapped('date'))
-        record_by_id = {st_line._origin.id: st_line for st_line in self}
-        query = self._where_calc(base_domain + [('date', '>=', min_date), ('date', '<=', max_date)])
-        tables, where_clause, where_params = query.get_sql()
-        order_by = ', '.join(self._generate_order_by_inner(
-            self._table,
-            self._order,
-            query,
-            reverse_direction=True,
-        ))
+            for st_line_id, journal_id, amount, running_balance_start in self._cr.fetchall():
+                starting_journal_balance = starting_balance_per_journal.get(journal_id, 0.0)
+                balance_map[st_line_id] = (
+                    starting_journal_balance + running_balance_start,
+                    starting_journal_balance + running_balance_start - amount,
+                )
 
-        self._cr.execute(f'''
-            SELECT
-                *
-            FROM (
-                SELECT
-                    account_bank_statement_line.id,
-                    move.journal_id,
-                    account_bank_statement_line.amount,
-                    SUM(account_bank_statement_line.amount) OVER (
-                        PARTITION BY account_bank_statement_line__move_id.journal_id
-                        ORDER BY {order_by}
-                        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-                    ) AS running_balance_start
-                FROM {tables}
-                JOIN account_move move ON move.id = account_bank_statement_line.move_id
-                WHERE {where_clause}
-            ) AS sub
-            WHERE sub.id IN %s
-        ''', where_params + [tuple(st_line_ids)])
-
-        for st_line_id, journal_id, amount, running_balance_start in self._cr.fetchall():
-            starting_journal_balance = starting_balance_per_journal.get(journal_id, 0.0)
-            record_by_id[st_line_id].running_balance_end = starting_journal_balance + running_balance_start
-            record_by_id[st_line_id].running_balance_start = starting_journal_balance + running_balance_start - amount
+        for st_line in self:
+            end, start = balance_map.get(st_line.id, (0.0, 0.0))
+            st_line.running_balance_end = end
+            st_line.running_balance_start = start
 
     # -------------------------------------------------------------------------
     # CONSTRAINT METHODS
