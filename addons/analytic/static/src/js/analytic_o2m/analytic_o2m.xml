@@ -20,8 +20,20 @@
                     onChange="onChange"
                     onFocus.bind.stop="computeIsOpened"/>
                 <div class="analytic_o2m_editor_popup dropdown-menu show" t-if="state.isOpened" t-ref="analyticPop">
-                    <!-- <ListRenderer t-props="rendererProps"/> -->
-                    <!-- <table class="o_list_table table table-sm table-hover table-striped">
+                    <!-- can't use a listrenderer - since columns headers should not be there
+                         and the list needs to be split 
+                    <t t-foreach="groups" t-as="group" t-key="group">
+                        <h4 class="o_group_name" t-esc="group"/>
+                        <ListRenderer t-props="rendererProps(group)"/>
+                    </t> -->
+                    <AutoComplete
+                        placeholder="'Type to change the Analytic Model'"
+                        value="state.autocompleteValue"
+                        sources="sources"
+                        onSelect.bind="onSelect"
+                        onInput.bind="onInput"
+                        onChange="onChange"/>
+                    <table class="o_list_table table table-sm table-hover table-striped">
                         <thead class="d-none">
                             <th class="first_col"/>
                             <th class="second_col"/>
@@ -33,16 +45,35 @@
                                 <t t-foreach="listByGroup(group)" t-as="dtag" t-key="dtag.id">
                                     <tr class="o_data_row">
                                         <td class="o_data_cell"><t t-esc="dtag.data.analytic_account_id and dtag.data.analytic_account_id.data.display_name.length ? dtag.data.analytic_account_id.data.display_name + 'A' : dtag.data.display_name + ' T'"/></td>
-                                        <td class="o_data_cell"><input class="o_input" t-on-click.stop="" t-on-change="(ev) => this.percentage_changed(dtag, ev)" t-att-value="dtag.data.percentage"/></td>
+                                        <td class="o_data_cell"><input class="o_input" t-on-click.stop="() => this.switchMode(dtag, 'edit')" t-on-change="(ev) => this.percentage_changed(dtag, ev, this)" t-att-value="dtag.data.percentage"/></td>
                                         <td class="o_data_cell"><span class="fa fa-trash" t-on-click="() => this.deleteTag(dtag.id)"/></td>
                                     </tr>
                                 </t>
-                                <tr><td colspan="3">Add a Line</td></tr>
-                                <tr><td colspan="3"/></tr>
+                                <t t-if="state.addingGroup === group">
+                                    <tr>
+                                        <td>
+                                            <AutoComplete
+                                                placeholder="'Type to search an Analytic Account'"
+                                                value="state.autocompleteValue2"
+                                                sources="sourcesAnalyticAccount"
+                                                onSelect.bind="onSelect"
+                                                onBlur.bind="addingBlur"
+                                                onFocus="(ev) => this.stopPropagation(ev)"/>
+                                        </td>
+                                        <td>
+                                        </td>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <t t-else="">
+                                    <tr><td colspan="3"><span t-on-click="() => this.addLine(group)">Add a Line</span></td></tr>
+                                </t>
+                                <tr><td colspan="3" class="spacer"/></tr>
                             </t>
                         </tbody>
-                    </table> -->
-                    <table class="o_list_table table table-sm table-hover table-striped">
+                    </table>
+                    <!-- <table class="o_list_table table table-sm table-hover table-striped">
                         <thead>
                             <tr>
                                 <th>Analytic Account</th>
@@ -52,7 +83,6 @@
                         </thead>
                         <tbody>
                             <t t-foreach="props.value.records" t-as="dtag" t-key="dtag.id">
-                                <!-- <t t-log="dtag"/> -->
                                 <tr class="o_data_row">
                                     <td class="o_data_cell"><t t-esc="dtag.data.analytic_account_id and dtag.data.analytic_account_id.data.display_name.length ? dtag.data.analytic_account_id.data.display_name + 'A' : dtag.data.display_name + ' T'"/></td>
                                     <td class="o_data_cell"><input class="o_input" t-on-click.stop="" t-on-change="(ev) => this.percentage_changed(dtag, ev)" t-att-value="dtag.data.percentage"/></td>
@@ -60,7 +90,7 @@
                                 </tr>
                             </t>
                         </tbody>
-                    </table>
+                    </table> -->
                 </div>
             </t>
         </div>
