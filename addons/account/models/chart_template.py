@@ -1235,33 +1235,6 @@ class AccountTaxRepartitionLineTemplate(models.Model):
             if all_engines and all_engines != {'tax_tags'}:
                 raise ValidationError(_("Only 'tax_tags' expressions can be linked to a tax repartition line template."))
 
-    def _retrieve_tags_from_formula(self):
-       # TODO OCO DOC
-        self.ensure_one()
-
-        if not self.tags_formula:
-            return self.env['account.account.tag']
-
-        country = (self.invoice_tax_id or self.refund_tax_id).chart_template_id.country_id
-        formula_to_eval = self.tags_formula.replace(' ', '')
-        tag_names = [name for name in re.split(r'(?=[+-])|[~]', formula_to_eval) if name]
-
-        if formula_to_eval and not tag_names:
-            # Split regex only returned empty strings, meaning the formula is wrong
-            raise UserError(_("Tags formula is syntactically wrong."))
-
-        tags = self.env['account.account.tag'].search([
-            ('name', 'in', tag_names),
-            '|',
-            ('country_id', '=', False),
-            ('country_id', '=', country.id)
-        ])
-
-        if len(tags) != len(tag_names):
-            raise UserError(_("Missing tags when fetching tags from formula '%s'.", self.tags_formula))
-
-        return tags
-
     def get_repartition_line_create_vals(self, company):
         rslt = [Command.clear()]
         for record in self:

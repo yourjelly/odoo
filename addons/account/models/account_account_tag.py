@@ -11,11 +11,10 @@ class AccountAccountTag(models.Model):
     name = fields.Char('Tag Name', required=True)
     applicability = fields.Selection([('accounts', 'Accounts'), ('taxes', 'Taxes'), ('products', 'Products')], required=True, default='accounts')
     color = fields.Integer('Color Index')
-    active = fields.Boolean(default=True, help="Set active to false to hide the Account Tag without removing it.") #TODO OCO s'assurer que dispo à la vue, pour permettre une désactivation manuelle des vieux trucs ?
+    active = fields.Boolean(default=True, help="Set active to false to hide the Account Tag without removing it.")
     tax_negate = fields.Boolean(string="Negate Tax Balance", help="Check this box to negate the absolute value of the balance of the lines associated with this tag in tax report computation.")
     country_id = fields.Many2one(string="Country", comodel_name='res.country', help="Country for which this tag is available, when applied on taxes.")
 
-    #TODO OCO bouger sur expression, à priori
     @api.model
     def _get_tax_tags(self, tag_name, country_id, sign=None):
         """ Returns all the tax tags corresponding to the tag name given in parameter

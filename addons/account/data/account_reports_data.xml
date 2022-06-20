@@ -6,6 +6,7 @@
         <record id="generic_tax_report" model="account.report">
             <field name="name">Generic Tax report</field>
             <field name="filter_multi_company">tax_units</field>
+            <field name="filter_fiscal_position" eval="1"/>
             <field name="default_opening_date_filter">last_month</field>
             <field name="only_tax_exigible" eval="True"/>
             <field name="dynamic_lines_generator">_generic_tax_report_default_grouping</field>
@@ -22,7 +23,6 @@
                     <field name="sequence" eval="2"/>
                 </record>
             </field>
-            <!--TODO OCO fiscal_position à voir-->
         </record>
 
         <record id="generic_tax_report_account_tax" model="account.report">
@@ -76,7 +76,6 @@
             <field name="filter_hierarchy">by_default</field>
             <field name="filter_journals" eval="True"/>
             <field name="filter_partner" eval="True"/>
-            <field name="filter_account_type" eval="None"/>
             <field name="column_ids">
                 <record id="test_report_column_main" model="account.report.column">
                     <field name="name">MAIN</field>
@@ -91,7 +90,6 @@
                     <field name="sequence" eval="2"/>
                 </record>
             </field>
-            <!--TODO OCO fiscal_position à voir-->
         </record>
 
         <record id="oco_test_line_1" model="account.report.line">
