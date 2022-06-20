@@ -187,8 +187,8 @@ export class AutoComplete extends Component {
         }
     }
 
-    onInputFocus() {
-        this.props.onFocus();
+    onInputFocus(ev) {
+        this.props.onFocus(ev);
     }
     onInputBlur() {
         const value = this.inputRef.el.value;
