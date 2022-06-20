@@ -13,6 +13,26 @@ class AccountBankStatement(models.Model):
     _order = "last_date desc, name desc, id desc"
     _inherit = ['mail.thread', 'sequence.mixin']
 
+    @api.model
+    def _default_start_statement_id(self):
+        if self._context.get('active_model') != 'account.bank.statement.line' or not self._context.get('active_id'):
+            return None
+
+        source_st_line = self.env[self._context['active_model']].browse(self._context['active_id'])
+        source_st_line.flush_model(fnames=['amount', 'date', 'sequence', 'journal_id'])
+        # self._cr.execute('''
+        #     SELECT
+        #     FROM account_bank_statement_line
+        # ''')
+
+    @api.model
+    def _default_end_statement_id(self):
+        if self._context.get('active_model') != 'account.bank.statement.line' or not self._context.get('active_id'):
+            return None
+
+        source_st_line = self.env[self._context['active_model']].browse(self._context['active_id'])
+        source_st_line.flush_model(fnames=['amount', 'date', 'sequence', 'journal_id'])
+
     name = fields.Char(
         string="Reference",
         copy=False,
@@ -57,6 +77,7 @@ class AccountBankStatement(models.Model):
     start_statement_line_id = fields.Many2one(
         comodel_name='account.bank.statement.line',
         required=True,
+        default=_default_start_statement_id,
     )
     start_statement_line_date = fields.Date(
         string="Start Date",
@@ -76,6 +97,7 @@ class AccountBankStatement(models.Model):
         string="End Date",
         related='end_statement_line_id.move_id.date',
         store=True,
+        default=_default_end_statement_id,
     )
     end_statement_line_sequence = fields.Integer(
         string="End Sequence",
@@ -248,6 +270,7 @@ class AccountBankStatementLine(models.Model):
         string="Statement",
         store=False,
         compute='_compute_statement_id',
+        inverse='_inverse_statement_id',
     )
     running_balance_start = fields.Monetary(
         string="Running Balance Before",
@@ -505,6 +528,9 @@ class AccountBankStatementLine(models.Model):
         else:
             # Statement lines are not stored inside the database.
             self.statement_id = None
+
+    def _inverse_statement_id(self):
+        pass
 
     @api.depends('date', 'sequence', 'journal_id')
     def _compute_running_balance(self):
