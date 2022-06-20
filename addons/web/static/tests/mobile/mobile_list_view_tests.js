@@ -197,23 +197,26 @@ QUnit.module("Mobile Views", ({ beforeEach }) => {
         );
     });
 
-    QUnit.test("add custom field button not shown in mobile (with opt. col.)", async (assert) => {
-        await makeView({
-            type: "list",
-            resModel: "foo",
-            serverData,
-            arch: `
+    QUnit.skipWOWL(
+        "add custom field button not shown in mobile (with opt. col.)",
+        async (assert) => {
+            await makeView({
+                type: "list",
+                resModel: "foo",
+                serverData,
+                arch: `
                     <tree>
                         <field name="foo" />
                         <field name="bar" optional="hide" />
                     </tree>
                 `,
-        });
+            });
 
-        assert.containsOnce(fixture, "table .o_optional_columns_dropdown_toggle");
-        await click(fixture, "table .o_optional_columns_dropdown_toggle");
-        assert.containsOnce(fixture, "div.o_optional_columns .dropdown-item");
-    });
+            assert.containsOnce(fixture, "table .o_optional_columns_dropdown_toggle");
+            await click(fixture, "table .o_optional_columns_dropdown_toggle");
+            assert.containsOnce(fixture, "div.o_optional_columns .dropdown-item");
+        }
+    );
 
     QUnit.test(
         "add custom field button not shown to non-system users (wo opt. col.)",
