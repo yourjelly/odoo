@@ -15,6 +15,7 @@ from collections import defaultdict
 from odoo import _, api, fields, models
 from odoo import tools
 from odoo.addons.base.models.ir_mail_server import MailDeliveryException
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -138,6 +139,10 @@ class MailMail(models.Model):
             new_mails_w_attach.mapped('attachment_ids').check(mode='read')
 
         return new_mails
+
+    @api.returns('self', lambda value: value.id)
+    def copy(self, default=None):
+        raise UserError(_('You cannot duplicate an email'))
 
     def write(self, vals):
         res = super(MailMail, self).write(vals)

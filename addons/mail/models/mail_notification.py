@@ -4,7 +4,7 @@
 from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models
-from odoo.exceptions import AccessError
+from odoo.exceptions import AccessError, UserError
 from odoo.tools.translate import _
 
 
@@ -85,6 +85,10 @@ class MailNotification(models.Model):
         if vals.get('is_read'):
             vals['read_date'] = fields.Datetime.now()
         return super(MailNotification, self).write(vals)
+
+    @api.returns('self', lambda value: value.id)
+    def copy(self, default=None):
+        raise UserError(_('You cannot duplicate a notification'))
 
     @api.model
     def _gc_notifications(self, max_age_days=180):
