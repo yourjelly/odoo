@@ -1249,6 +1249,7 @@ export class RelationalModel extends Model {
             }
         }
 
+        const Record = this.constructor.Record;
         const newRecord = new Record(this, {
             handle,
             viewType: params.viewMode,
@@ -1319,7 +1320,7 @@ export class RelationalModel extends Model {
             loadParams.context = params.context;
         }
         const state = this.root ? this.root.exportState() : {};
-        const nextRoot = new Record(
+        const nextRoot = new this.constructor.Record(
             this,
             {
                 __bm_load_params__: loadParams,
@@ -1394,7 +1395,8 @@ export class RelationalModel extends Model {
                 context: params.context,
             },
         });
-        return new Record(this, params, state);
+        return new this.constructor.Record(this, params, state);
     }
 }
 RelationalModel.services = ["action", "dialog", "notification"];
+RelationalModel.Record = Record;
