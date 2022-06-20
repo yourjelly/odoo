@@ -27,44 +27,7 @@ class AccountBankStatement(models.Model):
 
         source_st_line = self.env['account.bank.statement.line'].browse(self._context['active_id'])
 
-        # Find the previous bank statement in the chain.
-        source_st_line.flush_model(fnames=['amount', 'date', 'sequence', 'journal_id'])
-        self.flush_model(fnames=['start_statement_line_id', 'end_statement_line_id'])
-        self._cr.execute(
-            '''
-                SELECT
-                    st.start_statement_line_id,
-                    st.start_statement_line_date,
-                    st.start_statement_line_sequence
-                FROM account_bank_statement st
-                WHERE st.journal_id = %s
-                    AND
-                    (
-                        st.start_statement_line_date < %s
-                        OR (
-                            st.start_statement_line_date = %s
-                            AND (
-                                st.start_statement_line_sequence > %s
-                                OR (
-                                    st.start_statement_line_sequence = %s
-                                    AND st.start_statement_line_id < %s
-                                )
-                            )
-                        )
-                    )
-                ORDER BY st.start_statement_line_date
-                LIMIT 1
-            ''',
-            [
-                source_st_line.journal_id.id,
-                source_st_line.date,
-                source_st_line.date,
-                source_st_line.sequence,
-                source_st_line.sequence,
-                source_st_line.id,
-            ],
-        )
-        row = self._cr.fetchone()
+        row = source_st_line._find_previous_statement()
         if row:
             last_st_line_id, last_st_line_date, last_st_line_sequence = row
             st_query_clause = '''
@@ -585,30 +548,30 @@ class AccountBankStatementLine(models.Model):
                 JOIN account_move move ON move.id = st_line.move_id
                 JOIN account_bank_statement st ON
                     st.journal_id = move.journal_id
-                    AND
+                            AND
                     (
-                        move.date < st.start_statement_line_date
+                        move.date > st.start_statement_line_date
                         OR (
                             move.date = st.start_statement_line_date
                             AND (
-                                st_line.sequence > st.start_statement_line_sequence
+                                st_line.sequence < st.start_statement_line_sequence
                                 OR (
                                     st_line.sequence = st.start_statement_line_sequence
-                                    AND st_line.id <= st.start_statement_line_id
+                                    AND st_line.id >= st.start_statement_line_id
                                 )
                             )
                         )
                     )
                     AND
                     (
-                        move.date > st.end_statement_line_date
+                        move.date < st.end_statement_line_date
                         OR (
                             move.date = st.end_statement_line_date
                             AND (
-                                st_line.sequence < st.end_statement_line_sequence
+                                st_line.sequence > st.end_statement_line_sequence
                                 OR (
                                     st_line.sequence = st.end_statement_line_sequence
-                                    AND st_line.id >= st.end_statement_line_id
+                                    AND st_line.id <= st.end_statement_line_id
                                 )
                             )
                         )
@@ -1016,6 +979,141 @@ class AccountBankStatementLine(models.Model):
                 'partner_id': self.partner_id.id,
             })
         return bank_account
+
+    def _find_previous_statement(self):
+        """
+        Finds the previous bank statement in the chain.
+        :return: (id: id, date: date, sequence:sequence) of the last line of the previous statement
+        """
+
+        self.flush_model(fnames=['date', 'sequence', 'journal_id'])
+        self.statement_id.flush_model(fnames=['start_statement_line_id', 'end_statement_line_id'])
+        self._cr.execute(
+            '''
+                SELECT
+                    st.start_statement_line_id,
+                    st.start_statement_line_date,
+                    st.start_statement_line_sequence
+                FROM account_bank_statement st
+                WHERE st.journal_id = %s
+                    AND
+                    (
+                        st.start_statement_line_date < %s
+                        OR (
+                            st.start_statement_line_date = %s
+                            AND (
+                                st.start_statement_line_sequence > %s
+                                OR (
+                                    st.start_statement_line_sequence = %s
+                                    AND st.start_statement_line_id < %s
+                                )
+                            )
+                        )
+                    )
+                ORDER BY st.start_statement_line_date
+                LIMIT 1
+            ''',
+            [
+                self.journal_id.id,
+                self.date,
+                self.date,
+                self.sequence,
+                self.sequence,
+                self.id,
+            ],
+        )
+        row = self._cr.fetchone()
+        return dict(zip(('id', 'date', 'sequence'), row)) if row else {}
+
+    def _find_next_statement(self):
+        """
+        Finds the next bank statement in the chain.
+        :return: dict (id: id, date: date, sequence:sequence) of the first line of the next statement
+                 empty dict if not found
+        """
+
+        self.flush_model(fnames=['date', 'sequence', 'journal_id'])
+        self.statement_id.flush_model(fnames=['end_statement_line_id', 'end_statement_line_id'])
+        self._cr.execute(
+            '''
+                SELECT
+                    st.end_statement_line_id,
+                    st.end_statement_line_date,
+                    st.end_statement_line_sequence
+                FROM account_bank_statement st
+                WHERE st.journal_id = %s
+                    AND
+                    (
+                        st.end_statement_line_date > %s
+                        OR (
+                            st.end_statement_line_date = %s
+                            AND (
+                                st.end_statement_line_sequence < %s
+                                OR (
+                                    st.end_statement_line_sequence = %s
+                                    AND st.end_statement_line_id > %s
+                                )
+                            )
+                        )
+                    )
+                ORDER BY st.end_statement_line_date
+                LIMIT 1
+            ''',
+            [
+                self.journal_id.id,
+                self.date,
+                self.date,
+                self.sequence,
+                self.sequence,
+                self.id,
+            ],
+        )
+        row = self._cr.fetchone()
+        return dict(zip(('id', 'date', 'sequence'), row)) if row else {}
+
+    def _find_statement_gap(self, before=True, after=True):
+        """
+        Finds the lines with no bank statement in the chain.
+        :return: lines
+        """
+        self.ensure_one()
+        if not (before or after):
+            return self
+        # todo: obviously it needs optimization
+        domain = []
+        if before:
+            start_row = self._find_previous_statement()
+            if start_row:
+                start_line_id, start_line_date, start_line_sequence = start_row
+                domain.append([
+                    '|','|',
+                        ('date', '>', start_line_date),
+                        '&',
+                            ('date', '=', start_line_date),
+                            ('sequence', '<', start_line_sequence),
+                        '&', '&',
+                            ('date', '=', start_line_date),
+                            ('sequence', '=', start_line_sequence),
+                            ('id', '>', start_line_id),
+                ])
+
+        if after:
+            end_row = self._find_previous_statement()
+            if end_row:
+                end_line_id, end_line_date, end_line_sequence = end_row
+                domain.append([
+                    '|', '|',
+                        ('date', '<', end_line_date),
+                        '&',
+                            ('date', '=', end_line_date),
+                            ('sequence', '>', end_line_sequence),
+                        '&', '&',
+                            ('date', '=', end_line_date),
+                            ('sequence', '=', end_line_sequence),
+                            ('id', '<', end_line_id),
+                ])
+
+        return self.search(domain)
 
     def button_undo_reconciliation(self):
         ''' Undo the reconciliation mades on the statement line and reset their journal items
