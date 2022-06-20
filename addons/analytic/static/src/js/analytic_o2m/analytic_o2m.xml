@@ -40,9 +40,9 @@
                             <th class="third_col"/>
                         </thead>
                         <tbody>
-                            <t t-foreach="groups" t-as="group" t-key="group">
-                                <tr><th colspan="3" class="o_group_name" t-esc="group"/></tr>
-                                <t t-foreach="listByGroup(group)" t-as="dtag" t-key="dtag.id">
+                            <t t-foreach="state.groups" t-as="group" t-key="group[0]">
+                                <tr><th colspan="3" class="o_group_name" t-esc="group[1]"/></tr>
+                                <t t-foreach="listByGroup(group[1])" t-as="dtag" t-key="dtag.id">
                                     <tr class="o_data_row">
                                         <td class="o_data_cell"><t t-esc="dtag.data.analytic_account_id and dtag.data.analytic_account_id.data.display_name.length ? dtag.data.analytic_account_id.data.display_name + 'A' : dtag.data.display_name + ' T'"/></td>
                                         <td class="o_data_cell"><input class="o_input" t-on-click.stop="() => this.switchMode(dtag, 'edit')" t-on-change="(ev) => this.percentage_changed(dtag, ev, this)" t-att-value="dtag.data.percentage"/></td>

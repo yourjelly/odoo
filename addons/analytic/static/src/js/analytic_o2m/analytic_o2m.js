@@ -27,6 +27,7 @@ export class AnalyticO2M extends Component {
             isOpened: false,
             addingGroup: "",
             autocompleteValue2: "",
+            groups: [],
         });
         this.widgetRef = useRef("analyticO2m");
         usePosition(() => this.widgetRef.el, {
@@ -61,7 +62,7 @@ export class AnalyticO2M extends Component {
         });
         this.activeField = this.props.record.activeFields[this.props.name];
         // this.fetchTreeArch();
-        
+        this.fetchAllGroups();
     }
 
     // async fetchTreeArch(){
@@ -106,14 +107,9 @@ export class AnalyticO2M extends Component {
     }
 
     async fetchAllGroups() {
-        const groups = await this.orm.call('analytic.account.group', "name_search", [], {
-            name: request,
-            operator: "ilike",
-            args: [],
-            limit: 7,
-            context: [],
-        });
-        console.log(groups);
+        if (this.state.groups.length === 0) {
+            this.state.groups = await this.orm.call('account.analytic.group', "name_search", [], {});
+        }
     } 
 
     get sources() {
@@ -195,12 +191,12 @@ export class AnalyticO2M extends Component {
         let options = [];
         console.log('loadOptionsSourceAnalytic');
         // let group = console.log(this.state.addingGroup);
-        let existing_tags = this.listByGroup(this.state.addingGroup);
+        let existing_tags = this.listByGroup(this.state.addingGroup[1]).map((record) => record.data.acc_id);
 
         const records = await this.orm.call(this.search_field.relation, "name_search", [], {
             name: request,
             operator: "ilike",
-            args: [], //add domain to exclude existing analytic accounts
+            args: [['group_id', '=', this.state.addingGroup[0]], ['id', 'not in', existing_tags]],
             limit: 7,
             context: [],
         });
