@@ -267,6 +267,17 @@ const KnowledgeArticleFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin
     _renderPermissionPanel: function () {
         this.$('.btn-share').one('click', event => {
             const $container = this.$('.o_knowledge_permission_panel');
+            const $dropdown = $container.closest('.o-dropdown');
+            // prevent closing the panel when the user opens the invitation wizard.
+            $dropdown.on('hide.bs.dropdown', event => {
+                if (event.clickEvent) {
+                    const { target } = event.clickEvent;
+                    const names = ['.modal', '.ui-menu', '.o_notification_manager'];
+                    if (names.some(name => target.closest(name))) {
+                        event.preventDefault();
+                    }
+                }
+            });
             const panel = new PermissionPanelWidget(this, {
                 article_id: this.state.data.id
             });
