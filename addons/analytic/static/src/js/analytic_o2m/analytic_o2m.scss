@@ -2,4 +2,24 @@
     .first_col {
         width: 70%;
     }
+    .o_analytic_table {
+        max-width: 200px;
+    }
+    .o_analytic_account_name {
+        width: 100px;
+        max-width: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .o_analytic_percentage {
+        width: 30px;
+    }
+
+}
+
+.o_dropdown_bold {
+    text-indent: -6px;
+    .dropdown-item {
+        font-weight: $font-weight-bold !important;
+    }
 }

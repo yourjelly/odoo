@@ -4,7 +4,7 @@ import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { TagsList } from "@web/views/fields/many2many_tags/tags_list";
-import { useService, useOwnedDialogs } from "@web/core/utils/hooks";
+import { useService, useChildRef } from "@web/core/utils/hooks";
 import { usePosition } from "@web/core/position_hook";
 // import { ListArchParser } from "@web/views/list/list_arch_parser";
 // import { ListRenderer } from "@web/views/list/list_renderer";
@@ -16,7 +16,7 @@ import {
     useX2ManyCrud,
 } from "@web/views/fields/relational_utils";
 
-const { Component, useState, useRef } = owl;
+const { Component, useState, useRef, useExternalListener } = owl;
 
 
 export class AnalyticO2M extends Component {
@@ -63,6 +63,7 @@ export class AnalyticO2M extends Component {
         this.activeField = this.props.record.activeFields[this.props.name];
         // this.fetchTreeArch();
         this.fetchAllGroups();
+        useExternalListener(window, "scroll", this.onWindowScroll, true);
     }
 
     // async fetchTreeArch(){
@@ -100,10 +101,17 @@ export class AnalyticO2M extends Component {
         }));
     }
 
-    deleteTag(id) {
+    get tag_ids() {
+        return this.list.map((record) => record.data.acc_id);
+    }
+
+    async deleteTag(id) {
         const tagRecord = this.list.find((record) => record.id === id);
         const ids = this.props.value.currentIds.filter((id) => id !== tagRecord.resId);
-        this.props.value.replaceWith(ids);
+        await this.props.value.replaceWith(ids);
+        if (!ids.length) {
+            this.forceDropdownClose();
+        }
     }
 
     async fetchAllGroups() {
@@ -137,34 +145,45 @@ export class AnalyticO2M extends Component {
 
         
             // search for templates only if there are no existing tags
-        const records = await this.orm.call(this.template_field.relation, "name_search", [], {
+        let records = await this.orm.call(this.template_field.relation, "name_search", [], {
             name: request,
             operator: "ilike",
             args: [],
-            limit: 7,
+            limit: 3,
             context: [],
         });
-        options = records.map((result) => ({
+        if (records.length) {
+            options.push({
+                label: this.env._t("Model Templates"),
+                classList: "o_dropdown_bold",
+                unselectable: true,
+            })
+        }
+        records.map((result) => (options.push({
             value: result[0],
             label: result[1],
             field_to_update: this.template_field.name,
-        }));
+        })));
 
-        if (!options.length) {
-            // if no template are found - search analytic account (can use this to modify the selected template)
-            const records = await this.orm.call(this.search_field.relation, "name_search", [], {
-                name: request,
-                operator: "ilike",
-                args: [], //add domain to exclude existing analytic accounts
-                limit: 7,
-                context: [],
-            });
-            options = records.map((result) => ({
-                value: result[0],
-                label: result[1],
-                field_to_update: this.search_field.name,
-            }));
+        records = await this.orm.call(this.search_field.relation, "name_search", [], {
+            name: request,
+            operator: "ilike",
+            args: [['id', 'not in', this.tag_ids]], //add domain to exclude existing analytic accounts
+            limit: 8 - options.length,
+            context: [],
+        });
+        if (records.length) {
+            options.push({
+                label: this.env._t("Analytic Accounts"),
+                classList: "o_dropdown_bold",
+                unselectable: true,
+            })
         }
+        records.map((result) => (options.push({
+            value: result[0],
+            label: result[1],
+            field_to_update: this.search_field.name,
+        })));
 
         if (!options.length) {
             options.push({
@@ -245,7 +264,7 @@ export class AnalyticO2M extends Component {
         console.log('onInput');
         console.log(inputValue);
         this.state.autocompleteValue = inputValue;
-        this.computeIsOpened();
+        // this.computeIsOpened();
     }
 
     async onSelect(option, params) {
@@ -256,7 +275,7 @@ export class AnalyticO2M extends Component {
         changes[selected_option.field_to_update] = [selected_option.value, selected_option.label];
         await this.props.record.update(changes);
         this.state.autocompleteValue = "";
-        this.computeIsOpened();
+        // this.computeIsOpened();
         this.state.addingGroup = "";
     }
 
@@ -288,6 +307,14 @@ export class AnalyticO2M extends Component {
         this.state.isOpened = false;
     }
 
+    forceDropdownOpen(){
+        this.state.isOpened = true;
+    }
+
+    onWindowScroll(ev) {
+        this.forceDropdownClose();
+    }
+
     async percentage_changed(record, ev, obj) {
         console.log('percentage changed');
        
@@ -312,6 +339,10 @@ export class AnalyticO2M extends Component {
         console.log(record);
     }
 
+    selectText(ev){
+        ev.target.select();
+    }
+
     onOpenExisting() {
         console.log('open existing');
         this.openTemplate({ resId: this.template_field_value[0], context: {} })
@@ -333,7 +364,8 @@ export class AnalyticO2M extends Component {
         let changes = {};
         changes[this.template_field.name] = false;
         await this.props.record.update(changes);
-        this.computeIsOpened();
+        // this.computeIsOpened();
+        this.forceDropdownClose();
     }
 
     async onRandom() {
@@ -344,8 +376,19 @@ export class AnalyticO2M extends Component {
         
     }
 
+    // refreshAutocompleteRef() {
+    //     this.autocompleteContainerRef = useChildRef();
+    //     console.log(this.autocompleteContainerRef);
+    //     this.focusInput = () => {
+    //         this.autocompleteContainerRef.el.querySelector("input").focus();
+    //     };
+    // }
+
     addLine(group){
         this.state.addingGroup = group;
+        // Can not focus on the input of the new Autocomplete - needs useForwardRefToParent or a custom AutoComplete that does this
+        // this.refreshAutocompleteRef();
+        // this.focusInput();
     }
     addingBlur() {
         //this.state.addingGroup = "";
