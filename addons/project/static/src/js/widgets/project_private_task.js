@@ -22,4 +22,4 @@ const ProjectPrivateTask = FieldMany2One.extend({
     },
 });
 
-field_registry.add('project_private_task', ProjectPrivateTask);
+field_registry.add('legacy_project_private_task', ProjectPrivateTask);

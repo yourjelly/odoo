@@ -1544,7 +1544,7 @@
                           js_class="project_calendar"
                           scales="month,year">
                     <field name="allow_milestones" invisible="1" />
-                    <field name="project_id" widget="project_private_task"/>
+                    <field name="project_id" widget="legacy_project_private_task"/>
                     <field name="milestone_id" attrs="{'invisible': [('allow_milestones', '=', False)]}"/>
                     <field name="user_ids" widget="many2many_avatar_user"/>
                     <field name="partner_id" attrs="{'invisible': [('partner_id', '=', False)]}"/>
