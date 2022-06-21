@@ -41,4 +41,4 @@ export const StatusWithColor = FieldSelection.extend({
     },
 });
 
-fieldRegistry.add('status_with_color', StatusWithColor);
+fieldRegistry.add('legacy_status_with_color', StatusWithColor);
