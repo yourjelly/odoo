@@ -226,7 +226,6 @@ QUnit.module("Fields", (hooks) => {
                     </header>
                 </form>
             `,
-            // config: { device: { isMobile: false } },
         });
 
         assert.hasClass(
@@ -352,7 +351,6 @@ QUnit.module("Fields", (hooks) => {
                     </header>
                 </form>
             `,
-            // config: { device: { isMobile: false } },
         });
 
         assert.doesNotHaveClass(target.querySelector(".o_statusbar_status"), "o_field_empty");
@@ -435,7 +433,6 @@ QUnit.module("Fields", (hooks) => {
                         </header>
                     </form>
                 `,
-                // config: { device: { isMobile: false } },
             });
 
             await click(target, ".o_form_button_edit");
@@ -446,6 +443,52 @@ QUnit.module("Fields", (hooks) => {
             assert.containsOnce(status[status.length - 1], "button.disabled");
         }
     );
+
+    QUnit.test("statusbar: choose an item from the 'More' menu", async function (assert) {
+        assert.expect(3);
+
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+        });
+
+        serverData.models.partner.records[0].bar = false;
+
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            resId: 1,
+            serverData,
+            arch: `
+                    <form>
+                        <header>
+                            <field name="trululu" widget="statusbar" options="{'clickable': '1', 'fold_field': 'bar'}" />
+                        </header>
+                    </form>
+                `,
+        });
+
+        await click(target, ".o_form_button_edit");
+        assert.strictEqual(
+            target.querySelector("[aria-label='Current state']").textContent,
+            "aaa",
+            "default status is 'aaa'"
+        );
+        assert.strictEqual(
+            document
+                .querySelector(".o_statusbar_status .dropdown-toggle.o_arrow_button")
+                .textContent.trim(),
+            "More",
+            "button has the correct text"
+        );
+
+        await click(target, ".o_statusbar_status .dropdown-toggle");
+        await click(target, ".o-dropdown .dropdown-item");
+        assert.strictEqual(
+            target.querySelector("[aria-label='Current state']").textContent,
+            "second record",
+            "status has changed to the selected dropdown item"
+        );
+    });
 
     QUnit.test("statusbar with dynamic domain", async function (assert) {
         assert.expect(5);
