@@ -54,8 +54,8 @@
                             <div class="o_kanban_record_top">
                                 <div class="o_kanban_record_headings">
                                     <strong class="o_kanban_record_title">
-                                        <s t-if="!record.active.raw_value"><field name="name" widget="name_with_subtask_count"/></s>
-                                        <t t-else=""><field name="name" widget="name_with_subtask_count"/></t>
+                                        <s t-if="!record.active.raw_value"><field name="name" widget="legacy_name_with_subtask_count"/></s>
+                                        <t t-else=""><field name="name" widget="legacy_name_with_subtask_count"/></t>
                                     </strong>
                                     <span invisible="context.get('default_project_id', False)"><br/><field name="project_id" required="1"/></span>
                                     <span t-if="record.allow_milestones.raw_value and record.milestone_id.raw_value" t-attf-class="{{record.has_late_and_unreached_milestone.raw_value ? 'text-danger' : ''}}">
@@ -128,7 +128,7 @@
                 <field name="priority" widget="priority" optional="show" nolabel="1"/>
                 <field name="child_text" invisible="1"/>
                 <field name="allow_subtasks" invisible="1" />
-                <field name="name" widget="name_with_subtask_count"/>
+                <field name="name" widget="legacy_name_with_subtask_count"/>
                 <field name="company_id" invisible="1"/>
                 <field name="milestone_id" attrs="{'column_invisible': [('allow_milestones', '=', False)]}"/>
                 <field name="partner_id" optional="hide"/>

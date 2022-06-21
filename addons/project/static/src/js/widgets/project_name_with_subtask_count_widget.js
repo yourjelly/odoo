@@ -28,4 +28,4 @@ export const FieldNameWithSubTaskCount = FieldChar.extend({
     }
 });
 
-fieldRegistry.add('name_with_subtask_count', FieldNameWithSubTaskCount);
+fieldRegistry.add('legacy_name_with_subtask_count', FieldNameWithSubTaskCount);
