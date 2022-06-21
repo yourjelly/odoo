@@ -4,6 +4,7 @@
 import json
 
 from odoo.addons.knowledge.tests.common import KnowledgeCommon
+from odoo.exceptions import ValidationError
 from odoo.tests.common import HttpCase, tagged, users
 
 
@@ -141,4 +142,162 @@ class KnowledgeArticleControllerTest(HttpCase, KnowledgeCommon):
             'parent_id': child_article.id,
             'parent_name': child_article.display_name,
             'user_permission': 'write'
+        })
+
+    @users('employee')
+    def test_restore_permissions(self):
+        """ Check that the user can restore the of the article permissions. """
+        parent_article = self.env['knowledge.article'].article_create(title='Parent article')
+        child_article = self.env['knowledge.article'].article_create(title='Child article', parent_id=parent_article.id)
+        parent_article.invite_members(self.partner_employee, 'write')
+        self.assertTrue(len(parent_article.article_member_ids) == 1)
+
+        data = self.fetch_permission_panel_data(parent_article, self.user_employee)
+        self.assertIsSubDict(data, {
+            'internal_permission': 'write',
+            'parent_permission': False,
+            'based_on': False,
+            'based_on_id': False,
+            'members': [{
+                'id': parent_article.article_member_ids.id,
+                'partner_id': self.partner_employee.id,
+                'partner_name': self.partner_employee.name,
+                'partner_email': self.partner_employee.email,
+                'permission': 'write',
+                'based_on': False,
+                'based_on_id': False,
+                'partner_share': False,
+                'is_current_user': True,
+                'is_unique_writer': False
+            }],
+            'is_sync': True,
+            'parent_id': False,
+            'parent_name': False,
+            'user_permission': 'write'
+        })
+
+        data = self.fetch_permission_panel_data(child_article, self.user_employee)
+        self.assertIsSubDict(data, {
+            'internal_permission': 'write',
+            'parent_permission': 'write',
+            'based_on': parent_article.display_name,
+            'based_on_id': parent_article.id,
+            'members': [{
+                'id': parent_article.article_member_ids.id,
+                'partner_id': self.partner_employee.id,
+                'partner_name': self.partner_employee.name,
+                'partner_email': self.partner_employee.email,
+                'permission': 'write',
+                'based_on': parent_article.display_name,
+                'based_on_id': parent_article.id,
+                'partner_share': False,
+                'is_current_user': True,
+                'is_unique_writer': False
+            }],
+            'is_sync': True,
+            'parent_id': parent_article.id,
+            'parent_name': parent_article.display_name,
+            'user_permission': 'write'
+        })
+
+        child_article._set_internal_permission('read')
+
+        # After changing the internal permission of the child article, the child
+        # article should be desync with its parent and the inherited members should
+        # be copied.
+
+        self.assertMembers(child_article, 'read', {
+            self.partner_employee: 'write'
+        })
+
+        data = self.fetch_permission_panel_data(child_article, self.user_employee)
+        self.assertIsSubDict(data, {
+            'internal_permission': 'read',
+            'parent_permission': 'write',
+            'based_on': False,
+            'based_on_id': False,
+            'members': [{
+                'id': child_article.article_member_ids.id,
+                'partner_id': self.partner_employee.id,
+                'partner_name': self.partner_employee.name,
+                'partner_email': self.partner_employee.email,
+                'permission': 'write',
+                'based_on': False,
+                'based_on_id': False,
+                'partner_share': False,
+                'is_current_user': True,
+                'is_unique_writer': True
+            }],
+            'is_sync': False,
+            'parent_id': parent_article.id,
+            'parent_name': parent_article.display_name,
+            'user_permission': 'write'
+        })
+
+        child_article.restore_article_access()
+
+    @users('admin')
+    def test_check_effectiveness_of_at_least_on_writter(self):
+        """Checks that the constraints have not been applied."""
+        parent_article = self.env['knowledge.article'].article_create(title='Parent article')
+        child_article = self.env['knowledge.article'].article_create(title='Child article')
+        child_article.move_to(parent_id=parent_article.id)
+        self.assertEqual(child_article.parent_id, parent_article)
+
+        parent_article.invite_members(self.partner_admin, 'write')
+        parent_article.invite_members(self.partner_employee, 'read')
+
+        self.assertMembers(child_article, 'write', {})
+        self.assertMembers(parent_article, 'write', {
+            self.partner_admin: 'write',
+            self.partner_employee: 'read'
+        })
+
+        member = parent_article.article_member_ids.filtered(lambda member: member.partner_id == self.partner_employee)
+        self.assertTrue(len(member) == 1)
+        child_article._set_member_permission(member, 'write', True)
+
+        self.assertMembers(child_article, 'write', {
+            self.partner_employee: 'write'
+        })
+        self.assertMembers(parent_article, 'write', {
+            self.partner_admin: 'write',
+            self.partner_employee: 'read'
+        })
+
+        child_article._set_internal_permission('read')
+
+        self.assertMembers(child_article, 'read', {
+            self.partner_admin: 'write',
+            self.partner_employee: 'write'
+        })
+        self.assertMembers(parent_article, 'write', {
+            self.partner_admin: 'write',
+            self.partner_employee: 'read'
+        })
+
+        child_article._remove_member(
+            child_article.article_member_ids.filtered(lambda member:
+                member.partner_id == self.partner_employee
+            )
+        )
+        self.assertMembers(child_article, 'read', {self.partner_admin: 'write'})
+        self.assertMembers(parent_article, 'write', {
+            self.partner_admin: 'write',
+            self.partner_employee: 'read'
+        })
+
+        with self.assertRaises(ValidationError):
+            child_article._remove_member(
+                child_article.article_member_ids.filtered(lambda member:
+                    member.partner_id == self.partner_admin
+                )
+            )
+
+        self.assertMembers(child_article, 'read', {
+            self.partner_admin: 'write'
+        })
+        self.assertMembers(parent_article, 'write', {
+            self.partner_admin: 'write',
+            self.partner_employee: 'read'
         })
