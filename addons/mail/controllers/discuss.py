@@ -98,7 +98,7 @@ class DiscussController(http.Controller):
                         raise NotFound()
                     guest = channel_sudo.env['mail.guest'].create({
                         'country_id': channel_sudo.env['res.country'].search([('code', '=', request.geoip.get('country_code'))], limit=1).id,
-                        'lang': get_lang(channel_sudo.env).code,
+                        'lang_id': get_lang(channel_sudo.env).id,
                         'name': _("Guest"),
                         'timezone': channel_sudo.env['mail.guest']._get_timezone_from_request(request),
                     })

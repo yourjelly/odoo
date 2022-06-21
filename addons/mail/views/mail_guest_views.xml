@@ -10,7 +10,7 @@
                 <field name="id"/>
                 <field name="name"/>
                 <field name="country_id"/>
-                <field name="lang"/>
+                <field name="lang_id"/>
                 <field name="timezone"/>
             </tree>
         </field>

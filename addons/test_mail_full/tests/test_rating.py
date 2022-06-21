@@ -130,7 +130,7 @@ class TestRatingFlow(TestRatingCommon):
             # 3713 requests if only test_mail_full is installed
             # 4510 runbot community
             # 4910 runbot enterprise
-            with self.assertQueryCount(__system__=4910):
+            with self.assertQueryCount(__system__=4911):
                 record_ratings = self.env['mail.test.rating'].create([{
                     'customer_id': partners[idx].id,
                     'name': 'Test Rating',

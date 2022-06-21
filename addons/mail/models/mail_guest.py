@@ -18,14 +18,11 @@ class MailGuest(models.Model):
     _cookie_name = 'dgid'
     _cookie_separator = '|'
 
-    @api.model
-    def _lang_get(self):
-        return self.env['res.lang'].get_installed()
-
     name = fields.Char(string="Name", required=True)
     access_token = fields.Char(string="Access Token", default=lambda self: str(uuid.uuid4()), groups='base.group_system', required=True, readonly=True, copy=False)
     country_id = fields.Many2one(string="Country", comodel_name='res.country')
-    lang = fields.Selection(string="Language", selection=_lang_get)
+    lang = fields.Char('Language Code', related="lang_id.code")
+    lang_id = fields.Many2one('res.lang', string="Language")
     timezone = fields.Selection(string="Timezone", selection=_tz_get)
     channel_ids = fields.Many2many(string="Channels", comodel_name='mail.channel', relation='mail_channel_member', column1='guest_id', column2='channel_id', copy=False)
 

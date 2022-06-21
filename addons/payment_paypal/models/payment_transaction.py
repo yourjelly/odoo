@@ -50,7 +50,7 @@ class PaymentTransaction(models.Model):
             'item_name': f"{self.company_id.name}: {self.reference}",
             'item_number': self.reference,
             'last_name': partner_last_name,
-            'lc': self.partner_lang,
+            'lc': self.partner_lang_id.code,
             'notify_url': webhook_url if self.acquirer_id.paypal_use_ipn else None,
             'return_url': urls.url_join(base_url, PaypalController._return_url),
             'state': self.partner_state_id.name,

@@ -57,7 +57,7 @@
                             </div>
                             <field name="partner_email" widget="email"/>
                             <field name="partner_phone" widget="phone"/>
-                            <field name="partner_lang"/>
+                            <field name="partner_lang_id"/>
                         </group>
                     </group>
                     <group string="Message" attrs="{'invisible': [('state_message', '=', False)]}">

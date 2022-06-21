@@ -67,7 +67,7 @@ class PaymentTransaction(models.Model):
             'ORDERID': self.reference,
             'AMOUNT': payment_utils.to_minor_currency_units(self.amount, None, 2),
             'CURRENCY': self.currency_id.name,
-            'LANGUAGE': self.partner_lang or 'en_US',
+            'LANGUAGE': self.partner_lang_id.code or 'en_US',
             'EMAIL': self.partner_email or '',
             'OWNERADDRESS': self.partner_address or '',
             'OWNERZIP': self.partner_zip or '',

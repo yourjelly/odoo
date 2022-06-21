@@ -166,7 +166,7 @@ class TestLeadConvertMass(crm_common.TestLeadConvertMassCommon):
         test_leads = self._create_leads_batch(count=50, user_ids=[False])
         user_ids = self.assign_users.ids
 
-        with self.assertQueryCount(user_sales_manager=1038):  # 1033 - crm only: 1029
+        with self.assertQueryCount(user_sales_manager=1140):  # 1033 - crm only: 1029
             mass_convert = self.env['crm.lead2opportunity.partner.mass'].with_context({
                 'active_model': 'crm.lead',
                 'active_ids': test_leads.ids,

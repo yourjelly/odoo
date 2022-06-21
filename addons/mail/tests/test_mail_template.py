@@ -19,7 +19,7 @@ class TestMailTemplate(MailCommon):
             'name': 'Test template',
             'subject': '{{ 1 + 5 }}',
             'body_html': '<t t-out="4 + 9"/>',
-            'lang': '{{ object.lang }}',
+            'lang': '{{ object.lang_id.code }}',
             'auto_delete': True,
             'model_id': cls.env.ref('base.model_res_partner').id,
         })

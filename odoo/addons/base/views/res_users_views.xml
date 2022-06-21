@@ -239,9 +239,10 @@
                                 <group>
                                     <group string="Localization" name="preferences">
                                         <field name="active" invisible="1"/>
-                                        <label for="lang" />
+                                        <label for="lang_id" />
                                         <div class="o_row">
-                                            <field name="lang" required="1"/>
+                                            <field name="lang_id" required="1"
+                                                options="{'no_quick_create': True, 'no_create_edit': True, 'no_open': True}"/>
                                             <button
                                                 type="action"
                                                 name="%(base.action_view_base_language_install)d"
@@ -274,7 +275,7 @@
                 <tree string="Users">
                     <field name="name"/>
                     <field name="login"/>
-                    <field name="lang"/>
+                    <field name="lang_id"/>
                     <field name="login_date"/>
                     <field name="company_id" groups="base.group_multi_company"/>
                 </tree>
@@ -288,7 +289,7 @@
                     <field name="id"/>
                     <field name="name"/>
                     <field name="login"/>
-                    <field name="lang"/>
+                    <field name="lang_id"/>
                     <field name="active"/>
                     <field name="login_date"/>
                     <templates>
@@ -304,7 +305,7 @@
                                         <li class="mb4">
                                             <strong><field name="name"/></strong>
                                         </li>
-                                        <li class="badge rounded-pill float-end mb4" t-if="record.lang.raw_value"><field name="lang"/></li>
+                                        <li class="badge rounded-pill float-end mb4" t-if="record.lang_id"><field name="lang_id"/></li>
                                         <li class="mb4" t-if="record.login.raw_value" title="Login"><i class="fa fa-envelope" role="img" aria-label="Login"/> <field name="login"/></li>
                                     </ul>
                                 </div>
@@ -441,9 +442,10 @@
                                     <field name="email" widget="email" readonly="0"/>
                                 </group>
                                 <group>
-                                    <label for="lang"/>
+                                    <label for="lang_id"/>
                                     <div class="o_row">
-                                        <field name="lang" required="1" readonly="0"/>
+                                        <field name="lang_id" required="1" readonly="0"
+                                            options="{'no_quick_create': True, 'no_create_edit': True, 'no_open': True}"/>
                                         <button
                                             type="action"
                                             name="%(base.action_view_base_language_install)d"

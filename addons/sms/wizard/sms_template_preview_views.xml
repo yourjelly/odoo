@@ -16,7 +16,7 @@
                             <span class="text-warning" attrs="{'invisible': [('no_record', '=', False)]}">No records</span>
                         </div>
                     </div>
-                    <p>Choose a language: <field name="lang" class="oe_inline ml8"/></p>
+                    <p>Choose a language: <field name="lang_id" class="oe_inline ml8" options="{'no_quick_create': True, 'no_create_edit': True, 'no_open': True}"/></p>
                     <label for="body" string="SMS content"/>
                     <hr/>
                         <field name="body" readonly="1" nolabel="1" options='{"safe": True}'/>

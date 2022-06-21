@@ -197,7 +197,7 @@ class TestUsers2(TransactionCase):
         groups_id field).
         """
         # use the specific views which has the pseudo-fields
-        f = Form(self.env['res.users'], view='base.view_users_form')
+        f = Form(self.env['res.users'].with_context(lang='en_US'), view='base.view_users_form')
         f.name = "bob"
         f.login = "bob"
         user = f.save()

@@ -18,9 +18,9 @@ class TestMailTemplateTools(TestMailTemplate):
         preview = self.env['mail.template.preview'].create({
             'mail_template_id': test_template.id,
             'resource_ref': test_record,
-            'lang': 'es_ES',
+            'lang_id': self.env['res.lang']._lang_get_id('es_ES'),
         })
         self.assertEqual(preview.body_html, '<p>SpanishBody for %s</p>' % test_record.name)
 
-        preview.write({'lang': 'en_US'})
+        preview.write({'lang_id': self.env['res.lang']._lang_get_id('en_US')})
         self.assertEqual(preview.body_html, '<p>EnglishBody for %s</p>' % test_record.name)

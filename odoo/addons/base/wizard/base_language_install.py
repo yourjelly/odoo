@@ -71,7 +71,7 @@ class BaseLanguageInstall(models.TransientModel):
         }
 
     def switch_lang(self):
-        self.env.user.lang = self.first_lang_id.code
+        self.env.user.lang_id = self.first_lang_id.id
         return {
             'type': 'ir.actions.client',
             'tag': 'reload_context',

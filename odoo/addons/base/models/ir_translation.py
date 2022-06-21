@@ -154,7 +154,8 @@ class IrTranslation(models.Model):
 
     name = fields.Char(string='Translated field', required=True)
     res_id = fields.Integer(string='Record ID', index=True)
-    lang = fields.Selection(selection='_get_languages', string='Language', validate=False)
+    lang = fields.Char('Language Code', compute="_compute_lang", inverse="_inverse_lang", readonly=False, store=True)
+    lang_id = fields.Many2one('res.lang', 'Language')
     type = fields.Selection(TRANSLATION_TYPE, string='Type', index=True)
     src = fields.Text(string='Internal Source')  # stored in database, kept for backward compatibility
     value = fields.Text(string='Translation Value')
@@ -174,6 +175,15 @@ class IrTranslation(models.Model):
         ('lang_fkey_res_lang', 'FOREIGN KEY(lang) REFERENCES res_lang(code)',
          'Language code of translation item must be among known languages'),
     ]
+
+    @api.depends('lang_id')
+    def _compute_lang(self):
+        for translation in self:
+            translation.lang = translation.lang_id.code
+
+    def _inverse_lang(self):
+        for translation in self:
+            translation.lang_id = self.env['res.lang']._lang_get_id(translation.lang) if translation.lang else False
 
     @api.model
     def _get_languages(self):

@@ -114,7 +114,7 @@ class TestPartner(TransactionCase):
 
         # activate another languages to test language propagation when being in multi-lang
         self.env['res.lang']._activate_lang('de_DE')
-        self.env['res.lang']._activate_lang('fr_FR')
+        lang_fr = self.env['res.lang']._activate_lang('fr_FR')
 
         # default from context > default from installed
         partner_form = Form(
@@ -132,7 +132,7 @@ class TestPartner(TransactionCase):
         with partner_form.child_ids.new() as child:
             child.name = "First Child"
             self.assertEqual(child.lang, 'de_DE', "Child contact's lang should be the same as its parent.")
-        partner_form.lang = 'fr_FR'
+        partner_form.lang_id = lang_fr
         self.assertEqual(partner_form.lang, 'fr_FR', "New partner's lang should take user input")
         with partner_form.child_ids.new() as child:
             child.name = "Second Child"

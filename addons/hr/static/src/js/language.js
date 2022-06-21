@@ -8,7 +8,7 @@ var EmployeeFormController = FormController.extend({
     saveRecord: function () {
         var self = this;
         return this._super.apply(this, arguments).then(function () {
-            if (arguments[0].indexOf('lang') >= 0) {
+            if (arguments[0].indexOf('lang_id') >= 0) {
                 self.do_action('reload_context');
             }
         });

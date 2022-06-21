@@ -16,10 +16,6 @@ class MailTemplatePreview(models.TransientModel):
         return [(model.model, model.name) for model in self.env['ir.model'].sudo().search([])]
 
     @api.model
-    def _selection_languages(self):
-        return self.env['res.lang'].get_installed()
-
-    @api.model
     def default_get(self, fields):
         result = super(MailTemplatePreview, self).default_get(fields)
         if not result.get('mail_template_id') or 'resource_ref' not in fields:
@@ -33,7 +29,7 @@ class MailTemplatePreview(models.TransientModel):
     mail_template_id = fields.Many2one('mail.template', string='Related Mail Template', required=True)
     model_id = fields.Many2one('ir.model', string='Targeted model', related="mail_template_id.model_id")
     resource_ref = fields.Reference(string='Record', selection='_selection_target_model')
-    lang = fields.Selection(_selection_languages, string='Template Preview Language')
+    lang_id = fields.Many2one('res.lang', string="Template Preview Language")
     no_record = fields.Boolean('No Record', compute='_compute_no_record')
     error_msg = fields.Char('Error Message', readonly=True)
     # Fields same than the mail.template model, computed with resource_ref and lang
@@ -55,19 +51,19 @@ class MailTemplatePreview(models.TransientModel):
         for preview in self:
             preview.no_record = (self.env[preview.model_id.model].search_count([]) == 0) if preview.model_id else True
 
-    @api.depends('lang', 'resource_ref')
+    @api.depends('lang_id', 'resource_ref')
     def _compute_mail_template_fields(self):
         """ Preview the mail template (body, subject, ...) depending of the language and
         the record reference, more precisely the record id for the defined model of the mail template.
         If no record id is selectable/set, the inline_template placeholders won't be replace in the display information. """
-        copy_depends_values = {'lang': self.lang}
-        mail_template = self.mail_template_id.with_context(lang=self.lang)
+        copy_depends_values = {'lang_id': self.lang_id.id}
+        mail_template = self.mail_template_id.with_context(lang=self.lang_id.code)
         try:
             if not self.resource_ref:
                 self._set_mail_attributes()
             else:
                 copy_depends_values['resource_ref'] = '%s,%s' % (self.resource_ref._name, self.resource_ref.id)
-                mail_values = mail_template.with_context(template_preview_lang=self.lang).generate_email(
+                mail_values = mail_template.with_context(template_preview_lang=self.lang_id.code).generate_email(
                     self.resource_ref.id, self._MAIL_TEMPLATE_FIELDS)
                 self._set_mail_attributes(values=mail_values)
             self.error_msg = False

@@ -160,9 +160,9 @@ class Partner(models.Model):
     parent_name = fields.Char(related='parent_id.name', readonly=True, string='Parent name')
     child_ids = fields.One2many('res.partner', 'parent_id', string='Contact', domain=[('active', '=', True)])  # force "active_test" domain to bypass _search() override
     ref = fields.Char(string='Reference', index=True)
-    lang = fields.Selection(_lang_get, string='Language',
+    lang = fields.Selection(_lang_get, string='Language Code', compute="_compute_lang", inverse="_inverse_lang", store=True, readonly=False,
                             help="All the emails and documents sent to this contact will be translated in this language.")
-    active_lang_count = fields.Integer(compute='_compute_active_lang_count')
+    lang_id = fields.Many2one('res.lang', string="Language", default=lambda self: self.env['res.lang']._lang_get_id(self.env.context.get('lang')))
     tz = fields.Selection(_tz_get, string='Timezone', default=lambda self: self._context.get('tz'),
                           help="When printing documents and exporting/importing data, time values are computed according to this timezone.\n"
                                "If the timezone is not set, UTC (Coordinated Universal Time) is used.\n"
@@ -256,6 +256,23 @@ class Partner(models.Model):
         self.ensure_one()
         return tools.street_split(self.street or '')
 
+    @api.depends('lang_id')
+    @api.depends_context('lang')
+    def _compute_lang(self):
+        for partner in self:
+            lang_codes = set(lang_code for lang_code, lang_name in _lang_get(self))
+            if partner.lang_id.code in lang_codes:
+                partner.lang = partner.lang_id.code
+            elif self.env.context.get('lang') in lang_codes:
+                partner.lang = self.env.context['lang']
+            else:
+                partner.lang = lang_codes[0] if lang_codes else False
+
+    def _inverse_lang(self):
+        for partner in self:
+            if not partner.lang_id:
+                partner.lang_id = self.env['res.lang']._lang_get_id(partner.lang) if partner.lang else False
+
     @api.depends('name', 'user_ids.share', 'image_1920', 'is_company', 'type')
     def _compute_avatar_1920(self):
         super()._compute_avatar_1920()
@@ -297,12 +314,6 @@ class Partner(models.Model):
         names = dict(self.with_context({}).name_get())
         for partner in self:
             partner.display_name = names.get(partner.id)
-
-    @api.depends('lang')
-    def _compute_active_lang_count(self):
-        lang_count = len(self.env['res.lang'].get_installed())
-        for partner in self:
-            partner.active_lang_count = lang_count
 
     @api.depends('tz')
     def _compute_tz_offset(self):

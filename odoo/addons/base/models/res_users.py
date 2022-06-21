@@ -242,7 +242,7 @@ class Users(models.Model):
         from an employee.
 
         res.users class now inherits from res.partner. The partner model is
-        used to store the data related to the partner: lang, name, address,
+        used to store the data related to the partner: lang_id, name, address,
         avatar, ... The user model is now dedicated to technical data.
     """
     _name = "res.users"
@@ -257,7 +257,7 @@ class Users(models.Model):
         """
         return [
             'signature', 'company_id', 'login', 'email', 'name', 'image_1920',
-            'image_1024', 'image_512', 'image_256', 'image_128', 'lang', 'tz',
+            'image_1024', 'image_512', 'image_256', 'image_128', 'lang', 'lang_id', 'tz',
             'tz_offset', 'groups_id', 'partner_id', '__last_update', 'action_id',
             'avatar_1920', 'avatar_1024', 'avatar_512', 'avatar_256', 'avatar_128',
             'share',
@@ -268,7 +268,7 @@ class Users(models.Model):
         """ The list of fields a user can write on their own user record.
         In order to add fields, please override this property on model extensions.
         """
-        return ['signature', 'action_id', 'company_id', 'email', 'name', 'image_1920', 'lang', 'tz']
+        return ['signature', 'action_id', 'company_id', 'email', 'name', 'image_1920', 'lang', 'lang_id', 'tz']
 
     def _default_groups(self):
         default_user_id = self.env['ir.model.data']._xmlid_to_res_id('base.default_user', raise_if_not_found=False)
@@ -679,7 +679,7 @@ class Users(models.Model):
     @api.model
     def _get_invalidation_fields(self):
         return {
-            'groups_id', 'active', 'lang', 'tz', 'company_id', 'company_ids',
+            'groups_id', 'active', 'lang', 'lang_id', 'tz', 'company_id', 'company_ids',
             *USER_PRIVATE_FIELDS,
             *self._get_session_token_fields()
         }

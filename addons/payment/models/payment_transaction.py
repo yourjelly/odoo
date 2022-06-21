@@ -25,10 +25,6 @@ class PaymentTransaction(models.Model):
     _order = 'id desc'
     _rec_name = 'reference'
 
-    @api.model
-    def _lang_get(self):
-        return self.env['res.lang'].get_installed()
-
     acquirer_id = fields.Many2one(
         string="Acquirer", comodel_name='payment.acquirer', readonly=True, required=True)
     provider = fields.Selection(related='acquirer_id.provider')
@@ -120,7 +116,8 @@ class PaymentTransaction(models.Model):
         string="Customer", comodel_name='res.partner', readonly=True, required=True,
         ondelete='restrict')
     partner_name = fields.Char(string="Partner Name")
-    partner_lang = fields.Selection(string="Language", selection=_lang_get)
+    partner_lang = fields.Char('Lang Code', related='partner_lang_id.code')
+    partner_lang_id = fields.Many2one('res.lang', string="Language")
     partner_email = fields.Char(string="Email")
     partner_address = fields.Char(string="Address")
     partner_zip = fields.Char(string="Zip")
@@ -194,7 +191,7 @@ class PaymentTransaction(models.Model):
             partner = self.env['res.partner'].browse(values['partner_id'])
             values.update({
                 'partner_name': partner.name,
-                'partner_lang': partner.lang,
+                'partner_lang_id': partner.lang_id.id,
                 'partner_email': partner.email,
                 'partner_address': payment_utils.format_partner_address(
                     partner.street, partner.street2

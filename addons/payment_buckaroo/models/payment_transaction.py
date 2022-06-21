@@ -42,8 +42,8 @@ class PaymentTransaction(models.Model):
             'Brq_returnerror': return_url,
             'Brq_returnreject': return_url,
         }
-        if self.partner_lang:
-            rendering_values['Brq_culture'] = self.partner_lang.replace('_', '-')
+        if self.partner_lang_id:
+            rendering_values['Brq_culture'] = self.partner_lang_id.code.replace('_', '-')
         rendering_values['Brq_signature'] = self.acquirer_id._buckaroo_generate_digital_sign(
             rendering_values, incoming=False
         )

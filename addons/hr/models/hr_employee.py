@@ -48,7 +48,8 @@ class HrEmployeePrivate(models.Model):
         compute='_compute_is_address_home_a_company',
     )
     private_email = fields.Char(related='address_home_id.email', string="Private Email", groups="hr.group_hr_user")
-    lang = fields.Selection(related='address_home_id.lang', string="Lang", groups="hr.group_hr_user", readonly=False)
+    lang = fields.Char(related='lang_id.code', string="Lang", groups="hr.group_hr_user")
+    lang_id = fields.Many2one(related='address_home_id.lang_id', string="Language", groups="hr.group_hr_user", readonly=False)
     country_id = fields.Many2one(
         'res.country', 'Nationality (Country)', groups="hr.group_hr_user", tracking=True)
     gender = fields.Selection([
@@ -202,7 +203,7 @@ class HrEmployeePrivate(models.Model):
             responsible_user_id = employee.parent_id.user_id.id
             if responsible_user_id:
                 employees_scheduled |= employee
-                lang = self.env['res.partner'].browse(responsible_user_id).lang
+                lang = self.env['res.partner'].browse(responsible_user_id).lang_id.code
                 formated_date = format_date(employee.env, employee.work_permit_expiration_date, date_format="dd MMMM y", lang_code=lang)
                 employee.activity_schedule(
                     'mail.mail_activity_data_todo',

@@ -10,7 +10,7 @@
                     <filter name="openerp-web"
                         string="Web-only translations"
                         domain="[('comments', 'like', 'openerp-web')]"/>
-                    <field name="lang"/>
+                    <field name="lang_id"/>
                     <field name="src"/>
                     <field name="value"/>
                     <field name="name" filter_domain="('|', ('name', '=', self), ('name', 'ilike', self + ','))" string="Model"/>
@@ -31,7 +31,7 @@
                     <group>
                         <group>
                             <field name="name"/>
-                            <field name="lang"/>
+                            <field name="lang_id"/>
                         </group>
                         <group>
                             <field name="module"/>
@@ -59,7 +59,7 @@
                     <field name="src"/>
                     <field name="value"/>
                     <field name="name"/>
-                    <field name="lang"/>
+                    <field name="lang_id"/>
                     <field name="module"/>
                     <field name="type"/>
                     <field name="state"/>
@@ -71,7 +71,7 @@
             <field name="model">ir.translation</field>
             <field name="arch" type="xml">
                 <tree string="Translations" editable="top" create="false">
-                    <field name="lang" readonly="1"/>
+                    <field name="lang_id" readonly="1"/>
                     <field name="name" readonly="1"/>
                     <field name="src"/>
                     <field name="value"/>
@@ -84,7 +84,7 @@
             <field name="model">ir.translation</field>
             <field name="arch" type="xml">
                 <tree string="Translations" editable="top" create="false">
-                    <field name="lang" readonly="1"/>
+                    <field name="lang_id" readonly="1"/>
                     <field name="value"/>
                 </tree>
             </field>
@@ -94,7 +94,7 @@
             <field name="model">ir.translation</field>
             <field name="arch" type="xml">
                 <tree string="Translations" editable="top" create="false">
-                    <field name="lang" readonly="1"/>
+                    <field name="lang_id" readonly="1"/>
                     <field name="src" readonly="1"/>
                     <field name="value"/>
                 </tree>
