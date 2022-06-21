@@ -1,9 +1,9 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { standardFieldProps } from "@web/fields/standard_field_props";
+import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
-import { TagsList } from "@web/fields/many2many_tags/tags_list";
+import { TagsList } from "@web/views/fields/many2many_tags/tags_list";
 import { useService, useOwnedDialogs } from "@web/core/utils/hooks";
 import { usePosition } from "@web/core/position_hook";
 // import { ListArchParser } from "@web/views/list/list_arch_parser";
@@ -14,7 +14,7 @@ import {
     useOpenMany2XRecord,
     useSelectCreate,
     useX2ManyCrud,
-} from "@web/fields/relational_utils";
+} from "@web/views/fields/relational_utils";
 
 const { Component, useState, useRef } = owl;
 
