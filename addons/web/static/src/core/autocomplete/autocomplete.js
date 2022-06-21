@@ -1,17 +1,11 @@
 /** @odoo-module **/
 
 import { useService } from "@web/core/utils/hooks";
-import { debounce } from "@web/core/utils/timing";
+import { useDebounced } from "@web/core/utils/timing";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { usePosition } from "@web/core/position_hook";
 
-const { Component, onWillUnmount, useExternalListener, useRef, useState, useEffect } = owl;
-
-function useDebounced(callback, timeout) {
-    const debounced = debounce(callback, timeout);
-    onWillUnmount(() => debounced.cancel());
-    return debounced;
-}
+const { Component, useExternalListener, useRef, useState, useEffect } = owl;
 
 export class AutoComplete extends Component {
     setup() {
