@@ -8783,7 +8783,7 @@ QUnit.module("Views", (hooks) => {
 
         assert.containsNone(getCard(0), "img", "Initially there is no image.");
 
-        await click(document.body, ".modal img[data-id='1']");
+        await click(document.body, ".modal img[data-id='1']", true);
         await click(document.body.querySelector(".modal .btn-primary"));
 
         assert.containsOnce(target, 'img[data-src*="/web/image/1"]');
@@ -8792,7 +8792,7 @@ QUnit.module("Views", (hooks) => {
         const coverButton = getCard(1).querySelector("a");
         assert.strictEqual(coverButton.innerText.trim(), "Set Cover Image");
         await click(coverButton);
-        await triggerEvent(document.body, ".modal img[data-id='2']", "dblclick");
+        await triggerEvent(document.body, ".modal img[data-id='2']", "dblclick", {}, true);
 
         assert.containsOnce(target, 'img[data-src*="/web/image/2"]');
 
