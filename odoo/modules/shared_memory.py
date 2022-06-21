@@ -153,6 +153,23 @@ class SharedMemoryLRU:
     def hook_process_killed(self, pid):
         self._lock.force_release_if_mandatory(pid)
 
+    def clear(self):
+        """ Clear all the shared memory
+        """
+        with self._lock:
+            self._clear()
+
+    def _clear(self):
+        """ Clear all the shared memory
+
+        ! Need lock !
+        """
+        self._head[:] = [-1, 0, 1]
+        self._entry_table[:] = [(0, -1, -1)] * self._size
+        self._data_idx[:] = [(-1, -1)] * self._size
+        self._data_free[0] = (0, self._sm.size)
+        self._consistent.value = True
+
     def _check_consistence(self):
         """ Check that the last change of the SharedMemory was consistent
 
@@ -160,11 +177,7 @@ class SharedMemoryLRU:
         """
         if not self._consistent.value:
             _logger.info("Shared Memory not consistent, clean it")
-            self._head[:] = [-1, 0, 1]
-            self._entry_table[:] = [(0, -1, -1)] * self._size
-            self._data_idx[:] = [(-1, -1)] * self._size
-            self._data_free[0] = (0, self._sm.size)
-            self._consistent.value = True
+            self._clear()
 
     def _defrag(self):
         """
