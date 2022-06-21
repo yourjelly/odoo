@@ -166,20 +166,15 @@ class TestReconciliationMatchingRules(AccountTestInvoicingCommon):
 
     @classmethod
     def _create_st_line(cls, amount=1000.0, date='2019-01-01', payment_ref='turlututu', **kwargs):
-        st = cls.env['account.bank.statement'].create({
-            'name': 'test_allow_payment_tolerance_1',
-            'journal_id': kwargs.get('journal_id', cls.bank_journal.id),
-            'line_ids': [Command.create({
-                'amount': amount,
-                'date': date,
-                'payment_ref': payment_ref,
-                'partner_id': cls.partner_a.id,
-                **kwargs,
-            })],
+        st_line = cls.env['account.bank.statement.line'].create({
+            'amount': amount,
+            'date': date,
+            'payment_ref': payment_ref,
+            'partner_id': cls.partner_a.id,
+            **kwargs,
         })
-        st.balance_end_real = st.balance_end
-        st.button_post()
-        return st.line_ids
+        st_line.button_post()
+        return st_line
 
     @classmethod
     def _create_reconcile_model(cls, **kwargs):
@@ -296,7 +291,7 @@ class TestReconciliationMatchingRules(AccountTestInvoicingCommon):
             })
 
     def test_matching_fields_match_journal_ids(self):
-        self.rule_1.match_journal_ids |= self.cash_st.journal_id
+        self.rule_1.match_journal_ids |= self.cash_line_1.journal_id
         self._check_statement_matching(self.rule_1, {
             self.bank_line_1: {},
             self.bank_line_2: {},

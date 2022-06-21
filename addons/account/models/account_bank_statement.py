@@ -548,7 +548,7 @@ class AccountBankStatementLine(models.Model):
                 JOIN account_move move ON move.id = st_line.move_id
                 JOIN account_bank_statement st ON
                     st.journal_id = move.journal_id
-                            AND
+                    AND
                     (
                         move.date > st.start_statement_line_date
                         OR (

@@ -739,8 +739,7 @@ class TestAccountPayment(AccountTestInvoicingCommon):
             'is_matched': False,
         }])
 
-        statement_line = self.env['account.bank.statement'].create({
-            'journal_id': self.company_data['default_journal_bank'].id,
+        statement_line = self.env['account.bank.statement.line'].create({
             'payment_ref': '50 to pay',
             'partner_id': self.partner_a.id,
             'amount': 50.0,
