@@ -205,7 +205,6 @@ var ColumnQuickCreate = Widget.extend({
                 text: _t('Close'),
             }],
             size: "large",
-            fullscreen: config.device.isMobile,
             title: _t("Kanban Examples"),
         }).open();
         dialog.on('closed', this, function () {
