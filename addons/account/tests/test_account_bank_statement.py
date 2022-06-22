@@ -673,7 +673,7 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
     def test_statement_line_set_statement_1(self):
         """
 Scenario 1:                             |  Case 1:
-Before change:                          |  The user sets L2.statement_id = S4
+Before change:                          |  The user sets L3.statement_id = S4
                                         |  Result:
 L1.statement_id = False                 |  L1.statement_id = False
 L2.statement_id = S1                    |  L2.statement_id = S1
@@ -684,7 +684,7 @@ L6.statement_id = S2                    |  L6.statement_id = S2
 L7.statement_id = S3                    |  L7.statement_id = S3
 
 Case 2:                                 |  Case 3:
-The user sets L2.statement_id = S2      |  The user sets L2.statement_id = S3
+The user sets L3.statement_id = S2      |  The user sets L3.statement_id = S3
 Result:                                 |  Result:
 L1.statement_id = False                 |  L1.statement_id = False
 L2.statement_id = S1                    |  L2.statement_id = S1
@@ -718,24 +718,38 @@ L7.statement_id = S3                    |  L7.statement_id = S3
             'start_statement_line_id': line7.id,
             'end_statement_line_id': line7.id,
         })
-        statement4 = self.env['account.bank.statement'].create({
-        })
-
-        # case 1, new statement on a line with statement
-        line2.statement_id = statement4
 
         self.assertRecordValues(
             self.env['account.bank.statement.line'].search([('company_id', '=', self.env.company.id)]),
             [
                 # pylint: disable=C0326
-                {'amount': 1, 'running_balance_start':  0, 'running_balance_end':  1, 'statement_id': False},
-                {'amount': 2, 'running_balance_start':  1, 'running_balance_end':  3, 'statement_id': statement1.id},
-                {'amount': 3, 'running_balance_start':  3, 'running_balance_end':  6, 'statement_id': statement4.id},
-                {'amount': 4, 'running_balance_start':  6, 'running_balance_end': 10, 'statement_id': statement4.id},
-                {'amount': 5, 'running_balance_start': 10, 'running_balance_end': 15, 'statement_id': statement4.id},
-                {'amount': 6, 'running_balance_start': 15, 'running_balance_end': 21, 'statement_id': statement2.id},
-                {'amount': 7, 'running_balance_start': 21, 'running_balance_end': 28, 'statement_id': statement3.id},
                 {'amount': 8, 'running_balance_start': 28, 'running_balance_end': 35, 'statement_id': False},
+                {'amount': 7, 'running_balance_start': 21, 'running_balance_end': 28, 'statement_id': statement3.id},
+                {'amount': 6, 'running_balance_start': 15, 'running_balance_end': 21, 'statement_id': statement2.id},
+                {'amount': 5, 'running_balance_start': 10, 'running_balance_end': 15, 'statement_id': statement1.id},
+                {'amount': 4, 'running_balance_start':  6, 'running_balance_end': 10, 'statement_id': statement1.id},
+                {'amount': 3, 'running_balance_start':  3, 'running_balance_end':  6, 'statement_id': statement1.id},
+                {'amount': 2, 'running_balance_start':  1, 'running_balance_end':  3, 'statement_id': statement1.id},
+                {'amount': 1, 'running_balance_start':  0, 'running_balance_end':  1, 'statement_id': False},
+            ],
+        )
+
+        # case 1, new statement on a line with statement
+        line2.action_create_statement()
+        statement4 = line2.statement_id
+
+        self.assertRecordValues(
+            self.env['account.bank.statement.line'].search([('company_id', '=', self.env.company.id)]),
+            [
+                # pylint: disable=C0326
+                {'amount': 8, 'running_balance_start': 28, 'running_balance_end': 35, 'statement_id': False},
+                {'amount': 7, 'running_balance_start': 21, 'running_balance_end': 28, 'statement_id': statement3.id},
+                {'amount': 6, 'running_balance_start': 15, 'running_balance_end': 21, 'statement_id': statement2.id},
+                {'amount': 5, 'running_balance_start': 10, 'running_balance_end': 15, 'statement_id': statement1.id},
+                {'amount': 4, 'running_balance_start':  6, 'running_balance_end': 10, 'statement_id': statement1.id},
+                {'amount': 3, 'running_balance_start':  3, 'running_balance_end':  6, 'statement_id': statement1.id},
+                {'amount': 2, 'running_balance_start':  1, 'running_balance_end':  3, 'statement_id': statement2.id},
+                {'amount': 1, 'running_balance_start':  0, 'running_balance_end':  1, 'statement_id': False},
             ],
         )
 
@@ -745,30 +759,30 @@ L7.statement_id = S3                    |  L7.statement_id = S3
             self.env['account.bank.statement.line'].search([('company_id', '=', self.env.company.id)]),
             [
                 # pylint: disable=C0326
-                {'amount': 1, 'running_balance_start':  0, 'running_balance_end':  1, 'statement_id': False},
-                {'amount': 2, 'running_balance_start':  1, 'running_balance_end':  3, 'statement_id': statement1.id},
-                {'amount': 3, 'running_balance_start':  3, 'running_balance_end':  6, 'statement_id': False},
-                {'amount': 4, 'running_balance_start':  6, 'running_balance_end': 10, 'statement_id': False},
-                {'amount': 5, 'running_balance_start': 10, 'running_balance_end': 15, 'statement_id': False},
-                {'amount': 6, 'running_balance_start': 15, 'running_balance_end': 21, 'statement_id': statement2.id},
-                {'amount': 7, 'running_balance_start': 21, 'running_balance_end': 28, 'statement_id': statement3.id},
                 {'amount': 8, 'running_balance_start': 28, 'running_balance_end': 35, 'statement_id': False},
+                {'amount': 7, 'running_balance_start': 21, 'running_balance_end': 28, 'statement_id': statement3.id},
+                {'amount': 6, 'running_balance_start': 15, 'running_balance_end': 21, 'statement_id': statement2.id},
+                {'amount': 5, 'running_balance_start': 10, 'running_balance_end': 15, 'statement_id': statement1.id},
+                {'amount': 4, 'running_balance_start':  6, 'running_balance_end': 10, 'statement_id': statement1.id},
+                {'amount': 3, 'running_balance_start':  3, 'running_balance_end':  6, 'statement_id': statement1.id},
+                {'amount': 2, 'running_balance_start':  1, 'running_balance_end':  3, 'statement_id': False},
+                {'amount': 1, 'running_balance_start':  0, 'running_balance_end':  1, 'statement_id': False},
             ],
         )
 
-        statement1.end_statement_line_id = line5
+        statement1.start_statement_line_id = line1
         self.assertRecordValues(
             self.env['account.bank.statement.line'].search([('company_id', '=', self.env.company.id)]),
             [
                 # pylint: disable=C0326
-                {'amount': 1, 'running_balance_start':  0, 'running_balance_end':  1, 'statement_id': False},
-                {'amount': 2, 'running_balance_start':  1, 'running_balance_end':  3, 'statement_id': statement1.id},
-                {'amount': 3, 'running_balance_start':  3, 'running_balance_end':  6, 'statement_id': statement1.id},
-                {'amount': 4, 'running_balance_start':  6, 'running_balance_end': 10, 'statement_id': statement1.id},
-                {'amount': 5, 'running_balance_start': 10, 'running_balance_end': 15, 'statement_id': statement1.id},
-                {'amount': 6, 'running_balance_start': 15, 'running_balance_end': 21, 'statement_id': statement2.id},
-                {'amount': 7, 'running_balance_start': 21, 'running_balance_end': 28, 'statement_id': statement3.id},
                 {'amount': 8, 'running_balance_start': 28, 'running_balance_end': 35, 'statement_id': False},
+                {'amount': 7, 'running_balance_start': 21, 'running_balance_end': 28, 'statement_id': statement3.id},
+                {'amount': 6, 'running_balance_start': 15, 'running_balance_end': 21, 'statement_id': statement2.id},
+                {'amount': 5, 'running_balance_start': 10, 'running_balance_end': 15, 'statement_id': statement1.id},
+                {'amount': 4, 'running_balance_start':  6, 'running_balance_end': 10, 'statement_id': statement1.id},
+                {'amount': 3, 'running_balance_start':  3, 'running_balance_end':  6, 'statement_id': statement1.id},
+                {'amount': 2, 'running_balance_start':  1, 'running_balance_end':  3, 'statement_id': statement1.id},
+                {'amount': 1, 'running_balance_start':  0, 'running_balance_end':  1, 'statement_id': False},
             ],
         )
         # case 2, new statement on a line with statement
@@ -778,75 +792,142 @@ L7.statement_id = S3                    |  L7.statement_id = S3
             self.env['account.bank.statement.line'].search([('company_id', '=', self.env.company.id)]),
             [
                 # pylint: disable=C0326
-                {'amount': 1, 'running_balance_start':  0, 'running_balance_end':  1, 'statement_id': False},
-                {'amount': 2, 'running_balance_start':  1, 'running_balance_end':  3, 'statement_id': statement1.id},
-                {'amount': 3, 'running_balance_start':  3, 'running_balance_end':  6, 'statement_id': statement2.id},
-                {'amount': 4, 'running_balance_start':  6, 'running_balance_end': 10, 'statement_id': statement2.id},
-                {'amount': 5, 'running_balance_start': 10, 'running_balance_end': 15, 'statement_id': statement2.id},
-                {'amount': 6, 'running_balance_start': 15, 'running_balance_end': 21, 'statement_id': statement2.id},
-                {'amount': 7, 'running_balance_start': 21, 'running_balance_end': 28, 'statement_id': statement3.id},
                 {'amount': 8, 'running_balance_start': 28, 'running_balance_end': 35, 'statement_id': False},
+                {'amount': 7, 'running_balance_start': 21, 'running_balance_end': 28, 'statement_id': statement3.id},
+                {'amount': 6, 'running_balance_start': 15, 'running_balance_end': 21, 'statement_id': statement2.id},
+                {'amount': 5, 'running_balance_start': 10, 'running_balance_end': 15, 'statement_id': statement2.id},
+                {'amount': 4, 'running_balance_start':  6, 'running_balance_end': 10, 'statement_id': statement2.id},
+                {'amount': 3, 'running_balance_start':  3, 'running_balance_end':  6, 'statement_id': statement2.id},
+                {'amount': 2, 'running_balance_start':  1, 'running_balance_end':  3, 'statement_id': statement1.id},
+                {'amount': 1, 'running_balance_start':  0, 'running_balance_end':  1, 'statement_id': False},
             ],
         )
 
         # case 3, new statement on a line with statement
         with self.assertRaises(UserError):
             line2.statement_id = statement3
-
-    def test_statement_line_set_statement_2(self):
+        self.env.cr.rollback()
+    # def test_statement_line_set_statement_2(self):
         """
-Scenario 2:                     |   The user sets L2.statement_id = S4
+Scenario 2:                     |   The user sets L3.statement_id = S4
 Before change:                  |   Result:
 
-L0.statement_id = False         |   L0.statement_id = False
-L1.statement_id = S1            |   L1.statement_id = S1
-L2.statement_id = S1            |   L2.statement_id = S4
-L3.statement_id = S1            |   L3.statement_id = S4
-L4.statement_id = False         |   L4.statement_id = False
-L5.statement_id = S2            |   L5.statement_id = S2
-L6.statement_id = S3            |   L6.statement_id = S3
+L1.statement_id = False         |   L1.statement_id = False
+L2.statement_id = S1            |   L2.statement_id = S1      or S4  ?
+L3.statement_id = S1            |   L3.statement_id = S4         S4
+L4.statement_id = S1            |   L4.statement_id = S4         S1
+L5.statement_id = False         |   L5.statement_id = False
+L6.statement_id = S2            |   L6.statement_id = S2
+L7.statement_id = S3            |   L7.statement_id = S3
 """
+        self.env.user.company_id = self.company_data_2['company']
 
-    def test_statement_line_set_statement_3(self):
+        line1 = self.create_bank_transaction(1, '2020-03-01')
+        line2 = self.create_bank_transaction(2, '2020-03-02')
+        line3 = self.create_bank_transaction(3, '2020-03-03')
+        line4 = self.create_bank_transaction(4, '2020-03-04')
+        line5 = self.create_bank_transaction(5, '2020-03-05')
+        line6 = self.create_bank_transaction(6, '2020-03-06')
+        line7 = self.create_bank_transaction(7, '2020-03-07')
+        line8 = self.create_bank_transaction(8, '2020-03-08')
+
+        statement1 = self.env['account.bank.statement'].create({
+            'start_statement_line_id': line2.id,
+            'end_statement_line_id': line4.id,
+        })
+        statement2 = self.env['account.bank.statement'].create({
+            'start_statement_line_id': line6.id,
+            'end_statement_line_id': line6.id,
+        })
+        statement3 = self.env['account.bank.statement'].create({
+            'start_statement_line_id': line7.id,
+            'end_statement_line_id': line7.id,
+        })
+        statement4 = self.env['account.bank.statement'].create({
+        })
+
+        self.assertRecordValues(
+            self.env['account.bank.statement.line'].search([('company_id', '=', self.env.company.id)]),
+            [
+                # pylint: disable=C0326
+                {'amount': 8, 'running_balance_start': 28, 'running_balance_end': 35, 'statement_id': False},
+                {'amount': 7, 'running_balance_start': 21, 'running_balance_end': 28, 'statement_id': statement3.id},
+                {'amount': 6, 'running_balance_start': 15, 'running_balance_end': 21, 'statement_id': statement2.id},
+                {'amount': 5, 'running_balance_start': 10, 'running_balance_end': 15, 'statement_id': False},
+                {'amount': 4, 'running_balance_start':  6, 'running_balance_end': 10, 'statement_id': statement1.id},
+                {'amount': 3, 'running_balance_start':  3, 'running_balance_end':  6, 'statement_id': statement1.id},
+                {'amount': 2, 'running_balance_start':  1, 'running_balance_end':  3, 'statement_id': statement1.id},
+                {'amount': 1, 'running_balance_start':  0, 'running_balance_end':  1, 'statement_id': False},
+            ],
+        )
+
+        line3.statement_id = statement4
+
+        self.assertRecordValues(statement4, [{
+                                    'start_statement_line_id': line3.id,
+                                    'end_statement_line_id': line4.id,
+                                    'balance_start': line4.running_balance_start,
+                                    'balance_end': line3.running_balance_end,
+        }])
+
+        self.assertRecordValues(
+            self.env['account.bank.statement.line'].search([('company_id', '=', self.env.company.id)]),
+            [
+                # pylint: disable=C0326
+                {'amount': 8, 'running_balance_start': 28, 'running_balance_end': 35, 'statement_id': False},
+                {'amount': 7, 'running_balance_start': 21, 'running_balance_end': 28, 'statement_id': statement3.id},
+                {'amount': 6, 'running_balance_start': 15, 'running_balance_end': 21, 'statement_id': statement2.id},
+                {'amount': 5, 'running_balance_start': 10, 'running_balance_end': 15, 'statement_id': False},
+                {'amount': 4, 'running_balance_start':  6, 'running_balance_end': 10, 'statement_id': statement4.id},
+                {'amount': 3, 'running_balance_start':  3, 'running_balance_end':  6, 'statement_id': statement4.id},
+                {'amount': 2, 'running_balance_start':  1, 'running_balance_end':  3, 'statement_id': statement1.id},
+                {'amount': 1, 'running_balance_start':  0, 'running_balance_end':  1, 'statement_id': False},
+            ],
+        )
+
+
+
+        self._cr.rollback()
+    # def test_statement_line_set_statement_3(self):
         """
 Scenario 3:
 Before change:
 
-L0.statement_id = False
-L1.statement_id = S1
+L1.statement_id = False
 L2.statement_id = S1
-L3.statement_id = False
+L3.statement_id = S1
 L4.statement_id = False
-L5.statement_id = S2
-L6.statement_id = S3
+L5.statement_id = False
+L6.statement_id = S2
+L7.statement_id = S3
 
 Case 1:
-The user sets L4.statement_id = S4
+The user sets L5.statement_id = S4
 Result:
 
-L0.statement_id = False
-L1.statement_id = S1
+L1.statement_id = False
 L2.statement_id = S1
-L3.statement_id = False? or S4 why may need an extra input or this line maybe we can ask the user
-L4.statement_id = S4
-L5.statement_id = S2
-L6.statement_id = S3
+L3.statement_id = S1
+L4.statement_id = False? or S4 why may need an extra input or this line maybe we can ask the user
+L5.statement_id = S4
+L6.statement_id = S2
+L7.statement_id = S3
 
 Case 2:
-The user sets L3.statement_id = S4 --> same problem as Case 1
+The user sets L4.statement_id = S4 --> same problem as Case 1
 Case 3:
-The user sets L3.statement_id = S2
+The user sets L4.statement_id = S2
 
-L0.statement_id = False
-L1.statement_id = S1
+L1.statement_id = False
 L2.statement_id = S1
-L3.statement_id = S2
+L3.statement_id = S1
 L4.statement_id = S2
 L5.statement_id = S2
-L6.statement_id = S3
+L6.statement_id = S2
+L7.statement_id = S3
 
 Case 4:
-The user sets L4.statement_id = S1 --> similar to Case 3
+The user sets L5.statement_id = S1 --> similar to Case 3
 Case 5:
-The user sets (L3 or L4).statement_id = S3 --> Raise error
+The user sets (L4 or L5).statement_id = S3 --> Raise error
 """

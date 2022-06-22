@@ -27,7 +27,7 @@ class AccountBankStatement(models.Model):
 
         source_st_line = self.env['account.bank.statement.line'].browse(self._context['active_id'])
 
-        row = source_st_line._find_previous_statement()
+        row = source_st_line._get_previous_statement()
         if row:
             last_st_line_id, last_st_line_date, last_st_line_sequence = row
             st_query_clause = '''
@@ -156,6 +156,11 @@ class AccountBankStatement(models.Model):
         related='start_statement_line_id.sequence',
         store=True,
     )
+    start_line_internal_index = fields.Char(
+        string="Start Line index",
+        related='start_statement_line_id.internal_index',
+        store=True,
+    )
     end_statement_line_id = fields.Many2one(
         comodel_name='account.bank.statement.line',
         required=True,
@@ -170,6 +175,21 @@ class AccountBankStatement(models.Model):
         string="End Sequence",
         related='end_statement_line_id.sequence',
         store=True,
+    )
+    end_line_internal_index = fields.Char(
+        string="End Line index",
+        related='end_statement_line_id.internal_index',
+        store=True,
+    )
+    next_statement_id = fields.Many2one(
+        comodel_name='account.bank.statement',
+        string="Next Statement",
+        compute='_compute_adjutant_statements',
+    )
+    previous_statement_id = fields.Many2one(
+        comodel_name='account.bank.statement',
+        string="previous Statement",
+        compute='_compute_adjutant_statements',
     )
     attachment_id = fields.Many2one(
         comodel_name='ir.attachment',
@@ -252,12 +272,40 @@ class AccountBankStatement(models.Model):
             statement.balance_end = statement.start_statement_line_id.running_balance_end
             statement.balance_start = statement.end_statement_line_id.running_balance_start
 
+    def _compute_adjutant_statements(self):
+        # todo: optimise
+        # for statement in self:
+        #     statement.next_statement_id = self.search([
+        #         ('start_line_internal_index', '>', statement.end_line_internal_index)
+        #     ],
+        #         limit=1,
+        #         order='end_line_internal_index desc'
+        #     )
+        #     statement.previous_statement_id = self.search([
+        #         ('end_line_internal_index', '<', statement.start_line_internal_index)
+        #     ],
+        #         limit=1,
+        #         order='end_line_internal_index'
+        #     )
+        self._cr.execute('''
+        SELECT id, 
+            LEAD(id) OVER (ORDER BY start_line_internal_index), 
+            LAG(ID) OVER (ORDER BY start_line_internal_index) 
+        FROM account_bank_statement
+        WHERE id in %s;
+        ''',  [tuple(self.ids)])
+
+        id_map = {cur:(prev,next) for cur, prev, next in self._cr.fetchall()}
+        for statement in self:
+            statement.previous_statement_id = id_map[statement.id][0]
+            statement.next_statement_id = id_map[statement.id][1]
+
 
 class AccountBankStatementLine(models.Model):
     _name = "account.bank.statement.line"
     _inherits = {'account.move': 'move_id'}
     _description = "Bank Statement Line"
-    _order = "date desc, sequence, id desc"
+    _order = "internal_index desc"
     _check_company_auto = True
 
     def _get_default_journal(self):
@@ -297,10 +345,13 @@ class AccountBankStatementLine(models.Model):
         string="Foreign Currency",
         help="The optional other currency if it is a multi-currency entry.",
     )
-    amount_residual = fields.Float(string="Residual Amount",
+    amount_residual = fields.Float(
+        string="Residual Amount",
         compute="_compute_is_reconciled",
         store=True,
-        help="The amount left to be reconciled on this statement line (signed according to its move lines' balance), expressed in its currency. This is a technical field use to speedup the application of reconciliation models.")
+        help="The amount left to be reconciled on this statement line (signed according to its move lines' balance), "
+             "expressed in its currency. "
+             "This is a technical field use to speedup the application of reconciliation models.")
     currency_id = fields.Many2one(
         comodel_name='res.currency',
         string="Journal Currency",
@@ -320,13 +371,31 @@ class AccountBankStatementLine(models.Model):
         help="Technical field indicating if the statement line is already reconciled.",
     )
 
+    # == Technical fields ==
+    internal_index = fields.Char(
+        string='Internal Reference',
+        compute='_compute_internal_index',
+        store=True,
+        index=True,
+        help="Technical field used to store the internal reference of the statement line for fast indexing."
+    )
+
     # == Running balances ==
     statement_id = fields.Many2one(
         comodel_name='account.bank.statement',
         string="Statement",
-        store=False,
         compute='_compute_statement_id',
         inverse='_inverse_statement_id',
+    )
+    next_statement_id = fields.Many2one(
+        comodel_name='account.bank.statement',
+        string="Next Statement",
+        compute='_compute_adjutant_lines_with_statement',
+    )
+    previous_statement_id = fields.Many2one(
+        comodel_name='account.bank.statement',
+        string="previous Statement",
+        compute='_compute_adjutant_lines_with_statement',
     )
     running_balance_start = fields.Monetary(
         string="Running Balance Before",
@@ -489,6 +558,17 @@ class AccountBankStatementLine(models.Model):
         return [liquidity_line_vals, counterpart_line_vals]
 
     # -------------------------------------------------------------------------
+    # ONCHANGE METHODS
+    # -------------------------------------------------------------------------
+
+    @api.onchange('sequence')
+    def _onchange_sequence(self):
+        """
+        limit the sequence for use in internal_index
+        """
+        self.sequence = min(32767, max(-32768, self.sequence))
+
+    # -------------------------------------------------------------------------
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
 
@@ -537,9 +617,8 @@ class AccountBankStatementLine(models.Model):
 
         st_id_map = {}
         if stored_lines:
-            # Statement lines are stored inside the database.
-
-            self.flush_recordset(fnames=['amount', 'date', 'sequence', 'journal_id'])
+            # Statement lines that are stored inside the database.
+            stored_lines.flush_recordset(fnames=['internal_index', 'journal_id'])
             self._cr.execute('''
                 SELECT
                     st_line.id,
@@ -547,35 +626,11 @@ class AccountBankStatementLine(models.Model):
                 FROM account_bank_statement_line st_line
                 JOIN account_move move ON move.id = st_line.move_id
                 JOIN account_bank_statement st ON
-                    st.journal_id = move.journal_id
+                        st.journal_id = move.journal_id
                     AND
-                    (
-                        move.date > st.start_statement_line_date
-                        OR (
-                            move.date = st.start_statement_line_date
-                            AND (
-                                st_line.sequence < st.start_statement_line_sequence
-                                OR (
-                                    st_line.sequence = st.start_statement_line_sequence
-                                    AND st_line.id >= st.start_statement_line_id
-                                )
-                            )
-                        )
-                    )
+                        st_line.internal_index >= st.start_line_internal_index
                     AND
-                    (
-                        move.date < st.end_statement_line_date
-                        OR (
-                            move.date = st.end_statement_line_date
-                            AND (
-                                st_line.sequence > st.end_statement_line_sequence
-                                OR (
-                                    st_line.sequence = st.end_statement_line_sequence
-                                    AND st_line.id <= st.end_statement_line_id
-                                )
-                            )
-                        )
-                    )
+                        st_line.internal_index <= st.end_line_internal_index
                 WHERE st_line.id IN %s
             ''', [tuple(stored_lines.ids)])
 
@@ -585,8 +640,58 @@ class AccountBankStatementLine(models.Model):
             st_line.statement_id = st_id_map.get(st_line.id)
 
     def _inverse_statement_id(self):
-        # TODO
-        pass
+        # todo: optimize for multi
+        for st_line in self:
+            statement = st_line.statement_id
+            next_statement = st_line.previous_statement_id
+            previous_statement = st_line.next_statement_id
+
+            # expanding adjutant statements
+            if statement == next_statement:
+                next_statement.end_statement_line_id = st_line.id
+            elif statement == previous_statement:
+                previous_statement.start_statement_line_id = st_line.id
+            #it is a new statement
+            # in the middle of a statement,
+            elif next_statement and next_statement == previous_statement:
+                raise ValidationError(_('You cannot change the statement of a line in the middle of another statement.'))
+            # new statement this case cannot happen in the UI because of the domains
+            # the statement has lines after next statement, invalid
+            # L1->ST0
+            # L2->ST1
+            # L3->here we cannot set ST2 or ST3
+            # L4->ST2
+            # L5->ST3
+            elif (
+                  next_statement and
+                  statement.start_statement_line_id.internal_index < next_statement.start_line_internal_index
+                  or
+                  previous_statement and
+                  statement.end_statement_line_id.internal_index > previous_statement.end_line_internal_index
+            ):
+                raise ValidationError(_('You cannot set a statement that after or before adjutant statements.'))
+            else:
+                statement.end_statement_line_id = st_line
+                statement.start_statement_line_id = st_line
+
+    def _compute_adjutant_lines_with_statement(self):
+        # todo: obviously needs optimization
+        for st_line in self:
+            st_line.previous_statement_id = self.env['account.bank.statement'].search([
+                ('journal_id', '=', st_line.journal_id.id),
+                ('end_line_internal_index','<',st_line.internal_index)
+            ], limit=1, order='end_line_internal_index')
+            st_line.next_statement_id = self.env['account.bank.statement'].search([
+                ('journal_id', '=', st_line.journal_id.id),
+                ('start_line_internal_index', '>', st_line.internal_index)
+            ], limit=1, order='start_line_internal_index desc')
+
+    @api.depends('date', 'sequence')
+    def _compute_internal_index(self):
+        for st_line in self.filtered('id'):
+            st_line.internal_index = (st_line.date.toordinal() << 32) \
+                                   + ((32767 - st_line.sequence) << 16) \
+                                   + st_line.id % (1 << 16)
 
     @api.depends('date', 'sequence', 'journal_id', 'amount')
     def _compute_running_balance(self):
@@ -980,13 +1085,13 @@ class AccountBankStatementLine(models.Model):
             })
         return bank_account
 
-    def _find_previous_statement(self):
+    def _get_previous_statement(self):
         """
         Finds the previous bank statement in the chain.
         :return: (id: id, date: date, sequence:sequence) of the last line of the previous statement
         """
 
-        self.flush_model(fnames=['date', 'sequence', 'journal_id'])
+        self.flush_model(fnames=['date', 'sequence', 'journal_id', 'internal_index'])
         self.statement_id.flush_model(fnames=['start_statement_line_id', 'end_statement_line_id'])
         self._cr.execute(
             '''
@@ -1025,7 +1130,7 @@ class AccountBankStatementLine(models.Model):
         row = self._cr.fetchone()
         return dict(zip(('id', 'date', 'sequence'), row)) if row else {}
 
-    def _find_next_statement(self):
+    def _get_next_statement(self):
         """
         Finds the next bank statement in the chain.
         :return: dict (id: id, date: date, sequence:sequence) of the first line of the next statement
@@ -1034,6 +1139,7 @@ class AccountBankStatementLine(models.Model):
 
         self.flush_model(fnames=['date', 'sequence', 'journal_id'])
         self.statement_id.flush_model(fnames=['end_statement_line_id', 'end_statement_line_id'])
+
         self._cr.execute(
             '''
                 SELECT
@@ -1082,7 +1188,7 @@ class AccountBankStatementLine(models.Model):
         # todo: obviously it needs optimization
         domain = []
         if before:
-            start_row = self._find_previous_statement()
+            start_row = self._get_previous_statement()
             if start_row:
                 start_line_id, start_line_date, start_line_sequence = start_row
                 domain.append([
@@ -1098,7 +1204,7 @@ class AccountBankStatementLine(models.Model):
                 ])
 
         if after:
-            end_row = self._find_previous_statement()
+            end_row = self._get_previous_statement()
             if end_row:
                 end_line_id, end_line_date, end_line_sequence = end_row
                 domain.append([
@@ -1114,6 +1220,38 @@ class AccountBankStatementLine(models.Model):
                 ])
 
         return self.search(domain)
+
+    def action_create_statement(self):
+        for st_line in self:
+            statement = self.env['account.bank.statement'].create({
+                'start_statement_line_id': st_line.id,
+                'end_statement_line_id': st_line.id,
+                'name': _("Statement %s", fields.Date.to_string(st_line.date)),
+            })
+            st_line.statement_id = statement
+
+    def action_delete_statement(self):
+        for st_line in self:
+            st_line.statement_id = False
+
+    def action_open_statement(self):
+        self.ensure_one()
+        return {
+            'name': _('Bank Statement'),
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'res_model': 'account.bank.statement',
+            'res_id': self.statement_id.id,
+            'target': 'new',
+        }
+
+    def action_fill_up(self):
+        for st_line in self:
+            st_line.previous_statement_id.end_statement_line_id = st_line
+
+    def action_fill_down(self):
+        for st_line in self:
+            st_line.next_statement_id.start_statement_line_id = st_line
 
     def button_undo_reconciliation(self):
         ''' Undo the reconciliation mades on the statement line and reset their journal items
