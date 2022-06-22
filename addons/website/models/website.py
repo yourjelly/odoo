@@ -722,7 +722,8 @@ class Website(models.Model):
         # we only want a unique_path for website specific.
         # we need to be able to have /url for website=False, and /url for website=1
         # in case of duplicate, page manager will allow you to manage this case
-        domain_static = [('website_id', '=', self.get_current_website().id)]  # .website_domain()
+        website_id = self.env.context.get('website_id', False) or self.get_current_website().id
+        domain_static = [('website_id', '=', website_id)]  # .website_domain()
         page_temp = page_url
         while self.env['website.page'].with_context(active_test=False).sudo().search([('url', '=', page_temp)] + domain_static):
             inc += 1
@@ -761,6 +762,9 @@ class Website(models.Model):
         key_copy = string
         inc = 0
         domain_static = self.get_current_website().website_domain()
+        website_id = self.env.context.get('website_id', False)
+        if website_id:
+            domain_static = [('website_id', 'in', (False, website_id))]
         while self.env['website.page'].with_context(active_test=False).sudo().search([('key', '=', key_copy)] + domain_static):
             inc += 1
             key_copy = string + (inc and "-%s" % inc or "")
