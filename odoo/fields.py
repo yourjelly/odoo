@@ -1074,7 +1074,7 @@ class Field(MetaField('DummyField', (object,), {})):
 
         :param records:
         :param value: a value in any format
-        :return: the subset of `records` that have been modified
+        :return: the subset of `records` that have been modified  TODO: not used? remove it, sometime we do extra work for nothing
         """
         # discard recomputation of self on records
         records.env.remove_to_compute(self, records)
@@ -2378,6 +2378,7 @@ class Image(Binary):
         super(Image, self).write(records, new_value)
         cache_value = self.convert_to_cache(value if self.related else new_value, records)
         records.env.cache.update(records, self, [cache_value] * len(records))
+        # TODO: doesn't respect the signature, no return
 
     def _image_process(self, value):
         if self.readonly and not self.max_width and not self.max_height:
@@ -2939,7 +2940,7 @@ class Many2one(_Relational):
             return records
 
         # remove records from the cache of one2many fields of old corecords
-        self._remove_inverses(records, cache_value)
+        self._remove_inverses(records)
 
         # update the cache of self
         cache.update(records, self, [cache_value] * len(records))
@@ -2956,7 +2957,7 @@ class Many2one(_Relational):
 
         return records
 
-    def _remove_inverses(self, records, value):
+    def _remove_inverses(self, records):
         """ Remove `records` from the cached values of the inverse fields of `self`. """
         cache = records.env.cache
         record_ids = set(records._ids)
@@ -3016,8 +3017,8 @@ class Many2oneReference(Integer):
             value = value._ids[0] if value._ids else None
         return super().convert_to_cache(value, record, validate)
 
-    def _remove_inverses(self, records, value):
-        # TODO: unused
+    def _remove_inverses(self, records):
+        # TODO: unused -< to use or remove, it is confusing
         # remove records from the cache of one2many fields of old corecords
         cache = records.env.cache
         record_ids = set(records._ids)
@@ -3895,6 +3896,8 @@ class Many2many(_RelationalMulti):
                 self.read(records.browse(missing_ids))
 
         # determine new relation {x: ys}
+
+        # TODO: Why by record, all operation as done for all dict, maybe by records in recs
         old_relation = {record.id: set(record[self.name]._ids) for record in records}
         new_relation = {x: set(ys) for x, ys in old_relation.items()}
 
@@ -3970,14 +3973,17 @@ class Many2many(_RelationalMulti):
                 y_to_xs[y].add(x)
             for invf in records.pool.field_inverses[self]:
                 domain = invf.get_domain_list(comodel)
-                valid_ids = set(records.filtered_domain(domain)._ids)
-                if not valid_ids:
-                    continue
+                if domain:
+                    valid_ids = set(records.filtered_domain(domain)._ids)
+                    if not valid_ids:
+                        continue
                 for y, xs in y_to_xs.items():
                     corecord = comodel.browse(y)
                     try:
                         ids0 = cache.get(corecord, invf)
-                        ids1 = tuple(set(ids0) | (xs & valid_ids))
+                        # TODO: I know that xs is not in ids0 because it was just create now, no?
+                        # ids1 = ids0 + tuple((xs & valid_ids) if domain else xs) ?
+                        ids1 = tuple(set(ids0) | ((xs & valid_ids) if domain else xs))  # TODO: this part is slow
                         cache.set(corecord, invf, ids1)
                     except KeyError:
                         pass
