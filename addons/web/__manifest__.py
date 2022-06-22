@@ -533,6 +533,7 @@ This module provides the core of the Odoo Web Client.
             'web/static/tests/legacy/fields/basic_fields_mobile_tests.js',
             'web/static/tests/legacy/fields/relational_fields_mobile_tests.js',
             'web/static/tests/legacy/components/dropdown_menu_mobile_tests.js',
+            'web/static/tests/legacy/views/kanban_mobile_tests.js',
         ],
 
         # Used during the transition of the web architecture
