@@ -539,6 +539,7 @@
     // Kanban Grouped Layout - "Create new column" column
     .o_column_quick_create {
         flex-basis: $o-kanban-small-record-width + 2*$o-kanban-group-padding;
+        flex-shrink: 0;
 
         .o_quick_create_folded {
             cursor: pointer;
@@ -580,10 +581,10 @@
     }
 
     @include media-breakpoint-down(sm) {
-        .o_kanban_group, .o_column_quick_create {
+        .o_kanban_group, .o_column_quick_create, .o_kanban_example_background_container {
             flex: 1 0 90%; // don't take full width to give a hint of next/previous column
             scroll-snap-align: center;
-            overflow-y: scroll;
+            overflow: hidden scroll;
 
             .o_kanban_header {
                 position: sticky; // keep it visible
