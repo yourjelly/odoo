@@ -334,8 +334,9 @@ class HolidaysAllocation(models.Model):
         for allocation in self:
             current_level = allocation._get_current_accrual_plan_level_id(today)[0]
             if current_level and current_level.action_with_unused_accruals == 'lost':
+                first_day = allocation.date_from + get_timedelta(current_level.start_count, current_level.start_type)
                 # Allocations are lost but number_of_days should not be lower than leaves_taken
-                allocation.write({'number_of_days': allocation.leaves_taken, 'lastcall': today, 'nextcall': False})
+                allocation.write({'number_of_days': allocation.leaves_taken, 'lastcall': first_day, 'nextcall': False})
 
     def _get_current_accrual_plan_level_id(self, date, level_ids=False):
         """
