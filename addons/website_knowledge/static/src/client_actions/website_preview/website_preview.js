@@ -6,7 +6,7 @@ patch(WebsitePreview.prototype, 'website_knowledge_website_preview', {
     /**
      * @override
      */
-    _isTopWindow({ pathname }) {
+    _isTopWindowURL({ pathname }) {
         return (pathname && pathname.startsWith('/knowledge/article/')) || this._super(...arguments);
     }
 });

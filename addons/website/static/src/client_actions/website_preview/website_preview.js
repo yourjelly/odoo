@@ -116,12 +116,19 @@ export class WebsitePreview extends Component {
             path = this.props.action.context.params && this.props.action.context.params.path;
             if (path) {
                 const url = new URL(path, window.location.origin);
-                // If a path with an external domain, or matching a backend route
-                // that should be opened in the top window, is passed as a
-                // paramater, it is likely that the user did not do that
-                // intentionally. He is redirected to his homepage.
-                if (this._isTopWindow(url)) {
+                if (this._isTopWindowURL(url)) {
+                    // If the client action is initialized with a path that
+                    // should not be opened inside the iframe (= something we
+                    // would want to open on the top window), we consider that
+                    // this is not a valid flow. Instead of trying to open it on
+                    // the top window, we initialize the iframe with the
+                    // website homepage...
                     path = '/';
+                } else {
+                    // ... otherwise, the path still needs to be normalized (as
+                    // it would be if the given path was used as an href of a
+                    // <a/> element).
+                    path = url.pathname;
                 }
             } else {
                 path = '/';
@@ -167,7 +174,7 @@ export class WebsitePreview extends Component {
      * @param pathname {string} path of the route.
      * @private
      */
-    _isTopWindow({ host, pathname }) {
+    _isTopWindowURL({ host, pathname }) {
         const backendRoutes = ['/web', '/web/session/logout'];
         return host !== window.location.host || (pathname && backendRoutes.includes(pathname));
     }
@@ -215,7 +222,7 @@ export class WebsitePreview extends Component {
             }
 
             const { href, target } = linkEl;
-            if (href && target !== '_blank' && !this.websiteContext.edition && this._isTopWindow(linkEl)) {
+            if (href && target !== '_blank' && !this.websiteContext.edition && this._isTopWindowURL(linkEl)) {
                 ev.preventDefault();
                 ev.stopPropagation();
                 window.location.replace(href);
