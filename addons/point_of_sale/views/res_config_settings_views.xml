@@ -14,6 +14,7 @@
                 <field name="pos_iface_print_via_proxy" invisible="1"/>
                 <field name="pos_company_has_template" invisible="1"/>
                 <field name="is_default_pricelist_displayed" invisible="1"/>
+                <field name="pos_active" invisible="1"/>
 
                 <div class="app_settings_block" data-string="Point of sale" string="Point of Sale" data-key="point_of_sale" groups="point_of_sale.group_pos_manager">
                     <div class="app_settings_header pt-1 pb-1" style="background-color: #FEF0D0;">
@@ -23,7 +24,12 @@
                                     <div class="row mt8">
                                         <label class="col-lg-3 pl-0" string="Point of Sale" for="pos_config_id"/>
                                         <field name="pos_config_id" options="{'no_open': True, 'no_create': True}" title="Settings on this page will apply to this point of sale."/>
-                                        <button name="action_pos_config_create_new" type="object" string="+ New Shop" class="btn-link ml-2" style="line-height: 0.5;"/>
+                                        <button name="action_pos_config_create_new" type="object" class="btn btn-secondary ml-2 pt-0 pb-0 mt-n1 mb-1" context="{ '_pos_config_id': pos_config_id }" attrs="{'invisible': [('pos_config_id', '=', False)]}">
+                                            <span>Edit</span>
+                                        </button>
+                                        <button name="action_pos_config_create_new" type="object" class="btn btn-primary ml-2 pt-0 pb-0 mt-n1 mb-1" title="Create your first point of sale to continue.">
+                                            <span>Create</span>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -38,13 +44,13 @@
                                 A session is currently opened for this PoS. Some settings can only be changed after the session is closed.
                                 <button class="btn" style="padding:0" name="pos_open_ui" type="object">Click here to close the session</button>
                             </div>
-                            <div class="o_notification_alert alert alert-warning" attrs="{'invisible': [('pos_company_has_template','=',True)]}" role="alert">
+                            <div class="o_notification_alert alert alert-warning" attrs="{'invisible': ['|', ('pos_company_has_template','=',True), ('pos_active', '=', False)]}" role="alert">
                                 There is no Chart of Accounts configured on the company. Please go to the invoicing settings to install a Chart of Accounts.
                             </div>
                         </div>
                         <div class="col-12 col-lg-6 o_setting_box">
                             <div class="o_setting_left_pane">
-                                <field name="pos_module_pos_restaurant" attrs="{'readonly': [('pos_has_active_session', '=', True)]}"/>
+                                <field name="pos_module_pos_restaurant" attrs="{'readonly': ['|', ('pos_has_active_session', '=', True), ('pos_active', '=', False)]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="pos_module_pos_restaurant"/>
@@ -57,7 +63,7 @@
                         </div>
                         <div class="col-12 col-lg-6 o_setting_box">
                             <div class="o_setting_left_pane">
-                                <field name="pos_start_category"/>
+                                <field name="pos_start_category" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="pos_start_category"/>
@@ -65,7 +71,7 @@
                                     Start selling from a default product category
                                 </div>
                                 <div class="content-group mt16" attrs="{'invisible': [('pos_start_category', '=', False)]}">
-                                    <field name="pos_iface_start_categ_id" domain="[('id', 'in', pos_selectable_categ_ids)]"/>
+                                    <field name="pos_iface_start_categ_id" domain="[('id', 'in', pos_selectable_categ_ids)]" attrs="{'readonly': [('pos_active', '=', False)]}" />
                                 </div>
                             </div>
                         </div>
@@ -73,7 +79,7 @@
                         <div class="col-12 col-lg-6 o_setting_box"
                              title="Employees can scan their badge or enter a PIN to log in to a PoS session. These credentials are configurable in the *HR Settings* tab of the employee form.">
                             <div class="o_setting_left_pane">
-                                <field name="pos_module_pos_hr" attrs="{'readonly': [('pos_has_active_session','=', True)]}"/>
+                                <field name="pos_module_pos_hr" attrs="{'readonly': ['|', ('pos_active', '=', False), ('pos_has_active_session','=', True)]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <span class="o_form_label">Multi Employees per Session</span>
@@ -89,7 +95,7 @@
                         </div>
                         <div class="col-12 col-lg-6 o_setting_box">
                             <div class="o_setting_left_pane">
-                                <field name="pos_limit_categories" attrs="{'readonly': [('pos_has_active_session','=', True)]}"/>
+                                <field name="pos_limit_categories" attrs="{'readonly': ['|', ('pos_active', '=', False), ('pos_has_active_session','=', True)]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="pos_limit_categories"/>
@@ -97,7 +103,7 @@
                                     Pick which product categories are available
                                 </div>
                                 <div class="content-group mt16" attrs="{'invisible': [('pos_limit_categories', '=', False)]}">
-                                    <field name="pos_iface_available_categ_ids" widget="many2many_tags" attrs="{'readonly': [('pos_has_active_session','=', True)]}"/>
+                                    <field name="pos_iface_available_categ_ids" widget="many2many_tags" attrs="{'readonly': ['|', ('pos_active', '=', False), ('pos_has_active_session','=', True)]}"/>
                                 </div>
                                 <div class="content-group mt16" attrs="{'invisible': [('pos_limit_categories', '=', False)]}">
                                     <button name="%(product_pos_category_action)d" icon="fa-arrow-right" type="action" string="PoS Product Categories" class="btn-link"/>
@@ -106,7 +112,7 @@
                         </div>
                         <div class="col-12 col-lg-6 o_setting_box">
                             <div class="o_setting_left_pane">
-                                <field name="pos_iface_big_scrollbars"/>
+                                <field name="pos_iface_big_scrollbars" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="pos_iface_big_scrollbars"/>
@@ -117,7 +123,7 @@
                         </div>
                         <div class="col-12 col-lg-6 o_setting_box">
                             <div class="o_setting_left_pane">
-                                <field name="pos_is_margins_costs_accessible_to_every_user"/>
+                                <field name="pos_is_margins_costs_accessible_to_every_user" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="pos_is_margins_costs_accessible_to_every_user" string="Margins &amp; Costs"/>
@@ -142,7 +148,7 @@
                                         Default sales tax for products
                                     </div>
                                     <div class="content-group mt16">
-                                        <field name="sale_tax_id" colspan="4" nolabel="1" domain="[('type_tax_use', 'in', ('sale', 'all')), ('company_id', '=', company_id)]"/>
+                                        <field name="sale_tax_id" colspan="4" nolabel="1" domain="[('type_tax_use', 'in', ('sale', 'all')), ('company_id', '=', company_id)]" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                                     </div>
                                 </div>
                                 <div class="mt8">
@@ -160,14 +166,14 @@
                                         Intermediary account used for unidentified customers.
                                     </div>
                                     <div class="content-group mt16">
-                                        <field name="account_default_pos_receivable_account_id" colspan="4" nolabel="1" domain="[('reconcile', '=', True), ('user_type_id.type', '=', 'receivable'), ('company_id', '=', company_id)]"/>
+                                        <field name="account_default_pos_receivable_account_id" colspan="4" nolabel="1" domain="[('reconcile', '=', True), ('user_type_id.type', '=', 'receivable'), ('company_id', '=', company_id)]" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-12 col-lg-6 o_setting_box" title="Choose a specific fiscal position at the order depending on the kind of customer (tax exempt, onsite vs. takeaway, etc.).">
                             <div class="o_setting_left_pane">
-                                <field name="pos_tax_regime_selection"/>
+                                <field name="pos_tax_regime_selection" attrs="{'readonly': [('pos_active', '=', False)]}" />
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="pos_tax_regime_selection" string="Flexible Taxes"/>
@@ -177,11 +183,11 @@
                                 <div class="content-group mt16" attrs="{'invisible': [('pos_tax_regime_selection', '=', False)]}">
                                     <div class="row">
                                         <label string="Default" for="pos_default_fiscal_position_id" class="col-lg-3 o_light_label"/>
-                                        <field name="pos_default_fiscal_position_id" domain="['|',('company_id', '=', company_id),('company_id', '=', False)]"/>
+                                        <field name="pos_default_fiscal_position_id" domain="['|',('company_id', '=', company_id),('company_id', '=', False)]" attrs="{'readonly': [('pos_active', '=', False)]}" />
                                     </div>
                                     <div class="row">
                                         <label string="Allowed" for="pos_fiscal_position_ids" class="col-lg-3 o_light_label"/>
-                                        <field name="pos_fiscal_position_ids" widget="many2many_tags" options="{'no_create': True}" domain="['|',('company_id', '=', company_id),('company_id', '=', False)]"/>
+                                        <field name="pos_fiscal_position_ids" widget="many2many_tags" options="{'no_create': True}" domain="['|',('company_id', '=', company_id),('company_id', '=', False)]" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                                     </div>
                                     <div>
                                         <button name="%(account.action_account_fiscal_position_form)d" icon="fa-arrow-right" type="action" string="Fiscal Positions" class="btn-link"/>
@@ -204,7 +210,7 @@
                                         <label string="Invoices" for="pos_invoice_journal_id" class="col-lg-3 o_light_label"/>
                                         <field name="pos_invoice_journal_id"
                                                domain="[('company_id', '=', company_id), ('type', '=', 'sale')]"
-                                               attrs="{'required': [('pos_company_has_template', '=', True), ('pos_config_id', '!=', False)]}"
+                                               attrs="{'required': [('pos_company_has_template', '=', True), ('pos_config_id', '!=', False)], 'readonly': [('pos_active', '=', False)]}"
                                                context="{'default_company_id': company_id, 'default_type': 'sale'}"/>
                                     </div>
                                 </div>
@@ -216,7 +222,7 @@
                     <div class="row mt16 o_settings_container" id="pos_pricing_section">
                         <div class="col-12 col-lg-6 o_setting_box" id="multiple_prices_setting">
                             <div class="o_setting_left_pane">
-                                <field name="pos_use_pricelist"/>
+                                <field name="pos_use_pricelist" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="pos_use_pricelist" string="Flexible Pricelists" />
@@ -226,15 +232,15 @@
                                 <div class="content-group" attrs="{'invisible': [('pos_use_pricelist' ,'=', False)]}">
                                     <div class="mt16">
                                         <field name="group_sale_pricelist" invisible="1"/>
-                                        <field name="product_pricelist_setting" widget="radio" class="o_light_label"/>
+                                        <field name="product_pricelist_setting" widget="radio" class="o_light_label" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                                     </div>
                                     <div class="row mt16">
                                         <label string="Available" for="pos_available_pricelist_ids" class="col-lg-3 o_light_label"/>
-                                        <field name="pos_available_pricelist_ids" widget="many2many_tags" domain="['|',('company_id', '=', company_id),('company_id', '=', False)]" attrs="{'readonly': [('pos_has_active_session','=', True)]}"/>
+                                        <field name="pos_available_pricelist_ids" widget="many2many_tags" domain="['|',('company_id', '=', company_id),('company_id', '=', False)]" attrs="{'readonly': ['|', ('pos_active', '=', False), ('pos_has_active_session','=', True)]}"/>
                                     </div>
                                     <div class="row mt16" attrs="{'invisible': [('is_default_pricelist_displayed', '=', False)]}">
                                         <label string="Default" for="pos_pricelist_id" class="col-lg-3 o_light_label"/>
-                                        <field name="pos_pricelist_id" domain="[('id', 'in', pos_allowed_pricelist_ids)]" options="{'no_create': True}"/>
+                                        <field name="pos_pricelist_id" domain="[('id', 'in', pos_allowed_pricelist_ids)]" options="{'no_create': True}" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                                     </div>
                                     <div class="mt8">
                                         <button name="%(product.product_pricelist_action2)d" icon="fa-arrow-right" type="action" string="Pricelists" groups="product.group_product_pricelist" class="btn-link"/>
@@ -244,7 +250,7 @@
                         </div>
                         <div class="col-12 col-lg-6 o_setting_box price_control" title="Only users with Manager access rights for PoS app can modify the product prices on orders.">
                             <div class="o_setting_left_pane">
-                                <field name="pos_restrict_price_control"/>
+                                <field name="pos_restrict_price_control" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="pos_restrict_price_control" string="Price Control"/>
@@ -261,7 +267,7 @@
                                 </div>
                                 <div class="content-group">
                                     <div class="mt16">
-                                        <field name="pos_iface_tax_included" class="o_light_label" widget="radio"/>
+                                        <field name="pos_iface_tax_included" class="o_light_label" widget="radio" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                                     </div>
                                     <a attrs="{'invisible': [('pos_iface_tax_included', '!=', 'total')]}"
                                         href="https://www.odoo.com/documentation/master/applications/finance/accounting/taxation/taxes/B2B_B2C.html"
@@ -271,7 +277,7 @@
                         </div>
                         <div class="col-xs-12 col-lg-6 o_setting_box" >
                             <div class="o_setting_left_pane">
-                                <field name="pos_manual_discount"/>
+                                <field name="pos_manual_discount" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="pos_manual_discount"/>
@@ -282,7 +288,7 @@
                         </div>
                         <div class="col-xs-12 col-lg-6 o_setting_box" >
                             <div class="o_setting_left_pane">
-                                <field name="pos_module_pos_discount" attrs="{'readonly': [('pos_has_active_session','=', True)]}"/>
+                                <field name="pos_module_pos_discount" attrs="{'readonly': ['|', ('pos_active', '=', False), ('pos_has_active_session','=', True)]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="pos_module_pos_discount"/>
@@ -298,7 +304,7 @@
                         </div>
                         <div class="col-12 col-lg-6 o_setting_box" id="pos-loyalty">
                             <div class="o_setting_left_pane">
-                                <field name="pos_module_pos_loyalty" nolabel="1"/>
+                                <field name="pos_module_pos_loyalty" nolabel="1" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                             </div>
                             <div class="o_setting_right_pane" title="Loyalty program to use for this point of sale. ">
                                 <label for="pos_module_pos_loyalty"/>
@@ -318,7 +324,7 @@
                     <div class="row mt16 o_settings_container" id="pos_bills_and_receipts_section">
                         <div class="col-12 col-lg-6 o_setting_box">
                             <div class="o_setting_left_pane">
-                                <field name="pos_is_header_or_footer"/>
+                                <field name="pos_is_header_or_footer" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="pos_is_header_or_footer"/>
@@ -328,18 +334,18 @@
                                 <div class="content-group mt16" attrs="{'invisible' : [('pos_is_header_or_footer', '=', False)]}">
                                     <div>
                                         <label string="Header" for="pos_receipt_header" class="col-lg-2 o_light_label"/>
-                                        <field name="pos_receipt_header" placeholder="e.g. Company Address, Website"/>
+                                        <field name="pos_receipt_header" attrs="{'readonly': [('pos_active', '=', False)]}" placeholder="e.g. Company Address, Website"/>
                                     </div>
                                     <div>
                                         <label string="Footer" for="pos_receipt_footer" class="col-lg-2 o_light_label"/>
-                                        <field name="pos_receipt_footer" placeholder="e.g. Return Policy, Thanks for shopping with us!"/>
+                                        <field name="pos_receipt_footer" attrs="{'readonly': [('pos_active', '=', False)]}" placeholder="e.g. Return Policy, Thanks for shopping with us!"/>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-12 col-lg-6 o_setting_box" id="auto_printing">
                             <div class="o_setting_left_pane">
-                                <field name="pos_iface_print_auto"/>
+                                <field name="pos_iface_print_auto" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="pos_iface_print_auto"/>
@@ -348,7 +354,7 @@
                                 </div>
                                 <div class="content-group mt16" attrs="{'invisible' : ['|', ('pos_iface_print_auto', '=', False), '&amp;', ('pos_is_posbox', '=', False), ('pos_other_devices', '=', False)]}">
                                     <div>
-                                        <field name="pos_iface_print_skip_screen" class="oe_inline"/><span class="oe_inline"><b>Skip Preview Screen</b></span>
+                                        <field name="pos_iface_print_skip_screen" attrs="{'readonly': [('pos_active', '=', False)]}" class="oe_inline"/><span class="oe_inline"><b>Skip Preview Screen</b></span>
                                     </div>
                                 </div>
                             </div>
@@ -375,7 +381,7 @@
                                     Payment methods available
                                 </div>
                                 <div class="content-group mt16">
-                                    <field name="pos_payment_method_ids" colspan="4" nolabel="1" widget="many2many_tags" attrs="{'readonly': [('pos_has_active_session','=', True)], 'required': [('pos_company_has_template', '=', True), ('pos_config_id', '!=', False)]}" options="{'no_create': True}" />
+                                    <field name="pos_payment_method_ids" colspan="4" nolabel="1" widget="many2many_tags" attrs="{'readonly': ['|', ('pos_active', '=', False), ('pos_has_active_session','=', True)], 'required': [('pos_company_has_template', '=', True), ('pos_config_id', '!=', False)]}" options="{'no_create': True}" />
                                 </div>
                                 <div>
                                     <button name="%(action_payment_methods_tree)d" icon="fa-arrow-right" type="action" string="Payment Methods" class="btn-link"/>
@@ -384,7 +390,7 @@
                         </div>
                         <div class="col-12 col-lg-6 o_setting_box">
                             <div class="o_setting_left_pane">
-                                <field name="pos_cash_rounding"/>
+                                <field name="pos_cash_rounding" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="pos_cash_rounding" string="Cash Rounding" />
@@ -396,11 +402,11 @@
                                 <div class="content-group mt16" attrs="{'invisible': [('pos_cash_rounding', '=', False)]}">
                                     <div class="row mt16">
                                         <label string="Rounding Method" for="pos_rounding_method" class="col-lg-3 o_light_label" />
-                                        <field name="pos_rounding_method" attrs="{'required' : [('pos_cash_rounding', '=', True), ('pos_config_id', '!=', False)]}" domain="[('company_id', '=', company_id)]"/>
+                                        <field name="pos_rounding_method" attrs="{'required' : [('pos_cash_rounding', '=', True), ('pos_config_id', '!=', False)], 'readonly': [('pos_active', '=', False)]}" domain="[('company_id', '=', company_id)]"/>
                                     </div>
                                     <div class="row mt16">
                                         <label string="Only on cash methods" for="pos_only_round_cash_method" class="col-lg-3 o_light_label" />
-                                        <field name="pos_only_round_cash_method"/>
+                                        <field name="pos_only_round_cash_method" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                                     </div>
                                 </div>
                                 <div class="mt8">
@@ -412,7 +418,7 @@
                         </div>
                         <div class="col-12 col-lg-6 o_setting_box">
                             <div class="o_setting_left_pane">
-                                <field name="pos_set_maximum_difference" />
+                                <field name="pos_set_maximum_difference" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="pos_set_maximum_difference" />
@@ -421,7 +427,7 @@
                                 </div>
                                 <div class="content-group mt16" attrs="{'invisible': [('pos_set_maximum_difference', '=', False)]}">
                                     <label for="pos_amount_authorized_diff" string="Authorized Difference" class="font-weight-normal"/>
-                                    <field name="pos_amount_authorized_diff"/>
+                                    <field name="pos_amount_authorized_diff" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                                 </div>
                             </div>
                         </div>
@@ -432,7 +438,7 @@
                                     Set of coins/bills that will be used in opening and closing control
                                 </div>
                                 <div class="content-group mt16">
-                                    <field name="pos_default_bill_ids" colspan="4" widget="many2many_tags" options="{'no_create_edit': True}" context="{'default_pos_config_ids':[(6, False, [pos_config_id])]}"/>
+                                    <field name="pos_default_bill_ids" attrs="{'readonly': [('pos_active', '=', False)]}" colspan="4" widget="many2many_tags" options="{'no_create_edit': True}" context="{'default_pos_config_ids':[(6, False, [pos_config_id])]}"/>
                                 </div>
                             </div>
                         </div>
@@ -440,7 +446,7 @@
                              id="iface_tipproduct"
                              title="This product is used as reference on customer receipts.">
                             <div class="o_setting_left_pane">
-                                <field name="pos_iface_tipproduct" attrs="{'readonly': [('pos_has_active_session','=', True)]}"/>
+                                <field name="pos_iface_tipproduct" attrs="{'readonly': ['|', ('pos_active', '=', False), ('pos_has_active_session','=', True)]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="pos_iface_tipproduct" string="Tips"/>
@@ -450,7 +456,7 @@
                                 <div class="content-group" attrs="{'invisible': [('pos_iface_tipproduct', '=', False)]}">
                                     <div class="mt16" id="tip_product">
                                         <label string="Tip Product" for="pos_tip_product_id" class="o_light_label"/>
-                                        <field name="pos_tip_product_id"/>
+                                        <field name="pos_tip_product_id" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                                     </div>
                                 </div>
                             </div>
@@ -466,7 +472,7 @@
                             id="adyen_payment_terminal_setting"
                             title="The transactions are processed by Adyen. Set your Adyen credentials on the related payment method.">
                             <div class="o_setting_left_pane">
-                                <field name="module_pos_adyen"/>
+                                <field name="module_pos_adyen" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="module_pos_adyen" string="Adyen"/>
@@ -479,7 +485,7 @@
                             id="stripe_payment_terminal_setting"
                             title="The transactions are processed by Stripe. Set your Stripe credentials on the related payment method.">
                             <div class="o_setting_left_pane">
-                                <field name="module_pos_stripe"/>
+                                <field name="module_pos_stripe" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="module_pos_stripe" string="Stripe"/>
@@ -492,7 +498,7 @@
                             id="vantiv_payment_terminal_setting"
                             title="The transactions are processed by Vantiv. Set your Vantiv credentials on the related payment method.">
                             <div class="o_setting_left_pane">
-                                <field name="module_pos_mercury"/>
+                                <field name="module_pos_mercury" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="module_pos_mercury" string="Vantiv (US &amp; Canada)"/>
@@ -508,7 +514,7 @@
                         </div>
                         <div class="col-12 col-lg-6 o_setting_box" title="The transactions are processed by Six. Set the IP address of the terminal on the related payment method.">
                             <div class="o_setting_left_pane">
-                                <field name="module_pos_six"/>
+                                <field name="module_pos_six" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="module_pos_six" string="Six"/>
@@ -524,7 +530,7 @@
                     <div class="row mt16 o_settings_container" id="pos_connected_devices_section">
                         <div class="col-12 col-lg-6 o_setting_box" id="pos_other_devices">
                             <div class="o_setting_left_pane">
-                                <field name="pos_other_devices"/>
+                                <field name="pos_other_devices" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="pos_other_devices" string="ePos Printer"/>
@@ -535,7 +541,7 @@
                         </div>
                         <div id="customer_display" class="col-12 col-lg-6 o_setting_box">
                             <div class="o_setting_left_pane">
-                                <field name="pos_iface_customer_facing_display_local"/>
+                                <field name="pos_iface_customer_facing_display_local" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="pos_iface_customer_facing_display_local" string="Customer Display"/>
@@ -546,7 +552,7 @@
                         </div>
                         <div class="col-12 col-lg-6 o_setting_box">
                             <div class="o_setting_left_pane">
-                                <field name="pos_is_posbox"/>
+                                <field name="pos_is_posbox" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="pos_is_posbox" string="IoT Box"/>
@@ -556,27 +562,27 @@
                                 <div class="content-group pos_iot_config" attrs="{'invisible' : [('pos_is_posbox', '=', False)]}">
                                     <div class="row">
                                         <label string="IoT Box IP Address" for="pos_proxy_ip" class="col-lg-4 o_light_label"/>
-                                        <field name="pos_proxy_ip"/>
+                                        <field name="pos_proxy_ip" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                                     </div>
                                     <div class="row iot_barcode_scanner">
                                         <label string="Barcode Scanner/Card Reader" for="pos_iface_scan_via_proxy" class="col-lg-4 o_light_label"/>
-                                        <field name="pos_iface_scan_via_proxy"/>
+                                        <field name="pos_iface_scan_via_proxy" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                                     </div>
                                     <div class="row">
                                         <label string="Electronic Scale" for="pos_iface_electronic_scale" class="col-lg-4 o_light_label"/>
-                                        <field name="pos_iface_electronic_scale"/>
+                                        <field name="pos_iface_electronic_scale" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                                     </div>
                                     <div class="row">
                                         <label string="Receipt Printer" for="pos_iface_print_via_proxy" class="col-lg-4 o_light_label"/>
-                                        <field name="pos_iface_print_via_proxy"/>
+                                        <field name="pos_iface_print_via_proxy" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                                     </div>
                                     <div class="row" attrs="{'invisible': [('pos_iface_print_via_proxy', '=', False)]}">
                                         <label string="Cashdrawer" for="pos_iface_cashdrawer" class="col-lg-4 o_light_label"/>
-                                        <field name="pos_iface_cashdrawer"/>
+                                        <field name="pos_iface_cashdrawer" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                                     </div>
                                     <div class="row">
                                         <label string="Customer Display" for="pos_iface_customer_facing_display_via_proxy" class="col-lg-4 o_light_label"/>
-                                        <field name="pos_iface_customer_facing_display_via_proxy"/>
+                                        <field name="pos_iface_customer_facing_display_via_proxy" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                                     </div>
                                 </div>
                             </div>
@@ -592,13 +598,13 @@
                                     Used to record product pickings. Products are consumed from its default source location.
                                 </div>
                                 <div class="content-group mt16">
-                                    <field name="pos_picking_type_id" domain="[('company_id', '=', company_id)]" attrs="{'required': [('pos_config_id', '!=', False)]}"/>
+                                    <field name="pos_picking_type_id" domain="[('company_id', '=', company_id)]" attrs="{'required': [('pos_config_id', '!=', False)], 'readonly': [('pos_active', '=', False)]}"/>
                                 </div>
                             </div>
                         </div>
                         <div class="col-12 col-lg-6 o_setting_box">
                           <div class="o_setting_left_pane">
-                              <field name="pos_ship_later"/>
+                              <field name="pos_ship_later" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                           </div>
                             <div class="o_setting_right_pane">
                                 <label for="pos_ship_later" string="Allow Ship Later"/>
@@ -608,15 +614,15 @@
                                 <div class="mt16" attrs="{'invisible' : [('pos_ship_later', '=', False)]}">
                                     <div>
                                         <label for="pos_warehouse_id" string="Warehouse" class="font-weight-normal"/>
-                                        <field name="pos_warehouse_id" attrs="{'required': [('pos_ship_later', '=', True), ('pos_config_id', '!=', False)]}"/>
+                                        <field name="pos_warehouse_id" attrs="{'required': [('pos_ship_later', '=', True), ('pos_config_id', '!=', False)], 'readonly': [('pos_active', '=', False)]}"/>
                                     </div>
                                     <div groups="stock.group_adv_location">
                                         <label for="pos_route_id" string="Specific route" class="font-weight-normal"/>
-                                        <field name="pos_route_id"/>
+                                        <field name="pos_route_id" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                                     </div>
                                     <div>
                                         <label for="pos_picking_policy" class="font-weight-normal"/>
-                                        <field name="pos_picking_policy" attrs="{'required': [('pos_ship_later', '=', True), ('pos_config_id', '!=', False)]}"/>
+                                        <field name="pos_picking_policy" attrs="{'required': [('pos_ship_later', '=', True), ('pos_config_id', '!=', False)], 'readonly': [('pos_active', '=', False)]}"/>
                                     </div>
                                 </div>
                             </div>
@@ -632,7 +638,7 @@
                                 </div>
                                 <div class="content-group mt16 row">
                                     <label for="barcode_nomenclature_id" string="Barcode Nomenclature" class="col-lg-3 o_light_label"/>
-                                    <field name="barcode_nomenclature_id"/>
+                                    <field name="barcode_nomenclature_id" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                                 </div>
                             </div>
                         </div>
@@ -649,14 +655,14 @@
                                         Update quantities in stock
                                     </div>
                                     <div class="content-group mt16 o_light_label">
-                                        <field name="update_stock_quantities" colspan="4" nolabel="1" widget="radio"/>
+                                        <field name="update_stock_quantities" colspan="4" nolabel="1" widget="radio" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-12 col-lg-6 o_setting_box">
                             <div class="o_setting_left_pane">
-                                <field name="pos_limited_products_loading"/>
+                                <field name="pos_limited_products_loading" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="pos_limited_products_loading" string="Limited Products Loading"/>
@@ -666,10 +672,10 @@
                                 <div class="content-group mt16" attrs="{'invisible' : [('pos_limited_products_loading', '=', False)]}">
                                     <div class="row">
                                         <label for="pos_limited_products_amount" string="Number of Products Loaded" class="col-lg-3 o_light_label"/>
-                                        <field name="pos_limited_products_amount"  class="oe_inline"/>
+                                        <field name="pos_limited_products_amount"  class="oe_inline" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                                     </div>
                                     <div class="mt8">
-                                        <field name="pos_product_load_background" class="oe_inline" />
+                                        <field name="pos_product_load_background" class="oe_inline" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                                         <label for="pos_product_load_background" string="Load all remaining products in the background" />
                                     </div>
                                 </div>
@@ -677,7 +683,7 @@
                         </div>
                         <div class="col-12 col-lg-6 o_setting_box">
                             <div class="o_setting_left_pane">
-                                <field name="pos_limited_partners_loading"/>
+                                <field name="pos_limited_partners_loading" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="pos_limited_partners_loading" string="Limited Partners Loading"/>
@@ -687,10 +693,10 @@
                                 <div class="content-group mt16" attrs="{'invisible' : [('pos_limited_partners_loading', '=', False)]}">
                                     <div class="row">
                                         <label for="pos_limited_partners_amount" string="Number of Partners Loaded" class="col-lg-3 o_light_label"/>
-                                        <field name="pos_limited_partners_amount" class="oe_inline"/>
+                                        <field name="pos_limited_partners_amount" class="oe_inline" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                                     </div>
                                     <div class="mt8">
-                                        <field name="pos_partner_load_background" class="oe_inline" />
+                                        <field name="pos_partner_load_background" class="oe_inline" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                                         <label for="pos_partner_load_background" string="Load all remaining partners in the background" />
                                     </div>
                                 </div>

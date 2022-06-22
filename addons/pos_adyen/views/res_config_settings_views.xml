@@ -7,7 +7,7 @@
         <field name="arch" type="xml">
             <xpath expr="//div[@id='tip_product']" position="after">
                 <div attrs="{'invisible': [('pos_iface_tipproduct', '=', False)]}">
-                    <field name="pos_adyen_ask_customer_for_tip" class="oe_inline"/>
+                    <field name="pos_adyen_ask_customer_for_tip" class="oe_inline" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                     <label class="font-weight-normal" for="pos_adyen_ask_customer_for_tip" string="Add tip through payment terminal (Adyen)"/>
                 </div>
             </xpath>

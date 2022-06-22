@@ -16,7 +16,7 @@
                                 Sales are reported to the following sales team
                             </div>
                             <div class="content-group mt16">
-                                <field name="pos_crm_team_id" kanban_view_ref="%(sales_team.crm_team_view_kanban)s" domain="['|', ('company_id', '=', company_id), ('company_id', '=', False)]"/>
+                                <field name="pos_crm_team_id" kanban_view_ref="%(sales_team.crm_team_view_kanban)s" domain="['|', ('company_id', '=', company_id), ('company_id', '=', False)]" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                             </div>
                         </div>
                     </div>
@@ -31,6 +31,7 @@
                                     name="pos_down_payment_product_id"
                                     domain="[('type', '=', 'service'), '|', ('company_id', '=', company_id), ('company_id', '=', False)]"
                                     context="{'default_detailed_type': 'service', 'default_taxes_id': False }"
+                                    attrs="{'readonly': [('pos_active', '=', False)]}"
                                 />
                             </div>
                         </div>

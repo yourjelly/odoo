@@ -337,9 +337,13 @@ class PosConfig(models.Model):
         for config in self:
             last_session = self.env['pos.session'].search([('config_id', '=', config.id)], limit=1)
             if (not last_session) or (last_session.state == 'closed'):
-                result.append((config.id, _("%(pos_name)s (not used)", pos_name=config.name)))
+                user_name = _('not used') if config.active else _('archived')
             else:
-                result.append((config.id, "%s (%s)" % (config.name, last_session.user_id.name)))
+                user_name = last_session.user_id.name
+
+            shop_name = _("%(config_name)s (%(user_name)s)", config_name=config.name, user_name=user_name)
+
+            result.append((config.id, shop_name))
         return result
 
     @api.model_create_multi
@@ -673,4 +677,26 @@ class PosConfig(models.Model):
             'target': 'new',
             'res_id': self.id,
             'context': {'pos_config_open_modal': True},
+        }
+
+    def action_toggle_archive(self):
+        self.ensure_one()
+        if self.current_session_id:
+            raise UserError(_('You cannot archive a shop configuration which has open session.'))
+
+        self.write({'active': not self.active})
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'reload',
+        }
+
+    def action_delete(self):
+        self.ensure_one()
+        if self.current_session_id:
+            raise UserError(_('You cannot delete a shop configuration which has open session.'))
+
+        self.unlink()
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'reload',
         }

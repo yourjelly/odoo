@@ -31,7 +31,7 @@ class ResConfigSettings(models.TransientModel):
         # Default to the last modified pos.config.
         return self.env['pos.config'].search([('company_id', '=', self.env.company.id)], order='write_date desc', limit=1)
 
-    pos_config_id = fields.Many2one('pos.config', string="Point of Sale", default=lambda self: self._default_pos_config())
+    pos_config_id = fields.Many2one('pos.config', string="Point of Sale", default=lambda self: self._default_pos_config(), domain=['|', ('active', '=', True), ('active', '=', False)])
     sale_tax_id = fields.Many2one('account.tax', string="Default Sale Tax", related='company_id.account_sale_tax_id', readonly=False)
     module_pos_mercury = fields.Boolean(string="Vantiv Payment Terminal", help="The transactions are processed by Vantiv. Set your Vantiv credentials on the related payment method.")
     module_pos_adyen = fields.Boolean(string="Adyen Payment Terminal", help="The transactions are processed by Adyen. Set your Adyen credentials on the related payment method.")
@@ -48,6 +48,7 @@ class ResConfigSettings(models.TransientModel):
     pos_module_pos_loyalty = fields.Boolean(related='pos_config_id.module_pos_loyalty', readonly=False)
     pos_module_pos_restaurant = fields.Boolean(related='pos_config_id.module_pos_restaurant', readonly=False)
 
+    pos_active = fields.Boolean(related='pos_config_id.active', readonly=False)
     pos_allowed_pricelist_ids = fields.Many2many('product.pricelist', compute='_compute_pos_allowed_pricelist_ids')
     pos_amount_authorized_diff = fields.Float(related='pos_config_id.amount_authorized_diff', readonly=False)
     pos_available_pricelist_ids = fields.Many2many('product.pricelist', string='Available Pricelists', compute='_compute_pos_available_pricelist_ids', readonly=False, store=True, pos='available_pricelist_ids')
@@ -163,13 +164,14 @@ class ResConfigSettings(models.TransientModel):
             ]).cash_rounding = False
 
     def action_pos_config_create_new(self):
+        pos_config = self._context.get('_pos_config_id')
         return {
             'view_mode': 'form',
             'res_model': 'pos.config',
             'type': 'ir.actions.act_window',
             'target': 'new',
-            'res_id': False,
-            'context': {'pos_config_open_modal': True, 'pos_config_create_mode': True},
+            'res_id': pos_config and pos_config[0] or False,
+            'context': {'pos_config_open_modal': True, 'pos_config_create_mode': not bool(pos_config), 'pos_config_has_no_details': True},
         }
 
     def pos_open_ui(self):

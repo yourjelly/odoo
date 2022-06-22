@@ -10,7 +10,7 @@
                     <field name="pos_epson_printer_ip" placeholder="Epson Receipt Printer IP Address" />
                     <div class="row" attrs="{'invisible': [('pos_epson_printer_ip', 'in', [False, ''])]}">
                         <label string="Cashdrawer" for="pos_iface_cashdrawer" class="col-lg-3 o_light_label"/>
-                        <field name="pos_iface_cashdrawer"/>
+                        <field name="pos_iface_cashdrawer" attrs="{'readonly': [('pos_active', '=', False)]}"/>
                     </div>
                 </div>
                 <div role="alert" class="alert alert-warning" attrs="{'invisible': ['|', '|', ('pos_iface_print_via_proxy', '!=', True), ('pos_other_devices', '!=', True), ('pos_epson_printer_ip', 'in', [False, ''])]}">
