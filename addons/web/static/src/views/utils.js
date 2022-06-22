@@ -92,7 +92,7 @@ export function evalDomain(modifier, evalContext) {
     if (Array.isArray(modifier)) {
         modifier = new Domain(modifier).contains(evalContext);
     }
-    return !!modifier;
+    return Boolean(modifier);
 }
 
 export function getActiveActions(rootNode) {

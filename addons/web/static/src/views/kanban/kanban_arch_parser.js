@@ -29,43 +29,6 @@ import { Widget } from "@web/views/widgets/widget";
 const KANBAN_BOX_ATTRIBUTE = "kanban-box";
 const ACTION_TYPES = ["action", "object"];
 const SPECIAL_TYPES = [...ACTION_TYPES, "edit", "open", "delete", "url", "set_cover"];
-const TRANSPILED_EXPRESSIONS = [
-    // Action names
-    { regex: /\bwidget.editable\b/g, value: "canEditRecord()" },
-    { regex: /\bwidget.deletable\b/g, value: "canDeleteRecord()" },
-    // Special case: 'isHtmlEmpty' method
-    { regex: /\bwidget.isHtmlEmpty\b/g, value: "isHtmlEmpty" },
-    // `widget.prop` => `props.prop`
-    { regex: /\bwidget\.(\w+)\b/g, value: "props.$1" },
-    // `#{expr}` => `{{expr}}`
-    { regex: /#{([^}]+)}/g, value: "{{$1}}" },
-    // `kanban_image(model, field, idOrIds[, placeholder])` => `imageSrcFromRecordInfo(recordInfo, record)`
-    {
-        regex: /kanban_image\(([^)]*)\)/g,
-        value: (_match, group) => {
-            const [model, field, idOrIds, placeholder] = group.split(",");
-            const recordInfo = { model, field, idOrIds, placeholder };
-            const infoString = Object.entries(recordInfo)
-                .map(([k, v]) => `${k}:${v}`)
-                .join(",");
-            return `imageSrcFromRecordInfo({${infoString}},record)`;
-        },
-    },
-    // `kanban_color(value)` => `getColorClass(record)`
-    { regex: /\bkanban_color\(([^)]*)\)/g, value: `getColorClass($1)` },
-    // `kanban_getcolor(value)` => `getColorIndex(record)`
-    { regex: /\bkanban_getcolor\(([^)]*)\)/g, value: `getColorIndex($1)` },
-    // `kanban_getcolorname(value)` => `getColorName(record)`
-    { regex: /\bkanban_getcolorname\(([^)]*)\)/g, value: `getColorName($1)` },
-    // `record.prop.value` => `getValue(record,'prop')`
-    { regex: /\brecord\.(\w+)\.value\b/g, value: `getValue(record,'$1')` },
-    // `record.prop.raw_value` => `getRawValue(record,'prop')`
-    { regex: /\brecord\.(\w+)\.raw_value\b/g, value: `getRawValue(record,'$1')` },
-    // `record.prop` => `record.data.prop`
-    { regex: /\brecord\.(\w+)\b/g, value: `record.data.$1` },
-    // `selection_mode` => `isInSelectMode`
-    { regex: /\bselection_mode\b/g, value: `isInSelectMode` },
-];
 
 function isValidBox(el) {
     return el.tagName !== "t" || el.hasAttribute("t-component");
@@ -145,21 +108,10 @@ export class KanbanArchParser extends XMLParser {
                 }
             }
 
-            // Converts server qweb attributes to Owl attributes.
-            for (let { name, value: attrValue } of node.attributes) {
-                for (const { regex, value } of TRANSPILED_EXPRESSIONS) {
-                    attrValue = attrValue.replace(regex, value);
-                }
-                node.setAttribute(name, attrValue);
-            }
             // Keep track of last update so images can be reloaded when they may have changed.
             if (node.tagName === "img") {
                 const attSrc = node.getAttribute("t-att-src");
-                if (
-                    attSrc &&
-                    attSrc.includes("imageSrcFromRecordInfo") &&
-                    !fieldNodes.__last_update
-                ) {
+                if (attSrc && /\bkanban_image\b/.test(attSrc) && !fieldNodes.__last_update) {
                     fieldNodes.__last_update = { type: "datetime" };
                 }
             }
@@ -173,18 +125,12 @@ export class KanbanArchParser extends XMLParser {
         const validBoxes = isValidBox(boxTemplateDoc) ? [boxTemplateDoc] : boxTemplateDoc.children;
         const box = createElement("t", validBoxes);
         for (const child of box.children) {
-            child.setAttribute("t-att-tabindex", "isSample ? -1 : 0");
+            child.setAttribute("t-att-tabindex", `props.record.model.useSampleModel ? -1 : 0`);
             child.setAttribute("role", "article");
-            child.setAttribute("t-att-data-id", "canResequenceRecords and record.id");
-            child.setAttribute("t-on-click", "(ev) => this.onRecordClick(record, ev)");
+            child.setAttribute("t-att-data-id", `props.canResequence and props.record.id`);
+            child.setAttribute("t-on-click", "onGlobalClick");
 
-            const attClass = child.getAttribute("t-att-class");
-            child.setAttribute(
-                "t-att-class",
-                attClass
-                    ? `${attClass} + " " + getRecordClasses(record,groupOrRecord.group)`
-                    : `getRecordClasses(record,groupOrRecord.group)`
-            );
+            combineAttributes(child, "t-att-class", "getRecordClasses()", `+" "+`);
 
             // Generate a dropdown for the current box
             const dropdown = createElement("Dropdown", {
@@ -199,8 +145,9 @@ export class KanbanArchParser extends XMLParser {
             for (const el of child.querySelectorAll(".dropdown,.o_kanban_manage_button_section")) {
                 const classes = el.className
                     .split(/\s+/)
-                    .filter((cls) => cls && cls !== "dropdown");
-                combineAttributes(dropdown, "class", classes);
+                    .filter((cls) => cls && cls !== "dropdown")
+                    .join(" ");
+                combineAttributes(dropdown, "class", toStringExpression(classes), "+");
                 if (!dropdownInserted) {
                     transfers.push(() => el.replaceWith(dropdown));
                     dropdownInserted = true;
@@ -318,7 +265,7 @@ export class KanbanArchParser extends XMLParser {
             const strParams = Object.keys(params)
                 .map((k) => `${k}:"${params[k]}"`)
                 .join(",");
-            el.setAttribute("t-on-click", `() => this.triggerAction(record,group,{${strParams}})`);
+            el.setAttribute("t-on-click", `() => this.triggerAction({${strParams}})`);
         }
 
         if (!defaultOrder.length && handleField) {

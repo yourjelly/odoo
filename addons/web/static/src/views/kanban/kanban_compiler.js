@@ -6,6 +6,10 @@ import { ViewCompiler } from "@web/views/view_compiler";
 const INTERP_REGEXP = /\{\{.*?\}\}|#\{.*?\}/g;
 
 export class KanbanCompiler extends ViewCompiler {
+    setup() {
+        this.ctx.readonly = "read_only_mode";
+    }
+
     /**
      * @override
      */
@@ -14,7 +18,7 @@ export class KanbanCompiler extends ViewCompiler {
         if (!el.hasAttribute("widget")) {
             // fields without a specified widget are rendered as simple spans in kanban records
             compiled = createElement("span");
-            compiled.setAttribute("t-esc", `getValue(record, "${el.getAttribute("name")}")`);
+            compiled.setAttribute("t-esc", `record["${el.getAttribute("name")}"].value`);
         } else {
             compiled = super.compileField(el, params);
         }

@@ -2513,7 +2513,7 @@ QUnit.module("Fields", (hooks) => {
                             <templates>
                                 <t t-name="kanban-box">
                                     <div t-att-class="'oe_kanban_global_click'">
-                                        <t t-esc="record.display_name"/>
+                                        <t t-esc="record.display_name.value"/>
                                     </div>
                                 </t>
                             </templates>
@@ -2553,7 +2553,7 @@ QUnit.module("Fields", (hooks) => {
                             <templates>
                                 <t t-name="kanban-box">
                                     <div class="oe_kanban_global_click">
-                                        <t t-esc="record.display_name"/>
+                                        <t t-esc="record.display_name.value"/>
                                     </div>
                                 </t>
                             </templates>

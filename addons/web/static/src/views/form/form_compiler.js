@@ -5,12 +5,11 @@ import {
     combineAttributes,
     createElement,
     createTextNode,
-    toStringExpression,
     getTag,
+    toStringExpression,
 } from "@web/core/utils/xml";
 import {
     append,
-    applyInvisible,
     copyAttributes,
     getModifier,
     isAlwaysInvisible,
@@ -64,13 +63,13 @@ export class FormCompiler extends ViewCompiler {
         const props = {
             id: `'${fieldId}'`,
             fieldName: `'${fieldName}'`,
-            record: "record",
-            fieldInfo: `fieldNodes['${fieldId}']`,
+            record: `props.record`,
+            fieldInfo: `props.archInfo.fieldNodes['${fieldId}']`,
         };
         let labelText = label.textContent || fieldString;
         labelText = labelText
             ? toStringExpression(labelText)
-            : `record.fields['${fieldName}'].string`;
+            : `props.record.fields['${fieldName}'].string`;
         return createElement("FormLabel", {
             "t-props": objectToString(props),
             string: labelText,
@@ -118,7 +117,9 @@ export class FormCompiler extends ViewCompiler {
             const mainSlot = createElement("t", {
                 "t-set-slot": `slot_${slotId++}`,
                 isVisible:
-                    invisible !== false ? `!evalDomain(record,${JSON.stringify(invisible)})` : true,
+                    invisible !== false
+                        ? `!evalDomainFromRecord(props.record,${JSON.stringify(invisible)})`
+                        : true,
             });
             append(mainSlot, this.compileNode(child, params, false));
             append(buttonBox, mainSlot);
@@ -163,14 +164,10 @@ export class FormCompiler extends ViewCompiler {
      * @returns {Element}
      */
     compileForm(el, params) {
-        const form = createElement("div");
-        form.setAttribute(
-            `t-attf-class`,
-            "{{props.record.isInEdition ? 'o_form_editable' : 'o_form_readonly'}}"
-        );
-        if (params.className) {
-            form.setAttribute("t-att-class", params.className);
-        }
+        const form = createElement("div", {
+            "t-att-class": "props.class",
+            "t-attf-class": `{{props.record.isInEdition ? 'o_form_editable' : 'o_form_readonly'}}`,
+        });
         let hasSheet = false;
         for (const child of el.childNodes) {
             hasSheet = hasSheet || getTag(child, true) === "sheet";
@@ -259,11 +256,11 @@ export class FormCompiler extends ViewCompiler {
                     const props = {
                         id: `${fieldId}`,
                         fieldName: `'${fieldName}'`,
-                        record: "record",
+                        record: `props.record`,
                         string: child.hasAttribute("string")
                             ? toStringExpression(child.getAttribute("string"))
-                            : `record.fields.${fieldName}.string`,
-                        fieldInfo: `fieldNodes[${fieldId}]`,
+                            : `props.record.fields.${fieldName}.string`,
+                        fieldInfo: `props.archInfo.fieldNodes[${fieldId}]`,
                     };
                     // note: remove this oe_read/edit_only logic when form view
                     // will always be in edit mode
@@ -288,7 +285,7 @@ export class FormCompiler extends ViewCompiler {
                 if (invisible !== false) {
                     mainSlot.setAttribute(
                         "isVisible",
-                        `!evalDomain(record,${JSON.stringify(invisible)})`
+                        `!evalDomainFromRecord(props.record,${JSON.stringify(invisible)})`
                     );
                 }
                 if (itemSpan > 0) {
@@ -446,7 +443,7 @@ export class FormCompiler extends ViewCompiler {
             if (invisible === false) {
                 isVisible = "true";
             } else {
-                isVisible = `!evalDomain(record,${JSON.stringify(invisible)})`;
+                isVisible = `!evalDomainFromRecord(props.record,${JSON.stringify(invisible)})`;
             }
             pageSlot.setAttribute("isVisible", isVisible);
 
@@ -484,7 +481,7 @@ export class FormCompiler extends ViewCompiler {
     compileSeparator(el, params = {}) {
         const separator = makeSeparator(el.getAttribute("string"));
         copyAttributes(el, separator);
-        return applyInvisible(getModifier(el, "invisible"), separator, params);
+        return this.applyInvisible(getModifier(el, "invisible"), separator, params);
     }
 
     /**
@@ -519,7 +516,7 @@ export class FormCompiler extends ViewCompiler {
      */
     compileWidget(el) {
         const widget = super.compileWidget(el);
-        widget.setAttribute("readonly", "!props.record.isInEdition");
+        widget.setAttribute("readonly", `!props.record.isInEdition`);
         return widget;
     }
 }

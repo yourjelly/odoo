@@ -15,7 +15,7 @@ import {
  * @property {(el: Element, params: Record<string, any>) => Element} fn
  */
 
-const { useComponent, xml } = owl;
+const { xml } = owl;
 
 const templateIds = Object.create(null);
 
@@ -76,38 +76,6 @@ function appendToStringifiedObject(originalTattr, string) {
         string = `${oldString[1]},${string}`;
     }
     return `{${string}}`;
-}
-
-/**
- * @param {any} invisible
- * @param {Element} compiled
- * @param {Record<string, any>} params
- * @returns {Element}
- */
-export function applyInvisible(invisible, compiled, params) {
-    if (!invisible) {
-        return compiled;
-    }
-    if (typeof invisible === "boolean" && !params.enableInvisible) {
-        return;
-    }
-    if (!params.enableInvisible) {
-        combineAttributes(
-            compiled,
-            "t-if",
-            `!evalDomain(record,${JSON.stringify(invisible)})`,
-            " and "
-        );
-    } else {
-        let expr;
-        if (Array.isArray(invisible)) {
-            expr = `evalDomain(record,${JSON.stringify(invisible)})`;
-        } else {
-            expr = invisible;
-        }
-        appendAttr(compiled, "class", `o_invisible_modifier:${expr}`);
-    }
-    return compiled;
 }
 
 /**
@@ -187,6 +155,10 @@ export function decodeObjectForTemplate(str) {
  */
 export function encodeObjectForTemplate(obj) {
     return `"${encodeURI(JSON.stringify(obj))}"`;
+}
+
+export function evalDomainFromRecord(record, expr) {
+    return new Domain(expr).contains(record.evalContext);
 }
 
 /**
@@ -271,10 +243,43 @@ export class ViewCompiler {
         this.id = 1;
         /** @type {Compiler[]} */
         this.compilers = [];
+        this.ctx = { readonly: "props.readonly" };
         this.setup();
     }
 
     setup() {}
+
+    /**
+     * @param {any} invisible
+     * @param {Element} compiled
+     * @param {Record<string, any>} params
+     * @returns {Element}
+     */
+    applyInvisible(invisible, compiled, params) {
+        if (!invisible) {
+            return compiled;
+        }
+        if (typeof invisible === "boolean" && !params.enableInvisible) {
+            return;
+        }
+        if (!params.enableInvisible) {
+            combineAttributes(
+                compiled,
+                "t-if",
+                `!evalDomainFromRecord(props.record,${JSON.stringify(invisible)})`,
+                " and "
+            );
+        } else {
+            let expr;
+            if (Array.isArray(invisible)) {
+                expr = `evalDomainFromRecord(props.record,${JSON.stringify(invisible)})`;
+            } else {
+                expr = invisible;
+            }
+            appendAttr(compiled, "class", `o_invisible_modifier:${expr}`);
+        }
+        return compiled;
+    }
 
     /**
      * @param {Element} xmlElement
@@ -327,7 +332,7 @@ export class ViewCompiler {
         }
 
         if (evalInvisible && compiledNode) {
-            compiledNode = applyInvisible(invisible, compiledNode, params);
+            compiledNode = this.applyInvisible(invisible, compiledNode, params);
         }
         return compiledNode;
     }
@@ -353,7 +358,7 @@ export class ViewCompiler {
         }
         const button = createElement("ViewButton", {
             tag: toStringExpression(tag),
-            record: "record",
+            record: `props.record`,
         });
 
         assignOwlDirectives(button, el);
@@ -402,8 +407,8 @@ export class ViewCompiler {
         const field = createElement("Field");
         field.setAttribute("id", `'${fieldId}'`);
         field.setAttribute("name", `'${fieldName}'`);
-        field.setAttribute("record", "record");
-        field.setAttribute("fieldInfo", `fieldNodes['${fieldId}']`);
+        field.setAttribute("record", `props.record`);
+        field.setAttribute("fieldInfo", `props.archInfo.fieldNodes['${fieldId}']`);
 
         if (el.hasAttribute("widget")) {
             field.setAttribute("type", `'${el.getAttribute("widget")}'`);
@@ -442,7 +447,7 @@ export class ViewCompiler {
      */
     compileWidget(el) {
         const attrs = {};
-        const props = { record: "record", readonly: "props.readonly" };
+        const props = { record: `props.record`, readonly: this.ctx.readonly };
         for (const { name, value } of el.attributes) {
             switch (name) {
                 case "class":
@@ -473,15 +478,6 @@ export class ViewCompiler {
  * @returns {string}
  */
 export function useViewCompiler(ViewCompiler, templateKey, xmlDoc, params) {
-    const component = useComponent();
-
-    // Assigns special functions to the current component.
-    Object.assign(component, {
-        evalDomain(record, expr) {
-            return new Domain(expr).contains(record.evalContext);
-        },
-    });
-
     // Creates a new compiled template if the given template key hasn't been
     // compiled already.
     if (templateKey === undefined) {

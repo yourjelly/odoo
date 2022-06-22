@@ -649,6 +649,36 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
+    QUnit.test("user context can be used in kanban template", async (assert) => {
+        const fakeUserService = {
+            start() {
+                return { context: { some_key: true } };
+            },
+        };
+        serviceRegistry.add("user", fakeUserService, { force: true });
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch: /* xml */ `
+                <kanban>
+                    <templates>
+                        <div t-name="kanban-box">
+                            <field t-if="user_context.some_key" name="foo"/>
+                        </div>
+                    </templates>
+                </kanban>`,
+            domain: [["id", "=", 1]],
+        });
+
+        assert.containsOnce(target, ".o_kanban_record:not(.o_kanban_ghost)");
+        assert.containsOnce(
+            target,
+            ".o_kanban_record span:contains(yop)",
+            "condition in the kanban template should have been correctly evaluated"
+        );
+    });
+
     QUnit.test("kanban with sub-template", async (assert) => {
         await makeView({
             type: "kanban",
@@ -9418,12 +9448,10 @@ QUnit.module("Views", (hooks) => {
             arch: /* xml */ `
                 <kanban on_create="quick_create">
                     <templates>
-                        <t t-name="kanban-box">
-                            <div>
-                                <button t-if="canEditRecord()">EDIT</button>
-                                <button t-if="canDeleteRecord()">DELETE</button>
-                            </div>
-                        </t>
+                        <div t-name="kanban-box">
+                            <button t-if="widget.editable">EDIT</button>
+                            <button t-if="widget.deletable">DELETE</button>
+                        </div>
                     </templates>
                 </kanban>`,
         });
