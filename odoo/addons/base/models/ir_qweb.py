@@ -578,11 +578,11 @@ class IrQWeb(models.AbstractModel):
         'xml' not in tools.config['dev_mode'],
         tools.ormcache('template', 'tuple(self.env.context.get(k) for k in self._get_template_cache_keys())'),
     )
-    def _get_view_id_timestamp(self, template):
+    def _get_view_key_info(self, template):
         try:
             view_id = self.env['ir.ui.view'].sudo().with_context(load_all_views=True)._get_view_id(template)
             if not view_id:
-                return None, None
+                return None, None, None
             self.env["ir.ui.view"].flush_model(['model', 'write_date', 'inherit_id'])
             query = """
                 WITH RECURSIVE ir_ui_view_inherits AS (
@@ -593,15 +593,16 @@ class IrQWeb(models.AbstractModel):
                     SELECT ir_ui_view.id, ir_ui_view.write_date, ir_ui_view.model
                     FROM ir_ui_view
                     INNER JOIN ir_ui_view_inherits parent ON parent.id = ir_ui_view.inherit_id
-                    WHERE ir_ui_view.model = parent.model
+                    WHERE ir_ui_view.active IS TRUE
                 )
-                SELECT SUM(extract(epoch from v.write_date))
+                SELECT SUM(extract(epoch from v.write_date)), array_agg(v.id)
                 FROM ir_ui_view_inherits v
             """
             self.env.cr.execute(query, [view_id])
-            return view_id, self.env.cr.fetchone()[0]
+            write_sum, all_view_ids = self.env.cr.fetchone()
+            return view_id, write_sum, tuple(all_view_ids)
         except Exception:
-            return None, None
+            return None, None, None
 
     @QwebTracker.wrap_compile
     def _compile(self, template):
@@ -609,12 +610,12 @@ class IrQWeb(models.AbstractModel):
             self = self.with_context(is_t_cache_disabled=True)
             ref = None
         else:
-            ref, timestamp = self._get_view_id_timestamp(template)
+            ref, timestamp, all_view_ids = self._get_view_key_info(template)
 
         # define the base key cache for code in cache and t-cache feature
         base_key_cache = None
         if ref:
-            base_part = (self.env.cr.dbname, ref, timestamp)
+            base_part = (self.env.cr.dbname, all_view_ids, timestamp)
             context_part = tuple((k, self.env.context[k]) for k in self._get_template_cache_keys() if k in self.env.context)
             base_key_cache = self._get_cache_key(base_part + context_part)
         self = self.with_context(__qweb_base_key_cache=base_key_cache)
@@ -2430,6 +2431,11 @@ class IrQWeb(models.AbstractModel):
             return self._generate_asset_nodes_cache(bundle, css, js, debug, async_load, defer_load, lazy_load, media)
 
     # qweb cache feature
+    def _update_tcache_pollution(self, models, key):
+        for model_name in models:
+            if model_name in self.env.all.tcache_pollution['write']:
+                self.env.all.tcache_pollution['render'][model_name].add(key)
+
 
     def _get_cache_key(self, cache_key):
         """
@@ -2440,17 +2446,21 @@ class IrQWeb(models.AbstractModel):
         if not isinstance(cache_key, (tuple, list)):
             cache_key = (cache_key,)
         keys = []
+        model_names_used = {'ir.ui.view'}
         for item in cache_key:
             try:
                 # use try catch instead of isinstance to detect lazy values
                 keys.append(item._name)
                 keys.append(tuple(item.ids))
                 dates = item.mapped('write_date')
+                model_names_used.add(item._name)
                 if dates:
                     keys.append(max(dates).timestamp())
             except AttributeError:
                 keys.append(repr(item))
-        return tuple(keys)
+        final_key = tuple(keys)
+        self._update_tcache_pollution(model_names_used, final_key)
+        return final_key
 
     def _load_values(self, cache_key, get_value, loaded_values=None):
         """ generate value from the function if the result is not cached. """
@@ -2472,7 +2482,7 @@ class IrQWeb(models.AbstractModel):
             return get_value()
         shared_cache = get_shared_cache()
         if shared_cache is None:  # If there are no shared memory fallback on a ormcache
-            _logger.info("Not shared memory fall back on orm cache")
+            _logger.warning("Not shared memory fall back on orm cache")
             return self.__get_orm_cached_values(cache_key, get_value)
         try:
             return shared_cache[cache_key]

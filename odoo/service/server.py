@@ -487,7 +487,6 @@ class ThreadedServer(CommonServer):
         t.start()
 
     def start(self, stop=False):
-        create_shared_cache()
         _logger.debug("Setting signal handlers")
         set_limit_memory_hard()
         if os.name == 'posix':
@@ -541,7 +540,6 @@ class ThreadedServer(CommonServer):
                     time.sleep(0.05)
 
         odoo.sql_db.close_all()
-        unlink_shared_cache()
 
         _logger.debug('--')
         logging.shutdown()

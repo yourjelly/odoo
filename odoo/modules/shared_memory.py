@@ -12,6 +12,10 @@ from time import time, time_ns
 _logger = logging.getLogger(__name__)
 
 
+# TODO simplify the lock, no recovery
+# TODO no need the shared memory in multi-threading...
+
+
 class LockIdentify:
     """
     Lock where the pid process is save into a Shared Value after that the process acquires the lock.
@@ -47,7 +51,7 @@ class LockIdentify:
             # One a worst case of the worst case, if we have a ValueError ("release" a already released lock), it seems
             # that none other process has used the lock between (or it already finished)
             _logger.error("One process has release the lock when it was used.")
-            raise Exception("One process has release the lock when it was used.")
+            raise Exception("One process has release the lock when it was used, it shouldn't happen")
 
     def force_release_if_mandatory(self, pid: int):
         """Release the lock if it is locked by the killed process with `pid`

@@ -18,7 +18,7 @@ _logger = logging.getLogger(__name__)
 class TestLockPID(BaseCase):
 
     def test_lock_multiprocess_terminate(self):
-        # TODO mute the exception
+        self.skipTest("Create a traceback impossible to mute")
         lock = LockIdentify()
         def sleeting():
             with lock:
@@ -670,9 +670,9 @@ class TestSharedMemoryLRU(BaseCase):
     def test_performance_real_mono_process(self):
         # Size sample of t-cache template with demo data and website_sale
         size_sample = [
-            65294,13158,8349,10537,9215,765,30940,54101,12340,206964,
-            28,4149,5826,21940,3252,2184,3707,3447,3746,2156,8610,5271,
-            12380,3978,18085,4632,5734,4921,
+            65294, 13158, 8349, 10537, 9215, 765, 30940, 54101, 12340, 206964,
+            28, 4149, 5826, 21940, 3252, 2184, 3707, 3447, 3746, 2156, 8610, 5271,
+            12380, 3978, 18085, 4632, 5734, 4921,
         ]
 
         nb_write = 10_000
@@ -704,9 +704,9 @@ class TestSharedMemoryLRU(BaseCase):
     def test_performance_real_multi_process(self):
         # Size sample of t-cache template with demo data and website_sale
         size_sample = [
-            65294,13158,8349,10537,9215,765,30940,54101,12340,206964,
-            28,4149,5826,21940,3252,2184,3707,3447,3746,2156,8610,5271,
-            12380,3978,18085,4632,5734,4921,
+            65294, 13158, 8349, 10537, 9215, 765, 30940, 54101, 12340, 206964,
+            28, 4149, 5826, 21940, 3252, 2184, 3707, 3447, 3746, 2156, 8610, 5271,
+            12380, 3978, 18085, 4632, 5734, 4921,
         ]
 
         nb_write = 10_000

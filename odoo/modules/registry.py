@@ -30,28 +30,30 @@ _logger = logging.getLogger(__name__)
 _schema = logging.getLogger('odoo.schema')
 
 
-shared_cache = None
+# By default it is a local LRU
+# But the PreforkServer will replace it by a SharedMemoryLRU before forking
+shared_cache = LRU(8192)
 SIZE_SHARED_MEMORY = 20000
 
 def get_shared_cache():
     return shared_cache
 
 def close_shared_cache():
-    if shared_cache is not None:
+    if isinstance(shared_cache, SharedMemoryLRU):
         shared_cache.close()
 
 def release_lock_shared_cache(pid):
-    if shared_cache is not None:
+    if isinstance(shared_cache, SharedMemoryLRU):
         shared_cache.hook_process_killed(pid)
 
 def unlink_shared_cache():
-    if shared_cache is not None:
+    if isinstance(shared_cache, SharedMemoryLRU):
         _logger.info("Unlink shared memory")
         shared_cache.unlink()
 
 def create_shared_cache():
     global shared_cache
-    if shared_cache is None:
+    if not isinstance(shared_cache, SharedMemoryLRU):
         _logger.info("Create shared memory")
         shared_cache = SharedMemoryLRU(SIZE_SHARED_MEMORY)
 
@@ -142,7 +144,7 @@ class Registry(Mapping):
         self._fields_by_model = None
         self._ordinary_tables = None
         self._constraint_queue = deque()
-        self.__cache = {}
+        self.__cache = LRU(8192)
 
         # modules fully loaded (maintained during init phase by `loading` module)
         self._init_modules = set()
