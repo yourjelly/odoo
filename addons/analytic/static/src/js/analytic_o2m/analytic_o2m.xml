@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="analytic_o2m" owl="1">
-        <div class="analytic_o2m" t-ref="analyticO2m">
+        <div class="analytic_o2m" t-ref="analyticO2m" t-on-keydown="onAutoCompleteKeydown">
             <TagsList tags="tags"/>
             <t t-if="!props.readonly">
                 <AutoComplete t-if="!state.isOpened"
@@ -11,7 +11,7 @@
                     onSelect.bind="onSelect"
                     onInput.bind="onInput"
                     onChange="onChange"/>
-                <div class="analytic_o2m_editor_popup dropdown-menu show" t-else="!state.isOpened" t-ref="analyticPop">
+                <div class="analytic_o2m_editor_popup dropdown-menu show p-2" t-else="!state.isOpened" t-ref="analyticPop">
                     <!-- can't use a listrenderer - since columns headers should not be there
                          and the list needs to be split 
                     <t t-foreach="groups" t-as="group" t-key="group">
@@ -28,8 +28,8 @@
                     <div class="popupButtons" t-if="!props.readonly and state.isOpened">
                         <!-- <button t-if="tags.length and !state.isOpened" class="btn" t-on-click="this.forceDropdownOpen"><span class="fa fa-pencil"/></button> -->
                         <!-- <button t-if="state.isOpened" class="btn" t-on-click="() => this.forceDropdownClose()"><span class="fa fa-close"/></button> -->
-                        <button t-if="template_field_value" class="btn" t-on-click="onOpenExisting"><span class="fa fa-external-link o_external_button"/></button>
-                        <button t-if="tags.length" class="btn o_button" t-on-click="onSaveNew"><span class="fa fa-save"/></button>
+                        <span t-if="template_field_value" class="btn o_button" t-on-click="onOpenExisting"><i class="fa fa-external-link o_external_button"/></span>
+                        <span t-if="tags.length" class="btn o_button" t-on-click="onSaveNew"><i class="fa fa-save"/></span>
                         <!-- <button t-if="tags.length" class="btn" t-on-click="onClear"><span class="fa fa-trash"/></button> -->
                         <!-- <button class="btn" t-on-click="onRandom"><span class="fa fa-random"/></button> -->
                     </div>

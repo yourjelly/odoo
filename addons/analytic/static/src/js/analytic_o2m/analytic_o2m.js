@@ -5,7 +5,14 @@ import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { TagsList } from "@web/views/fields/many2many_tags/tags_list";
 import { useService, useChildRef } from "@web/core/utils/hooks";
+import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
+import {
+    getNextTabableElement,
+    getPreviousTabableElement,
+    getTabableElements
+} from "@web/core/utils/ui";
 import { usePosition } from "@web/core/position_hook";
+
 // import { getNextTabableElement } from "@web/core/utils/ui";
 // import { ListArchParser } from "@web/views/list/list_arch_parser";
 // import { ListRenderer } from "@web/views/list/list_renderer";
@@ -89,14 +96,18 @@ export class AnalyticO2M extends Component {
 
     patched(){
         console.log('onPatched');
-        if (this.state.addingGroup.length) {
-            this.focusGroupAutocomplete();
-        }
-        else if (!this.state.isOpened && !this.props.readonly){
-            this.focusCellAutocomplete();
-        }
-        else if (this.state.isOpened && !this.props.readonly && this.state.clickedTag) {
-            this.focusTagPercentage();
+        if (!this.props.readonly) {
+            if (!this.state.isOpened ){
+                this.focusCellAutocomplete();
+            }
+            else {
+                if (!!this.state.addingGroup) {
+                    this.focusGroupAutocomplete();
+                }
+                if (this.state.clickedTag) {
+                    this.focusTagPercentage();
+                }
+            }
         }
     }
 
@@ -123,15 +134,19 @@ export class AnalyticO2M extends Component {
     // }
 
     focusGroupAutocomplete(){
-        this.groupTableRef.el.querySelector('.o-autocomplete--input').focus();
+        
+        const el = this.groupTableRef.el.querySelector('.o-autocomplete--input');
+        console.log('focusgroupAutoComplete' + el);
+        if (el) el.focus();
     }
 
     focusCellAutocomplete(){
-        this.widgetRef.el.querySelector('.o-autocomplete--input').focus();
+        const el = this.widgetRef.el.querySelector('.o-autocomplete--input');
+        if (el) el.focus();
     }
 
     get groups() {
-        let groups = this.list.map((record) => {return record.data.group_name});
+        const groups = this.list.map((record) => {return record.data.group_name});
         return [...new Set(groups)]
     }
 
@@ -155,10 +170,10 @@ export class AnalyticO2M extends Component {
         }));
     }
 
-    tagClicked(tag){
+    tagClicked({id}){
         console.log('clicked tag');
-        console.log(tag);
-        this.state.clickedTag = tag.id;
+        console.log(id);
+        this.state.clickedTag = id;
         this.forceDropdownOpen();
     }
 
@@ -332,6 +347,78 @@ export class AnalyticO2M extends Component {
         // this.computeIsOpened();
     }
 
+    getNextElement() {
+        this.state.clickedTag = false;
+        let el = getNextTabableElement(this.dropdownRef.el)
+        el = el ? el : getTabableElements(this.dropdownRef.el)[0]
+        return el; 
+    }
+
+    getPreviousElement() {
+        this.state.clickedTag = false;
+        let el = getPreviousTabableElement(this.dropdownRef.el)
+        el = el ? el : getTabableElements(this.dropdownRef.el).pop()
+        return el; 
+    }
+
+
+    onAutoCompleteKeydown(ev) {
+        console.log('onAutoCompleteKeydown');
+        console.log(ev);
+        if (this.props.readonly) {
+            return;
+        }
+        const hotkey = getActiveHotkey(ev);
+        console.log(hotkey);
+        const dropdownOpen = this.state.isOpened;
+        const mainAutoCompleteEditing = dropdownOpen ? false : !!this.state.autocompleteValue;
+        // const activeInput = dropdownOpen ? document.activeElement : false;
+        // console.log(activeInput);
+        switch (hotkey) {
+            case "backspace": {
+                if (!dropdownOpen) {
+                    this.deleteTag(this.tags.pop().id);
+                }
+                return;
+            }
+            case "arrowright": {
+                if (!mainAutoCompleteEditing && !dropdownOpen && this.tags.length) this.forceDropdownOpen();
+                return;
+            }
+            case "arrowleft": {
+                if (dropdownOpen) this.forceDropdownClose();
+                //maybe select a tag so it can be deleted with backspace
+                return;
+            }
+            case "escape": {
+                if (dropdownOpen) this.forceDropdownClose();
+                break;
+            }
+            case "tab": {
+                if (dropdownOpen) {
+                    if (!!this.state.addingGroup) this.cancelAddLine();
+                    console.log('should tab to:');
+                    this.getNextElement().focus();
+                    break;
+                }
+                return;
+            }
+            case "shift+tab": {
+                if (dropdownOpen) {
+                    if (!!this.state.addingGroup) this.cancelAddLine();
+                    console.log('should tab back to:');
+                    this.getPreviousElement().focus();
+                    break;
+                }
+                return;
+            }
+            default:
+                return;
+        }
+        ev.preventDefault();
+        ev.stopPropagation();
+    }
+
     async onSelect(option, params) {
         console.log('OnSelect');
         console.log(option);
@@ -341,11 +428,12 @@ export class AnalyticO2M extends Component {
         await this.props.record.update(changes);
         this.state.autocompleteValue = "";
         // this.computeIsOpened();
-        this.state.addingGroup = "";
+        // this.state.addingGroup = "";
+        this.cancelAddLine();
         if (selected_option.field_to_update === this.props.search_field){
             console.log('new analytic tag added - setting the tag clicked to:');
-            // this.tagClicked(null, this.get_tag_by_acc_id(selected_option.value));
-            this.state.clickedTag = this.get_tag_by_acc_id(selected_option.value).id
+            // this.tagClicked(this.get_tag_by_acc_id(selected_option.value));
+            this.state.clickedTag = this.get_tag_by_acc_id(selected_option.value).id;
             console.log(this.state.clickedTag);
         } else {
             this.state.clickedTag = false;
@@ -377,17 +465,21 @@ export class AnalyticO2M extends Component {
 
     forceDropdownClose() {
         console.log('forceDropdownClose');
-        this.state.isOpened = false;
-        this.state.addingGroup = "";
-        this.state.clickedTag = false;
+        if (this.state.isOpened) {
+            this.state.addingGroup = "";
+            this.state.clickedTag = false;
+            this.state.isOpened = false;
+        }
     }
 
     forceDropdownOpen(){
         if (!this.state.clickedTag) {
             // this.tagClicked(null, this.tags[0]);
+            console.log('force dropdown open is defaulting to tag 0');
+            // this.tagClicked(this.tags[0])
             this.state.clickedTag = this.tags[0].id;
         }
-        this.state.isOpened = true;
+        if (!this.state.isOpened) this.state.isOpened = true;
     }
 
     onWindowScroll(ev) {
@@ -432,9 +524,9 @@ export class AnalyticO2M extends Component {
     // }
 
     selectText(ev){
-        this.state.clickedTag = false;
+        // this.state.clickedTag = false;
         ev.target.select();
-        this.cancelAddLine();
+        // this.cancelAddLine();
     }
 
     onOpenExisting() {
@@ -482,7 +574,8 @@ export class AnalyticO2M extends Component {
         this.state.addingGroup = group;
         this.state.clickedTag = false;
         // let nextInput = this.groupTableRef.el.querySelector('.o-autocomplete--input'); //getNextTabableElement(this.groupTableRef.el);
-        // console.log('addLine');
+        console.log('addLine');
+        console.log(this.state.addingGroup);
         // console.log(nextInput);
         // Can not focus on the input of the new Autocomplete - needs useForwardRefToParent or a custom AutoComplete that does this
         // this.refreshAutocompleteRef();
