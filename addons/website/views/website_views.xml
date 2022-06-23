@@ -136,7 +136,7 @@
                     <notebook>
                         <page string="Name">
                             <group class="mt-4">
-                                <field name="name" string="Page Name" class="form-control"/>
+                                <field name="name" string="Page Name" widget="page_name"/>
                             </group>
                             <group>
                                 <field name="website_id" invisible="1"/>

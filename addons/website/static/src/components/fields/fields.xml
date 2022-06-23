@@ -22,6 +22,15 @@
         </div>
     </t>
 
+    <t t-name="website.FieldPageName" owl="1">
+        <div>
+            <input t-model="state.name" type="text" class="o_input"/>
+            <div t-if="warnAboutCall" class="mt-4">
+                <PageDependencies pageId="resId" mode="'popover'" type="'key'"/>
+            </div>
+        </div>
+    </t>
+
     <t t-name="website.FieldFaPrefix" owl="1">
         <span><i t-attf-class="fa fa-fw {{prefix.class}} {{prefix.visible ? '': 'invisible'}}" t-att-title="prefix.help"/><t t-esc="_formatValue(value)"/></span>
     </t>

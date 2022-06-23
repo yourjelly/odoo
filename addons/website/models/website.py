@@ -13,6 +13,7 @@ from psycopg2 import sql
 from werkzeug import urls
 from werkzeug.datastructures import OrderedMultiDict
 from werkzeug.exceptions import NotFound
+from markupsafe import Markup
 
 from odoo import api, fields, models, tools, http, release, registry
 from odoo.addons.http_routing.models.ir_http import RequestUID, slugify, _guess_mimetype, url_for
@@ -783,7 +784,7 @@ class Website(models.Model):
             return dependencies
 
         page = self.env['website.page'].browse(int(page_id))
-        website = self.env['website'].browse(self._context.get('website_id'))
+        website = page.website_id or self.get_current_website()
         url = page.url
 
         # search for website_page with link
@@ -796,7 +797,7 @@ class Website(models.Model):
         for page in pages:
             dependencies.setdefault(page_key, [])
             dependencies[page_key].append({
-                'text': _('Page <b>%s</b> contains a link to this page', page.url),
+                'content': Markup(_("Page <b>%s</b> contains a link to this page", page.url)),
                 'item': page.name,
                 'link': page.url,
             })
@@ -811,7 +812,7 @@ class Website(models.Model):
         for view in views:
             dependencies.setdefault(view_key, [])
             dependencies[view_key].append({
-                'text': _('Template <b>%s (id:%s)</b> contains a link to this page') % (view.key or view.name, view.id),
+                'content': Markup(_('Template <b>%s (id:%s)</b> contains a link to this page') % (view.key or view.name, view.id)),
                 'link': '/web#id=%s&view_type=form&model=ir.ui.view' % view.id,
                 'item': _('%s (id:%s)') % (view.key or view.name, view.id),
             })
@@ -824,7 +825,7 @@ class Website(models.Model):
             menu_key = _('Menus')
         for menu in menus:
             dependencies.setdefault(menu_key, []).append({
-                'text': _('This page is in the menu <b>%s</b>', menu.name),
+                'content': Markup(_('This page is in the menu <b>%s</b>') % menu.name),
                 'link': '/web#id=%s&view_type=form&model=website.menu' % menu.id,
                 'item': menu.name,
             })
@@ -844,7 +845,7 @@ class Website(models.Model):
             return dependencies
 
         page = self.env['website.page'].browse(int(page_id))
-        website = self.env['website'].browse(self._context.get('website_id'))
+        website = page.website_id or self.get_current_website()
         key = page.key
 
         # search for website_page with link
@@ -860,7 +861,7 @@ class Website(models.Model):
         for p in pages:
             dependencies.setdefault(page_key, [])
             dependencies[page_key].append({
-                'text': _('Page <b>%s</b> is calling this file', p.url),
+                'content': Markup(_('Page <b>%s</b> is calling this file', p.url)),
                 'item': p.name,
                 'link': p.url,
             })
@@ -878,7 +879,7 @@ class Website(models.Model):
         for view in views:
             dependencies.setdefault(view_key, [])
             dependencies[view_key].append({
-                'text': _('Template <b>%s (id:%s)</b> is calling this file') % (view.key or view.name, view.id),
+                'content': Markup(_('Template <b>%s (id:%s)</b> is calling this file') % (view.key or view.name, view.id)),
                 'item': _('%s (id:%s)') % (view.key or view.name, view.id),
                 'link': '/web#id=%s&view_type=form&model=ir.ui.view' % view.id,
             })

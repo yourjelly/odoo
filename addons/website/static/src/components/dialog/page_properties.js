@@ -30,8 +30,10 @@ export class PageDependencies extends Component {
     async onWillStart() {
         this.dependencies = await this.orm.call(
             'website',
-            'page_search_dependencies',
-            [this.props.pageId]
+            this.props.type === 'key' ?
+                'page_search_key_dependencies' :
+                'page_search_dependencies',
+            [this.props.pageId],
         );
         if (this.props.mode === 'popover') {
             this.depText = Object.entries(this.dependencies)
@@ -40,7 +42,7 @@ export class PageDependencies extends Component {
         } else {
             for (const key of Object.keys(this.dependencies)) {
                 this.dependencies[key] = this.dependencies[key].map(item => {
-                    item.text = markup(item.text);
+                    item.contentToDisplay = markup(item.content);
                     return item;
                 });
             }
@@ -68,6 +70,10 @@ PageDependencies.template = 'website.PageDependencies';
 PageDependencies.props = {
     pageId: Number,
     mode: String,
+    type: {
+        type: String,
+        optional: true,
+    },
 };
 
 export class DeletePageDialog extends Component {
