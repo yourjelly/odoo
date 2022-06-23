@@ -4,6 +4,7 @@ import itertools
 import logging
 import re
 import psycopg2
+import traceback
 from ast import literal_eval
 from collections import defaultdict
 from collections.abc import Mapping
@@ -16,6 +17,7 @@ from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.osv import expression
 from odoo.tools import pycompat, unique
 from odoo.tools.safe_eval import safe_eval, datetime, dateutil, time
+from odoo.uninstall import Uninstaller
 
 _logger = logging.getLogger(__name__)
 
@@ -2095,6 +2097,7 @@ class IrModelData(models.Model):
         constraint_ids = []
 
         module_data = self.search([('module', 'in', modules_to_remove)], order='id DESC')
+        module_data = Uninstaller(module_data).uninstall()
         for data in module_data:
             if data.model == 'ir.model':
                 model_ids.append(data.res_id)
@@ -2155,19 +2158,24 @@ class IrModelData(models.Model):
                 ))
 
             # now delete the records
-            _logger.info('Deleting %s', records)
-            try:
-                with self._cr.savepoint():
-                    records.unlink()
-            except Exception:
-                if len(records) <= 1:
-                    _logger.info('Unable to delete %s', records, exc_info=True)
-                    undeletable_ids.extend(ref_data._ids)
-                else:
+            stack = [records]
+            while len(stack) > 0:
+                records = stack.pop()
+                _logger.info('Deleting %s', records)
+                try:
+                    with self._cr.savepoint():
+                        records.unlink()
+                except Exception:
+                    if len(records) <= 1:
+                        trace = ''.join(traceback.format_list(traceback.extract_stack()[-2:-1]))
+                        _logger.warning('Unable to delete %s at\n%s', records, trace, exc_info=True)
+                        undeletable_ids.extend(ref_data._ids)
+                        continue
+
                     # divide the batch in two, and recursively delete them
                     half_size = len(records) // 2
-                    delete(records[:half_size])
-                    delete(records[half_size:])
+                    stack.append(records[:half_size])
+                    stack.append(records[half_size:])
 
         # remove non-model records first, grouped by batches of the same model
         for model, items in itertools.groupby(unique(records_items), itemgetter(0)):
