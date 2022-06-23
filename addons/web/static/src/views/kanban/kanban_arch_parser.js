@@ -268,6 +268,21 @@ export class KanbanArchParser extends XMLParser {
             el.replaceWith(createElement("t", { "t-call": "web.KanbanColorPicker" }));
         }
 
+        /**
+         * WOWL FIXME
+         * For some reason, buttons in some arch have a data-something instead of just a normal attribute.
+         * The new system only uses normal attributes.
+         * This is an ugly small compatibility trick to fix this.
+         */
+        for (const el of box.querySelectorAll("a[data-type],button[data-type]")) {
+            const dataAttrs = Object.values(el.attributes).filter((attr) =>
+                attr.name.startsWith("data-")
+            );
+            for (const attr of dataAttrs) {
+                el.setAttribute(attr.name.replace("data-", ""), el.attributes[attr.name].value);
+            }
+        }
+
         // Special actions
         for (const el of box.querySelectorAll("a[type],button[type]")) {
             const type = el.getAttribute("type");
