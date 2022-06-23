@@ -5752,15 +5752,9 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-<<<<<<< HEAD
-    __info__.version = '2.0.0-beta-8';
-    __info__.date = '2022-06-08T07:54:26.105Z';
-    __info__.hash = 'a3111eb';
-=======
     __info__.version = '2.0.0-beta-10';
     __info__.date = '2022-06-23T06:55:56.650Z';
     __info__.hash = 'c7459ef';
->>>>>>> 83b21f71cf25... [IMP] web: update owl from 2.0.0-beta-8 to 2.0.0-beta-10
     __info__.url = 'https://github.com/odoo/owl';
 
 
