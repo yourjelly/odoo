@@ -112,11 +112,17 @@ export function useSetupAction(params = {}) {
                 Object.assign(state, getLocalState());
             }
             if (rootRef) {
-                const contentEl = rootRef.el.querySelector(".o_content");
-                if (contentEl) {
+                if (component.env.isSmall) {
                     state[scrollSymbol] = {
-                        content: { left: contentEl.scrollLeft, top: contentEl.scrollTop },
+                        root: { left: rootRef.el.scrollLeft, top: rootRef.el.scrollTop },
                     };
+                } else {
+                    const contentEl = rootRef.el.querySelector(".o_content");
+                    if (contentEl) {
+                        state[scrollSymbol] = {
+                            content: { left: contentEl.scrollLeft, top: contentEl.scrollTop },
+                        };
+                    }
                 }
             }
             return state;
@@ -127,10 +133,15 @@ export function useSetupAction(params = {}) {
                 const { state } = component.props;
                 const scrolling = state && state[scrollSymbol];
                 if (scrolling) {
-                    const contentEl = rootRef.el.querySelector(".o_content");
-                    if (contentEl) {
-                        contentEl.scrollTop = (scrolling.content && scrolling.content.top) || 0;
-                        contentEl.scrollLeft = (scrolling.content && scrolling.content.left) || 0;
+                    if (component.env.isSmall) {
+                        rootRef.el.scrollTop = (scrolling.root && scrolling.root.top) || 0;
+                        rootRef.el.scrollLeft = (scrolling.root && scrolling.root.left) || 0;
+                    } else if (scrolling.content) {
+                        const contentEl = rootRef.el.querySelector(".o_content");
+                        if (contentEl) {
+                            contentEl.scrollTop = scrolling.content.top || 0;
+                            contentEl.scrollLeft = scrolling.content.left || 0;
+                        }
                     }
                 }
             });
