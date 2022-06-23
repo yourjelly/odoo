@@ -11,11 +11,13 @@
  * @return {Element}
  */
 function getScrollableElement(env) {
-    if (env.isSmall) {
-        return document.firstElementChild; // aka html node;
-    } else {
-        return document.querySelector(".o_web_client > .o_action_manager > .o_action > .o_content");
+    const actionEl = document.querySelector(
+        ".o_web_client > .o_action_manager > .o_action:not(.o_action_delegate_scroll"
+    );
+    if (env.isSmall && actionEl) {
+        return actionEl;
     }
+    return document.querySelector(".o_web_client > .o_action_manager > .o_action > .o_content");
 }
 
 /**
