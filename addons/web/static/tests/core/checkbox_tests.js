@@ -1,13 +1,20 @@
 /** @odoo-module **/
 
 import { CheckBox } from "@web/core/checkbox/checkbox";
+import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { translatedTerms } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 import { makeFakeLocalizationService } from "@web/../tests/helpers/mock_services";
-import { click, getFixture, patchWithCleanup, mount } from "@web/../tests/helpers/utils";
+import {
+    click,
+    getFixture,
+    patchWithCleanup,
+    mount,
+    triggerEvent,
+} from "@web/../tests/helpers/utils";
 
-const { Component, xml } = owl;
+const { Component, useState, xml } = owl;
 const serviceRegistry = registry.category("services");
 
 let target;
@@ -15,6 +22,7 @@ let target;
 QUnit.module("Components", (hooks) => {
     hooks.beforeEach(async () => {
         target = getFixture();
+        serviceRegistry.add("hotkey", hotkeyService);
     });
 
     QUnit.module("CheckBox");
@@ -60,5 +68,27 @@ QUnit.module("Components", (hooks) => {
         assert.strictEqual(value, true);
         await click(target.querySelector("input"));
         assert.strictEqual(value, false);
+    });
+
+    QUnit.test("can toggle value by pressing ENTER", async (assert) => {
+        const env = await makeTestEnv();
+        class Parent extends Component {
+            setup() {
+                this.state = useState({ value: false });
+            }
+            onChange(checked) {
+                this.state.value = checked;
+            }
+        }
+        Parent.template = xml`<CheckBox onChange.bind="onChange" value="state.value"/>`;
+        Parent.components = { CheckBox };
+
+        await mount(Parent, target, { env });
+        assert.containsOnce(target, "div.custom-checkbox");
+        assert.notOk(target.querySelector("div.custom-checkbox input").checked);
+        await triggerEvent(target, "div.custom-checkbox input", "keydown", { key: "Enter" });
+        assert.ok(target.querySelector("div.custom-checkbox input").checked);
+        await triggerEvent(target, "div.custom-checkbox input", "keydown", { key: "Enter" });
+        assert.notOk(target.querySelector("div.custom-checkbox input").checked);
     });
 });
