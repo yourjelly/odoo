@@ -1,3 +1,7 @@
+/** @odoo-module */
+
+import { canDefaultBehaviorHappen } from "./helpers/utils";
+
 (function () {
     "use strict";
 
@@ -180,6 +184,12 @@
     function isNotVisible(el, msg) {
         return _checkVisible(el, false, msg);
     }
+    function defaultBehavior(el, selector, eventType, eventAttrs, msg) {
+        const answer = canDefaultBehaviorHappen(el, selector, eventType, eventAttrs);
+        QUnit.assert.ok(answer, msg);
+    }
+
+    QUnit.assert.defaultBehavior = defaultBehavior;
     QUnit.assert.containsN = containsN;
     QUnit.assert.containsNone = containsNone;
     QUnit.assert.containsOnce = containsOnce;
@@ -310,16 +320,20 @@
 
     // Append a "Rerun in debug" link.
     // Only works if the test is not hidden.
-    QUnit.testDone(async ({ testId}) => {
+    QUnit.testDone(async ({ testId }) => {
         const testElement = document.getElementById(`qunit-test-output-${testId}`);
-        if (!testElement) { // Is probably hidden because it passed
+        if (!testElement) {
+            // Is probably hidden because it passed
             return;
         }
         const reRun = testElement.querySelector("li a");
         const reRunDebug = document.createElement("a");
         reRunDebug.textContent = "Rerun in debug";
         const location = window.location;
-        reRunDebug.setAttribute("href", `${location.origin}${location.pathname}${location.search}&debugTestId=${testId}`);
+        reRunDebug.setAttribute(
+            "href",
+            `${location.origin}${location.pathname}${location.search}&debugTestId=${testId}`
+        );
 
         reRun.parentElement.insertBefore(reRunDebug, reRun.nextSibling);
     });
@@ -349,6 +363,11 @@
         QUnit.config.testId = [debugTestId];
         setQUnitDebugMode();
     }
+
+    const skip = QUnit.skip;
+    QUnit.skipWOWL = (name, cb) => {
+        skip(name, cb);
+    };
 
     // Override global UnhandledRejection that is assigned wayyy before this file
     // Do not really crash on non-errors rejections
