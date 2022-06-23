@@ -6,6 +6,7 @@ import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { TagsList } from "@web/views/fields/many2many_tags/tags_list";
 import { useService, useChildRef } from "@web/core/utils/hooks";
 import { usePosition } from "@web/core/position_hook";
+// import { getNextTabableElement } from "@web/core/utils/ui";
 // import { ListArchParser } from "@web/views/list/list_arch_parser";
 // import { ListRenderer } from "@web/views/list/list_renderer";
 import {
@@ -16,7 +17,7 @@ import {
     useX2ManyCrud,
 } from "@web/views/fields/relational_utils";
 
-const { Component, useState, useRef, useExternalListener } = owl;
+const { Component, useState, useRef, useExternalListener, onPatched } = owl;
 
 
 export class AnalyticO2M extends Component {
@@ -28,8 +29,11 @@ export class AnalyticO2M extends Component {
             addingGroup: "",
             autocompleteValue2: "",
             groups: [],
+            clickedTag: false,
         });
         this.widgetRef = useRef("analyticO2m");
+        this.dropdownRef = useRef("analyticPop");
+        this.groupTableRef = useRef("groupTable");
         usePosition(() => this.widgetRef.el, {
             popper: "analyticPop",
         });
@@ -56,14 +60,20 @@ export class AnalyticO2M extends Component {
                 // }
                 console.log('New Template Saved');
                 console.log(record);
+                this.focusCellAutocomplete();
             },
-            onClose: () => {},
+            onClose: () => {
+                console.log('form Closed');
+                this.focusCellAutocomplete();
+            },
             fieldString: 'Analytic Distribution Template',
         });
         this.activeField = this.props.record.activeFields[this.props.name];
         // this.fetchTreeArch();
         this.fetchAllGroups();
         useExternalListener(window, "scroll", this.onWindowScroll, true);
+        useExternalListener(window, "click", this.onWindowClick, true);
+        onPatched(this.patched);
     }
 
     // async fetchTreeArch(){
@@ -76,6 +86,49 @@ export class AnalyticO2M extends Component {
     //     this.treeArch = await new ListArchParser().parse(dtag_view.views.tree.arch, dtag_view.relatedModels, this.activeField.relation);
     //     console.log(this.treeArch);
     // }
+
+    patched(){
+        console.log('onPatched');
+        if (this.state.addingGroup.length) {
+            this.focusGroupAutocomplete();
+        }
+        else if (!this.state.isOpened && !this.props.readonly){
+            this.focusCellAutocomplete();
+        }
+        else if (this.state.isOpened && !this.props.readonly && this.state.clickedTag) {
+            this.focusTagPercentage();
+        }
+    }
+
+    focusTagPercentage() {
+        // this.dropdownRef.querySelector(this.state.clickedTag + "_percentage").focus()
+        console.log('focusTagPercentage - should focus on:');
+        let inputToFocus = this.dropdownRef.el.querySelector('#' + this.state.clickedTag + "_percentage");
+        console.log(inputToFocus);
+        if (inputToFocus) inputToFocus.focus();
+        console.log('document activeElement');
+        console.log(document.activeElement);
+        // onpatched methods should not update the state as it will trigger onpatched
+        // this.state.clickedTag = false;s
+    }
+
+    // focusNextPercentage(containerEl = null, nearbyEl = null) {
+    //     let container = containerEl ? containerEl : this.groupTableRef.el;
+    //     let percentage_inputs = container.querySelectorAll('.o_analytic_percentage');
+    //     console.log('focus Next Percentage - found these:');
+    //     console.log(percentage_inputs);
+    //     if (percentage_inputs.length) {
+    //         percentage_inputs[0].focus();
+    //     }
+    // }
+
+    focusGroupAutocomplete(){
+        this.groupTableRef.el.querySelector('.o-autocomplete--input').focus();
+    }
+
+    focusCellAutocomplete(){
+        this.widgetRef.el.querySelector('.o-autocomplete--input').focus();
+    }
 
     get groups() {
         let groups = this.list.map((record) => {return record.data.group_name});
@@ -96,9 +149,21 @@ export class AnalyticO2M extends Component {
             text: record.data.display_name,
             colorIndex: record.data.color,
             group: record.data.group_name,
-            // onClick: (ev) => this.onBadgeClick(ev, record),
+            acc_id: record.data.acc_id,
+            onClick: (ev) => this.tagClicked({id: record.id}),
             onDelete: !this.props.readonly ? () => this.deleteTag(record.id) : undefined,
         }));
+    }
+
+    tagClicked(tag){
+        console.log('clicked tag');
+        console.log(tag);
+        this.state.clickedTag = tag.id;
+        this.forceDropdownOpen();
+    }
+
+    get_tag_by_acc_id(acc_id) {
+        return this.tags.filter((tag) => tag.acc_id == acc_id)[0];
     }
 
     get tag_ids() {
@@ -277,18 +342,26 @@ export class AnalyticO2M extends Component {
         this.state.autocompleteValue = "";
         // this.computeIsOpened();
         this.state.addingGroup = "";
+        if (selected_option.field_to_update === this.props.search_field){
+            console.log('new analytic tag added - setting the tag clicked to:');
+            // this.tagClicked(null, this.get_tag_by_acc_id(selected_option.value));
+            this.state.clickedTag = this.get_tag_by_acc_id(selected_option.value).id
+            console.log(this.state.clickedTag);
+        } else {
+            this.state.clickedTag = false;
+        }
     }
 
-    get shouldShowEditorDropdown() {
-        console.log('should show editor?');
-        console.log(this.state.autocompleteValue);
-        console.log(!this.props.readonly && !this.state.autocompleteValue.length && !!this.tags.length && this.widgetRef.el.contains(document.activeElement));
-        return !this.props.readonly && !this.state.autocompleteValue.length && !!this.tags.length && this.widgetRef.el.contains(document.activeElement);
-    }
+    // get shouldShowEditorDropdown() {
+    //     console.log('should show editor?');
+    //     console.log(this.state.autocompleteValue);
+    //     console.log(!this.props.readonly && !this.state.autocompleteValue.length && !!this.tags.length && this.widgetRef.el.contains(document.activeElement));
+    //     return !this.props.readonly && !this.state.autocompleteValue.length && !!this.tags.length && this.widgetRef.el.contains(document.activeElement);
+    // }
 
-    computeIsOpened() {
-        this.state.isOpened = this.shouldShowEditorDropdown;
-    }
+    // computeIsOpened() {
+    //     this.state.isOpened = this.shouldShowEditorDropdown;
+    // }
 
     // onAutocompleteBlur() {
     //     this.state.isOpened = this.shouldShowEditorDropdown;
@@ -305,42 +378,63 @@ export class AnalyticO2M extends Component {
     forceDropdownClose() {
         console.log('forceDropdownClose');
         this.state.isOpened = false;
+        this.state.addingGroup = "";
+        this.state.clickedTag = false;
     }
 
     forceDropdownOpen(){
+        if (!this.state.clickedTag) {
+            // this.tagClicked(null, this.tags[0]);
+            this.state.clickedTag = this.tags[0].id;
+        }
         this.state.isOpened = true;
     }
 
     onWindowScroll(ev) {
-        this.forceDropdownClose();
+        if (this.state.isOpened && this.dropdownRef.el ? !this.dropdownRef.el.contains(ev.target) : false) {
+            this.forceDropdownClose();
+        }
+    }
+
+    onWindowClick(ev) {
+        console.log('window click');
+        // console.log(ev);
+        // console.log('isOpened and click not in dropdown' + (this.state.isOpened && this.dropdownRef.el ? !this.dropdownRef.el.contains(ev.target) : false))
+        if (this.state.isOpened && this.dropdownRef.el ? !this.dropdownRef.el.contains(ev.target) : false) {
+            this.forceDropdownClose();
+        }
     }
 
     async percentage_changed(record, ev, obj) {
         console.log('percentage changed');
-       
+        console.log(record);
         await record.update({
-            analytic_account_id: [record.data.acc_id, "whatever"],
+            analytic_account_id: [record.data.acc_id, record.data.analytic_account_id ? record.data.analytic_account_id[1] : record.data.display_name],
             percentage: ev.target.value,
         });
+        // debugger;
         // this.props.value.unselectRecord(true);
         // await this.updateRecord(record);
         // console.log(this);
         await record.save()
+        // record.model.notify()
         // await record.save({savePoint: true});
         // await obj.props.record.save({savePoint: true});
         // debugger;
         // this.record.save();
     }
 
-    async switchMode(record, mode){
-        console.log('switch mode doing nothing');
-        console.log(record);
-        // await record.switchMode(mode);
-        console.log(record);
-    }
+    // async switchMode(record, mode){
+    //     console.log('switch mode doing nothing');
+    //     console.log(record);
+    //     // await record.switchMode(mode);
+    //     console.log(record);
+    // }
 
     selectText(ev){
+        this.state.clickedTag = false;
         ev.target.select();
+        this.cancelAddLine();
     }
 
     onOpenExisting() {
@@ -384,11 +478,18 @@ export class AnalyticO2M extends Component {
     //     };
     // }
 
-    addLine(group){
+    addLine(group, ev){
         this.state.addingGroup = group;
+        this.state.clickedTag = false;
+        // let nextInput = this.groupTableRef.el.querySelector('.o-autocomplete--input'); //getNextTabableElement(this.groupTableRef.el);
+        // console.log('addLine');
+        // console.log(nextInput);
         // Can not focus on the input of the new Autocomplete - needs useForwardRefToParent or a custom AutoComplete that does this
         // this.refreshAutocompleteRef();
         // this.focusInput();
+    }
+    cancelAddLine(ev) {
+        this.state.addingGroup = "";
     }
     addingBlur() {
         //this.state.addingGroup = "";

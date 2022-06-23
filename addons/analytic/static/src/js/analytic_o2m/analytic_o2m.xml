@@ -3,14 +3,6 @@
 
     <t t-name="analytic_o2m" owl="1">
         <div class="analytic_o2m" t-ref="analyticO2m">
-            <div class="popupButtons" t-if="!props.readonly">
-                <button t-if="tags.length and !state.isOpened" class="btn" t-on-click="this.forceDropdownOpen"><span class="fa fa-pencil"/></button>
-                <button t-if="state.isOpened" class="btn" t-on-click="() => this.forceDropdownClose()"><span class="fa fa-close"/></button>
-                <button t-if="template_field_value" class="btn" t-on-click="onOpenExisting"><span class="fa fa-external-link o_external_button"/></button>
-                <button t-if="tags.length" class="btn o_button" t-on-click="onSaveNew"><span class="fa fa-save"/></button>
-                <button t-if="tags.length" class="btn" t-on-click="onClear"><span class="fa fa-trash"/></button>
-                <!-- <button class="btn" t-on-click="onRandom"><span class="fa fa-random"/></button> -->
-            </div>
             <TagsList tags="tags"/>
             <t t-if="!props.readonly">
                 <AutoComplete t-if="!state.isOpened"
@@ -26,14 +18,22 @@
                         <h4 class="o_group_name" t-esc="group"/>
                         <ListRenderer t-props="rendererProps(group)"/>
                     </t> -->
-                    <AutoComplete
+                    <!-- <AutoComplete
                         placeholder="'Type to change the Analytic Model'"
                         value="state.autocompleteValue"
                         sources="sources"
                         onSelect.bind="onSelect"
                         onInput.bind="onInput"
-                        onChange="onChange"/>
-                    <table class="o_list_table table table-sm table-hover table-striped o_analytic_table">
+                        onChange="onChange"/> -->
+                    <div class="popupButtons" t-if="!props.readonly and state.isOpened">
+                        <!-- <button t-if="tags.length and !state.isOpened" class="btn" t-on-click="this.forceDropdownOpen"><span class="fa fa-pencil"/></button> -->
+                        <!-- <button t-if="state.isOpened" class="btn" t-on-click="() => this.forceDropdownClose()"><span class="fa fa-close"/></button> -->
+                        <button t-if="template_field_value" class="btn" t-on-click="onOpenExisting"><span class="fa fa-external-link o_external_button"/></button>
+                        <button t-if="tags.length" class="btn o_button" t-on-click="onSaveNew"><span class="fa fa-save"/></button>
+                        <!-- <button t-if="tags.length" class="btn" t-on-click="onClear"><span class="fa fa-trash"/></button> -->
+                        <!-- <button class="btn" t-on-click="onRandom"><span class="fa fa-random"/></button> -->
+                    </div>
+                    <table class="o_list_table table table-sm table-hover table-striped o_analytic_table" t-ref="groupTable">
                         <!-- <thead class="d-none">
                             <th class="first_col col-sm-8"/>
                             <th class="second_col col-sm-2"/>
@@ -48,12 +48,15 @@
                             <t t-foreach="state.groups" t-as="group" t-key="group[0]">
                                 <tr>
                                     <th colspan="2" class="o_group_name" t-esc="group[1]"/>
-                                    <th><i class="fa fa-plus-circle" t-on-click="() => this.addLine(group)"/></th>
+                                    <th>
+                                        <i t-if="state.addingGroup === group" class="fa fa-close" t-on-click="(ev) => this.cancelAddLine(ev)"/>
+                                        <i t-else="" class="fa fa-plus-circle" t-on-click="(ev) => this.addLine(group, ev)"/>
+                                    </th>
                                 </tr>
                                 <t t-foreach="listByGroup(group[1])" t-as="dtag" t-key="dtag.id">
                                     <tr class="o_data_row">
-                                        <td class="o_data_cell o_analytic_account_name"><t t-esc="dtag.data.analytic_account_id and dtag.data.analytic_account_id.data.display_name.length ? dtag.data.analytic_account_id.data.display_name + 'A' : dtag.data.display_name + ' T'"/></td>
-                                        <td class="o_data_cell"><input class="o_input o_analytic_percentage" t-on-click.stop="(ev) => this.selectText(ev)" t-on-change="(ev) => this.percentage_changed(dtag, ev, this)" t-att-value="dtag.data.percentage"/></td>
+                                        <td class="o_data_cell o_analytic_account_name"><t t-esc="dtag.data.analytic_account_id and dtag.data.analytic_account_id.data.display_name.length ? dtag.data.analytic_account_id.data.display_name : dtag.data.display_name"/></td>
+                                        <td class="o_data_cell"><input t-att-id="dtag.id + '_percentage'" class="o_input o_analytic_percentage" t-on-click.stop="" t-on-focus="(ev) => this.selectText(ev)" t-on-change="(ev) => this.percentage_changed(dtag, ev, this)" t-att-value="dtag.data.percentage"/></td>
                                         <td class="o_data_cell"><span class="fa fa-trash-o" t-on-click="() => this.deleteTag(dtag.id)"/></td>
                                     </tr>
                                 </t>
