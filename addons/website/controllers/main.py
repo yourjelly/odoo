@@ -68,8 +68,25 @@ class QueryURL(object):
 
 class Website(Home):
 
+    def redirect(self):
+        print('noop')
+
     @http.route('/', type='http', auth="public", website=True, sitemap=True)
     def index(self, **kw):
+
+        request.redirect('valid')
+
+        self.redirect('valid')
+
+        werkzeug.utils.redirect('invalid')
+
+        from werkzeug import utils
+        utils.redirect('invalid')
+
+        from werkzeug.utils import redirect
+        redirect('invalid')
+
+
         # prefetch all menus (it will prefetch website.page too)
         top_menu = request.website.menu_id
 
