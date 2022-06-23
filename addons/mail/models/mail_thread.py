@@ -280,16 +280,21 @@ class MailThread(models.AbstractModel):
         # post track template if a tracked field changed
         threads._track_discard()
         if not self._context.get('mail_notrack'):
-            fnames = self._track_get_fields()
-            for thread in threads:
-                create_values = create_values_list[thread.id]
-                changes = [fname for fname in fnames if create_values.get(fname)]
-                # based on tracked field to stay consistent with write
-                # we don't consider that a falsy field is a change, to stay consistent with previous implementation,
-                # but we may want to change that behaviour later.
-                thread._message_track_post_template(changes)
+            self.env.cr.precommit.add(threads._track_initial_values)
+            self.env.cr.precommit.data.setdefault(f'mail.tracking.create.{self._name}', create_values_list)
 
         return threads
+
+    def _track_initial_values(self):
+        create_values_list = self.env.cr.precommit.data.pop(f'mail.tracking.create.{self._name}', {})
+        fnames = self._track_get_fields()
+        for thread in self:
+            create_values = create_values_list[thread.id]
+            changes = [fname for fname in fnames if create_values.get(fname)]
+            # based on tracked field to stay consistent with write
+            # we don't consider that a falsy field is a change, to stay consistent with previous implementation,
+            # but we may want to change that behaviour later.
+            thread._message_track_post_template(changes)
 
     def write(self, values):
         if self._context.get('tracking_disable'):
