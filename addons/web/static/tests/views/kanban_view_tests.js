@@ -6355,6 +6355,42 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_btn_test_2", 3, "kanban should have three buttons of type 2");
     });
 
+    QUnit.test("support styling of anchor tags with action type", async function (assert) {
+        const actionService = {
+            start() {
+                return { doActionButton: (action) => assert.strictEqual(action.name, "42") };
+            },
+        };
+        registry.category("services").add("action", actionService, { force: true });
+
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <kanban>
+                    <templates>
+                        <div t-name="kanban-box">
+                            <field name="foo"/>
+                            <a type="action" name="42" class="btn-primary" style="margin-left: 10px"><i class="fa fa-arrow-right"/> Click me !</a>
+                        </div>
+                    </templates>
+                </kanban>`,
+            resId: 1,
+        });
+        await click(target.querySelector("a[type='action']"));
+        assert.hasClass(
+            target.querySelector("a[type='action']"),
+            "btn-primary",
+            "classname is given if set on the <a> element"
+        );
+        assert.strictEqual(
+            target.querySelector("a[type='action']").style.marginLeft,
+            "10px",
+            "style is applied to the ViewButton"
+        );
+    });
+
     QUnit.test("button executes action and reloads", async (assert) => {
         const kanban = await makeView({
             type: "kanban",
