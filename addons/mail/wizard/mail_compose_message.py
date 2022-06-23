@@ -370,7 +370,8 @@ class MailComposer(models.TransientModel):
         reply_to_value = dict.fromkeys(res_ids, None)
         if mass_mail_mode and not self.reply_to_force_new:
             records = self.env[self.model].browse(res_ids)
-            reply_to_value = records._notify_get_reply_to(default=self.email_from)
+            reply_to_value = records._notify_get_reply_to(default="")
+            reply_to_value = reply_to_value or self.render_field('email_from')
 
         for res_id in res_ids:
             # static wizard (mail.message) values
