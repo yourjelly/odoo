@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="hr_employee_view_form" model="ir.ui.view">
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button class="oe_stat_button" name="action_open_slides_wizard"
+                        type="object" icon="fa-graduation-cap"
+                        attrs="{'invisible': [('employee_skill_ids', '=', False)]}">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">
+                            Courses
+                        </span>
+                    </div>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="slide_channel_partner_employee" model="ir.ui.view">
+        <field name="model">slide.channel.partner</field>
+        <field name="arch" type="xml">
+            <gantt
+                date_start="date_start"
+                date_stop="date_end"
+                dynamic_range="1"
+                disable_drag_drop="1"
+                progress="completion"
+                default_group_by="channel_id"
+                thumbnails="{'channel_id': 'image_128'}">
+                <field name="partner_id"/>
+                <field name="completion"/>
+            </gantt>
+        </field>
+    </record>
+</odoo>

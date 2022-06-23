@@ -8,6 +8,10 @@ from odoo.tools import html2plaintext
 class SlideChannelPartner(models.Model):
     _inherit = 'slide.channel.partner'
 
+    # For Gantt view
+    date_start = fields.Datetime(related='create_date')
+    date_end = fields.Datetime(related='write_date')
+
     def _recompute_completion(self):
         res = super(SlideChannelPartner, self)._recompute_completion()
         partner_has_completed = {

@@ -15,7 +15,10 @@ This module add completed courses to resumé for employees.
         """,
     'depends': ['hr_skills', 'website_slides'],
     'data': [
+        'security/ir.model.access.csv',
+        'views/hr_employee_views.xml',
         'views/hr_templates.xml',
+        'wizard/hr_employee_slides_wizard_views.xml',
         'data/hr_resume_data.xml',
     ],
     'auto_install': True,
