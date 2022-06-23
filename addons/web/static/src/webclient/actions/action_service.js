@@ -632,6 +632,11 @@ function makeActionManager(env) {
                     });
                     dialog = nextDialog;
                 } else {
+                    if (this.env.isSmall) {
+                        const el = document.firstElementChild;
+                        el.scrollLeft = (controller.scrolling && controller.scrolling.left) || 0;
+                        el.scrollTop = (controller.scrolling && controller.scrolling.top) || 0;
+                    }
                     controller.getGlobalState = () => {
                         const exportFns = this.__getGlobalState__.callbacks;
                         if (exportFns.length) {
@@ -743,6 +748,11 @@ function makeActionManager(env) {
         }
         if (controller.action.globalState) {
             controller.props.globalState = controller.action.globalState;
+        }
+
+        if (currentController && env.isSmall) {
+            const el = document.firstElementChild;
+            currentController.scrolling = { left: el.scrollLeft, top: el.scrollTop };
         }
 
         const closingProm = _executeCloseAction();
