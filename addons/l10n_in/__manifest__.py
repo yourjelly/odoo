@@ -22,14 +22,14 @@ Sheet, now only Vertical format has been permitted Which is Supported By Odoo.
     ],
     'data': [
         'security/l10n_in_security.xml',
-        # 'security/ir.model.access.csv',
+        'security/ir.model.access.csv',
         'data/account_tax_tag_data.xml',
         'data/account_tax_group_data.xml',
         'data/l10n_in_chart_data.xml',
         'data/account.account.template.csv',
         'data/l10n_in_chart_post_data.xml',
         'data/account_tax_template_data.xml',
-        # 'data/account_fiscal_position_data.xml',
+        'data/account_fiscal_position_data.xml',
         'data/l10n_in.port.code.csv',
         'data/res_country_state_data.xml',
         'data/uom_data.xml',
@@ -44,7 +44,6 @@ Sheet, now only Vertical format has been permitted Which is Supported By Odoo.
         'views/res_partner_views.xml',
         'views/account_tax_views.xml',
         'views/uom_uom_views.xml',
-        # 'views/report_template.xml',
         'data/account_chart_template_data.xml'
     ],
     'demo': [
