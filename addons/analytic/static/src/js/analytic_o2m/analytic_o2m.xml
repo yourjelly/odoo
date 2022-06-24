@@ -11,7 +11,7 @@
                     onSelect.bind="onSelect"
                     onInput.bind="onInput"
                     onChange="onChange"/>
-                <div class="analytic_o2m_editor_popup dropdown-menu show p-2" t-else="!state.isOpened" t-ref="analyticPop">
+                <div class="analytic_o2m_editor_popup dropdown-menu show p-2 rounded" t-else="!state.isOpened" t-ref="analyticPop">
                     <!-- can't use a listrenderer - since columns headers should not be there
                          and the list needs to be split 
                     <t t-foreach="groups" t-as="group" t-key="group">
@@ -25,11 +25,11 @@
                         onSelect.bind="onSelect"
                         onInput.bind="onInput"
                         onChange="onChange"/> -->
-                    <div class="popupButtons" t-if="!props.readonly and state.isOpened">
+                    <div class="popupButtons text-right" t-if="!props.readonly and state.isOpened">
                         <!-- <button t-if="tags.length and !state.isOpened" class="btn" t-on-click="this.forceDropdownOpen"><span class="fa fa-pencil"/></button> -->
                         <!-- <button t-if="state.isOpened" class="btn" t-on-click="() => this.forceDropdownClose()"><span class="fa fa-close"/></button> -->
-                        <span t-if="template_field_value" class="btn o_button" t-on-click="onOpenExisting"><i class="fa fa-external-link o_external_button"/></span>
-                        <span t-if="tags.length" class="btn o_button" t-on-click="onSaveNew"><i class="fa fa-save"/></span>
+                        <span t-if="template_field_value" class="btn btn-secondary o_button" t-on-click="onOpenExisting"><i class="fa fa-external-link o_external_button"/></span>
+                        <span t-if="tags.length" class="btn btn-secondary o_button" t-on-click="onSaveNew"><i class="fa fa-save"/></span>
                         <!-- <button t-if="tags.length" class="btn" t-on-click="onClear"><span class="fa fa-trash"/></button> -->
                         <!-- <button class="btn" t-on-click="onRandom"><span class="fa fa-random"/></button> -->
                     </div>
@@ -49,14 +49,29 @@
                                 <tr>
                                     <th colspan="2" class="o_group_name" t-esc="group[1]"/>
                                     <th>
-                                        <i t-if="state.addingGroup === group" class="fa fa-close" t-on-click="(ev) => this.cancelAddLine(ev)"/>
-                                        <i t-else="" class="fa fa-plus-circle" t-on-click="(ev) => this.addLine(group, ev)"/>
+                                        <i t-if="state.addingGroup === group" class="btn-secondary fa fa-close" t-on-click="(ev) => this.cancelAddLine(ev)"/>
+                                        <i t-else="" class="btn-secondary fa fa-plus-circle" t-on-click="(ev) => this.addLine(group, ev)"/>
                                     </th>
                                 </tr>
                                 <t t-foreach="listByGroup(group[1])" t-as="dtag" t-key="dtag.id">
                                     <tr class="o_data_row">
-                                        <td class="o_data_cell o_analytic_account_name"><t t-esc="dtag.data.analytic_account_id and dtag.data.analytic_account_id.data.display_name.length ? dtag.data.analytic_account_id.data.display_name : dtag.data.display_name"/></td>
-                                        <td class="o_data_cell"><input t-att-id="dtag.id + '_percentage'" class="o_input o_analytic_percentage" t-on-click.stop="" t-on-focus="(ev) => this.selectText(ev)" t-on-change="(ev) => this.percentage_changed(dtag, ev, this)" t-att-value="dtag.data.percentage"/></td>
+                                        <td class="o_data_cell o_analytic_account_name">
+                                            <t t-esc="dtag.data.analytic_account_id and dtag.data.analytic_account_id.data.display_name.length ? dtag.data.analytic_account_id.data.display_name : dtag.data.display_name"/>
+                                        </td>
+                                        <td class="o_data_cell">
+                                            <!-- <div class="input-group"> -->
+                                                <input
+                                                    t-att-id="dtag.id + '_percentage'"
+                                                    class="o_input o_analytic_percentage"
+                                                    t-on-click.stop=""
+                                                    t-on-focus="(ev) => this.selectText(ev)"
+                                                    t-on-change="(ev) => this.percentage_changed(dtag, ev, this)"
+                                                    t-att-value="dtag.data.percentage"/>
+                                                <!-- <div class="input-group-append">
+                                                    <span class="input-group-suffix">%</span>
+                                                </div>
+                                            </div> -->
+                                        </td>
                                         <td class="o_data_cell"><span class="fa fa-trash-o" t-on-click="() => this.deleteTag(dtag.id)"/></td>
                                     </tr>
                                 </t>
