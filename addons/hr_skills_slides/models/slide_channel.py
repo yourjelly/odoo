@@ -4,6 +4,11 @@
 from odoo import fields, models
 from odoo.tools import html2plaintext
 
+class SlideChannel(models.Model):
+    _inherit = 'slide.channel'
+
+    hr_skill_ids = fields.Many2many('hr.skill')
+
 
 class SlideChannelPartner(models.Model):
     _inherit = 'slide.channel.partner'

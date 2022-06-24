@@ -18,6 +18,11 @@
         </field>
     </record>
 
+    <record model="ir.ui.view" id="view_slide_channel_form">
+        <field name="inherit_id" ref="website_slides.view_slide_channel_form"/>
+        <field name="model">slide.channel</field>
+    </record>
+
     <record id="slide_channel_partner_employee" model="ir.ui.view">
         <field name="model">slide.channel.partner</field>
         <field name="arch" type="xml">
