@@ -384,6 +384,41 @@ if tax &gt; result:result=tax</field>
         <field name="children_tax_ids" eval="[(6, 0, [ref('cess_purchase_5'),ref('cess_purchase_1591'),])]"/>
         <field name="tax_group_id" ref="cess_group"/>
     </record>
+    <record id="cess_purchase_5_service" model="account.tax.template">
+        <field name="name">CESS Purchase 5%(service)</field>
+        <field name="description">CESS 5%</field>
+        <field name="type_tax_use">none</field>
+        <field name="amount_type">percent</field>
+        <field name="tax_scope">service</field>
+        <field name="amount">5</field>
+        <field name="tax_group_id" ref="cess_group"/>
+        <field name="chart_template_id" ref="indian_chart_template_standard"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             'tag_ids': [ref('tax_tag_base_cess')]}),               (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10055'),                 'tag_ids': [ref('tax_tag_cess')],             }),         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             'tag_ids': [ref('tax_tag_base_cess')]}),               (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11235'),                 'tag_ids': [ref('tax_tag_cess')],             }),         ]"/>
+    </record>
+    <record id="cess_purchase_1591_service" model="account.tax.template">
+        <field name="name">CESS Purchase 1591 Per Thousand (service)</field>
+        <field name="description">1591 PER THOUSAND</field>
+        <field name="type_tax_use">none</field>
+        <field name="amount_type">fixed</field>
+        <field name="tax_scope">service</field>
+        <field name="amount">1.591</field>
+        <field name="tax_group_id" ref="cess_group"/>
+        <field name="chart_template_id" ref="indian_chart_template_standard"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             'tag_ids': [ref('tax_tag_base_cess')]}),               (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10055'),                 'tag_ids': [ref('tax_tag_cess')],             }),         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             'tag_ids': [ref('tax_tag_base_cess')]}),               (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11235'),                 'tag_ids': [ref('tax_tag_cess')],             }),         ]"/>
+    </record>
+    <record id="cess_5_plus_1591_purchase_service" model="account.tax.template">
+        <field name="name">CESS 5% + RS.1591/THOUSAND</field>
+        <field name="description">CESS 5% + RS.1591/THOUSAND</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="amount_type">group</field>
+        <field name="tax_scope">service</field>
+        <field name="amount">0</field>
+        <field name="chart_template_id" ref="indian_chart_template_standard"/>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('cess_purchase_5_service'),ref('cess_purchase_1591_service'),])]"/>
+        <field name="tax_group_id" ref="cess_group"/>
+    </record>
     <record id="cess_21_4170_higer_purchase" model="account.tax.template">
         <field name="name">CESS 21% or RS.4170/THOUSAND</field>
         <field name="description">CESS 21% or RS.4170/THOUSAND</field>
@@ -492,6 +527,18 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">purchase</field>
         <field name="amount_type">percent</field>
         <field name="amount">5</field>
+        <field name="chart_template_id" ref="indian_chart_template_standard"/>
+        <field name="tax_group_id" ref="igst_group"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             'tag_ids': [ref('tax_tag_base_igst')]}),               (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10053'),                 'tag_ids': [ref('tax_tag_igst')],             }),         ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             'tag_ids': [ref('tax_tag_base_igst')]}),               (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11234'),                 'tag_ids': [ref('tax_tag_igst')],             }),         ]"/>
+    </record>
+    <record id="igst_purchase_5_service" model="account.tax.template">
+        <field name="name">IGST 5% (Service)</field>
+        <field name="description">IGST 5%</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">5</field>
+        <field name="tax_scope">service</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             'tag_ids': [ref('tax_tag_base_igst')]}),               (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10053'),                 'tag_ids': [ref('tax_tag_igst')],             }),         ]"/>
