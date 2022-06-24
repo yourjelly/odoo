@@ -372,17 +372,18 @@ export class AnalyticO2M extends Component {
         console.log(hotkey);
         const dropdownOpen = this.state.isOpened;
         const mainAutoCompleteEditing = dropdownOpen ? false : !!this.state.autocompleteValue;
+        const hasTags = !!this.tags.length;
         // const activeInput = dropdownOpen ? document.activeElement : false;
         // console.log(activeInput);
         switch (hotkey) {
             case "backspace": {
-                if (!dropdownOpen) {
+                if (!dropdownOpen && hasTags) {
                     this.deleteTag(this.tags.pop().id);
                 }
                 return;
             }
             case "arrowright": {
-                if (!mainAutoCompleteEditing && !dropdownOpen && this.tags.length) this.forceDropdownOpen();
+                if (!mainAutoCompleteEditing && !dropdownOpen && hasTags) this.forceDropdownOpen();
                 return;
             }
             case "arrowleft": {
