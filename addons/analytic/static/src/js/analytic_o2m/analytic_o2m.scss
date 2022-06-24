@@ -1,25 +1,24 @@
-.analytic_o2m_editor_popup {
-    .first_col {
-        width: 70%;
-    }
-    .o_analytic_table {
-        max-width: 200px;
-    }
-    .o_analytic_account_name {
-        width: 180px !important;
-        max-width: 180px !important;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .o_analytic_percentage {
-        width: 30px;
+.analytic_o2m {
+
+    .analytic_o2m_editor_popup {
+        width: 260px;
+
+        .o_analytic_account_name {
+            width: 180px !important;
+            max-width: 180px !important;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .o_analytic_percentage {
+            width: 40px;
+        }
     }
 
-}
-
-.o_dropdown_bold {
-    text-indent: -6px;
-    .dropdown-item {
-        font-weight: $font-weight-bolder !important;
+    .o_dropdown_bold {
+        text-indent: -6px;
+        .dropdown-item {
+            font-weight: $font-weight-bolder !important;
+        }
     }
+
 }
