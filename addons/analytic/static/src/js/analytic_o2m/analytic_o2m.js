@@ -624,6 +624,7 @@ AnalyticO2M.fieldsToFetch = {
     color: { name: "color", type: "integer" },
     analytic_account_id: { name: 'analytic_account_id', type: "many2one"},
     acc_id: { name: "acc_id", type: "integer" },
+    acc_name: { name: "acc_name", type: "char"},
     group_name: { name: "group_name", type: "char"},
 };
 

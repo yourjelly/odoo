@@ -56,7 +56,7 @@
                                 <t t-foreach="listByGroup(group[1])" t-as="dtag" t-key="dtag.id">
                                     <tr class="o_data_row">
                                         <td class="o_data_cell o_analytic_account_name">
-                                            <t t-esc="dtag.data.analytic_account_id and dtag.data.analytic_account_id.data.display_name.length ? dtag.data.analytic_account_id.data.display_name : dtag.data.display_name"/>
+                                            <t t-esc="dtag.data.acc_name"/>
                                         </td>
                                         <td class="o_data_cell">
                                             <!-- <div class="input-group"> -->
