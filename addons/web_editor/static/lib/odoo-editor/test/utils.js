@@ -459,18 +459,32 @@ export async function createLink(editor, content) {
     editor.execCommand('createLink', '#', content);
 }
 
-export async function insertText(editor, text) {
+export async function mockInsertCharacter(editor, char) {
+    if(char.length !== 1) {
+        console.error('mockInsertCharacter only mock one character at a time.');
+        return;
+    }
     // We create and dispatch an event to mock the insert Text.
     // Unfortunatly those Event are flagged `isTrusted: false`.
     // So we have no choice and need to detect them inside the Editor.
     // But it's the closest to real Browser we can go.
-    var event = new InputEvent('input', {
-        inputType: 'insertText',
-        data: text,
+    //
+    // KeyDownEvent : needed to trigger deleteRange
+    // InputEvent : needed to simùulate the insert text
+    var keyDownEvent = new KeyboardEvent('keydown', {
+        inputType: 'keydown',
+        key: char,
         bubbles: true,
         cancelable: true,
     });
-    editor.editable.dispatchEvent(event);
+    editor.editable.dispatchEvent(keyDownEvent);
+    var inputEvent = new InputEvent('input', {
+        inputType: 'insertText',
+        data: char,
+        bubbles: true,
+        cancelable: true,
+    });
+    editor.editable.dispatchEvent(inputEvent);
 }
 
 export function undo(editor) {

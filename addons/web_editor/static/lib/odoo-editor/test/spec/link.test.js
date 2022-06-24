@@ -2,7 +2,7 @@ import { URL_REGEX, URL_REGEX_WITH_INFOS } from '../../src/OdooEditor.js';
 import {
     BasicEditor,
     click,
-    insertText,
+    mockInsertCharacter,
     insertParagraphBreak,
     insertLineBreak,
     testEditor,
@@ -18,13 +18,13 @@ const testUrlRegex = (url) => {
         window.chai.assert.exists(url.match(URL_REGEX));
         window.chai.assert.exists(url.match(URL_REGEX_WITH_INFOS));
     });
-}
+};
 const testNotUrlRegex = (url) => {
     it(`should be a link: ${url}`, () => {
         window.chai.assert.notExists(url.match(URL_REGEX));
         window.chai.assert.notExists(url.match(URL_REGEX_WITH_INFOS));
     });
-}
+};
 
 describe('Link', () => {
     describe('regex', () => {
@@ -53,7 +53,7 @@ describe('Link', () => {
                     contentBefore: '<p>a[]c</p>',
                     stepFunction: async editor => {
                         await createLink(editor);
-                        await insertText(editor, 'b');
+                        await mockInsertCharacter(editor, 'b');
                     },
                     contentAfter: '<p>a<a href="#">link</a>b[]c</p>',
                 });
@@ -63,8 +63,8 @@ describe('Link', () => {
                     contentBefore: '<p>a[]d</p>',
                     stepFunction: async editor => {
                         await createLink(editor);
-                        await insertText(editor, 'b');
-                        await insertText(editor, 'c');
+                        await mockInsertCharacter(editor, 'b');
+                        await mockInsertCharacter(editor, 'c');
                     },
                     contentAfter: '<p>a<a href="#">link</a>bc[]d</p>',
                 });
@@ -74,7 +74,7 @@ describe('Link', () => {
                     contentBefore: '<p>a[]c</p>',
                     stepFunction: async editor => {
                         await createLink(editor);
-                        await insertText(editor, 'b');
+                        await mockInsertCharacter(editor, 'b');
                         await insertParagraphBreak(editor);
                     },
                     contentAfter: '<p>a<a href="#">link</a>b</p><p>[]c</p>',
@@ -85,9 +85,9 @@ describe('Link', () => {
                     contentBefore: '<p>a[]d</p>',
                     stepFunction: async editor => {
                         await createLink(editor);
-                        await insertText(editor, 'b');
+                        await mockInsertCharacter(editor, 'b');
                         await insertParagraphBreak(editor);
-                        await insertText(editor, 'c');
+                        await mockInsertCharacter(editor, 'c');
                     },
                     contentAfter: '<p>a<a href="#">link</a>b</p><p>c[]d</p>',
                 });
@@ -97,7 +97,7 @@ describe('Link', () => {
                     contentBefore: '<p>a[]c</p>',
                     stepFunction: async editor => {
                         await createLink(editor);
-                        await insertText(editor, 'b');
+                        await mockInsertCharacter(editor, 'b');
                         await insertLineBreak(editor);
                     },
                     // Writing at the end of a link writes outside the link.
@@ -109,9 +109,9 @@ describe('Link', () => {
                     contentBefore: '<p>a[]d</p>',
                     stepFunction: async editor => {
                         await createLink(editor);
-                        await insertText(editor, 'b');
+                        await mockInsertCharacter(editor, 'b');
                         await insertLineBreak(editor);
-                        await insertText(editor, 'c');
+                        await mockInsertCharacter(editor, 'c');
                     },
                     // Writing at the end of a link writes outside the link.
                     contentAfter: '<p>a<a href="#">link</a>b<br>c[]d</p>',
@@ -144,7 +144,7 @@ describe('Link', () => {
                     contentBefore: '<p>a[bc]e</p>',
                     stepFunction: async editor => {
                         await convertToLink(editor);
-                        await insertText(editor, 'd');
+                        await mockInsertCharacter(editor, 'd');
                     },
                     contentAfter: '<p>a<a href="#">bc</a>d[]e</p>',
                 });
@@ -273,7 +273,7 @@ describe('Link', () => {
             await testEditor(BasicEditor, {
                 contentBefore: '<p>a<a href="exist">b[]<span></span></a>c</p>',
                 stepFunction: async editor => {
-                    await insertText(editor, 'c');
+                    await mockInsertCharacter(editor, 'c');
                 },
                 contentAfter: '<p>a<a href="exist">bc[]<span></span></a>c</p>',
             });
@@ -282,7 +282,7 @@ describe('Link', () => {
             await testEditor(BasicEditor, {
                 contentBefore: '<p>a<a href="exist"><span>b[]</span></a>d</p>',
                 stepFunction: async editor => {
-                    await insertText(editor, 'c');
+                    await mockInsertCharacter(editor, 'c');
                 },
                 // JW cAfter: '<p>a<span><a href="exist">b</a>c[]</span>d</p>',
                 contentAfter: '<p>a<a href="exist"><span>bc[]</span></a>d</p>',
@@ -292,7 +292,7 @@ describe('Link', () => {
             await testEditor(BasicEditor, {
                 contentBefore: '<p>a<a href="exist"><span>b[]</span>d</a>e</p>',
                 stepFunction: async editor => {
-                    await insertText(editor, 'c');
+                    await mockInsertCharacter(editor, 'c');
                 },
                 contentAfter: '<p>a<a href="exist"><span>bc[]</span>d</a>e</p>',
             });
@@ -301,7 +301,7 @@ describe('Link', () => {
             await testEditor(BasicEditor, {
                 contentBefore: '<p>a<a href="exist"><span>b</span>c[]</a>e</p>',
                 stepFunction: async editor => {
-                    await insertText(editor, 'd');
+                    await mockInsertCharacter(editor, 'd');
                 },
                 // JW cAfter: '<p>a<a href="exist"><span>b</span>c</a>d[]e</p>',
                 contentAfter: '<p>a<a href="exist"><span>b</span>cd[]</a>e</p>',
@@ -311,7 +311,7 @@ describe('Link', () => {
             await testEditor(BasicEditor, {
                 contentBefore: '<p>a<a href="exist">b[]</a>d</p>',
                 stepFunction: async editor => {
-                    await insertText(editor, 'c');
+                    await mockInsertCharacter(editor, 'c');
                 },
                 // JW cAfter: '<p>a<a href="exist">b</a>c[]d</p>',
                 contentAfter: '<p>a<a href="exist">bc[]</a>d</p>',
@@ -321,7 +321,7 @@ describe('Link', () => {
             await testEditor(BasicEditor, {
                 contentBefore: '<p>a<a href="exist">b</a>[]d</p>',
                 stepFunction: async editor => {
-                    await insertText(editor, 'c');
+                    await mockInsertCharacter(editor, 'c');
                 },
                 contentAfter: '<p>a<a href="exist">b</a>c[]d</p>',
             });
@@ -330,7 +330,7 @@ describe('Link', () => {
             await testEditor(BasicEditor, {
                 contentBefore: '<p>a<a href="exist">b<br>[]</a>d</p>',
                 stepFunction: async editor => {
-                    await insertText(editor, 'c');
+                    await mockInsertCharacter(editor, 'c');
                 },
                 contentAfter: '<p>a<a href="exist">b<br>c[]</a>d</p>',
             });
@@ -339,7 +339,7 @@ describe('Link', () => {
             await testEditor(BasicEditor, {
                 contentBefore: '<p>a<a href="exist">b</a></p><p>[]d</p>',
                 stepFunction: async editor => {
-                    await insertText(editor, 'c');
+                    await mockInsertCharacter(editor, 'c');
                 },
                 contentAfter: '<p>a<a href="exist">b</a></p><p>c[]d</p>',
             });
