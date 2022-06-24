@@ -207,7 +207,7 @@ class AccountAnalyticDistributionTag(models.Model):
     group_name = fields.Char(related='group_id.name')
     color = fields.Integer(related='group_id.color')
     acc_id = fields.Integer(related='analytic_account_id.id')
-    acc_name = fields.Char(related='analytic_account_id.name')  # or should we use display name?
+    acc_name = fields.Char(related='analytic_account_id.name')  # or should we use display name? TODO: fix label warnings
 
     # consider using reference fields instead
     # res_model = fields.Char('Resource Model', help="The database object this analytic distribution tag is attached to")
