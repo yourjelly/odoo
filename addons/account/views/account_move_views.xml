@@ -880,13 +880,10 @@
                                                groups="analytic.group_analytic_tags"
                                                optional="show"
                                                widget="many2many_tags"/>
-<<<<<<< HEAD
                                         <field name="quantity" optional="show"/>
                                         <!-- These fields should have groups applied -->
-=======
                                         <!-- These fields should have groups applied - Not sure if it's too much trouble for other models
                                              to add fields. We do need to store the model_selector_id though - to update it-->
->>>>>>> a712d536a66 (add the position hook popup, try listrenderer, fail, diy table)
                                         <field name="analytic_account_selector_id" invisible="1"/>
                                         <field name="analytic_dist_model_selector_id" invisible="1"/>
                                         <!-- <field name="analytic_dist_tag_ids"
