@@ -11,7 +11,7 @@
                     onSelect.bind="onSelect"
                     onInput.bind="onInput"
                     onChange="onChange"/>
-                <div class="analytic_o2m_editor_popup dropdown-menu show p-2 rounded" t-else="!state.isOpened" t-ref="analyticPop">
+                <div class="analytic_o2m_editor_popup dropdown-menu show rounded py-0" t-else="!state.isOpened" t-ref="analyticPop">
                     <!-- can't use a listrenderer - since columns headers should not be there
                          and the list needs to be split 
                     <t t-foreach="groups" t-as="group" t-key="group">
@@ -25,75 +25,82 @@
                         onSelect.bind="onSelect"
                         onInput.bind="onInput"
                         onChange="onChange"/> -->
-                    <div class="popupButtons text-right" t-if="!props.readonly and state.isOpened">
-                        <!-- <button t-if="tags.length and !state.isOpened" class="btn" t-on-click="this.forceDropdownOpen"><span class="fa fa-pencil"/></button> -->
-                        <!-- <button t-if="state.isOpened" class="btn" t-on-click="() => this.forceDropdownClose()"><span class="fa fa-close"/></button> -->
-                        <span t-if="template_field_value" class="btn btn-secondary o_button" t-on-click="onOpenExisting"><i class="fa fa-external-link o_external_button"/></span>
-                        <span t-if="tags.length" class="btn btn-secondary o_button" t-on-click="onSaveNew"><i class="fa fa-save"/></span>
-                        <!-- <button t-if="tags.length" class="btn" t-on-click="onClear"><span class="fa fa-trash"/></button> -->
-                        <!-- <button class="btn" t-on-click="onRandom"><span class="fa fa-random"/></button> -->
+                    <div class="popover-header">
+                        <div class="d-flex">
+                            <div class="h5 mt-2 mr-auto"><t t-esc="dropdownHeader"/></div>
+                            <div class="popupButtons">
+                                <!-- <button t-if="tags.length and !state.isOpened" class="btn" t-on-click="this.forceDropdownOpen"><span class="fa fa-pencil"/></button> -->
+                                <!-- <button t-if="state.isOpened" class="btn" t-on-click="() => this.forceDropdownClose()"><span class="fa fa-close"/></button> -->
+                                <span t-if="template_field_value" class="btn btn-outline-primary o_button" t-on-click="onOpenExisting"><i class="fa fa-external-link o_external_button"/></span>
+                                <span t-if="tags.length" class="btn btn-outline-primary o_button" t-on-click="onSaveNew"><i class="fa fa-save"/></span>
+                                <!-- <button t-if="tags.length" class="btn" t-on-click="onClear"><span class="fa fa-trash"/></button> -->
+                                <!-- <button class="btn" t-on-click="onRandom"><span class="fa fa-random"/></button> -->
+                            </div>
+                        </div>
                     </div>
-                    <table class="o_list_table table table-sm table-hover table-striped o_analytic_table" t-ref="groupTable">
-                        <!-- <thead class="d-none">
-                            <th class="first_col col-sm-8"/>
-                            <th class="second_col col-sm-2"/>
-                            <th class="third_col col-sm-2"/>
-                        </thead> -->
-                        <!-- <colgroup>
-                            <col class="col-md-8"/>
-                            <col class="col-md-2"/>
-                            <col class="col-md-2"/>
-                        </colgroup> -->
-                        <tbody>
-                            <t t-foreach="state.groups" t-as="group" t-key="group[0]">
-                                <tr>
-                                    <th colspan="2" class="o_group_name" t-esc="group[1]"/>
-                                    <th>
-                                        <i t-if="state.addingGroup === group" class="btn-secondary fa fa-close" t-on-click="(ev) => this.cancelAddLine(ev)"/>
-                                        <i t-else="" class="btn-secondary fa fa-plus-circle" t-on-click="(ev) => this.addLine(group, ev)"/>
-                                    </th>
-                                </tr>
-                                <t t-foreach="listByGroup(group[1])" t-as="dtag" t-key="dtag.id">
-                                    <tr class="o_data_row">
-                                        <td class="o_data_cell o_analytic_account_name">
-                                            <t t-esc="dtag.data.acc_name"/>
-                                        </td>
-                                        <td class="o_data_cell">
-                                            <!-- <div class="input-group"> -->
-                                                <input
-                                                    t-att-id="dtag.id + '_percentage'"
-                                                    class="o_input o_analytic_percentage"
-                                                    t-on-click.stop=""
-                                                    t-on-focus="(ev) => this.selectText(ev)"
-                                                    t-on-change="(ev) => this.percentage_changed(dtag, ev, this)"
-                                                    t-att-value="dtag.data.percentage"/>
-                                                <!-- <div class="input-group-append">
-                                                    <span class="input-group-suffix">%</span>
-                                                </div>
-                                            </div> -->
-                                        </td>
-                                        <td class="o_data_cell"><span class="fa fa-trash-o" t-on-click="() => this.deleteTag(dtag.id)"/></td>
-                                    </tr>
-                                </t>
-                                <t t-if="state.addingGroup === group">
+                    <div class="px-2">
+                        <table class="o_list_table table table-sm table-hover table-striped o_analytic_table" t-ref="groupTable">
+                            <!-- <thead class="d-none">
+                                <th class="first_col col-sm-8"/>
+                                <th class="second_col col-sm-2"/>
+                                <th class="third_col col-sm-2"/>
+                            </thead> -->
+                            <!-- <colgroup>
+                                <col class="col-md-8"/>
+                                <col class="col-md-2"/>
+                                <col class="col-md-2"/>
+                            </colgroup> -->
+                            <tbody>
+                                <t t-foreach="state.groups" t-as="group" t-key="group[0]">
                                     <tr>
-                                        <td colspan="3">
-                                            <AutoComplete
-                                                placeholder="'Type to search an Analytic Account'"
-                                                value="state.autocompleteValue2"
-                                                sources="sourcesAnalyticAccount"
-                                                onSelect.bind="onSelect"
-                                                onBlur.bind="addingBlur"/>
-                                        </td>
+                                        <th colspan="2" class="o_group_name" t-esc="group[1]"/>
+                                        <th>
+                                            <i t-if="state.addingGroup === group" class="btn-secondary fa fa-close" t-on-click="(ev) => this.cancelAddLine(ev)"/>
+                                            <i t-else="" class="btn-secondary fa fa-plus-circle" t-on-click="(ev) => this.addLine(group, ev)"/>
+                                        </th>
                                     </tr>
+                                    <t t-foreach="listByGroup(group[1])" t-as="dtag" t-key="dtag.id">
+                                        <tr class="o_data_row">
+                                            <td class="o_data_cell o_analytic_account_name">
+                                                <t t-esc="dtag.data.acc_name"/>
+                                            </td>
+                                            <td class="o_data_cell">
+                                                <!-- <div class="input-group"> -->
+                                                    <input
+                                                        t-att-id="dtag.id + '_percentage'"
+                                                        class="o_input o_analytic_percentage"
+                                                        t-on-click.stop=""
+                                                        t-on-focus="(ev) => this.selectText(ev)"
+                                                        t-on-change="(ev) => this.percentage_changed(dtag, ev, this)"
+                                                        t-att-value="dtag.data.percentage"/>
+                                                    <!-- <div class="input-group-append">
+                                                        <span class="input-group-suffix">%</span>
+                                                    </div>
+                                                </div> -->
+                                            </td>
+                                            <td class="o_data_cell"><span class="fa fa-trash-o" t-on-click="() => this.deleteTag(dtag.id)"/></td>
+                                        </tr>
+                                    </t>
+                                    <t t-if="state.addingGroup === group">
+                                        <tr>
+                                            <td colspan="3">
+                                                <AutoComplete
+                                                    placeholder="'Type to search an Analytic Account'"
+                                                    value="state.autocompleteValue2"
+                                                    sources="sourcesAnalyticAccount"
+                                                    onSelect.bind="onSelect"
+                                                    onBlur.bind="addingBlur"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    <t t-else="">
+                                        <!-- <tr><td colspan="3"><span t-on-click="() => this.addLine(group)">Add a Line</span></td></tr> -->
+                                    </t>
+                                    <tr><td colspan="3" class="spacer"/></tr>
                                 </t>
-                                <t t-else="">
-                                    <!-- <tr><td colspan="3"><span t-on-click="() => this.addLine(group)">Add a Line</span></td></tr> -->
-                                </t>
-                                <tr><td colspan="3" class="spacer"/></tr>
-                            </t>
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    </div>
                     <!-- <table class="o_list_table table table-sm table-hover table-striped">
                         <thead>
                             <tr>

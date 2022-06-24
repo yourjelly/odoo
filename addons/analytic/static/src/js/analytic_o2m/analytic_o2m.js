@@ -44,6 +44,7 @@ export class AnalyticO2M extends Component {
         usePosition(() => this.widgetRef.el, {
             popper: "analyticPop",
         });
+        this.dropdownHeader = this.env._t("Modify Distribution");
         // console.log('AnalyticO2m props:');
         // console.log(this.props);
         const { saveRecord, updateRecord, removeRecord } = useX2ManyCrud(
