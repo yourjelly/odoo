@@ -7,6 +7,8 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.osv.expression import get_unaccent_wrapper
 from odoo.addons.base.models.res_bank import sanitize_account_number
 
+from xmlrpc.client import MAXINT
+
 
 class AccountCashboxLine(models.Model):
     """ Cash Box Details """
@@ -115,50 +117,19 @@ class AccountBankStatement(models.Model):
     _check_company_auto = True
     _sequence_index = "journal_id"
 
-    # Note: the reason why we did 2 separate function with the same dependencies (one for balance_start and one for balance_end_real)
-    # is because if we create a bank statement with a default value for one of the field but not the other, the compute method
-    # won't be called and therefore the other field will have a value of 0 and we don't want that.
-    @api.depends('previous_statement_id', 'previous_statement_id.balance_end_real')
-    def _compute_starting_balance(self):
-        for statement in self:
-            if statement.previous_statement_id.balance_end_real != statement.balance_start:
-                statement.balance_start = statement.previous_statement_id.balance_end_real
-            else:
-                # Need default value
-                statement.balance_start = statement.balance_start or 0.0
-
-    @api.depends('line_ids', 'previous_statement_id.balance_end_real')
-    def _compute_ending_balance(self):
-        latest_statement = self.env['account.bank.statement'].search([('journal_id', '=', self[0].journal_id.id)], limit=1)
-        for statement in self:
-            # recompute balance_end_real in case we are in a bank journal and if we change the
-            # balance_end_real of previous statement as we don't want
-            # holes in case we add a statement in between 2 others statements.
-            # We only do this for the bank journal as we use the balance_end_real in cash
-            # journal for verification and creating cash difference entries so we don't want
-            # to recompute the value in that case
-            if statement.journal_type == 'bank':
-                # If we are on last statement and that statement already has a balance_end_real, don't change the balance_end_real
-                # Otherwise, recompute balance_end_real to prevent holes between statement.
-                if latest_statement.id and statement.id == latest_statement.id and not float_is_zero(statement.balance_end_real, precision_digits=statement.currency_id.decimal_places):
-                    statement.balance_end_real = statement.balance_end_real or 0.0
-                else:
-                    total_entry_encoding = sum([line.amount for line in statement.line_ids])
-                    statement.balance_end_real = statement.previous_statement_id.balance_end_real + total_entry_encoding
-            else:
-                # Need default value
-                statement.balance_end_real = statement.balance_end_real or 0.0
-
-    @api.depends('line_ids', 'balance_start', 'line_ids.amount', 'balance_end_real')
-    def _end_balance(self):
+    @api.depends('line_ids.accumulated_balance', 'line_ids.amount', 'balance_end_real')
+    def _compute_balance(self):
         for statement in self:
             statement.total_entry_encoding = sum([line.amount for line in statement.line_ids])
-            statement.balance_end = statement.balance_start + statement.total_entry_encoding
-            statement.difference = statement.balance_end_real - statement.balance_end
+            sorted_lines = statement.line_ids.sorted(key=lambda x: x.internal_index)
+            statement.balance_start = sorted_lines[:1].accumulated_balance - sorted_lines[:1].amount
+            statement.balance_end = sorted_lines[-1:].accumulated_balance
 
-    def _is_difference_zero(self):
-        for bank_stmt in self:
-            bank_stmt.is_difference_zero = float_is_zero(bank_stmt.difference, precision_digits=bank_stmt.currency_id.decimal_places)
+    @api.depends('balance_end_real', 'balance_end')
+    def _compute_difference(self):
+        for statement in self:
+            statement.difference = statement.balance_end_real - statement.balance_end
+            statement.is_difference_zero = statement.currency_id.is_zero(statement.difference)
 
     @api.depends('journal_id')
     def _compute_currency(self):
@@ -210,8 +181,16 @@ class AccountBankStatement(models.Model):
     reference = fields.Char(string='External Reference', states={'open': [('readonly', False)]}, copy=False, readonly=True, help="Used to hold the reference of the external mean that created this statement (name of imported file, reference of online synchronization...)")
     date = fields.Date(required=True, states={'confirm': [('readonly', True)]}, index=True, copy=False, default=fields.Date.context_today)
     date_done = fields.Datetime(string="Closed On")
-    balance_start = fields.Monetary(string='Starting Balance', states={'confirm': [('readonly', True)]}, compute='_compute_starting_balance', readonly=False, store=True, tracking=True)
-    balance_end_real = fields.Monetary('Ending Balance', states={'confirm': [('readonly', True)]}, compute='_compute_ending_balance', recursive=True, readonly=False, store=True, tracking=True)
+    balance_start = fields.Monetary(
+        string='Starting Balance',
+        states={'confirm': [('readonly', True)]},
+        compute='_compute_balance',
+        store=True,
+    )
+    balance_end_real = fields.Monetary(
+        string='Ending Balance',
+        states={'confirm': [('readonly', True)]},
+    )
     state = fields.Selection(string='Status', required=True, readonly=True, copy=False, tracking=True, selection=[
             ('open', 'New'),
             ('posted', 'Processing'),
@@ -226,9 +205,23 @@ class AccountBankStatement(models.Model):
     journal_type = fields.Selection(related='journal_id.type', help="Technical field used for usability purposes")
     company_id = fields.Many2one('res.company', related='journal_id.company_id', string='Company', store=True, readonly=True)
 
-    total_entry_encoding = fields.Monetary('Transactions Subtotal', compute='_end_balance', store=True, help="Total of transaction lines.")
-    balance_end = fields.Monetary('Computed Balance', compute='_end_balance', store=True, help='Balance as calculated based on Opening Balance and transaction lines')
-    difference = fields.Monetary(compute='_end_balance', store=True, help="Difference between the computed ending balance and the specified ending balance.")
+    total_entry_encoding = fields.Monetary(
+        string='Transactions Subtotal',
+        compute='_compute_balance',
+        store=True,
+        help="Total of transaction lines."
+    )
+    balance_end = fields.Monetary(
+        string='Computed Balance',
+        compute='_compute_balance',
+        store=True,
+        help='Balance as calculated based on Opening Balance and transaction lines'
+    )
+    difference = fields.Monetary(
+        compute='_compute_difference',
+        store=True,
+        help="Difference between the computed ending balance and the specified ending balance."
+    )
 
     line_ids = fields.One2many('account.bank.statement.line', 'statement_id', string='Statement lines', states={'confirm': [('readonly', True)]}, copy=True)
     move_line_ids = fields.One2many('account.move.line', 'statement_id', string='Entry lines', states={'confirm': [('readonly', True)]})
@@ -239,15 +232,26 @@ class AccountBankStatement(models.Model):
     user_id = fields.Many2one('res.users', string='Responsible', required=False, default=lambda self: self.env.user)
     cashbox_start_id = fields.Many2one('account.bank.statement.cashbox', string="Starting Cashbox")
     cashbox_end_id = fields.Many2one('account.bank.statement.cashbox', string="Ending Cashbox")
-    is_difference_zero = fields.Boolean(compute='_is_difference_zero', string='Is zero', help="Check if difference is zero.")
+    is_difference_zero = fields.Boolean(
+        compute='_compute_difference',
+        string='Is zero',
+        store=True,
+        help="Check if difference is zero."
+    )
     previous_statement_id = fields.Many2one(
         comodel_name='account.bank.statement',
         help='technical field to compute starting balance correctly',
-        compute='_compute_previous_statement_id'
+        compute='_get_previous_statement',
+        store=True,
     )
-    is_valid_balance_start = fields.Boolean(string="Is Valid Balance Start", store=True,
+    attachment_id = fields.Many2one('ir.attachment', string='Attachment', readonly=True, states={'open': [('readonly', False)]})
+    is_valid_balance_start = fields.Boolean(
+        string="Is Valid Balance Start",
+        store=True,
         compute="_compute_is_valid_balance_start",
-        help="Technical field to display a warning message in case starting balance is different than previous ending balance")
+        help="Technical field to display a warning message in case starting balance is"
+             " different than previous ending balance",
+    )
     country_code = fields.Char(related='company_id.account_fiscal_country_id.code')
 
     def write(self, values):
@@ -552,7 +556,11 @@ class AccountBankStatementLine(models.Model):
         comodel_name='res.partner',
         string='Partner', ondelete='restrict',
         domain="['|', ('parent_id','=', False), ('is_company','=',True)]",
-        check_company=True)
+        compute='_compute_partner_id',
+        readonly=False,
+        store=True,
+        check_company=True
+    )
     payment_ids = fields.Many2many(
         comodel_name='account.payment',
         relation='account_payment_account_bank_statement_line_rel',
@@ -571,22 +579,23 @@ class AccountBankStatementLine(models.Model):
     is_reconciled = fields.Boolean(string='Is Reconciled', store=True,
         compute='_compute_is_reconciled',
         help="Technical field indicating if the statement line is already reconciled.")
+
     is_journal_in_context = fields.Boolean(compute='_compute_is_journal_in_context')
     # state = fields.Selection(related='statement_id.state', string='Status', readonly=True)
     country_code = fields.Char(related='company_id.account_fiscal_country_id.code')
 
-    accumulated_balance_before = fields.Monetary(
-        string="Running Balance Before",
-        store=False,
+    accumulated_balance = fields.Monetary(
         currency_field='currency_id',
         compute='_compute_accumulated_balance',
-        help="Technical field for keeping running balance before this record",
+        store=True,
+        recursive=True,
     )
-    accumulated_balance_after = fields.Monetary(
-        string="Running Ending Balance",
-        store=False,
-        currency_field='currency_id',
-        compute='_compute_accumulated_balance',
+
+    previous_line_id = fields.Many2one(
+        comodel_name='account.bank.statement.line',
+        help='technical field to compute accumulated balance correctly',
+        compute='_compute_previous_line_id',
+        store=True,
     )
 
     # -------------------------------------------------------------------------
@@ -691,22 +700,7 @@ class AccountBankStatementLine(models.Model):
                 self.journal_id.display_name,
             ))
 
-        journal = self.journal_id
-        company_currency = journal.company_id.currency_id
-        journal_currency = journal.currency_id or company_currency
-        foreign_currency = self.foreign_currency_id or journal_currency or company_currency
-
-        journal_amount = self.amount
-        if foreign_currency == journal_currency:
-            transaction_amount = journal_amount
-        else:
-            transaction_amount = self.amount_currency
-        if journal_currency == company_currency:
-            company_amount = journal_amount
-        elif foreign_currency == company_currency:
-            company_amount = transaction_amount
-        else:
-            company_amount = journal_currency._convert(journal_amount, company_currency, journal.company_id, self.date)
+        company_amount, foreign_currency, journal, journal_amount, journal_currency, transaction_amount = self._get_company_amount()
 
         liquidity_line_vals = {
             'name': self.payment_ref,
@@ -731,6 +725,24 @@ class AccountBankStatementLine(models.Model):
             'credit': company_amount if company_amount > 0.0 else 0.0,
         }
         return [liquidity_line_vals, counterpart_line_vals]
+
+    def _get_company_amount(self):
+        journal = self.journal_id
+        company_currency = journal.company_id.currency_id
+        journal_currency = journal.currency_id or company_currency
+        foreign_currency = self.foreign_currency_id or journal_currency or company_currency
+        journal_amount = self.amount
+        if foreign_currency == journal_currency:
+            transaction_amount = journal_amount
+        else:
+            transaction_amount = self.amount_currency
+        if journal_currency == company_currency:
+            company_amount = journal_amount
+        elif foreign_currency == company_currency:
+            company_amount = transaction_amount
+        else:
+            company_amount = journal_currency._convert(journal_amount, company_currency, journal.company_id, self.date)
+        return company_amount, foreign_currency, journal, journal_amount, journal_currency, transaction_amount
 
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
@@ -779,6 +791,42 @@ class AccountBankStatementLine(models.Model):
                 # The journal entry seems reconciled.
                 st_line.is_reconciled = True
 
+    @api.depends('internal_index', 'journal_id')
+    def _compute_previous_line_id(self):
+        # only stored lines have an internal_index
+        stored_lines = self.filtered(lambda x: x._origin)
+        for st_line in stored_lines:
+            st_line.previous_line_id = self.search([
+                ('internal_index', '<', st_line.internal_index),
+                ('journal_id', '=', st_line.journal_id.id)],
+                limit=1
+            )
+
+    @api.depends('account_number', 'partner_name', 'ref', 'narration', 'payment_ref')
+    def _compute_partner_id(self):
+        for st_line in self:
+            st_line.partner_id = st_line._retrieve_partner(force=True)
+
+    @api.depends('previous_line_id.accumulated_balance', 'amount')
+    def _compute_accumulated_balance(self):
+        for st_line in self:
+            st_line.accumulated_balance = st_line.previous_line_id.accumulated_balance + st_line.amount
+
+    @api.depends('date', 'sequence')
+    def _compute_internal_index(self):
+        for st_line in self.filtered('id'):
+            # if I can find a way to put bigint in the db without side effects this one would be better
+            # st_line.internal_index = (st_line.date.toordinal() << 32) \
+            #                          + ((32767 - st_line.sequence) << 16) \
+            #                          + st_line.id % (1 << 16)
+            # or if I decide to use a numeric field
+            # st_line.internal_index = (st_line.date.toordinal() << 96) \
+            #                          + (st_line.sequence << 64) \
+            #                          + st_line.id % (1 << 64)
+
+            # sequence is int4 so maximum digits are 10
+            st_line.internal_index = f'{st_line.date.strftime("%Y%m%d")}{MAXINT-st_line.sequence:0>10}{st_line.id:0>12}'
+
     # -------------------------------------------------------------------------
     # CONSTRAINT METHODS
     # -------------------------------------------------------------------------
@@ -794,97 +842,6 @@ class AccountBankStatementLine(models.Model):
                 raise ValidationError(_("The foreign currency must be different than the journal one: %s", st_line.currency_id.name))
             if not st_line.foreign_currency_id and st_line.amount_currency:
                 raise ValidationError(_("You can't provide an amount in foreign currency without specifying a foreign currency."))
-
-    # -------------------------------------------------------------------------
-    # COMPUTE METHODS
-    # -------------------------------------------------------------------------
-
-    @api.depends('date', 'sequence', 'journal_id', 'amount')
-    def _compute_accumulated_balance(self):
-        stored_lines = self.filtered(lambda x: x._origin)
-
-        balance_map = {}
-
-        if stored_lines:
-            journal_ids = stored_lines.journal_id._origin.ids
-            base_domain = [('journal_id', 'in', tuple(journal_ids)), ('state', '!=', 'cancel')]
-
-            # Fetch the starting balance to consider avoiding computing the running balance on the whole database.
-            self.flush_recordset(fnames=['amount', 'date', 'sequence', 'journal_id'])
-            min_date = min(self.mapped('date'))
-            query = self._where_calc(base_domain + [('date', '<', min_date)])
-            tables, where_clause, where_params = query.get_sql()
-            self._cr.execute(
-                f'''
-                        SELECT
-                            move.journal_id,
-                            SUM(account_bank_statement_line.amount)
-                        FROM {tables}
-                        JOIN account_move move ON move.id = account_bank_statement_line.move_id
-                        WHERE {where_clause}
-                        GROUP BY move.journal_id
-                    ''',
-                where_params,
-            )
-            starting_balance_per_journal = {r[0]: r[1] for r in self._cr.fetchall()}
-
-            # Compute the running balances.
-            max_date = max(self.mapped('date'))
-            query = self._where_calc(base_domain + [('date', '>=', min_date), ('date', '<=', max_date)])
-            tables, where_clause, where_params = query.get_sql()
-            order_by = ', '.join(self._generate_order_by_inner(
-                self._table,
-                self._order,
-                query,
-                reverse_direction=True,
-            ))
-
-            self._cr.execute(f'''
-                    SELECT
-                        *
-                    FROM (
-                        SELECT
-                            account_bank_statement_line.id,
-                            move.journal_id,
-                            account_bank_statement_line.amount,
-                            SUM(account_bank_statement_line.amount) OVER (
-                                PARTITION BY account_bank_statement_line__move_id.journal_id
-                                ORDER BY {order_by}
-                                ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-                            ) AS accumulated_balance_before
-                        FROM {tables}
-                        JOIN account_move move ON move.id = account_bank_statement_line.move_id
-                        WHERE {where_clause}
-                    ) AS sub
-                    WHERE sub.id IN %s
-                ''', where_params + [tuple(stored_lines.ids)])
-
-            for st_line_id, journal_id, amount, accumulated_balance_before in self._cr.fetchall():
-                starting_journal_balance = starting_balance_per_journal.get(journal_id, 0.0)
-                balance_map[st_line_id] = (
-                    starting_journal_balance + accumulated_balance_before,
-                    starting_journal_balance + accumulated_balance_before - amount,
-                )
-
-        for st_line in self:
-            before, after = balance_map.get(st_line.id, (0.0, 0.0))
-            st_line.accumulated_balance_before = before
-            st_line.accumulated_balance_after = after
-
-    @api.depends('date', 'sequence')
-    def _compute_internal_index(self):
-        for st_line in self.filtered('id'):
-            # if I can find a way to put bigint in the db without side effects this one would be better
-            # st_line.internal_index = (st_line.date.toordinal() << 32) \
-            #                          + ((32767 - st_line.sequence) << 16) \
-            #                          + st_line.id % (1 << 16)
-            # or if I decide to use a numeric field
-            # st_line.internal_index = (st_line.date.toordinal() << 96) \
-            #                          + (st_line.sequence << 64) \
-            #                          + st_line.id % (1 << 64)
-
-            # sequence is int4 so maximum digits are 10
-            st_line.internal_index = f'{st_line.date.strftime("%Y%m%d")}{st_line.sequence:0>10}{st_line.id:0>12}'
 
     # -------------------------------------------------------------------------
     # LOW-LEVEL METHODS
@@ -925,20 +882,56 @@ class AccountBankStatementLine(models.Model):
             # Otherwise field narration will be recomputed silently (at next flush) when writing on partner_id
             self.env.remove_to_compute(st_line.move_id._fields['narration'], st_line.move_id)
         st_lines.move_id.action_post()
+        next_lines_to_recompute = self.search([
+            ('previous_line_id', 'in', [line.previous_line_id.id for line in st_lines]),
+            ('id', 'not in', st_lines.ids),
+        ])
+        if next_lines_to_recompute:
+            self.env.add_to_compute(self._fields['previous_line_id'], next_lines_to_recompute)
+            next_lines_to_recompute.modified(['previous_line_id'])
         return st_lines
 
-    def write(self, vals):
+    def write(self, values):
         # OVERRIDE
-        res = super().write(vals)
-        self._synchronize_to_moves(set(vals.keys()))
+        res = super().write(values)
+        self._synchronize_to_moves(set(values.keys()))
+        if any(field in values for field in ['date', 'sequence', 'journal_id']):
+            # If we are changing the date or journal of a bank statement, we have to change its previous_line_id. 
+            # This is done automatically using the compute function, but we also have to change the previous_line_id 
+            # of records that were previously pointing toward us and records that were pointing towards our new 
+            # previous_line_id. This is done here by marking those record as needing to be recomputed.
+            # Note that marking the field is not enough as we also have to recompute all its other fields that
+            # depend on 'previous_line_id' hence the need to call modified afterwards.
+            to_recompute = self.search([
+                ('previous_line_id', 'in', self.ids), 
+                ('id', 'not in', self.ids), 
+            ])
+            if to_recompute:
+                self.env.add_to_compute(self._fields['previous_line_id'], to_recompute)
+                to_recompute.modified(['previous_line_id'])
+
+            next_lines_to_recompute = self.search([
+                ('previous_line_id', 'in', [line.previous_line_id.id for line in self]),
+                ('id', 'not in', self.ids), 
+            ])
+
+            if next_lines_to_recompute:
+                self.env.add_to_compute(self._fields['previous_line_id'], next_lines_to_recompute)
+                next_lines_to_recompute.modified(['previous_line_id'])
         return res
 
-    def unlink(self):
-        # OVERRIDE to unlink the inherited account.move (move_id field) as well.
+    @api.ondelete(at_uninstall=False)
+    def _unlink_moves_and_fix_chain_only_if_not_uninstall(self):
+        # if module is uninstalling, the moves will be unlinked anyway, otherwise we have to unlink them when
+        # the related lines are unlinked
         moves = self.with_context(force_delete=True).mapped('move_id')
-        res = super().unlink()
         moves.unlink()
-        return res
+
+        # if module is not uninstalling, we need to recompute the previous_line_id for the lines after current lines
+        for line in self:
+            next_line = self.search([('previous_line_id', '=', line.id)], limit=1)
+            if next_line:
+                next_line.previous_line_id = line.previous_line_id
 
     # -------------------------------------------------------------------------
     # SYNCHRONIZATION account.bank.statement.line <-> account.move
@@ -1081,7 +1074,7 @@ class AccountBankStatementLine(models.Model):
 
         def _get_text_value(field_name):
             if self._fields[field_name].type == 'html':
-                return html2plaintext(self[field_name])
+                return self[field_name] and html2plaintext(self[field_name])
             else:
                 return self[field_name]
 
@@ -1117,11 +1110,12 @@ class AccountBankStatementLine(models.Model):
             ('statement_line_id', '!=', self.id),
         ]
 
-    def _retrieve_partner(self):
+    def _retrieve_partner(self, force=False):
+        # TODO: Improve for multi records
         self.ensure_one()
 
         # Retrieve the partner from the statement line.
-        if self.partner_id:
+        if self.partner_id and not force:
             return self.partner_id
 
         # Retrieve the partner from the bank account.
@@ -1184,7 +1178,7 @@ class AccountBankStatementLine(models.Model):
                         AND name IS NOT NULL
                         AND (''' + ') OR ('.join(sub_queries) + ''')
                 ''',
-                [self.company_id.id] + params,
+                [self.company_id.id or self.env.company.id] + params,
             )
             rows = self._cr.fetchall()
             if len(rows) == 1:
@@ -1216,3 +1210,6 @@ class AccountBankStatementLine(models.Model):
                 'to_check': False,
                 'line_ids': [(5, 0)] + [(0, 0, line_vals) for line_vals in st_line._prepare_move_line_default_vals()],
             })
+
+    def action_post(self):
+        self.move_id.filtered(lambda move: move.state=='draft').action_post()

@@ -101,7 +101,7 @@
                                         <a role="menuitem" type="object" name="create_cash_statement">Statement</a>
                                     </t>
                                 </div>
-                                <div>
+                                <div name="bank_customer_payment">
                                     <a role="menuitem" type="object" name="create_customer_payment">Cust. Payment</a>
                                 </div>
                                 <div>

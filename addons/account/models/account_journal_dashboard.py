@@ -274,20 +274,20 @@ class account_journal(models.Model):
             outstanding_pay_account_balance, nb_lines_outstanding_pay_account_balance = self._get_journal_outstanding_payments_account_balance(
                 domain=[('parent_state', '=', 'posted')])
 
-            self._cr.execute('''
-                SELECT COUNT(st_line.id)
-                FROM account_bank_statement_line st_line
-                JOIN account_move st_line_move ON st_line_move.id = st_line.move_id
-                JOIN account_bank_statement st ON st_line.statement_id = st.id
-                WHERE st_line_move.journal_id IN %s
-                AND st.state = 'posted'
-                AND NOT st_line.is_reconciled
-            ''', [tuple(self.ids)])
-            number_to_reconcile = self.env.cr.fetchone()[0]
+            number_to_reconcile = self.env['account.bank.statement.line'].search_count([
+                ('journal_id', '=', self.id),
+                ('state', '=', 'posted'),
+                ('is_reconciled', '=', False),
+            ])
 
-            to_check_ids = self.to_check_ids()
-            number_to_check = len(to_check_ids)
-            to_check_balance = sum([r.amount for r in to_check_ids])
+            lines_to_check = self.env['account.bank.statement.line'].search([
+                ('journal_id', '=', self.id),
+                ('state', '=', 'posted'),
+                ('to_check', '=', True),
+            ])
+
+            number_to_check = len(lines_to_check)
+            to_check_balance = sum(lines_to_check.mapped('amount'))
         #TODO need to check if all invoices are in the same currency than the journal!!!!
         elif self.type in ['sale', 'purchase']:
             title = _('Bills to pay') if self.type == 'purchase' else _('Invoices owed to you')
@@ -489,13 +489,6 @@ class account_journal(models.Model):
             'views': [[view_id, 'form']],
         }
 
-    def to_check_ids(self):
-        self.ensure_one()
-        return self.env['account.bank.statement.line'].search([
-            ('journal_id', '=', self.id),
-            ('move_id.to_check', '=', True),
-            ('move_id.state', '=', 'posted'),
-        ])
 
     def _select_action_to_open(self):
         self.ensure_one()
@@ -506,20 +499,16 @@ class account_journal(models.Model):
         elif self.type == 'cash':
             return 'action_view_bank_statement_tree'
         elif self.type == 'sale':
-            return 'action_move_out_invoice_type'
+            action_name = 'account.action_move_out_invoice_type'
         elif self.type == 'purchase':
-            return 'action_move_in_invoice_type'
+            action_name = 'account.action_move_in_invoice_type'
         else:
-            return 'action_move_journal_line'
+            return 'account.action_move_journal_line'
 
     def open_action(self):
         """return action based on type for related journals"""
         self.ensure_one()
         action_name = self._select_action_to_open()
-
-        # Set 'account.' prefix if missing.
-        if not action_name.startswith("account."):
-            action_name = 'account.%s' % action_name
 
         action = self.env["ir.actions.act_window"]._for_xml_id(action_name)
 

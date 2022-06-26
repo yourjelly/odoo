@@ -863,27 +863,32 @@ var BasicController = AbstractController.extend(FieldManagerMixin, {
      *
      * @private
      * @param {OdooEvent} ev
+     */
+    async __onResequenceRecords(ev){
+        let state = this.model.get(this.handle);
+        const resIDs = ev.data.recordIds
+            .map(recordID => state.data.find(d => d.id === recordID).res_id);
+        const options = {
+            offset: ev.data.offset,
+            field: ev.data.handleField,
+        };
+        await this.model.resequence(this.modelName, resIDs, this.handle, options);
+        this._updateControlPanel();
+        state = this.model.get(this.handle);
+        return this._updateRendererState(state, { noRender: true });
+    },
+    /**
+     * Resequence records in the given order (with mutex).
+     *
+     * @private
+     * @param {OdooEvent} ev
      * @param {string[]} ev.data.recordIds
      * @param {integer} ev.data.offset
      * @param {string} ev.data.handleField
      */
     _onResequenceRecords: function (ev) {
         ev.stopPropagation(); // prevent other controllers from handling this request
-        this.trigger_up('mutexify', {
-            action: async () => {
-                let state = this.model.get(this.handle);
-                const resIDs = ev.data.recordIds
-                    .map(recordID => state.data.find(d => d.id === recordID).res_id);
-                const options = {
-                    offset: ev.data.offset,
-                    field: ev.data.handleField,
-                };
-                await this.model.resequence(this.modelName, resIDs, this.handle, options);
-                this._updateControlPanel();
-                state = this.model.get(this.handle);
-                return this._updateRendererState(state, { noRender: true });
-            },
-        });
+        this.trigger_up('mutexify', {action: async () => this.__onResequenceRecords(ev)});
     },
     /**
      * Load the optional columns settings in local storage for this view

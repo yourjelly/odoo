@@ -135,7 +135,12 @@
                             attrs="{'invisible': [('state', '!=', 'confirm')]}"/>
                     <field name="state" widget="statusbar" statusbar_visible="open,posted,confirm"/>
                 </header>
-                <div class="alert alert-warning" role="alert" attrs="{'invisible': ['|', ('previous_statement_id', '=', False), ('is_valid_balance_start', '=', True)]}">
+                <div class="alert alert-warning" role="alert"
+                     attrs="{'invisible': [
+                     '|', '|',
+                     ('previous_statement_id', '=', False),
+                     ('is_valid_balance_start', '=', True),
+                     ('line_ids', '!=', False)]}">
                     The starting balance <b>doesn't match</b> with the ending balance of the previous bank statement.
                 </div>
                 <sheet>
@@ -167,10 +172,11 @@
                                    options="{'datepicker': {'warn_future': true}}"/>
                             <field name='company_id' options="{'no_create': True}" groups="base.group_multi_company" />
                             <field name="currency_id" invisible="1"/>
-                        </group><group>
-                            <label for="balance_start"/>
+                        </group>
+                        <group>
+                           <label for="balance_start"/>
                             <div>
-                                <field name="balance_start" class="oe_inline" attrs="{'readonly': [('state', '=', 'confirm')]}"/>
+                                <field name="balance_start" class="oe_inline" />
                                 <button name="open_cashbox_id" attrs="{'invisible': ['|',('state','!=','open'),('journal_type','!=','cash')]}" string="&#8594; Count" type="object" class="oe_edit_only oe_link oe_inline" context="{'balance':'start'}"/>
                             </div>
                             <label for="balance_end_real"/>
@@ -214,9 +220,12 @@
                                            attrs="{'readonly': [('parent.state', '!=', 'open')]}"/>
                                     <field name="foreign_currency_id" optional="hidden" groups="base.group_multi_currency"
                                            attrs="{'readonly': [('parent.state', '!=', 'open')]}"/>
+                                    <field name="account_number" optional="hidden"/>
                                     <field name="amount"
                                            attrs="{'readonly': [('parent.state', '!=', 'open')]}"/>
-                                    <field name="account_number" optional="hidden"/>
+                                    <field name="accumulated_balance" optional="hidden" attrs="{'invisible':[('internal_index', '=', False)]}"/>
+                                    <field name="previous_line_id" optional="hidden" attrs="{'invisible':[('internal_index', '=', False)]}"/>
+                                    <field name="internal_index" invisible="1"/>
 
                                     <!-- Buttons -->
                                     <button name="button_undo_reconciliation" type="object"
