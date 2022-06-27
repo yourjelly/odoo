@@ -249,7 +249,7 @@ export class AnalyticO2M extends Component {
         records = await this.orm.call(this.search_field.relation, "name_search", [], {
             name: request,
             operator: "ilike",
-            args: [['id', 'not in', this.tag_ids]], //add domain to exclude existing analytic accounts
+            args: [['group_id', '!=', false], ['id', 'not in', this.tag_ids]], //analytic accounts should always have a group_id / plan (remove this domain)
             limit: 8 - options.length,
             context: [],
         });
