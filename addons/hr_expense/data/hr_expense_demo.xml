@@ -68,6 +68,7 @@
             <field name="purchase_ok" eval="False"/>
             <field name="image_1920" type="base64" file="hr_expense/static/img/mileage.png"/>
         </record>
+        <!--
         <record id="accomodation_expense_product" model="product.product">
             <field name="name">Accomodation</field>
             <field name="standard_price">1</field>
@@ -80,6 +81,7 @@
             <field name="purchase_ok" eval="False"/>
             <field name="image_1920" type="base64" file="hr_expense/static/img/accomodation.png"/>
         </record>
+        -->
         <record id="allowance_expense_product" model="product.product">
             <field name="name">Daily Allowance</field>
             <field name="standard_price">100</field>
@@ -163,6 +165,7 @@
             <field name="sheet_id" ref="travel_ny_sheet"/>
         </record>
 
+        <!--
         <record id="hotel_bill_expense" model="hr.expense">
             <field name="name">Hotel Expenses</field>
             <field name="employee_id" ref="hr.employee_admin"/>
@@ -174,6 +177,7 @@
             <field name="date" eval="time.strftime('%Y-%m')+'-17'"/>
             <field name="sheet_id" ref="travel_ny_sheet"/>
         </record>
+        -->
 
         <record id="lunch_customer_bill_expense" model="hr.expense">
             <field name="name">Lunch with Customer</field>
