@@ -218,3 +218,32 @@ kbd {
 [type="toggle"] {
   cursor: pointer !important;
 }
+
+//------------------------------------------------------------------------------
+// Buttons
+//------------------------------------------------------------------------------
+// Bootstrap define buttons using just one base-color for each color variation
+// (eg.$primary), without control over text-color or border.
+// The following code define exceptions for buttons that needs a different
+// design by default or in specific scenarios.
+
+.btn-outline-secondary {
+  // Slightly customize to act like an odoo custom btn-secondary with
+  // light gray border and $secondary text.
+  // Used for not prioritary actions ordropdown (eg. dashboard view).
+
+  @include button-variant(
+    $background: $o-btn-secondary-bg,
+    $border: $o-gray-200,
+    $hover-background: $o-btn-secondary-hover-bg,
+    $hover-border: $o-gray-300,
+    $active-background: $o-btn-secondary-hover-bg,
+    $active-border: $o-gray-300
+  );
+
+  @include o-hover-text-color($o-main-text-color, $o-gray-900);
+
+  &.disabled, &:disabled {
+    @include o-hover-text-color($o-main-text-color, $o-main-text-color);
+  }
+}
