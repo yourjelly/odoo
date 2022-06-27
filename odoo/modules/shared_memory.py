@@ -12,10 +12,6 @@ from time import time, time_ns
 _logger = logging.getLogger(__name__)
 
 
-# TODO simplify the lock, no recovery
-# TODO no need the shared memory in multi-threading...
-
-
 class LockIdentify:
     """
     Lock where the pid process is save into a Shared Value after that the process acquires the lock.
@@ -65,21 +61,6 @@ class LockIdentify:
         if not have_lock and self._pid.value == pid:
             _logger.info("Force the release of SM lock for pid=%s", pid)
             self._pid.value = -1
-            self._lock.release()
-        elif not have_lock and self._pid.value == -1:
-            old_last_exit = self._last_exit.value
-            # After 50 msec, if we cannot still acquire and the _last_exit didn't change
-            # We consider into the first worst case, one process take the lock without write
-            # his pid (or after clean it). Then we let the process 50 msec to set or reset
-            # the `self._pid` after/before acquire/release) after that we consider the process dead
-            # (which can be False with the CPU high and the process didn't get a round trip on it => TODO: what can we do ? )
-            have_lock = self._lock.acquire(timeout=0.05)
-            if not have_lock and old_last_exit == self._last_exit.value and self._pid.value == -1:
-                _logger.warning("Force the release of SM lock but there wasn't pid attach to the lock")
-                self._lock.release()
-            elif have_lock:
-                self._lock.release()
-        elif have_lock:
             self._lock.release()
 
 class _Entry(Structure):
@@ -156,6 +137,12 @@ class SharedMemoryLRU:
 
     def hook_process_killed(self, pid):
         self._lock.force_release_if_mandatory(pid)
+
+    def is_alive(self):
+        acquired = self._lock._lock.acquire(timeout=0.5)
+        if acquired:
+            self._lock._lock.release()
+        return acquired
 
     def clear(self):
         """ Clear all the shared memory

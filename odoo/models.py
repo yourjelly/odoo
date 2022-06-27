@@ -3908,7 +3908,7 @@ class BaseModel(metaclass=MetaModel):
             tcache_pollution = env.all.tcache_pollution
             tcache_pollution['write'].add(self._name)
             if self._name in tcache_pollution['render']:
-                poluated_keys = tcache_pollution['render'][self._name]
+                poluated_keys = tcache_pollution['render'].pop(self._name)
                 _logger.info("t-cache pollution detected for %s, invalidate some keys (%s)", self._name, len(poluated_keys))  # TODO: remove this part or debug ?
                 c = get_shared_cache()
                 for key in poluated_keys:

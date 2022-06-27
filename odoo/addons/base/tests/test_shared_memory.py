@@ -503,6 +503,10 @@ class TestSharedMemoryLRU(BaseCase):
                     p.kill()
                     p.join()
                     lru.hook_process_killed(p.pid)
+                    # Simulate server.py: if it cannot obtain the lock during some period of
+                    # time, restart everything
+                    if not lru.is_alive():
+                        lru._lock._lock.release()
                     if i % (len(processes) // 5):
                         with lru._lock:
                             lru._check_consistence()
@@ -537,7 +541,7 @@ class TestSharedMemoryLRU(BaseCase):
             process_2.start()
 
             time.sleep(0.2)
-            process_1.kill() # Step 3
+            process_1.kill() # During the Step 2 of process_1 (Step 3)
             lru.hook_process_killed(process_1.pid)
 
             process_1.join()

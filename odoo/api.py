@@ -871,6 +871,8 @@ class Transaction:
         self.cache.invalidate()
         self.tocompute.clear()
         self.towrite.clear()
+        self.tcache_pollution['write'].clear()
+        self.tcache_pollution['render'].clear()
 
     def reset(self):
         """ Reset the transaction.  This clears the transaction, and reassigns

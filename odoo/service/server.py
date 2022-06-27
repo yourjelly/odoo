@@ -23,7 +23,7 @@ from werkzeug.debug import DebuggedApplication
 
 import odoo
 from odoo.modules import get_modules
-from odoo.modules.registry import Registry, create_shared_cache, unlink_shared_cache, release_lock_shared_cache, close_shared_cache
+from odoo.modules.registry import Registry, create_shared_cache, get_shared_cache, unlink_shared_cache, release_lock_shared_cache, close_shared_cache
 from odoo.release import nt_service_name
 from odoo.tools import config
 from odoo.tools import stripped_sys_argv, dumpstacks, log_ormcache_stats
@@ -836,6 +836,14 @@ class PreforkServer(CommonServer):
         while len(self.workers_cron) < config['max_cron_threads']:
             self.worker_spawn(WorkerCron, self.workers_cron)
 
+    def check_shared_cache(self):
+        shared_cache = get_shared_cache()
+        if not shared_cache.is_alive():
+            # TODO: Check the pid to see if it is set, and check the state of the process and try to recover
+            _logger.critical("Shared cache is inaccessible, restart everythink")
+            odoo.phoenix = True
+            raise Exception()
+
     def sleep(self):
         try:
             # map of fd -> worker
@@ -924,6 +932,7 @@ class PreforkServer(CommonServer):
                 self.process_zombie()
                 self.process_timeout()
                 self.process_spawn()
+                self.check_shared_cache()
                 self.sleep()
             except KeyboardInterrupt:
                 _logger.debug("Multiprocess clean stop")
