@@ -489,7 +489,6 @@ class PosOrder(models.Model):
         return bank_partner_id
 
     def _create_invoice(self, move_vals):
-        #self.ensure_one()
         if len(set(self.config_id)) > 1:
             raise UserError("You can only group invoice that have the same configuration")
         amount_total = sum(order.amount_total for order in self)
