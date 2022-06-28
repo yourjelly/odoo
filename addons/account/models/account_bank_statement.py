@@ -579,8 +579,17 @@ class AccountBankStatementLine(models.Model):
     is_reconciled = fields.Boolean(string='Is Reconciled', store=True,
         compute='_compute_is_reconciled',
         help="Technical field indicating if the statement line is already reconciled.")
-
-    is_journal_in_context = fields.Boolean(compute='_compute_is_journal_in_context')
+    kanban_state = fields.Selection(
+        selection=[
+            ('draft', 'New'),
+            ('posted', 'Validated'),
+            ('reconciled', 'Reconciled'),
+            ('to_check', 'To Check'),
+            ('canceled', 'Cancelled')],
+        string='Status',
+        compute='_compute_kanban_state',
+        store=True,
+    )
     # state = fields.Selection(related='statement_id.state', string='Status', readonly=True)
     country_code = fields.Char(related='company_id.account_fiscal_country_id.code')
 
@@ -597,7 +606,8 @@ class AccountBankStatementLine(models.Model):
         compute='_compute_previous_line_id',
         store=True,
     )
-
+    # fake field to add groupby in kanban view
+    fake_field = fields.Char()
     # -------------------------------------------------------------------------
     # HELPERS
     # -------------------------------------------------------------------------
@@ -748,10 +758,6 @@ class AccountBankStatementLine(models.Model):
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
 
-    @api.depends_context('default_journal_id')
-    def _compute_is_journal_in_context(self):
-        self.is_journal_in_context = self.env.context.get('default_journal_id')
-
     @api.depends('journal_id')
     def _compute_currency_id(self):
         for st_line in self:
@@ -827,6 +833,19 @@ class AccountBankStatementLine(models.Model):
             # sequence is int4 so maximum digits are 10
             st_line.internal_index = f'{st_line.date.strftime("%Y%m%d")}{MAXINT-st_line.sequence:0>10}{st_line.id:0>12}'
 
+    @api.depends('is_reconciled', 'state', 'to_check')
+    def _compute_kanban_state(self):
+        for st_line in self:
+            if st_line.to_check:
+                st_line.kanban_state = 'to_check'
+            elif st_line.is_reconciled:
+                st_line.kanban_state = 'reconciled'
+            elif st_line.state == 'draft':
+                st_line.kanban_state = 'draft'
+            elif st_line.state == 'posted':
+                st_line.kanban_state = 'posted'
+            else:
+                st_line.kanban_state = 'canceled'
     # -------------------------------------------------------------------------
     # CONSTRAINT METHODS
     # -------------------------------------------------------------------------
@@ -853,17 +872,19 @@ class AccountBankStatementLine(models.Model):
         counterpart_account_ids = []
 
         for vals in vals_list:
-            statement = self.env['account.bank.statement'].browse(vals['statement_id'])
+            if 'statement_id' in vals:
+                statement = self.env['account.bank.statement'].browse(vals['statement_id'])
+                if statement:
+                    journal = statement.journal_id
+                    # Ensure the journal is the same as the statement one.
+                    vals['journal_id'] = journal.id
+                    vals['currency_id'] = (journal.currency_id or journal.company_id.currency_id).id
+                    if 'date' not in vals:
+                        vals['date'] = statement.date
+
             # Force the move_type to avoid inconsistency with residual 'default_move_type' inside the context.
             vals['move_type'] = 'entry'
 
-            if statement:
-                journal = statement.journal_id
-                # Ensure the journal is the same as the statement one.
-                vals['journal_id'] = journal.id
-                vals['currency_id'] = (journal.currency_id or journal.company_id.currency_id).id
-                if 'date' not in vals:
-                    vals['date'] = statement.date
 
             # Hack to force different account instead of the suspense account.
             counterpart_account_ids.append(vals.pop('counterpart_account_id', None))
