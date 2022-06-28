@@ -448,7 +448,7 @@ class AccountBankStatement(models.Model):
 
     def button_reopen(self):
         ''' Move the bank statements back to the 'open' state. '''
-        if any(statement.state == 'draft' for statement in self):
+        if any(statement.state != 'confirm' for statement in self):
             raise UserError(_("Only validated statements can be reset to new."))
 
         self.write({'state': 'open'})
@@ -507,6 +507,16 @@ class AccountBankStatementLine(models.Model):
     _description = "Bank Statement Line"
     _order = "internal_index desc"
     _check_company_auto = True
+
+    def default_get(self, fields_list):
+        defaults = super().default_get(fields_list) or {}
+        if 'statement_id' in fields_list and 'statement_id' not in defaults and defaults.get('journal_id'):
+            statement = self.env['account.bank.statement'].search(
+                [('journal_id', '=', defaults['journal_id'])],
+                limit=1)
+            if not statement.is_difference_zero:
+                defaults['statement_id'] = statement.id
+        return defaults
 
     # FIXME: Fields having the same name in both tables are confusing (partner_id & state). We don't change it because:
     # - It's a mess to track/fix.
@@ -971,12 +981,13 @@ class AccountBankStatementLine(models.Model):
             move_vals_to_write = {}
             st_line_vals_to_write = {}
 
-            if 'state' in changed_fields:
-                if (st_line.state == 'open' and move.state != 'draft') or (st_line.state in ('posted', 'confirm') and move.state != 'posted'):
-                    raise UserError(_(
-                        "You can't manually change the state of journal entry %s, as it has been created by bank "
-                        "statement %s."
-                    ) % (st_line.move_id.display_name, st_line.statement_id.display_name))
+            # todo: check if we can remove this condition as statements doesn't have state anymore
+            # if 'state' in changed_fields:
+                # if (st_line.state == 'posted' and move.state != 'draft') or (st_line.state in ('posted', 'confirm') and move.state != 'posted'):
+                #     raise UserError(_(
+                #         "You can't manually change the state of journal entry %s, as it has been created by bank "
+                #         "statement %s."
+                #     ) % (st_line.move_id.display_name, st_line.statement_id.display_name))
 
             if 'line_ids' in changed_fields:
                 liquidity_lines, suspense_lines, other_lines = st_line._seek_for_lines()
