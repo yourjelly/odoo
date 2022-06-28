@@ -672,9 +672,9 @@ $o-form-label-margin-right: 0px;
             display: inline-block;
             text-align: right;
             border: none;  // usefull for textarea
-    }
-    input, textarea {
-        &.o_field_translate {
+        }
+    .o_field_widget.o_field_translate {
+        input, textarea {
             padding-right: 25px;
         }
     }
@@ -985,7 +985,6 @@ $o-form-label-margin-right: 0px;
                 max-width: 100%;
                 padding: 0;
 
-                width: auto!important;  // !important is required to override the width computed in JS
                 &.o_td_label {
                     width: 94%!important; // The label must be on its own line except if the form field is small enough (checkbox)
                     line-height: $o-label-font-size-factor;

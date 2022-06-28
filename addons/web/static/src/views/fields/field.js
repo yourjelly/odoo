@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { localization } from "@web/core/l10n/localization";
 import { evaluateExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
 import { archParseBoolean, evalDomain, X2M_TYPES } from "@web/views/utils";
@@ -78,7 +79,7 @@ export class Field extends Component {
     }
 
     get classNames() {
-        const { class: _class, fieldInfo, name, record } = this.props;
+        const { class: _class, fieldInfo, name, record, isTranslatable } = this.props;
         const { readonly, required, invalid, empty } = fieldVisualFeedback(
             this.FieldComponent,
             record,
@@ -91,6 +92,7 @@ export class Field extends Component {
             o_required_modifier: required,
             o_field_invalid: invalid,
             o_field_empty: empty,
+            o_field_translate: localization.multiLang && isTranslatable,
             [`o_field_${this.type}`]: true,
             [_class]: Boolean(_class),
         };
