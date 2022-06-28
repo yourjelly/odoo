@@ -770,11 +770,10 @@ class TransactionCase(BaseCase):
         self.addCleanup(envs.update, list(envs))
         self.addCleanup(envs.clear)
 
-        shared_cache = get_shared_cache()
-        if shared_cache is not None:
-            self.addCleanup(shared_cache.clear)
         self.addCleanup(self.registry.clear_caches)
         self.addCleanup(self.env.clear)
+        shared_cache = get_shared_cache()
+        self.addCleanup(shared_cache.clear)
 
         # flush everything in setUpClass before introducing a savepoint
         self.env.flush_all()
