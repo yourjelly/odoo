@@ -6,7 +6,7 @@ import { useService } from "@web/core/utils/hooks";
 import { fuzzyLookup } from "@web/core/utils/search";
 import { useSortable } from "@web/core/utils/sortable";
 
-const { Component, useRef, useState, onMounted } = owl;
+const { Component, useRef, useState, onWillStart } = owl;
 
 class DeleteExportListDialog extends Component {
     async onDelete() {
@@ -42,15 +42,15 @@ ExportDataItem.props = {
     field: { type: Object, optional: true },
     exportList: { type: Object, optional: true },
     expandedContent: Function,
-    isFieldExpanded: Function,
+    isDebug: Boolean,
     isFieldExpandable: Function,
+    isFieldExpanded: Function,
     onClick: Function,
     onAdd: Function,
 };
 
 export class ExportDataDialog extends Component {
     setup() {
-        super.setup();
         this.dialog = useService("dialog");
         this.notification = useService("notification");
         this.orm = useService("orm");
@@ -102,7 +102,7 @@ export class ExportDataDialog extends Component {
             },
         });
 
-        onMounted(async () => {
+        onWillStart(async () => {
             this.availableFormats = await this.rpc("/web/export/formats");
             this.templates = await this.rpc("/web/dataset/call_kw", {
                 args: [],
@@ -123,6 +123,10 @@ export class ExportDataDialog extends Component {
         return Object.values(this.knownFields);
     }
 
+    get isDebug() {
+        return Boolean(odoo.debug);
+    }
+
     get rootFields() {
         return this.fieldsAvailable.filter(({ parent }) => !parent);
     }
@@ -132,11 +136,15 @@ export class ExportDataDialog extends Component {
      */
     async fetchFields() {
         this.state.search = [];
-        this.searchRef.el.value = "";
         this.knownFields = {};
         await this.loadFields();
         this.setDefaultExportList();
-        this.state.templateId && this.loadExportList(this.state.templateId);
+        if (this.searchRef.el) {
+            this.searchRef.el.value = "";
+        }
+        if (this.state.templateId) {
+            this.loadExportList(this.state.templateId);
+        }
     }
 
     enterTemplateEdition() {
@@ -160,7 +168,8 @@ export class ExportDataDialog extends Component {
     async loadExportList(value) {
         this.state.templateId = value;
         if (value === "new_template") {
-            return (this.state.isEditingTemplate = true);
+            this.state.isEditingTemplate = true;
+            return;
         }
         this.state.isEditingTemplate = false;
         const fields = await this.rpc("/web/export/namelist", {

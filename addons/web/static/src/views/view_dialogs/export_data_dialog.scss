@@ -5,12 +5,12 @@
 
         .o_left_panel, .o_right_panel {
             height: inherit;
-            
+
             .o_left_field_panel, .o_right_field_panel {
                 user-select: none;
                 .o_export_tree_item {
                     &:hover:not(.o_expanded) {
-                        background: rgba($o-brand-odoo, .7);
+                        background: rgba($o-brand-odoo, .3);
                         color: white;
                     }
 
