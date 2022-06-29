@@ -89,10 +89,11 @@ function orderByToString(orderBy) {
  * @param {string} resModel
  * @param {integer[]} resIds
  * @param {boolean} doArchive archive the records if true, otherwise unarchive them
+ * @param {Context} context
  */
-async function toggleArchive(model, resModel, resIds, doArchive) {
+async function toggleArchive(model, resModel, resIds, doArchive, context) {
     const method = doArchive ? "action_archive" : "action_unarchive";
-    const action = await model.orm.call(resModel, method, [resIds]);
+    const action = await model.orm.call(resModel, method, [resIds], { context });
     if (action && Object.keys(action).length !== 0) {
         model.action.doAction(action);
     }
@@ -536,7 +537,7 @@ export class Record extends DataPoint {
     }
 
     async archive() {
-        await toggleArchive(this.model, this.resModel, [this.resId], true);
+        await toggleArchive(this.model, this.resModel, [this.resId], true, this.context);
         await this.load();
         this.model.notify();
         this.invalidateCache();
@@ -862,7 +863,7 @@ export class Record extends DataPoint {
     }
 
     async unarchive() {
-        await toggleArchive(this.model, this.resModel, [this.resId], false);
+        await toggleArchive(this.model, this.resModel, [this.resId], false, this.context);
         await this.load();
         this.model.notify();
         this.invalidateCache();
@@ -1394,7 +1395,7 @@ class DynamicList extends DataPoint {
      */
     async archive(isSelected) {
         const resIds = await this.getResIds(isSelected);
-        await toggleArchive(this.model, this.resModel, resIds, true);
+        await toggleArchive(this.model, this.resModel, resIds, true, this.context);
         await this.model.load();
         this.invalidateCache();
         return resIds;
@@ -1428,9 +1429,14 @@ class DynamicList extends DataPoint {
         let resIds;
         if (isSelected) {
             if (this.isDomainSelected) {
-                resIds = await this.model.orm.search(this.resModel, this.domain, {
-                    limit: session.active_ids_limit,
-                });
+                resIds = await this.model.orm.search(
+                    this.resModel,
+                    this.domain,
+                    {
+                        limit: session.active_ids_limit,
+                    },
+                    this.context
+                );
             } else {
                 resIds = this.selection.map((r) => r.resId);
             }
@@ -1470,7 +1476,7 @@ class DynamicList extends DataPoint {
      */
     async unarchive(isSelected) {
         const resIds = await this.getResIds(isSelected);
-        await toggleArchive(this.model, this.resModel, resIds, false);
+        await toggleArchive(this.model, this.resModel, resIds, false, this.context);
         await this.model.load();
         this.invalidateCache();
         return resIds;
@@ -2718,7 +2724,12 @@ export class StaticList extends DataPoint {
             }
             // 2) fetch values for non loaded records
             if (resIds.length) {
-                const result = await this.model.orm.read(this.resModel, resIds, orderFieldNames);
+                const result = await this.model.orm.read(
+                    this.resModel,
+                    resIds,
+                    orderFieldNames,
+                    this.context
+                );
                 for (const values of result) {
                     const resId = values.id;
                     recordValues[resId] = {};
