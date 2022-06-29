@@ -50,7 +50,7 @@ QUnit.module("SettingsFormView", (hooks) => {
         };
     });
 
-    QUnit.test("change setting on nav bar click in base settings", async function (assert) {
+    QUnit.skipWOWL("change setting on nav bar click in base settings", async function (assert) {
         await makeView({
             type: "form",
             resModel: "res.config.settings",
