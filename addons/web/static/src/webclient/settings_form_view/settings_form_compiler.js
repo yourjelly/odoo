@@ -281,15 +281,16 @@ export class SettingsFormCompiler extends FormCompiler {
             }
         );
     }
-    createLabelFromField(fieldId, fieldName, fieldString, label, params) {
-        const res = super.createLabelFromField(fieldId, fieldName, fieldString, label, params);
-        let labelText = label.textContent || fieldString;
-        labelText = labelText ? labelText : params.record.fields[fieldName].string;
+    // FIXME WOWL: the following line crashes, there's no record in params (MobileWebSuite)
+    // createLabelFromField(fieldId, fieldName, fieldString, label, params) {
+    //     const res = super.createLabelFromField(fieldId, fieldName, fieldString, label, params);
+    //     let labelText = label.textContent || fieldString;
+    //     labelText = labelText ? labelText : params.record.fields[fieldName].string;
 
-        params.labels.push({
-            label: labelText,
-            ...params.config,
-        });
-        return res;
-    }
+    //     params.labels.push({
+    //         label: labelText,
+    //         ...params.config,
+    //     });
+    //     return res;
+    // }
 }
