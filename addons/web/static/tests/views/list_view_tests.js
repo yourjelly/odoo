@@ -36,6 +36,7 @@ import {
     triggerHotkey,
 } from "../helpers/utils";
 import {
+    editFavoriteName,
     getButtons,
     getFacetTexts,
     getPagerLimit,
@@ -43,11 +44,13 @@ import {
     groupByMenu,
     pagerNext,
     pagerPrevious,
+    saveFavorite,
     toggleActionMenu,
     toggleFavoriteMenu,
     toggleFilterMenu,
     toggleGroupByMenu,
     toggleMenuItem,
+    toggleSaveFavorite,
     validateSearch,
 } from "../search/helpers";
 import { createWebClient, doAction, loadState } from "../webclient/helpers";
@@ -1519,7 +1522,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.test("ordered target, sort attribute in context", async function (assert) {
+    QUnit.debug("ordered target, sort attribute in context", async function (assert) {
         // Equivalent to saving a custom filter
         // FIXME WOWL: no it isn't
 
@@ -1531,6 +1534,9 @@ QUnit.module("Views", (hooks) => {
             resModel: "foo",
             serverData,
             arch: '<tree><field name="foo"/><field name="date"/></tree>',
+            mockRPC: (route, args) => {
+                // assert.deepEqual()
+            },
         });
 
         // Descending order on Foo
@@ -1539,6 +1545,10 @@ QUnit.module("Views", (hooks) => {
 
         // Ascending order on Date
         await click($(target).find('th.o_column_sortable:contains("Date")')[0]);
+        await toggleFavoriteMenu(target);
+        await toggleSaveFavorite(target);
+        await editFavoriteName(target, "My favorite");
+        await saveFavorite(target);
 
         assert.deepEqual(
             list.model.root.orderBy,

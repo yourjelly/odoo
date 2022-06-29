@@ -99,7 +99,17 @@ async function toggleArchive(model, resModel, resIds, doArchive, context) {
     }
 }
 
-// WOWL FIXME: all calls to the ORM that are not calling a method should give a context, this is currently not the case
+async function unselectRecord(editedRecord, abandonRecord) {
+    if (editedRecord) {
+        const canBeAbandoned = editedRecord.canBeAbandoned;
+        if (!canBeAbandoned && editedRecord.checkValidity()) {
+            return editedRecord.switchMode("readonly");
+        } else if (canBeAbandoned) {
+            return abandonRecord(editedRecord.id);
+        }
+    }
+}
+
 class RequestBatcherORM extends ORM {
     constructor() {
         super(...arguments);
@@ -497,7 +507,6 @@ export class Record extends DataPoint {
     }
 
     get isNew() {
-        // WOWL check if it is enough ?
         return this.isVirtual;
     }
 
@@ -1384,7 +1393,6 @@ class DynamicList extends DataPoint {
     // -------------------------------------------------------------------------
 
     abandonRecord(recordId) {
-        // TODO
         const record = this.records.find((r) => r.id === recordId);
         this.removeRecord(record);
     }
@@ -1671,15 +1679,7 @@ class DynamicList extends DataPoint {
     }
 
     async unselectRecord() {
-        const editedRecord = this.editedRecord;
-        if (editedRecord) {
-            const canBeAbandoned = editedRecord.canBeAbandoned;
-            if (!canBeAbandoned && editedRecord.checkValidity()) {
-                return editedRecord.switchMode("readonly");
-            } else if (canBeAbandoned) {
-                return this.abandonRecord(editedRecord.id);
-            }
-        }
+        await unselectRecord(this.editedRecord, this.abandonRecord.bind(this));
     }
 }
 
@@ -3129,17 +3129,8 @@ export class StaticList extends DataPoint {
         await Promise.all(proms);
     }
 
-    // FIXME WOWL: factorize this (needed in both DynamicList and StaticList)
     async unselectRecord() {
-        const editedRecord = this.editedRecord;
-        if (editedRecord) {
-            const canBeAbandoned = editedRecord.canBeAbandoned;
-            if (!canBeAbandoned && editedRecord.checkValidity()) {
-                return editedRecord.switchMode("readonly");
-            } else if (canBeAbandoned) {
-                return this.abandonRecord(editedRecord.id);
-            }
-        }
+        await unselectRecord(this.editedRecord);
     }
 }
 
