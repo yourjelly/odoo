@@ -904,7 +904,7 @@ export class ListRenderer extends Component {
             return;
         }
 
-        const closestCell = ev.target.closest("td, th");
+        const closestCell = ev.target.closest(".o_data_row>td, th");
 
         const handled = this.props.list.editedRecord
             ? this.onCellKeydownEditMode(hotkey, closestCell, group, record)
