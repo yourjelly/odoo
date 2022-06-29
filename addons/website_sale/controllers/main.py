@@ -216,6 +216,18 @@ class WebsiteSale(http.Controller):
             if not qs or qs.lower() in loc:
                 yield {'loc': loc}
 
+    def with_tax_filter(self, r, prices, min_price, max_price):
+        # The prices list enables us to compute the prices with taxes only once and latter
+        # to get the max and min value for the slider
+        price = r.taxes_id.compute_all(r.price, product=r, partner=request.env['res.partner'])['total_included'] if r.taxes_id else r.price
+        prices.append(price)
+        result = True
+        if max_price:
+            result = (price <= max_price)
+        if min_price:
+            result = result and (price >= min_price)
+        return result
+
     @http.route([
         '''/shop''',
         '''/shop/page/<int:page>''',
@@ -289,13 +301,29 @@ class WebsiteSale(http.Controller):
             'attrib_values': attrib_values,
             'display_currency': pricelist.currency_id,
         }
+        line_tax_type = request.env['ir.config_parameter'].sudo().get_param('account.show_line_subtotals_tax_selection')
         # No limit because attributes are obtained from complete product list
-        product_count, details, fuzzy_search_term = request.website._search_with_fuzzy("products_only", search,
-            limit=None, order=self._get_search_order(post), options=options)
-        search_product = details[0].get('results', request.env['product.template']).with_context(bin_size=True)
+        if line_tax_type == "tax_excluded":
+            # Tax excluded
+            product_count, details, fuzzy_search_term = request.website._search_with_fuzzy("products_only", search, limit=None,
+                                                                                           order=self._get_search_order(post), options=options)
+            search_product = details[0].get('results', request.env['product.template']).with_context(bin_size=True)
+        else:
+            # Tax included
+            prices = []
+            # remove the min_price and max_price to have base_domain without them
+            del options['min_price']
+            del options['max_price']
+            search_details = request.website._search_get_details("products_only", order=self._get_search_order(post), options=options)
+            all_product = request.env['product.template'].search(search_details[0]["base_domain"][0])
+            search_product = all_product.filtered(lambda r: self.with_tax_filter(r, prices, min_price / conversion_rate, max_price / conversion_rate))
+            product_count = len(search_product)
+            fuzzy_search_term = False
+            available_min_price = min(prices)
+            available_max_price = max(prices)
 
         filter_by_price_enabled = request.website.is_view_active('website_sale.filter_products_price')
-        if filter_by_price_enabled:
+        if filter_by_price_enabled and line_tax_type == "tax_excluded":
             # TODO Find an alternative way to obtain the domain through the search metadata.
             Product = request.env['product.template'].with_context(bin_size=True)
             domain = self._get_search_domain(search, category, attrib_values)
@@ -304,25 +332,24 @@ class WebsiteSale(http.Controller):
             from_clause, where_clause, where_params = Product._where_calc(domain).get_sql()
             query = f"""
                 SELECT COALESCE(MIN(list_price), 0) * {conversion_rate}, COALESCE(MAX(list_price), 0) * {conversion_rate}
-                  FROM {from_clause}
-                 WHERE {where_clause}
+                FROM {from_clause}
+                WHERE {where_clause}
             """
             request.env.cr.execute(query, where_params)
             available_min_price, available_max_price = request.env.cr.fetchone()
-
-            if min_price or max_price:
-                # The if/else condition in the min_price / max_price value assignment
-                # tackles the case where we switch to a list of products with different
-                # available min / max prices than the ones set in the previous page.
-                # In order to have logical results and not yield empty product lists, the
-                # price filter is set to their respective available prices when the specified
-                # min exceeds the max, and / or the specified max is lower than the available min.
-                if min_price:
-                    min_price = min_price if min_price <= available_max_price else available_min_price
-                    post['min_price'] = min_price
-                if max_price:
-                    max_price = max_price if max_price >= available_min_price else available_max_price
-                    post['max_price'] = max_price
+        if filter_by_price_enabled and (min_price or max_price):
+            # The if/else condition in the min_price / max_price value assignment
+            # tackles the case where we switch to a list of products with different
+            # available min / max prices than the ones set in the previous page.
+            # In order to have logical results and not yield empty product lists, the
+            # price filter is set to their respective available prices when the specified
+            # min exceeds the max, and / or the specified max is lower than the available min.
+            if min_price:
+                min_price = min_price if min_price <= available_max_price else available_min_price
+                post['min_price'] = min_price
+            if max_price:
+                max_price = max_price if max_price >= available_min_price else available_max_price
+                post['max_price'] = max_price
 
         website_domain = request.website.website_domain()
         categs_domain = [('parent_id', '=', False)] + website_domain
