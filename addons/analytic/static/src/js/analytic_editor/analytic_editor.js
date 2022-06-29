@@ -34,6 +34,8 @@ export class AnalyticEditor extends Component {
             popper: "editorDropdown",
         });
 
+        this.dropdownHeader = "";
+
         useExternalListener(window, "click", this.onWindowClick, true);
     }
 
@@ -53,8 +55,39 @@ export class AnalyticEditor extends Component {
     }
 
     // data getters
+    get tags() {
+        return this.list.map((record) => ({
+            id: record.id, // datapoint_X
+            text: record.data.display_name,
+            colorIndex: record.data.color,
+            group: record.data.group_id,
+            onClick: (ev) => {},//(ev) => this.tagClicked({id: record.id}),
+            onDelete: this.editingRecord ? () => this.deleteTag(record.id) : undefined,
+        }));
+    }
+
+    listByGroup({ id }){
+        return this.list.filter((record) => record.data.group_id[0] === id);
+    }
+
+    get list() {
+        return this.props.value.records;
+    }
+
     get plans() {
         return this.allPlans;
+    }
+
+    // data modifiers
+    async deleteTag(id) {
+        const tagRecord = this.list.find((record) => record.id === id);
+        const ids = this.props.value.currentIds.filter((id) => id !== tagRecord.resId);
+        await this.props.value.replaceWith(ids);
+    }
+
+    async addLineToGroup({id}) {
+        console.log('addLineToGroup ' + id);
+        this.props.value.addNew({ position: "bottom" });
     }
 
     // orm
@@ -69,7 +102,7 @@ export class AnalyticEditor extends Component {
 
     // prop/state getters
     get preventOpen() {
-        return this.state.visited == true;
+        return this.state.visited;
     }
 
     get nextElementToFocus() {
@@ -102,7 +135,9 @@ export class AnalyticEditor extends Component {
         if (this.dropdownOpen && this.dropdownRef.el ? !this.dropdownRef.el.contains(ev.target) : false) {
             this.closeAnalyticEditor();
         }
-        this.resetVisited();
+        if (this.editingRecord) {
+            this.resetVisited();
+        }
     }
 
     onMainInputFocus(ev) {
@@ -175,8 +210,7 @@ export class AnalyticEditor extends Component {
             }
             case "escape": {
                 if (this.dropdownOpen) {
-                    this.closeAnalyticEditor();
-                    this.focusMainInputNoActivation();
+                    this.forceCloseAnalyticEditor();
                     break;
                 }
                 return;
@@ -209,6 +243,11 @@ export class AnalyticEditor extends Component {
         console.log('closeAnalyticEditor');
         this.state.showDropdown = false;
     }
+
+    forceCloseAnalyticEditor() {
+        this.closeAnalyticEditor();
+        this.focusMainInputNoActivation();
+    }
 }
 
 AnalyticEditor.template = "analytic_editor";
@@ -222,13 +261,14 @@ AnalyticEditor.components = {
 
 };
 AnalyticEditor.fieldsToFetch = {
-    display_name: { name: "display_name", type: "char" },
+    display_name: { name: "display_name", type: "char" }, //used
     percentage: { name: "percentage", type: "float" },
-    color: { name: "color", type: "integer" },
-    analytic_account_id: { name: 'analytic_account_id', type: "many2one"},
+    color: { name: "color", type: "integer" }, //used
+    analytic_account_id: { name: 'analytic_account_id', type: "many2one" },
     acc_id: { name: "acc_id", type: "integer" },
-    acc_name: { name: "acc_name", type: "char"},
-    group_name: { name: "group_name", type: "char"},
+    acc_name: { name: "acc_name", type: "char" },
+    group_id: { name: "group_id", type: "many2one" }, //used
+    group_name: { name: "group_name", type: "char" },
 };
 
 AnalyticEditor.extractProps = (fieldName, record, attrs) => {
