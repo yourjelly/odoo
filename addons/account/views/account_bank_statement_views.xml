@@ -219,7 +219,7 @@
                                     <field name="account_number" optional="hidden"/>
                                     <field name="amount"
                                            attrs="{'readonly': [('parent.state', '!=', 'open')]}"/>
-                                    <field name="accumulated_balance" optional="hidden" attrs="{'invisible':[('internal_index', '=', False)]}"/>
+                                    <field name="cumulative_balance" optional="hidden" attrs="{'invisible':[('internal_index', '=', False)]}"/>
                                     <field name="previous_line_id" optional="hidden" attrs="{'invisible':[('internal_index', '=', False)]}"/>
                                     <field name="internal_index" invisible="1"/>
 

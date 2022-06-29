@@ -122,11 +122,11 @@ class AccountBankStatement(models.Model):
         for statement in self:
             statement.total_entry_encoding = sum(statement.line_ids.mapped('amount'))
 
-    @api.depends('first_line_id.accumulated_balance', 'first_line_id.amount', 'last_line_id.accumulated_balance')
+    @api.depends('first_line_id.cumulative_balance', 'first_line_id.amount', 'last_line_id.cumulative_balance')
     def _compute_balance(self):
         for statement in self:
-            statement.balance_start = statement.first_line_id.accumulated_balance - statement.first_line_id.amount
-            statement.balance_end = statement.last_line_id.accumulated_balance
+            statement.balance_start = statement.first_line_id.cumulative_balance - statement.first_line_id.amount
+            statement.balance_end = statement.last_line_id.cumulative_balance
 
     @api.depends('balance_end_real', 'balance_end')
     def _compute_difference(self):
@@ -316,14 +316,14 @@ class AccountBankStatement(models.Model):
         - is_gap_before: If there are line with no statement before current statement
         - is_line_missing_before: If there are no line with no statement before current statement,
           but the current statement real start balance does not match the last statement real end balance
-        - is_line_missing_beginning: If the calculated start balance (from the first line accumulated balance)
+        - is_line_missing_beginning: If the calculated start balance (from the first line cumulative balance)
             does not match the statement real start balance, it means some lines are not entered/connected
             before the first line of this statement.
         - is_gap_middle: If there are lines between start and end of this statement that are
           not connected to this statement
         - is_line_missing_middle: If there is no gap in the middle but sum of all lines is not equal to
           the statement real balance
-        - is_line_missing_end: If the last line accumulated balance does not match the statement real end balance
+        - is_line_missing_end: If the last line cumulative balance does not match the statement real end balance
         """
         for st in self:
             is_gap_before = st.first_line_id.previous_line_id and not st.first_line_id.previous_line_id.statement_id
@@ -345,7 +345,7 @@ class AccountBankStatement(models.Model):
                                  ' end balance. it means some statements are not entered before this statement or '
                                  'the real start balance is not correct.'))
             if is_line_missing_beginning:
-                message.append(_('- The calculated start balance (from the first line accumulated balance) does not '
+                message.append(_('- The calculated start balance (from the first line cumulative balance) does not '
                                  'match the statement real start balance, it means some lines are not entered/connected'
                                  ' before the first line of this statement or the real start balance is not correct.'))
             if is_gap_middle:
@@ -678,16 +678,16 @@ class AccountBankStatementLine(models.Model):
     # state = fields.Selection(related='statement_id.state', string='Status', readonly=True)
     country_code = fields.Char(related='company_id.account_fiscal_country_id.code')
 
-    accumulated_balance = fields.Monetary(
+    cumulative_balance = fields.Monetary(
         currency_field='currency_id',
-        compute='_compute_accumulated_balance',
+        compute='_compute_cumulative_balance',
         store=True,
         recursive=True,
     )
 
     previous_line_id = fields.Many2one(
         comodel_name='account.bank.statement.line',
-        help='technical field to compute accumulated balance correctly',
+        help='technical field to compute cumulative balance correctly',
         compute='_compute_previous_line_id',
         store=True,
     )
@@ -898,10 +898,10 @@ class AccountBankStatementLine(models.Model):
         for st_line in self:
             st_line.partner_id = st_line._retrieve_partner(force=True)
 
-    @api.depends('previous_line_id.accumulated_balance', 'amount')
-    def _compute_accumulated_balance(self):
+    @api.depends('previous_line_id.cumulative_balance', 'amount')
+    def _compute_cumulative_balance(self):
         for st_line in self:
-            st_line.accumulated_balance = st_line.previous_line_id.accumulated_balance + st_line.amount
+            st_line.cumulative_balance = st_line.previous_line_id.cumulative_balance + st_line.amount
 
     @api.depends('date', 'sequence')
     def _compute_internal_index(self):
