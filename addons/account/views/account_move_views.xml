@@ -882,10 +882,11 @@
                                                widget="analytic_editor"
                                                string="Analytic Distribution"
                                                options="{'template_field': 'analytic_dist_model_selector_id', 'search_field': 'analytic_account_selector_id'}">
-                                               <!-- trying to use list renderer in the popup requires an arch but this doesn't work and we don't want to have to specify it every time
+                                               <!-- trying to use list renderer in the popup requires an arch but this doesn't work and we don't want to have to specify it every time-->
                                                <tree editable="bottom">
-                                                <field name="display_name"/>
-                                               </tree> -->
+                                                <field name="analytic_account_id"/>
+                                                <field name="percentage"/>
+                                               </tree>
                                         </field>
                                         <!-- <field name="analytic_json" widget="analytic_json"/> -->
                                         <field name="quantity"/>
