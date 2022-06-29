@@ -112,18 +112,21 @@ class AccountBankStmtCloseCheck(models.TransientModel):
 class AccountBankStatement(models.Model):
     _name = "account.bank.statement"
     _description = "Bank Statement"
-    _order = "date desc, name desc, id desc"
+    _order = "last_internal_index desc, name desc, id desc"
     _inherit = ['mail.thread', 'sequence.mixin']
     _check_company_auto = True
     _sequence_index = "journal_id"
 
-    @api.depends('line_ids.accumulated_balance', 'line_ids.amount', 'balance_end_real')
+    @api.depends('line_ids.amount',)
+    def _compute_total_entry_encoding(self):
+        for statement in self:
+            statement.total_entry_encoding = sum(statement.line_ids.mapped('amount'))
+
+    @api.depends('first_line_id.accumulated_balance', 'first_line_id.amount', 'last_line_id.accumulated_balance')
     def _compute_balance(self):
         for statement in self:
-            statement.total_entry_encoding = sum([line.amount for line in statement.line_ids])
-            sorted_lines = statement.line_ids.sorted(key=lambda x: x.internal_index)
-            statement.balance_start = sorted_lines[:1].accumulated_balance - sorted_lines[:1].amount
-            statement.balance_end = sorted_lines[-1:].accumulated_balance
+            statement.balance_start = statement.first_line_id.accumulated_balance - statement.first_line_id.amount
+            statement.balance_end = statement.last_line_id.accumulated_balance
 
     @api.depends('balance_end_real', 'balance_end')
     def _compute_difference(self):
@@ -135,6 +138,11 @@ class AccountBankStatement(models.Model):
     def _compute_currency(self):
         for statement in self:
             statement.currency_id = statement.journal_id.currency_id or statement.company_id.currency_id
+
+    @api.depends('line_ids.date')
+    def _compute_date(self):
+        for statement in self:
+            statement.date = statement.line_ids.sorted()[-1:].date
 
     @api.depends('move_line_ids')
     def _get_move_line_count(self):
@@ -152,45 +160,33 @@ class AccountBankStatement(models.Model):
             ], limit=1)
         return self.env['account.journal']
 
-    @api.depends('balance_start', 'previous_statement_id')
-    def _compute_is_valid_balance_start(self):
-        for bnk in self:
-            bnk.is_valid_balance_start = (
-                bnk.currency_id.is_zero(
-                    bnk.balance_start - bnk.previous_statement_id.balance_end_real
-                )
-                if bnk.previous_statement_id
-                else True
-            )
-
     @api.depends('date', 'journal_id')
     def _get_previous_statement(self):
         for st in self:
             # Search for the previous statement
-            domain = [('date', '<=', st.date), ('journal_id', '=', st.journal_id.id)]
-            # The reason why we have to perform this test is because we have two use case here:
-            # First one is in case we are creating a new record, in that case that new record does
-            # not have any id yet. However if we are updating an existing record, the domain date <= st.date
-            # will find the record itself, so we have to add a condition in the search to ignore self.id
-            if not isinstance(st.id, models.NewId):
-                domain.extend(['|', '&', ('id', '<', st.id), ('date', '=', st.date), '&', ('id', '!=', st.id), ('date', '!=', st.date)])
-            previous_statement = self.search(domain, limit=1, order='date desc, id desc')
-            st.previous_statement_id = previous_statement.id
+            domain = [('last_internal_index', '<', st.last_internal_index), ('journal_id', '=', st.journal_id.id)]
+            st.previous_statement_id = self.search(domain, limit=1).id
 
-    name = fields.Char(string='Reference', states={'open': [('readonly', False)]}, copy=False, readonly=True)
+    name = fields.Char(string='Reference',required=True, states={'open': [('readonly', False)]}, copy=False, readonly=True)
     reference = fields.Char(string='External Reference', states={'open': [('readonly', False)]}, copy=False, readonly=True, help="Used to hold the reference of the external mean that created this statement (name of imported file, reference of online synchronization...)")
-    date = fields.Date(required=True, states={'confirm': [('readonly', True)]}, index=True, copy=False, default=fields.Date.context_today)
+    date = fields.Date(compute='_compute_date', store=True)
     date_done = fields.Datetime(string="Closed On")
     balance_start = fields.Monetary(
-        string='Starting Balance',
+        string='Computed Starting Balance',
         states={'confirm': [('readonly', True)]},
         compute='_compute_balance',
         store=True,
+    )
+    balance_start_real = fields.Monetary(
+        string='Starting Balance',
+        states={'confirm': [('readonly', True)]},
     )
     balance_end_real = fields.Monetary(
         string='Ending Balance',
         states={'confirm': [('readonly', True)]},
     )
+    is_valid = fields.Boolean(compute='_compute_validity_and_error_message', store=True)
+    error_message = fields.Text(compute='_compute_validity_and_error_message', store=True)
     state = fields.Selection(string='Status', required=True, readonly=True, copy=False, tracking=True, selection=[
             ('open', 'New'),
             ('posted', 'Processing'),
@@ -200,6 +196,7 @@ class AccountBankStatement(models.Model):
              "- New: Fully editable with draft Journal Entries."
              "- Processing: No longer editable with posted Journal entries, ready for the reconciliation."
              "- Validated: All lines are reconciled. There is nothing left to process.")
+
     currency_id = fields.Many2one('res.currency', compute='_compute_currency', string="Currency")
     journal_id = fields.Many2one('account.journal', string='Journal', required=True, states={'confirm': [('readonly', True)]}, default=_default_journal, check_company=True)
     journal_type = fields.Selection(related='journal_id.type', help="Technical field used for usability purposes")
@@ -207,7 +204,7 @@ class AccountBankStatement(models.Model):
 
     total_entry_encoding = fields.Monetary(
         string='Transactions Subtotal',
-        compute='_compute_balance',
+        compute='_compute_total_entry_encoding',
         store=True,
         help="Total of transaction lines."
     )
@@ -224,6 +221,21 @@ class AccountBankStatement(models.Model):
     )
 
     line_ids = fields.One2many('account.bank.statement.line', 'statement_id', string='Statement lines', states={'confirm': [('readonly', True)]}, copy=True)
+    first_line_id = fields.Many2one(
+        comodel_name='account.bank.statement.line',
+        compute='_compute_first_last_line',
+        store=True
+    )
+    last_line_id = fields.Many2one(
+        comodel_name='account.bank.statement.line',
+        compute='_compute_first_last_line',
+        store=True
+    )
+    last_internal_index = fields.Char(
+        related='last_line_id.internal_index',
+        store=True,
+    )
+
     move_line_ids = fields.One2many('account.move.line', 'statement_id', string='Entry lines', states={'confirm': [('readonly', True)]})
     move_line_count = fields.Integer(compute="_get_move_line_count")
 
@@ -244,14 +256,7 @@ class AccountBankStatement(models.Model):
         compute='_get_previous_statement',
         store=True,
     )
-    attachment_id = fields.Many2one('ir.attachment', string='Attachment', readonly=True, states={'open': [('readonly', False)]})
-    is_valid_balance_start = fields.Boolean(
-        string="Is Valid Balance Start",
-        store=True,
-        compute="_compute_is_valid_balance_start",
-        help="Technical field to display a warning message in case starting balance is"
-             " different than previous ending balance",
-    )
+    attachment_id = fields.Many2one('ir.attachment', string='Attachment')
     country_code = fields.Char(related='company_id.account_fiscal_country_id.code')
 
     def write(self, values):
@@ -293,6 +298,84 @@ class AccountBankStatement(models.Model):
         for statement in self:
             statement.all_lines_reconciled = all(st_line.is_reconciled for st_line in statement.line_ids)
 
+    @api.depends('line_ids.internal_index',)
+    def _compute_first_last_line(self):
+        for statement in self:
+            sorted_lines = statement.line_ids.sorted(lambda line: line.internal_index)
+            statement.first_line_id = sorted_lines[:1]
+            statement.last_line_id = sorted_lines[-1:]
+
+
+    @api.depends('balance_start', 'balance_end', 'previous_statement_id',
+                 'balance_start_real', 'balance_end_real', 'total_entry_encoding',
+                 'line_ids.previous_line_id', 'previous_statement_id.balance_end_real',
+                 'line_ids.previous_line_id.statement_id', 'is_difference_zero')
+    def _compute_validity_and_error_message(self):
+        """
+        Finds missing info in the statement.
+        - is_gap_before: If there are line with no statement before current statement
+        - is_line_missing_before: If there are no line with no statement before current statement,
+          but the current statement real start balance does not match the last statement real end balance
+        - is_line_missing_beginning: If the calculated start balance (from the first line accumulated balance)
+            does not match the statement real start balance, it means some lines are not entered/connected
+            before the first line of this statement.
+        - is_gap_middle: If there are lines between start and end of this statement that are
+          not connected to this statement
+        - is_line_missing_middle: If there is no gap in the middle but sum of all lines is not equal to
+          the statement real balance
+        - is_line_missing_end: If the last line accumulated balance does not match the statement real end balance
+        """
+        for st in self:
+            is_gap_before = st.first_line_id.previous_line_id and not st.first_line_id.previous_line_id.statement_id
+            is_line_missing_before = not is_gap_before and st.previous_statement_id and st.currency_id.compare_amounts(
+                                            st.balance_start_real, st.previous_statement_id.balance_end_real
+                                        )
+            is_line_missing_beginning = not is_line_missing_before and st.balance_start != st.balance_start_real
+            is_gap_middle = any(
+                line.previous_line_id.statement_id != st._origin
+                for line in (st.line_ids - st.first_line_id)
+            )
+            is_line_missing_middle = not is_gap_middle \
+                                     and st.total_entry_encoding != (st.balance_end_real - st.balance_start_real)
+            message = []
+            if is_gap_before:
+                message.append(_('- There are some lines with no statement before this statement.'))
+            if is_line_missing_before:
+                message.append(_('- The real start balance of this statement does not match the last statement real'
+                                 ' end balance. it means some statements are not entered before this statement or '
+                                 'the real start balance is not correct.'))
+            if is_line_missing_beginning:
+                message.append(_('- The calculated start balance (from the first line accumulated balance) does not '
+                                 'match the statement real start balance, it means some lines are not entered/connected'
+                                 ' before the first line of this statement or the real start balance is not correct.'))
+            if is_gap_middle:
+                message.append(_('- There are statement lines between the start and end of this statement that are not'
+                                 ' connected to this statement.'))
+            if is_line_missing_middle:
+                message.append(_('- The sum of all lines is not equal to the statement real balance, you should '
+                                 'check if there are some lines that are not entered in this statement yet or '
+                                 'either the real start/end balances are not correct.'))
+            if not st.is_difference_zero:
+                message.append(_('- The statement has a difference between the calculated and real end balances.'))
+            if message:
+                if is_line_missing_before:
+                    message.append(_('Last statement: %s', st.previous_statement_id.display_name))
+                    message.append(_('Last statement ending balance: %s',
+                                     formatLang(self.env, st.previous_statement_id.balance_end_real,
+                                                currency_obj=st.currency_id)))
+                if is_line_missing_beginning or is_line_missing_middle:
+                    message.append(_('Calculated start balance: %s', formatLang(self.env, st.balance_start,
+                                                                                currency_obj=st.currency_id)))
+                if is_line_missing_middle or not st.is_difference_zero:
+                    message.append(_('Calculated end balance: %s', formatLang(self.env, st.balance_end,
+                                                                              currency_obj=st.currency_id)))
+
+                st.error_message = '\n'.join(message)
+                st.is_valid = False
+            else:
+                st.error_message = ''
+                st.is_valid = True
+
     @api.onchange('journal_id')
     def onchange_journal_id(self):
         for st_line in self.line_ids:
@@ -328,14 +411,6 @@ class AccountBankStatement(models.Model):
                         st_line_vals['counterpart_account_id'] = stmt.journal_id.profit_account_id.id
 
                     self.env['account.bank.statement.line'].create(st_line_vals)
-                else:
-                    balance_end_real = formatLang(self.env, stmt.balance_end_real, currency_obj=stmt.currency_id)
-                    balance_end = formatLang(self.env, stmt.balance_end, currency_obj=stmt.currency_id)
-                    # raise UserError(_(
-                    #     'The ending balance is incorrect !\nThe expected balance (%(real_balance)s) is different from the computed one (%(computed_balance)s).',
-                    #     real_balance=balance_end_real,
-                    #     computed_balance=balance_end
-                    # ))
         return True
 
     @api.ondelete(at_uninstall=False)
@@ -484,9 +559,9 @@ class AccountBankStatement(models.Model):
 
         if not relaxed:
             domain = [('journal_id', '=', self.journal_id.id), ('id', '!=', self.id or self._origin.id), ('name', '!=', False)]
-            previous_name = self.search(domain + [('date', '<', self.date)], order='date desc', limit=1).name
+            previous_name = self.search(domain + [('last_internal_index', '<', self.last_internal_index)], order='last_internal_index desc', limit=1).name
             if not previous_name:
-                previous_name = self.search(domain, order='date desc', limit=1).name
+                previous_name = self.search(domain, order='last_internal_index desc', limit=1).name
             sequence_number_reset = self._deduce_sequence_number_reset(previous_name)
             if sequence_number_reset == 'year':
                 where_string += " AND date_trunc('year', date) = date_trunc('year', %(date)s) "
@@ -830,7 +905,7 @@ class AccountBankStatementLine(models.Model):
 
     @api.depends('date', 'sequence')
     def _compute_internal_index(self):
-        for st_line in self.filtered('id'):
+        for st_line in self.filtered(lambda line: line._origin.id):
             # if I can find a way to put bigint in the db without side effects this one would be better
             # st_line.internal_index = (st_line.date.toordinal() << 32) \
             #                          + ((32767 - st_line.sequence) << 16) \
@@ -841,7 +916,7 @@ class AccountBankStatementLine(models.Model):
             #                          + st_line.id % (1 << 64)
 
             # sequence is int4 so maximum digits are 10
-            st_line.internal_index = f'{st_line.date.strftime("%Y%m%d")}{MAXINT-st_line.sequence:0>10}{st_line.id:0>12}'
+            st_line.internal_index = f'{st_line.date.strftime("%Y%m%d")}{MAXINT-st_line.sequence:0>10}{st_line._origin.id:0>12}'
 
     @api.depends('is_reconciled', 'state', 'to_check')
     def _compute_kanban_state(self):

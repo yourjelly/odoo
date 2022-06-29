@@ -136,12 +136,8 @@
                     <field name="state" widget="statusbar" statusbar_visible="open,posted,confirm"/>
                 </header>
                 <div class="alert alert-warning" role="alert"
-                     attrs="{'invisible': [
-                     '|', '|',
-                     ('previous_statement_id', '=', False),
-                     ('is_valid_balance_start', '=', True),
-                     ('line_ids', '!=', False)]}">
-                    The starting balance <b>doesn't match</b> with the ending balance of the previous bank statement.
+                     attrs="{'invisible': [('is_valid','=', True)]}">
+                    <field name="error_message"/>
                 </div>
                 <sheet>
                     <!-- Invisible fields -->
@@ -162,7 +158,7 @@
                     <group>
                         <group>
                             <field name="previous_statement_id" invisible="1"/>
-                            <field name="is_valid_balance_start" invisible="1"/>
+                            <field name="is_valid" invisible="1"/>
                             <field name="journal_type" invisible="1"/>
                             <field name="cashbox_start_id" invisible="1"/>
                             <field name="cashbox_end_id" invisible="1"/>
