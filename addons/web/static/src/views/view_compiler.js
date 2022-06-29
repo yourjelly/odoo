@@ -35,6 +35,7 @@ const BUTTON_CLICK_PARAMS = [
     "debounce",
 ];
 const BUTTON_STRING_PROPS = ["string", "size", "title", "icon"];
+const INTERP_REGEXP = /(\{\{|#\{)(.*?)(\}{1,2})/g;
 
 /**
  * @param {Element} el
@@ -71,15 +72,21 @@ export function assignOwlDirectives(target, ...sources) {
     for (const source of sources) {
         for (const { name, value } of source.attributes) {
             if (name.startsWith("t-attf-")) {
+                const matches = value.matchAll(INTERP_REGEXP);
+                const parts = [];
+                let searchString = value;
+                for (const [match, head, expr] of matches) {
+                    const index = searchString.indexOf(head);
+                    const left = searchString.slice(0, index);
+                    if (left) {
+                        parts.push(toStringExpression(left));
+                    }
+                    parts.push(`(${expr})`);
+                    searchString = searchString.slice(index + match.length);
+                }
+                parts.push(toStringExpression(searchString));
+                const tAttf = parts.join("+");
                 const propName = name.slice(7);
-                const tAttf = value
-                    .split("}}")
-                    .map((leftAndExpr) => {
-                        const [left, expr] = leftAndExpr.split("{{");
-                        const part = toStringExpression(left);
-                        return expr ? part + `+${expr}+` : part;
-                    })
-                    .join("");
                 target.setAttribute(propName, tAttf);
             } else if (name.startsWith("t-att-")) {
                 const propName = name.slice(6);
@@ -329,7 +336,14 @@ export class ViewCompiler {
         }
 
         button.setAttribute("clickParams", JSON.stringify(clickParams));
-        button.setAttribute("className", toStringExpression(el.className));
+
+        const className = [toStringExpression(el.className)];
+        const buttonClass = button.getAttribute("class");
+        if (buttonClass) {
+            className.push(toStringExpression(" "));
+            className.push(buttonClass);
+        }
+        button.setAttribute("className", className.join("+"));
         el.removeAttribute("class");
         button.removeAttribute("class");
 
