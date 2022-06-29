@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+    <t t-name="analytic_editor" owl="1">
+        <div class="analytic_editor" t-ref="analyticEditor" t-on-keydown="onKeydown">
+            <t t-if="!props.readonly">
+                <div tabindex="0" type="text" class="o_input" t-ref="mainInput" t-on-focus="onMainInputFocus" t-on-keydown="onMainInputKeydown"/>
+                <div class="analytic_o2m_editor_popup dropdown-menu show rounded py-0" t-if="state.showDropdown" t-ref="editorDropdown">
+                    <t t-foreach="plans" t-as="plan" t-key="plan.id">
+                        <t t-esc="plan.name"/>
+                        <input type="text"/>
+                    </t>
+                    
+                </div>
+            </t>
+        </div>
+    </t>
+
+</templates>

@@ -27,6 +27,7 @@ that have no counterpart in the general financial accounts.
         'web.assets_backend': [
             'analytic/static/src/js/analytic_json/**/*',
             'analytic/static/src/js/analytic_o2m/**/*',
+            'analytic/static/src/js/analytic_editor/**/*',
         ],
         'web.assets_qweb': [
             'analytic/static/src/**/*.xml',
