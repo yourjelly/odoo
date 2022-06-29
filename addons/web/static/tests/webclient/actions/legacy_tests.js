@@ -116,7 +116,7 @@ QUnit.module("ActionManager", (hooks) => {
 
         const webClient = await createWebClient({ serverData });
         await doAction(webClient, 3);
-        assert.containsOnce(target, ".o_list_view");
+        assert.containsOnce(target, ".o_legacy_list_view");
         list.trigger_up("warning", {
             title: "Warning!!!",
             message: "This is a warning...\nabc",
@@ -124,7 +124,7 @@ QUnit.module("ActionManager", (hooks) => {
         });
         await testUtils.nextTick();
         await legacyExtraNextTick();
-        assert.containsOnce(target, ".o_list_view");
+        assert.containsOnce(target, ".o_legacy_list_view");
         assert.containsOnce(document.body, ".modal");
         assert.strictEqual($(".modal-title").text(), "Warning!!!");
         assert.strictEqual($(".modal-body")[0].innerText, "This is a warning...\nabc");
