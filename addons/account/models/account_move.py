@@ -4302,7 +4302,9 @@ class AccountMoveLine(models.Model):
 
         # the following replicates the behaviour of the many2many_tags popup and save - create a new distribution tag and link it
         if self.analytic_account_selector_id:
-            new_tag = self.env['account.analytic.distribution.tag'].create({'analytic_account_id': self.analytic_account_selector_id.id, 'percentage': 100})
+            current_perc_for_group = sum(self.analytic_dist_tag_ids.filtered(lambda t: t.group_id == self.analytic_account_selector_id.group_id).mapped('percentage'))
+            remaining_percentage = 100 - min(current_perc_for_group, 100)
+            new_tag = self.env['account.analytic.distribution.tag'].create({'analytic_account_id': self.analytic_account_selector_id.id, 'percentage': remaining_percentage})
             self.analytic_dist_tag_ids += new_tag
 
 
