@@ -190,15 +190,7 @@ export function isComponentNode(el) {
  * @param {Node} node
  * @returns {boolean}
  */
-function isRelevantTextNode(node) {
-    return isTextNode(node) && !!node.nodeValue.trim();
-}
-
-/**
- * @param {Node} node
- * @returns {boolean}
- */
-function isTextNode(node) {
+export function isTextNode(node) {
     return node.nodeType === 3;
 }
 
@@ -276,10 +268,8 @@ export class ViewCompiler {
         if (isComment(node)) {
             return;
         }
-        if (isRelevantTextNode(node)) {
+        if (isTextNode(node)) {
             return createTextNode(node.nodeValue);
-        } else if (isTextNode(node)) {
-            return;
         }
 
         let invisible;

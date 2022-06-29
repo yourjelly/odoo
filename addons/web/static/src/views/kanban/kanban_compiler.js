@@ -8,7 +8,7 @@ import {
     getTag,
 } from "@web/core/utils/xml";
 import { toStringExpression } from "@web/views/utils";
-import { ViewCompiler } from "@web/views/view_compiler";
+import { isTextNode, ViewCompiler } from "@web/views/view_compiler";
 import { KANBAN_BOX_ATTRIBUTE, KANBAN_TOOLTIP_ATTRIBUTE } from "./kanban_arch_parser";
 
 /**
@@ -179,7 +179,9 @@ export class KanbanCompiler extends ViewCompiler {
      */
     compileCard(el, params) {
         const compiledCard = this.compileGenericNode(el, params);
-        const cards = getValidCards(compiledCard).flat(Infinity).filter(Boolean);
+        const cards = getValidCards(compiledCard)
+            .flat(Infinity)
+            .filter((card) => card && !isTextNode(card));
 
         // Add a root ref if we need to use it to add tooltips on the cards
         // This means that multi-root kanban-box templates cannot have tooltips

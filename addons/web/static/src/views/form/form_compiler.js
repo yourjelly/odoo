@@ -14,6 +14,7 @@ import {
     getModifier,
     isAlwaysInvisible,
     isComponentNode,
+    isTextNode,
     makeSeparator,
 } from "@web/views/view_compiler";
 import { ViewCompiler } from "../view_compiler";
@@ -246,7 +247,7 @@ export class FormCompiler extends ViewCompiler {
                     ? child.getAttribute("nolabel") !== "1"
                     : true;
                 slotContent = this.compileNode(child, params, false);
-                if (addLabel && !isOuterGroup) {
+                if (addLabel && !isOuterGroup && !isTextNode(slotContent)) {
                     itemSpan = itemSpan === 1 ? itemSpan + 1 : itemSpan;
                     const fieldName = child.getAttribute("name");
                     const fieldId = slotContent.getAttribute("id") || fieldName;
@@ -278,7 +279,7 @@ export class FormCompiler extends ViewCompiler {
                 slotContent = this.compileNode(child, params, false);
             }
 
-            if (slotContent) {
+            if (slotContent && !isTextNode(slotContent)) {
                 if (invisible !== false) {
                     mainSlot.setAttribute(
                         "isVisible",
@@ -331,7 +332,7 @@ export class FormCompiler extends ViewCompiler {
         const others = [];
         for (const child of el.childNodes) {
             const compiled = this.compileNode(child, params);
-            if (!compiled) {
+            if (!compiled || isTextNode(compiled)) {
                 continue;
             }
             if (getTag(child, true) === "field") {
