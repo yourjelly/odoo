@@ -1422,6 +1422,14 @@ class BaseModel(metaclass=MetaModel):
         for model, names in parent_fields.items():
             defaults.update(self.env[model].default_get(names))
 
+        # delegate the default properties to the properties field
+        for field_name in fields_list:
+            field = self._fields[field_name]
+            if field.type == 'properties':
+                default_properties = field._add_default_values(self.env, defaults)
+                if default_properties:
+                    defaults[field_name] = default_properties
+
         return defaults
 
     @api.model
@@ -2049,19 +2057,26 @@ class BaseModel(metaclass=MetaModel):
             if not avoid(field)
         }
 
-        if not missing_defaults:
-            return values
+        if missing_defaults:
+            # override defaults with the provided values, never allow the other way around
+            defaults = self.default_get(list(missing_defaults))
+            for name, value in defaults.items():
+                if self._fields[name].type == 'many2many' and value and isinstance(value[0], int):
+                    # convert a list of ids into a list of commands
+                    defaults[name] = [Command.set(value)]
+                elif self._fields[name].type == 'one2many' and value and isinstance(value[0], dict):
+                    # convert a list of dicts into a list of commands
+                    defaults[name] = [Command.create(x) for x in value]
+            defaults.update(values)
 
-        # override defaults with the provided values, never allow the other way around
-        defaults = self.default_get(list(missing_defaults))
-        for name, value in defaults.items():
-            if self._fields[name].type == 'many2many' and value and isinstance(value[0], int):
-                # convert a list of ids into a list of commands
-                defaults[name] = [Command.set(value)]
-            elif self._fields[name].type == 'one2many' and value and isinstance(value[0], dict):
-                # convert a list of dicts into a list of commands
-                defaults[name] = [Command.create(x) for x in value]
-        defaults.update(values)
+        else:
+            defaults = values
+
+        # delegate the default properties to the properties field
+        for name, field in self._fields.items():
+            if field.type == 'properties':
+                defaults[field.name] = field._add_default_values(self.env, defaults)
+
         return defaults
 
     @classmethod
@@ -6730,6 +6745,19 @@ class BaseModel(metaclass=MetaModel):
 
         # make a snapshot based on the initial values of record
         snapshot0 = Snapshot(record, nametree, fetch=(not first_call))
+
+        for name in initial_values:
+            # TODO: make the onchange work on properties field, not sure it's correct.
+            # The parent field on "record" can be False, if it was changed, (even if
+            # if was changed to a not Falsy value) because of
+            # >>> initial_values = dict(values, **dict.fromkeys(names, False)) <<<
+            # If it's the case when we will read the properties field on this record,
+            # it will return False as well (no parent == no definition) but we need
+            # "record" to have the old value to be able to compare it with the new one
+            # and trigger the onchange if necessary.
+            field = self._fields.get(name)
+            if field.type == 'properties':
+                snapshot0[name] = initial_values[name]
 
         # store changed values in cache; also trigger recomputations based on
         # subfields (e.g., line.a has been modified, line.b is computed stored

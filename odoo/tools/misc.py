@@ -1708,3 +1708,26 @@ def street_split(street):
         'street_number': results[1].strip(),
         'street_number2': results[2],
     }
+
+
+def is_list_of(value, item_type):
+    """Return True if the given value is a list / tuple of the given type."""
+    if not isinstance(value, (list, tuple)):
+        return False
+
+    return all(isinstance(item, item_type) for item in value)
+
+
+def is_list(value, args):
+    """Return True if the given value is a list / tuple with the given type in the right order."""
+    if not isinstance(value, (list, tuple)):
+        return False
+
+    if len(value) != len(args):
+        return False
+
+    for arg, item in zip(args, value):
+        if not isinstance(item, arg):
+            return False
+
+    return True

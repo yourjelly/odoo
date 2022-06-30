@@ -8,9 +8,11 @@ from datetime import date, datetime, time
 from operator import attrgetter
 from xmlrpc.client import MAXINT
 import base64
+import copy
 import binascii
 import enum
 import itertools
+import json
 import logging
 import warnings
 
@@ -21,7 +23,7 @@ import pytz
 from .tools import (
     float_repr, float_round, float_compare, float_is_zero, html_sanitize, human_size,
     pg_varchar, ustr, OrderedSet, pycompat, sql, date_utils, unique,
-    image_process, merge_sequences, SQL_ORDER_BY_TYPE,
+    image_process, merge_sequences, SQL_ORDER_BY_TYPE, is_list_of, is_list,
 )
 from .tools import DEFAULT_SERVER_DATE_FORMAT as DATE_FORMAT
 from .tools import DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
@@ -40,6 +42,8 @@ IR_MODELS = (
     'ir.model', 'ir.model.data', 'ir.model.fields', 'ir.model.fields.selection',
     'ir.model.relation', 'ir.model.constraint', 'ir.module.module',
 )
+
+NoneType = type(None)
 
 _logger = logging.getLogger(__name__)
 _schema = logging.getLogger(__name__[:-7] + '.schema')
@@ -2875,6 +2879,11 @@ class Many2one(_Relational):
         return records.pool[self.comodel_name](records.env, ids, prefetch_ids)
 
     def convert_to_read(self, value, record, use_name_get=True):
+        return self._convert_to_read(value, record, use_name_get)
+
+    @classmethod
+    def _convert_to_read(cls, value, record, use_name_get=True):
+        """Class method that can be used without field instantiation."""
         if use_name_get and value:
             # evaluate name_get() as superuser, because the visibility of a
             # many2one field value (id and name) depends on the current record's
@@ -3057,6 +3066,499 @@ class Many2oneReference(Integer):
                     continue
             model_ids[model].add(record.id)
         return model_ids
+
+
+class Json(Field):
+    type = 'json'
+    column_type = ('json', 'json')
+
+    JSON_TYPES = str, dict, list, int, float, bool, NoneType
+
+    def convert_to_column(self, value, record, values=None, validate=True):
+        if not value:
+            return None
+
+        if isinstance(value, str):
+            return value
+
+        assert isinstance(value, self.JSON_TYPES), f"Wrong type {type(value)!r}"
+
+        return json.dumps(value)
+
+    def convert_to_cache(self, value, record, validate=True):
+        return self.convert_to_column(value, record, validate)
+
+    def convert_to_record(self, value, record):
+        if not value:
+            return False
+
+        if isinstance(value, self.JSON_TYPES) and not isinstance(value, str):
+            return value
+
+        return json.loads(value)
+
+
+class Properties(Json):
+    """Field that contains a list of properties (aka "sub-field").
+
+    The "parent_record" define the field used to find the parent of the current record.
+    The parent must have a JSON field "parent_field" that contains the properties
+    definition (type of each property, default value)...
+
+    Only the value of each property is stored on the child. When we read the properties
+    field, we will read the definition of the parent, and merge it with the value of
+    the child. So the web client know the type of each property,...
+    """
+    type = 'properties'
+    copy = False
+    readonly = False
+    required = False
+
+    parent_record = None  # field on the current model that point to the parent
+    parent_field = None   # field on the parent which defined the Properties field definition
+
+    ALLOWED_TYPES = (
+        'boolean', 'integer', 'float', 'char', 'date',
+        'datetime', 'many2one', 'many2many', 'selection', 'tags',
+    )
+
+    def _setup_attrs(self, model_class, name):
+        super()._setup_attrs(model_class, name)
+        if self.parent_record:
+            # if we change the parent field, we should invalidate the cache here
+            self._depends = (self.parent_record, )
+
+        assert not self.compute, "Compute not supported on Properties field"
+
+    def convert_to_column(self, value, record, values=None, validate=True):
+        if not value:
+            return None
+
+        if isinstance(value, str):
+            # assume already JSONified
+            return value
+
+        assert isinstance(value, (list, dict)), f"Wrong property type {type(value)!r}"
+
+        if isinstance(value, list):
+            # Convert the list with all definition into a simple dict
+            # {name: value} to store the strict minimum on the child
+            value = self._list_remove_display_name(value)
+            value = self._list_to_dict(value)
+
+        return json.dumps(value)
+
+    def convert_to_cache(self, value, record, validate=True):
+        return self.convert_to_column(value, record, validate)
+
+    def convert_to_read(self, value, record, use_name_get=True):
+        """Return the value used in a read / search_read.
+
+        The value might contains the name_get of the many2one / many2many.
+        """
+        values = super().convert_to_read(value, record, use_name_get)
+        properties_definition = self._get_properties_definition(record) or []
+        if not values or not properties_definition:
+            return properties_definition
+
+        if isinstance(values, str):
+            values = json.loads(values)
+
+        if isinstance(values, dict):
+            values = self._dict_to_list(values, properties_definition)
+            values = self._parse_json_types(values, record.env)
+
+        assert isinstance(values, list), f"Wrong property type {type(values)!r}"
+
+        values = self._validate_values(values)
+        if use_name_get:
+            values = self._list_add_display_name(values, record.env)
+
+        return values
+
+    def convert_to_record(self, value, record):
+        return self.convert_to_read(value, record, use_name_get=False)
+
+    def convert_to_onchange(self, value, record, names):
+        # TODO: make the onchange work, not sure it's the right way to do it
+        # The record in argument has the old parent id, so when we call the super,
+        # convert_to_read is called, and the properties definition are fetched
+        # on the old parent, breaking the onchange
+        if not isinstance(value, list):
+            value = super().convert_to_onchange(value, record, names)
+
+        # add default values
+        for property_definition in value:
+            if property_definition.get('value') is None:
+                property_definition['value'] = property_definition.get('default')
+        return value
+
+    def _get_properties_definition(self, record):
+        parent = record[self.parent_record]
+        if not parent:
+            return
+
+        properties_definition = parent[self.parent_field]
+        return properties_definition
+
+    @classmethod
+    def _list_add_display_name(cls, values_list, env, value_key='value'):
+        """Add the name_get for each many2one / many2many properties.
+
+        :param values_list: List of properties definition and values
+        :param env: environment
+        """
+        for property_definition in values_list:
+            property_type = property_definition.get('type')
+            property_value = property_definition.get(value_key)
+            property_model = property_definition.get('model')
+            if not property_model:
+                continue
+
+            if property_type == 'many2one' and isinstance(property_value, int):
+                property_value = env[property_model].browse(property_value).name_get()
+                property_definition[value_key] = property_value[0] if property_value else False
+
+            elif property_type == 'many2many' and is_list_of(property_value, int):
+                property_value = env[property_model].browse(property_value).name_get()
+                property_definition[value_key] = property_value or False
+
+        return values_list
+
+    @classmethod
+    def _validate_values(self, values_list, value_key='value'):
+        """Remove any incoherent properties values.
+
+        :param values_list: List of properties definition with value
+        :param value_key: The dict key which contains the values to validate
+        """
+        for values in values_list:
+            property_value = values.get(value_key)
+            if not property_value:
+                continue
+
+            property_type = values.get('type')
+            if property_type == 'many2one' and not isinstance(property_value, int):
+                values[value_key] = False
+
+            elif property_type == 'many2many':
+                if not is_list_of(property_value, int):
+                    values[value_key] = False
+                elif len(property_value) != len(set(property_value)):
+                    # remove duplicated value and preserve order
+                    values[value_key] = list(dict.fromkeys(property_value))
+
+        return values_list
+
+    @classmethod
+    def _parse_json_types(cls, values_list, env):
+        """Parse the value stored in the JSON.
+
+        Check for records existence, if we removed a selection option,...
+
+        :param values_list: List of properties definition and values
+        :param env: environment
+        """
+        for property_definition in values_list:
+            property_value = property_definition.get('value')
+            property_type = property_definition.get('type')
+            current_model = property_definition.get('model')
+
+            assert property_type in cls.ALLOWED_TYPES, f'Wrong property type {property_type!r}'
+
+            if property_type == 'many2one' and property_value:
+                # [1337, 'res.partner']
+                assert is_list(property_value, [int, str]), f'Wrong many2one value: {property_value!r}.'
+
+                res_id, res_model = property_value
+                if not current_model or res_model != current_model:
+                    # the model on the child does not match the model on the parent
+                    # maybe we have changed the model on the parent, we should reset
+                    # the many2one value
+                    property_value = False
+                else:
+                    # many2one might have been deleted
+                    property_value = env[res_model].browse(res_id).exists().id
+
+            elif property_type == 'many2many' and property_value:
+                # [[1337, 1338, 1339], 'res.partner']
+                assert is_list(property_value, [(list, tuple), str]), f'Wrong many2many value: {property_value!r}.'
+                assert is_list_of(property_value[0], int), f'Wrong many2many value: {property_value!r}.'
+
+                res_ids, res_model = property_value
+                if isinstance(res_ids, int):
+                    res_ids = [res_ids]
+
+                if not current_model or res_model != current_model:
+                    # the model on the child does not match the model on the parent
+                    # maybe we have changed the model on the parent, we should reset
+                    # the many2many value
+                    property_value = False
+                else:
+                    # many2many might have been deleted
+                    property_value = env[res_model].browse(res_ids).exists().ids
+
+            elif property_type == 'boolean':
+                # E.G. convert zero to False
+                property_value = bool(property_value)
+
+            elif property_value and property_type == 'selection':
+                # check if the selection option still exists
+                options = property_definition.get('selection') or []
+                options = [option[0] for option in options if option and len(option) == 2]
+                if property_value not in options:
+                    # maybe the option has been removed on the parent
+                    property_value = False
+
+            elif property_value and property_type == 'tags':
+                # remove all tags that are not defined on the parent
+                all_tags = [tag[0] for tag in property_definition.get('tags') or []]
+                property_value = [tag for tag in property_value if tag in all_tags]
+
+            property_definition['value'] = property_value
+
+        return values_list
+
+    @classmethod
+    def _list_remove_display_name(cls, values_list, value_key='value'):
+        """Remove the display name received bu the web client for the relational properties.
+
+        - many2one: (35, 'Bob') -> 35
+        - many2many: [(35, 'Bob'), (36, 'Alice')] -> [35, 36]
+
+        :param values_list: List of properties definition with properties value
+        :param value_key: In which dict key we need to remove the display name
+        """
+        for property_definition in values_list:
+            if not isinstance(property_definition, dict) or not property_definition.get('id'):
+                continue
+
+            property_value = property_definition.get(value_key)
+            if not property_value:
+                continue
+
+            property_type = property_definition.get('type')
+
+            if property_type == 'many2one' and is_list(property_value, [int, (str, NoneType)]):
+                property_definition[value_key] = property_value[0]
+
+            elif property_type == 'many2many':
+                if is_list_of(property_value, (list, tuple)):
+                    # [(35, 'Admin'), (36, 'Demo')] -> [35, 36]
+                    property_definition[value_key] = [
+                        many2many_value[0]
+                        for many2many_value in property_value
+                    ]
+
+                # Should be list of ids at this point
+                assert is_list_of(property_definition[value_key], int)
+
+        return values_list
+
+    @classmethod
+    def _list_to_dict(cls, values_list):
+        """Convert a list of properties with definition into a dict {name: value}.
+
+        To not repeat data in database, we only store the value of each property on
+        the child. The properties definition is stored on the parent.
+
+        :param values_list: List of properties definition and value
+        :return: Generate a dict {name: value} from this definitions / values list
+        """
+        assert is_list_of(values_list, dict)
+
+        dict_value = {}
+        for property_definition in values_list:
+            property_value = property_definition.get('value')
+            property_type = property_definition.get('type')
+            property_model = property_definition.get('model')
+
+            if property_type in ('many2one', 'many2many') and property_model and property_value:
+                # many2one: (1337, "Mitchel Admin")
+                # keep only the record id in the dict that will be stored in database
+                # many2many: [(1336, "Marc Demo"), (1337, "Mitchel Admin")]
+                # [(1, 2, 3), 'res.partner']
+                property_value = [property_value, property_model]
+
+            dict_value[property_definition['id']] = property_value
+
+        return dict_value
+
+    @classmethod
+    def _dict_to_list(cls, values_dict, properties_definition):
+        """Convert a dict of {property: value} into a list of property definition with values.
+
+        :param values_dict: JSON value coming from the child table
+        :param properties_definition: Properties definition coming from the parent table
+        :return: Merge both value into a list of properties with value
+            Ignore every values in the child that is not defined on the parent.
+        """
+        assert is_list_of(properties_definition, dict)
+        values_list = copy.deepcopy(properties_definition)
+
+        for property_definition in values_list:
+            property_definition['value'] = values_dict.get(property_definition['id'])
+
+        return values_list
+
+    def _add_default_values(self, env, values):
+        """Read the properties definition to add default values.
+
+        Default values are defined on the parent, in the 'default' key.
+
+        :param env: environment
+        :param values: All values that will be written on the record
+        :return: Return the default values in the "dict" format
+        """
+        properties_values = values.get(self.name) or {}
+
+        if isinstance(properties_values, list):
+            properties_values = self._list_remove_display_name(properties_values)
+            properties_values = self._list_to_dict(properties_values)
+
+        if not values.get(self.parent_record):
+            # parent is not given in the value, can not find properties definition
+            return properties_values
+
+        parent_id = values[self.parent_record]
+        assert isinstance(parent_id, (int, BaseModel))
+
+        if isinstance(parent_id, int):
+            # retrieve the parent record
+            current_model = env[self.model_name]
+            parent_field = current_model._fields[self.parent_record]
+            parent_model_name = parent_field.comodel_name
+            parent_id = env[parent_model_name].browse(parent_id)
+
+        properties_definition = parent_id[self.parent_field]
+        if not properties_definition:
+            return properties_values
+
+        for property_definition in properties_definition:
+            property_id = property_definition.get('id')
+            if properties_values.get(property_id) is None:
+                property_type = property_definition.get('type')
+                default = property_definition.get('default')
+                if property_type in ('many2one', 'many2many') and default:
+                    # need to add the model for the child value
+                    # 14 => (14, 'res.partner')
+                    properties_values[property_id] = [default, property_definition.get('model')]
+                else:
+                    properties_values[property_id] = property_definition.get('default') or False
+
+        return properties_values
+
+
+class PropertiesDefinition(Json):
+    """Field used to define the properties definition (see the Properties field).
+
+    Allow us to do some verification on the properties definition.
+    """
+    type = 'properties_definition'
+    copy = False
+    readonly = False
+    required = False
+
+    REQUIRED_KEYS = 'id', 'type'
+    ALLOWED_KEYS = 'id', 'string', 'type', 'model', 'default', 'selection', 'tags'
+
+    def convert_to_column(self, value, record, values=None, validate=True):
+        if not value:
+            return []
+
+        if isinstance(value, str):
+            value = json.loads(value)
+
+        if not isinstance(value, list):
+            raise ValueError(f'Wrong properties definition type {type(value)!r}')
+
+        value = Properties._list_remove_display_name(value, value_key='default')
+
+        self._validate_properties_definition(value, record.env)
+
+        return super().convert_to_column(value, record, values, validate)
+
+    def convert_to_cache(self, value, record, validate=True):
+        return self.convert_to_column(value, record, validate)
+
+    def convert_to_read(self, value, record, use_name_get=True):
+        values_list = super().convert_to_read(value, record, use_name_get)
+
+        if not values_list:
+            return values_list
+
+        values_list = [
+            values for values in values_list
+            if all(values.get(key) for key in self.REQUIRED_KEYS)
+        ]
+
+        values_list = Properties._validate_values(values_list, value_key='default')
+        if use_name_get:
+            values_list = Properties._list_add_display_name(values_list, record.env, value_key='default')
+
+        for property_definition in values_list:
+            # check if the model still exists in the environment, the module of the
+            # model might have been uninstalled so the model might not exist anymore
+            property_model = property_definition.get('model')
+            if property_model and property_model not in record.env:
+                property_definition['model'] = property_model = False
+
+        return values_list
+
+    @classmethod
+    def _validate_properties_definition(cls, properties_definition, env):
+        """Raise an error if the property definition is not valid."""
+        properties_ids = set()
+
+        for property_definition in properties_definition:
+            property_definition_keys = set(property_definition.keys())
+
+            invalid_keys = property_definition_keys - set(cls.ALLOWED_KEYS)
+            if invalid_keys:
+                raise ValueError(
+                    'Some key are not allowed for a properties definition [%s].' %
+                    ', '.join(invalid_keys),
+                )
+
+            required_keys = set(cls.REQUIRED_KEYS) - property_definition_keys
+            if required_keys:
+                raise ValueError(
+                    'Some key are missing for a properties definition [%s].' %
+                    ', '.join(required_keys),
+                )
+
+            property_id = property_definition.get('id')
+            if not property_id or property_id in properties_ids:
+                raise ValueError('The property id is not set or duplicated.')
+            properties_ids.add(property_id)
+
+            property_type = property_definition.get('type')
+            if property_type and property_type not in Properties.ALLOWED_TYPES:
+                raise ValueError(f'Wrong property type {property_type!r}.')
+
+            model = property_definition.get('model')
+            if property_type in ('many2one', 'many2many') and model:
+                env[model].check_access_rights('read')
+
+            property_selection = property_definition.get('selection')
+            if property_selection:
+                if (not is_list_of(property_selection, (list, tuple))
+                   or not all(len(selection) == 2 for selection in property_selection)):
+                    raise ValueError(f'Wrong options {property_selection!r}.')
+
+                all_options = [option[0] for option in property_selection]
+                if len(all_options) != len(set(all_options)):
+                    raise ValueError('Some options are duplicated.')
+
+            property_tags = property_definition.get('tags')
+            if property_tags:
+                if (not is_list_of(property_tags, (list, tuple))
+                   or not all(len(tag) == 3 and isinstance(tag[2], int) for tag in property_tags)):
+                    raise ValueError(f'Wrong tags definition {property_tags!r}.')
+
+                all_tags = [tag[0] for tag in property_tags]
+                if len(all_tags) != len(set(all_tags)):
+                    raise ValueError('Some tags are duplicated.')
 
 
 class Command(enum.IntEnum):
