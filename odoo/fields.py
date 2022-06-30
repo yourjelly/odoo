@@ -8,9 +8,11 @@ from datetime import date, datetime, time
 from operator import attrgetter
 from xmlrpc.client import MAXINT
 import base64
+import copy
 import binascii
 import enum
 import itertools
+import json
 import logging
 import warnings
 
@@ -40,6 +42,8 @@ IR_MODELS = (
     'ir.model', 'ir.model.data', 'ir.model.fields', 'ir.model.fields.selection',
     'ir.model.relation', 'ir.model.constraint', 'ir.module.module',
 )
+
+NoneType = type(None)
 
 _logger = logging.getLogger(__name__)
 _schema = logging.getLogger(__name__[:-7] + '.schema')
@@ -253,6 +257,7 @@ class Field(MetaField('DummyField', (object,), {})):
     _extra_keys = ()                    # unknown attributes set on the field
     _direct = False                     # whether self may be used directly (shared)
     _toplevel = False                   # whether self is on the model's registry class
+    _convert_all_records = False        # convert_to_column will be called on all records
 
     automatic = False                   # whether the field is automatically created ("magic" field)
     inherited = False                   # whether the field is inherited (_inherits)
@@ -1092,11 +1097,17 @@ class Field(MetaField('DummyField', (object,), {})):
         # update towrite
         if self.store:
             towrite = records.env.all.towrite[self.model_name]
-            record = records[:1]
-            write_value = self.convert_to_write(cache_value, record)
-            column_value = self.convert_to_column(write_value, record)
-            for record in records.filtered('id'):
-                towrite[record.id][self.name] = column_value
+            if not self._convert_all_records:
+                record = records[:1]
+                write_value = self.convert_to_write(cache_value, record)
+                column_value = self.convert_to_column(write_value, record)
+                for record in records.filtered('id'):
+                    towrite[record.id][self.name] = column_value
+            else:
+                for record in records:
+                    write_value = self.convert_to_write(cache_value, record)
+                    column_value = self.convert_to_column(write_value, record)
+                    towrite[record.id][self.name] = column_value
 
         return records
 
@@ -2875,6 +2886,11 @@ class Many2one(_Relational):
         return records.pool[self.comodel_name](records.env, ids, prefetch_ids)
 
     def convert_to_read(self, value, record, use_name_get=True):
+        return self._convert_to_read(value, record, use_name_get)
+
+    @classmethod
+    def _convert_to_read(cls, value, record, use_name_get=True):
+        """Class method that can be used without field instantiation."""
         if use_name_get and value:
             # evaluate name_get() as superuser, because the visibility of a
             # many2one field value (id and name) depends on the current record's
@@ -3057,6 +3073,352 @@ class Many2oneReference(Integer):
                     continue
             model_ids[model].add(record.id)
         return model_ids
+
+
+class Json(Field):
+    type = 'json'
+    column_type = ('json', 'json')
+
+    JSON_TYPES = str, dict, list, int, float, bool, NoneType
+
+    def convert_to_column(self, value, record, values=None, validate=True):
+        if not value:
+            return None
+
+        if isinstance(value, str):
+            return value
+
+        assert isinstance(value, self.JSON_TYPES), f"Wrong type {type(value)!r}"
+
+        return json.dumps(value)
+
+    def convert_to_cache(self, value, record, validate=True):
+        return self.convert_to_column(value, record, validate)
+
+    def convert_to_record(self, value, record):
+        if not value:
+            return False
+
+        if isinstance(value, self.JSON_TYPES) and not isinstance(value, str):
+            return value
+
+        return json.loads(value)
+
+
+class PropertiesList(list):
+    """Extend the python list type to ease to usage of the properties field.
+
+    Allow us to get a property value by using the dict syntax properties['property_name']
+    (we iterate over the list to return the value).
+    """
+
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            # Standard list[1337] getter
+            return super().__getitem__(key)
+
+        # dict like getter
+        for property_definition in self:
+            if not isinstance(property_definition, dict):
+                continue
+
+            if property_definition.get('id') == key:
+                return property_definition.get('value')
+
+    def __setattr__(self, key, value):
+        raise ValueError('You can not write on properties field using this object.')
+
+    def __setitem__(self, key, value):
+        raise ValueError('You can not write on properties field using this object.')
+
+
+class Properties(Json):
+    """Field that contains a list of properties (aka "sub-field").
+
+    The "parent_record" define the field used to find the parent of the current record.
+    The parent must have a JSON field "parent_field" that contains the properties
+    definition (type of each property, default value)...
+
+    Only the value of each property is stored on the child. When we read the properties
+    field, we will read the definition of the parent, and merge it with the value of
+    the child. So the web client know the type of each property,...
+    """
+    type = 'properties'
+    copy = False
+    readonly = False
+    required = False
+
+    _convert_all_records = True
+
+    parent_record = None  # field on the current model that point to the parent
+    parent_field = None   # field on the parent which defined the Properties field definition
+
+    def _setup_attrs(self, model_class, name):
+        super()._setup_attrs(model_class, name)
+        if self.parent_record:
+            # if we change the parent field, we should invalidate the cache here
+            self._depends = (self.parent_record, )
+
+        assert not self.compute, "Compute not supported on Properties field"
+
+    def convert_to_column(self, value, record, values=None, validate=True):
+        if not value:
+            return None
+
+        if isinstance(value, str):
+            # assume already JSONified
+            return value
+
+        assert isinstance(value, (list, dict)), f"Wrong property type {type(value)!r}"
+
+        if isinstance(value, list):
+            # Convert the list with all definition into a simple dict
+            # {name: value} to store the strict minimum on the child
+            value = self._list_to_dict(value)
+
+        value = self._convert_to_json_types(value)
+        return json.dumps(value)
+
+    def convert_to_cache(self, value, record, validate=True):
+        return self.convert_to_column(value, record, validate)
+
+    def convert_to_record(self, value, record):
+        """Read the data in database and filter based on the parent field definition."""
+        values_dict = super().convert_to_record(value, record)
+
+        if not record:
+            # no record, maybe a new record is created
+            return []
+
+        assert len(record) == 1
+
+        properties_definition = self._get_properties_definition(record) or []
+
+        if not values_dict or not properties_definition:
+            return PropertiesList(properties_definition)
+
+        assert isinstance(values_dict, (str, dict)), f"Wrong property type {type(values_dict)!r}"
+
+        if isinstance(values_dict, str):
+            values_dict = json.loads(values_dict)
+
+        values_list = self._dict_to_list(values_dict, properties_definition)
+        values_list = self._parse_json_types(values_list, record.env)
+
+        return values_list
+
+    def convert_to_read(self, value, record, use_name_get=True):
+        """Return the value used in a read / search_read.
+
+        The value might contains the name_get of the many2one / many2many.
+        """
+        values_list = super().convert_to_read(value, record, use_name_get)
+        assert isinstance(values_list, list), f"Wrong properties type {type(value)!r}"
+
+        for property_definition in values_list:
+            property_type = property_definition.get('type')
+            property_value = property_definition.get('value')
+            if property_type == 'many2one' and isinstance(property_value, BaseModel):
+                property_definition['value'] = Many2one._convert_to_read(
+                    property_value, record, use_name_get)
+
+            elif property_type == 'many2many' and isinstance(property_value, BaseModel):
+                if use_name_get:
+                    property_definition['value'] = property_value.name_get()
+                else:
+                    property_definition['value'] = property_value.ids
+
+        return values_list
+
+    def _get_properties_definition(self, record):
+        parent = record[self.parent_record]
+        if not parent:
+            return
+
+        properties_definition = parent[self.parent_field]
+        return properties_definition
+
+    @classmethod
+    def _convert_to_json_types(cls, values_dict):
+        """Convert all value in the list of properties to make them JSONifiable.
+
+        Convert the dict containing the properties values to be able
+        to insert it in the SQL child table.
+
+        :param values_dict: Dict {name: value}
+        """
+        # make sure everything is jsonifiable
+        for property_id, property_value in values_dict.items():
+            if isinstance(property_value, datetime):
+                values_dict[property_id] = Datetime.to_string(property_value)
+
+            elif isinstance(property_value, date):
+                values_dict[property_id] = Date.to_string(property_value)
+
+            elif isinstance(property_value, BaseModel) and len(property_value) == 1:
+                values_dict[property_id] = property_value.id
+
+            elif isinstance(property_value, BaseModel) and len(property_value) > 1:
+                values_dict[property_id] = property_value.ids
+
+            elif isinstance(property_value, BaseModel) and not property_value:
+                values_dict[property_id] = False
+
+            assert isinstance(values_dict[property_id], cls.JSON_TYPES), \
+                f"Wrong property type {type(property_value)!r}"
+
+        return values_dict
+
+    @classmethod
+    def _parse_json_types(cls, values_list, env):
+        """Parse the value stored in the JSON.
+
+        E.G. the date, datetime, many2one record...
+
+        :param values_list: List of properties definition and values
+        :param env: environment
+        """
+        for property_definition in values_list:
+            property_type = property_definition.get('type')
+            property_value = property_definition.get('value')
+
+            if property_type == 'many2one' and isinstance(property_value, int):
+                model = property_definition.get('model')
+                if not model:
+                    property_definition['value'] = False
+                else:
+                    # many2one might have been deleted
+                    property_definition['value'] = env[model].browse(property_value).exists()
+
+            elif property_type == 'many2many' and property_value:
+                if isinstance(property_value, int):
+                    property_value = [property_value]
+
+                model = property_definition.get('model')
+                if not model:
+                    property_definition['value'] = False
+                else:
+                    # many2many might have been deleted
+                    property_definition['value'] = env[model].browse(property_value).exists()
+
+            elif property_type == 'boolean':
+                # E.G. convert zero to False
+                property_definition['value'] = bool(property_value)
+
+            elif not isinstance(property_value, str):
+                # nothing to parse
+                continue
+
+            elif property_type == 'datetime':
+                property_definition['value'] = Datetime.to_datetime(property_value)
+
+            elif property_type == 'date':
+                property_definition['value'] = Date.to_date(property_value)
+
+            elif property_type == 'selection':
+                options = property_definition.get('selection') or []
+                options = [option[0] for option in options if option and len(option) == 2]
+                if property_value not in options:
+                    # maybe the option has been removed on the parent
+                    property_definition['value'] = False
+
+            elif property_type not in ('char', ):
+                raise ValueError(f'Wrong property type {property_type!r}')
+
+        return values_list
+
+    @classmethod
+    def _list_to_dict(cls, values_list):
+        """Convert a list of properties with definition into a dict {name: value}.
+
+        To not repeat data in database, we only store the value of each property on
+        the child. The properties definition is stored on the parent.
+
+        :param values_list: List of properties definition and value
+        :return: Generate a dict {name: value} from this definitions / values list
+        """
+        dict_value = {}
+        for property_definition in values_list:
+            if not isinstance(property_definition, dict) or not property_definition.get('id'):
+                continue
+
+            property_value = property_definition.get('value')
+            property_type = property_definition.get('type')
+
+            if (property_type == 'many2one'
+               and isinstance(property_value, tuple)
+               and len(property_value) == 2):
+                # many2one: (1337, "Mitchel Admin")
+                # keep only the record id in the dict that will be stored in database
+                property_value = property_value[0]
+
+            if (property_type == 'many2many'
+               and isinstance(property_value, (list, tuple))
+               and all(isinstance(line, (list, tuple)) and len(line) == 2 for line in property_value)):
+                # many2many: [(1336, "Marc Demo"), (1337, "Mitchel Admin")]
+                # keep only the record ids in the dict that will be stored in database
+                property_value = [line[0] for line in property_value]
+
+            dict_value[property_definition['id']] = property_value
+
+        return dict_value
+
+    @classmethod
+    def _dict_to_list(cls, values_dict, properties_definition):
+        """Convert a dict of {property: value} into a list of property definition with values.
+
+        :param values_dict: JSON value coming from the child table
+        :param properties_definition: Properties definition coming from the parent table
+        :return: Merge both value into a list of properties with value
+            Ignore every values in the child that is not defined on the parent.
+        """
+        values_list = copy.deepcopy(properties_definition)
+
+        for property_definition in values_list:
+            if not isinstance(property_definition, dict) or not property_definition.get('id'):
+                continue
+
+            property_definition['value'] = values_dict.get(property_definition['id'])
+
+        return PropertiesList(values_list)
+
+    def _add_default_values(self, env, values):
+        """Read the properties definition to add default values.
+
+        Default values are defined on the parent, in the 'default' key.
+
+        :param env: environment
+        :param values: All values that will be written on the record
+        """
+        properties_values = values.get(self.name) or {}
+
+        if isinstance(properties_values, list):
+            properties_values = self._list_to_dict(properties_values)
+
+        if not values.get(self.parent_record):
+            # parent is not given in the value, can not find properties definition
+            return properties_values
+
+        parent_id = values[self.parent_record]
+        assert isinstance(parent_id, (int, BaseModel))
+
+        if isinstance(parent_id, int):
+            # retrieve the parent record
+            current_model = env[self.model_name]
+            parent_field = current_model._fields[self.parent_record]
+            parent_model_name = parent_field.comodel_name
+            parent_id = env[parent_model_name].browse(parent_id)
+
+        properties_definition = parent_id[self.parent_field]
+        if not properties_definition:
+            return properties_values
+
+        for property_definition in properties_definition:
+            property_id = property_definition.get('id')
+            if properties_values.get(property_id) is None:
+                properties_values[property_id] = property_definition.get('default') or False
+
+        return properties_values
 
 
 class Command(enum.IntEnum):

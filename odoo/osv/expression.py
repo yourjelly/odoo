@@ -123,8 +123,8 @@ from datetime import date, datetime, time
 from psycopg2.sql import Composable, SQL
 
 import odoo.modules
-from ..models import BaseModel
 from odoo.tools import pycompat, Query, _generate_table_alias
+from ..models import BaseModel, regex_pg_name
 
 
 # Domain operators.
@@ -710,6 +710,14 @@ class expression(object):
                 query = comodel.with_context(**field.context)._where_calc(domain)
                 subquery, subparams = query.select('"%s"."%s"' % (comodel._table, field.inverse_name))
                 push(('id', 'inselect', (subquery, subparams)), model, alias, internal=True)
+
+            elif field.type in ('json', 'properties'):
+                assert len(path) == 2
+                assert regex_pg_name.match(path[1]), "Wrong property name"
+                assert operator in ('=', '!=', 'like', 'ilike')
+
+                expr = f"""("{alias}"."{path[0]}" ->> '{path[1]}' {operator} (%s))"""
+                push_result(expr, [right])
 
             elif len(path) > 1 and field.store and field.auto_join:
                 raise NotImplementedError('auto_join attribute not supported on field %s' % field)
