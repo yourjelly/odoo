@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
+    <t t-name="sale.SaleProgressBarField" owl="1">
+        <a t-if="state.isUnset" t-on-click.prevent="onClick" href="#">Click to define an invoicing target</a>
+        <ProgressBarField t-else="" t-props="props"/>
+    </t>
+
     <t t-name="web.ProgressBarField" owl="1">
         <t t-if="props.readonly">
             <div class="o_progressbar">

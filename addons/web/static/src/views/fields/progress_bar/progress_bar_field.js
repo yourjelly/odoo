@@ -121,3 +121,27 @@ ProgressBarField.extractProps = (fieldName, record, attrs) => {
 };
 
 registry.category("fields").add("progressbar", ProgressBarField);
+
+class SaleProgressBarField extends Component {
+    setup() {
+        this.state = useState({
+            isUnset: !this.props.maxValue.value,
+        });
+        onWillUpdateProps(() => {
+            this.state.isUnset = !this.props.record.data[this.props.maxValue.fieldName];
+        });
+    }
+
+    onClick() {
+        this.state.isUnset = false;
+    }
+}
+SaleProgressBarField.template = "sale.SaleProgressBarField";
+SaleProgressBarField.components = { ProgressBarField };
+SaleProgressBarField.extractProps = ProgressBarField.extractProps;
+SaleProgressBarField.props = ProgressBarField.props;
+SaleProgressBarField.defaultProps = ProgressBarField.defaultProps;
+SaleProgressBarField.displayName = ProgressBarField.displayName;
+SaleProgressBarField.supportedTypes = ProgressBarField.supportedTypes;
+
+registry.category("fields").add("saleprogressbar", SaleProgressBarField);

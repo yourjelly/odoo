@@ -52,11 +52,11 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.module("ProgressBarField");
 
-    QUnit.test("ProgressBarField: max_value should update", async function (assert) {
+    QUnit.debug("ProgressBarField: max_value should update", async function (assert) {
         assert.expect(3);
 
         serverData.models.partner.records = serverData.models.partner.records.slice(0, 1);
-        serverData.models.partner.records[0].float_field = 2;
+        serverData.models.partner.records[0].float_field = 0;
 
         serverData.models.partner.onchanges = {
             display_name(obj) {
@@ -72,37 +72,11 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="display_name" />
-                    <field name="float_field" invisible="1" />
-                    <field name="int_field" widget="progressbar" options="{'current_value': 'int_field', 'max_value': 'float_field'}" />
+                    <field name="float_field"/>
+                    <field name="int_field" widget="saleprogressbar" options="{'editable': true, 'current_value': 'int_field', 'max_value': 'float_field'}" />
                 </form>`,
             resId: 1,
-            mockRPC(route, { method, args }) {
-                if (method === "write") {
-                    assert.deepEqual(
-                        args[1],
-                        { int_field: 999, float_field: 5, display_name: "new name" },
-                        "New value of progress bar saved"
-                    );
-                }
-            },
         });
-
-        assert.strictEqual(
-            target.querySelector(".o_progressbar_value").textContent,
-            "10 / 2",
-            "The initial value of the progress bar should be correct"
-        );
-        // The view should be in edit mode
-        await click(target.querySelector(".o_form_button_edit"));
-
-        await editInput(target, ".o_field_widget[name=display_name] input", "new name");
-        await click(target.querySelector(".o_form_button_save"));
-
-        assert.strictEqual(
-            target.querySelector(".o_progressbar_value").textContent,
-            "999 / 5",
-            "The value of the progress bar should be correct after the update"
-        );
     });
 
     QUnit.test(
