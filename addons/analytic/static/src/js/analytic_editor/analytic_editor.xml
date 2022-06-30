@@ -3,12 +3,13 @@
 
     <t t-name="analytic_editor" owl="1">
         <div class="analytic_editor" t-ref="analyticEditor" t-on-keydown="onKeydown">
+            <TagsList tags="tags" t-if="!state.showDropdown"/>
             <t t-if="!props.readonly">
                 <div tabindex="0" type="text" class="o_input" t-ref="mainInput" t-on-focus="onMainInputFocus" t-on-keydown="onMainInputKeydown"/>
                 <div class="analytic_o2m_editor_popup dropdown-menu show rounded py-0" t-if="state.showDropdown" t-ref="editorDropdown">
                     <div class="popover-header">
                         <div class="d-flex">
-                            <div class="h5 mt-2 mr-auto"><t t-esc="dropdownHeader"/></div>
+                            <div class="h5 mt-2 mr-auto"><t t-esc="list.length"/> records</div>
                             <div class="popupButtons">
                                 <!-- <span t-if="template_field_value" class="btn btn-outline-primary o_button" t-on-click="onOpenExisting"><i class="fa fa-external-link o_external_button"/></span> -->
                                 <!-- <span t-if="tags.length" class="btn btn-outline-primary o_button" t-on-click="onSaveNew"><i class="fa fa-save"/></span> -->
@@ -29,10 +30,24 @@
                                 </tr>
                                 <t t-foreach="listByGroup(plan)" t-as="dist_tag" t-key="dist_tag.id">
                                     <tr>
-                                        <td>
+                                        <td class="o_analytic_account_name">
+                                            <Many2XAutocomplete
+                                                value="dist_tag.data.analytic_account_id ? dist_tag.data.analytic_account_id[1] : dist_tag.data.acc_name || ''"
+                                                id="dist_tag.id"
+                                                placeholder="many2OnePlaceholder"
+                                                resModel="many2OneModel"
+                                                autoSelect="true"
+                                                fieldString="many2OneFieldString"
+                                                activeActions="many2OneActiveActions"
+                                                update.bind="(value, params = {}) => this.updateTag(dist_tag, value, params)"
+                                                quickCreate="false"
+                                                context="{}"
+                                                getDomain.bind="() => this.getMany2OneDomain(plan)"
+                                                autocomplete_container="autocompleteContainerRef"
+                                            />
                                         </td>
-                                        <td>
-                                            <input t-on-click.stop="" type="text"/>
+                                        <td class="o_analytic_percentage">
+                                            <input t-on-click.stop="" type="text" t-att-value="dist_tag.data.percentage"/>
                                         </td>
                                         <td>
                                             <span class="fa fa-trash-o" t-on-click="() => this.deleteTag(dist_tag.id)"/>

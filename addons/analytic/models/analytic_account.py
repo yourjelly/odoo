@@ -209,6 +209,9 @@ class AccountAnalyticDistributionTag(models.Model):
     acc_id = fields.Integer(related='analytic_account_id.id')
     acc_name = fields.Char(related='analytic_account_id.name')  # or should we use display name? TODO: fix label warnings
 
+    # extra fields for the widget
+    adding_to_group_id = fields.Many2one('account.analytic.group')
+
     # consider using reference fields instead
     # res_model = fields.Char('Resource Model', help="The database object this analytic distribution tag is attached to")
     # res_id = fields.Many2oneReference('Resource ID', model_field='res_model',
