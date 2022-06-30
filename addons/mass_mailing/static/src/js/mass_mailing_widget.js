@@ -326,7 +326,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
             {
                 groupName: 'Marketing Tools',
                 title: 'Dynamic Placeholder',
-                description: ' Insert personalized content',
+                description: 'Insert personalized content',
                 fontawesome: 'fa-magic',
                 callback: () => {
                     const baseModel = this.recordData && this.recordData.mailing_model_real ? this.recordData.mailing_model_real : undefined;
@@ -337,8 +337,31 @@ var MassMailingFieldHtml = FieldHtml.extend({
                 },
             }];
 
+        options.powerboxFilters = [this._filterPowerBoxCommands.bind(this)];
 
         return options;
+    },
+    /**
+     * Prevent usage of the dynamic placeholder command inside widgets
+     * containing background images ( cover & masonry ).
+     *
+     * We cannot use dynamic placeholder in block containing background images
+     * because the email processing will flatten the text into the background
+     * image and this case the dynamic placeholder cannot be dynamic anymore.
+     *
+     * @param {Array} commands commands available in this wysiwyg
+     * @returns {Array} commands which can be used after the filter was applied
+     */
+    _filterPowerBoxCommands: function (commands) {
+        let selectionIsInForbidenSnippet = false;
+        if (this.wysiwyg && this.wysiwyg.odooEditor) {
+            const selection = this.wysiwyg.odooEditor.document.getSelection();
+            selectionIsInForbidenSnippet = this.wysiwyg.closestElement(
+                selection.anchorNode,
+                'div[data-snippet="s_cover"], div[data-snippet="s_masonry_block"]'
+            );
+        }
+        return selectionIsInForbidenSnippet ? commands.filter((o) => o.title !== "Dynamic Placeholder") : commands;
     },
 
     //--------------------------------------------------------------------------
