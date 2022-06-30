@@ -582,7 +582,7 @@ export function getCursorDirection(anchorNode, anchorOffset, focusNode, focusOff
  */
 export function getTraversedNodes(editable) {
     const document = editable.ownerDocument;
-    const range = getDeepRange(editable);
+    const range = getDeepRange(editable,{correctTripleClick:true});
     if (!range) return [];
     const iterator = document.createNodeIterator(range.commonAncestorContainer);
     let node;
