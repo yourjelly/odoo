@@ -9,6 +9,7 @@ import pytz
 
 from odoo import api, Command, fields, models, _
 from odoo.tools import ustr
+from odoo.tools.translate import code_translations
 
 REFERENCING_FIELDS = {None, 'id', '.id'}
 def only_ref_fields(record):
@@ -297,6 +298,8 @@ class IrFieldsConverter(models.AbstractModel):
 
     @api.model
     def _get_translations(self, types, src):
+        if not src:
+            return []
         types = tuple(types)
         # Cache translations so they don't have to be reloaded from scratch on
         # every row of the file
@@ -304,9 +307,22 @@ class IrFieldsConverter(models.AbstractModel):
         if tnx_cache.setdefault(types, {}) and src in tnx_cache[types]:
             return tnx_cache[types][src]
 
-        Translations = self.env['ir.translation']
-        tnx = Translations.search([('type', 'in', types), ('src', '=', src)])
-        result = tnx_cache[types][src] = [t.value for t in tnx if t.value is not False]
+        values = set()
+        if 'code' in types:
+            for lang, __ in self.env['res.lang'].get_installed():
+                translations = code_translations.get_python_translations('base', lang)
+                if src in translations:
+                    values.add(translations[src])
+        if 'selection' in types:
+            selections = self.with_context(lang='en_US').env['ir.model.fields.selection'].search([('name', '=', src)])
+            if selections:
+                cr = self.env.cr
+                cr.execute('SELECT name FROM ir_model_fields_selection WHERE id in %s', [tuple(selections.ids)])
+                for (name,) in cr.fetchall():
+                    name.pop('en_US')
+                    for value in name.values():
+                        values.add(value)
+        result = tnx_cache[types][src] = list(values)
         return result
 
     @api.model
@@ -317,7 +333,7 @@ class IrFieldsConverter(models.AbstractModel):
 
         for item, label in selection:
             label = ustr(label)
-            labels = [label] + self._get_translations(('selection', 'model', 'code'), label)
+            labels = [label] + self._get_translations(('selection', 'code'), label)
             # case insensitive comparaison of string to allow to set the value even if the given 'value' param is not
             # exactly (case sensitive) the same as one of the selection item.
             if value.lower() == str(item).lower() or any(value.lower() == label.lower() for label in labels):
