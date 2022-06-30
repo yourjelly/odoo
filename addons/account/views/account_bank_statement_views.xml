@@ -157,7 +157,6 @@
                     </div>
                     <group>
                         <group>
-                            <field name="previous_statement_id" invisible="1"/>
                             <field name="is_valid" invisible="1"/>
                             <field name="journal_type" invisible="1"/>
                             <field name="cashbox_start_id" invisible="1"/>
@@ -219,9 +218,7 @@
                                     <field name="account_number" optional="hidden"/>
                                     <field name="amount"
                                            attrs="{'readonly': [('parent.state', '!=', 'open')]}"/>
-                                    <field name="cumulative_balance" optional="hidden" attrs="{'invisible':[('internal_index', '=', False)]}"/>
-                                    <field name="previous_line_id" optional="hidden" attrs="{'invisible':[('internal_index', '=', False)]}"/>
-                                    <field name="internal_index" invisible="1"/>
+                                    <field name="cumulative_balance" optional="hidden" />
 
                                     <!-- Buttons -->
                                     <button name="button_undo_reconciliation" type="object"
