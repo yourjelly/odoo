@@ -1,12 +1,14 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
+import { useService, useChildRef } from "@web/core/utils/hooks";
 import { getNextTabableElement, getPreviousTabableElement, getTabableElements } from "@web/core/utils/ui";
 import { usePosition } from "@web/core/position_hook";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
+import { Many2XAutocomplete, useOpenMany2XRecord, useX2ManyCrud, useAddInlineRecord } from "@web/views/fields/relational_utils";
+import { TagsList } from "@web/views/fields/many2many_tags/tags_list";
 
 const { Component, onPatched, useState, useRef, useExternalListener } = owl;
 
@@ -37,6 +39,25 @@ export class AnalyticEditor extends Component {
         this.dropdownHeader = "";
 
         useExternalListener(window, "click", this.onWindowClick, true);
+
+        this.setMany2OneProps();
+        this.autocompleteContainerRef = useChildRef();
+
+        // this.update = (value, params = {}) => {
+        //    debugger;
+        // };
+        // const { saveRecord, removeRecord } = useX2ManyCrud(() => this.props.value, false);
+        this.addInLine = useAddInlineRecord({
+            position: "bottom",
+            addNew: (...args) => this.props.value.addNew(...args),
+        });
+        // this.update = (recordlist) => {
+        //     if (Array.isArray(recordlist)) {
+        //         const resIds = recordlist.map((rec) => rec.id);
+        //         return saveRecord(resIds);
+        //     }
+        //     return saveRecord(recordlist);
+        // };
     }
 
     patched() {
@@ -58,7 +79,7 @@ export class AnalyticEditor extends Component {
     get tags() {
         return this.list.map((record) => ({
             id: record.id, // datapoint_X
-            text: record.data.display_name,
+            text: record.data.display_name ? record.data.display_name : record.data.analytic_account_id[1] + ' ' + record.data.percentage + '%',
             colorIndex: record.data.color,
             group: record.data.group_id,
             onClick: (ev) => {},//(ev) => this.tagClicked({id: record.id}),
@@ -66,8 +87,12 @@ export class AnalyticEditor extends Component {
         }));
     }
 
+    get usedIds() {
+        return this.list.filter((record) => !!record.data.acc_id || !!record.data.analytic_account_id).map((record) => record.data.acc_id || record.data.analytic_account_id[0]);
+    }
+
     listByGroup({ id }){
-        return this.list.filter((record) => record.data.group_id[0] === id);
+        return this.list.filter((record) => (record.data.group_id && record.data.group_id[0] === id) || record.data.adding_to_group_id[0] == id);
     }
 
     get list() {
@@ -79,15 +104,35 @@ export class AnalyticEditor extends Component {
     }
 
     // data modifiers
+    async updateTag(rec, value, params = {}) {
+        console.log('updateTag');
+        console.log(this);
+        await rec.switchMode("edit");
+        await rec.update({
+            analytic_account_id: [value[0].id, value[0].name],
+            percentage: this.list.length,
+        });
+        let unselected = await this.props.value.unselectRecord(true);
+        let saved = rec.save()
+        // this.props.value.add(rec.id);
+        // this.update(this.props.value.records)
+        console.log(unselected);
+        console.log(saved);
+    }
+
     async deleteTag(id) {
+        console.log('deleteTag ' + id);
+        //TODO Fix: deleting an unsaved distribution tag (id virtual_XX) does not work
         const tagRecord = this.list.find((record) => record.id === id);
-        const ids = this.props.value.currentIds.filter((id) => id !== tagRecord.resId);
+        const ids = this.props.value.currentIds.filter((id) => id !== tagRecord.data.id);
         await this.props.value.replaceWith(ids);
+        console.log(this.props.value);
     }
 
     async addLineToGroup({id}) {
         console.log('addLineToGroup ' + id);
-        this.props.value.addNew({ position: "bottom" });
+        // this.props.value.addNew({ position: "bottom", context: { default_adding_to_group_id: id }});
+        this.addInLine({context: { default_adding_to_group_id: id }});
     }
 
     // orm
@@ -101,6 +146,10 @@ export class AnalyticEditor extends Component {
     }
 
     // prop/state getters
+    getMany2OneDomain({ id }) {
+        return [["group_id", "=", id], ["id", "not in", this.usedIds]];
+    }
+
     get preventOpen() {
         return this.state.visited;
     }
@@ -223,6 +272,21 @@ export class AnalyticEditor extends Component {
     }
 
     // actions
+    // setMany2OneFloating(bool) {
+    //     console.log('setMany2OneFloating ' + bool);
+    // }
+
+    setMany2OneProps() {
+        this.many2OnePlaceholder = this.env._t("Search Analytic Accounts");
+        this.many2OneModel = "account.analytic.account";
+        this.many2OneFieldString = "AnalyticAcc"
+        this.many2OneActiveActions = {
+            canCreate: false,
+            canCreateEdit: false,
+            canWrite: false,
+        };
+    }
+
     focusMainInputNoActivation () {
         this.state.visited = true;
         this.mainInputRef.el.focus();
@@ -258,7 +322,8 @@ AnalyticEditor.props = {
     template_field: { type: String, optional: true },
 }
 AnalyticEditor.components = { 
-
+    Many2XAutocomplete,
+    TagsList,
 };
 AnalyticEditor.fieldsToFetch = {
     display_name: { name: "display_name", type: "char" }, //used
@@ -269,6 +334,7 @@ AnalyticEditor.fieldsToFetch = {
     acc_name: { name: "acc_name", type: "char" },
     group_id: { name: "group_id", type: "many2one" }, //used
     group_name: { name: "group_name", type: "char" },
+    adding_to_group_id: { name: "adding_to_group_id", type: "many2one" },
 };
 
 AnalyticEditor.extractProps = (fieldName, record, attrs) => {

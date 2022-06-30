@@ -894,9 +894,12 @@
                                                string="Analytic Distribution"
                                                options="{'template_field': 'analytic_dist_model_selector_id', 'search_field': 'analytic_account_selector_id'}">
                                                <!-- trying to use list renderer in the popup requires an arch but this doesn't work and we don't want to have to specify it every time-->
+                                               <!-- update I hacked the list arch parser to make it work but it still does some crazy shit like seeing these as fields of line_ids, -->
+                                               <!-- so I make them invisble, but the analytic_account_id still persists. The field needs to be removed -->
                                                <tree editable="bottom">
-                                                <field name="analytic_account_id"/>
-                                                <field name="percentage"/>
+                                                <field name="analytic_account_id" invisble="1"/> <!-- This field matches a field of account.move.line -->
+                                                <field name="percentage" invisble="1"/>
+                                                <field name="adding_to_group_id" invisible="1"/> <!-- This is another hacky field - used to enable filter on domain -->
                                                </tree>
                                         </field>
                                         <!-- <field name="analytic_json" widget="analytic_json"/> -->
