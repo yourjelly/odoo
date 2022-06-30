@@ -52,7 +52,7 @@ export class KanbanRecordQuickCreate extends Component {
         );
 
         // Key Navigation
-        // FIXME ? Maybe it will also validate even if enter is pressed outside of the quick create machin
+        // FIXME! It will try to validate when being too fast encoding smtg in an autocomplete field.
         useHotkey("enter", () => this.validate("add"), { bypassEditableProtection: true });
         useHotkey("escape", () => this.cancel(true));
     }
