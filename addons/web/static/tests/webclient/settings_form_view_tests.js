@@ -252,7 +252,7 @@ QUnit.module("SettingsFormView", (hooks) => {
         );
     });
 
-    QUnit.test("hide / show setting tips properly", async function (assert) {
+    QUnit.skipWOWL("hide / show setting tips properly", async function (assert) {
         await makeView({
             type: "form",
             resModel: "res.config.settings",
@@ -474,7 +474,7 @@ QUnit.module("SettingsFormView", (hooks) => {
         assert.notOk(webClient.env.services.router.current.hash.id);
     });
 
-    QUnit.test(
+    QUnit.skipWOWL(
         "settings views can search when coming back in breadcrumbs",
         async function (assert) {
             serverData.actions = {
@@ -643,7 +643,7 @@ QUnit.module("SettingsFormView", (hooks) => {
         }
     );
 
-    QUnit.test("settings view does not display o_not_app settings", async function (assert) {
+    QUnit.skipWOWL("settings view does not display o_not_app settings", async function (assert) {
         await makeView({
             type: "form",
             resModel: "res.config.settings",
