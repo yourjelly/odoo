@@ -52,6 +52,7 @@ export class ListArchParser extends XMLParser {
         const treeAttr = {};
         let nextId = 0;
         const activeFields = {};
+        let nbTree;
         this.visitXML(arch, (node) => {
             if (node.tagName !== "button") {
                 buttonGroup = undefined;
@@ -135,6 +136,10 @@ export class ListArchParser extends XMLParser {
                     description: node.getAttribute("string"),
                 });
             } else if (["tree", "list"].includes(node.tagName)) {
+                if (nbTree.length > 0) {
+                    return false;
+                }
+                nbTree++;
                 const activeActions = {
                     ...getActiveActions(xmlDoc),
                     exportXlsx: archParseBoolean(xmlDoc.getAttribute("export_xlsx"), true),
