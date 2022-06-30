@@ -197,7 +197,7 @@ QUnit.module("SettingsFormView", (hooks) => {
         );
     });
 
-    QUnit.test("unhighlight section not matching anymore", async function (assert) {
+    QUnit.skipWOWL("unhighlight section not matching anymore", async function (assert) {
         await makeView({
             type: "form",
             resModel: "res.config.settings",
