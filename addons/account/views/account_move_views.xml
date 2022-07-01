@@ -897,9 +897,15 @@
                                                <!-- update I hacked the list arch parser to make it work but it still does some crazy shit like seeing these as fields of line_ids, -->
                                                <!-- so I make them invisble, but the analytic_account_id still persists. The field needs to be removed -->
                                                <tree editable="bottom">
-                                                <field name="analytic_account_id" invisble="1"/> <!-- This field matches a field of account.move.line -->
-                                                <field name="percentage" invisble="1"/>
-                                                <field name="adding_to_group_id" invisible="1"/> <!-- This is another hacky field - used to enable filter on domain -->
+                                                <field name="analytic_account_id"/> <!-- This field matches a field of account.move.line -->
+                                                <field name="percentage"/>
+                                                <field name="adding_to_group_id"/> <!-- This is another hacky field - used to enable filter on domain -->
+                                                <!-- <field name="display_name"/>
+                                                <field name="color"/>
+                                                <field name="acc_id"/>
+                                                <field name="acc_name"/>
+                                                <field name="group_id"/>
+                                                <field name="group_name"/> -->
                                                </tree>
                                         </field>
                                         <!-- <field name="analytic_json" widget="analytic_json"/> -->
@@ -1105,7 +1111,13 @@
                                                attrs="{'invisible': [('display_type', 'in', ('line_section', 'line_note'))]}"/>
                                         <!-- These fields are added here to ensure saving - visible? -->
                                         <field name="analytic_dist_model_selector_id" invisible="1"/>
-                                        <field name="analytic_dist_tag_ids"/>
+                                        <field name="analytic_dist_tag_ids">
+                                            <tree editable="bottom">
+                                                <field name="analytic_account_id"/> <!-- This field matches a field of account.move.line -->
+                                                <field name="percentage"/>
+                                                <field name="adding_to_group_id"/> <!-- This is another hacky field - used to enable filter on domain -->
+                                            </tree>
+                                        </field>
                                         <field name="date_maturity"
                                                optional="hide"
                                                invisible="context.get('view_no_maturity')"
