@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
 import testUtils from "web.test_utils";
-import LazyColumnList from "../src/js/lazy_column_list";
-import { makeDeferred, nextTick } from "../../../web/static/tests/helpers/utils";
+import LazyColumnList from "../../src/js/lazy_column_list";
+import { makeDeferred, nextTick } from "../../../../web/static/tests/helpers/utils";
 
 const createView = testUtils.createView;
 

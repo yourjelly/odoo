@@ -1,19 +1,13 @@
-odoo.define('stock.InventoryReportListView', function (require) {
-"use strict";
+/** @odoo-module */
 
-var ListView = require('web.ListView');
-var InventoryReportListController = require('stock.InventoryReportListController');
-var viewRegistry = require('web.view_registry');
+import { listView } from '@web/views/list/list_view';
+import { registry } from "@web/core/registry";
+import { InventoryReportListController } from './inventory_report_list_controller';
 
+export const InventoryReportListView = {
+    ...listView,
+    Controller: InventoryReportListController,
+    buttonTemplate: 'stock.InventoryReport.Buttons',
+};
 
-var InventoryReportListView = ListView.extend({
-    config: _.extend({}, ListView.prototype.config, {
-        Controller: InventoryReportListController,
-    }),
-});
-
-viewRegistry.add('inventory_report_list', InventoryReportListView);
-
-return InventoryReportListView;
-
-});
+registry.category("views").add("inventory_report_list", InventoryReportListView);

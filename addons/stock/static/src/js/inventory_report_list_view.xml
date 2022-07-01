@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates id="template" xml:space="preserve">
+
+<t t-name="stock.InventoryReport.Buttons" t-inherit="web.ListView.Buttons" t-inherit-mode="primary" owl="1">
+    <xpath expr="//t[@t-elif]" position="after">
+        <t t-if="!props.context.no_at_date">
+            <button class="btn btn-primary o_button_at_date mr-2" type="button" t-on-click="_onClickOpenWizard">
+                Inventory at Date
+            </button>
+        </t>
+    </xpath>
+</t>
+
+</templates>
