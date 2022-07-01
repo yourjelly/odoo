@@ -58,6 +58,13 @@ $o-knowledge-font-configs: (
     }
 }
 
+.oe-emoji-tooltip-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 250px;
+}
+
 @include media-breakpoint-down(lg) {
     .o_knowledge_editor .note-editable,
     .o_knowledge_editor .o_readonly {

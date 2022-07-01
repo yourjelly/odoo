@@ -7,6 +7,9 @@ import Wysiwyg from 'web_editor.wysiwyg';
 import { KnowledgeArticleLinkModal } from './wysiwyg/knowledge_article_link.js';
 import { preserveCursor, setCursorStart } from '@web_editor/../lib/odoo-editor/src/OdooEditor';
 
+import emojis from '@mail/js/emojis';
+import { getRangePosition } from '../../../../web_editor/static/lib/odoo-editor/src/utils/utils.js';
+
 /**
  * Override the @see DocumentWidget to manage files in a @see MediaDialog used
  * by the /file command. The purpose of this override is to redefine the
@@ -86,6 +89,79 @@ Wysiwyg.include({
         this._super.apply(this, arguments);
     },
     /**
+     * @override
+     */
+    start: async function () {
+        await this._super.apply(this, arguments);
+        const editable = this.odooEditor.editable;
+        const tooltip = $(QWeb.render('knowledge.wysiwyg_emoji_tooltip', {emojis}))[0];
+        document.body.append(tooltip);
+
+        /**
+         * Open the tooltip
+         * @param {Event} event
+         */
+        const open = event => {
+            update(event);
+            tooltip.classList.remove('d-none');
+            /**
+             * @param {Event} e
+             */
+            const onInput = e => {
+                if (e.data === ':' || e.data === ' ') {
+                    if (e.data === ':') {
+                        this._insertEmoji();
+                    }
+                    editable.removeEventListener('input', onInput, {capture: true});
+                    editable.removeEventListener('keydown', onKeyDown, {capture: true});
+                    close();
+                } else {
+                    update(e);
+                }
+            }
+            /**
+             * @param {Event} e
+             */
+            const onKeyDown = e => {
+                if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    console.log('e', e);
+                    // TODO: move the active class on the emoji
+                } else if (e.key === 'Backspace') {
+                    console.log('backspace');
+                }
+            }
+            editable.addEventListener('input', onInput, {capture: true});
+            editable.addEventListener('keydown', onKeyDown, {capture: true});
+        }
+        /**
+         * Close the tooltip
+         */
+        const close = () => {
+            tooltip.classList.add('d-none');
+            const onInput = e => {
+                if (e.data === ':') {
+                    editable.removeEventListener('input', onInput, {capture: true});
+                    open(e);
+                }
+            }
+            editable.addEventListener('input', onInput, {capture: true});
+        }
+        /**
+         * Update the position of the tooltip
+         */
+        const update = () => {
+            const position = getRangePosition(tooltip, this.odooEditor.document);
+            const rect = this.odooEditor.options.getContextFromParentRect();
+            const x = position.left + rect.left;
+            const y = position.top + rect.top;
+            tooltip.style.left = `${x}px`;
+            tooltip.style.top = `${y}px`;
+        }
+        close();
+    },
+    /**
      * Prevent usage of commands from the group "Knowledge" inside the block
      * inserted by the /template Knowledge command. The content of a /template
      * block is destined to be used in @see OdooEditor in modules other than
@@ -118,6 +194,15 @@ Wysiwyg.include({
             fontawesome: 'fa-file',
             callback: () => {
                 this._insertArticleLink();
+            },
+        }, {
+            groupName: 'Basic blocks',
+            title: 'Emoji',
+            description: 'Add an emoji',
+            fontawesome: 'fa-smile-o',
+            callback: () => {
+                this.odooEditor.execCommand('insertText', ':');
+                // TODO: call the 'open' function ?
             },
         });
         if (this.options.knowledge_commands) {
@@ -220,6 +305,34 @@ Wysiwyg.include({
             restoreSelection();
         });
         dialog.open();
+    },
+    /**
+     * Inserts an Emoji in the document
+     */
+    _insertEmoji: function () {
+        const selection = this.odooEditor.document.getSelection();
+        const anchor = selection.anchorNode;
+        const text = anchor.textContent;
+
+        let description = '';
+        let offset = selection.anchorOffset - 1;
+        let count = 0;
+
+        while (offset >= 0 && count < 2) {
+            const symbol = text.charAt(offset);
+            if (count === 1) {
+                description = symbol + description;
+            }
+            if (symbol === ':') {
+                count++;
+            }
+            offset--;
+        }
+        const emoji = emojis.find(emoji => emoji.description === description);
+        if (emoji) {
+            selection.setBaseAndExtent(anchor, selection.anchorOffset, anchor, offset + 1);
+            this.odooEditor.execCommand('insertText', emoji.unicode);
+        }
     },
     /**
      * Notify the @see FieldHtmlInjector when a /file block is inserted from a
