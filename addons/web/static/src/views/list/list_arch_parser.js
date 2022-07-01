@@ -54,6 +54,7 @@ export class ListArchParser extends XMLParser {
         const treeAttr = {};
         let nextId = 0;
         const activeFields = {};
+        let nbTree = 0;
         this.visitXML(arch, (node) => {
             if (node.tagName !== "button") {
                 buttonGroup = undefined;
@@ -77,8 +78,6 @@ export class ListArchParser extends XMLParser {
                     columns.push(buttonGroup);
                 }
             } else if (node.tagName === "field") {
-                const field_name = node.getAttribute("name")
-                if (!models[modelName][field_name]) return; //UGLY HACK TO FIX THE BROKEN LIST_ARCH_PARSER
                 const fieldInfo = Field.parseFieldNode(node, models, modelName, "list");
                 const invisible = node.getAttribute("invisible");
                 fieldNodes[fieldInfo.name] = fieldInfo;
@@ -134,6 +133,10 @@ export class ListArchParser extends XMLParser {
                 });
                 return false;
             } else if (["tree", "list"].includes(node.tagName)) {
+                if (nbTree > 0){
+                    return false;
+                }
+                nbTree++;
                 const activeActions = {
                     ...getActiveActions(xmlDoc),
                     exportXlsx: archParseBoolean(xmlDoc.getAttribute("export_xlsx"), true),
