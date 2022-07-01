@@ -553,7 +553,7 @@ export const editorCommands = {
             ) {
                 setSelection(block, 0, block, nodeSize(block));
                 editor.historyPauseSteps();
-                editor.execCommand('removeFormat');
+                editor.execCommand('removeFont');
                 editor.historyUnpauseSteps();
                 setTagName(block, tagName);
             } else {
@@ -590,6 +590,14 @@ export const editorCommands = {
         editor.document.execCommand('removeFormat');
         for (const node of getTraversedNodes(editor.editable)) {
             // The only possible background image on text is the gradient.
+            closestElement(node).style.backgroundImage = '';
+        }
+    },
+
+    //Font Formatting:
+    removeFont: editor => {
+        for (const node of getTraversedNodes(editor.editable)) {
+            closestElement(node).style.fontSize = '';
             closestElement(node).style.backgroundImage = '';
         }
     },

@@ -635,7 +635,7 @@ describe('setTagName', () => {
         });
         it('should remove the background image while turning a p>font into a heading 1>span', async () => {
             await testEditor(BasicEditor, {
-                contentBefore: '<div><p><font class="text-gradient" style="background-image: linear-gradient(135deg, rgb(255, 204, 51) 0%, rgb(226, 51, 255) 100%);">[ab]</font></p></div>',
+                contentBefore: '<div><p><span style="background-image: linear-gradient(135deg, rgb(255, 204, 51) 0%, rgb(226, 51, 255) 100%);">[ab]</span></p></div>',
                 stepFunction: editor => editor.execCommand('setTag', 'h1'),
                 contentAfter: '<div><h1><span style="">[ab]</span></h1></div>',
             });
