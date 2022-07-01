@@ -31,7 +31,7 @@
                                 <t t-foreach="listByGroup(plan)" t-as="dist_tag" t-key="dist_tag.id">
                                     <tr>
                                         <td class="o_analytic_account_name">
-                                            <Many2XAutocomplete
+                                            <!-- <Many2XAutocomplete
                                                 value="dist_tag.data.analytic_account_id ? dist_tag.data.analytic_account_id[1] : dist_tag.data.acc_name || ''"
                                                 id="dist_tag.id"
                                                 placeholder="many2OnePlaceholder"
@@ -44,13 +44,50 @@
                                                 context="{}"
                                                 getDomain.bind="() => this.getMany2OneDomain(plan)"
                                                 autocomplete_container="autocompleteContainerRef"
-                                            />
+                                            /> -->
+                                            <Field
+                                                name="'analytic_account_id'"
+                                                record="dist_tag"
+                                                type="'many2one'"
+                                                fieldInfo="props.record.activeFields['analytic_dist_tag_ids'].views['list'].fieldNodes['analytic_account_id']"
+                                                setDirty="(isDirty) => this.setDirty(isDirty)"
+                                                readonly="false"
+                                                canOpen="false"
+                                                canCreate="false"
+                                                canWrite="false"
+                                                canQuickCreate="false"
+                                                canCreateEdit="false"
+                                                getDomain="() => this.getMany2OneDomain(plan)"
+                                                />
+                                            <!-- <Many2OneField
+                                                id="dist_tag.id"
+                                                name="'analytic_account_id'"
+                                                readonly="false"
+                                                record="dist_tag"
+                                                value="dist_tag.data.acc_name or dist_tag.data.analytic_account_id[1]"
+                                                setDirty="(isDirty) => this.setDirty(isDirty)"
+                                                placeholder="Search Analytic Accounts"
+                                                canOpen="false"
+                                                canCreate="false"
+                                                canWrite="false"
+                                                canQuickCreate="false"
+                                                canCreateEdit="false"
+                                                relation="dist_tag.fields['analytic_account_id'].relation"
+                                                getDomain.bind="() => this.getMany2OneDomain(plan)"/> -->
                                         </td>
                                         <td class="o_analytic_percentage">
-                                            <input t-on-click.stop="" type="text" t-att-value="dist_tag.data.percentage"/>
+                                            <!-- <input t-on-click.stop="" type="text" t-att-value="dist_tag.data.percentage"/> -->
+                                            <Field
+                                                name="'percentage'"
+                                                record="dist_tag"
+                                                type="'float'"
+                                                fieldInfo="props.record.activeFields['analytic_dist_tag_ids'].views['list'].fieldNodes['percentage']"
+                                                readonly="false"
+                                                setDirty="(isDirty) => this.setDirty(isDirty)"
+                                                t-on-click.stop="()=>{}"/>
                                         </td>
                                         <td>
-                                            <span class="fa fa-trash-o" t-on-click="() => this.deleteTag(dist_tag.id)"/>
+                                            <span class="fa fa-trash-o" t-on-click="() => this.deleteRecord(dist_tag)"/>
                                         </td>
                                     </tr>
                                 </t>

@@ -7,8 +7,10 @@ import { usePosition } from "@web/core/position_hook";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
+import { Field } from "@web/views/fields/field";
 import { Many2XAutocomplete, useOpenMany2XRecord, useX2ManyCrud, useAddInlineRecord } from "@web/views/fields/relational_utils";
 import { TagsList } from "@web/views/fields/many2many_tags/tags_list";
+import { Domain } from "@web/core/domain";
 
 const { Component, onPatched, useState, useRef, useExternalListener } = owl;
 
@@ -46,11 +48,12 @@ export class AnalyticEditor extends Component {
         // this.update = (value, params = {}) => {
         //    debugger;
         // };
-        // const { saveRecord, removeRecord } = useX2ManyCrud(() => this.props.value, false);
+        const { saveRecord, removeRecord } = useX2ManyCrud(() => this.props.value, false);
         this.addInLine = useAddInlineRecord({
             position: "bottom",
             addNew: (...args) => this.props.value.addNew(...args),
         });
+        this.delete = removeRecord;
         // this.update = (recordlist) => {
         //     if (Array.isArray(recordlist)) {
         //         const resIds = recordlist.map((rec) => rec.id);
@@ -61,10 +64,10 @@ export class AnalyticEditor extends Component {
     }
 
     patched() {
-        console.log('patched...');
-        if (this.editingRecord) {
-            this.focusSomewhere();
-        }
+        // console.log('patched...');
+        // if (this.editingRecord) {
+        //     this.focusSomewhere();
+        // }
     }
 
     focusSomewhere() {
@@ -76,6 +79,10 @@ export class AnalyticEditor extends Component {
     }
 
     // data getters
+    getGroupPercentageBalance({ id }) {
+        return 100 - Math.min(this.listByGroup({id: id}).reduce((prev, next) => prev + (next.data.percentage || 0), 0), 100);
+    }
+
     get tags() {
         return this.list.map((record) => ({
             id: record.id, // datapoint_X
@@ -104,6 +111,10 @@ export class AnalyticEditor extends Component {
     }
 
     // data modifiers
+    async setDirty(isDirty) {
+        console.log('setDirty', isDirty);
+    }
+
     async updateTag(rec, value, params = {}) {
         console.log('updateTag');
         console.log(this);
@@ -112,8 +123,10 @@ export class AnalyticEditor extends Component {
             analytic_account_id: [value[0].id, value[0].name],
             percentage: this.list.length,
         });
+        
+        let saved = rec.save();
+        debugger;
         let unselected = await this.props.value.unselectRecord(true);
-        let saved = rec.save()
         // this.props.value.add(rec.id);
         // this.update(this.props.value.records)
         console.log(unselected);
@@ -129,10 +142,15 @@ export class AnalyticEditor extends Component {
         console.log(this.props.value);
     }
 
+    async deleteRecord(rec) {
+        this.delete(rec);
+    }
+
     async addLineToGroup({id}) {
-        console.log('addLineToGroup ' + id);
+        console.log('addLineToGroup ', id);
         // this.props.value.addNew({ position: "bottom", context: { default_adding_to_group_id: id }});
-        this.addInLine({context: { default_adding_to_group_id: id }});
+        this.addInLine({context: { default_adding_to_group_id: id, default_percentage: this.getGroupPercentageBalance({id: id}) }});
+        console.log(this);
     }
 
     // orm
@@ -147,7 +165,8 @@ export class AnalyticEditor extends Component {
 
     // prop/state getters
     getMany2OneDomain({ id }) {
-        return [["group_id", "=", id], ["id", "not in", this.usedIds]];
+        console.log('getMany2OneDomain', id, this.usedIds);
+        return new Domain([["group_id", "=", id], ["id", "not in", this.usedIds]]);
     }
 
     get preventOpen() {
@@ -180,13 +199,14 @@ export class AnalyticEditor extends Component {
 
     // events
     onWindowClick(ev) {
-        console.log('window click');
         if (this.dropdownOpen && this.dropdownRef.el ? !this.dropdownRef.el.contains(ev.target) : false) {
+            console.log('window click outside dropdown...closing');
             this.closeAnalyticEditor();
-        }
-        if (this.editingRecord) {
             this.resetVisited();
         }
+        // else if (this.editingRecord) {
+        //     this.resetVisited();
+        // }
     }
 
     onMainInputFocus(ev) {
@@ -322,14 +342,15 @@ AnalyticEditor.props = {
     template_field: { type: String, optional: true },
 }
 AnalyticEditor.components = { 
-    Many2XAutocomplete,
+    // Many2XAutocomplete,
+    Field,
     TagsList,
 };
 AnalyticEditor.fieldsToFetch = {
     display_name: { name: "display_name", type: "char" }, //used
     percentage: { name: "percentage", type: "float" },
     color: { name: "color", type: "integer" }, //used
-    analytic_account_id: { name: 'analytic_account_id', type: "many2one" },
+    // analytic_account_id: { name: 'analytic_account_id', type: "many2one" },
     acc_id: { name: "acc_id", type: "integer" },
     acc_name: { name: "acc_name", type: "char" },
     group_id: { name: "group_id", type: "many2one" }, //used
