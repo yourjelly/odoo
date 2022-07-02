@@ -239,20 +239,20 @@ function removeUnwantedAttrsFromTemplates(templates, attrs) {
 }
 
 export async function setupTests() {
-    QUnit.testStart(() => {
-        checkGlobalObjectsIntegrity();
-        prepareRegistriesWithCleanup();
-        prepareLegacyRegistriesWithCleanup();
-        forceLocaleAndTimezoneWithCleanup();
-        patchBrowserWithCleanup();
-        patchLegacyCoreBus();
-        patchOdoo();
-        patchSessionInfo();
+    // QUnit.testStart(() => {
+    //     checkGlobalObjectsIntegrity();
+    //     prepareRegistriesWithCleanup();
+    //     prepareLegacyRegistriesWithCleanup();
+    //     forceLocaleAndTimezoneWithCleanup();
+    //     patchBrowserWithCleanup();
+    //     patchLegacyCoreBus();
+    //     patchOdoo();
+    //     patchSessionInfo();
 
-        // WOWL: remove this once new form and list views are activated
-        registry.category("views").add("form", formView, { force: true });
-        registry.category("views").add("list", listView, { force: true });
-    });
+    //     // WOWL: remove this once new form and list views are activated
+    //     registry.category("views").add("form", formView, { force: true });
+    //     registry.category("views").add("list", listView, { force: true });
+    // });
 
     const templatesUrl = `/web/webclient/qweb/${new Date().getTime()}?bundle=web.assets_qweb`;
     const templates = await loadFile(templatesUrl);

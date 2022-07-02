@@ -1,20 +1,16 @@
 /** @odoo-module **/
 
-import { titleService } from "@web/core/browser/title_service";
-import { registry } from "@web/core/registry";
-import { makeTestEnv } from "../../helpers/mock_env";
-
-// -----------------------------------------------------------------------------
-// Tests
-// -----------------------------------------------------------------------------
+import { makeTestEnv, setupRegistries } from "../../helpers/new_utils";
 
 let env;
 let title;
 
 QUnit.module("Title", {
+    before() {
+        setupRegistries({ services: ["title"] });
+    },
     async beforeEach() {
         title = document.title;
-        registry.category("services").add("title", titleService);
         env = await makeTestEnv();
     },
     afterEach() {
@@ -23,13 +19,11 @@ QUnit.module("Title", {
 });
 
 QUnit.test("simple title", async (assert) => {
-    assert.expect(1);
     env.services.title.setParts({ zopenerp: "Odoo" });
     assert.strictEqual(env.services.title.current, "Odoo");
 });
 
 QUnit.test("add title part", async (assert) => {
-    assert.expect(2);
     env.services.title.setParts({ zopenerp: "Odoo", chat: null });
     assert.strictEqual(env.services.title.current, "Odoo");
     env.services.title.setParts({ action: "Import" });
@@ -37,7 +31,6 @@ QUnit.test("add title part", async (assert) => {
 });
 
 QUnit.test("modify title part", async (assert) => {
-    assert.expect(2);
     env.services.title.setParts({ zopenerp: "Odoo" });
     assert.strictEqual(env.services.title.current, "Odoo");
     env.services.title.setParts({ zopenerp: "Zopenerp" });
@@ -45,7 +38,6 @@ QUnit.test("modify title part", async (assert) => {
 });
 
 QUnit.test("delete title part", async (assert) => {
-    assert.expect(2);
     env.services.title.setParts({ zopenerp: "Odoo" });
     assert.strictEqual(env.services.title.current, "Odoo");
     env.services.title.setParts({ zopenerp: null });
@@ -53,7 +45,6 @@ QUnit.test("delete title part", async (assert) => {
 });
 
 QUnit.test("all at once", async (assert) => {
-    assert.expect(2);
     env.services.title.setParts({ zopenerp: "Odoo", action: "Import" });
     assert.strictEqual(env.services.title.current, "Odoo - Import");
     env.services.title.setParts({ action: null, zopenerp: "Zopenerp", chat: "Sauron" });
@@ -61,7 +52,6 @@ QUnit.test("all at once", async (assert) => {
 });
 
 QUnit.test("get title parts", async (assert) => {
-    assert.expect(3);
     env.services.title.setParts({ zopenerp: "Odoo", action: "Import" });
     assert.strictEqual(env.services.title.current, "Odoo - Import");
     const parts = env.services.title.getParts();
