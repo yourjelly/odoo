@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { makeTestEnv, setupRegistries } from "../../helpers/new_utils";
+import { makeTestEnv, setupRegistries } from "@web/../tests/helpers/helpers";
 
 let env;
 let title;

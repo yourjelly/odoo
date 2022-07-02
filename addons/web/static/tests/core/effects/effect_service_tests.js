@@ -15,6 +15,7 @@ import {
     nextTick,
     patchWithCleanup,
 } from "../../helpers/utils";
+import { magicSetup, setupRegistries } from "../../helpers/helpers";
 
 const { Component, markup, xml } = owl;
 const serviceRegistry = registry.category("services");
@@ -42,9 +43,15 @@ async function makeParent() {
 }
 
 QUnit.module("Effect Service", (hooks) => {
+    hooks.before(() => {
+        setupRegistries({
+            effects: ["rainbow_man"],
+        });
+    });
     let effectParams;
     let execRegisteredTimeouts;
     hooks.beforeEach(() => {
+        magicSetup();
         effectParams = {
             message: markup("<div>Congrats!</div>"),
         };

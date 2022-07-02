@@ -10,6 +10,7 @@ import { translatedTerms, _lt } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { patch, unpatch } from "@web/core/utils/patch";
 import { session } from "@web/session";
+import { magicSetup } from "@web/../tests/helpers/helpers";
 
 const { Component, xml } = owl;
 const { DateTime, Settings } = luxon;
@@ -52,7 +53,11 @@ async function patchLang(lang) {
     await makeTestEnv();
 }
 
-QUnit.module("Translations");
+QUnit.module("Translations", {
+    beforeEach() {
+        magicSetup();
+    },
+});
 
 QUnit.test("can translate a text node", async (assert) => {
     assert.expect(1);

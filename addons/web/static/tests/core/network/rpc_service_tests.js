@@ -17,6 +17,7 @@ import {
     patchWithCleanup,
 } from "../../helpers/utils";
 import { registerCleanup } from "../../helpers/cleanup";
+import { magicSetup } from "@web/../tests/helpers/helpers";
 
 const { Component, xml } = owl;
 
@@ -63,6 +64,7 @@ async function testRPC(route, params) {
 
 QUnit.module("RPC", {
     beforeEach() {
+        magicSetup();
         serviceRegistry.add("notification", notificationService);
         serviceRegistry.add("rpc", rpcService);
     },

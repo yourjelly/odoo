@@ -8,6 +8,7 @@ import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { registry } from "@web/core/registry";
 import { uiService } from "@web/core/ui/ui_service";
 import { makeTestEnv } from "../../helpers/mock_env";
+import { magicSetup } from "../../setup";
 import {
     click,
     getFixture,
@@ -42,6 +43,7 @@ TestComponent.template = xml`
 
 QUnit.module("Command Palette", {
     async beforeEach() {
+        magicSetup();
         serviceRegistry.add("ui", uiService);
         serviceRegistry.add("dialog", dialogService);
         serviceRegistry.add("hotkey", hotkeyService);
@@ -1518,7 +1520,7 @@ QUnit.test("generate new session id when opened", async (assert) => {
     mount(TestComponent, target, { env });
     const providers = [
         {
-            provide: (env, {sessionId}) => {
+            provide: (env, { sessionId }) => {
                 lastSessionId = sessionId;
                 return [];
             },

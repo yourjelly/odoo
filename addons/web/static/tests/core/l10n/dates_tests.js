@@ -20,6 +20,7 @@ import test_utils from "web.test_utils";
 import { registerCleanup } from "../../helpers/cleanup";
 import { defaultLocalization } from "../../helpers/mock_services";
 import { patchWithCleanup } from "../../helpers/utils";
+import { magicSetup } from "@web/../tests/helpers/helpers";
 
 const { DateTime, Settings } = luxon;
 
@@ -73,6 +74,9 @@ QUnit.module(
     {
         before() {
             moment.suppressDeprecationWarnings = true;
+        },
+        beforeEach() {
+            magicSetup();
         },
         after() {
             moment.suppressDeprecationWarnings = false;

@@ -15,6 +15,7 @@ import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { makeTestEnv } from "../../helpers/mock_env";
 import { makeFakeDialogService, makeFakeLocalizationService } from "../../helpers/mock_services";
 import { click, getFixture, mount, nextTick, patchWithCleanup } from "../../helpers/utils";
+import { magicSetup } from "@web/../tests/helpers/helpers";
 
 let target;
 let env;
@@ -31,6 +32,7 @@ async function makeDialogTestEnv() {
 
 QUnit.module("Error dialogs", {
     async beforeEach() {
+        magicSetup();
         target = getFixture();
         serviceRegistry.add("ui", uiService);
         serviceRegistry.add("hotkey", hotkeyService);

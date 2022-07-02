@@ -10,6 +10,7 @@ import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { registry } from "@web/core/registry";
 import { uiService, useActiveElement } from "@web/core/ui/ui_service";
 import testUtils from "web.test_utils";
+import { setupRegistries, magicSetup } from "../../helpers/helpers";
 import { clearRegistryWithCleanup, makeTestEnv } from "../../helpers/mock_env";
 import {
     click,
@@ -52,7 +53,14 @@ TestComponent.template = xml`
 `;
 
 QUnit.module("Command Service", {
+    before() {
+        setupRegistries({
+            command_setup: ["default"],
+            command_provider: ["command", "data-hotkeys"],
+        });
+    },
     async beforeEach() {
+        magicSetup();
         const commandProviders = commandProviderRegistry
             .getEntries()
             .filter((provider) => ["command", "data-hotkeys"].includes(provider[0]));

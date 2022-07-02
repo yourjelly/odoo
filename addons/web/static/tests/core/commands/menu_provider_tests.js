@@ -5,11 +5,20 @@ import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import { click, getFixture, nextTick, patchWithCleanup, triggerHotkey } from "../../helpers/utils";
 import { editSearchBar } from "./command_service_tests";
+import { setupRegistries, magicSetup } from "../../helpers/helpers";
 
 let serverData;
 let target;
 QUnit.module("Menu Command Provider", {
+    before() {
+        setupRegistries({
+            // command_setup: ["default"],
+            command_provider: ["menu"],
+            command_categories: ["apps", "menu_items"],
+        });
+    },
     async beforeEach() {
+        magicSetup();
         patchWithCleanup(browser, {
             clearTimeout: () => {},
             setTimeout: (later) => {

@@ -21,6 +21,7 @@ import {
     makeFakeRPCService,
 } from "../../helpers/mock_services";
 import { makeDeferred, nextTick, patchWithCleanup } from "../../helpers/utils";
+import { magicSetup, setupRegistries } from "@web/../tests/helpers/helpers";
 
 const { Component, xml } = owl;
 const errorDialogRegistry = registry.category("error_dialogs");
@@ -31,7 +32,13 @@ let errorCb;
 let unhandledRejectionCb;
 
 QUnit.module("Error Service", {
+    before() {
+        setupRegistries({
+            error_handlers: "*",
+        });
+    },
     async beforeEach() {
+        magicSetup();
         serviceRegistry.add("error", errorService);
         serviceRegistry.add("dialog", dialogService);
         serviceRegistry.add("notification", notificationService);

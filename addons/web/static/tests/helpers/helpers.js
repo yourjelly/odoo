@@ -4,6 +4,9 @@ import { registry } from "@web/core/registry";
 import { patch, unpatch } from "@web/core/utils/patch";
 import { makeEnv, startServices } from "@web/env";
 
+// TODO: remove this
+export { magicSetup } from "../setup";
+
 // -----------------------------------------------------------------------------
 // Private stuff
 // -----------------------------------------------------------------------------
@@ -44,6 +47,11 @@ export async function makeTestEnv() {
     return env;
 }
 
+// todo: need a way to easily provide mock base services
+// for example:
+// setupRegistries({
+//   services: ["ui", "dialog", "localization.mock"]
+// });
 export function setupRegistries(config) {
     suiteCleanups[currentSuite] = suiteCleanups[currentSuite] || [];
     const cleanups = suiteCleanups[currentSuite];
@@ -52,9 +60,12 @@ export function setupRegistries(config) {
         const initialState = initialRegistryState[registryName];
         currentRegistry.elements = null;
         currentRegistry.entries = null;
-        for (let key of config[registryName]) {
-            patch(currentRegistry.content, `__${key}`, { key: initialState[key] });
-            currentRegistry.content[key] = initialState[key];
+        let targets = config[registryName];
+        if (targets === "*") {
+            targets = Object.keys(initialState);
+        }
+        for (let key of targets) {
+            patch(currentRegistry.content, `__${key}`, { [key]: initialState[key] });
             cleanups.push(() => {
                 unpatch(currentRegistry.content, `__${key}`);
                 currentRegistry.elements = null;

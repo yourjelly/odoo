@@ -15,6 +15,7 @@ import {
     patchWithCleanup,
     triggerHotkey,
 } from "../../helpers/utils";
+import { magicSetup } from "@web/../tests/helpers/helpers";
 
 const { Component, useRef, useState, xml } = owl;
 const serviceRegistry = registry.category("services");
@@ -24,6 +25,7 @@ let target;
 
 QUnit.module("Hotkey Service", {
     async beforeEach() {
+        magicSetup();
         serviceRegistry.add("hotkey", hotkeyService);
         serviceRegistry.add("ui", uiService);
         env = await makeTestEnv();

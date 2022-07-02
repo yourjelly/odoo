@@ -28,6 +28,7 @@ import {
 import { createWebClient, doAction, getActionManagerServerData } from "../../webclient/helpers";
 import { openViewItem } from "@web/webclient/debug_items";
 import { editSearchView, editView, setDefaults } from "@web/views/debug_items";
+import { magicSetup } from "../../helpers/helpers";
 
 const { Component, xml } = owl;
 const { prepareRegistriesWithCleanup } = utils;
@@ -45,6 +46,9 @@ let target;
 let testConfig;
 
 QUnit.module("DebugMenu", (hooks) => {
+    hooks.before(() => {
+        magicSetup();
+    });
     hooks.beforeEach(async () => {
         target = getFixture();
         registry

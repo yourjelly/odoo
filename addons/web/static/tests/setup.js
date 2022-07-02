@@ -238,22 +238,27 @@ function removeUnwantedAttrsFromTemplates(templates, attrs) {
     }
 }
 
+/**
+ * This function should only be used while we transition to the new test utils
+ * For test suites that have not been updated yet, this fonction should be called
+ * in the beforeEach hook of the suite
+ */
+export function magicSetup() {
+    checkGlobalObjectsIntegrity();
+    prepareRegistriesWithCleanup();
+    prepareLegacyRegistriesWithCleanup();
+    forceLocaleAndTimezoneWithCleanup();
+    patchBrowserWithCleanup();
+    patchLegacyCoreBus();
+    patchOdoo();
+    patchSessionInfo();
+
+    // WOWL: remove this once new form and list views are activated
+    registry.category("views").add("form", formView, { force: true });
+    registry.category("views").add("list", listView, { force: true });
+}
+
 export async function setupTests() {
-    // QUnit.testStart(() => {
-    //     checkGlobalObjectsIntegrity();
-    //     prepareRegistriesWithCleanup();
-    //     prepareLegacyRegistriesWithCleanup();
-    //     forceLocaleAndTimezoneWithCleanup();
-    //     patchBrowserWithCleanup();
-    //     patchLegacyCoreBus();
-    //     patchOdoo();
-    //     patchSessionInfo();
-
-    //     // WOWL: remove this once new form and list views are activated
-    //     registry.category("views").add("form", formView, { force: true });
-    //     registry.category("views").add("list", listView, { force: true });
-    // });
-
     const templatesUrl = `/web/webclient/qweb/${new Date().getTime()}?bundle=web.assets_qweb`;
     const templates = await loadFile(templatesUrl);
     window.__OWL_TEMPLATES__ = processTemplates(templates);
