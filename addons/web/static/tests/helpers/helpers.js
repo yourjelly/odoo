@@ -3,6 +3,7 @@
 import { registry } from "@web/core/registry";
 import { patch, unpatch } from "@web/core/utils/patch";
 import { makeEnv, startServices } from "@web/env";
+import { browser, makeRAMLocalStorage } from "@web/core/browser/browser";
 
 // TODO: remove this
 export { magicSetup } from "../setup";
@@ -11,8 +12,16 @@ export { magicSetup } from "../setup";
 // Private stuff
 // -----------------------------------------------------------------------------
 let currentSuite = null;
-const initialRegistryState = {};
-const suiteCleanups = {};
+let initialRegistryState = {};
+let testCleanups = [];
+let suiteCleanups = {};
+
+QUnit.testDone(() => {
+    for (let cb of testCleanups) {
+        cb();
+    }
+    testCleanups = [];
+});
 
 QUnit.moduleStart((details) => {
     currentSuite = details.name;
@@ -32,10 +41,28 @@ QUnit.moduleDone((details) => {
 for (let registryName in registry.subRegistries) {
     const subRegistry = registry.subRegistries[registryName];
     initialRegistryState[registryName] = { ...subRegistry.content };
-    subRegistry.content = {};
-    subRegistry.elements = null;
-    subRegistry.entries = null;
 }
+
+// intercepting all addEventListener on browser to remove them after test
+const addEventListener = browser.addEventListener;
+const removeEventListener = browser.removeEventListener;
+
+browser.addEventListener = (type, listener, options) => {
+    testCleanups.push(() => {
+        removeEventListener(type, listener, options);
+    });
+    addEventListener(type, listener, options);
+};
+
+// clearing all registries before each test
+QUnit.testStart(() => {
+    for (let registryName in registry.subRegistries) {
+        const subRegistry = registry.subRegistries[registryName];
+        subRegistry.content = {};
+        subRegistry.elements = null;
+        subRegistry.entries = null;
+    }
+});
 
 // -----------------------------------------------------------------------------
 // Helpers
@@ -50,7 +77,8 @@ export async function makeTestEnv() {
 // todo: need a way to easily provide mock base services
 // for example:
 // setupRegistries({
-//   services: ["ui", "dialog", "localization.mock"]
+//   services: ["ui", "dialog", "localization.mock"],
+//   otherRegistry: "*"
 // });
 export function setupRegistries(config) {
     suiteCleanups[currentSuite] = suiteCleanups[currentSuite] || [];

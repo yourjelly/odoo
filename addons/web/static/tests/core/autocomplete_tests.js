@@ -13,6 +13,7 @@ import {
     triggerEvent,
     triggerEvents,
 } from "../helpers/utils";
+import { magicSetup } from "@web/../tests/helpers/helpers";
 
 const { Component, useState, xml } = owl;
 
@@ -23,6 +24,7 @@ let target;
 
 QUnit.module("Components", (hooks) => {
     hooks.beforeEach(async () => {
+        magicSetup();
         serviceRegistry.add("hotkey", hotkeyService);
         env = await makeTestEnv();
         target = getFixture();

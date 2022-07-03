@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { CheckBox } from "@web/core/checkbox/checkbox";
-import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { translatedTerms } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
@@ -15,6 +14,7 @@ import {
     triggerHotkey,
     nextTick,
 } from "@web/../tests/helpers/utils";
+import { setupRegistries } from "@web/../tests/helpers/helpers";
 
 const { Component, useState, xml } = owl;
 const serviceRegistry = registry.category("services");
@@ -22,9 +22,13 @@ const serviceRegistry = registry.category("services");
 let target;
 
 QUnit.module("Components", (hooks) => {
+    hooks.before(() => {
+        setupRegistries({
+            services: ["hotkey"],
+        });
+    });
     hooks.beforeEach(async () => {
         target = getFixture();
-        serviceRegistry.add("hotkey", hotkeyService);
     });
 
     QUnit.module("CheckBox");

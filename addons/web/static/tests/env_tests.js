@@ -8,10 +8,15 @@ import {
     makeTestEnv,
 } from "./helpers/mock_env";
 import { makeDeferred, nextTick, patchWithCleanup } from "./helpers/utils";
+import { magicSetup } from "./helpers/helpers";
 
 const serviceRegistry = registry.category("services");
 
-QUnit.module("env");
+QUnit.module("env", {
+    beforeEach() {
+        magicSetup();
+    },
+});
 
 QUnit.test("can start a service", async (assert) => {
     serviceRegistry.add("test", {
@@ -203,7 +208,10 @@ QUnit.test(
         serviceRegistry.add("b", serviceB);
         const prom = startServices(env);
         await Promise.resolve();
-        await assert.rejects(prom, "Some services could not be started: b. Missing dependencies: a");
+        await assert.rejects(
+            prom,
+            "Some services could not be started: b. Missing dependencies: a"
+        );
         assert.deepEqual(env.services, {});
 
         serviceRegistry.add("a", serviceA);

@@ -129,6 +129,7 @@ function patchBrowserWithCleanup() {
                 if (evName === "hashchange") {
                     hasHashChangeListeners = true;
                 }
+                debugger;
                 originalAddEventListener(...arguments);
                 registerCleanup(() => {
                     originalRemoveEventListener(...arguments);
