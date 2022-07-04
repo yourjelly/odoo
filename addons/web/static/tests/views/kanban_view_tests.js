@@ -6838,7 +6838,7 @@ QUnit.module("Views", (hooks) => {
                 '<t t-name="kanban-box">' +
                 "<div>" +
                 '<field name="foo"/>' +
-                "<button type=\"object\" attrs=\"{'invisible':['|', ('bar','=',True), ('category_ids', '!=', [])]}\" class=\"btn btn-primary float-right\" name=\"arbitrary\">Join</button>" +
+                "<button type=\"object\" attrs=\"{'invisible':['|', ('bar','=',True), ('category_ids', '!=', [])]}\" class=\"btn btn-primary float-end\" name=\"arbitrary\">Join</button>" +
                 "</div>" +
                 "</t>" +
                 "</templates>" +
@@ -6847,7 +6847,7 @@ QUnit.module("Views", (hooks) => {
 
         assert.containsOnce(
             target,
-            "button.float-right.oe_kanban_action_button",
+            "button.float-end.oe_kanban_action_button",
             "only one button should be visible"
         );
     });
@@ -6866,7 +6866,7 @@ QUnit.module("Views", (hooks) => {
                 '<t t-name="kanban-box">' +
                 '<div color="color">' +
                 '<div class="o_dropdown_kanban dropdown">' +
-                '<a class="dropdown-toggle o-no-caret btn" data-toggle="dropdown" href="#">' +
+                '<a class="dropdown-toggle o-no-caret btn" data-bs-toggle="dropdown" href="#">' +
                 '<span class="fa fa-bars fa-lg"/>' +
                 "</a>" +
                 '<ul class="dropdown-menu" role="menu">' +
@@ -7325,7 +7325,7 @@ QUnit.module("Views", (hooks) => {
                 '<t t-name="kanban-box">' +
                 '<div color="color">' +
                 '<div class="o_dropdown_kanban dropdown">' +
-                '<a class="dropdown-toggle o-no-caret btn" data-toggle="dropdown" href="#">' +
+                '<a class="dropdown-toggle o-no-caret btn" data-bs-toggle="dropdown" href="#">' +
                 '<span class="fa fa-bars fa-lg"/>' +
                 "</a>" +
                 '<ul class="dropdown-menu" role="menu">' +
@@ -8652,7 +8652,7 @@ QUnit.module("Views", (hooks) => {
         await makeViewProm;
 
         assert.deepEqual(getCardTexts(), ["LOADED", "LOADED", "LOADED", "LOADED"]);
-        assert.hasClass(getCard(0).querySelector(".o_field_asyncwidget"), "float-right");
+        assert.hasClass(getCard(0).querySelector(".o_field_asyncwidget"), "float-end");
     });
 
     QUnit.test("asynchronous rendering of a widget", async (assert) => {
@@ -8745,7 +8745,7 @@ QUnit.module("Views", (hooks) => {
                 '<div class="oe_kanban_global_click">' +
                 '<field name="name"/>' +
                 '<div class="o_dropdown_kanban dropdown">' +
-                '<a class="dropdown-toggle o-no-caret btn" data-toggle="dropdown" href="#">' +
+                '<a class="dropdown-toggle o-no-caret btn" data-bs-toggle="dropdown" href="#">' +
                 '<span class="fa fa-bars fa-lg"/>' +
                 "</a>" +
                 '<div class="dropdown-menu" role="menu">' +
@@ -8938,7 +8938,7 @@ QUnit.module("Views", (hooks) => {
             `,
         });
 
-        assert.containsOnce(getCard(0), "div.o_field_boolean .custom-checkbox");
+        assert.containsOnce(getCard(0), "div.o_field_boolean .form-check");
     });
 
     QUnit.test("kanban view with boolean toggle widget", async (assert) => {
