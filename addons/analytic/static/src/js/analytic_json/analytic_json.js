@@ -16,6 +16,7 @@ export class AnalyticJson extends Component {
         console.log('Analytic Json', this);
         this.state = useState({
             showDropdown: false,
+            list: [],
         });
         this.orm = useService("orm");
         this.fetchAllPlans();
@@ -43,11 +44,46 @@ export class AnalyticJson extends Component {
     }
 
     get tags() {
-        return []
+        return this.list.map((dist_tag) => ({
+            id: dist_tag.id,
+            text: dist_tag.analytic_account_name + " " + dist_tag.percentage + "%",
+            colorIndex: dist_tag.color,
+            group_id: dist_tag.group_id,
+            onDelete: this.editingRecord ? () => this.deleteTag(dist_tag.id) : undefined
+        }));
     }
 
     get list() {
-        return []
+        return this.state.list;
+        // return this.props.value || [];
+    }
+
+    listByGroup(id) {
+        return this.list.filter((dist_tag) => (dist_tag.group_id === id));
+    }
+
+    sumByGroup(id) {
+        return this.listByGroup(id).reduce((prev, next) => prev + (next.percentage || 0), 0)
+    }
+
+    remainderByGroup(id) {
+        return 100 - Math.min(this.sumByGroup(id), 100);
+    }
+
+    autoFill() {
+        for (let group of this.plans){
+            if (this.remainderByGroup(group.id)) {
+                this.addLineToGroup(group.id);
+            }
+        }
+    }
+
+    cleanUp() {
+        this.state.list = this.list.filter((dist_tag) => dist_tag.analytic_account_id !== null && dist_tag.percentage > 0 && dist_tag.percentage <= 100);
+    }
+
+    deleteTag(id) {
+        this.state.list = this.list.filter((dist_tag) => dist_tag.id != id);
     }
 
     get editingRecord() {
@@ -62,12 +98,19 @@ export class AnalyticJson extends Component {
         this.recentlyClosed = false;
     }
 
-    listByGroup({ id }) {
-        return []
+    newTag(group_id) {
+        return {
+            id: this.list.length,
+            group_id: group_id,
+            analytic_account_id: null,
+            analytic_account_name: "",
+            percentage: this.remainderByGroup(group_id),
+            color: 0,
+        }
     }
 
-    addLineToGroup(plan) {
-        console.log('not implemented');
+    addLineToGroup(id) {
+        this.state.list.push(this.newTag(id));
     }
 
     onMainElementFocus(ev) {
@@ -76,7 +119,7 @@ export class AnalyticJson extends Component {
         }
     }
 
-    onMainElementKeydown(ev) {
+    onWidgetKeydown(ev) {
         if (!this.editingRecord) {
             return;
         }
@@ -132,10 +175,12 @@ export class AnalyticJson extends Component {
     }
 
     closeAnalyticEditor() {
+        this.cleanUp();
         this.state.showDropdown = false;
     }
 
     openAnalyticEditor() {
+        this.autoFill();
         this.state.showDropdown = true;
     }
 }
