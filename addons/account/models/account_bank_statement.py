@@ -118,7 +118,7 @@ class AccountBankStatement(models.Model):
     _check_company_auto = True
     _sequence_index = "journal_id"
 
-    @api.depends('line_ids.amount',)
+    @api.depends('line_ids', 'line_ids.amount')
     def _compute_total_entry_encoding(self):
         for statement in self:
             statement.total_entry_encoding = sum(statement.line_ids.mapped('amount'))
@@ -129,21 +129,21 @@ class AccountBankStatement(models.Model):
             statement.balance_start = statement.first_line_id.cumulative_balance - statement.first_line_id.amount
             statement.balance_end = statement.last_line_id.cumulative_balance
 
-    @api.depends('balance_end_real', 'balance_end')
+    @api.depends('balance_end_real', 'balance_end', 'currency_id')
     def _compute_difference(self):
         for statement in self:
             statement.difference = statement.balance_end_real - statement.balance_end
-            statement.is_difference_zero = statement.currency_id.is_zero(statement.difference)
+            statement.is_difference_zero = statement.currency_id and statement.currency_id.is_zero(statement.difference)
 
     @api.depends('journal_id')
     def _compute_currency(self):
         for statement in self:
             statement.currency_id = statement.journal_id.currency_id or statement.company_id.currency_id
 
-    @api.depends('line_ids.date')
-    def _compute_date(self):
+    @api.depends('line_ids.journal_id')
+    def _compute_journal_id(self):
         for statement in self:
-            statement.date = statement.line_ids.sorted()[-1:].date
+            statement.journal_id = statement.line_ids.journal_id[:1]
 
     @api.depends('move_line_ids')
     def _get_move_line_count(self):
@@ -163,7 +163,7 @@ class AccountBankStatement(models.Model):
 
     name = fields.Char(string='Reference',required=True, states={'open': [('readonly', False)]}, copy=False, readonly=True)
     reference = fields.Char(string='External Reference', states={'open': [('readonly', False)]}, copy=False, readonly=True, help="Used to hold the reference of the external mean that created this statement (name of imported file, reference of online synchronization...)")
-    date = fields.Date(compute='_compute_date', store=True)
+    date = fields.Date(related='last_line_id.date', store=True)
     date_done = fields.Datetime(string="Closed On")
     balance_start = fields.Monetary(
         string='Computed Starting Balance',
@@ -192,7 +192,12 @@ class AccountBankStatement(models.Model):
              "- Validated: All lines are reconciled. There is nothing left to process.")
 
     currency_id = fields.Many2one('res.currency', compute='_compute_currency', string="Currency")
-    journal_id = fields.Many2one('account.journal', string='Journal', required=True, states={'confirm': [('readonly', True)]}, default=_default_journal, check_company=True)
+    journal_id = fields.Many2one(
+        comodel_name='account.journal',
+        compute='_compute_journal_id',
+        store=True,
+        check_company=True,
+    )
     journal_type = fields.Selection(related='journal_id.type', help="Technical field used for usability purposes")
     company_id = fields.Many2one('res.company', related='journal_id.company_id', string='Company', store=True, readonly=True)
 
@@ -214,7 +219,12 @@ class AccountBankStatement(models.Model):
         help="Difference between the computed ending balance and the specified ending balance."
     )
 
-    line_ids = fields.One2many('account.bank.statement.line', 'statement_id', string='Statement lines', states={'confirm': [('readonly', True)]}, copy=True)
+    line_ids = fields.One2many(
+        comodel_name='account.bank.statement.line',
+        inverse_name='statement_id',
+        string='Statement lines',
+        required=True,
+    )
     first_line_id = fields.Many2one(
         comodel_name='account.bank.statement.line',
         compute='_compute_first_last_line',
@@ -243,7 +253,6 @@ class AccountBankStatement(models.Model):
     attachment_id = fields.Many2one('ir.attachment', string='Attachment')
     country_code = fields.Char(related='company_id.account_fiscal_country_id.code')
 
-
     @api.depends('line_ids.is_reconciled')
     def _compute_all_lines_reconciled(self):
         for statement in self:
@@ -253,12 +262,13 @@ class AccountBankStatement(models.Model):
     def _compute_first_last_line(self):
         for statement in self:
             sorted_lines = statement.line_ids.sorted()
-            statement.first_line_id = sorted_lines[:1]
-            statement.last_line_id = sorted_lines[-1:]
+            statement.first_line_id = sorted_lines[-1:]
+            statement.last_line_id = sorted_lines[:1]
 
     @api.depends('balance_start', 'balance_end',
                  'balance_start_real', 'balance_end_real',
                  'line_ids.previous_line_id', 'line_ids.previous_line_id.statement_id',
+                 'line_ids.previous_line_id.statement_id.balance_end_real',
                  'total_entry_encoding', 'is_difference_zero',
                  )
     def _compute_validity_and_error_message(self):
@@ -277,6 +287,10 @@ class AccountBankStatement(models.Model):
         - is_line_missing_end: If the last line cumulative balance does not match the statement real end balance
         """
         for st in self:
+            if not st.line_ids:
+                st.is_valid = False
+                st.error_message = _('No statement line.')
+                continue
             is_gap_before = st.first_line_id.previous_line_id and not st.first_line_id.previous_line_id.statement_id
             is_line_missing_before = not is_gap_before and st.currency_id.compare_amounts(
                                             st.balance_start_real, st.first_line_id.previous_line_id.statement_id.balance_end_real
@@ -287,7 +301,7 @@ class AccountBankStatement(models.Model):
                 for line in (st.line_ids - st.first_line_id)
             )
             is_line_missing_middle = not is_gap_middle \
-                                     and st.total_entry_encoding != (st.balance_end_real - st.balance_start_real)
+                                     and sum(st.line_ids.mapped('amount')) != (st.balance_end_real - st.balance_start_real)
             message = []
             if is_gap_before:
                 message.append(_('- There are some lines with no statement before this statement.'))
@@ -883,19 +897,8 @@ class AccountBankStatementLine(models.Model):
         counterpart_account_ids = []
 
         for vals in vals_list:
-            if 'statement_id' in vals:
-                statement = self.env['account.bank.statement'].browse(vals['statement_id'])
-                if statement:
-                    journal = statement.journal_id
-                    # Ensure the journal is the same as the statement one.
-                    vals['journal_id'] = journal.id
-                    vals['currency_id'] = (journal.currency_id or journal.company_id.currency_id).id
-                    if 'date' not in vals:
-                        vals['date'] = statement.date
-
             # Force the move_type to avoid inconsistency with residual 'default_move_type' inside the context.
             vals['move_type'] = 'entry'
-
 
             # Hack to force different account instead of the suspense account.
             counterpart_account_ids.append(vals.pop('counterpart_account_id', None))
@@ -962,17 +965,17 @@ class AccountBankStatementLine(models.Model):
         return res
 
     @api.ondelete(at_uninstall=False)
-    def _unlink_moves_and_fix_chain_only_if_not_uninstall(self):
-        # if module is uninstalling, the moves will be unlinked anyway, otherwise we have to unlink them when
-        # the related lines are unlinked
-        moves = self.with_context(force_delete=True).mapped('move_id')
-        moves.unlink()
-
+    def _unlink_moves_and_fix_chain_if_not_uninstall(self):
         # if module is not uninstalling, we need to recompute the previous_line_id for the lines after current lines
         for line in self:
             next_line = self.search([('previous_line_id', '=', line.id)], limit=1)
             if next_line:
                 next_line.previous_line_id = line.previous_line_id
+
+        # if module is uninstalling, the moves will be unlinked anyway, otherwise we have to unlink them when
+        # the related lines are unlinked
+        moves = self.with_context(force_delete=True).mapped('move_id')
+        moves.unlink()
 
     # -------------------------------------------------------------------------
     # SYNCHRONIZATION account.bank.statement.line <-> account.move
