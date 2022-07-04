@@ -5650,11 +5650,11 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
     function useEffect(effect, computeDependencies = () => [NaN]) {
         let cleanup;
         let dependencies;
-        onMounted(() => {
+        onMounted(async () => {
             dependencies = computeDependencies();
-            cleanup = effect(...dependencies);
+            cleanup = await effect(...dependencies);
         });
-        onPatched(() => {
+        onPatched(async () => {
             const newDeps = computeDependencies();
             const shouldReapply = newDeps.some((val, i) => val !== dependencies[i]);
             if (shouldReapply) {
@@ -5662,7 +5662,7 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
                 if (cleanup) {
                     cleanup();
                 }
-                cleanup = effect(...dependencies);
+                cleanup = await effect(...dependencies);
             }
         });
         onWillUnmount(() => cleanup && cleanup());

@@ -59,7 +59,7 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
             this.switchableRelatedViews = Promise.resolve(switchableRelatedViews);
         });
 
-        useEffect(() => {
+        useEffect(async () => {
             const initWysiwyg = async () => {
                 this.$editable.on('click.odoo-website-editor', '*', this, this._preventDefault);
                 // Disable OdooEditor observer's while setting up classes
@@ -89,7 +89,7 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                 setEditableWindow(this.websiteService.contentWindow);
             };
 
-            initWysiwyg();
+            await initWysiwyg();
 
             return () => {
                 this.$editable.off('click.odoo-website-editor', '*');
