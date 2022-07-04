@@ -249,3 +249,7 @@ $form-switch-icon-checked-color: $form-switch-checked-color !default;
 $form-switch-bg-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='3' fill='#{$form-switch-circle-bg-color}'/><line x1='-1.5' y1='-1.5' x2='1.5' y2='1.5' stroke='#{$form-switch-icon-color}' stroke-width='0.75'/><line x1='1.5' y1='-1.5' x2='-1.5' y2='1.5' stroke='#{$form-switch-icon-color}' stroke-width='0.75'/></svg>") !default;
 $form-switch-checked-bg-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='3' fill='#{$form-switch-circle-checked-bg-color}'/><path d='m-2.125,-0.5l1.75,1.75l2.5,-2.5' fill='none' stroke='#{$form-switch-icon-checked-color}' stroke-width='0.75'/></svg>") !default;
 
+// Badge
+$badge-color: inherit !default;
+$badge-padding-y: 0.25em !default;
+$badge-padding-x: 0.4em !default;
