@@ -881,34 +881,7 @@
                                                optional="show"
                                                widget="many2many_tags"/>
                                         <field name="quantity" optional="show"/>
-                                        <!-- These fields should have groups applied -->
-                                        <!-- These fields should have groups applied - Not sure if it's too much trouble for other models
-                                             to add fields. We do need to store the model_selector_id though - to update it-->
-                                        <field name="analytic_account_selector_id" invisible="1"/>
-                                        <field name="analytic_dist_model_selector_id" invisible="1"/>
-                                        <!-- <field name="analytic_dist_tag_ids"
-                                               widget="many2many_tags"/> -->
-                                        <field name="analytic_dist_tag_ids"
-                                               mode="tree"
-                                               widget="analytic_editor"
-                                               string="Analytic Distribution"
-                                               options="{'template_field': 'analytic_dist_model_selector_id', 'search_field': 'analytic_account_selector_id'}">
-                                               <!-- trying to use list renderer in the popup requires an arch but this doesn't work and we don't want to have to specify it every time-->
-                                               <!-- update I hacked the list arch parser to make it work but it still does some crazy shit like seeing these as fields of line_ids, -->
-                                               <!-- so I make them invisble, but the analytic_account_id still persists. The field needs to be removed -->
-                                               <tree editable="bottom">
-                                                <field name="analytic_account_id"/> <!-- This field matches a field of account.move.line -->
-                                                <field name="percentage"/>
-                                                <field name="adding_to_group_id"/> <!-- This is another hacky field - used to enable filter on domain -->
-                                                <!-- <field name="display_name"/>
-                                                <field name="color"/>
-                                                <field name="acc_id"/>
-                                                <field name="acc_name"/>
-                                                <field name="group_id"/>
-                                                <field name="group_name"/> -->
-                                               </tree>
-                                        </field>
-                                        <!-- <field name="analytic_json" widget="analytic_json"/> -->
+                                        <field name="analytic_json_stored" widget="analytic_json"/>
                                         <field name="quantity"/>
                                         <field name="product_uom_category_id" invisible="1"/>
                                         <field name="product_uom_id" string="UoM" groups="uom.group_uom" optional="show"/>
@@ -1109,15 +1082,7 @@
                                                groups="analytic.group_analytic_tags"
                                                widget="many2many_tags"
                                                attrs="{'invisible': [('display_type', 'in', ('line_section', 'line_note'))]}"/>
-                                        <!-- These fields are added here to ensure saving - visible? -->
-                                        <field name="analytic_dist_model_selector_id" invisible="1"/>
-                                        <field name="analytic_dist_tag_ids">
-                                            <tree editable="bottom">
-                                                <field name="analytic_account_id"/> <!-- This field matches a field of account.move.line -->
-                                                <field name="percentage"/>
-                                                <field name="adding_to_group_id"/> <!-- This is another hacky field - used to enable filter on domain -->
-                                            </tree>
-                                        </field>
+                                        <field name="analytic_json_stored" widget="analytic_json"/>
                                         <field name="date_maturity"
                                                optional="hide"
                                                invisible="context.get('view_no_maturity')"

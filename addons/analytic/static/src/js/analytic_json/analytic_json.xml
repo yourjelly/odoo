@@ -2,14 +2,49 @@
 <templates xml:space="preserve">
 
     <t t-name="analytic_json" owl="1">
-        <div class="analytic_json">
-            <t t-if="props.value.tags.length">
-                <t t-foreach="props.value.tags" t-as="tag" t-key="tag_key">
-                    <t t-esc="tag.name"/>
-                </t>
-            </t>
-            <t t-else="">
-                <span>No tags</span>
+        <div class="analytic_json" t-ref="analyticJson">
+            <TagsList tags="tags"/>
+            <t t-if="!props.readonly">
+                <div tabindex="0" t-ref="mainElement" t-on-focus="onMainElementFocus" t-on-keydown="onMainElementKeydown"/>
+                <div class="analytic_json_popup dropdown-menu show rounded py-0" t-if="state.showDropdown" t-ref="analyticDropdown">
+                    <div class="popover-header">
+                        <div class="d-flex">
+                            <div class="h5 mt-2 mr-auto"><t t-esc="list.length"/> records</div>
+                            <div class="popupButtons">
+                                <span class="btn o_button" t-on-click="() => this.forceCloseEditor()"><span class="fa fa-close"/></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="px-2">
+                        <t t-foreach="plans" t-as="plan" t-key="plan.id">
+                            <table class="o_list_table table table-sm table-hover o_analytic_table mb-1">
+                                <tr class="border-bottom">
+                                    <th>
+                                        <t t-esc="plan.name"/>
+                                    </th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                                <t t-foreach="listByGroup(plan)" t-as="dist_tag" t-key="dist_tag.id">
+                                    <tr>
+                                        <td class="o_analytic_account_name">
+                                        </td>
+                                        <td class="o_analytic_percentage">
+                                        </td>
+                                        <td>
+                                            <span class="fa fa-trash-o" t-on-click="() => this.deleteRecord(dist_tag)"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <tr>
+                                    <td class="o_field_x2many_list_row_add" colspan="3">
+                                        <a href="#" role="button" tabindex="-1" t-on-click.prevent="() => this.addLineToGroup(plan)">Add a line</a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </t>
+                    </div>
+                </div>
             </t>
         </div>
     </t>

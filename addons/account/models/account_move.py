@@ -3806,6 +3806,7 @@ class AccountMoveLine(models.Model):
     analytic_dist_model_selector_id = fields.Many2one(comodel_name='account.analytic.distribution.model', help="Technical field used to populate analytic_dist_tag_ids onchange")
     # the following field is a JSON representation of the main o2m field
     analytic_json = fields.Binary(compute='_compute_analytic_json', inverse='_set_analytic_json')
+    analytic_json_stored = fields.Binary()
     # this field contains the actual distribution tags
     analytic_dist_tag_ids = fields.One2many(comodel_name='account.analytic.distribution.tag', inverse_name='move_line_id')
 
