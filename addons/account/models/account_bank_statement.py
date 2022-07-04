@@ -793,7 +793,7 @@ class AccountBankStatementLine(models.Model):
                 ],
                 limit=1)
 
-    @api.depends('journal_id')
+    @api.depends('journal_id.currency_id')
     def _compute_currency_id(self):
         for st_line in self:
             st_line.currency_id = st_line.journal_id.currency_id or st_line.company_id.currency_id
@@ -854,7 +854,10 @@ class AccountBankStatementLine(models.Model):
     @api.depends('account_number', 'partner_name', 'ref', 'narration', 'payment_ref')
     def _compute_partner_id(self):
         for st_line in self:
-            st_line.partner_id = st_line._retrieve_partner(force=True)
+            # consider using force=False, currently the partner is changed based on the communication
+            # but if no partner found, it will not be deleted. Using force=False means if partner is
+            # specified, we will not update it based on the communication changes
+            st_line.partner_id = st_line._retrieve_partner(force=True) or st_line.partner_id
 
     @api.depends('previous_line_id.cumulative_balance', 'amount')
     def _compute_cumulative_balance(self):
