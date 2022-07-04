@@ -70,9 +70,7 @@ export class ListController extends Component {
             rootState,
         });
 
-        onWillStart(async () => {
-            this.isExportEnable = await this.userService.hasGroup("base.group_allow_export");
-        });
+        onWillStart(this._onWillStart);
 
         this.archiveEnabled =
             "active" in fields
@@ -396,6 +394,10 @@ export class ListController extends Component {
         this.model.root.records.forEach((record) => {
             record.toggleSelection(false);
         });
+    }
+
+    async _onWillStart() {
+        this.isExportEnable = await this.userService.hasGroup("base.group_allow_export");
     }
 }
 

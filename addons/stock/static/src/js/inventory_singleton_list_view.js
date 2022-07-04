@@ -1,20 +1,15 @@
-odoo.define('stock.SingletonListView', function (require) {
-'use strict';
+/** @odoo-module */
 
-var InventoryReportListView = require('stock.InventoryReportListView');
-var SingletonListController = require('stock.SingletonListController');
-var SingletonListRenderer = require('stock.SingletonListRenderer');
-var viewRegistry = require('web.view_registry');
+import { registry } from "@web/core/registry";
+import { InventoryReportListView } from './inventory_report_list_view';
+import { SingletonListController } from './inventory_singleton_list_controller';
+import { SingletonListRenderer } from './inventory_singleton_list_renderer';
 
-var SingletonListView = InventoryReportListView.extend({
-    config: _.extend({}, InventoryReportListView.prototype.config, {
-        Controller: SingletonListController,
-        Renderer: SingletonListRenderer,
-    }),
-});
+export const SingletonListView = {
+    ...InventoryReportListView,
+    Controller: SingletonListController,
+    Renderer: SingletonListRenderer,
+    buttonTemplate: 'stock.InventoryAdjustments.Buttons',
+}
 
-viewRegistry.add('singleton_list', SingletonListView);
-
-return SingletonListView;
-
-});
+registry.category("views").add("singleton_list", SingletonListView);

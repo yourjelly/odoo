@@ -1,11 +1,6 @@
-odoo.define('stock.SingletonListController', function (require) {
-"use strict";
+/** @odoo-module */
 
-var core = require('web.core');
-var InventoryReportListController = require('stock.InventoryReportListController');
-var session = require('web.session');
-
-var _t = core._t;
+import { InventoryReportListController } from './inventory_report_list_controller';
 
 /**
  * The purpose of this override has 2 purposes:
@@ -21,42 +16,22 @@ var _t = core._t;
  *    autosaving logic to prevent button actions before edits are saved.
  */
 
-var SingletonListController = InventoryReportListController.extend({
-
-
-    init: function (parent, model, renderer, params) {
-        this.context = renderer.state.getContext();
-        return this._super(...arguments);
-    },
-
-    willStart() {
-        const sup = this._super(...arguments);
-        const acl = this.getSession().user_has_group('stock.group_stock_manager').then(hasGroup => {
-            if (hasGroup) {
-                this.buttons_template = 'StockInventoryAdjustments.Buttons';
-            }
-        });
-        return Promise.all([sup, acl]);
-    },
-
-    /**
-     * @override
-     */
-    renderButtons: function ($node) {
-        this._super(...arguments);
-        this.$buttons.on('click', '.o_button_apply_all', this._onApplyAll.bind(this));
-    },
-
+export class SingletonListController extends InventoryReportListController {
     // -------------------------------------------------------------------------
     // Private
     // -------------------------------------------------------------------------
+
+    async _onWillStart() {
+        super._onWillStart();
+        this.isStockManager = await this.userService.hasGroup("stock.group_stock_manager");
+    }
 
     /**
      * @override
      * @return {Promise} rejected when updating the list because we don't want
      * to select a cell that might not exist anymore.
      */
-    _confirmSave: function (id) {
+    _confirmSave(id) {
         var newRecord = this.model.localData[id];
         var model = newRecord.model;
         var res_id = newRecord.res_id;
@@ -94,34 +69,34 @@ var SingletonListController = InventoryReportListController.extend({
         else {
             return this._super.apply(this, arguments);
         }
-    },
+    }
 
     // -------------------------------------------------------------------------
     // Handlers
     // -------------------------------------------------------------------------
 
-    /**
-     *
-     * @private
-     * @param {OdooEvent} ev
-     */
-    _onButtonClicked: function (ev) {
-        ev.stopPropagation();
-        var self = this;
-        return self.saveRecord(ev.data.record.id, {
-            stayInEdit: true,
-        }).then(function () {
-            // we need to re-get the record to make sure we have changes made
-            // by the basic model, such as the new res_id, if the record is
-            // new.
-            var record = self.model.get(ev.data.record.id);
-            return self._callButtonAction(ev.data.attrs, record);
-        }).then(function () {
-            self._enableButtons();
-        }).guardedCatch(this._enableButtons.bind(this));
-    },
+    // /**
+    //  *
+    //  * @private
+    //  * @param {OdooEvent} ev
+    //  */
+    // _onButtonClicked(ev) {
+    //     ev.stopPropagation();
+    //     var self = this;
+    //     return self.saveRecord(ev.data.record.id, {
+    //         stayInEdit: true,
+    //     }).then(function () {
+    //         // we need to re-get the record to make sure we have changes made
+    //         // by the basic model, such as the new res_id, if the record is
+    //         // new.
+    //         var record = self.model.get(ev.data.record.id);
+    //         return self._callButtonAction(ev.data.attrs, record);
+    //     }).then(function () {
+    //         self._enableButtons();
+    //     }).guardedCatch(this._enableButtons.bind(this));
+    // }
 
-    _onApplyAll: async function () {
+    async _onApplyAll() {
         const resIds = await this._domainToResIds(this.renderer.state.getDomain(), session.active_ids_limit);
         this.do_action('stock.action_stock_inventory_adjustement_name', {
             additional_context: {
@@ -130,9 +105,5 @@ var SingletonListController = InventoryReportListController.extend({
             },
             on_close: this.reload,
         });
-    },
-});
-
-return SingletonListController;
-
-});
+    }
+}
