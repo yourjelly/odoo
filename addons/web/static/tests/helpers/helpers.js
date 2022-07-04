@@ -8,10 +8,76 @@ import { browser, makeRAMLocalStorage } from "@web/core/browser/browser";
 // TODO: remove this
 export { magicSetup } from "../setup";
 
+/**
+ * This file is intended to be the main entry point for all test helpers, and
+ * to be the only helper file necessary to write tests. It will export helpers
+ * to perform the following kind of tasks:
+ * - setup registries and patches for a test suite
+ * - provide mock implementations of some basic services
+ * - random test helpers: getFixture, nextTick, nextMicrotick,
+ * - dom interaction helpers: click, keydown, writeInInput, ...
+ * - various presets to help quickly setting up: WEB_MISC_MENU_ITEMS, WEB_VIEWS, ...
+ * - helpers to generate mock data
+ *
+ * Here is a short list of what it could look like:
+ *
+ * utils
+ *      getFixture,
+ *      nextTick,
+ *      nextMicroTick
+ *      mountWithCleanup
+ *      makeTestEnv
+ *      makeDeferred
+ *
+ * suiteSetup
+ *      setRegistries
+ *      setPatches
+ *      setTiming <-- timeout, cleartimeout stuff
+ *      setDate   <-- current date
+ *      setTimeZone (or merge with setDate into setTime?)
+ *
+ * dom
+ *      click
+ *      triggerKeyPress
+ *      triggerKeyDown
+ *      dragAndDrop
+ *      ...
+ *
+ * components
+ *      viewClickDiscard
+ *      viewClickEdit
+ *      searchApplyFilter
+ *      searchEditInput
+ *      searchGetPagerValue
+ *      webClientDoAction
+ *      listAddRow
+ *      searchToggleMenuItem
+ *
+ * builders
+ *      makeWebClient
+ *      makeView
+ *
+ * mocks
+ *      makeMockNotificationService
+ *      makeFakeUserService
+ *      ...
+ *
+ * presets
+ *      WEB_MISC_MENU_ITEMS
+ *      WEB_VIEWS,
+ *      ...
+ * data
+ *      makeServerModel
+ *
+ * Note: there should not be patch/patchWithCleanup
+ *
+ */
+
 // -----------------------------------------------------------------------------
 // Private stuff
 // -----------------------------------------------------------------------------
 let currentSuite = null;
+let currentTest = null;
 let initialRegistryState = {};
 let testCleanups = [];
 let suiteCleanups = {};
@@ -21,6 +87,10 @@ QUnit.testDone(() => {
         cb();
     }
     testCleanups = [];
+});
+
+QUnit.testStart((details) => {
+    currentTest = details.name;
 });
 
 QUnit.moduleStart((details) => {
