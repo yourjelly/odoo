@@ -37,7 +37,7 @@
                                                 onFocus.bind="() => this.groupAutocompleteFocus(plan.id)"/>
                                         </td>
                                         <td class="o_analytic_percentage">
-                                            <input class="o_input" inputmode="numeric" type="text" t-model="dist_tag.percentage" t-on-click.stop=""/>
+                                            <input class="o_input" inputmode="numeric" type="text" t-model="dist_tag.percentage" t-on-click.stop="" t-on-blur="() => this.autoFill()"/>
                                         </td>
                                         <td>
                                             <span class="fa fa-trash-o" t-on-click="() => this.deleteTag(dist_tag.id)"/>

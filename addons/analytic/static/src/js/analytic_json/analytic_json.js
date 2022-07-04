@@ -2,6 +2,7 @@
 
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
+import { getNextTabableElement, getPreviousTabableElement, getTabableElements } from "@web/core/utils/ui";
 import { usePosition } from "@web/core/position_hook";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
@@ -205,6 +206,37 @@ export class AnalyticJson extends Component {
         }
     }
 
+    adjacentElementToFocus(direction, el = null) {
+        if (!this.isDropdownOpen) {
+            return null;
+        }
+        if (!el) {
+            el = this.dropdownRef.el;
+        }
+        return direction == "next" ? getNextTabableElement(el) : getPreviousTabableElement(el);
+    }
+
+    focusAdjacent(direction) {
+        let elementToFocus = this.adjacentElementToFocus(direction);
+        if (elementToFocus){
+            this.focus(elementToFocus);
+            return true;
+        }
+        return false;
+    }
+
+    focus(el) {
+        el.focus();
+        if (["INPUT", "TEXTAREA"].includes(el.tagName)) {
+            if (el.selectionStart) {
+                //bad
+                el.selectionStart = 0;
+                el.selectionEnd = el.value.length;
+            }
+            el.select();
+        }
+    }
+
     onWidgetKeydown(ev) {
         if (!this.editingRecord) {
             return;
@@ -213,7 +245,9 @@ export class AnalyticJson extends Component {
         switch (hotkey) {
             case "tab": {
                 if (this.isDropdownOpen) {
-                    console.log('caught tab; to focus is not implemented; closing...');
+                    if (this.focusAdjacent("next")){
+                        break;
+                    }
                     this.closeAnalyticEditor();
                 };
                 this.resetRecentlyClosed();
@@ -221,7 +255,9 @@ export class AnalyticJson extends Component {
             }
             case "shift+tab": {
                 if (this.isDropdownOpen) {
-                    console.log('caught shift+tab; to focus is not implemented; closing...');
+                    if (this.focusAdjacent("previous")){
+                        break;
+                    }
                     this.closeAnalyticEditor();
                 };
                 this.resetRecentlyClosed();
