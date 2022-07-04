@@ -349,6 +349,51 @@ class TestAccountBankStatementLine(TestAccountBankStatementCommon):
             'amount_currency': -2500.0,
         }
 
+        cls.st_lines = cls.env['account.bank.statement.line'].create(
+            [
+                {
+                    'company_id': cls.company_data_2['company'].id,
+                    'journal_id': cls.company_data_2['default_journal_bank'].id,
+                    'payment_ref': f'line_{vals[0]}',
+                    'amount': vals[0],
+                    'date': fields.Date.from_string(vals[1]),
+                } for vals in [
+                    (1, '2020-01-10'),
+                    (6, '2020-01-13'),
+                    (2, '2020-01-11'),
+                    (3, '2020-01-12'),
+                    (4, '2020-01-12'),
+                    (7, '2020-01-13'),
+                    (5, '2020-01-12'),
+                ]
+            ]
+        ).sorted()
+
+    def create_bank_transaction(self, amount, date, amount_currency=None, currency=None, statement=None,
+                                partner=None, journal=None, sequence=0):
+        values = {
+            'payment_ref': str(amount),
+            'amount': amount,
+            'date': date,
+            'partner_id': partner and partner.id,
+            'sequence': sequence,
+        }
+        if amount_currency:
+            values['amount_currency'] = amount_currency
+            values['foreign_currency_id'] = currency.id
+        if statement and journal and statement.journal_id != journal:
+            raise(ValidationError("The statement and the journal are contradictory"))
+        if statement:
+            values['journal_id'] = statement.journal_id.id
+            values['statement_id'] = statement.id
+        if journal:
+            values['journal_id'] = journal.id
+        if not values.get('journal_id'):
+            values['journal_id'] = (self.company_data_2['default_journal_bank']
+                                    if self.env.company == self.company_data_2['company']
+                                    else self.company_data['default_journal_bank']
+                                    ).id
+        return self.env['account.bank.statement.line'].create(values)
     # -------------------------------------------------------------------------
     # TESTS about the statement line model.
     # -------------------------------------------------------------------------
@@ -890,3 +935,526 @@ class TestAccountBankStatementLine(TestAccountBankStatementCommon):
         statement_line = statement.line_ids
 
         self.assertRecordValues(statement_line, [{'is_reconciled': True, 'amount_residual': 0.0}])
+
+    def test_statement_line_ordering_by_date(self):
+
+        self.env.user.company_id = self.company_data_2['company']
+
+        self.assertRecordValues(
+            self.st_lines,
+            [
+                {'amount': 7, 'cumulative_balance': 28},
+                {'amount': 6, 'cumulative_balance': 21},
+                {'amount': 5, 'cumulative_balance': 15},
+                {'amount': 4, 'cumulative_balance': 10},
+                {'amount': 3, 'cumulative_balance': 6},
+                {'amount': 2, 'cumulative_balance': 3},
+                {'amount': 1, 'cumulative_balance': 1},
+            ],
+        )
+
+        # change the date of 7 to be before the first one
+        self.st_lines.filtered(lambda l: l.amount == 7).date = '2020-01-05'
+        self.assertRecordValues(
+            self.st_lines.sorted(),
+            [
+                {'amount': 6, 'cumulative_balance': 28},
+                {'amount': 5, 'cumulative_balance': 22},
+                {'amount': 4, 'cumulative_balance': 17},
+                {'amount': 3, 'cumulative_balance': 13},
+                {'amount': 2, 'cumulative_balance': 10},
+                {'amount': 1, 'cumulative_balance': 8},
+                {'amount': 7, 'cumulative_balance': 7},
+
+            ],
+        )
+
+        # swap the date of 7 and 2
+        self.st_lines.filtered(lambda l: l.amount == 7).date = '2020-01-11'
+        self.st_lines.filtered(lambda l: l.amount == 2).date = '2020-01-05'
+        self.assertRecordValues(
+            self.st_lines.sorted(),
+            [
+                {'amount': 6, 'cumulative_balance': 28},
+                {'amount': 5, 'cumulative_balance': 22},
+                {'amount': 4, 'cumulative_balance': 17},
+                {'amount': 3, 'cumulative_balance': 13},
+                {'amount': 7, 'cumulative_balance': 10},
+                {'amount': 1, 'cumulative_balance': 3},
+                {'amount': 2, 'cumulative_balance': 2},
+            ],
+        )
+
+        # change the amount of 1 to be negative
+        self.st_lines.filtered(lambda l: l.amount == 1).amount = -1
+        self.assertRecordValues(
+            self.st_lines.sorted(),
+            [
+                {'amount': 6, 'cumulative_balance': 26},
+                {'amount': 5, 'cumulative_balance': 20},
+                {'amount': 4, 'cumulative_balance': 15},
+                {'amount': 3, 'cumulative_balance': 11},
+                {'amount': 7, 'cumulative_balance': 8},
+                {'amount': -1, 'cumulative_balance': 1},
+                {'amount': 2, 'cumulative_balance': 2},
+            ],
+        )
+        # erase no 3
+        self.st_lines.filtered(lambda l: l.amount == 3).unlink()
+        self.assertRecordValues(
+            self.st_lines.sorted(),
+            [
+                {'amount': 6, 'cumulative_balance': 23},
+                {'amount': 5, 'cumulative_balance': 17},
+                {'amount': 4, 'cumulative_balance': 12},
+                {'amount': 7, 'cumulative_balance': 8},
+                {'amount': -1, 'cumulative_balance': 1},
+                {'amount': 2, 'cumulative_balance': 2},
+
+            ],
+        )
+
+        # insert a new line with between 2 and 1
+        self.create_bank_transaction(
+            amount=8,
+            date='2020-01-08',
+        )
+        self.assertRecordValues(
+            self.env['account.bank.statement.line'].search([('company_id', '=', self.env.company.id)]),
+            [
+                {'amount': 6, 'cumulative_balance': 31},
+                {'amount': 5, 'cumulative_balance': 25},
+                {'amount': 4, 'cumulative_balance': 20},
+                {'amount': 7, 'cumulative_balance': 16},
+                {'amount': -1, 'cumulative_balance': 9},
+                {'amount': 8, 'cumulative_balance': 10},
+                {'amount': 2, 'cumulative_balance': 2},
+            ],
+        )
+
+    def test_statement_line_ordering_by_sequence(self):
+
+        self.env.user.company_id = self.company_data_2['company']
+        # swap line 6 and 7 by sequence
+        self.st_lines.filtered(lambda l: l.amount == 7).sequence += 1
+        self.assertRecordValues(
+            self.st_lines.sorted(),
+            [
+                {'amount': 6, 'cumulative_balance': 28},
+                {'amount': 7, 'cumulative_balance': 22},
+                {'amount': 5, 'cumulative_balance': 15},
+                {'amount': 4, 'cumulative_balance': 10},
+                {'amount': 3, 'cumulative_balance': 6},
+                {'amount': 2, 'cumulative_balance': 3},
+                {'amount': 1, 'cumulative_balance': 1},
+            ],
+        )
+        # add a line before 3 with the same date
+        self.create_bank_transaction(
+            amount=8,
+            date='2020-01-12',
+            sequence=2,
+        )
+        self.assertRecordValues(
+            self.env['account.bank.statement.line'].search([('company_id', '=', self.env.company.id)]),
+            [
+                {'amount': 6, 'cumulative_balance': 36},
+                {'amount': 7, 'cumulative_balance': 30},
+                {'amount': 5, 'cumulative_balance': 23},
+                {'amount': 4, 'cumulative_balance': 18},
+                {'amount': 3, 'cumulative_balance': 14},
+                {'amount': 8, 'cumulative_balance': 11},
+                {'amount': 2, 'cumulative_balance': 3},
+                {'amount': 1, 'cumulative_balance': 1},
+            ],
+        )
+
+        # change the sequence of 3 to move it before 5
+        self.st_lines.filtered(lambda l: l.amount == 3).sequence = -1
+        self.assertRecordValues(
+            self.env['account.bank.statement.line'].search([('company_id', '=', self.env.company.id)]),
+            [
+                {'amount': 6, 'cumulative_balance': 36},
+                {'amount': 7, 'cumulative_balance': 30},
+                {'amount': 3, 'cumulative_balance': 23},
+                {'amount': 5, 'cumulative_balance': 20},
+                {'amount': 4, 'cumulative_balance': 15},
+                {'amount': 8, 'cumulative_balance': 11},
+                {'amount': 2, 'cumulative_balance': 3},
+                {'amount': 1, 'cumulative_balance': 1},
+            ],
+        )
+
+    def test_statement_assignation(self):
+
+        def get_line(amount):
+            return self.env['account.bank.statement.line'].search([('amount', '=', amount)])
+
+        self.env.user.company_id = self.company_data_2['company']
+
+        statement1 = self.env['account.bank.statement'].create({
+            'name': 'statement1',
+            'balance_start_real': 0.0,
+            'balance_end_real': 7.0,
+            'line_ids': [Command.set((self.st_lines.filtered(lambda l: l.amount in (1, 2, 4))).ids)],
+        })
+
+        self.assertRecordValues(
+            self.st_lines,
+            [
+                {'amount': 7, 'statement_id': False, 'cumulative_balance': 28},
+                {'amount': 6, 'statement_id': False, 'cumulative_balance': 21},
+                {'amount': 5, 'statement_id': False, 'cumulative_balance': 15},
+                {'amount': 4, 'statement_id': statement1.id, 'cumulative_balance': 10},
+                {'amount': 3, 'statement_id': False, 'cumulative_balance': 6},
+                {'amount': 2, 'statement_id': statement1.id, 'cumulative_balance': 3},
+                {'amount': 1, 'statement_id': statement1.id, 'cumulative_balance': 1},
+            ],
+        )
+        self.assertRecordValues(
+            statement1,
+            [{
+                'balance_start': 0.0,
+                'balance_end': 10.0,
+                'first_line_id': get_line(1).id,
+                'last_line_id': get_line(4).id,
+                'date': fields.Date.from_string('2020-01-12'),
+                'is_valid': False,  # there is a gap, sum mismatch
+                'is_difference_zero': False,
+                'total_entry_encoding': 7.0,
+                'difference': -3.0,
+            }],
+        )
+        statement1.balance_end_real = 10.0
+        self.assertRecordValues(
+            statement1,
+            [{
+                'is_valid': False,  # there is a gap, end mismatch
+                'is_difference_zero': True,
+            }],
+        )
+
+        get_line(3).statement_id = statement1.id
+        self.assertRecordValues(
+            statement1,
+            [{
+                'balance_start': 0.0,
+                'balance_end': 10.0,
+                'first_line_id': get_line(1).id,
+                'last_line_id': get_line(4).id,
+                'total_entry_encoding': 10.0,
+                'is_valid': True,
+                'is_difference_zero': True,
+            }]
+        )
+        # add a proper statement
+        statement2 = self.env['account.bank.statement'].create({
+            'name': 'statement2',
+            'balance_start_real': 15.0,
+            'balance_end_real': 28.0,
+            'line_ids': [Command.set((get_line(6) + get_line(7)).ids)],
+        })
+
+        self.assertRecordValues(
+            self.st_lines,
+            [
+                {'amount': 7, 'statement_id': statement2.id, 'cumulative_balance': 28},
+                {'amount': 6, 'statement_id': statement2.id, 'cumulative_balance': 21},
+                {'amount': 5, 'statement_id': False, 'cumulative_balance': 15},
+                {'amount': 4, 'statement_id': statement1.id, 'cumulative_balance': 10},
+                {'amount': 3, 'statement_id': statement1.id, 'cumulative_balance': 6},
+                {'amount': 2, 'statement_id': statement1.id, 'cumulative_balance': 3},
+                {'amount': 1, 'statement_id': statement1.id, 'cumulative_balance': 1},
+            ],
+        )
+
+        self.assertRecordValues(
+            statement2,
+            [{
+                'balance_start': 15.0,
+                'balance_end': 28.0,
+                'is_valid': False,  # there is a gap before
+                'is_difference_zero': True,
+            }],
+        )
+
+        # add statement 3 to reach a clean state
+        statement3 = self.env['account.bank.statement'].create({
+            'name': 'statement3',
+            'balance_start_real': 10.0,
+            'balance_end_real': 15.0,
+            'line_ids': [Command.set(get_line(5).ids)],
+        })
+
+        self.assertRecordValues(
+            self.st_lines,
+            [
+                {'amount': 7, 'statement_id': statement2.id, 'cumulative_balance': 28},
+                {'amount': 6, 'statement_id': statement2.id, 'cumulative_balance': 21},
+                {'amount': 5, 'statement_id': statement3.id, 'cumulative_balance': 15},
+                {'amount': 4, 'statement_id': statement1.id, 'cumulative_balance': 10},
+                {'amount': 3, 'statement_id': statement1.id, 'cumulative_balance': 6},
+                {'amount': 2, 'statement_id': statement1.id, 'cumulative_balance': 3},
+                {'amount': 1, 'statement_id': statement1.id, 'cumulative_balance': 1},
+            ],
+        )
+        self.assertRecordValues(
+            statement3 + statement2 + statement1,
+            [
+                {
+                    'is_difference_zero': True,
+                    'is_valid': True,
+                },
+                {
+                    'is_difference_zero': True,
+                    'is_valid': True,
+                },
+                {
+                    'is_difference_zero': True,
+                    'is_valid': True,
+                },
+            ],
+        )
+
+        # remove statement3
+        get_line(5).statement_id = statement1.id
+        self.assertRecordValues(
+            self.st_lines,
+            [
+                {'amount': 7, 'statement_id': statement2.id, 'cumulative_balance': 28},
+                {'amount': 6, 'statement_id': statement2.id, 'cumulative_balance': 21},
+                {'amount': 5, 'statement_id': statement1.id, 'cumulative_balance': 15},
+                {'amount': 4, 'statement_id': statement1.id, 'cumulative_balance': 10},
+                {'amount': 3, 'statement_id': statement1.id, 'cumulative_balance': 6},
+                {'amount': 2, 'statement_id': statement1.id, 'cumulative_balance': 3},
+                {'amount': 1, 'statement_id': statement1.id, 'cumulative_balance': 1},
+            ],
+        )
+        self.assertRecordValues(
+            statement1 + statement2,
+            [
+                {
+                    'balance_start': 0.0,
+                    'balance_end': 15.0,
+                    'is_difference_zero': False,  # balance_end_real: 10.0,
+                    'is_valid': False,
+                },
+                {
+                    'balance_start': 15.0,
+                    'balance_end': 28.0,
+                    'is_difference_zero': True,
+                    'is_valid': False,  # previous statement balance_end_real != balance_start
+                },
+            ],
+        )
+        # fixup statement1
+        statement1.balance_end_real = 15.0
+        self.assertTrue(statement1.is_valid)
+        self.assertTrue(statement2.is_valid)
+
+        # change in first and last lines
+        statement1.balance_end_real = 10.0
+        get_line(5).statement_id = statement2.id
+        self.assertRecordValues(
+            self.st_lines,
+            [
+                {'amount': 7, 'statement_id': statement2.id, 'cumulative_balance': 28},
+                {'amount': 6, 'statement_id': statement2.id, 'cumulative_balance': 21},
+                {'amount': 5, 'statement_id': statement2.id, 'cumulative_balance': 15},
+                {'amount': 4, 'statement_id': statement1.id, 'cumulative_balance': 10},
+                {'amount': 3, 'statement_id': statement1.id, 'cumulative_balance': 6},
+                {'amount': 2, 'statement_id': statement1.id, 'cumulative_balance': 3},
+                {'amount': 1, 'statement_id': statement1.id, 'cumulative_balance': 1},
+            ],
+        )
+        self.assertRecordValues(
+            statement1 + statement2,
+            [
+                {
+                    'balance_start': 0.0,
+                    'balance_end': 10.0,
+                    'is_difference_zero': True,
+                    'is_valid': True,
+                },
+                {
+                    'balance_start': 10.0,
+                    'balance_end': 28.0,
+                    'is_difference_zero': True,
+                    'is_valid': False,
+                },
+            ],
+        )
+        # make a mess
+        get_line(2).statement_id = statement2.id
+
+        self.assertRecordValues(
+            self.st_lines,
+            [
+                {'amount': 7, 'statement_id': statement2.id, 'cumulative_balance': 28},
+                {'amount': 6, 'statement_id': statement2.id, 'cumulative_balance': 21},
+                {'amount': 5, 'statement_id': statement2.id, 'cumulative_balance': 15},
+                {'amount': 4, 'statement_id': statement1.id, 'cumulative_balance': 10},
+                {'amount': 3, 'statement_id': statement1.id, 'cumulative_balance': 6},
+                {'amount': 2, 'statement_id': statement2.id, 'cumulative_balance': 3},
+                {'amount': 1, 'statement_id': statement1.id, 'cumulative_balance': 1},
+            ],
+        )
+        self.assertRecordValues(
+            statement1 + statement2,
+            [
+                {
+                    'balance_start': 0.0,
+                    'balance_end': 10.0,
+                    'is_difference_zero': True,
+                    'is_valid': False,
+                },
+                {
+                    'balance_start': 1.0,
+                    'balance_end': 28.0,
+                    'is_difference_zero': True,
+                    'is_valid': False,
+                },
+            ],
+        )
+
+        # remove messy line
+        get_line(2).unlink()
+        self.assertRecordValues(
+            self.env['account.bank.statement.line'].search([('company_id', '=', self.env.company.id)]),
+            [
+                {'amount': 7, 'statement_id': statement2.id, 'cumulative_balance': 26},
+                {'amount': 6, 'statement_id': statement2.id, 'cumulative_balance': 19},
+                {'amount': 5, 'statement_id': statement2.id, 'cumulative_balance': 13},
+                {'amount': 4, 'statement_id': statement1.id, 'cumulative_balance': 8},
+                {'amount': 3, 'statement_id': statement1.id, 'cumulative_balance': 4},
+                {'amount': 1, 'statement_id': statement1.id, 'cumulative_balance': 1},
+            ],
+        )
+        self.assertRecordValues(
+            statement1 + statement2,
+            [
+                {
+                    'balance_start': 0.0,
+                    'balance_end': 8.0,
+                    'is_difference_zero': False,
+                    'is_valid': False,
+                    'difference': 2.0,
+                },
+                {
+                    'balance_start': 8.0,
+                    'balance_end': 26.0,
+                    'is_difference_zero': False,
+                    'is_valid': False,
+                    'difference': 2.0,
+                },
+            ],
+        )
+        # make it clean again
+        statement1.balance_end_real = 8.0
+        statement2.balance_end_real = 26.0
+        statement2.balance_start_real = 8.0
+        self.assertFalse(statement2.error_message)
+        self.assertRecordValues(
+            statement1 + statement2,
+            [
+                {
+                    'is_difference_zero': True,
+                    'is_valid': True,
+                },
+                {
+                    'is_difference_zero': True,
+                    'is_valid': True,
+                },
+            ],
+        )
+        # remove two lines ae same time from start and end of two statements
+        (get_line(5)+get_line(6)).unlink()
+        self.assertRecordValues(
+            self.env['account.bank.statement.line'].search([('company_id', '=', self.env.company.id)]),
+            [
+                {'amount': 7, 'statement_id': statement2.id, 'cumulative_balance': 15},
+                {'amount': 4, 'statement_id': statement1.id, 'cumulative_balance': 8},
+                {'amount': 3, 'statement_id': statement1.id, 'cumulative_balance': 4},
+                {'amount': 1, 'statement_id': statement1.id, 'cumulative_balance': 1},
+            ],
+        )
+        # make it valid again
+        statement1.balance_end_real = 8.0
+        statement2.balance_end_real = 15.0
+        statement2.balance_start_real = 8.0
+        self.assertRecordValues(
+            statement1 + statement2,
+            [
+                {
+                    'is_difference_zero': True,
+                    'is_valid': True,
+                },
+                {
+                    'is_difference_zero': True,
+                    'is_valid': True,
+                },
+            ],
+        )
+        # change a line value
+        get_line(3).amount = -3
+        self.assertRecordValues(
+            self.env['account.bank.statement.line'].search([('company_id', '=', self.env.company.id)]),
+            [
+                {'amount': 7, 'statement_id': statement2.id, 'cumulative_balance': 9},
+                {'amount': 4, 'statement_id': statement1.id, 'cumulative_balance': 2},
+                {'amount': -3, 'statement_id': statement1.id, 'cumulative_balance': -2},
+                {'amount': 1, 'statement_id': statement1.id, 'cumulative_balance': 1},
+            ],
+        )
+        self.assertRecordValues(
+            statement1 + statement2,
+            [
+                {
+                    'balance_start': 0.0,
+                    'balance_end': 2.0,
+                    'is_difference_zero': False,
+                    'is_valid': False,
+                    'difference': 6.0,
+                },
+                {
+                    'balance_start': 2.0,
+                    'balance_end': 9.0,
+                    'is_difference_zero': False,
+                    'is_valid': False,
+                    'difference': 6.0,
+                },
+            ],
+        )
+
+        # add a new line with statement
+        self.create_bank_transaction(amount=8, statement=statement1, date='2020-01-10', sequence=-1)
+        self.assertRecordValues(
+            self.env['account.bank.statement.line'].search([('company_id', '=', self.env.company.id)]),
+            [
+                {'amount': 7, 'statement_id': statement2.id, 'cumulative_balance': 17},
+                {'amount': 4, 'statement_id': statement1.id, 'cumulative_balance': 10},
+                {'amount': -3, 'statement_id': statement1.id, 'cumulative_balance': 6},
+                {'amount': 8, 'statement_id': statement1.id, 'cumulative_balance': 9},
+                {'amount': 1, 'statement_id': statement1.id, 'cumulative_balance': 1},
+            ],
+        )
+
+        self.assertRecordValues(
+            statement1 + statement2,
+            [
+                {
+                    'balance_start': 0.0,
+                    'balance_end': 10,
+                    'is_difference_zero': False,
+                    'is_valid': False,
+                    'difference': -2.0,
+                },
+                {
+                    'balance_start': 10.0,
+                    'balance_end': 17.0,
+                    'is_difference_zero': False,
+                    'is_valid': False,
+                    'difference': -2.0,
+                },
+            ],
+        )
