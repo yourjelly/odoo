@@ -49,5 +49,5 @@ class AccountAccountTag(models.Model):
             ]
             or_domains.append(expr_domain)
 
-        domain = osv.expression.AND([('engine', '=', 'tax_tags')], osv.expression.OR(or_domains))
+        domain = osv.expression.AND([[('engine', '=', 'tax_tags')], osv.expression.OR(or_domains)])
         return self.env['account.report.expression'].search(domain)
