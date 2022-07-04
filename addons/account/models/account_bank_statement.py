@@ -537,16 +537,6 @@ class AccountBankStatementLine(models.Model):
     _order = "date desc, sequence, id desc"
     _check_company_auto = True
 
-    def default_get(self, fields_list):
-        defaults = super().default_get(fields_list) or {}
-        if 'statement_id' in fields_list and 'statement_id' not in defaults and defaults.get('journal_id'):
-            statement = self.env['account.bank.statement'].search(
-                [('journal_id', '=', defaults['journal_id'])],
-                limit=1)
-            if not statement.is_difference_zero:
-                defaults['statement_id'] = statement.id
-        return defaults
-
     # FIXME: Fields having the same name in both tables are confusing (partner_id & state). We don't change it because:
     # - It's a mess to track/fix.
     # - Some fields here could be simplified when the onchanges will be gone in account.move.
@@ -561,6 +551,8 @@ class AccountBankStatementLine(models.Model):
     statement_id = fields.Many2one(
         comodel_name='account.bank.statement',
         string='Statement',
+        compute='_compute_statement_id',
+        store=True,
     )
 
     sequence = fields.Integer(help="Gives the sequence order when displaying a list of bank statement lines.", default=1)
@@ -789,6 +781,17 @@ class AccountBankStatementLine(models.Model):
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
+
+    @api.depends('journal_id')
+    def _compute_statement_id(self):
+        # todo convert to sql and maybe mix with _compute_currency_id
+        for line in self.filtered(lambda l: l.statement_id.journal_id != l.journal_id):
+            line.statement_id = self.env['account.bank.statement'].search(
+                [
+                    ('journal_id', '=', line.journal_id.id),
+                    ('is_difference_zero', '=', False),
+                ],
+                limit=1)
 
     @api.depends('journal_id')
     def _compute_currency_id(self):

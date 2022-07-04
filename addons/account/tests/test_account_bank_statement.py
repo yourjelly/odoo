@@ -1458,3 +1458,37 @@ class TestAccountBankStatementLine(TestAccountBankStatementCommon):
                 },
             ],
         )
+
+    def test_autofill_statement(self):
+        self.env.user.company_id = self.company_data_2['company']
+
+        statement1 = self.env['account.bank.statement'].create({
+            'name': 'statement1',
+            'balance_start_real': 0.0,
+            'balance_end_real': 18.0,
+            'line_ids': [Command.set((self.st_lines.filtered(lambda l: l.amount in (1, 2, 3, 4))).ids)],
+        })
+
+        self.assertFalse(statement1.is_difference_zero)
+        new_line = self.create_bank_transaction(amount=8, date='2020-01-11')
+        self.assertRecordValues(
+            self.env['account.bank.statement.line'].search([('company_id', '=', self.env.company.id)]),
+            [
+                {'amount': 7, 'cumulative_balance': 36},
+                {'amount': 6, 'cumulative_balance': 29},
+                {'amount': 5, 'cumulative_balance': 23},
+                {'amount': 4, 'cumulative_balance': 18},
+                {'amount': 3, 'cumulative_balance': 14},
+                {'amount': 8, 'cumulative_balance': 11},
+                {'amount': 2, 'cumulative_balance': 3},
+                {'amount': 1, 'cumulative_balance': 1},
+            ],
+        )
+        # statement1 end_balance_real is not valid, so we add a line to it
+        self.assertRecordValues(new_line, [{'statement_id': statement1.id}])
+
+        # statement1's end balance is now valid, so we do not suggest it for the new line
+        self.assertTrue(statement1.is_difference_zero)
+
+        new_line = self.create_bank_transaction(amount=9, date='2020-01-11')
+        self.assertRecordValues(new_line, [{'statement_id': False}])
