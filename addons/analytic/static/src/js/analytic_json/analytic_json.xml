@@ -28,7 +28,13 @@
                                 <t t-foreach="listByGroup(plan.id)" t-as="dist_tag" t-key="dist_tag.id">
                                     <tr>
                                         <td class="o_analytic_account_name">
-                                            <span>Auto-Complete here</span>
+                                            <AutoComplete
+                                                id="dist_tag.id.toString()"
+                                                placeholder="'Search Analytic Account'"
+                                                value="dist_tag.analytic_account_name"
+                                                sources="sourcesAnalyticAccount"
+                                                onSelect.bind="onSelect"
+                                                onFocus.bind="() => this.groupAutocompleteFocus(plan.id)"/>
                                         </td>
                                         <td class="o_analytic_percentage">
                                             <input class="o_input" inputmode="numeric" type="text" t-model="dist_tag.percentage" t-on-click.stop=""/>

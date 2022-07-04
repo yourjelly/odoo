@@ -4,6 +4,7 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { usePosition } from "@web/core/position_hook";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
+import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { TagsList } from "@web/views/fields/many2many_tags/tags_list";
@@ -17,6 +18,7 @@ export class AnalyticJson extends Component {
         this.state = useState({
             showDropdown: false,
             list: [],
+            addingGroup: false,
         });
         this.orm = useService("orm");
         this.fetchAllPlans();
@@ -27,30 +29,114 @@ export class AnalyticJson extends Component {
             popper: "analyticDropdown",
         });
 
+        this.nextId = 0;
+
         useExternalListener(window, "click", this.onWindowClick, true);
     }
 
     async fetchAllPlans() {
         // there is no need to do this for each component instance - consider adding a service - keep in mind groups may change
-        let allPlans = await this.orm.call('account.analytic.group', "name_search", [], {});
+        let allPlans = await this.orm.call('account.analytic.group', "search_read", [], {fields: ["id", "name", "color"]});
         this.allPlans = allPlans.map((record) => ({
-            id: record[0],
-            name: record[1],
+            id: record.id,
+            name: record.name,
+            color: record.color,
         }));
+    }
+
+    get sourcesAnalyticAccount() {
+        return [this.optionsSourceAnalytic];
+    }
+    get optionsSourceAnalytic() {
+        return {
+            placeholder: this.env._t("Loading..."),
+            options: this.loadOptionsSourceAnalytic.bind(this),
+        };
+    }
+
+    async loadOptionsSourceAnalytic(request) {
+        let options = [];
+        let domain = [['id', 'not in', this.existingAnalyticAccountIDs], ['group_id', '!=', false]];
+        if (this.state.addingGroup) {
+            domain.push(['group_id', '=', this.state.addingGroup]);
+        }
+        const records = await this.orm.call("account.analytic.account", "search_read", [], {
+            domain: [...domain, ["name", "ilike", request]],
+            fields: ["id", "name", "group_id"],
+            limit: 7,
+            context: [],
+        });
+        options = records.map((result) => ({
+            value: result.id,
+            label: result.name,
+            group_id: result.group_id[0],
+        }));
+        
+
+        if (!options.length) {
+            options.push({
+                label: this.env._t("No Analytic Accounts for this plan"),
+                classList: "o_m2o_no_result",
+                unselectable: true,
+            });
+        }
+
+        return options;
+    }
+
+    groupAutocompleteFocus(group_id) {
+        this.state.addingGroup = group_id;
+    }
+
+    async getAnalyticAccountInfo(id) {
+        let data = await this.orm.call("account.analytic.account", "read", [id], {fields:["name", "group_id"]})
+    }
+
+    async onSelect(option, params) {
+        let selected_option = Object.getPrototypeOf(option);
+        let tag_id = parseInt(params.input.id);
+        let record = this.listItemByID(tag_id);
+        if (record) {
+            record.analytic_account_id = selected_option.value;
+            record.analytic_account_name = selected_option.label;
+            record.color = this.planById(selected_option.group_id).color;
+        } else {
+            console.log('record not found', option, tag_id);
+        }
     }
 
     get plans() {
         return this.allPlans;
     }
 
+    planById(id) {
+        return this.plans.filter((plan) => plan.id === id)[0];
+    }
+
     get tags() {
-        return this.list.map((dist_tag) => ({
+        return this.listReady.map((dist_tag) => ({
             id: dist_tag.id,
-            text: dist_tag.analytic_account_name + " " + dist_tag.percentage + "%",
+            text: dist_tag.analytic_account_name + (dist_tag.percentage === 100 ? "" : " " + dist_tag.percentage + "%"),
             colorIndex: dist_tag.color,
             group_id: dist_tag.group_id,
             onDelete: this.editingRecord ? () => this.deleteTag(dist_tag.id) : undefined
         }));
+    }
+
+    get existingAnalyticAccountIDs() {
+        return this.listWithAnalyticID.map((dist_tag) => dist_tag.analytic_account_id);
+    }
+
+    get listWithAnalyticID() {
+        return this.list.filter((dist_tag) => Number.isInteger(dist_tag.analytic_account_id));
+    }
+
+    listItemByID(id) {
+        return this.list.filter((dist_tag) => dist_tag.id === id)[0];
+    }
+
+    get listReady() {
+        return this.list.filter((dist_tag) => !!dist_tag.analytic_account_id && dist_tag.percentage > 0);
     }
 
     get list() {
@@ -63,7 +149,7 @@ export class AnalyticJson extends Component {
     }
 
     sumByGroup(id) {
-        return this.listByGroup(id).reduce((prev, next) => prev + (next.percentage || 0), 0)
+        return this.listByGroup(id).reduce((prev, next) => prev + (parseInt(next.percentage) || 0), 0);;
     }
 
     remainderByGroup(id) {
@@ -100,7 +186,7 @@ export class AnalyticJson extends Component {
 
     newTag(group_id) {
         return {
-            id: this.list.length,
+            id: this.nextId++,
             group_id: group_id,
             analytic_account_id: null,
             analytic_account_name: "",
@@ -187,6 +273,7 @@ export class AnalyticJson extends Component {
 AnalyticJson.template = "analytic_json";
 AnalyticJson.supportedTypes = ["char", "binary"];
 AnalyticJson.components = {
+    AutoComplete,
     TagsList,
 }
 AnalyticJson.props = {
