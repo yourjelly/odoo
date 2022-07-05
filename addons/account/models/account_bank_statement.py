@@ -7,8 +7,6 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.osv.expression import get_unaccent_wrapper
 from odoo.addons.base.models.res_bank import sanitize_account_number
 
-from xmlrpc.client import MAXINT
-
 
 class AccountCashboxLine(models.Model):
     """ Cash Box Details """
@@ -161,7 +159,7 @@ class AccountBankStatement(models.Model):
             ], limit=1)
         return self.env['account.journal']
 
-    name = fields.Char(string='Reference',required=True, states={'open': [('readonly', False)]}, copy=False, readonly=True)
+    name = fields.Char(string='Reference', states={'open': [('readonly', False)]}, copy=False, readonly=True)
     reference = fields.Char(string='External Reference', states={'open': [('readonly', False)]}, copy=False, readonly=True, help="Used to hold the reference of the external mean that created this statement (name of imported file, reference of online synchronization...)")
     date = fields.Date(related='last_line_id.date', store=True)
     date_done = fields.Datetime(string="Closed On")
@@ -250,7 +248,7 @@ class AccountBankStatement(models.Model):
         store=True,
         help="Check if difference is zero."
     )
-    attachment_id = fields.Many2one('ir.attachment', string='Attachment')
+    attachment = fields.Binary()
     country_code = fields.Char(related='company_id.account_fiscal_country_id.code')
 
     @api.depends('line_ids.is_reconciled')
@@ -508,14 +506,14 @@ class AccountBankStatement(models.Model):
 
     def _get_last_sequence_domain(self, relaxed=False):
         self.ensure_one()
-        where_string = "WHERE journal_id = %(journal_id)s AND name != '/'"
+        where_string = "WHERE journal_id = %(journal_id)s"
         param = {'journal_id': self.journal_id.id}
 
         if not relaxed:
             domain = [('journal_id', '=', self.journal_id.id), ('id', '!=', self.id or self._origin.id), ('name', '!=', False)]
-            previous_name = self.first_line_id.statement_id.name
+            previous_name = self.first_line_id.previous_line_id.statement_id.name
             if not previous_name:
-                previous_name = self.search(domain, order='date, name', limit=1).name
+                previous_name = self.search(domain, order='date desc, name', limit=1).name
             sequence_number_reset = self._deduce_sequence_number_reset(previous_name)
             if sequence_number_reset == 'year':
                 where_string += " AND date_trunc('year', date) = date_trunc('year', %(date)s) "
@@ -610,7 +608,7 @@ class AccountBankStatementLine(models.Model):
             ('reconciled', 'Reconciled'),
             ('to_check', 'To Check'),
             ('canceled', 'Cancelled')],
-        string='Status',
+        string='State',
         compute='_compute_kanban_state',
         store=True,
     )

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import base64
 import logging
 import time
 from datetime import timedelta
@@ -104,51 +105,74 @@ class AccountChartTemplate(models.Model):
     def _get_demo_data_statement(self):
         cid = self.env.company.id
         ref = self.env.ref
+        journal_id = self.env['account.journal'].search([
+            ('type', '=', 'bank'),
+            ('company_id', '=', cid),
+        ], limit=1).id,
         return ('account.bank.statement', {
-            f'{cid}_demo_bank_statement_1': {
-                'journal_id': self.env['account.journal'].search([
-                    ('type', '=', 'bank'),
-                    ('company_id', '=', cid),
-                ], limit=1).id,
-                'date': time.strftime('%Y')+'-01-01',
-                'balance_end_real': 9944.87,
-                'balance_start': 5103.0,
+
+            f'{cid}_demo_bank_statement_0': {
+                'name': time.strftime('%Y')+'-01-01',
+                'balance_end_real': 5103.0,
+                'balance_start': 0.0,
                 'line_ids': [
                     Command.create({
+                        'journal_id': journal_id,
+                        'payment_ref': 'Initial balance',
+                        'amount': 5103.0,
+                        'date': time.strftime('%Y-01-01'),
+                        'sequence': -1,
+                    }),
+                ]
+            },
+            f'{cid}_demo_bank_statement_1': {
+                'name': time.strftime('%Y')+'-01-01',
+                'balance_end_real': 9944.87,
+                'balance_start': 5103.0,
+                'attachment': base64.b64encode(file_open('account/static/demo/bank_statement_yourcompany_1.pdf', 'rb').read()),
+                'line_ids': [
+                    Command.create({
+                        'journal_id': journal_id,
                         'payment_ref': time.strftime('INV/%Y/00002 and INV/%Y/00003'),
                         'amount': 1275.0,
                         'date': time.strftime('%Y-01-01'),
                         'partner_id': ref('base.res_partner_12').id
                     }),
                     Command.create({
+                        'journal_id': journal_id,
                         'payment_ref': 'Bank Fees',
                         'amount': -32.58,
                         'date': time.strftime('%Y-01-01'),
                     }),
                     Command.create({
+                        'journal_id': journal_id,
                         'payment_ref': 'Prepayment',
                         'amount': 650,
                         'date': time.strftime('%Y-01-01'),
                         'partner_id': ref('base.res_partner_12').id
                     }),
                     Command.create({
+                        'journal_id': journal_id,
                         'payment_ref': time.strftime('First 2000 $ of invoice %Y/00001'),
                         'amount': 2000,
                         'date': time.strftime('%Y-01-01'),
                         'partner_id': ref('base.res_partner_12').id
                     }),
                     Command.create({
+                        'journal_id': journal_id,
                         'payment_ref': 'Last Year Interests',
                         'amount': 102.78,
                         'date': time.strftime('%Y-01-01'),
                     }),
                     Command.create({
+                        'journal_id': journal_id,
                         'payment_ref': time.strftime('INV/%Y/00002'),
                         'amount': 750,
                         'date': time.strftime('%Y-01-01'),
                         'partner_id': ref('base.res_partner_2').id
                     }),
                     Command.create({
+                        'journal_id': journal_id,
                         'payment_ref': 'R:9772938  10/07 AX 9415116318 T:5 BRT: 100,00€ C/ croip',
                         'amount': 96.67,
                         'date': time.strftime('%Y-01-01'),
@@ -198,15 +222,6 @@ class AccountChartTemplate(models.Model):
         cid = self.env.company.id
         ref = self.env.ref
         return ('ir.attachment', {
-            f'{cid}_ir_attachment_bank_statement_1': {
-                'type': 'binary',
-                'name': 'bank_statement_yourcompany_demo.pdf',
-                'res_model': 'account.bank.statement',
-                'res_id': ref(f'account.{cid}_demo_bank_statement_1').id,
-                'raw': file_open(
-                    'account/static/demo/bank_statement_yourcompany_1.pdf', 'rb'
-                ).read()
-            },
             f'{cid}_ir_attachment_in_invoice_1': {
                 'type': 'binary',
                 'name': 'in_invoice_yourcompany_demo.pdf',
@@ -232,16 +247,6 @@ class AccountChartTemplate(models.Model):
         cid = self.env.company.id
         ref = self.env.ref
         return ('mail.message', {
-            f'{cid}_mail_message_bank_statement_1': {
-                'model': 'account.bank.statement',
-                'res_id': ref(f'account.{cid}_demo_bank_statement_1').id,
-                'body': 'Bank statement attachment',
-                'message_type': 'comment',
-                'author_id': ref('base.partner_demo').id,
-                'attachment_ids': [Command.set([
-                    ref(f'account.{cid}_ir_attachment_bank_statement_1').id
-                ])]
-            },
             f'{cid}_mail_message_in_invoice_1': {
                 'model': 'account.move',
                 'res_id': ref(f'account.{cid}_demo_invoice_extract').id,
@@ -332,8 +337,7 @@ class AccountChartTemplate(models.Model):
                     move.action_post()
                 except (UserError, ValidationError):
                     _logger.exception('Error while posting demo data')
-        elif created._name == 'account.bank.statement':
-            created.button_post()
+
 
     @api.model
     def _get_demo_account(self, xml_id, user_type_id, company):
