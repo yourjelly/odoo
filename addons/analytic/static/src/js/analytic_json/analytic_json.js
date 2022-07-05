@@ -10,19 +10,19 @@ import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { TagsList } from "@web/views/fields/many2many_tags/tags_list";
 
-const { Component, useState, useRef, useExternalListener } = owl;
+const { Component, useState, useRef, useExternalListener, onWillUpdateProps, onWillStart } = owl;
 
 
 export class AnalyticJson extends Component {
     setup(){
         console.log('Analytic Json', this);
+        this.orm = useService("orm");
+
         this.state = useState({
             showDropdown: false,
             list: [],
             addingGroup: false,
         });
-        this.orm = useService("orm");
-        this.fetchAllPlans();
 
         this.widgetRef = useRef("analyticJson");
         this.dropdownRef = useRef("analyticDropdown");
@@ -31,8 +31,15 @@ export class AnalyticJson extends Component {
         });
 
         this.nextId = 0;
+        onWillStart(this.fetchData);
+        onWillUpdateProps(this.jsonToList);
 
         useExternalListener(window, "click", this.onWindowClick, true);
+    }
+
+    async fetchData() {
+        await this.fetchAllPlans();
+        await this.jsonToList(this.props);
     }
 
     async fetchAllPlans() {
@@ -124,6 +131,35 @@ export class AnalyticJson extends Component {
         }));
     }
 
+    get listForJson() {
+        return this.listReady.map((dist_tag) => ({
+            analytic_account_id: dist_tag.analytic_account_id,
+            percentage: dist_tag.percentage,
+        }));
+    }
+
+    async jsonToList(nextProps) {
+        
+        let data = JSON.parse(nextProps.value || "[]");
+
+        let analytic_account_ids = data.map((record) => record.analytic_account_id);
+        const records = await this.orm.call("account.analytic.account", "search_read", [], {
+            domain: [["id", "in", analytic_account_ids]],
+            fields: ["id", "name", "group_id"],
+            context: [],
+        });
+        this.state.list = records.map((record) => ({
+            ...data.find((d) => d.analytic_account_id === record.id),
+            id: this.nextId++,
+            group_id: record.group_id[0],
+            analytic_account_name: record.name,
+            color: this.planById(record.group_id[0]).color,
+        }));
+        if (records.length < data.length) {
+            console.log('removing tags....props value should be updated?');
+        }
+    }
+
     get existingAnalyticAccountIDs() {
         return this.listWithAnalyticID.map((dist_tag) => dist_tag.analytic_account_id);
     }
@@ -160,13 +196,15 @@ export class AnalyticJson extends Component {
     autoFill() {
         for (let group of this.plans){
             if (this.remainderByGroup(group.id)) {
+                console.log('autoFill adding lines');
                 this.addLineToGroup(group.id);
             }
         }
     }
 
-    cleanUp() {
-        this.state.list = this.list.filter((dist_tag) => dist_tag.analytic_account_id !== null && dist_tag.percentage > 0 && dist_tag.percentage <= 100);
+    cleanUpAndSave() {
+        this.state.list = this.list.filter((dist_tag) => dist_tag.analytic_account_id !== null && dist_tag.percentage > 0);
+        this.props.update(JSON.stringify(this.listForJson));
     }
 
     deleteTag(id) {
@@ -290,6 +328,11 @@ export class AnalyticJson extends Component {
         }
     }
 
+    async percentageChanged(dist_tag, ev) {
+        dist_tag.percentage = parseFloat(ev.target.value);
+        this.autoFill();
+    }
+
     forceCloseEditor() {
         // this is used when focus will remain/return to the main Element but the dropdown should not open
         this.recentlyClosed = true;
@@ -297,7 +340,7 @@ export class AnalyticJson extends Component {
     }
 
     closeAnalyticEditor() {
-        this.cleanUp();
+        this.cleanUpAndSave();
         this.state.showDropdown = false;
     }
 
@@ -307,7 +350,7 @@ export class AnalyticJson extends Component {
     }
 }
 AnalyticJson.template = "analytic_json";
-AnalyticJson.supportedTypes = ["char", "binary"];
+AnalyticJson.supportedTypes = ["char", "text"];
 AnalyticJson.components = {
     AutoComplete,
     TagsList,

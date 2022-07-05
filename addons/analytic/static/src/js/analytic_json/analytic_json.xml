@@ -3,6 +3,7 @@
 
     <t t-name="analytic_json" owl="1">
         <div class="analytic_json" t-ref="analyticJson" t-on-keydown="onWidgetKeydown">
+            <!-- <span t-esc="this.props.value"/> -->
             <TagsList tags="tags"/>
             <t t-if="!props.readonly">
                 <div tabindex="0" t-ref="mainElement" t-on-focus="onMainElementFocus"/>
@@ -37,7 +38,13 @@
                                                 onFocus.bind="() => this.groupAutocompleteFocus(plan.id)"/>
                                         </td>
                                         <td class="o_analytic_percentage">
-                                            <input class="o_input" inputmode="numeric" type="text" t-model="dist_tag.percentage" t-on-click.stop="" t-on-blur="() => this.autoFill()"/>
+                                            <input
+                                                class="o_input"
+                                                inputmode="numeric"
+                                                type="text"
+                                                t-att-value="dist_tag.percentage"
+                                                t-on-click.stop=""
+                                                t-on-change="(ev) => this.percentageChanged(dist_tag, ev)"/>
                                         </td>
                                         <td>
                                             <span class="fa fa-trash-o" t-on-click="() => this.deleteTag(dist_tag.id)"/>
