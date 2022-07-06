@@ -585,9 +585,6 @@ class AccountBankStatementLine(models.Model):
         comodel_name='res.partner',
         string='Partner', ondelete='restrict',
         domain="['|', ('parent_id','=', False), ('is_company','=',True)]",
-        compute='_compute_partner_id',
-        readonly=False,
-        store=True,
         check_company=True
     )
     payment_ids = fields.Many2many(
@@ -849,13 +846,6 @@ class AccountBankStatementLine(models.Model):
                 limit=1
             )
 
-    @api.depends('account_number', 'partner_name', 'ref', 'narration', 'payment_ref')
-    def _compute_partner_id(self):
-        for st_line in self:
-            # consider using force=False, currently the partner is changed based on the communication
-            # but if no partner found, it will not be deleted. Using force=False means if partner is
-            # specified, we will not update it based on the communication changes
-            st_line.partner_id = st_line._retrieve_partner(force=True) or st_line.partner_id
 
     @api.depends('previous_line_id.cumulative_balance', 'amount')
     def _compute_cumulative_balance(self):
@@ -1159,12 +1149,11 @@ class AccountBankStatementLine(models.Model):
             ('statement_line_id', '!=', self.id),
         ]
 
-    def _retrieve_partner(self, force=False):
-        # TODO: Improve for multi records
+    def _retrieve_partner(self):
         self.ensure_one()
 
         # Retrieve the partner from the statement line.
-        if self.partner_id and not force:
+        if self.partner_id:
             return self.partner_id
 
         # Retrieve the partner from the bank account.
