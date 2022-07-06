@@ -963,12 +963,7 @@ def freehash(arg):
     try:
         return hash(arg)
     except Exception:
-        if isinstance(arg, Mapping):
-            return hash(frozendict(arg))
-        elif isinstance(arg, Iterable):
-            return hash(frozenset(freehash(item) for item in arg))
-        else:
-            return id(arg)
+        return id(arg)
 
 def clean_context(context):
     """ This function take a dictionary and remove each entry with its key
