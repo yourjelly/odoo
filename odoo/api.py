@@ -15,6 +15,7 @@ __all__ = [
 ]
 
 import logging
+import time
 import warnings
 from collections import defaultdict
 from collections.abc import Mapping
@@ -44,6 +45,8 @@ _logger = logging.getLogger(__name__)
 #
 
 INHERITED_ATTRS = ('_returns',)
+
+ENV_LOOKUP_TIME = 0
 
 
 class Params(object):
@@ -507,9 +510,13 @@ class Environment(Mapping):
             transaction = cr.transaction = Transaction(Registry(cr.dbname))
 
         # if env already exists, return it
+        global ENV_LOOKUP_TIME
+        t0 = time.time()
         for env in transaction.envs:
             if env.args == args:
+                ENV_LOOKUP_TIME += time.time() - t0
                 return env
+        ENV_LOOKUP_TIME += time.time() - t0
 
         # otherwise create environment, and add it in the set
         self = object.__new__(cls)
