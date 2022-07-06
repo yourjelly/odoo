@@ -349,7 +349,7 @@ class AccountReportExpression(models.Model):
     figure_type = fields.Selection(string="Figure Type", selection=FIGURE_TYPE_SELECTION_VALUES)
     green_on_positive = fields.Boolean(string="Is Growth Good when Positive", default=True)
     blank_if_zero = fields.Boolean(string="Blank if Zero")
-    auditable = fields.Boolean(string="Auditable", default=True)
+    auditable = fields.Boolean(string="Auditable", store=True, readonly=False, compute='_compute_auditable')
 
     # Carryover fields
     carryover_target = fields.Char(
@@ -357,6 +357,15 @@ class AccountReportExpression(models.Model):
         help="Formula in the form line_code.expression_label. This allows setting the target of the carryover for this expression "
              "(on a _carryover_*-labeled expression), in case it is different from the parent line."
     )
+
+    @api.depends('engine')
+    def _compute_auditable(self):
+        auditable_engines = self._get_auditable_engines()
+        for record in self:
+            record.auditable = record.engine in auditable_engines
+
+    def _get_auditable_engines(self):
+        return {'tax_tags', 'domain', 'account_codes', 'external', 'aggregation'}
 
     @api.model_create_multi
     def create(self, vals_list):
