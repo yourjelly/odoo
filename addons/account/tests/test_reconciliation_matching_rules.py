@@ -206,7 +206,7 @@ class TestReconciliationMatchingRules(AccountTestInvoicingCommon):
     @freeze_time('2020-01-01')
     def _check_statement_matching(self, rules, expected_values_list):
         for statement_line, expected_values in expected_values_list.items():
-            res = rules._apply_rules(statement_line, statement_line._retrieve_partner())
+            res = rules._apply_rules(statement_line, statement_line._retrieve_partner(force=True))
             self.assertDictEqual(res, expected_values)
 
     def test_matching_fields(self):
@@ -232,19 +232,19 @@ class TestReconciliationMatchingRules(AccountTestInvoicingCommon):
             match_text_location_note=False,
         )
         self.assertDictEqual(
-            rule._apply_rules(st_line, st_line._retrieve_partner()),
+            rule._apply_rules(st_line, st_line._retrieve_partner(force=True)),
             {'amls': inv1, 'model': rule},
         )
 
         rule.match_text_location_reference = True
         self.assertDictEqual(
-            rule._apply_rules(st_line, st_line._retrieve_partner()),
+            rule._apply_rules(st_line, st_line._retrieve_partner(force=True)),
             {'amls': inv2, 'model': rule},
         )
 
         rule.match_text_location_note = True
         self.assertDictEqual(
-            rule._apply_rules(st_line, st_line._retrieve_partner()),
+            rule._apply_rules(st_line, st_line._retrieve_partner(force=True)),
             {'amls': inv3, 'model': rule},
         )
 
@@ -260,7 +260,7 @@ class TestReconciliationMatchingRules(AccountTestInvoicingCommon):
             'line_ids': [(5, 0, 0)],
         })
 
-        st_line_initial_vals = {'ref': None, 'payment_ref': 'nothing', 'narration': None}
+        st_line_initial_vals = {'ref': None, 'payment_ref': 'nothing', 'narration': None, 'partner_id': None}
         recmod_initial_vals = {'match_text_location_label': False, 'match_text_location_note': False, 'match_text_location_reference': False}
 
         rec_mod_options_to_fields = {
@@ -294,7 +294,7 @@ class TestReconciliationMatchingRules(AccountTestInvoicingCommon):
             })
 
     def test_matching_fields_match_journal_ids(self):
-        self.rule_1.match_journal_ids |= self.cash_st.journal_id
+        self.rule_1.match_journal_ids |= self.cash_line_1.journal_id
         self._check_statement_matching(self.rule_1, {
             self.bank_line_1: {},
             self.bank_line_2: {},
@@ -842,17 +842,17 @@ class TestReconciliationMatchingRules(AccountTestInvoicingCommon):
         )
 
         # Matching using the regex on payment_ref.
-        self.assertEqual(st_line._retrieve_partner(), self.partner_1)
+        self.assertEqual(st_line._retrieve_partner(force=True), self.partner_1)
 
         rule.partner_mapping_line_ids.narration_regex = ".*coincoin"
 
         # No match because the narration is not matching the regex.
-        self.assertEqual(st_line._retrieve_partner(), self.env['res.partner'])
+        self.assertEqual(st_line._retrieve_partner(force=True), self.env['res.partner'])
 
         st_line.narration = "42coincoin"
 
         # Matching is back thanks to "coincoin".
-        self.assertEqual(st_line._retrieve_partner(), self.partner_1)
+        self.assertEqual(st_line._retrieve_partner(force=True), self.partner_1)
 
     def test_partner_name_in_communication(self):
         self.invoice_line_1.partner_id.write({'name': "Archibald Haddock"})
