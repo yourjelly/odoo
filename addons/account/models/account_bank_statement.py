@@ -629,7 +629,7 @@ class AccountBankStatementLine(models.Model):
         store=True,
     )
     # fake field to add groupby in kanban view
-    fake_field = fields.Char()
+    fake_field = fields.Char(default=" ")
     # -------------------------------------------------------------------------
     # HELPERS
     # -------------------------------------------------------------------------

@@ -169,7 +169,7 @@ class TestReconciliationMatchingRules(AccountTestInvoicingCommon):
 
     @classmethod
     def _create_st_line(cls, amount=1000.0, date='2019-01-01', payment_ref='turlututu', **kwargs):
-        st = cls.env['account.bank.statement.line'].create({
+        st_line = cls.env['account.bank.statement.line'].create({
             'journal_id': kwargs.get('journal_id', cls.bank_journal.id),
             'amount': amount,
             'date': date,
@@ -177,7 +177,7 @@ class TestReconciliationMatchingRules(AccountTestInvoicingCommon):
             'partner_id': cls.partner_a.id,
             **kwargs,
         })
-        return st.line_ids
+        return st_line
 
     @classmethod
     def _create_reconcile_model(cls, **kwargs):
