@@ -414,7 +414,6 @@ class AccountReportExpression(models.Model):
         else:
             rslt = super().write(vals)
 
-
         return rslt
 
     def _expand_aggregations(self):
@@ -558,9 +557,6 @@ class AccountReportExternalValue(models.Model):
     carryover_origin_expression_label = fields.Char(string="Origin Expression Label")
     carryover_origin_report_line_id = fields.Many2one(string="Origin Line", comodel_name='account.report.line')
 
-    _sql_constraints = [
-        ('unique_date', 'unique(company_id, date, foreign_vat_fiscal_position_id)', 'There can be at most one external value for a given date.'),
-    ]
 
     @api.constrains('foreign_vat_fiscal_position_id', 'target_report_expression_id')
     def _check_fiscal_position(self):
