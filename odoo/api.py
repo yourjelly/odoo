@@ -46,6 +46,8 @@ _logger = logging.getLogger(__name__)
 
 INHERITED_ATTRS = ('_returns',)
 
+ENV_LOOKUP_COUNT = 0
+ENV_LOOKUP_HIT = 0
 ENV_LOOKUP_TIME = 0
 
 
@@ -511,11 +513,13 @@ class Environment(Mapping):
             transaction = cr.transaction = Transaction(Registry(cr.dbname))
 
         # if env already exists, return it
-        global ENV_LOOKUP_TIME
+        global ENV_LOOKUP_COUNT, ENV_LOOKUP_HIT, ENV_LOOKUP_TIME
         t0 = time.time()
         env = transaction.environments.get(args)
         ENV_LOOKUP_TIME += time.time() - t0
+        ENV_LOOKUP_COUNT += 1
         if env is not None:
+            ENV_LOOKUP_HIT += 1
             return env
 
         # otherwise create environment, and add it in the set

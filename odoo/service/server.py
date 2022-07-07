@@ -516,7 +516,12 @@ class ThreadedServer(CommonServer):
             _logger.info("Hit CTRL-C again or send a second signal to force the shutdown.")
 
         stop_time = time.time()
-        _logger.warning("Environment lookups: %.3fs", odoo.api.ENV_LOOKUP_TIME)
+        _logger.warning(
+            "Environment lookups: total %d, hit rate %d%%, time %.3fs",
+            odoo.api.ENV_LOOKUP_COUNT,
+            100 * odoo.api.ENV_LOOKUP_HIT // odoo.api.ENV_LOOKUP_COUNT,
+            odoo.api.ENV_LOOKUP_TIME,
+        )
 
         if self.httpd:
             self.httpd.shutdown()
