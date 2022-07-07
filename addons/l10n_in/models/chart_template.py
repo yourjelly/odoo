@@ -23,6 +23,19 @@ class AccountChartTemplate(models.Model):
             company.write({'fiscalyear_last_month': '3'})
         return res
 
+    @api.model
+    def _get_demo_data(self):
+        ref = self.env.ref
+
+        # Do not load generic demo data on these companies
+        in_demo_companies = (
+            ref('l10n_in.demo_company_in', raise_if_not_found=False),
+        )
+        if self.env.company in in_demo_companies:
+            return []
+
+        return super()._get_demo_data()
+
 
 class AccountTaxTemplate(models.Model):
     _inherit = 'account.tax.template'

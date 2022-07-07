@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- GST Base tax tag -->
+    <record id="tax_tag_base_sgst" model="account.account.tag">
+        <field name="name">BASE SGST</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_base_cgst" model="account.account.tag">
+        <field name="name">BASE CGST</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_base_igst" model="account.account.tag">
+        <field name="name">BASE IGST</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <!-- Base Non ITC -->
+    <record id="tax_tag_non_itc_base_sgst" model="account.account.tag">
+        <field name="name">NON ITC BASE SGST</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_non_itc_base_cgst" model="account.account.tag">
+        <field name="name">NON ITC BASE CGST</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_non_itc_base_igst" model="account.account.tag">
+        <field name="name">NON ITC BASE IGST</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <!-- Base Other Non ITC -->
+     <record id="tax_tag_other_non_itc_base_sgst" model="account.account.tag">
+        <field name="name">Other NON ITC BASE SGST</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_other_non_itc_base_cgst" model="account.account.tag">
+        <field name="name">Other NON ITC BASE CGST</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_other_non_itc_base_igst" model="account.account.tag">
+        <field name="name">Other NON ITC BASE IGST</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+
+    <!-- CESS Base tax tag -->
+    <record id="tax_tag_base_cess" model="account.account.tag">
+        <field name="name">BASE CESS</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_base_state_cess" model="account.account.tag">
+        <field name="name">BASE STATE CESS</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <!-- Base Non ITC -->
+    <record id="tax_tag_non_itc_base_cess" model="account.account.tag">
+        <field name="name">NON ITC BASE CESS</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <!-- Base Other Non ITC -->
+    <record id="tax_tag_other_non_itc_base_cess" model="account.account.tag">
+        <field name="name">Other NON ITC BASE CESS</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <!-- Zero Rated tag -->
+    <record id="tax_tag_exempt" model="account.account.tag">
+        <field name="name">EXEMPT</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_nil_rated" model="account.account.tag">
+        <field name="name">NIL-RATED</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_zero_rated" model="account.account.tag">
+        <field name="name">ZERO-RATED</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_non_gst_supplies" model="account.account.tag">
+        <field name="name">NON GST SUPPLIES</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <!-- GST RC Base tax tag -->
+    <record id="tax_tag_base_sgst_rc" model="account.account.tag">
+        <field name="name">BASE SGST (RC)</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_base_cgst_rc" model="account.account.tag">
+        <field name="name">BASE CGST (RC)</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_base_igst_rc" model="account.account.tag">
+        <field name="name">BASE IGST (RC)</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <!-- CESS RC Base tax tag -->
+    <record id="tax_tag_base_cess_rc" model="account.account.tag">
+        <field name="name">BASE CESS (RC)</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <!-- GST tax tag -->
+	<record id="tax_tag_sgst" model="account.account.tag">
+        <field name="name">SGST</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_cgst" model="account.account.tag">
+        <field name="name">CGST</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_igst" model="account.account.tag">
+        <field name="name">IGST</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <!-- Non ITC -->
+    <record id="tax_tag_non_itc_sgst" model="account.account.tag">
+        <field name="name">NON ITC SGST</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_non_itc_cgst" model="account.account.tag">
+        <field name="name">NON ITC CGST</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_non_itc_igst" model="account.account.tag">
+        <field name="name">NON ITC IGST</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <!-- Other Non ITC -->
+    <record id="tax_tag_other_non_itc_sgst" model="account.account.tag">
+        <field name="name">Other NON ITC SGST</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_other_non_itc_cgst" model="account.account.tag">
+        <field name="name">Other NON ITC CGST</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_other_non_itc_igst" model="account.account.tag">
+        <field name="name">Other NON ITC IGST</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <!-- CESS tax tag -->
+    <record id="tax_tag_cess" model="account.account.tag">
+        <field name="name">CESS</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_state_cess" model="account.account.tag">
+        <field name="name">STATE CESS</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <!-- Non ITC -->
+    <record id="tax_tag_non_itc_cess" model="account.account.tag">
+        <field name="name">NON ITC CESS</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <!-- Other Non ITC -->
+    <record id="tax_tag_other_non_itc_cess" model="account.account.tag">
+        <field name="name">Other NON ITC CESS</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <!-- GST RC tax tag -->
+    <record id="tax_tag_sgst_rc" model="account.account.tag">
+        <field name="name">SGST (RC)</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_cgst_rc" model="account.account.tag">
+        <field name="name">CGST (RC)</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_igst_rc" model="account.account.tag">
+        <field name="name">IGST (RC)</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <!-- RC Non ITC -->
+    <record id="tax_tag_non_itc_sgst_rc" model="account.account.tag">
+        <field name="name">NON ITC SGST (RC)</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_non_itc_cgst_rc" model="account.account.tag">
+        <field name="name">NON ITC CGST (RC)</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_non_itc_igst_rc" model="account.account.tag">
+        <field name="name">NON ITC IGST (RC)</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <!-- RC Other Non ITC -->
+    <record id="tax_tag_other_non_itc_sgst_rc" model="account.account.tag">
+        <field name="name">Other NON ITC SGST (RC)</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_other_non_itc_cgst_rc" model="account.account.tag">
+        <field name="name">Other NON ITC CGST (RC)</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_other_non_itc_igst_rc" model="account.account.tag">
+        <field name="name">Other NON ITC IGST (RC)</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <!-- CESS RC tax tag -->
+    <record id="tax_tag_cess_rc" model="account.account.tag">
+        <field name="name">CESS (RC)</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <!-- RC Non ITC -->
+    <record id="tax_tag_non_itc_cess_rc" model="account.account.tag">
+        <field name="name">NON ITC CESS (RC)</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <!-- RC Other Non ITC -->
+    <record id="tax_tag_other_non_itc_cess_rc" model="account.account.tag">
+        <field name="name">Other NON ITC CESS (RC)</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+</odoo>
