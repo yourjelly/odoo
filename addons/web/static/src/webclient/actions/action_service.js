@@ -196,7 +196,7 @@ function makeActionManager(env) {
                 typeof domain === "string"
                     ? evaluateExpr(
                           domain,
-                          Object.assign({}, env.services.user.context, action.context)
+                          Object.assign({}, action.context, env.services.user.context)
                       )
                     : domain;
         }
@@ -1138,7 +1138,7 @@ function makeActionManager(env) {
     async function _executeServerAction(action, options) {
         const runProm = env.services.rpc("/web/action/run", {
             action_id: action.id,
-            context: makeContext([env.services.user.context, action.context]),
+            context: makeContext([action.context, env.services.user.context]),
         });
         let nextAction = await keepLast.add(runProm);
         if (nextAction.help) {
