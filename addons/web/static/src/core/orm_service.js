@@ -109,7 +109,7 @@ export class ORM {
     call(model, method, args = [], kwargs = {}) {
         validateModel(model);
         let url = `/web/dataset/call_kw/${model}/${method}`;
-        const fullContext = Object.assign({}, this.user.context, kwargs.context || {});
+        const fullContext = Object.assign({}, kwargs.context || {}, this.user.context);
         const fullKwargs = Object.assign({}, kwargs, { context: fullContext });
         let params = {
             model,
@@ -178,11 +178,11 @@ export class ORM {
     }
 
     searchCount(model, domain, ctx = {}) {
-        validateArray('domain', domain);
+        validateArray("domain", domain);
         const kwargs = {
             context: ctx,
         };
-        return this.call(model, 'search_count', [domain], kwargs);
+        return this.call(model, "search_count", [domain], kwargs);
     }
 
     unlink(model, ids, ctx) {
