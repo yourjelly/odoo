@@ -53,7 +53,6 @@ class TestExpenses(TestExpenseCommon):
             'amount': -350.0,
             'partner_id': self.expense_employee.address_home_id.id,
         })
-        statement_line.button_post()
 
         # Reconcile without the bank reconciliation widget since the widget is in enterprise.
         _st_liquidity_lines, st_suspense_lines, _st_other_lines = statement_line\
