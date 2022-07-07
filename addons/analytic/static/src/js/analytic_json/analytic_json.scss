@@ -9,6 +9,24 @@
         .o_analytic_percentage {
             width: 22% !important;
         }
+        .o_analytic_status_red {
+            background-color: $o-danger;
+        }
+        .o_analytic_status_green {
+            background-color: $o-success;
+        }
+        .o_analytic_status_orange {
+            background-color: $o-warning;
+        }
     }
 
+}
+.o_field_analytic_json {
+    &.o_field_invalid {
+        border-bottom: 3px solid $o-danger;
+
+        .o_tag {
+            border: 1px solid $o-danger !important;
+        }
+    }
 }
