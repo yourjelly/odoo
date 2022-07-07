@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.PropertyDefinition" owl="1">
+        <table class="o_field_property_definition">
+            <tr>
+                <td>
+                    <b>Label</b>
+                </td>
+                <td>
+                    <span
+                        t-if="props.readonly"
+                        t-out="state.value.string"/>
+                    <input
+                        t-else=""
+                        class="o_input o_field_property_definition_label"
+                        type="text"
+                        required=""
+                        placeholder="Property Name"
+                        t-model="state.value.string"
+                        t-on-change="onStringChange"
+                    />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <b>Type</b>
+                </td>
+                <td>
+                    <div
+                        t-if="props.readonly"
+                        class="d-flex align-items-center">
+                        <span t-out="state.typeLabel"/>
+                    </div>
+
+                    <Dropdown
+                        t-else=""
+                        title="state.typeLabel" togglerClass="'btn btn-link d-flex p-0 w-100'">
+                        <t t-set-slot="toggler">
+                            <div class="o_input_dropdown w-100 o_field_property_dropdown">
+                                <div class="dropdown">
+                                    <input type="text" class="text-start o_input w-100" readonly=""
+                                        placeholder="Model" t-att-value="state.typeLabel"/>
+                                </div>
+                                <a role="button" class="o_dropdown_button"/>
+                            </div>
+                        </t>
+                        <t t-foreach="availablePropertiesType" t-as="option" t-key="option[0]">
+                            <DropdownItem onSelected="() => this.onSelectType(option[0])">
+                                <div class="d-flex align-items-center">
+                                    <span t-out="option[1]"/>
+                                </div>
+                            </DropdownItem>
+                        </t>
+                    </Dropdown>
+                </td>
+            </tr>
+            <!-- Add / remove selection labels -->
+            <tr t-if="state.value.type === 'selection'">
+                <td class="d-block">
+                    <b>Values</b>
+                </td>
+                <td>
+                    <PropertySelection
+                        readonly="props.readonly"
+                        value="state.value.selection || []"
+                        onChange="(newOptions) => this.onSelectionLabelChange(newOptions)"
+                    />
+                </td>
+            </tr>
+            <tr t-if="state.value.type === 'tags'">
+                <td class="d-block">
+                    <b>Tags</b>
+                </td>
+                <td>
+                    <PropertyTagsDefinition
+                        value="state.value.tags || []"
+                        readonly="props.readonly"
+                        onChange="(newTags) => this.onTagsChange(newTags)"/>
+                </td>
+            </tr>
+            <tr t-if="state.value.type === 'many2one' || state.value.type === 'many2many'">
+                <td>
+                    <b>Model</b>
+                </td>
+                <td>
+                    <span t-if="props.readonly">
+                        <t t-if="state.modelDescription" t-out="state.modelDescription"/>
+                    </span>
+                    <Many2XAutocomplete
+                        t-else=""
+                        value="state.modelDescription || ''"
+                        id="state.modelID &amp;&amp; state.modelID.toString() || ''"
+                        placeholder="'Model'"
+                        resModel="'ir.model'"
+                        autoSelect="true"
+                        fieldString="props.string"
+                        activeActions="[]"
+                        update="(value) => this.onModelChange(value)"
+                        context="props.context"
+                        getDomain.bind="() => []"
+                        nameCreateField="false"
+                        setInputFloats="setFloating"
+                        autocomplete_container="autocompleteContainerRef"
+                    />
+                </td>
+            </tr>
+            <tr t-if="state.value.type !== 'tags'">
+                <td>
+                    <b>Default</b>
+                </td>
+                <td>
+                    <PropertyValue
+                        readonly="props.readonly"
+                        type="state.value.type"
+                        string="state.value.string"
+                        value="state.value.default"
+                        selection="state.value.selection"
+                        model="state.value.model || ''"
+                        context="props.context"
+                        onChange="value => this.onDefaultChange(value)"
+                    />
+                </td>
+            </tr>
+        </table>
+    </t>
+</templates>

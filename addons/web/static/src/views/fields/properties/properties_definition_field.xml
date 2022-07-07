@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="web.PropertiesDefinitionField" owl="1">
+        <div t-ref="propertiesDefinition">
+            <div t-foreach="props.value || []" t-as="propertyDict" t-key="propertyDict.id"
+                style="width: 600px">
+                <PropertyDefinition
+                    readonly="props.readonly"
+                    value="propertyDict"
+                    context="context"
+                    onChange="(value) => this.onPropertyChange(propertyDict_index, value)"
+                />
+                <button
+                    t-if="!props.readonly"
+                    class="btn btn-link px-0"
+                    title="Remove Property"
+                    t-on-click="() => this.onDeleteProperty(propertyDict_index)">
+                    <i class="fa fa-trash"/> Delete
+                </button>
+                <hr/>
+            </div>
+            <button
+                t-if="!props.readonly"
+                class="btn btn-secondary o_field_properties_definition_add"
+                t-on-click="onNewProperty">
+                Add a new property
+            </button>
+        </div>
+    </t>
+</templates>

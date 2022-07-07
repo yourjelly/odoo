@@ -1,0 +1,28 @@
+.o_field_property_definition {
+    width: 100%;
+
+    td:first-child {
+        width: 80px;
+    }
+    .o_field_property_dropdown input {
+        cursor: pointer;
+    }
+}
+
+.o_field_properties_definition.o_field_invalid {
+    // only the empty property label should be affected by `o_field_invalid`
+    .o_input:not(.o_field_property_definition_label),
+    .o_input:valid,
+    .o_dropdown_button {
+        @include print-variable(o-input-border-color, $o-form-lightsecondary);
+
+        .o_field_widget:focus-within {
+            @include print-variable(o-input-border-color, $o-brand-primary);
+        }
+        color: initial !important;
+        * {
+            color: initial !important;
+        }
+    }
+}
+

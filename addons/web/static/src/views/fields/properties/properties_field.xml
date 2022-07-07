@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="web.PropertiesField" owl="1">
+        <table class="o_field_properties">
+            <tr t-foreach="props.value || []" t-as="propertyDict" t-key="propertyDict.id">
+                <td class="d-block">
+                    <b t-out="propertyDict.string"/>
+                </td>
+                <td class="w-100">
+                    <PropertyValue
+                        readonly="props.readonly"
+                        string="propertyDict.string"
+                        type="propertyDict.type"
+                        value="propertyDict.value"
+                        model="propertyDict.model || ''"
+                        context="context"
+                        selection="propertyDict.selection"
+                        tags="propertyDict.tags"
+                        onChange="value => this.onPropertyChange(propertyDict_index, value)"/>
+                </td>
+            </tr>
+        </table>
+    </t>
+</templates>

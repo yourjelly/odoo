@@ -1,0 +1,13 @@
+.o_field_properties {
+    table {
+        tr {
+            line-height: 25px;
+            td:nth-child(1) {
+                width: 150px;
+            }
+            td:nth-child(2) {
+                min-width: 250px;
+            }
+        }
+    }
+}

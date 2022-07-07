@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.PropertyValue" owl="1">
+
+        <t t-if="props.readonly &amp;&amp; ['boolean', 'many2one', 'many2many', 'tags'].indexOf(props.type) &lt; 0">
+            <span t-if="displayValue" t-out="displayValue"/>
+        </t>
+        <t t-else="">
+            <t t-if="props.type === 'boolean'">
+                <CheckBox
+                    value="propertyValue"
+                    disabled="props.readonly"
+                    onChange="(value) => this.onValueChange(value)"
+                />
+            </t>
+            <t t-elif="props.type === 'datetime'">
+                <DateTimePicker
+                    date="propertyValue"
+                    onDateTimeChanged="(value) => this.onValueChange(value)"
+                />
+            </t>
+            <t t-elif="props.type === 'date'">
+                <DatePicker
+                    date="propertyValue"
+                    onDateTimeChanged="(value) => this.onValueChange(value)"
+                />
+            </t>
+            <t t-elif="props.type === 'integer' || props.type === 'float'">
+                <input
+                    class="o_input"
+                    type="number"
+                    placeholder="Default value"
+                    t-att-value="propertyValue"
+                    t-on-change="(event) => this.onValueChange(event.target.value)"
+                />
+            </t>
+            <t t-elif="props.type === 'selection'">
+                <Dropdown
+                    title="propertyValue" togglerClass="'btn btn-link d-flex p-0 w-100'">
+                    <t t-set-slot="toggler">
+                        <div class="o_input_dropdown w-100 o_field_property_dropdown">
+                            <div class="dropdown">
+                                <input type="text" class="text-start o_input w-100" readonly=""
+                                    placeholder="Model" t-att-value="propertyValue"/>
+                            </div>
+                            <a role="button" class="o_dropdown_button"/>
+                        </div>
+                    </t>
+                    <DropdownItem onSelected="() => this.onValueChange(false)">
+                        <div class="d-flex align-items-center">
+                            <span><i>None</i></span>
+                        </div>
+                    </DropdownItem>
+                    <t t-foreach="props.selection || []" t-as="option" t-key="option[0]">
+                        <DropdownItem onSelected="() => this.onValueChange(option[0])">
+                            <div class="d-flex align-items-center">
+                                <span t-out="option[1]"/>
+                            </div>
+                        </DropdownItem>
+                    </t>
+                </Dropdown>
+
+            </t>
+            <t t-elif="props.type === 'tags'">
+                <TagsList tags="propertyValue"/>
+                <div
+                    t-if="!props.readonly"
+                    class="o_field_property_dropdown_menu o_input_dropdown">
+                    <AutoComplete
+                        placeholder="'Search a tag'"
+                        value="''"
+                        sources="tagsAutocomplete"
+                        onSelect.bind="(event) => this.onValueChange(event.value)"
+                    />
+                    <a role="button" class="o_dropdown_button" draggable="false" />
+                </div>
+            </t>
+            <div
+                t-elif="props.type === 'many2one'"
+                class="d-flex flex-row">
+                <t t-if="props.model">
+                    <a
+                        t-if="props.readonly"
+                        class="o_form_uri"
+                        t-att-href="propertyValue[0] ? `#id=${propertyValue[0]}&amp;model=${props.model}` : '#'"
+                        t-on-click.prevent="onMany2oneClick">
+                        <span t-out="propertyValue &amp;&amp; propertyValue[1] || ''" />
+                    </a>
+                    <Many2XAutocomplete
+                        t-else=""
+                        value="propertyValue &amp;&amp; propertyValue[1] || ''"
+                        id="propertyValue[0] ? propertyValue[0].toString() : ''"
+                        placeholder="'Many2one'"
+                        resModel="props.model"
+                        autoSelect="true"
+                        fieldString="false"
+                        activeActions="[]"
+                        update="(newValue) => this.onValueChange(newValue)"
+                        context="props.context"
+                        getDomain.bind="() => []"
+                        nameCreateField="false"
+                        setInputFloats="setFloating"
+                        autocomplete_container="false"
+                    />
+                    <button
+                        t-if="!props.readonly"
+                        type="button"
+                        class="btn btn-secondary fa fa-external-link o_external_button o_properties_external_button"
+                        tabindex="-1"
+                        draggable="false"
+                        aria-label="External link"
+                        data-tooltip="External link"
+                        t-on-click="onMany2oneEdit"
+                    />
+                </t>
+            </div>
+            <t t-elif="props.type === 'many2many'">
+                <t t-if="props.model">
+                    <TagsList tags="propertyValue"/>
+                    <Many2XAutocomplete
+                        t-if="!props.readonly"
+                        id="''"
+                        placeholder="'Many2many'"
+                        resModel="props.model"
+                        autoSelect="true"
+                        fieldString="false"
+                        activeActions="[]"
+                        update="(newValue) => this.onValueChange(newValue)"
+                        context="props.context"
+                        getDomain.bind="() => []"
+                        isToMany="true"
+                        nameCreateField="false"
+                    />
+                </t>
+            </t>
+            <t t-else="">
+                <input
+                    class="o_input"
+                    type="text"
+                    placeholder="Default value"
+                    t-att-value="propertyValue"
+                    t-on-change="(event) => this.onValueChange(event.target.value)"
+                />
+            </t>
+        </t>
+    </t>
+
+</templates>

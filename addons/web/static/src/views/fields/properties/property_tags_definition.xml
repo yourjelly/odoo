@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="web.PropertyTagsDefinition" owl="1">
+        <div class="d-flex flex-column">
+            <input
+                t-if="!props.readonly"
+                class="o_input mb-2"
+                type="text"
+                placeholder="Type a new tag..."
+                t-on-keypress="onNewTag"/>
+            <TagsList tags="currentTags"/>
+        </div>
+    </t>
+
+    <t t-name="web.PropertyTagsDefinitionColorListPopover" owl="1">
+        <div class="o_tag_popover m-2">
+            <ColorList
+                colors="props.colors"
+                onColorSelected="(id) => props.switchTagColor(id, props.tag)"/>
+        </div>
+    </t>
+
+</templates>
