@@ -551,6 +551,7 @@ class AccountBankStatementLine(models.Model):
         string='Statement',
         compute='_compute_statement_id',
         store=True,
+        readonly=False,
     )
 
     sequence = fields.Integer(help="Gives the sequence order when displaying a list of bank statement lines.", default=1)
