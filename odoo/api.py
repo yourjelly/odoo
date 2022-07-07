@@ -22,7 +22,7 @@ from collections.abc import Mapping
 from contextlib import contextmanager
 from inspect import signature
 from pprint import pformat
-from weakref import WeakValueDictionary
+from weakref import WeakKeyDictionary
 
 from decorator import decorate
 
@@ -515,12 +515,14 @@ class Environment(Mapping):
         # if env already exists, return it
         global ENV_LOOKUP_COUNT, ENV_LOOKUP_HIT, ENV_LOOKUP_TIME
         t0 = time.time()
-        env = transaction.environments.get(args)
+        for env in reversed(list(transaction.environments)):
+            if env.args == args:
+                ENV_LOOKUP_TIME += time.time() - t0
+                ENV_LOOKUP_COUNT += 1
+                ENV_LOOKUP_HIT += 1
+                return env
         ENV_LOOKUP_TIME += time.time() - t0
         ENV_LOOKUP_COUNT += 1
-        if env is not None:
-            ENV_LOOKUP_HIT += 1
-            return env
 
         # otherwise create environment, and add it in the set
         self = object.__new__(cls)
@@ -531,7 +533,7 @@ class Environment(Mapping):
         self.cache = transaction.cache
         self._cache_key = {}                    # memo {field: cache_key}
         self._protected = transaction.protected
-        transaction.environments[args] = self
+        transaction.environments[self] = None
         return self
 
     #
@@ -846,8 +848,8 @@ class Transaction:
     """ A object holding ORM data structures for a transaction. """
     def __init__(self, registry):
         self.registry = registry
-        # weak dict of environments {args: env}
-        self.environments = WeakValueDictionary()
+        # weak dict of environments {env: None}
+        self.environments = WeakKeyDictionary()
         # cache for all records
         self.cache = Cache()
         # fields to protect {field: ids}
@@ -860,7 +862,7 @@ class Transaction:
     def flush(self):
         """ Flush pending computations and updates in the transaction. """
         env_to_flush = None
-        for env in self.environments.values():
+        for env in self.environments:
             if isinstance(env.uid, int) or env.uid is None:
                 env_to_flush = env
                 if env.uid is not None:
@@ -880,7 +882,7 @@ class Transaction:
             recommended after reloading the registry.
         """
         self.registry = Registry(self.registry.db_name)
-        for env in self.environments.values():
+        for env in self.environments:
             env.registry = self.registry
             lazy_property.reset_all(env)
         self.clear()
