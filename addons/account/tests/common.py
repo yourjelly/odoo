@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from odoo import fields
+from odoo import api, fields
 from odoo.tests.common import TransactionCase, HttpCase, tagged, Form
 
 import json
@@ -66,6 +66,10 @@ class AccountTestInvoicingCommon(TransactionCase):
             'company_ids': [(6, 0, (cls.company_data['company'] + cls.company_data_2['company']).ids)],
             'company_id': cls.company_data['company'].id,
         })
+
+        new_ctx = cls.env.context.copy()
+        new_ctx['allowed_company_ids'] = [cls.company_data['company'].id, cls.company_data_2['company'].id]
+        cls.env = api.Environment(cls.env.cr, cls.env.uid, new_ctx)
 
         cls.currency_data = cls.setup_multi_currency_data()
 
