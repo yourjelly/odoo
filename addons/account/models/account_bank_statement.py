@@ -830,7 +830,7 @@ class AccountBankStatementLine(models.Model):
 
     @api.depends('date', 'sequence', 'journal_id')
     def _compute_previous_line_id(self):
-        for st_line in self:
+        for st_line in self._origin:
             st_line.previous_line_id = self.search([
                 ('journal_id', '=', st_line.journal_id.id),
                 '|', '|',
