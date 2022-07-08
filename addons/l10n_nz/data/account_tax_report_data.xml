@@ -141,7 +141,9 @@
                         <field name="expression_ids">
                             <record id="tax_report_box13_formula" model="account.report.expression">
                                 <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
+                                <field name="engine">external</field>
+                                <field name="formula">sum</field>
+                                <field name="subformula">editable;rounding=2</field>
                             </record>
                         </field>
                     </record>
