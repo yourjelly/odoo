@@ -273,11 +273,11 @@ class Project(models.Model):
         def get_action(sol_id):
             """ Return the action vals to call it in frontend if the user can access to the SO related """
             action, res_id = action_per_sol.get(sol_id, (None, None))
-            return {'action': action, 'res_id': res_id, 'additional_context': json.dumps({'active_id': sol_id, 'default_project_id': self.id})} if action else {}
+            return {'name': action, 'resId': res_id, 'buttonContext': json.dumps({'active_id': sol_id, 'default_project_id': self.id})} if action else {}
 
         return [{
             **sol_read,
-            **get_action(sol_read['id']),
+            'action': get_action(sol_read['id']),
         } for sol_read in sols.with_context(with_price_unit=True).read(['display_name', 'product_uom_qty', 'qty_delivered', 'qty_invoiced', 'product_uom'])]
 
     def _get_sale_items_domain(self, additional_domain=None):

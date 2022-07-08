@@ -120,7 +120,7 @@ tour.register('project_update_tour', {
 }, {
     trigger: ".modal-footer button"
 }, {
-    trigger: ".o_open_milestone:eq(1) .o_milestone_detail span:eq(0)",
+    trigger: ".o_rightpanel_milestone:eq(1) .o_milestone_detail span:eq(0)",
     extra_trigger: ".o_add_milestone a",
     run: function () {
         setTimeout(() => {
