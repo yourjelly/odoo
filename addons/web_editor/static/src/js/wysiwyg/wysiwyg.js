@@ -1878,6 +1878,54 @@ const Wysiwyg = Widget.extend({
                     this.odooEditor.execCommand('setTag', 'pre');
                 },
             },
+            {
+                groupName: 'Structure',
+                title: '2 columns',
+                description: 'Convert into 2 columns.',
+                fontawesome: 'fa-columns',
+                callback: () => this.odooEditor.execCommand('columnize', 2, options.pAfterColumn),
+                isDisabled: () => {
+                    const anchor = this.odooEditor.document.getSelection().anchorNode;
+                    const row = closestElement(anchor, '.o_text_columns .row', true);
+                    return row && row.childElementCount === 2;
+                },
+            },
+            {
+                groupName: 'Structure',
+                title: '3 columns',
+                description: 'Convert into 3 columns.',
+                fontawesome: 'fa-columns',
+                callback: () => this.odooEditor.execCommand('columnize', 3, options.pAfterColumn),
+                isDisabled: () => {
+                    const anchor = this.odooEditor.document.getSelection().anchorNode;
+                    const row = closestElement(anchor, '.o_text_columns .row', true);
+                    return row && row.childElementCount === 3;
+                },
+            },
+            {
+                groupName: 'Structure',
+                title: '4 columns',
+                description: 'Convert into 4 columns.',
+                fontawesome: 'fa-columns',
+                callback: () => this.odooEditor.execCommand('columnize', 4, options.pAfterColumn),
+                isDisabled: () => {
+                    const anchor = this.odooEditor.document.getSelection().anchorNode;
+                    const row = closestElement(anchor, '.o_text_columns .row', true);
+                    return row && row.childElementCount === 4;
+                },
+            },
+            {
+                groupName: 'Structure',
+                title: 'Remove columns',
+                description: 'Back to one column.',
+                fontawesome: 'fa-columns',
+                callback: () => this.odooEditor.execCommand('columnize', 0),
+                isDisabled: () => {
+                    const anchor = this.odooEditor.document.getSelection().anchorNode;
+                    const row = closestElement(anchor, '.o_text_columns .row', true);
+                    return !row;
+                },
+            },
         ];
         if (editorOptions.allowCommandLink) {
             categories.push({ name: 'Navigation', priority: 40 });
