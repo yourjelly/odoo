@@ -92,7 +92,7 @@ class TestInvoiceTaxes(AccountTestInvoicingCommon):
                 }),
             ],
         })
-        base_tags = tax_report_line.expression_ids._get_matching_tags()
+        base_tags = base_report_line.expression_ids._get_matching_tags()
         cls.base_tag_pos = base_tags.filtered(lambda x: not x.tax_negate)
         cls.base_tag_neg = base_tags.filtered(lambda x: x.tax_negate)
 
