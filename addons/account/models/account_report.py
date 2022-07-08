@@ -18,6 +18,7 @@ FIGURE_TYPE_SELECTION_VALUES = [
     ('none', "No Formatting"),
 ]
 
+
 class AccountReport(models.Model):
     _name = "account.report"
     _description = "Accounting Report"
@@ -193,6 +194,13 @@ class AccountReport(models.Model):
         while self.search_count([('name', '=', name)]) > 0:
             name += ' ' + _('(copy)')
         return name
+
+    @api.depends('name', 'country_id')
+    def name_get(self):
+        result = []
+        for report in self:
+            result.append((report.id, report.name + (f' ({report.country_id.code})' if report.country_id else '')))
+        return result
 
 
 class AccountReportLine(models.Model):
