@@ -4522,7 +4522,7 @@ class AccountMoveLine(models.Model):
                     tag_name = tag.name
 
                 audit_str += separator if audit_str else ''
-                audit_str += tag.name + ': ' + formatLang(self.env, tag_amount, currency_obj=currency)
+                audit_str += tag_name + ': ' + formatLang(self.env, tag_amount, currency_obj=currency)
 
             record.tax_audit = audit_str
 

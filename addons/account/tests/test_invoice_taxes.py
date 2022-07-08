@@ -80,19 +80,6 @@ class TestInvoiceTaxes(AccountTestInvoicingCommon):
         cls.tax_tag_pos = tax_tags.filtered(lambda x: not x.tax_negate)
         cls.tax_tag_neg = tax_tags.filtered(lambda x: x.tax_negate)
 
-        base_report_line = cls.env['account.report.line'].create({
-            'name': 'base_test_tax_report_line',
-            'report_id': tax_report.id,
-            'sequence': 10,
-            'expression_ids': [
-                Command.create({
-                    'label': 'balance',
-                    'engine': 'tax_tags',
-                    'formula': 'base_test_tax_report_line',
-                }),
-            ],
-        })
-        base_tags = tax_report_line.expression_ids._get_matching_tags()
         cls.base_tag_pos = tax_tags.filtered(lambda x: not x.tax_negate)
         cls.base_tag_neg = tax_tags.filtered(lambda x: x.tax_negate)
 
