@@ -19,7 +19,7 @@
                     <div class="px-2">
                         <t t-foreach="Object.values(list)" t-as="plan" t-key="plan.id">
                             <!-- <t t-set="plan" t-value="list[plan_id]"/> -->
-                            <table class="o_list_table table table-sm table-hover o_analytic_table mb-1">
+                            <table class="o_list_table table table-sm table-hover o_analytic_table mb-1" t-attf-id="plan_{{plan.id}}">
                                 <tr class="border-bottom">
                                     <th class="o_analytic_account_name">
                                         <t t-esc="plan.name"/>
@@ -30,7 +30,7 @@
                                     <th></th>
                                 </tr>
                                 <t t-foreach="plan.distribution" t-as="dist_tag" t-key="dist_tag.id">
-                                    <tr>
+                                    <tr t-att-class="tagIsReady(dist_tag) and 'ready' or 'incomplete'">
                                         <td class="o_analytic_account_name">
                                             <AutoComplete
                                                 id="dist_tag.id.toString()"
@@ -47,7 +47,15 @@
                                                 type="text"
                                                 t-att-value="dist_tag.percentage"
                                                 t-on-click.stop=""
-                                                t-on-change="(ev) => this.percentageChanged(dist_tag, ev)"/>
+                                                t-on-change="(ev) => this.percentageChanged(dist_tag, ev)"
+                                                t-on-input="(ev) => this.editingPercentage(ev, plan.id)"
+                                                t-on-blur="(ev) => this.percentageBlur()"/>
+                                            <!-- <input
+                                                class="o_input"
+                                                inputmode="numeric"
+                                                type="text"
+                                                t-model="dist_tag.percentage"
+                                                t-on-click.stop=""/> -->
                                         </td>
                                         <td>
                                             <span class="fa fa-trash-o" t-on-click="() => this.deleteTag(dist_tag.id)"/>

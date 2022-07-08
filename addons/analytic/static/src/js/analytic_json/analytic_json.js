@@ -10,7 +10,7 @@ import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { TagsList } from "@web/views/fields/many2many_tags/tags_list";
 
-const { Component, useState, useRef, useExternalListener, onWillUpdateProps, onWillStart } = owl;
+const { Component, useState, useRef, useExternalListener, onWillUpdateProps, onWillStart, onPatched } = owl;
 
 
 export class AnalyticJson extends Component {
@@ -34,7 +34,37 @@ export class AnalyticJson extends Component {
         onWillStart(this.fetchData);
         onWillUpdateProps(this.jsonToList);
 
+        this.percentageEditing = false;
+
+        onPatched(this.patched);
         useExternalListener(window, "click", this.onWindowClick, true);
+    }
+
+    // tryToClose() {
+    //     if (this.isDropdownOpen && this.state.closing){
+    //         this.state.closing = false;
+    //         if (!this.firstIncompletePlanId) {
+    //             this.closeAnalyticEditor();
+    //         } else {
+    //             this.focusIncomplete();
+    //         }
+    //     }
+    // }
+
+    patched() {
+        console.log('patched readonly:', this.props.readonly, 'dropdownOpen:', this.isDropdownOpen, 'firstIncompletePlanId:', this.firstIncompletePlanId);
+        this.focusIncomplete();
+    }
+
+    focusIncomplete() {
+        if (this.editingRecord && this.isDropdownOpen && !this.percentageEditing) {
+            let incompletePlanId = this.firstIncompletePlanId;
+            if (incompletePlanId) {
+                let incompletePlanSelector = "#plan_" + incompletePlanId + " .incomplete";
+                let incompleteEl = this.dropdownRef.el.querySelector(incompletePlanSelector);
+                if (!!incompleteEl) this.focus(this.adjacentElementToFocus("next", incompleteEl));
+            }
+        }
     }
 
     async fetchData() {
@@ -103,6 +133,7 @@ export class AnalyticJson extends Component {
         let selected_option = Object.getPrototypeOf(option);
         tag.analytic_account_id = parseInt(selected_option.value);
         tag.analytic_account_name = selected_option.label;
+        this.editingPercentage(null, selected_option.group_id);
     }
 
     get plans() {
@@ -167,6 +198,10 @@ export class AnalyticJson extends Component {
         }
     }
 
+    tagIsReady({analytic_account_id, percentage}) {
+        return !!analytic_account_id && !!percentage;
+    }
+
     addLineToGroup(id) {
         if (this.list[id].distribution.length === this.listReadyByGroup(id).length) {
             this.state.list[id].distribution.push(this.newTag(id));
@@ -199,6 +234,14 @@ export class AnalyticJson extends Component {
         return true;
     }
 
+    get firstIncompletePlanId() {
+        for (let group_id in this.list) {
+            let group_status = this.groupStatus(group_id);
+            if (["orange", "red"].includes(group_status)) return group_id;
+        }
+        return 0;
+    }
+
     async save() {
         console.log('saving locally')
         await this.props.update(JSON.stringify(this.listForJson));
@@ -210,7 +253,7 @@ export class AnalyticJson extends Component {
     }
 
     get listReady() {
-        return this.listFlat.filter((dist_tag) => !!dist_tag.analytic_account_id && dist_tag.percentage > 0);
+        return this.listFlat.filter((dist_tag) => this.tagIsReady(dist_tag));
     }
 
     get listFlat() {
@@ -239,7 +282,7 @@ export class AnalyticJson extends Component {
     }
 
     listReadyByGroup(id) {
-        let ready = this.list[id].distribution.filter((tag) => !!tag.analytic_account_id && tag.percentage > 0);
+        let ready = this.list[id].distribution.filter((tag) => this.tagIsReady(tag));
         return ready;
     }
 
@@ -319,8 +362,32 @@ export class AnalyticJson extends Component {
                 if (this.isDropdownOpen) {
                     if (this.focusAdjacent("next")){
                         break;
+                    } else {
+                        // we're on the last percentage - it is uncertain whether the dropdown should close since the percentageChanged has not yet occurred.
+                        let g_id = this.firstIncompletePlanId;
+                        if (g_id) {
+                            // since there is another incomplete plan - we allow the onPatch to focus there
+                            console.log('blur to go to next incomplete');
+                            ev.target.blur();
+                            break;
+                        } else {
+                            // if the value is 100, this plan is complete but it could be complete anyway
+                            if (ev.target.value == 100) {
+                                console.log('closing 100');
+                                this.closeAnalyticEditor();
+                            } else {
+                                if (this.percentageEditing) {
+                                    console.log('blurring');
+                                    ev.target.blur();
+                                    ev.target.focus();
+                                    break;
+                                } else {
+                                    console.log('closing...hopefully updated');
+                                    this.closeAnalyticEditor();
+                                }
+                            }
+                        }
                     }
-                    this.closeAnalyticEditor();
                 };
                 this.resetRecentlyClosed();
                 return;
@@ -356,15 +423,24 @@ export class AnalyticJson extends Component {
         if (!this.widgetRef.el.contains(ev.target) && this.recentlyClosed) {
             this.resetRecentlyClosed(); // in case the click happened after pressing escape (like tab/ shift+tab)
         }
-        if (this.isDropdownOpen && !this.dropdownRef.el.contains(ev.target)) {
+        if (this.isDropdownOpen && this.dropdownRef.el && !this.dropdownRef.el.contains(ev.target)) {
             console.log('window click outside dropdown...closing');
             this.closeAnalyticEditor();
         }
     }
 
+    editingPercentage(ev, plan_id) {
+        this.percentageEditing = plan_id;
+    }
+
     async percentageChanged(dist_tag, ev) {
+        console.log('percentageChanged');
         dist_tag.percentage = parseFloat(ev.target.value);
         this.autoFill();
+    }
+
+    percentageBlur() {
+        this.percentageEditing = false;
     }
 
     forceCloseEditor() {
