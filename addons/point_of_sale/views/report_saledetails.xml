@@ -60,7 +60,7 @@
             <br/>
 
             <h3>Taxes</h3>
-            <table  class="table table-sm">
+            <table  class="table table-sm" id="taxesTable">
                 <thead><tr>
                     <th>Name</th>
                     <th>Tax Amount</th>
