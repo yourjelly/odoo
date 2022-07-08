@@ -10,6 +10,7 @@
                       <group>
                         <field name="name"/>
                         <field name="implementation"/>
+                        <field name="sequence_preview"/>
                       </group>
                       <group>
                         <field name="code"/>
