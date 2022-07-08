@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import itertools
 import re
 from collections import defaultdict
 
@@ -17,6 +16,7 @@ FIGURE_TYPE_SELECTION_VALUES = [
     ('datetime', "Datetime"),
     ('none', "No Formatting"),
 ]
+
 
 class AccountReport(models.Model):
     _name = "account.report"
@@ -148,7 +148,6 @@ class AccountReport(models.Model):
         # Overridden so that changing the country of a report also creates new tax tags if necessary, or updates the country
         # of existing tags, if they aren't shared with another report.
         if 'country_id' in vals:
-            tags_cache = {}
             impacted_reports = self.filtered(lambda x: x.country_id.id != vals['country_id'])
             tax_tags_expressions = impacted_reports.line_ids.expression_ids.filtered(lambda x: x.engine == 'tax_tags')
 
@@ -328,7 +327,7 @@ class AccountReportExpression(models.Model):
     label = fields.Char(string="Label", required=True)
     engine = fields.Selection(
         string="Computation Engine",
-        selection = [
+        selection=[
             ('domain', "Odoo Domain"),
             ('tax_tags', "Tax Tags"),
             ('aggregation', "Aggregate Other Formulas"),

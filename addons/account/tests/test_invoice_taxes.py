@@ -93,8 +93,8 @@ class TestInvoiceTaxes(AccountTestInvoicingCommon):
             ],
         })
         base_tags = tax_report_line.expression_ids._get_matching_tags()
-        cls.base_tag_pos = tax_tags.filtered(lambda x: not x.tax_negate)
-        cls.base_tag_neg = tax_tags.filtered(lambda x: x.tax_negate)
+        cls.base_tag_pos = base_tags.filtered(lambda x: not x.tax_negate)
+        cls.base_tag_neg = base_tags.filtered(lambda x: x.tax_negate)
 
     def _create_invoice(self, taxes_per_line, inv_type='out_invoice', currency_id=False, invoice_payment_term_id=False):
         ''' Create an invoice on the fly.

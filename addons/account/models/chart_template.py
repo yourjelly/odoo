@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import re
-
 from odoo.exceptions import AccessError
 from odoo import api, fields, models, Command, _, osv
 from odoo import SUPERUSER_ID
