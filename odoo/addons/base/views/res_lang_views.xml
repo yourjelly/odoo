@@ -68,6 +68,23 @@
                                 <field name="time_format"/>
                                 <field name="week_start"/>
                             </group>
+                            <group>
+                                <div class='o_preview_res_lang'>
+                                    <p class="text-center">Preview</p>
+                                    <group>
+                                        <field name="date_format_preview"/>
+                                        <field name="thousand_separator_preview"/>
+                                        <field name="decimal_point_preview"/>
+                                    </group>
+                                    <!-- <table class='w-100'>
+                                        <tr>
+                                            <td><label for='date_format_preview' class='text-muted'/></td>
+                                            <td><field name='date_format_preview'/></td>
+                                        </tr>
+                                        </tr>
+                                    </table> -->
+                                </div>
+                            </group>
                         </group>
                         <group string="Legends for supported Date and Time Formats">
                             <div>%a - Abbreviated day of the week.</div>

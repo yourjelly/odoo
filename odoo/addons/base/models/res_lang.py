@@ -32,6 +32,7 @@ class Lang(models.Model):
     active = fields.Boolean()
     direction = fields.Selection([('ltr', 'Left-to-Right'), ('rtl', 'Right-to-Left')], required=True, default='ltr')
     date_format = fields.Char(string='Date Format', required=True, default=DEFAULT_DATE_FORMAT)
+    date_format_preview = fields.Char(string='Date format', compute='_compute_date_format_preview')
     time_format = fields.Char(string='Time Format', required=True, default=DEFAULT_TIME_FORMAT)
     week_start = fields.Selection([('1', 'Monday'),
                                    ('2', 'Tuesday'),
@@ -46,7 +47,9 @@ class Lang(models.Model):
              "[1,2,-1] will represent it to be 106,50,0;[3] will represent it as 106,500. "
              "Provided ',' as the thousand separator in each case.")
     decimal_point = fields.Char(string='Decimal Separator', required=True, default='.', trim=False)
+    decimal_point_preview = fields.Char(string="Decimal separator", compute="_compute_decimal_point_preview")
     thousands_sep = fields.Char(string='Thousands Separator', default=',', trim=False)
+    thousand_separator_preview = fields.Char(string="Thousands separator", compute='_compute_thounsand_separator_preview')
 
     @api.depends('code', 'flag_image')
     def _compute_field_flag_image_url(self):
@@ -64,6 +67,22 @@ class Lang(models.Model):
         ('code_uniq', 'unique(code)', 'The code of the language must be unique !'),
         ('url_code_uniq', 'unique(url_code)', 'The URL code of the language must be unique !'),
     ]
+
+    @api.depends('date_format')
+    def _compute_date_format_preview(self):
+        for lang in self:
+            lang.date_format_preview = fields.Date.today().strftime(lang.date_format)
+
+    @api.depends('thousands_sep', 'grouping')
+    def _compute_thounsand_separator_preview(self):
+        for lang in self:
+            lang.thousand_separator_preview = intersperse('999999999', ast.literal_eval(lang.grouping), lang.thousands_sep)[0]
+
+    @api.depends('decimal_point')
+    def _compute_decimal_point_preview(self):
+        for lang in self:
+            lang.decimal_point_preview = '99' + lang.decimal_point + '00'
+
 
     @api.constrains('active')
     def _check_active(self):
