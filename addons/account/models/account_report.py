@@ -361,7 +361,8 @@ class AccountReportExpression(models.Model):
     carryover_target = fields.Char(
         string="Carry Over To",
         help="Formula in the form line_code.expression_label. This allows setting the target of the carryover for this expression "
-             "(on a _carryover_*-labeled expression), in case it is different from the parent line."
+             "(on a _carryover_*-labeled expression), in case it is different from the parent line. 'custom' is also allowed as value"
+             " in case the carryover destination requires more complex logic."
     )
 
     @api.depends('engine')
@@ -462,10 +463,13 @@ class AccountReportExpression(models.Model):
             if expression.engine != 'aggregation':
                 raise UserError(_("Cannot get aggregation details from a line not using 'aggregation' engine"))
 
-            expression_terms = re.split('[-+/*]', expression.formula.replace(' ', '')) # TODO une constante pour les opérateurs admis à l'aggrégation ?
+            expression_terms = re.split('[-+/*]', re.sub(r'[\s()]', '', expression.formula))
             for term in expression_terms:
                 if term: # term might be empty if the formula contains a negative term
-                    line_code, total_name = term.split('.')
+                    try:
+                        line_code, total_name = term.split('.')
+                    except:
+                        import pdb; pdb.set_trace()
                     totals_by_code[line_code].add(total_name)
 
         return totals_by_code
@@ -500,7 +504,7 @@ class AccountReportExpression(models.Model):
         }
         return [(minus_tag_vals), (plus_tag_vals)]
 
-    def _get_carryover_target_expression(self):
+    def _get_carryover_target_expression(self, options):
         self.ensure_one()
 
         if self.carryover_target:

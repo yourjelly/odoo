@@ -94,7 +94,8 @@
                                     <record id="tax_report_line_vp6a_formula" model="account.report.expression">
                                         <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">VP4&gt;VP5 and VP4.balance-VP5 or 0.balance</field>
+                                        <field name="formula">VP4.balance - VP5.balance</field>
+                                        <field name="subformula">if_above(EUR(0))</field>
                                     </record>
                                 </field>
                             </record>
@@ -106,23 +107,33 @@
                                     <record id="tax_report_line_vp6b_formula" model="account.report.expression">
                                         <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">VP5&gt;VP4 and VP5.balance-VP4 or 0.balance</field>
+                                        <field name="formula">VP4.balance - VP5.balance</field>
+                                        <field name="subformula">if_below(EUR(0))</field>
                                     </record>
                                 </field>
                             </record>
                         </field>
                     </record>
-                    <!--TODO OCO intégrer le carryover-->
                     <record id="tax_report_line_vp7" model="account.report.line">
                         <field name="name">VP7 - Debito periodo precedente non superiore 25,82</field>
                         <field name="code">VP7</field>
                         <field name="sequence" eval="11"/>
-                        <field name="is_carryover_used_in_balance">True</field>
                         <field name="expression_ids">
                             <record id="tax_report_line_vp7_tag" model="account.report.expression">
-                                <field name="label">balance</field>
+                                <field name="label">tag</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">vp7</field>
+                            </record>
+                            <record id="tax_report_line_vp7_applied_carryover" model="account.report.expression">
+                                <field name="label">_applied_carryover_balance</field>
+                                <field name="engine">external</field>
+                                <field name="formula">most_recent</field>
+                                <field name="date_scope">previous_tax_period</field>
+                            </record>
+                            <record id="tax_report_line_vp7_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">VP7._applied_carryover_balance + VP7.tag</field>
                             </record>
                         </field>
                     </record>
@@ -130,12 +141,22 @@
                         <field name="name">VP8 - Credito periodo precedente</field>
                         <field name="code">VP8</field>
                         <field name="sequence" eval="12"/>
-                        <field name="is_carryover_used_in_balance">True</field>
                         <field name="expression_ids">
                             <record id="tax_report_line_vp8_tag" model="account.report.expression">
-                                <field name="label">balance</field>
+                                <field name="label">tag</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">vp8</field>
+                            </record>
+                            <record id="tax_report_line_vp8_applied_carryover" model="account.report.expression">
+                                <field name="label">_applied_carryover_balance</field>
+                                <field name="engine">external</field>
+                                <field name="formula">most_recent</field>
+                                <field name="date_scope">previous_tax_period</field>
+                            </record>
+                            <record id="tax_report_line_vp8_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">VP8._applied_carryover_balance + VP8.tag</field>
                             </record>
                         </field>
                     </record>
@@ -143,12 +164,22 @@
                         <field name="name">VP9 - Credito anno precedente</field>
                         <field name="code">VP9</field>
                         <field name="sequence" eval="13"/>
-                        <field name="is_carryover_used_in_balance">True</field>
                         <field name="expression_ids">
                             <record id="tax_report_line_vp9_tag" model="account.report.expression">
-                                <field name="label">balance</field>
+                                <field name="label">tag</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">vp9</field>
+                            </record>
+                            <record id="tax_report_line_vp9_applied_carryover" model="account.report.expression">
+                                <field name="label">_applied_carryover_balance</field>
+                                <field name="engine">external</field>
+                                <field name="formula">most_recent</field>
+                                <field name="date_scope">previous_tax_period</field>
+                            </record>
+                            <record id="tax_report_line_vp9_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">VP9._applied_carryover_balance + VP9.tag</field>
                             </record>
                         </field>
                     </record>
@@ -216,9 +247,6 @@
                                 <field name="name">VP14a - IVA da versare (debito)</field>
                                 <field name="code">VP14a</field>
                                 <field name="sequence" eval="20"/>
-                                <field name="carry_over_condition_method">vp14_debt_carryover_condition</field>
-                                <field name="carry_over_destination_line_id" ref="tax_report_line_vp7"/>
-                                <field name="is_carryover_persistent">False</field>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_vp14a_vp4_vp5_dif_pos" model="account.report.expression">
                                         <field name="label">vp4_vp5_dif_pos</field>
@@ -232,22 +260,25 @@
                                         <field name="formula">VP4.balance - VP5.balance</field>
                                         <field name="subformula">if_below(EUR(0))</field>
                                     </record>
-                                    <record id="tax_report_line_vp14a_formula" model="account.report.expression">
+                                    <record id="tax_report_line_vp14a_balance" model="account.report.expression">
                                         <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">(vp4_vp5_dif_pos.balance + VP7.balance + VP12.balance) - (-vp4_vp5_dif_neg + VP8.balance + VP9.balance + VP10.balance + VP11.balance + VP13)</field>
+                                        <field name="formula">(VP14a.vp4_vp5_dif_pos + VP7.balance + VP12.balance) - (-VP14a.vp4_vp5_dif_neg + VP8.balance + VP9.balance + VP10.balance + VP11.balance + VP13.balance)</field>
                                         <field name="subformula">if_above(EUR(0))</field>
                                     </record>
-                                    <!--TODO OCO foireux ^-->
+                                    <record id="tax_report_line_vp14a_carryover" model="account.report.expression">
+                                        <field name="label">_carryover_balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">VP14a.balance</field>
+                                        <field name="subformula">if_between(EUR(0), EUR(25.82))</field>
+                                        <field name="carryover_target">VP7._applied_carryover_balance</field>
+                                    </record>
                                 </field>
                             </record>
                             <record id="tax_report_line_vp14b" model="account.report.line">
                                 <field name="name">VP14b - IVA da versare (credito)</field>
                                 <field name="code">VP14b</field>
                                 <field name="sequence" eval="21"/>
-                                <field name="carry_over_condition_method">vp14_credit_carryover_condition</field>
-                                <field name="carry_over_destination_line_id" ref="tax_report_line_vp8"/>
-                                <field name="is_carryover_persistent">False</field>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_vp14b_vp4_vp5_dif_pos" model="account.report.expression">
                                         <field name="label">vp4_vp5_dif_pos</field>
@@ -261,11 +292,18 @@
                                         <field name="formula">VP4.balance - VP5.balance</field>
                                         <field name="subformula">if_below(EUR(0))</field>
                                     </record>
-                                    <record id="tax_report_line_vp14b_formula" model="account.report.expression">
+                                    <record id="tax_report_line_vp14b_balance" model="account.report.expression">
                                         <field name="label">balance</field>
                                         <field name="engine">aggregation</field>
-                                        <field name="formula">(-vp4_vp5_dif_neg + VP8.balance + VP9.balance + VP10.balance + VP11.balance + VP13) - (vp4_vp5_dif_pos.balance + VP7.balance + VP12.balance)</field>
+                                        <field name="formula">(-VP14b.vp4_vp5_dif_neg + VP8.balance + VP9.balance + VP10.balance + VP11.balance + VP13.balance) - (VP14b.vp4_vp5_dif_pos + VP7.balance + VP12.balance)</field>
                                         <field name="subformula">if_above(EUR(0))</field>
+                                    </record>
+                                    <record id="tax_report_line_vp14b_carryover" model="account.report.expression">
+                                        <field name="label">_carryover_balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">VP14b.balance</field>
+                                        <field name="subformula">if_above(EUR(0))</field>
+                                        <field name="carryover_target">VP8._applied_carryover_balance</field>
                                     </record>
                                 </field>
                             </record>
