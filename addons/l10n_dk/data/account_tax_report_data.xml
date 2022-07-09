@@ -22,13 +22,13 @@
                     <record id="account_tax_report_line_sales_group_formula" model="account.report.expression">
                         <field name="label">balance</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">SALES_VAT.balance + REVERSE_CHARGE_MERCHANDISES_PURCHASED_OUT_DK.balance + REVERSE_CHARGE_SERVICES_PURCHASED_OUT_DK.balance</field>
+                        <field name="formula">DK_SALES_VAT.balance + REVERSE_CHARGE_MERCHANDISES_PURCHASED_OUT_DK.balance + REVERSE_CHARGE_SERVICES_PURCHASED_OUT_DK.balance</field>
                     </record>
                 </field>
                 <field name="children_ids">
                     <record id="account_tax_report_line_sales_tax" model="account.report.line">
                         <field name="name">Salgsmoms (udgående moms)</field>
-                        <field name="code">SALES_VAT</field>
+                        <field name="code">DK_SALES_VAT</field>
                         <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_sales_tax_tag" model="account.report.expression">
