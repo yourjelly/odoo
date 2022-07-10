@@ -626,8 +626,6 @@ class AccountBankStatementLine(models.Model):
         compute='_compute_previous_line_id',
         store=True,
     )
-    # fake field to add groupby in kanban view
-    fake_field = fields.Char(default=" ")
     # -------------------------------------------------------------------------
     # HELPERS
     # -------------------------------------------------------------------------
