@@ -40,17 +40,6 @@ export class AnalyticJson extends Component {
         useExternalListener(window, "click", this.onWindowClick, true);
     }
 
-    // tryToClose() {
-    //     if (this.isDropdownOpen && this.state.closing){
-    //         this.state.closing = false;
-    //         if (!this.firstIncompletePlanId) {
-    //             this.closeAnalyticEditor();
-    //         } else {
-    //             this.focusIncomplete();
-    //         }
-    //     }
-    // }
-
     patched() {
         console.log('patched readonly:', this.props.readonly, 'dropdownOpen:', this.isDropdownOpen, 'firstIncompletePlanId:', this.firstIncompletePlanId);
         this.focusIncomplete();
@@ -262,6 +251,30 @@ export class AnalyticJson extends Component {
 
     get list() {
         return this.state.list;
+    }
+
+    applicabilityStatus(group_id) {
+        let group = this.list[group_id];
+        let status = this.groupStatus(group_id);
+        let description = group.applicability.charAt(0).toUpperCase() + group.applicability.slice(1) + " - ";
+        switch(status){
+            case "gray":
+                description += "Editing (OK)";
+                break;
+            case "orange": {
+                description += "Editing (Incomplete)";
+                break;
+            }
+            case "red": {
+                description += "Invalid";
+                break;
+            }
+            case "green": {
+                description += "OK";
+                break;
+            }
+        }
+        return description;
     }
 
     groupStatus(id) {

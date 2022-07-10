@@ -25,7 +25,7 @@
                                         <t t-esc="plan.name"/>
                                     </th>
                                     <th class="o_analytic_percentage">
-                                        <span t-attf-class="o_status d-inline-block o_analytic_status_{{groupStatus(plan.id)}}" t-att-title="plan.applicability"/>
+                                        <span t-attf-class="o_status d-inline-block o_analytic_status_{{groupStatus(plan.id)}}" t-att-title="applicabilityStatus(plan.id)"/>
                                     </th>
                                     <th></th>
                                 </tr>
