@@ -4,8 +4,10 @@ from odoo import api, fields, models, _
 from odoo.tools import float_is_zero, html2plaintext
 from odoo.tools.misc import formatLang, format_date
 from odoo.exceptions import UserError, ValidationError
-from odoo.osv.expression import get_unaccent_wrapper
+from odoo.osv import expression
 from odoo.addons.base.models.res_bank import sanitize_account_number
+
+import datetime
 
 
 class AccountCashboxLine(models.Model):
@@ -116,6 +118,24 @@ class AccountBankStatement(models.Model):
     _check_company_auto = True
     _sequence_index = "journal_id"
 
+    @api.model
+    def default_get(self, fields):
+        # OVERRIDE
+        defaults = super().default_get(fields)
+        if self.env.context.get('from_kanban_card'):
+            st_line = self.env['account.bank.statement.line'].browse(self.env.context.get('active_id'))
+            preceding_statement_last_line = st_line._get_preceding_statement_last_line()
+
+            lines_in_between = self.env['account.bank.statement.line'].search(
+                st_line._get_preceding_lines_domain() +
+                preceding_statement_last_line._get_succeeding_lines_domain(default_journal_id=st_line.journal_id.id),
+            )
+            defaults['balance_end_real'] = preceding_statement_last_line.statement_id.balance_end_real + \
+                                           sum((lines_in_between + st_line).mapped('amount'))
+            defaults['theoretical_balance'] = st_line.cumulative_balance
+
+        return defaults
+
     @api.depends('line_ids', 'line_ids.amount')
     def _compute_total_entry_encoding(self):
         for statement in self:
@@ -175,7 +195,6 @@ class AccountBankStatement(models.Model):
     )
     balance_end_real = fields.Monetary(
         string='Ending Balance',
-        states={'confirm': [('readonly', True)]},
     )
     is_valid = fields.Boolean(compute='_compute_validity_and_error_message', store=True)
     error_message = fields.Text(compute='_compute_validity_and_error_message', store=True)
@@ -205,6 +224,11 @@ class AccountBankStatement(models.Model):
         store=True,
         help="Total of transaction lines."
     )
+    # Display field for the theoretical balance based on the selected line in the kanban view in the minimal form view.
+    theoretical_balance = fields.Monetary(
+        readonly=True,
+        store=False,
+        )
     balance_end = fields.Monetary(
         string='Computed Balance',
         compute='_compute_balance',
@@ -527,6 +551,29 @@ class AccountBankStatement(models.Model):
         self.ensure_one()
         return "%s %s %04d/%02d/00000" % (self.journal_id.code, _('Statement'), self.date.year, self.date.month)
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        res = super().create(vals_list)
+        if self.env.context.get('from_kanban_card'):
+            res.ensure_one()
+            st_line = self.env['account.bank.statement.line'].browse(self.env.context.get('active_ids'))
+            if st_line.statement_id:
+                # split the statement line into multiple statements
+                lines = st_line + self.env['account.bank.statement.line'].search([
+                    st_line._get_succeeding_lines_domain() + [('statement_id', '=', st_line.statement_id.id)],
+                ])
+                total = sum(lines.mapped('amount'))
+                lines.statement_id = res
+                res.balance_start_real = res.balance_end_real - total
+                st_line._get_preceding_statement_last_line().statement_id.balance_end_real -= total
+            else:
+                # create a new statement from the statement line and all anterior lines with no statement
+                lines = st_line + self.env['account.bank.statement.line'].search(
+                    st_line._get_preceding_lines_domain() + [('statement_id', '=', False)])
+                lines.statement_id = res
+                res.balance_start_real = res.balance_end_real - sum(lines.mapped('amount'))
+
+        return res
 
 class AccountBankStatementLine(models.Model):
     _name = "account.bank.statement.line"
@@ -829,21 +876,7 @@ class AccountBankStatementLine(models.Model):
     @api.depends('date', 'sequence', 'journal_id')
     def _compute_previous_line_id(self):
         for st_line in self._origin:
-            st_line.previous_line_id = self.search([
-                ('journal_id', '=', st_line.journal_id.id),
-                '|', '|',
-                    ('date', '<', st_line.date),
-                    '&',
-                        ('date', '=', st_line.date),
-                        ('sequence', '>', st_line.sequence),
-                   '&','&',
-                        ('date', '=', st_line.date),
-                        ('sequence', '=', st_line.sequence),
-                        ('id', '<', st_line.id),
-            ]
-                ,
-                limit=1
-            )
+            st_line.previous_line_id = self.search(st_line._get_preceding_lines_domain(), limit=1)
 
 
     @api.depends('previous_line_id.cumulative_balance', 'amount')
@@ -1188,7 +1221,7 @@ class AccountBankStatementLine(models.Model):
 
         # Retrieve the partner from statement line text values.
         st_line_text_values = self._get_st_line_strings_for_matching()
-        unaccent = get_unaccent_wrapper(self._cr)
+        unaccent = expression.get_unaccent_wrapper(self._cr)
         sub_queries = []
         params = []
         for text_value in st_line_text_values:
@@ -1235,14 +1268,49 @@ class AccountBankStatementLine(models.Model):
             })
         return bank_account
 
-    def _order_domain(self):
-        return [
-            '|', '|',
-               ('date', '<', self.date),
-            '&',
-                  ('date', '=', self.date),
-                  ('sequence', '<', self.sequence),
-            ('id', '!=', self.id)]
+    def _get_preceding_lines_domain(self, default_journal_id=False):
+        """
+        get a domain for acquiring the lines before the current one. Accepts zero or one record
+        :return: 
+        """
+        # we set a default date so it can be directly on search results, regardless of the existance of a line
+        date = self.date or datetime.date.max
+        return[('journal_id', '=', self.journal_id.id or default_journal_id),
+                '|', '|',
+                    ('date', '<', date),
+                    '&',
+                        ('date', '=', date),
+                        ('sequence', '>', self.sequence),
+                   '&','&',
+                        ('date', '=', date),
+                        ('sequence', '=', self.sequence),
+                        ('id', '<', self.id),
+        ]
+
+    def _get_succeeding_lines_domain(self, default_journal_id=False):
+        # we set a default date so it can be directly on search results, regardless of the existence of a line
+        date = self.date or datetime.date.min
+        return[('journal_id', '=', self.journal_id.id or default_journal_id),
+                '|', '|',
+                    ('date', '>', date),
+                    '&',
+                        ('date', '=', date),
+                        ('sequence', '<', self.sequence),
+                   '&','&',
+                        ('date', '=', date),
+                        ('sequence', '=', self.sequence),
+                        ('id', '>', self.id),
+        ]
+
+    def _get_preceding_statement_last_line(self):
+        """
+        get the last line of the preceding statement
+        """
+        self.ensure_one()
+        domain = self._get_preceding_lines_domain() + [
+            ('statement_id', '!=', self.statement_id.id), ('statement_id', '!=', False)
+        ]
+        return self.search(domain, limit=1)
 
     def button_undo_reconciliation(self):
         ''' Undo the reconciliation mades on the statement line and reset their journal items

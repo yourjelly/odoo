@@ -121,12 +121,11 @@ class AccountChartTemplate(models.Model):
                         'payment_ref': 'Initial balance',
                         'amount': 5103.0,
                         'date': time.strftime('%Y-01-01'),
-                        'sequence': -1,
                     }),
                 ]
             },
             f'{cid}_demo_bank_statement_1': {
-                'name': time.strftime('%Y')+'-01-01',
+                'name': time.strftime('%Y')+'-01-01/2',
                 'balance_end_real': 9944.87,
                 'balance_start': 5103.0,
                 'attachment': base64.b64encode(file_open('account/static/demo/bank_statement_yourcompany_1.pdf', 'rb').read()),
