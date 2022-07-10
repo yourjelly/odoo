@@ -34,7 +34,7 @@ export class AnalyticJson extends Component {
         onWillStart(this.fetchData);
         onWillUpdateProps(this.jsonToList);
 
-        this.percentageEditing = false;
+        this.keepFocusInPlan = false;
 
         onPatched(this.patched);
         useExternalListener(window, "click", this.onWindowClick, true);
@@ -57,8 +57,8 @@ export class AnalyticJson extends Component {
     }
 
     focusIncomplete() {
-        if (this.editingRecord && this.isDropdownOpen && !this.percentageEditing) {
-            let incompletePlanId = this.firstIncompletePlanId;
+        if (this.editingRecord && this.isDropdownOpen) {
+            let incompletePlanId = this.keepFocusInPlan || this.firstIncompletePlanId;
             if (incompletePlanId) {
                 let incompletePlanSelector = "#plan_" + incompletePlanId + " .incomplete";
                 let incompleteEl = this.dropdownRef.el.querySelector(incompletePlanSelector);
@@ -133,7 +133,7 @@ export class AnalyticJson extends Component {
         let selected_option = Object.getPrototypeOf(option);
         tag.analytic_account_id = parseInt(selected_option.value);
         tag.analytic_account_name = selected_option.label;
-        this.editingPercentage(null, selected_option.group_id);
+        this.keepFocusInPlan = selected_option.group_id;
     }
 
     get plans() {
@@ -237,7 +237,7 @@ export class AnalyticJson extends Component {
     get firstIncompletePlanId() {
         for (let group_id in this.list) {
             let group_status = this.groupStatus(group_id);
-            if (["orange", "red"].includes(group_status)) return group_id;
+            if (["orange", "red", "grey"].includes(group_status)) return group_id;
         }
         return 0;
     }
@@ -363,30 +363,7 @@ export class AnalyticJson extends Component {
                     if (this.focusAdjacent("next")){
                         break;
                     } else {
-                        // we're on the last percentage - it is uncertain whether the dropdown should close since the percentageChanged has not yet occurred.
-                        let g_id = this.firstIncompletePlanId;
-                        if (g_id) {
-                            // since there is another incomplete plan - we allow the onPatch to focus there
-                            console.log('blur to go to next incomplete');
-                            ev.target.blur();
-                            break;
-                        } else {
-                            // if the value is 100, this plan is complete but it could be complete anyway
-                            if (ev.target.value == 100) {
-                                console.log('closing 100');
-                                this.closeAnalyticEditor();
-                            } else {
-                                if (this.percentageEditing) {
-                                    console.log('blurring');
-                                    ev.target.blur();
-                                    ev.target.focus();
-                                    break;
-                                } else {
-                                    console.log('closing...hopefully updated');
-                                    this.closeAnalyticEditor();
-                                }
-                            }
-                        }
+                        this.closeAnalyticEditor();
                     }
                 };
                 this.resetRecentlyClosed();
@@ -429,18 +406,11 @@ export class AnalyticJson extends Component {
         }
     }
 
-    editingPercentage(ev, plan_id) {
-        this.percentageEditing = plan_id;
-    }
-
     async percentageChanged(dist_tag, ev) {
         console.log('percentageChanged');
         dist_tag.percentage = parseFloat(ev.target.value);
+        if (!this.remainderByGroup(dist_tag.group_id)) this.keepFocusInPlan = false;
         this.autoFill();
-    }
-
-    percentageBlur() {
-        this.percentageEditing = false;
     }
 
     forceCloseEditor() {
@@ -456,6 +426,7 @@ export class AnalyticJson extends Component {
     }
 
     openAnalyticEditor() {
+        this.keepFocusInPlan = false;
         this.autoFill();
         this.state.showDropdown = true;
     }

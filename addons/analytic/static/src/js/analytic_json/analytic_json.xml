@@ -47,15 +47,7 @@
                                                 type="text"
                                                 t-att-value="dist_tag.percentage"
                                                 t-on-click.stop=""
-                                                t-on-change="(ev) => this.percentageChanged(dist_tag, ev)"
-                                                t-on-input="(ev) => this.editingPercentage(ev, plan.id)"
-                                                t-on-blur="(ev) => this.percentageBlur()"/>
-                                            <!-- <input
-                                                class="o_input"
-                                                inputmode="numeric"
-                                                type="text"
-                                                t-model="dist_tag.percentage"
-                                                t-on-click.stop=""/> -->
+                                                t-on-change="(ev) => this.percentageChanged(dist_tag, ev)"/>
                                         </td>
                                         <td>
                                             <span class="fa fa-trash-o" t-on-click="() => this.deleteTag(dist_tag.id)"/>
@@ -69,6 +61,7 @@
                                 </tr>
                             </table>
                         </t>
+                        <div tabindex="0"/>
                     </div>
                 </div>
             </t>
