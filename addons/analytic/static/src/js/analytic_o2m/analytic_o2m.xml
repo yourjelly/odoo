@@ -9,7 +9,6 @@
                     value="state.autocompleteValue"
                     sources="sources"
                     onSelect.bind="onSelect"
-                    onInput.bind="onInput"
                     onChange="onChange"/>
                 <div class="analytic_o2m_editor_popup dropdown-menu show rounded py-0" t-else="!state.isOpened" t-ref="analyticPop">
                     <!-- can't use a listrenderer - since columns headers should not be there
