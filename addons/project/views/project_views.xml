@@ -546,7 +546,7 @@
                                     <field name="privacy_visibility" widget="radio"/>
                                     <span colspan="2" class="text-muted" attrs="{'invisible':[('privacy_visibility_warning', '=', '')]}">
                                         <i class="fa fa-warning">&amp;nbsp;</i>
-                                        <field name="privacy_visibility_warning" nolabel="1"/>  
+                                        <field name="privacy_visibility_warning" nolabel="1"/>
                                     </span>
                                 </group>
                                 <group>
@@ -1056,7 +1056,7 @@
             <field name="model">project.task</field>
             <field eval="2" name="priority"/>
             <field name="arch" type="xml">
-                <form string="Task" class="o_form_project_tasks" js_class="project_task_form">
+                <form string="Task" class="o_form_project_tasks" js_class="legacy_project_task_form">
                     <field name="allow_subtasks" invisible="1" />
                     <field name="is_closed" invisible="1" />
                     <field name="allow_recurring_tasks" invisible="1" />
