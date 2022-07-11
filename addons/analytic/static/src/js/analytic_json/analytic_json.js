@@ -63,17 +63,21 @@ export class AnalyticJson extends Component {
     }
 
     patched() {
-        console.log('patched readonly:', this.props.readonly, 'dropdownOpen:', this.isDropdownOpen, 'firstIncompletePlanId:', this.firstIncompletePlanId);
+        console.log('patched readonly:', this.props.readonly, 'dropdownOpen:', this.isDropdownOpen, 'firstIncompletePlanId:', this.firstIncompletePlanId, 'keepFocusInPlan', this.keepFocusInPlan);
         this.focusIncomplete();
     }
 
     focusIncomplete() {
         if (this.editingRecord && this.isDropdownOpen) {
             let incompletePlanId = this.keepFocusInPlan || this.firstIncompletePlanId;
+            let incompletePlanSelector = this.keepFocusInPlan ? "#plan_" + this.keepFocusInPlan + " tr:nth-last-child(2)" : "#plan_" + incompletePlanId + " .incomplete";
             if (incompletePlanId) {
-                let incompletePlanSelector = "#plan_" + incompletePlanId + " .incomplete";
                 let incompleteEl = this.dropdownRef.el.querySelector(incompletePlanSelector);
-                if (!!incompleteEl) this.focus(this.adjacentElementToFocus("next", incompleteEl));
+                if (!!incompleteEl) {
+                    this.focus(this.adjacentElementToFocus("next", incompleteEl));
+                } else {
+                    console.log(incompletePlanSelector, 'not found');
+                }
             }
         }
     }
@@ -407,6 +411,7 @@ export class AnalyticJson extends Component {
         }
         const hotkey = getActiveHotkey(ev);
         switch (hotkey) {
+            case "enter":
             case "tab": {
                 if (this.isDropdownOpen) {
                     if (this.focusAdjacent("next")){
