@@ -551,29 +551,35 @@ class AccountBankStatement(models.Model):
         self.ensure_one()
         return "%s %s %04d/%02d/00000" % (self.journal_id.code, _('Statement'), self.date.year, self.date.month)
 
+    def action_split_or_create(self):
+        self.ensure_one()
+        st_line = self.env['account.bank.statement.line'].browse(self.env.context.get('active_ids'))
+        if st_line.statement_id:
+            # split the statement line into multiple statements
+            lines = st_line + self.env['account.bank.statement.line'].search(
+                st_line._get_succeeding_lines_domain() + [('statement_id', '=', st_line.statement_id.id)],
+            )
+            total = sum(lines.mapped('amount'))
+            lines.statement_id = self
+            self.balance_start_real = self.balance_end_real - total
+            st_line._get_preceding_statement_last_line().statement_id.balance_end_real -= total
+        else:
+            # fill the new statement by the statement line and all anterior lines with no statement
+            lines = st_line + self.env['account.bank.statement.line'].search(
+                st_line._get_preceding_lines_domain() + [('statement_id', '=', False)])
+            lines.statement_id = self
+            self.balance_start_real = self.balance_end_real - sum(lines.mapped('amount'))
+        if not self.name:
+            self._set_next_sequence()
+        return {'type': 'ir.actions.act_window_close'}
+
     @api.model_create_multi
     def create(self, vals_list):
         res = super().create(vals_list)
-        if self.env.context.get('from_kanban_card'):
-            res.ensure_one()
-            st_line = self.env['account.bank.statement.line'].browse(self.env.context.get('active_ids'))
-            if st_line.statement_id:
-                # split the statement line into multiple statements
-                lines = st_line + self.env['account.bank.statement.line'].search([
-                    st_line._get_succeeding_lines_domain() + [('statement_id', '=', st_line.statement_id.id)],
-                ])
-                total = sum(lines.mapped('amount'))
-                lines.statement_id = res
-                res.balance_start_real = res.balance_end_real - total
-                st_line._get_preceding_statement_last_line().statement_id.balance_end_real -= total
-            else:
-                # create a new statement from the statement line and all anterior lines with no statement
-                lines = st_line + self.env['account.bank.statement.line'].search(
-                    st_line._get_preceding_lines_domain() + [('statement_id', '=', False)])
-                lines.statement_id = res
-                res.balance_start_real = res.balance_end_real - sum(lines.mapped('amount'))
-
+        for statement in res.filtered(lambda st: st.journal_id and not st.name):
+            statement._set_next_sequence()
         return res
+
 
 class AccountBankStatementLine(models.Model):
     _name = "account.bank.statement.line"

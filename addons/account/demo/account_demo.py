@@ -105,19 +105,22 @@ class AccountChartTemplate(models.Model):
     def _get_demo_data_statement(self):
         cid = self.env.company.id
         ref = self.env.ref
-        journal_id = self.env['account.journal'].search([
-            ('type', '=', 'bank'),
-            ('company_id', '=', cid),
-        ], limit=1).id,
+        journal = self.env['account.journal'].search(
+            domain=[
+                ('type', '=', 'bank'),
+                ('company_id', '=', cid),
+            ],
+            limit=1,
+        )
         return ('account.bank.statement', {
 
             f'{cid}_demo_bank_statement_0': {
-                'name': time.strftime('%Y')+'-01-01',
+                'name': f'{journal.name} - {time.strftime("%Y")}-01-01/1',
                 'balance_end_real': 5103.0,
                 'balance_start': 0.0,
                 'line_ids': [
                     Command.create({
-                        'journal_id': journal_id,
+                        'journal_id': journal.id,
                         'payment_ref': 'Initial balance',
                         'amount': 5103.0,
                         'date': time.strftime('%Y-01-01'),
@@ -125,53 +128,53 @@ class AccountChartTemplate(models.Model):
                 ]
             },
             f'{cid}_demo_bank_statement_1': {
-                'name': time.strftime('%Y')+'-01-01/2',
+                'name': f'{journal.name} - {time.strftime("%Y")}-01-01/2',
                 'balance_end_real': 9944.87,
                 'balance_start': 5103.0,
                 'attachment': base64.b64encode(file_open('account/static/demo/bank_statement_yourcompany_1.pdf', 'rb').read()),
                 'line_ids': [
                     Command.create({
-                        'journal_id': journal_id,
+                        'journal_id': journal.id,
                         'payment_ref': time.strftime('INV/%Y/00002 and INV/%Y/00003'),
                         'amount': 1275.0,
                         'date': time.strftime('%Y-01-01'),
                         'partner_id': ref('base.res_partner_12').id
                     }),
                     Command.create({
-                        'journal_id': journal_id,
+                        'journal_id': journal.id,
                         'payment_ref': 'Bank Fees',
                         'amount': -32.58,
                         'date': time.strftime('%Y-01-01'),
                     }),
                     Command.create({
-                        'journal_id': journal_id,
+                        'journal_id': journal.id,
                         'payment_ref': 'Prepayment',
                         'amount': 650,
                         'date': time.strftime('%Y-01-01'),
                         'partner_id': ref('base.res_partner_12').id
                     }),
                     Command.create({
-                        'journal_id': journal_id,
+                        'journal_id': journal.id,
                         'payment_ref': time.strftime('First 2000 $ of invoice %Y/00001'),
                         'amount': 2000,
                         'date': time.strftime('%Y-01-01'),
                         'partner_id': ref('base.res_partner_12').id
                     }),
                     Command.create({
-                        'journal_id': journal_id,
+                        'journal_id': journal.id,
                         'payment_ref': 'Last Year Interests',
                         'amount': 102.78,
                         'date': time.strftime('%Y-01-01'),
                     }),
                     Command.create({
-                        'journal_id': journal_id,
+                        'journal_id': journal.id,
                         'payment_ref': time.strftime('INV/%Y/00002'),
                         'amount': 750,
                         'date': time.strftime('%Y-01-01'),
                         'partner_id': ref('base.res_partner_2').id
                     }),
                     Command.create({
-                        'journal_id': journal_id,
+                        'journal_id': journal.id,
                         'payment_ref': 'R:9772938  10/07 AX 9415116318 T:5 BRT: 100,00€ C/ croip',
                         'amount': 96.67,
                         'date': time.strftime('%Y-01-01'),
