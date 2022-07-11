@@ -110,11 +110,30 @@ TaxGroupComponent.template = "account.TaxGroupComponent";
 **/
 export class TaxTotalsComponent extends Component {
     setup() {
-        this.totals = this.props.parsedValue;
+        this.totals = this.parseValue();
         onWillUpdateProps((nextProps) => {
             // We only reformat tax groups if there are changed
-            this.totals = nextProps.parsedValue;
+            this.totals =  this.parseValue();
         });
+    }
+
+    get allowTaxEdition() {
+        return this.totals && this.totals.allow_tax_edition;
+    }
+
+    get currency() {
+        return session.currencies[this.props.record.data.currency_id[0]];
+    }
+
+    parseValue() {
+        if (this.props.record.data[this.props.name]) {
+            return JSON.parse(this.props.record.data[this.props.name]);
+        }
+        return null;
+    }
+
+    invalidate() {
+        return this.props.record.setInvalidField(this.props.name);
     }
 
     /**
@@ -138,20 +157,6 @@ TaxTotalsComponent.template = "account.TaxTotalsField";
 TaxTotalsComponent.components = { TaxGroupComponent };
 TaxTotalsComponent.props = {
     ...standardFieldProps,
-    allowTaxEdition: {type: Boolean, optional: true},
-    currency: {},
-    invalidate: Function,
-    parsedValue: Object,
 }
-
-TaxTotalsComponent.extractProps = (fieldName, record, attrs) => {
-    const parsedValue = record.data[fieldName] ? JSON.parse(record.data[fieldName]) : null;
-    return {
-        parsedValue,
-        currency: session.currencies[record.data.currency_id[0]],
-        allowTaxEdition: parsedValue && parsedValue.allow_tax_edition || attrs.allowTaxEdition,
-        invalidate: () => record.setInvalidField(fieldName),
-    };
-};
 
 registry.category("fields").add("account-tax-totals-field", TaxTotalsComponent);

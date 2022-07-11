@@ -54,12 +54,12 @@
 
                     <t t-foreach="totals.groups_by_subtotal[subtotal['name']]" t-as="taxGroup" t-key="taxGroup.group_key">
                         <TaxGroupComponent
-                            currency="props.currency"
+                            currency="currency"
                             taxGroup="taxGroup"
                             isReadonly="props.readonly"
-                            allowTaxEdition="props.allowTaxEdition"
+                            allowTaxEdition="allowTaxEdition"
                             onChangeTaxGroup.bind="_onChangeTaxValueByTaxGroup"
-                            invalidate="props.invalidate"
+                            invalidate="invalidate"
                         />
                     </t>
                 </t>
