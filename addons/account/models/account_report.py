@@ -534,6 +534,7 @@ class AccountReportColumn(models.Model):
     sortable = fields.Boolean(string="Sortable")
     figure_type = fields.Selection(string="Figure Type", selection=FIGURE_TYPE_SELECTION_VALUES, default="monetary", required=True)
     blank_if_zero = fields.Boolean(string="Blank if Zero", default=True)
+    custom_audit_action_id = fields.Many2one(string="Custom Audit Action", comodel_name="ir.actions.act_window")
 
 
 class AccountReportExternalValue(models.Model):
