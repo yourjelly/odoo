@@ -77,8 +77,6 @@
             'project/static/src/css/project.css',
             'project/static/src/js/project_activity.js',
             'project/static/src/js/project_control_panel.js',
-            'project/static/src/js/project_form.js',
-            'project/static/src/js/project_form_html_field_expander_mixin.js',
             'project/static/src/js/project_graph_view.js',
             'project/static/src/js/project_pivot_view.js',
             'project/static/src/js/project_rating_graph_view.js',
