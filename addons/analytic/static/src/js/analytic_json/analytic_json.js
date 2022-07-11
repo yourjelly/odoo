@@ -9,6 +9,7 @@ import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { TagsList } from "@web/views/fields/many2many_tags/tags_list";
+import { useOpenMany2XRecord } from "@web/views/fields/relational_utils";
 
 const { Component, useState, useRef, useExternalListener, onWillUpdateProps, onWillStart, onPatched } = owl;
 
@@ -26,6 +27,7 @@ export class AnalyticJson extends Component {
 
         this.widgetRef = useRef("analyticJson");
         this.dropdownRef = useRef("analyticDropdown");
+        this.mainRef = useRef("mainElement");
         usePosition(() => this.widgetRef.el, {
             popper: "analyticDropdown",
         });
@@ -38,6 +40,26 @@ export class AnalyticJson extends Component {
 
         onPatched(this.patched);
         useExternalListener(window, "click", this.onWindowClick, true);
+
+        this.openTemplate = useOpenMany2XRecord({
+            resModel: 'account.analytic.distribution.model',
+            activeActions: {
+                canCreate: true,
+                canCreateEdit: false,
+                canWrite: true,
+            },
+            isToMany: false,
+            onRecordSaved: async (record) => {
+                console.log('New Template Saved');
+                console.log(record);
+                this.mainRef.el.focus();
+            },
+            onClose: () => {
+                console.log('form Closed');
+                this.mainRef.el.focus();
+            },
+            fieldString: 'Analytic Distribution Template',
+        });
     }
 
     patched() {
@@ -259,22 +281,36 @@ export class AnalyticJson extends Component {
         let description = group.applicability.charAt(0).toUpperCase() + group.applicability.slice(1) + " - ";
         switch(status){
             case "gray":
-                description += "Editing (OK)";
+                description += this.env._t("Editing (OK)");
                 break;
             case "orange": {
-                description += "Editing (Incomplete)";
+                description += this.env._t("Editing (Incomplete)");
                 break;
             }
             case "red": {
-                description += "Invalid";
+                description += this.env._t("Invalid");
                 break;
             }
             case "green": {
-                description += "OK";
+                description += this.env._t("OK");
                 break;
             }
         }
         return description;
+    }
+
+    onSaveNew() {
+        this.openTemplate({ resId: false, context: {
+            'default_distribution_json': JSON.stringify(this.listForJson),
+            'default_name': this.listReady.map((dist_tag) => dist_tag.analytic_account_name).join(),
+        }})
+    }
+
+    get allowSave() {
+        for (let group_id in this.list) {
+            if (['orange', 'red'].includes(this.groupStatus(group_id))) return false;
+        }
+        return true;
     }
 
     groupStatus(id) {

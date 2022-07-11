@@ -98,12 +98,13 @@
                     <sheet>
                         <group>
                             <field name="name"/>
-                            <field name="distribution_tag_ids">
+                            <field name="distribution_json" widget="analytic_json" readonly="1"/>
+                            <!-- <field name="distribution_tag_ids">
                                 <tree editable="bottom">
                                     <field name="analytic_account_id"/>
                                     <field name="percentage"/>
                                 </tree>
-                            </field>
+                            </field> -->
                         </group>
                     </sheet>
                 </form>

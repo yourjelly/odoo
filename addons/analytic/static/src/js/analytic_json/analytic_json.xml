@@ -12,6 +12,7 @@
                         <div class="d-flex">
                             <div class="h5 mt-2 mr-auto"><t t-esc="listReady.length"/> of <t t-esc="listFlat.length"/> records</div>
                             <div class="popupButtons">
+                                <span t-if="tags.length and allowSave" class="btn btn-outline-primary o_button" t-on-click="onSaveNew"><i class="fa fa-save"/></span>
                                 <span class="btn o_button" t-on-click="() => this.forceCloseEditor()"><span class="fa fa-close"/></span>
                             </div>
                         </div>

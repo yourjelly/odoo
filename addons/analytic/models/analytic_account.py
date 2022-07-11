@@ -236,3 +236,4 @@ class AccountAnalyticDistributionModel(models.Model):
     #this should maybe replace account.analytic.default (in accounting)
     name = fields.Char(required=True)
     distribution_tag_ids = fields.One2many(comodel_name='account.analytic.distribution.tag', inverse_name='model_id')
+    distribution_json = fields.Char()
