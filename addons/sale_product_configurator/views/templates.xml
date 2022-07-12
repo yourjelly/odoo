@@ -151,6 +151,7 @@
             <t t-call="sale_product_configurator.optional_product_items">
                 <t t-set="parent_combination" t-value="combination"/>
             </t>
+            <input name="tags" type="text" class="form-control o_wetrack_select2_tags"/>
         </tbody>
         </table>
     </template>

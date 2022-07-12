@@ -6,8 +6,9 @@ var Dialog = require('web.Dialog');
 const OwlDialog = require('web.OwlDialog');
 var ServicesMixin = require('web.ServicesMixin');
 var VariantMixin = require('sale.VariantMixin');
+const SelectionTagMixin = require('sale_product_configurator.SelectionTagMixin');
 
-var OptionalProductsModal = Dialog.extend(ServicesMixin, VariantMixin, {
+var OptionalProductsModal = Dialog.extend(SelectionTagMixin, ServicesMixin, VariantMixin, {
     events:  _.extend({}, Dialog.prototype.events, VariantMixin.events, {
         'click a.js_add, a.js_remove': '_onAddOrRemoveOption',
         'click button.js_add_cart_json': 'onClickAddCartJSON',
@@ -159,6 +160,7 @@ var OptionalProductsModal = Dialog.extend(ServicesMixin, VariantMixin, {
             // This has to be triggered to compute the "out of stock" feature
             self._opened.then(function () {
                 self.triggerVariantChange(self.$el);
+                self._bindSelect2Dropdown();
             });
         });
     },
