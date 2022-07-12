@@ -256,3 +256,30 @@ class SaleOrder(models.Model):
             return self.env['ir.qweb']._render('sale_stock.exception_on_so', values)
 
         self.env['stock.picking']._log_activity(_render_note_exception_quantity_so, documents)
+
+    def _create_or_update_procurement_groups(self):
+        for order in self:
+            order = order.with_company(order.company_id)
+            if not order.procurement_group_id:
+                # TODO VFE batch procurement group creation ?
+                order.procurement_group_id = order.env['procurement.group'].create(
+                    order._prepare_procurement_group_vals()
+                )
+            else:
+                procurement_group = order.procurement_group_id
+                updated_vals = {}
+                if procurement_group.partner_id != order.partner_shipping_id:
+                    updated_vals['partner_id'] = order.partner_shipping_id.id
+                if procurement_group.move_type != order.picking_policy:
+                    updated_vals['move_type'] = order.picking_policy
+                if updated_vals:
+                    procurement_group.write(updated_vals)
+
+    def _prepare_procurement_group_vals(self):
+        self.ensure_one()
+        return {
+            'name': self.name,
+            'move_type': self.picking_policy,
+            'sale_id': self.id,
+            'partner_id': self.partner_shipping_id.id,
+        }

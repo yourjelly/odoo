@@ -815,6 +815,9 @@ class Picking(models.Model):
         return self.env.ref('stock.action_report_picking').report_action(self)
 
     def action_confirm(self):
+        if not self:
+            return True
+
         self._check_company()
         self.mapped('package_level_ids').filtered(lambda pl: pl.state == 'draft' and not pl.move_ids)._generate_moves()
         # call `_action_confirm` on every draft move
