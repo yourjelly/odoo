@@ -12,15 +12,13 @@ class SaleOrder(models.Model):
         compute='_compute_purchase_order_count',
         groups='purchase.group_purchase_user')
 
-    @api.depends('order_line.purchase_line_ids.order_id')
     def _compute_purchase_order_count(self):
         for order in self:
             order.purchase_order_count = len(order._get_purchase_orders())
 
     def _action_confirm(self):
-        result = super(SaleOrder, self)._action_confirm()
-        for order in self:
-            order.order_line.sudo()._purchase_service_generation()
+        result = super()._action_confirm()
+        self.order_line.sudo()._purchase_service_generation()
         return result
 
     def _action_cancel(self):
