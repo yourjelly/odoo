@@ -36,6 +36,10 @@ class SaleOrder(models.Model):
         ('partial', 'Partially Delivered'),
         ('full', 'Fully Delivered'),
     ], string='Delivery Status', compute='_compute_delivery_status', store=True)
+    procurement_group_ids = fields.One2many(
+        comodel_name='procurement.group',
+        inverse_name='sale_id',
+    )
     procurement_group_id = fields.Many2one('procurement.group', 'Procurement Group', copy=False)
     effective_date = fields.Datetime("Effective Date", compute='_compute_effective_date', store=True, help="Completion date of the first delivery order.")
     expected_date = fields.Datetime( help="Delivery date you can promise to the customer, computed from the minimum lead time of "
@@ -258,15 +262,14 @@ class SaleOrder(models.Model):
         self.env['stock.picking']._log_activity(_render_note_exception_quantity_so, documents)
 
     def _create_or_update_procurement_groups(self):
+        procurement_group_vals = []
         for order in self:
-            order = order.with_company(order.company_id)
-            if not order.procurement_group_id:
-                # TODO VFE batch procurement group creation ?
-                order.procurement_group_id = order.env['procurement.group'].create(
+            if not order.procurement_group_ids:
+                procurement_group_vals.append(
                     order._prepare_procurement_group_vals()
                 )
             else:
-                procurement_group = order.procurement_group_id
+                procurement_group = order.procurement_group_ids[:1]
                 updated_vals = {}
                 if procurement_group.partner_id != order.partner_shipping_id:
                     updated_vals['partner_id'] = order.partner_shipping_id.id
@@ -274,6 +277,9 @@ class SaleOrder(models.Model):
                     updated_vals['move_type'] = order.picking_policy
                 if updated_vals:
                     procurement_group.write(updated_vals)
+
+        if procurement_group_vals:
+            self.env['procurement.group'].create(procurement_group_vals)
 
     def _prepare_procurement_group_vals(self):
         self.ensure_one()

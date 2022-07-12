@@ -9,5 +9,5 @@ class SaleOrder(models.Model):
 
     def _get_purchase_orders(self):
         return super()._get_purchase_orders()\
-            | self.procurement_group_id.stock_move_ids.created_purchase_line_id.order_id\
-            | self.procurement_group_id.stock_move_ids.move_orig_ids.purchase_line_id.order_id
+            | self.procurement_group_ids.stock_move_ids.created_purchase_line_id.order_id\
+            | self.procurement_group_ids.stock_move_ids.move_orig_ids.purchase_line_id.order_id
