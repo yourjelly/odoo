@@ -21,6 +21,7 @@ class SaleOrderLine(models.Model):
     forecast_expected_date = fields.Datetime(compute='_compute_qty_at_date')
     free_qty_today = fields.Float(compute='_compute_qty_at_date', digits='Product Unit of Measure')
     qty_available_today = fields.Float(compute='_compute_qty_at_date')
+    # FIXME VFE what's the use of this related field to the warehouse ?
     warehouse_id = fields.Many2one(related='order_id.warehouse_id')
     qty_to_deliver = fields.Float(compute='_compute_qty_to_deliver', digits='Product Unit of Measure')
     is_mto = fields.Boolean(compute='_compute_is_mto')
@@ -352,7 +353,7 @@ class SaleOrderLine(models.Model):
             'date_planned': date_planned,
             'date_deadline': date_deadline,
             'route_ids': self.route_id,
-            'warehouse_id': self.order_id.warehouse_id or False,
+            'warehouse_id': self.order_id.warehouse_id,
             'partner_id': self.order_id.partner_shipping_id.id,
             'product_description_variants': self._get_sale_order_line_multiline_description_variants(),
             'company_id': self.order_id.company_id,

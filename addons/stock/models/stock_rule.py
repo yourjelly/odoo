@@ -438,8 +438,11 @@ class ProcurementGroup(models.Model):
                 continue
             rule = self._get_rule(procurement.product_id, procurement.location_id, procurement.values)
             if not rule:
-                error = _('No rule has been found to replenish "%s" in "%s".\nVerify the routes configuration on the product.') %\
-                    (procurement.product_id.display_name, procurement.location_id.display_name)
+                error = _(
+                    'No rule has been found to replenish "%s" in "%s".\nVerify the routes configuration on the product.',
+                    procurement.product_id.display_name,
+                    procurement.location_id.display_name,
+                )
                 procurement_errors.append((procurement, error))
             else:
                 action = 'pull' if rule.action == 'pull_push' else rule.action
