@@ -575,10 +575,10 @@ class AccountBankStatement(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        res = super().create(vals_list)
-        for statement in res.filtered(lambda st: st.journal_id and not st.name):
+        statements = super().create(vals_list)
+        for statement in statements.filtered(lambda st: st.journal_id and not st.name):
             statement._set_next_sequence()
-        return res
+        return statements
 
 
 class AccountBankStatementLine(models.Model):
@@ -934,6 +934,11 @@ class AccountBankStatementLine(models.Model):
 
             # Hack to force different account instead of the suspense account.
             counterpart_account_ids.append(vals.pop('counterpart_account_id', None))
+
+            if vals.get('statement_id') and not vals.get('journal_id'):
+                statement = self.env['account.bank.statement'].browse(vals['statement_id'])
+                if statement.journal_id:
+                    vals['journal_id'] = statement.journal_id.id
 
         st_lines = super().create(vals_list)
 
