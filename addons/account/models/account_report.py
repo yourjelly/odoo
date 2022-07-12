@@ -322,8 +322,10 @@ class AccountReportLine(models.Model):
 class AccountReportExpression(models.Model):
     _name = "account.report.expression"
     _description = "Accounting Report Expression"
+    _rec_name = 'report_line_name'
 
     report_line_id = fields.Many2one(string="Report Line", comodel_name='account.report.line', required=True, ondelete='cascade')
+    report_line_name = fields.Char(string="Report Line Name", related="report_line_id.name")
     label = fields.Char(string="Label", required=True)
     engine = fields.Selection(
         string="Computation Engine",
@@ -423,8 +425,14 @@ class AccountReportExpression(models.Model):
 
         return rslt
 
+    def name_get(self):
+        result = []
+        for expr in self:
+            result.append((expr.id, f'{expr.report_line_name} [{expr.label}]'))
+        return result
+
     def _expand_aggregations(self):
-        """ Returns a recordset containning all the expressions in self + all the expressions the aggregation expressions contained in self
+        """ Returns a recordset containing all the expressions in self + all the expressions the aggregation expressions contained in self
         depend on. This is done recursively, so if an aggregation depends on other aggregations, they will be expanded as well in the result, so that
         we ensure all expressions in the resulting set can be fully evaluated together.
         """
@@ -520,6 +528,21 @@ class AccountReportExpression(models.Model):
             raise UserError(_("Could not determine carryover target automatically for expression %s.", self.label))
 
         return auto_chosen_target
+
+    def action_view_carryover_lines(self, options):
+        date_from, date_to, dummy = self.report_line_id.report_id._get_date_bounds_info(options, self.date_scope)
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Carryover lines for: %s', self.report_line_name),
+            'res_model': 'account.report.external.value',
+            'views': [(self.env.ref('account_reports.account_report_external_value_tree').id, 'list')],
+            'domain': [
+                ('target_report_expression_id', '=', self.id),
+                ('date', '>=', date_from),
+                ('date', '<=', date_to),
+            ],
+        }
 
 
 class AccountReportColumn(models.Model):
