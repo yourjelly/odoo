@@ -40,7 +40,7 @@ class SaleOrder(models.Model):
         comodel_name='procurement.group',
         inverse_name='sale_id',
     )
-    procurement_group_id = fields.Many2one('procurement.group', 'Procurement Group', copy=False)
+    # procurement_group_id = fields.Many2one('procurement.group', 'Procurement Group', copy=False)
     effective_date = fields.Datetime("Effective Date", compute='_compute_effective_date', store=True, help="Completion date of the first delivery order.")
     expected_date = fields.Datetime( help="Delivery date you can promise to the customer, computed from the minimum lead time of "
                                           "the order lines in case of Service products. In case of shipping, the shipping policy of "
