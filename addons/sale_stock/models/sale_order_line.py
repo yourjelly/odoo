@@ -169,14 +169,21 @@ class SaleOrderLine(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         lines = super().create(vals_list)
-        lines.filtered(lambda line: line.state == 'sale')._action_launch_stock_rule()
+        lines._action_launch_stock_rule()
         return lines
 
     def write(self, values):
         lines = self.env['sale.order.line']
         if 'product_uom_qty' in values:
-            # TODO VFE filter out service product lines, not only expenses
-            lines = self.filtered(lambda r: r.state == 'sale' and not r.is_expense)
+            # TODO VFE extract the filtering logic to have one clear place
+            # to use to know whether a line should trigger stock logic or not...
+            # it's not clear if the product type check is enough or if the is_expense field should be checked as well...
+            lines = self.filtered(
+                lambda line:
+                    line.state == 'sale'
+                    and line.product_id.type in ('consu', 'product')
+                    and not line.is_expense
+            )
             previous_product_uom_qty = {
                 line.id: line.product_uom_qty
                 for line in lines
@@ -269,7 +276,6 @@ class SaleOrderLine(models.Model):
         if self._context.get('skip_procurement'):
             return True
 
-        precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
         lines = self.filtered(
             lambda line:
                 line.state == 'sale'
@@ -281,8 +287,10 @@ class SaleOrderLine(models.Model):
 
         lines.order_id._create_or_update_procurement_groups()
 
-        procurements = []
         ProcurementGroup = self.env['procurement.group']
+        precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
+        procurements = []
+
         for line in lines:
             line = line.with_company(line.company_id)
             qty = line._get_qty_procurement(previous_product_uom_qty)
@@ -291,7 +299,7 @@ class SaleOrderLine(models.Model):
 
             procurements.append(
                 ProcurementGroup.Procurement(
-                    *line._prepare_procurement_run_values(),
+                    *line._prepare_procurement_run_values(qty),
                 )
             )
 
