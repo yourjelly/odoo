@@ -72,9 +72,21 @@ class AccountEdiFormat(models.Model):
             We recognize these cases based on the taxes that target the VJ tax grids, which imply
             the use of VAT External Reverse Charge.
         """
-        report_lines_xmlids = invoice.line_ids.tax_tag_ids.tax_report_line_ids.mapped(lambda x: x.get_external_id().get(x.id, ''))
-        return (invoice.is_purchase_document()
-                and any([x.startswith("l10n_it.tax_report_line_vj") for x in report_lines_xmlids]))
+        if not invoice.is_purchase_document():
+            return False
+
+        invoice_lines_tag_ids = invoice.line_ids.tax_tag_ids.ids
+        it_tax_report_id = self.env.ref('l10n_it.tax_report_vat').id
+        it_tax_report_expressions = self.env['account.report.expression'].search([('report_line_id.report_id', '=', it_tax_report_id)])
+        for expression in it_tax_report_expressions:
+            expression_xml_id = expression.get_external_id().get(expression.id, '')
+            if not expression_xml_id.startswith('l10n_it.tax_report_line_vj'):
+                continue
+
+            matching_tags_ids = expression._get_matching_tags().ids
+            if any(tag_id in invoice_lines_tag_ids for tag_id in matching_tags_ids):
+                return True
+        return False
 
     def _l10n_it_edi_check_ordinary_invoice_configuration(self, invoice):
         errors = []
@@ -215,8 +227,18 @@ class AccountEdiFormat(models.Model):
             that are phisically in Italy but are in a VAT deposit, meaning that the goods
             have not passed customs.
         """
-        report_lines_xmlids = invoice.line_ids.tax_tag_ids.tax_report_line_ids.mapped(lambda x: x.get_external_id().get(x.id, ''))
-        return any([x == "l10n_it.tax_report_line_vj3" for x in report_lines_xmlids])
+        invoice_lines_tag_ids = invoice.line_ids.tax_tag_ids.ids
+        it_tax_report_id = self.env.ref('l10n_it.tax_report_vat').id
+        it_tax_report_expressions = self.env['account.report.expression'].search([('report_line_id.report_id', '=', it_tax_report_id)])
+        for expression in it_tax_report_expressions:
+            expression_xml_id = expression.get_external_id().get(expression.id, '')
+            if expression_xml_id != 'l10n_it.tax_report_line_vj3_tag':
+                continue
+
+            matching_tags_ids = expression._get_matching_tags().ids
+            if any(tag_id in invoice_lines_tag_ids for tag_id in matching_tags_ids):
+                return True
+        return False
 
     def _l10n_it_document_type_mapping(self):
         return {

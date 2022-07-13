@@ -540,7 +540,7 @@
                             <record id="tax_report_line_vj1_balance" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
-                                <field name="formula">VJ1 + VJ2 + VJ3 + VJ4 + VJ5 + VJ6 + VJ7 + VJ8 + VJ9 + VJ10 + VJ11 + VJ12 + VJ13 + VJ14 + VJ15 + VJ16 + VJ17 + VJ18</field>
+                                <field name="formula">VJ1.balance + VJ2.balance + VJ3.balance + VJ4.balance + VJ5.balance + VJ6.balance + VJ7.balance + VJ8.balance + VJ9.balance + VJ10.balance + VJ11.balance + VJ12.balance + VJ13.balance + VJ14.balance + VJ15.balance + VJ16.balance + VJ17.balance + VJ18.balance</field>
                             </record>
                         </field>
                     </record>
