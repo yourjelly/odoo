@@ -9,6 +9,6 @@ class IrAsset(models.Model):
     _inherit = 'ir.asset'
 
     def _get_active_addons_list_skip_theme(self):
-        if request and request.session['project_sharing']:
+        if request and request.session.get('project_sharing'):
             return True
         return super()._get_active_addons_list_skip_theme()
