@@ -141,7 +141,6 @@
             <field name="name">test sub line - MAIN</field>
             <field name="report_id" ref="test_report"/>
             <field name="foldable" eval="True"/>
-            <field name="hierarchy_level">1</field>
             <field name="sequence">5</field>
         </record>
 
@@ -154,7 +153,6 @@
             ]"/>
             <field name="parent_id" ref="oco_test_line_sub1_main"/>
             <field name="foldable" eval="True"/>
-            <field name="hierarchy_level">2</field>
             <field name="sequence">6</field>
         </record>
 
@@ -163,7 +161,6 @@
             <field name="report_id" ref="test_report"/>
             <field name="foldable" eval="False"/>
             <field name="parent_id" ref="oco_test_line_sub1_sub1"/>
-            <field name="hierarchy_level">3</field>
             <field name="sequence">7</field>
         </record>
 
@@ -175,7 +172,6 @@
                 (0, 0, {'label': 'forty_two', 'engine': 'tax_tags', 'formula': 'test E'}),
             ]"/>
             <field name="foldable" eval="False"/>
-            <field name="hierarchy_level">2</field>
             <field name="sequence">8</field>
         </record>
 
@@ -187,7 +183,6 @@
                 (0, 0, {'label': 'main', 'engine': 'aggregation', 'formula': 'FINANCIAL_GROUPBY.forty_two + LINE_1.main'}),
             ]"/>
             <field name="foldable" eval="False"/>
-            <field name="hierarchy_level">1</field>
             <field name="sequence">9</field>
         </record>
 
@@ -198,7 +193,6 @@
                 (0, 0, {'label': 'main', 'engine': 'aggregation', 'formula': 'AGGREGATE.main + LINE_1.forty_two'}),
             ]"/>
             <field name="foldable" eval="False"/>
-            <field name="hierarchy_level">1</field>
             <field name="sequence">10</field>
         </record>
 
@@ -210,7 +204,6 @@
                 (0, 0, {'label': 'main', 'engine': 'aggregation', 'formula': 'TEST_INNER.inner + LINE_1.forty_two'}),
                 (0, 0, {'label': 'inner', 'engine': 'domain', 'formula': &quot;[('account_id.code', 'like', '4%')]&quot;, 'subformula': 'sum'}),
             ]"/>
-            <field name="hierarchy_level">1</field>
             <field name="sequence">11</field>
         </record>
 
@@ -221,7 +214,6 @@
                 (0, 0, {'label': 'main', 'engine': 'account_codes', 'formula': '44 + 7002 + cocolasticot'}),
                 (0, 0, {'label': 'forty_two', 'engine': 'domain', 'formula': &quot;['|', '|', ('account_id.code', 'like', '44%'), ('account_id.code', 'like', '7002%'), ('account_id.code', 'like', 'cocolasticot%')]&quot;, 'subformula': 'sum'}),
             ]"/>
-            <field name="hierarchy_level">1</field>
             <field name="sequence">12</field>
         </record>
 
@@ -236,7 +228,6 @@
                 (0, 0, {'label': 'main_tags', 'engine': 'tax_tags', 'formula': 'carryover_test_be'}),
                 (0, 0, {'label': 'main_unbounded', 'engine': 'aggregation', 'formula': 'test_carryover_be.main_tags + test_carryover_be._applied_carryover_main'}),
             ]"/>
-            <field name="hierarchy_level">1</field>
             <field name="sequence">13</field>
         </record>
 
@@ -248,7 +239,6 @@
                 (0, 0, {'label': '_carryover_main', 'engine': 'aggregation', 'formula': 'test_carryover_fr_27.main', 'carryover_target': 'test_carryover_fr_22._applied_carryover_main'}),
                 (0, 0, {'label': 'main', 'engine': 'tax_tags', 'formula': 'carryover_test_fr'}),
             ]"/>
-            <field name="hierarchy_level">1</field>
             <field name="sequence">14</field>
         </record>
 
@@ -260,7 +250,6 @@
                 (0, 0, {'label': '_applied_carryover_main', 'engine': 'external', 'formula': 'most_recent', 'date_scope': 'previous_tax_period'}),
                 (0, 0, {'label': 'main', 'engine': 'aggregation', 'formula': 'test_carryover_fr_22._applied_carryover_main'}),
             ]"/>
-            <field name="hierarchy_level">1</field>
             <field name="sequence">15</field>
         </record>
 
@@ -271,7 +260,6 @@
             <field name="expression_ids" eval="[(5, 0, 0),
                 (0, 0, {'label': 'main', 'engine': 'external', 'formula': 'sum', 'subformula': 'editable;rounding=3', 'figure_type': 'none'}),
             ]"/>
-            <field name="hierarchy_level">1</field>
             <field name="sequence">16</field>
         </record>
 
