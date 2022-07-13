@@ -140,7 +140,7 @@ DOMAIN_OPERATORS = (NOT_OPERATOR, OR_OPERATOR, AND_OPERATOR)
 # only one representation).
 # Internals (i.e. not available to the user) 'inselect' and 'not inselect'
 # operators are also used. In this case its right operand has the form (subselect, params).
-TERM_OPERATORS = ('=', '!=', '<=', '<', '>', '>=', '=?', '=like', '=ilike',
+TERM_OPERATORS = ('=', '!=', '<=', '<', '>', '>=', '=?', '?=', '=like', '=ilike',
                   'like', 'not like', 'ilike', 'not ilike', 'in', 'not in',
                   'child_of', 'parent_of')
 
@@ -1076,6 +1076,9 @@ class expression(object):
             else:
                 # '=?' behaves like '=' in other cases
                 query, params = self.__leaf_to_sql((left, '=', right), model, alias)
+
+        elif operator == '?=':
+            query, params = self.__leaf_to_sql((left, 'in', (right, False)), model, alias)
 
         else:
             field = model._fields.get(left)
