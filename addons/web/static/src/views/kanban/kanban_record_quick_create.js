@@ -64,6 +64,7 @@ export class KanbanRecordQuickCreate extends Component {
 
     /** @param {"add" | "edit"} mode */
     async validate(mode) {
+        document.getElementById('name').blur()
         if (this.state.disabled) {
             return;
         }
