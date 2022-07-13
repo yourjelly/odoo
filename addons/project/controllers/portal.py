@@ -169,6 +169,7 @@ class ProjectCustomerPortal(CustomerPortal):
         if not project.exists() or not project.with_user(request.env.user)._check_project_sharing_access():
             return request.not_found()
         task = task_id and request.env['project.task'].browse(int(task_id))
+        request.session['project_sharing'] = True
         return request.render(
             'project.project_sharing_embed',
             {'session_info': self._prepare_project_sharing_session_info(project, task)},
