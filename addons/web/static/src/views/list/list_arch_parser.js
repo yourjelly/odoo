@@ -96,6 +96,7 @@ export class ListArchParser extends XMLParser {
                             fieldInfo.string,
                     });
                 }
+                return false;
             } else if (node.tagName === "widget") {
                 const widgetInfo = Widget.parseWidgetNode(node);
                 for (const [name, field] of Object.entries(widgetInfo.fieldDependencies)) {
