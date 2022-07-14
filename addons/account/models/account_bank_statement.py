@@ -541,7 +541,7 @@ class AccountBankStatement(models.Model):
 
     def _get_starting_sequence(self):
         self.ensure_one()
-        return "%s %s %04d/%02d/00000" % (self.journal_id.code, _('Statement'), self.date.year, self.date.month)
+        return "%s %s %04d/00000" % (self.journal_id.code, _('Statement'), self.date.year)
 
     @api.model
     def _gc_statements(self):

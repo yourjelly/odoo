@@ -765,17 +765,17 @@ class TestAccountPayment(AccountTestInvoicingCommon):
         payment = AccountPayment.create({
             'journal_id': self.company_data['default_journal_bank'].id,
         })
-        self.assertRegex(payment.name, r'BNK1/\d{4}/\d{2}/0001')
+        self.assertRegex(payment.name, r'BNK1/\d{4}/00001')
 
         with Form(AccountPayment.with_context(default_move_journal_types=('bank', 'cash'))) as payment_form:
             self.assertEqual(payment_form._values['name'], '/')
             payment_form.journal_id = self.company_data['default_journal_cash']
-            self.assertRegex(payment_form._values['name'], r'CSH1/\d{4}/\d{2}/0001')
+            self.assertRegex(payment_form._values['name'], r'CSH1/\d{4}/00001')
             payment_form.journal_id = self.company_data['default_journal_bank']
         payment = payment_form.save()
         self.assertEqual(payment.name, '/')
         payment.action_post()
-        self.assertRegex(payment.name, r'BNK1/\d{4}/\d{2}/0002')
+        self.assertRegex(payment.name, r'BNK1/\d{4}/00002')
 
     def test_payment_without_default_company_account(self):
         """ The purpose of this test is to check the specific behavior when duplicating an inbound payment, then change
