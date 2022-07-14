@@ -21,8 +21,9 @@ const { markRaw, reactive } = owl;
  */
 
 export const dialogService = {
+    dependencies: ["ui"],
     /** @returns {DialogServiceInterface} */
-    start(env) {
+    start(env, { ui }) {
         const dialogs = reactive({});
         let dialogId = 0;
 
@@ -58,7 +59,7 @@ export const dialogService = {
                     id,
                 },
             };
-            if (env.isSmall) {
+            if (ui.isSmall) {
                 const scrollOrigin = { top: window.scrollY, left: window.scrollX };
                 dialog.dialogData.scrollToOrigin = () => {
                     if (!Object.keys(dialogs).length) {

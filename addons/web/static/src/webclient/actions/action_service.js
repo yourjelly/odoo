@@ -74,7 +74,7 @@ const CTX_KEY_REGEX = /^(?:(?:default_|search_default_|show_).+|.+_view_ref|grou
 // only register this template once for all dynamic classes ControllerComponent
 const ControllerComponentTemplate = xml`<t t-component="Component" t-props="props"/>`;
 
-function makeActionManager(env) {
+function makeActionManager(env, { ui }) {
     const keepLast = new KeepLast();
     let id = 0;
     let controllerStack = [];
@@ -869,7 +869,7 @@ function makeActionManager(env) {
             view = views[0];
         }
 
-        if (env.isSmall) {
+        if (ui.isSmall) {
             if (!view.isMobileFriendly) {
                 view = _findMobileView(views, view.multiRecord) || view;
             }
@@ -1473,8 +1473,8 @@ export const actionService = {
         "ui",
         "user",
     ],
-    start(env) {
-        return makeActionManager(env);
+    start(env, dependencies) {
+        return makeActionManager(env, dependencies);
     },
 };
 

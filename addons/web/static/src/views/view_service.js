@@ -44,8 +44,8 @@ import { generateLegacyLoadViewsResult } from "@web/legacy/legacy_load_views";
  */
 
 export const viewService = {
-    dependencies: ["orm"],
-    start(env, { orm }) {
+    dependencies: ["orm", "ui"],
+    start(env, { orm, ui }) {
         let cache = {};
 
         env.bus.addEventListener("CLEAR-CACHES", () => {
@@ -69,7 +69,7 @@ export const viewService = {
                 load_filters: options.loadIrFilters || false,
                 toolbar: options.loadActionMenus || false,
             };
-            if (env.isSmall) {
+            if (ui.isSmall) {
                 loadViewsOptions.mobile = true;
             }
             const { context, resModel, views } = params;
