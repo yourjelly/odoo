@@ -327,6 +327,7 @@ class SaleOrderLine(models.Model):
             product_qty,
             procurement_uom,
             # TODO VFE stock location must be rental one for rental flows
+            # TODO property_rental_stock_customer to allow custom configs, but by default a loc under the property_stock_cust one.
             self.order_id.partner_shipping_id.property_stock_customer,
             self.name,
             self.order_id.name,  # origin
@@ -346,7 +347,7 @@ class SaleOrderLine(models.Model):
         self.ensure_one()
 
         # Use the delivery date if there is else use date_order and lead time
-        date_deadline = self.order_id.commitment_date or (self.order_id.date_order + timedelta(days=self.customer_lead or 0.0))
+        date_deadline = self.order_id.commitment_date or self._expected_date()
         date_planned = date_deadline - timedelta(days=self.order_id.company_id.security_lead)
         return {
             'group_id': group_id,
@@ -370,3 +371,6 @@ class SaleOrderLine(models.Model):
 
     # REntal location under Partner locations/(customers?)
     # company-restricted ? if yes, one by comp, it is possible to use company-restricted locs under shared locations
+
+    # Stock rule ->
+    # Use detailed picking type
