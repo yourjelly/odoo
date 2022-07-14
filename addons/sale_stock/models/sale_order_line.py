@@ -367,3 +367,6 @@ class SaleOrderLine(models.Model):
         if line_products.mapped('qty_delivered') and float_compare(values['product_uom_qty'], max(line_products.mapped('qty_delivered')), precision_digits=precision) == -1:
             raise UserError(_('The ordered quantity cannot be decreased below the amount already delivered. Instead, create a return in your inventory.'))
         super()._update_line_quantity(values)
+
+    # REntal location under Partner locations/(customers?)
+    # company-restricted ? if yes, one by comp, it is possible to use company-restricted locs under shared locations
