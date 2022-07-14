@@ -185,7 +185,7 @@ var OptionalProductsModal = Dialog.extend(ServicesMixin, VariantMixin, {
         let noVariantAttributeValues;
         for (const product of self.$modal.find('.js_product.in_cart')) {
             var $item = $(product);
-            var quantity = parseInt($item.find('input[name="add_qty"]').val(), 10);
+            var quantity = parseFloat($item.find('input[name="add_qty"]').val().replace(',','.') || 1);
             var parentUniqueId = product.dataset.parentUniqueId;
             var uniqueId = product.dataset.uniqueId;
             productCustomVariantValues = self.getCustomVariantValues($item);

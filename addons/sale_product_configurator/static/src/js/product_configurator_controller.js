@@ -186,7 +186,7 @@ var ProductConfiguratorFormController = FormController.extend({
             self.rootProduct = {
                 product_id: productId,
                 product_template_id: parseInt(productTemplateId),
-                quantity: parseFloat($modal.find('input[name="add_qty"]').val() || 1),
+                quantity: parseFloat($modal.find('input[name="add_qty"]').val().replace(',','.') || 1),
                 variant_values: variantValues,
                 product_custom_attribute_values: productCustomVariantValues,
                 no_variant_attribute_values: noVariantAttributeValues
