@@ -150,6 +150,7 @@ function makeActionManager(env) {
                 active_id: context.active_id,
                 active_ids: context.active_ids,
                 active_model: context.active_model,
+                auto_form: context.auto_form,
             };
             const key = `${JSON.stringify(actionRequest)},${JSON.stringify(additional_context)}`;
             let action;

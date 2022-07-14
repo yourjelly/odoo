@@ -21,6 +21,7 @@ from odoo.tools.translate import _
 from odoo.tools.misc import file_open
 from odoo import http
 from odoo.http import request
+from odoo.tools.safe_eval import safe_eval
 
 
 _logger = logging.getLogger(__name__)
@@ -30,6 +31,9 @@ def clean_action(action, env):
     action_type = action.setdefault('type', 'ir.actions.act_window_close')
     if action_type == 'ir.actions.act_window':
         action = fix_view_modes(action)
+        if env.context.get('auto_form'):
+            action = auto_form(action, env)
+            
 
     # When returning an action, keep only relevant fields/properties
     readable_fields = env[action['type']]._get_readable_fields()
@@ -52,6 +56,17 @@ def clean_action(action, env):
 
     return cleaned_action
 
+def auto_form(action, env):
+    domain = action['domain']
+    active_id = env.context.get('active_id')
+    active_id = active_id and int(active_id)
+    eval_ctx = {'active_id': active_id}
+    evaled_domain = safe_eval(domain, eval_ctx)
+    records = env[action['res_model']].search(evaled_domain)
+    if len(records) == 1:
+        action['view_mode'] == 'form'
+        action['res_id'] = records.id
+    return action
 
 def ensure_db(redirect='/web/database/selector'):
     # This helper should be used in web client auth="none" routes
