@@ -1256,7 +1256,7 @@ class PosSession(models.Model):
         return {
             'date': fields.Date.context_today(self),
             'amount': amount,
-            'payment_ref': self.name or "/",  # fixme:
+            'payment_ref': self.name,
             'pos_session_id': self.id,
             'journal_id': journal_id,
             'counterpart_account_id': self._get_receivable_account(payment_method).id,
@@ -1267,7 +1267,7 @@ class PosSession(models.Model):
         return {
             'date': fields.Date.context_today(self, timestamp=payment.payment_date),
             'amount': amount,
-            'payment_ref': payment.name or "/",  # fixme:poma
+            'payment_ref': payment.name,
             'pos_session_id': self.id,
             'journal_id': journal_id,
             'counterpart_account_id': accounting_partner.property_account_receivable_id.id,

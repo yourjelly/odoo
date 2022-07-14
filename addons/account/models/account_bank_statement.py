@@ -619,7 +619,7 @@ class AccountBankStatementLine(models.Model):
         help="This field is used to record the third party name when importing bank statement in electronic format, "
              "when the partner doesn't exist yet in the database (or cannot be found).")
     transaction_type = fields.Char(string='Transaction Type')
-    payment_ref = fields.Char(string='Label', required=True)
+    payment_ref = fields.Char(string='Label')
     amount = fields.Monetary(currency_field='currency_id')
     amount_currency = fields.Monetary(
         string="Amount in Currency",
