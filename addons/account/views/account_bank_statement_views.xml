@@ -74,5 +74,14 @@
             <field name="target">new</field>
         </record>
 
+        <record id="ir_cron_garbage_clean_statements" model="ir.cron">
+            <field name="name">Remove empty old statements</field>
+            <field name="model_id" ref="model_account_bank_statement"/>
+            <field name="state">code</field>
+            <field name="code">model._gc_statements()</field>
+            <field name="interval_type">weeks</field>
+            <field name="numbercall">-1</field>
+        </record>
+
     </data>
 </odoo>

@@ -551,6 +551,13 @@ class AccountBankStatement(models.Model):
         self.ensure_one()
         return "%s %s %04d/%02d/00000" % (self.journal_id.code, _('Statement'), self.date.year, self.date.month)
 
+    @api.model
+    def _gc_statements(self):
+        self.search([
+            ('line_ids', '=', False),
+            ('write_date', '<', fields.Date.context_today(self))
+        ]).unlink()
+
     def action_split_or_create(self):
         self.ensure_one()
         st_line = self.env['account.bank.statement.line'].browse(self.env.context.get('active_ids'))
@@ -837,6 +844,7 @@ class AccountBankStatementLine(models.Model):
                 [
                     ('journal_id', '=', line.journal_id.id),
                     ('is_difference_zero', '=', False),
+                    ('line_ids', '!=', False), # we don't want the invisible statements to pop up here
                 ],
                 limit=1)
 
