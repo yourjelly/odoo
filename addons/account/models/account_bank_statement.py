@@ -358,7 +358,10 @@ class AccountBankStatement(models.Model):
                                                                               currency_obj=st.currency_id)))
 
                 st.error_message = '\n'.join(message)
-                st.is_valid = False
+                st.is_valid = st.is_difference_zero and not st.currency_id.compare_amounts(
+                    st.balance_start_real,
+                    st.first_line_id._get_preceding_statement_last_line().statement_id.balance_end_real
+                )
             else:
                 st.error_message = ''
                 st.is_valid = True
