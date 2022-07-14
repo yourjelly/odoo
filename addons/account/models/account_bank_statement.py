@@ -597,7 +597,7 @@ class AccountBankStatementLine(models.Model):
         defaults = super().default_get(fields)
         # override journal_id with the default journal from the move, which is a general journal instead of liquidity
         if 'journal_id' in fields and 'default_journal_id' not in self.env.context:
-            defaults['journal_id'] = self._get_default_journal()
+            defaults['journal_id'] = self._get_default_journal().id
         return defaults
 
     move_id = fields.Many2one(
@@ -984,15 +984,15 @@ class AccountBankStatementLine(models.Model):
         res = super().write(values)
         self._synchronize_to_moves(set(values.keys()))
         if any(field in values for field in ['date', 'sequence', 'journal_id']):
-            # If we are changing the date or journal of a bank statement, we have to change its previous_line_id. 
-            # This is done automatically using the compute function, but we also have to change the previous_line_id 
-            # of records that were previously pointing toward us and records that were pointing towards our new 
+            # If we are changing the date or journal of a bank statement, we have to change its previous_line_id.
+            # This is done automatically using the compute function, but we also have to change the previous_line_id
+            # of records that were previously pointing toward us and records that were pointing towards our new
             # previous_line_id. This is done here by marking those record as needing to be recomputed.
             # Note that marking the field is not enough as we also have to recompute all its other fields that
             # depend on 'previous_line_id' hence the need to call modified afterwards.
             to_recompute = self.search([
-                ('previous_line_id', 'in', self.ids), 
-                ('id', 'not in', self.ids), 
+                ('previous_line_id', 'in', self.ids),
+                ('id', 'not in', self.ids),
             ])
             if to_recompute:
                 self.env.add_to_compute(self._fields['previous_line_id'], to_recompute)
@@ -1000,7 +1000,7 @@ class AccountBankStatementLine(models.Model):
 
             next_lines_to_recompute = self.search([
                 ('previous_line_id', 'in', [line.previous_line_id.id for line in self]),
-                ('id', 'not in', self.ids), 
+                ('id', 'not in', self.ids),
             ])
 
             if next_lines_to_recompute:
@@ -1289,7 +1289,6 @@ class AccountBankStatementLine(models.Model):
     def _get_preceding_lines_domain(self, default_journal_id=False):
         """
         get a domain for acquiring the lines before the current one. Accepts zero or one record
-        :return: 
         """
         # we set a default date so it can be directly on search results, regardless of the existance of a line
         date = self.date or datetime.date.max
@@ -1299,7 +1298,7 @@ class AccountBankStatementLine(models.Model):
                     '&',
                         ('date', '=', date),
                         ('sequence', '>', self.sequence),
-                   '&','&',
+                   '&', '&',
                         ('date', '=', date),
                         ('sequence', '=', self.sequence),
                         ('id', '<', self.id),
@@ -1314,7 +1313,7 @@ class AccountBankStatementLine(models.Model):
                     '&',
                         ('date', '=', date),
                         ('sequence', '<', self.sequence),
-                   '&','&',
+                   '&', '&',
                         ('date', '=', date),
                         ('sequence', '=', self.sequence),
                         ('id', '>', self.id),
@@ -1357,4 +1356,4 @@ class AccountBankStatementLine(models.Model):
             })
 
     def action_post(self):
-        self.move_id.filtered(lambda move: move.state=='draft').action_post()
+        self.move_id.filtered(lambda move: move.state == 'draft').action_post()

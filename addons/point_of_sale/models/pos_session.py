@@ -1554,7 +1554,7 @@ class PosSession(models.Model):
                 'journal_id': session.cash_journal_id.id,
                 'amount': sign * amount,
                 'date': fields.Date.context_today(self),
-                'payment_ref': '-'.join(session.name, extras['translatedType'], reason),
+                'payment_ref': '-'.join([session.name, extras['translatedType'], reason]),
             })
 
         message_content = [f"Cash {extras['translatedType']}", f'- Amount: {extras["formattedAmount"]}']

@@ -805,7 +805,7 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
         self.assertRecordValues(
             statement1,
             [{
-                'is_valid': False,  # there is a gap, end mismatch
+                'is_valid': True,  # there is a gap, but we don't care
                 'is_difference_zero': True,
             }],
         )
