@@ -168,17 +168,6 @@ class AccountBankStatement(models.Model):
         for statement in self:
             statement.move_line_count = len(statement.move_line_ids)
 
-    @api.model
-    def _default_journal(self):
-        journal_type = self.env.context.get('journal_type', False)
-        company_id = self.env.company.id
-        if journal_type:
-            return self.env['account.journal'].search([
-                ('type', '=', journal_type),
-                ('company_id', '=', company_id)
-            ], limit=1)
-        return self.env['account.journal']
-
     name = fields.Char(string='Reference', states={'open': [('readonly', False)]}, copy=False, readonly=True)
     reference = fields.Char(string='External Reference', states={'open': [('readonly', False)]}, copy=False, readonly=True, help="Used to hold the reference of the external mean that created this statement (name of imported file, reference of online synchronization...)")
     date = fields.Date(related='last_line_id.date', store=True)
@@ -604,6 +593,13 @@ class AccountBankStatementLine(models.Model):
     # Should be improved in the future.
 
     # == Business fields ==
+    def default_get(self, fields):
+        defaults = super().default_get(fields)
+        # override journal_id with the default journal from the move, which is a general journal instead of liquidity
+        if 'journal_id' in fields and 'default_journal_id' not in self.env.context:
+            defaults['journal_id'] = self._get_default_journal()
+        return defaults
+
     move_id = fields.Many2one(
         comodel_name='account.move',
         auto_join=True,
@@ -1333,6 +1329,19 @@ class AccountBankStatementLine(models.Model):
             ('statement_id', '!=', self.statement_id.id), ('statement_id', '!=', False)
         ]
         return self.search(domain, limit=1)
+
+
+    @api.model
+    def _get_default_journal(self):
+        journal_type = self.env.context.get('journal_type', 'bank')
+        company_id = self.env.company.id
+        if journal_type:
+            return self.env['account.journal'].search([
+                ('type', '=', journal_type),
+                ('company_id', '=', company_id)
+            ], limit=1)
+        return self.env['account.journal']
+
 
     def button_undo_reconciliation(self):
         ''' Undo the reconciliation mades on the statement line and reset their journal items
