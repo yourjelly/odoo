@@ -7,7 +7,7 @@ from freezegun import freeze_time
 from odoo.addons.crm.models.crm_lead import PARTNER_FIELDS_TO_SYNC, PARTNER_ADDRESS_FIELDS_TO_SYNC
 from odoo.addons.crm.tests.common import TestCrmCommon, INCOMING_EMAIL
 from odoo.addons.phone_validation.tools.phone_validation import phone_format
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from odoo.tests.common import Form, tagged, users
 
 
@@ -703,3 +703,15 @@ class TestCRMLead(TestCrmCommon):
             leads.stage_id = self.stage_team1_won
         self.assertEqual(won_lead.date_closed, date_closed)
         self.assertEqual(self.lead_1.date_closed, datetime.strptime('2020-02-02 18:00', '%Y-%m-%d %H:%M'))
+
+    def test_crm_lead_creation_with_company_on_team(self):
+        """ Test lead / partner creation with no company on lead but with
+            a company set on the sales team. This should raise a ValidationError.
+        """
+        self.sales_team_1.write({'company_id': self.company_main.id})
+        vals = {
+            'name': 'TestLead',
+            'team_id': self.sales_team_1.id,
+            'company_id': False,
+        }
+        self.assertRaises(ValidationError, self.env['crm.lead'].create, vals)

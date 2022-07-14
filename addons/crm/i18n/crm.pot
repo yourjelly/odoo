@@ -3123,6 +3123,13 @@ msgid "Teams Members"
 msgstr ""
 
 #. module: crm
+#: code:addons/crm/models/crm_lead.py:0
+#, python-format
+msgid ""
+"The company must be defined if there is a company on the Sales team."
+msgstr ""
+
+#. module: crm
 #: model:ir.model.fields,help:crm.field_crm_team__alias_id
 msgid ""
 "The email address associated with this channel. New emails received will "

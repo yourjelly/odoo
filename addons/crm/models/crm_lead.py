@@ -12,7 +12,7 @@ from odoo import api, fields, models, tools, SUPERUSER_ID
 from odoo.addons.iap.tools import iap_tools
 from odoo.addons.mail.tools import mail_validation
 from odoo.addons.phone_validation.tools import phone_validation
-from odoo.exceptions import UserError, AccessError
+from odoo.exceptions import UserError, AccessError, ValidationError
 from odoo.osv import expression
 from odoo.tools.translate import _
 from odoo.tools import date_utils, email_re, email_split, is_html_empty
@@ -260,6 +260,12 @@ class Lead(models.Model):
                 lead.company_currency = self.env.company.currency_id
             else:
                 lead.company_currency = lead.company_id.currency_id
+
+    @api.constrains('team_id', 'company_id')
+    def _check_company(self):
+        for lead in self:
+            if lead.team_id.company_id and not lead.company_id:
+                raise ValidationError(_('The company must be defined if there is a company on the Sales team.'))
 
     @api.depends('user_id', 'type')
     def _compute_team_id(self):
