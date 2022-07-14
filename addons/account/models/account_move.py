@@ -234,6 +234,8 @@ class AccountMove(models.Model):
     statement_line_id = fields.Many2one(
         comodel_name='account.bank.statement.line',
         string="Statement Line", copy=False, check_company=True)
+
+    #todo:PoMa remove statement_id after fixing account_payment
     statement_id = fields.Many2one(
         related='statement_line_id.statement_id',
         copy=False,
@@ -2903,13 +2905,14 @@ class AccountMove(models.Model):
     def open_reconcile_view(self):
         return self.line_ids.open_reconcile_view()
 
-    def open_bank_statement_view(self):
+    def open_bank_statement_line_view(self):
         return {
             'type': 'ir.actions.act_window',
-            'res_model': 'account.bank.statement',
+            'res_model': 'account.bank.statement.line',
             'view_mode': 'form',
-            'res_id': self.statement_id.id,
+            'res_id': self.statement_line_id.id,
             'views': [(False, 'form')],
+            'target': 'new',
         }
 
     def open_payment_view(self):
@@ -3728,6 +3731,7 @@ class AccountMoveLine(models.Model):
         string="Originator Statement Line",
         related='move_id.statement_line_id',
         help="The statement line that created this entry")
+    #todo:PoMa remove this after fixing account reconcile model (reading from _get_default_amls_matching_domain)
     statement_id = fields.Many2one(related='statement_line_id.statement_id', store=True, index='btree_not_null', copy=False,
         help="The bank statement used for bank reconciliation")
 
@@ -6118,8 +6122,6 @@ class AccountMoveLine(models.Model):
     def _get_attachment_domains(self):
         self.ensure_one()
         domains = [[('res_model', '=', 'account.move'), ('res_id', '=', self.move_id.id)]]
-        if self.statement_id:
-            domains.append([('res_model', '=', 'account.bank.statement'), ('res_id', '=', self.statement_id.id)])
         if self.payment_id:
             domains.append([('res_model', '=', 'account.payment'), ('res_id', '=', self.payment_id.id)])
         return domains
