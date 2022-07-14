@@ -1141,7 +1141,7 @@ export class ListRenderer extends Component {
                         // add a line
                         if (record.checkValidity()) {
                             const { context } = this.creates[0];
-                            this.props.onAdd(context);
+                            this.props.onAdd({ context });
                         }
                     } else if (
                         activeActions.create &&
