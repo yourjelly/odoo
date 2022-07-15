@@ -2052,8 +2052,9 @@ class BaseModel(metaclass=MetaModel):
             if tz_convert:
                 qualified_field = "timezone('%s', timezone('UTC',%s))" % (self._context.get('tz', 'UTC'), qualified_field)
             if gb_function == 'week':
-                locale = babel.Locale(get_lang(self.env).code)
-                days_offset = locale.first_week_day and 7 - locale.first_week_day
+                # first_week_day: 0=Monday, 1=Tuesday, ...
+                first_week_day = int(get_lang(self.env).week_start) - 1
+                days_offset = first_week_day and 7 - first_week_day
                 qualified_field = f"date_trunc('{gb_function}', {qualified_field}::timestamp - INTERVAL '-{days_offset} DAY') + INTERVAL '-{days_offset} DAY'"
             else:
                 qualified_field = f"date_trunc('{gb_function}', {qualified_field}::timestamp)"
