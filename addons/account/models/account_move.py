@@ -3731,7 +3731,9 @@ class AccountMoveLine(models.Model):
         string="Originator Statement Line",
         related='move_id.statement_line_id',
         help="The statement line that created this entry")
-    #todo:PoMa remove this after fixing account reconcile model (reading from _get_default_amls_matching_domain)
+    # todo:PoMa remove statement_id after fixing account reconcile model (reading from _get_default_amls_matching_domain)
+    # also we use it to map sort order of statement lines to move lines for calculating cumulative balance
+    # if this method is approved, we have to keep it
     statement_id = fields.Many2one(related='statement_line_id.statement_id', store=True, index='btree_not_null', copy=False,
         help="The bank statement used for bank reconciliation")
 
