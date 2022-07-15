@@ -53,7 +53,7 @@ class IrUiView(models.Model):
         try:
             value = converter.from_html(Model, Model._fields[field], el)
         except ValueError:
-            raise ValidationError(_("Invalid field value for %s: %s") % (Model._fields[field].string, el.text_content().strip()))
+            raise ValidationError(_("Invalid field value for %s: %s", Model._fields[field].string, el.text_content().strip()))
 
         if value is not None:
             # TODO: batch writes?
