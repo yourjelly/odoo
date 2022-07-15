@@ -913,7 +913,9 @@ tour.stepUtils.autoExpandMoreButtons('.o_control_panel .breadcrumb:contains("the
     position: 'bottom',
 }, {
     // FIXME replace list by kanban + form
-    trigger: '.o_selected_row .o_field_widget[name=name] input',
+    // FIXME WOWL: remove first part of selector when legacy view is dropped
+    // (currently, it's anew view in community and a legacy one in enterprise)
+    trigger: '.o_selected_row input[name=name], .o_selected_row .o_field_widget[name=name] input',
     content: _t('Set description'),
     position: 'bottom',
     run: 'text 10 hours',
@@ -933,7 +935,7 @@ tour.stepUtils.autoExpandMoreButtons('.o_control_panel .breadcrumb:contains("the
     content: _t("Select the the_flow.vendor"),
     position: "bottom",
 }, {
-    trigger: '.o_selected_row .o_field_widget[name=unit_amount] input',
+    trigger: '.o_selected_row .o_field_widget[name=unit_amount]input',
     content: _t('Set time'),
     position: 'bottom',
     run: 'text 10',
@@ -980,7 +982,7 @@ tour.stepUtils.autoExpandMoreButtons('.o_control_panel .breadcrumb:contains("the
     position: 'bottom',
 }, {
     edition: "enterprise",
-    trigger: 'div[name=bank_statement_create_button] > a[data-name=create_bank_statement], div[name=bank_statement_create_button] > a[data-name=create_bank_statement]',
+    trigger: 'div[name=bank_statement_create_button] > a[data-name=create_bank_statement]',
     content: _t('Create a new bank statement'),
     position: 'bottom',
 }, {
@@ -1030,7 +1032,8 @@ tour.stepUtils.autoExpandMoreButtons('.o_control_panel .breadcrumb:contains("the
 ...tour.stepUtils.mobileKanbanSearchMany2X('Partner', 'the_flow.customer'),
 {
     edition: "enterprise",
-    trigger: ".o_selected_row .o_field_widget[name=payment_ref]",
+    trigger: ".o_selected_row .o_field_widget[name=payment_ref] input",
+    extra_trigger: ".o_selected_row .o_field_widget[name=partner_id] .o_external_button",
     content: _t("Let's enter a name."),
     position: "bottom",
     run: "text the_flow.statement.line",
