@@ -8,11 +8,14 @@ import { ChatWindowManagerContainer } from '@mail/components/chat_window_manager
 import { DialogManagerContainer } from '@mail/components/dialog_manager_container/dialog_manager_container';
 import { DiscussContainer } from '@mail/components/discuss_container/discuss_container';
 import { PopoverManagerContainer } from '@mail/components/popover_manager_container/popover_manager_container';
+import ActivityMenu from '@mail/js/systray/systray_activity_menu';
 import { messagingService } from '@mail/services/messaging_service';
 import { systrayService } from '@mail/services/systray_service';
 import { makeMessagingToLegacyEnv } from '@mail/utils/make_messaging_to_legacy_env';
 
 import { registry } from '@web/core/registry';
+import { Items as legacySystrayItems } from 'web.SystrayMenu';
+import { registerCleanup } from '@web/../tests/helpers/cleanup';
 import { patchWithCleanup } from "@web/../tests/helpers/utils";
 import { createWebClient } from "@web/../tests/webclient/helpers";
 
@@ -129,6 +132,9 @@ function setupMessagingServiceRegistries({
  */
  async function getWebClientReady(param0) {
     setupMainComponentRegistry();
+
+    legacySystrayItems.push(ActivityMenu);
+    registerCleanup(() => legacySystrayItems.pop());
 
     const servicesParameters = {};
     const param0Entries = Object.entries(param0);
