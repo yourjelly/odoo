@@ -98,14 +98,21 @@ class Uninstaller:
 
         groups = self.data_by_model.get('res.groups', self.env['res.groups'])
 
+        node_by_model = {
+            model: self.env[model] if model in orm_tables else records
+            for model, records in self.data_by_model.items()
+            if model not in models.mapped('model')
+        }
+
         #######################################################################
         # Generate removal nodes for model data                               #
         #######################################################################
 
-        for model, records in self.data_by_model.items():
-            # Only generate removal nodes for data when the associated model
-            # and database table is not targeted for removal.
-            if model not in orm_tables and model not in models.mapped('model'):
+        # Only generate removal nodes for data when the associated model and
+        # database table is not targeted for removal.
+
+        for model, records in node_by_model.items():
+            if model not in orm_tables:
                 self.build_node(records)
 
         #######################################################################
@@ -115,9 +122,6 @@ class Uninstaller:
         for model in models:
             self.build_node(model)
             self.build_edge(Model, model)
-
-            # if model.model in self.data_by_model:
-            #     self.build_edge(self.data_by_model[model.model], model)
 
         #######################################################################
         # Generate foreign key based dependencies between model data          #
@@ -132,22 +136,23 @@ class Uninstaller:
         # and will set a given many2one field on the recordset to null whenever
         # the id is contained in a list of given ids.
         def set_null_step(field, nullable_ids):
-            return lambda records: records.filtered(lambda record: (
-                record[field.name].id in nullable_ids
-            )).write({field.name: False})
+            def execute_step(records):
+                filtered = records.filtered(lambda record: (
+                    record[field.name].id in nullable_ids
+                ))
+                if len(filtered) > 0:
+                    filtered.write({field.name: False})
 
-        for model, records in self.data_by_model.items():
+            return execute_step
+
+        for model, records in node_by_model.items():
             is_orm_table = model in orm_tables
-            records = (self.env if is_orm_table else self.data_by_model)[model]
             for field in self.env[model]._fields.values():
-                if not field.type == 'many2one':
-                    continue
-
-                if model in models.mapped('model'):
+                if not field.type == 'many2one' or not field.store:
                     continue
 
                 comodel = field.comodel_name
-                if comodel not in self.data_by_model or model == comodel:
+                if comodel not in node_by_model or model == comodel:
                     continue
 
                 # Many2one fields that are not required allow us to break
@@ -160,29 +165,18 @@ class Uninstaller:
                 # directions).
                 # FIXME Investigate if problems might result when such a
                 # comodel record turns out to be undeletable.
-                if not field.required:
+                is_nullable_field = not field.required or field.company_dependent
+                if is_nullable_field and field.ondelete != 'cascade':
                     steps = self.extra_steps[model]
                     nullable_ids = self.data_by_model[comodel].ids
                     steps.append(set_null_step(field, nullable_ids))
                     continue
 
-                dependent_records = (
-                    self.env if comodel in orm_tables else self.data_by_model
-                )[comodel]
-
-                # Special case: if the model of the comodel records will also
-                # be removed, the dependent becomes the comodel.
-                if comodel in models.mapped('model'):
-                    dependent_records = models.filtered(lambda model: (
-                        model.model == comodel
-                    ))
-
-                self.build_edge(records, dependent_records)
+                self.build_edge(records, node_by_model[comodel])
 
             # When unlinking data, manual access rights checks may potentially
             # depend on user groups that will also be removed.
-            is_node = not is_orm_table and model not in models.mapped('model')
-            if is_node and model != 'res.groups' and len(groups) > 0:
+            if not is_orm_table and model != 'res.groups' and len(groups) > 0:
                 self.build_edge(records, groups)
 
         #######################################################################
@@ -235,10 +229,8 @@ class Uninstaller:
             if field.model_id in models:
                 self.build_edge(field, field.model_id)
 
-            if field.model in models.mapped('model'):
-                continue
-            elif field.model in self.data_by_model:
-                self.build_edge(self.data_by_model[field.model], field)
+            if field.model in node_by_model:
+                self.build_edge(node_by_model[field.model], field)
 
         #######################################################################
         # Generate selection value removal nodes                              #
@@ -260,11 +252,9 @@ class Uninstaller:
             self.build_edge(value, Field)
 
             model_name = value.field_id.model
-            if model_name in models.mapped('model'):
-                continue
-            elif model_name in self.data_by_model:
-                related_records = self.data_by_model[model_name]
-                self.build_edge(related_records, value)
+            # Special case needed for base_sparse_field
+            if model_name in node_by_model and model_name != 'ir.model.fields':
+                self.build_edge(node_by_model[model_name], value)
 
         #######################################################################
         # Generate contraint removal nodes                                    #
@@ -279,11 +269,8 @@ class Uninstaller:
                 self.build_edge(constraint, constraint.model)
 
             model_name = constraint.model.model
-            if model_name in models.mapped('model'):
-                continue
-            elif model_name in self.data_by_model:
-                related_records = self.data_by_model[model_name]
-                self.build_edge(related_records, constraint)
+            if model_name in node_by_model:
+                self.build_edge(node_by_model[model_name], constraint)
 
         #######################################################################
         # Generate many2many relation removal nodes                           #
