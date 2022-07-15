@@ -85,6 +85,7 @@ function setupMessagingServiceRegistries({
     };
 
     const customBusService = {
+        ...busService,
         start() {
             const originalService = busService.start(...arguments);
             Object.assign(originalService, {
