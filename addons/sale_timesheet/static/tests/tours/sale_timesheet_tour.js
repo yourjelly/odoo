@@ -47,7 +47,7 @@ tour.register('sale_timesheet_tour', {
     run: 'click',
 }, {
     trigger: 'button.o_form_button_save',
-    extra_trigger: '.o_form_view:not(:has(button[name="action_confirm"]:not(.o_invisible_modifier)))',
+    extra_trigger: '.o_field_widget[name=state] button[data-value=sale].btn-primary',
     content: 'Click on Save button to save the Sales Order.',
     run: 'click',
 }, {
