@@ -105,14 +105,14 @@ class TestUi(TestPointOfSaleHttpCommon):
 
     def setUp(self):
         super().setUp()
+        default_pricelist = self.env["product.pricelist"].create({"name": "PoS Default Pricelist"})
         # Set the programs to the pos config.
         # Remove fiscal position and pricelist.
         self.main_pos_config.write({
             'tax_regime_selection': False,
             'use_pricelist': False,
-            'pricelist_id': self.env["product.pricelist"].create(
-                {"name": "PoS Default Pricelist",}
-            ),
+            'pricelist_id': default_pricelist,
+            'available_pricelist_ids': default_pricelist.ids,
             'use_coupon_programs': True,
             'coupon_program_ids': [Command.link(self.coupon_program.id)],
             'promo_program_ids': [Command.link(prog.id) for prog in self.promo_programs],
