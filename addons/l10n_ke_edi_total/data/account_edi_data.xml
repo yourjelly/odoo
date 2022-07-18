@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="edi_eg_eta" model="account.edi.format">
+            <field name="name">Kenya TIMS</field>
+            <field name="code">ke_tims</field>
+        </record>
+    </data>
+</odoo>

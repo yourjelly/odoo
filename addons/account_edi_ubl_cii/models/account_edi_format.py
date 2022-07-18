@@ -30,6 +30,7 @@ class AccountEdiFormat(models.Model):
     def _infer_xml_builder_from_tree(self, tree):
         self.ensure_one()
         ubl_version = tree.find('{*}UBLVersionID')
+        import pdb; pdb.set_trace()
         customization_id = tree.find('{*}CustomizationID')
         if tree.tag == '{urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100}CrossIndustryInvoice':
             return self.env['account.edi.xml.cii']
@@ -43,7 +44,7 @@ class AccountEdiFormat(models.Model):
         if ubl_version is not None:
             if ubl_version.text == '2.0':
                 return self.env['account.edi.xml.ubl_20']
-            if ubl_version.text == '2.1':
+            if '2.1' in ubl_version.text:
                 return self.env['account.edi.xml.ubl_21']
         return
 
