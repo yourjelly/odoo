@@ -463,12 +463,15 @@ publicWidget.registry.WebsiteSale = publicWidget.Widget.extend(VariantMixin, car
     _startZoom: function () {
         // Do not activate image zoom for mobile devices, since it might prevent users from scrolling the page
         if (!config.device.isMobile) {
-            var autoZoom = $('.ecom-zoomable').data('ecom-zoom-auto') || false,
-            attach = '#o-carousel-product';
+            var autoZoom = $('.ecom-zoomable').data('ecom-zoom-auto') || false;
+            // attach = '#o-carousel-product';
+            // if (!$("#o-carousel-product").length) {
+            //     attach = "#o-grid-product";
+            // }
             _.each($('.ecom-zoomable img[data-zoom]'), function (el) {
                 onImageLoaded(el, function () {
                     var $img = $(el);
-                    $img.zoomOdoo({event: autoZoom ? 'mouseenter' : 'click', attach: attach});
+                    $img.zoomOdoo({event: autoZoom ? 'mouseenter' : 'click', attachToTarget: true});
                     $img.attr('data-zoom', 1);
                 });
             });
