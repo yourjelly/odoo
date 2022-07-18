@@ -122,7 +122,14 @@ export class TaxTotalsComponent extends Component {
     }
 
     get currency() {
-        return session.currencies[this.props.record.data.currency_id[0]];
+        const recordCurrency = this.props.record.data.currency_id;
+        let currencyId;
+        if (recordCurrency) {
+            currencyId = recordCurrency[0];
+        } else {
+            currencyId = session.company_currency_id;
+        }
+        return session.currencies[currencyId];
     }
 
     parseValue() {
