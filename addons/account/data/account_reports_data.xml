@@ -121,7 +121,7 @@
                 (0, 0, {'label': 'forty_two', 'engine': 'domain', 'formula': &quot;[('account_id.user_type_id', '=', ref('account.data_account_type_revenue'))]&quot;, 'subformula': 'sum'}),
             ]"/>
             <field name="foldable" eval="False"/>
-            <field name="sequence">2</field>
+            <field name="sequence">3</field>
         </record>
 
         <record id="oco_test_line_financial_group" model="account.report.line">
@@ -134,7 +134,7 @@
             ]"/>
             <field name="foldable" eval="True"/>
             <field name="groupby">partner_id,account_id,id</field>
-            <field name="sequence">2</field>
+            <field name="sequence">4</field>
         </record>
 
         <record id="oco_test_line_sub1_main" model="account.report.line">
@@ -142,7 +142,7 @@
             <field name="report_id" ref="test_report"/>
             <field name="foldable" eval="True"/>
             <field name="hierarchy_level">1</field>
-            <field name="sequence">3</field>
+            <field name="sequence">5</field>
         </record>
 
         <record id="oco_test_line_sub1_sub1" model="account.report.line">
@@ -155,7 +155,7 @@
             <field name="parent_id" ref="oco_test_line_sub1_main"/>
             <field name="foldable" eval="True"/>
             <field name="hierarchy_level">2</field>
-            <field name="sequence">4</field>
+            <field name="sequence">6</field>
         </record>
 
         <record id="oco_test_line_sub1_sub1-sub" model="account.report.line">
@@ -164,7 +164,7 @@
             <field name="foldable" eval="False"/>
             <field name="parent_id" ref="oco_test_line_sub1_sub1"/>
             <field name="hierarchy_level">3</field>
-            <field name="sequence">5</field>
+            <field name="sequence">7</field>
         </record>
 
         <record id="oco_test_line_sub1_sub2" model="account.report.line">
@@ -176,7 +176,7 @@
             ]"/>
             <field name="foldable" eval="False"/>
             <field name="hierarchy_level">2</field>
-            <field name="sequence">6</field>
+            <field name="sequence">8</field>
         </record>
 
         <record id="oco_test_aggregate1" model="account.report.line">
@@ -188,7 +188,7 @@
             ]"/>
             <field name="foldable" eval="False"/>
             <field name="hierarchy_level">1</field>
-            <field name="sequence">7</field>
+            <field name="sequence">9</field>
         </record>
 
         <record id="oco_test_aggregate2" model="account.report.line">
@@ -199,7 +199,7 @@
             ]"/>
             <field name="foldable" eval="False"/>
             <field name="hierarchy_level">1</field>
-            <field name="sequence">8</field>
+            <field name="sequence">10</field>
         </record>
 
         <record id="oco_test_aggregate3" model="account.report.line">
@@ -211,7 +211,7 @@
                 (0, 0, {'label': 'inner', 'engine': 'domain', 'formula': &quot;[('account_id.code', 'like', '4%')]&quot;, 'subformula': 'sum'}),
             ]"/>
             <field name="hierarchy_level">1</field>
-            <field name="sequence">9</field>
+            <field name="sequence">11</field>
         </record>
 
         <record id="oco_test_line_prefix" model="account.report.line">
@@ -222,7 +222,7 @@
                 (0, 0, {'label': 'forty_two', 'engine': 'domain', 'formula': &quot;['|', '|', ('account_id.code', 'like', '44%'), ('account_id.code', 'like', '7002%'), ('account_id.code', 'like', 'cocolasticot%')]&quot;, 'subformula': 'sum'}),
             ]"/>
             <field name="hierarchy_level">1</field>
-            <field name="sequence">10</field>
+            <field name="sequence">12</field>
         </record>
 
         <record id="oco_test_carryover_be" model="account.report.line">
@@ -237,7 +237,7 @@
                 (0, 0, {'label': 'main_unbounded', 'engine': 'aggregation', 'formula': 'test_carryover_be.main_tags + test_carryover_be._applied_carryover_main'}),
             ]"/>
             <field name="hierarchy_level">1</field>
-            <field name="sequence">11</field>
+            <field name="sequence">13</field>
         </record>
 
         <record id="oco_test_carryover_fr_27" model="account.report.line">
@@ -249,7 +249,7 @@
                 (0, 0, {'label': 'main', 'engine': 'tax_tags', 'formula': 'carryover_test_fr'}),
             ]"/>
             <field name="hierarchy_level">1</field>
-            <field name="sequence">12</field>
+            <field name="sequence">14</field>
         </record>
 
         <record id="oco_test_carryover_fr_22" model="account.report.line">
@@ -261,7 +261,7 @@
                 (0, 0, {'label': 'main', 'engine': 'aggregation', 'formula': 'test_carryover_fr_22._applied_carryover_main'}),
             ]"/>
             <field name="hierarchy_level">1</field>
-            <field name="sequence">13</field>
+            <field name="sequence">15</field>
         </record>
 
         <record id="oco_test_manual" model="account.report.line">
@@ -272,7 +272,7 @@
                 (0, 0, {'label': 'main', 'engine': 'external', 'formula': 'sum', 'subformula': 'editable;rounding=3', 'figure_type': 'none'}),
             ]"/>
             <field name="hierarchy_level">1</field>
-            <field name="sequence">14</field>
+            <field name="sequence">16</field>
         </record>
 
         <record id="oco_test_line_financial_hide_if_zero" model="account.report.line">
@@ -286,7 +286,7 @@
             ]"/>
             <field name="foldable" eval="True"/>
             <field name="groupby">account_id</field>
-            <field name="sequence">15</field>
+            <field name="sequence">17</field>
         </record>
 
         <record id="oco_test_line_financial_group_single" model="account.report.line">
@@ -298,7 +298,7 @@
             ]"/>
             <field name="foldable" eval="True"/>
             <field name="groupby">partner_id</field>
-            <field name="sequence">16</field>
+            <field name="sequence">18</field>
         </record>
 
         <record id="oco_test_line_financial_group_single_sum_if_pos" model="account.report.line">
@@ -309,7 +309,7 @@
             ]"/>
             <field name="foldable" eval="True"/>
             <field name="groupby">partner_id</field>
-            <field name="sequence">17</field>
+            <field name="sequence">19</field>
         </record>
 
         <record id="oco_test_line_financial_group_single_sum_if_neg" model="account.report.line">
@@ -320,7 +320,7 @@
             ]"/>
             <field name="foldable" eval="True"/>
             <field name="groupby">partner_id</field>
-            <field name="sequence">18</field>
+            <field name="sequence">20</field>
         </record>
 
         <record id="oco_test_line_financial_group_single_sum_if_pos_and_neg" model="account.report.line">
@@ -332,7 +332,7 @@
             ]"/>
             <field name="foldable" eval="True"/>
             <field name="groupby">partner_id</field>
-            <field name="sequence">19</field>
+            <field name="sequence">21</field>
         </record>
 
         <record id="oco_test_line_financial_group_single_sum_if_pos_and_neg_double_group" model="account.report.line">
@@ -344,7 +344,7 @@
             ]"/>
             <field name="foldable" eval="True"/>
             <field name="groupby">partner_id, id</field>
-            <field name="sequence">20</field>
+            <field name="sequence">22</field>
         </record>
 
         <record id="oco_test_line_financial_group_single_code_debit" model="account.report.line">
@@ -355,7 +355,7 @@
             ]"/>
             <field name="foldable" eval="True"/>
             <field name="groupby">partner_id</field>
-            <field name="sequence">21</field>
+            <field name="sequence">23</field>
         </record>
 
         <record id="oco_test_line_financial_group_single_code_credit" model="account.report.line">
@@ -366,7 +366,7 @@
             ]"/>
             <field name="foldable" eval="True"/>
             <field name="groupby">partner_id</field>
-            <field name="sequence">22</field>
+            <field name="sequence">24</field>
         </record>
 
         <record id="oco_test_line_financial_group_single_code_debit_credit" model="account.report.line">
@@ -378,7 +378,7 @@
             ]"/>
             <field name="foldable" eval="True"/>
             <field name="groupby">partner_id</field>
-            <field name="sequence">23</field>
+            <field name="sequence">25</field>
         </record>
 
         <record id="oco_test_line_financial_group_double_code_debit_credit" model="account.report.line">
@@ -390,7 +390,7 @@
             ]"/>
             <field name="foldable" eval="True"/>
             <field name="groupby">partner_id,id</field>
-            <field name="sequence">24</field>
+            <field name="sequence">26</field>
         </record>
 
     </data>
