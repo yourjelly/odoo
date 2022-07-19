@@ -75,18 +75,13 @@ class AccountEdiFormat(models.Model):
         if not invoice.is_purchase_document():
             return False
 
-        invoice_lines_tag_ids = invoice.line_ids.tax_tag_ids.ids
-        it_tax_report_id = self.env.ref('l10n_it.tax_report_vat').id
-        it_tax_report_expressions = self.env['account.report.expression'].search([('report_line_id.report_id', '=', it_tax_report_id)])
-        for expression in it_tax_report_expressions:
-            expression_xml_id = expression.get_external_id().get(expression.id, '')
-            if not expression_xml_id.startswith('l10n_it.tax_report_line_vj'):
-                continue
-
-            matching_tags_ids = expression._get_matching_tags().ids
-            if any(tag_id in invoice_lines_tag_ids for tag_id in matching_tags_ids):
-                return True
-        return False
+        invoice_lines_tags = invoice.line_ids.tax_tag_ids
+        it_tax_report_vj_lines = self.env['account.report.line'].search([
+            ('report_id.country_id.code', '=', 'IT'),
+            ('code', 'like', 'VJ%'),
+        ])
+        vj_lines_tags = it_tax_report_vj_lines.expression_ids._get_matching_tags()
+        return bool(invoice_lines_tags & vj_lines_tags)
 
     def _l10n_it_edi_check_ordinary_invoice_configuration(self, invoice):
         errors = []
@@ -227,18 +222,13 @@ class AccountEdiFormat(models.Model):
             that are phisically in Italy but are in a VAT deposit, meaning that the goods
             have not passed customs.
         """
-        invoice_lines_tag_ids = invoice.line_ids.tax_tag_ids.ids
-        it_tax_report_id = self.env.ref('l10n_it.tax_report_vat').id
-        it_tax_report_expressions = self.env['account.report.expression'].search([('report_line_id.report_id', '=', it_tax_report_id)])
-        for expression in it_tax_report_expressions:
-            expression_xml_id = expression.get_external_id().get(expression.id, '')
-            if expression_xml_id != 'l10n_it.tax_report_line_vj3_tag':
-                continue
-
-            matching_tags_ids = expression._get_matching_tags().ids
-            if any(tag_id in invoice_lines_tag_ids for tag_id in matching_tags_ids):
-                return True
-        return False
+        invoice_lines_tags = invoice.line_ids.tax_tag_ids
+        it_tax_report_vj3_lines = self.env['account.report.line'].search([
+            ('report_id.country_id.code', '=', 'IT'),
+            ('code', '=', 'VJ3'),
+        ])
+        vj3_lines_tags = it_tax_report_vj3_lines.expression_ids._get_matching_tags()
+        return bool(invoice_lines_tags & vj3_lines_tags)
 
     def _l10n_it_document_type_mapping(self):
         return {
