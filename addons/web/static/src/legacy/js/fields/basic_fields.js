@@ -9,6 +9,7 @@ odoo.define('web.basic_fields', function (require) {
  */
 
 var AbstractField = require('web.AbstractField');
+var ajax = require('web.ajax');
 var config = require('web.config');
 var core = require('web.core');
 var datepicker = require('web.datepicker');
@@ -1008,6 +1009,34 @@ var FieldDate = InputField.extend({
             await this._setValue(value);
             this._render();
         }
+    },
+});
+
+var LangFieldDate = FieldDate.extend({
+    resetOnAnyFieldChange: true,
+
+    willStart: async function () {
+        const _super = this._super;
+        if (this.record.data.iso_code) {
+            this.value.locale(this.record.data.iso_code);
+            if (this.value._locale._abbr != this.record.data.iso_code) {
+                const resp = await ajax.loadJS(`web/static/lib/moment/locale/${this.record.data.iso_code}.js`);
+                this.value.locale(this.record.data.iso_code);
+            }
+        }
+        return _super.apply(this, arguments);
+    },
+
+    _formatValue: function (value, formatType) {
+        if (value === false || isNaN(value)) {
+            return "";
+        }
+        return value.format(time.strftime_to_moment_format(this.record.data.date_format));
+    },
+
+    _reset: function () {
+        this._super.apply(this, arguments);
+        this._render();
     },
 });
 
@@ -4219,6 +4248,7 @@ return {
     FieldChar: FieldChar,
     LinkButton: LinkButton,
     FieldDate: FieldDate,
+    LangFieldDate: LangFieldDate,
     FieldDateTime: FieldDateTime,
     FieldDateRange: FieldDateRange,
     RemainingDays: RemainingDays,

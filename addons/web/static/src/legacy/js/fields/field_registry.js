@@ -27,6 +27,7 @@ registry
     .add('integer', basic_fields.FieldInteger)
     .add('boolean', basic_fields.FieldBoolean)
     .add('date', basic_fields.FieldDate)
+    .add('lang_date', basic_fields.LangFieldDate)
     .add('datetime', basic_fields.FieldDateTime)
     .add('daterange', basic_fields.FieldDateRange)
     .add('remaining_days', basic_fields.RemainingDays)

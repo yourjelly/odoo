@@ -72,17 +72,10 @@
                                 <div class='o_preview_res_lang'>
                                     <p class="text-center">Preview</p>
                                     <group>
-                                        <field name="date_format_preview"/>
+                                        <field name="date_format_preview" widget="lang_date"/>
                                         <field name="thousand_separator_preview"/>
                                         <field name="decimal_point_preview"/>
                                     </group>
-                                    <!-- <table class='w-100'>
-                                        <tr>
-                                            <td><label for='date_format_preview' class='text-muted'/></td>
-                                            <td><field name='date_format_preview'/></td>
-                                        </tr>
-                                        </tr>
-                                    </table> -->
                                 </div>
                             </group>
                         </group>

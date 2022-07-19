@@ -71,7 +71,8 @@ class Lang(models.Model):
     @api.depends('thousands_sep', 'grouping')
     def _compute_thounsand_separator_preview(self):
         for lang in self:
-            lang.thousand_separator_preview = intersperse('999999999', ast.literal_eval(lang.grouping), lang.thousands_sep)[0]
+            separator = lang.thousands_sep if lang.thousands_sep else ''
+            lang.thousand_separator_preview = intersperse('999999999', ast.literal_eval(lang.grouping), separator)[0]
 
     @api.depends('decimal_point')
     def _compute_decimal_point_preview(self):
