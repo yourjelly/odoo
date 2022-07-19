@@ -418,8 +418,8 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
         };
         return [
             {
-                groupName: 'Website',
-                title: 'Alert',
+                category: 'Website',
+                name: 'Alert',
                 description: 'Insert an alert snippet.',
                 fontawesome: 'fa-info',
                 callback: () => {
@@ -427,8 +427,8 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                 },
             },
             {
-                groupName: 'Website',
-                title: 'Rating',
+                category: 'Website',
+                name: 'Rating',
                 description: 'Insert a rating snippet.',
                 fontawesome: 'fa-star-half-o',
                 callback: () => {
@@ -436,8 +436,8 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                 },
             },
             {
-                groupName: 'Website',
-                title: 'Card',
+                category: 'Website',
+                name: 'Card',
                 description: 'Insert a card snippet.',
                 fontawesome: 'fa-sticky-note',
                 callback: () => {
@@ -445,8 +445,8 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                 },
             },
             {
-                groupName: 'Website',
-                title: 'Share',
+                category: 'Website',
+                name: 'Share',
                 description: 'Insert a share snippet.',
                 fontawesome: 'fa-share-square-o',
                 callback: () => {
@@ -454,8 +454,8 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                 },
             },
             {
-                groupName: 'Website',
-                title: 'Text Highlight',
+                category: 'Website',
+                name: 'Text Highlight',
                 description: 'Insert a text Highlight snippet.',
                 fontawesome: 'fa-sticky-note',
                 callback: () => {
@@ -463,8 +463,8 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                 },
             },
             {
-                groupName: 'Website',
-                title: 'Chart',
+                category: 'Website',
+                name: 'Chart',
                 description: 'Insert a chart snippet.',
                 fontawesome: 'fa-bar-chart',
                 callback: () => {
@@ -472,8 +472,8 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                 },
             },
             {
-                groupName: 'Website',
-                title: 'Progress Bar',
+                category: 'Website',
+                name: 'Progress Bar',
                 description: 'Insert a progress bar snippet.',
                 fontawesome: 'fa-spinner',
                 callback: () => {
@@ -481,8 +481,8 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                 },
             },
             {
-                groupName: 'Website',
-                title: 'Badge',
+                category: 'Website',
+                name: 'Badge',
                 description: 'Insert a badge snippet.',
                 fontawesome: 'fa-tags',
                 callback: () => {
@@ -490,8 +490,8 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                 },
             },
             {
-                groupName: 'Website',
-                title: 'Blockquote',
+                category: 'Website',
+                name: 'Blockquote',
                 description: 'Insert a blockquote snippet.',
                 fontawesome: 'fa-quote-left',
                 callback: () => {
@@ -499,8 +499,8 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                 },
             },
             {
-                groupName: 'Website',
-                title: 'Separator',
+                category: 'Website',
+                name: 'Separator',
                 description: 'Insert an horizontal separator sippet.',
                 fontawesome: 'fa-minus',
                 callback: () => {

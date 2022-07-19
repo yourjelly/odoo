@@ -1857,8 +1857,8 @@ const Wysiwyg = Widget.extend({
         const options = this._editorOptions();
         const commands = [
             {
-                groupName: 'Basic blocks',
-                title: 'Quote',
+                category: 'Basic blocks',
+                name: 'Quote',
                 description: 'Add a blockquote section.',
                 fontawesome: 'fa-quote-right',
                 callback: () => {
@@ -1866,8 +1866,8 @@ const Wysiwyg = Widget.extend({
                 },
             },
             {
-                groupName: 'Basic blocks',
-                title: 'Code',
+                category: 'Basic blocks',
+                name: 'Code',
                 description: 'Add a code section.',
                 fontawesome: 'fa-code',
                 callback: () => {
@@ -1878,8 +1878,8 @@ const Wysiwyg = Widget.extend({
         if (options.allowCommandLink) {
             commands.push(
                 {
-                    groupName: 'Navigation',
-                    title: 'Link',
+                    category: 'Navigation',
+                    name: 'Link',
                     description: 'Add a link.',
                     fontawesome: 'fa-link',
                     callback: () => {
@@ -1887,8 +1887,8 @@ const Wysiwyg = Widget.extend({
                     },
                 },
                 {
-                    groupName: 'Navigation',
-                    title: 'Button',
+                    category: 'Navigation',
+                    name: 'Button',
                     description: 'Add a button.',
                     fontawesome: 'fa-link',
                     callback: () => {
@@ -1903,8 +1903,8 @@ const Wysiwyg = Widget.extend({
         }
         if (options.allowCommandImage) {
             commands.push({
-                groupName: 'Medias',
-                title: 'Image',
+                category: 'Media',
+                name: 'Image',
                 description: 'Insert an image.',
                 fontawesome: 'fa-file-image-o',
                 callback: () => {
@@ -1914,8 +1914,8 @@ const Wysiwyg = Widget.extend({
         }
         if (options.allowCommandVideo) {
             commands.push({
-                groupName: 'Medias',
-                title: 'Video',
+                category: 'Media',
+                name: 'Video',
                 description: 'Insert a video.',
                 fontawesome: 'fa-file-video-o',
                 callback: () => {
