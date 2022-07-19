@@ -39,12 +39,13 @@
                     <group>
                         <group>
                             <field name="active" invisible="1"/>
-                            <label for="date_begin" string="Date"/>
+                            <label for="date_begin_relative" string="Date"/>
                             <div class="o_row">
-                                <field name="date_begin" widget="daterange" nolabel="1" class="oe_inline" options="{'related_end_date': 'date_end'}"/>
+                                <field name="date_begin_relative" widget="daterange" nolabel="1" class="oe_inline" options="{'related_end_date': 'date_end_relative'}"/>
                                 <i class="fa fa-long-arrow-right mx-2" aria-label="Arrow icon" title="Arrow"/>
-                                <field name="date_end" widget="daterange" nolabel="1" class="oe_inline" options="{'related_start_date': 'date_begin'}"/>
+                                <field name="date_end_relative" widget="daterange" nolabel="1" class="oe_inline" options="{'related_start_date': 'date_begin_relative'}"/>
                             </div>
+
                             <field name="date_tz"/>
                             <field name="event_type_id" string="Template" options="{'no_create':True}"/>
                             <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_quick_create': True}"/>
@@ -125,8 +126,8 @@
                 <field name="organizer_id" readonly="1" optional="hide"/>
                 <field name="user_id" readonly="1" widget="many2one_avatar_user"/>
                 <field name="company_id" groups="base.group_multi_company" readonly="1" optional="show"/>
-                <field name="date_begin" readonly="1" widget="date"/>
-                <field name="date_end" readonly="1" widget="date"/>
+                <field name="date_begin_relative" readonly="1" widget="date"/>
+                <field name="date_end_relative" readonly="1" widget="date"/>
                 <field name="stage_id" readonly="1"/>
                 <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" optional="hide"/>
                 <field name="seats_expected" string="Expected Attendees" sum="Total" readonly="1"/>
@@ -148,11 +149,11 @@
             <form>
                 <group>
                     <field name="name" placeholder="e.g. Conference for Architects"/>
-                    <label for="date_begin" string="Date"/>
+                    <label for="date_begin_relative" string="Date"/>
                     <div class="o_row">
-                        <field name="date_begin" widget="daterange" options="{'related_end_date': 'date_end'}"/>
+                        <field name="date_begin_relative" widget="daterange" options="{'related_end_date': 'date_end_relative'}"/>
                         <i class="fa fa-long-arrow-right mx-2" aria-label="Arrow icon" title="Arrow"/>
-                        <field name="date_end" widget="daterange" options="{'related_start_date': 'date_begin'}"/>
+                        <field name="date_end_relative" widget="daterange" options="{'related_start_date': 'date_begin_relative'}"/>
                     </div>
                 </group>
             </form>
@@ -168,8 +169,8 @@
                 <field name="name"/>
                 <field name="stage_id" options='{"group_by_tooltip": {"description": "Description"}}'/>
                 <field name="address_id"/>
-                <field name="date_begin"/>
-                <field name="date_end"/>
+                <field name="date_begin_relative"/>
+                <field name="date_end_relative"/>
                 <field name="auto_confirm"/>
                 <field name="seats_unconfirmed"/>
                 <field name="seats_reserved"/>
@@ -185,14 +186,14 @@
                         <div t-attf-class="d-flex flex-column p-0 oe_kanban_card oe_kanban_global_click">
                             <div class="o_kanban_content p-0 m-0 position-relative row d-flex flex-fill">
                                 <div class="col-3 text-bg-primary p-2 text-center d-flex flex-column justify-content-center">
-                                    <div t-esc="record.date_begin.raw_value.getDate()" class="o_event_fontsize_20"/>
+                                    <div t-esc="record.date_begin_relative.raw_value.getDate()" class="o_event_fontsize_20"/>
                                     <div>
-                                        <t t-esc="luxon.DateTime.fromJSDate(record.date_begin.raw_value).toFormat('MMM yyyy')"/>
+                                        <t t-esc="luxon.DateTime.fromJSDate(record.date_begin_relative.raw_value).toFormat('MMM yyyy')"/>
                                     </div>
-                                    <div><t t-esc="luxon.DateTime.fromJSDate(record.date_begin.raw_value).toFormat('t')"/></div>
-                                        <div t-if="luxon.DateTime.fromJSDate(record.date_begin.raw_value).toFormat('DDMMYYYY') !== luxon.DateTime.fromJSDate(record.date_end.raw_value).toFormat('DDMMYYYY')">
+                                    <div><t t-esc="luxon.DateTime.fromJSDate(record.date_begin_relative.raw_value).toFormat('t')"/></div>
+                                        <div t-if="luxon.DateTime.fromJSDate(record.date_begin_relative.raw_value).toFormat('DDMMYYYY') !== luxon.DateTime.fromJSDate(record.date_end_relative.raw_value).toFormat('DDMMYYYY')">
                                             <i class="fa fa-arrow-right me-2 o_event_fontsize_09" title="End date"/>
-                                            <t t-esc="luxon.DateTime.fromJSDate(record.date_end.raw_value).toFormat('d MMM')"/>
+                                            <t t-esc="luxon.DateTime.fromJSDate(record.date_end_relative.raw_value).toFormat('d MMM')"/>
                                         </div>
                                 </div>
                                 <div class="col-9 py-2 px-3 d-flex flex-column justify-content-between pt-3">
@@ -238,7 +239,7 @@
         <field name="model">event.event</field>
         <field eval="2" name="priority"/>
         <field name="arch" type="xml">
-            <calendar date_start="date_begin" date_stop="date_end" string="Event Organization" mode="month" color="event_type_id" event_limit="5">
+            <calendar date_start="date_begin_relative" date_stop="date_end_relative" string="Event Organization" mode="month" color="event_type_id" event_limit="5">
                 <field name="user_id" avatar_field="avatar_128"/>
                 <field name="seats_expected"/>
                 <field name="seats_reserved"/>

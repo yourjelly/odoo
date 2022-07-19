@@ -3,6 +3,7 @@
 
 import logging
 import pytz
+from dateutil import tz
 
 from odoo import _, api, Command, fields, models
 from odoo.addons.base.models.res_partner import _tz_get
@@ -183,8 +184,12 @@ class EventEvent(models.Model):
     date_tz = fields.Selection(
         _tz_get, string='Timezone', required=True,
         compute='_compute_date_tz', precompute=True, readonly=False, store=True)
+    # Actual Date/time when the event begins/ends expressed in UTC
     date_begin = fields.Datetime(string='Start Date', required=True, tracking=True)
     date_end = fields.Datetime(string='End Date', required=True, tracking=True)
+    # Date/time when the event begins/ends expressed relative to the event's TZ field and the user's TZ
+    date_begin_relative = fields.Datetime(string="Start Date (relative)", compute='_compute_date_relative', inverse='_inverse_date_begin_relative')
+    date_end_relative = fields.Datetime(string="End Date (relative)", compute='_compute_date_relative', inverse='_inverse_date_end_relative')
     date_begin_located = fields.Char(string='Start Date Located', compute='_compute_date_begin_tz')
     date_end_located = fields.Char(string='End Date Located', compute='_compute_date_end_tz')
     is_ongoing = fields.Boolean('Is Ongoing', compute='_compute_is_ongoing', search='_search_is_ongoing')
@@ -205,6 +210,38 @@ class EventEvent(models.Model):
     ticket_instructions = fields.Html('Ticket Instructions', translate=True,
         compute='_compute_ticket_instructions', store=True, readonly=False,
         help="This information will be printed on your tickets.")
+
+    @api.depends('date_begin', 'date_tz')
+    def _compute_date_relative(self):
+        # We have datetimes in UTC, what we're doing here is:
+        # 1. converting that datetime to the event's tz (because that's how it was expressed by the user when they saved the event)
+        # 2. switching the tz of the datetime to that of the user WITHOUT converting the time
+        # 3. convert that back to UTC and strip the timezone info from the datetime (because the ORM wants naive datetime, which it assumes means UTC)
+        # We need to do that because the frontend will automatically apply the user's timezone when displaying the data, but
+        # we want this data expressed relative to the event's timezone
+        for event in self:
+            event_tz = tz.gettz(event.date_tz)
+            user_tz = tz.gettz(self.env.context.get('tz'))
+            event.date_begin_relative = event.date_begin.astimezone(event_tz).replace(tzinfo=user_tz).astimezone(tz.UTC).replace(tzinfo=None)
+            event.date_end_relative = event.date_end.astimezone(event_tz).replace(tzinfo=user_tz).astimezone(tz.UTC).replace(tzinfo=None)
+
+    def _inverse_date_begin_relative(self):
+        # Conversely, we receive a naive datetime that should be converted properly:
+        # 1. convert it to the user's timezone (so we know the time they input exactly)
+        # 2. switching to the tz of the event, WITHOUT converting the time because that's what our user means here
+        # 3. convert that back to UTC and strip the timezone info for storage
+        # We need to do that because we received a datetime in UTC converted from the user's timezone, but it should have been be converted from the event's tz instead
+        for event in self:
+            event_tz = tz.gettz(event.date_tz)
+            user_tz = tz.gettz(self.env.context.get('tz'))
+            event.date_begin = event.date_begin_relative.astimezone(user_tz).replace(tzinfo=event_tz).astimezone(tz.UTC).replace(tzinfo=None)
+
+    def _inverse_date_end_relative(self):
+        # Ditto
+        for event in self:
+            event_tz = tz.gettz(event.date_tz)
+            user_tz = tz.gettz(self.env.context.get('tz'))
+            event.date_end = event.date_end_relative.astimezone(user_tz).replace(tzinfo=event_tz).astimezone(tz.UTC).replace(tzinfo=None)
 
     @api.depends('stage_id', 'kanban_state')
     def _compute_kanban_state_label(self):
