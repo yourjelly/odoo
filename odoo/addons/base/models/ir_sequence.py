@@ -146,25 +146,24 @@ class IrSequence(models.Model):
     padding = fields.Integer(string='Sequence Size', required=True, default=0,
                              help="Odoo will automatically adds some '0' on the left of the "
                                   "'Next Number' to get the required padding size.")
-    sequence_preview = fields.Char(string="Preview", compute='_compute_sequence_preview')
+    sequence_preview = fields.Char(string='Preview', compute='_compute_sequence_preview')
     company_id = fields.Many2one('res.company', string='Company',
                                  default=lambda s: s.env.company)
     use_date_range = fields.Boolean(string='Use subsequences per date_range')
     date_range_ids = fields.One2many('ir.sequence.date_range', 'sequence_id', string='Subsequences')
 
-    @api.depends('use_date_range', 'date_range_ids', 'prefix', 'suffix', 'padding', 'number_increment', 'number_next_actual')
+    @api.depends('use_date_range', 'date_range_ids', 'number_next_actual')
     def _compute_sequence_preview(self):
         for seq in self:
-            number_next = None
+            number_next = False
             if seq.use_date_range:
-                dt = seq._context.get('ir_sequence_date', fields.Date.today())
-                seq_date = seq.date_range_ids.filtered(lambda date_range: date_range.date_from <= dt and date_range.date_to >= dt)
-                # seq_date = seq.env['ir.sequence.date_range'].search([('sequence_id', '=', seq.id), ('date_from', '<=', dt), ('date_to', '>=', dt)], limit=1)
+                dt = seq.env.context.get('ir_sequence_date', fields.Date.today())
+                seq_date = seq.date_range_ids.filtered(lambda date_range: date_range.date_from <= dt <= date_range.date_to)
                 if seq_date:
                     number_next = seq_date[0].number_next_actual
             else:
                 number_next = seq.number_next_actual
-            seq.sequence_preview = seq.get_next_char(number_next)  if number_next else None
+            seq.sequence_preview = seq.get_next_char(number_next) if number_next else False
 
     @api.model_create_multi
     def create(self, vals_list):

@@ -32,7 +32,7 @@ class Lang(models.Model):
     active = fields.Boolean()
     direction = fields.Selection([('ltr', 'Left-to-Right'), ('rtl', 'Right-to-Left')], required=True, default='ltr')
     date_format = fields.Char(string='Date Format', required=True, default=DEFAULT_DATE_FORMAT)
-    date_format_preview = fields.Char(string='Date format', compute='_compute_date_format_preview')
+    date_format_preview = fields.Date(string='Date format', default=fields.Date.context_today, readonly=True)
     time_format = fields.Char(string='Time Format', required=True, default=DEFAULT_TIME_FORMAT)
     week_start = fields.Selection([('1', 'Monday'),
                                    ('2', 'Tuesday'),
@@ -67,11 +67,6 @@ class Lang(models.Model):
         ('code_uniq', 'unique(code)', 'The code of the language must be unique !'),
         ('url_code_uniq', 'unique(url_code)', 'The URL code of the language must be unique !'),
     ]
-
-    @api.depends('date_format')
-    def _compute_date_format_preview(self):
-        for lang in self:
-            lang.date_format_preview = fields.Date.today().strftime(lang.date_format)
 
     @api.depends('thousands_sep', 'grouping')
     def _compute_thounsand_separator_preview(self):
