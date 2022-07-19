@@ -37,6 +37,7 @@ VariantMixin._onChangeCombination = function (ev, $parent, combination) {
     if ('product_tracking_info' in combination) {
         const $product = $('#product_detail');
         $product.data('product-tracking-info', combination['product_tracking_info']);
+        console.log("\n\n\n\nGot product_tracking_info\n\n");
         $product.trigger('view_item_event', combination['product_tracking_info']);
     }
     const addToCart = $parent.find('#add_to_cart_wrap');

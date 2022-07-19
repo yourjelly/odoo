@@ -16,6 +16,7 @@ class WebsiteSaleVariantController(VariantController):
         combination = self.get_combination_info(product_template_id, product_id, combination, add_qty, request.website.get_current_pricelist(), **kw)
 
         if request.website.google_analytics_key:
+            print("Adding product_tracking_info")
             combination['product_tracking_info'] = request.env['product.template'].get_google_analytics_data(combination)
 
         if request.website.product_page_image_width != 'none':
