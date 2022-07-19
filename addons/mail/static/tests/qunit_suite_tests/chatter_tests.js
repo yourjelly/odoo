@@ -479,7 +479,7 @@ QUnit.test('many2many_tags_email widget can load more than 40 records', async fu
     const views = {
         'mail.message,false,form': '<form><field name="partner_ids" widget="many2many_tags"/></form>',
     };
-    var { click, openView } = await start({
+    var { openView } = await start({
         serverData: { views },
     });
     await openView({
