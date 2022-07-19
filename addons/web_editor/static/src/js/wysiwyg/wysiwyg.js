@@ -119,7 +119,7 @@ const Wysiwyg = Widget.extend({
 
         this.toolbar = new Toolbar(this, this.options.toolbarTemplate);
         await this.toolbar.appendTo(document.createElement('void'));
-        const commands = this._getCommands();
+        const powerboxOptions = this._getPowerboxOptions();
 
         let editorCollaborationOptions;
         if (
@@ -183,7 +183,8 @@ const Wysiwyg = Widget.extend({
                     this.linkTools = undefined;
                 }
             },
-            commands: commands,
+            commands: powerboxOptions.commands,
+            categories: powerboxOptions.categories,
             plugins: options.editorPlugins,
             direction: localization.direction || 'ltr',
         }, editorCollaborationOptions));
@@ -1853,12 +1854,14 @@ const Wysiwyg = Widget.extend({
             });
         }
     },
-    _getCommands: function () {
-        const options = this._editorOptions();
+    _getPowerboxOptions: function () {
+        const editorOptions = this._editorOptions();
+        const categories = [];
         const commands = [
             {
-                category: 'Basic blocks',
+                category: 'Structure',
                 name: 'Quote',
+                priority: 30,
                 description: 'Add a blockquote section.',
                 fontawesome: 'fa-quote-right',
                 callback: () => {
@@ -1866,8 +1869,9 @@ const Wysiwyg = Widget.extend({
                 },
             },
             {
-                category: 'Basic blocks',
+                category: 'Structure',
                 name: 'Code',
+                priority: 20,
                 description: 'Add a code section.',
                 fontawesome: 'fa-code',
                 callback: () => {
@@ -1875,11 +1879,13 @@ const Wysiwyg = Widget.extend({
                 },
             },
         ];
-        if (options.allowCommandLink) {
+        if (editorOptions.allowCommandLink) {
+            categories.push({ name: 'Navigation', priority: 40 });
             commands.push(
                 {
                     category: 'Navigation',
                     name: 'Link',
+                    priority: 40,
                     description: 'Add a link.',
                     fontawesome: 'fa-link',
                     callback: () => {
@@ -1889,6 +1895,7 @@ const Wysiwyg = Widget.extend({
                 {
                     category: 'Navigation',
                     name: 'Button',
+                    priority: 30,
                     description: 'Add a button.',
                     fontawesome: 'fa-link',
                     callback: () => {
@@ -1901,10 +1908,14 @@ const Wysiwyg = Widget.extend({
                 },
             );
         }
-        if (options.allowCommandImage) {
+        if (editorOptions.allowCommandImage || editorOptions.allowCommandVideo) {
+            categories.push({ name: 'Media', priority: 50 });
+        }
+        if (editorOptions.allowCommandImage) {
             commands.push({
                 category: 'Media',
                 name: 'Image',
+                priority: 40,
                 description: 'Insert an image.',
                 fontawesome: 'fa-file-image-o',
                 callback: () => {
@@ -1912,10 +1923,11 @@ const Wysiwyg = Widget.extend({
                 },
             });
         }
-        if (options.allowCommandVideo) {
+        if (editorOptions.allowCommandVideo) {
             commands.push({
                 category: 'Media',
                 name: 'Video',
+                priority: 30,
                 description: 'Insert a video.',
                 fontawesome: 'fa-file-video-o',
                 callback: () => {
@@ -1923,10 +1935,13 @@ const Wysiwyg = Widget.extend({
                 },
             });
         }
-        if (options.powerboxCommands) {
-            commands.push(...options.powerboxCommands);
+        if (editorOptions.powerboxCategories) {
+            categories.push(...editorOptions.powerboxCategories);
         }
-        return commands;
+        if (editorOptions.powerboxCommands) {
+            commands.push(...editorOptions.powerboxCommands);
+        }
+        return {commands, categories};
     },
 
     /**
