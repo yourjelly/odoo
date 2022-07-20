@@ -241,12 +241,16 @@ export class AnalyticJson extends Component {
     validate() {
         for (let group_id in this.list) {
             if (this.groupStatus(group_id) === 'red') {
-                this.props.invalidate();
+                this.invalidate();
                 console.log('invalidate called because ', group_id, ' is ', this.groupStatus(group_id));
                 return false;
             }
         }
         return true;
+    }
+
+    invalidate() {
+        this.props.record.setInvalidField(this.props.name);
     }
 
     get firstIncompletePlanId() {
@@ -493,15 +497,6 @@ AnalyticJson.components = {
 }
 AnalyticJson.props = {
     ...standardFieldProps,
-    invalidate: { type: Function, optional: true },
 }
-AnalyticJson.defaultProps = {
-    invalidate: () => {},
-};
-AnalyticJson.extractProps = (fieldName, record, attrs) => {
-    return {
-        invalidate: () => record.setInvalidField(fieldName),
-    };
-};
 
 registry.category("fields").add("analytic_json", AnalyticJson);
