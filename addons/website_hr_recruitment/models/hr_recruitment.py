@@ -59,8 +59,7 @@ class Job(models.Model):
 
     @mute_logger('odoo.addons.base.models.ir_qweb')
     def _get_default_description(self):
-        default_description = self.env.ref("website_hr_recruitment.default_description", raise_if_not_found=False)
-        return (default_description._render() if default_description else "")
+        return self.env['ir.qweb']._render("website_hr_recruitment.default_description", raise_if_not_found=False)
 
     def _get_default_website_description(self):
         return self.env['ir.qweb']._render("website_hr_recruitment.default_website_description", raise_if_not_found=False)
