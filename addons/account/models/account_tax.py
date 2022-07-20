@@ -1106,6 +1106,16 @@ class AccountTax(models.Model):
                 subtotal_order[subtotal_title] = sequence
                 groups_by_subtotal[subtotal_title] = []
 
+            # If the invoice has an early payment discount with tax included in the computation :
+            discounted_amount_tax_group = False
+            if hasattr(line_vals['record'], 'move_id'):
+                move_id_payment_term = line_vals['record'].move_id.invoice_payment_term_id
+                if move_id_payment_term.has_early_payment:
+                    if move_id_payment_term.discount_computation == 'included':
+                        discounted_amount_tax_group = tax_group_vals['tax_amount'] - ((tax_group_vals['tax_amount']/100) * move_id_payment_term.percentage_to_discount)
+                    else:
+                        discounted_amount_tax_group = tax_group_vals['tax_amount']
+
             groups_by_subtotal[subtotal_title].append({
                 'group_key': tax_group.id,
                 'tax_group_id': tax_group.id,
@@ -1114,20 +1124,33 @@ class AccountTax(models.Model):
                 'tax_group_base_amount': tax_group_vals['base_amount'],
                 'formatted_tax_group_amount': formatLang(self.env, tax_group_vals['tax_amount'], currency_obj=currency),
                 'formatted_tax_group_base_amount': formatLang(self.env, tax_group_vals['base_amount'], currency_obj=currency),
+                'discounted_amount_tax_group':discounted_amount_tax_group,
+                'formatted_discounted_amount_tax_group': formatLang(self.env, discounted_amount_tax_group, currency_obj=currency)
             })
 
         # ==== Build the final result ====
 
         subtotals = []
         for subtotal_title in sorted(subtotal_order.keys(), key=lambda k: subtotal_order[k]):
+            discounted_amount_tax = False
             amount_total = amount_untaxed + amount_tax
             subtotals.append({
                 'name': subtotal_title,
                 'amount': amount_total,
                 'formatted_amount': formatLang(self.env, amount_total, currency_obj=currency),
+                'discounted_amount_tax': discounted_amount_tax,
+                'formatted_discounted_amount_tax': formatLang(self.env, discounted_amount_tax, currency_obj=currency)
             })
             amount_tax += sum(x['tax_group_amount'] for x in groups_by_subtotal[subtotal_title])
-
+            discounted_amount_tax = False
+            if hasattr(line_vals['record'], 'move_id'):
+                move_id_payment_term = line_vals['record'].move_id.invoice_payment_term_id
+                if move_id_payment_term.has_early_payment:
+                    if move_id_payment_term.discount_computation == 'included':
+                        discounted_amount_tax = amount_tax - ((amount_tax/100) * move_id_payment_term.percentage_to_discount)
+                    else:
+                        discounted_amount_tax = amount_tax
+            subtotals[-1]['discounted_amount_tax'] = discounted_amount_tax
         amount_total = amount_untaxed + amount_tax
 
         return {
