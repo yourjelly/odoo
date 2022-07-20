@@ -302,7 +302,8 @@ class Orderpoint(models.Model):
 
     @api.constrains('product_id')
     def check_product_is_not_kit(self):
-        if self.env['mrp.bom'].search(['|', ('product_id', 'in', self.product_id.ids),
+        boms = self.env['mrp.bom'].search(['|', ('product_id', 'in', self.product_id.ids),
                                             '&', ('product_id', '=', False), ('product_tmpl_id', 'in', self.product_id.product_tmpl_id.ids),
-                                       ('type', '=', 'phantom')], count=True):
-            raise ValidationError(_("A product with a kit-type bill of materials can not have a reordering rule."))
+                                           ('type', '=', 'phantom')])
+        if len(boms):
+            raise ValidationError(_("A product with a kit-type bill of materials can not have a reordering rule.") + ("\n{}".format("\n".join(["BOM #{} {}".format(b.id, b.product_id.name) for b in boms]))))
