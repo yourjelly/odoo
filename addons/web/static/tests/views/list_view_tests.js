@@ -835,7 +835,7 @@ QUnit.module("Views", (hooks) => {
         fieldRegistry.add("nolabel_char", NoLabelCharField);
 
         class LabelCharField extends CharField {}
-        LabelCharField.displayName = "Some static label";
+        LabelCharField.label = "Some static label";
         fieldRegistry.add("label_char", LabelCharField);
 
         await makeView({
