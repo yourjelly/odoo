@@ -441,7 +441,7 @@ export class ListRenderer extends Component {
             }));
     }
 
-    displayOptionalFields() {
+    get displayOptionalFields() {
         return this.getOptionalFields.length;
     }
 
