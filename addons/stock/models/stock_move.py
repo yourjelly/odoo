@@ -1330,6 +1330,7 @@ class StockMove(models.Model):
             'company_id': self.company_id.id,
         }
         if quantity:
+            # TODO could be also move in create/write
             rounding = self.env['decimal.precision'].precision_get('Product Unit of Measure')
             uom_quantity = self.product_id.uom_id._compute_quantity(quantity, self.product_uom, rounding_method='HALF-UP')
             uom_quantity = float_round(uom_quantity, precision_digits=rounding)
@@ -1387,30 +1388,29 @@ class StockMove(models.Model):
             if float_compare(taken_quantity, int(taken_quantity), precision_digits=rounding) != 0:
                 taken_quantity = 0
 
-        try:
-            with self.env.cr.savepoint():
-                if not float_is_zero(taken_quantity, precision_rounding=self.product_id.uom_id.rounding):
-                    quants = self.env['stock.quant']._update_reserved_quantity(
-                        self.product_id, location_id, taken_quantity, lot_id=lot_id,
-                        package_id=package_id, owner_id=owner_id, strict=strict
-                    )
-        except UserError:
-            taken_quantity = 0
+
+        if not float_is_zero(taken_quantity, precision_rounding=self.product_id.uom_id.rounding):
+            quants = self.env['stock.quant']._get_reserve_quantity(
+                self.product_id, location_id, taken_quantity, lot_id=lot_id,
+                package_id=package_id, owner_id=owner_id, strict=strict
+            )
 
         # Find a candidate move line to update or create a new one.
         for reserved_quant, quantity in quants:
+            if float_compare(quantity, 0, precision_digits=rounding) <= 0:
+                continue
             to_update = next((line for line in self.move_line_ids if line._reservation_is_updatable(quantity, reserved_quant)), False)
             if to_update:
                 uom_quantity = self.product_id.uom_id._compute_quantity(quantity, to_update.product_uom_id, rounding_method='HALF-UP')
                 uom_quantity = float_round(uom_quantity, precision_digits=rounding)
                 uom_quantity_back_to_product_uom = to_update.product_uom_id._compute_quantity(uom_quantity, self.product_id.uom_id, rounding_method='HALF-UP')
             if to_update and float_compare(quantity, uom_quantity_back_to_product_uom, precision_digits=rounding) == 0:
-                to_update.with_context(bypass_reservation_update=True).reserved_uom_qty += uom_quantity
+                to_update.with_context(reserved_quant=reserved_quant).reserved_uom_qty += uom_quantity
             else:
                 if self.product_id.tracking == 'serial':
-                    self.env['stock.move.line'].create([self._prepare_move_line_vals(quantity=1, reserved_quant=reserved_quant) for i in range(int(quantity))])
+                    self.env['stock.move.line'].with_context(reserved_quant=reserved_quant).create([self._prepare_move_line_vals(quantity=1, reserved_quant=reserved_quant) for i in range(int(quantity))])
                 else:
-                    self.env['stock.move.line'].create(self._prepare_move_line_vals(quantity=quantity, reserved_quant=reserved_quant))
+                    self.env['stock.move.line'].with_context(reserved_quant=reserved_quant).create(self._prepare_move_line_vals(quantity=quantity, reserved_quant=reserved_quant))
         return taken_quantity
 
     def _should_bypass_reservation(self, forced_location=False):
