@@ -37,6 +37,7 @@ import {
 } from "../helpers/utils";
 import {
     editFavoriteName,
+    editPager,
     getButtons,
     getFacetTexts,
     getPagerLimit,
@@ -44,6 +45,7 @@ import {
     groupByMenu,
     pagerNext,
     pagerPrevious,
+    removeFacet,
     saveFavorite,
     toggleActionMenu,
     toggleFavoriteMenu,
@@ -14127,4 +14129,111 @@ QUnit.module("Views", (hooks) => {
 
         assert.containsNone(target, ".o_selected_row");
     });
+
+    QUnit.test("keep custom limit when changing search", async (assert) => {
+        const limits = [1, 2, 2];
+        await makeView({
+            resModel: "foo",
+            type: "list",
+            arch: `<list limit="1"><field name="display_name" /></list>`,
+            serverData,
+            mockRPC(route, args) {
+                if (args.method === "web_search_read") {
+                    assert.strictEqual(args.kwargs.limit, limits.shift());
+                }
+            },
+        });
+
+        await editPager(target, "1-2");
+        await validateSearch(target);
+    });
+    QUnit.test("keep custom limit when changing search (grouped list)", async (assert) => {
+        const limits = [80, 2, 2];
+        await makeView({
+            resModel: "foo",
+            type: "list",
+            arch: `<list limit="1"><field name="display_name" /></list>`,
+            serverData,
+            groupBy: ["bar"],
+            mockRPC(route, args) {
+                if (args.method === "web_read_group") {
+                    assert.strictEqual(args.kwargs.limit, limits.shift());
+                }
+                if (args.method === "web_search_read") {
+                    assert.strictEqual(args.kwargs.limit, 1);
+                }
+            },
+        });
+
+        await editPager(target, "1-2");
+        await validateSearch(target);
+    });
+
+    QUnit.test(
+        "keep custom limit when changing search (ungrouped to grouped list)",
+        async (assert) => {
+            const recLimits = [1, 2, 2, 2];
+            const groupLimits = [80, 80];
+
+            serverData.models.foo.fields.bar.sortable = true;
+            await makeView({
+                resModel: "foo",
+                type: "list",
+                arch: `<list limit="1"><field name="display_name" /></list>`,
+                serverData,
+                mockRPC(route, args) {
+                    if (args.method === "web_read_group") {
+                        assert.strictEqual(args.kwargs.limit, groupLimits.shift());
+                    }
+                    if (args.method === "web_search_read") {
+                        assert.strictEqual(args.kwargs.limit, recLimits.shift());
+                    }
+                },
+            });
+
+            await editPager(target, "1-2");
+            await groupByMenu(target, "bar");
+            await validateSearch(target);
+
+            assert.strictEqual(recLimits.length, 2);
+            assert.strictEqual(groupLimits.length, 0);
+
+            for (const el of target.querySelectorAll(".o_group_header")) {
+                await click(el);
+            }
+
+            assert.strictEqual(recLimits.length, 0);
+        }
+    );
+
+    QUnit.test(
+        "keep custom limit when changing search (ungrouped list to grouped to ungrouped list)",
+        async (assert) => {
+            const recLimits = [1, 2, 2];
+
+            serverData.models.foo.fields.bar.sortable = true;
+            await makeView({
+                resModel: "foo",
+                type: "list",
+                arch: `<list limit="1"><field name="display_name" /></list>`,
+                serverData,
+                mockRPC(route, args) {
+                    if (args.method === "web_read_group") {
+                        assert.strictEqual(args.kwargs.limit, 80);
+                    }
+                    if (args.method === "web_search_read") {
+                        assert.strictEqual(args.kwargs.limit, recLimits.shift());
+                    }
+                },
+            });
+
+            await editPager(target, "1-2");
+            await groupByMenu(target, "bar");
+            await removeFacet(target);
+
+            assert.strictEqual(recLimits.length, 0);
+
+            assert.strictEqual(recLimits.length, 0);
+        }
+    );
 });

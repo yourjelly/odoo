@@ -1331,7 +1331,7 @@ class DynamicList extends DataPoint {
             params.orderBy && params.orderBy.length ? params.orderBy : state.orderBy || []; // rename orderBy
         this.offset = state.offset || 0;
         this.count = 0;
-        this.limit = params.limit || state.limit || this.constructor.DEFAULT_LIMIT;
+        this.limit = state.limit || params.limit || this.constructor.DEFAULT_LIMIT;
         this.isDomainSelected = false;
         this.loadedCount = state.loadedCount || 0;
         this.previousParams = state.previousParams || "[]";
@@ -1952,6 +1952,7 @@ export class DynamicGroupList extends DynamicList {
         this.expand = params.expand;
         this.limitByGroup = this.limit;
         this.limit =
+            state.groupsLimit ||
             params.groupsLimit ||
             (this.expand ? this.constructor.DEFAULT_LOAD_LIMIT : this.constructor.DEFAULT_LIMIT);
         this.onCreateRecord =
@@ -2077,6 +2078,8 @@ export class DynamicGroupList extends DynamicList {
         return {
             ...super.exportState(),
             groups: this.groups,
+            groupsLimit: this.limit,
+            limitByGroup: this.limitByGroup,
         };
     }
 
@@ -3283,6 +3286,10 @@ export class RelationalModel extends Model {
                     DpClass = this.constructor.DynamicGroupList;
                 } else {
                     DpClass = this.constructor.DynamicRecordList;
+                }
+                if (!(params.groupBy || []).length && "limitByGroup" in state) {
+                    // transition from grouped to ungrouped list: keep the records limit
+                    state.limit = state.limitByGroup;
                 }
                 break;
             }
