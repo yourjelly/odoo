@@ -439,9 +439,10 @@ export class AnalyticJson extends Component {
             }
             case "escape": {
                 if (this.isDropdownOpen) {
-                    this.forceCloseEditor();
+                    this.closeAnalyticEditor();
                     break;
                 }
+                this.resetRecentlyClosed();
                 return;
             }
             default: {
@@ -458,7 +459,7 @@ export class AnalyticJson extends Component {
         if (!this.widgetRef.el.contains(ev.target) && this.recentlyClosed) {
             this.resetRecentlyClosed(); // in case the click happened after pressing escape (like tab/ shift+tab)
         }
-        if (this.isDropdownOpen && this.dropdownRef.el && !this.dropdownRef.el.contains(ev.target)) {
+        if (this.isDropdownOpen && this.dropdownRef.el && !this.dropdownRef.el.contains(ev.target) && !this.widgetRef.el.contains(ev.target)) {
             console.log('window click outside dropdown...closing');
             this.closeAnalyticEditor();
         }
