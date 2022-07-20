@@ -130,9 +130,7 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_readonly'),
     content: _t('Go to inventory tab'),
     position: 'top',
 }, {
-    // FIXME WOWL: can't toggle boolean by clicking on label (only with tour helpers, only in dialog ???)
-    // trigger: '.o_field_widget[name=route_ids] .form-check > label:contains("Replenish on Order (MTO)")',
-    trigger: '.o_field_widget[name=route_ids] .form-check:contains("Replenish on Order (MTO)") input',
+    trigger: '.o_field_widget[name=route_ids] .form-check > label:contains("Replenish on Order (MTO)")',
     content: _t('Check Replenish on Order (MTO)'),
     position: 'right',
 }, {
