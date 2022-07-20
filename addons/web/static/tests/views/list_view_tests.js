@@ -14127,4 +14127,15 @@ QUnit.module("Views", (hooks) => {
 
         assert.containsNone(target, ".o_selected_row");
     });
+
+    QUnit.test("list with class", async function (assert) {
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: '<tree class="myClass"><field name="foo"/></tree>',
+        });
+
+        assert.hasClass(target.querySelector(".o_list_renderer"), "myClass");
+    });
 });
