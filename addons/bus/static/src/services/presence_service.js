@@ -2,16 +2,13 @@
 
 import { browser } from '@web/core/browser/browser';
 import { registry } from '@web/core/registry';
-import core from 'web.core';
+
+const { EventBus } = owl;
 
 export const presenceService = {
-    start(env) {
+    start() {
         const LOCAL_STORAGE_PREFIX = 'presence';
-
-        // map window_focus event from the wowlBus to the legacy one.
-        env.bus.addEventListener('window_focus', isOdooFocused => {
-            core.bus.trigger('window_focus', isOdooFocused);
-        });
+        const bus = new EventBus();
 
         let isOdooFocused = true;
         let lastPresenceTime = (
@@ -29,14 +26,14 @@ export const presenceService = {
             browser.localStorage.setItem(`${LOCAL_STORAGE_PREFIX}.focus`, isOdooFocused);
             if (isFocused) {
                 lastPresenceTime = new Date().getTime();
-                env.bus.trigger('window_focus', isOdooFocused);
+                bus.trigger('window_focus', isOdooFocused);
             }
         }
 
         function onStorage({ key, newValue }) {
             if (key === `${LOCAL_STORAGE_PREFIX}.focus`) {
                 isOdooFocused = JSON.parse(newValue);
-                env.bus.trigger('window_focus', newValue);
+                bus.trigger('window_focus', newValue);
             }
             if (key === `${LOCAL_STORAGE_PREFIX}.lastPresence`) {
                 lastPresenceTime = JSON.parse(newValue);
@@ -49,14 +46,14 @@ export const presenceService = {
         browser.addEventListener('click', onPresence);
         browser.addEventListener('keydown', onPresence);
 
-        return {
+        return Object.assign(bus, {
             getLastPresence() {
                 return lastPresenceTime;
             },
             isOdooFocused() {
                 return isOdooFocused;
             }
-        };
+        });
     },
 };
 
