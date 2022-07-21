@@ -717,37 +717,7 @@ describe('Copy and paste', () => {
             it('should paste a text when selection across two p', async () => {
                 await testEditor(BasicEditor, {
                     contentBefore: '<div>a<p>b[c</p><p>d]e</p>f</div>',
-                    stepFunction: async editor => {
-                        await pasteHtml(editor, complexHtmlData);
-                    },
-                    contentAfter: '<div>a<p>b12</p><p>34[]e</p>f</div>',
-                });
-                await testEditor(BasicEditor, {
-                    contentBefore: '<div>a<p>b[c</p>- -<p>d]e</p>f</div>',
-                    stepFunction: async editor => {
-                        await pasteHtml(editor, complexHtmlData);
-                    },
-                    contentAfter: '<div>a<p>b12</p><p>34[]e</p>f</div>',
-                });
-            });
-            it('should paste a text when selection leave a span (1)', async () => {
-                await testEditor(BasicEditor, {
-                    contentBefore: '<div>1ab<span>c[d</span>e]f</div>',
-                    stepFunction: async editor => {
-                        await pasteHtml(editor, complexHtmlData);
-                    },
-                    contentAfter: '<div>1ab<span>c12<br>34[]</span>f</div>',
-                });
-                await testEditor(BasicEditor, {
-                    contentBefore: '<div>2a[b<span>c]d</span>ef</div>',
-                    stepFunction: async editor => {
-                        await pasteHtml(editor, complexHtmlData);
-                    },
-                    contentAfter: '<div>2a12<br>34[]<span>d</span>ef</div>',
-                });
-            });
-            it('should paste a text when selection leave a span (2)', async () => {
-                await testEditor(BasicEditor, {
+                    15.0-reset-bgcolor-test-dhba{
                     contentBefore: '<p>1ab<span>c[d</span>e]f</p>',
                     stepFunction: async editor => {
                         await pasteHtml(editor, complexHtmlData);
@@ -1456,4 +1426,49 @@ describe('Copy and paste', () => {
             });
         });
     });
+    describe('Copy Text', async () => {
+        const simpleHtmlCharX = '<span style="background-color: rgb(4, 4, 5, 0.07);">Text</span>'
+        describe('range collapsed', async () => {
+            it('should paste and transform a text in a font', async () => {
+                await testEditor(BasicEditor, {
+                    stepFunction: async editor => {
+                        await pasteHtml(editor,simpleHtmlCharX);
+                    },
+                    contentAfter: '<p><font style="background-color: rgba(4, 4, 5, 0.07);>Text</font></p>',
+                });
+            });
+            it('should paste and transform a text in a span or font', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<p>a<span style="font-weight:bolder">b[]c</span>d</p>',
+                    stepFunction: async editor => {
+                        await pasteHtml(editor,simpleHtmlCharX);
+                    },
+                    contentAfter: '<p><font style="background-color: rgba(4, 4, 5, 0.07);">x</font>a<span style="font-weight: bolder">b[]c</span>d<br></p>',
+                });
+            });
+        });
+    });
+    describe('Copy Text P', async () => {
+        const simpleHtmlCharX = '<p style="background-color: rgb(4, 4, 5, 0.07);">Text</span>'
+        describe('range collapsed', async () => {
+            it('should paste and transform a text in a font from p', async () => {
+                await testEditor(BasicEditor, {
+                    stepFunction: async editor => {
+                        await pasteHtml(editor,simpleHtmlCharX);
+                    },
+                    contentAfter: '<p><font style="background-color: rgba(4, 4, 5, 0.07);>Text</font></p>',
+                });
+            });
+            it('should paste and transform a text in a span or font from p', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<p>a<span style="font-weight:bolder">b[]c</span>d</p>',
+                    stepFunction: async editor => {
+                        await pasteHtml(editor,simpleHtmlCharX);
+                    },
+                    contentAfter: '<p><font style="background-color: rgba(4, 4, 5, 0.07);">x</font>a<span style="font-weight: bolder">b[]c</span>d<br></p>',
+                });
+            });
+        });
+    });
+
 });

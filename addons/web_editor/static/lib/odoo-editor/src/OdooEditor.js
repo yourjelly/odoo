@@ -2179,6 +2179,7 @@ export class OdooEditor extends EventTarget {
      * @param {Node} node
      */
     _cleanForPaste(node) {
+        debugger;
         if (node.nodeName === 'FONT') {
             return;
         }
@@ -2201,13 +2202,13 @@ export class OdooEditor extends EventTarget {
                     let fontStyle = '';
                     const allowedSpanInlineStyles = spanInlineStyles.filter(rawStyle => {
                         const [styleName, styleValue] = rawStyle.split(':');
-                        let whitelistStyle = CLIPBOARD_WHITELISTS.spanStyle[styleName.trim()];
-                        let style = whitelistStyle && !whitelistStyle.defaultValues.includes(styleValue.trim());
-                        if (['color', 'background-color'].includes(styleName.trim()) && style) {
+                        const style = CLIPBOARD_WHITELISTS.spanStyle[styleName.trim()];
+                        const hasNotDefaultValues = style && !style.defaultValues.includes(styleValue.trim());
+                        if (['color', 'background-color'].includes(styleName.trim()) && hasNotDefaultValues) {
                             fontStyle += rawStyle.concat(';');
-                            style = false;
+                        } else {
+                            return hasNotDefaultValues;
                         }
-                        return style;
                     });
                     if (fontStyle) {
                         const font = document.createElement('font');
@@ -3035,6 +3036,7 @@ export class OdooEditor extends EventTarget {
      * Handle safe pasting of html or plain text into the editor.
      */
     _onPaste(ev) {
+        debugger;
         ev.preventDefault();
         const sel = this.document.getSelection();
         const files = getImageFiles(ev.clipboardData);
