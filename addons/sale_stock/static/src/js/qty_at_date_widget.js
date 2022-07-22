@@ -1,5 +1,4 @@
-odoo.define('sale_stock.QtyAtDateWidget', function (require) {
-"use strict";
+import { registry } from "@web/core/registry";
 
 var core = require('web.core');
 var QWeb = core.qweb;
@@ -8,35 +7,35 @@ var Widget = require('web.Widget');
 var widget_registry = require('web.widget_registry');
 var utils = require('web.utils');
 
-var _t = core._t;
+import { _t } from 'web.core';
 var time = require('web.time');
 
-var QtyAtDateWidget = Widget.extend({
-    template: 'sale_stock.qtyAtDate',
-    events: _.extend({}, Widget.prototype.events, {
-        'click .fa-area-chart': '_onClickButton',
-    }),
+export class QtyAtDateWidget extends Component {
+
+    // events: _.extend({}, Widget.prototype.events, {
+    //     'click .fa-area-chart': '_onClickButton',
+    // })
 
     /**
      * @override
      * @param {Widget|null} parent
      * @param {Object} params
      */
-    init: function (parent, params) {
+    init(parent, params) {
         this.data = params.data;
         this.fields = params.fields;
         this._updateData();
         this._super(parent);
-    },
+    }
 
-    start: function () {
+    start() {
         var self = this;
         return this._super.apply(this, arguments).then(function () {
             self._setPopOver();
         });
-    },
+    }
 
-    _updateData: function() {
+    _updateData() {
         // add some data to simplify the template
         if (this.data.scheduled_date) {
             var qty_to_deliver = utils.round_decimals(this.data.qty_to_deliver, this.fields.qty_to_deliver.digits[1]);
@@ -54,9 +53,9 @@ var QtyAtDateWidget = Widget.extend({
                 this.data.forecasted_issue = !this.data.will_be_fulfilled || this.data.will_be_late;
             }
         }
-    },
+    }
     
-    updateState: function (state) {
+    updateState(state) {
         this.$el.popover('dispose');
         var candidate = state.data[this.getParent().currentRow];
         if (candidate) {
@@ -65,7 +64,7 @@ var QtyAtDateWidget = Widget.extend({
             this.renderElement();
             this._setPopOver();
         }
-    },
+    }
     /**
      * Redirect to the product graph view.
      *
@@ -90,7 +89,7 @@ var QtyAtDateWidget = Widget.extend({
             sale_line_to_match_id: this.data.id,
         };
         return this.do_action(action);
-    },
+    }
 
     _getContent() {
         if (!this.data.scheduled_date) {
@@ -105,7 +104,7 @@ var QtyAtDateWidget = Widget.extend({
         }));
         $content.on('click', '.action_open_forecast', this._openForecast.bind(this));
         return $content;
-    },
+    }
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
@@ -127,20 +126,19 @@ var QtyAtDateWidget = Widget.extend({
             delay: {'show': 0, 'hide': 100 },
         };
         this.$el.popover(options);
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
-    _onClickButton: function () {
+    _onClickButton() {
         // We add the property special click on the widget link.
         // This hack allows us to trigger the popover (see _setPopOver) without
         // triggering the _onRowClicked that opens the order line form view.
         this.$el.find('.fa-area-chart').prop('special_click', true);
-    },
-});
+    }
+};
 
-widget_registry.add('qty_at_date_widget', QtyAtDateWidget);
+QtyAtDateWidget.template = 'sale_stock.qtyAtDate';
 
-return QtyAtDateWidget;
-});
+registry.category("fields").add("qty_at_date_widget", QtyAtDateWidget);
