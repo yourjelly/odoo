@@ -114,15 +114,15 @@ class AccountEdiFormat(models.Model):
             # DEBUG: send directly to the test platform (the one used by ecosio)
             #response = self.env['account.edi.common']._check_xml_ecosio(invoice, xml_content, builder._export_invoice_ecosio_schematrons())
 
+            # attachments are created when opening the send & print wizard, we don't want it to appear on the move
+            # multiple times (they are saved on the move when closing the wizard, when clicking 'send & print')
             attachment_create_vals = {
                 'name': builder._export_invoice_filename(invoice),
                 'raw': xml_content,
                 'mimetype': 'application/xml',
+                'res_id': None,
+                'res_model': None,
             }
-            # we don't want the Factur-X and E-FFF xml to appear in the attachment of the invoice when confirming it
-            # E-FFF will appear after the pdf is generated, Factur-X will never appear (it's contained in the PDF)
-            if self.code not in ['facturx_1_0_05', 'efff_1']:
-                attachment_create_vals.update({'res_id': invoice.id, 'res_model': 'account.move'})
 
             attachment = self.env['ir.attachment'].create(attachment_create_vals)
             res[invoice] = {
@@ -132,19 +132,15 @@ class AccountEdiFormat(models.Model):
 
         return res
 
-    def _is_embedding_to_invoice_pdf_needed(self):
-        # EXTENDS account_edi
-        self.ensure_one()
-
-        if self.code == 'facturx_1_0_05':
-            return True
-        return super()._is_embedding_to_invoice_pdf_needed()
-
     def _prepare_invoice_report(self, pdf_writer, edi_document):
         # EXTENDS account_edi
         self.ensure_one()
         if self.code != 'facturx_1_0_05':
             return super()._prepare_invoice_report(pdf_writer, edi_document)
+
+        # TODO: generate edi document for facturx only
+        edi_document._process_documents_no_web_services()
+
         if not edi_document.attachment_id:
             return
 

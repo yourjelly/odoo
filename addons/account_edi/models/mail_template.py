@@ -13,7 +13,7 @@ class MailTemplate(models.Model):
         :param document: an edi document
         :return: list with a tuple with the name and base64 content of the attachment
         """
-        if not document.attachment_id:
+        if not document.attachment_id or document.attachment_id.name == 'factur-x.xml':
             return []
         return [(document.attachment_id.name, document.attachment_id.datas)]
 
@@ -30,6 +30,10 @@ class MailTemplate(models.Model):
 
         records = self.env[self.model].browse(res_ids)
         for record in records:
+            # Factur-x is created when rendering the pdf
+            record.edi_document_ids.filtered(
+                lambda doc: doc.edi_format_id.code != 'facturx_1_0_05')._process_documents_no_web_services()
+
             record_data = (res[record.id] if multi_mode else res)
             for doc in record.edi_document_ids:
                 record_data.setdefault('attachments', [])

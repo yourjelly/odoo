@@ -801,7 +801,9 @@ class IrActionsReport(models.Model):
                     'type': 'binary',
                 })
 
-            if attachment_vals_list:
+            # Avoid multiple PDF creation when using the 'send & print' wizard (PDF is rendered again when closing
+            # the wizard)
+            if attachment_vals_list and not self.env.context.get('is_origin_send_and_print'):
                 attachment_names = ', '.join(x['name'] for x in attachment_vals_list)
                 try:
                     self.env['ir.attachment'].create(attachment_vals_list)

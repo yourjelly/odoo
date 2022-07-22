@@ -491,12 +491,13 @@ class AccountMove(models.Model):
         if not res:
             return False
 
-        edi_documents_to_send = self.edi_document_ids.filtered(lambda x: x.state == 'to_send')
+        edi_documents_to_send = self.edi_document_ids.filtered(lambda x: x.state in ['to_send', 'to_download'])
         return not bool(edi_documents_to_send)
 
     def _post(self, soft=True):
         # OVERRIDE
         # Set the electronic document to be posted and post immediately for synchronous formats.
+        # TODO: edi documents generation should now be handled when send & printing
         posted = super()._post(soft=soft)
 
         edi_document_vals_list = []
@@ -512,18 +513,17 @@ class AccountMove(models.Model):
                     existing_edi_document = move.edi_document_ids.filtered(lambda x: x.edi_format_id == edi_format)
                     if existing_edi_document:
                         existing_edi_document.write({
-                            'state': 'to_send',
+                            'state': 'to_send' if edi_format._needs_web_services() else 'not_applicable',
                             'attachment_id': False,
                         })
                     else:
                         edi_document_vals_list.append({
                             'edi_format_id': edi_format.id,
                             'move_id': move.id,
-                            'state': 'to_send',
+                            'state': 'to_send' if edi_format._needs_web_services() else 'not_applicable',
                         })
 
         self.env['account.edi.document'].create(edi_document_vals_list)
-        posted.edi_document_ids._process_documents_no_web_services()
         self.env.ref('account_edi.ir_cron_edi_network')._trigger()
         return posted
 

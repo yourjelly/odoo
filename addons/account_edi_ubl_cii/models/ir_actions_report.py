@@ -44,8 +44,6 @@ class IrActionsReport(models.Model):
                 tree.insert(anchor_index, etree.fromstring(to_inject))
                 new_xml = etree.tostring(cleanup_xml_node(tree))
                 edi_attachment.write({
-                    'res_model': 'account.move',
-                    'res_id': invoice.id,
                     'datas': base64.b64encode(new_xml),
                     'mimetype': 'application/xml',
                 })
