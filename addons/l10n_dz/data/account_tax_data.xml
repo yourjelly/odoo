@@ -13,6 +13,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -24,6 +25,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -31,7 +33,6 @@
             }),
         ]"/>
     </record>
-
     <record id="tva_normale19" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
         <field name="name">TVA (vente) 19,0%</field>
@@ -45,6 +46,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -56,6 +58,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -63,7 +66,6 @@
             }),
         ]"/>
     </record>
-
     <record id="tva_acq_specifique9" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
         <field name="name">TVA (achat) 9,0%</field>
@@ -77,6 +79,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -88,6 +91,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -95,7 +99,6 @@
             }),
         ]"/>
     </record>
-
     <record id="tva_specifique9" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
         <field name="name">TVA (vente) 9,0%</field>
@@ -109,6 +112,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -120,6 +124,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -127,7 +132,6 @@
             }),
         ]"/>
     </record>
-
     <record id="tva_imm_normale19" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
         <field name="name">TVA immobilisation (achat) 19,0%</field>
@@ -141,6 +145,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -152,6 +157,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -159,7 +165,6 @@
             }),
         ]"/>
     </record>
-
     <record id="tva_imm_specifique9" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
         <field name="name">TVA immobilisation (achat) 9,0%</field>
@@ -173,6 +178,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -184,6 +190,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -191,7 +198,6 @@
             }),
         ]"/>
     </record>
-
     <record id="tva_exo_0" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
         <field name="name">TVA 0% EXO (achat)</field>
@@ -205,6 +211,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -215,13 +222,13 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
             }),
         ]"/>
     </record>
-
     <record id="tva_purchase_0" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
         <field name="name">TVA 0% (achat)</field>
@@ -235,6 +242,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -245,13 +253,13 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
             }),
         ]"/>
     </record>
-
     <record id="tva_0" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
         <field name="name">TVA 0% (vente)</field>
@@ -265,6 +273,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -275,13 +284,13 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
             }),
         ]"/>
     </record>
-
     <record id="tva_export_0" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
         <field name="name">TVA 0% export (vente)</field>
@@ -295,6 +304,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -305,13 +315,13 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
             }),
         ]"/>
     </record>
-
     <record id="tva_import_0" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
         <field name="name">TVA 0% import (achat)</field>
@@ -325,6 +335,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -335,6 +346,7 @@
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
