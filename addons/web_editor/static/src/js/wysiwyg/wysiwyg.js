@@ -1879,11 +1879,12 @@ const Wysiwyg = Widget.extend({
                 },
             },
             {
-                groupName: 'Structure',
-                title: '2 columns',
+                category: 'Structure',
+                name: '2 columns',
+                priority: 13,
                 description: 'Convert into 2 columns.',
                 fontawesome: 'fa-columns',
-                callback: () => this.odooEditor.execCommand('columnize', 2, options.pAfterColumn),
+                callback: () => this.odooEditor.execCommand('columnize', 2, editorOptions.pAfterColumn),
                 isDisabled: () => {
                     const anchor = this.odooEditor.document.getSelection().anchorNode;
                     const row = closestElement(anchor, '.o_text_columns .row', true);
@@ -1891,11 +1892,12 @@ const Wysiwyg = Widget.extend({
                 },
             },
             {
-                groupName: 'Structure',
-                title: '3 columns',
+                category: 'Structure',
+                name: '3 columns',
+                priority: 12,
                 description: 'Convert into 3 columns.',
                 fontawesome: 'fa-columns',
-                callback: () => this.odooEditor.execCommand('columnize', 3, options.pAfterColumn),
+                callback: () => this.odooEditor.execCommand('columnize', 3, editorOptions.pAfterColumn),
                 isDisabled: () => {
                     const anchor = this.odooEditor.document.getSelection().anchorNode;
                     const row = closestElement(anchor, '.o_text_columns .row', true);
@@ -1903,11 +1905,12 @@ const Wysiwyg = Widget.extend({
                 },
             },
             {
-                groupName: 'Structure',
-                title: '4 columns',
+                category: 'Structure',
+                name: '4 columns',
+                priority: 11,
                 description: 'Convert into 4 columns.',
                 fontawesome: 'fa-columns',
-                callback: () => this.odooEditor.execCommand('columnize', 4, options.pAfterColumn),
+                callback: () => this.odooEditor.execCommand('columnize', 4, editorOptions.pAfterColumn),
                 isDisabled: () => {
                     const anchor = this.odooEditor.document.getSelection().anchorNode;
                     const row = closestElement(anchor, '.o_text_columns .row', true);
@@ -1915,8 +1918,9 @@ const Wysiwyg = Widget.extend({
                 },
             },
             {
-                groupName: 'Structure',
-                title: 'Remove columns',
+                category: 'Structure',
+                name: 'Remove columns',
+                priority: 10,
                 description: 'Back to one column.',
                 fontawesome: 'fa-columns',
                 callback: () => this.odooEditor.execCommand('columnize', 0),
