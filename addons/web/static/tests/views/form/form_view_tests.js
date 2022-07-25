@@ -8311,6 +8311,14 @@ QUnit.module("Views", (hooks) => {
                         ["CUST2", "second custom"],
                     ];
                 }
+                if (route === "/web/dataset/call_kw/partner/get_field_translations") {
+                    return Promise.resolve([
+                        [
+                            { lang: "CUST", src: "yop", value: "yop"},
+                            { lang: "CUST2", src: "yop", value: "valeur français"},
+                        ],
+                        { "translation_type": "char", "translation_show_src": false }]);
+                }
             },
         });
 
@@ -8325,7 +8333,7 @@ QUnit.module("Views", (hooks) => {
 
         await click(target, ".o_field_translate.btn-link");
         await click(target.querySelectorAll(".modal-footer button")[0]); // save
-        assert.verifySteps(["create", "read", "translate_fields", "get_installed", "search_read"]);
+        assert.verifySteps(["create", "read", "get_installed", "get_field_translations"]);
         assert.containsOnce(target, ".modal");
         assert.strictEqual(target.querySelector(".modal-title").textContent, "Translate: foo");
     });
@@ -8372,12 +8380,20 @@ QUnit.module("Views", (hooks) => {
                         ["CUST2", "second custom"],
                     ];
                 }
+                if (route === "/web/dataset/call_kw/partner/get_field_translations") {
+                    return Promise.resolve([
+                        [
+                            { lang: "CUST", src: "yop", value: "yop"},
+                            { lang: "CUST2", src: "yop", value: "valeur français"},
+                        ],
+                        { "translation_type": "char", "translation_show_src": false }]);
+                }
             },
         });
         assert.verifySteps(["get_views", "read"]);
         await clickEdit(target);
         await click(target, ".o_field_legacy_char .o_field_translate.btn-link");
-        assert.verifySteps(["translate_fields", "get_installed", "search_read"]);
+        assert.verifySteps(["get_installed", "get_field_translations"]);
         assert.containsOnce(target, ".modal");
         assert.strictEqual(target.querySelector(".modal-title").textContent, "Translate: foo");
     });
