@@ -2,7 +2,7 @@
 
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { getNextTabableElement, getPreviousTabableElement, getTabableElements } from "@web/core/utils/ui";
+import { getNextTabableElement, getPreviousTabableElement } from "@web/core/utils/ui";
 import { usePosition } from "@web/core/position_hook";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
@@ -10,6 +10,7 @@ import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { TagsList } from "@web/views/fields/many2many_tags/tags_list";
 import { useOpenMany2XRecord } from "@web/views/fields/relational_utils";
+import { parseFloat as oParseFloat } from "@web/views/fields/parsers";
 
 const { Component, useState, useRef, useExternalListener, onWillUpdateProps, onWillStart, onPatched } = owl;
 
@@ -344,7 +345,7 @@ export class AnalyticJson extends Component {
     }
 
     sumByGroup(id) {
-        return this.list[id].distribution.reduce((prev, next) => prev + (parseFloat(next.percentage) || 0), 0);;
+        return this.listReadyByGroup(id).reduce((prev, next) => prev + (parseFloat(next.percentage) || 0), 0);
     }
 
     remainderByGroup(id) {
@@ -465,9 +466,18 @@ export class AnalyticJson extends Component {
         }
     }
 
+    parse(value) {
+        try {
+            return typeof value === 'string' || value instanceof String ? oParseFloat(value) : value;
+        } catch (error) {
+            console.log('cannot parse', value, 'to float');
+            return 0;
+        }
+    }
+
     async percentageChanged(dist_tag, ev) {
         console.log('percentageChanged');
-        dist_tag.percentage = parseFloat(ev.target.value);
+        dist_tag.percentage = this.parse(ev.target.value);
         if (!this.remainderByGroup(dist_tag.group_id)) this.keepFocusInPlan = false;
         this.autoFill();
     }
