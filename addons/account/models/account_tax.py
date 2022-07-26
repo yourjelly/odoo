@@ -1124,7 +1124,7 @@ class AccountTax(models.Model):
                 'tax_group_base_amount': tax_group_vals['base_amount'],
                 'formatted_tax_group_amount': formatLang(self.env, tax_group_vals['tax_amount'], currency_obj=currency),
                 'formatted_tax_group_base_amount': formatLang(self.env, tax_group_vals['base_amount'], currency_obj=currency),
-                'discounted_amount_tax_group':discounted_amount_tax_group,
+                'discounted_amount_tax_group':formatLang(self.env, discounted_amount_tax_group, currency_obj=currency),
                 'formatted_discounted_amount_tax_group': formatLang(self.env, discounted_amount_tax_group, currency_obj=currency)
             })
 

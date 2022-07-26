@@ -242,7 +242,7 @@
                                                             <t t-else="">
                                                                 <td><span class="text-nowrap" t-esc="amount_by_group['tax_group_name']"/></td>
                                                                 <td class="text-end o_price_total">
-                                                                    <span class="text-nowrap" t-esc="amount_by_group['formatted_tax_group_amount']" />
+                                                                    <span class="text-nowrap" t-esc="amount_by_group['formatted_discounted_amount_tax_group']" />
                                                                 </td>
                                                             </t>
                                                         </tr>
