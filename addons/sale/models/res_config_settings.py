@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 
 
 class ResConfigSettings(models.TransientModel):
@@ -48,12 +48,13 @@ class ResConfigSettings(models.TransientModel):
         help="Email sent to the customer once the invoice is available.",
     )
 
-    use_quotation_validity_days = fields.Boolean(
-        "Default Quotation Validity", config_parameter='sale.use_quotation_validity_days')
-
     # Company setup
     quotation_validity_days = fields.Integer(
-        related='company_id.quotation_validity_days', string="Default Quotation Validity (Days)", readonly=False)
+        related='company_id.quotation_validity_days',
+        readonly=False,
+        string="Default Quotation Validity",
+        help="Days between quotation proposal and expiration."
+            " 0 days means automatic expiration is disabled")
     portal_confirmation_sign = fields.Boolean(
         related='company_id.portal_confirmation_sign', string='Online Signature', readonly=False)
     portal_confirmation_pay = fields.Boolean(
@@ -76,17 +77,18 @@ class ResConfigSettings(models.TransientModel):
 
     #=== ONCHANGE METHODS ===#
 
-    @api.onchange('use_quotation_validity_days')
-    def _onchange_use_quotation_validity_days(self):
-        if self.quotation_validity_days <= 0:
-            self.quotation_validity_days = self.env['res.company'].default_get(['quotation_validity_days'])['quotation_validity_days']
-
     @api.onchange('quotation_validity_days')
     def _onchange_quotation_validity_days(self):
-        if self.quotation_validity_days <= 0:
-            self.quotation_validity_days = self.env['res.company'].default_get(['quotation_validity_days'])['quotation_validity_days']
+        if self.quotation_validity_days and self.quotation_validity_days < 0:
+            self.quotation_validity_days = 0
             return {
-                'warning': {'title': "Warning", 'message': "Quotation Validity is required and must be greater than 0."},
+                'warning': {
+                    'title': _("Warning"),
+                    'message': _(
+                        "You cannot set a negative number for the default quotation validity."
+                        " Leave empty (or 0) to disable the automatic expiration of quotations."
+                    ),
+                },
             }
 
     #=== CRUD METHODS ===#
