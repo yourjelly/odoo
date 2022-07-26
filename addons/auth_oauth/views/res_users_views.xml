@@ -17,4 +17,23 @@
                 </xpath>
             </field>
         </record>
+
+        <record id="identity_check_wizard" model="ir.ui.view">
+            <field name="model">res.users.identitycheck.oauth</field>
+            <field name="inherit_id" ref="base.identity_check_wizard"/>
+            <field name="arch" type="xml">
+                <field name="oauth_uid" invisible="True"/>
+                <xpath expr="//a[@href='/web/reset_password/']" position="replace">
+                    <p attrs="{'invisible': [('oauth_uid', '=', False)]}">
+                        Using an external authentication and don't have a password defined?<br/>
+                        <a href="/web/reset_password/" role="button">Click here</a> to receive a reset password email.
+                    </p>
+                    <p attrs="{'invisible': [('oauth_uid', '!=', False)]}">
+                        <a href="/web/reset_password/" class="btn btn-link" role="button">Forgot password?</a>
+                    </p>
+                </xpath>
+                </form>
+            </field>
+        </record>
+
 </odoo>
