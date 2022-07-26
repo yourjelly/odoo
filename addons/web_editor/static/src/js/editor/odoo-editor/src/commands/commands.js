@@ -888,7 +888,8 @@ export const editorCommands = {
     deleteTable: (editor, table) => deleteTable(editor, table),
     // Structure
     columnize: (editor, numberOfColumns, addParagraphAfter=true) => {
-        const anchor = editor.document.getSelection().anchorNode;
+        const sel = editor.document.getSelection();
+        const anchor = sel.anchorNode;
         const hasColumns = !!closestElement(anchor, '.o_text_columns', true);
         if (!numberOfColumns && hasColumns) {
             // Remove columns.
@@ -910,6 +911,7 @@ export const editorCommands = {
             restore();
         } else if (numberOfColumns && !hasColumns) {
             // Create columns.
+            const restore = preserveCursor(editor.document);
             const container = document.createElement('div');
             if (!closestElement(anchor, '.container')) {
                 container.classList.add('container');
@@ -936,9 +938,11 @@ export const editorCommands = {
             for (const column of columns) {
                 const p = document.createElement('p');
                 p.append(document.createElement('br'));
+                p.classList.add('oe-hint');
+                p.setAttribute('placeholder', 'New column...');
                 column.append(p);
             }
-            setSelection(columns[columns.length - 1].firstElementChild, 0);
+            restore();
             if (addParagraphAfter) {
                 const p = document.createElement('p');
                 p.append(document.createElement('br'));
@@ -951,6 +955,7 @@ export const editorCommands = {
             const diff = numberOfColumns - columns.length;
             if (diff > 0) {
                 // Add extra columns.
+                const restore = preserveCursor(editor.document);
                 for (const column of columns) {
                     column.className = column.className.replace(REGEX_BOOTSTRAP_COLUMN, `col$1-${columnSize}`);
                 }
@@ -960,11 +965,13 @@ export const editorCommands = {
                     column.classList.add(`col-lg-${columnSize}`);
                     const p = document.createElement('p');
                     p.append(document.createElement('br'));
+                    p.classList.add('oe-hint');
+                    p.setAttribute('placeholder', 'New column...');
                     column.append(p);
                     lastColumn.after(column);
                     lastColumn = column;
                 }
-                setSelection(lastColumn.firstElementChild, 0);
+                restore();
             } else if (diff < 0) {
                 // Remove superfluous columns.
                 const restore = preserveCursor(editor.document);

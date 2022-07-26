@@ -3648,8 +3648,8 @@ X[]
                     contentBefore: '<p>[]abcd</p>',
                     stepFunction: editor => editor.execCommand('columnize', 2),
                     contentAfter: columnsContainer(
-                        column(6, '<p>abcd</p>') +
-                        column(6, '<p>[]<br></p>')
+                        column(6, '<p>[]abcd</p>') +
+                        column(6, '<p><br></p>')
                     ) + '<p><br></p>',
                 });
             });
@@ -3704,9 +3704,9 @@ X[]
                     contentBefore: '<p>ab[]cd</p>',
                     stepFunction: editor => editor.execCommand('columnize', 3),
                     contentAfter: columnsContainer(
-                        column(4, '<p>abcd</p>') +
+                        column(4, '<p>ab[]cd</p>') +
                         column(4, '<p><br></p>') +
-                        column(4, '<p>[]<br></p>')
+                        column(4, '<p><br></p>')
                     ) + '<p><br></p>',
                 });
             });
@@ -3719,8 +3719,8 @@ X[]
                     stepFunction: editor => editor.execCommand('columnize', 3),
                     contentAfter: columnsContainer(
                         column(4, '<p>abcd</p>') +
-                        column(4, '<h1>ef</h1><ul><li>gh</li></ul>') +
-                        column(4, '<p>[]<br></p>')
+                        column(4, '<h1>ef</h1><ul><li>g[]h</li></ul>') +
+                        column(4, '<p><br></p>')
                     ),
                 });
             });
@@ -3764,10 +3764,10 @@ X[]
                     contentBefore: '<p>abcd[]</p>',
                     stepFunction: editor => editor.execCommand('columnize', 4),
                     contentAfter: columnsContainer(
-                        column(3, '<p>abcd</p>') +
+                        column(3, '<p>abcd[]</p>') +
                         column(3, '<p><br></p>') +
                         column(3, '<p><br></p>') +
-                        column(3, '<p>[]<br></p>')
+                        column(3, '<p><br></p>')
                     ) + '<p><br></p>',
                 });
             });
@@ -3780,9 +3780,9 @@ X[]
                     stepFunction: editor => editor.execCommand('columnize', 4),
                     contentAfter: columnsContainer(
                         column(3, '<p>abcd</p>') +
-                        column(3, '<h1>ef</h1><ul><li>gh</li></ul>') +
+                        column(3, '<h1>[]ef</h1><ul><li>gh</li></ul>') +
                         column(3, '<p><br></p>') +
-                        column(3, '<p>[]<br></p>')
+                        column(3, '<p><br></p>')
                     ),
                 });
             });
@@ -3796,9 +3796,9 @@ X[]
                     stepFunction: editor => editor.execCommand('columnize', 4),
                     contentAfter: columnsContainer(
                         column(3, '<p>abcd</p>') +
-                        column(3, '<h1>ef</h1>') +
+                        column(3, '<h1>ef[]</h1>') +
                         column(3, '<ul><li>gh</li></ul><p>ij</p>') +
-                        column(3, '<p>[]<br></p>')
+                        column(3, '<p><br></p>')
                     ),
                 });
             });
@@ -3857,10 +3857,9 @@ X[]
                         editor.execCommand('columnize', 2);
                         editor.execCommand('columnize', 0);
                     },
-                    // A paragraph was created for each column + after the
-                    // and they were all kept. The selection was set at the last
-                    // column every time columns were added, then preserved.
-                    contentAfter: '<p>abcd</p><p><br></p><p><br></p><p>[]<br></p><p><br></p>',
+                    // A paragraph was created for each column + after them and
+                    // they were all kept.
+                    contentAfter: '<p>ab[]cd</p><p><br></p><p><br></p><p><br></p><p><br></p>',
                 });
             });
             it('should not add a container when one already exists', async () => {
@@ -3872,9 +3871,9 @@ X[]
                     contentAfter: '<div class="container"><div class="row"><div class="col">' +
                                       '<div class="o_text_columns"><div class="row">' + // no "container" class
                                           '<div class="col-lg-6">' +
-                                              '<p>abcd</p>' +
+                                              '<p>ab[]cd</p>' +
                                           '</div>' +
-                                          '<div class="col-lg-6"><p>[]<br></p></div>' +
+                                          '<div class="col-lg-6"><p><br></p></div>' +
                                       '</div></div>' +
                                       '<p><br></p>' +
                                   '</div></div></div>',
