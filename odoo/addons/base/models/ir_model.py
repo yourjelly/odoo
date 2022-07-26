@@ -1464,7 +1464,7 @@ class IrModelSelection(models.Model):
                 )
                 # if this fails then we're shit out of luck and there's nothing
                 # we can do except fix on a case-by-case basis
-                value = field.convert_to_column(value, records)
+                value = field.convert_to_column(field.convert_to_cache(value, records), records)
                 self.env.cr.execute(query, [value, records._ids])
                 records.invalidate_recordset([fname])
 

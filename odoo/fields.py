@@ -874,8 +874,14 @@ class Field(MetaField('DummyField', (object,), {})):
         """ Return the null value for this field in the record format. """
         return False
 
+    def convert_to_query(self, value, record, values=None, validate=True):
+        """ Convert ``value`` from the ``search`` format to the SQL format. """
+        if value is None or value is False:
+            return None
+        return pycompat.to_text(value)
+
     def convert_to_column(self, value, record, values=None, validate=True):
-        """ Convert ``value`` from the ``write`` format to the SQL format. """
+        """ Convert ``value`` from the ``cache`` format to the SQL format. """
         if value is None or value is False:
             return None
         return pycompat.to_text(value)
@@ -1361,8 +1367,11 @@ class Boolean(Field):
     type = 'boolean'
     column_type = ('bool', 'bool')
 
-    def convert_to_column(self, value, record, values=None, validate=True):
+    def convert_to_query(self, value, record, values=None, validate=True):
         return bool(value)
+
+    def convert_to_column(self, value, record, values=None, validate=True):
+        return value
 
     def convert_to_cache(self, value, record, validate=True):
         return bool(value)
@@ -1378,8 +1387,11 @@ class Integer(Field):
 
     group_operator = 'sum'
 
-    def convert_to_column(self, value, record, values=None, validate=True):
+    def convert_to_query(self, value, record, values=None, validate=True):
         return int(value or 0)
+
+    def convert_to_column(self, value, record, values=None, validate=True):
+        return value
 
     def convert_to_cache(self, value, record, validate=True):
         if isinstance(value, dict):
@@ -1478,12 +1490,20 @@ class Float(Field):
     def _description_digits(self, env):
         return self.get_digits(env)
 
-    def convert_to_column(self, value, record, values=None, validate=True):
+    def convert_to_query(self, value, record, values=None, validate=True):
         result = float(value or 0.0)
         digits = self.get_digits(record.env)
         if digits:
             precision, scale = digits
             result = float_repr(float_round(result, precision_digits=scale), precision_digits=scale)
+        return result
+
+    def convert_to_column(self, value, record, values=None, validate=True):
+        result = value
+        digits = self.get_digits(record.env)
+        if digits:
+            precision, scale = digits
+            result = float_repr(value, precision_digits=scale)
         return result
 
     def convert_to_cache(self, value, record, validate=True):
@@ -1549,6 +1569,26 @@ class Monetary(Field):
             self.currency_field = self.related_field.get_currency_field(model.env[self.related_field.model_name])
         assert self.get_currency_field(model) in model._fields, \
             "Field %s with unknown currency_field %r" % (self, self.get_currency_field(model))
+
+    def convert_to_query(self, value, record, values=None, validate=True):
+        # retrieve currency from values or record
+        currency_field = self.get_currency_field(record)
+        if values and currency_field in values:
+            field = record._fields[currency_field]
+            currency = field.convert_to_cache(values[currency_field], record, validate)
+            currency = field.convert_to_record(currency, record)
+        else:
+            # Note: this is wrong if 'record' is several records with different
+            # currencies, which is functional nonsense and should not happen
+            # BEWARE: do not prefetch other fields, because 'value' may be in
+            # cache, and would be overridden by the value read from database!
+            currency = record[:1].with_context(prefetch_fields=False)[currency_field]
+            currency = currency.with_env(record.env)
+
+        value = float(value or 0.0)
+        if currency:
+            return float_repr(currency.round(value), currency.decimal_places)
+        return value
 
     def convert_to_column(self, value, record, values=None, validate=True):
         # retrieve currency from values or record
@@ -1657,12 +1697,9 @@ class _String(Field):
         return func(term)
 
     def convert_to_column(self, value, record, values=None, validate=True):
-        """ Convert ``value`` from the ``write`` format to the SQL format. """
-        super_convert_to_column = super().convert_to_column
         if not self.translate:
-            return super_convert_to_column(value, record, values, validate)
-        cache_value = self.convert_to_cache(value, record, validate)
-        return Json(cache_value)
+            return value
+        return Json(value)
 
     def convert_to_cache(self, value, record, validate=True):
         if not self.translate or not (self.store or self.inherited):
@@ -1881,6 +1918,14 @@ class Char(_String):
         # TODO VSC : modernize ifs
         return ('jsonb', 'jsonb') if self.translate else ('varchar', pg_varchar(self.size))
 
+    def convert_to_query(self, value, record, values=None, validate=True):
+        if value is None or value is False:
+            return None
+        else:
+            # we need to convert the string to a unicode object to be able
+            # to evaluate its length (and possibly truncate it) reliably
+            return pycompat.to_text(value)[:self.size]
+
     def update_db_column(self, model, column):
         if (
             column and column['udt_name'] == 'varchar' and column['character_maximum_length'] and
@@ -1897,15 +1942,9 @@ class Char(_String):
 
     def convert_to_column(self, value, record, values=None, validate=True):
         if not self.translate:
-            if value is None or value is False:
-                return None
-            else:
-                # we need to convert the string to a unicode object to be able
-                # to evaluate its length (and possibly truncate it) reliably
-                return pycompat.to_text(value)[:self.size]
+            return value
         else:
-            cache_value = self.convert_to_cache(value, record)
-            return Json(cache_value)
+            return Json(value)
 
     def convert_to_cache(self, value, record, validate=True):
         if not self.translate or not (self.store or self.inherited):
@@ -2006,7 +2045,7 @@ class Html(_String):
         # TODO VSC: modernize ifs
         return ('jsonb', 'jsonb') if self.translate else ('text', 'text')
 
-    def convert_to_column(self, value, record, values=None, validate=True):
+    def convert_to_query(self, value, record, values=None, validate=True):
         sanitize = (lambda v: html_sanitize(
             v, silent=True,
             sanitize_tags=self.sanitize_tags,
@@ -2015,12 +2054,14 @@ class Html(_String):
             sanitize_form=self.sanitize_form,
             strip_style=self.strip_style,
             strip_classes=self.strip_classes)) if self.sanitize else lambda v: v
+        if value is None or value is False:
+            return None
+        return sanitize(value)
+
+    def convert_to_column(self, value, record, values=None, validate=True):
         if not self.translate:
-            if value is None or value is False:
-                return None
-            return sanitize(value)
-        cache_value = self.convert_to_cache(value, record, validate=True)
-        return Json(cache_value)
+            return value
+        return Json(value)
 
     def convert_to_cache(self, value, record, validate=True):
         sanitize = (lambda v: html_sanitize(
@@ -2296,6 +2337,39 @@ class Binary(Field):
         return attrs
 
     _description_attachment = property(attrgetter('attachment'))
+
+    def convert_to_query(self, value, record, values=None, validate=True):
+        # Binary values may be byte strings (python 2.6 byte array), but
+        # the legacy OpenERP convention is to transfer and store binaries
+        # as base64-encoded strings. The base64 string may be provided as a
+        # unicode in some circumstances, hence the str() cast here.
+        # This str() coercion will only work for pure ASCII unicode strings,
+        # on purpose - non base64 data must be passed as a 8bit byte strings.
+        if not value:
+            return None
+        # Detect if the binary content is an SVG for restricting its upload
+        # only to system users.
+        magic_bytes = {
+            b'P',  # first 6 bits of '<' (0x3C) b64 encoded
+            b'<',  # plaintext XML tag opening
+        }
+        if isinstance(value, str):
+            value = value.encode()
+        if value[:1] in magic_bytes:
+            try:
+                decoded_value = base64.b64decode(value.translate(None, delete=b'\r\n'), validate=True)
+            except binascii.Error:
+                decoded_value = value
+            # Full mimetype detection
+            if (guess_mimetype(decoded_value).startswith('image/svg') and
+                    not record.env.is_system()):
+                raise UserError(_("Only admins can upload SVG files."))
+        if isinstance(value, bytes):
+            return psycopg2.Binary(value)
+        try:
+            return psycopg2.Binary(str(value).encode('ascii'))
+        except UnicodeEncodeError:
+            raise UserError(_("ASCII characters are required for %s in %s") % (value, self.name))
 
     def convert_to_column(self, value, record, values=None, validate=True):
         # Binary values may be byte strings (python 2.6 byte array), but
@@ -2747,11 +2821,6 @@ class Selection(Field):
             selection = selection(model)
         return [value for value, _ in selection]
 
-    def convert_to_column(self, value, record, values=None, validate=True):
-        if validate and self.validate:
-            value = self.convert_to_cache(value, record)
-        return super(Selection, self).convert_to_column(value, record, values, validate)
-
     def convert_to_cache(self, value, record, validate=True):
         if not validate:
             return value or None
@@ -2785,9 +2854,6 @@ class Reference(Selection):
     def column_type(self):
         return ('varchar', pg_varchar())
 
-    def convert_to_column(self, value, record, values=None, validate=True):
-        return Field.convert_to_column(self, value, record, values, validate)
-
     def convert_to_cache(self, value, record, validate=True):
         # cache format: str ("model,id") or None
         if isinstance(value, BaseModel):
@@ -2796,7 +2862,7 @@ class Reference(Selection):
         elif isinstance(value, str):
             res_model, res_id = value.split(',')
             if not validate or res_model in self.get_values(record.env):
-                if record.env[res_model].browse(int(res_id)).exists():
+                if not validate or record.env[res_model].browse(int(res_id)).exists():
                     return value
                 else:
                     return None
@@ -2987,6 +3053,9 @@ class Many2one(_Relational):
         cache = records.env.cache
         for record in records:
             cache.set(record, self, self.convert_to_cache(value, record, validate=False))
+
+    def convert_to_query(self, value, record, values=None, validate=True):
+        return value or None
 
     def convert_to_column(self, value, record, values=None, validate=True):
         return value or None

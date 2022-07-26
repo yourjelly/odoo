@@ -2874,7 +2874,7 @@ class BaseModel(metaclass=MetaModel):
         field = self._fields[column_name]
         if field.default:
             value = field.default(self)
-            value = field.convert_to_write(value, self)
+            value = field.convert_to_cache(value, self)
             value = field.convert_to_column(value, self)
         else:
             value = None
@@ -4431,7 +4431,7 @@ class BaseModel(metaclass=MetaModel):
                     columns.append(fname)
                     for stored, row in zip(stored_list, rows):
                         if fname in stored:
-                            colval = field.convert_to_column(stored[fname], self, stored)
+                            colval = field.convert_to_column(field.convert_to_cache(stored[fname], self, validate=field.type != 'reference'), self, stored)
                             row.append(colval)
                         else:
                             row.append(SQL_DEFAULT)
@@ -4483,7 +4483,7 @@ class BaseModel(metaclass=MetaModel):
                     cachetoclear.append((record, field))
                 else:
                     # Use empty recordset to prevent fetching translated fields when cache miss
-                    cache_value = field.convert_to_cache(value, record.browse() if field.translate else record)
+                    cache_value = field.convert_to_cache(value, record.browse() if field.translate else record, validate=field.type != 'reference')
                     self.env.cache.set(record, field, cache_value)
                     if field.type in ('many2one', 'many2one_reference') and self.pool.field_inverses[field]:
                         inverses_update[(field, cache_value)].append(record.id)
@@ -5974,11 +5974,7 @@ class BaseModel(metaclass=MetaModel):
                         f"    Context: {self.env.context}\n" \
                         f"    Cache: {self.env.cache!r}"
                     for record, value in zip(records, values):
-                        if not field.translate:
-                            value = field.convert_to_write(value, record)
-                            value = field.convert_to_column(value, record)
-                        else:
-                            value = Json(value)
+                        value = field.convert_to_column(value, record)
                         id_vals[record.id][field.name] = value
                 process(model, id_vals)
 

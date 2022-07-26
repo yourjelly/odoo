@@ -1049,7 +1049,7 @@ class expression(object):
                 if params:
                     if left != 'id':
                         field = model._fields[left]
-                        params = [field.convert_to_column(p, model, validate=False) for p in params]
+                        params = [field.convert_to_query(p, model, validate=False) for p in params]
                     query = f'({table_alias}."{left}" {operator} %s)'
                     params = [tuple(params)]
                 else:
@@ -1106,7 +1106,7 @@ class expression(object):
             if need_wildcard:
                 params = ['%%%s%%' % pycompat.to_text(right)]
             else:
-                params = [field.convert_to_column(right, model, validate=False)]
+                params = [field.convert_to_query(right, model, validate=False)]
 
         return query, params
 
