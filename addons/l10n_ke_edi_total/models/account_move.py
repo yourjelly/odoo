@@ -11,8 +11,10 @@ _logger = logging.getLogger(__name__)
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
-    l10n_ke_qrcode = fields.Char(string="QR Code")
-    l10n_ke_json = fields.Char(string="Technical field with the json answer/response.  Put in an attachment afterwards")
+    l10n_ke_qrcode = fields.Char(string="QR Code",
+                                 copy=False)
+    l10n_ke_json = fields.Char(string="Technical field with the json answer/response.  Put in an attachment afterwards",
+                               copy=False)
 
     def l10n_ke_set_response_data(self, invoices):
         invoice_dict = json.loads(invoices)

@@ -18,7 +18,7 @@ class AccountEdiFormat(models.Model):
     _inherit = 'account.edi.format'
 
     def _l10n_ke_tims_prepare_invoice(self, invoice):
-        # TODO: make sure passed fields are cleaned out
+        # TODO: make sure passed fields are cleaned out -> need to remove all non-alphanumeric chars probably
         def remove_special_chars(name):
             pass
 
@@ -26,7 +26,8 @@ class AccountEdiFormat(models.Model):
                      8.0: 'B',
                      0.0: 'C'}
         # Let's try to assemble all the info we need for this invoice
-        invoice_dict = {'invoice_name': invoice.name,
+        invoice_dict = {'company_name': invoice.company_id.name,
+                        'invoice_name': invoice.name.strip("/"),
                         'invoice_type': invoice.move_type, # TODO: add support for debit notes or check if needed
                         'company_pin': invoice.company_id.vat,
                         'buyer_pin': invoice.partner_id.vat,
@@ -39,9 +40,10 @@ class AccountEdiFormat(models.Model):
         for invoice_line in invoice.invoice_line_ids.filtered(lambda l: not l.display_type):
             percentage = invoice_line.tax_ids[0].amount
             letter = perc_dict.get(percentage, 'D')
-            uom = invoice_line.product_uom_id.name[:3]
+            uom = invoice_line.product_uom_id and invoice_line.product_uom_id.name[:3] or 'UNI' #TODO: check UNI
             invoice_line_dict = {
                 'vat_class': letter,
+                'name': invoice_line.name,
                 'price': invoice_line.price_unit,
                 'uom': uom,
                 'quantity': invoice_line.quantity,

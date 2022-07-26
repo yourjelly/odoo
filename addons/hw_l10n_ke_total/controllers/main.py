@@ -5,7 +5,7 @@ import logging
 import platform
 import json
 
-from passlib.context import CryptContext
+#from FP import FP, Enums
 
 from odoo import http
 from odoo.tools.config import config
@@ -35,9 +35,36 @@ class TotalUsbController(http.Controller):
 
         response_dict = {'invoices': {}}
         invoices_dict = json.loads(invoices)
+        # Make connection
+
         for invoice, tims_json in invoices_dict.items():
-            response_dict['invoices'] = json.dumps({invoice: {'qrcode': 'blabla',
-                                      'cuserial': '0000012'}}) #TODO: need real response and real calls here
+            from .FP import FP, Enums
+            fp = FP()
+            fp.serverSetSettings("localhost", 4444) # TODO: use the passed url
+            tcp = ""
+            password = ""
+            port = ""
+            fp.serverSetDeviceTcpSettings(tcp, password, port)
+            #import pdb; pdb.set_trace()
+            fp.OpenInvoiceWithFreeCustomerData(tims_json['company_name'][:30],
+                                               tims_json['buyer_pin'][:14],
+                                               tims_json['partner_name'][:30],
+                                               tims_json['partner_addr'][:30],
+                                               tims_json['partner_zip'][:30],
+                                               '0', "000000124") #tims_json['invoice_name'].replace("/", "")
+            #print(fp.ReadStatus())
+            #fp.OpenReceipt(Enums.OptionReceiptFormat.Brief, "POS99") #tims_json['invoice_name'].strip("/")
+
+            for invoice_line in tims_json.get('invoice_lines', []):
+                fp.SellPLUfromExtDB(invoice_line['name'].strip("[]/"), invoice_line['vat_class'],
+                                    invoice_line['price'], invoice_line['uom'],
+                                    '', '', '0', invoice_line['quantity'],
+                                    invoice_line['discount'])
+            #print(fp.ReadCurrentReceiptInfo())
+            result = fp.CloseReceipt()
+
+            response_dict['invoices'] = json.dumps({invoice: {'qrcode': result.QRcode,
+                                                              'cuserial': result.InvoiceNum}})
         return json.dumps(response_dict)
 
     def _get_error_template(self, error_str):
