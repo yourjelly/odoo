@@ -340,8 +340,7 @@ export class AnalyticJson extends Component {
     }
 
     listReadyByGroup(id) {
-        let ready = this.list[id].distribution.filter((tag) => this.tagIsReady(tag));
-        return ready;
+        return this.list[id].distribution.filter((tag) => this.tagIsReady(tag));
     }
 
     sumByGroup(id) {
