@@ -22,6 +22,10 @@
                             <div class="mt16">
                                 <label for="company_so_template_id" class="o_light_label"/>
                                 <field name="company_so_template_id" class="oe_inline"/>
+                                <!-- FIXME VFE missing class to move the building icon a bit to the right -->
+                                <span class="fa fa-lg fa-building-o"
+                                   title="Values set here are company-specific."
+                                   groups="base.group_multi_company"/>
                             </div>
                             <div class="mt8">
                                 <button name="%(sale_management.sale_order_template_action)d" icon="fa-arrow-right" type="action" string="Quotation Templates" class="btn-link"/>
