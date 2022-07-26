@@ -152,6 +152,12 @@ export class AnalyticJson extends Component {
         this.keepFocusInPlan = selected_option.group_id;
     }
 
+    autoCompleteInput(dist_tag, {inputValue}) {
+        if (inputValue === "") {
+            dist_tag.analytic_account_id = "";
+        }
+    }
+
     get plans() {
         return this.allPlans;
     }
@@ -210,7 +216,7 @@ export class AnalyticJson extends Component {
             analytic_account_id: null,
             analytic_account_name: "",
             percentage: this.remainderByGroup(group_id),
-            color: this.state.list[group_id].color,
+            color: this.list[group_id].color,
         }
     }
 
@@ -220,7 +226,10 @@ export class AnalyticJson extends Component {
 
     addLineToGroup(id) {
         if (this.list[id].distribution.length === this.listReadyByGroup(id).length) {
-            this.state.list[id].distribution.push(this.newTag(id));
+            this.list[id].distribution.push(this.newTag(id));
+        } else {
+            //all tags are not ready - update the last value
+            this.list[id].distribution.find((t) => !this.tagIsReady(t)).percentage = this.remainderByGroup(id);
         }
     }
 
