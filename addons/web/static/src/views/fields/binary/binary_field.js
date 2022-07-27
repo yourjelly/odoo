@@ -15,6 +15,7 @@ function isBinarySize(value) {
 
 export class BinaryField extends Component {
     setup() {
+        console.log(this.props);
         this.notification = useService("notification");
         this.state = useState({
             fileName: this.fileName || "",
