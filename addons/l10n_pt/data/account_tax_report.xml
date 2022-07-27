@@ -21,13 +21,7 @@
                         <field name="children_ids">
                             <record id="tax_report_pt_base_vendas_faturas" model="account.report.line">
                                 <field name="name">Faturas/Notas de débito</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_pt_base_vendas_faturas_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">TAX_REPORT_PT_BASE_VENDAS_FATURAS_NORMAL.balance + TAX_REPORT_PT_BASE_VENDAS_FATURAS_INTERMEDIA.balance + TAX_REPORT_PT_BASE_VENDAS_FATURAS_REDUZIDA.balance + TAX_REPORT_PT_BASE_VENDAS_FATURAS_ISENTO.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">TAX_REPORT_PT_BASE_VENDAS_FATURAS_NORMAL.balance + TAX_REPORT_PT_BASE_VENDAS_FATURAS_INTERMEDIA.balance + TAX_REPORT_PT_BASE_VENDAS_FATURAS_REDUZIDA.balance + TAX_REPORT_PT_BASE_VENDAS_FATURAS_ISENTO.balance</field>
                                 <field name="children_ids">
                                     <record id="tax_report_pt_base_vendas_faturas_normal" model="account.report.line">
                                         <field name="name">Normal</field>
@@ -77,13 +71,7 @@
                             </record>
                             <record id="tax_report_pt_base_vendas_notas_credito" model="account.report.line">
                                 <field name="name">Notas de crédito</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_pt_base_vendas_notas_credito_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">TAX_REPORT_PT_BASE_VENDAS_NOTAS_CREDITO_NORMAL.balance + TAX_REPORT_PT_BASE_VENDAS_NOTAS_CREDITO_INTERMEDIA.balance + TAX_REPORT_PT_BASE_VENDAS_NOTAS_CREDITO_REDUZIDA.balance + TAX_REPORT_PT_BASE_VENDAS_NOTAS_CREDITO_ISENTO.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">TAX_REPORT_PT_BASE_VENDAS_NOTAS_CREDITO_NORMAL.balance + TAX_REPORT_PT_BASE_VENDAS_NOTAS_CREDITO_INTERMEDIA.balance + TAX_REPORT_PT_BASE_VENDAS_NOTAS_CREDITO_REDUZIDA.balance + TAX_REPORT_PT_BASE_VENDAS_NOTAS_CREDITO_ISENTO.balance</field>
                                 <field name="children_ids">
                                     <record id="tax_report_pt_base_vendas_notas_credito_normal" model="account.report.line">
                                         <field name="name">Normal</field>
@@ -138,13 +126,7 @@
                         <field name="children_ids">
                             <record id="tax_report_pt_base_despesas_faturas" model="account.report.line">
                                 <field name="name">Faturas</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_pt_base_despesas_faturas_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">TAX_REPORT_PT_BASE_DESPESAS_FATURAS_NORMAL.balance + TAX_REPORT_PT_BASE_DESPESAS_FATURAS_INTERMEDIA.balance + TAX_REPORT_PT_BASE_DESPESAS_FATURAS_REDUZIDA.balance + TAX_REPORT_PT_BASE_DESPESAS_FATURAS_ISENTO.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">TAX_REPORT_PT_BASE_DESPESAS_FATURAS_NORMAL.balance + TAX_REPORT_PT_BASE_DESPESAS_FATURAS_INTERMEDIA.balance + TAX_REPORT_PT_BASE_DESPESAS_FATURAS_REDUZIDA.balance + TAX_REPORT_PT_BASE_DESPESAS_FATURAS_ISENTO.balance</field>
                                 <field name="children_ids">
                                     <record id="tax_report_pt_base_despesas_faturas_normal" model="account.report.line">
                                         <field name="name">Normal</field>
@@ -194,13 +176,7 @@
                             </record>
                             <record id="tax_report_pt_base_despesas_notas_credito" model="account.report.line">
                                 <field name="name">Notas de crédito</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_pt_base_despesas_notas_credito_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">TAX_REPORT_PT_BASE_DESPESAS_NOTAS_CREDITO_NORMAL.balance + TAX_REPORT_PT_BASE_DESPESAS_NOTAS_CREDITO_INTERMEDIA.balance + TAX_REPORT_PT_BASE_DESPESAS_NOTAS_CREDITO_REDUZIDA.balance + TAX_REPORT_PT_BASE_DESPESAS_NOTAS_CREDITO_ISENTO.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">TAX_REPORT_PT_BASE_DESPESAS_NOTAS_CREDITO_NORMAL.balance + TAX_REPORT_PT_BASE_DESPESAS_NOTAS_CREDITO_INTERMEDIA.balance + TAX_REPORT_PT_BASE_DESPESAS_NOTAS_CREDITO_REDUZIDA.balance + TAX_REPORT_PT_BASE_DESPESAS_NOTAS_CREDITO_ISENTO.balance</field>
                                 <field name="children_ids">
                                     <record id="tax_report_pt_base_despesas_notas_credito_normal" model="account.report.line">
                                         <field name="name">Normal</field>
@@ -261,13 +237,7 @@
                             <record id="tax_report_pt_tax_vendas_faturas" model="account.report.line">
                                 <field name="name">Faturas/Notas de débito (Total IVA liquidado)</field>
                                 <field name="code">tax_report_pt_tax_vendas_faturas</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_pt_tax_vendas_faturas_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">TAX_REPORT_PT_TAX_VENDAS_FATURAS_NORMAL.balance + TAX_REPORT_PT_TAX_VENDAS_FATURAS_INTERMEDIA.balance + TAX_REPORT_PT_TAX_VENDAS_FATURAS_REDUZIDA.balance + TAX_REPORT_PT_TAX_VENDAS_FATURAS_ISENTO.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">TAX_REPORT_PT_TAX_VENDAS_FATURAS_NORMAL.balance + TAX_REPORT_PT_TAX_VENDAS_FATURAS_INTERMEDIA.balance + TAX_REPORT_PT_TAX_VENDAS_FATURAS_REDUZIDA.balance + TAX_REPORT_PT_TAX_VENDAS_FATURAS_ISENTO.balance</field>
                                 <field name="children_ids">
                                     <record id="tax_report_pt_tax_vendas_faturas_normal" model="account.report.line">
                                         <field name="name">Normal</field>
@@ -318,13 +288,7 @@
                             <record id="tax_report_pt_tax_vendas_notas_credito" model="account.report.line">
                                 <field name="name">Notas de crédito (Total IVA regularizado a favor da empresa)</field>
                                 <field name="code">tax_report_pt_tax_vendas_notas_credito</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_pt_tax_vendas_notas_credito_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">TAX_REPORT_PT_TAX_VENDAS_NOTAS_CREDITO_NORMAL.balance + TAX_REPORT_PT_TAX_VENDAS_NOTAS_CREDITO_INTERMEDIA.balance + TAX_REPORT_PT_TAX_VENDAS_NOTAS_CREDITO_REDUZIDA.balance + TAX_REPORT_PT_TAX_VENDAS_NOTAS_CREDITO_ISENTO.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">TAX_REPORT_PT_TAX_VENDAS_NOTAS_CREDITO_NORMAL.balance + TAX_REPORT_PT_TAX_VENDAS_NOTAS_CREDITO_INTERMEDIA.balance + TAX_REPORT_PT_TAX_VENDAS_NOTAS_CREDITO_REDUZIDA.balance + TAX_REPORT_PT_TAX_VENDAS_NOTAS_CREDITO_ISENTO.balance</field>
                                 <field name="children_ids">
                                     <record id="tax_report_pt_tax_vendas_notas_credito_normal" model="account.report.line">
                                         <field name="name">Normal</field>
@@ -380,13 +344,7 @@
                             <record id="tax_report_pt_tax_despesas_faturas" model="account.report.line">
                                 <field name="name">Faturas (Total IVA dedutível)</field>
                                 <field name="code">tax_report_pt_tax_despesas_faturas</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_pt_tax_despesas_faturas_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">TAX_REPORT_PT_TAX_DESPESAS_FATURAS_NORMAL.balance + TAX_REPORT_PT_TAX_DESPESAS_FATURAS_INTERMEDIA.balance + TAX_REPORT_PT_TAX_DESPESAS_FATURAS_REDUZIDA.balance + TAX_REPORT_PT_TAX_DESPESAS_FATURAS_ISENTO.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">TAX_REPORT_PT_TAX_DESPESAS_FATURAS_NORMAL.balance + TAX_REPORT_PT_TAX_DESPESAS_FATURAS_INTERMEDIA.balance + TAX_REPORT_PT_TAX_DESPESAS_FATURAS_REDUZIDA.balance + TAX_REPORT_PT_TAX_DESPESAS_FATURAS_ISENTO.balance</field>
                                 <field name="children_ids">
                                     <record id="tax_report_pt_tax_despesas_faturas_normal" model="account.report.line">
                                         <field name="name">Normal</field>
@@ -437,13 +395,7 @@
                             <record id="tax_report_pt_tax_despesas_notas_credito" model="account.report.line">
                                 <field name="name">Notas de crédito (Total IVA regularizado a favor do Estado)</field>
                                 <field name="code">tax_report_pt_tax_despesas_notas_credito</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_pt_tax_despesas_notas_credito_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">TAX_REPORT_PT_TAX_DESPESAS_NOTAS_CREDITO_NORMAL.balance + TAX_REPORT_PT_TAX_DESPESAS_NOTAS_CREDITO_INTERMEDIA.balance + TAX_REPORT_PT_TAX_DESPESAS_NOTAS_CREDITO_REDUZIDA.balance + TAX_REPORT_PT_TAX_DESPESAS_NOTAS_CREDITO_ISENTO.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">TAX_REPORT_PT_TAX_DESPESAS_NOTAS_CREDITO_NORMAL.balance + TAX_REPORT_PT_TAX_DESPESAS_NOTAS_CREDITO_INTERMEDIA.balance + TAX_REPORT_PT_TAX_DESPESAS_NOTAS_CREDITO_REDUZIDA.balance + TAX_REPORT_PT_TAX_DESPESAS_NOTAS_CREDITO_ISENTO.balance</field>
                                 <field name="children_ids">
                                     <record id="tax_report_pt_tax_despesas_notas_credito_normal" model="account.report.line">
                                         <field name="name">Normal</field>

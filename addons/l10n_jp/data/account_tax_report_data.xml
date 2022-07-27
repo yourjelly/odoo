@@ -15,24 +15,12 @@
         <field name="line_ids">
             <record id="tax_report_to_pay" model="account.report.line">
                 <field name="name">支払対象税額</field>
-                <field name="expression_ids">
-                    <record id="tax_report_to_pay_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">JIA_SHOU_SHUI_E_.balance + JIA_FU_SHUI_E_.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">JIA_SHOU_SHUI_E_.balance + JIA_FU_SHUI_E_.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_to_pay_temp_tx" model="account.report.line">
                         <field name="name">仮受税額</field>
                         <field name="code">JIA_SHOU_SHUI_E_</field>
-                        <field name="expression_ids">
-                            <record id="tax_report_to_pay_temp_tx_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">JIA_SHOU_XIAO_FEI_SHUI_8.balance + JIA_SHOU_XIAO_FEI_SHUI_10.balance + MIAN_SHUI_.balance + BU_KE_SHUI__JIA_SHOU_SHUI_E_.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">JIA_SHOU_XIAO_FEI_SHUI_8.balance + JIA_SHOU_XIAO_FEI_SHUI_10.balance + MIAN_SHUI_.balance + BU_KE_SHUI__JIA_SHOU_SHUI_E_.balance</field>
                         <field name="children_ids">
                             <record id="tax_report_to_pay_temp_tx_output_8" model="account.report.line">
                                 <field name="name">仮受消費税(8%)</field>
@@ -83,13 +71,7 @@
                     <record id="tax_report_to_pay_temp_pmt" model="account.report.line">
                         <field name="name">仮払税額</field>
                         <field name="code">JIA_FU_SHUI_E_</field>
-                        <field name="expression_ids">
-                            <record id="tax_report_to_pay_temp_pmt_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">JIA_FU_XIAO_FEI_SHUI_8.balance + JIA_FU_XIAO_FEI_SHUI_10.balance + SHU_RU_.balance + BU_KE_SHUI__JIA_FU_SHUI_E_.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">JIA_FU_XIAO_FEI_SHUI_8.balance + JIA_FU_XIAO_FEI_SHUI_10.balance + SHU_RU_.balance + BU_KE_SHUI__JIA_FU_SHUI_E_.balance</field>
                         <field name="children_ids">
                             <record id="tax_report_to_pay_temp_pmt_susp_cons_8" model="account.report.line">
                                 <field name="name">仮払消費税(8%)</field>
@@ -141,24 +123,12 @@
             </record>
             <record id="tax_report_comp_basis" model="account.report.line">
                 <field name="name">税計算基準額</field>
-                <field name="expression_ids">
-                    <record id="tax_report_comp_basis_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">FAN_MAI_JI_ZHUN_E_.balance + GOU_MAI_JI_ZHUN_E_.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">FAN_MAI_JI_ZHUN_E_.balance + GOU_MAI_JI_ZHUN_E_.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_comp_basis_sales" model="account.report.line">
                         <field name="name">販売基準額</field>
                         <field name="code">FAN_MAI_JI_ZHUN_E_</field>
-                        <field name="expression_ids">
-                            <record id="tax_report_comp_basis_sales_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">KE_SHUI_DUI_XIANG_MAI_SHANG_8.balance + KE_SHUI_DUI_XIANG_MAI_SHANG_10.balance + MIAN_SHUI_MAI_SHANG_.balance + BU_KE_SHUI_MAI_SHANG_.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">KE_SHUI_DUI_XIANG_MAI_SHANG_8.balance + KE_SHUI_DUI_XIANG_MAI_SHANG_10.balance + MIAN_SHUI_MAI_SHANG_.balance + BU_KE_SHUI_MAI_SHANG_.balance</field>
                         <field name="children_ids">
                             <record id="tax_report_comp_basis_sales_taxable_8" model="account.report.line">
                                 <field name="name">課税対象売上(8%)</field>
@@ -209,13 +179,7 @@
                     <record id="tax_report_comp_basis_purchases" model="account.report.line">
                         <field name="name">購買基準額</field>
                         <field name="code">GOU_MAI_JI_ZHUN_E_</field>
-                        <field name="expression_ids">
-                            <record id="tax_report_comp_basis_purchases_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">KE_SHUI_DUI_XIANG_SHI_RU_8.balance + KE_SHUI_DUI_XIANG_SHI_RU_10.balance + SHU_RU_SHI_RU_.balance + BU_KE_SHUI_SHI_RU_.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">KE_SHUI_DUI_XIANG_SHI_RU_8.balance + KE_SHUI_DUI_XIANG_SHI_RU_10.balance + SHU_RU_SHI_RU_.balance + BU_KE_SHUI_SHI_RU_.balance</field>
                         <field name="children_ids">
                             <record id="tax_report_comp_basis_purchases_taxable_8" model="account.report.line">
                                 <field name="name">課税対象仕入(8%)</field>

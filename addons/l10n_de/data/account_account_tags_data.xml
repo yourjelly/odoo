@@ -15,46 +15,22 @@
         <field name="line_ids">
             <record id="tax_report_de_tag_01" model="account.report.line">
                 <field name="name">Bemessungsgrundlage</field>
-                <field name="expression_ids">
-                    <record id="tax_report_de_tag_01_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">I_ANMELDUNG_DER_UMSATZSTEUERVORAUSZAHLUNG_ZEILE_17_GRUNDLAGE.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">I_ANMELDUNG_DER_UMSATZSTEUERVORAUSZAHLUNG_ZEILE_17_GRUNDLAGE.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_de_tag_17" model="account.report.line">
                         <field name="name">I. Anmeldung der Umsatzsteuer-Vorauszahlung (zeile 17)</field>
                         <field name="code">I_ANMELDUNG_DER_UMSATZSTEUERVORAUSZAHLUNG_ZEILE_17_GRUNDLAGE</field>
-                        <field name="expression_ids">
-                            <record id="tax_report_de_tag_17_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">LIEFERUNGEN_UND_SONSTIGE_LEISTUNGEN_ZEILE_18_GRUNDLAGE.balance + INNERGEMEINSCHAFTLICHE_ERWERBE_ZEILE_31_GRUNDLAGE.balance + ERGANZENDE_ANGABEN_ZU_UMSATZEN_ZEILE_37_GRUNDLAGE.balance + LEISTUNGSEMPFANGER_ALS_STEUERSCHULDNER_ZEILE_46_GRUNDLAGE.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">LIEFERUNGEN_UND_SONSTIGE_LEISTUNGEN_ZEILE_18_GRUNDLAGE.balance + INNERGEMEINSCHAFTLICHE_ERWERBE_ZEILE_31_GRUNDLAGE.balance + ERGANZENDE_ANGABEN_ZU_UMSATZEN_ZEILE_37_GRUNDLAGE.balance + LEISTUNGSEMPFANGER_ALS_STEUERSCHULDNER_ZEILE_46_GRUNDLAGE.balance</field>
                         <field name="children_ids">
                             <record id="tax_report_de_tag_18" model="account.report.line">
                                 <field name="name">Lieferungen und sonstige Leistungen (zeile 18)</field>
                                 <field name="code">LIEFERUNGEN_UND_SONSTIGE_LEISTUNGEN_ZEILE_18_GRUNDLAGE</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_de_tag_18_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">STEUERFREIE_UMSATZE_MIT_VORSTEUERABZUG_ZEILE_19.balance + DE_48.balance + STEUERPFLICHTIGE_UMSATZE_ZEILE_25.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">STEUERFREIE_UMSATZE_MIT_VORSTEUERABZUG_ZEILE_19.balance + DE_48.balance + STEUERPFLICHTIGE_UMSATZE_ZEILE_25.balance</field>
                                 <field name="children_ids">
                                     <record id="tax_report_de_tag_19" model="account.report.line">
                                         <field name="name">Steuerfreie Umsätze mit Vorsteuerabzug (zeile 19)</field>
                                         <field name="code">STEUERFREIE_UMSATZE_MIT_VORSTEUERABZUG_ZEILE_19</field>
-                                        <field name="expression_ids">
-                                            <record id="tax_report_de_tag_19_formula" model="account.report.expression">
-                                                <field name="label">balance</field>
-                                                <field name="engine">aggregation</field>
-                                                <field name="formula">DE_41.balance + DE_44.balance + DE_49.balance + DE_43.balance</field>
-                                            </record>
-                                        </field>
+                                        <field name="aggregation_formula">DE_41.balance + DE_44.balance + DE_49.balance + DE_43.balance</field>
                                         <field name="children_ids">
                                             <record id="tax_report_de_tag_41" model="account.report.line">
                                                 <field name="name">41. an Abnehmer mit USt-IdNr (zeile 20)</field>
@@ -116,13 +92,7 @@
                                     <record id="tax_report_de_tag_25" model="account.report.line">
                                         <field name="name">Steuerpflichtige Umsätze (zeile 25)</field>
                                         <field name="code">STEUERPFLICHTIGE_UMSATZE_ZEILE_25</field>
-                                        <field name="expression_ids">
-                                            <record id="tax_report_de_tag_25_formula" model="account.report.expression">
-                                                <field name="label">balance</field>
-                                                <field name="engine">aggregation</field>
-                                                <field name="formula">DE_81_BASE.balance + DE_86_BASE.balance + DE_35.balance + DE_77.balance + DE_76.balance</field>
-                                            </record>
-                                        </field>
+                                        <field name="aggregation_formula">DE_81_BASE.balance + DE_86_BASE.balance + DE_35.balance + DE_77.balance + DE_76.balance</field>
                                         <field name="children_ids">
                                             <record id="tax_report_de_tag_81" model="account.report.line">
                                                 <field name="name">81. zum Steuersatz von 19 % (zeile 26)</field>
@@ -186,13 +156,7 @@
                             <record id="tax_report_de_tag_31" model="account.report.line">
                                 <field name="name">Innergemeinschaftliche Erwerbe (zeile 31)</field>
                                 <field name="code">INNERGEMEINSCHAFTLICHE_ERWERBE_ZEILE_31_GRUNDLAGE</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_de_tag_31_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">DE_91.balance + DE_89_BASE.balance + DE_93_BASE.balance + DE_95.balance + DE_94.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">DE_91.balance + DE_89_BASE.balance + DE_93_BASE.balance + DE_95.balance + DE_94.balance</field>
                                 <field name="children_ids">
                                     <record id="tax_report_de_tag_91" model="account.report.line">
                                         <field name="name">91. Steuerfreie innergemeinschaftliche Erwerbe (zeile 32)</field>
@@ -254,13 +218,7 @@
                             <record id="tax_report_de_tag_37" model="account.report.line">
                                 <field name="name">Ergänzende Angaben zu Umsätzen (zeile 37)</field>
                                 <field name="code">ERGANZENDE_ANGABEN_ZU_UMSATZEN_ZEILE_37_GRUNDLAGE</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_de_tag_37_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">DE_42.balance + DE_68.balance + DE_60.balance + DE_21.balance + DE_45_BASE.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">DE_42.balance + DE_68.balance + DE_60.balance + DE_21.balance + DE_45_BASE.balance</field>
                                 <field name="children_ids">
                                     <record id="tax_report_de_tag_42" model="account.report.line">
                                         <field name="name">42. Dreiecksgeschäften (zeile 38)</field>
@@ -322,13 +280,7 @@
                             <record id="tax_report_de_tag_46" model="account.report.line">
                                 <field name="name">Leistungsempfänger als Steuerschuldner (zeile 46)</field>
                                 <field name="code">LEISTUNGSEMPFANGER_ALS_STEUERSCHULDNER_ZEILE_46_GRUNDLAGE</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_de_tag_46_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">DE_46.balance + DE_52.balance + DE_73.balance + DE_78.balance + DE_84.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">DE_46.balance + DE_52.balance + DE_73.balance + DE_78.balance + DE_84.balance</field>
                                 <field name="children_ids">
                                     <record id="tax_report_de_tag_48" model="account.report.line">
                                         <field name="name">46. Steuerpflichtige sonstige Leistungen eines im übrigen Gemeinschaftsgebiet ansässigen Unternehmers (zeile 48)</field>
@@ -393,35 +345,17 @@
             </record>
             <record id="tax_report_de_tag_02" model="account.report.line">
                 <field name="name">Steuer</field>
-                <field name="expression_ids">
-                    <record id="tax_report_de_tag_02_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">I_ANMELDUNG_DER_UMSATZSTEUERVORAUSZAHLUNG_ZEILE_17_STEUER.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">I_ANMELDUNG_DER_UMSATZSTEUERVORAUSZAHLUNG_ZEILE_17_STEUER.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_de_tax_tag_17" model="account.report.line">
                         <field name="name">I. Anmeldung der Umsatzsteuer-Vorauszahlung (zeile 17)</field>
                         <field name="code">I_ANMELDUNG_DER_UMSATZSTEUERVORAUSZAHLUNG_ZEILE_17_STEUER</field>
-                        <field name="expression_ids">
-                            <record id="tax_report_de_tax_tag_17_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">LIEFERUNGEN_UND_SONSTIGE_LEISTUNGEN_ZEILE_18_STEUER.balance + INNERGEMEINSCHAFTLICHE_ERWERBE_ZEILE_31_STEUER.balance + ERGANZENDE_ANGABEN_ZU_UMSATZEN_ZEILE_37_STEUER.balance + LEISTUNGSEMPFANGER_ALS_STEUERSCHULDNER_ZEILE_46.balance + ABZIEHBARE_VORSTEUERBETRAGE_ZEILE_55.balance + ANDERE_STEUERBETRAGE_ZEILE_64.balance + UMSATZSTEUERVORAUSZAHLUNGUBERSCHUSS_ZEILE_66.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">LIEFERUNGEN_UND_SONSTIGE_LEISTUNGEN_ZEILE_18_STEUER.balance + INNERGEMEINSCHAFTLICHE_ERWERBE_ZEILE_31_STEUER.balance + ERGANZENDE_ANGABEN_ZU_UMSATZEN_ZEILE_37_STEUER.balance + LEISTUNGSEMPFANGER_ALS_STEUERSCHULDNER_ZEILE_46.balance + ABZIEHBARE_VORSTEUERBETRAGE_ZEILE_55.balance + ANDERE_STEUERBETRAGE_ZEILE_64.balance + UMSATZSTEUERVORAUSZAHLUNGUBERSCHUSS_ZEILE_66.balance</field>
                         <field name="children_ids">
                             <record id="tax_report_de_tax_tag_18" model="account.report.line">
                                 <field name="name">Lieferungen und sonstige Leistungen (zeile 18)</field>
                                 <field name="code">LIEFERUNGEN_UND_SONSTIGE_LEISTUNGEN_ZEILE_18_STEUER</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_de_tax_tag_18_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">DE_81.balance + DE_86.balance + DE_36.balance + DE_80.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">DE_81.balance + DE_86.balance + DE_36.balance + DE_80.balance</field>
                                 <field name="children_ids">
                                     <record id="tax_report_de_tag_26" model="account.report.line">
                                         <field name="name">81. zum Steuersatz von 19 % (zeile 26)</field>
@@ -472,13 +406,7 @@
                             <record id="tax_report_de_tax_tag_31" model="account.report.line">
                                 <field name="name">Innergemeinschaftliche Erwerbe (zeile 31)</field>
                                 <field name="code">INNERGEMEINSCHAFTLICHE_ERWERBE_ZEILE_31_STEUER</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_de_tax_tag_31_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">DE_89.balance + DE_93.balance + DE_98.balance + DE_96.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">DE_89.balance + DE_93.balance + DE_98.balance + DE_96.balance</field>
                                 <field name="children_ids">
                                     <record id="tax_report_de_tag_33" model="account.report.line">
                                         <field name="name">89. zum Steuersatz von 19 % (zeile 33)</field>
@@ -529,13 +457,7 @@
                             <record id="tax_report_de_tax_tag_37" model="account.report.line">
                                 <field name="name">Erganzende Angaben zu Umsatzen (zeile 37)</field>
                                 <field name="code">ERGANZENDE_ANGABEN_ZU_UMSATZEN_ZEILE_37_STEUER</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_de_tax_tag_37_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">DE_45.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">DE_45.balance</field>
                                 <field name="children_ids">
                                     <record id="tax_report_de_tax_tag_45" model="account.report.line">
                                         <field name="name">45. Ubertrag (zeile 45)</field>
@@ -553,13 +475,7 @@
                             <record id="tax_report_de_tax_tag_46" model="account.report.line">
                                 <field name="name">Leistungsempfanger als Steuerschuldner (zeile 46)</field>
                                 <field name="code">LEISTUNGSEMPFANGER_ALS_STEUERSCHULDNER_ZEILE_46</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_de_tax_tag_46_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">DE_47.balance + DE_53.balance + DE_74.balance + DE_79.balance + DE_85.balance + DE_65.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">DE_47.balance + DE_53.balance + DE_74.balance + DE_79.balance + DE_85.balance + DE_65.balance</field>
                                 <field name="children_ids">
                                     <record id="tax_report_de_tag_47" model="account.report.line">
                                         <field name="name">47. Steuerpflichtige sonstige Leistungen eines im übrigen Gemeinschaftsgebietansässigen Unternehmers (zeile 48)</field>
@@ -632,13 +548,7 @@
                             <record id="tax_report_de_tax_tag_55" model="account.report.line">
                                 <field name="name">Abziehbare Vorsteuerbetrage (zeile 55)</field>
                                 <field name="code">ABZIEHBARE_VORSTEUERBETRAGE_ZEILE_55</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_de_tax_tag_55_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">DE_66.balance + DE_61.balance + DE_62.balance + DE_67.balance + DE_63.balance + DE_64.balance + DE_59.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">DE_66.balance + DE_61.balance + DE_62.balance + DE_67.balance + DE_63.balance + DE_64.balance + DE_59.balance</field>
                                 <field name="children_ids">
                                     <record id="tax_report_de_tag_66" model="account.report.line">
                                         <field name="name">66. Vorsteuerbeträge aus Rechnungen von anderen Unternehmern (zeile 56)</field>
@@ -722,13 +632,7 @@
                             <record id="tax_report_de_tax_tag_64" model="account.report.line">
                                 <field name="name">Andere Steuerbetrage (zeile 64)</field>
                                 <field name="code">ANDERE_STEUERBETRAGE_ZEILE_64</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_de_tax_tag_64_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">DE_69.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">DE_69.balance</field>
                                 <field name="children_ids">
                                     <record id="tax_report_de_tag_69" model="account.report.line">
                                         <field name="name">69. In Rechnungen unrichtig oder unberechtigt ausgewiesene Steuerbeträge (zeile 65)</field>
@@ -746,13 +650,7 @@
                             <record id="tax_report_de_tax_tag_66" model="account.report.line">
                                 <field name="name">Umsatzsteuer-Vorauszahlung/Uberschuss (zeile 66)</field>
                                 <field name="code">UMSATZSTEUERVORAUSZAHLUNGUBERSCHUSS_ZEILE_66</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_de_tax_tag_66_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">DE_39.balance + DE_83.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">DE_39.balance + DE_83.balance</field>
                                 <field name="children_ids">
                                     <record id="tax_report_de_tag_39" model="account.report.line">
                                         <field name="name">39. Abzug der festgesetzten Sondervorauszahlung für Dauerfristverlängerung (zeile 67)</field>

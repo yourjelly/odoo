@@ -16,13 +16,7 @@
             <record id="account_tax_report_line_sales_group" model="account.report.line">
                 <field name="name">Skyldig moms</field>
                 <field name="code">DUE_VAT</field>
-                <field name="expression_ids">
-                    <record id="account_tax_report_line_sales_group_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">DK_SALES_VAT.balance + REVERSE_CHARGE_MERCHANDISES_PURCHASED_OUT_DK.balance + REVERSE_CHARGE_SERVICES_PURCHASED_OUT_DK.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">DK_SALES_VAT.balance + REVERSE_CHARGE_MERCHANDISES_PURCHASED_OUT_DK.balance + REVERSE_CHARGE_SERVICES_PURCHASED_OUT_DK.balance</field>
                 <field name="children_ids">
                     <record id="account_tax_report_line_sales_tax" model="account.report.line">
                         <field name="name">Salgsmoms (udgående moms)</field>
@@ -62,13 +56,7 @@
             <record id="account_tax_report_line_deduction_group" model="account.report.line">
                 <field name="name">Fradrag</field>
                 <field name="code">VAT_TO_DEDUCED</field>
-                <field name="expression_ids">
-                    <record id="account_tax_report_line_deduction_group_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">PURCHASE_VAT.balance + OIL_AND_BOTTLED_GAS_TAX.balance + ELECTRICITY_TAX.balance + NATURAL_AND_CITY_GAS_TAX.balance + COAL_TAX.balance + CO2_TAX.balance + WATER_TAX.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">PURCHASE_VAT.balance + OIL_AND_BOTTLED_GAS_TAX.balance + ELECTRICITY_TAX.balance + NATURAL_AND_CITY_GAS_TAX.balance + COAL_TAX.balance + CO2_TAX.balance + WATER_TAX.balance</field>
                 <field name="children_ids">
                     <record id="account_tax_report_line_deduction_purchase_tax" model="account.report.line">
                         <field name="name">Købsmoms (indgående moms)</field>
@@ -151,13 +139,7 @@
             </record>
             <record id="account_tax_report_line_vat_statement" model="account.report.line">
                 <field name="name">Momsangivelse (positivt beløb = betale, negativt beløb = penge tilgode)</field>
-                <field name="expression_ids">
-                    <record id="account_tax_report_line_vat_statement_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">DUE_VAT.balance - VAT_TO_DEDUCED.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">DUE_VAT.balance - VAT_TO_DEDUCED.balance</field>
             </record>
             <record id="account_tax_report_line_additional_info" model="account.report.line">
                 <field name="name">Supplerende oplysninger</field>

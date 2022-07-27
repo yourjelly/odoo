@@ -15,13 +15,7 @@
         <field name="line_ids">
             <record id="tax_report_vat_return_sale_base" model="account.report.line">
                 <field name="name">VAT on Sales and all other Outputs (Base)</field>
-                <field name="expression_ids">
-                    <record id="tax_report_vat_return_sale_base_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">EG_STD_SALE_B.balance + EG_ZERO_SALE_B.balance + EG_EXM_SALE_B.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">EG_STD_SALE_B.balance + EG_ZERO_SALE_B.balance + EG_EXM_SALE_B.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_vat_return_sale_base_fourteen" model="account.report.line">
                         <field name="name">1. Standard Rated 14% (Base)</field>
@@ -60,13 +54,7 @@
             </record>
             <record id="tax_report_vat_return_sale_tax" model="account.report.line">
                 <field name="name">VAT on Sales and all other Outputs (Tax)</field>
-                <field name="expression_ids">
-                    <record id="tax_report_vat_return_sale_tax_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">EG_STD_SALE_T.balance + EG_ZERO_SALE_T.balance + EG_EXM_SALE_T.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">EG_STD_SALE_T.balance + EG_ZERO_SALE_T.balance + EG_EXM_SALE_T.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_vat_return_sale_tax_fourteen" model="account.report.line">
                         <field name="name">1. Standard Rated 14% (Tax)</field>
@@ -105,13 +93,7 @@
             </record>
             <record id="tax_report_vat_return_expense_base" model="account.report.line">
                 <field name="name">VAT on Expenses and all other Inputs (Base)</field>
-                <field name="expression_ids">
-                    <record id="tax_report_vat_return_expense_base_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">EG_STD_PUR_B.balance + EG_ZERO_PUR_B.balance + EG_EXM_PUR_B.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">EG_STD_PUR_B.balance + EG_ZERO_PUR_B.balance + EG_EXM_PUR_B.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_vat_return_expense_base_fourteen" model="account.report.line">
                         <field name="name">5. Standard Rated 14% Expenses (Base)</field>
@@ -150,13 +132,7 @@
             </record>
             <record id="tax_report_vat_return_expense_tax" model="account.report.line">
                 <field name="name">VAT on Expenses and all other Inputs (Tax)</field>
-                <field name="expression_ids">
-                    <record id="tax_report_vat_return_expense_tax_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">EG_STD_PUR_T.balance + EG_ZERO_PUR_T.balance + EG_EXM_PUR_T.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">EG_STD_PUR_T.balance + EG_ZERO_PUR_T.balance + EG_EXM_PUR_T.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_vat_return_expense_tax_fourteen" model="account.report.line">
                         <field name="name">5. Standard Rated 14% Expenses (Tax)</field>
@@ -198,33 +174,15 @@
                 <field name="children_ids">
                     <record id="tax_report_vat_return_net_1" model="account.report.line">
                         <field name="name">Total value of due tax for the period</field>
-                        <field name="expression_ids">
-                            <record id="tax_report_vat_return_net_1_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">EG_STD_SALE_T.balance + EG_ZERO_SALE_T.balance + EG_EXM_SALE_T.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">EG_STD_SALE_T.balance + EG_ZERO_SALE_T.balance + EG_EXM_SALE_T.balance</field>
                     </record>
                     <record id="tax_report_vat_return_net_2" model="account.report.line">
                         <field name="name">Total value of recoverable tax for the period</field>
-                        <field name="expression_ids">
-                            <record id="tax_report_vat_return_net_2_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">EG_STD_PUR_T.balance + EG_ZERO_PUR_T.balance + EG_EXM_PUR_T.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">EG_STD_PUR_T.balance + EG_ZERO_PUR_T.balance + EG_EXM_PUR_T.balance</field>
                     </record>
                     <record id="tax_report_vat_return_net_3" model="account.report.line">
                         <field name="name">Net VAT due (or reclaimed) for the period</field>
-                        <field name="expression_ids">
-                            <record id="tax_report_vat_return_net_3_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">EG_STD_SALE_T.balance + EG_ZERO_SALE_T.balance + EG_EXM_SALE_T.balance - (EG_STD_PUR_T.balance + EG_ZERO_PUR_T.balance + EG_EXM_PUR_T.balance)</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">EG_STD_SALE_T.balance + EG_ZERO_SALE_T.balance + EG_EXM_SALE_T.balance - (EG_STD_PUR_T.balance + EG_ZERO_PUR_T.balance + EG_EXM_PUR_T.balance)</field>
                     </record>
                 </field>
             </record>
@@ -245,13 +203,7 @@
         <field name="line_ids">
             <record id="tax_report_withholding_tax_sale_base" model="account.report.line">
                 <field name="name">Withholding Tax on Sales (Base)</field>
-                <field name="expression_ids">
-                    <record id="tax_report_withholding_tax_sale_base_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">EG_H_SALE_B.balance + EG_O_SALE_B.balance + EG_T_SALE_B.balance + EG_F_SALE_B.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">EG_H_SALE_B.balance + EG_O_SALE_B.balance + EG_T_SALE_B.balance + EG_F_SALE_B.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_withholding_tax_sale_base_half" model="account.report.line">
                         <field name="name">Withholding Tax on Sales -0.5% (Base)</field>
@@ -301,13 +253,7 @@
             </record>
             <record id="tax_report_withholding_tax_sale_tax" model="account.report.line">
                 <field name="name">Withholding Tax on Sales (Tax)</field>
-                <field name="expression_ids">
-                    <record id="tax_report_withholding_tax_sale_tax_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">EG_H_SALE_T.balance + EG_O_SALE_T.balance + EG_T_SALE_T.balance + EG_F_SALE_T.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">EG_H_SALE_T.balance + EG_O_SALE_T.balance + EG_T_SALE_T.balance + EG_F_SALE_T.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_withholding_tax_sale_tax_half" model="account.report.line">
                         <field name="name">Withholding Tax on Sales -0.5% (Tax)</field>
@@ -357,13 +303,7 @@
             </record>
             <record id="tax_report_withholding_tax_purchase_base" model="account.report.line">
                 <field name="name">Withholding Tax on Purchases (Base)</field>
-                <field name="expression_ids">
-                    <record id="tax_report_withholding_tax_purchase_base_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">EG_H_PUR_B.balance + EG_O_PUR_B.balance + EG_T_PUR_B.balance + EG_F_PUR_B.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">EG_H_PUR_B.balance + EG_O_PUR_B.balance + EG_T_PUR_B.balance + EG_F_PUR_B.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_withholding_tax_purchase_base_half" model="account.report.line">
                         <field name="name">Withholding Tax on Purchases -0.5% (Base)</field>
@@ -413,13 +353,7 @@
             </record>
             <record id="tax_report_withholding_tax_purchase_tax" model="account.report.line">
                 <field name="name">Withholding Tax on Purchases (Tax)</field>
-                <field name="expression_ids">
-                    <record id="tax_report_withholding_tax_purchase_tax_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">EG_H_PUR_T.balance + EG_O_PUR_T.balance + EG_T_PUR_T.balance + EG_F_PUR_T.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">EG_H_PUR_T.balance + EG_O_PUR_T.balance + EG_T_PUR_T.balance + EG_F_PUR_T.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_withholding_tax_purchase_tax_half" model="account.report.line">
                         <field name="name">Withholding Tax on Purchases -0.5% (Tax)</field>
@@ -484,13 +418,7 @@
         <field name="line_ids">
             <record id="tax_report_schedule_tax_schedule_tax_sale_base" model="account.report.line">
                 <field name="name">Schedule Tax on Sales (Base)</field>
-                <field name="expression_ids">
-                    <record id="tax_report_schedule_tax_schedule_tax_sale_base_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">EG_H_SALE_SB.balance + EG_O_SALE_SB.balance + EG_F_SALE_SB.balance + EG_E_SALE_SB.balance + EG_T_SALE_SB.balance + EG_FF_SALE_SB.balance + EG_TY_SALE_SB.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">EG_H_SALE_SB.balance + EG_O_SALE_SB.balance + EG_F_SALE_SB.balance + EG_E_SALE_SB.balance + EG_T_SALE_SB.balance + EG_FF_SALE_SB.balance + EG_TY_SALE_SB.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_schedule_tax_schedule_tax_sale_base_half" model="account.report.line">
                         <field name="name">Schedule Tax on Sales 0.5% (Base)</field>
@@ -573,13 +501,7 @@
             </record>
             <record id="tax_report_schedule_tax_schedule_tax_sale_tax" model="account.report.line">
                 <field name="name">Schedule Tax on Sales (Tax)</field>
-                <field name="expression_ids">
-                    <record id="tax_report_schedule_tax_schedule_tax_sale_tax_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">EG_H_SALE_ST.balance + EG_O_SALE_ST.balance + EG_F_SALE_ST.balance + EG_E_SALE_ST.balance + EG_T_SALE_ST.balance + EG_FF_SALE_ST.balance + EG_TY_SALE_ST.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">EG_H_SALE_ST.balance + EG_O_SALE_ST.balance + EG_F_SALE_ST.balance + EG_E_SALE_ST.balance + EG_T_SALE_ST.balance + EG_FF_SALE_ST.balance + EG_TY_SALE_ST.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_schedule_tax_schedule_tax_sale_tax_half" model="account.report.line">
                         <field name="name">Schedule Tax on Sales 0.5% (Tax)</field>
@@ -662,13 +584,7 @@
             </record>
             <record id="tax_report_schedule_tax_schedule_tax_purchase_base" model="account.report.line">
                 <field name="name">Schedule Tax on Purchases (Base)</field>
-                <field name="expression_ids">
-                    <record id="tax_report_schedule_tax_schedule_tax_purchase_base_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">EG_H_PUR_SB.balance + EG_O_PUR_SB.balance + EG_F_PUR_SB.balance + EG_E_PUR_SB.balance + EG_T_PUR_SB.balance + EG_FF_PUR_SB.balance + EG_TY_PUR_SB.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">EG_H_PUR_SB.balance + EG_O_PUR_SB.balance + EG_F_PUR_SB.balance + EG_E_PUR_SB.balance + EG_T_PUR_SB.balance + EG_FF_PUR_SB.balance + EG_TY_PUR_SB.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_schedule_tax_schedule_tax_purchase_base_half" model="account.report.line">
                         <field name="name">Schedule Tax on Purchases 0.5% (Base)</field>
@@ -751,13 +667,7 @@
             </record>
             <record id="tax_report_schedule_tax_schedule_tax_purchase_tax" model="account.report.line">
                 <field name="name">Schedule Tax on Purchases (Tax)</field>
-                <field name="expression_ids">
-                    <record id="tax_report_schedule_tax_schedule_tax_purchase_tax_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">EG_H_PUR_ST.balance + EG_O_PUR_ST.balance + EG_F_PUR_ST.balance + EG_E_PUR_ST.balance + EG_T_PUR_ST.balance + EG_FF_PUR_ST.balance + EG_TY_PUR_ST.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">EG_H_PUR_ST.balance + EG_O_PUR_ST.balance + EG_F_PUR_ST.balance + EG_E_PUR_ST.balance + EG_T_PUR_ST.balance + EG_FF_PUR_ST.balance + EG_TY_PUR_ST.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_schedule_tax_schedule_tax_purchase_tax_half" model="account.report.line">
                         <field name="name">Schedule Tax on Purchases 0.5% (Tax)</field>
@@ -855,13 +765,7 @@
         <field name="line_ids">
             <record id="tax_report_other_taxes_stamp_tax_base" model="account.report.line">
                 <field name="name">Stamp Tax Sales (Base)</field>
-                <field name="expression_ids">
-                    <record id="tax_report_other_taxes_stamp_tax_base_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">EG_STMP_TW_SB.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">EG_STMP_TW_SB.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_other_taxes_stamp_tax_base_sales" model="account.report.line">
                         <field name="name">Stamp Tax Sales 20% (Base)</field>
@@ -878,13 +782,7 @@
             </record>
             <record id="tax_report_other_taxes_stamp_tax_tax" model="account.report.line">
                 <field name="name">Stamp Tax Sales (Tax)</field>
-                <field name="expression_ids">
-                    <record id="tax_report_other_taxes_stamp_tax_tax_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">EG_STMP_TW_ST.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">EG_STMP_TW_ST.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_other_taxes_stamp_tax_tax_sales" model="account.report.line">
                         <field name="name">Stamp Tax Sales 20% (Tax)</field>
@@ -901,13 +799,7 @@
             </record>
             <record id="tax_report_other_taxes_stamp_purchase_tax_base" model="account.report.line">
                 <field name="name">Stamp Tax Purchases (Base)</field>
-                <field name="expression_ids">
-                    <record id="tax_report_other_taxes_stamp_purchase_tax_base_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">EG_STMP_TW_PB.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">EG_STMP_TW_PB.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_other_taxes_stamp_purchase_tax_base_purchase" model="account.report.line">
                         <field name="name">Stamp Tax Purchases 20% (Base)</field>
@@ -924,13 +816,7 @@
             </record>
             <record id="tax_report_other_taxes_stamp_purchase_tax_tax" model="account.report.line">
                 <field name="name">Stamp Tax Purchases (Tax)</field>
-                <field name="expression_ids">
-                    <record id="tax_report_other_taxes_stamp_purchase_tax_tax_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">EG_STMP_TW_PT.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">EG_STMP_TW_PT.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_other_taxes_stamp_purchase_tax_tax_purchase" model="account.report.line">
                         <field name="name">Stamp Tax Purchases 20% (Tax)</field>

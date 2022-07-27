@@ -15,13 +15,7 @@
         <field name="line_ids">
             <record id="account_tax_report_line_razem_c" model="account.report.line">
                 <field name="name">Podstawa - Razem C</field>
-                <field name="expression_ids">
-                    <record id="account_tax_report_line_razem_c_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">PLTAXC_01_10.balance + PLTAXC_02_11.balance + PLTAXC_03_13.balance + PLTAXC_04_15.balance + PLTAXC_05_17.balance + PLTAXC_06_19.balance + PLTAXC_07_21.balance + PLTAXC_08_22.balance + PLTAXC_09_23.balance + PLTAXC_10_25.balance + PLTAXC_11_27.balance + PLTAXC_12_31.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">PLTAXC_01_10.balance + PLTAXC_02_11.balance + PLTAXC_03_13.balance + PLTAXC_04_15.balance + PLTAXC_05_17.balance + PLTAXC_06_19.balance + PLTAXC_07_21.balance + PLTAXC_08_22.balance + PLTAXC_09_23.balance + PLTAXC_10_25.balance + PLTAXC_11_27.balance + PLTAXC_12_31.balance</field>
                 <field name="children_ids">
                     <record id="account_tax_report_line_kraj_zwolnione" model="account.report.line">
                         <field name="name">Podstawa - Dostawa towarów/usług, kraj, zwolnione</field>
@@ -198,13 +192,7 @@
             </record>
             <record id="account_tax_report_line_razem_d" model="account.report.line">
                 <field name="name">Podstawa - Razem D</field>
-                <field name="expression_ids">
-                    <record id="account_tax_report_line_razem_d_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">PODSTAWA__NABYCIE_TOWAROW_I_USLUG_STRWALE.balance + PLTAXD_02_41a.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">PODSTAWA__NABYCIE_TOWAROW_I_USLUG_STRWALE.balance + PLTAXD_02_41a.balance</field>
                 <field name="children_ids">
                     <record id="account_tax_report_line_uslug_s_trwale" model="account.report.line">
                         <field name="name">Podstawa - Nabycie towarów i usług ś.trwałe</field>
@@ -233,33 +221,15 @@
             </record>
             <record id="account_tax_report_line_do_przeniesienia" model="account.report.line">
                 <field name="name">Podatek - Do przeniesienia</field>
-                <field name="expression_ids">
-                    <record id="account_tax_report_line_do_przeniesienia_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">PLTAXC.balance - PLTAXD.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">PLTAXC.balance - PLTAXD.balance</field>
                 <field name="children_ids">
                     <record id="account_tax_report_line_nad_naleznym" model="account.report.line">
                         <field name="name">Podatek - Nadwyżka naliczonego nad należnym</field>
-                        <field name="expression_ids">
-                            <record id="account_tax_report_line_nad_naleznym_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">PLTAXC.balance - PLTAXD.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">PLTAXC.balance - PLTAXD.balance</field>
                         <field name="children_ids">
                             <record id="account_tax_report_line_do_US" model="account.report.line">
                                 <field name="name">Podatek - Do wpłaty do US</field>
-                                <field name="expression_ids">
-                                    <record id="account_tax_report_line_do_US_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">PLTAXC.balance - PLTAXD.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">PLTAXC.balance - PLTAXD.balance</field>
                                 <field name="children_ids">
                                     <record id="account_tax_report_line_kasy_rejestrujace" model="account.report.line">
                                         <field name="name">Podatek - Wydatek na kasy rejestrujące</field>
@@ -286,13 +256,7 @@
                                     <record id="account_tax_report_line_podatek_razem_c" model="account.report.line">
                                         <field name="name">Podatek - Razem C</field>
                                         <field name="code">PLTAXC</field>
-                                        <field name="expression_ids">
-                                            <record id="account_tax_report_line_podatek_razem_c_formula" model="account.report.expression">
-                                                <field name="label">balance</field>
-                                                <field name="engine">aggregation</field>
-                                                <field name="formula">PLTAXC_04_16.balance + PLTAXC_05_18.balance + PLTAXC_06_20.balance + PLTAXC_09_24.balance + PLTAXC_10_26.balance + PLTAXC_11_28.balance + PLTAXC_12_32.balance</field>
-                                            </record>
-                                        </field>
+                                        <field name="aggregation_formula">PLTAXC_04_16.balance + PLTAXC_05_18.balance + PLTAXC_06_20.balance + PLTAXC_09_24.balance + PLTAXC_10_26.balance + PLTAXC_11_28.balance + PLTAXC_12_32.balance</field>
                                         <field name="children_ids">
                                             <record id="account_tax_report_line_podatek_kraj_3_lub_5" model="account.report.line">
                                                 <field name="name">Podatek - Dostawa towarów/usług, kraj, 3% lub 5%</field>
@@ -411,13 +375,7 @@
                                     <record id="account_tax_report_line_podatek_razem_d" model="account.report.line">
                                         <field name="name">Podatek - Razem D</field>
                                         <field name="code">PLTAXD</field>
-                                        <field name="expression_ids">
-                                            <record id="account_tax_report_line_podatek_razem_d_formula" model="account.report.expression">
-                                                <field name="label">balance</field>
-                                                <field name="engine">aggregation</field>
-                                                <field name="formula">PODATEK__NADWYZKA_Z_POPRZEDNIEJ_DEKLARACJI.balance + PODATEK__NALICZONY_ZE_SPISU_Z_NATURY_ART113.balance + PODATEK__NABYCIE_TOWAROW_I_USLUG_STRWALE.balance + PLTAXD_02_42.balance + PODATEK__KOREKTA_NALICZONEGO_OD_NABYCIA_STRWALYCH.balance + PODATEK__KOREKTA_NALICZONEGO_OD_POZOSTALYCH_NABYC.balance</field>
-                                            </record>
-                                        </field>
+                                        <field name="aggregation_formula">PODATEK__NADWYZKA_Z_POPRZEDNIEJ_DEKLARACJI.balance + PODATEK__NALICZONY_ZE_SPISU_Z_NATURY_ART113.balance + PODATEK__NABYCIE_TOWAROW_I_USLUG_STRWALE.balance + PLTAXD_02_42.balance + PODATEK__KOREKTA_NALICZONEGO_OD_NABYCIA_STRWALYCH.balance + PODATEK__KOREKTA_NALICZONEGO_OD_POZOSTALYCH_NABYC.balance</field>
                                         <field name="children_ids">
                                             <record id="account_tax_report_line_podatek_deklaracji" model="account.report.line">
                                                 <field name="name">Podatek - Nadwyżka z poprzedniej deklaracji</field>
@@ -509,13 +467,7 @@
                     </record>
                     <record id="account_tax_report_line_podatek_do_zwrotu" model="account.report.line">
                         <field name="name">Podatek - Do zwrotu</field>
-                        <field name="expression_ids">
-                            <record id="account_tax_report_line_podatek_do_zwrotu_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">PODATEK__DO_ZWROTU_25_DNI.balance + PODATEK__DO_ZWROTU_60_DNI.balance + PODATEK__DO_ZWROTU_180_DNI.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">PODATEK__DO_ZWROTU_25_DNI.balance + PODATEK__DO_ZWROTU_60_DNI.balance + PODATEK__DO_ZWROTU_180_DNI.balance</field>
                         <field name="children_ids">
                             <record id="account_tax_report_line_do_zwrotu_25_dni" model="account.report.line">
                                 <field name="name">Podatek - Do zwrotu 25 dni</field>

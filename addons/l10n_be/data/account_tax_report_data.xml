@@ -88,13 +88,7 @@
                             <record id="tax_report_title_operations_sortie_46" model="account.report.line">
                                 <field name="name">46 - Livraisons intra-communautaires exemptées</field>
                                 <field name="code">c46</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_title_operations_sortie_46_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">c46L.balance + c46T.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">c46L.balance + c46T.balance</field>
                                 <field name="children_ids">
                                     <record id="tax_report_line_46L" model="account.report.line">
                                         <field name="name">46L - Livraisons biens intra-communautaires exemptées</field>
@@ -134,13 +128,7 @@
                             <record id="tax_report_title_operations_sortie_48" model="account.report.line">
                                 <field name="name">48 - Notes de crédit aux opérations grilles [44] et [46]</field>
                                 <field name="code">c48</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_title_operations_sortie_48_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">c48s44.balance + c48s46L.balance + c48s46T.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">c48s44.balance + c48s46L.balance + c48s46T.balance</field>
                                 <field name="children_ids">
                                     <record id="tax_report_line_48s44" model="account.report.line">
                                         <field name="name">48s44 - Notes de crédit aux opérations grilles [44]</field>

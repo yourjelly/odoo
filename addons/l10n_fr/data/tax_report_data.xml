@@ -378,13 +378,7 @@
                             <record id="tax_report_16" model="account.report.line">
                                 <field name="name">16 - Total de la TVA brute due</field>
                                 <field name="code">box_16</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_16_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">box_08_taxe.balance + box_09_taxe.balance + box_9B_taxe.balance + box_10_taxe.balance + box_11_taxe.balance + box_13_taxe.balance + box_14_taxe.balance + box_15.balance + box_5B.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">box_08_taxe.balance + box_09_taxe.balance + box_9B_taxe.balance + box_10_taxe.balance + box_11_taxe.balance + box_13_taxe.balance + box_14_taxe.balance + box_15.balance + box_5B.balance</field>
                             </record>
                             <record id="tax_report_7C" model="account.report.line">
                                 <field name="name">7C - Dont TVA sur importations bénéficiant du dispositif d'autoliquidation</field>
@@ -504,13 +498,7 @@
                             <record id="tax_report_23" model="account.report.line">
                                 <field name="name">23 - Total TVA déductible</field>
                                 <field name="code">box_23</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_23_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">box_19.balance + box_20.balance + box_21.balance + box_22.balance + box_2C.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">box_19.balance + box_20.balance + box_21.balance + box_22.balance + box_2C.balance</field>
                             </record>
                             <record id="tax_report_24" model="account.report.line">
                                 <field name="name">24 - Dont TVA déductible sur importations</field>
@@ -618,13 +606,7 @@
                     <record id="tax_report_32" model="account.report.line">
                         <field name="name">32 - Total à payer</field>
                         <field name="code">box_32</field>
-                        <field name="expression_ids">
-                            <record id="tax_report_32_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">box_28.balance + box_29.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">box_28.balance + box_29.balance</field>
                     </record>
                 </field>
             </record>

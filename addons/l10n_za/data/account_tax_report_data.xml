@@ -15,23 +15,11 @@
         <field name="line_ids">
             <record id="total_vat_payable" model="account.report.line">
                 <field name="name">[20] VAT PAYABLE/REFUNDABLE (Total A - Total B)</field>
-                <field name="expression_ids">
-                    <record id="total_vat_payable_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">(VAT4.balance + VAT4A.balance + (SEC6.balance * 0.6 + SEC7.balance) + VAT11.balance + VAT12.balance) - (VAT14.balance + VAT14A.balance + VAT15.balance + VAT16.balance + VAT17.balance + VAT18.balance)</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">(VAT4.balance + VAT4A.balance + (SEC6.balance * 0.6 + SEC7.balance) + VAT11.balance + VAT12.balance) - (VAT14.balance + VAT14A.balance + VAT15.balance + VAT16.balance + VAT17.balance + VAT18.balance)</field>
                 <field name="children_ids">
                     <record id="total_output_tax" model="account.report.line">
                         <field name="name">[13] Total A: TOTAL OUTPUT TAX (4 + 4A + 9 + 11 + 12)</field>
-                        <field name="expression_ids">
-                            <record id="total_output_tax_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">VAT4.balance + VAT4A.balance + (SEC6.balance * 0.6 + SEC7.balance) + VAT11.balance + VAT12.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">VAT4.balance + VAT4A.balance + (SEC6.balance * 0.6 + SEC7.balance) + VAT11.balance + VAT12.balance</field>
                         <field name="children_ids">
                             <record id="standard_rate_exclude_capital_goods_service" model="account.report.line">
                                 <field name="name">[1] Standard Rate (Excluding Capital goods and/or services and accomodation)</field>
@@ -123,13 +111,7 @@
                             </record>
                             <record id="accomodation_exceeding_28_days_60_percent" model="account.report.line">
                                 <field name="name">[6] x 60%</field>
-                                <field name="expression_ids">
-                                    <record id="accomodation_exceeding_28_days_60_percent_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">VAT5.balance * 0.6</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">VAT5.balance * 0.6</field>
                             </record>
                             <record id="accomodation_under_28_days" model="account.report.line">
                                 <field name="name">[7] Accomodation under 28 days</field>
@@ -144,23 +126,11 @@
                             </record>
                             <record id="accomodation_28_days" model="account.report.line">
                                 <field name="name">[8] Total (6 + 7)</field>
-                                <field name="expression_ids">
-                                    <record id="accomodation_28_days_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">(VAT5.balance * 0.6) + VAT7.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">(VAT5.balance * 0.6) + VAT7.balance</field>
                             </record>
                             <record id="vat_on_accomodation_28_days" model="account.report.line">
                                 <field name="name">[9] x 15 / (100 ??) </field>
-                                <field name="expression_ids">
-                                    <record id="vat_on_accomodation_28_days_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">SEC6.balance * 0.6 + SEC7.balance </field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">SEC6.balance * 0.6 + SEC7.balance </field>
                                 <field name="children_ids">
                                     <record id="vat_on_accomodation_exceeding_28_days" model="account.report.line">
                                         <field name="name">VAT on Accomodation exceeding 28 days</field>
@@ -188,13 +158,7 @@
                             </record>
                             <record id="vat_plus_base_of_second_hand_goods_export" model="account.report.line">
                                 <field name="name">[10] Change in use and export of second-hand goods</field>
-                                <field name="expression_ids">
-                                    <record id="vat_plus_base_of_second_hand_goods_export_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">VAT10a.balance + VAT11.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">VAT10a.balance + VAT11.balance</field>
                                 <field name="children_ids">
                                     <record id="second_hand_goods_export" model="account.report.line">
                                         <field name="name">[10] Base Amount: Change in use and export of second-hand goods</field>
@@ -235,13 +199,7 @@
                     </record>
                     <record id="total_input_tax" model="account.report.line">
                         <field name="name">[19] Total B: TOTAL INPUT TAX (14 + 14A + 15 + 15A + 16 + 17 + 18)</field>
-                        <field name="expression_ids">
-                            <record id="total_input_tax_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">VAT14.balance + VAT14A.balance + VAT15.balance + VAT15A.balance + VAT16.balance + VAT17.balance + VAT18.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">VAT14.balance + VAT14A.balance + VAT15.balance + VAT15A.balance + VAT16.balance + VAT17.balance + VAT18.balance</field>
                         <field name="children_ids">
                             <record id="capital_goods_services_supplied" model="account.report.line">
                                 <field name="name">[14] Capital Goods and/or services supplied to you</field>

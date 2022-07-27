@@ -15,13 +15,7 @@
         <field name="line_ids">
             <record id="tax_report_alap" model="account.report.line">
                 <field name="name">ÁFA alap</field>
-                <field name="expression_ids">
-                    <record id="tax_report_alap_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">ADOALAP__FIZETENDO_AFA_EXPORT.balance + ADOALAP__FIZETENDO_AFA_EU.balance + ADOALAP__FIZETENDO_AFA_TARGYI_ADOMENTES.balance + ADOALAP__FIZETENDO_AFA_ALANYI_ADOMENTES.balance + ADOALAP__FIZETENDO_AFA_KORON_KIVULI.balance + ADOALAP__FIZETENDO_AFA_5.balance + ADOALAP__FIZETENDO_AFA_18.balance + ADOALAP__FIZETENDO_AFA_27.balance + ADOALAP__VISSZAIGENYELHETO_AFA_EU.balance + ADOALAP__IMPORT_AFA.balance + ADOALAP__FORDITOTT_AFA.balance + ADOALAP__VISSZAIGENYELHETO_AFA_ALANYI_ADOMENTES.balance + ADOALAP__VISSZAIGENYELHETO_AFA_TARGYI_ADOMENTES.balance + ADOALAP__VISSZAIGENYELHETO_AFA_KORON_KIVULI.balance + ADOALAP__VISSZAIGENYELHETO_AFA_5.balance + ADOALAP__VISSZAIGENYELHETO_AFA_18.balance + ADOALAP__VISSZAIGENYELHETO_AFA_27.balance + ADOALAP__VISSZAIGENYELHETO_KOMPENZACIOS_FELAR.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">ADOALAP__FIZETENDO_AFA_EXPORT.balance + ADOALAP__FIZETENDO_AFA_EU.balance + ADOALAP__FIZETENDO_AFA_TARGYI_ADOMENTES.balance + ADOALAP__FIZETENDO_AFA_ALANYI_ADOMENTES.balance + ADOALAP__FIZETENDO_AFA_KORON_KIVULI.balance + ADOALAP__FIZETENDO_AFA_5.balance + ADOALAP__FIZETENDO_AFA_18.balance + ADOALAP__FIZETENDO_AFA_27.balance + ADOALAP__VISSZAIGENYELHETO_AFA_EU.balance + ADOALAP__IMPORT_AFA.balance + ADOALAP__FORDITOTT_AFA.balance + ADOALAP__VISSZAIGENYELHETO_AFA_ALANYI_ADOMENTES.balance + ADOALAP__VISSZAIGENYELHETO_AFA_TARGYI_ADOMENTES.balance + ADOALAP__VISSZAIGENYELHETO_AFA_KORON_KIVULI.balance + ADOALAP__VISSZAIGENYELHETO_AFA_5.balance + ADOALAP__VISSZAIGENYELHETO_AFA_18.balance + ADOALAP__VISSZAIGENYELHETO_AFA_27.balance + ADOALAP__VISSZAIGENYELHETO_KOMPENZACIOS_FELAR.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_alap_fiz_export" model="account.report.line">
                         <field name="name">Adóalap - Fizetendő ÁFA Export</field>
@@ -225,13 +219,7 @@
             </record>
             <record id="tax_report_fizetndo" model="account.report.line">
                 <field name="name">ÁFA fizetndő / visszaigényelhető</field>
-                <field name="expression_ids">
-                    <record id="tax_report_fizetndo_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">FIZETENDO_AFA_5.balance + FIZETENDO_AFA_18.balance + FIZETENDO_AFA_27.balance + VISSZAIGENYELHETO_AFA_5.balance + VISSZAIGENYELHETO_AFA_18.balance + VISSZAIGENYELHETO_AFA_27.balance + VISSZAIGENYELHETO_KOMPENZACIOS_FELAR.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">FIZETENDO_AFA_5.balance + FIZETENDO_AFA_18.balance + FIZETENDO_AFA_27.balance + VISSZAIGENYELHETO_AFA_5.balance + VISSZAIGENYELHETO_AFA_18.balance + VISSZAIGENYELHETO_AFA_27.balance + VISSZAIGENYELHETO_KOMPENZACIOS_FELAR.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_fizetndo_5" model="account.report.line">
                         <field name="name">Fizetendő ÁFA 5%</field>

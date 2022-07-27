@@ -15,13 +15,7 @@
         <field name="line_ids">
             <record id="tax_report_sale_and_income" model="account.report.line">
                 <field name="name">Sales and Income</field>
-                <field name="expression_ids">
-                    <record id="tax_report_sale_and_income_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">NZBOX5.balance + NZBOX6.balance + NZBOX9.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">NZBOX5.balance + NZBOX6.balance + NZBOX9.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_box5" model="account.report.line">
                         <field name="name">[BOX 5] Total sales and income for the period(including GST and zero-rated Supplies)</field>
@@ -48,24 +42,12 @@
                     <record id="tax_report_box7" model="account.report.line">
                         <field name="name">[BOX 7] The amount in Box 6 is subracted from Box 5</field>
                         <field name="code">NZBOX7</field>
-                        <field name="expression_ids">
-                            <record id="tax_report_box7_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">NZBOX5.balance - NZBOX6.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">NZBOX5.balance - NZBOX6.balance</field>
                     </record>
                     <record id="tax_report_box8" model="account.report.line">
                         <field name="name">[BOX 8] Multiply the amount in Box 7 by 3 and then divide by 23</field>
                         <field name="code">NZBOX8</field>
-                        <field name="expression_ids">
-                            <record id="tax_report_box8_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">(NZBOX7.balance * 3).balance/23.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">(NZBOX7.balance * 3).balance/23.balance</field>
                     </record>
                     <record id="tax_report_box9" model="account.report.line">
                         <field name="name">[BOX 9] Enter any adjustments from your calculation sheet</field>
@@ -81,25 +63,13 @@
                     <record id="tax_report_box10" model="account.report.line">
                         <field name="name">[BOX 10] Total GST collected on sales and income</field>
                         <field name="code">NZBOX10</field>
-                        <field name="expression_ids">
-                            <record id="tax_report_box10_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">NZBOX8.balance + NZBOX9.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">NZBOX8.balance + NZBOX9.balance</field>
                     </record>
                 </field>
             </record>
             <record id="tax_report_purchases_and_expenses" model="account.report.line">
                 <field name="name">Purchases and Expenses</field>
-                <field name="expression_ids">
-                    <record id="tax_report_purchases_and_expenses_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">NZBOX11.balance + NZBOX13.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">NZBOX11.balance + NZBOX13.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_box11" model="account.report.line">
                         <field name="name">[BOX 11] Total purchases and expenses(including GST) for which tax invoicing requirements have been met</field>
@@ -115,13 +85,7 @@
                     <record id="tax_report_box12" model="account.report.line">
                         <field name="name">[BOX 12] Multiply BOX11 by 3 and then divide by 23</field>
                         <field name="code">NZBOX12</field>
-                        <field name="expression_ids">
-                            <record id="tax_report_box12_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">(NZBOX11.balance * 3).balance/23.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">(NZBOX11.balance * 3).balance/23.balance</field>
                     </record>
                     <record id="tax_report_box13" model="account.report.line">
                         <field name="name">[BOX 13] Credit adjustments from your calculation sheet</field>
@@ -138,25 +102,13 @@
                     <record id="tax_report_box14" model="account.report.line">
                         <field name="name">[BOX 14] Total GST credit for purchases and expenses</field>
                         <field name="code">NZBOX14</field>
-                        <field name="expression_ids">
-                            <record id="tax_report_box14_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">NZBOX12.balance + NZBOX13.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">NZBOX12.balance + NZBOX13.balance</field>
                     </record>
                 </field>
             </record>
             <record id="tax_report_box15" model="account.report.line">
                 <field name="name">[BOX 15] Difference between BOX10 and BOX14</field>
-                <field name="expression_ids">
-                    <record id="tax_report_box15_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">NZBOX10.balance - NZBOX14.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">NZBOX10.balance - NZBOX14.balance</field>
             </record>
         </field>
     </record>

@@ -17,6 +17,7 @@ FIGURE_TYPE_SELECTION_VALUES = [
     ('none', "No Formatting"),
 ]
 
+DOMAIN_REGEX = re.compile(r'(-*sum)\((.*)\)')
 
 class AccountReport(models.Model):
     _name = "account.report"
@@ -245,6 +246,9 @@ class AccountReportLine(models.Model):
     print_on_new_page = fields.Boolean('Print On New Page', help='When checked this line and everything after it will be printed on a new page.')
     action_id = fields.Many2one(string="Action", comodel_name='ir.actions.actions')
     hide_if_zero = fields.Boolean(string="Hide if Zero", help="This line and its children will be hidden when all of their columns are at 0.")
+    domain_formula = fields.Char(string="Domain Formula Shortcut", help="Internal field to shorten expression_ids creation for the domain engine", inverse='_inverse_domain_formula', store=False)
+    account_codes_formula = fields.Char(string="Account Codes Formula Shortcut", help="Internal field to shorten expression_ids creation for the account_codes engine", inverse='_inverse_account_codes_formula', store=False)
+    aggregation_formula = fields.Char(string="Aggregation Formula Shortcut", help="Internal field to shorten expression_ids creation for the aggregation engine", inverse='_inverse_aggregation_formula', store=False)
 
     _sql_constraints = [
         ('code_uniq', 'unique (code)', "A report line with the same code already exists."),
@@ -329,6 +333,36 @@ class AccountReportLine(models.Model):
         while self.search_count([('code', '=', code)]) > 0:
             code += '_COPY'
         return code
+
+    def _inverse_domain_formula(self):
+        self._create_report_expression(engine='domain')
+
+    def _inverse_aggregation_formula(self):
+        self._create_report_expression(engine='aggregation')
+
+    def _inverse_account_codes_formula(self):
+        self._create_report_expression(engine='account_codes')
+
+    def _create_report_expression(self, engine):
+        # create account.report.expression for each report line based on the formula provided to each
+        # engine-related field. This makes xmls a bit shorter
+        vals_list = []
+        for report_line in self:
+            if not report_line.expression_ids:
+                if engine == 'domain':
+                    subformula, formula = DOMAIN_REGEX.match(report_line.domain_formula or '').groups()
+                else:
+                    subformula, formula = None, report_line[f'{engine}_formula']
+                vals = {
+                    'report_line_id': report_line.id,
+                    'label': 'balance',
+                    'engine': engine,
+                    'formula': formula,
+                    'subformula': subformula
+                }
+                vals_list.append(vals)
+
+        self.env['account.report.expression'].create(vals_list)
 
 
 class AccountReportExpression(models.Model):

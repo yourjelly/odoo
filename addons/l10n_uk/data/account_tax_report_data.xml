@@ -15,13 +15,7 @@
         <field name="line_ids">
             <record id="account_tax_report_line_vat_cal" model="account.report.line">
                 <field name="name">VAT calculations</field>
-                <field name="expression_ids">
-                    <record id="account_tax_report_line_vat_cal_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">UKTAX_1.balance + UKTAX_2.balance + UKTAX_4.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">UKTAX_1.balance + UKTAX_2.balance + UKTAX_4.balance</field>
                 <field name="children_ids">
                     <record id="account_tax_report_line_vat_box1" model="account.report.line">
                         <field name="name">[BOX 1] VAT due on sales and other outputs</field>
@@ -47,13 +41,7 @@
                     </record>
                     <record id="account_tax_report_line_vat_box3" model="account.report.line">
                         <field name="name">[BOX 3] Total VAT due (box 1 + box 2)</field>
-                        <field name="expression_ids">
-                            <record id="account_tax_report_line_vat_box3_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">UKTAX_1.balance + UKTAX_2.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">UKTAX_1.balance + UKTAX_2.balance</field>
                     </record>
                     <record id="account_tax_report_line_vat_box4" model="account.report.line">
                         <field name="name">[BOX 4] VAT reclaimed on purchases and other inputs (including acquisitions from EC)</field>
@@ -68,25 +56,13 @@
                     </record>
                     <record id="account_tax_report_line_vat_box5" model="account.report.line">
                         <field name="name">[BOX 5] VAT to pay/reclaim</field>
-                        <field name="expression_ids">
-                            <record id="account_tax_report_line_vat_box5_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">UKTAX_1.balance + UKTAX_2.balance - UKTAX_4.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">UKTAX_1.balance + UKTAX_2.balance - UKTAX_4.balance</field>
                     </record>
                 </field>
             </record>
             <record id="account_tax_report_line_exd_vat" model="account.report.line">
                 <field name="name">Sales and Purchases Excluding VAT</field>
-                <field name="expression_ids">
-                    <record id="account_tax_report_line_exd_vat_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">UKTAX_6.balance + UKTAX_7.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">UKTAX_6.balance + UKTAX_7.balance</field>
                 <field name="children_ids">
                     <record id="account_tax_report_line_exd_vat_box6" model="account.report.line">
                         <field name="name">[BOX 6] Total value of sales and other outputs excluding VAT (including EC supplies)</field>
@@ -114,13 +90,7 @@
             </record>
             <record id="account_tax_report_line_ec_exd_vat" model="account.report.line">
                 <field name="name">EC Sales and Purchases excluding VAT</field>
-                <field name="expression_ids">
-                    <record id="account_tax_report_line_ec_exd_vat_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">UKTAX_8.balance + UKTAX_9.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">UKTAX_8.balance + UKTAX_9.balance</field>
                 <field name="children_ids">
                     <record id="account_tax_report_line_exd_vat_box8" model="account.report.line">
                         <field name="name">[BOX 8] Total value of EC sales excluding VAT</field>

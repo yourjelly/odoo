@@ -15,13 +15,7 @@
         <field name="line_ids">
             <record id="account_tax_report_line_samlet_omsetning" model="account.report.line">
                 <field name="name">A. Samlet omsetning, uttak og innførsel</field>
-                <field name="expression_ids">
-                    <record id="account_tax_report_line_samlet_omsetning_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">NOTAX_01.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">NOTAX_01.balance</field>
                 <field name="children_ids">
                     <record id="account_tax_report_line_post_1" model="account.report.line">
                         <field name="name">Post 1 Samlet omsetning og uttak utenfor merverdiavgiftsloven</field>
@@ -37,25 +31,13 @@
                     <record id="account_tax_report_line_post_2" model="account.report.line">
                         <field name="name">Post 2 Samlet omsetning og uttak innenfor merverdiavgiftloven og innførsel</field>
                         <field name="code">NOTAX_02</field>
-                        <field name="expression_ids">
-                            <record id="account_tax_report_line_post_2_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">NOTAX_03.balance+NOTAX_04.balance+NOTAX_05.balance+NOTAX_06.balance+NOTAX_07.balance+NOTAX_08.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">NOTAX_03.balance+NOTAX_04.balance+NOTAX_05.balance+NOTAX_06.balance+NOTAX_07.balance+NOTAX_08.balance</field>
                     </record>
                 </field>
             </record>
             <record id="account_tax_report_line_innenlands_omsetning" model="account.report.line">
                 <field name="name">B. Innenlands omsetning og uttak</field>
-                <field name="expression_ids">
-                    <record id="account_tax_report_line_innenlands_omsetning_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">NOTAX_03.balance + NOTAX_03_1.balance + NOTAX_04.balance + NOTAX_04_1.balance + NOTAX_05.balance + NOTAX_05_1.balance + NOTAX_06.balance + NOTAX_07.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">NOTAX_03.balance + NOTAX_03_1.balance + NOTAX_04.balance + NOTAX_04_1.balance + NOTAX_05.balance + NOTAX_05_1.balance + NOTAX_06.balance + NOTAX_07.balance</field>
                 <field name="children_ids">
                     <record id="account_tax_report_line_post_3" model="account.report.line">
                         <field name="name">Post 3 Innenlands omsetning og uttak, og beregnet avgift 25 %</field>
@@ -149,13 +131,7 @@
             </record>
             <record id="account_tax_report_line_utforsel" model="account.report.line">
                 <field name="name">C. Utførsel</field>
-                <field name="expression_ids">
-                    <record id="account_tax_report_line_utforsel_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">NOTAX_08.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">NOTAX_08.balance</field>
                 <field name="children_ids">
                     <record id="account_tax_report_line_post_8" model="account.report.line">
                         <field name="name">Post 8 Utførsel av varer og tjenester fritatt for merverdiavgift</field>
@@ -172,13 +148,7 @@
             </record>
             <record id="account_tax_report_line_innforsel_av_varer" model="account.report.line">
                 <field name="name">D. Innførsel av varer</field>
-                <field name="expression_ids">
-                    <record id="account_tax_report_line_innforsel_av_varer_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">NOTAX_09.balance + NOTAX_09_1.balance + NOTAX_10.balance + NOTAX_10_1.balance + NOTAX_11.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">NOTAX_09.balance + NOTAX_09_1.balance + NOTAX_10.balance + NOTAX_10_1.balance + NOTAX_11.balance</field>
                 <field name="children_ids">
                     <record id="account_tax_report_line_post_9" model="account.report.line">
                         <field name="name">Post 9 Innførsel av varer, og beregnet avgift 25 %</field>
@@ -239,13 +209,7 @@
             </record>
             <record id="account_tax_report_line_kjop_med_omvendt_avgiftsplikt" model="account.report.line">
                 <field name="name">E. Kjøp med omvendt avgiftsplikt</field>
-                <field name="expression_ids">
-                    <record id="account_tax_report_line_kjop_med_omvendt_avgiftsplikt_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">NOTAX_12.balance + NOTAX_12_1.balance + NOTAX_13.balance + NOTAX_13_1.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">NOTAX_12.balance + NOTAX_12_1.balance + NOTAX_13.balance + NOTAX_13_1.balance</field>
                 <field name="children_ids">
                     <record id="account_tax_report_line_post_12" model="account.report.line">
                         <field name="name">Post 12 Tjenester kjøpt fra utlandet, og beregnet avgift 25 %</field>
@@ -295,13 +259,7 @@
             </record>
             <record id="account_tax_report_line_fradragsberettigen_innenlands" model="account.report.line">
                 <field name="name">F. Fradragsberettiget innenlands inngående avgift</field>
-                <field name="expression_ids">
-                    <record id="account_tax_report_line_fradragsberettigen_innenlands_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">NOTAX_14.balance + NOTAX_15.balance + NOTAX_16.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">NOTAX_14.balance + NOTAX_15.balance + NOTAX_16.balance</field>
                 <field name="children_ids">
                     <record id="account_tax_report_line_post_14" model="account.report.line">
                         <field name="name">Post 14 Fradragsberettiget innenlands inngående avgift 25 %</field>
@@ -340,13 +298,7 @@
             </record>
             <record id="account_tax_report_line_fradragsberettiget_innforselsmerverdiavgift" model="account.report.line">
                 <field name="name">G. Fradragsberettiget innførselsmerverdiavgift</field>
-                <field name="expression_ids">
-                    <record id="account_tax_report_line_fradragsberettiget_innforselsmerverdiavgift_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">NOTAX_17.balance + NOTAX_18.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">NOTAX_17.balance + NOTAX_18.balance</field>
                 <field name="children_ids">
                     <record id="account_tax_report_line_post_17" model="account.report.line">
                         <field name="name">Post 17 Fradragsberettiget innførselsmerverdiavgift 25 %</field>
@@ -386,13 +338,7 @@
                     <record id="account_tax_report_line_post_19" model="account.report.line">
                         <field name="name">Post 19 Avgift å betale</field>
                         <field name="code">NOTAX_19</field>
-                        <field name="expression_ids">
-                            <record id="account_tax_report_line_post_19_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">NOTAX_03_1.balance+NOTAX_04_1.balance+NOTAX_05_1.balance+NOTAX_09_1.balance+NOTAX_10_1.balance+NOTAX_12_1.balance+NOTAX_13_1.balance-NOTAX_14.balance-NOTAX_15.balance-NOTAX_16.balance-NOTAX_17.balance-NOTAX_18.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">NOTAX_03_1.balance+NOTAX_04_1.balance+NOTAX_05_1.balance+NOTAX_09_1.balance+NOTAX_10_1.balance+NOTAX_12_1.balance+NOTAX_13_1.balance-NOTAX_14.balance-NOTAX_15.balance-NOTAX_16.balance-NOTAX_17.balance-NOTAX_18.balance</field>
                     </record>
                 </field>
             </record>

@@ -15,13 +15,7 @@
         <field name="line_ids">
             <record id="tax_report_ventilation_chiffre_affaires_imposable" model="account.report.line">
                 <field name="name">Ventilation du chiffre d’affaires imposable</field>
-                <field name="expression_ids">
-                    <record id="tax_report_ventilation_chiffre_affaires_imposable_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">MATAXB_1.balance + MATAXB_2.balance + MATAXB_3.balance + MATAXB_4.balance + MATAXB_5.balance + MATAXB_6.balance + MATAXB_7.balance + MATAXB_8.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">MATAXB_1.balance + MATAXB_2.balance + MATAXB_3.balance + MATAXB_4.balance + MATAXB_5.balance + MATAXB_6.balance + MATAXB_7.balance + MATAXB_8.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_taux_normal_20" model="account.report.line">
                         <field name="name">TAUX NORMAL DE 20% (Base HT)</field>
@@ -115,24 +109,12 @@
             </record>
             <record id="tax_report_ventilation_des_deductions" model="account.report.line">
                 <field name="name">Ventilation des déductions</field>
-                <field name="expression_ids">
-                    <record id="tax_report_ventilation_des_deductions_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">1ACHATS_NON_IMMOBILISES_BASE_HT.balance + 1ACHATS_NON_IMMOBILISES_TVA_DEDUCTIBLE.balance + IMMOBILISATIONS_BASE_HT.balance + IMMOBILISATIONS_TVA_DEDUCTIBLE.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">1ACHATS_NON_IMMOBILISES_BASE_HT.balance + 1ACHATS_NON_IMMOBILISES_TVA_DEDUCTIBLE.balance + IMMOBILISATIONS_BASE_HT.balance + IMMOBILISATIONS_TVA_DEDUCTIBLE.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_achats_non_immobilises_ht" model="account.report.line">
                         <field name="name">1-ACHATS NON IMMOBILISES (Base HT)</field>
                         <field name="code">1ACHATS_NON_IMMOBILISES_BASE_HT</field>
-                        <field name="expression_ids">
-                            <record id="tax_report_achats_non_immobilises_ht_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">TRAVAUX_A_FACONS_HT.balance + SOUSTRAITANCE_TRAVAUX_IMMOBILIERS_HT.balance + BIENS_MATERIELS_BASE_HT.balance + PRESTATIONS_DE_SERVICES_BASE_HT.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">TRAVAUX_A_FACONS_HT.balance + SOUSTRAITANCE_TRAVAUX_IMMOBILIERS_HT.balance + BIENS_MATERIELS_BASE_HT.balance + PRESTATIONS_DE_SERVICES_BASE_HT.balance</field>
                         <field name="children_ids">
                             <record id="tax_report_travaux_facons_ht" model="account.report.line">
                                 <field name="name">Travaux à façons (HT)</field>
@@ -161,13 +143,7 @@
                             <record id="tax_report_biens_materiels_ht" model="account.report.line">
                                 <field name="name">Biens matériels (Base HT)</field>
                                 <field name="code">BIENS_MATERIELS_BASE_HT</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_biens_materiels_ht_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">ACHATS_A_LIMPORTATION_20_HT.balance + ACHATS_A_LINTERIEUR_20_HT.balance + ACHATS_A_LIMPORTATION_14_HT.balance + ACHATS_A_LINTERIEUR_14_HT.balance + ACHATS_A_LIMPORTATION_10_HT.balance + ACHATS_A_LINTERIEUR_10_HT.balance + ACHAT_A_LIMPORTATION_7_HT.balance + ACHAT_A_LINTERIEUR_7_HT.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">ACHATS_A_LIMPORTATION_20_HT.balance + ACHATS_A_LINTERIEUR_20_HT.balance + ACHATS_A_LIMPORTATION_14_HT.balance + ACHATS_A_LINTERIEUR_14_HT.balance + ACHATS_A_LIMPORTATION_10_HT.balance + ACHATS_A_LINTERIEUR_10_HT.balance + ACHAT_A_LIMPORTATION_7_HT.balance + ACHAT_A_LINTERIEUR_7_HT.balance</field>
                                 <field name="children_ids">
                                     <record id="tax_report_achats_importation_ht_20" model="account.report.line">
                                         <field name="name">Achats à l'importation (20%) (HT)</field>
@@ -276,13 +252,7 @@
                     <record id="tax_report_achats_immobilises_deductible_tva" model="account.report.line">
                         <field name="name">1-ACHATS NON IMMOBILISES (TVA déductible)</field>
                         <field name="code">1ACHATS_NON_IMMOBILISES_TVA_DEDUCTIBLE</field>
-                        <field name="expression_ids">
-                            <record id="tax_report_achats_immobilises_deductible_tva_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">TRAVAUX_A_FACONS_TVA_DEDUCTIBLE.balance + SOUSTRAITANCE_TRAVAUX_IMMOBILIERS_TVA_DEDUCTIBLE.balance + BIENS_MATERIELS_TVA_DEDUCTIBLE.balance + PRESTATIONS_DE_SERVICES_TVA_DEDUCTIBLE.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">TRAVAUX_A_FACONS_TVA_DEDUCTIBLE.balance + SOUSTRAITANCE_TRAVAUX_IMMOBILIERS_TVA_DEDUCTIBLE.balance + BIENS_MATERIELS_TVA_DEDUCTIBLE.balance + PRESTATIONS_DE_SERVICES_TVA_DEDUCTIBLE.balance</field>
                         <field name="children_ids">
                             <record id="tax_report_travaux_facons_tva" model="account.report.line">
                                 <field name="name">Travaux à façons (TVA déductible)</field>
@@ -311,13 +281,7 @@
                             <record id="tax_report_biens_materiels_tva" model="account.report.line">
                                 <field name="name">Biens matériels (TVA déductible)</field>
                                 <field name="code">BIENS_MATERIELS_TVA_DEDUCTIBLE</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_biens_materiels_tva_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">ACHATS_A_LIMPORTATION_20_TVA.balance + ACHATS_A_LINTERIEUR_20_TVA.balance + ACHATS_A_LIMPORTATION_14_TVA.balance + ACHATS_A_LINTERIEUR_14_TVA.balance + ACHATS_A_LIMPORTATION_10_TVA.balance + ACHATS_A_LINTERIEUR_10_TVA.balance + ACHAT_A_LIMPORTATION_7_TVA.balance + ACHAT_A_LINTERIEUR_7_TVA.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">ACHATS_A_LIMPORTATION_20_TVA.balance + ACHATS_A_LINTERIEUR_20_TVA.balance + ACHATS_A_LIMPORTATION_14_TVA.balance + ACHATS_A_LINTERIEUR_14_TVA.balance + ACHATS_A_LIMPORTATION_10_TVA.balance + ACHATS_A_LINTERIEUR_10_TVA.balance + ACHAT_A_LIMPORTATION_7_TVA.balance + ACHAT_A_LINTERIEUR_7_TVA.balance</field>
                                 <field name="children_ids">
                                     <record id="tax_report_achats_importation_tva_20" model="account.report.line">
                                         <field name="name">Achats à l'importation (20%) (TVA)</field>

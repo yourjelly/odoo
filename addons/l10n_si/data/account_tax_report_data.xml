@@ -15,35 +15,17 @@
         <field name="line_ids">
             <record id="tax_report_zo_dvd" model="account.report.line">
                 <field name="name">Znesek osnov za DDV</field>
-                <field name="expression_ids">
-                    <record id="tax_report_zo_dvd_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">ZO_NEODBITNI_DDV.balance + ZO_ODBITNI_DDV.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">ZO_NEODBITNI_DDV.balance + ZO_ODBITNI_DDV.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_zo_dvd_neo" model="account.report.line">
                         <field name="name">Neodbitni DDV</field>
                         <field name="code">ZO_NEODBITNI_DDV</field>
-                        <field name="expression_ids">
-                            <record id="tax_report_zo_dvd_neo_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">ZO_NEODBITNI_VSTOPNI_DDV.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">ZO_NEODBITNI_VSTOPNI_DDV.balance</field>
                         <field name="children_ids">
                             <record id="tax_report_zo_dvd_neo_sdtopni" model="account.report.line">
                                 <field name="name">Vstopni DDV</field>
                                 <field name="code">ZO_NEODBITNI_VSTOPNI_DDV</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_zo_dvd_neo_sdtopni_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">NABAVE_PO_OSNOVNI_STOPNJI_DDV_NEODBITNI.balance + NABAVE_PO_ZNIZANI_STOPNJI_DDV_NEODBITNI.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">NABAVE_PO_OSNOVNI_STOPNJI_DDV_NEODBITNI.balance + NABAVE_PO_ZNIZANI_STOPNJI_DDV_NEODBITNI.balance</field>
                                 <field name="children_ids">
                                     <record id="tax_report_zo_dvd_neo_sdtopni_osno" model="account.report.line">
                                         <field name="name">Nabave po osnovni stopnji DDV</field>
@@ -74,24 +56,12 @@
                     <record id="tax_report_zo_dvd_odb" model="account.report.line">
                         <field name="name">Odbitni DDV</field>
                         <field name="code">ZO_ODBITNI_DDV</field>
-                        <field name="expression_ids">
-                            <record id="tax_report_zo_dvd_odb_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">ZO_IZSTOPNI_DDV.balance + ODBITNI_VSTOPNI_DDV.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">ZO_IZSTOPNI_DDV.balance + ODBITNI_VSTOPNI_DDV.balance</field>
                         <field name="children_ids">
                             <record id="tax_report_zo_dvd_odb_izstopni" model="account.report.line">
                                 <field name="name">Izstopni DDV</field>
                                 <field name="code">ZO_IZSTOPNI_DDV</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_zo_dvd_odb_izstopni_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">PRODAJA_OPROSCENA_DDV.balance + PRODAJA_PO_OSNOVNI_STOPNJI_DDV.balance + PRODAJA_PO_ZNIZANI_STOPNJI_DDV.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">PRODAJA_OPROSCENA_DDV.balance + PRODAJA_PO_OSNOVNI_STOPNJI_DDV.balance + PRODAJA_PO_ZNIZANI_STOPNJI_DDV.balance</field>
                                 <field name="children_ids">
                                     <record id="tax_report_zo_dvd_odb_izstopni_opr" model="account.report.line">
                                         <field name="name">Prodaja oproščena DDV</field>
@@ -131,13 +101,7 @@
                             <record id="tax_report_zo_dvd_odb_vstopni" model="account.report.line">
                                 <field name="name">Vstopni DDV</field>
                                 <field name="code">ODBITNI_VSTOPNI_DDV</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_zo_dvd_odb_vstopni_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">NABAVE_OPROSCENE_DDV.balance + NABAVE_PO_OSNOVNI_STOPNJI_DDV_VSTOPNI.balance + NABAVE_PO_ZNIZANI_STOPNJI_DDV_VSTOPNI.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">NABAVE_OPROSCENE_DDV.balance + NABAVE_PO_OSNOVNI_STOPNJI_DDV_VSTOPNI.balance + NABAVE_PO_ZNIZANI_STOPNJI_DDV_VSTOPNI.balance</field>
                                 <field name="children_ids">
                                     <record id="tax_report_zo_dvd_odb_vstopni_opr" model="account.report.line">
                                         <field name="name">Nabave oproščene DDV</field>
@@ -180,35 +144,17 @@
             </record>
             <record id="tax_report_zn_dvd" model="account.report.line">
                 <field name="name">Znesek DDV</field>
-                <field name="expression_ids">
-                    <record id="tax_report_zn_dvd_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">ZN_NEODBITNI_DDV.balance + ZN_ODBITNI_DDV.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">ZN_NEODBITNI_DDV.balance + ZN_ODBITNI_DDV.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_zn_dvd_neo" model="account.report.line">
                         <field name="name">Neodbitni DDV</field>
                         <field name="code">ZN_NEODBITNI_DDV</field>
-                        <field name="expression_ids">
-                            <record id="tax_report_zn_dvd_neo_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">ZN_NEODBITNI_VSTOPNI_DDV.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">ZN_NEODBITNI_VSTOPNI_DDV.balance</field>
                         <field name="children_ids">
                             <record id="tax_report_zn_dvd_neo_vstopni" model="account.report.line">
                                 <field name="name">Vstopni DDV</field>
                                 <field name="code">ZN_NEODBITNI_VSTOPNI_DDV</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_zn_dvd_neo_vstopni_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">NEODBITNI_DDV__OSNOVNA_STOPNJA.balance + NEODBITNI_DDV__ZNIZANA_STOPNJA.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">NEODBITNI_DDV__OSNOVNA_STOPNJA.balance + NEODBITNI_DDV__ZNIZANA_STOPNJA.balance</field>
                                 <field name="children_ids">
                                     <record id="tax_report_zn_dvd_neo_vstopni_osnnovna" model="account.report.line">
                                         <field name="name">Neodbitni DDV – osnovna stopnja</field>
@@ -239,24 +185,12 @@
                     <record id="tax_report_zn_dvd_odb" model="account.report.line">
                         <field name="name">Odbitni DDV</field>
                         <field name="code">ZN_ODBITNI_DDV</field>
-                        <field name="expression_ids">
-                            <record id="tax_report_zn_dvd_odb_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">ZN_IZSTOPNI_DDV.balance + VSTOPNI_DDV.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">ZN_IZSTOPNI_DDV.balance + VSTOPNI_DDV.balance</field>
                         <field name="children_ids">
                             <record id="tax_report_zn_dvd_odb_izstopni" model="account.report.line">
                                 <field name="name">Izstopni DDV</field>
                                 <field name="code">ZN_IZSTOPNI_DDV</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_zn_dvd_odb_izstopni_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">IZSTOPNI_DDV__OSNOVNA_STOPNJA.balance + IZSTOPNI_DDV__ZNIZANA_STOPNJA.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">IZSTOPNI_DDV__OSNOVNA_STOPNJA.balance + IZSTOPNI_DDV__ZNIZANA_STOPNJA.balance</field>
                                 <field name="children_ids">
                                     <record id="tax_report_zn_dvd_odb_izstopni_osn" model="account.report.line">
                                         <field name="name">Izstopni DDV - osnovna stopnja</field>
@@ -285,13 +219,7 @@
                             <record id="tax_report_zn_dvd_odb_vstopni" model="account.report.line">
                                 <field name="name">Vstopni DDV</field>
                                 <field name="code">VSTOPNI_DDV</field>
-                                <field name="expression_ids">
-                                    <record id="tax_report_zn_dvd_odb_vstopni_formula" model="account.report.expression">
-                                        <field name="label">balance</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">VSTOPNI_DDV__OSNOVNA_STOPNJA.balance + VSTOPNI_DDV__ZNIZANA_STOPNJA.balance</field>
-                                    </record>
-                                </field>
+                                <field name="aggregation_formula">VSTOPNI_DDV__OSNOVNA_STOPNJA.balance + VSTOPNI_DDV__ZNIZANA_STOPNJA.balance</field>
                                 <field name="children_ids">
                                     <record id="tax_report_zn_dvd_odb_vstopni_osn" model="account.report.line">
                                         <field name="name">Vstopni DDV - osnovna stopnja</field>

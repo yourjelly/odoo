@@ -494,13 +494,7 @@
                     <record id="tax_report_line_vj19" model="account.report.line">
                         <field name="name">VJ19 - Totale quadro VJ</field>
                         <field name="code">VJ19</field>
-                        <field name="expression_ids">
-                            <record id="tax_report_line_vj1_balance" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">VJ1.balance + VJ2.balance + VJ3.balance + VJ4.balance + VJ5.balance + VJ6.balance + VJ7.balance + VJ8.balance + VJ9.balance + VJ10.balance + VJ11.balance + VJ12.balance + VJ13.balance + VJ14.balance + VJ15.balance + VJ16.balance + VJ17.balance + VJ18.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">VJ1.balance + VJ2.balance + VJ3.balance + VJ4.balance + VJ5.balance + VJ6.balance + VJ7.balance + VJ8.balance + VJ9.balance + VJ10.balance + VJ11.balance + VJ12.balance + VJ13.balance + VJ14.balance + VJ15.balance + VJ16.balance + VJ17.balance + VJ18.balance</field>
                     </record>
                 </field>
             </record>

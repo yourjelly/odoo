@@ -26,13 +26,7 @@
             </record>
             <record id="tax_report_impuesto_trans" model="account.report.line">
                 <field name="name">Impuesto a las Transacciones IT (3%)</field>
-                <field name="expression_ids">
-                    <record id="tax_report_impuesto_trans_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">IMPUESTO_A_LAS_TRANSACCIONES_IT_3.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">IMPUESTO_A_LAS_TRANSACCIONES_IT_3.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_impuesto_trans_3" model="account.report.line">
                         <field name="name">Impuesto a las Transacciones IT (3%)</field>
@@ -49,24 +43,12 @@
             </record>
             <record id="tax_report_impuesto_ttl" model="account.report.line">
                 <field name="name">Impuesto al Valor Agregado (IVA) Total a Pagar</field>
-                <field name="expression_ids">
-                    <record id="tax_report_impuesto_ttl_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">IMPUESTO_COBRADO.balance + IMPUESTO_PAGADO.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">IMPUESTO_COBRADO.balance + IMPUESTO_PAGADO.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_impuesto_ttl_cob" model="account.report.line">
                         <field name="name">Impuesto Cobrado</field>
                         <field name="code">IMPUESTO_COBRADO</field>
-                        <field name="expression_ids">
-                            <record id="tax_report_impuesto_ttl_cob_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">IMPUESTO_COBRADO_FUERA_DE_AMBITO.balance + IMPUESTO_COBRADO_DE_EXONERADOS_AL_IVA.balance + IMPUESTO_COBRADO_IVA.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">IMPUESTO_COBRADO_FUERA_DE_AMBITO.balance + IMPUESTO_COBRADO_DE_EXONERADOS_AL_IVA.balance + IMPUESTO_COBRADO_IVA.balance</field>
                         <field name="children_ids">
                             <record id="tax_report_impuesto_ttl_cob_fuera" model="account.report.line">
                                 <field name="name">Impuesto Cobrado Fuera de Ámbito</field>
@@ -108,13 +90,7 @@
                     <record id="tax_report_impuesto_ttl_pag" model="account.report.line">
                         <field name="name">Impuesto Pagado</field>
                         <field name="code">IMPUESTO_PAGADO</field>
-                        <field name="expression_ids">
-                            <record id="tax_report_impuesto_ttl_pag_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">IMPUESTO_PAGADO_FUERA_DE_AMBITO.balance + IMPUESTO_PAGADO_DE_EXONERADOS_AL_IVA.balance + IMPUESTO_PAGADO_IVA.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">IMPUESTO_PAGADO_FUERA_DE_AMBITO.balance + IMPUESTO_PAGADO_DE_EXONERADOS_AL_IVA.balance + IMPUESTO_PAGADO_IVA.balance</field>
                         <field name="children_ids">
                             <record id="tax_report_impuesto_ttl_pag_fuera" model="account.report.line">
                                 <field name="name">Impuesto Pagado Fuera de Ámbito</field>
@@ -157,24 +133,12 @@
             </record>
             <record id="tax_report_base_imponible" model="account.report.line">
                 <field name="name">Base Imponible</field>
-                <field name="expression_ids">
-                    <record id="tax_report_base_imponible_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">BASE_IMPONIBLE__COMPRAS.balance + BASE_IMPONIBLE__VENTAS.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">BASE_IMPONIBLE__COMPRAS.balance + BASE_IMPONIBLE__VENTAS.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_base_imponible_compras" model="account.report.line">
                         <field name="name">Base Imponible - Compras</field>
                         <field name="code">BASE_IMPONIBLE__COMPRAS</field>
-                        <field name="expression_ids">
-                            <record id="tax_report_base_imponible_compras_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">COMPRAS_GRAVADAS_FUERA_DE_AMBITO.balance + COMPRAS_NO_GRAVADAS_EXONERADAS.balance + COMPRAS_GRAVADAS_CON_IVA.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">COMPRAS_GRAVADAS_FUERA_DE_AMBITO.balance + COMPRAS_NO_GRAVADAS_EXONERADAS.balance + COMPRAS_GRAVADAS_CON_IVA.balance</field>
                         <field name="children_ids">
                             <record id="tax_report_base_imponible_compras_fuera" model="account.report.line">
                                 <field name="name">Compras Gravadas Fuera de Ámbito</field>
@@ -216,13 +180,7 @@
                     <record id="tax_report_base_imponible_venras" model="account.report.line">
                         <field name="name">Base Imponible - Ventas</field>
                         <field name="code">BASE_IMPONIBLE__VENTAS</field>
-                        <field name="expression_ids">
-                            <record id="tax_report_base_imponible_venras_formula" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">VENTAS_GRAVADAS_FUERA_DE_AMBITO.balance + VENTAS_NO_GRAVADAS_EXONERADAS.balance + IMPUESTO_AL_VALOR_AGREGADO_CON_IVA.balance</field>
-                            </record>
-                        </field>
+                        <field name="aggregation_formula">VENTAS_GRAVADAS_FUERA_DE_AMBITO.balance + VENTAS_NO_GRAVADAS_EXONERADAS.balance + IMPUESTO_AL_VALOR_AGREGADO_CON_IVA.balance</field>
                         <field name="children_ids">
                             <record id="tax_report_base_imponible_venras_fuera" model="account.report.line">
                                 <field name="name">Ventas Gravadas Fuera de Ámbito</field>

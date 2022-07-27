@@ -15,13 +15,7 @@
         <field name="line_ids">
             <record id="tax_report_sales_title" model="account.report.line">
                 <field name="name">Vero kotimaan myynneistä verokannoittain</field>
-                <field name="expression_ids">
-                    <record id="tax_report_sales_title_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">sale_24.balance + sale_14.balance + sale_10.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">sale_24.balance + sale_14.balance + sale_10.balance</field>
                 <field name="children_ids">
                     <record id="tax_report_sales_24" model="account.report.line">
                         <field name="name">24 %:n vero</field>
@@ -125,13 +119,7 @@
             </record>
             <record id="tax_report_tax_payable" model="account.report.line">
                 <field name="name">Maksettava vero / Palautukseen oikeuttava vero (-)</field>
-                <field name="expression_ids">
-                    <record id="tax_report_tax_payable_formula" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">sale_24.balance + sale_14.balance + sale_10.balance + goods_eu.balance + service_eu.balance + goods_no_eu.balance + construct.balance - deductible.balance</field>
-                    </record>
-                </field>
+                <field name="aggregation_formula">sale_24.balance + sale_14.balance + sale_10.balance + goods_eu.balance + service_eu.balance + goods_no_eu.balance + construct.balance - deductible.balance</field>
             </record>
             <record id="tax_report_base_turnover_0_vat" model="account.report.line">
                 <field name="name">0-verokannan alainen liikevaihto</field>
