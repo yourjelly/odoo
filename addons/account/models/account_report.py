@@ -44,8 +44,13 @@ class AccountReport(models.Model):
     default_opening_date_filter = fields.Selection(
         string="Default Opening",
         selection=[
-            ('this_year', "This Year"), ('this_quarter', "This Quarter"), ('this_month', "This Month"), ('today', "Today"),
-            ('last_month', "Last Month"), ('last_quarter', "Last Quarter"), ('last_year', "Last Year"),
+            ('this_year', "This Year"),
+            ('this_quarter', "This Quarter"),
+            ('this_month', "This Month"),
+            ('today', "Today"),
+            ('last_month', "Last Month"),
+            ('last_quarter', "Last Quarter"),
+            ('last_year', "Last Year"),
         ],
         compute=lambda x: x._compute_report_option_filter('default_opening_date_filter', 'last_month'),
         readonly=False, store=True, depends=['root_report_id'],
@@ -124,24 +129,24 @@ class AccountReport(models.Model):
     def _compute_report_option_filter(self, field_name, default_value=False):
         # We don't depend on the different filter fields on the root report, as we don't want a manual change on it to be reflected on all the reports
         # using it as their root (would create confusion). The root report filters are only used as some kind of default values.
-        for record in self:
-            if record.root_report_id:
-                record[field_name] = record.root_report_id[field_name]
+        for report in self:
+            if report.root_report_id:
+                report[field_name] = report.root_report_id[field_name]
             else:
-                record[field_name] = default_value
+                report[field_name] = default_value
 
     @api.depends('root_report_id', 'country_id')
     def _compute_default_availability_condition(self):
-        for record in self:
-            if record.root_report_id:
-                record.availability_condition = 'country'
+        for report in self:
+            if report.root_report_id:
+                report.availability_condition = 'country'
             else:
-                record.availability_condition = 'always'
+                report.availability_condition = 'always'
 
     @api.constrains('root_report_id')
     def _validate_root_report_id(self):
-        for record in self:
-            if record.root_report_id.root_report_id:
+        for report in self:
+            if report.root_report_id.root_report_id:
                 raise ValidationError(_("Only a report without a root report of its own can be selected as root report."))
 
     def write(self, vals):
@@ -247,30 +252,29 @@ class AccountReportLine(models.Model):
 
     @api.depends('parent_id.hierarchy_level')
     def _compute_hierarchy_level(self):
-        for record in self:
-            if record.parent_id:
-                record.hierarchy_level = record.parent_id.hierarchy_level + 2
+        for report_line in self:
+            if report_line.parent_id:
+                report_line.hierarchy_level = report_line.parent_id.hierarchy_level + 2
             else:
-                record.hierarchy_level = 1
+                report_line.hierarchy_level = 1
 
     @api.depends('parent_id.report_id')
     def _compute_report_id(self):
-        for record in self:
-            if record.parent_id:
-                record.report_id = record.parent_id.report_id
+        for report_line in self:
+            if report_line.parent_id:
+                report_line.report_id = report_line.parent_id.report_id
 
     @api.constrains('parent_id')
     def _validate_groupby_no_child(self):
-        for record in self:
-            if record.parent_id.groupby:
-                raise ValidationError(_("A line cannot have both children and a groupby value (line '%s').", record.parent_id.name))
+        for report_line in self:
+            if report_line.parent_id.groupby:
+                raise ValidationError(_("A line cannot have both children and a groupby value (line '%s').", report_line.parent_id.name))
 
     @api.constrains('expression_ids', 'groupby')
     def _validate_formula(self):
         for expression in self.expression_ids:
-            if expression.engine == 'aggregation':
-                if expression.report_line_id.groupby:
-                    raise ValidationError(_("Groupby feature isn't supported by aggregation engine."))
+            if expression.engine == 'aggregation' and expression.report_line_id.groupby:
+                raise ValidationError(_("Groupby feature isn't supported by aggregation engine."))
 
     def _copy_hierarchy(self, code_mapping, report=None, copied_report=None, parent=None):
         ''' Copy the whole hierarchy from this line by copying each line children recursively and adapting the
@@ -285,10 +289,9 @@ class AccountReportLine(models.Model):
 
         # If the line points to the old report, replace with the new one.
         # Otherwise, cut the link to another financial report.
+        report_id = None
         if report and copied_report and self.report_id.id == report.id:
             report_id = copied_report.id
-        else:
-            report_id = None
 
         copied_line = self.copy({
             'report_id': report_id,
@@ -379,8 +382,8 @@ class AccountReportExpression(models.Model):
     @api.depends('engine')
     def _compute_auditable(self):
         auditable_engines = self._get_auditable_engines()
-        for record in self:
-            record.auditable = record.engine in auditable_engines
+        for expression in self:
+            expression.auditable = expression.engine in auditable_engines
 
     def _get_auditable_engines(self):
         return {'tax_tags', 'domain', 'account_codes', 'external', 'aggregation'}
@@ -389,63 +392,56 @@ class AccountReportExpression(models.Model):
     def create(self, vals_list):
         # Overridden so that we create the corresponding account.account.tag objects when instantiating an expression
         # with engine 'tax_tags'.
-        rslt = super().create(vals_list)
+        result = super().create(vals_list)
 
-        for record in rslt:
-            tag_name = record.formula if record.engine == 'tax_tags' else None
+        for expression in result:
+            tag_name = expression.formula if expression.engine == 'tax_tags' else None
             if tag_name:
-                country = record.report_line_id.report_id.country_id
+                country = expression.report_line_id.report_id.country_id
                 existing_tags = self.env['account.account.tag']._get_tax_tags(tag_name, country.id)
 
                 if not existing_tags:
                     tag_vals = self._get_tags_create_vals(tag_name, country.id)
                     self.env['account.account.tag'].create(tag_vals)
 
-        return rslt
-
-    def write(self, vals):
-        if 'formula' in vals:
-            tax_tags_expressions = self.filtered(lambda x: x.engine == 'tax_tags')
-            former_formulas_by_country = defaultdict(lambda: [])
-            for expr in tax_tags_expressions:
-                former_formulas_by_country[expr.report_line_id.report_id.country_id].append(expr.formula)
-
-            rslt = super().write(vals)
-
-            for country, former_formulas_list in former_formulas_by_country.items():
-                for former_formula in former_formulas_list:
-                    new_tax_tags = self.env['account.account.tag']._get_tax_tags(vals['formula'], country.id)
-
-                    if not new_tax_tags:
-                        # If new tags already exist, nothing to do ; else, we must create them or update existing tags.
-                        former_tax_tags = self.env['account.account.tag']._get_tax_tags(former_formula, country.id)
-
-                        if former_tax_tags and all(tag_expr in self for tag_expr in former_tax_tags._get_related_tax_report_expressions()):
-                            # If we're changing the formula of all the expressions using that tag, rename the tag
-                            negative_tags = former_tax_tags.filtered(lambda x: x.tax_negate)
-                            negative_tags.write({'name': '-%s' % vals['formula']})
-                            (former_tax_tags - negative_tags).write({'name': '+%s' % vals['formula']})
-                        else:
-                            # Else, create a new tag. Its the compute functions will make sure it is properly linked to the expressions
-                            tag_vals = self.env['account.report.expression']._get_tags_create_vals(vals['formula'], country.id)
-                            self.env['account.account.tag'].create(tag_vals)
-        else:
-            rslt = super().write(vals)
-
-        return rslt
-
-    def name_get(self):
-        result = []
-        for expr in self:
-            result.append((expr.id, f'{expr.report_line_name} [{expr.label}]'))
         return result
 
+    def write(self, vals):
+        result = super().write(vals)
+
+        if 'formula' not in vals:
+            return result
+
+        tax_tags_expressions = self.filtered(lambda x: x.engine == 'tax_tags')
+        former_formulas_by_country = defaultdict(lambda: [])
+        for expr in tax_tags_expressions:
+            former_formulas_by_country[expr.report_line_id.report_id.country_id].append(expr.formula)
+
+        for country, former_formulas_list in former_formulas_by_country.items():
+            for former_formula in former_formulas_list:
+                new_tax_tags = self.env['account.account.tag']._get_tax_tags(vals['formula'], country.id)
+
+                if not new_tax_tags:
+                    # If new tags already exist, nothing to do ; else, we must create them or update existing tags.
+                    former_tax_tags = self.env['account.account.tag']._get_tax_tags(former_formula, country.id)
+
+                    if former_tax_tags and all(tag_expr in self for tag_expr in former_tax_tags._get_related_tax_report_expressions()):
+                        # If we're changing the formula of all the expressions using that tag, rename the tag
+                        positive_tags, negative_tags = former_tax_tags.sorted(lambda x: x.tax_negate)
+                        positive_tags.name, negative_tags.name = f"+{vals['formula']}", f"-{vals['formula']}"
+                    else:
+                        # Else, create a new tag. Its the compute functions will make sure it is properly linked to the expressions
+                        tag_vals = self.env['account.report.expression']._get_tags_create_vals(vals['formula'], country.id)
+                        self.env['account.account.tag'].create(tag_vals)
+
+        return result
+
+    def name_get(self):
+        return [(expr.id, f'{expr.report_line_name} [{expr.label}]') for expr in self]
+
     def _expand_aggregations(self):
-        """ Returns a recordset containing all the expressions in self + all the expressions the aggregation expressions contained in self
-        depend on. This is done recursively, so if an aggregation depends on other aggregations, they will be expanded as well in the result, so that
-        we ensure all expressions in the resulting set can be fully evaluated together.
-        """
-        rslt = self
+        """Return self and its full aggregation expression dependency"""
+        result = self
 
         to_expand = self.filtered(lambda x: x.engine == 'aggregation')
         while to_expand:
@@ -463,15 +459,15 @@ class AccountReportExpression(models.Model):
                     domains.append(dependency_domain)
 
             sub_expressions = self.env['account.report.expression'].search(osv.expression.OR(domains))
-            to_expand = sub_expressions.filtered(lambda x: x.engine == 'aggregation' and x not in rslt)
-            rslt |= sub_expressions
+            to_expand = sub_expressions.filtered(lambda x: x.engine == 'aggregation' and x not in result)
+            result |= sub_expressions
 
-        return rslt
+        return result
 
     def _get_aggregation_terms_details(self):
         """ Computes the details of each aggregation expression in self, and returns them in the form of a single dict aggregating all the results.
 
-        Example of aggreation details:
+        Example of aggregation details:
         formula 'A.balance + B.balance + A.other'
         will return: {'A': {'balance', 'other'}, 'B': {'balance'}}
         """

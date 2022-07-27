@@ -438,7 +438,7 @@ class AccountEdiFormat(models.Model):
                     line_code = "state_cess"
             else:
                 for gst in ["cgst", "sgst", "igst"]:
-                    if self.env.ref("l10n_in.tax_tag_%s"%(gst)) in tax_line.tax_tag_ids:
+                    if self.env.ref(f"l10n_in.tax_tag_{gst}") in tax_line.tax_tag_ids:
                         line_code = gst
             return {
                 "tax": tax_values["tax_id"],

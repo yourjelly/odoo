@@ -1277,24 +1277,18 @@ class AccountTaxRepartitionLineTemplate(models.Model):
 
     def _get_tags_to_add(self):
         self.ensure_one()
-        tags_to_add = self.env["account.account.tag"]
-        tags_to_add += self._search_expression_tags(self.plus_report_expression_ids, '+')
-        tags_to_add += self._search_expression_tags(self.minus_report_expression_ids, '-')
-        tags_to_add += self.tag_ids
-        return tags_to_add
+        tags_to_add = self.tag_ids
 
-    def _search_expression_tags(self, report_expressions, sign):
         domains = []
-        for report_expression in report_expressions:
-            country = report_expression.report_line_id.report_id.country_id
-            domains.append(self.env['account.account.tag']._get_tax_tags_domain(report_expression.formula, country.id, sign=sign))
+        for sign, report_expressions in (('+', self.plus_report_expression_ids), ('-', self.minus_report_expression_ids)):
+            for report_expression in report_expressions:
+                country = report_expression.report_line_id.report_id.country_id
+                domains.append(self.env['account.account.tag']._get_tax_tags_domain(report_expression.formula, country.id, sign=sign))
 
         if domains:
-            return self.env['account.account.tag'].search(osv.expression.OR(domains))
+            tags_to_add |= self.env['account.account.tag'].search(osv.expression.OR(domains))
 
-        return self.env['account.account.tag']
-
-# Fiscal Position Templates
+        return tags_to_add
 
 class AccountFiscalPositionTemplate(models.Model):
     _name = 'account.fiscal.position.template'
