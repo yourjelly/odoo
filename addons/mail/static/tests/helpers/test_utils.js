@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { insertAndReplace } from '@mail/model/model_field_command';
 import { getMessagingComponent } from '@mail/utils/messaging_component';
 import { nextTick } from '@mail/utils/utils';
 import { getAdvanceTime } from '@mail/../tests/helpers/time_control';
@@ -372,19 +371,6 @@ function getClick({ afterNextRender }) {
     };
 }
 
-function getCreateNotificationListComponent({ env, target }) {
-    return async function createNotificationListComponent({ filter = 'all' } = {}) {
-        const notificationListView = env.services.messaging.modelManager.messaging.models['NotificationListView'].create({
-            filter,
-            qunitTestOwner: insertAndReplace(),
-        });
-        await createRootMessagingComponent(env, "NotificationList", {
-            props: { record: notificationListView },
-            target,
-        });
-    };
-}
-
 function getOpenDiscuss(afterEvent, webClient, { context = {}, params, ...props } = {}) {
     return async function openDiscuss({ waitUntilMessagesLoaded = true } = {}) {
         const actionOpenDiscuss = {
@@ -558,8 +544,6 @@ async function start(param0 = {}) {
         afterEvent,
         afterNextRender,
         click: getClick({ afterNextRender }),
-        createNotificationListComponent: getCreateNotificationListComponent({ env: webClient.env, target }),
-        createRootMessagingComponent: (componentName, props) => createRootMessagingComponent(webClient.env, componentName, { props, target }),
         env: webClient.env,
         insertText,
         messaging: webClient.env.services.messaging.modelManager.messaging,
