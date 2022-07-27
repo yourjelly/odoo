@@ -43,8 +43,8 @@ class TotalUsbController(http.Controller):
             fp.serverSetSettings("localhost", 4444) # TODO: use the passed url
             tcp = ""
             password = ""
-            port = ""
-            fp.serverSetDeviceTcpSettings(tcp, password, port)
+            port = 8000
+            fp.serverSetDeviceTcpSettings(tcp, port, password)
             #import pdb; pdb.set_trace()
             fp.OpenInvoiceWithFreeCustomerData(tims_json['company_name'][:30],
                                                tims_json['buyer_pin'][:14],
