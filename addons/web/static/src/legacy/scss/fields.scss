@@ -61,7 +61,9 @@
 
 .o_field_widget {
     // Default display and alignment of widget and internal <input/>
-    &, input.o_input {
+    text-align: inherit;
+
+    input.o_input {
         display: inline-block;
         text-align: inherit;
     }
