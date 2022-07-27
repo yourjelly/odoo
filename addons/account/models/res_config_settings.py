@@ -167,7 +167,6 @@ class ResConfigSettings(models.TransientModel):
         readonly=False,
         related='company_id.account_journal_cash_discount_income_id',
         domain="[('deprecated', '=', False), ('company_id', '=', company_id), \
-                ('account_type', 'not in', ('asset_receivable', 'liability_payable')), \
                 ('account_type', 'in', ('income', 'income_other'))]")
     account_journal_cash_discount_expense_id = fields.Many2one(
         comodel_name='account.account',
@@ -175,7 +174,6 @@ class ResConfigSettings(models.TransientModel):
         readonly=False,
         related='company_id.account_journal_cash_discount_expense_id',
         domain="[('deprecated', '=', False), ('company_id', '=', company_id), \
-                ('account_type', 'not in', ('asset_receivable', 'liability_payable')), \
                 ('account_type', '=', 'expense')]")
 
     def set_values(self):

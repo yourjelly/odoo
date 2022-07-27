@@ -65,8 +65,8 @@ class ResCompany(models.Model):
     account_journal_payment_debit_account_id = fields.Many2one('account.account', string='Journal Outstanding Receipts Account')
     account_journal_payment_credit_account_id = fields.Many2one('account.account', string='Journal Outstanding Payments Account')
 
-    account_journal_cash_discount_income_id = fields.Many2one('account.account', string='Cash Discount Write-Off Income Account')
-    account_journal_cash_discount_expense_id = fields.Many2one('account.account', string='Cash Discount Write-Off Expense Account')
+    account_journal_cash_discount_income_id = fields.Many2one(comodel_name='account.account', string='Cash Discount Write-Off Income Account')
+    account_journal_cash_discount_expense_id = fields.Many2one(comodel_name='account.account', string='Cash Discount Write-Off Expense Account')
 
     transfer_account_code_prefix = fields.Char(string='Prefix of the transfer accounts')
     account_sale_tax_id = fields.Many2one('account.tax', string="Default Sale Tax")

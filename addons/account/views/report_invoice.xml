@@ -201,8 +201,7 @@
                         <p t-if="o.invoice_payment_term_id.has_early_payment">
                             <strong>
                                 Early Payment (before <span t-esc="o.invoice_payment_term_id._get_last_date_for_discount(o.invoice_date)"/>):
-                                <span t-esc="o.currency_id.symbol"/>
-                                <span t-esc="o.invoice_early_pay_amount_after_discount"/>
+                                <span t-esc="o.get_formatted_early_pay_untaxed_amount_after_discount()"/>
                                 (<span t-esc="o.invoice_payment_term_id.percentage_to_discount"/> % discount)
                             </strong>
                         </p>
@@ -215,10 +214,9 @@
                                         <tr class="border-black">
                                             <td><strong>Untaxed Amount</strong></td>
                                             <td class="text-end">
-                                                <span t-esc="o.currency_id.symbol"/>
                                                 <span
                                                     t-att-class="oe_subtotal_footer_separator"
-                                                    t-esc="'%.2f'% o.invoice_early_pay_untaxed_amount_after_discount"
+                                                    t-esc="o.get_formatted_early_pay_untaxed_amount_after_discount()"
                                                 />
                                             </td>
                                         </tr>
@@ -254,8 +252,7 @@
                                         <tr class="border-black o_total">
                                             <td><b><strong>Total</strong></b></td>
                                             <td class="text-end">
-                                                <span t-esc="o.currency_id.symbol"/>
-                                                <span t-esc="'%.2f'% o.invoice_early_pay_amount_after_discount"/>
+                                                <span t-esc="o.get_formatted_early_pay_amount_after_discount()"/>
                                             </td>
                                         </tr>
                                 </table>

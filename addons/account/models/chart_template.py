@@ -134,11 +134,10 @@ class AccountChartTemplate(models.Model):
 
     default_cash_difference_income_account_id = fields.Many2one('account.account.template', string="Cash Difference Income Account")
     default_cash_difference_expense_account_id = fields.Many2one('account.account.template', string="Cash Difference Expense Account")
-
     default_pos_receivable_account_id = fields.Many2one('account.account.template', string="PoS receivable account")
 
-    account_journal_cash_discount_expense_id = fields.Many2one('account.account.template', string='Cash Discount Write-Off Expense Account',)
-    account_journal_cash_discount_income_id = fields.Many2one('account.account.template', string='Cash Discount Write-Off Income Account',)
+    account_journal_cash_discount_expense_id = fields.Many2one(comodel_name='account.account.template', string='Cash Discount Write-Off Expense Account',)
+    account_journal_cash_discount_income_id = fields.Many2one(comodel_name='account.account.template', string='Cash Discount Write-Off Income Account',)
 
     property_account_receivable_id = fields.Many2one('account.account.template', string='Receivable Account')
     property_account_payable_id = fields.Many2one('account.account.template', string='Payable Account')
