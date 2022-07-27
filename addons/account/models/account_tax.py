@@ -988,7 +988,7 @@ class AccountTax(models.Model):
             })
         return tax_group_vals_list
 
-    def _prepare_tax_totals_json(self, base_lines, currency, tax_lines=None):
+    def _prepare_tax_totals_json(self, base_lines, currency, tax_lines=None, move_payment_term=None):
         """ Compute the tax totals details for the business documents.
         :param base_lines:  A list of python dictionaries created using the '_convert_to_tax_base_line_dict' method.
         :param currency:    The currency set on the business document.
@@ -1108,13 +1108,11 @@ class AccountTax(models.Model):
 
             # If the invoice has an early payment discount with tax included in the computation :
             discounted_amount_tax_group = False
-            if hasattr(line_vals['record'], 'move_id'):
-                move_id_payment_term = line_vals['record'].move_id.invoice_payment_term_id
-                if move_id_payment_term.has_early_payment:
-                    if move_id_payment_term.discount_computation == 'included':
-                        discounted_amount_tax_group = tax_group_vals['tax_amount'] - ((tax_group_vals['tax_amount']/100) * move_id_payment_term.percentage_to_discount)
-                    else:
-                        discounted_amount_tax_group = tax_group_vals['tax_amount']
+            if move_payment_term and move_payment_term.has_early_payment:
+                if move_payment_term.discount_computation == 'included':
+                    discounted_amount_tax_group = tax_group_vals['tax_amount'] - ((tax_group_vals['tax_amount'] / 100) * move_payment_term.percentage_to_discount)
+                else:
+                    discounted_amount_tax_group = tax_group_vals['tax_amount']
 
             groups_by_subtotal[subtotal_title].append({
                 'group_key': tax_group.id,
