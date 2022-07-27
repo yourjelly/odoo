@@ -432,7 +432,7 @@ class AccountReportExpression(models.Model):
                         tag_vals = self.env['account.report.expression']._get_tags_create_vals(vals['formula'], country.id)
                         self.env['account.account.tag'].create(tag_vals)
 
-            return super().write(vals)
+        return super().write(vals)
 
     def name_get(self):
         return [(expr.id, f'{expr.report_line_name} [{expr.label}]') for expr in self]
