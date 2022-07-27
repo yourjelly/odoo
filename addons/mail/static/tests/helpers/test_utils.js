@@ -589,7 +589,6 @@ async function start(param0 = {}) {
         createComposerComponent: getCreateComposerComponent({ env: webClient.env, target }),
         createComposerSuggestionViewComponent: getCreateComposerSuggestionViewComponent({ env: webClient.env, target }),
         createNotificationListComponent: getCreateNotificationListComponent({ env: webClient.env, target }),
-        createRootMessagingComponent: (componentName, props) => createRootMessagingComponent(webClient.env, componentName, { props, target }),
         env: webClient.env,
         insertText,
         messaging: webClient.env.services.messaging.modelManager.messaging,

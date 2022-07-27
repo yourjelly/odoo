@@ -24,12 +24,12 @@ QUnit.test('thread icon of a chat when correspondent is on leave & online', asyn
         ],
         channel_type: 'chat',
     });
-    const { createRootMessagingComponent, messaging } = await start();
-    const thread = messaging.models['Thread'].findFromIdentifyingData({
-        id: mailChannelId1,
-        model: 'mail.channel',
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: mailChannelId1 },
+        },
     });
-    await createRootMessagingComponent('ThreadIcon', { thread });
+    await openDiscuss();
 
     assert.containsOnce(
         document.body,
@@ -58,12 +58,12 @@ QUnit.test('thread icon of a chat when correspondent is on leave & away', async 
         ],
         channel_type: 'chat',
     });
-    const { createRootMessagingComponent, messaging } = await start();
-    const thread = messaging.models['Thread'].findFromIdentifyingData({
-        id: mailChannelId1,
-        model: 'mail.channel',
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: mailChannelId1 },
+        },
     });
-    await createRootMessagingComponent('ThreadIcon', { thread });
+    await openDiscuss();
 
     assert.containsOnce(
         document.body,
@@ -92,12 +92,12 @@ QUnit.test('thread icon of a chat when correspondent is on leave & offline', asy
         ],
         channel_type: 'chat',
     });
-    const { createRootMessagingComponent, messaging } = await start();
-    const thread = messaging.models['Thread'].findFromIdentifyingData({
-        id: mailChannelId1,
-        model: 'mail.channel',
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: mailChannelId1 },
+        },
     });
-    await createRootMessagingComponent('ThreadIcon', { thread });
+    await openDiscuss();
 
     assert.containsOnce(
         document.body,
