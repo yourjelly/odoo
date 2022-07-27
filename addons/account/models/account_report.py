@@ -407,10 +407,8 @@ class AccountReportExpression(models.Model):
         return result
 
     def write(self, vals):
-        result = super().write(vals)
-
         if 'formula' not in vals:
-            return result
+            return super().write(vals)
 
         tax_tags_expressions = self.filtered(lambda x: x.engine == 'tax_tags')
         former_formulas_by_country = defaultdict(lambda: [])
@@ -434,7 +432,7 @@ class AccountReportExpression(models.Model):
                         tag_vals = self.env['account.report.expression']._get_tags_create_vals(vals['formula'], country.id)
                         self.env['account.account.tag'].create(tag_vals)
 
-        return result
+            return super().write(vals)
 
     def name_get(self):
         return [(expr.id, f'{expr.report_line_name} [{expr.label}]') for expr in self]
