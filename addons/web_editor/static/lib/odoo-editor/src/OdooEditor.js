@@ -43,7 +43,6 @@ import {
     isEmptyBlock,
     getUrlsInfosInString,
     URL_REGEX,
-    URL_REGEX_WITH_INFOS,
     isSelectionFormat,
     YOUTUBE_URL_GET_VIDEO_ID,
     unwrapContents,
@@ -2389,7 +2388,7 @@ export class OdooEditor extends EventTarget {
                     // Remove added space
                     textNodeSplitted.pop();
                     const potentialUrl = textNodeSplitted.pop();
-                    const lastWordMatch = potentialUrl.match(URL_REGEX_WITH_INFOS);
+                    const lastWordMatch = potentialUrl.match(URL_REGEX);
 
                     if (lastWordMatch) {
                         const matches = getUrlsInfosInString(textSliced);

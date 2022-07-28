@@ -110,7 +110,7 @@ class Sanitize {
             }
 
             const anchor = this.root.ownerDocument.getSelection().anchorNode;
-            const anchorEl = anchor ? closestElement(anchor) : null;
+            const anchorEl = anchor && closestElement(anchor);
             // Remove zero-width spaces added by `fillEmpty` when there is
             // content and the selection is not next to it.
             if (
@@ -177,7 +177,7 @@ class Sanitize {
             ) {
                 node.setAttribute('contenteditable', 'false');
             }
-            // update link URL if label is a new valid link
+            // Update link URL if label is a new valid link.
             if (node.nodeName === 'A' && anchorEl === node) {
                 const linkLabel = node.textContent;
                 const match = linkLabel.match(URL_REGEX);

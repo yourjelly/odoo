@@ -96,7 +96,7 @@ const Link = Widget.extend({
         }
 
         if (!this.data.url) {
-            const urls = this.data.content.match(OdooEditorLib.URL_REGEX_WITH_INFOS);
+            const urls = this.data.content.match(OdooEditorLib.URL_REGEX);
             if (urls) {
                 this.data.url = urls[0];
             }
