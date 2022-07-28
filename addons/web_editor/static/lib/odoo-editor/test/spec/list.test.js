@@ -5,7 +5,7 @@ import {
     deleteForward,
     insertLineBreak,
     insertParagraphBreak,
-    insertText,
+    mockInsertCharacter,
     indentList,
     outdentList,
     testEditor,
@@ -5412,7 +5412,7 @@ describe('List', () => {
                                 contentBefore: '<ol class="a"><li>abc[]</li></ol>',
                                 stepFunction: async editor => {
                                     await insertParagraphBreak(editor);
-                                    await insertText(editor, 'b');
+                                    await mockInsertCharacter(editor, 'b');
                                     await insertParagraphBreak(editor);
                                 },
                                 contentAfter:
@@ -5424,7 +5424,7 @@ describe('List', () => {
                                 contentBefore: '<ol><li class="a">abc[]</li></ol>',
                                 stepFunction: async editor => {
                                     await insertParagraphBreak(editor);
-                                    await insertText(editor, 'b');
+                                    await mockInsertCharacter(editor, 'b');
                                     await insertParagraphBreak(editor);
                                 },
                                 contentAfter:
@@ -5437,7 +5437,7 @@ describe('List', () => {
                                     '<ol><li class="a"><custom-block style="display: block;">abc[]</custom-block></li></ol>',
                                 stepFunction: async editor => {
                                     await insertParagraphBreak(editor);
-                                    await insertText(editor, 'b');
+                                    await mockInsertCharacter(editor, 'b');
                                     await insertParagraphBreak(editor);
                                 },
                                 contentAfter:
@@ -5450,7 +5450,7 @@ describe('List', () => {
                                     '<ol><li><custom-block class="a" style="display: block;">abc[]</custom-block></li></ol>',
                                 stepFunction: async editor => {
                                     await insertParagraphBreak(editor);
-                                    await insertText(editor, 'b');
+                                    await mockInsertCharacter(editor, 'b');
                                     await insertParagraphBreak(editor);
                                 },
                                 contentAfter:
@@ -5475,7 +5475,7 @@ describe('List', () => {
                                     </ul>`),
                                 stepFunction: async editor => {
                                     await insertParagraphBreak(editor);
-                                    await insertText(editor, 'b');
+                                    await mockInsertCharacter(editor, 'b');
                                     await insertParagraphBreak(editor);
                                 },
                                 contentAfter: unformat(`
@@ -5562,7 +5562,7 @@ describe('List', () => {
                                 contentBefore: '<ul class="a"><li>abc[]</li></ul>',
                                 stepFunction: async editor => {
                                     await insertParagraphBreak(editor);
-                                    await insertText(editor, 'b');
+                                    await mockInsertCharacter(editor, 'b');
                                     await insertParagraphBreak(editor);
                                 },
                                 contentAfter:
@@ -5574,7 +5574,7 @@ describe('List', () => {
                                 contentBefore: '<ul><li class="a">abc[]</li></ul>',
                                 stepFunction: async editor => {
                                     await insertParagraphBreak(editor);
-                                    await insertText(editor, 'b');
+                                    await mockInsertCharacter(editor, 'b');
                                     await insertParagraphBreak(editor);
                                 },
                                 contentAfter:
@@ -5587,7 +5587,7 @@ describe('List', () => {
                                     '<ul><li class="a"><custom-block style="display: block;">abc[]</custom-block></li></ul>',
                                 stepFunction: async editor => {
                                     await insertParagraphBreak(editor);
-                                    await insertText(editor, 'b');
+                                    await mockInsertCharacter(editor, 'b');
                                     await insertParagraphBreak(editor);
                                 },
                                 contentAfter:
@@ -5600,7 +5600,7 @@ describe('List', () => {
                                     '<ul><li><custom-block class="a" style="display: block;">abc[]</custom-block></li></ul>',
                                 stepFunction: async editor => {
                                     await insertParagraphBreak(editor);
-                                    await insertText(editor, 'b');
+                                    await mockInsertCharacter(editor, 'b');
                                     await insertParagraphBreak(editor);
                                 },
                                 contentAfter:
@@ -5740,7 +5740,7 @@ describe('List', () => {
                                     contentBefore: '<ul class="checklist a"><li>abc[]</li></ul>',
                                     stepFunction: async editor => {
                                         await insertParagraphBreak(editor);
-                                        await insertText(editor, 'd');
+                                        await mockInsertCharacter(editor, 'd');
                                         await insertParagraphBreak(editor);
                                     },
                                     contentAfter:
@@ -5753,7 +5753,7 @@ describe('List', () => {
                                         '<ul class="o_checklist"><li class="a">abc[]</li></ul>',
                                     stepFunction: async editor => {
                                         await insertParagraphBreak(editor);
-                                        await insertText(editor, 'd');
+                                        await mockInsertCharacter(editor, 'd');
                                         await insertParagraphBreak(editor);
                                     },
                                     contentAfter:
@@ -5766,7 +5766,7 @@ describe('List', () => {
                                         '<ul class="o_checklist"><li class="a"><custom-block style="display: block;">abc[]</custom-block></li></ul>',
                                     stepFunction: async editor => {
                                         await insertParagraphBreak(editor);
-                                        await insertText(editor, 'd');
+                                        await mockInsertCharacter(editor, 'd');
                                         await insertParagraphBreak(editor);
                                     },
                                     contentAfter:
@@ -5779,7 +5779,7 @@ describe('List', () => {
                                         '<ul class="o_checklist"><li><custom-block class="a" style="display: block;">abc[]</custom-block></li></ul>',
                                     stepFunction: async editor => {
                                         await insertParagraphBreak(editor);
-                                        await insertText(editor, 'd');
+                                        await mockInsertCharacter(editor, 'd');
                                         await insertParagraphBreak(editor);
                                     },
                                     contentAfter:
@@ -5804,7 +5804,7 @@ describe('List', () => {
                                     </ul>`),
                                     stepFunction: async editor => {
                                         await insertParagraphBreak(editor);
-                                        await insertText(editor, '0');
+                                        await mockInsertCharacter(editor, '0');
                                         await insertParagraphBreak(editor);
                                     },
                                     contentAfter: unformat(`
@@ -5832,7 +5832,7 @@ describe('List', () => {
                                         '<ul class="checklist a"><li class="o_checked">abc[]</li></ul>',
                                     stepFunction: async editor => {
                                         await insertParagraphBreak(editor);
-                                        await insertText(editor, 'd');
+                                        await mockInsertCharacter(editor, 'd');
                                         await insertParagraphBreak(editor);
                                     },
                                     contentAfter:
@@ -5845,7 +5845,7 @@ describe('List', () => {
                                         '<ul class="o_checklist"><li class="a o_checked">abc[]</li></ul>',
                                     stepFunction: async editor => {
                                         await insertParagraphBreak(editor);
-                                        await insertText(editor, 'd');
+                                        await mockInsertCharacter(editor, 'd');
                                         await insertParagraphBreak(editor);
                                     },
                                     contentAfter:
@@ -5858,7 +5858,7 @@ describe('List', () => {
                                         '<ul class="o_checklist"><li class="a o_checked"><div>abc[]</div></li></ul>',
                                     stepFunction: async editor => {
                                         await insertParagraphBreak(editor);
-                                        await insertText(editor, 'd');
+                                        await mockInsertCharacter(editor, 'd');
                                         await insertParagraphBreak(editor);
                                     },
                                     contentAfter:
@@ -5871,7 +5871,7 @@ describe('List', () => {
                                         '<ul class="o_checklist"><li class="o_checked"><div class="a">abc[]</div></li></ul>',
                                     stepFunction: async editor => {
                                         await insertParagraphBreak(editor);
-                                        await insertText(editor, 'd');
+                                        await mockInsertCharacter(editor, 'd');
                                         await insertParagraphBreak(editor);
                                     },
                                     contentAfter:
@@ -5894,7 +5894,7 @@ describe('List', () => {
                                     </ul>`),
                                     stepFunction: async editor => {
                                         await insertParagraphBreak(editor);
-                                        await insertText(editor, '0');
+                                        await mockInsertCharacter(editor, '0');
                                         await insertParagraphBreak(editor);
                                     },
                                     contentAfter: unformat(`

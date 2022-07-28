@@ -459,42 +459,32 @@ export async function createLink(editor, content) {
     editor.execCommand('createLink', '#', content);
 }
 
-export async function insertText(editor, text) {
-    // Create and dispatch events to mock text insertion. Unfortunatly, the
-    // events will be flagged `isTrusted: false` by the browser, requiring
-    // the editor to detect them since they would not trigger the default
-    // browser behavior otherwise.
-    for (char of text) {
-        // KeyDownEvent is required to trigger deleteRange.
-        const keyDownEvent = new KeyboardEvent('keydown', {
-            key: char,
-            bubbles: true,
-            cancelable: true,
-        });
-        editor.editable.dispatchEvent(keyDownEvent);
-        // KeyPressEvent is not required but is triggered like in the browser.
-        const keyPressEvent = new KeyboardEvent('keypress', {
-            key: char,
-            bubbles: true,
-            cancelable: true,
-        });
-        editor.editable.dispatchEvent(keyPressEvent);
-        // InputEvent is required to simulate the insert text.
-        const inputEvent = new InputEvent('input', {
-            inputType: 'insertText',
-            data: char,
-            bubbles: true,
-            cancelable: true,
-        });
-        editor.editable.dispatchEvent(inputEvent);
-        // KeyUpEvent is not required but is triggered like the browser would.
-        const keyUpEvent = new KeyboardEvent('keyup', {
-            key: char,
-            bubbles: true,
-            cancelable: true,
-        });
-        editor.editable.dispatchEvent(keyUpEvent);
+export async function mockInsertCharacter(editor, char) {
+    if(char.length !== 1) {
+        console.error('mockInsertCharacter only mock one character at a time.');
+        return;
     }
+    // We create and dispatch an event to mock the insert Text.
+    // Unfortunatly those Event are flagged `isTrusted: false`.
+    // So we have no choice and need to detect them inside the Editor.
+    // But it's the closest to real Browser we can go.
+    //
+    // KeyDownEvent : needed to trigger deleteRange
+    // InputEvent : needed to simùulate the insert text
+    var keyDownEvent = new KeyboardEvent('keydown', {
+        inputType: 'keydown',
+        key: char,
+        bubbles: true,
+        cancelable: true,
+    });
+    editor.editable.dispatchEvent(keyDownEvent);
+    var inputEvent = new InputEvent('input', {
+        inputType: 'insertText',
+        data: char,
+        bubbles: true,
+        cancelable: true,
+    });
+    editor.editable.dispatchEvent(inputEvent);
 }
 
 export function undo(editor) {
