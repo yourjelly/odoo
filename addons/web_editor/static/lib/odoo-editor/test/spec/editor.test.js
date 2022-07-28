@@ -7,7 +7,7 @@ import {
     deleteForward,
     insertLineBreak,
     insertParagraphBreak,
-    mockInsertCharacter,
+    insertText,
     keydown,
     redo,
     testEditor,
@@ -71,10 +71,10 @@ describe('Editor', () => {
             it('should not transform indentation', async () => {
                 await testEditor(BasicEditor, {
                     contentBefore: `
-    <p>ab</p>  
+    <p>ab</p>
     <p>c</p>`,
                     contentAfter: `
-    <p>ab</p>  
+    <p>ab</p>
     <p>c</p>`,
                 });
             });
@@ -222,7 +222,7 @@ describe('Editor', () => {
                         stepFunction: async editor => {
                             await deleteForward(editor);
                             await deleteForward(editor);
-                            await mockInsertCharacter(editor, 'x');
+                            await insertText(editor, 'x');
                         },
                         contentAfter: '<p>ab<span class="style">x[]</span>ef</p>',
                     });
@@ -233,7 +233,7 @@ describe('Editor', () => {
                         contentBeforeEdit: '<p><span class="removeme" oe-zws-empty-inline="">[]\u200B</span><b>ab</b></p>',
                         stepFunction: async editor => {
                             await deleteForward(editor);
-                            await mockInsertCharacter(editor, 'x');
+                            await insertText(editor, 'x');
                         },
                         contentAfter: '<p><b>x[]b</b></p>',
                     });
@@ -241,7 +241,7 @@ describe('Editor', () => {
                         contentBefore: '<p><span class="removeme" oe-zws-empty-inline="">[]\u200B</span><span>cd</span></p>',
                         stepFunction: async editor => {
                             await deleteForward(editor);
-                            await mockInsertCharacter(editor, 'x');
+                            await insertText(editor, 'x');
                         },
                         contentAfter: '<p><span>x[]d</span></p>',
                     });
@@ -249,7 +249,7 @@ describe('Editor', () => {
                         contentBefore: '<p><span class="removeme" oe-zws-empty-inline="">[]\u200B</span><br><b>ef</b></p>',
                         stepFunction: async editor => {
                             await deleteForward(editor);
-                            await mockInsertCharacter(editor, 'x');
+                            await insertText(editor, 'x');
                         },
                         contentAfter: '<p><b>x[]ef</b></p>',
                     });
@@ -1239,7 +1239,7 @@ X[]
                         contentBefore: '<div><p>cd</p><br><span>e[]</span></div>',
                         stepFunction: async editor => {
                             await deleteBackward(editor);
-                            await mockInsertCharacter(editor, 'x');
+                            await insertText(editor, 'x');
                         },
                         contentAfterEdit: '<div><p>cd</p><br><span>x[]</span></div>',
                         contentAfter: '<div><p>cd</p><br><span>x[]</span></div>',
@@ -1261,7 +1261,7 @@ X[]
                         contentBefore: '<p>uv<i style="color:red">w[]</i>xy</p>',
                         stepFunction: async editor => {
                             await deleteBackward(editor);
-                            await mockInsertCharacter(editor, 'i');
+                            await insertText(editor, 'i');
                         },
                         contentAfterEdit: '<p>uv<i style="color:red">i[]</i>xy</p>',
                         contentAfter: '<p>uv<i style="color:red">i[]</i>xy</p>',
@@ -1280,7 +1280,7 @@ X[]
                         stepFunction: async editor => {
                             await deleteBackward(editor);
                             await deleteBackward(editor);
-                            await mockInsertCharacter(editor, 'x');
+                            await insertText(editor, 'x');
                         },
                         contentAfterEdit: '<p>ab<span class="style">x[]</span>ef</p>',
                         contentAfter: '<p>ab<span class="style">x[]</span>ef</p>',
@@ -1291,7 +1291,7 @@ X[]
                         contentBefore: '<p><b>ab</b><span class="removeme" oe-zws-empty-inline="">[]\u200B</span></p>',
                         stepFunction: async editor => {
                             await deleteBackward(editor);
-                            await mockInsertCharacter(editor, 'x');
+                            await insertText(editor, 'x');
                         },
                         contentAfter: '<p><b>ax[]</b></p>',
                     });
@@ -1299,7 +1299,7 @@ X[]
                         contentBefore: '<p><span>cd</span><span class="removeme" oe-zws-empty-inline="">[]\u200B</span></p>',
                         stepFunction: async editor => {
                             await deleteBackward(editor);
-                            await mockInsertCharacter(editor, 'x');
+                            await insertText(editor, 'x');
                         },
                         contentAfter: '<p><span>cx[]</span></p>',
                     });
@@ -1307,7 +1307,7 @@ X[]
                         contentBefore: '<p><b>ef</b><br><span class="removeme" oe-zws-empty-inline="">[]\u200B</span></p>',
                         stepFunction: async editor => {
                             await deleteBackward(editor);
-                            await mockInsertCharacter(editor, 'x');
+                            await insertText(editor, 'x');
                         },
                         contentAfter: '<p><b>efx[]</b></p>',
                     });
@@ -1322,7 +1322,7 @@ X[]
                         contentBefore: '<div><p>cd</p><br><span>[]\u200B</span></div>',
                         stepFunction: async editor => {
                             await deleteBackward(editor);
-                            await mockInsertCharacter(editor, 'x');
+                            await insertText(editor, 'x');
                         },
                         contentAfter: '<div><p>cd</p>x[]</div>',
                     });
@@ -2171,7 +2171,7 @@ X[]
                     contentBefore: '<div><p>ab <span class="style">[c]</span> d</p></div>',
                     stepFunction: async editor => {
                         await deleteBackward(editor);
-                        await mockInsertCharacter(editor, 'x');
+                        await insertText(editor, 'x');
                     },
                     contentAfterEdit: '<div><p>ab <span class="style">x[]</span> d</p></div>',
                     contentAfter: '<div><p>ab <span class="style">x[]</span> d</p></div>',
@@ -2180,7 +2180,7 @@ X[]
                     contentBefore: '<div><p>ab<span class="style">[c]</span>d</p></div>',
                     stepFunction: async editor => {
                         await deleteBackward(editor);
-                        await mockInsertCharacter(editor, 'x');
+                        await insertText(editor, 'x');
                     },
                     contentAfterEdit: '<div><p>ab<span class="style">x[]</span>d</p></div>',
                     contentAfter: '<div><p>ab<span class="style">x[]</span>d</p></div>',
@@ -2189,7 +2189,7 @@ X[]
                     contentBefore: '<div><p>ab <span class="style">[cde]</span> f</p></div>',
                     stepFunction: async editor => {
                         await deleteBackward(editor);
-                        await mockInsertCharacter(editor, 'x');
+                        await insertText(editor, 'x');
                     },
                     contentAfterEdit: '<div><p>ab <span class="style">x[]</span> f</p></div>',
                     contentAfter: '<div><p>ab <span class="style">x[]</span> f</p></div>',
@@ -2863,14 +2863,14 @@ X[]
                 await testEditor(BasicEditor, {
                     contentBefore: '<p>ab<span>[]\u200B</span>cd</p>',
                     stepFunction: async editor => {
-                        await mockInsertCharacter(editor, 'x');
+                        await insertText(editor, 'x');
                     },
                     contentAfter: '<p>ab<span>x[]</span>cd</p>',
                 });
                 await testEditor(BasicEditor, {
                     contentBefore: '<p>uv <span>[]\u200B</span> wx</p>',
                     stepFunction: async editor => {
-                        await mockInsertCharacter(editor, 'y');
+                        await insertText(editor, 'y');
                     },
                     contentAfter: '<p>uv <span>y[]</span> wx</p>',
                 });
@@ -3410,12 +3410,10 @@ X[]
                 await testEditor(OdooEditor, {
                     contentBefore: '<p>[]</p>',
                     stepFunction: async editor => {
-                        await mockInsertCharacter(editor, 'a');
-                        await mockInsertCharacter(editor, 'b');
-                        await mockInsertCharacter(editor, 'c');
+                        await insertText(editor, 'abc');
                         undo(editor);
                         undo(editor);
-                        await mockInsertCharacter(editor, 'd');
+                        await insertText(editor, 'd');
                         undo(editor);
                         undo(editor);
                         redo(editor);
@@ -3428,12 +3426,10 @@ X[]
                 await testEditor(OdooEditor, {
                     contentBefore: '<p>[]</p>',
                     stepFunction: async editor => {
-                        await mockInsertCharacter(editor, 'a');
-                        await mockInsertCharacter(editor, 'b');
-                        await mockInsertCharacter(editor, 'c');
+                        await insertText(editor, 'abc');
                         undo(editor);
                         undo(editor);
-                        await mockInsertCharacter(editor, 'd');
+                        await insertText(editor, 'd');
                         undo(editor);
                         redo(editor);
                         redo(editor);

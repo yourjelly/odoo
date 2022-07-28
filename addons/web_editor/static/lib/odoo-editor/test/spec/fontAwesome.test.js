@@ -1,4 +1,4 @@
-import { BasicEditor, mockInsertCharacter, testEditor, deleteForward, deleteBackward } from '../utils.js';
+import { BasicEditor, insertText, testEditor, deleteForward, deleteBackward } from '../utils.js';
 
 describe('FontAwesome', () => {
     describe('parse/render', () => {
@@ -462,7 +462,7 @@ describe('FontAwesome', () => {
                 contentBefore: '<p>ab[]<i class="fa fa-pastafarianism"></i>cd</p>',
                 contentBeforeEdit: '<p>ab[]<i class="fa fa-pastafarianism" contenteditable="false">\u200b</i>cd</p>',
                 stepFunction: async editor => {
-                    await mockInsertCharacter(editor, 's');
+                    await insertText(editor, 's');
                 },
                 contentAfterEdit:
                     '<p>abs[]<i class="fa fa-pastafarianism" contenteditable="false">\u200b</i>cd</p>',
@@ -474,7 +474,7 @@ describe('FontAwesome', () => {
                 contentBefore: '<p>ab<i class="fa fa-pastafarianism"></i>[]cd</p>',
                 contentBeforeEdit: '<p>ab<i class="fa fa-pastafarianism" contenteditable="false">\u200b</i>[]cd</p>',
                 stepFunction: async editor => {
-                    await mockInsertCharacter(editor, 's');
+                    await insertText(editor, 's');
                 },
                 contentAfterEdit:
                     '<p>ab<i class="fa fa-pastafarianism" contenteditable="false">\u200b</i>s[]cd</p>',
@@ -485,7 +485,7 @@ describe('FontAwesome', () => {
             await testEditor(BasicEditor, {
                 contentBefore: '<p>ab[<i class="fa fa-pastafarianism"></i>]cd</p>',
                 stepFunction: async editor => {
-                    await mockInsertCharacter(editor, 's');
+                    await insertText(editor, 's');
                 },
                 contentAfter: '<p>abs[]cd</p>',
             });
