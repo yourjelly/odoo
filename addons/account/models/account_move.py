@@ -3233,6 +3233,7 @@ class AccountMove(models.Model):
             default_email_layout_xmlid="mail.mail_notification_paynow",
             model_description=self.with_context(lang=lang).type_name,
             force_email=True,
+            is_origin_send_and_print=True,
         )
         return {
             'name': _('Send Invoice'),

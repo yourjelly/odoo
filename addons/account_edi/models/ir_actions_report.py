@@ -33,6 +33,9 @@ class IrActionsReport(models.Model):
                     writer = OdooPdfFileWriter()
                     writer.cloneReaderDocumentRoot(reader)
                     for edi_document in to_embed:
+                        if edi_document.edi_format_id._when_is_edi_generated() == 'print':
+                            edi_document.state = 'to_send'
+                            edi_document._process_documents_no_web_services()
                         edi_document.edi_format_id._prepare_invoice_report(writer, edi_document)
 
                     # Replace the current content.

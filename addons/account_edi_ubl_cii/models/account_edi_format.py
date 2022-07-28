@@ -118,6 +118,8 @@ class AccountEdiFormat(models.Model):
                 'name': builder._export_invoice_filename(invoice),
                 'raw': xml_content,
                 'mimetype': 'application/xml',
+                'res_id': None,
+                'res_model': None,
             }
             # we don't want the Factur-X and E-FFF xml to appear in the attachment of the invoice when confirming it
             # E-FFF will appear after the pdf is generated, Factur-X will never appear (it's contained in the PDF)
@@ -139,6 +141,13 @@ class AccountEdiFormat(models.Model):
         if self.code == 'facturx_1_0_05':
             return True
         return super()._is_embedding_to_invoice_pdf_needed()
+
+    def _when_is_edi_generated(self):
+        self.ensure_one()
+
+        if self.code == 'facturx_1_0_05':
+            return 'print'
+        return super()._when_is_edi_generated()
 
     def _prepare_invoice_report(self, pdf_writer, edi_document):
         # EXTENDS account_edi

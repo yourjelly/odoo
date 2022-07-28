@@ -161,6 +161,15 @@ class AccountEdiFormat(models.Model):
         self.ensure_one()
         return {}
 
+    def _when_is_edi_generated(self):
+        """ Select whether the edi is generated at the 'post' (button 'Confirm') or the 'generate_email'
+        (button 'Send & Print') or directly when printing the pdf (button 'print')
+
+        :returns: 'post' or 'email' or 'print'
+        """
+        self.ensure_one()
+        return 'post'
+
     def _cancel_invoice_edi(self, invoices):
         """Calls the web services to cancel the invoice of this document.
 
