@@ -443,6 +443,10 @@ body:not(.editor_has_snippets) {
         inset: -5px;
         pointer-events: none;
     }
+    &:empty::after {
+        content: '_';
+        opacity: .4px;
+    }
 }
 
 // ANIMATIONS
