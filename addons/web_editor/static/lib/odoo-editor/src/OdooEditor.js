@@ -948,9 +948,7 @@ export class OdooEditor extends EventTarget {
      * @returns {boolean}
      */
     historyResetLatestComputedSelection(limitToEditable) {
-        const computedSelection = limitToEditable
-            ? this._latestComputedSelectionInEditable
-            : this._latestComputedSelection;
+        const computedSelection = limitToEditable ? this.getSelection() : this._latestComputedSelection;
         if (computedSelection && computedSelection.anchorNode) {
             const anchorNode = this.idFind(computedSelection.anchorNode.oid);
             const focusNode = this.idFind(computedSelection.focusNode.oid) || anchorNode;
@@ -1519,6 +1517,15 @@ export class OdooEditor extends EventTarget {
     }
 
     /**
+     * Returns the latest selection within the editable, if any.
+     *
+     * @returns {Selection|undefined}
+     */
+    getSelection() {
+        const selection = this.document.getSelection();
+        return this.isSelectionInEditable(selection) ? selection : this._latestComputedSelectionInEditable;
+    }
+    /**
      * Applies the given command to the current selection. This does *NOT*:
      * 1) update the history cursor
      * 2) protect the unbreakables or unremovables
@@ -1535,13 +1542,9 @@ export class OdooEditor extends EventTarget {
      * @returns {?}
      */
     _applyRawCommand(method, ...args) {
-        const sel = this.document.getSelection();
-        if (
-            !this.editable.contains(sel.anchorNode) ||
-            (sel.anchorNode !== sel.focusNode && !this.editable.contains(sel.focusNode))
-        ) {
-            // Do not apply commands out of the editable area.
-            return false;
+        let sel = this.getSelection();
+        if (!sel) {
+            return false; // Do not apply commands out of the editable area.
         }
         if (!sel.isCollapsed && BACKSPACE_FIRST_COMMANDS.includes(method)) {
             let range = getDeepRange(this.editable, {sel, splitText: true, select: true, correctTripleClick: true});
