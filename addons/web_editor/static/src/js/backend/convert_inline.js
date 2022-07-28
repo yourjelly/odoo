@@ -456,6 +456,17 @@ function classToStyle($editable, cssRules) {
     };
     writes.forEach(fn => fn());
 }
+
+/**
+ * Disable all links (used in preview only)
+ *
+ * @param {Element} editable
+ */
+function disableAllLinks(editable) {
+    for (const link of editable.querySelectorAll('a')) {
+        link.style.setProperty('pointer-events', 'none');
+    }
+}
 /**
  * Add styles to all table rows and columns, that are necessary for them to be
  * responsive. This only works if columns have a max-width so the styles are
@@ -547,8 +558,9 @@ function enforceImagesResponsivity(editable) {
  *                                   style: {[styleName]: string};
  *                                   specificity: number;}>
  * @param {JQuery} [$iframe] the iframe containing the editable, if any
+ * @param {Boolean} preview
  */
-async function toInline($editable, cssRules, $iframe) {
+async function toInline($editable, cssRules, $iframe, preview=false) {
     $editable.removeClass('odoo-editor-editable');
     const editable = $editable.get(0);
     const iframe = $iframe && $iframe.get(0);
@@ -612,6 +624,9 @@ async function toInline($editable, cssRules, $iframe) {
     formatTables($editable);
     enforceImagesResponsivity(editable);
     await flattenBackgroundImages(editable);
+    if (preview) {
+        disableAllLinks(editable);
+    }
 
     // Hide replaced cells on Outlook
     for (const toHide of editable.querySelectorAll('.mso-hide')) {
