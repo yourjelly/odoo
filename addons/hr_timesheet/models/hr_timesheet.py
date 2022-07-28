@@ -89,13 +89,17 @@ class AccountAnalyticLine(models.Model):
         for line in self.filtered(lambda line: not line.project_id):
             line.task_id = False
 
-    @api.onchange('project_id')
+    @api.onchange('project_id', 'employee_id')
     def _onchange_project_id(self):
         # TODO KBA in master - check to do it "properly", currently:
         # This onchange is used to reset the task_id when the project changes.
         # Doing it in the compute will remove the task_id when the project of a task changes.
         if self.project_id != self.task_id.project_id:
             self.task_id = False
+        if self.employee_id and self.project_id:
+            if self.employee_id.company_id != self.project_id.company_id:
+                self.employee_id = False
+                return {'domain':{'employee_id':[('company_id','=',self.project_id.company_id.id)]}}
 
     @api.depends('employee_id')
     def _compute_user_id(self):
