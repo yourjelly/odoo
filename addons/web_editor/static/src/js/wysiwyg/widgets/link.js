@@ -482,6 +482,7 @@ const Link = Widget.extend({
         let isLink = value.indexOf('@') < 0;
         this.$('input[name="is_new_window"]').closest('.form-group').toggleClass('d-none', !isLink);
         this.$('.o_strip_domain').toggleClass('d-none', value.indexOf(window.location.origin) !== 0);
+        this._adaptPreview();
     },
     _onURLInputChange: function () {
         this._adaptPreview();
