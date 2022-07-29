@@ -1386,7 +1386,11 @@ export class OdooEditor extends EventTarget {
             isRemovableInvisible(start) &&
             !(endIsStart && start.contains(range.startContainer))
         ) {
-            const parent = start.parentNode;
+            let parent = start.parentNode;
+            if (start.parentNode && ['PRE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE'].includes(start.parentNode.tagName) && !start.parentNode.textContent) {
+                start.parentNode.replaceWith(next.parentNode);
+                parent = start.parentNode;
+            }
             start.remove();
             start = parent;
         }
