@@ -170,6 +170,9 @@ export const multiTabService = {
 
         return {
             bus,
+            get currentTabId() {
+                return tabId;
+            },
             /**
              * Determine whether or not this tab is the main one.
              *
