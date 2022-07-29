@@ -92,8 +92,8 @@ class IrMailServer(models.Model):
         "FROM Filtering",
         help='Define for which email address or domain this server can be used.\n'
              'e.g.: "notification@odoo.com" or "odoo.com"')
-    smtp_host = fields.Char(string='SMTP Server', required=True, help="Hostname or IP of SMTP server")
-    smtp_port = fields.Integer(string='SMTP Port', required=True, default=25, help="SMTP Port. Usually 465 for SSL, and 25 or 587 for other cases.")
+    smtp_host = fields.Char(string='SMTP Server', required=False, help="Hostname or IP of SMTP server")
+    smtp_port = fields.Integer(string='SMTP Port', required=False, default=25, help="SMTP Port. Usually 465 for SSL, and 25 or 587 for other cases.")
     smtp_authentication = fields.Selection([('login', 'Username'), ('certificate', 'SSL Certificate')], string='Authenticate with', required=True, default='login')
     smtp_authentication_info = fields.Text('Authentication Info', compute='_compute_smtp_authentication_info')
     smtp_user = fields.Char(string='Username', help="Optional username for SMTP authentication", groups='base.group_system')
@@ -117,7 +117,14 @@ class IrMailServer(models.Model):
                                                          "(this is very verbose and may include confidential info!)")
     sequence = fields.Integer(string='Priority', default=10, help="When no specific mail server is requested for a mail, the highest priority one "
                                                                   "is used. Default priority is 10 (smaller number = higher priority)")
+    use_config_credentials = fields.Boolean("Use Server Credentials", help="If checked, server-provided SMTP credentials will be used.")
     active = fields.Boolean(default=True)
+
+    _sql_constraints = [(
+            'check_server_data',
+             "CHECK((smtp_host IS NOT NULL AND smtp_port IS NOT NULL) OR use_config_credentials = true)",
+             "Missing connection data."
+        )]
 
     @api.depends('smtp_authentication')
     def _compute_smtp_authentication_info(self):
@@ -247,34 +254,57 @@ class IrMailServer(models.Model):
         ssl_context = None
 
         if mail_server:
-            smtp_server = mail_server.smtp_host
-            smtp_port = mail_server.smtp_port
-            if mail_server.smtp_authentication == "certificate":
-                smtp_user = None
-                smtp_password = None
+            if mail_server.use_config_credentials:
+                smtp_server = tools.config.get('smtp_server')
+                smtp_port = tools.config.get('smtp_port')
+                smtp_user = tools.config.get('smtp_user')
+                smtp_password = tools.config.get('smtp_password')
+                from_filter = mail_server.from_filter
+                smtp_encryption = encryption
+                if tools.config.get('smtp_ssl'):
+                    smtp_encryption = 'starttls'
+                smtp_ssl_certificate_filename = tools.config.get('smtp_ssl_certificate_filename')
+                smtp_ssl_private_key_filename = tools.config.get('smtp_ssl_private_key_filename')
+
+                if smtp_ssl_certificate_filename and smtp_ssl_private_key_filename:
+                    try:
+                        ssl_context = PyOpenSSLContext(ssl.PROTOCOL_TLS)
+                        ssl_context.load_cert_chain(smtp_ssl_certificate_filename, keyfile=smtp_ssl_private_key_filename)
+                        # Check that the private key match the certificate
+                        ssl_context._ctx.check_privatekey()
+                    except SSLCryptoError as e:
+                        raise UserError(_('The private key or the certificate is not a valid file. \n%s', str(e)))
+                    except SSLError as e:
+                        raise UserError(_('Could not load your certificate / private key. \n%s', str(e)))
             else:
-                smtp_user = mail_server.smtp_user
-                smtp_password = mail_server.smtp_pass
-            smtp_encryption = mail_server.smtp_encryption
-            smtp_debug = smtp_debug or mail_server.smtp_debug
-            from_filter = mail_server.from_filter
-            if (mail_server.smtp_authentication == "certificate"
-               and mail_server.smtp_ssl_certificate
-               and mail_server.smtp_ssl_private_key):
-                try:
-                    ssl_context = PyOpenSSLContext(ssl.PROTOCOL_TLS)
-                    smtp_ssl_certificate = base64.b64decode(mail_server.smtp_ssl_certificate)
-                    certificate = SSLCrypto.load_certificate(FILETYPE_PEM, smtp_ssl_certificate)
-                    smtp_ssl_private_key = base64.b64decode(mail_server.smtp_ssl_private_key)
-                    private_key = SSLCrypto.load_privatekey(FILETYPE_PEM, smtp_ssl_private_key)
-                    ssl_context._ctx.use_certificate(certificate)
-                    ssl_context._ctx.use_privatekey(private_key)
-                    # Check that the private key match the certificate
-                    ssl_context._ctx.check_privatekey()
-                except SSLCryptoError as e:
-                    raise UserError(_('The private key or the certificate is not a valid file. \n%s', str(e)))
-                except SSLError as e:
-                    raise UserError(_('Could not load your certificate / private key. \n%s', str(e)))
+                smtp_server = mail_server.smtp_host
+                smtp_port = mail_server.smtp_port
+                if mail_server.smtp_authentication == "certificate":
+                    smtp_user = None
+                    smtp_password = None
+                else:
+                    smtp_user = mail_server.smtp_user
+                    smtp_password = mail_server.smtp_pass
+                smtp_encryption = mail_server.smtp_encryption
+                smtp_debug = smtp_debug or mail_server.smtp_debug
+                from_filter = mail_server.from_filter
+                if (mail_server.smtp_authentication == "certificate"
+                and mail_server.smtp_ssl_certificate
+                and mail_server.smtp_ssl_private_key):
+                    try:
+                        ssl_context = PyOpenSSLContext(ssl.PROTOCOL_TLS)
+                        smtp_ssl_certificate = base64.b64decode(mail_server.smtp_ssl_certificate)
+                        certificate = SSLCrypto.load_certificate(FILETYPE_PEM, smtp_ssl_certificate)
+                        smtp_ssl_private_key = base64.b64decode(mail_server.smtp_ssl_private_key)
+                        private_key = SSLCrypto.load_privatekey(FILETYPE_PEM, smtp_ssl_private_key)
+                        ssl_context._ctx.use_certificate(certificate)
+                        ssl_context._ctx.use_privatekey(private_key)
+                        # Check that the private key match the certificate
+                        ssl_context._ctx.check_privatekey()
+                    except SSLCryptoError as e:
+                        raise UserError(_('The private key or the certificate is not a valid file. \n%s', str(e)))
+                    except SSLError as e:
+                        raise UserError(_('Could not load your certificate / private key. \n%s', str(e)))
 
         else:
             # we were passed individual smtp parameters or nothing and there is no default server

@@ -15,16 +15,17 @@
                         <group>
                             <group>
                                 <field name="name" placeholder="e.g. My Outgoing Server"/>
-                                <field name="from_filter"/>
+                                <field name="use_config_credentials" />
+                                <field name="from_filter" />
                             </group>
                             <group>
-                                <field name="sequence"/>
+                                <field name="sequence" />
                                 <field name="active" invisible="1"/>
                             </group>
                         </group>
-                        <group>
+                        <group attrs="{'invisible': [('use_config_credentials', '=', True)]}">
                             <group>
-                                <field name="smtp_authentication" widget="radio"/>
+                                <field name="smtp_authentication" widget="radio" />
                             </group>
                             <group>
                                 <div class="text-muted font-italic" role="alert"
@@ -35,7 +36,10 @@
                         </group>
                         <notebook colspan="4">
                             <page name="connection" string="Connection">
-                                <group>
+                                <div role="alert" class="alert alert-info" attrs="{'invisible': [('use_config_credentials', '=', False)]}">
+                                    This server will use credentials provided by the Odoo server and cannot be edited.
+                                </div>
+                                <group attrs="{'invisible': [('use_config_credentials', '=', True)]}">
                                     <group>
                                         <field name="smtp_encryption" widget="radio"/>
                                         <field name="smtp_host"/>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="config_mail_server" model="ir.mail_server">
+            <field name="name">Default configuration</field>
+            <field name="use_config_credentials">True</field>
+            <field name="sequence">0</field>
+        </record>
+    </data>
+</odoo>
