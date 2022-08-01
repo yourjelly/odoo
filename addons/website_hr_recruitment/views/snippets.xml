@@ -8,12 +8,12 @@
                          data-customize-website-views="website_hr_recruitment.job_filter_by_countries"
                          data-no-preview="true"
                          data-reload="/"/>
-            <we-checkbox string="Departments Filter"
-                         data-customize-website-views="website_hr_recruitment.job_filter_by_departments"
-                         data-no-preview="true"
-                         data-reload="/"/>
             <we-checkbox string="Offices Filter"
                          data-customize-website-views="website_hr_recruitment.job_filter_by_offices"
+                         data-no-preview="true"
+                         data-reload="/"/>
+            <we-checkbox string="Departments Filter"
+                         data-customize-website-views="website_hr_recruitment.job_filter_by_departments"
                          data-no-preview="true"
                          data-reload="/"/>
             <we-checkbox string="Employment Types Filter"
