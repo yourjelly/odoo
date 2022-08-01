@@ -4,6 +4,7 @@
 from odoo import http, _
 from odoo.addons.http_routing.models.ir_http import slug
 from odoo.http import request
+from odoo.tools.misc import groupby
 from werkzeug.exceptions import NotFound
 
 
@@ -15,12 +16,33 @@ class WebsiteHrRecruitment(http.Controller):
     @http.route([
         '/jobs',
         '/jobs/country/<model("res.country"):country>',
+        '/jobs/country/<model("res.country"):country>/page/<int:page>',
+        '/jobs/department/other',
+        '/jobs/department/other/page/<int:page>',
         '/jobs/department/<model("hr.department"):department>',
+        '/jobs/department/<model("hr.department"):department>/page/<int:page>',
+        '/jobs/country/<model("res.country"):country>/department/other',
+        '/jobs/country/<model("res.country"):country>/department/other/page/<int:page>',
         '/jobs/country/<model("res.country"):country>/department/<model("hr.department"):department>',
+        '/jobs/country/<model("res.country"):country>/department/<model("hr.department"):department>/page/<int:page>',
         '/jobs/office/<int:office_id>',
+        '/jobs/office/<int:office_id>/page/<int:page>',
         '/jobs/country/<model("res.country"):country>/office/<int:office_id>',
+        '/jobs/country/<model("res.country"):country>/office/<int:office_id>/page/<int:page>',
+        '/jobs/department/other/office/<int:office_id>',
+        '/jobs/department/other/office/<int:office_id>/page/<int:page>',
         '/jobs/department/<model("hr.department"):department>/office/<int:office_id>',
+        '/jobs/department/<model("hr.department"):department>/office/<int:office_id>/page/<int:page>',
+        '/jobs/country/<model("res.country"):country>/department/other/office/<int:office_id>',
+        '/jobs/country/<model("res.country"):country>/department/other/office/<int:office_id>/page/<int:page>',
         '/jobs/country/<model("res.country"):country>/department/<model("hr.department"):department>/office/<int:office_id>',
+        '/jobs/country/<model("res.country"):country>/department/<model("hr.department"):department>/office/<int:office_id>/page/<int:page>',
+        '/jobs/remote',
+        '/jobs/remote/page/<int:page>',
+        '/jobs/remote/department/other',
+        '/jobs/remote/department/other/page/<int:page>',
+        '/jobs/remote/department/<model("hr.department"):department>',
+        '/jobs/remote/department/<model("hr.department"):department>/page/<int:page>',
     ], type='http', auth="public", website=True, sitemap=sitemap_jobs)
     def jobs(self, country=None, department=None, office_id=None, **kwargs):
         env = request.env(context=dict(request.env.context, show_address=True, no_tag_br=True))
@@ -28,11 +50,8 @@ class WebsiteHrRecruitment(http.Controller):
         Country = env['res.country']
         Jobs = env['hr.job']
 
-        # List jobs available to current UID
-        domain = request.website.website_domain()
-        job_ids = Jobs.search(domain, order="is_published desc, sequence, no_of_recruitment desc").ids
-        # Browse jobs as superuser, because address is restricted
-        jobs = Jobs.sudo().browse(job_ids)
+        is_remote = 'remote' in request.httprequest.path.split('/')
+        is_other_department = '/department/other' in request.httprequest.path and not department
 
         # Default search by user country
         if not (country or department or office_id or kwargs.get('all_countries')):
@@ -43,23 +62,71 @@ class WebsiteHrRecruitment(http.Controller):
                 if not any(j for j in jobs if j.address_id and j.address_id.country_id == country):
                     country = False
 
-        # Filter job / office for country
-        if country and not kwargs.get('all_countries'):
-            jobs = [j for j in jobs if not j.address_id or j.address_id.country_id.id == country.id]
-            offices = set(j.address_id for j in jobs if not j.address_id or j.address_id.country_id.id == country.id)
-        else:
-            offices = set(j.address_id for j in jobs if j.address_id)
+        options = {
+            'displayDescription': True,
+            'allowFuzzy': not request.params.get('noFuzzy'),
+            'country': str(country.id) if country else None,
+            'department': str(department.id) if department else None,
+            'office_id': office_id,
+            'is_remote': is_remote,
+            'is_other_department': is_other_department,
+        }
+        total, details, fuzzy_search_term = request.website._search_with_fuzzy("jobs", search,
+            limit=1000, order="is_published desc, sequence, no_of_recruitment desc", options=options)
+        # Browse jobs as superuser, because address is restricted
+        jobs = details[0].get('results', Jobs).sudo()
 
-        # Deduce departments and countries offices of those jobs
-        departments = set(j.department_id for j in jobs if j.department_id)
-        countries = set(o.country_id for o in offices if o.country_id)
+        # Deduce offices, departments and countries offices of those jobs
+        def sort(items, key):
+            """ Sort items alphabetically followed by None if present
 
-        if department:
-            jobs = [j for j in jobs if j.department_id and j.department_id.id == department.id]
-        if office_id and office_id in [x.id for x in offices]:
-            jobs = [j for j in jobs if j.address_id and j.address_id.id == office_id]
-        else:
-            office_id = False
+            :param set items: set of model ids and None
+            :param str key: field on which to sort
+            :return: sorted list of items
+            """
+            has_special = None in items
+            if has_special:
+                items.remove(None)
+            items = list(items)
+            items.sort(key=lambda item: item[key] or '')
+            if has_special:
+                items.append(None)
+            return items
+
+        offices = sort(set(j.address_id or None for j in jobs), 'city')
+        departments = sort(set(j.department_id or None for j in jobs), 'name')
+        countries = sort(set(o and o.country_id or None for o in offices), 'name')
+
+        total = len(jobs)
+
+        count_per_country = {'all': total}
+        for c, jobs_list in groupby(jobs, lambda job: job.address_id.country_id):
+            count_per_country[c] = len(jobs_list)
+        count_per_department = {'all': total}
+        for d, jobs_list in groupby(jobs, lambda job: job.department_id):
+            count_per_department[d] = len(jobs_list)
+        count_other_department = len(jobs.filtered(lambda job: not job.department_id))
+        if count_other_department:
+            count_per_department[None] = count_other_department
+        count_per_office = {'all': total}
+        for o, jobs_list in groupby(jobs, lambda job: job.address_id):
+            count_per_office[o] = len(jobs_list)
+        count_remote = len(jobs.filtered(lambda job: not job.address_id))
+        if count_remote:
+            count_per_country[None] = count_remote
+            count_per_office[None] = count_remote
+
+        pager = request.website.pager(
+            url=request.httprequest.path.partition('/page/')[0],
+            url_args={'search': search},
+            total=total,
+            page=page,
+            step=self._jobs_per_page,
+        )
+        offset = pager['offset']
+        jobs = jobs[offset:offset + self._jobs_per_page]
+
+        office = env['res.partner'].browse(office_id) if office_id else None
 
         # Render page
         return request.render("website_hr_recruitment.index", {
@@ -69,7 +136,16 @@ class WebsiteHrRecruitment(http.Controller):
             'offices': offices,
             'country_id': country,
             'department_id': department,
-            'office_id': office_id,
+            'office_id': office,
+            'is_remote': is_remote,
+            'is_other_department': is_other_department,
+            'pager': pager,
+            'search': fuzzy_search_term or search,
+            'search_count': total,
+            'original_search': fuzzy_search_term and search,
+            'count_per_country': count_per_country,
+            'count_per_department': count_per_department,
+            'count_per_office': count_per_office,
         })
 
     @http.route('/jobs/add', type='http', auth="user", website=True)

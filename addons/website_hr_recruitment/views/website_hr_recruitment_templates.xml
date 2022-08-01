@@ -636,54 +636,130 @@
     </field>
 </record>
 
-<template id="job_filter_by_countries" inherit_id="website_hr_recruitment.index" active="False" name="Filter by Countries">
-    <xpath expr="//div[@id='jobs_grid_left']" position="inside">
-        <ul class="nav nav-pills flex-column mb32">
-            <li class="nav-item"><a t-attf-href="/jobs#{ '/department/%s' % slug(department_id) if department_id else '' }#{ '/office/%s' % office_id if office_id else '' }?all_countries=1" t-attf-class="nav-link#{'' if country_id else ' active'}">All Countries</a></li>
-            <t t-foreach="countries" t-as="country">
-                <li class="nav-item">
-                    <a t-attf-href="/jobs/country/#{ slug(country) }#{ '/department/%s' % slug(department_id) if department_id else '' }#{ '/office/%s' % office_id if office_id else '' }"
-                        t-attf-class="nav-link#{' active' if country_id and country_id.id == country.id else ''}"><span t-field="country.name"/></a>
-                </li>
-            </t>
-        </ul>
+<!-- Topbar Customizations -->
+<template id="topbar_customizations" name="Topbar">
+    <!-- Sets -->
+    <t t-set="current_country_path" t-valuef="#{ '/remote' if is_remote else ('/country/%s' % slug(country_id) if country_id else '') }"/>
+    <t t-set="current_department_path" t-valuef="#{ '/department/%s' % slug(department_id) if department_id else '/department/other' if is_other_department else '' }"/>
+    <t t-set="current_office_path" t-valuef="#{ '' if is_remote else '/office/%s' % office_id.id if office_id else '' }"/>
+    <t t-set="opt_jobs_filter_countries" t-value="is_view_active('website_hr_recruitment.job_filter_by_countries')"/>
+    <t t-set="opt_jobs_filter_departments" t-value="is_view_active('website_hr_recruitment.job_filter_by_departments')"/>
+    <t t-set="opt_jobs_filter_offices" t-value="is_view_active('website_hr_recruitment.job_filter_by_offices')"/>
+    <t t-set="opt_jobs_search_bar" t-value="is_view_active('website_hr_recruitment.job_search_bar')"/>
+    <!-- Filters -->
+    <ul class="o_jobs_topbar_filters flex-md-nowrap nav ps-md-3"/>
+</template>
+
+<!-- Filter - Countries -->
+<template id="job_filter_by_countries" inherit_id="website_hr_recruitment.topbar_customizations" active="False">
+    <xpath expr="//ul[hasclass('o_jobs_topbar_filters')]" position="inside">
+        <li t-attf-class="nav-item dropdown w-100 w-md-auto me-2 my-1 flex-fill">
+            <button type="button" class="btn btn-outline-primary dropdown-toggle w-100" data-bs-toggle="dropdown" id="countriesDropdown">
+                <i class="fa fa-map-marker"/>
+                <t t-if="country_id" t-out="country_id.name"/>
+                <t t-elif="is_remote">Remote</t>
+                <span t-else="" t-attf-class="#{(opt_jobs_filter_departments or opt_jobs_filter_offices) and 'd-none d-md-inline-block'}">All Countries</span>
+            </button>
+            <div class="dropdown-menu w-100 w-md-auto" aria-labelledby="countriesDropdown">
+                <a  t-attf-href="/jobs#{current_department_path}#{current_office_path}?all_countries=1"
+                    t-attf-class="dropdown-item d-flex align-items-center justify-content-between nav-link#{'' if country_id or is_remote else ' active'}">
+                    All Countries
+                    <span t-attf-class="badge rounded-pill#{' bg-primary' if country_id or is_remote else ' bg-light text-primary'} ms-2 px-2" t-out="count_per_country.get('all', '0')"/>
+                </a>
+                <t t-foreach="countries" t-as="country">
+                    <t t-if="country">
+                        <a  t-attf-href="/jobs/country/#{ slug(country) }#{current_department_path}#{current_office_path}"
+                            t-attf-class="dropdown-item d-flex align-items-center justify-content-between nav-link #{' active' if country_id and country_id.id == country.id else ''}">
+                            <t t-out="country.name"/>
+                            <span t-attf-class="badge rounded-pill#{' bg-light text-primary' if country_id and country_id.id == country.id else ' bg-primary'} ms-2 px-2" t-out="count_per_country.get(country, '0')"/>
+                        </a>
+                    </t>
+                    <t t-else="">
+                        <a  t-attf-href="/jobs/remote#{current_department_path}"
+                            t-attf-class="dropdown-item d-flex align-items-center justify-content-between nav-link#{' active' if is_remote else ''}">
+                            Remote
+                            <span t-attf-class="badge rounded-pill#{' bg-light text-primary' if is_remote else ' bg-primary'} ms-2 px-2" t-out="count_per_country.get(None, '0')"/>
+                        </a>
+                    </t>
+                </t>
+            </div>
+        </li>
     </xpath>
 </template>
 
-<template id="job_filter_by_departments" inherit_id="website_hr_recruitment.index" active="False" name="Filter by Departments">
-    <xpath expr="//div[@id='jobs_grid_left']" position="inside">
-        <ul class="nav nav-pills flex-column mb32">
-            <li class="nav-item"><a t-attf-href="/jobs#{ '/country/%s' % slug(country_id) if country_id else '' }#{ '/office/%s' % office_id if office_id else ''}" t-attf-class="nav-link#{'' if department_id else ' active'}">All Departments</a></li>
-            <t t-foreach="departments" t-as="department">
-                <li class="nav-item">
-                    <a t-attf-href="/jobs#{ '/country/%s' % slug(country_id) if country_id else '' }/department/#{ slug(department) }#{ '/office/%s' % office_id if office_id else '' }" t-attf-class="nav-link#{' active' if department_id and department_id.id == department.id else ''}"><span t-field="department.name"/></a>
-                </li>
-            </t>
-        </ul>
-    </xpath>
-    <xpath expr="//div[@id='jobs_grid_left']" position="attributes">
-        <attribute name="class">col-lg-3</attribute>
+<!-- Filter - Departments -->
+<template id="job_filter_by_departments" inherit_id="website_hr_recruitment.topbar_customizations" active="False">
+    <xpath expr="//ul[hasclass('o_jobs_topbar_filters')]" position="inside">
+        <li t-attf-class="nav-item dropdown w-100 w-md-auto me-2 my-1 flex-fill">
+            <button type="button" class="btn btn-outline-primary dropdown-toggle w-100" data-bs-toggle="dropdown" id="departmentsDropdown">
+                <i class="fa fa-sitemap"/>
+                <t t-if="department_id" t-out="department_id.name"/>
+                <t t-elif="is_other_department">Others</t>
+                <span t-else="" t-attf-class="#{(opt_jobs_filter_countries or opt_jobs_filter_offices) and 'd-none d-md-inline-block'}">All Departments</span>
+            </button>
+            <div class="dropdown-menu w-100 w-md-auto" aria-labelledby="departmentsDropdown">
+                <a  t-attf-href="/jobs#{current_country_path}#{current_office_path}"
+                    t-attf-class="dropdown-item d-flex align-items-center justify-content-between nav-link#{'' if department_id or is_other_department else ' active'}">
+                    All Departments
+                    <span t-attf-class="badge rounded-pill#{' bg-primary' if department_id or is_other_department else ' bg-light text-primary'} ms-2 px-2" t-out="count_per_department.get('all', '0')"/>
+                </a>
+                <t t-foreach="departments" t-as="department">
+                    <t t-if="department">
+                        <a  t-attf-href="/jobs#{current_country_path}/department/#{ slug(department) }#{current_office_path}"
+                            t-attf-class="dropdown-item d-flex align-items-center justify-content-between nav-link #{' active' if department_id and department_id.id == department.id else ''}">
+                            <t t-out="department.name"/>
+                            <span t-attf-class="badge rounded-pill#{' bg-light text-primary' if department_id and department_id.id == department.id else ' bg-primary'} ms-2 px-2" t-out="count_per_department.get(department, '0')"/>
+                        </a>
+                    </t>
+                    <t t-else="">
+                        <a  t-attf-href="/jobs#{current_country_path}/department/other#{current_office_path}"
+                            t-attf-class="dropdown-item d-flex align-items-center justify-content-between nav-link #{' active' if is_other_department else ''}">
+                            Others
+                            <span t-attf-class="badge rounded-pill#{' bg-light text-primary' if is_other_department else ' bg-primary'} ms-2 px-2" t-out="count_per_department.get(None, '0')"/>
+                        </a>
+                    </t>
+                </t>
+            </div>
+        </li>
     </xpath>
 </template>
 
-<template id="job_filter_by_offices" inherit_id="website_hr_recruitment.index" active="False" name="Filter by Offices">
-    <xpath expr="//div[@id='jobs_grid_left']" position="inside">
-        <ul class="nav nav-pills flex-column mb32">
-            <li class="nav-item"><a t-attf-href="/jobs#{ '/country/%s' % slug(country_id) if country_id else '' }#{ '/department/%s' % slug(department_id) if department_id else '' }" t-attf-class="nav-link#{'' if office_id else ' active'}">All Offices</a></li>
-            <t t-foreach="offices" t-as="thisoffice">
-                <li class="nav-item">
-                    <a t-attf-href="/jobs#{ '/country/%s' % slug(country_id) if country_id else '' }#{ '/department/%s' % slug(department_id) if department_id else '' }/office/#{ thisoffice.id }"
-                        t-attf-class="nav-link#{' active' if office_id == thisoffice.id else ''}">
-                        <span t-field="thisoffice.city"/><t t-if="thisoffice.country_id">,
-                            <span t-field="thisoffice.country_id.name"/>
-                        </t>
-                    </a>
-                </li>
-            </t>
-        </ul>
-    </xpath>
-    <xpath expr="//div[@id='jobs_grid_left']" position="attributes">
-        <attribute name="class">col-lg-3</attribute>
+<!-- Filter - Offices -->
+<template id="job_filter_by_offices" inherit_id="website_hr_recruitment.topbar_customizations" active="False">
+    <xpath expr="//ul[hasclass('o_jobs_topbar_filters')]" position="inside">
+        <li t-attf-class="nav-item dropdown w-100 w-md-auto me-2 my-1 flex-fill">
+            <button type="button" class="btn btn-outline-primary dropdown-toggle w-100" data-bs-toggle="dropdown" id="officesDropdown">
+                <i class="fa fa-building"/>
+                <t t-if="office_id">
+                    <t t-out="office_id.city"/><t t-if="office_id.country_id">, <t t-out="office_id.country_id.name"/></t>
+                </t>
+                <t t-elif="is_remote">Remote</t>
+                <span t-else="" t-attf-class="#{(opt_jobs_filter_countries or opt_jobs_filter_departments) and 'd-none d-md-inline-block'}">All Offices</span>
+            </button>
+            <div class="dropdown-menu w-100 w-md-auto" aria-labelledby="officesDropdown">
+                <a  t-attf-href="/jobs#{'' if is_remote else current_country_path}#{current_department_path}"
+                    t-attf-class="dropdown-item d-flex align-items-center justify-content-between nav-link#{'' if office_id or is_remote else ' active'}">
+                    All Offices
+                    <span t-attf-class="badge rounded-pill#{' bg-primary' if office_id or is_remote else ' bg-light text-primary'} ms-2 px-2" t-out="count_per_office.get('all', '0')"/>
+                </a>
+                <t t-foreach="offices" t-as="thisoffice">
+                    <t t-if="thisoffice" class="nav-item">
+                        <a  t-attf-href="/jobs#{current_country_path}#{current_department_path}/office/#{ thisoffice.id }"
+                            t-attf-class="dropdown-item d-flex align-items-center justify-content-between nav-link #{' active' if office_id and office_id.id == thisoffice.id else ''}">
+                            <t t-out="thisoffice.city"/><t t-if="thisoffice.country_id">, <t t-out="thisoffice.country_id.name"/></t>
+                            <span t-attf-class="badge rounded-pill#{' bg-light text-primary' if office_id and office_id.id == thisoffice.id else ' bg-primary'} ms-2 px-2" t-out="count_per_office.get(thisoffice, '0')"/>
+                        </a>
+                    </t>
+                    <t t-else="">
+                        <a  t-attf-href="/jobs/remote#{current_department_path}"
+                            t-attf-class="dropdown-item d-flex align-items-center justify-content-between nav-link#{' active' if is_remote else ''}">
+                            Remote
+                            <span t-attf-class="badge rounded-pill#{' bg-light text-primary' if is_remote else ' bg-primary'} ms-2 px-2" t-out="count_per_office.get(None, '0')"/>
+                        </a>
+                    </t>
+                </t>
+            </div>
+        </li>
     </xpath>
 </template>
 
