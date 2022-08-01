@@ -24,12 +24,9 @@
 
                     <div id="informations" class="row mt-4 mb-4">
                         <div class="col-auto col-3 mw-100 mb-2" t-if="o.invoice_date" name="invoice_date">
-                            <strong>Invoice Date:</strong>
+                            <span t-if="o.move_type == 'out_invoice' and o.state == 'posted'"><strong>Invoice Date:</strong></span>
+                            <span t-if="o.move_type == 'out_refund' and o.state == 'posted'"><strong>Credit Note Date:</strong></span>
                             <p class="m-0" t-field="o.invoice_date"/>
-                        </div>
-                        <div class="col-auto col-3 mw-100 mb-2" t-if="o.invoice_date_due and o.move_type == 'out_invoice' and o.state == 'posted'" name="due_date">
-                            <strong>Due Date:</strong>
-                            <p class="m-0" t-field="o.invoice_date_due"/>
                         </div>
                         <div class="col-auto col-3 mw-100 mb-2" t-if="o.invoice_origin" name="origin">
                             <strong>Source:</strong>
@@ -41,7 +38,10 @@
                         </div>
                         <div class="col-auto col-3 mw-100 mb-2" t-if="o.ref" name="reference">
                             <strong>Reference:</strong>
-                            <p class="m-0" t-field="o.ref"/>
+                            <t t-set="ref_value" t-value="o.ref.replace('Reversal of:','')"/>
+                            <p class="m-0" t-esc="ref_value.split(',')[0]" />
+                            <p class="m-0" t-field="o.invoice_date"/>
+                            <p class="m-0" t-esc="ref_value.split(',')[-1]" />
                         </div>
                     </div>
 
