@@ -3191,7 +3191,7 @@ class AccountMove(models.Model):
     def action_send_and_print(self):
         return {
             'name': _('Send Invoice'),
-            'res_model': 'account.invoice.send',
+            'res_model': 'mail.compose.wizard',
             'view_mode': 'form',
             'context': {
                 'default_email_layout_xmlid': 'mail.mail_notification_paynow',
@@ -3206,6 +3206,23 @@ class AccountMove(models.Model):
             'target': 'new',
             'type': 'ir.actions.act_window',
         }
+        # return {
+        #     'name': _('Send Invoice'),
+        #     'res_model': 'account.invoice.send',
+        #     'view_mode': 'form',
+        #     'context': {
+        #         'default_email_layout_xmlid': 'mail.mail_notification_paynow',
+        #         'default_template_id': self.env.ref(self._get_mail_template()).id,
+        #         'mark_invoice_as_sent': True,
+        #         'active_model': 'account.move',
+        #         # Setting both active_id and active_ids is required, mimicking how direct call to
+        #         # ir.actions.act_window works
+        #         'active_id': self.ids[0],
+        #         'active_ids': self.ids,
+        #     },
+        #     'target': 'new',
+        #     'type': 'ir.actions.act_window',
+        # }
 
     def action_invoice_sent(self):
         """ Open a window to compose an email, with the edi invoice template
@@ -3239,12 +3256,23 @@ class AccountMove(models.Model):
             'type': 'ir.actions.act_window',
             'view_type': 'form',
             'view_mode': 'form',
-            'res_model': 'account.invoice.send',
-            'views': [(compose_form.id, 'form')],
-            'view_id': compose_form.id,
+            'res_model': 'mail.compose.message',
+            # 'views': [(compose_form.id, 'form')],
+            # 'view_id': compose_form.id,
             'target': 'new',
             'context': ctx,
         }
+        # return {
+        #     'name': _('Send Invoice'),
+        #     'type': 'ir.actions.act_window',
+        #     'view_type': 'form',
+        #     'view_mode': 'form',
+        #     'res_model': 'account.invoice.send',
+        #     'views': [(compose_form.id, 'form')],
+        #     'view_id': compose_form.id,
+        #     'target': 'new',
+        #     'context': ctx,
+        # }
 
     def _get_new_hash(self, secure_seq_number):
         """ Returns the hash to write on journal entries when they get posted"""

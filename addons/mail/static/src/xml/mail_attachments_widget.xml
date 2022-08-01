@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="mail.mail_attachments_widget" owl="1">
+        <t t-set="data" t-value="getRenderValues()"/>
+        <t t-set="editable" t-value="widget.mode === 'edit'"/>
+
+        <div class="o_attachments">
+            <t t-foreach="data" t-as="attachment" t-key="file_index">
+                <div class="o_attachment o_attachment_many2many o_attachment_editable">
+
+                </div>
+            </t>
+        </div>
+    </t>
+
+</templates>

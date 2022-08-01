@@ -49,12 +49,7 @@ class MailComposer(models.TransientModel):
                 - active_ids: record IDs
                 - default_model or active_model
         """
-        # backward compatibility of context before addition of
-        # email_layout_xmlid field: to remove in 15.1+
-        if self._context.get('custom_layout') and 'default_email_layout_xmlid' not in self._context:
-            self = self.with_context(default_email_layout_xmlid=self._context['custom_layout'])
-
-        result = super(MailComposer, self).default_get(fields)
+        result = super().default_get(fields)
 
         # author
         missing_author = 'author_id' in fields and 'author_id' not in result
@@ -97,10 +92,18 @@ class MailComposer(models.TransientModel):
     attachment_ids = fields.Many2many(
         'ir.attachment', 'mail_compose_message_ir_attachments_rel',
         'wizard_id', 'attachment_id', 'Attachments')
+    attachments_widget = fields.Binary(compute='_compute_attachments_widget')
     email_layout_xmlid = fields.Char('Email Notification Layout', copy=False)
     email_add_signature = fields.Boolean(default=True)
     # origin
-    email_from = fields.Char('From', help="Email address of the sender. This field is set when no matching partner is found and replaces the author_id field in the chatter.")
+    email_from = fields.Char(
+        string="From",
+        compute='_compute_email_from',
+        readonly=False,
+        store=True,
+        help="Email address of the sender. This field is set when no matching partner is found and replaces the "
+             "author_id field in the chatter.",
+    )
     author_id = fields.Many2one(
         'res.partner', 'Author',
         help="Author of the message. If not set, email_from may hold an email address that did not match any partner.")
@@ -126,7 +129,13 @@ class MailComposer(models.TransientModel):
         default=lambda self: self.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment'))
     mail_activity_type_id = fields.Many2one('mail.activity.type', 'Mail Activity Type', ondelete='set null')
     # destination
-    reply_to = fields.Char('Reply To', help='Reply email address. Setting the reply_to bypasses the automatic thread creation.')
+    reply_to = fields.Char(
+        string="Reply To",
+        compute='_compute_reply_to',
+        readonly=False,
+        store=True,
+        help='Reply email address. Setting the reply_to bypasses the automatic thread creation.',
+    )
     reply_to_force_new = fields.Boolean(
         string='Considers answers as new thread',
         help='Manage answers as new incoming emails instead of replies going to the same thread.')
@@ -146,7 +155,133 @@ class MailComposer(models.TransientModel):
     auto_delete = fields.Boolean('Delete Emails',
         help='This option permanently removes any track of email after it\'s been sent, including from the Technical menu in the Settings, in order to preserve storage space of your Odoo database.')
     auto_delete_message = fields.Boolean('Delete Message Copy', help='Do not keep a copy of the email in the document communication history (mass mailing only)')
-    mail_server_id = fields.Many2one('ir.mail_server', 'Outgoing mail server')
+    mail_server_id = fields.Many2one(
+        comodel_name='ir.mail_server',
+        string="Outgoing mail server",
+        compute='_compute_mail_server_id',
+        readonly=False,
+        store=True,
+    )
+    lang = fields.Char(
+        string="Lang",
+        compute='_compute_lang',
+    )
+
+    def _get_default_field_value_from_template(self, field, **kwargs):
+        self.ensure_one()
+        if self.composition_mode == 'mass_mail':
+            return self.template_id[field]
+        else:
+            results = self.template_id\
+                .with_context(lang=self.lang)\
+                ._render_field(field, [self.res_id], **kwargs)
+            return list(results.values())[0]
+
+    def _get_default_field_value_from_default_get(self, field):
+        self.ensure_one()
+        ctx = {
+            'default_composition_mode': self.composition_mode,
+            'default_model': self.model,
+            'default_res_id': self.res_id,
+        }
+        return self.with_context(**ctx).default_get(['composition_mode', field]).get(field)
+
+    @api.depends('template_id', 'composition_mode')
+    def _compute_lang(self):
+        for composer in self:
+            if composer.template_id:
+                if composer.composition_mode == 'mass_mail':
+                    composer.lang = None
+                else:
+                    composer.lang = composer.template_id._get_default_context_lang() \
+                                    or composer.template_id._render_lang([composer.res_id])[composer.res_id]
+            else:
+                composer.lang = None
+
+    @api.depends('template_id', 'composition_mode', 'lang', 'model', 'res_id')
+    def _compute_subject(self):
+        for composer in self:
+            if composer.template_id:
+                composer.subject = composer._get_default_field_value_from_template('subject')
+            else:
+                composer.subject = composer._get_default_field_value_from_default_get('subject')
+
+    @api.depends('template_id', 'composition_mode', 'lang', 'model', 'res_id')
+    def _compute_body(self):
+        for composer in self:
+            if composer.template_id:
+                composer.body = composer._get_default_field_value_from_template('body_html', post_process=True)
+            else:
+                composer.body = composer._get_default_field_value_from_default_get('body')
+
+    @api.depends('template_id', 'composition_mode', 'lang', 'model', 'res_id')
+    def _compute_email_from(self):
+        for composer in self:
+            if composer.template_id:
+                composer.email_from = composer._get_default_field_value_from_template('email_from')
+            else:
+                composer.email_from = composer._get_default_field_value_from_default_get('email_from')
+
+    @api.depends('template_id', 'composition_mode', 'lang', 'model', 'res_id')
+    def _compute_reply_to(self):
+        for composer in self:
+            if composer.template_id:
+                composer.reply_to = composer._get_default_field_value_from_template('reply_to')
+            else:
+                composer.reply_to = composer._get_default_field_value_from_default_get('reply_to')
+
+    @api.depends('template_id', 'composition_mode', 'lang', 'model', 'res_id')
+    def _compute_mail_server_id(self):
+        for composer in self:
+            if composer.template_id:
+                composer.mail_server_id = composer._get_default_field_value_from_template('mail_server_id')
+            else:
+                composer.mail_server_id = composer._get_default_field_value_from_default_get('mail_server_id')
+
+    @api.depends('template_id', 'composition_mode', 'lang', 'model', 'res_id')
+    def _compute_attachments_widget(self):
+        for composer in self:
+            attachments_widget = []
+
+            if composer.template_id:
+                if composer.composition_mode == 'mass_mail':
+                    attachments_widget = [
+                        {
+                            'attachment_vals': {
+                                'name': attachment.name,
+                                'datas': attachment.datas,
+                                'type': attachment.type,
+                            },
+                            'source_attachment_id': attachment.id,
+                        }
+                        for attachment in composer.template_id.attachment_ids
+                    ]
+                elif composer.template_id.report_template:
+                    report = composer.template_id.report_template
+
+                    report_name = composer._get_default_field_value_from_template('report_name')
+                    if not report_name:
+                        report_name = f'report.{report.report_name}'
+
+                    filename_extension = None
+                    if report.report_type == 'qweb-html':
+                        filename_extension = '.html'
+                    elif report.report_type == 'qweb-pdf':
+                        filename_extension = '.pdf'
+
+                    if not report_name.endswith(filename_extension):
+                        report_name = f'{report_name}{filename_extension}'
+
+                    attachments_widget.append({
+                        'attachment_vals': {
+                            'name': report_name,
+                            'datas': None,
+                            'type': 'binary',
+                        },
+                        'action_report_id': report.id,
+                    })
+
+            composer.attachments_widget = attachments_widget
 
     @api.depends('reply_to_force_new')
     def _compute_reply_to_mode(self):
@@ -168,9 +303,9 @@ class MailComposer(models.TransientModel):
     @api.onchange('template_id')
     def _onchange_template_id_wrapper(self):
         self.ensure_one()
-        values = self._onchange_template_id(self.template_id.id, self.composition_mode, self.model, self.res_id)['value']
-        for fname, value in values.items():
-            setattr(self, fname, value)
+        # values = self._onchange_template_id(self.template_id.id, self.composition_mode, self.model, self.res_id)['value']
+        # for fname, value in values.items():
+        #     setattr(self, fname, value)
 
     def _compute_can_edit_body(self):
         """Can edit the body if we are not in "mass_mail" mode because the template is
@@ -537,18 +672,15 @@ class MailComposer(models.TransientModel):
             - normal mode: return rendered values
             /!\ for x2many field, this onchange return command instead of ids
         """
+        values = {}
         if template_id and composition_mode == 'mass_mail':
             template = self.env['mail.template'].browse(template_id)
-            fields = ['subject', 'body_html', 'email_from', 'reply_to', 'mail_server_id']
-            values = dict((field, getattr(template, field)) for field in fields if getattr(template, field))
             if template.attachment_ids:
                 values['attachment_ids'] = [att.id for att in template.attachment_ids]
-            if template.mail_server_id:
-                values['mail_server_id'] = template.mail_server_id.id
         elif template_id:
             values = self.generate_email_for_composer(
                 template_id, [res_id],
-                ['subject', 'body_html', 'email_from', 'email_to', 'partner_to', 'email_cc', 'reply_to', 'attachment_ids', 'mail_server_id']
+                ['attachment_ids']
             )[res_id]
             # transform attachments into attachment_ids; not attached to the document because this will
             # be done further in the posting process, allowing to clean database if email not send
@@ -568,9 +700,6 @@ class MailComposer(models.TransientModel):
         else:
             default_values = self.with_context(default_composition_mode=composition_mode, default_model=model, default_res_id=res_id).default_get(['composition_mode', 'model', 'res_id', 'parent_id', 'partner_ids', 'subject', 'body', 'email_from', 'reply_to', 'attachment_ids', 'mail_server_id'])
             values = dict((key, default_values[key]) for key in ['subject', 'body', 'partner_ids', 'email_from', 'reply_to', 'attachment_ids', 'mail_server_id'] if key in default_values)
-
-        if values.get('body_html'):
-            values['body'] = values.pop('body_html')
 
         # This onchange should return command instead of ids for x2many field.
         values = self._convert_to_write(values)

@@ -529,6 +529,14 @@ class MailRenderMixin(models.AbstractModel):
             for res_id, lang in rendered_langs.items()
         )
 
+    @api.model
+    def _get_default_context_lang(self):
+        """ Get the default renderer lang from the context.
+
+        :return: The lang retrieved from the context.
+        """
+        return self._context.get('template_preview_lang')
+
     def _classify_per_lang(self, res_ids, engine='inline_template'):
         """ Given some record ids, return for computed each lang a contextualized
         template and its subset of res_ids.
@@ -542,8 +550,9 @@ class MailRenderMixin(models.AbstractModel):
         """
         self.ensure_one()
 
-        if self.env.context.get('template_preview_lang'):
-            lang_to_res_ids = {self.env.context['template_preview_lang']: res_ids}
+        default_context_lang = self._get_default_context_lang()
+        if default_context_lang:
+            lang_to_res_ids = {default_context_lang: res_ids}
         else:
             lang_to_res_ids = {}
             for res_id, lang in self._render_lang(res_ids, engine=engine).items():
