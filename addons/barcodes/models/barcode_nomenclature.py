@@ -22,23 +22,13 @@ class BarcodeNomenclature(models.Model):
         help="UPC Codes can be converted to EAN by prefixing them with a zero. This setting determines if a UPC/EAN barcode should be automatically converted in one way or another when trying to match a rule with the other encoding.")
 
     @api.model
-    def get_barcode_check_digit(self, numeric_barcode):
-        # todo master: remove this method
-        return self.env['ir.actions.report'].get_barcode_check_digit(numeric_barcode)
-
-    @api.model
-    def check_encoding(self, barcode, encoding):
-        # todo master: remove this method
-        return self.env['ir.actions.report'].check_barcode_encoding(barcode, encoding)
-
-    @api.model
     def sanitize_ean(self, ean):
         """ Returns a valid zero padded EAN-13 from an EAN prefix.
 
         :type ean: str
         """
         ean = ean[0:13].zfill(13)
-        return ean[0:-1] + str(self.get_barcode_check_digit(ean))
+        return ean[0:-1] + str(self.env['ir.actions.report'].get_barcode_check_digit(ean))
 
     @api.model
     def sanitize_upc(self, upc):
@@ -114,12 +104,12 @@ class BarcodeNomenclature(models.Model):
 
         for rule in self.rule_ids:
             cur_barcode = barcode
-            if rule.encoding == 'ean13' and self.check_encoding(barcode, 'upca') and self.upc_ean_conv in ['upc2ean', 'always']:
+            if rule.encoding == 'EAN13' and self.env['ir.actions.report'].check_barcode_encoding(barcode, 'UPCA') and self.upc_ean_conv in ['upc2ean', 'always']:
                 cur_barcode = '0' + cur_barcode
-            elif rule.encoding == 'upca' and self.check_encoding(barcode, 'ean13') and barcode[0] == '0' and self.upc_ean_conv in ['ean2upc', 'always']:
+            elif rule.encoding == 'UPCA' and self.env['ir.actions.report'].check_barcode_encoding(barcode, 'EAN13') and barcode[0] == '0' and self.upc_ean_conv in ['ean2upc', 'always']:
                 cur_barcode = cur_barcode[1:]
 
-            if not self.check_encoding(barcode, rule.encoding):
+            if not self.env['ir.actions.report'].check_barcode_encoding(barcode, rule.encoding):
                 continue
 
             match = self.match_pattern(cur_barcode, rule.pattern)
@@ -132,9 +122,9 @@ class BarcodeNomenclature(models.Model):
                     parsed_result['type'] = rule.type
                     parsed_result['value'] = match['value']
                     parsed_result['code'] = cur_barcode
-                    if rule.encoding == "ean13":
+                    if rule.encoding == "EAN13":
                         parsed_result['base_code'] = self.sanitize_ean(match['base_code'])
-                    elif rule.encoding == "upca":
+                    elif rule.encoding == "UPCA":
                         parsed_result['base_code'] = self.sanitize_upc(match['base_code'])
                     else:
                         parsed_result['base_code'] = match['base_code']

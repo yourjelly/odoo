@@ -1101,7 +1101,7 @@ class QuantPackage(models.Model):
         self.valid_sscc = False
         for package in self:
             if package.name:
-                package.valid_sscc = self.env['barcode.nomenclature'].check_encoding(package.name, 'sscc')
+                package.valid_sscc = self.env['ir.actions.report'].check_barcode_encoding(package.name, 'SSCC')
 
     def _search_owner(self, operator, value):
         if value:

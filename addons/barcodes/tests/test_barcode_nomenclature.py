@@ -18,7 +18,7 @@ class TestBarcodeNomenclature(common.TransactionCase):
         self.env['barcode.rule'].create({
             'name': 'Rule Test #1',
             'barcode_nomenclature_id': self.nomenclature.id,
-            'encoding': 'ean8',
+            'encoding': 'EAN8',
             'pattern': '........',
         })
 
@@ -42,7 +42,7 @@ class TestBarcodeNomenclature(common.TransactionCase):
         res = self.nomenclature.parse_barcode('12345670')
         self.assertEqual(res['code'], '12345670')
         self.assertEqual(res['type'], 'product')
-        self.assertEqual(res['encoding'], 'ean8')
+        self.assertEqual(res['encoding'], 'EAN8')
         self.assertEqual(res['base_code'], '12345670')
         self.assertEqual(res['value'], 0, "No value must be located into the barcode")
 
@@ -50,7 +50,7 @@ class TestBarcodeNomenclature(common.TransactionCase):
         res = self.nomenclature.parse_barcode('02003405')
         self.assertEqual(res['code'], '02003405')
         self.assertEqual(res['type'], 'product')
-        self.assertEqual(res['encoding'], 'ean8')
+        self.assertEqual(res['encoding'], 'EAN8')
         self.assertEqual(res['base_code'], '02003405')
         self.assertEqual(res['value'], 0, "No value must be located into the barcode")
 
@@ -60,7 +60,7 @@ class TestBarcodeNomenclature(common.TransactionCase):
         barcode_rule = self.env['barcode.rule'].create({
             'name': 'Rule Test #1',
             'barcode_nomenclature_id': self.nomenclature.id,
-            'encoding': 'ean8',
+            'encoding': 'EAN8',
         })
 
         with self.assertRaises(ValidationError), self.cr.savepoint():
@@ -86,7 +86,7 @@ class TestBarcodeNomenclature(common.TransactionCase):
         self.env['barcode.rule'].create({
             'name': 'Rule Test #2',
             'barcode_nomenclature_id': self.nomenclature.id,
-            'encoding': 'ean8',
+            'encoding': 'EAN8',
             'pattern': '{NNNNNNNN}',
         })
 
@@ -108,7 +108,7 @@ class TestBarcodeNomenclature(common.TransactionCase):
         res = self.nomenclature.parse_barcode('12345670')
         self.assertEqual(res['code'], '12345670')
         self.assertEqual(res['type'], 'product')
-        self.assertEqual(res['encoding'], 'ean8')
+        self.assertEqual(res['encoding'], 'EAN8')
         self.assertEqual(res['base_code'], '00000000',
             "All the barcode should be consumed into the value")
         self.assertEqual(res['value'], 12345670.0, "The barcode must be converted into value")
@@ -117,7 +117,7 @@ class TestBarcodeNomenclature(common.TransactionCase):
         res = self.nomenclature.parse_barcode('02003405')
         self.assertEqual(res['code'], '02003405')
         self.assertEqual(res['type'], 'product')
-        self.assertEqual(res['encoding'], 'ean8')
+        self.assertEqual(res['encoding'], 'EAN8')
         self.assertEqual(res['base_code'], '00000000',
             "All the barcode should be consumed into the value")
         self.assertEqual(res['value'], 2003405.0, "The barcode must be converted into value")
@@ -129,13 +129,13 @@ class TestBarcodeNomenclature(common.TransactionCase):
         self.env['barcode.rule'].create({
             'name': 'Rule Test #1',
             'barcode_nomenclature_id': self.nomenclature.id,
-            'encoding': 'ean8',
+            'encoding': 'EAN8',
             'pattern': '11.....{N}',
         })
         self.env['barcode.rule'].create({
             'name': 'Rule Test #1',
             'barcode_nomenclature_id': self.nomenclature.id,
-            'encoding': 'ean8',
+            'encoding': 'EAN8',
             'pattern': '66{NN}....',
         })
 
@@ -143,7 +143,7 @@ class TestBarcodeNomenclature(common.TransactionCase):
         res = self.nomenclature.parse_barcode('11012344')
         self.assertEqual(res['code'], '11012344')
         self.assertEqual(res['type'], 'product')
-        self.assertEqual(res['encoding'], 'ean8')
+        self.assertEqual(res['encoding'], 'EAN8')
         self.assertEqual(res['base_code'], '11012340')
         self.assertEqual(res['value'], 4)
 
@@ -151,7 +151,7 @@ class TestBarcodeNomenclature(common.TransactionCase):
         res = self.nomenclature.parse_barcode('66012344')
         self.assertEqual(res['code'], '66012344')
         self.assertEqual(res['type'], 'product')
-        self.assertEqual(res['encoding'], 'ean8')
+        self.assertEqual(res['encoding'], 'EAN8')
         self.assertEqual(res['base_code'], '66002344')
         self.assertEqual(res['value'], 1)
 
@@ -170,7 +170,7 @@ class TestBarcodeNomenclature(common.TransactionCase):
         self.env['barcode.rule'].create({
             'name': 'Rule Test #3',
             'barcode_nomenclature_id': self.nomenclature.id,
-            'encoding': 'ean13',
+            'encoding': 'EAN13',
             'pattern': '1........{NND}.',
         })
 
@@ -194,7 +194,7 @@ class TestBarcodeNomenclature(common.TransactionCase):
         res = self.nomenclature.parse_barcode('1020034051259')
         self.assertEqual(res['code'], '1020034051259')
         self.assertEqual(res['type'], 'product')
-        self.assertEqual(res['encoding'], 'ean13')
+        self.assertEqual(res['encoding'], 'EAN13')
         self.assertEqual(res['base_code'], '1020034050009')
         self.assertEqual(res['value'], 12.5, "Should taken only the value part (NND)")
 
@@ -205,14 +205,14 @@ class TestBarcodeNomenclature(common.TransactionCase):
         first_created_rule = self.env['barcode.rule'].create({
             'name': 'Rule Test #1',
             'barcode_nomenclature_id': self.nomenclature.id,
-            'encoding': 'ean13',
+            'encoding': 'EAN13',
             'pattern': '.....{NNNDDDD}.',
             'sequence': 3,
         })
         self.env['barcode.rule'].create({
             'name': 'Rule Test #2',
             'barcode_nomenclature_id': self.nomenclature.id,
-            'encoding': 'ean13',
+            'encoding': 'EAN13',
             'pattern': '22......{NNDD}.',
             'sequence': 2,
         })
@@ -224,7 +224,7 @@ class TestBarcodeNomenclature(common.TransactionCase):
         res = self.nomenclature.parse_barcode('2012345610255')
         self.assertEqual(res['code'], '2012345610255')
         self.assertEqual(res['type'], 'product')
-        self.assertEqual(res['encoding'], 'ean13')
+        self.assertEqual(res['encoding'], 'EAN13')
         self.assertEqual(res['base_code'], '2012300000008')
         self.assertEqual(res['value'], 456.1025)
 
@@ -232,7 +232,7 @@ class TestBarcodeNomenclature(common.TransactionCase):
         res = self.nomenclature.parse_barcode('2212345610259')
         self.assertEqual(res['code'], '2212345610259')
         self.assertEqual(res['type'], 'product')
-        self.assertEqual(res['encoding'], 'ean13')
+        self.assertEqual(res['encoding'], 'EAN13')
         self.assertEqual(res['base_code'], '2212345600007')
         self.assertEqual(res['value'], 10.25)
 
@@ -244,6 +244,6 @@ class TestBarcodeNomenclature(common.TransactionCase):
         res = self.nomenclature.parse_barcode('2212345610259')
         self.assertEqual(res['code'], '2212345610259')
         self.assertEqual(res['type'], 'product')
-        self.assertEqual(res['encoding'], 'ean13')
+        self.assertEqual(res['encoding'], 'EAN13')
         self.assertEqual(res['base_code'], '2212300000002')
         self.assertEqual(res['value'], 456.1025)

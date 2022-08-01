@@ -546,17 +546,17 @@ class IrActionsReport(models.Model):
         :return: True if the barcode string is encoded with the provided encoding.
         :rtype: bool
         """
-        if encoding == "any":
+        if encoding == "ANY":
             return True
         barcode_sizes = {
-            'ean8': 8,
-            'ean13': 13,
-            'gtin14': 14,
-            'upca': 12,
-            'sscc': 18,
+            'EAN8': 8,
+            'EAN13': 13,
+            'GTIN14': 14,
+            'UPCA': 12,
+            'SSCC': 18,
         }
         barcode_size = barcode_sizes[encoding]
-        return (encoding != 'ean13' or barcode[0] != '0') \
+        return (encoding != 'EAN13' or barcode[0] != '0') \
                and len(barcode) == barcode_size \
                and re.match(r"^\d+$", barcode) \
                and self.get_barcode_check_digit(barcode) == int(barcode[-1])
@@ -597,7 +597,7 @@ class IrActionsReport(models.Model):
             if kwargs['quiet']:
                 kwargs['barBorder'] = 0
 
-        if barcode_type in ('EAN8', 'EAN13') and not self.check_barcode_encoding(value, barcode_type.lower()):
+        if barcode_type in ('EAN8', 'EAN13') and not self.check_barcode_encoding(value, barcode_type):
             # If the barcode does not respect the encoding specifications, convert its type into Code128.
             # Otherwise, the report-lab method may return a barcode different from its value. For instance,
             # if the barcode type is EAN-8 and the value 11111111, the report-lab method will take the first

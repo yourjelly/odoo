@@ -14,10 +14,10 @@ class BarcodeRule(models.Model):
     sequence = fields.Integer(string='Sequence', help='Used to order rules such that rules with a smaller sequence match first')
     encoding = fields.Selection(
         string='Encoding', required=True, default='any', selection=[
-            ('any', 'Any'),
-            ('ean13', 'EAN-13'),
-            ('ean8', 'EAN-8'),
-            ('upca', 'UPC-A'),
+            ('ANY', 'Any'),
+            ('EAN13', 'EAN-13'),
+            ('EAN8', 'EAN-8'),
+            ('UPCA', 'UPC-A'),
         ], help='This rule will apply only if the barcode is encoded with the specified encoding')
     type = fields.Selection(
         string='Type', required=True, selection=[
