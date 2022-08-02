@@ -48,6 +48,8 @@
                 <div class="row flex-column">
                     <t t-if="not jobs">
                         <div class="col">
+                            <div t-if="search" class="alert alert-warning p-3 mx-lg-4" role="alert">
+                                <h5 class="text-center">No results found for '<span t-out="search"/>'.</h5>
                             </div>
                             <div class="alert alert-info p-3 mx-lg-4" groups="hr_recruitment.group_hr_recruitment_manager">
                                 <div class="text-center text-muted">
@@ -61,6 +63,12 @@
                             </div>
                         </div>
                     </t>
+                    <t t-elif="search and original_search">
+                        <div class="alert alert-info mx-3 mb-4 p-3" role="alert">
+                            <h5 class="text-center">No results found for '<span t-out="original_search"/>'. Showing results for '<span t-out="search"/>'.</h5>
+                            <t t-set="search" t-value="original_search"/>
+                        </div>
+                    </t>
                     <div t-foreach="jobs" t-as="job" class="col-lg mb32">
                         <div t-attf-class="card #{not job.website_published and 'o_jobs_unpublished'}">
                             <a t-attf-href="/jobs/detail/#{ slug(job) }" t-attf-class="text-decoration-none text-reset">
@@ -71,6 +79,12 @@
                         </div>
                     </div>
                 </div>
+            </div>
+            <!-- Pager -->
+            <div class='navbar mb-3 w-100'>
+                <t t-call="website.pager">
+                    <t t-set="classname" t-valuef="mx-auto"/>
+                </t>
             </div>
         </div>
     </div>
@@ -648,6 +662,8 @@
     <t t-set="opt_jobs_search_bar" t-value="is_view_active('website_hr_recruitment.job_search_bar')"/>
     <!-- Filters -->
     <ul class="o_jobs_topbar_filters flex-md-nowrap nav ps-md-3"/>
+    <!-- Search bar -->
+    <div t-if="opt_jobs_search_bar" class="o_jobs_topbar_search_bar d-flex align-items-center justify-content-end w-md-100 w-lg-25 me-2 me-lg-0 ps-lg-2"/>
 </template>
 
 <!-- Filter - Countries -->
@@ -760,6 +776,18 @@
                 </t>
             </div>
         </li>
+    </xpath>
+</template>
+
+<!-- Search Bar -->
+<template id="job_search_bar" inherit_id="website_hr_recruitment.topbar_customizations" active="True">
+    <xpath expr="//div[hasclass('o_jobs_topbar_search_bar')]" position="inside">
+        <t t-call="website.website_search_box_input">
+            <t t-set="_form_classes" t-valuef="w-100"/>
+            <t t-set="_classes" t-valuef="my-1"/>
+            <t t-set="search_type" t-valuef="jobs"/>
+            <t t-set="display_description" t-valuef="true"/>
+        </t>
     </xpath>
 </template>
 

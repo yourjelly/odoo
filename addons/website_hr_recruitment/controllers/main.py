@@ -3,18 +3,22 @@
 
 from odoo import http, _
 from odoo.addons.http_routing.models.ir_http import slug
+from odoo.osv.expression import AND
 from odoo.http import request
 from odoo.tools.misc import groupby
 from werkzeug.exceptions import NotFound
 
 
 class WebsiteHrRecruitment(http.Controller):
+    _jobs_per_page = 12
+
     def sitemap_jobs(env, rule, qs):
         if not qs or qs.lower() in '/jobs':
             yield {'loc': '/jobs'}
 
     @http.route([
         '/jobs',
+        '/jobs/page/<int:page>',
         '/jobs/country/<model("res.country"):country>',
         '/jobs/country/<model("res.country"):country>/page/<int:page>',
         '/jobs/department/other',
@@ -44,7 +48,7 @@ class WebsiteHrRecruitment(http.Controller):
         '/jobs/remote/department/<model("hr.department"):department>',
         '/jobs/remote/department/<model("hr.department"):department>/page/<int:page>',
     ], type='http', auth="public", website=True, sitemap=sitemap_jobs)
-    def jobs(self, country=None, department=None, office_id=None, **kwargs):
+    def jobs(self, country=None, department=None, office_id=None, page=1, search=None, **kwargs):
         env = request.env(context=dict(request.env.context, show_address=True, no_tag_br=True))
 
         Country = env['res.country']
@@ -59,8 +63,13 @@ class WebsiteHrRecruitment(http.Controller):
             if country_code:
                 countries_ = Country.search([('code', '=', country_code)])
                 country = countries_[0] if countries_ else None
-                if not any(j for j in jobs if j.address_id and j.address_id.country_id == country):
-                    country = False
+                if country:
+                    country_count = Jobs.search_count(AND([
+                        request.website.website_domain(),
+                        [('address_id.country_id', '=', country.id)]
+                    ]))
+                    if not country_count:
+                        country = False
 
         options = {
             'displayDescription': True,

@@ -5,6 +5,7 @@ from werkzeug import urls
 
 from odoo import api, fields, models, _
 from odoo.tools import mute_logger
+from odoo.addons.http_routing.models.ir_http import unslug
 from odoo.tools.translate import html_translate
 
 
@@ -48,7 +49,12 @@ class Applicant(models.Model):
 class Job(models.Model):
 
     _name = 'hr.job'
-    _inherit = ['hr.job', 'website.seo.metadata', 'website.published.multi.mixin']
+    _inherit = [
+        'hr.job',
+        'website.seo.metadata',
+        'website.published.multi.mixin',
+        'website.searchable.mixin',
+    ]
 
     @mute_logger('odoo.addons.base.models.ir_qweb')
     def _get_default_description(self):
@@ -78,3 +84,51 @@ class Job(models.Model):
         action = super().open_website_url()
         action['target'] = 'new'
         return action
+
+    @api.model
+    def _search_get_detail(self, website, order, options):
+        requires_sudo = False
+        with_description = options['displayDescription']
+        country_id = options.get('country')
+        department_id = options.get('department')
+        office_id = options.get('office_id')
+        is_remote = options.get('is_remote')
+        is_other_department = options.get('is_other_department')
+
+        domain = [website.website_domain()]
+        if country_id:
+            domain.append([('address_id.country_id', '=', unslug(country_id)[1])])
+            requires_sudo = True
+        if department_id:
+            domain.append([('department_id', '=', unslug(department_id)[1])])
+        elif is_other_department:
+            domain.append([('department_id', '=', None)])
+        if office_id:
+            domain.append([('address_id', '=', office_id)])
+        elif is_remote:
+            domain.append([('address_id', '=', None)])
+
+        if requires_sudo and not self.env.user.has_group('hr_recruitment.group_hr_recruitment_user'):
+            # Rule must be reinforced because of sudo.
+            domain.append([('website_published', '=', True)])
+
+
+        search_fields = ['name']
+        fetch_fields = ['name', 'website_url']
+        mapping = {
+            'name': {'name': 'name', 'type': 'text', 'match': True},
+            'website_url': {'name': 'website_url', 'type': 'text', 'truncate':  False},
+        }
+        if with_description:
+            search_fields.append('description')
+            fetch_fields.append('description')
+            mapping['description'] = {'name': 'description', 'type': 'text', 'html': True, 'match': True}
+        return {
+            'model': 'hr.job',
+            'requires_sudo': requires_sudo,
+            'base_domain': domain,
+            'search_fields': search_fields,
+            'fetch_fields': fetch_fields,
+            'mapping': mapping,
+            'icon': 'fa-briefcase',
+        }
