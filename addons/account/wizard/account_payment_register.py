@@ -3,7 +3,6 @@ from collections import defaultdict
 
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
-from odoo.tools import float_compare, frozendict
 
 
 class AccountPaymentRegister(models.TransientModel):
@@ -98,19 +97,29 @@ class AccountPaymentRegister(models.TransientModel):
     # == Payment difference fields ==
     payment_difference = fields.Monetary(
         compute='_compute_payment_difference')
-    payment_difference_handling = fields.Selection([
-        ('open', 'Keep open'),
-        ('reconcile', 'Mark as fully paid'),
-    ], default='open', string="Payment Difference Handling")
+    payment_difference_handling = fields.Selection(
+        string="Payment Difference Handling",
+        selection=[('open', 'Keep open'), ('reconcile', 'Mark as fully paid')],
+        compute='_compute_payment_difference_handling',
+        store=True,
+        readonly=False,
+    )
     writeoff_account_id = fields.Many2one(
-        'account.account',
+        comodel_name='account.account',
         string="Difference Account",
         copy=False,
-        domain="[('deprecated', '=', False), ('company_id', '=', company_id)]")
+        domain="[('deprecated', '=', False), ('company_id', '=', company_id)]",
+        compute='_compute_writeoff_account_id',
+        store=True,
+        readonly=False,
+    )
     writeoff_label = fields.Char(
         string='Journal Item Label',
-        default='Write-Off',
-        help='Change label of the counterpart that will hold the payment difference')
+        compute='_compute_writeoff_label',
+        store=True,
+        readonly=False,
+        help='Change label of the counterpart that will hold the payment difference',
+    )
 
     # == Display purpose fields ==
     show_partner_bank_account = fields.Boolean(
@@ -134,27 +143,19 @@ class AccountPaymentRegister(models.TransientModel):
     # -------------------------------------------------------------------------
     # HELPERS
     # -------------------------------------------------------------------------
-    @api.onchange('amount')
-    def _on_change_amount(self):
-        for wizard in self:
-            if wizard.source_currency_id and wizard.can_edit_wizard:
-                move_id = wizard.line_ids.move_id
-                if wizard.has_epd_and_is_in_time and wizard.source_currency_id.compare_amounts(wizard.amount, move_id.invoice_early_pay_amount_after_discount) == 0.0:
-                    wizard.writeoff_label = _('Early Payment Discount')
-                    invoice_payment_term = wizard.line_ids.move_id.invoice_payment_term_id
-                    wizard.writeoff_account_id = invoice_payment_term.get_early_payment_discount_account(move_id)
-                    wizard.payment_difference_handling = 'reconcile'
-                elif wizard.source_currency_id.compare_amounts(wizard.amount, move_id.amount_total) != 0.0:
-                    wizard.show_early_pay_discount_button = False
 
-    @api.onchange('payment_date')
-    def _on_change_payment_date(self):
-        for wizard in self:
-            if wizard.source_currency_id and wizard.can_edit_wizard:
-                move_id = wizard.line_ids.move_id
-                wizard.has_epd_and_is_in_time = move_id.is_eligible_for_early_discount(wizard.payment_date)
-                if wizard.has_epd_and_is_in_time and (move_id.move_type == 'in_invoice' or move_id.move_type == 'in_receipt'):
-                    wizard.amount = move_id.invoice_early_pay_amount_after_discount
+    @api.model
+    def _is_eligible_for_early_payment_discount(self, batch_result, currency, amount):
+        payment_values = batch_result['payment_values']
+
+        if not payment_values['early_discount_pay_term'] or payment_values['currency_id'] != currency.id:
+            return False
+
+        total_early_discount_amount = sum(
+            move.invoice_early_pay_amount_after_discount
+            for move in batch_result['lines'].move_id
+        )
+        return currency.is_zero(amount - total_early_discount_amount)
 
     def fill_in_with_early_pay_discount(self):
         for wizard in self:
@@ -387,6 +388,52 @@ class AccountPaymentRegister(models.TransientModel):
                 wizard.group_payment = len(batches[0]['lines'].move_id) == 1
             else:
                 wizard.group_payment = False
+
+    @api.depends('can_edit_wizard', 'payment_date', 'currency_id', 'amount')
+    def _compute_payment_difference_handling(self):
+        for wizard in self:
+            if wizard.can_edit_wizard:
+                payment_difference_handling = 'open'
+
+                batch_result = wizard._get_batches()[0]
+                if wizard._is_eligible_for_early_payment_discount(batch_result, wizard.currency_id, wizard.amount):
+                    payment_difference_handling = 'reconcile'
+
+                wizard.payment_difference_handling = payment_difference_handling
+            else:
+                wizard.payment_difference_handling = False
+
+    @api.depends('payment_difference_handling')
+    def _compute_writeoff_account_id(self):
+        for wizard in self:
+            writeoff_account = None
+
+            if wizard.can_edit_wizard:
+                batch_result = wizard._get_batches()[0]
+                is_eligible_for_early_pay_discount = wizard._is_eligible_for_early_payment_discount(
+                    batch_result, wizard.currency_id, wizard.amount)
+                if wizard.payment_difference_handling == 'reconcile' and is_eligible_for_early_pay_discount:
+                    payment_values = batch_result['payment_values']
+                    if payment_values['payment_type'] == 'inbound':
+                        writeoff_account = wizard.company_id.account_journal_cash_discount_income_id
+                    else:
+                        writeoff_account = wizard.company_id.account_journal_cash_discount_expense_id
+
+            wizard.writeoff_account_id = writeoff_account
+
+    @api.depends('payment_difference_handling')
+    def _compute_writeoff_label(self):
+        for wizard in self:
+            writeoff_label = _("Write-Off")
+
+            if wizard.can_edit_wizard:
+                batch_result = wizard._get_batches()[0]
+                is_eligible_for_early_pay_discount = wizard._is_eligible_for_early_payment_discount(
+                    batch_result, wizard.currency_id, wizard.amount)
+                if wizard.payment_difference_handling == 'reconcile' and is_eligible_for_early_pay_discount:
+                    writeoff_label = _("Early Payment Discount")
+
+            wizard.writeoff_label = writeoff_label
 
     @api.depends('journal_id')
     def _compute_currency_id(self):
