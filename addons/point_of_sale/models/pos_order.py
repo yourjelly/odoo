@@ -502,7 +502,7 @@ class PosOrder(models.Model):
         new_move = self.env['account.move'].sudo().with_company(self.company_id).with_context(default_move_type=move_vals['move_type']).create(move_vals)
         for order in self:
             message = _("This invoice has been created from the point of sale session: <a href=# data-oe-model=pos.order data-oe-id=%d>%s</a>") % (order.id, order.name)
-        new_move.message_post(body=message)
+            new_move.message_post(body=message)
         if cash_rounding:
             rounding_applied = float_round(amount_paid - amount_total,
                                            precision_rounding=new_move.currency_id.rounding)
