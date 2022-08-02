@@ -383,12 +383,18 @@
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="automatic_invoice"/>
+                                <span class="fa fa-lg fa-building-o"
+                                   title="Values set here are company-specific."
+                                   groups="base.group_multi_company"/>
                                 <div class="text-muted">
                                     Generate the invoice automatically when the online payment is confirmed
                                 </div>
-                                <div  attrs="{'invisible': [('automatic_invoice','=',False)]}" groups="base.group_no_one">
+                                <div attrs="{'invisible': [('automatic_invoice', '=', False)]}">
                                     <label for="invoice_mail_template_id" class="o_light_label"/>
                                     <field name="invoice_mail_template_id" class="oe_inline" options="{'no_create': True}"/>
+                                    <span class="fa fa-lg fa-building-o"
+                                        title="Values set here are company-specific."
+                                        groups="base.group_multi_company"/>
                                 </div>
                             </div>
                         </div>
@@ -397,6 +403,9 @@
                             <div class="o_setting_right_pane">
                                 <span class="o_form_label">Down Payments</span>
                                 <a href="https://www.odoo.com/documentation/master/applications/sales/sales/invoicing/down_payment.html" title="Documentation" class="o_doc_link" target="_blank"></a>
+                                <span class="fa fa-lg fa-building-o"
+                                   title="Values set here are company-specific."
+                                   groups="base.group_multi_company"/>
                                 <div class="text-muted">
                                     Product used for down payments
                                 </div>

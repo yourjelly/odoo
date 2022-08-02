@@ -743,7 +743,8 @@ class SaleOrder(models.Model):
             return self._get_confirmation_template()
 
     def _get_confirmation_template(self):
-        return self.env.ref('sale.mail_template_sale_confirmation', raise_if_not_found=False)
+        self.ensure_one()
+        return self.company_id.sale_order_confirmation_mail_template_id
 
     def action_quotation_sent(self):
         if self.filtered(lambda so: so.state != 'draft'):

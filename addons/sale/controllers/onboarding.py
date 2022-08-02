@@ -21,6 +21,6 @@ class OnboardingController(http.Controller):
         return {
             'html': request.env['ir.qweb']._render('sale.sale_quotation_onboarding_panel', {
                 'company': company,
-                'state': company.get_and_update_sale_quotation_onboarding_state()
+                'state': company._get_and_update_sale_quotation_onboarding_state()
             })
         }

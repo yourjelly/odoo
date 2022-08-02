@@ -116,60 +116,20 @@ class PaymentTransaction(models.Model):
         confirmed_orders = self._check_amount_and_confirm_order()
         confirmed_orders._send_order_confirmation_mail()
 
-        # invoice the sale orders if needed and send it
-        if str2bool(self.env['ir.config_parameter'].sudo().get_param('sale.automatic_invoice')):
-            # Invoice the sale orders in self instead of in confirmed_orders to create the invoice
-            # even if only a partial payment was made.
-            self._invoice_sale_orders()
-            self._send_invoice()
+        # Invoice the sale orders in self instead of in confirmed_orders to create the invoice
+        # even if only a partial payment was made.
+        self._invoice_sale_orders()
+        self._send_invoices()
+
         return super()._reconcile_after_done()
 
-    def _send_invoice(self):
-        template_id = self.env['ir.config_parameter'].sudo().get_param(
-            'sale.default_invoice_email_template'
-        )
-        if not template_id:
-            return
-
-        for tx in self:
-            tx = tx.with_company(tx.company_id).with_context(
-                company_id=tx.company_id.id,
-            )
-            invoice_to_send = tx.invoice_ids.filtered(
-                lambda i: not i.is_move_sent and i.state == 'posted' and i._is_ready_to_be_sent()
-            )
-            invoice_to_send.is_move_sent = True # Mark invoice as sent
-            for invoice in invoice_to_send.with_user(SUPERUSER_ID):
-                invoice.message_post_with_template(
-                    int(template_id),
-                    email_layout_xmlid='mail.mail_notification_layout_with_responsible_signature',
-                )
-
-    def _cron_send_invoice(self):
-        """
-            Cron to send invoice that where not ready to be send directly after posting
-        """
-        if not self.env['ir.config_parameter'].sudo().get_param('sale.automatic_invoice'):
-            return
-
-        # No need to retrieve old transactions
-        retry_limit_date = datetime.now() - relativedelta.relativedelta(days=2)
-        # Retrieve all transactions matching the criteria for post-processing
-        self.search([
-            ('state', '=', 'done'),
-            ('is_post_processed', '=', True),
-            ('invoice_ids', 'in', self.env['account.move']._search([
-                ('is_move_sent', '=', False),
-                ('state', '=', 'posted'),
-            ])),
-            ('sale_order_ids.state', 'in', ('sale', 'done')),
-            ('last_state_change', '>=', retry_limit_date),
-        ])._send_invoice()
-
     def _invoice_sale_orders(self):
-        for tx in self.filtered(lambda tx: tx.sale_order_ids):
+        for tx in self.filtered('sale_order_ids'):
+            if not tx.company_id.sale_automatic_invoice:
+                continue
+
             # Create invoices
-            tx = tx.with_company(tx.company_id).with_context(company_id=tx.company_id.id)
+            tx = tx.with_company(tx.company_id)
             confirmed_orders = tx.sale_order_ids.filtered(lambda so: so.state in ('sale', 'done'))
             if confirmed_orders:
                 confirmed_orders._force_lines_to_invoice_policy_order()
@@ -181,6 +141,47 @@ class PaymentTransaction(models.Model):
                 for invoice in invoices:
                     invoice._portal_ensure_token()
                 tx.invoice_ids = [Command.set(invoices.ids)]
+
+    def _send_invoices(self):
+        for tx in self.filtered('invoice_ids'):
+            if not tx.company_id.sale_automatic_invoice:
+                continue
+
+            invoicing_mail_template_id = tx.company_id.sale_order_invoicing_mail_template_id.id
+            if not invoicing_mail_template_id:
+                continue
+
+            tx = tx.with_company(tx.company_id)
+            invoice_to_send = tx.invoice_ids.filtered(
+                lambda i: not i.is_move_sent and i.state == 'posted' and i._is_ready_to_be_sent()
+            )
+            invoice_to_send.is_move_sent = True # Mark invoice as sent
+            for invoice in invoice_to_send.with_user(SUPERUSER_ID):
+                invoice.message_post_with_template(
+                    invoicing_mail_template_id,
+                    email_layout_xmlid='mail.mail_notification_layout_with_responsible_signature',
+                )
+
+    @api.model
+    def _cron_send_invoice(self):
+        """
+            Cron to send invoice that where not ready to be send directly after posting
+        """
+        # No need to retrieve old transactions
+        retry_limit_date = datetime.now() - relativedelta.relativedelta(days=2)
+        # Retrieve all transactions matching the criteria for post-processing
+        self.env['payment.transaction'].search([
+            ('company_id.sale_automatic_invoice', '=', True),
+            ('company_id.sale_order_invoicing_mail_template_id', '=', True),
+            ('state', '=', 'done'),
+            ('is_post_processed', '=', True),
+            ('invoice_ids', 'in', self.env['account.move']._search([
+                ('is_move_sent', '=', False),
+                ('state', '=', 'posted'),
+            ])),
+            ('sale_order_ids.state', 'in', ('sale', 'done')),
+            ('last_state_change', '>=', retry_limit_date),
+        ])._send_invoices()
 
     @api.model
     def _compute_reference_prefix(self, provider_code, separator, **values):

@@ -29,7 +29,7 @@ This module contains all the common features of Sales Management and eCommerce.
         'data/mail_activity_type_data.xml',
         'data/mail_message_subtype_data.xml',
         'data/mail_template_data.xml',
-        'data/sale_data.xml',
+        'data/ir_cron.xml',
 
         'wizard/account_accrued_orders_wizard_views.xml',
         'wizard/payment_link_wizard_views.xml',
@@ -87,6 +87,5 @@ This module contains all the common features of Sales Management and eCommerce.
             'sale/static/src/scss/sale_report.scss',
         ],
     },
-    'post_init_hook': '_synchronize_cron',
     'license': 'LGPL-3',
 }

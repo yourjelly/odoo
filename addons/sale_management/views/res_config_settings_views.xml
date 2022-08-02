@@ -10,7 +10,6 @@
                 <div class="col-12 col-lg-6 o_setting_box" id="standardized_offers_setting">
                     <div class="o_setting_left_pane">
                         <field name="group_sale_order_template"/>
-                        <field name="module_sale_quotation_builder" invisible="1"/>
                     </div>
                     <div class="o_setting_right_pane">
                         <label for="group_sale_order_template"/>
@@ -31,11 +30,15 @@
                                 <button name="%(sale_management.sale_order_template_action)d" icon="fa-arrow-right" type="action" string="Quotation Templates" class="btn-link"/>
                             </div>
                         </div>
-                        <div class="mt16 oe_inline" attrs="{'invisible': [('group_sale_order_template', '=', False)]}">
+                        <div class="mt16 oe_inline"
+                             attrs="{'invisible': [('group_sale_order_template', '=', False)]}"
+                             id="module_sale_quotation_builder">
                             <field name="module_sale_quotation_builder" class="col-lg-4 oe_inline"/>
                             <label for="module_sale_quotation_builder"/>
                         </div>
-                        <div class="text-muted" attrs="{'invisible': [('group_sale_order_template', '=', False)]}">
+                        <div class="text-muted"
+                             attrs="{'invisible': [('group_sale_order_template', '=', False)]}"
+                             id="module_sale_quotation_builder_description">
                             Design your quotation templates using building blocks
                         </div>
                     </div>

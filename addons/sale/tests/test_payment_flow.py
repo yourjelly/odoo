@@ -151,7 +151,7 @@ class TestSalePayment(AccountPaymentCommon, SaleCommon, PaymentHttpCommon):
         """Test that with automatic invoice and invoicing policy based on delivered quantity, a transaction for the partial
         amount does not validate the SO."""
         # set automatic invoice
-        self.env['ir.config_parameter'].sudo().set_param('sale.automatic_invoice', 'True')
+        self.env.company.sale_automatic_invoice = True
         # invoicing policy is based on delivered quantity
         self.product.invoice_policy = 'delivery'
 
@@ -203,7 +203,7 @@ class TestSalePayment(AccountPaymentCommon, SaleCommon, PaymentHttpCommon):
 
     def test_auto_confirm_and_auto_invoice(self):
         # Set automatic invoice
-        self.env['ir.config_parameter'].sudo().set_param('sale.automatic_invoice', 'True')
+        self.env.company.sale_automatic_invoice = True
 
         # Create the payment
         self.amount = self.sale_order.amount_total
@@ -217,7 +217,7 @@ class TestSalePayment(AccountPaymentCommon, SaleCommon, PaymentHttpCommon):
 
     def test_auto_done_and_auto_invoice(self):
         # Set automatic invoice
-        self.env['ir.config_parameter'].sudo().set_param('sale.automatic_invoice', 'True')
+        self.env.company.sale_automatic_invoice = True
         # Lock the sale orders when confirmed
         self.env.user.groups_id += self.env.ref('sale.group_auto_done_setting')
 
@@ -233,7 +233,7 @@ class TestSalePayment(AccountPaymentCommon, SaleCommon, PaymentHttpCommon):
 
     def test_so_partial_payment_no_invoice(self):
         # Set automatic invoice
-        self.env['ir.config_parameter'].sudo().set_param('sale.automatic_invoice', 'True')
+        self.env.company.sale_automatic_invoice = True
 
         # Create the payment
         self.amount = self.sale_order.amount_total / 10.
@@ -247,7 +247,7 @@ class TestSalePayment(AccountPaymentCommon, SaleCommon, PaymentHttpCommon):
 
     def test_already_confirmed_so_payment(self):
         # Set automatic invoice
-        self.env['ir.config_parameter'].sudo().set_param('sale.automatic_invoice', 'True')
+        self.env.company.sale_automatic_invoice = True
 
         # Confirm order before payment
         self.sale_order.action_confirm()
