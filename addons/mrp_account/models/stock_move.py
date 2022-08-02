@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import _, models
+from odoo import _, api, models
 
 
 class StockMove(models.Model):
@@ -42,3 +42,63 @@ class StockMove(models.Model):
         if self.unbuild_id:
             return True
         return super()._is_returned(valued_type)
+
+
+class StockMoveLine(models.Model):
+    _inherit = "stock.move.line"
+
+    # -------------------------------------------------------------------------
+    # CRUD
+    # -------------------------------------------------------------------------
+    @api.model_create_multi
+    def create(self, vals_list):
+        self_context = self.with_context({'set_zero_qty': True})
+        move_lines = super(StockMoveLine, self).create(vals_list)
+        for move_line in move_lines:
+            move = move_line.move_id
+            # TODO: Get production_id from move or move_line or search like below.
+            production_id = self.env['mrp.production'].search([('name', '=', move_line.origin)], limit=1)
+
+            if production_id and move_line.qty_done and production_id.product_id.cost_method in (
+                            'average', 'fifo') and production_id.state in ['done', 'to_close']:
+                bom_qty = sum([bom_line.product_qty for bom_line in production_id.bom_id.bom_line_ids if
+                               production_id.bom_id and production_id.bom_id.bom_line_ids and bom_line.product_id == move_line.product_id])
+                byproduct_qty = sum([bom_line.product_qty for bom_line in production_id.bom_id.byproduct_ids if
+                                     production_id.bom_id and production_id.bom_id.byproduct_ids and bom_line.product_id == move_line.product_id])
+                if move_line.product_id.id not in production_id.move_byproduct_ids.mapped('product_id').ids and not bom_qty and move_line.product_id != production_id.product_id or bom_qty and bom_qty != move_line.qty_done:
+                    self_context._create_correction_svl(move, -abs(move_line.qty_done))
+                elif move_line.product_id.id in production_id.move_byproduct_ids.mapped('product_id').ids and not byproduct_qty or byproduct_qty and not move.cost_share and not bom_qty and move_line.product_id != production_id.product_id or bom_qty and bom_qty != move_line.qty_done:
+                    self_context._create_correction_svl(move, move_line.qty_done)
+        return move_lines
+
+    def write(self, vals):
+        if 'qty_done' in vals:
+            self_context = self.with_context({'set_zero_qty': True})
+            for move_line in self:
+                move = move_line.move_id
+                # TODO: Get production_id from move or move_line or search like below.
+                #  for produced qty > it will get from move and for consumed qty > it will get from move_line.
+                production_id = self.env['mrp.production'].search([('name', '=', move_line.origin)], limit=1)
+                if production_id and production_id.product_id.cost_method in ('average', 'fifo') and production_id.state == 'done':
+                    production_id.product_id.button_bom_cost()
+                    if move_line.product_id.id in production_id.move_finished_ids.mapped('product_id').ids:
+                        bom_qty = vals['qty_done'] - move_line.qty_done
+                        self_context._create_correction_svl(move, bom_qty)
+                    elif move.product_uom_qty != vals['qty_done']:
+                        bom_qty = sum([bom_line.product_qty for bom_line in production_id.bom_id.bom_line_ids if
+                                       production_id.bom_id and production_id.bom_id.bom_line_ids and bom_line.product_id == move_line.product_id])
+                        if not bom_qty or bom_qty and bom_qty != vals['qty_done']:
+                            bom_qty = move_line.qty_done - vals['qty_done']
+                            self_context._create_correction_svl(move, bom_qty)
+        return super(StockMoveLine, self).write(vals)
+
+    @api.model
+    def _create_correction_svl(self, move, diff):
+        res = super(StockMoveLine, self)._create_correction_svl(move, diff)
+        context_zeros = self.env.context.get('set_zero_qty')
+        if diff and context_zeros:
+            res.write({'quantity': 0.00})
+            production_id = self.env['mrp.production'].search([('name', '=', move.origin)], limit=1)
+            if move.product_id.id in production_id.move_finished_ids.mapped('product_id').ids:
+                res.write({'value': -abs(res.value) if res.value > 0 else abs(res.value)})
+        return res
