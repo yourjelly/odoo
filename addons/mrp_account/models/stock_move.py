@@ -3,7 +3,6 @@
 
 from odoo import _, api, models
 
-
 class StockMove(models.Model):
     _inherit = "stock.move"
 
@@ -47,27 +46,25 @@ class StockMove(models.Model):
 class StockMoveLine(models.Model):
     _inherit = "stock.move.line"
 
-    # -------------------------------------------------------------------------
-    # CRUD
-    # -------------------------------------------------------------------------
     @api.model_create_multi
     def create(self, vals_list):
         self_context = self.with_context({'set_zero_qty': True})
         move_lines = super(StockMoveLine, self).create(vals_list)
         for move_line in move_lines:
             move = move_line.move_id
-            # TODO: Get production_id from move or move_line or search like below.
             production_id = self.env['mrp.production'].search([('name', '=', move_line.origin)], limit=1)
-
             if production_id and move_line.qty_done and production_id.product_id.cost_method in (
                             'average', 'fifo') and production_id.state in ['done', 'to_close']:
                 bom_qty = sum([bom_line.product_qty for bom_line in production_id.bom_id.bom_line_ids if
                                production_id.bom_id and production_id.bom_id.bom_line_ids and bom_line.product_id == move_line.product_id])
                 byproduct_qty = sum([bom_line.product_qty for bom_line in production_id.bom_id.byproduct_ids if
                                      production_id.bom_id and production_id.bom_id.byproduct_ids and bom_line.product_id == move_line.product_id])
-                if move_line.product_id.id not in production_id.move_byproduct_ids.mapped('product_id').ids and not bom_qty and move_line.product_id != production_id.product_id or bom_qty and bom_qty != move_line.qty_done:
+                if move_line.product_id.id not in production_id.move_byproduct_ids.mapped(
+                        'product_id').ids and not bom_qty and move_line.product_id != production_id.product_id or bom_qty:
                     self_context._create_correction_svl(move, -abs(move_line.qty_done))
-                elif move_line.product_id.id in production_id.move_byproduct_ids.mapped('product_id').ids and not byproduct_qty or byproduct_qty and not move.cost_share and not bom_qty and move_line.product_id != production_id.product_id or bom_qty and bom_qty != move_line.qty_done:
+                elif move_line.product_id.id in production_id.move_byproduct_ids.mapped(
+                        'product_id').ids and not byproduct_qty or byproduct_qty and not move.cost_share and not bom_qty \
+                        and move_line.product_id != production_id.product_id or bom_qty:
                     self_context._create_correction_svl(move, move_line.qty_done)
         return move_lines
 
@@ -76,8 +73,6 @@ class StockMoveLine(models.Model):
             self_context = self.with_context({'set_zero_qty': True})
             for move_line in self:
                 move = move_line.move_id
-                # TODO: Get production_id from move or move_line or search like below.
-                #  for produced qty > it will get from move and for consumed qty > it will get from move_line.
                 production_id = self.env['mrp.production'].search([('name', '=', move_line.origin)], limit=1)
                 if production_id and production_id.product_id.cost_method in ('average', 'fifo') and production_id.state == 'done':
                     production_id.product_id.button_bom_cost()
