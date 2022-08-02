@@ -265,18 +265,7 @@ const ProjectTaskKanbanModel = KanbanModel.extend({
 
         await this.notifyChanges(recordID, changes);
         await self.save(recordID);
-        if (groupedFieldName === 'stage_id') {
-            const action = await this._rpc({
-                model: 'project.task',
-                method: 'get_milestone_to_mark_as_reached_action',
-                args: [[resID]],
-            });
-            if (action) {
-                this.trigger_up('do-action', {
-                    action,
-                });
-            }
-        }
+
         record.parentID = new_group.id;
         return [old_group.id, new_group.id];
     },
