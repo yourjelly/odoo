@@ -257,6 +257,15 @@ ROUTING_KEYS = {
     'alias', 'host', 'methods',
 }
 
+werkzeug_version = tuple(int(val) for val in werkzeug.__version__.split('.'))
+if werkzeug_version >= (2, 0, 2):
+    # Werkzeug 2.0.2 adds the websocket option. If a websocket request
+    # (ws/wss) is trying to access an HTTP route, a WebsocketMismatch
+    # exception is raised. On the other hand, Werkzeug 0.16 does not
+    # support the websocket routing key. In order to bypass this issue,
+    # let's add the websocket key only when appropriate.
+    ROUTING_KEYS.add('websocket')
+
 # The duration of a user session before it is considered expired,
 # three months.
 SESSION_LIFETIME = 60 * 60 * 24 * 90
