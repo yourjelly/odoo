@@ -26,7 +26,6 @@ class MailMail(models.Model):
         facilities to queue and send new email messages.  """
     _name = 'mail.mail'
     _description = 'Outgoing Mails'
-    _inherits = {'mail.message': 'mail_message_id'}
     _order = 'id desc'
     _rec_name = 'subject'
 
@@ -34,7 +33,7 @@ class MailMail(models.Model):
     def default_get(self, fields):
         # protection for `default_type` values leaking from menu action context (e.g. for invoices)
         # To remove when automatic context propagation is removed in web client
-        if self._context.get('default_type') not in type(self).message_type.base_field.selection:
+        if self._context.get('default_type') not in type(self.env['mail.message']).message_type.base_field.selection:
             self = self.with_context(dict(self._context, default_type=None))
         if self._context.get('default_state') not in type(self).state.base_field.selection:
             self = self.with_context(dict(self._context, default_state='outgoing'))
@@ -89,27 +88,50 @@ class MailMail(models.Model):
         help="If set, the queue manager will send the email after the date. If not set, the email will be send as soon as possible. Unless a timezone is specified, it is considered as being in UTC timezone.")
     fetchmail_server_id = fields.Many2one('fetchmail.server', "Inbound Mail Server", readonly=True)
 
+    # message fields
+    subject = fields.Char(related='mail_message_id.subject', related_sudo=True, readonly=False)
+    date = fields.Datetime(related='mail_message_id.date', related_sudo=True, readonly=False)
+    body = fields.Html(related='mail_message_id.body', related_sudo=True, readonly=False)
+    attachment_ids = fields.Many2many(related='mail_message_id.attachment_ids', readonly=False)
+    model = fields.Char(related='mail_message_id.model', related_sudo=True, readonly=False)
+    res_id = fields.Many2oneReference(related='mail_message_id.res_id', related_sudo=True, readonly=False)
+    record_name = fields.Char(related='mail_message_id.record_name', related_sudo=True, readonly=False)
+    message_type = fields.Selection(related='mail_message_id.message_type', related_sudo=True, readonly=False)
+    mail_activity_type_id = fields.Many2one(related='mail_message_id.mail_activity_type_id', related_sudo=True,
+                                            readonly=False)
+    email_from = fields.Char(related='mail_message_id.email_from', related_sudo=True, readonly=False)
+    author_id = fields.Many2one(related='mail_message_id.author_id', related_sudo=True, readonly=False)
+    reply_to_force_new = fields.Boolean(related='mail_message_id.reply_to_force_new', related_sudo=True, readonly=False)
+    message_id = fields.Char(related='mail_message_id.message_id', related_sudo=True, readonly=False)
+    reply_to = fields.Char(related='mail_message_id.reply_to', related_sudo=True, readonly=False)
+    mail_server_id = fields.Many2one(related='mail_message_id.mail_server_id', related_sudo=True, readonly=False)
+
     def _compute_mail_message_id_int(self):
         for mail in self:
             mail.mail_message_id_int = mail.mail_message_id.id
 
-    @api.depends('attachment_ids')
+    @api.depends('mail_message_id.attachment_ids')
     def _compute_restricted_attachments(self):
         """We might not have access to all the attachments of the emails.
         Compute the attachments we have access to,
         and the number of attachments we do not have access to.
         """
         IrAttachment = self.env['ir.attachment']
-        for mail_sudo, mail in zip(self.sudo(), self):
-            mail.unrestricted_attachment_ids = IrAttachment._filter_attachment_access(mail_sudo.attachment_ids.ids)
-            mail.restricted_attachment_count = len(mail_sudo.attachment_ids) - len(mail.unrestricted_attachment_ids)
+        for mail in self:
+            mail_message_sudo = self.mail_message_id.sudo()
+            mail.unrestricted_attachment_ids = IrAttachment._filter_attachment_access(
+                mail_message_sudo.attachment_ids.ids)
+            mail.restricted_attachment_count = len(mail_message_sudo.attachment_ids) - len(
+                mail.unrestricted_attachment_ids)
 
     def _inverse_unrestricted_attachment_ids(self):
         """We can only remove the attachments we have access to."""
         IrAttachment = self.env['ir.attachment']
-        for mail_sudo, mail in zip(self.sudo(), self):
-            restricted_attaments = mail_sudo.attachment_ids - IrAttachment._filter_attachment_access(mail_sudo.attachment_ids.ids)
-            mail_sudo.attachment_ids = restricted_attaments | mail.unrestricted_attachment_ids
+        for mail in self:
+            mail_message_sudo = self.mail_message_id.sudo()
+            restricted_attaments = mail_message_sudo.attachment_ids - IrAttachment._filter_attachment_access(
+                mail_message_sudo.attachment_ids.ids)
+            mail_message_sudo.attachment_ids = restricted_attaments | mail.unrestricted_attachment_ids
 
     def init(self):
         """Create a partial index on "to_delete" to make the search on those records fast.
@@ -123,6 +145,32 @@ class MailMail(models.Model):
                       ON mail_mail(id)
                    WHERE to_delete = TRUE;
         """)
+
+    # @api.model_create_multi
+    def create_with_message(self, values_list):
+        if isinstance(values_list, dict):
+            values_list = [values_list]
+        MailMessage = self.env['mail.message']
+        MailMail = self.env['mail.mail']
+        new_mails = MailMail
+        for values in values_list:
+            if not values.get('mail_message_id'):
+                mail_mail_values = {field: value for field, value in values.items()
+                                    if field in MailMail._fields and field not in MailMessage._fields}
+                mail_message_values = {field: value for field, value in values.items() if
+                                       field in MailMessage._fields}
+                mail_message = MailMessage.create(mail_message_values)
+                mail_mail_values['mail_message_id'] = mail_message.id
+            else:
+                mail_message_values = {field: value for field, value in values.items() if
+                                       field in MailMessage._fields}
+                if mail_message_values:
+                    self.env['mail.message'].browse(values['mail_message_id']).write(mail_message_values)
+                mail_mail_values = {field: value for field, value in values.items() if
+                                    field in MailMail._fields and field in MailMail._fields}
+            mail = MailMail.create(mail_mail_values)
+            new_mails += mail
+        return new_mails
 
     @api.model_create_multi
     def create(self, values_list):
@@ -163,21 +211,6 @@ class MailMail(models.Model):
         if mail_msg_cascade_ids:
             self.env['mail.message'].browse(mail_msg_cascade_ids).unlink()
         return res
-
-    @api.model
-    def _add_inherited_fields(self):
-        """Allow to bypass ACLs for some mail message fields.
-
-        This trick add a related_sudo on the inherits fields, it can't be done with
-        >>> subject = fields.Char(related='mail_message_id.subject', related_sudo=True)
-        because the field of <mail.message> will be fetched two times (one time before of
-        the inherits, and a second time because of the related), and so it will add extra
-        SQL queries.
-        """
-        super()._add_inherited_fields()
-        cls = type(self)
-        for field in ('email_from', 'reply_to', 'subject'):
-            cls._fields[field].related_sudo = True
 
     def action_retry(self):
         self.filtered(lambda mail: mail.state == 'exception').mark_outgoing()

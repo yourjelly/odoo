@@ -169,7 +169,7 @@ class Digest(models.Model):
             'state': 'outgoing',
             'subject': '%s: %s' % (user.company_id.name, self.name),
         }
-        self.env['mail.mail'].sudo().create(mail_values)
+        self.env['mail.mail'].sudo().create_with_message(mail_values)
         return True
 
     @api.model

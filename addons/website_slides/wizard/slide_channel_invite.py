@@ -60,7 +60,7 @@ class SlideChannelInvite(models.TransientModel):
             if slide_channel_partner:
                 mail_values.append(self._prepare_mail_values(slide_channel_partner))
 
-        self.env['mail.mail'].sudo().create(mail_values)
+        self.env['mail.mail'].sudo().create_with_message(mail_values)
 
         return {'type': 'ir.actions.act_window_close'}
 

@@ -235,7 +235,7 @@ class MailGroupMessage(models.Model):
 
             body_html = append_content_to_html('<div>%s</div>' % ustr(comment), message.body, plaintext=False)
             body_html = self.env['mail.render.mixin']._replace_local_links(body_html)
-            self.env['mail.mail'].sudo().create({
+            self.env['mail.mail'].sudo().create_with_message({
                 'author_id': self.env.user.partner_id.id,
                 'auto_delete': True,
                 'body_html': body_html,

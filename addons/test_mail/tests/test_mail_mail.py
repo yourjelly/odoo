@@ -39,7 +39,7 @@ class TestMailMail(TestMailCommon):
         }).with_context({})
 
         cls.test_message = cls.test_record.message_post(body='<p>Message</p>', subject='Subject')
-        cls.test_mail = cls.env['mail.mail'].create([{
+        cls.test_mail = cls.env['mail.mail'].create_with_message([{
             'body': '<p>Body</p>',
             'email_from': False,
             'email_to': 'test@example.com',
@@ -66,7 +66,7 @@ class TestMailMail(TestMailCommon):
 
     @users('admin')
     def test_mail_mail_attachment_access(self):
-        mail = self.env['mail.mail'].create({
+        mail = self.env['mail.mail'].create_with_message({
             'body_html': 'Test',
             'email_to': 'test@example.com',
             'partner_ids': [(4, self.user_employee.partner_id.id)],
@@ -129,7 +129,7 @@ class TestMailMail(TestMailCommon):
     @mute_logger('odoo.addons.mail.models.mail_mail')
     def test_mail_mail_recipients(self):
         """ Partner_ids is a field used from mail_message, but not from mail_mail. """
-        mail = self.env['mail.mail'].sudo().create({
+        mail = self.env['mail.mail'].sudo().create_with_message({
             'body_html': '<p>Test</p>',
             'email_to': 'test@example.com',
             'partner_ids': [(4, self.user_employee.partner_id.id)]
@@ -139,7 +139,7 @@ class TestMailMail(TestMailCommon):
         self.assertSentEmail(mail.env.user.partner_id, ['test@example.com'])
         self.assertEqual(len(self._mails), 1)
 
-        mail = self.env['mail.mail'].sudo().create({
+        mail = self.env['mail.mail'].sudo().create_with_message({
             'body_html': '<p>Test</p>',
             'email_to': 'test@example.com',
             'recipient_ids': [(4, self.user_employee.partner_id.id)],
@@ -153,7 +153,7 @@ class TestMailMail(TestMailCommon):
     @mute_logger('odoo.addons.mail.models.mail_mail')
     def test_mail_mail_recipients_cc(self):
         """ Partner_ids is a field used from mail_message, but not from mail_mail. """
-        mail = self.env['mail.mail'].sudo().create({
+        mail = self.env['mail.mail'].sudo().create_with_message({
             'body_html': '<p>Test</p>',
             'email_cc': 'test.cc.1@example.com, "Herbert" <test.cc.2@example.com>',
             'email_to': 'test.rec.1@example.com, "Raoul" <test.rec.2@example.com>',
@@ -174,7 +174,7 @@ class TestMailMail(TestMailCommon):
     @mute_logger('odoo.addons.mail.models.mail_mail')
     def test_mail_mail_recipients_formatting(self):
         """ Check support of email / formatted email """
-        mail = self.env['mail.mail'].sudo().create({
+        mail = self.env['mail.mail'].sudo().create_with_message({
             'author_id': False,
             'body_html': '<p>Test</p>',
             'email_cc': 'test.cc.1@example.com, "Herbert" <test.cc.2@example.com>',
@@ -198,13 +198,13 @@ class TestMailMail(TestMailCommon):
             'email_to': 'test@example.com',
         }
 
-        mail = self.env['mail.mail'].create(base_values)
+        mail = self.env['mail.mail'].create_with_message(base_values)
         with self.mock_mail_gateway():
             mail.send()
         self.assertEqual(self._mails[0]['headers']['Return-Path'], '%s@%s' % (self.alias_bounce, self.alias_domain))
 
         # mail on thread-enabled record
-        mail = self.env['mail.mail'].create(dict(base_values, **{
+        mail = self.env['mail.mail'].create_with_message(dict(base_values, **{
             'model': self.test_record._name,
             'res_id': self.test_record.id,
         }))
@@ -245,7 +245,7 @@ class TestMailMail(TestMailCommon):
             'sent', 'outgoing'
         ]
 
-        mails = self.env['mail.mail'].create([
+        mails = self.env['mail.mail'].create_with_message([
             {'body_html': '<p>Test</p>',
              'email_to': 'test@example.com',
              'scheduled_date': scheduled_datetime,
@@ -647,10 +647,10 @@ class TestMailMail(TestMailCommon):
         }
 
         # Should be encapsulated in the notification email
-        mails = self.env['mail.mail'].create([{
+        mails = self.env['mail.mail'].create_with_message([{
             **mail_values,
             'email_from': 'test@unknown_domain.com',
-        } for _ in range(5)]) | self.env['mail.mail'].create([{
+        } for _ in range(5)]) | self.env['mail.mail'].create_with_message([{
             **mail_values,
             'email_from': 'test_2@unknown_domain.com',
         } for _ in range(5)])
@@ -658,16 +658,16 @@ class TestMailMail(TestMailCommon):
         # Should use the test_2 mail server
         # Once with "user_1@test_2.com" as login
         # Once with "user_2@test_2.com" as login
-        mails |= self.env['mail.mail'].create([{
+        mails |= self.env['mail.mail'].create_with_message([{
             **mail_values,
             'email_from': 'user_1@test_2.com',
-        } for _ in range(5)]) | self.env['mail.mail'].create([{
+        } for _ in range(5)]) | self.env['mail.mail'].create_with_message([{
             **mail_values,
             'email_from': 'user_2@test_2.com',
         } for _ in range(5)])
 
         # Mail server is forced
-        mails |= self.env['mail.mail'].create([{
+        mails |= self.env['mail.mail'].create_with_message([{
             **mail_values,
             'email_from': 'user_1@test_2.com',
             'mail_server_id': self.server_domain.id,
@@ -710,7 +710,7 @@ class TestMailMailRace(common.TransactionCase):
             'name': 'Ernest Partner',
         })
         # we need to simulate a mail sent by the cron task, first create mail, message and notification by hand
-        mail = self.env['mail.mail'].sudo().create({
+        mail = self.env['mail.mail'].sudo().create_with_message({
             'body_html': '<p>Test</p>',
             'is_notification': True,
             'state': 'outgoing',

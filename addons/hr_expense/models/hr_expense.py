@@ -795,7 +795,7 @@ Or send your receipts at <a href="mailto:%(email)s?subject=Lunch%%20with%%20cust
                 email_layout_xmlid='mail.mail_notification_light',
             )
         else:
-            self.env['mail.mail'].sudo().create({
+            self.env['mail.mail'].sudo().create_with_message({
                 'email_from': self.env.user.email_formatted,
                 'author_id': self.env.user.partner_id.id,
                 'body_html': body,

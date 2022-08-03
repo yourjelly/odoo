@@ -338,7 +338,7 @@ class MailTemplate(models.Model):
 
             values['body_html'] = self.env['mail.render.mixin']._replace_local_links(body)
 
-        mail = self.env['mail.mail'].sudo().create(values)
+        mail = self.env['mail.mail'].sudo().create_with_message(values)
 
         # manage attachments
         for attachment in attachments:

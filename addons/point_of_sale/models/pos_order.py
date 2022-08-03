@@ -806,7 +806,7 @@ class PosOrder(models.Model):
         if not client.get('email'):
             return False
 
-        mail = self.env['mail.mail'].sudo().create(self._prepare_mail_values(name, client, ticket))
+        mail = self.env['mail.mail'].sudo().create_with_message(self._prepare_mail_values(name, client, ticket))
         mail.send()
 
     @api.model

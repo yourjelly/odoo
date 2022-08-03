@@ -1181,7 +1181,7 @@ class MassMailing(models.Model):
                              mailing_name=mailing.subject
                             ),
             }
-            mails_sudo += self.env['mail.mail'].sudo().create(mail_values)
+            mails_sudo += self.env['mail.mail'].sudo().create_with_message(mail_values)
         return mails_sudo
 
     def _prepare_statistics_email_values(self):

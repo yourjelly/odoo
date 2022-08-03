@@ -61,7 +61,7 @@ class TestMassMailing(models.TransientModel):
                 'auto_delete': False,  # they are manually deleted after notifying the document
                 'mail_server_id': mailing.mail_server_id.id,
             }
-            mail = self.env['mail.mail'].sudo().create(mail_values)
+            mail = self.env['mail.mail'].sudo().create_with_message(mail_values)
             mails_sudo |= mail
         mails_sudo.send()
 

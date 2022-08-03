@@ -76,7 +76,7 @@ class PaymentAcquirer(models.Model):
                 'email_from': self.create_uid.email_formatted,
                 'author_id': self.create_uid.partner_id.id,
             }
-            self.env['mail.mail'].sudo().create(mail_values).send()
+            self.env['mail.mail'].sudo().create_with_message(mail_values).send()
 
     def _get_default_payment_method_id(self):
         self.ensure_one()

@@ -156,7 +156,7 @@ class ChannelUsersRelation(models.Model):
             mail_mail_values.append(email_values)
 
         if mail_mail_values:
-            self.env['mail.mail'].sudo().create(mail_mail_values)
+            self.env['mail.mail'].sudo().create_with_message(mail_mail_values)
 
 
 class Channel(models.Model):

@@ -178,7 +178,7 @@ class MailChannel(models.Model):
         }
         mail_body = self.env['ir.qweb']._render('im_livechat.livechat_email_template', render_context, minimal_qcontext=True)
         mail_body = self.env['mail.render.mixin']._replace_local_links(mail_body)
-        mail = self.env['mail.mail'].sudo().create({
+        mail = self.env['mail.mail'].sudo().create_with_message({
             'subject': _('Conversation with %s', self.livechat_operator_id.user_livechat_username or self.livechat_operator_id.name),
             'email_from': company.catchall_formatted or company.email_formatted,
             'author_id': self.env.user.partner_id.id,

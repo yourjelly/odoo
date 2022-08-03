@@ -297,6 +297,7 @@ class MailComposer(models.TransientModel):
             else:
                 subtype_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment')
 
+            MailMail = self.env['mail.mail']
             for res_ids in sliced_res_ids:
                 # mass mail mode: mail are sudo-ed, as when going through get_mail_values
                 # standard access rights on related records will be checked when browsing them
@@ -306,7 +307,7 @@ class MailComposer(models.TransientModel):
                 all_mail_values = wizard.get_mail_values(res_ids)
                 for res_id, mail_values in all_mail_values.items():
                     if wizard.composition_mode == 'mass_mail':
-                        batch_mails_sudo += self.env['mail.mail'].sudo().create(mail_values)
+                        batch_mails_sudo += MailMail.sudo().create_with_message(mail_values)
                     else:
                         post_params = dict(
                             message_type=wizard.message_type,

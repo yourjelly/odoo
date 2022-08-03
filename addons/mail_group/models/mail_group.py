@@ -347,7 +347,7 @@ class MailGroup(models.Model):
             group_message.action_moderate_reject()
 
         elif self.moderation_notify:
-            self.env['mail.mail'].sudo().create({
+            self.env['mail.mail'].sudo().create_with_message({
                 'author_id': self.env.user.partner_id.id,
                 'auto_delete': True,
                 'body_html': group_message.mail_group_id.moderation_notify_msg,
@@ -469,7 +469,7 @@ class MailGroup(models.Model):
                 })
 
             if mail_values:
-                self.env['mail.mail'].sudo().create(mail_values)
+                self.env['mail.mail'].sudo().create_with_message(mail_values)
 
     @api.model
     def _cron_notify_moderators(self):

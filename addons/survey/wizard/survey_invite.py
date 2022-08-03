@@ -241,7 +241,7 @@ class SurveyInvite(models.TransientModel):
             else:
                 _logger.warning('QWeb template %s not found or is empty when sending survey mails. Sending without layout', email_layout_xmlid)
 
-        return self.env['mail.mail'].sudo().create(mail_values)
+        return self.env['mail.mail'].sudo().create_with_message(mail_values)
 
     def action_invite(self):
         """ Process the wizard content and proceed with sending the related

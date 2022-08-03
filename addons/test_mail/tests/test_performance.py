@@ -710,7 +710,7 @@ class TestMailComplexPerformance(BaseMailPerformance):
             dict(attachment, res_id=self.container.id, res_model='mail.test.container')
             for attachment in self.test_attachments_vals
         ])
-        mail = self.env['mail.mail'].sudo().create({
+        mail = self.env['mail.mail'].sudo().create_with_message({
             'attachment_ids': [(4, att.id) for att in attachments],
             'auto_delete': False,
             'body_html': '<p>Test</p>',
@@ -738,7 +738,7 @@ class TestMailComplexPerformance(BaseMailPerformance):
             dict(attachment, res_id=self.container.id, res_model='mail.test.container')
             for attachment in self.test_attachments_vals
         ])
-        mails = self.env['mail.mail'].sudo().create([{
+        mails = self.env['mail.mail'].sudo().create_with_message([{
             'attachment_ids': [(4, att.id) for att in attachments],
             'auto_delete': True,
             'body_html': '<p>Test %s</p>' % idx,

@@ -681,7 +681,7 @@ class MailThread(models.AbstractModel):
         else:
             bounce_mail_values['email_from'] = tools.formataddr(('MAILER-DAEMON', self.env.user.email_normalized))
         bounce_mail_values.update(mail_values)
-        self.env['mail.mail'].sudo().create(bounce_mail_values).send()
+        self.env['mail.mail'].sudo().create_with_message(bounce_mail_values).send()
 
     @api.model
     def _routing_handle_bounce(self, email_message, message_dict):
@@ -2493,7 +2493,7 @@ class MailThread(models.AbstractModel):
                     base_mail_values,
                     additional_values={'body_html': mail_body}
                 )
-                new_email = SafeMail.create(mail_values)
+                new_email = SafeMail.create_with_message(mail_values)
 
                 if new_email and recipients_ids_chunk:
                     tocreate_recipient_ids = list(recipients_ids_chunk)
