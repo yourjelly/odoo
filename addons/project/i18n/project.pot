@@ -404,14 +404,6 @@ msgid ""
 msgstr ""
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.project_milestone_reach_wizard_view_form
-msgid ""
-"<span attrs=\"{'invisible': [('line_count', '=', 1)]}\">Congratulations, all"
-" of the tasks linked to those milestones are now done. Would you like to "
-"mark those milestones as reached?</span>"
-msgstr ""
-
-#. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_project_kanban
 msgid "<span class=\"fa fa-clock-o mr-2\" title=\"Dates\"/>"
 msgstr ""
@@ -1294,11 +1286,6 @@ msgid "Confirmation"
 msgstr ""
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.project_milestone_reach_wizard_view_form
-msgid "Congratulations, all of the tasks linked to the"
-msgstr ""
-
-#. module: project
 #. openerp-web
 #: code:addons/project/static/src/js/tours/project.js:0
 #, python-format
@@ -1763,7 +1750,6 @@ msgstr ""
 #: code:addons/project/static/src/js/project_form.js:0
 #: code:addons/project/static/src/js/project_list.js:0
 #: model_terms:ir.ui.view,arch_db:project.project_delete_wizard_form
-#: model_terms:ir.ui.view,arch_db:project.project_milestone_reach_wizard_view_form
 #: model_terms:ir.ui.view,arch_db:project.project_project_view_form_simplified_footer
 #: model_terms:ir.ui.view,arch_db:project.project_share_wizard_view_form
 #: model_terms:ir.ui.view,arch_db:project.view_project_task_type_delete_confirmation_wizard
@@ -2783,7 +2769,6 @@ msgstr ""
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_milestone_reach_line_wizard__mark_as_reached
-#: model_terms:ir.ui.view,arch_db:project.project_milestone_reach_wizard_view_form
 msgid "Mark As Reached"
 msgstr ""
 
@@ -5506,12 +5491,6 @@ msgstr ""
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.project_milestone_view_form
 msgid "e.g: Product Launch"
-msgstr ""
-
-#. module: project
-#: model_terms:ir.ui.view,arch_db:project.project_milestone_reach_wizard_view_form
-msgid ""
-"milestone are now done. Would you like to mark this milestone as reached?"
 msgstr ""
 
 #. module: project
