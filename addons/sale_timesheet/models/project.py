@@ -351,6 +351,7 @@ class Project(models.Model):
                 domain_per_model.get(Timesheet._name, []),
                 timesheet_domain,
             ])
+<<<<<<< HEAD
         timesheet_query = Timesheet._where_calc(timesheet_domain)
         Timesheet._apply_ir_rules(timesheet_query, 'read')
         timesheet_query_str, timesheet_params = timesheet_query.select(
@@ -381,6 +382,53 @@ class Project(models.Model):
         return query
 
     def _get_profitability_labels(self):
+||||||| parent of b26c46bd84a2... temp
+        return super()._get_sale_order_items_query(domain_per_model)
+
+    def _get_profitability_items(self):
+        if not self.user_has_groups('project.group_project_manager'):
+            return {'data': []}
+        data = []
+        if self.allow_billable:
+            profitability = self._get_profitability_common()
+            margin_color = False
+            if not float_is_zero(profitability['margin'], precision_digits=0):
+                margin_color = profitability['margin'] > 0 and 'green' or 'red'
+            data += [{
+                'name': _("Revenues"),
+                'value': format_amount(self.env, profitability['revenues'], self.env.company.currency_id)
+            }, {
+                'name': _("Costs"),
+                'value': format_amount(self.env, profitability['costs'], self.env.company.currency_id)
+            }, {
+                'name': _("Margin"),
+                'color': margin_color,
+                'value': format_amount(self.env, profitability['margin'], self.env.company.currency_id)
+            }]
+=======
+        return super()._get_sale_order_items_query(domain_per_model)
+
+    def _get_profitability_items(self):
+        if not self.user_has_groups('project.group_project_manager'):
+            return {'data': []}
+        data = []
+        if self.allow_billable:
+            profitability = self._get_profitability_common()
+            margin_color = False
+            if not float_is_zero(profitability['margin'], precision_digits=0):
+                margin_color = profitability['margin'] > 0 and 'green' or 'red'
+            data += [{
+                'name': _("Revenues"),
+                'value': format_amount(self.env, profitability['revenues'], self.company_id.currency_id)
+            }, {
+                'name': _("Costs"),
+                'value': format_amount(self.env, profitability['costs'], self.company_id.currency_id)
+            }, {
+                'name': _("Margin"),
+                'color': margin_color,
+                'value': format_amount(self.env, profitability['margin'], self.company_id.currency_id)
+            }]
+>>>>>>> b26c46bd84a2... temp
         return {
             **super()._get_profitability_labels(),
             'billable_fixed': _lt('Timesheets (Fixed Price)'),
