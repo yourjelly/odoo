@@ -93,6 +93,11 @@
     'post_init_hook': '_assign_default_mail_template_picking_id',
     'assets': {
         'web.report_assets_common': [
+            # legacy reports (delete when all reports are converted)
+            'stock/static/src/legacy_web_report/utils.js',
+            'stock/static/src/legacy_web_report/report.js',
+            'stock/static/src/legacy_web_report/report_backend.scss',
+
             'web/static/src/legacy/scss/views.scss',
             'web/static/src/legacy/scss/graph_view.scss',
             'stock/static/src/scss/report_stock_forecasted.scss',
@@ -103,6 +108,10 @@
             'stock/static/src/scss/stock_traceability_report.scss',
         ],
         'web.assets_backend': [
+            # legacy reports (delete when all reports are converted)
+            'stock/static/src/legacy_web_report/utils.js',
+            'stock/static/src/legacy_web_report/client_action.js',
+
             'stock/static/src/js/inventory_report_list_controller.js',
             'stock/static/src/js/inventory_report_list_view.js',
             'stock/static/src/js/inventory_singleton_list_renderer.js',
@@ -134,6 +143,9 @@
             'stock/static/tests/stock_traceability_report_backend_tests.js',
         ],
         'web.assets_qweb': [
+             # legacy reports (delete when all reports are converted)
+            'stock/static/src/legacy_web_report/*.xml',
+
             'stock/static/src/xml/inventory_report.xml',
             'stock/static/src/xml/inventory_adjustments.xml',
             'stock/static/src/xml/inventory_lines.xml',

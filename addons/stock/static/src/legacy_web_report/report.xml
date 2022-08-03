@@ -1,9 +1,9 @@
 <template>
 
     <!-- Main layout (iframe) -->
-    <div t-name="report.client_action">
+    <t t-name="report.client_action">
         <iframe class="o_report_iframe"/>
-    </div>
+    </t>
 
     <!-- Buttons of the Control Panel -->
     <t t-name="report.client_action.ControlButtons">
