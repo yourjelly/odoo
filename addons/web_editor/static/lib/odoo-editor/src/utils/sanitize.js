@@ -13,7 +13,7 @@ import {
     isMediaElement,
     getDeepRange,
     isUnbreakable,
-    isUnremovable
+    select,
 } from './utils.js';
 
 const NOT_A_NUMBER = /[^\d]/g;
@@ -96,7 +96,10 @@ class Sanitize {
                 areSimilarElements(node, node.previousSibling) &&
                 !isUnbreakable(node)
             ) {
-                getDeepRange(this.root, { select: true });
+                const range = getDeepRange(this.root);
+                if (range) {
+                    select(range);
+                }
                 const restoreCursor = node.isConnected &&
                     preserveCursor(this.root.ownerDocument);
                 const nodeP = node.previousSibling;

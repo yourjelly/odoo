@@ -22,8 +22,7 @@ commandProviderRegistry.add("link dialog", {
             const wysiwyg = [...Wysiwyg.activeWysiwygs].find((wysiwyg) => {
                 return wysiwyg.isSelectionInEditable();
             });
-            const selection = wysiwyg && wysiwyg.odooEditor && wysiwyg.odooEditor.document.getSelection();
-            const range = selection && selection.rangeCount && selection.getRangeAt(0);
+            const range = wysiwyg && wysiwyg.odooEditor && wysiwyg.odooEditor.getRange();;
             if (range) {
                 label = !wysiwyg.getInSelection('a') ? 'Create link' : 'Edit link';
                 action = () => {

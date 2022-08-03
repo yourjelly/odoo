@@ -25,12 +25,11 @@ const pasteHtml = async (editor, html) => pasteData(editor, html, 'text/html');
 describe('Copy and paste', () => {
     describe('Html Paste cleaning', () => {
         describe('whitelist', async () => {
-            it('should keep whitelisted Tags tag', async () => {
-                for (const node of CLIPBOARD_WHITELISTS.nodes) {
-                    if (!['TABLE', 'THEAD', 'TH', 'TBODY', 'TR', 'TD', 'IMG', 'BR', 'LI', '.fa'].includes(node)) {
-                        const isInline = ['I', 'B', 'U', 'EM', 'STRONG', 'IMG', 'BR', 'A'].includes(node)
-                        const html = isInline ? `a<${node.toLowerCase()}>b</${node.toLowerCase()}>c` : `a</p><${node.toLowerCase()}>b</${node.toLowerCase()}><p>c`;
-
+            for (const node of CLIPBOARD_WHITELISTS.nodes) {
+                if (!['TABLE', 'THEAD', 'TH', 'TBODY', 'TR', 'TD', 'IMG', 'BR', 'LI', '.fa'].includes(node)) {
+                    const isInline = ['I', 'B', 'U', 'EM', 'STRONG', 'IMG', 'BR', 'A'].includes(node)
+                    const html = isInline ? `a<${node.toLowerCase()}>b</${node.toLowerCase()}>c` : `a</p><${node.toLowerCase()}>b</${node.toLowerCase()}><p>c`;
+                    it(`'should keep ${node.toUpperCase()} tag'`, async () => {
                         await testEditor(BasicEditor, {
                             contentBefore: '<p>123[]4</p>',
                             stepFunction: async editor => {
@@ -38,10 +37,9 @@ describe('Copy and paste', () => {
                             },
                             contentAfter: '<p>123' + html + '[]4</p>',
                         });
-                    }
+                    });
                 }
-
-            });
+            };
             it('should keep whitelisted Tags tag (2)', async () => {
                 const tagsToKeep = [
                     'a<img src="http://www.imgurl.com/img.jpg">d', // img tag
@@ -159,7 +157,7 @@ describe('Copy and paste', () => {
             });
             // TODO: We might want to have it consider \n as paragraph breaks
             // instead of linebreaks but that would be an opinionated choice.
-            it('should paste text and understand \n newlines', async () => {
+            it('should paste text and understand \\n newlines', async () => {
                 await testEditor(BasicEditor, {
                     contentBefore: '<p>[]<br/></p>',
                     stepFunction: async editor => {
@@ -168,7 +166,7 @@ describe('Copy and paste', () => {
                     contentAfter: '<p>a<br>b<br>c<br>d[]<br></p>',
                 });
             });
-            it('should paste text and understand \r\n newlines', async () => {
+            it('should paste text and understand \\r\\n newlines', async () => {
                 await testEditor(BasicEditor, {
                     contentBefore: '<p>[]<br/></p>',
                     stepFunction: async editor => {

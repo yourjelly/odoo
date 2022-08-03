@@ -16,7 +16,7 @@ import {
     getNormalizedCursorPosition,
     getSelectedNodes,
     getTraversedNodes,
-    insertAndSelectZws,
+    insertZws,
     insertText,
     isBlock,
     isFormat,
@@ -40,6 +40,8 @@ import {
     allowsParagraphRelatedElements,
     isUnbreakable,
     makeContentsInline,
+    select,
+    boundariesOut,
 } from '../utils/utils.js';
 
 const TEXT_CLASSES_REGEX = /\btext-[^\s]*\b/g;
@@ -49,19 +51,19 @@ function insert(editor, data, isText = true) {
     if (!data) {
         return;
     }
-    const selection = editor.document.getSelection();
-    const range = selection.getRangeAt(0);
-    let startNode;
+    let range = editor.getRange();
+    let startNode = range.startContainer;
     let insertBefore = false;
-    if (selection.isCollapsed) {
+    if (range.collapsed) {
         if (range.startContainer.nodeType === Node.TEXT_NODE) {
             insertBefore = !range.startOffset;
             splitTextNode(range.startContainer, range.startOffset, DIRECTIONS.LEFT);
-            startNode = range.startContainer;
         }
     } else {
-        editor.deleteRange(selection);
+        editor.deleteRange(range);
     }
+    range = editor.getRange();
+    startNode = range.startContainer;
 
     const fakeEl = document.createElement('fake-element');
     const fakeElFirstChild = document.createElement('fake-element-fc');
@@ -74,7 +76,7 @@ function insert(editor, data, isText = true) {
 
     // In case the html inserted starts with a list and will be inserted within
     // a list, unwrap the list elements from the list.
-    if (closestElement(selection.anchorNode, 'UL, OL') &&
+    if (closestElement(startNode, 'UL, OL') &&
         (fakeEl.firstChild.nodeName === 'UL' || fakeEl.firstChild.nodeName === 'OL')) {
        fakeEl.replaceChildren(...fakeEl.firstChild.childNodes);
     }
@@ -98,14 +100,13 @@ function insert(editor, data, isText = true) {
         }
     }
 
-    startNode = startNode || editor.document.getSelection().anchorNode;
     if (startNode.nodeType === Node.ELEMENT_NODE) {
-        if (selection.anchorOffset === 0) {
+        if (range.startOffset === 0) {
             const textNode = editor.document.createTextNode('');
             startNode.prepend(textNode);
             startNode = textNode;
         } else {
-            startNode = startNode.childNodes[selection.anchorOffset - 1];
+            startNode = startNode.childNodes[range.startOffset - 1];
         }
     }
 
@@ -186,25 +187,24 @@ function insert(editor, data, isText = true) {
     }
 
     currentNode = lastChildNode || currentNode;
-    selection.removeAllRanges();
     const newRange = new Range();
     const lastPosition = rightPos(currentNode);
     newRange.setStart(lastPosition[0], lastPosition[1]);
     newRange.setEnd(lastPosition[0], lastPosition[1]);
-    selection.addRange(newRange);
+    select(newRange);
     return insertedNodes;
 }
 function align(editor, mode) {
-    const sel = editor.document.getSelection();
+    const range = editor.getRange();
     const visitedBlocks = new Set();
-    const traversedNode = getTraversedNodes(editor.editable);
+    const traversedNode = getTraversedNodes(range);
     for (const node of traversedNode) {
         if (isContentTextNode(node) && isVisible(node)) {
             const block = closestBlock(node);
             if (!visitedBlocks.has(block)) {
                 const hasModifier = getComputedStyle(block).textAlign === mode;
                 if (!hasModifier && block.isContentEditable) {
-                    block.oAlign(sel.anchorOffset, mode);
+                    block.oAlign(range.startOffset, mode);
                 }
                 visitedBlocks.add(block);
             }
@@ -290,11 +290,9 @@ function hasColor(element, mode) {
  * @returns {Element[]} the elements on which the style was changed.
  */
 export function applyInlineStyle(editor, applyStyle, style, shouldApply=true) {
-    getDeepRange(editor.editable, { splitText: true, select: true });
-    const sel = editor.document.getSelection();
-    const { startContainer, startOffset, endContainer, endOffset } = sel.getRangeAt(0);
-    const { anchorNode, anchorOffset, focusNode, focusOffset } = sel;
-    const direction = getCursorDirection(anchorNode, anchorOffset, focusNode, focusOffset);
+    const range = getDeepRange(editor.editable, { range: editor.getRange(), splitText: true });
+    select(range);
+    const { startContainer, startOffset, endContainer, endOffset } = range;
     const [
         normalizedStartContainer,
         normalizedStartOffset
@@ -303,7 +301,7 @@ export function applyInlineStyle(editor, applyStyle, style, shouldApply=true) {
         normalizedEndContainer,
         normalizedEndOffset
     ] = getNormalizedCursorPosition(endContainer, endOffset);
-    const selectedTextNodes = getSelectedNodes(editor.editable).filter(node => {
+    const selectedTextNodes = getSelectedNodes(range).filter(node => {
         const atLeastOneCharFromNodeInSelection = !(
             (node === normalizedEndContainer && normalizedEndOffset === 0) ||
             (node === normalizedStartContainer && normalizedStartOffset === node.textContent.length)
@@ -367,7 +365,8 @@ export function applyInlineStyle(editor, applyStyle, style, shouldApply=true) {
     } else if (selectedTextNodes.length) {
         const firstNode = selectedTextNodes[0];
         const lastNode = selectedTextNodes[selectedTextNodes.length - 1];
-        if (direction === DIRECTIONS.RIGHT) {
+        const selection = editor.getSelection();
+        if (getCursorDirection(selection.anchorNode, selection.anchorOffset, selection.focusNode, selection.focusOffset) === DIRECTIONS.RIGHT) {
             setSelection(firstNode, 0, lastNode, lastNode.length);
         } else {
             setSelection(lastNode, lastNode.length, firstNode, 0);
@@ -402,22 +401,24 @@ const styles = {
 };
 
 export function toggleFormat(editor, format) {
-    const selection = editor.document.getSelection();
-    if (!selection.rangeCount) return;
-    const wasCollapsed = selection.getRangeAt(0).collapsed;
+    const range = editor.getRange();
+    if (!range) return;
+    const wasCollapsed = range.collapsed;
     let zws;
     if (wasCollapsed) {
-        if (selection.anchorNode.nodeType === Node.TEXT_NODE && selection.anchorNode.textContent === '\u200b') {
-            zws = selection.anchorNode;
-            selection.getRangeAt(0).selectNode(zws);
+        if (range.startContainer.nodeType === Node.TEXT_NODE && range.startContainer.textContent === '\u200b') {
+            zws = range.startContainer;
+            range.selectNode(zws);
         } else {
-            zws = insertAndSelectZws(selection);
+            zws = insertZws(range);
         }
+        setSelection(...boundariesOut(zws), false);
     }
-    getDeepRange(editor.editable, { splitText: true, select: true, correctTripleClick: true });
+    const deepRange = getDeepRange(editor.editable, { splitText: true, correctTripleClick: true });
+    select(deepRange);
     const {anchorNode, anchorOffset, focusNode, focusOffset} = editor.document.getSelection();
     const style = styles[format];
-    const selectedTextNodes = getSelectedNodes(editor.editable)
+    const selectedTextNodes = getSelectedNodes(deepRange)
         .filter(n => n.nodeType === Node.TEXT_NODE && n.nodeValue.length);
     const isAlreadyFormatted = style.is(editor.editable);
     let changedElements = [];
@@ -503,16 +504,16 @@ export function toggleFormat(editor, format) {
     return changedElements;
 }
 function addColumn(editor, beforeOrAfter) {
-    getDeepRange(editor.editable, { select: true }); // Ensure deep range for finding td.
-    const c = getInSelection(editor.document, 'td');
+    select(getDeepRange(editor.editable, { range: editor.getRange() })); // Ensure deep range for finding td.
+    const c = getInSelection(editor.getRange(), 'td');
     if (!c) return;
     const i = [...closestElement(c, 'tr').querySelectorAll('th, td')].findIndex(td => td === c);
     const column = closestElement(c, 'table').querySelectorAll(`tr td:nth-of-type(${i + 1})`);
     column.forEach(row => row[beforeOrAfter](document.createElement('td')));
 }
 function addRow(editor, beforeOrAfter) {
-    getDeepRange(editor.editable, { select: true }); // Ensure deep range for finding tr.
-    const row = getInSelection(editor.document, 'tr');
+    select(getDeepRange(editor.editable, { range: editor.getRange() })); // Ensure deep range for finding tr.
+    const row = getInSelection(editor.getRange(), 'tr');
     if (!row) return;
     const newRow = document.createElement('tr');
     const cells = row.querySelectorAll('td');
@@ -520,7 +521,8 @@ function addRow(editor, beforeOrAfter) {
     row[beforeOrAfter](newRow);
 }
 function deleteTable(editor, table) {
-    table = table || getInSelection(editor.document, 'table');
+    // TODO tamaman
+    table = table || getInSelection(editor.getRange(), 'table');
     if (!table) return;
     const p = document.createElement('p');
     p.appendChild(document.createElement('br'));
@@ -559,7 +561,7 @@ export const editorCommands = {
     setTag(editor, tagName) {
         const restoreCursor = preserveCursor(editor.document);
         const range = getDeepRange(editor.editable, { correctTripleClick: true });
-        const selectedBlocks = [...new Set(getTraversedNodes(editor.editable, range).map(closestBlock))];
+        const selectedBlocks = [...new Set(getTraversedNodes(range).map(closestBlock))];
         for (const block of selectedBlocks) {
             if (
                 ['P', 'PRE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE'].includes(
@@ -603,7 +605,7 @@ export const editorCommands = {
     },
     removeFormat: editor => {
         editor.document.execCommand('removeFormat');
-        for (const node of getTraversedNodes(editor.editable)) {
+        for (const node of getTraversedNodes(editor.getRange())) {
             // The only possible background image on text is the gradient.
             closestElement(node).style.backgroundImage = '';
         }
@@ -618,10 +620,11 @@ export const editorCommands = {
      * @param {string} size A valid css size string
      */
     setFontSize: (editor, size) => {
-        const selection = editor.document.getSelection();
-        if (!selection.rangeCount) return;
-        if (selection.getRangeAt(0).collapsed) {
-            insertAndSelectZws(selection);
+        const range = editor.getRange();
+        if (!range) return;
+        if (range.collapsed) {
+            const zws = insertZws(range);
+            setSelection(...boundariesOut(zws), false);
         }
         applyInlineStyle(editor, element => {
             element.style.fontSize = size;
@@ -631,11 +634,13 @@ export const editorCommands = {
     // Link
     createLink: (editor, link, content) => {
         const sel = editor.document.getSelection();
+        const range = sel.getRangeAt(0);
         if (content && !sel.isCollapsed) {
-            editor.deleteRange(sel);
+            editor.deleteRange(range);
         }
         if (sel.isCollapsed) {
-            insertText(sel, content || 'link');
+            const txt = insertText(range, content || 'link');
+            setSelection(...boundariesOut(txt), false);
         }
         const currentLink = closestElement(sel.focusNode, 'a');
         link = link || prompt('URL or Email', (currentLink && currentLink.href) || 'http://');
@@ -701,7 +706,7 @@ export const editorCommands = {
         const li = new Set();
         const blocks = new Set();
 
-        for (const node of getTraversedNodes(editor.editable)) {
+        for (const node of getTraversedNodes(editor.getRange())) {
             if (node.nodeType === Node.TEXT_NODE && !isVisibleStr(node)) {
                 node.remove();
             } else {
@@ -737,17 +742,23 @@ export const editorCommands = {
             colorElement(element, color, mode);
             return [element];
         }
-        const selection = editor.document.getSelection();
+        let range = editor.getRange();
         let wasCollapsed = false;
-        if (selection.getRangeAt(0).collapsed) {
-            insertAndSelectZws(selection);
+        if (range.collapsed) {
+            const zws = insertZws(range)
+            setSelection(...boundariesOut(zws), false);
+            range = editor.getRange();
             wasCollapsed = true;
         }
-        const range = getDeepRange(editor.editable, { splitText: true, select: true });
-        if (!range) return;
+        const deepRange = getDeepRange(editor.editable, { range, splitText: true });
+        if (deepRange) {
+            select(deepRange);
+        } else {
+            return;
+        }
         const restoreCursor = preserveCursor(editor.document);
         // Get the <font> nodes to color
-        const selectedNodes = getSelectedNodes(editor.editable);
+        const selectedNodes = getSelectedNodes(deepRange);
         const fonts = selectedNodes.flatMap(node => {
             let font = closestElement(node, 'font');
             const children = font && descendants(font);
@@ -841,8 +852,8 @@ export const editorCommands = {
         addRow(editor, 'after');
     },
     removeColumn: editor => {
-        getDeepRange(editor.editable, { select: true }); // Ensure deep range for finding td.
-        const cell = getInSelection(editor.document, 'td');
+        const range = select(getDeepRange(editor.editable, { range: editor.getRange() })); // Ensure deep range for finding td.
+        const cell = getInSelection(range, 'td');
         if (!cell) return;
         const table = closestElement(cell, 'table');
         const cells = [...closestElement(cell, 'tr').querySelectorAll('th, td')];
@@ -852,8 +863,8 @@ export const editorCommands = {
         siblingCell ? setSelection(...startPos(siblingCell)) : deleteTable(editor, table);
     },
     removeRow: editor => {
-        getDeepRange(editor.editable, { select: true }); // Ensure deep range for finding tr.
-        const row = getInSelection(editor.document, 'tr');
+        const range = select(getDeepRange(editor.editable, { range: editor.getRange() })); // Ensure deep range for finding td.
+        const row = getInSelection(range, 'tr');
         if (!row) return;
         const table = closestElement(row, 'table');
         const rows = [...table.querySelectorAll('tr')];
@@ -864,8 +875,7 @@ export const editorCommands = {
     },
     deleteTable: (editor, table) => deleteTable(editor, table),
     insertHorizontalRule(editor) {
-        const selection = editor.document.getSelection();
-        const range = selection.getRangeAt(0);
+        const range = editor.getRange();
         const element = closestElement(
             range.startContainer,
             'P, PRE, H1, H2, H3, H4, H5, H6, BLOCKQUOTE',

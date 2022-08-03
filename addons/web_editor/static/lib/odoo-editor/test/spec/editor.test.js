@@ -71,10 +71,10 @@ describe('Editor', () => {
             it('should not transform indentation', async () => {
                 await testEditor(BasicEditor, {
                     contentBefore: `
-    <p>ab</p>  
+    <p>ab</p>
     <p>c</p>`,
                     contentAfter: `
-    <p>ab</p>  
+    <p>ab</p>
     <p>c</p>`,
                 });
             });
@@ -3235,7 +3235,7 @@ X[]
                 stepFunction: editor => {
                     window.chai
                         .expect(
-                            getTraversedNodes(editor.editable).map(node =>
+                            getTraversedNodes(editor.getRange()).map(node =>
                                 node.nodeType === Node.TEXT_NODE ? node.textContent : node.nodeName,
                             ),
                         )
@@ -3249,7 +3249,7 @@ X[]
                 stepFunction: editor => {
                     window.chai
                         .expect(
-                            getTraversedNodes(editor.editable).map(node =>
+                            getTraversedNodes(editor.getRange()).map(node =>
                                 node.nodeType === Node.TEXT_NODE ? node.textContent : node.nodeName,
                             ),
                         )
@@ -3263,7 +3263,7 @@ X[]
                 stepFunction: editor => {
                     window.chai
                         .expect(
-                            getTraversedNodes(editor.editable).map(node =>
+                            getTraversedNodes(editor.getRange()).map(node =>
                                 node.nodeType === Node.TEXT_NODE ? node.textContent : node.nodeName,
                             ),
                         )

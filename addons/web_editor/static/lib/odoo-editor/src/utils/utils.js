@@ -535,30 +535,30 @@ export function setCursorEnd(node, normalize = true) {
 /**
  * From selection position, checks if it is left-to-right or right-to-left.
  *
- * @param {Node} anchorNode
- * @param {number} anchorOffset
- * @param {Node} focusNode
- * @param {number} focusOffset
+ * @param {Selection} selection
  * @returns {boolean} the direction of the current range if the selection not is collapsed | false
  */
 export function getCursorDirection(anchorNode, anchorOffset, focusNode, focusOffset) {
     if (anchorNode === focusNode) {
-        if (anchorOffset === focusOffset) return false;
-        return anchorOffset < focusOffset ? DIRECTIONS.RIGHT : DIRECTIONS.LEFT;
+        if (!anchorNode || anchorOffset === focusOffset) {
+            return DIRECTIONS.RIGHT;
+        } else {
+            return anchorOffset < focusOffset ? DIRECTIONS.RIGHT : DIRECTIONS.LEFT;
+        }
+    } else {
+        return anchorNode.compareDocumentPosition(focusNode) & Node.DOCUMENT_POSITION_FOLLOWING
+            ? DIRECTIONS.RIGHT
+            : DIRECTIONS.LEFT;
     }
-    return anchorNode.compareDocumentPosition(focusNode) & Node.DOCUMENT_POSITION_FOLLOWING
-        ? DIRECTIONS.RIGHT
-        : DIRECTIONS.LEFT;
 }
 /**
  * Returns an array containing all the nodes traversed when walking the
  * selection.
  *
- * @param {Node} editable
+ * @param {Range} range
  * @returns {Node[]}
  */
-export function getTraversedNodes(editable, range = getDeepRange(editable)) {
-    const document = editable.ownerDocument;
+export function getTraversedNodes(range = getDeepRange(editable)) {
     if (!range) return [];
     const iterator = document.createNodeIterator(range.commonAncestorContainer);
     let node;
@@ -575,17 +575,14 @@ export function getTraversedNodes(editable, range = getDeepRange(editable)) {
 /**
  * Returns an array containing all the nodes fully contained in the selection.
  *
- * @param {Node} editable
+ * @param {Range} range
  * @returns {Node[]}
  */
-export function getSelectedNodes(editable) {
-    const document = editable.ownerDocument;
-    const sel = document.getSelection();
-    if (!sel.rangeCount) {
+export function getSelectedNodes(range) {
+    if (!range) {
         return [];
     }
-    const range = sel.getRangeAt(0);
-    return getTraversedNodes(editable).filter(
+    return getTraversedNodes(range).filter(
         node => range.isPointInRange(node, 0) && range.isPointInRange(node, nodeSize(node)),
     );
 }
@@ -596,24 +593,22 @@ export function getSelectedNodes(editable) {
  *
  * @param {Node} editable
  * @param {object} [options]
- * @param {Selection} [options.range] the range to use.
- * @param {Selection} [options.sel] the selection to use.
+ * @param {Range} [options.range] the range to use.
  * @param {boolean} [options.splitText] split the targeted text nodes at offset.
- * @param {boolean} [options.select] select the new range if it changed (via splitText).
  * @param {boolean} [options.correctTripleClick] adapt the range if it was a triple click.
  * @returns {Range}
  */
-export function getDeepRange(editable, { range, sel, splitText, select, correctTripleClick } = {}) {
-    sel = sel || editable.ownerDocument.getSelection();
-    range = range ? range.cloneRange() : sel.rangeCount && sel.getRangeAt(0).cloneRange();
+export function getDeepRange(editable, { range, splitText, correctTripleClick } = {}) {
+    if (!range) {
+        const selection = editable.ownerDocument.getSelection();
+        range = selection.rangeCount && selection.getRangeAt(0);
+    }
+    range = range && range.cloneRange();
     if (!range) return;
     let start = range.startContainer;
     let startOffset = range.startOffset;
     let end = range.endContainer;
     let endOffset = range.endOffset;
-
-    const isBackwards =
-        !range.collapsed && start === sel.focusNode && startOffset === sel.focusOffset;
 
     // Target the deepest descendant of the range nodes.
     [start, startOffset] = getDeepestPosition(start, startOffset);
@@ -663,28 +658,38 @@ export function getDeepRange(editable, { range, sel, splitText, select, correctT
         }
     }
 
-    if (select) {
-        if (isBackwards) {
-            [start, end, startOffset, endOffset] = [end, start, endOffset, startOffset];
-            range.setEnd(start, startOffset);
-            range.collapse(false);
-        } else {
-            range.setStart(start, startOffset);
-            range.collapse(true);
-        }
-        sel.removeAllRanges();
-        sel.addRange(range);
-        try {
-            sel.extend(end, endOffset);
-        } catch (e) {
-            // Firefox yells not happy when setting selection on elem with contentEditable=false.
-        }
-        range = sel.getRangeAt(0);
-    } else {
-        range.setStart(start, startOffset);
-        range.setEnd(end, endOffset);
-    }
+    range.setStart(start, startOffset);
+    range.setEnd(end, endOffset);
     return range;
+}
+
+export function select(range) {
+    let start = range.startContainer;
+    let end = range.endContainer;
+    let startOffset = range.startOffset;
+    let endOffset = range.endOffset;
+
+    const selectionRange = document.createRange();
+    // Conserve current selection direction.
+    const selection = start.ownerDocument.getSelection();
+    if (
+        selection &&
+        getCursorDirection(selection.anchorNode, selection.anchorOffset, selection.focusNode, selection.focusOffset) === DIRECTIONS.LEFT
+    ) {
+        [start, end, startOffset, endOffset] = [end, start, endOffset, startOffset];
+        selectionRange.setEnd(start, startOffset);
+        selectionRange.collapse(false);
+    } else {
+        selectionRange.setStart(start, startOffset);
+        selectionRange.collapse(true);
+    }
+    selection.removeAllRanges();
+    selection.addRange(selectionRange);
+    try {
+        selection.extend(end, endOffset);
+    } catch (e) {
+        // Firefox yells not happy when setting selection on elem with contentEditable=false.
+    }
 }
 
 function getNextVisibleNode(node) {
@@ -730,10 +735,7 @@ export function getDeepestPosition(node, offset) {
 
 export function getCursors(document) {
     const sel = document.getSelection();
-    if (
-        getCursorDirection(sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset) ===
-        DIRECTIONS.LEFT
-    )
+    if (getCursorDirection(sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset) === DIRECTIONS.LEFT)
         return [
             [sel.focusNode, sel.focusOffset],
             [sel.anchorNode, sel.anchorOffset],
@@ -940,7 +942,11 @@ export const isFormat = {
  * @returns {boolean}
  */
 export function isSelectionFormat(editable, format) {
-    const selectedText = getSelectedNodes(editable)
+    const selection = editable.ownerDocument.getSelection();
+    if (!selection || !selection.rangeCount) {
+        return false;
+    }
+    const selectedText = getSelectedNodes(selection.getRangeAt(0))
         .filter(n => n.nodeType === Node.TEXT_NODE && n.nodeValue.trim().length);
     if (selectedText.length) {
         return selectedText.every(n => isFormat[format](n.parentElement, editable))
@@ -1020,9 +1026,7 @@ export function containsUnremovable(node) {
     return isUnremovable(node) || containsUnremovable(node.firstChild);
 }
 
-export function getInSelection(document, selector) {
-    const selection = document.getSelection();
-    const range = !!selection.rangeCount && selection.getRangeAt(0);
+export function getInSelection(range, selector) {
     return (
         range &&
         (closestElement(range.startContainer, selector) ||
@@ -1454,16 +1458,17 @@ export function splitAroundUntil(elements, limitAncestor) {
     return [beforeSplit, afterSplit];
 }
 
-export function insertText(sel, content) {
-    if (sel.anchorNode.nodeType === Node.TEXT_NODE) {
-        const pos = [sel.anchorNode.parentElement, splitTextNode(sel.anchorNode, sel.anchorOffset)];
-        setSelection(...pos, ...pos, false);
+export function insertText(range, content) {
+    if (range.startContainer.nodeType === Node.TEXT_NODE) {
+        const pos = [range.startContainer.parentElement, splitTextNode(range.startContainer, range.startOffset)];
+        const [anchorNode] = setSelection(...pos, ...pos, false);
+        range = anchorNode.ownerDocument.getSelection().getRangeAt(0);
     }
     const txt = document.createTextNode(content || '#');
-    const restore = prepareUpdate(sel.anchorNode, sel.anchorOffset);
-    sel.getRangeAt(0).insertNode(txt);
+    const restore = prepareUpdate(range.startContainer, range.startOffset);
+    range.insertNode(txt);
     restore();
-    setSelection(...boundariesOut(txt), false);
+    setSelection(txt, txt.length, txt, txt.length);
     return txt;
 }
 
@@ -1520,17 +1525,16 @@ export function fillEmpty(el) {
     return fillers;
 }
 /**
- * Takes a selection (assumed to be collapsed) and insert a zero-width space at
+ * Takes a range (assumed to be collapsed) and insert a zero-width space at
  * its anchor point. Then, select that zero-width space.
  *
- * @param {Selection} selection
+ * @param {Range} range
  * @returns {Node} the inserted zero-width space
  */
-export function insertAndSelectZws(selection) {
-    const offset = selection.anchorOffset;
-    const zws = insertText(selection, '\u200B');
+export function insertZws(range) {
+    const offset = range.startOffset;
+    const zws = insertText(range, '\u200B');
     splitTextNode(zws, offset);
-    selection.getRangeAt(0).selectNode(zws);
     return zws;
 }
 /**

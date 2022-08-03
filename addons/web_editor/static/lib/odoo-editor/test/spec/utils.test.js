@@ -32,6 +32,7 @@ import {
     getCursorDirection,
     DIRECTIONS,
     isBlock,
+    select,
 } from '../../src/utils/utils.js';
 import { BasicEditor, testEditor } from '../utils.js';
 
@@ -1006,7 +1007,19 @@ describe('Utils', () => {
                         .expect(
                             getCursorDirection(anchorNode, anchorOffset, focusNode, focusOffset),
                         )
-                        .to.equal(false);
+                        .to.equal(DIRECTIONS.RIGHT);
+                },
+            });
+        });
+        it('should default to RIGHT', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: '<p>ab[]cd</p>',
+                stepFunction: editor => {
+                    window.chai
+                        .expect(
+                            getCursorDirection(null, 0, null, 0),
+                        )
+                        .to.equal(DIRECTIONS.RIGHT);
                 },
             });
         });
@@ -1018,7 +1031,7 @@ describe('Utils', () => {
                 stepFunction: editor => {
                     const editable = editor.editable;
                     const abcd = editable.firstChild.firstChild;
-                    const result = getTraversedNodes(editable);
+                    const result = getTraversedNodes(editor.getRange());
                     window.chai.expect(result).to.eql([abcd]);
                 },
             });
@@ -1031,7 +1044,7 @@ describe('Utils', () => {
                     const abcd = editable.firstChild.firstChild;
                     const p2 = editable.childNodes[1];
                     const efgh = p2.firstChild;
-                    const result = getTraversedNodes(editable);
+                    const result = getTraversedNodes(editor.getRange());
                     window.chai.expect(result).to.eql([abcd, p2, efgh]);
                 },
             });
@@ -1051,7 +1064,7 @@ describe('Utils', () => {
                     const e = b.firstChild;
                     const i = b.nextSibling;
                     const fg = i.firstChild;
-                    const result = getTraversedNodes(editable);
+                    const result = getTraversedNodes(editor.getRange());
                     window.chai.expect(result).to.eql([ab, cd, div, p2, span2, b, e, i, fg]);
                 },
             });
@@ -1062,8 +1075,7 @@ describe('Utils', () => {
             await testEditor(BasicEditor, {
                 contentBefore: '<p>ab[]cd</p>',
                 stepFunction: editor => {
-                    const editable = editor.editable;
-                    const result = getSelectedNodes(editable);
+                    const result = getSelectedNodes(editor.getRange());
                     window.chai.expect(result).to.eql([]);
                 },
                 contentAfter: '<p>ab[]cd</p>',
@@ -1073,8 +1085,7 @@ describe('Utils', () => {
             await testEditor(BasicEditor, {
                 contentBefore: '<p>ab[c]d</p>',
                 stepFunction: editor => {
-                    const editable = editor.editable;
-                    const result = getSelectedNodes(editable);
+                    const result = getSelectedNodes(editor.getRange());
                     window.chai.expect(result).to.eql([]);
                 },
             });
@@ -1083,8 +1094,7 @@ describe('Utils', () => {
             await testEditor(BasicEditor, {
                 contentBefore: '<p>ab[cd</p><p>ef]gh</p>',
                 stepFunction: editor => {
-                    const editable = editor.editable;
-                    const result = getSelectedNodes(editable);
+                    const result = getSelectedNodes(editor.getRange());
                     window.chai.expect(result).to.eql([]);
                 },
             });
@@ -1094,7 +1104,7 @@ describe('Utils', () => {
                 contentBefore: '<p><span>ab</span>[cd]</p>',
                 stepFunction: editor => {
                     const editable = editor.editable;
-                    const result = getSelectedNodes(editable);
+                    const result = getSelectedNodes(editor.getRange());
                     const cd = editable.firstChild.lastChild;
                     window.chai.expect(result).to.eql([cd]);
                 },
@@ -1105,7 +1115,7 @@ describe('Utils', () => {
                 contentBefore: '<p>[ab</p><p>cd</p><p>ef]gh</p>',
                 stepFunction: editor => {
                     const editable = editor.editable;
-                    const result = getSelectedNodes(editable);
+                    const result = getSelectedNodes(editor.getRange());
                     const ab = editable.firstChild.firstChild;
                     const p2 = editable.childNodes[1];
                     const cd = p2.firstChild;
@@ -1122,7 +1132,7 @@ describe('Utils', () => {
                     const cd = editable.firstChild.lastChild;
                     const b = editable.lastChild.firstChild.firstChild.firstChild;
                     const e = b.firstChild;
-                    const result = getSelectedNodes(editable);
+                    const result = getSelectedNodes(editor.getRange());
                     window.chai.expect(result).to.eql([cd, b, e]);
                 },
             });
@@ -1140,8 +1150,9 @@ describe('Utils', () => {
                 const range = document.createRange();
                 range.setStart(p, 0);
                 range.setEnd(p, 0);
-                const result = getDeepRange(p.parentElement, { range, select: true });
-                const { startContainer, startOffset, endContainer, endOffset } = result;
+                const deepRange = getDeepRange(p.parentElement, { range });
+                select(deepRange);
+                const { startContainer, startOffset, endContainer, endOffset } = deepRange;
                 window.chai
                     .expect([startContainer, startOffset, endContainer, endOffset])
                     .to.eql([abc, 0, abc, 0]);
@@ -1161,8 +1172,9 @@ describe('Utils', () => {
                 const range = document.createRange();
                 range.setStart(p, 2);
                 range.setEnd(p, 2);
-                const result = getDeepRange(p.parentElement, { range, select: true });
-                const { startContainer, startOffset, endContainer, endOffset } = result;
+                const deepRange = getDeepRange(p.parentElement, { range });
+                select(deepRange);
+                const { startContainer, startOffset, endContainer, endOffset } = deepRange;
                 window.chai
                     .expect([startContainer, startOffset, endContainer, endOffset])
                     .to.eql([abc, 3, abc, 3]);
@@ -1184,16 +1196,19 @@ describe('Utils', () => {
                 const range = document.createRange();
                 range.setStart(p, 0);
                 range.setEnd(p, 2);
-                const result = getDeepRange(p.parentElement, { range, select: true });
-                const { startContainer, startOffset, endContainer, endOffset } = result;
-                window.chai
-                    .expect([startContainer, startOffset, endContainer, endOffset])
-                    .to.eql([abc, 0, abc, 3]);
+                const deepRange = getDeepRange(p.parentElement, { range });
+                const { startContainer, startOffset, endContainer, endOffset } = deepRange;
+                window.chai.expect(startContainer).to.equal(abc);
+                window.chai.expect(startOffset).to.equal(0);
+                window.chai.expect(endContainer).to.equal(abc);
+                window.chai.expect(endOffset).to.equal(3);
+                select(deepRange);
                 const { anchorNode, anchorOffset, focusNode, focusOffset } =
                     document.getSelection();
-                window.chai
-                    .expect([anchorNode, anchorOffset, focusNode, focusOffset])
-                    .to.eql([abc, 0, abc, 3]);
+                window.chai.expect(anchorNode).to.equal(abc);
+                window.chai.expect(anchorOffset).to.equal(0);
+                window.chai.expect(focusNode).to.equal(abc);
+                window.chai.expect(focusOffset).to.equal(3);
             });
             it('should make a complex selection', () => {
                 const [p1, p2] = insertTestHtml(
@@ -1209,26 +1224,32 @@ describe('Utils', () => {
                 const range = document.createRange();
                 range.setStart(span1, 1);
                 range.setEnd(p2, 2);
-                const result = getDeepRange(p1.parentElement, { range, select: true });
-                const { startContainer, startOffset, endContainer, endOffset } = result;
-                const expect = [startContainer, startOffset, endContainer, endOffset];
-                const eql = [ef, 0, st, 0];
-                window.chai.expect(expect).to.eql(eql);
+                const deepRange = getDeepRange(p1.parentElement, { range });
+                const { startContainer, startOffset, endContainer, endOffset } = deepRange;
+                window.chai.expect(startContainer).to.equal(ef);
+                window.chai.expect(startOffset).to.equal(0);
+                window.chai.expect(endContainer).to.equal(st);
+                window.chai.expect(endOffset).to.equal(0);
+                select(deepRange);
+                window.chai.expect(startContainer).to.equal(ef);
+                window.chai.expect(startOffset).to.equal(0);
+                window.chai.expect(endContainer).to.equal(st);
+                window.chai.expect(endOffset).to.equal(0);
             });
             it('should correct a triple click', () => {
                 const [p1, p2] = insertTestHtml('<p>abc def ghi</p><p>jkl mno pqr</p>');
                 const range = document.createRange();
                 range.setStart(p1, 0);
                 range.setEnd(p2, 0);
-                const result = getDeepRange(p1.parentElement, {
+                const deepRange = getDeepRange(p1.parentElement, {
                     range,
-                    select: true,
                     correctTripleClick: true,
                 });
-                const { startContainer, startOffset, endContainer, endOffset } = result;
+                const { startContainer, startOffset, endContainer, endOffset } = deepRange;
                 window.chai
                     .expect([startContainer, startOffset, endContainer, endOffset])
                     .to.eql([p1.firstChild, 0, p1.firstChild, 11]);
+                select(deepRange);
                 const { anchorNode, anchorOffset, focusNode, focusOffset } =
                     document.getSelection();
                 window.chai
@@ -1241,12 +1262,12 @@ describe('Utils', () => {
                 const range = document.createRange();
                 range.setStart(p2, 0);
                 range.setEnd(p2, 0);
-                const result = getDeepRange(p1.parentElement, {
+                const deepRange = getDeepRange(p1.parentElement, {
                     range,
-                    select: true,
                     correctTripleClick: true,
                 });
-                const { startContainer, startOffset, endContainer, endOffset } = result;
+                select(deepRange);
+                const { startContainer, startOffset, endContainer, endOffset } = deepRange;
                 window.chai
                     .expect([startContainer, startOffset, endContainer, endOffset])
                     .to.eql([p2.firstChild, 0, p2.firstChild, 0]);
@@ -1271,8 +1292,9 @@ describe('Utils', () => {
                 const range = document.createRange();
                 range.setStart(whiteBeforeFont, 0);
                 range.setEnd(whiteAfterFont, 10);
-                const result = getDeepRange(p.parentElement, { range, select: true });
-                const { startContainer, startOffset, endContainer, endOffset } = result;
+                const deepRange = getDeepRange(p.parentElement, { range });
+                select(deepRange);
+                const { startContainer, startOffset, endContainer, endOffset } = deepRange;
                 window.chai
                     .expect([startContainer, startOffset, endContainer, endOffset])
                     .to.eql([title, 0, title, 5]);
@@ -1291,8 +1313,9 @@ describe('Utils', () => {
                 const range = document.createRange();
                 range.setStart(p0, 0);
                 range.setEnd(p2, 0);
-                const result = getDeepRange(p1.parentElement, { range, select: true });
-                const { startContainer, startOffset, endContainer, endOffset } = result;
+                const deepRange = getDeepRange(p1.parentElement, { range });
+                select(deepRange);
+                const { startContainer, startOffset, endContainer, endOffset } = deepRange;
                 window.chai
                     .expect([startContainer, startOffset, endContainer, endOffset])
                     .to.eql([p0, 0, p2, 0]);
@@ -1312,8 +1335,12 @@ describe('Utils', () => {
                 );
                 const abc = p.childNodes[1].firstChild.firstChild.firstChild.firstChild;
                 setSelection(p, 2, p, 0, false);
-                const result = getDeepRange(p.parentElement, { select: true });
-                const { startContainer, startOffset, endContainer, endOffset } = result;
+                const range = document.createRange();
+                range.setStart(p, 0);
+                range.setEnd(p, 2);
+                const deepRange = getDeepRange(p.parentElement, { range });
+                select(deepRange);
+                const { startContainer, startOffset, endContainer, endOffset } = deepRange;
                 window.chai
                     .expect([startContainer, startOffset, endContainer, endOffset])
                     .to.eql([abc, 0, abc, 3]);
@@ -1335,8 +1362,12 @@ describe('Utils', () => {
                 const ef = span1.childNodes[1].firstChild;
                 const st = p2.childNodes[2];
                 setSelection(p2, 2, span1, 1, false);
-                const result = getDeepRange(p1.parentElement, { select: true });
-                const { startContainer, startOffset, endContainer, endOffset } = result;
+                const range = document.createRange();
+                range.setStart(span1, 1);
+                range.setEnd(p2, 2);
+                const deepRange = getDeepRange(p1.parentElement, { range });
+                select(deepRange);
+                const { startContainer, startOffset, endContainer, endOffset } = deepRange;
                 window.chai
                     .expect([startContainer, startOffset, endContainer, endOffset])
                     .to.eql([ef, 0, st, 0]);

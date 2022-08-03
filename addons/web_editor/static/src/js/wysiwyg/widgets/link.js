@@ -7,6 +7,7 @@ const Widget = require('web.Widget');
 const {isColorGradient} = require('web_editor.utils');
 
 const getDeepRange = OdooEditorLib.getDeepRange;
+const select = OdooEditorLib.select;
 const getInSelection = OdooEditorLib.getInSelection;
 const _t = core._t;
 
@@ -67,7 +68,7 @@ const Link = Widget.extend({
         }
 
         if (this.data.range) {
-            this.$link = this.$link || $(OdooEditorLib.getInSelection(this.editable.ownerDocument, 'a'));
+            this.$link = this.$link || $(OdooEditorLib.getInSelection(this.editable.getRange(), 'a'));
             this.linkEl = this.$link[0];
             this.data.iniClassName = this.$link.attr('class') || '';
             this.colorCombinationClass = false;
@@ -507,9 +508,10 @@ Link.getOrCreateLink = ({ containerNode, startNode } = {})  => {
 
     const doc = containerNode && containerNode.ownerDocument || document;
     let needLabel = false;
-    let link = getInSelection(doc, 'a');
+    let link = getInSelection(doc.getSelection().getRangeAt(0), 'a');
     const $link = $(link);
-    const range = getDeepRange(containerNode, {splitText: true, select: true, correctTripleClick: true});
+    const range = getDeepRange(containerNode, { splitText: true, correctTripleClick: true });
+    select(range);
     const isContained = containerNode.contains(range.startContainer) && containerNode.contains(range.endContainer);
     if (link && (!$link.has(range.startContainer).length || !$link.has(range.endContainer).length)) {
         // Expand the current link to include the whole selection.

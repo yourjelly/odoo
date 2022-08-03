@@ -7,6 +7,7 @@ const weSnippetEditor = require('web_editor.snippet.editor');
 const wSnippetOptions = require('website.editor.snippets.options');
 const OdooEditorLib = require('@web_editor/../lib/odoo-editor/src/utils/utils');
 const getDeepRange = OdooEditorLib.getDeepRange;
+const select = OdooEditorLib.select;
 const getTraversedNodes = OdooEditorLib.getTraversedNodes;
 
 const FontFamilyPickerUserValueWidget = wSnippetOptions.FontFamilyPickerUserValueWidget;
@@ -201,8 +202,8 @@ weSnippetEditor.SnippetsMenu.include({
      * @return {Element|false}
      */
     _getAnimatedTextElement() {
-        const editable = this.options.wysiwyg.$editable[0];
-        const animatedTextNode = getTraversedNodes(editable).find(n => n.parentElement.closest(".o_animated_text"));
+        const range = this.options.wysiwyg.odooEditor.getRange();
+        const animatedTextNode = getTraversedNodes(range).find(n => n.parentElement.closest(".o_animated_text"));
         return animatedTextNode ? animatedTextNode.parentElement.closest('.o_animated_text') : false;
     },
     /**
@@ -335,7 +336,8 @@ weSnippetEditor.SnippetsMenu.include({
             return;
         }
         const editable = this.options.wysiwyg.$editable[0];
-        const range = getDeepRange(editable, { splitText: true, select: true, correctTripleClick: true });
+        const range = getDeepRange(editable, { splitText: true, correctTripleClick: true });
+        select(range);
         if (this.$currentAnimatedText.length) {
             this.$currentAnimatedText.contents().unwrap();
             this.options.wysiwyg.odooEditor.historyResetLatestComputedSelection();

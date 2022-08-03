@@ -28,6 +28,7 @@ const QWeb = core.qweb;
 
 const OdooEditor = OdooEditorLib.OdooEditor;
 const getDeepRange = OdooEditorLib.getDeepRange;
+const select = OdooEditorLib.select;
 const getInSelection = OdooEditorLib.getInSelection;
 const isBlock = OdooEditorLib.isBlock;
 const rgbToHex = OdooEditorLib.rgbToHex;
@@ -1062,7 +1063,7 @@ const Wysiwyg = Widget.extend({
      * Open the link tools or the image link tool depending on the selection.
      */
     openLinkToolsFromSelection() {
-        const targetEl = this.odooEditor.document.getSelection().getRangeAt(0).startContainer;
+        const targetEl = this.odooEditor.getRange().startContainer;
         // Link tool is different if the selection is an image or a text.
         if (targetEl instanceof HTMLElement
                 && (targetEl.tagName === 'IMG' || targetEl.querySelectorAll('img').length === 1)) {
@@ -1081,7 +1082,7 @@ const Wysiwyg = Widget.extend({
      * @param {boolean} [options.noFocusUrl=false] Disable the automatic focusing of the URL field.
      */
     toggleLinkTools(options = {}) {
-        const linkEl = getInSelection(this.odooEditor.document, 'a');
+        const linkEl = getInSelection(this.odooEditor.getRange(), 'a');
         if (linkEl && (!linkEl.matches(this.customizableLinksSelector) || !linkEl.isContentEditable)) {
             return;
         }
@@ -1156,7 +1157,7 @@ const Wysiwyg = Widget.extend({
                     return;
                 }
                 const linkWidget = linkDialog.linkWidget;
-                getDeepRange(this.$editable[0], {range: data.range, select: true});
+                select(getDeepRange(this.$editable[0], { range: data.range }));
                 if (this.options.userGeneratedContent) {
                     data.rel = 'ugc';
                 }
@@ -1194,7 +1195,7 @@ const Wysiwyg = Widget.extend({
      */
     openMediaDialog(params = {}) {
         const sel = this.odooEditor.document.getSelection();
-        const fontawesomeIcon = getInSelection(this.odooEditor.document, '.fa');
+        const fontawesomeIcon = getInSelection(this.odooEditor.getRange(), '.fa');
         if (fontawesomeIcon && sel.toString().trim() === "") {
             params.node = $(fontawesomeIcon);
             // save layouting classes from icons to not break the page if you edit an icon
@@ -1255,7 +1256,7 @@ const Wysiwyg = Widget.extend({
         });
     },
     getInSelection(selector) {
-        return getInSelection(this.odooEditor.document, selector);
+        return getInSelection(this.odooEditor.getRange(), selector);
     },
 
     //--------------------------------------------------------------------------
@@ -1427,8 +1428,7 @@ const Wysiwyg = Widget.extend({
      * @returns {String} color
      */
     _getSelectedColor($, eventName) {
-        const selection = this.odooEditor.document.getSelection();
-        const range = selection.rangeCount && selection.getRangeAt(0);
+        const range = this.odooEditor.getRange();
         const targetNode = range && range.startContainer;
         const targetElement = targetNode && targetNode.nodeType === Node.ELEMENT_NODE
             ? targetNode
@@ -1472,9 +1472,8 @@ const Wysiwyg = Widget.extend({
                     const oldColorpicker = colorpicker;
                     const hookEl = oldColorpicker ? oldColorpicker.el : elem;
                     const selectedColor = this._getSelectedColor($, eventName);
-                    const selection = this.odooEditor.document.getSelection();
-                    const range = selection.rangeCount && selection.getRangeAt(0);
-                    const hadNonCollapsedSelection = range && !selection.isCollapsed;
+                    const range = this.odooEditor.getRange();
+                    const hadNonCollapsedSelection = range && !range.collapsed;
                     colorpicker = new ColorPaletteWidget(this, {
                         excluded: ['transparent_grayscale'],
                         $editable: $(this.odooEditor.editable), // Our parent is the root widget, we can't retrieve the editable section from it...
@@ -1693,7 +1692,7 @@ const Wysiwyg = Widget.extend({
             this._updateMediaJustifyButton();
             this._updateFaResizeButtons();
         }
-        const link = getInSelection(this.odooEditor.document, this.customizableLinksSelector);
+        const link = getInSelection(this.odooEditor.getRange(), this.customizableLinksSelector);
         if (isInMedia || (link && link.isContentEditable)) {
             // Handle the media/link's tooltip.
             this.showTooltip = true;
