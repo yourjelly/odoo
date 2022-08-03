@@ -32,7 +32,9 @@ class Lang(models.Model):
     active = fields.Boolean()
     direction = fields.Selection([('ltr', 'Left-to-Right'), ('rtl', 'Right-to-Left')], required=True, default='ltr')
     date_format = fields.Char(string='Date Format', required=True, default=DEFAULT_DATE_FORMAT)
+    date_format_preview = fields.Datetime(string='Date format', default=fields.Date.context_today, readonly=True)
     time_format = fields.Char(string='Time Format', required=True, default=DEFAULT_TIME_FORMAT)
+    time_format_preview = fields.Datetime(string='Time format', default=fields.Datetime.today(), readonly=True)
     week_start = fields.Selection([('1', 'Monday'),
                                    ('2', 'Tuesday'),
                                    ('3', 'Wednesday'),
@@ -46,7 +48,20 @@ class Lang(models.Model):
              "[1,2,-1] will represent it to be 106,50,0;[3] will represent it as 106,500. "
              "Provided ',' as the thousand separator in each case.")
     decimal_point = fields.Char(string='Decimal Separator', required=True, default='.', trim=False)
+    decimal_point_preview = fields.Char(string="Decimal separator", compute="_compute_decimal_point_preview")
     thousands_sep = fields.Char(string='Thousands Separator', default=',', trim=False)
+    thousand_separator_preview = fields.Char(string="Thousands separator", compute='_compute_thounsand_separator_preview')
+
+    @api.depends('thousands_sep', 'grouping')
+    def _compute_thounsand_separator_preview(self):
+        for lang in self:
+            separator = lang.thousands_sep if lang.thousands_sep else ''
+            lang.thousand_separator_preview = intersperse('999999999', ast.literal_eval(lang.grouping), separator)[0]
+
+    @api.depends('decimal_point')
+    def _compute_decimal_point_preview(self):
+        for lang in self:
+            lang.decimal_point_preview = '99' + lang.decimal_point + '00'
 
     @api.depends('code', 'flag_image')
     def _compute_field_flag_image_url(self):
