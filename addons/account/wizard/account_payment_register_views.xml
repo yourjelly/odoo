@@ -28,6 +28,10 @@
                     <field name="company_currency_id" invisible="1"/>
                     <field name="has_epd_and_is_in_time" invisible="1"/>
                     <field name="show_early_pay_discount_button" invisible="1"/>
+                    <field name="payment_difference"/>
+                    <field name="can_edit_wizard"/>
+                    <field name="can_group_payments"/>
+                    <field name="group_payment"/>
 
                     <group>
                         <group name="group1">

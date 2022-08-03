@@ -3,7 +3,6 @@ from collections import defaultdict
 
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
-from odoo.tools import float_compare, frozendict
 
 
 class AccountPaymentRegister(models.TransientModel):
@@ -98,20 +97,30 @@ class AccountPaymentRegister(models.TransientModel):
     # == Payment difference fields ==
     payment_difference = fields.Monetary(
         compute='_compute_payment_difference')
-    payment_difference_handling = fields.Selection([
-        ('open', 'Keep open'),
-        ('reconcile', 'Mark as fully paid'),
-    ], default='open', string="Payment Difference Handling")
+
+    payment_difference_handling = fields.Selection(
+        string="Payment Difference Handling",
+        selection=[('open', 'Keep open'), ('reconcile', 'Mark as fully paid')],
+        compute='_compute_payment_difference_handling',
+        store=True,
+        readonly=False,
+    )
     writeoff_account_id = fields.Many2one(
-        'account.account',
+        comodel_name='account.account',
         string="Difference Account",
         copy=False,
-        domain="[('deprecated', '=', False), ('company_id', '=', company_id)]")
+        domain="[('deprecated', '=', False), ('company_id', '=', company_id)]",
+        compute='_compute_writeoff_account_id',
+        store=True,
+        readonly=False,
+    )
     writeoff_label = fields.Char(
         string='Journal Item Label',
-        default='Write-Off',
-        help='Change label of the counterpart that will hold the payment difference')
-
+        compute='_compute_writeoff_label',
+        store=True,
+        readonly=False,
+        help='Change label of the counterpart that will hold the payment difference',
+    )
     # == Display purpose fields ==
     show_partner_bank_account = fields.Boolean(
         compute='_compute_show_require_partner_bank',
@@ -134,27 +143,19 @@ class AccountPaymentRegister(models.TransientModel):
     # -------------------------------------------------------------------------
     # HELPERS
     # -------------------------------------------------------------------------
-    @api.onchange('amount')
-    def _on_change_amount(self):
-        for wizard in self:
-            if wizard.source_currency_id and wizard.can_edit_wizard:
-                move_id = wizard.line_ids.move_id
-                if wizard.has_epd_and_is_in_time and wizard.source_currency_id.compare_amounts(wizard.amount, move_id.invoice_early_pay_amount_after_discount) == 0.0:
-                    wizard.writeoff_label = _('Early Payment Discount')
-                    invoice_payment_term = wizard.line_ids.move_id.invoice_payment_term_id
-                    wizard.writeoff_account_id = invoice_payment_term.get_early_payment_discount_account(move_id)
-                    wizard.payment_difference_handling = 'reconcile'
-                elif wizard.source_currency_id.compare_amounts(wizard.amount, move_id.amount_total) != 0.0:
-                    wizard.show_early_pay_discount_button = False
+    @api.model
+    def _is_eligible_for_early_payment_discount(self, batch_result, currency, amount):
+        print("is_eligible")
+        payment_values = batch_result['payment_values']
 
-    @api.onchange('payment_date')
-    def _on_change_payment_date(self):
-        for wizard in self:
-            if wizard.source_currency_id and wizard.can_edit_wizard:
-                move_id = wizard.line_ids.move_id
-                wizard.has_epd_and_is_in_time = move_id.is_eligible_for_early_discount(wizard.payment_date)
-                if wizard.has_epd_and_is_in_time and (move_id.move_type == 'in_invoice' or move_id.move_type == 'in_receipt'):
-                    wizard.amount = move_id.invoice_early_pay_amount_after_discount
+        if not payment_values['early_discount_pay_term'] or payment_values['currency_id'] != currency.id:
+            return False
+
+        total_early_discount_amount = sum(
+            move.invoice_early_pay_amount_after_discount
+            for move in batch_result['lines'].move_id
+        )
+        return currency.is_zero(amount - total_early_discount_amount)
 
     def fill_in_with_early_pay_discount(self):
         for wizard in self:
@@ -318,8 +319,10 @@ class AccountPaymentRegister(models.TransientModel):
         payment_values = batch_result['payment_values']
         lines = batch_result['lines']
         company = lines[0].company_id
-
-        source_amount = abs(sum(lines.mapped('amount_residual')))
+        if payment_values['early_discount_pay_term']:
+            source_amount = abs(sum(lines.move_id.mapped('invoice_early_pay_amount_after_discount')))
+        else:
+            source_amount = abs(sum(lines.mapped('amount_residual')))
         if payment_values['currency_id'] == company.currency_id.id:
             source_amount_currency = source_amount
         else:
@@ -342,6 +345,7 @@ class AccountPaymentRegister(models.TransientModel):
     @api.depends('line_ids')
     def _compute_from_lines(self):
         ''' Load initial values from the account.moves passed through the context. '''
+        print("compute from lines")
         for wizard in self:
             batches = wizard._get_batches()
             batch_result = batches[0]
@@ -372,6 +376,7 @@ class AccountPaymentRegister(models.TransientModel):
     def _compute_communication(self):
         # The communication can't be computed in '_compute_from_lines' because
         # it's a compute editable field and then, should be computed in a separated method.
+        print("_compute_communication")
         for wizard in self:
             if wizard.can_edit_wizard:
                 batches = wizard._get_batches()
@@ -381,6 +386,7 @@ class AccountPaymentRegister(models.TransientModel):
 
     @api.depends('can_edit_wizard')
     def _compute_group_payment(self):
+        print("compute_group_payement")
         for wizard in self:
             if wizard.can_edit_wizard:
                 batches = wizard._get_batches()
@@ -388,13 +394,51 @@ class AccountPaymentRegister(models.TransientModel):
             else:
                 wizard.group_payment = False
 
+    @api.depends('can_edit_wizard', 'payment_date', 'currency_id', 'amount')
+    def _compute_payment_difference_handling(self):
+        print("compute_difference_handling")
+        for wizard in self:
+            if wizard.can_edit_wizard:
+                batch_result = wizard._get_batches()[0]
+                if batch_result['payment_values']['early_discount_pay_term']:
+                    wizard.payment_difference_handling = 'reconcile'
+                else:
+                    wizard.payment_difference_handling = 'open'
+            else:
+                wizard.payment_difference_handling = False
+
+    @api.depends('payment_difference_handling')
+    def _compute_writeoff_account_id(self):
+        print("compute_writeoff_account_id")
+        for wizard in self:
+            wizard.writeoff_account_id = None
+            if wizard.can_edit_wizard:
+                batch_result = wizard._get_batches()[0]
+                if batch_result['payment_values']['early_discount_pay_term']:
+                    payment_values = batch_result['payment_values']
+                    wizard.writeoff_account_id = wizard.company_id.account_journal_cash_discount_income_id if payment_values['payment_type'] == 'inbound' else wizard.company_id.account_journal_cash_discount_expense_id
+
+
+    @api.depends('payment_difference_handling')
+    def _compute_writeoff_label(self):
+        print("compute_writeoff_label")
+        for wizard in self:
+            writeoff_label = _("Write-Off")
+            if wizard.can_edit_wizard:
+                batch_result = wizard._get_batches()[0]
+                if batch_result['payment_values']['early_discount_pay_term']:
+                    writeoff_label = _("Early Payment Discount")
+            wizard.writeoff_label = writeoff_label
+
     @api.depends('journal_id')
     def _compute_currency_id(self):
+        print("compute_currency_id")
         for wizard in self:
             wizard.currency_id = wizard.journal_id.currency_id or wizard.source_currency_id or wizard.company_id.currency_id
 
     @api.depends('payment_type', 'company_id', 'can_edit_wizard')
     def _compute_available_journal_ids(self):
+        print("compute_available_journal_ids")
         for wizard in self:
             if wizard.can_edit_wizard:
                 batch = wizard._get_batches()[0]
@@ -407,6 +451,7 @@ class AccountPaymentRegister(models.TransientModel):
 
     @api.depends('available_journal_ids')
     def _compute_journal_id(self):
+        print("compute_journal_ids")
         for wizard in self:
             if wizard.can_edit_wizard:
                 batch = wizard._get_batches()[0]
@@ -419,6 +464,7 @@ class AccountPaymentRegister(models.TransientModel):
 
     @api.depends('can_edit_wizard', 'journal_id')
     def _compute_available_partner_bank_ids(self):
+        print("compute_available_partner_bank_ids")
         for wizard in self:
             if wizard.can_edit_wizard:
                 batch = wizard._get_batches()[0]
@@ -428,6 +474,7 @@ class AccountPaymentRegister(models.TransientModel):
 
     @api.depends('journal_id', 'available_partner_bank_ids')
     def _compute_partner_bank_id(self):
+        print("compute_partner_bank_id")
         for wizard in self:
             if wizard.can_edit_wizard:
                 batch = wizard._get_batches()[0]
@@ -442,6 +489,7 @@ class AccountPaymentRegister(models.TransientModel):
 
     @api.depends('payment_type', 'journal_id')
     def _compute_payment_method_line_fields(self):
+        print("compute_payement_method_line_fields")
         for wizard in self:
             if wizard.journal_id:
                 wizard.available_payment_method_line_ids = wizard.journal_id._get_available_payment_method_lines(wizard.payment_type)
@@ -450,6 +498,7 @@ class AccountPaymentRegister(models.TransientModel):
 
     @api.depends('payment_type', 'journal_id')
     def _compute_payment_method_line_id(self):
+        print("compute_payement_method_line_id")
         for wizard in self:
             if wizard.journal_id:
                 available_payment_method_lines = wizard.journal_id._get_available_payment_method_lines(wizard.payment_type)
@@ -466,6 +515,7 @@ class AccountPaymentRegister(models.TransientModel):
     def _compute_show_require_partner_bank(self):
         """ Computes if the destination bank account must be displayed in the payment form view. By default, it
         won't be displayed but some modules might change that, depending on the payment type."""
+        print("compute_show_require_partner_bank")
         for wizard in self:
             if wizard.journal_id.type == 'cash':
                 wizard.show_partner_bank_account = False
@@ -484,9 +534,11 @@ class AccountPaymentRegister(models.TransientModel):
         comp_curr = self.company_id.currency_id
         if self.source_currency_id == self.currency_id:
             # Same currency.
+            print('zat')
             return self.source_amount_currency
         elif self.source_currency_id != comp_curr and self.currency_id == comp_curr:
             # Foreign currency on source line but the company currency one on the opposite line.
+            print('zot')
             return self.source_currency_id._convert(
                 self.source_amount_currency,
                 comp_curr,
@@ -495,6 +547,7 @@ class AccountPaymentRegister(models.TransientModel):
             )
         elif self.source_currency_id == comp_curr and self.currency_id != comp_curr:
             # Company currency on source line but a foreign currency one on the opposite line.
+            print('zut')
             return abs(sum(
                 comp_curr._convert(
                     aml.amount_residual,
@@ -506,6 +559,7 @@ class AccountPaymentRegister(models.TransientModel):
             ))
         else:
             # Foreign currency on payment different than the one set on the journal entries.
+            print('zet')
             return comp_curr._convert(
                 self.source_amount,
                 self.currency_id,
@@ -515,47 +569,75 @@ class AccountPaymentRegister(models.TransientModel):
 
     @api.depends('can_edit_wizard', 'source_amount', 'source_amount_currency', 'source_currency_id', 'company_id', 'currency_id', 'payment_date')
     def _compute_amount(self):
+        print("compute_amount")
         for wizard in self:
+            print(f"in compute_amout; wizard source currency : {wizard.source_currency_id}")
+            print(f"in compute_amout; wizard can_edit wiz : {wizard.can_edit_wizard}")
             if wizard.source_currency_id and wizard.can_edit_wizard:
-                move_id = wizard.line_ids.move_id
-                if len(move_id) == 1 and wizard.has_epd_and_is_in_time and (move_id.move_type == 'in_invoice' or move_id.move_type == 'in_receipt'):
-                    wizard.amount = move_id.invoice_early_pay_amount_after_discount
-                else:
-                    batch_result = wizard._get_batches()[0]
-                    wizard.amount = wizard._get_total_amount_in_wizard_currency_to_full_reconcile(batch_result)
+                print('avant batch_result')
+                batch_result = wizard._get_batches()[0]
+                print('après batch_result')
+                wizard.amount = wizard._get_total_amount_in_wizard_currency_to_full_reconcile(batch_result)
+                print('après _get_total_amount_in_wizard_currency_to_full_reconcile')
             else:
                 # The wizard is not editable so no partial payment allowed and then, 'amount' is not used.
                 wizard.amount = None
+            print(f"in compute_amout; amount : {wizard.amount}")
 
     @api.depends('can_edit_wizard', 'amount')
     def _compute_payment_difference(self):
+        print("compute_payment_diff")
         for wizard in self:
             if wizard.can_edit_wizard:
+                print('xxxx')
                 batch_result = wizard._get_batches()[0]
+                print('yyyy')
                 total_amount_residual_in_wizard_currency = wizard._get_total_amount_in_wizard_currency_to_full_reconcile(batch_result)
+                print('zzzz')
+                print("in compute_payment_diff; total_amount_residual_in_wiz_curr : "+str(total_amount_residual_in_wizard_currency))
+                print(f"in compute_payment_diff; wizard amount: {wizard.amount}")
                 wizard.payment_difference = total_amount_residual_in_wizard_currency - wizard.amount
+                print('aaaa')
+                print("in compute_payment_diff; wizard payment diff"+str(wizard.payment_difference))
             else:
                 wizard.payment_difference = 0.0
 
     @api.depends('line_ids')
     def _compute_has_epd_and_is_in_time(self):
+        print("compute_has_epd_and_is_in_time")
         for wizard in self:
-            wizard.has_epd_and_is_in_time = wizard.line_ids.move_id.is_eligible_for_early_discount(wizard.payment_date)
+            if wizard.can_edit_wizard:
+                batch_result = wizard._get_batches()[0]
+                if batch_result['payment_values']['early_discount_pay_term']:
+                    wizard.has_epd_and_is_in_time = True
+                else:
+                    wizard.has_epd_and_is_in_time = False
+            else:
+                wizard.has_epd_and_is_in_time = False
 
     @api.depends('line_ids')
     def _compute_show_early_pay_discount_button(self):
+        print("compute_show_early_pay_discount_button")
         for wizard in self:
             if wizard.can_edit_wizard:
-                wizard.show_early_pay_discount_button = wizard.has_epd_and_is_in_time and \
-                                                        not (wizard.line_ids.move_id.move_type == 'in_invoice' or wizard.line_ids.move_id.move_type == 'in_receipt') \
-                                                        and wizard.source_currency_id.compare_amounts(wizard.amount, wizard.line_ids.move_id.invoice_early_pay_amount_after_discount) != 0.0
-
+                batch_result = wizard._get_batches()[0]
+                if batch_result['payment_values']['early_discount_pay_term']:
+                    # wizard.show_early_pay_discount_button = wizard.has_epd_and_is_in_time and \
+                    #                                         not (wizard.line_ids.move_id.move_type == 'in_invoice' or wizard.line_ids.move_id.move_type == 'in_receipt') \
+                    #                                         and wizard.source_currency_id.compare_amounts(wizard.amount, wizard.line_ids.move_id.invoice_early_pay_amount_after_discount) != 0.0
+                    #TODO tofix
+                    wizard.show_early_pay_discount_button = True
+                else:
+                    wizard.show_early_pay_discount_button = False
+            else:
+                wizard.show_early_pay_discount_button = False
     # -------------------------------------------------------------------------
     # LOW-LEVEL METHODS
     # -------------------------------------------------------------------------
 
     @api.model
     def default_get(self, fields_list):
+        print("default_get")
         # OVERRIDE
         res = super().default_get(fields_list)
 
@@ -645,7 +727,7 @@ class AccountPaymentRegister(models.TransientModel):
 
         payment_vals = {
             'date': self.payment_date,
-            'amount': discounted_amount if early_discount_pay_term else batch_values['source_amount_currency'],
+            'amount': discounted_amount if (early_discount_pay_term) else batch_values['source_amount_currency'],
             'payment_type': batch_values['payment_type'],
             'partner_type': batch_values['partner_type'],
             'ref': self._get_batch_communication(batch_result),
