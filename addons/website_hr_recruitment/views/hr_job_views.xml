@@ -17,7 +17,7 @@
             <xpath expr="//div[@name='kanban_boxes']" position="inside">
                 <field name="website_url" invisible="1"/>
                 <div class="col-6">
-                    <field name="is_published" widget='boolean_toggle'/>
+                    <field name="is_published" widget='boolean_toggle' class="me-1"/>
                     <t t-if="record.is_published.raw_value">Published</t>
                     <t t-else="">Not published</t>
                 </div>
@@ -26,7 +26,7 @@
         </field>
     </record>
 
-    <record id="view_hr_job_kanban_referal_extends" model="ir.ui.view"> 
+    <record id="view_hr_job_kanban_referal_extends" model="ir.ui.view">
         <field name="model">hr.job</field>
         <field name="name">hr.job.view.kanban</field>
         <field name="inherit_id" ref="hr_recruitment.view_hr_job_kanban"/>
