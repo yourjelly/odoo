@@ -1012,33 +1012,33 @@ var FieldDate = InputField.extend({
     },
 });
 
-var LangFieldDate = FieldDate.extend({
-    resetOnAnyFieldChange: true,
+// var LangFieldDate = FieldDate.extend({
+//     resetOnAnyFieldChange: true,
 
-    willStart: async function () {
-        const _super = this._super;
-        if (this.record.data.iso_code) {
-            this.value.locale(this.record.data.iso_code);
-            if (this.value._locale._abbr != this.record.data.iso_code) {
-                const resp = await ajax.loadJS(`web/static/lib/moment/locale/${this.record.data.iso_code}.js`);
-                this.value.locale(this.record.data.iso_code);
-            }
-        }
-        return _super.apply(this, arguments);
-    },
+//     willStart: async function () {
+//         const _super = this._super;
+//         if (this.record.data.iso_code) {
+//             this.value.locale(this.record.data.iso_code);
+//             if (this.value._locale._abbr != this.record.data.iso_code) {
+//                 const resp = await ajax.loadJS(`web/static/lib/moment/locale/${this.record.data.iso_code}.js`);
+//                 this.value.locale(this.record.data.iso_code);
+//             }
+//         }
+//         return _super.apply(this, arguments);
+//     },
 
-    _formatValue: function (value, formatType) {
-        if (value === false || isNaN(value)) {
-            return "";
-        }
-        return value.format(time.strftime_to_moment_format(this.record.data.date_format));
-    },
+//     _formatValue: function (value, formatType) {
+//         if (value === false || isNaN(value)) {
+//             return "";
+//         }
+//         return value.format(time.strftime_to_moment_format(this.record.data.date_format));
+//     },
 
-    _reset: function () {
-        this._super.apply(this, arguments);
-        this._render();
-    },
-});
+//     _reset: function () {
+//         this._super.apply(this, arguments);
+//         this._render();
+//     },
+// });
 
 var FieldDateTime = FieldDate.extend({
     description: _lt("Date & Time"),
@@ -4248,7 +4248,6 @@ return {
     FieldChar: FieldChar,
     LinkButton: LinkButton,
     FieldDate: FieldDate,
-    LangFieldDate: LangFieldDate,
     FieldDateTime: FieldDateTime,
     FieldDateRange: FieldDateRange,
     RemainingDays: RemainingDays,
