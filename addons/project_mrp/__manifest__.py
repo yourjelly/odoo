@@ -8,7 +8,6 @@
     'category': 'Services/Project',
     'depends': ['mrp_account', 'project'],
     'data': [
-        'views/project_views.xml',
     ],
     'demo': [
         'data/project_mrp_demo.xml',

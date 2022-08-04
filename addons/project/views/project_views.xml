@@ -443,44 +443,6 @@
                     </header>
                 <sheet string="Project">
                     <div class="oe_button_box" name="button_box" groups="base.group_user">
-                        <field name="currency_id" invisible="1"/>
-                        <button class="oe_stat_button" type="object" name="action_view_analytic_account_entries" icon="fa-usd" attrs="{'invisible': [('analytic_account_id', '=', False)]}" groups="analytic.group_analytic_accounting">
-                            <div class="o_form_field o_stat_info">
-                                <span class="o_stat_value">
-                                    <field name="analytic_account_balance" widget='monetary'/>
-                                </span>
-                                <span class="o_stat_text">Gross Margin</span>
-                            </div>
-                        </button>
-                        <button class="oe_stat_button" type="action"
-                            name="%(act_project_project_2_project_task_all)d" icon="fa-tasks">
-                            <field string="Tasks In Progress" name="task_count" widget="statinfo" options="{'label_field': 'label_tasks'}"/>
-                        </button>
-                        <button class="oe_stat_button" name="action_get_list_view" type="object" icon="fa-check-square-o" attrs="{'invisible': [('allow_milestones', '=', False)]}">
-                            <div class="o_field_widget o_stat_info">
-                                <span class="o_stat_value">
-                                    <field name="milestone_count" nolabel="1"/>
-                                </span>
-                                <span class="o_stat_text">
-                                    Milestones
-                                </span>
-                            </div>
-                        </button>
-                        <field name="rating_avg" invisible="1"/>
-                        <field name="rating_count" invisible="1"/>
-                        <button name="action_view_all_rating" type="object" attrs="{'invisible': ['|', ('rating_active', '=', False), ('rating_count', '=', 0)]}" class="oe_stat_button" groups="project.group_project_rating">
-                            <i class="fa fa-fw o_button_icon fa-smile-o text-success" attrs="{'invisible': [('rating_avg', '&lt;', 3.66)]}" title="Satisfied"/>
-                            <i class="fa fa-fw o_button_icon fa-meh-o text-warning" attrs="{'invisible': ['|', ('rating_avg', '&lt;', 2.33), ('rating_avg', '&gt;=', 3.66)]}" title="Okay"/>
-                            <i class="fa fa-fw o_button_icon fa-frown-o text-danger" attrs="{'invisible': [('rating_avg', '&gt;=', 2.33)]}" title="Dissatisfied"/>
-                            <div class="o_field_widget o_stat_info">
-                                <span class="o_stat_value">
-                                    <field name="rating_avg_percentage" nolabel="1" widget="percentage"/>
-                                </span>
-                                <span class="o_stat_text">
-                                    Satisfaction
-                                </span>
-                            </div>
-                        </button>
                         <button class="oe_stat_button" name="project_update_all_action" type="object" groups="project.group_project_manager">
                             <div class="ps-4">
                                 <field name="last_update_color" invisible="1"/>
@@ -492,11 +454,6 @@
                                 <field name="last_update_color" invisible="1"/>
                                 <field name="last_update_status" readonly="1" widget="status_with_color" options="{'color_field': 'last_update_color', 'no_quick_edit': 1}"/>
                             </div>
-                        </button>
-                        <button name="%(action_project_task_burndown_chart_report)d" type="action" class="oe_stat_button" icon="fa-area-chart" groups="project.group_project_user">
-                            <span class="o_stat_text">
-                                Burndown Chart
-                            </span>
                         </button>
                         <button class="oe_stat_button" name="%(project.project_collaborator_action)d" type="action" icon="fa-users" groups="project.group_project_manager" attrs="{'invisible':[('privacy_visibility', '!=', 'portal')]}">
                             <div class="o_field_widget o_stat_info">
