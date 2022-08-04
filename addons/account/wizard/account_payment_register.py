@@ -80,6 +80,12 @@ class AccountPaymentRegister(models.TransientModel):
     partner_id = fields.Many2one('res.partner',
         string="Customer/Vendor", store=True, copy=False, ondelete='restrict',
         compute='_compute_from_lines')
+    discounted_amount = fields.Monetary(
+        store=True,
+        copy=False,
+        currency_field='source_currency_id',
+        compute='_compute_from_lines',
+    )
 
     # == Payment methods fields ==
     payment_method_line_id = fields.Many2one('account.payment.method.line', string='Payment Method',
@@ -132,12 +138,11 @@ class AccountPaymentRegister(models.TransientModel):
     # == Early Payment Discount ==
     show_early_pay_discount_button = fields.Boolean(compute="_compute_show_early_pay_discount_button")
     early_pay_discount_toggle_button = fields.Boolean(
+        string="Early Payment Discounts",
         compute='_compute_early_pay_discount_toggle_button',
         readonly=False,
         store=True,
-        string="Early Payment Discounts",
     )
-    discounted_amount = fields.Monetary()
 
     # -------------------------------------------------------------------------
     # HELPERS
@@ -532,7 +537,7 @@ class AccountPaymentRegister(models.TransientModel):
             if wizard.source_currency_id and wizard.can_edit_wizard:
                 batch_result = wizard._get_batches()[0]
                 wizard.amount = wizard._get_total_amount_in_wizard_currency_to_full_reconcile(batch_result)
-                if wizard.discounted_amount and self.early_pay_discount_toggle_button:
+                if wizard.discounted_amount and wizard.early_pay_discount_toggle_button:
                     wizard.amount = wizard.discounted_amount
             else:
                 # The wizard is not editable so no partial payment allowed and then, 'amount' is not used.
