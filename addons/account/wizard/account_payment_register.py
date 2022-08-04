@@ -526,7 +526,6 @@ class AccountPaymentRegister(models.TransientModel):
                 self.payment_date,
             )
 
-    @api.depends('can_edit_wizard', 'source_amount', 'source_amount_currency', 'source_currency_id', 'company_id', 'currency_id', 'payment_date')
     @api.depends('early_pay_discount_toggle_button', 'discounted_amount', 'can_edit_wizard', 'source_amount', 'source_amount_currency', 'source_currency_id', 'company_id', 'currency_id', 'payment_date')
     def _compute_amount(self):
         for wizard in self:
