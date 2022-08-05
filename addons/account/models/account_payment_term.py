@@ -148,7 +148,8 @@ class AccountPaymentTerm(models.Model):
             return date_utils.end_of(move_date, 'month') + timedelta(self.discount_days)
         if self.discount_time_availability == 'day_following_month' or self.discount_time_availability == 'day_current_month':
             month_to_add = 1 if self.discount_time_availability == 'day_following_month' else 0
-            computed_date = date_utils.end_of(move_date, 'month') + timedelta(self.discount_days)
+            date_to_compare = fields.Date.today() if self.discount_time_availability == 'day_current_month' else move_date
+            computed_date = date_utils.end_of(date_to_compare, 'month') + timedelta(self.discount_days)
             if self.discount_days > 28:
                 last_day_of_month = date_utils.get_month(move_date.replace(month=move_date.month + month_to_add))[1]
                 if last_day_of_month < computed_date:
