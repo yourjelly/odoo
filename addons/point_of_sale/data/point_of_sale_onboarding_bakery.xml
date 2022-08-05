@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="pos_category_breads" model="pos.category">
+        <field name="name">Breads</field>
+    </record>
+
+    <record id="pos_category_pastries" model="pos.category">
+        <field name="name">Pastries</field>
+    </record>
+
+    <record id="multigrain_bread" model="product.product">
+        <field name="available_in_pos">True</field>
+        <field name="list_price">4</field>
+        <field name="name">Multigrain Bread</field>
+        <field name="default_code">BREAD_0009</field>
+        <field name="type">product</field>
+        <field name="weight">0.01</field>
+        <field name="to_weight">False</field>
+        <field name="barcode">2100002000003</field>
+        <field name="taxes_id" eval='[(5,)]'/>
+        <field name="categ_id" ref="product.product_category_1"/>
+        <field name="pos_categ_id" ref="pos_category_breads"/>
+        <field name="uom_id" ref="uom.product_uom_unit" />
+        <field name="uom_po_id" ref="uom.product_uom_unit" />
+        <field name="image_1920" type="base64" file="point_of_sale/static/img/bread.png"/>
+    </record>
+
+    <record id="white_baguette" model="product.product">
+        <field name="available_in_pos">True</field>
+        <field name="list_price">2.5</field>
+        <field name="name">White Baguette</field>
+        <field name="default_code">BREAD_0008</field>
+        <field name="type">product</field>
+        <field name="weight">0.01</field>
+        <field name="taxes_id" eval='[(5,)]'/>
+        <field name="categ_id" ref="product.product_category_1"/>
+        <field name="pos_categ_id" ref="pos_category_breads"/>
+        <field name="to_weight">False</field>
+        <field name="uom_id" ref="uom.product_uom_unit" />
+        <field name="uom_po_id" ref="uom.product_uom_unit" />
+        <field name="image_1920" type="base64" file="point_of_sale/static/img/baguette.png"/>
+    </record>
+
+    <record id="croissant" model="product.product">
+        <field name="available_in_pos">True</field>
+        <field name="list_price">1.5</field>
+        <field name="name">Croissant</field>
+        <field name="default_code">PASTRY_0006</field>
+        <field name="type">product</field>
+        <field name="weight">0.01</field>
+        <field name="to_weight">False</field>
+        <field name="categ_id" ref="product.product_category_1"/>
+        <field name="pos_categ_id" ref="pos_category_pastries"/>
+        <field name="uom_id" ref="uom.product_uom_unit" />
+        <field name="uom_po_id" ref="uom.product_uom_unit" />
+        <field name="image_1920" type="base64" file="point_of_sale/static/img/croissant.png"/>
+    </record>
+
+    <record id="apple_pie" model="product.product">
+        <field name="available_in_pos">True</field>
+        <field name="list_price">8</field>
+        <field name="name">Apple Pie</field>
+        <field name="default_code">PASTRY_0001</field>
+        <field name="to_weight">False</field>
+        <field name="barcode">2300001000008</field>
+        <field name="type">product</field>
+        <field name="weight">0.01</field>
+        <field name="categ_id" ref="product.product_category_1"/>
+        <field name="pos_categ_id" ref="pos_category_pastries"/>
+        <field name="uom_id" ref="uom.product_uom_unit" />
+        <field name="uom_po_id" ref="uom.product_uom_unit" />
+        <field name="image_1920" type="base64" file="point_of_sale/static/img/apple_pie.png"/>
+    </record>
+
+    <record id="strawberry_pie" model="product.product">
+        <field name="available_in_pos">True</field>
+        <field name="list_price">10</field>
+        <field name="name">Strawberry Pie</field>
+        <field name="weight">0.01</field>
+        <field name="default_code">PASTRY_0002</field>
+        <field name="to_weight">False</field>
+        <field name="categ_id" ref="product.product_category_1"/>
+        <field name="pos_categ_id" ref="pos_category_pastries"/>
+        <field name="uom_id" ref="uom.product_uom_unit" />
+        <field name="uom_po_id" ref="uom.product_uom_unit" />
+        <field name="image_1920" type="base64" file="point_of_sale/static/img/strawberry_pie.png"/>
+    </record>
+</odoo>

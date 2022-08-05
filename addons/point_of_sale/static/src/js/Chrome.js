@@ -390,16 +390,19 @@ odoo.define('point_of_sale.Chrome', function(require) {
 
         async _loadDemoData() {
             const { confirmed } = await this.showPopup('ConfirmPopup', {
-                title: this.env._t('You do not have any products'),
+                title: this.env._t('At Odoo we cover all your needs'),
                 body: this.env._t(
-                    'Would you like to load demo data?'
+                    "Let's load some demo data by pretending you want to open a "
                 ),
-                confirmText: this.env._t('Yes'),
-                cancelText: this.env._t('No')
+                confirmText: this.env._t("Let's go"),
+                cancelText: this.env._t('I want an empty POS')
             });
             if (confirmed) {
                 await this.rpc({
                     'route': '/pos/load_onboarding_data',
+                    params: {
+                        arg: 'clothes' // to add arguments
+                    },
                 });
                 const result = await this.rpc({
                     method: 'get_onboarding_data',
