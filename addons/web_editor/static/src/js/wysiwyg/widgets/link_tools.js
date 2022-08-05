@@ -57,9 +57,8 @@ const LinkTools = Link.extend({
         if (!this.el) {
             return this._super(...arguments);
         }
-        const $contents = this.$link.contents();
         if (!this.$link.attr('href') && !this.colorCombinationClass) {
-            $contents.unwrap();
+            this.options.wysiwyg.odooEditor.historyRevertCurrentStep();
         }
         this._observer.disconnect();
         this._super(...arguments);

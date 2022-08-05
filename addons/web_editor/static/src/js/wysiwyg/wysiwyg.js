@@ -1087,6 +1087,7 @@ const Wysiwyg = Widget.extend({
         }
         if (this.snippetsMenu && !options.forceDialog) {
             if (options.forceOpen || !this.linkTools) {
+                this.odooEditor._recordHistorySelection();
                 const $btn = this.toolbar.$el.find('#create-link');
                 if (!this.linkTools || ![options.link, ...wysiwygUtils.ancestors(options.link)].includes(this.linkTools.$link[0])) {
                     const { link } = Link.getOrCreateLink({
@@ -1102,14 +1103,22 @@ const Wysiwyg = Widget.extend({
                 this.linkTools.noFocusUrl = options.noFocusUrl;
                 const _onMousedown = ev => {
                     if (
-                        !ev.target.closest('.oe-toolbar') &&
+                        !ev.target.closest('#create-link') &&
+                        (!ev.target.closest('.oe-toolbar') || !ev.target.closest('we-customizeblock-option')) &&
                         !ev.target.closest('.ui-autocomplete') &&
                         (!this.linkTools || ![ev.target, ...wysiwygUtils.ancestors(ev.target)].includes(this.linkTools.$link[0]))
                     ) {
                         // Destroy the link tools on click anywhere outside the
                         // toolbar if the target is the orgiginal target not in the original target.
-                        this.linkTools && this.linkTools.destroy();
-                        this.linkTools = undefined;
+                        if (ev.target.closest('.colorpicker-group')) {
+                            // TODO: For some reason, the colorpicker buttons
+                            // won't open if the link tools are destroyed
+                            // synchronously. However, doing so breaks other
+                            // buttons like Italic and such.
+                            setTimeout(() => this.destroyLinkTools(), 0);
+                        } else {
+                            this.destroyLinkTools();
+                        }
                         this.odooEditor.document.removeEventListener('mousedown', _onMousedown, true);
                     }
                 };
@@ -1118,22 +1127,7 @@ const Wysiwyg = Widget.extend({
                     this.linkTools.appendTo(this.toolbar.$el);
                 }
             } else {
-                const selection = this.odooEditor.document.getSelection();
-                const link = this.linkTools.$link[0];
-                if (selection && link.parentElement) {
-                    // Focus the link after the dialog element is removed.
-                    // In order to not refactor the legacy dialog widget,
-                    // use a hackhy microtask strategy.
-                    // Using a microtask to set the focus might break if
-                    // another microtask which focus an element in the dom
-                    // occurs at the same time (but this case seems
-                    // unlikely).
-                    Promise.resolve().then(() => {
-                        setSelection(link, 0, link, link.childNodes.length, false);
-                    });
-                }
-                this.linkTools.destroy();
-                this.linkTools = undefined;
+                this.destroyLinkTools();
             }
         } else {
             let { link } = Link.getOrCreateLink({
@@ -1181,6 +1175,29 @@ const Wysiwyg = Widget.extend({
                     restoreSelection();
                 }
             });
+        }
+    },
+    /**
+     * Destroy the Link tools/dialog and restore the selection.
+     */
+    destroyLinkTools() {
+        if (this.linkTools) {
+            const selection = this.odooEditor.document.getSelection();
+            const link = this.linkTools.$link[0];
+            if (selection && link.parentElement) {
+                // Focus the link after the dialog element is removed.
+                // In order to not refactor the legacy dialog widget,
+                // use a hackhy microtask strategy.
+                // Using a microtask to set the focus might break if
+                // another microtask which focus an element in the dom
+                // occurs at the same time (but this case seems
+                // unlikely).
+                Promise.resolve().then(() => {
+                    setSelection(link, 0, link, link.childNodes.length, false);
+                });
+            }
+            this.linkTools.destroy();
+            this.linkTools = undefined;
         }
     },
     /**
