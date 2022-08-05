@@ -1547,6 +1547,7 @@ class PosSession(models.Model):
         return {
             "categories": self._load_model('pos.category'),
             "products": self._load_model('product.product'),
+            "attributes_by_ptal_id": self._get_attributes_by_ptal_id(),
         }
 
     def _load_model(self, model):

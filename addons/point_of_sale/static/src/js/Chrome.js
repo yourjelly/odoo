@@ -384,6 +384,57 @@ odoo.define('point_of_sale.Chrome', function(require) {
         }
 
         // MISC METHODS //
+
+        /*
+        ** Selection of demo data
+        */
+        _selectionDemoList() {
+            return [
+                {
+                    id:"0",
+                    label: this.env._t("Shop selling beautiful clothes"),
+                    item: ['point_of_sale', 'point_of_sale_demo_clothes'],
+                },
+                {
+                    id:"1",
+                    label: this.env._t("Shop selling stylish furniture"),
+                    item: ['point_of_sale', 'point_of_sale_demo_furniture'],
+                },
+                {
+                    id:"2",
+                    label: this.env._t("Bakery selling succulent breads and pastries"),
+                    item: ['point_of_sale', 'point_of_sale_demo_bakery'],
+                },
+            ]
+        }
+
+        async _loadDemoData() {
+            const selectionList = this._selectionDemoList()
+            const { confirmed, payload: selectedOption } = await this.showPopup('SelectionPopup',
+            {
+                title: this.env._t("Let's load some demo data by pretending you want to open a"),
+                list: selectionList,
+                cancelText: "Empty POS"
+            });
+            if (confirmed) {
+                await this.rpc({
+                    'route': '/pos/load_onboarding_data',
+                    params: {
+                        module_name: selectedOption[0],
+                        file_name: selectedOption[1]
+                    },
+                });
+                const result = await this.rpc({
+                    method: 'get_onboarding_data',
+                    model: 'pos.session',
+                    args: [[odoo.pos_session_id]]
+                });
+                Object.assign(this.env.pos.attributes_by_ptal_id, result['attributes_by_ptal_id']);
+                this.env.pos.db.add_categories(result['categories']);
+                this.env.pos._loadProductProduct(result['products']);
+            }
+        }
+
         _preloadImages() {
             for (let product of this.env.pos.db.get_product_by_category(0)) {
                 const image = new Image();
