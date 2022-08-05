@@ -894,7 +894,7 @@ class Project(models.Model):
             'show': True,
             'sequence': 3,
         }]
-        if self.user_has_groups('project.group_project_rating'):
+        if self.user_has_groups('project.group_project_rating') and (self.rating_count != 0):
             if self.rating_avg >= rating_data.RATING_AVG_TOP:
                 icon = 'smile-o text-success'
             elif self.rating_avg >= rating_data.RATING_AVG_OK:

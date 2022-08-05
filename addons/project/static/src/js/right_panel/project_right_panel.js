@@ -39,14 +39,18 @@ export default class ProjectRightPanel extends LegacyComponent {
             ...options,
             'noSymbol': true,
         });
+
+        const array = valueFormatted.split('.');
+        const valueFormattedToInteger = array[0];
+
         const currency = session.currencies[this.state.data.currency_id];
         if (!currency) {
-            return valueFormatted;
+            return valueFormattedToInteger;
         }
         if (currency.position === "after") {
-            return `${valueFormatted}\u00A0${currency.symbol}`;
+            return `${valueFormattedToInteger}\u00A0${currency.symbol}`;
         } else {
-            return `${currency.symbol}\u00A0${valueFormatted}`;
+            return `${currency.symbol}\u00A0${valueFormattedToInteger}`;
         }
     }
 

@@ -885,7 +885,7 @@
                                             </div>
                                             <div role="menuitem" class="col-6" groups="project.group_project_manager">
                                                 <a t-if="record.privacy_visibility.raw_value == 'portal'" class="dropdown-item" role="menuitem" name="%(project.project_share_wizard_action)d" type="action">Share</a>
-                                                <a class="dropdown-item" role="menuitem" type="edit">Edit</a>
+                                                <a class="dropdown-item" role="menuitem" type="edit">Settings</a>
                                             </div>
                                             <div class="o_kanban_card_manage_section o_kanban_manage_view col-12 row ps-0" groups="!project.group_project_manager">
                                                 <div role="menuitem" class="w-100">
@@ -1174,8 +1174,7 @@
                             <field name="active" invisible="1"/>
                             <field name="partner_id" widget="res_partner_many2one" class="o_task_customer_field"/>
                             <field name="partner_phone" widget="phone" attrs="{'invisible': True}"/>
-                            <field name="date_deadline" attrs="{'invisible': [('is_closed', '=', True)]}"/>
-                            <field name="recurring_task" attrs="{'invisible': ['|', ('allow_recurring_tasks', '=', False), ('active', '=', False)]}"/>
+                            <field name="date_deadline" attrs="{'invisible': [('is_closed', '=', True), ]}"/>
                             <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}" context="{'project_id': project_id}"/>
                             <field name="legend_blocked" invisible="1"/>
                             <field name="legend_normal" invisible="1"/>
@@ -1261,8 +1260,10 @@
                                 </tree>
                             </field>
                         </page>
-                        <page name="recurrence" string="Recurrence" attrs="{'invisible': [('recurring_task', '=', False)]}" groups="project.group_project_recurring_tasks">
-                            <group>
+                        <page name="recurrence" string="Recurrence"  groups="project.group_project_recurring_tasks">
+                            <span class="o_form_label"> Recurrence </span>
+                            <field name="recurring_task" attrs="{'invisible': ['|', ('allow_recurring_tasks', '=', False), ('active', '=', False)]}"/>
+                            <group attrs="{'invisible': [('recurring_task', '=', False)]}">
                                 <group>
                                     <label for="repeat_interval" />
                                     <div class="o_col">
