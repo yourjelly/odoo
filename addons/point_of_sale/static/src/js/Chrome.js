@@ -389,19 +389,37 @@ odoo.define('point_of_sale.Chrome', function(require) {
         // MISC METHODS //
 
         async _loadDemoData() {
-            const { confirmed } = await this.showPopup('ConfirmPopup', {
-                title: this.env._t('At Odoo we cover all your needs'),
-                body: this.env._t(
-                    "Let's load some demo data by pretending you want to open a "
-                ),
-                confirmText: this.env._t("Let's go"),
-                cancelText: this.env._t('I want an empty POS')
+            const selectionList = [
+                {
+                    id:"0",
+                    label: this.env._t("Shop selling beautiful clothes"),
+                    item: false,
+                    argument: 'clothes',
+                },
+                {
+                    id:"1",
+                    label: this.env._t("Shop selling stylish furniture"),
+                    item: false,
+                    argument: 'furniture',
+                },
+                {
+                    id:"2",
+                    label: this.env._t("Bakery selling succulent breads and pastries"),
+                    item: false,
+                    argument: 'bakery',
+                },
+            ]
+            const { confirmed, payload: selectedOption } = await this.showPopup('SelectionPopup',
+            {
+                title: this.env._t("Let's load some demo data by pretending you want to open a"),
+                list: selectionList,
+                cancelText: "Empty POS"
             });
             if (confirmed) {
                 await this.rpc({
                     'route': '/pos/load_onboarding_data',
                     params: {
-                        arg: 'clothes' // to add arguments
+                        arg: String(selectedOption) // Extract argument from selected option
                     },
                 });
                 const result = await this.rpc({
