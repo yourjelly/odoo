@@ -108,7 +108,7 @@ class SaleOrderLine(models.Model):
             if line.state == 'sale' and not line.is_expense:
                 line.sudo()._timesheet_service_generation()
                 # if the SO line created a task, post a message on the order
-                if line.task_id:
+                if line.task_id and line.project_id:
                     msg_body = _("Task Created (%s): %s", line.product_id.name, line.task_id._get_html_link())
                     line.order_id.message_post(body=msg_body)
         return lines
