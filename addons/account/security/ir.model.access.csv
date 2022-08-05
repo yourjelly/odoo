@@ -147,3 +147,8 @@ access_account_tour_upload_bill,account.tour.upload.bill,model_account_tour_uplo
 access_account_tour_upload_bill_email_confirm,account.tour.upload.bill.email.confirm,model_account_tour_upload_bill_email_confirm,account.group_account_manager,1,1,1,0
 
 access_account_accrued_orders_wizard,account.account.accrued.orders.wizard,account.model_account_accrued_orders_wizard,group_account_user,1,1,1,0
+
+access_account_edi_format_readonly,account.edi.format,model_account_edi_format,,1,0,0,0
+access_account_edi_format_group_invoice,account.edi.format,model_account_edi_format,account.group_account_invoice,1,1,1,1
+access_account_edi_document_readonly,account.edi.document,model_account_edi_document,,1,0,0,0
+access_account_edi_document_group_invoice,account.edi.document,model_account_edi_document,account.group_account_invoice,1,1,1,1

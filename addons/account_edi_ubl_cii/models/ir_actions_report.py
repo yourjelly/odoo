@@ -12,10 +12,15 @@ from xml.sax.saxutils import escape, quoteattr
 class IrActionsReport(models.Model):
     _inherit = 'ir.actions.report'
 
-    def _add_pdf_into_invoice_xml(self, invoice, stream_data):
+
+    def _add_pdf_into_invoice_xml(self, invoice, stream_data, data):
+        print("... Embed the pdf inside xml")
         format_codes = ['ubl_bis3', 'ubl_de', 'nlcius_1', 'efff_1']
-        edi_attachments = invoice.edi_document_ids.filtered(lambda d: d.edi_format_id.code in format_codes).attachment_id
-        for edi_attachment in edi_attachments:
+        edi_formats = invoice.edi_format_ids.filtered(lambda f: f.code in format_codes)
+        for edi_format in edi_formats:
+            edi_attachment = data['edi_attachments'][invoice].get(edi_format)
+            if not edi_attachment:
+                continue
             old_xml = base64.b64decode(edi_attachment.with_context(bin_size=False).datas, validate=True)
             tree = etree.fromstring(old_xml)
             anchor_elements = tree.xpath("//*[local-name()='AccountingSupplierParty']")
@@ -44,8 +49,6 @@ class IrActionsReport(models.Model):
                 tree.insert(anchor_index, etree.fromstring(to_inject))
                 new_xml = etree.tostring(cleanup_xml_node(tree))
                 edi_attachment.write({
-                    'res_model': 'account.move',
-                    'res_id': invoice.id,
                     'datas': base64.b64encode(new_xml),
                     'mimetype': 'application/xml',
                 })
@@ -60,6 +63,6 @@ class IrActionsReport(models.Model):
                 and self.report_name in ('account.report_invoice_with_payments', 'account.report_invoice'):
             for res_id, stream_data in collected_streams.items():
                 invoice = self.env['account.move'].browse(res_id)
-                self._add_pdf_into_invoice_xml(invoice, stream_data)
+                self._add_pdf_into_invoice_xml(invoice, stream_data, data)
 
         return collected_streams

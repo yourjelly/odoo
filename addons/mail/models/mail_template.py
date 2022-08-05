@@ -223,7 +223,8 @@ class MailTemplate(models.Model):
                     report_service = report.report_name
 
                     if report.report_type in ['qweb-html', 'qweb-pdf']:
-                        result, format = report._render_qweb_pdf([res_id])
+                        # pass 'results' to add the edi attachments they are generated
+                        result, format = report._render_qweb_pdf([res_id], results=results)
                     else:
                         res = report._render([res_id])
                         if not res:

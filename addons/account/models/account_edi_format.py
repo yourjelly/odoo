@@ -43,13 +43,18 @@ class AccountEdiFormat(models.Model):
 
         # activate cron
         if any(edi_format._needs_web_services() for edi_format in edi_formats):
-            self.env.ref('account_edi.ir_cron_edi_network').active = True
+            self.env.ref('account.ir_cron_edi_network').active = True
 
         return edi_formats
 
     ####################################################
     # Export method to override based on EDI Format
     ####################################################
+
+    #def _is_edi_document_needed(self):
+    #    ''' Is the creation of an edi.document needed ?
+    #    '''
+    #    return self._needs_web_services()
 
     def _get_invoice_edi_content(self, move):
         ''' Create a bytes literal of the file content representing the invoice - to be overridden by the EDI Format
@@ -160,6 +165,14 @@ class AccountEdiFormat(models.Model):
         # TO OVERRIDE
         self.ensure_one()
         return {}
+
+    def _when_is_edi_generated(self):
+        """ Select whether the edi is generated at the 'post' (button 'Confirm') or the 'generate_email'
+        (button 'Send & Print') or directly when printing the pdf (button 'print')
+        :returns: 'post' or 'email' or 'print'
+        """
+        self.ensure_one()
+        return 'post'
 
     def _cancel_invoice_edi(self, invoices):
         """Calls the web services to cancel the invoice of this document.
@@ -277,11 +290,10 @@ class AccountEdiFormat(models.Model):
         self.ensure_one()
         return self.env['account.move']
 
-    def _prepare_invoice_report(self, pdf_writer, edi_document):
+    def _prepare_invoice_report(self, pdf_writer, attachment):
         """
         Prepare invoice report to be printed.
         :param pdf_writer: The pdf writer with the invoice pdf content loaded.
-        :param edi_document: The edi document to be added to the pdf file.
         """
         # TO OVERRIDE
         self.ensure_one()

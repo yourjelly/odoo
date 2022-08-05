@@ -11,3 +11,4 @@ from . import account_edi_xml_ubl_nlcius
 from . import account_edi_xml_ubl_efff
 from . import ir_actions_report
 from . import mail_template
+from . import account_move

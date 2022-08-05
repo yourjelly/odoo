@@ -762,7 +762,7 @@ class IrActionsReport(models.Model):
 
         return collected_streams
 
-    def _render_qweb_pdf(self, res_ids=None, data=None):
+    def _render_qweb_pdf(self, res_ids=None, data=None, results=None):
         self.ensure_one()
         if not data:
             data = {}

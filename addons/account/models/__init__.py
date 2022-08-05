@@ -33,3 +33,7 @@ from . import ir_actions_report
 from . import res_currency
 from . import res_bank
 from . import mail_thread
+from . import account_edi_format
+from . import account_edi_document
+from . import account_move2  #TODO: remove after wan refactor
+from . import mail_template

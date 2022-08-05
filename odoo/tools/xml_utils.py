@@ -49,7 +49,10 @@ def _check_with_xsd(tree_or_str, stream, env=None):
             stream = BytesIO(base64.b64decode(attachment.datas))
     xsd_schema = etree.XMLSchema(etree.parse(stream, parser=parser))
     try:
+        # TODO: This is so slow
+        print("Asserting with the xsd schema...")
         xsd_schema.assertValid(tree_or_str)
+        print("..DONE !")
     except etree.DocumentInvalid as xml_errors:
         raise UserError('\n'.join(str(e) for e in xml_errors.error_log))
 

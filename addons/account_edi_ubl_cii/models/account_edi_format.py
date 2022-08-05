@@ -123,7 +123,7 @@ class AccountEdiFormat(models.Model):
             }
             # we don't want the Factur-X and E-FFF xml to appear in the attachment of the invoice when confirming it
             # E-FFF will appear after the pdf is generated, Factur-X will never appear (it's contained in the PDF)
-            if self.code not in ['facturx_1_0_05', 'efff_1']:
+            if self.code not in ['facturx_1_0_05']:
                 attachment_create_vals.update({'res_id': invoice.id, 'res_model': 'account.move'})
 
             attachment = self.env['ir.attachment'].create(attachment_create_vals)
@@ -144,20 +144,19 @@ class AccountEdiFormat(models.Model):
 
     def _when_is_edi_generated(self):
         self.ensure_one()
-
-        if self.code == 'facturx_1_0_05':
+        if self.code in FORMAT_CODES:
             return 'print'
         return super()._when_is_edi_generated()
 
-    def _prepare_invoice_report(self, pdf_writer, edi_document):
+    def _prepare_invoice_report(self, pdf_writer, attachment):
         # EXTENDS account_edi
         self.ensure_one()
         if self.code != 'facturx_1_0_05':
-            return super()._prepare_invoice_report(pdf_writer, edi_document)
-        if not edi_document.attachment_id:
+            return super()._prepare_invoice_report(pdf_writer, attachment)
+        if not attachment:
             return
 
-        pdf_writer.embed_odoo_attachment(edi_document.attachment_id, subtype='text/xml')
+        pdf_writer.embed_odoo_attachment(attachment, subtype='text/xml')
         if not pdf_writer.is_pdfa and str2bool(
                 self.env['ir.config_parameter'].sudo().get_param('edi.use_pdfa', 'False')):
             try:
@@ -168,7 +167,7 @@ class AccountEdiFormat(models.Model):
                                              raise_if_not_found=False)
             if metadata_template:
                 content = self.env['ir.qweb']._render('account_edi_ubl_cii.account_invoice_pdfa_3_facturx_metadata', {
-                    'title': edi_document.move_id.name,
+                    'title': attachment.move_id.name,
                     'date': fields.Date.context_today(self),
                 })
                 pdf_writer.add_file_metadata(content.encode())

@@ -22,9 +22,8 @@ Note also that you need to activate PDF A in order to be able to submit a Factur
 go to Settings > Technical (debug mode) > System Parameters > select/create one with Key: edi.use_pdfa, Value: true.
 With this setting, Chorus Pro will automatically detect the "PDF/A-3 (Factur-X)" format.
     """,
-    'depends': ['account_edi'],
+    'depends': ['account'],
     'data': [
-        'data/account_edi_data.xml',
         'data/cii_22_templates.xml',
         'data/ubl_20_templates.xml',
         'data/ubl_21_templates.xml',
