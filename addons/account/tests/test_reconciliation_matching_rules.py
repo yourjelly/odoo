@@ -161,14 +161,12 @@ class TestReconciliationMatchingRules(AccountTestInvoicingCommon):
         cls._post_statements(cls)
 
     @classmethod
-    def _create_invoice_line(cls, amount, partner, move_type, currency=None, pay_reference=None, ref=None, name=None, inv_date='2019-09-01', payment_term=None):
+    def _create_invoice_line(cls, amount, partner, move_type, currency=None, pay_reference=None, ref=None, name=None, inv_date='2019-09-01'):
         ''' Create an invoice on the fly.'''
         invoice_form = Form(cls.env['account.move'].with_context(default_move_type=move_type, default_invoice_date=inv_date, default_date=inv_date))
         invoice_form.partner_id = partner
         if currency:
             invoice_form.currency_id = currency
-        if payment_term:
-            invoice_form.invoice_payment_term_id = payment_term
         if pay_reference:
             invoice_form.payment_reference = pay_reference
         if ref:
@@ -1104,23 +1102,3 @@ class TestReconciliationMatchingRules(AccountTestInvoicingCommon):
                 'status': 'write_off',
             },
         })
-
-    def test_early_payment_discount_match(self):
-        rule = self._create_reconcile_model(line_ids=[{}])
-
-        early_discount_pay_term = self.env['account.payment.term'].create({
-            'name': "test_early_payment_discount_match",
-            'has_early_payment': True,
-            'line_ids': [Command.create({
-                'value': 'balance',
-                'days': 0,
-                'option': 'day_after_invoice_date',
-            })],
-        })
-
-        st_line = self._create_st_line(amount=2940.0)
-
-        inv1 = self._create_invoice_line(1000, self.partner_a, 'out_invoice', payment_term=early_discount_pay_term)
-        inv2 = self._create_invoice_line(2000, self.partner_a, 'out_invoice', payment_term=early_discount_pay_term)
-
-        self._check_statement_matching(rule, {st_line: {'amls': inv1 + inv2, 'model': rule}})
