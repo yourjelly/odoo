@@ -865,100 +865,97 @@ tour.stepUtils.mobileModifier(tour.stepUtils.autoExpandMoreButtons('.o_control_p
     content: _t('See Project'),
     position: 'right',
 },
-tour.stepUtils.autoExpandMoreButtons('.o_control_panel .breadcrumb:contains("the_flow.project")'),
+tour.stepUtils.toggleHomeMenu(),
+...tour.stepUtils.goToAppSteps("project.menu_main_pm", 'Go to the Project app.'),
 {
-    trigger: '.oe_button_box .oe_stat_button:has(span:contains("Recorded"))',
-    extra_trigger: '.o_form_readonly',
-    content: _t('See Timesheets'),
+    trigger: ".o_kanban_record:has(span:contains('the_flow.project'))",
+    content: _t('Open project'),
+    position: 'bottom',
+},{
+    trigger: ".o_kanban_record:has(span:contains('the_flow.service')) .o_dropdown_kanban",
+    content: _t('Open task'),
     position: 'bottom',
 }, {
-    mobile: true,
-    trigger: '.o_enable_searchview',
-    content: _t('Open the search field'),
-    position: 'bottom',
-}, {
-    mobile: true,
-    trigger: '.o_toggle_searchview_full',
-    content: _t('Open the full search field'),
-    position: 'bottom',
-}, {
-    trigger: '.o_group_by_menu .dropdown-toggle',
-    content: _t('Click on the group by button'),
-    position: 'bottom',
-}, {
-    trigger: '.dropdown-item.selected:contains(Employee)',
-    extra_trigger: '.dropdown.show',
-    content: _t('Remove group by employee'),
-    position: 'bottom',
-}, {
-    trigger: '.dropdown-item.selected:contains(Billing Type)',
-    extra_trigger: '.dropdown.show',
-    content: _t('Remove group by Billing type'),
-    position: 'bottom',
-}, {
-    mobile: true,
-    trigger: '.o_mobile_search_footer',
-    content: _t('Close the search dropdown on mobile'),
-    position: 'bottom',
-}, {
-    mobile: true,
-    trigger: '.o_cp_bottom_right .o_cp_switch_buttons .btn-link',
-    content: _t('Prepare to change the view on mobile'),
-    position: 'bottom',
-}, {
-    trigger: '.o_switch_view.o_list',
+    trigger: "a:contains('Timesheets')",
     content: _t('Activate the list view'),
     position: 'bottom',
 }, {
-    trigger: '.o_list_button_add',
+    mobile: true,
+    trigger: ".o_form_button_edit",
+    content: _t("Edit the task"),
+    position: "bottom",
+}, {
+    mobile: true,
+    trigger: ".o_cp_buttons .btn-add-record",
+    content: _t("Add a Timesheet"),
+    position: "bottom",
+}, {
+    mobile: true,
+    trigger: "input[name=name]",
+    content: _t("set description"),
+    position: "bottom",
+    run: 'text 10 hours',
+}, {
+    mobile: true,
+    trigger: "input[name=unit_amount]",
+    content: _t("set time"),
+    position: "bottom",
+    run: 'text 10',
+}, {
+    mobile: true,
+    trigger: "button:has(span:contains('Save & Close'))",
+    content: _t('Save'),
+    position: 'bottom',
+}, {
+    mobile: false,
+    trigger: "a:contains('Add a line')",
     content: _t('Add a Timesheet'),
     position: 'bottom',
 }, {
     // FIXME replace list by kanban + form
     // FIXME WOWL: remove first part of selector when legacy view is dropped
     // (currently, it's anew view in community and a legacy one in enterprise)
+    mobile: false,
     trigger: '.o_selected_row input[name=name], .o_selected_row .o_field_widget[name=name] input',
     content: _t('Set description'),
     position: 'bottom',
     run: 'text 10 hours',
-}, {
-    trigger: '.o_selected_row .o_field_widget[name=task_id] input',
-    content: _t('Choose a task'),
-    position: 'bottom',
-    run: 'click',
-}, {
+},  {
     mobile: false,
-    trigger: ".ui-menu-item > a",
-    auto: true,
-}, {
-    mobile: true,
-    trigger: ".o_kanban_record:has(.o_kanban_record_title :contains('the_flow.service'))",
-    extra_trigger: ".modal:not(.o_inactive_modal) .modal-title:contains('Task')",
-    content: _t("Select the the_flow.vendor"),
-    position: "bottom",
-}, {
     trigger: '.o_selected_row .o_field_widget[name=unit_amount]input',
     content: _t('Set time'),
     position: 'bottom',
     run: 'text 10',
 }, {
-    trigger: '.o_list_button_save',
+    mobile: false,
+    trigger: "button:contains('Save')",
     content: _t('Save'),
     position: 'bottom',
 },
-...tour.stepUtils.goBackBreadcrumbsMobile(
-        _t('Back to the sale order'),
-        undefined,
-        ".breadcrumb-item.active:contains('Timesheets')",
-        ".breadcrumb-item.active:contains('the_flow.project')",
-        ".breadcrumb-item.active:contains('the_flow.service')"
-    ),
+tour.stepUtils.toggleHomeMenu(),
+...tour.stepUtils.goToAppSteps('sale.sale_menu_root',('Go back to the Sales app')),
+tour.stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('Quotations')"),
 {
+    trigger: ".o_menu_sections button[data-menu-xmlid='sale.sale_order_menu']",
+    content: _t("Go to Sales menu"),
+    position: "bottom"
+},
+{
+    trigger: ".o_menu_sections .dropdown-item[data-menu-xmlid='sale.menu_sale_order']",
+    content: _t("Go to the sales orders"),
+    position: "bottom"
+}, {
     mobile: false,
-    trigger: '.breadcrumb-item:nth-child(2) a',
-    extra_trigger: '.o_list_button_add', // Waiting save
-    content: _t('Back to the sale order'),
-    position: 'bottom',
+    trigger: ".o_data_cell:contains('the_flow.customer')",
+    extra_trigger: '.o_control_panel .breadcrumb:contains("Sales Orders")',
+    content: _t("Go to the last sale order"),
+    position: "right"
+}, {
+    mobile: true,
+    trigger: ".o_kanban_record .o_kanban_record_title:contains('the_flow.customer')",
+    extra_trigger: '.o_control_panel .breadcrumb:contains("Sales Orders")',
+    content: _t("Go to the last sale order"),
+    position: "bottom"
 },
 ...tour.stepUtils.statusbarButtonsSteps('Create Invoice', _t("Validate"), ".o_field_widget[name=order_line]"),
 {
