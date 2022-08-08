@@ -5,8 +5,8 @@ import { attr, many, one } from '@mail/model/model_field';
 import { clear } from '@mail/model/model_field_command';
 
 import { qweb } from 'web.core';
-
-import { get_cookie, Markup, set_cookie } from 'web.utils';
+import { Markup } from 'web.utils';
+import {get_cookie, set_cookie} from 'web.utils.cookies';
 
 registerModel({
     name: 'PublicLivechatGlobal',

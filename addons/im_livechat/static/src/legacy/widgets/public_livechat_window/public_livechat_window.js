@@ -4,7 +4,8 @@ import config from 'web.config';
 import { _t, qweb } from 'web.core';
 import Widget from 'web.Widget';
 
-import { set_cookie, unaccent } from 'web.utils';
+import {unaccent} from 'web.utils';
+import {set_cookie} from 'web.utils.cookies';
 
 /**
  * This is the widget that represent windows of livechat in the frontend.

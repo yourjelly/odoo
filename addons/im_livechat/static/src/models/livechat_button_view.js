@@ -4,7 +4,8 @@ import { registerModel } from '@mail/model/model_core';
 import { attr, one } from '@mail/model/model_field';
 import { clear } from '@mail/model/model_field_command';
 
-import { get_cookie, set_cookie, unaccent } from 'web.utils';
+import {unaccent} from 'web.utils';
+import {get_cookie, set_cookie} from 'web.utils.cookies';
 
 registerModel({
     name: 'LivechatButtonView',

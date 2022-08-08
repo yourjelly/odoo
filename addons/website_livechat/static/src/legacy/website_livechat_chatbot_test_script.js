@@ -1,7 +1,7 @@
 /** @odoo-module alias=website_livechat.chatbot_test_script **/
 
 import publicWidget from 'web.public.widget';
-import utils from 'web.utils';
+import {set_cookie} from 'web.utils.cookies';
 
 import LivechatButton from '@im_livechat/legacy/widgets/livechat_button';
 
@@ -45,10 +45,10 @@ publicWidget.registry.livechatChatbotTestScript = publicWidget.Widget.extend({
      * Remove any existing session cookie to start fresh
      */
     async start() {
-        utils.set_cookie('im_livechat_session', '', -1);
-        utils.set_cookie('im_livechat_auto_popup', '', -1);
-        utils.set_cookie('im_livechat_history', '', -1);
-        utils.set_cookie('im_livechat_previous_operator_pid', '', -1);
+        set_cookie('im_livechat_session', '', -1);
+        set_cookie('im_livechat_auto_popup', '', -1);
+        set_cookie('im_livechat_history', '', -1);
+        set_cookie('im_livechat_previous_operator_pid', '', -1);
         const messaging = await this.env.services.messaging.get();
         return this._super(...arguments).then(() => {
             messaging.update({

@@ -5,7 +5,8 @@ import { clear } from '@mail/model/model_field_command';
 // ensure that the model definition is loaded before the patch
 import '@im_livechat/models/livechat_button_view';
 
-import { set_cookie, unaccent } from 'web.utils';
+import {unaccent} from 'web.utils';
+import {set_cookie} from 'web.utils.cookies';
 
 patchRecordMethods('LivechatButtonView', {
     /**

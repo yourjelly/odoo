@@ -3,7 +3,7 @@ odoo.define('website.s_popup', function (require) {
 
 const config = require('web.config');
 const publicWidget = require('web.public.widget');
-const utils = require('web.utils');
+const {get_cookie, set_cookie} = require('web.utils.cookies');
 
 const PopupWidget = publicWidget.Widget.extend({
     selector: '.s_popup',
@@ -17,7 +17,7 @@ const PopupWidget = publicWidget.Widget.extend({
      * @override
      */
     start: function () {
-        this._popupAlreadyShown = !!utils.get_cookie(this.$el.attr('id'));
+        this._popupAlreadyShown = !!get_cookie(this.$el.attr('id'));
         if (!this._popupAlreadyShown) {
             this._bindPopup();
         }
@@ -96,7 +96,7 @@ const PopupWidget = publicWidget.Widget.extend({
      */
     _onHideModal: function () {
         const nbDays = this.$el.find('.modal').data('consentsDuration');
-        utils.set_cookie(this.el.id, true, nbDays * 24 * 60 * 60, 'required');
+        set_cookie(this.el.id, true, nbDays * 24 * 60 * 60, 'required');
         this._popupAlreadyShown = true;
 
         this.$target.find('.media_iframe_video iframe').each((i, iframe) => {
@@ -136,9 +136,9 @@ publicWidget.registry.cookies_bar = PopupWidget.extend({
      * @param acceptOptional Whether optional cookies were accepted or not
      */
     _onAcceptClick(acceptOptional) {
-        const acceptedCookieTypes = JSON.parse(utils.get_cookie('accepted_cookie_types') || '{}');
+        const acceptedCookieTypes = JSON.parse(get_cookie('accepted_cookie_types') || '{}');
         Object.assign(acceptedCookieTypes, {'required': true, 'optional': acceptOptional});
-        utils.set_cookie('accepted_cookie_types',
+        set_cookie('accepted_cookie_types',
             JSON.stringify(acceptedCookieTypes),
             this.cookieDurationDays * 24 * 60 * 60, 'required');
         // Prevent the modal from reopening again.
@@ -161,9 +161,9 @@ publicWidget.registry.cookies_bar = PopupWidget.extend({
      */
     _onHideModal() {
         this._super.apply(this, arguments);
-        if (!utils.get_cookie('accepted_cookie_types')) {
+        if (!get_cookie('accepted_cookie_types')) {
             // No confirmation => show popup again next time.
-            utils.set_cookie(this.el.id, false, -1, 'required');
+            set_cookie(this.el.id, false, -1, 'required');
             this._popupAlreadyShown = false;
         }
     },

@@ -4,7 +4,7 @@ import { patchRecordMethods } from '@mail/model/model_core';
 // ensure that the model definition is loaded before the patch
 import '@im_livechat/models/public_livechat_global';
 
-import { set_cookie } from 'web.utils';
+import {set_cookie} from 'web.utils.cookies';
 
 patchRecordMethods('PublicLivechatGlobal', {
     /**
