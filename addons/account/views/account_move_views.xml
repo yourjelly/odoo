@@ -1267,10 +1267,9 @@
                             </page>
                             <page id="edi_documents"
                                   string="EDI Info"
-                                  groups="base.group_no_one"
-                                  attrs="{'invisible': [('edi_format_ids', '=', [])]}">
-                                <group string="Electronic Data Interchange" attrs="{'invisible': [('compatible_edi_ids', '=', [])]}">
-                                    <field name="compatible_edi_ids" invisible="1" />
+                                  groups="base.group_no_one">
+                                <group string="Electronic Data Interchange">
+                                    <field name="compatible_edi_ids" invisible="1"/>
                                     <field name="edi_format_ids" widget="many2many_checkboxes"/>
                                 </group>
                                 <field name="edi_document_ids" options="{'no_open': '1'}" attrs="{'invisible': [('edi_document_ids', '=', [])]}">

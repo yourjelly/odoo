@@ -22,9 +22,16 @@ class AccountMove(models.Model):
     edi_show_cancel_button = fields.Boolean(compute='_compute_edi_show_cancel_button')
     edi_show_abandon_cancel_button = fields.Boolean(compute='_compute_edi_show_abandon_cancel_button')
 
-    # TODO: cannot uncheck formats if documents exist for it and requires webservices ? Make it stored
-    edi_format_ids = fields.Many2many(related="journal_id.edi_format_ids", readonly=False)
+    edi_format_ids = fields.Many2many(compute="_compute_edi_format_ids", readonly=False, store=True,
+                                      comodel_name='account.edi.format',
+                                      domain="[('id', 'in', compatible_edi_ids)]")
     compatible_edi_ids = fields.Many2many(related="journal_id.compatible_edi_ids")
+
+    @api.depends('journal_id')
+    def _compute_edi_format_ids(self):
+        for move in self:
+            move.journal_id._compute_edi_format_ids()
+            move.edi_format_ids = move.journal_id.edi_format_ids.ids
 
     def _get_mapping_format_field(self):
         ''' Mapping between the edi format code and the edi state field defined in the other modules

@@ -153,6 +153,7 @@
 
         <record model="ir.config_parameter" id="ir_config_parameter_use_pdfa">
             <field name="key">edi.use_pdfa</field>
+            <!-- TODO: always set to true ?-->
             <field name="value">false</field>
         </record>
 
