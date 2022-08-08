@@ -1184,6 +1184,8 @@ const Wysiwyg = Widget.extend({
         if (this.linkTools) {
             const selection = this.odooEditor.document.getSelection();
             const link = this.linkTools.$link[0];
+            let first
+            let last;
             if (selection && link.parentElement) {
                 // Focus the link after the dialog element is removed.
                 // In order to not refactor the legacy dialog widget,
@@ -1192,11 +1194,18 @@ const Wysiwyg = Widget.extend({
                 // another microtask which focus an element in the dom
                 // occurs at the same time (but this case seems
                 // unlikely).
-                Promise.resolve().then(() => {
-                    setSelection(link, 0, link, link.childNodes.length, false);
-                });
+                if (this.linkTools.shouldUnlink()) {
+                    first = link.childNodes[0];
+                    last = link.childNodes[link.childNodes.length - 1];
+                } else {
+                    first = link;
+                    last = link;
+                }
             }
             this.linkTools.destroy();
+            if (first) {
+                setSelection(first, 0, last, last.childNodes.length || last.length, false);
+            }
             this.linkTools = undefined;
         }
     },
@@ -1492,6 +1501,11 @@ const Wysiwyg = Widget.extend({
                     const selection = this.odooEditor.document.getSelection();
                     const range = selection.rangeCount && selection.getRangeAt(0);
                     const hadNonCollapsedSelection = range && !selection.isCollapsed;
+                    // Hack: The event color_leave revert the mutations with
+                    // `historyRevertCurrentStep`. We must prevent that revert
+                    // from reverting the current mutations of the editor.
+                    const startingMutations = this.odooEditor._currentStep.mutations;
+                    this.odooEditor._currentStep.mutations = [];
                     colorpicker = new ColorPaletteWidget(this, {
                         excluded: ['transparent_grayscale'],
                         $editable: $(this.odooEditor.editable), // Our parent is the root widget, we can't retrieve the editable section from it...
@@ -1504,6 +1518,7 @@ const Wysiwyg = Widget.extend({
                         if (hadNonCollapsedSelection) {
                             this.odooEditor.historyResetLatestComputedSelection(true);
                         }
+                        this.odooEditor._currentStep.mutations = [...startingMutations, ...this.odooEditor._currentStep.mutations];
                         this._processAndApplyColor(eventName, ev.data.color);
                         this._updateEditorUI();
                     });

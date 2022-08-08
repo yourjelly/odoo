@@ -57,14 +57,17 @@ const LinkTools = Link.extend({
         if (!this.el) {
             return this._super(...arguments);
         }
-        if (!this.$link.attr('href') && !this.colorCombinationClass) {
-            this.options.wysiwyg.odooEditor.historyRevertCurrentStep();
+        const $contents = this.$link.contents();
+        if (this.shouldUnlink()) {
+            $contents.unwrap();
         }
         this._observer.disconnect();
         this._super(...arguments);
         this._removeHintClasses();
     },
-
+    shouldUnlink: function () {
+        return !this.$link.attr('href') && !this.colorCombinationClass
+    },
     applyLinkToDom() {
         this._observer.disconnect();
         this._removeHintClasses();
