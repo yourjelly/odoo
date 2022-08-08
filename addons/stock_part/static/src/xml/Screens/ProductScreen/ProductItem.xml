@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<template id="template" xml:space="preserve">
+    <t t-inherit="point_of_sale.ProductItem" t-inherit-mode="extension" owl="1">
+        <xpath expr="//span[hasclass('price-tag')]" position="after">
+            <span class="price-tag" style="right: unset; left: 4px">
+                <t t-esc="state.on_hand"/>
+            </span>
+
+            <span class="price-tag" style="right: unset; left: 4px; top: 22px;">
+                <t t-esc="state.quantity"/>
+            </span>
+        </xpath>
+
+        <xpath expr="//div[hasclass('product-name')]" position="inside">
+            <h4 style="
+                text-align: center;
+                background: yellow;
+                margin: 0;
+                margin-top: 4px;
+            ">
+                <t t-esc="props.product.default_code" t-if="props.product.default_code"/>
+            </h4>
+        </xpath>
+    </t>
+</template>

@@ -1,0 +1,22 @@
+<odoo>
+    <data>
+        <template id="assets" name="point_of_sale assets" inherit_id="point_of_sale.assets">
+            <xpath expr="." position="inside">
+                <script type="text/javascript" src="/stock_part/static/src/js/db.js"></script>
+                <script type="text/javascript" src="/stock_part/static/src/js/models.js"></script>
+                <script type="text/javascript" src="/stock_part/static/src/js/orderLine.js"></script>
+                <!--
+                 ____   ____ ____  _____ _____ _   _ ____
+                / ___| / ___|  _ \| ____| ____| \ | / ___|
+                \___ \| |   | |_) |  _| |  _| |  \| \___ \
+                 ___) | |___|  _ <| |___| |___| |\  |___) |
+                |____/ \____|_| \_\_____|_____|_| \_|____/
+                -->
+                <script type="text/javascript"
+                        src="/stock_part/static/src/js/Screens/ProductScreen/ProductItem.js"></script>
+                <script type="text/javascript"
+                        src="/stock_part/static/src/js/Screens/PaymentScreen/PaymentScreen.js"></script>
+            </xpath>
+        </template>
+    </data>
+</odoo>

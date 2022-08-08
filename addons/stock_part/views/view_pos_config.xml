@@ -1,0 +1,26 @@
+<odoo>
+    <data>
+        <record id="stock_part.view_pos_config" model="ir.ui.view">
+            <field name="name">stock_part.config.form.view</field>
+            <field name="model">pos.config</field>
+            <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@id='inventory_location']//div[hasclass('o_setting_box')]"
+                       position="after">
+                    <div class="col-12 col-lg-6 o_setting_box" id="update_quantities_stock_setting" modifiers="{}">
+                        <div class="o_setting_right_pane" modifiers="{}">
+                            <div modifiers="{}">
+                                <label string="Stock live update" for="block_when_no_stock_id" modifiers="{}"/>
+                                <div class="content-group mt16 o_light_label" modifiers="{}">
+                                    <div class="text-muted">Block when no stock</div>
+                                    <field name="block_when_no_stock" colspan="4" modifiers="{}"
+                                           id="block_when_no_stock_id" widget="boolean_toggle"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
