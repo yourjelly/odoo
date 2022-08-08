@@ -393,20 +393,17 @@ odoo.define('point_of_sale.Chrome', function(require) {
                 {
                     id:"0",
                     label: this.env._t("Shop selling beautiful clothes"),
-                    item: false,
-                    argument: 'clothes',
+                    item: 'clothes',
                 },
                 {
                     id:"1",
                     label: this.env._t("Shop selling stylish furniture"),
-                    item: false,
-                    argument: 'furniture',
+                    item: 'furniture',
                 },
                 {
                     id:"2",
                     label: this.env._t("Bakery selling succulent breads and pastries"),
-                    item: false,
-                    argument: 'bakery',
+                    item: 'bakery',
                 },
             ]
             const { confirmed, payload: selectedOption } = await this.showPopup('SelectionPopup',
@@ -419,7 +416,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
                 await this.rpc({
                     'route': '/pos/load_onboarding_data',
                     params: {
-                        arg: String(selectedOption) // Extract argument from selected option
+                        arg: selectedOption
                     },
                 });
                 const result = await this.rpc({
