@@ -837,7 +837,7 @@ class AccountReconcileModel(models.Model):
             amount_residual_currency = aml.amount_residual_currency
 
             # Manage the early payment discount.
-            if same_currency_mode and aml.move_id.is_eligible_for_early_discount(st_line.date):
+            if same_currency_mode and aml.move_id._is_eligible_for_early_discount(st_line.date):
                 amount_residual = aml.move_id.amount_total_signed
                 amount_residual_currency = -aml.move_id.invoice_early_pay_amount_after_discount * sign
                 discounted_balance = aml.amount_residual_currency - amount_residual_currency

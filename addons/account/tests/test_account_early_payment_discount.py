@@ -183,17 +183,17 @@ class TestAccountEarlyPaymentDiscount(AccountTestInvoicingCommon):
     def test_early_pay_reduced_amounts(self):
         # Check that the monetary amounts after the discount are correct.
         # 1200 invoice, no tax, 10% discount
-        self.assertEqual(self.inv_1200_10_percents_discount_no_tax.invoice_early_pay_amount_after_discount, 1080.00)
-        self.assertEqual(self.inv_1200_10_percents_discount_no_tax.get_early_pay_untaxed_amount_after_discount(), 1080.00)
-        self.assertEqual(self.inv_1200_10_percents_discount_no_tax.get_early_pay_tax_after_discount(), 0.00)
+        self.assertRecordValues(self.inv_1200_10_percents_discount_no_tax, [{
+            'invoice_early_pay_amount_after_discount': 1080.00,
+        }])
         # 1500 invoice, 15% tax, 10% discount including taxes
-        self.assertEqual(self.inv_1500_10_percents_discount_tax_incl_15_percents_tax.invoice_early_pay_amount_after_discount, 1552.50)
-        self.assertEqual(self.inv_1500_10_percents_discount_tax_incl_15_percents_tax.get_early_pay_untaxed_amount_after_discount(), 1350.00)
-        self.assertEqual(self.inv_1500_10_percents_discount_tax_incl_15_percents_tax.get_early_pay_tax_after_discount(), 202.50)
+        self.assertRecordValues(self.inv_1500_10_percents_discount_tax_incl_15_percents_tax, [{
+            'invoice_early_pay_amount_after_discount': 1552.50,
+        }])
         # 1500 invoice, 15% tax, 10% discount excluding taxes
-        self.assertEqual(self.inv_1500_10_percents_discount_tax_excl_15_percents_tax.invoice_early_pay_amount_after_discount, 1575.00)
-        self.assertEqual(self.inv_1500_10_percents_discount_tax_excl_15_percents_tax.get_early_pay_untaxed_amount_after_discount(), 1350.00)
-        self.assertEqual(self.inv_1500_10_percents_discount_tax_excl_15_percents_tax.get_early_pay_tax_after_discount(), 225.00)
+        self.assertRecordValues(self.inv_1500_10_percents_discount_tax_excl_15_percents_tax, [{
+            'invoice_early_pay_amount_after_discount': 1575.0,
+        }])
 
     # ========================== Tests Payment Register ==========================
     def test_register_discounted_payment_on_single_invoice(self):

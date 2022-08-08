@@ -234,7 +234,7 @@ class AccountPaymentRegister(models.TransientModel):
         partner_bank_account = self.env['res.partner.bank']
         if move.is_invoice(include_receipts=True):
             partner_bank_account = move.partner_bank_id._origin
-        early_discount_pay_term = move.invoice_payment_term_id if move.is_eligible_for_early_discount(self.payment_date) else False
+        early_discount_pay_term = move.invoice_payment_term_id if move._is_eligible_for_early_discount(self.payment_date) else False
 
         return {
             'partner_id': line.partner_id.id,

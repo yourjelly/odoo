@@ -164,9 +164,9 @@
                             <div t-attf-class="#{'col-6' if report_type != 'html' else 'col-sm-7 col-md-6'} ms-auto">
                                 <table class="table table-sm" style="page-break-inside: avoid;">
 
-                                        <!--Tax totals-->
-                                        <t t-set="tax_totals" t-value="json.loads(o.tax_totals_json)"/>
-                                        <t t-call="account.document_tax_totals"/>
+                                    <!--Tax totals-->
+                                    <t t-set="tax_totals" t-value="json.loads(o.tax_totals_json)"/>
+                                    <t t-call="account.document_tax_totals"/>
 
                                     <!--Payments-->
                                     <t t-if="print_with_payments">
@@ -197,68 +197,28 @@
                             </div>
                         </div>
                     </div>
-                    <div t-if="o.invoice_payment_term_id">
-                        <p t-if="o.invoice_payment_term_id.has_early_payment">
-                            <strong>
-                                Early Payment (before <span t-esc="o.invoice_payment_term_id._get_last_date_for_discount(o.invoice_date)"/>):
-                                <span t-esc="o.get_formatted_early_pay_untaxed_amount_after_discount()"/>
-                                (<span t-esc="o.invoice_payment_term_id.percentage_to_discount"/> % discount)
-                            </strong>
-                        </p>
-                    </div>
-                    <div t-if="o.invoice_payment_term_id.has_early_payment" class="clearfix mb-4">
+                    <t t-set="early_pay_totals" t-value="o._get_report_early_payment_totals_values()"/>
+                    <t t-if="early_pay_totals">
+                        <div>
+                            <p>
+                                <strong>
+                                    Early Payment (before <span t-esc="o.invoice_payment_term_id._get_last_date_for_discount(o.invoice_date)"/>):
+<!--                                    <span t-esc="o.get_formatted_early_pay_untaxed_amount_after_discount()"-->
+<!--                                          t-options='{"widget": "monetary", "display_currency": o.currency_id/>'/>-->
+                                    (<span t-esc="o.invoice_payment_term_id.percentage_to_discount"/> % discount)
+                                </strong>
+                            </p>
+                        </div>
                         <div id="total-early" class="row">
                             <div t-attf-class="#{'col-6' if report_type != 'html' else 'col-sm-7 col-md-6'}">
                                 <table class="table table-sm" style="page-break-inside: avoid;">
-                                    <t>
-                                        <tr class="border-black">
-                                            <td><strong>Untaxed Amount</strong></td>
-                                            <td class="text-end">
-                                                <span
-                                                    t-att-class="oe_subtotal_footer_separator"
-                                                    t-esc="o.get_formatted_early_pay_untaxed_amount_after_discount()"
-                                                />
-                                            </td>
-                                        </tr>
-                                        <t>
-                                            <tr>
-                                                <t t-foreach="tax_totals['subtotals']" t-as="subtotal">
-                                                    <t t-set="subtotal_to_show" t-value="subtotal['name']"/>
-                                                    <t t-foreach="tax_totals['groups_by_subtotal'][subtotal_to_show]" t-as="amount_by_group">
-                                                        <tr>
-                                                            <t t-if="len(tax_totals['groups_by_subtotal'][subtotal_to_show]) > 1">
-                                                                <td>
-                                                                    <span t-esc="amount_by_group['tax_group_name']"/>
-                                                                    <span class="text-nowrap"> on
-                                                                        <t t-esc="amount_by_group['formatted_tax_group_base_amount']"/>
-                                                                    </span>
-                                                                </td>
-                                                                <td class="text-end o_price_total">
-                                                                    <span class="text-nowrap" t-esc="amount_by_group['formatted_discounted_amount_tax_group']"/>
-                                                                </td>
-                                                            </t>
-                                                            <t t-else="">
-                                                                <td><span class="text-nowrap" t-esc="amount_by_group['tax_group_name']"/></td>
-                                                                <td class="text-end o_price_total">
-                                                                    <span class="text-nowrap" t-esc="amount_by_group['formatted_discounted_amount_tax_group']" />
-                                                                </td>
-                                                            </t>
-                                                        </tr>
-                                                    </t>
-                                                </t>
-                                            </tr>
-                                        </t>
+                                    <t t-call="account.document_tax_totals">
+                                        <t t-set="tax_totals" t-value="early_pay_totals"/>
                                     </t>
-                                        <tr class="border-black o_total">
-                                            <td><b><strong>Total</strong></b></td>
-                                            <td class="text-end">
-                                                <span t-esc="o.get_formatted_early_pay_amount_after_discount()"/>
-                                            </td>
-                                        </tr>
                                 </table>
                             </div>
                         </div>
-                    </div>
+                    </t>
 
                     <p t-if="o.move_type in ('out_invoice', 'in_refund') and o.payment_reference" name="payment_communication">
                         Please use the following communication for your payment : <b><span t-field="o.payment_reference"/></b>

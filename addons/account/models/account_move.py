@@ -265,12 +265,9 @@ class AccountMove(models.Model):
 
     # ==== Early payment cash discount fields ====
     invoice_early_pay_amount_after_discount = fields.Monetary(
-        default=0.0,
         compute='_compute_early_pay_amount_after_discount',
-        store=True,
-        help='Total amount left to pay after the discount was applied',
+        help="Total amount left to pay after the discount was applied",
     )
-    early_pay_end_date = fields.Date(compute="_compute_early_pay_end_date")
 
     # ==== Cash basis feature fields ====
     tax_cash_basis_rec_id = fields.Many2one(
@@ -1852,6 +1849,19 @@ class AccountMove(models.Model):
             else:
                 move.invoice_payments_widget = json.dumps(False)
 
+    def _get_report_early_payment_totals_values(self):
+        self.ensure_one()
+
+        if not self.is_invoice(include_receipts=True) or not self.invoice_payment_term_id.has_early_payment:
+            return
+
+        base_lines = self.line_ids.filtered(lambda x: not x.display_type and not x.exclude_from_invoice_tab)
+        return self.env['account.tax']._prepare_tax_totals_json(
+            [x._convert_to_tax_base_line_dict() for x in base_lines],
+            self.currency_id,
+            early_payment_term=self.invoice_payment_term_id,
+        )
+
     @api.depends('line_ids.amount_currency', 'line_ids.tax_base_amount', 'line_ids.tax_line_id', 'partner_id', 'currency_id', 'amount_total', 'amount_untaxed')
     def _compute_tax_totals_json(self):
         """ Computed field used for custom widget's rendering.
@@ -1866,7 +1876,6 @@ class AccountMove(models.Model):
                     [x._convert_to_tax_base_line_dict() for x in base_lines],
                     move.currency_id,
                     tax_lines=[x._convert_to_tax_line_dict() for x in tax_lines],
-                    move_payment_term=move.invoice_payment_term_id
                 )
                 tax_totals['allow_tax_edition'] = move.is_purchase_document(include_receipts=True)
 
@@ -1939,45 +1948,25 @@ class AccountMove(models.Model):
                 updated_credit = move.partner_id.credit + move.amount_total_signed
                 move.partner_credit_warning = self._build_credit_warning_message(move, updated_credit)
 
-    # -------Early Payment Cash Discount Functions -----
-    @api.depends('invoice_payment_term_id')
-    def _compute_early_pay_end_date(self):
-        for record in self:
-            if record.invoice_payment_term_id.has_early_payment:
-                record.early_pay_end_date = record.invoice_payment_term_id._get_last_date_for_discount(
-                    record.invoice_date)
-            else:
-                record.early_pay_end_date = None
-
     @api.depends('invoice_payment_term_id', 'amount_residual_signed', 'currency_id')
     def _compute_early_pay_amount_after_discount(self):
         for record in self:
             if record.invoice_payment_term_id.has_early_payment:
-                record.invoice_early_pay_amount_after_discount = record.get_early_pay_untaxed_amount_after_discount() + record.get_early_pay_tax_after_discount()
+                percentage_to_discount = record.invoice_payment_term_id.percentage_to_discount
+                discount_computation = self.invoice_payment_term_id.discount_computation
+
+                discounted_amount_untaxed = (100 - percentage_to_discount) * record.amount_untaxed / 100
+                if discount_computation == 'included':
+                    discounted_amount_tax = (100 - percentage_to_discount) * record.amount_tax / 100
+                else:
+                    discounted_amount_tax = record.amount_tax
+                record.invoice_early_pay_amount_after_discount = discounted_amount_untaxed + discounted_amount_tax
                 if record.currency_id.compare_amounts(record.invoice_early_pay_amount_after_discount, 0.0) <= 0.0:
                     record.invoice_early_pay_amount_after_discount = 0
             else:
                 record.invoice_early_pay_amount_after_discount = 0
 
-    def get_early_pay_untaxed_amount_after_discount(self):
-        self.ensure_one()
-        if self.invoice_payment_term_id.has_early_payment:
-            percentage_to_discount = self.invoice_payment_term_id.percentage_to_discount
-            return self.amount_untaxed - ((self.amount_untaxed / 100) * percentage_to_discount)
-        return 0
-
-    def get_early_pay_tax_after_discount(self):
-        self.ensure_one()
-        if self.invoice_payment_term_id.has_early_payment:
-            discount_computation = self.invoice_payment_term_id.discount_computation
-            if discount_computation != 'included':
-                return self.amount_tax
-            else:
-                percentage_to_discount = self.invoice_payment_term_id.percentage_to_discount
-                return self.amount_tax - ((self.amount_tax / 100) * percentage_to_discount)
-        return 0
-
-    def is_eligible_for_early_discount(self, payment_date):
+    def _is_eligible_for_early_discount(self, payment_date):
         '''
         An early payment discount is possible if the option has been activated,
         no partial payment was registered,
@@ -1987,18 +1976,6 @@ class AccountMove(models.Model):
         return self.invoice_payment_term_id.has_early_payment and \
                self.payment_state == 'not_paid' and \
                payment_date <= self.invoice_payment_term_id._get_last_date_for_discount(self.invoice_date)
-
-    def get_formatted_early_pay_untaxed_amount_after_discount(self):
-        self.ensure_one()
-        return formatLang(self.env,
-                          self.get_early_pay_untaxed_amount_after_discount(),
-                          currency_obj=self.company_id.currency_id)
-
-    def get_formatted_early_pay_amount_after_discount(self):
-        self.ensure_one()
-        return formatLang(self.env,
-                          self.invoice_early_pay_amount_after_discount,
-                          currency_obj=self.company_id.currency_id)
 
     def _build_credit_warning_message(self, record, updated_credit):
         ''' Build the warning message that will be displayed in a yellow banner on top of the current record
