@@ -7,7 +7,7 @@ from itertools import groupby
 
 from odoo import api, fields, models, _, Command
 from odoo.exceptions import AccessError, UserError, ValidationError
-from odoo.tools import float_is_zero, float_compare
+from odoo.tools import float_is_zero, float_compare, frozendict
 from odoo.osv.expression import AND, OR
 from odoo.service.common import exp_version
 
@@ -318,9 +318,7 @@ class PosSession(models.Model):
         return self._validate_session(balancing_account, amount_to_balance, bank_payment_method_diffs)
 
     def _validate_session(self, balancing_account=False, amount_to_balance=0, bank_payment_method_diffs=None):
-        bank_payment_method_diffs = bank_payment_method_diffs or {}
         self.ensure_one()
-        sudo = self.user_has_groups('point_of_sale.group_pos_user')
         if self.order_ids or self.statement_ids.line_ids:
             self.cash_real_transaction = self.cash_register_total_entry_encoding
             self.cash_real_expected = self.cash_register_balance_end
@@ -332,36 +330,15 @@ class PosSession(models.Model):
             if self.update_stock_at_closing:
                 self._create_picking_at_end_of_session()
                 self.order_ids.filtered(lambda o: not o.is_total_cost_computed)._compute_total_cost_at_session_closing(self.picking_ids.move_ids)
-            try:
-                data = self.with_company(self.company_id)._create_account_move(balancing_account, amount_to_balance, bank_payment_method_diffs)
-            except AccessError as e:
-                if sudo:
-                    data = self.sudo().with_company(self.company_id)._create_account_move(balancing_account, amount_to_balance, bank_payment_method_diffs)
-                else:
-                    raise e
 
-            try:
-                balance = sum(self.move_id.line_ids.mapped('balance'))
-                with self.move_id._check_balanced({'records': self.move_id.sudo()}):
-                    pass
-            except UserError:
-                # Creating the account move is just part of a big database transaction
-                # when closing a session. There are other database changes that will happen
-                # before attempting to create the account move, such as, creating the picking
-                # records.
-                # We don't, however, want them to be committed when the account move creation
-                # failed; therefore, we need to roll back this transaction before showing the
-                # close session wizard.
-                self.env.cr.rollback()
-                return self._close_session_action(balance)
+            account_move = self.sudo()._create_closing_journal_entries()
+            if account_move:
+                self.write({'move_id': account_move.id})
 
-            if self.move_id.line_ids:
-                self.move_id.sudo().with_company(self.company_id)._post()
-                # Set the uninvoiced orders' state to 'done'
-                self.env['pos.order'].search([('session_id', '=', self.id), ('state', '=', 'paid')]).write({'state': 'done'})
-            else:
-                self.move_id.sudo().unlink()
-            self.sudo().with_company(self.company_id)._reconcile_account_move_lines(data)
+            # Set the uninvoiced orders' state to 'done'
+            self.env['pos.order']\
+                .search([('session_id', '=', self.id), ('state', '=', 'paid')])\
+                .write({'state': 'done'})
         else:
             statement = self.cash_register_id
             if not self.config_id.cash_control:
@@ -629,7 +606,7 @@ class PosSession(models.Model):
         propoerty_account = self.env['ir.property']._get('property_account_receivable_id', 'res.partner')
         return self.company_id.account_default_pos_receivable_account_id or propoerty_account or self.env['account.account']
 
-    def _create_account_move(self, balancing_account=False, amount_to_balance=0, bank_payment_method_diffs=None):
+    def _create_closing_journal_entries(self):
         """ Create account.move and account.move.line records for this session.
 
         Side-effects include:
@@ -637,25 +614,200 @@ class PosSession(models.Model):
             - creating and validating account.bank.statement for cash payments
             - reconciling cash receivable lines, invoice receivable lines and stock output lines
         """
+        self.ensure_one()
+
+        orders_amls_per_nature = {
+            'product': [],
+            'tax': [],
+            'cash_rounding': [],
+            'stock': [],
+            'payment': defaultdict(list),
+        }
+        payment_amls_per_pay_method = defaultdict(list)
+        for order in self.order_ids:
+
+            if order.is_invoiced:
+                continue
+
+            # Collect the order's amls except the payment terms.
+            for nature, amls_values_list in order._prepare_aml_values_list_per_nature().items():
+                if nature in orders_amls_per_nature:
+                    orders_amls_per_nature[nature] += amls_values_list
+
+            for payment in order.payment_ids:
+
+                if payment.currency_id.is_zero(payment.amount):
+                    continue
+
+                payment_method = payment.payment_method_id
+                payment_amls_values_list_per_nature = payment._prepare_aml_values_list_per_nature()
+                orders_amls_per_nature['payment'][payment_method].append(payment_amls_values_list_per_nature['counterpart_receivable'])
+
+                if payment_method.type != 'pay_later':
+                    payment_amls_per_pay_method[payment_method].append(payment_amls_values_list_per_nature['outstanding'])
+                    payment_amls_per_pay_method[payment_method].append(payment_amls_values_list_per_nature['receivable'])
+
+        # Get journal items from orders.
+        pos_entry_amls = self._aggregate_journal_items_values_list(
+            orders_amls_per_nature['product'],
+            {
+                'partner_id': True,
+                'product_id': True,
+                'account_id': True,
+                'tax_ids': True,
+            },
+        )
+        pos_entry_amls += self._aggregate_journal_items_values_list(
+            orders_amls_per_nature['tax'],
+            {
+                'partner_id': True,
+                'account_id': True,
+                'group_tax_id': True,
+                'tax_repartition_line_id': True,
+                'tax_ids': True,
+            },
+        )
+        pos_entry_amls += self._aggregate_journal_items_values_list(
+            orders_amls_per_nature['cash_rounding'],
+            {
+                'partner_id': True,
+                'account_id': True,
+            },
+        )
+        pos_entry_amls += self._aggregate_journal_items_values_list(
+            orders_amls_per_nature['stock'],
+            {
+                'partner_id': True,
+                'account_id': True,
+            },
+        )
+
+        # Use the sequence to reconcile lines together.
+        for pos_entry_aml in pos_entry_amls:
+            pos_entry_aml['sequence'] = 10
+
+        # Get journal items to pay the orders.
+        for i, (payment_method, amls_values_list) in enumerate(orders_amls_per_nature['payment'].items(), start=1):
+            receivable_amls = self._aggregate_journal_items_values_list(amls_values_list, {'partner_id': True})
+            pos_entry_amls += receivable_amls
+            for pos_entry_aml in receivable_amls:
+                pos_entry_aml['sequence'] = 10 + i
+
+        # Create the POS journal entry.
+        line_ids_commands = [
+            Command.create(self._convert_to_closing_journal_item(pos_entry_aml))
+            for pos_entry_aml in pos_entry_amls
+        ]
+
+        if not line_ids_commands:
+            return None
+
         account_move = self.env['account.move'].create({
             'journal_id': self.config_id.journal_id.id,
             'date': fields.Date.context_today(self),
             'ref': self.name,
+            'line_ids': line_ids_commands,
         })
-        self.write({'move_id': account_move.id})
+        account_move.action_post()
 
-        data = {'bank_payment_method_diffs': bank_payment_method_diffs or {}}
-        data = self._accumulate_amounts(data)
-        data = self._create_non_reconciliable_move_lines(data)
-        data = self._create_bank_payment_moves(data)
-        data = self._create_pay_later_receivable_lines(data)
-        data = self._create_cash_statement_lines_and_cash_move_lines(data)
-        data = self._create_invoice_receivable_lines(data)
-        data = self._create_stock_output_lines(data)
-        if balancing_account and amount_to_balance:
-            data = self._create_balancing_line(data, balancing_account, amount_to_balance)
+        # Create a journal entry for each payment method.
+        created_move_per_pay_method = {}
+        for payment_method, amls_values_list in payment_amls_per_pay_method.items():
 
-        return data
+            if not payment_method.split_transactions:
+                amls_values_list = self._aggregate_journal_items_values_list(
+                    amls_values_list,
+                    {
+                        'partner_id': True,
+                        'account_id': True,
+                        'name': lambda vals: _("Total %s payments from %s", payment_method.name, self.name),
+                    },
+                )
+
+            payment_move = self.env['account.move'].create({
+                'journal_id': payment_method.journal_id.id,
+                'date': fields.Date.context_today(self),
+                'ref': self.name,
+                'line_ids': [
+                    Command.create(self._convert_to_closing_journal_item(x))
+                    for x in amls_values_list
+                ],
+            })
+            payment_move.action_post()
+
+            created_move_per_pay_method[payment_method] = payment_move
+
+        # Reconcile.
+        for i, payment_method in enumerate(orders_amls_per_nature['payment'], start=1):
+
+            # Nothing to reconcile with pay_later.
+            if not created_move_per_pay_method.get(payment_method):
+                continue
+
+            pos_entry_amls = account_move.line_ids.filtered(lambda x: x.sequence == 10 + 1)
+            payment_move_amls = created_move_per_pay_method[payment_method].line_ids\
+                .filtered(lambda x: x.account_id.account_type == 'asset_receivable')
+            (pos_entry_amls + payment_move_amls).reconcile()
+
+        return account_move
+
+    @api.model
+    def _aggregate_journal_items_values_list(self, aml_values_list, fields_to_aggregate):
+        aggregation = defaultdict(list)
+
+        # Batch lines.
+        for aml_values in aml_values_list:
+            grouping_dict = {
+                field: aml_values.get(field)
+                for field, value in fields_to_aggregate.items()
+                if value is True
+            }
+            grouping_dict['sign'] = 1 if aml_values['amount_currency'] >= 0.0 else -1
+            grouping_key = frozendict(grouping_dict)
+            aggregation[grouping_key].append(aml_values)
+
+        # Squash lines, one for each aggregation dict.
+        new_aml_values_list = []
+        for aggr_aml_values_list in aggregation.values():
+            new_aml_values = dict(
+                aggr_aml_values_list[0],
+                amount_currency=sum(x['amount_currency'] for x in aggr_aml_values_list),
+                balance=sum(x['balance'] for x in aggr_aml_values_list),
+            )
+
+            for field, method in fields_to_aggregate.items():
+                if callable(method):
+                    new_aml_values[field] = method(new_aml_values)
+
+            new_aml_values_list.append(new_aml_values)
+        return new_aml_values_list
+
+    @api.model
+    def _convert_to_closing_journal_item(self, values):
+        return {
+            k: v for k, v in values.items()
+            if k in self.env['account.move.line']._fields and k != 'display_type'
+        }
+
+        # account_move = self.env['account.move'].create({
+        #     'journal_id': self.config_id.journal_id.id,
+        #     'date': fields.Date.context_today(self),
+        #     'ref': self.name,
+        # })
+        # self.write({'move_id': account_move.id})
+        #
+        # data = {'bank_payment_method_diffs': bank_payment_method_diffs or {}}
+        # data = self._accumulate_amounts(data)
+        # data = self._create_non_reconciliable_move_lines(data)
+        # data = self._create_bank_payment_moves(data)
+        # data = self._create_pay_later_receivable_lines(data)
+        # data = self._create_cash_statement_lines_and_cash_move_lines(data)
+        # data = self._create_invoice_receivable_lines(data)
+        # data = self._create_stock_output_lines(data)
+        # if balancing_account and amount_to_balance:
+        #     data = self._create_balancing_line(data, balancing_account, amount_to_balance)
+        #
+        # return data
 
     def _accumulate_amounts(self, data):
         # Accumulate the amounts for each accounting lines group

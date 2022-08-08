@@ -45,7 +45,7 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
                 'price_unit': 300,
                 'discount': 5.0,
                 'qty': 3.0,
-                'tax_ids': [(6, 0, self.product4.taxes_id.ids)],
+                'tax_ids': [(6, 0, self.product4.taxes_id.filtered(lambda x: x.company_id == self.env.company).ids)],
                 'price_subtotal': 300 * (1 - 5/100.0) * 3,
                 'price_subtotal_incl': 300 * (1 - 5/100.0) * 3,
             })],
@@ -1212,4 +1212,4 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
         pos_order_id = self.PosOrder.create_from_ui([product5_order])[0]['id']
         pos_order = self.PosOrder.search([('id', '=', pos_order_id)])
         #assert account_move amount_residual is 300
-        self.assertEqual(pos_order.account_move.amount_residual, 300)
+        self.assertEqual(pos_order.account_move.amount_residual, 290)

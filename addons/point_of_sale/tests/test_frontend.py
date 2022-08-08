@@ -567,14 +567,9 @@ class TestUi(TestPointOfSaleHttpCommon):
         # Close the session and check the session journal entry.
         pos_session.action_pos_session_validate()
 
-        lines = pos_session.move_id.line_ids.sorted('balance')
-
-        # order in the tour is paid using the bank payment method.
-        bank_pm = self.main_pos_config.payment_method_ids.filtered(lambda pm: pm.name == 'Bank')
-
-        self.assertEqual(lines[0].account_id, bank_pm.receivable_account_id or self.env.company.account_default_pos_receivable_account_id)
-        self.assertAlmostEqual(lines[0].balance, -1)
-        self.assertEqual(lines[1].account_id, zero_amount_product.categ_id.property_account_income_categ_id)
-        self.assertAlmostEqual(lines[1].balance, 0)
-        self.assertEqual(lines[2].account_id, tax_received_account)
-        self.assertAlmostEqual(lines[2].balance, 1)
+        self.assertRecordValues(pos_session.move_id.line_ids.sorted('balance'), [
+            # pylint: disable=bad-whitespace
+            {'account_id': self.env.company.account_default_pos_receivable_account_id.id,       'balance': -1.0},
+            {'account_id': tax_received_account.id,                                             'balance': 1.0},
+            {'account_id': zero_amount_product.categ_id.property_account_income_categ_id.id,    'balance': 0.0},
+        ])

@@ -562,6 +562,7 @@ class TestPoSBasicConfig(TestPoSCommon):
 
         # check values after the session is closed
         session_account_move = self.pos_session.move_id
+        amls = self.env['pos.order'].browse(order[0]['id'])._prepare_aml_values_list()
 
         rounding_line = session_account_move.line_ids.filtered(lambda line: line.name == 'Rounding line')
         self.assertAlmostEqual(rounding_line.credit, 0.03, msg='The credit should be equals to 0.03')
