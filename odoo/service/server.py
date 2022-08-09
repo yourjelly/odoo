@@ -23,7 +23,7 @@ from werkzeug.debug import DebuggedApplication
 
 import odoo
 from odoo.modules import get_modules
-from odoo.modules.registry import Registry, create_shared_cache, get_shared_cache, unlink_shared_cache, release_lock_shared_cache, close_shared_cache, log_shared_cache_stats
+from odoo.modules.registry import Registry, create_shared_cache, get_shared_cache, unlink_shared_cache, release_lock_shared_cache, close_shared_cache, log_shared_cache_stats, is_shared_cache
 from odoo.release import nt_service_name
 from odoo.tools import config
 from odoo.tools import stripped_sys_argv, dumpstacks, log_ormcache_stats
@@ -838,6 +838,8 @@ class PreforkServer(CommonServer):
             self.worker_spawn(WorkerCron, self.workers_cron)
 
     def check_shared_cache(self):
+        if not is_shared_cache():
+            return True
         shared_cache = get_shared_cache()
         if not shared_cache.is_alive():
             # TODO: Check the pid to see if it is set, and check the state of the process and try to recover

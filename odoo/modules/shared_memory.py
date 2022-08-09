@@ -647,7 +647,7 @@ if __name__=='__main__':
         print('100 reads: %.4f ms' % (timeit.timeit('for i in range(100): z = d[i]', number=1000, globals={'d': d}),))
         # print('%d touch over %d, %.4f%%' % (d._counter_touch, d._counter_should_touch, float(d._counter_touch * 100) / d._counter_should_touch))
 
-    for nbr in (1, 4, 6):
+    for nbr in (1, 3, 4):
         print('Testing', nbr, 'processes')
         with Pool(nbr) as p:
             p.starmap(test, [()]*nbr)

@@ -35,6 +35,9 @@ _schema = logging.getLogger('odoo.schema')
 # But the PreforkServer will replace it by a SharedMemoryLRU before forking
 shared_cache = LRU(8192)  # TODO: decrease this number (also the ormcache) to avoid taking 2 memory than before
 
+def is_shared_cache():
+    return isinstance(shared_cache, SharedMemoryLRU)
+
 def get_shared_cache():
     return shared_cache
 
