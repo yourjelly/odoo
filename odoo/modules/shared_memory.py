@@ -499,9 +499,9 @@ class SharedMemoryLRU:
             if val is None:
                 raise KeyError(f"{key} does not exist")
 
-            self._counter_should_touch += 1
             root = self._root
 
+        self._counter_should_touch += 1
         if (root != index) and not self._counter_should_touch & 7:
             self._counter_touch += 1
             with self._lock:
