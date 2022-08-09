@@ -636,3 +636,28 @@ class SharedMemoryLRU:
                     f'\nFree spots {self._free_len}:\n' + \
                     "\n".join(str(e) for e in self._data_free[:self._free_len])
         raise MemoryError(f"Infinite loop detected in the Linked list, {self._root=}:\n" + "\n".join(str(i) + ": " + str(e) for i, e in enumerate(self._entry_table)))
+
+if __name__=='__main__':
+    import timeit
+    from multiprocessing import Process, Manager, Pool
+
+    # Initialize Memory
+    d = SharedMemoryLRU(1000)
+    s = '0123456789'*1000
+    for i in range(100):
+        d[i] = s
+
+    def test():
+        print('100 reads: %.4f ms' % (timeit.timeit('for i in range(100): z = d[i]', number=1000, globals={'d': d}),))
+
+    for nbr in (1, 4, 6):
+        print('Testing', nbr, 'processes')
+        with Pool(nbr) as p:
+            p.starmap(test, [()]*nbr)
+            p.close()
+            p.join()
+
+    d.close()
+    d.unlink()
+
+
