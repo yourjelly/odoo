@@ -493,32 +493,27 @@ class SharedMemoryLRU:
         :raises KeyError: If the key doesn't exist
         :return: The value unmarshalled
         """
-        with self._stats.time_register_get():
-            hash_ = hash(key)
-            with self._lock.read_acquire():
-                index, entry, val = self._lookup(key, hash_)
-                if val is None:
-                    self._stats.miss()
-                    raise KeyError(f"{key} does not exist")
-                self._stats.hit()
+        hash_ = hash(key)
+        with self._lock.read_acquire():
+            index, entry, val = self._lookup(key, hash_)
+            if val is None:
+                raise KeyError(f"{key} does not exist")
 
-                if self._root != index:
-                    self._counter_should_touch += 1
-                    with self._lock._read_counter_lock:
-                        if self._lock._read_counter.value == 1:  # I have the write lock for myself and I lock _read_counter to avoid any intrusion
-                            self._counter_touch += 1
-                            # Pop me from my previous location
-                            self._entry_table[entry.prev].next = entry.next
-                            self._entry_table[entry.next].prev = entry.prev
-                            # Put me in front
-                            entry.next = self._root
-                            entry.prev = self._entry_table[self._root].prev
-                            self._entry_table[self._entry_table[self._root].prev].next = index
-                            self._entry_table[self._root].prev = index
-                            self._root = index
-            if self._counter_should_touch == 2000:
-                print(f"TOUCH : {self._counter_touch} on {self._counter_should_touch}")
-            return val
+            if self._root != index:
+                self._counter_should_touch += 1
+                with self._lock._read_counter_lock:
+                    if self._lock._read_counter.value == 1:  # I have the write lock for myself and I lock _read_counter to avoid any intrusion
+                        self._counter_touch += 1
+                        # Pop me from my previous location
+                        self._entry_table[entry.prev].next = entry.next
+                        self._entry_table[entry.next].prev = entry.prev
+                        # Put me in front
+                        entry.next = self._root
+                        entry.prev = self._entry_table[self._root].prev
+                        self._entry_table[self._entry_table[self._root].prev].next = index
+                        self._entry_table[self._root].prev = index
+                        self._root = index
+        return val
 
     def __setitem__(self, key, value):
         with self._stats.time_register_set():
