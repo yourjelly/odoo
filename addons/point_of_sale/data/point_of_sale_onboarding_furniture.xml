@@ -72,6 +72,41 @@
         <field name="image_1920" type="base64" file="point_of_sale/static/img/desk_organizer.png"/>
     </record>
 
+    <function model="ir.model.data" name="_update_xmlids">
+            <value model="base" eval="[{
+                'xml_id': 'point_of_sale.desk_organizer_product_template',
+                'record': obj().env.ref('point_of_sale.desk_organizer').product_tmpl_id,
+                'noupdate': True,
+            }]"/>
+        </function>
+
+    <record id="size_attribute" model="product.attribute">
+        <field name="name">Size</field>
+        <field name="sequence">30</field>
+        <field name="display_type">radio</field>
+        <field name="create_variant">no_variant</field>
+    </record>
+    <record id="size_attribute_s" model="product.attribute.value">
+        <field name="name">S</field>
+        <field name="sequence">1</field>
+        <field name="attribute_id" ref="size_attribute"/>
+    </record>
+    <record id="size_attribute_m" model="product.attribute.value">
+        <field name="name">M</field>
+        <field name="sequence">2</field>
+        <field name="attribute_id" ref="size_attribute"/>
+    </record>
+    <record id="size_attribute_l" model="product.attribute.value">
+        <field name="name">L</field>
+        <field name="sequence">3</field>
+        <field name="attribute_id" ref="size_attribute"/>
+    </record>
+    <record id="desk_organizer_size" model="product.template.attribute.line">
+        <field name="product_tmpl_id" ref="point_of_sale.desk_organizer_product_template"/>
+        <field name="attribute_id" ref="size_attribute"/>
+        <field name="value_ids" eval="[(6, 0, [ref('size_attribute_s'), ref('size_attribute_m'), ref('size_attribute_l')])]"/>
+    </record>
+
     <record id="whiteboard_pen" model="product.product">
         <field name="available_in_pos">True</field>
         <field name="list_price">1.20</field>

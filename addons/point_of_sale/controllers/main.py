@@ -86,6 +86,6 @@ class PosController(http.Controller):
         pdfhttpheaders = [('Content-Type', 'application/pdf'), ('Content-Length', len(pdf))]
         return request.make_response(pdf, headers=pdfhttpheaders)
 
-    @http.route('/pos/load_onboarding_data', type='json', auth='user', cors='*', csrf=False)
+    @http.route('/pos/load_onboarding_data', type='json', auth='user')
     def load_onboarding_data(self, arg=False):
         convert.convert_file(request.env.cr, 'point_of_sale', f'data/point_of_sale_onboarding_{arg}.xml', None, mode='init', kind='data')

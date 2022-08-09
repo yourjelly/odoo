@@ -424,6 +424,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
                     model: 'pos.session',
                     args: [[odoo.pos_session_id]]
                 });
+                Object.assign(this.env.pos.attributes_by_ptal_id, result['attributes_by_ptal_id']);
                 this.env.pos.db.add_categories(result['categories']);
                 this.env.pos._loadProductProduct(result['products']);
             }
