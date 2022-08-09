@@ -499,20 +499,21 @@ class SharedMemoryLRU:
             if val is None:
                 raise KeyError(f"{key} does not exist")
 
-            if self._root != index:
-                self._counter_should_touch += 1
-                with self._lock._read_counter_lock:
-                    if self._lock._read_counter.value == 1:  # I have the write lock for myself and I lock _read_counter to avoid any intrusion
-                        self._counter_touch += 1
-                        # Pop me from my previous location
-                        self._entry_table[entry.prev].next = entry.next
-                        self._entry_table[entry.next].prev = entry.prev
-                        # Put me in front
-                        entry.next = self._root
-                        entry.prev = self._entry_table[self._root].prev
-                        self._entry_table[self._entry_table[self._root].prev].next = index
-                        self._entry_table[self._root].prev = index
-                        self._root = index
+            self._counter_should_touch += 1
+            root = self._root
+
+        if (root != index) and not self._counter_should_touch & 7:
+            self._counter_touch += 1
+            with self._lock:
+                # Pop me from my previous location
+                self._entry_table[entry.prev].next = entry.next
+                self._entry_table[entry.next].prev = entry.prev
+                # Put me in front
+                entry.next = root
+                entry.prev = self._entry_table[root].prev
+                self._entry_table[self._entry_table[root].prev].next = index
+                self._entry_table[root].prev = index
+                self._root = index
         return val
 
     def __setitem__(self, key, value):
@@ -644,6 +645,7 @@ if __name__=='__main__':
 
     def test():
         print('100 reads: %.4f ms' % (timeit.timeit('for i in range(100): z = d[i]', number=1000, globals={'d': d}),))
+        # print('%d touch over %d, %.4f%%' % (d._counter_touch, d._counter_should_touch, float(d._counter_touch * 100) / d._counter_should_touch))
 
     for nbr in (1, 4, 6):
         print('Testing', nbr, 'processes')
