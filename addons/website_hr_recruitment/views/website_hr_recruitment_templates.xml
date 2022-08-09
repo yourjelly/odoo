@@ -747,6 +747,7 @@
             <button type="button" class="btn btn-outline-primary dropdown-toggle w-100" data-bs-toggle="dropdown" id="officesDropdown">
                 <i class="fa fa-building"/>
                 <t t-if="office_id">
+                    <span t-if="len(office_id.contact_address) &lt;= 5" class="fst-italic">No address specified</span>
                     <t t-out="office_id.city"/><t t-if="office_id.country_id">, <t t-out="office_id.country_id.name"/></t>
                 </t>
                 <t t-elif="is_remote">Remote</t>
@@ -762,7 +763,10 @@
                     <t t-if="thisoffice" class="nav-item">
                         <a  t-attf-href="/jobs#{current_country_path}#{current_department_path}/office/#{ thisoffice.id }"
                             t-attf-class="dropdown-item d-flex align-items-center justify-content-between nav-link #{' active' if office_id and office_id.id == thisoffice.id else ''}">
-                            <t t-out="thisoffice.city"/><t t-if="thisoffice.country_id">, <t t-out="thisoffice.country_id.name"/></t>
+                            <t t-if="not (thisoffice.city or thisoffice.country_id)"><span class="fst-italic">No address specified</span></t>
+                            <t t-else="">
+                                <t t-out="thisoffice.city"/><t t-if="thisoffice.country_id">, <t t-out="thisoffice.country_id.name"/></t>
+                            </t>
                             <span t-attf-class="badge rounded-pill#{' bg-light text-primary' if office_id and office_id.id == thisoffice.id else ' bg-primary'} ms-2 px-2" t-out="count_per_office.get(thisoffice, '0')"/>
                         </a>
                     </t>
