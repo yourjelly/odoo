@@ -39,7 +39,7 @@
                         <group>
                             <label for="program_type"/>
                             <div>
-                                <field name="program_type" widget="selection"/>
+                                <field name="program_type" widget="filterable_selection" options="{'allowed_selection_values': ['gift_card']}"/>
                                 <p class="text-muted" attrs="{'invisible': [('program_type', '!=', 'coupons')]}" colspan="2">
                                     Generate &amp; share coupon code manually.
                                     <br/>
