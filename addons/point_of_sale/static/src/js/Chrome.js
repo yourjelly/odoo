@@ -388,24 +388,31 @@ odoo.define('point_of_sale.Chrome', function(require) {
 
         // MISC METHODS //
 
-        async _loadDemoData() {
-            const selectionList = [
+        /*
+        ** Selection of demo data
+        */
+        _selectionDemoList() {
+            return [
                 {
                     id:"0",
                     label: this.env._t("Shop selling beautiful clothes"),
-                    item: 'clothes',
+                    item: 'point_of_sale_onboarding_clothes',
                 },
                 {
                     id:"1",
                     label: this.env._t("Shop selling stylish furniture"),
-                    item: 'furniture',
+                    item: 'point_of_sale_onboarding_furniture',
                 },
                 {
                     id:"2",
                     label: this.env._t("Bakery selling succulent breads and pastries"),
-                    item: 'bakery',
+                    item: 'point_of_sale_onboarding_bakery',
                 },
             ]
+        }
+
+        async _loadDemoData() {
+            const selectionList = this._selectionDemoList()
             const { confirmed, payload: selectedOption } = await this.showPopup('SelectionPopup',
             {
                 title: this.env._t("Let's load some demo data by pretending you want to open a"),
@@ -416,7 +423,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
                 await this.rpc({
                     'route': '/pos/load_onboarding_data',
                     params: {
-                        arg: selectedOption
+                        file_name: selectedOption
                     },
                 });
                 const result = await this.rpc({

@@ -73,6 +73,29 @@ odoo.define('pos_restaurant.chrome', function (require) {
                 super.__showScreen(...arguments);
                 this._setIdleTimer();
             }
+
+            // MISC METHODS //
+
+            /**
+             * @override
+             * Load POS Restaurant Demo Data instead of POS
+             */
+            _selectionDemoList() {
+                return [...super._selectionDemoList(), ...[ // Syntaxic sugar
+                        {
+                            id:"3",
+                            label: this.env._t("Restaurant selling the best pizzas in the world"),
+                            item: 'restaurant',
+                        },
+                        {
+                            id:"4",
+                            label: this.env._t("Bar selling delicious cocktails"),
+                            item: 'bar',
+                        },
+                    ]
+                ];
+            }
+
             /**
              * @override
              * Before closing pos, we remove the event listeners set on window
