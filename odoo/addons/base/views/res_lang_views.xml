@@ -73,7 +73,7 @@
                                     <p class="text-center">Preview</p>
                                     <group>
                                         <field name="date_format_preview" widget="lang_date"/>
-                                        <field name="time_format_preview" widget="lang_date"/>
+                                        <field name="time_format_preview" widget="lang_date" options="{'format_type': 'time_format'}"/>
                                         <field name="thousand_separator_preview"/>
                                         <field name="decimal_point_preview"/>
                                     </group>

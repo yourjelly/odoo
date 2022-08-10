@@ -10,7 +10,7 @@ import { translatedTerms, _t } from "./translation";
 const { Settings } = luxon;
 
 /** @type {[RegExp, string][]} */
-const NUMBERING_SYSTEMS = [
+export const NUMBERING_SYSTEMS = [
     [/^ar-(sa|001)$/i, "arab"],
     [/^bn/i, "beng"],
     [/^bo/i, "tibt"],
