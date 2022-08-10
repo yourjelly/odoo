@@ -7,7 +7,13 @@ import core from 'web.core';
 import wysiwygLoader from 'web_editor.loader';
 import field_registry from 'web.field_registry';
 import {QWebPlugin} from '@web_editor/js/backend/QWebPlugin';
-import {getAdjacentPreviousSiblings, getAdjacentNextSiblings} from '../editor/odoo-editor/src/utils/utils';
+import {
+    getAdjacentPreviousSiblings,
+    getAdjacentNextSiblings,
+    setSelection,
+    rightPos,
+    getRangePosition
+} from '../editor/odoo-editor/src/utils/utils';
 // must wait for web/ to add the default html widget, otherwise it would override the web_editor one
 import 'web._field_registry';
 import "@web/views/fields/html/html_field"; // make sure the html field file has first been executed.
@@ -15,6 +21,7 @@ import { registry } from '@web/core/registry';
 
 var _lt = core._lt;
 var TranslatableFieldMixin = basic_fields.TranslatableFieldMixin;
+var DynamicPlaceholderFieldMixin = basic_fields.DynamicPlaceholderFieldMixin;
 var QWeb = core.qweb;
 
 /**
@@ -32,7 +39,7 @@ var QWeb = core.qweb;
  *  - resizable
  *  - codeview
  */
-var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
+var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, DynamicPlaceholderFieldMixin, {
     description: _lt("Html"),
     className: 'oe_form_field oe_form_field_html',
     supportedFieldTypes: ['html'],
@@ -40,12 +47,64 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
     quickEditExclusion: [
         '[href]',
     ],
-
     custom_events: {
         wysiwyg_focus: '_onWysiwygFocus',
         wysiwyg_blur: '_onWysiwygBlur',
         wysiwyg_change: '_onChange',
         wysiwyg_attachment: '_onAttachmentChange',
+    },
+
+    /**
+     * Open a Model Field Selector which can select fields
+     * to create a dynamic placeholder <t-out> Element in the field HTML
+     * with or without a default text value.
+     *
+     * @override
+     * @public
+     * @param {String} baseModel
+     * @param {Array} chain
+     *
+     */
+    openDynamicPlaceholder: async function (baseModel, chain = []) {
+
+        let modelSelector;
+        const onFieldChanged = (ev) => {
+            this.wysiwyg.odooEditor.editable.focus();
+            if (ev.data.chain.length) {
+                let dynamicPlaceholder = "object." + ev.data.chain.join('.');
+                const defaultValue = ev.data.defaultValue;
+                dynamicPlaceholder += defaultValue && defaultValue !== '' ? ` or '''${defaultValue}'''` : '';
+
+                const t = document.createElement('T');
+                t.setAttribute('t-out', dynamicPlaceholder);
+                const fragment = new DocumentFragment();
+                fragment.appendChild(t);
+                this.wysiwyg.odooEditor.execCommand('insertFragment', fragment);
+                setSelection(...rightPos(t));
+                this.wysiwyg.odooEditor.editable.focus();
+            }
+            modelSelector.destroy();
+        };
+
+        const onFieldCancel = () => {
+            this.wysiwyg.odooEditor.editable.focus();
+            modelSelector.destroy();
+        }
+
+        modelSelector = await this._openNewModelSelector(
+            baseModel, chain, onFieldChanged, onFieldCancel
+        );
+
+        let top, left;
+        const position = getRangePosition(modelSelector.$el, this.wysiwyg.options.document);
+
+        top = position.top;
+        left = position.left - 25;
+        top = Math.min(top, window.window.innerHeight - modelSelector.$el.height() - 15);
+        left = Math.min(left, window.window.innerWidth - modelSelector.$el.width() - 10);
+
+        modelSelector.$el.css('top', top);
+        modelSelector.$el.css('left', left);
     },
 
     /**

@@ -17,6 +17,7 @@ var dom = require('web.dom');
 var Domain = require('web.Domain');
 var DomainSelector = require('web.DomainSelector');
 var DomainSelectorDialog = require('web.DomainSelectorDialog');
+var ModelFieldSelectorPopover = require("web.ModelFieldSelectorPopover");
 var framework = require('web.framework');
 var py_utils = require('web.py_utils');
 var session = require('web.session');
@@ -72,6 +73,42 @@ var TranslatableFieldMixin = {
         });
     },
 };
+
+var DynamicPlaceholderFieldMixin = {
+    /**
+     * Open and return new Model Field Selector with the provided options
+     *
+     * @private
+     * @param {String} baseModel
+     * @param {Array} chain
+     * @param {Function} onFieldChanged
+     * @param {Function} onFieldCancel
+     *
+     * @returns {ModelFieldSelectorPopover}
+     */
+    _openNewModelSelector: async function (baseModel, chain, onFieldChanged, onFieldCancel) {
+        const modelSelector = new ModelFieldSelectorPopover(
+            this,
+            baseModel,
+            [],
+            {
+                readonly: false,
+                needDefaultValue: true,
+                cancelOnEscape: true,
+                chainedTitle: true,
+                filter: (model) => !["one2many", "boolean", "many2many"].includes(model.type)
+            }
+        );
+
+        modelSelector.on("field_chain_changed", undefined, onFieldChanged);
+        modelSelector.on("field_chain_cancel", undefined, onFieldCancel);
+
+        await modelSelector.insertAfter(this.$el);
+        modelSelector.open(chain, true);
+
+        return modelSelector
+    },
+}
 
 var DebouncedField = AbstractField.extend({
     /**
@@ -565,7 +602,7 @@ var NumericField = InputField.extend({
     },
 });
 
-var FieldChar = InputField.extend(TranslatableFieldMixin, {
+var FieldChar = InputField.extend(TranslatableFieldMixin, DynamicPlaceholderFieldMixin, {
     description: _lt("Text"),
     className: 'o_field_char',
     tagName: 'span',
@@ -576,6 +613,74 @@ var FieldChar = InputField.extend(TranslatableFieldMixin, {
     // Private
     //--------------------------------------------------------------------------
 
+
+    /**
+     * @override
+     */
+    init: function () {
+        this._super(...arguments);
+        if (this.nodeOptions && this.nodeOptions.dynamic_placeholder) {
+            // When the dynamic placeholder is active, the recordData
+            // need to be updated when `mailing_model_real` change
+            this.resetOnAnyFieldChange = true;
+        }
+    },
+
+    /**
+     * Open a Model Field Selector in order to select fields
+     * and create a dynamic placeholder string with or without
+     * a default text value.
+     *
+     * @public
+     * @param {String} baseModel
+     * @param {Array} chain
+     *
+     */
+    openDynamicPlaceholder: async function (baseModel, chain = []) {
+        const triggerKeyReplaceRegex = new RegExp('#$');
+
+        let modelSelector;
+        const onFieldChanged = (ev) => {
+            this.$el.focus();
+            if (ev.data.chain.length) {
+                let dynamicPlaceholder = "{{object." + ev.data.chain.join('.');
+                const defaultValue = ev.data.defaultValue;
+                dynamicPlaceholder += defaultValue && defaultValue !== '' ? ` or '''${defaultValue}'''}}` : '}}';
+                this.el.value =
+                    this.el.value.replace(triggerKeyReplaceRegex, '') + dynamicPlaceholder;
+            }
+            modelSelector.destroy();
+        };
+
+        const onFieldCancel = () => {
+            this.$el.focus();
+            modelSelector.destroy();
+        }
+
+        modelSelector = await this._openNewModelSelector(
+            baseModel, chain, onFieldChanged, onFieldCancel
+        );
+
+        modelSelector.$el.css('margin-top', this.$el.height() + 12);
+    },
+    /**
+     * Open the dynamic placeholder if trigger key match
+     *
+     * @private
+     * @override
+     * @param {KeyboardEvent} ev
+     */
+    async _onKeydown(ev) {
+        this._super(...arguments);
+        if (this.nodeOptions && this.nodeOptions.dynamic_placeholder && ev.key === '#') {
+            ev.preventDefault();
+            const baseModel = this.recordData && this.recordData.mailing_model_real ? this.recordData.mailing_model_real : undefined;
+            if (baseModel) {
+                await this.openDynamicPlaceholder(baseModel);
+            }
+            this.el.value += ev.key;
+        }
+    },
     /**
      * Add translation button
      *
@@ -4205,6 +4310,7 @@ var FieldColorPicker = FieldInteger.extend({
 
 return {
     TranslatableFieldMixin: TranslatableFieldMixin,
+    DynamicPlaceholderFieldMixin: DynamicPlaceholderFieldMixin,
     DebouncedField: DebouncedField,
     FieldEmail: FieldEmail,
     FieldBinaryFile: FieldBinaryFile,
