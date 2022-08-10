@@ -24,9 +24,11 @@ class AccountEdiDocument(models.Model):
     is_validated = fields.Boolean(help="Whether the document has been signed/accepted by the government, meaning the linked attachment can no longer be touched", default=False)
 
     # message_level
-    blocking_level = fields.Selection(selection=[('info', 'Info'), ('warning', 'Warning'), ('error', 'Error')])
-    message = fields.Html(help='The text of the last error/warning/note that happened during Electronic Invoice operation.')
+    #blocking_level = fields.Selection(selection=[('info', 'Info'), ('warning', 'Warning'), ('error', 'Error')])
+    #message = fields.Html(help='The text of the last error/warning/note that happened during Electronic Invoice operation.')
 
+    # Technical field
+    show_export_xml_button = fields.Boolean(compute='_compute_show_export_xml_button')
     # == Not stored fields == TODO: remove if possible
     name = fields.Char(related='attachment_id.name')
     edi_format_name = fields.Char(string='Format Name', related='edi_format_id.name')
@@ -40,9 +42,8 @@ class AccountEdiDocument(models.Model):
     #    ),
     #]
 
-    # Maps formats and field states
-
-    def _get_document_field_state(self):
+    def _get_document_edi_field_state(self):
+        # TODO JUVR remove this, move it to account.move
         self.ensure_one()
         code = self.edi_format_id.code
         field_name = self.env['account.move']._get_mapping_format_field().get(code)
@@ -50,7 +51,18 @@ class AccountEdiDocument(models.Model):
             print("Document field state: ", getattr(self.move_id, field_name))
             return getattr(self.move_id, field_name)
 
-    @api.depends('move_id', 'message', 'is_validated')
+    @api.depends('move_id.edi_messages_mapping')
+    def _compute_show_export_xml_button(self):
+        for doc in self:
+            doc.show_export_xml_button = False
+            edi_format_code = doc.edi_format_id.code
+            if not doc.move_id.edi_messages_mapping:
+                continue
+            edi_message = doc.move_id.edi_messages_mapping.get(edi_format_code)
+            if edi_message and edi_message.get('level') in ['warning', 'error']:
+                doc.show_export_xml_button = True
+
+    @api.depends('move_id', 'move_id.edi_messages_mapping', 'is_validated')
     def _compute_edi_content(self):
         for doc in self:
             res = b''
@@ -85,7 +97,7 @@ class AccountEdiDocument(models.Model):
 
         # Classify jobs by (edi_format, edi_doc.state, doc_type, move.company_id, custom_key)
         to_process = {}
-        documents = self.filtered(lambda d: d._get_document_field_state() in ('to_send', 'to_cancel') and d.blocking_level != 'error')
+        documents = self.filtered(lambda d: d._get_document_edi_field_state() in ('to_send', 'to_cancel') and d.blocking_level != 'error')
         for edi_doc in documents:
             move = edi_doc.move_id
             edi_format = edi_doc.edi_format_id
@@ -96,8 +108,8 @@ class AccountEdiDocument(models.Model):
             else:
                 continue
 
-            custom_key = edi_format._get_batch_key(edi_doc.move_id, edi_doc._get_document_field_state())
-            key = (edi_format, edi_doc._get_document_field_state(), doc_type, move.company_id, custom_key)
+            custom_key = edi_format._get_batch_key(edi_doc.move_id, edi_doc._get_document_edi_field_state())
+            key = (edi_format, edi_doc._get_document_edi_field_state(), doc_type, move.company_id, custom_key)
             to_process.setdefault(key, self.env['account.edi.document'])
             to_process[key] |= edi_doc
 
@@ -187,7 +199,6 @@ class AccountEdiDocument(models.Model):
             self.env.ref('account_edi.ir_cron_edi_network')._trigger()
 
 
-    # TO OVERRIDE
     def _postprocess_post_edi_results(self, edi_result):
         attachments_to_unlink = self.env['ir.attachment']
         for document in self:

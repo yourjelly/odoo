@@ -11,20 +11,29 @@ class AccountMove(models.Model):
     _inherit = 'account.move'
 
     edi_document_ids = fields.One2many(comodel_name='account.edi.document', inverse_name='move_id')
+    # TODO remove if possible
     edi_error_count = fields.Integer(compute='_compute_edi_error_count', help='How many EDIs are in error for this move ?')
     edi_blocking_level = fields.Selection(
         selection=[('info', 'Info'), ('warning', 'Warning'), ('error', 'Error')],
         compute='_compute_edi_message')
     edi_message = fields.Html(compute='_compute_edi_message')
+    # TODO JUVR: do something to make the compute able to deal with different states than the current ones
     edi_web_services_to_process = fields.Text(
         compute='_compute_edi_web_services_to_process',
         help="Technical field to display the documents that will be processed by the CRON")
     edi_show_cancel_button = fields.Boolean(compute='_compute_edi_show_cancel_button')
     edi_show_abandon_cancel_button = fields.Boolean(compute='_compute_edi_show_abandon_cancel_button')
 
-    edi_format_ids = fields.Many2many(compute="_compute_edi_format_ids", readonly=False, store=True,
-                                      comodel_name='account.edi.format',
-                                      domain="[('id', 'in', compatible_edi_ids)]")
+    edi_messages_mapping = fields.Binary(
+        help="Mapping {account.edi.format.code: {'message', 'level'}}",
+        attachment=False)
+
+    edi_format_ids = fields.Many2many(
+        compute="_compute_edi_format_ids",
+        readonly=False,
+        store=True,
+        comodel_name='account.edi.format',
+        domain="[('id', 'in', compatible_edi_ids)]")
     compatible_edi_ids = fields.Many2many(related="journal_id.compatible_edi_ids")
 
     @api.depends('journal_id')
@@ -38,82 +47,94 @@ class AccountMove(models.Model):
         '''
         return {}
 
-    @api.depends('edi_document_ids.message')
+    @api.depends('edi_messages_mapping')
     def _compute_edi_error_count(self):
         for move in self:
-            move.edi_error_count = len(move.edi_document_ids.filtered(lambda d: d.message))
+            move.edi_error_count = 0
+            print("edi_messages_mapping :", move.edi_messages_mapping)
+            if not move.edi_messages_mapping:
+                continue
+            for _, edi_message in move.edi_messages_mapping.items():
+                if edi_message.get('level') in ['warning', 'error']:
+                    move.edi_error_count += 1
 
-    @api.depends('edi_error_count', 'edi_document_ids.message', 'edi_document_ids.blocking_level')
+    @api.depends('edi_error_count', 'edi_messages_mapping')
     def _compute_edi_message(self):
         for move in self:
-            if move.edi_error_count == 0:
-                move.edi_message = None
-                move.edi_blocking_level = None
-            elif move.edi_error_count == 1:
-                error_doc = move.edi_document_ids.filtered(lambda d: d.message)
-                move.edi_message = error_doc.message
-                move.edi_blocking_level = error_doc.blocking_level
-            else:
-                error_levels = set([doc.blocking_level for doc in move.edi_document_ids])
-                if 'error' in error_levels:
-                    move.edi_message = str(move.edi_error_count) + _(" Electronic invoicing error(s)")
-                    move.edi_blocking_level = 'error'
-                elif 'warning' in error_levels:
-                    move.edi_message = str(move.edi_error_count) + _(" Electronic invoicing warning(s)")
-                    move.edi_blocking_level = 'warning'
-                else:
-                    move.edi_message = str(move.edi_error_count) + _(" Electronic invoicing info(s)")
-                    move.edi_blocking_level = 'info'
+            edi_messages = []
+            edi_levels = []
+            move.edi_message = None
+            move.edi_blocking_level = None
+            print("edi_messages_mapping :", move.edi_messages_mapping)
+            if not move.edi_messages_mapping:
+                continue
+            for _, edi_message in move.edi_messages_mapping.items():
+                if edi_message.get('message'):
+                    edi_messages.append(edi_message.get('message'))
+                    edi_levels.append(edi_message.get('level'))
+
+            if 'error' in edi_levels:
+                move.edi_message = str(edi_messages) + _(" Electronic invoicing error(s)")
+                move.edi_blocking_level = 'error'
+            elif 'warning' in edi_levels:
+                move.edi_message = str(edi_messages) + _(" Electronic invoicing warning(s)")
+                move.edi_blocking_level = 'warning'
+            elif 'info' in edi_levels:
+                move.edi_message = str(edi_messages) + _(" Electronic invoicing info(s)")
+                move.edi_blocking_level = 'info'
 
     @api.depends(
         lambda self: [
+            'edi_messages_mapping',
             'edi_document_ids',
-            'edi_document_ids.blocking_level',
             'edi_document_ids.edi_format_id',
             'edi_document_ids.edi_format_id.name'
         ] + list(self._get_mapping_format_field().values()))
     def _compute_edi_web_services_to_process(self):
+        domain = self._edi_get_buttons_domains()['_compute_edi_web_services_to_process']
         for move in self:
-            to_process = move.edi_document_ids.filtered(
-                lambda d: d._get_document_field_state() in ['to_send', 'to_cancel'] and d.blocking_level != 'error')
-            format_web_services = to_process.edi_format_id.filtered(lambda f: f._needs_web_services())
-            move.edi_web_services_to_process = ', '.join(f.name for f in format_web_services)
+            web_services = []
+            for edi_format in move.filtered_domain(domain).edi_format_ids.filtered(lambda f: f._needs_web_services()):
+                # getting the level is really a pain
+                if not move.edi_messages_mapping or \
+                        move.edi_messages_mapping.get(edi_format.code, {}).get('level') != 'error':
+                    web_services.append(edi_format.name)
+            move.edi_web_services_to_process = ', '.join(web_services)
 
     @api.depends(lambda self: ['state'] + list(self._get_mapping_format_field().values()))
     def _compute_show_reset_to_draft_button(self):
         # OVERRIDE
         super()._compute_show_reset_to_draft_button()
 
-        for move in self:
-            for doc in move.edi_document_ids:
-                if doc.edi_format_id._needs_web_services() \
-                        and doc._get_document_field_state() in ('sent', 'to_cancel') \
-                        and move.is_invoice(include_receipts=True) \
-                        and doc.edi_format_id._is_required_for_invoice(move):
+        domain = self._edi_get_buttons_domains()['_compute_show_reset_to_draft_button']
+        for move in self.filtered_domain(domain):
+            for edi_format in move.edi_format_ids:
+                if edi_format._needs_web_services() and \
+                        move.is_invoice(include_receipts=True) and \
+                        edi_format._is_required_for_invoice(move):
                     move.show_reset_to_draft_button = False
                     break
 
     @api.depends(lambda self: ['state'] + list(self._get_mapping_format_field().values()))
     def _compute_edi_show_cancel_button(self):
+        domain = self._edi_get_buttons_domains()['_compute_edi_show_cancel_button']
         for move in self:
             if move.state != 'posted':
                 move.edi_show_cancel_button = False
                 continue
-
-            move.edi_show_cancel_button = any([doc.edi_format_id._needs_web_services()
-                                               and doc._get_document_field_state() == 'sent'
-                                               and move.is_invoice(include_receipts=True)
-                                               and doc.edi_format_id._is_required_for_invoice(move)
-                                               for doc in move.edi_document_ids])
+            move.edi_show_cancel_button = any(f._needs_web_services()
+                                              and move.is_invoice(include_receipts=True)
+                                              and f._is_required_for_invoice(move)
+                                              for f in move.filtered_domain(domain).edi_format_ids)
 
     @api.depends(lambda self: ['state'] + list(self._get_mapping_format_field().values()))
     def _compute_edi_show_abandon_cancel_button(self):
+        domain = self._edi_get_buttons_domains()['_compute_edi_show_abandon_cancel_button']
         for move in self:
-            move.edi_show_abandon_cancel_button = any(doc.edi_format_id._needs_web_services()
-                                                      and doc._get_document_field_state() == 'to_cancel'
+            move.edi_show_abandon_cancel_button = any(f._needs_web_services()
                                                       and move.is_invoice(include_receipts=True)
-                                                      and doc.edi_format_id._is_required_for_invoice(move)
-                                                      for doc in move.edi_document_ids)
+                                                      and f._is_required_for_invoice(move)
+                                                      for f in move.filtered_domain(domain).edi_format_ids)
 
     ####################################################
     # Export Electronic Document
@@ -517,27 +538,35 @@ class AccountMove(models.Model):
 
         res = super().button_draft()
 
-        self.edi_document_ids.write({'message': False, 'blocking_level': False})
+        for move in self:
+            if not move.edi_messages_mapping:
+                continue
+            for _, edi_message in move.edi_messages_mapping.items():
+                edi_message['level'] = False
+                edi_message['message'] = False
+
+        #self.edi_document_ids.write({'message': False, 'blocking_level': False})
 
         return res
 
     def button_cancel_posted_moves(self):
         '''Mark the edi.document related to this move to be canceled.
         '''
+        #TODO JUVR: we can only cancel if there's a validated edi_document already
+        # what if we cancel before the validation of the edi_document ??
         to_cancel_documents = self.env['account.edi.document']
-        for move in self:
+        for move in self.filtered_domain(self._edi_get_buttons_domains()['button_cancel_posted_moves']):
             is_move_marked = False
             for doc in move.edi_document_ids:
                 if doc.edi_format_id._needs_web_services() \
                         and doc.attachment_id \
-                        and doc._get_document_field_state() == 'sent' \
                         and move.is_invoice(include_receipts=True) \
                         and doc.edi_format_id._is_required_for_invoice(move):
                     to_cancel_documents |= doc
                     is_move_marked = True
-                    state_field = move._get_mapping_format_field().get(doc.edi_format_id.code)
-                    if state_field:
-                        setattr(move, state_field, 'to_cancel')
+                    edi_state_field = move._get_mapping_format_field().get(doc.edi_format_id.code)
+                    if edi_state_field:
+                        setattr(move, edi_state_field, 'to_cancel')
             if is_move_marked:
                 move.message_post(body=_("A cancellation of the EDI has been requested."))
 
@@ -548,17 +577,16 @@ class AccountMove(models.Model):
         '''Cancel the request for cancellation of the EDI.
         '''
         documents = self.env['account.edi.document']
-        for move in self:
+        for move in self.filtered_domain(self._get_mapping_format_field()['button_abandon_cancel_posted_posted_moves']):
             is_move_marked = False
             for doc in move.edi_document_ids:
-                if doc._get_document_field_state() == 'to_cancel' \
-                        and move.is_invoice(include_receipts=True) \
+                if move.is_invoice(include_receipts=True) \
                         and doc.edi_format_id._is_required_for_invoice(move):
                     documents |= doc
                     is_move_marked = True
-                    state_field = move._get_mapping_format_field().get(doc.edi_format_id.code)
-                    if state_field:
-                        setattr(move, state_field, 'sent')
+                    edi_state_field = move._get_mapping_format_field().get(doc.edi_format_id.code)
+                    if edi_state_field:
+                        setattr(move, edi_state_field, 'sent')
             if is_move_marked:
                 move.message_post(body=_("A request for cancellation of the EDI has been called off."))
 
@@ -567,6 +595,16 @@ class AccountMove(models.Model):
 
     def _get_edi_attachment(self, edi_format):
         return self._get_edi_document(edi_format).attachment_id
+
+    def _edi_get_buttons_domains(self):
+        return {
+            '_compute_edi_web_services_to_process': [],
+            '_compute_show_reset_to_draft_button': [],
+            '_compute_edi_show_cancel_button': [],
+            '_compute_edi_show_abandon_cancel_button': [],
+            'button_cancel_posted_moves': [],
+            'button_abandon_cancel_posted_posted_moves': [],
+        }
 
     ####################################################
     # Import Electronic Document

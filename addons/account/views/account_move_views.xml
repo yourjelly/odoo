@@ -1273,18 +1273,17 @@
                                     <field name="edi_format_ids" widget="many2many_checkboxes"/>
                                 </group>
                                 <field name="edi_document_ids" options="{'no_open': '1'}" attrs="{'invisible': [('edi_document_ids', '=', [])]}">
-                                    <tree create="false" delete="false" edit="false" decoration-danger="message">
+                                    <tree create="false" delete="false" edit="false">
                                         <field name="name"/>
                                         <field name="edi_format_name"/>
-                                        <field name="write_date" eval="strftime('%d/%m/%Y %H:%M:%S')" optional="hide"/>
-                                        <field name="message" invisible="1"/>
-                                        <field name="blocking_level" invisible="1"/>
+                                        <field name="write_date" eval="strftime('%d/%m/%Y %H:%M:%S')"/>
+                                        <field name="show_export_xml_button" invisible="1"/>
                                         <button name="action_export_xml"
                                                 type="object"
                                                 class="oe_link oe_inline"
                                                 string="Download"
                                                 groups="base.group_no_one"
-                                                attrs="{'invisible': ['|', ('message', '=', False), ('blocking_level', '=', 'info')]}"/>
+                                                attrs="{'invisible': [('show_export_xml_button', '=', False)]}"/>
                                     </tree>
                                 </field>
                             </page>
