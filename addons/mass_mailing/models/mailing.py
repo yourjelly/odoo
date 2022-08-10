@@ -437,8 +437,11 @@ class MassMailing(models.Model):
 
     @api.depends(lambda self: self._get_ab_testing_description_modifying_fields())
     def _compute_ab_testing_description(self):
-        mailing_ab_test = self.filtered('ab_testing_enabled')
-        (self - mailing_ab_test).ab_testing_description = False
+        mailings = self.filtered(lambda mailing: not mailing.ab_testing_enabled)
+        mailings.ab_testing_description = False
+        no_recipients_mailing = (self - mailings).filtered_domain([('mailing_type', '=', 'mail'), ('state', '=', 'done'), ('sent', '=', 0), ('failed', '=', 0), ('canceled', '=', 0)])
+        no_recipients_mailing.ab_testing_description = "There wasn't enough recipients left for this mailing"
+        mailing_ab_test = self - mailings - no_recipients_mailing
         for mailing in mailing_ab_test:
             mailing.ab_testing_description = self.env['ir.qweb']._render(
                 'mass_mailing.ab_testing_description',
