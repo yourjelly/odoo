@@ -1,11 +1,14 @@
 <?xml version="1.0"?>
 <odoo>
+    <record id="pos_category_miscellaneous" model="pos.category">
+        <field name="name">Miscellaneous</field>
+    </record>
     <!-- Kitchen Printer -->
 
     <record id="kitchen_printer" model="restaurant.printer">
         <field name="name">Kitchen Printer</field>
         <field name="proxy_ip">localhost</field>
-        <!-- <field name="product_categories_ids" eval="[(6, 0, [ref('point_of_sale.pos_category_miscellaneous')])]" /> -->
+        <field name="product_categories_ids" eval="[(6, 0, [ref('pos_restaurant.pos_category_miscellaneous')])]" />
     </record>
 
     <record id="product_category_pos_drinks" model="product.category">
