@@ -23,37 +23,33 @@
         <field name="list_price">7.0</field>
         <field name="name">Margherita</field>
         <field name="taxes_id" eval="[(5,)]"/>
-        <field name="weight">0.01</field>
         <field name="pos_categ_id" ref="food"/>
         <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
         <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-pizza.png"/>
     </record>
-    <record id="pos_food_funghi" model="product.product">
+    <record id="pos_food_pepperoni" model="product.product">
         <field name="available_in_pos">True</field>
-        <field name="list_price">7.0</field>
-        <field name="name">Funghi</field>
+        <field name="list_price">8.50</field>
+        <field name="name">Pepperoni</field>
         <field name="taxes_id" eval="[(5,)]"/>
-        <field name="weight">0.01</field>
         <field name="pos_categ_id" ref="food"/>
         <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
-        <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-pizza.png"/>
+        <field name="image_1920" type="base64" file="pos_restaurant/static/img/pepperoni.jpg"/>
     </record>
     <record id="pos_food_vege" model="product.product">
         <field name="available_in_pos">True</field>
-        <field name="list_price">7.0</field>
+        <field name="list_price">6.0</field>
         <field name="name">Vegetarian</field>
         <field name="taxes_id" eval="[(5,)]"/>
-        <field name="weight">0.01</field>
         <field name="pos_categ_id" ref="food"/>
         <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
-        <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-pizza.png"/>
+        <field name="image_1920" type="base64" file="pos_restaurant/static/img/vegetarian.jpg"/>
     </record>
     <record id="pos_food_4formaggi" model="product.product">
         <field name="available_in_pos">True</field>
         <field name="list_price">5.5</field>
         <field name="name">Pasta 4 formaggi </field>
         <field name="taxes_id" eval="[(5,)]"/>
-        <field name="weight">0.01</field>
         <field name="pos_categ_id" ref="food"/>
         <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
         <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-pasta-4f.jpg"/>
@@ -68,7 +64,7 @@
         <field name="iface_printbill">True</field>
         <field name="iface_orderline_notes">True</field>
         <field name="printer_ids" eval="[(6, 0, [ref('pos_restaurant.kitchen_printer')])]" />
-        <field name="iface_start_categ_id" ref="drinks"/>
+        <field name="iface_start_categ_id" ref="food"/>
         <field name="start_category">True</field>
     </record>
 

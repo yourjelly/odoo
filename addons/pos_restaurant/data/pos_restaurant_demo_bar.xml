@@ -43,7 +43,7 @@
         <field name="taxes_id" eval="[(5,)]"/>
         <field name="pos_categ_id" ref="drinks"/>
         <field name="categ_id" ref="pos_restaurant.product_category_pos_drinks"/>
-        <field name="image_1920" type="base64" file="pos_restaurant/static/img/moscow_mule.png"/>
+        <field name="image_1920" type="base64" file="pos_restaurant/static/img/moscow_mule.jpg"/>
     </record>
     <record id="pos_drink_spritz" model="product.product">
         <field name="available_in_pos">True</field>
