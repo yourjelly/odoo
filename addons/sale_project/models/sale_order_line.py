@@ -271,6 +271,18 @@ class SaleOrderLine(models.Model):
 
             return False
 
+        def _generate_milestone(sol):
+            if sol.product_id.service_policy in ['delivered_milestones']:
+                milestone = self.env['project.milestone'].create({
+                    'name': sol.name + " (milestone)",
+                    'project_id': sol.project_id.id,
+                    'sale_line_id': sol.id,
+                    'quantity_percentage': 1,
+                })
+                if sol.product_id.service_tracking == 'task_in_project':
+                    sol.task_id.milestone_id = milestone.id
+            return
+
         # task_global_project: create task in global project
         for so_line in so_line_task_global_project:
             if not so_line.task_id:
@@ -301,6 +313,9 @@ class SaleOrderLine(models.Model):
                         project = map_so_project[so_line.order_id.id]
                 if not so_line.task_id:
                     so_line._timesheet_create_task(project=project)
+            _generate_milestone(so_line)
+
+
 
     def _prepare_invoice_line(self, **optional_values):
         """
