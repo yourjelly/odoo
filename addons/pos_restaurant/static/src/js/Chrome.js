@@ -81,16 +81,17 @@ odoo.define('pos_restaurant.chrome', function (require) {
              * Load POS Restaurant Demo Data instead of POS
              */
             _selectionDemoList() {
+                this.env.pos.is_table_management = true;
                 return [...super._selectionDemoList(), ...[ // Syntaxic sugar
                         {
                             id:"3",
                             label: this.env._t("Restaurant selling the best pizzas in the world"),
-                            item: 'restaurant',
+                            item: 'pos_restaurant_demo_restaurant',
                         },
                         {
                             id:"4",
                             label: this.env._t("Bar selling delicious cocktails"),
-                            item: 'bar',
+                            item: 'pos_restaurant_demo_bar',
                         },
                     ]
                 ];

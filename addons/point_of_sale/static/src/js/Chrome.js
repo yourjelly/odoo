@@ -396,17 +396,17 @@ odoo.define('point_of_sale.Chrome', function(require) {
                 {
                     id:"0",
                     label: this.env._t("Shop selling beautiful clothes"),
-                    item: 'point_of_sale_onboarding_clothes',
+                    item: 'point_of_sale_demo_clothes',
                 },
                 {
                     id:"1",
                     label: this.env._t("Shop selling stylish furniture"),
-                    item: 'point_of_sale_onboarding_furniture',
+                    item: 'point_of_sale_demo_furniture',
                 },
                 {
                     id:"2",
                     label: this.env._t("Bakery selling succulent breads and pastries"),
-                    item: 'point_of_sale_onboarding_bakery',
+                    item: 'point_of_sale_demo_bakery',
                 },
             ]
         }
@@ -423,6 +423,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
                 await this.rpc({
                     'route': '/pos/load_onboarding_data',
                     params: {
+                        module_name: this.env.pos.is_table_management ? 'pos_restaurant' : 'point_of_sale',
                         file_name: selectedOption
                     },
                 });

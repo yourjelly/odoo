@@ -74,6 +74,7 @@
         <field name="default_code">CLOTH_0006</field>
         <field name="type">product</field>
         <field name="weight">0.01</field>
+        <field name="taxes_id" eval='[(5,)]'/>
         <field name="to_weight">False</field>
         <field name="categ_id" ref="product.product_category_1"/>
         <field name="pos_categ_id" ref="pos_category_clothes"/>
@@ -91,6 +92,7 @@
         <field name="barcode">230000100008</field>
         <field name="type">product</field>
         <field name="weight">0.01</field>
+        <field name="taxes_id" eval='[(5,)]'/>
         <field name="categ_id" ref="product.product_category_1"/>
         <field name="pos_categ_id" ref="pos_category_clothes"/>
         <field name="uom_id" ref="uom.product_uom_unit" />
@@ -106,33 +108,7 @@
         }]"/>
     </function>
 
-    <record id="size_attribute" model="product.attribute">
-        <field name="name">Size</field>
-        <field name="sequence">30</field>
-        <field name="display_type">radio</field>
-        <field name="create_variant">no_variant</field>
-    </record>
-    <record id="size_attribute_s" model="product.attribute.value">
-        <field name="name">S</field>
-        <field name="sequence">1</field>
-        <field name="attribute_id" ref="size_attribute"/>
-    </record>
-    <record id="size_attribute_m" model="product.attribute.value">
-        <field name="name">M</field>
-        <field name="sequence">2</field>
-        <field name="attribute_id" ref="size_attribute"/>
-    </record>
-    <record id="size_attribute_l" model="product.attribute.value">
-        <field name="name">L</field>
-        <field name="sequence">3</field>
-        <field name="attribute_id" ref="size_attribute"/>
-    </record>
-    <record id="hoodie_size" model="product.template.attribute.line">
-        <field name="product_tmpl_id" ref="point_of_sale.hoodie_product_template"/>
-        <field name="attribute_id" ref="size_attribute"/>
-        <field name="value_ids" eval="[(6, 0, [ref('size_attribute_s'), ref('size_attribute_m'), ref('size_attribute_l')])]"/>
-    </record>
-    <!-- <record id="hoodie_color_attribute" model="product.attribute">
+    <record id="hoodie_color_attribute" model="product.attribute">
             <field name="name">Color</field>
             <field name="sequence">30</field>
             <field name="display_type">radio</field>
@@ -152,13 +128,14 @@
         <field name="product_tmpl_id" ref="point_of_sale.hoodie_product_template"/>
         <field name="attribute_id" ref="hoodie_color_attribute"/>
         <field name="value_ids" eval="[(6, 0, [ref('hoodie_color_attribute_white'), ref('hoodie_color_attribute_black')])]"/>
-    </record> -->
+    </record>
 
     <record id="cap" model="product.product">
         <field name="available_in_pos">True</field>
         <field name="list_price">25</field>
         <field name="name">Cap</field>
         <field name="weight">0.01</field>
+        <field name="taxes_id" eval='[(5,)]'/>
         <field name="default_code">CLOTH_0002</field>
         <field name="to_weight">False</field>
         <field name="categ_id" ref="product.product_category_1"/>
