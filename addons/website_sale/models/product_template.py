@@ -254,7 +254,7 @@ class ProductTemplate(models.Model):
                 combination_info['price_extra'], product_taxes, taxes, company_id, pricelist,
                 product, partner
             )
-            has_discounted_price = pricelist.currency_id.compare_amounts(list_price, price) == 1
+            has_discounted_price = pricelist.currency_id.compare_amounts(list_price, price) > 0
             prevent_zero_price_sale = not price and current_website.prevent_zero_price_sale
             combination_info.update(
                 base_unit_name=product.base_unit_name,

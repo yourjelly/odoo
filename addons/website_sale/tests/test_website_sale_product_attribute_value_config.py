@@ -42,31 +42,31 @@ class TestWebsiteSaleProductAttributeValueConfig(TestSaleProductAttributeValueCo
         group_tax_excluded.users |= self.env.user
 
         combination_info = self.computer._get_combination_info()
-        self.assertEqual(combination_info['price'], 2222 * discount_rate * currency_ratio)
-        self.assertEqual(combination_info['list_price'], 2222 * discount_rate * currency_ratio)
-        self.assertEqual(combination_info['price_extra'], 222 * currency_ratio)
-        self.assertEqual(combination_info['has_discounted_price'], False)
+        self.assertTrue(pricelist.currency_id.is_equal(combination_info['price'], 2222 * discount_rate * currency_ratio))
+        self.assertTrue(pricelist.currency_id.is_equal(combination_info['list_price'], 2222 * discount_rate * currency_ratio))
+        self.assertTrue(pricelist.currency_id.is_equal(combination_info['price_extra'], 222 * currency_ratio))
+        self.assertTrue(pricelist.currency_id.is_equal(combination_info['has_discounted_price'], False))
 
         # CASE: B2C setting
         group_tax_excluded.users -= self.env.user
         group_tax_included.users |= self.env.user
 
         combination_info = self.computer._get_combination_info()
-        self.assertEqual(combination_info['price'], 2222 * discount_rate * currency_ratio * tax_ratio)
-        self.assertEqual(combination_info['list_price'], 2222 * discount_rate * currency_ratio * tax_ratio)
-        self.assertEqual(combination_info['price_extra'], round(222 * currency_ratio * tax_ratio, 2))
-        self.assertEqual(combination_info['has_discounted_price'], False)
+        self.assertTrue(pricelist.currency_id.is_equal(combination_info['price'], 2222 * discount_rate * currency_ratio * tax_ratio))
+        self.assertTrue(pricelist.currency_id.is_equal(combination_info['list_price'], 2222 * discount_rate * currency_ratio * tax_ratio))
+        self.assertTrue(pricelist.currency_id.is_equal(combination_info['price_extra'], round(222 * currency_ratio * tax_ratio, 2)))
+        self.assertTrue(pricelist.currency_id.is_equal(combination_info['has_discounted_price'], False))
 
         # CASE: pricelist 'without_discount'
         pricelist.discount_policy = 'without_discount'
 
-        # ideally we would need to use compare_amounts everywhere, but this is
+        # ideally we would need to use currency rounding everywhere, but this is
         # the only rounding where it fails without it
         combination_info = self.computer._get_combination_info()
-        self.assertEqual(pricelist.currency_id.compare_amounts(combination_info['price'], 2222 * discount_rate * currency_ratio * tax_ratio), 0)
-        self.assertEqual(pricelist.currency_id.compare_amounts(combination_info['list_price'], 2222 * currency_ratio * tax_ratio), 0)
-        self.assertEqual(pricelist.currency_id.compare_amounts(combination_info['price_extra'], 222 * currency_ratio * tax_ratio), 0)
-        self.assertEqual(combination_info['has_discounted_price'], True)
+        self.assertTrue(pricelist.currency_id.is_equal(combination_info['price'], 2222 * discount_rate * currency_ratio * tax_ratio))
+        self.assertTrue(pricelist.currency_id.is_equal(combination_info['price_extra'], 222 * currency_ratio * tax_ratio))
+        self.assertTrue(pricelist.currency_id.is_equal(combination_info['list_price'], 2222 * currency_ratio * tax_ratio))
+        self.assertTrue(combination_info['has_discounted_price'])
 
     def test_get_combination_info_with_fpos(self):
         self.env.user.partner_id.country_id = False

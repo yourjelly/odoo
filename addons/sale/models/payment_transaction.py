@@ -65,7 +65,7 @@ class PaymentTransaction(models.Model):
                     lambda tx: tx.state in ('authorized', 'done')  # Only consider confirmed tx
                 )) == 1:
                     # Check if the SO is fully paid
-                    if quotation.currency_id.compare_amounts(tx.amount, quotation.amount_total) == 0:
+                    if quotation.currency_id.is_equal(tx.amount, quotation.amount_total):
                         quotation.with_context(send_email=True).action_confirm()
                         confirmed_orders |= quotation
                     else:

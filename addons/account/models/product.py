@@ -70,10 +70,10 @@ class ProductTemplate(models.Model):
         res = self.taxes_id.compute_all(price, product=self, partner=self.env['res.partner'])
         joined = []
         included = res['total_included']
-        if currency.compare_amounts(included, price):
+        if not currency.is_equal(included, price):
             joined.append(_('%s Incl. Taxes', format_amount(self.env, included, currency)))
         excluded = res['total_excluded']
-        if currency.compare_amounts(excluded, price):
+        if not currency.is_equal(excluded, price):
             joined.append(_('%s Excl. Taxes', format_amount(self.env, excluded, currency)))
         if joined:
             tax_string = f"(= {', '.join(joined)})"

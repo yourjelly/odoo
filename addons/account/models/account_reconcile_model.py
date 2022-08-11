@@ -820,7 +820,7 @@ class AccountReconcileModel(models.Model):
             sum_aml_residual = 0.0
             for aml in amls:
 
-                if st_line_currency.compare_amounts(st_line_amount, -aml.amount_residual_currency) == 0:
+                if st_line_currency.is_equal(st_line_amount, -aml.amount_residual_currency):
                     # Special case: the amounts are the same, submit the line directly.
                     kepts_amls = aml
                     break

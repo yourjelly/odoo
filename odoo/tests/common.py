@@ -662,7 +662,7 @@ class BaseCase(unittest.TestCase, metaclass=MetaCase):
                     if field_name not in candidate:
                         diff[field_name] = (record_value, None)
                     elif record_currency:
-                        if record_currency.compare_amounts(candidate[field_name], record_value):
+                        if not record_currency.is_equal(candidate[field_name], record_value):
                             diff[field_name] = (record_value, record_currency.round(candidate[field_name]))
                     elif candidate[field_name] != record_value:
                         diff[field_name] = (record_value, candidate[field_name])

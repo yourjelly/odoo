@@ -273,7 +273,7 @@ class ProductTemplate(models.Model):
             )
 
         price_without_discount = list_price if pricelist and pricelist.discount_policy == 'without_discount' else price
-        has_discounted_price = (pricelist or product_template).currency_id.compare_amounts(price_without_discount, price) == 1
+        has_discounted_price = (pricelist or product_template).currency_id.compare_amounts(price_without_discount, price) > 0
 
         return {
             'product_id': product.id,

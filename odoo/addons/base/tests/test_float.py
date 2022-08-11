@@ -63,6 +63,25 @@ class TestFloatPrecision(TransactionCase):
         try_compare(0.01, 0, 1)
         try_compare(-0.01, 0, -1)
 
+        def try_equal(amount1, amount2, expected):
+            self.assertEqual(currency.is_equal(amount1, amount2), expected,
+                             "Rounding error, is_equal(%s,%s) should be %s" % (amount1, amount2, expected))
+
+        try_compare(0.001, 0.001, True)
+        try_compare(-0.001, -0.001, True)
+        try_compare(0.001, -0.001, True)
+        try_compare(0.001, 0.002, True)
+        try_compare(-0.001, -0.002, True)
+        try_compare(2.675, 2.68, True)
+        try_compare(2.676, 2.68, True)
+        try_compare(-2.676, -2.68, True)
+        try_compare(2.674, 2.68, False)
+        try_compare(-2.674, -2.68, False)
+        try_compare(3, 2.68, False)
+        try_compare(-3, -2.68, -False)
+        try_compare(0.01, 0, False)
+        try_compare(-0.01, 0, False)
+
     def test_rounding_03(self):
         """ Test rounding methods with 3 digits. """
 
@@ -135,7 +154,7 @@ class TestFloatPrecision(TransactionCase):
 
         def try_compare(amount1, amount2, expected):
             self.assertEqual(float_compare(amount1, amount2, precision_digits=3), expected,
-                             "Rounding error, compare_amounts(%s,%s) should be %s" % (amount1, amount2, expected))
+                             "Rounding error, float_compare(%s,%s) should be %s" % (amount1, amount2, expected))
 
         try_compare(0.0003, 0.0004, 0)
         try_compare(-0.0003, -0.0004, 0)
