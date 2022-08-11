@@ -208,6 +208,15 @@ class Currency(models.Model):
         self.ensure_one()
         return tools.float_compare(amount1, amount2, precision_rounding=self.rounding)
 
+    def is_equal(self, amount1, amount2):
+        """Returns true if ``amount1`` and ``amount2`` are equal after rounding them
+           according to the given currency's precision..
+           :param float amount1: first amount to compare
+           :param float amount2: second amount to compare
+           :return: (resp.) True or False, if ``amount1`` and ``amount2`` are (resp.) equal or not
+        """
+        return self.compare_amounts(amount1, amount2) == 0
+
     def is_zero(self, amount):
         """Returns true if ``amount`` is small enough to be treated as
            zero according to current currency's rounding rules.
