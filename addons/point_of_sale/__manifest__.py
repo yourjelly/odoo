@@ -43,9 +43,6 @@
         'views/report_invoice.xml',
         'views/res_config_settings_views.xml',
     ],
-    'demo': [
-        'data/point_of_sale_demo.xml',
-    ],
     'installable': True,
     'application': True,
     'website': 'https://www.odoo.com/app/point-of-sale-shop',
