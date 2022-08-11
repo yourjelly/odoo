@@ -305,9 +305,10 @@ export class FormCompiler extends ViewCompiler {
                     mainSlot.setAttribute("subType", "'item_component'");
                 }
             } else {
-                if (child.classList.contains("o_td_label") || getTag(child, true) === "label") {
+                // TODO: When every apps will be revamp, we could remove the condition using 'o_td_label' in favor of 'o_wrap_label'
+                if (child.classList.contains("o_wrap_label") || child.classList.contains("o_td_label") || getTag(child, true) === "label") {
                     mainSlot.setAttribute("subType", "'label'");
-                    child.classList.remove("o_td_label");
+                    child.classList.remove("o_wrap_label");
                 }
                 slotContent = this.compileNode(child, params, false);
             }

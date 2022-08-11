@@ -28,10 +28,7 @@
     margin-right: -$o-horizontal-padding;
 }
 
-@mixin o-td-label-style {
-    width: 0%;
-    padding: 0 15px 0 0;
-    min-width: 150px;
+@mixin o-label-style {
     color: $headings-color;
 }
 $o-form-label-margin-right: 0px;
@@ -449,48 +446,6 @@ $o-form-label-margin-right: 0px;
 
     // Groups
     .o_group {
-        display: inline-block;
-        width: 100%;
-        margin: 10px 0;
-
-        .o_group {
-            margin: 0;
-        }
-
-        // o_group contains nested groups
-        @for $i from 1 through $o-form-group-cols {
-            .o_group_col_#{$i} {
-                display: inline-block;
-                width: floor(100% / 12 * $i);
-                vertical-align: top;
-            }
-        }
-
-        &.o_inner_group {
-            display: inline-table;
-
-            > tbody > tr > td {
-                &.o_td_label {
-                    @include o-td-label-style;
-                }
-                vertical-align: top;
-
-                span, .o_field_boolean, .oe_avatar, .o_form_uri {
-                    &.o_field_widget {
-                        width: auto;
-                    }
-                }
-            }
-
-            .o_field_widget {
-                &.o_field_many2one_avatar {
-                    .o_field_many2one_selection {
-                        width: calc(100% - 24px);
-                    }
-                }
-            }
-        }
-
         .o_form_label {
             font-weight: $font-weight-normal;
         }
@@ -504,26 +459,28 @@ $o-form-label-margin-right: 0px;
             }
         }
 
-        @include media-breakpoint-up(sm) {
-            :not(.o_row):not(.o_data_cell) > .o_field_widget,
-            .o_row > .o_field_widget:last-child { // Note: this does not take care
-                                                // of an invisible last-child but
-                                                // it does not really matter
-                // Makes extra buttons (e.g. m2o external button) overflow on the
-                // right padding of the parent element
-                .o_input_dropdown {
-                    flex: 1 0 auto;
-                }
-            }
-        }
-
         &.o_label_nowrap .o_form_label {
             white-space: nowrap;
         }
 
-        .o_td_label .o_form_label {
+        .o_wrap_label .o_form_label {
             font-weight: $font-weight-bold;
             margin-right: $o-form-label-margin-right;
+        }
+    }
+
+    .o_inner_group {
+        grid-template-columns: auto 1fr;
+        gap: map-get($spacers, 2) $o-horizontal-padding;
+
+        .o_wrap_label {
+            @include o-label-style;
+        }
+
+        span, .o_field_boolean, .oe_avatar, .o_form_uri {
+            &.o_field_widget {
+                width: auto;
+            }
         }
     }
 
@@ -536,7 +493,7 @@ $o-form-label-margin-right: 0px;
         }
 
         > .o_form_label {
-            @include o-td-label-style;
+            @include o-label-style;
             margin-right: $o-form-label-margin-right;
             font-weight: $font-weight-bold;
         }
@@ -546,7 +503,7 @@ $o-form-label-margin-right: 0px;
     .o_horizontal_separator {
         font-size: $font-size-sm;
         font-weight: $font-weight-bold;
-        margin: 1.2em ($grid-gutter-width * .5) .8em 0;
+        margin: 1.2em 0 .8em 0;
 
         &:not(:empty) {
             box-shadow: 0 $border-width 0 $o-form-separator-color;
@@ -585,10 +542,7 @@ $o-form-label-margin-right: 0px;
             margin-bottom: 0px;
         }
     }
-    .o_td_label .o_form_label:not(.o_status), .o_checkbox_optional_field > .o_form_label {
-        min-height: 33px;
-    }
-    td:not(.o_field_cell) .o_form_uri > span:first-child {
+    .o_cell:not(.o_field_cell) .o_form_uri > span:first-child {
         display: inline-block;
         padding: 1px 0;
         margin-bottom: 1px;
@@ -634,13 +588,13 @@ $o-form-label-margin-right: 0px;
     }
 
     // Specific style classes
-    .o_group.o_inner_group.oe_subtotal_footer {
+    .o_inner_group.oe_subtotal_footer {
         @extend .oe_right;
 
-        > tbody > tr > td {
+        .o_cell {
             padding: 0;
 
-            &.o_td_label {
+            &.o_wrap_label {
                 text-align: right;
             }
 
@@ -661,7 +615,7 @@ $o-form-label-margin-right: 0px;
             }
         }
 
-        > tbody > tr:first-child > td {
+        .o_wrap_field:first-child > .o_cell {
             padding-top: 4px;
         }
 
@@ -815,7 +769,7 @@ $o-form-label-margin-right: 0px;
     }
 
     &.oe_form_configuration {
-        .o_group .o_form_label {
+        .o_inner_group .o_form_label {
             white-space: nowrap;
         }
         h2 {
@@ -915,40 +869,36 @@ $o-form-label-margin-right: 0px;
     display: block;
     margin-bottom: $o-form-spacing-unit * 4;
 
-    > tbody {
-        display: block;
+    .o_wrap_field {
+        display: flex;
+        flex-flow: row wrap;
 
-        > tr {
-            display: flex;
-            flex-flow: row wrap;
+        .o_cell {
+            flex: 1 0 auto;
+            display: block;
+            max-width: 100%;
+            padding: 0;
 
-            > td {
-                flex: 1 0 auto;
-                display: block;
+            &.o_wrap_label {
+                width: 94%!important; // The label must be on its own line except if the form field is small enough (checkbox)
+                line-height: $o-label-font-size-factor;
+            }
+
+            .o_field_widget {
+                margin-bottom: $o-form-spacing-unit * 2;
+
+                > .o_field_widget {
+                    margin-bottom: 0;
+                }
+
+                &.o_field_boolean {
+                    margin-right: 0;
+                }
+            }
+
+            .o_input_dropdown {
+                width: auto;
                 max-width: 100%;
-                padding: 0;
-
-                &.o_td_label {
-                    width: 94%!important; // The label must be on its own line except if the form field is small enough (checkbox)
-                    line-height: $o-label-font-size-factor;
-                }
-
-                .o_field_widget {
-                    margin-bottom: $o-form-spacing-unit * 2;
-
-                    > .o_field_widget {
-                        margin-bottom: 0;
-                    }
-
-                    &.o_field_boolean {
-                        margin-right: 0;
-                    }
-                }
-
-                .o_input_dropdown {
-                    width: auto;
-                    max-width: 100%;
-                }
             }
         }
     }
@@ -983,8 +933,8 @@ $o-form-label-margin-right: 0px;
         word-break: break-all;
     }
     .o_group {
-        &.o_inner_group {
-            @include form-break-table;
+        .o_inner_group {
+            margin-bottom: $o-form-spacing-unit * 4;
         }
     }
 }

@@ -78,10 +78,7 @@ $o-td-label-padding-right: 8px;
 
     // Groups
     .o_group {
-        .o_td_label, .o_checkbox_optional_field > .o_form_label {
-            border-right: 1px solid #ddd;
-        }
-        .o_td_label + td {
+        .o_wrap_label + .o_cell {
             padding: 0px 36px 0px $o-td-label-padding-right;
         }
         .o_checkbox_optional_field > .o_form_label {
@@ -105,7 +102,7 @@ $o-td-label-padding-right: 8px;
         .oe_subtotal_footer_separator {
             border-top: 1px solid #cacaca;
         }
-        .o_td_label {
+        .o_wrap_label {
             border-right: none;
         }
     }
@@ -125,7 +122,7 @@ $o-td-label-padding-right: 8px;
 
 // XXS form view specific rules
 .o_form_view.o_xxs_form_view {
-    .o_group .o_td_label {
+    .o_group .o_wrap_label {
         border: none;
     }
 }
