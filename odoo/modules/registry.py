@@ -853,3 +853,104 @@ def merge_trigger_trees(trees: list, select=bool) -> dict:
             result_tree[key] = subtree
 
     return result_tree
+
+
+class Graph:
+    def __init__(self):
+        # incoming edges {to_node: {label: from_nodes}}
+        self._incoming = defaultdict(lambda: defaultdict(OrderedSet))
+
+    def add(self, from_node, to_node, label=None):
+        self._incoming[to_node][label].add(from_node)
+
+    def add_depends(self, from_node, labels, to_node):
+        if not labels:
+            # add an edge without label from_node ---> to_node
+            return self.add(from_node, to_node)
+
+        # add labelled edges from_node -x-> () -x-> ... -x-> to_node
+        dummy_nodes = [DummyField() for _i in range(len(labels) - 1)]
+        src_nodes = [from_node] + dummy_nodes
+        dst_nodes = dummy_nodes + [to_node]
+        for src_node, dst_node, label in zip(src_nodes, dst_nodes, labels):
+            self.add(src_node, dst_node, label)
+
+    def discard(self, fields):
+        fields = set(fields)
+        incoming = dict(self._incoming)
+        self._incoming.clear()
+        for from_node, edges in incoming.items():
+            if from_node not in fields:
+                for label, to_nodes in edges.items():
+                    if label not in fields:
+                        to_nodes -= fields
+                        if to_nodes:
+                            self._incoming[from_node][label] = to_nodes
+
+    def closure(self, nodes):
+        nodes = list(nodes)
+        done = set(nodes)
+        for node in nodes:
+            edges = self._incoming.get(node)
+            if edges:
+                for src in edges.get(None, ()):
+                    if src not in done:
+                        nodes.append(src)
+                        done.add(src)
+        return nodes
+
+    def transitive_closure(self, nodes):
+        nodes = list(nodes)
+        offset = len(nodes)
+        done = set()
+        for node in nodes:
+            edges = self._incoming.get(node)
+            if edges:
+                for src in edges.get(None, ()):
+                    if src not in done:
+                        nodes.append(src)
+                        done.add(src)
+        return nodes[offset:]
+
+    def incoming(self, nodes):
+        result = defaultdict(OrderedSet)    # {label: from_nodes}
+        for node in nodes:
+            incoming = self._incoming.get(node)
+            if incoming:
+                for label, from_nodes in incoming.items():
+                    result[label].update(from_nodes)
+        return result
+
+    def trigger_tree(self, fields, select=bool):
+        nodes = OrderedSet(fields)
+        fields = [node for node in self.transitive_closure(nodes) if node and select(node)]
+        tree = {None: fields} if fields else {}
+        for label, from_nodes in self.incoming(self.closure(nodes)).items():
+            if label is not None:
+                subtree = self._trigger_tree(from_nodes, select)
+                if subtree:
+                    tree[label] = subtree
+        return tree
+
+    def _trigger_tree(self, nodes, select, ignore=frozenset()):
+        nodes = [node for node in self.closure(nodes) if node not in ignore]
+        fields = [node for node in nodes if node and select(node)]
+        ignore = ignore | frozenset(nodes)
+        tree = {None: fields} if fields else {}
+        for label, from_nodes in self.incoming(nodes).items():
+            if label is not None:
+                subtree = self._trigger_tree(from_nodes, select, ignore)
+                if subtree:
+                    tree[label] = subtree
+        return tree
+
+
+class DummyField:
+    """ Falsy object to be used along with actual field objects in the graph of
+    field dependencies. Those objects are considered distinct, which enables to
+    have many of them inside the graph.
+    """
+    __slots__ = ()
+
+    def __bool__(self):
+        return False
