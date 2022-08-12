@@ -235,20 +235,61 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
      * Checks for tooltips to activate (only from the running tour or specified tour if there
      * is one, from all active tours otherwise). Should be called each time the DOM changes.
      */
-    update: function (tour_name) {
-        if (this.paused) return;
+    update: function (tourName) {
+        if (this.paused) {
+            return;
+        }
 
-        tour_name = this.running_tour || tour_name;
-        if (tour_name) {
-            var tour = this.tours[tour_name];
-            if (!tour || !tour.ready) return;
+        tourName = this.running_tour || tourName;
+        if (tourName) {
+            var tour = this.tours[tourName];
+            if (!tour || !tour.ready) {
+                return;
+            }
 
             if (this.running_tour && this.running_tour_timeout === undefined) {
                 this._set_running_tour_timeout(this.running_tour, this.active_tooltips[this.running_tour]);
             }
             var self = this;
             setTimeout(function () {
-                self._check_for_tooltip(self.active_tooltips[tour_name], tour_name);
+                const currentStep = self.active_tooltips[tourName];
+                const currentStepIndex = self.tours[self.running_tour].current_step;
+                const nextStep = self.tours[self.running_tour].steps[currentStepIndex + 1];
+                if (nextStep) {
+                    /*
+                    2 cases we allow:
+                    First, when the current step is just a check, then no reason to error if the next step is already visible
+                    Second, when, regardless of the current step, the next step is doing some JS, it is most likely done to
+                    be able to execute some stuff for the step after that, and it probably just don't care about the trigger
+                    just being 'body' probably
+                    eg:
+                            [{
+                                trigger: '#cart',
+                                run: () => null, // It's a check
+                            }, {
+                                trigger: 'body',
+                                run: () => {
+                                    // Some RPC which result is modifying to dom..
+                                    // .. or some whatever js code modifying the DOM
+                                },
+                            }, {
+                                trigger: '.element-existing-because-of-prev-step',
+                                run: () => null, // It's a check
+                            }]
+                            Maybe for second case, we should check next's next step. Because if
+                    Third step trigger is already available when on step 1, this is wrong and a door open
+                    for race condition. The tour will pursue without waiting the RPC/JS of step 2.
+                    */
+                   const currentStepIsJustACheck = ['() => null', '()=>null', '() => {}', '()=>{}', 'function () {}', 'function(){}'].includes((currentStep.run || '').toString());
+                    if (!currentStepIsJustACheck && typeof (nextStep.run || '') !== "function") {
+                        if (self._check_for_tooltip(nextStep, tourName, true)) {
+                            console.warn(currentStep);
+                            console.warn(nextStep);
+                            console.warn('Next step trigger(s) already found');
+                        }
+                    }
+                }
+                self._check_for_tooltip(currentStep, tourName);
             });
         } else {
             const sortedTooltips = Object.keys(this.active_tooltips).sort(
@@ -269,13 +310,15 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
      * @param {string} tour_name
      * @returns {boolean} true if a tip was found and activated/updated
      */
-    _check_for_tooltip: function (tip, tour_name) {
+    _check_for_tooltip: function (tip, tour_name, checkOnly) {
         if (tip === undefined) {
             return true;
         }
         if ($('body').hasClass('o_ui_blocked')) {
-            this._deactivate_tip(tip);
-            this._log.push("blockUI is preventing the tip to be consumed");
+            if (!checkOnly) {
+                this._deactivate_tip(tip);
+                this._log.push("blockUI is preventing the tip to be consumed");
+            }
             return false;
         }
         this.$modal_displayed = $('.modal:visible').last();
@@ -307,6 +350,9 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
         }
 
         var triggered = $visible_trigger.length && extra_trigger;
+        if (checkOnly) {
+            return !!triggered;
+        }
         if (triggered) {
             if (!tip.widget) {
                 this._activate_tip(tip, tour_name, $visible_trigger, $visible_alt_trigger);
