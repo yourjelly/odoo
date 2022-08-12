@@ -44,7 +44,7 @@
     <record id="pizza_topping_attribute" model="product.attribute">
         <field name="name">Extra Topping</field>
         <field name="sequence">30</field>
-        <field name="display_type">select</field>
+        <!-- <field name="display_type">select</field> -->
         <field name="create_variant">no_variant</field>
     </record>
 

@@ -22,33 +22,45 @@
         <field name="pos_categ_id" ref="pos_category_clothes"/>
         <field name="uom_id" ref="uom.product_uom_unit" />
         <field name="uom_po_id" ref="uom.product_uom_unit" />
-        <field name="image_1920" type="base64" file="point_of_sale/static/img/tshirt.png"/>
+        <field name="image_1920" type="base64" file="point_of_sale/static/img/tshirt.jpg"/>
     </record>
+
+    <function model="ir.model.data" name="_update_xmlids">
+        <value model="base" eval="[{
+            'xml_id': 'point_of_sale.tshirt_product_template',
+            'record': obj().env.ref('point_of_sale.t_shirt').product_tmpl_id,
+            'noupdate': True,
+        }]"/>
+    </function>
+
     <record id="tshirt_color_attribute" model="product.attribute">
-            <field name="name">Color</field>
-            <field name="sequence">30</field>
-            <field name="display_type">radio</field>
-            <field name="create_variant">no_variant</field>
+        <field name="name">Color</field>
+        <field name="sequence">30</field>
+        <field name="display_type">color</field>
+        <field name="create_variant">no_variant</field>
     </record>
     <record id="tshirt_color_attribute_white" model="product.attribute.value">
         <field name="name">White</field>
+        <field name="html_color">#FFFFFF</field>
         <field name="sequence">1</field>
         <field name="attribute_id" ref="tshirt_color_attribute"/>
     </record>
     <record id="tshirt_color_attribute_black" model="product.attribute.value">
         <field name="name">Black</field>
+        <field name="html_color">#000000</field>
         <field name="sequence">2</field>
         <field name="attribute_id" ref="tshirt_color_attribute"/>
     </record>
-    <record id="tshirt_color_attribute_navy" model="product.attribute.value">
-        <field name="name">Navy</field>
+    <record id="tshirt_color_attribute_red" model="product.attribute.value">
+        <field name="name">Red</field>
+        <field name="html_color">#D64D4D</field>
         <field name="sequence">3</field>
         <field name="attribute_id" ref="tshirt_color_attribute"/>
     </record>
     <record id="t_shirt_color" model="product.template.attribute.line">
-        <field name="product_tmpl_id" ref="point_of_sale.t_shirt"/>
+        <field name="product_tmpl_id" ref="point_of_sale.t_shirt_product_template"/>
         <field name="attribute_id" ref="tshirt_color_attribute"/>
-        <field name="value_ids" eval="[(6, 0, [ref('tshirt_color_attribute_white'), ref('tshirt_color_attribute_black'), ref('tshirt_color_attribute_navy')])]"/>
+        <field name="value_ids" eval="[(6, 0, [ref('tshirt_color_attribute_white'), ref('tshirt_color_attribute_black'), ref('tshirt_color_attribute_red')])]"/>
     </record>
 
     <record id="jeans" model="product.product">
@@ -64,7 +76,7 @@
         <field name="to_weight">False</field>
         <field name="uom_id" ref="uom.product_uom_unit" />
         <field name="uom_po_id" ref="uom.product_uom_unit" />
-        <field name="image_1920" type="base64" file="point_of_sale/static/img/jeans.png"/>
+        <field name="image_1920" type="base64" file="point_of_sale/static/img/jeans.jpg"/>
     </record>
 
     <record id="sweater" model="product.product">
@@ -80,7 +92,7 @@
         <field name="pos_categ_id" ref="pos_category_clothes"/>
         <field name="uom_id" ref="uom.product_uom_unit" />
         <field name="uom_po_id" ref="uom.product_uom_unit" />
-        <field name="image_1920" type="base64" file="point_of_sale/static/img/sweater.png"/>
+        <field name="image_1920" type="base64" file="point_of_sale/static/img/sweater.jpg"/>
     </record>
 
     <record id="hoodie" model="product.product">
@@ -97,7 +109,7 @@
         <field name="pos_categ_id" ref="pos_category_clothes"/>
         <field name="uom_id" ref="uom.product_uom_unit" />
         <field name="uom_po_id" ref="uom.product_uom_unit" />
-        <field name="image_1920" type="base64" file="point_of_sale/static/img/hoodie.png"/>
+        <field name="image_1920" type="base64" file="point_of_sale/static/img/hoodie.jpg"/>
     </record>
 
     <function model="ir.model.data" name="_update_xmlids">
@@ -109,25 +121,27 @@
     </function>
 
     <record id="hoodie_color_attribute" model="product.attribute">
-            <field name="name">Color</field>
-            <field name="sequence">30</field>
-            <field name="display_type">radio</field>
-            <field name="create_variant">no_variant</field>
+        <field name="name">Color</field>
+        <field name="sequence">30</field>
+        <field name="display_type">color</field>
+        <field name="create_variant">no_variant</field>
     </record>
-    <record id="hoodie_color_attribute_white" model="product.attribute.value">
-        <field name="name">White</field>
+    <record id="hoodie_color_attribute_grey" model="product.attribute.value">
+        <field name="name">Grey</field>
+        <field name="html_color">#ADACA4</field>
         <field name="sequence">1</field>
         <field name="attribute_id" ref="hoodie_color_attribute"/>
     </record>
-    <record id="hoodie_color_attribute_black" model="product.attribute.value">
-        <field name="name">Black</field>
+    <record id="hoodie_color_attribute_mustard" model="product.attribute.value">
+        <field name="name">Mustard</field>
+        <field name="html_color">#D6D250</field>
         <field name="sequence">2</field>
         <field name="attribute_id" ref="hoodie_color_attribute"/>
     </record>
     <record id="hoodie_color" model="product.template.attribute.line">
         <field name="product_tmpl_id" ref="point_of_sale.hoodie_product_template"/>
         <field name="attribute_id" ref="hoodie_color_attribute"/>
-        <field name="value_ids" eval="[(6, 0, [ref('hoodie_color_attribute_white'), ref('hoodie_color_attribute_black')])]"/>
+        <field name="value_ids" eval="[(6, 0, [ref('hoodie_color_attribute_grey'), ref('hoodie_color_attribute_mustard')])]"/>
     </record>
 
     <record id="cap" model="product.product">
@@ -142,6 +156,6 @@
         <field name="pos_categ_id" ref="pos_category_clothes"/>
         <field name="uom_id" ref="uom.product_uom_unit" />
         <field name="uom_po_id" ref="uom.product_uom_unit" />
-        <field name="image_1920" type="base64" file="point_of_sale/static/img/cap.png"/>
+        <field name="image_1920" type="base64" file="point_of_sale/static/img/cap.jpg"/>
     </record>
 </odoo>
