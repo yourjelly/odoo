@@ -35,9 +35,9 @@ class ProjectCustomerPortal(CustomerPortal):
         domain = [('project_id', '=', project.id)]
         # pager
         url = "/my/projects/%s" % project.id
+
         values = self._prepare_tasks_values(page, date_begin, date_end, sortby, search, search_in, groupby, url, domain, su=bool(access_token))
         pager = portal_pager(**values['pager'])
-
         values.update(
             grouped_tasks=values['grouped_tasks'](pager['offset']),
             page_name='project',
@@ -45,6 +45,9 @@ class ProjectCustomerPortal(CustomerPortal):
             project=project,
             task_url=f'projects/{project.id}/task',
         )
+        # default value is set to 'project' in _prepare_tasks_values, so we have to set it to 'none' here.
+        if not groupby:
+            values.update(groupby='none')
         return self._get_page_view_values(project, access_token, values, 'my_projects_history', False, **kwargs)
 
     def _prepare_project_domain(self):
@@ -254,9 +257,10 @@ class ProjectCustomerPortal(CustomerPortal):
             'users': {'label': _('Assignees'), 'order': 'user_ids', 'sequence': 4},
             'stage': {'label': _('Stage'), 'order': 'stage_id, project_id', 'sequence': 5},
             'status': {'label': _('Status'), 'order': 'kanban_state', 'sequence': 6},
-            'priority': {'label': _('Priority'), 'order': 'priority desc', 'sequence': 7},
-            'date_deadline': {'label': _('Deadline'), 'order': 'date_deadline asc', 'sequence': 8},
-            'update': {'label': _('Last Stage Update'), 'order': 'date_last_stage_update desc', 'sequence': 10},
+            'milestone': {'label': _('Milestone'), 'order': 'milestone_id', 'sequence': 7},
+            'priority': {'label': _('Priority'), 'order': 'priority desc', 'sequence': 8},
+            'date_deadline': {'label': _('Deadline'), 'order': 'date_deadline asc', 'sequence': 9},
+            'update': {'label': _('Last Stage Update'), 'order': 'date_last_stage_update desc', 'sequence': 11},
         }
 
     def _task_get_searchbar_groupby(self):
@@ -265,8 +269,9 @@ class ProjectCustomerPortal(CustomerPortal):
             'project': {'input': 'project', 'label': _('Project'), 'order': 2},
             'stage': {'input': 'stage', 'label': _('Stage'), 'order': 4},
             'status': {'input': 'status', 'label': _('Status'), 'order': 5},
-            'priority': {'input': 'priority', 'label': _('Priority'), 'order': 6},
-            'customer': {'input': 'customer', 'label': _('Customer'), 'order': 9},
+            'milestone': {'input': 'milestone', 'label': _('Milestone'), 'order': 6},
+            'priority': {'input': 'priority', 'label': _('Priority'), 'order': 7},
+            'customer': {'input': 'customer', 'label': _('Customer'), 'order': 10},
         }
         return dict(sorted(values.items(), key=lambda item: item[1]["order"]))
 
@@ -275,6 +280,7 @@ class ProjectCustomerPortal(CustomerPortal):
             'project': 'project_id',
             'stage': 'stage_id',
             'customer': 'partner_id',
+            'milestone': 'milestone_id',
             'priority': 'priority',
             'status': 'kanban_state',
         }
@@ -295,8 +301,9 @@ class ProjectCustomerPortal(CustomerPortal):
             'users': {'input': 'users', 'label': _('Search in Assignees'), 'order': 3},
             'stage': {'input': 'stage', 'label': _('Search in Stages'), 'order': 4},
             'status': {'input': 'status', 'label': _('Search in Status'), 'order': 5},
-            'priority': {'input': 'priority', 'label': _('Search in Priority'), 'order': 6},
-            'message': {'input': 'message', 'label': _('Search in Messages'), 'order': 10},
+            'milestone': {'input': 'milestone', 'label': _('Search in Milestone'), 'order': 6},
+            'priority': {'input': 'priority', 'label': _('Search in Priority'), 'order': 7},
+            'message': {'input': 'message', 'label': _('Search in Messages'), 'order': 11},
         }
         return dict(sorted(values.items(), key=lambda item: item[1]["order"]))
 
@@ -315,6 +322,8 @@ class ProjectCustomerPortal(CustomerPortal):
             search_domain.append([('project_id', 'ilike', search)])
         if search_in in ('ref', 'all'):
             search_domain.append([('id', 'ilike', search)])
+        if search_in in ('milestone', 'all'):
+            search_domain.append([('milestone_id', 'ilike', search)])
         if search_in in ('users', 'all'):
             user_ids = request.env['res.users'].sudo().search([('name', 'ilike', search)])
             search_domain.append([('user_ids', 'in', user_ids.ids)])
