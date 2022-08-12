@@ -716,7 +716,7 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
         allocation.action_validate()
         with freeze_time('2022-4-4'):
             allocation._update_accrual()
-        self.assertEqual(allocation.number_of_days, 3, "Invalid number of days")
+        self.assertEqual(allocation.number_of_days, 4, "Invalid number of days")
 
     def test_accrual_maximum_leaves(self):
         accrual_plan = self.env['hr.leave.accrual.plan'].with_context(tracking_disable=True).create({

@@ -332,9 +332,14 @@ class HolidaysAllocation(models.Model):
             current_level = allocation._get_current_accrual_plan_level_id(first_day_this_year)[0]
             nextcall = current_level._get_next_date(first_day_this_year)
             if current_level and current_level.action_with_unused_accruals == 'lost':
-                # Allocations are lost but number_of_days should not be lower than leaves_taken
-                allocation.write({'number_of_days': allocation.leaves_taken, 'lastcall': first_day_this_year, 'nextcall': nextcall})
-
+                # _get_previous_date returns the day taken in argument if this a reattribution day
+                if current_level._get_previous_date(first_day_this_year) != first_day_this_year or current_level.frequency == 'daily':
+                    # Allocations are lost but number_of_days should not be lower than leaves_taken
+                    allocation.write({'number_of_days': allocation.leaves_taken, 'lastcall': first_day_this_year, 'nextcall': nextcall})
+                else:
+                    # If the level days are attribuated ont the first of the year set the last call as the day before and the nextcall as
+                    # first day so that the days for the last period can be added
+                    allocation.write({'number_of_days': allocation.leaves_taken, 'lastcall': first_day_this_year - relativedelta(days=1), 'nextcall': first_day_this_year})
     def _get_current_accrual_plan_level_id(self, date, level_ids=False):
         """
         Returns a pair (accrual_plan_level, idx) where accrual_plan_level is the level for the given date
@@ -432,6 +437,10 @@ class HolidaysAllocation(models.Model):
                         continue
                     else:
                         period_start = max(period_start, this_year_first_day)
+                        # if the period_start and _end is equal to the first of the year reset the period start to the day before
+                        # as they should match the last/nextcall for the last period across two years for this period's days to be added.
+                        if period_end == period_start and current_level.frequency != 'daily':
+                            period_start = period_start - relativedelta(days=1)
                 # Also prorate this accrual in the event that we are passing from one level to another
                 if current_level_idx < (len(level_ids) - 1) and allocation.accrual_plan_id.transition_mode == 'immediately':
                     next_level = level_ids[current_level_idx + 1]
