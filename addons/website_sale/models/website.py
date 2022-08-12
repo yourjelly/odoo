@@ -141,6 +141,8 @@ class Website(models.Model):
                                                    website.pricelist_ids,
                                                    partner_pl=partner_pl and partner_pl.id or None,
                                                    order_pl=last_order_pl and last_order_pl.id or None)
+        if partner_pl.id not in pricelists:
+            pricelists.append(partner_pl.id)
         return self.env['product.pricelist'].browse(pricelists)
 
     def get_pricelist_available(self, show_visible=False):
