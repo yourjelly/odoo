@@ -22,9 +22,8 @@ from odoo.modules.db import FunctionStatus
 from odoo.osv.expression import get_unaccent_wrapper
 from .. import SUPERUSER_ID
 from odoo.sql_db import TestCursor
-from odoo.tools import (config, existing_tables, ignore,
-                        lazy_classproperty, lazy_property, sql,
-                        Collector, OrderedSet)
+from odoo.tools import (config, existing_tables, lazy_classproperty,
+                        lazy_property, sql, Collector, OrderedSet, TriggerGraph)
 from odoo.tools.func import locked
 from odoo.tools.lru import LRU
 
@@ -331,11 +330,7 @@ class Registry(Mapping):
         should be kept in the tree nodes.  This enables to discard some unnecessary
         fields from the tree nodes.
         """
-        field_triggers = self.field_triggers
-        trees = [field_triggers[field] for field in fields if field in field_triggers]
-        if not trees:
-            return {}
-        return merge_trigger_trees(trees, select)
+        return self._field_trigger_graph.make_tree(fields, select)
 
     def get_dependent_fields(self, field):
         """ Return an iterator on the fields that depend on ``field``. """
@@ -350,64 +345,11 @@ class Registry(Mapping):
     def _discard_fields(self, fields: list):
         """ Discard the given fields from the registry's internal data structures. """
 
-        # discard fields from field triggers
-        def discard(tree):
-            # discard fields from the tree's root node
-            tree.get(None, set()).difference_update(fields)
-            # discard subtrees labelled with any of the fields
-            for field in fields:
-                tree.pop(field, None)
-            # discard fields from remaining subtrees
-            for field, subtree in tree.items():
-                if field is not None:
-                    discard(subtree)
-
-        discard(self.field_triggers)
+        # discard fields from field dependency graph
+        self._field_trigger_graph.discard(fields)
 
         # discard fields from field inverses
         self.field_inverses.discard_keys_and_values(fields)
-
-    @lazy_property
-    def field_triggers(self):
-        # determine field dependencies
-        dependencies = {}
-        for Model in self.models.values():
-            if Model._abstract:
-                continue
-            for field in Model._fields.values():
-                # dependencies of custom fields may not exist; ignore that case
-                exceptions = (Exception,) if field.base_field.manual else ()
-                with suppress(*exceptions):
-                    dependencies[field] = OrderedSet(field.resolve_depends(self))
-
-        # determine transitive dependencies
-        def transitive_dependencies(field, seen=[]):
-            if field in seen:
-                return
-            for seq1 in dependencies.get(field, ()):
-                yield seq1
-                for seq2 in transitive_dependencies(seq1[-1], seen + [field]):
-                    yield concat(seq1[:-1], seq2)
-
-        def concat(seq1, seq2):
-            if seq1 and seq2:
-                f1, f2 = seq1[-1], seq2[0]
-                if f1.type == 'one2many' and f2.type == 'many2one' and \
-                        f1.model_name == f2.comodel_name and f1.inverse_name == f2.name:
-                    return concat(seq1[:-1], seq2[1:])
-            return seq1 + seq2
-
-        # determine triggers based on transitive dependencies
-        triggers = {}
-        for field in dependencies:
-            for path in transitive_dependencies(field):
-                if path:
-                    tree = triggers
-                    for label in reversed(path):
-                        tree = tree.setdefault(label, {})
-                    tree.setdefault(None, OrderedSet()).add(field)
-
-        return triggers
 
     def is_modifying_relations(self, field):
         """ Return whether ``field`` has dependent fields on some records, and
@@ -430,6 +372,28 @@ class Registry(Mapping):
     def _is_modifying_relations(self):
         # internal cache of method is_modifying_relations()
         return {}
+
+    @lazy_property
+    def _field_trigger_graph(self):
+        """ The :class:`TriggerGraph` corresponding to field dependencies. """
+        graph = TriggerGraph()
+
+        # traverse dependencies
+        for Model in self.models.values():
+            if Model._abstract:
+                continue
+            for field in Model._fields.values():
+                try:
+                    dependencies = OrderedSet(field.resolve_depends(self))
+                except Exception:
+                    # dependencies of custom fields may not exist; ignore that case
+                    if not field.base_field.manual:
+                        raise
+                else:
+                    for dependency in dependencies:
+                        graph.add_dependency(field, dependency)
+
+        return graph
 
     def post_init(self, func, *args, **kwargs):
         """ Register a function to call at the end of :meth:`~.init_models`. """
@@ -829,32 +793,3 @@ class DummyRLock(object):
         self.acquire()
     def __exit__(self, type, value, traceback):
         self.release()
-
-
-def merge_trigger_trees(trees: list, select=bool) -> dict:
-    """ Merge trigger trees list into a final tree. The function ``select`` is
-    called on every field to determine which fields should be kept in the tree
-    nodes. This enables to discard some fields from the tree nodes.
-    """
-    result_tree = {}                        # the resulting tree
-    root_fields = OrderedSet()              # the fields in the root node
-    subtrees_to_merge = defaultdict(list)   # the subtrees to merge grouped by key
-
-    for tree in trees:
-        for key, val in tree.items():
-            if key is None:
-                root_fields.update(val)
-            else:
-                subtrees_to_merge[key].append(val)
-
-    # the root node contains the collected fields for which select is true
-    root_node = [field for field in root_fields if select(field)]
-    if root_node:
-        result_tree[None] = root_node
-
-    for key, subtrees in subtrees_to_merge.items():
-        subtree = merge_trigger_trees(subtrees, select)
-        if subtree:
-            result_tree[key] = subtree
-
-    return result_tree

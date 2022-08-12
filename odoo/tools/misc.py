@@ -1092,6 +1092,9 @@ class OrderedSet(MutableSet):
     def __len__(self):
         return len(self._map)
 
+    def __eq__(self, other):
+        return list(self) == list(other)
+
     def add(self, elem):
         self._map[elem] = None
 
