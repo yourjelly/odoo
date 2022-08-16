@@ -524,7 +524,7 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
 
         with freeze_time('2022-01-01'):
             allocation._update_accrual()
-            self.assertEqual(allocation.number_of_days, 0, 'There number of days should be reset')
+            self.assertEqual(allocation.number_of_days, 1, 'The number of days should be reset')
 
     def test_unused_accrual_postponed(self):
         # 1 accrual with 2 levels and level transition after
@@ -717,7 +717,7 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
         allocation.action_validate()
         with freeze_time('2022-4-4'):
             allocation._update_accrual()
-        self.assertEqual(allocation.number_of_days, 3, "Invalid number of days")
+        self.assertEqual(allocation.number_of_days, 4, "Invalid number of days")
 
     def test_accrual_maximum_leaves(self):
         accrual_plan = self.env['hr.leave.accrual.plan'].with_context(tracking_disable=True).create({
