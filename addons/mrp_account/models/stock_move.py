@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import _, models
+from odoo import _, api, models
 
 
 class StockMove(models.Model):
@@ -42,3 +42,73 @@ class StockMove(models.Model):
         if self.unbuild_id:
             return True
         return super()._is_returned(valued_type)
+
+class StockMoveLine(models.Model):
+    _inherit = "stock.move.line"
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        def create_valuation_layer(production, move):
+            if production and move_line.qty_done and production.product_id.cost_method in ('average', 'fifo') and \
+                    production.state == 'done' and move_line.product_id != production.product_id:
+                if move_line.product_id.id not in production.move_byproduct_ids.mapped('product_id').ids:
+                    production_cost = move_line.qty_done * move_line.product_id.standard_price
+                    production_qty = self.generate_production_quantity(production.move_byproduct_ids, move_line.qty_done, production_cost, production, is_qty_positive=True)
+                    production_move = production.move_finished_ids.filtered(lambda l: l.product_id == production.product_id)
+                    self_context._create_correction_svl(production_move, abs(production_qty) if move_line.qty_done > 0 else -abs(production_qty))
+                elif move_line.product_id.id in production.move_byproduct_ids.mapped('product_id').ids:
+                    self_context._create_correction_svl(move, abs(move_line.qty_done) if move_line.qty_done < 0 else -abs(move_line.qty_done))
+        self_context = self.with_context({'set_zero_qty': True})
+        move_lines = super(StockMoveLine, self).create(vals_list)
+        for move_line in move_lines:
+            move = move_line.move_id
+            production = move.production_id or move.raw_material_production_id
+            create_valuation_layer(production, move)
+        return move_lines
+
+    def write(self, vals):
+        def create_valuation_layer(production, move):
+            if production.product_id.cost_method in ('average', 'fifo') and production.state == 'done':
+                if move_line.product_id.id in production.move_finished_ids.mapped('product_id').ids:
+                    qty = vals['qty_done'] - move_line.qty_done
+                    self_context._create_correction_svl(move, abs(qty) if qty < 0 else -abs(qty))
+                elif move.product_uom_qty != vals['qty_done']:
+                    qty = move_line.qty_done - vals['qty_done']
+                    production_move = production.move_finished_ids.filtered(lambda l: l.product_id == production.product_id)
+                    production_cost = qty * move_line.product_id.standard_price
+                    production_qty = self.generate_production_quantity(production.move_byproduct_ids, qty,
+                                                                       production_cost, production, is_qty_positive=False)
+                    self_context._create_correction_svl(production_move, abs(production_qty) if qty < 0 else -abs(production_qty))
+        if 'qty_done' in vals:
+            self_context = self.with_context({'set_zero_qty': True})
+            for move_line in self:
+                move = move_line.move_id
+                production = move.production_id or move_line.production_id or move.raw_material_production_id
+                create_valuation_layer(production, move)
+        return super(StockMoveLine, self).write(vals)
+
+    def generate_production_quantity(self, byproduct_move_ids, qty, production_cost, production, is_qty_positive):
+        byproduct_cost_list = []
+        self_context = self.with_context({'set_zero_qty': True})
+        for byproduct_move in byproduct_move_ids:
+            if byproduct_move.cost_share:
+                product_cost = byproduct_move.product_id.standard_price
+                byproduct_cost = (production_cost * byproduct_move.cost_share) / 100
+                byproduct_cost_list.append(byproduct_cost)
+                byproduct_qty = byproduct_cost / product_cost if product_cost else 1
+                if is_qty_positive:
+                    self_context._create_correction_svl(byproduct_move, abs(byproduct_qty) if qty > 0 else -abs(byproduct_qty))
+                else:
+                    self_context._create_correction_svl(byproduct_move, abs(byproduct_qty) if qty < 0 else -abs(byproduct_qty))
+        production.product_id.button_bom_cost()
+        main_cost = production_cost - sum(byproduct_cost_list) if byproduct_cost_list else production_cost
+        product_cost = production.product_id.standard_price
+        production_qty = main_cost / product_cost if product_cost else 1
+        return production_qty
+
+    @api.model
+    def _create_correction_svl(self, move, diff):
+        res = super(StockMoveLine, self)._create_correction_svl(move, diff)
+        if diff and self.env.context.get('set_zero_qty'):
+            res.write({'quantity': 0.00})
+        return res
