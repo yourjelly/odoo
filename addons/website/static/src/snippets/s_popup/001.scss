@@ -75,6 +75,12 @@
 
         .modal-content {
             pointer-events: auto;
+            overflow: auto;
+            max-height: 100%;
+        }
+
+        .modal-dialog {
+            height: 100%;
         }
     }
 }

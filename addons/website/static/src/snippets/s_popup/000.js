@@ -126,13 +126,13 @@ function _updateScrollbar(ev) {
     const isOverflowing = dom.hasScrollableContent(context._element);
     if (context._isOverflowingWindow !== isOverflowing) {
         context._isOverflowingWindow = isOverflowing;
-        context._checkScrollbar();
-        context._setScrollbar();
+        //context._checkScrollbar();
+        //context._setScrollbar();
         if (isOverflowing) {
             document.body.classList.add('modal-open');
         } else {
             document.body.classList.remove('modal-open');
-            context._resetScrollbar();
+            //context._resetScrollbar();
         }
     }
 }
