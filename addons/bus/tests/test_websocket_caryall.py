@@ -1,8 +1,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import time
+from collections import defaultdict
 from unittest.mock import patch
 
+from odoo.api import Environment
 from odoo.tests import common
 from .common import WebsocketCase
 from ..websocket import (
@@ -17,6 +19,26 @@ from ..websocket import (
 
 @common.tagged('post_install', '-at_install')
 class TestWebsocketCaryall(WebsocketCase):
+    def test_lifecycle_hooks(self):
+        events = []
+        with patch.object(Websocket, '_event_callbacks', defaultdict(set)):
+            @Websocket.onopen
+            def onopen(env, websocket):  # pylint: disable=unused-variable
+                self.assertIsInstance(env, Environment)
+                self.assertIsInstance(websocket, Websocket)
+                events.append('open')
+
+            @Websocket.onclose
+            def onclose(env, websocket):  # pylint: disable=unused-variable
+                self.assertIsInstance(env, Environment)
+                self.assertIsInstance(websocket, Websocket)
+                events.append('close')
+
+            ws = self.websocket_connect()
+            ws.close(CloseCode.CLEAN)
+            self.wait_remaining_websocket_connections()
+            self.assertEqual(['open', 'close'], events)
+
     def test_instances_set(self):
         first_ws = self.websocket_connect()
         second_ws = self.websocket_connect()
