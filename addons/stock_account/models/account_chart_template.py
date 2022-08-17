@@ -31,5 +31,11 @@ class AccountChartTemplate(models.Model):
             account = self[field]
             value = acc_template_ref[account].id if account else False
             PropertyObj._set_default(field, "product.category", value, company)
-
+        production_account_id = acc_template_ref[self.property_stock_production_account_id].id if account else False
+        property_stock_production = PropertyObj._get('property_stock_production','product.template')
+        if property_stock_production:
+            property_stock_production.write({
+                'valuation_in_account_id': production_account_id,
+                'valuation_out_account_id': production_account_id
+            })
         return res
