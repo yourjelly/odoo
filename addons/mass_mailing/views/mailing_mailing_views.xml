@@ -172,7 +172,7 @@
                             <label for="subject">Subject</label>
                             <div class="o_mass_mailing_subject d-flex flex-row align-items-baseline">
                                 <field class="text-break" name="subject" string="Subject"
-                                    options="{'dynamic_placeholder':  [('mailing_type', '=', 'mail')]}"
+                                    options="{'dynamic_placeholder': true}"
                                     attrs="{'readonly': [('state', 'in', ('sending', 'done'))]}"
                                     widget="char_emojis" placeholder="e.g. New Sale on all T-shirts"/>
                                 <field name="favorite" invisible="1"/>

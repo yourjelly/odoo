@@ -86,7 +86,9 @@ var DynamicPlaceholderFieldMixin = {
      *
      * @returns {ModelFieldSelectorPopover}
      */
-    _openNewModelSelector: async function (baseModel, chain, onFieldChanged, onFieldCancel) {
+    _openNewModelSelector: async function (baseModel, chain, onFieldChanged = null, onFieldCancel = null) {
+        const triggerKeyReplaceRegex = new RegExp('#$');
+
         const modelSelector = new ModelFieldSelectorPopover(
             this,
             baseModel,
@@ -99,13 +101,48 @@ var DynamicPlaceholderFieldMixin = {
                 filter: (model) => !["one2many", "boolean", "many2many"].includes(model.type)
             }
         );
+        if (onFieldChanged === null) {
+            onFieldChanged = (ev) => {
+                this.$el.focus();
+                if (ev.data.chain.length) {
+                    let dynamicPlaceholder = "{{object." + ev.data.chain.join('.');
+                    const defaultValue = ev.data.defaultValue;
+                    dynamicPlaceholder += defaultValue && defaultValue !== '' ? ` or '''${defaultValue}'''}}` : '}}';
+                    this.el.value =
+                        this.el.value.replace(triggerKeyReplaceRegex, '') + dynamicPlaceholder;
+                }
+                modelSelector.destroy();
+            };
+        }
+
+        if (onFieldCancel === null) {
+            onFieldCancel = () => {
+                this.$el.focus();
+                modelSelector.destroy();
+            }
+
+        }
 
         modelSelector.on("field_chain_changed", undefined, onFieldChanged);
         modelSelector.on("field_chain_cancel", undefined, onFieldCancel);
 
-        await modelSelector.insertAfter(this.$el);
-        modelSelector.open(chain, true);
+        let insertAfterElement = this.$el.first();
+        const relatedElementPosition = insertAfterElement[0].getBoundingClientRect();
+        const modalParent = insertAfterElement.parents('div.modal');
+        if (modalParent.length) {
+            const modalContent = modalParent.find('.modal-content');
+            const modalContentPosition = modalContent[0].getBoundingClientRect();
+            await modelSelector.appendTo(modalContent);
 
+            const topPosition = relatedElementPosition.top + relatedElementPosition.height - modalContentPosition.top;
+            const leftPosition = relatedElementPosition.left - modalContentPosition.left;
+            modelSelector.$el.css('top', topPosition + 'px');
+            modelSelector.$el.css('left', leftPosition + 'px');
+        } else {
+            await modelSelector.insertAfter(insertAfterElement);
+        }
+
+        modelSelector.open(chain, true);
         return modelSelector
     },
 }
@@ -637,31 +674,10 @@ var FieldChar = InputField.extend(TranslatableFieldMixin, DynamicPlaceholderFiel
      *
      */
     openDynamicPlaceholder: async function (baseModel, chain = []) {
-        const triggerKeyReplaceRegex = new RegExp('#$');
-
-        let modelSelector;
-        const onFieldChanged = (ev) => {
-            this.$el.focus();
-            if (ev.data.chain.length) {
-                let dynamicPlaceholder = "{{object." + ev.data.chain.join('.');
-                const defaultValue = ev.data.defaultValue;
-                dynamicPlaceholder += defaultValue && defaultValue !== '' ? ` or '''${defaultValue}'''}}` : '}}';
-                this.el.value =
-                    this.el.value.replace(triggerKeyReplaceRegex, '') + dynamicPlaceholder;
-            }
-            modelSelector.destroy();
-        };
-
-        const onFieldCancel = () => {
-            this.$el.focus();
-            modelSelector.destroy();
+        const modelSelector = await this._openNewModelSelector(baseModel, chain);
+        if (this.$el.first().parents('div.modal').length === 0) {
+            modelSelector.$el.css('margin-top', this.$el.height() + 12);
         }
-
-        modelSelector = await this._openNewModelSelector(
-            baseModel, chain, onFieldChanged, onFieldCancel
-        );
-
-        modelSelector.$el.css('margin-top', this.$el.height() + 12);
     },
     /**
      * Open the dynamic placeholder if trigger key match
