@@ -195,9 +195,6 @@ export const editorCommands = {
         }
 
         startNode = startNode || editor.document.getSelection().anchorNode;
-        if (isVisibleEmpty(startNode) && startNode.previousSibling.nodeName.includes('')) {
-            startNode = startNode.previousSibling;
-        }
         if (startNode.nodeType === Node.ELEMENT_NODE) {
             if (selection.anchorOffset === 0) {
                 const textNode = editor.document.createTextNode('');
