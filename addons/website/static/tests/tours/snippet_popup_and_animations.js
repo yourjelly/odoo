@@ -56,7 +56,7 @@ registerWebsitePreviewTour("snippet_popup_and_animations", {
     },
     {
         content: "Scroll to top",
-        trigger: ":iframe #wrapwrap",
+        trigger: ":iframe html",
         run() {
             const animatedColumnEl = this.anchor.querySelector(".s_three_columns .row > :last-child");
             // When the animated element is fully visible, its animation delay
