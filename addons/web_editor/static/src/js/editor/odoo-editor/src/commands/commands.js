@@ -45,7 +45,6 @@ import {
     parseHTML,
     formatSelection,
     isVisibleEmpty,
-    formatSelection,
 } from '../utils/utils.js';
 
 const TEXT_CLASSES_REGEX = /\btext-[^\s]*\b/g;
@@ -198,7 +197,11 @@ export const editorCommands = {
         if (startNode.nodeType === Node.ELEMENT_NODE) {
             if (selection.anchorOffset === 0) {
                 const textNode = editor.document.createTextNode('');
-                startNode.prepend(textNode);
+                if (isVisibleEmpty(startNode)) {
+                    startNode.parentElement.prepend(textNode);
+                } else {
+                    startNode.prepend(textNode);
+                }
                 startNode = textNode;
             } else {
                 startNode = startNode.childNodes[selection.anchorOffset - 1];
