@@ -67,8 +67,13 @@ var BarcodeEvents = core.Class.extend(mixins.PropertiesMixin, {
         this.__blurBarcodeInput = _.debounce(this._blurBarcodeInput, this.inputTimeOut);
     },
 
+    _clean_translated_barcode: function(barcode) {
+        return str.replace(/Alt|Shift/g, '');
+    },
+
     handle_buffered_keys: function() {
-        var str = this.buffered_key_events.reduce(function(memo, e) { return memo + String.fromCharCode(e.which) }, '');
+        var str = this.buffered_key_events.reduce(function(memo, e) { return memo + e.key }, '');
+        str = this._clean_translated_barcode(str);
         var match = str.match(this.regexp);
 
         if (match) {
@@ -149,11 +154,13 @@ var BarcodeEvents = core.Class.extend(mixins.PropertiesMixin, {
     // repeat. When preventDefault() is called on a keydown event
     // the keypress that normally follows is cancelled.
     keydown_handler: function(e){
-        if (this.key_pressed[e.which]) {
+        if (this.prevent_key_repeat && this.key_pressed[e.which]) {
             e.preventDefault();
+            return;
         } else {
             this.key_pressed[e.which] = true;
         }
+        this.handler(e)
     },
 
     keyup_handler: function(e){
@@ -167,13 +174,7 @@ var BarcodeEvents = core.Class.extend(mixins.PropertiesMixin, {
         // Don't catch non-printable keys for which Firefox triggers a keypress
         if (this.is_special_key(e))
             return;
-        // Don't catch keypresses which could have a UX purpose (like shortcuts)
-        if (e.ctrlKey || e.metaKey || e.altKey)
-            return;
-        // Don't catch Return when nothing is buffered. This way users
-        // can still use Return to 'click' on focused buttons or links.
-        if (e.which === 13 && this.buffered_key_events.length === 0)
-            return;
+        if (['Enter',].includes(e.key)) return;
         // Don't catch events targeting elements that are editable because we
         // have no way of redispatching 'genuine' key events. Resent events
         // don't trigger native event handlers of elements. So this means that
@@ -269,12 +270,10 @@ var BarcodeEvents = core.Class.extend(mixins.PropertiesMixin, {
         // This fix is only applied for Google Chrome Mobile but it should work for
         // all other cases.
         // In master, we could remove the behavior with keypress and only use keydown.
+        this.prevent_key_repeat = prevent_key_repeat;
         if (this.isChromeMobile) {
             $('body').on("keydown", this._listenBarcodeScanner.bind(this));
         } else {
-            $('body').bind("keypress", this.__handler);
-        }
-        if (prevent_key_repeat === true) {
             $('body').bind("keydown", this.__keydown_handler);
             $('body').bind('keyup', this.__keyup_handler);
         }

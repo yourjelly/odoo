@@ -1,11 +1,29 @@
 odoo.define('barcodes_gs1_nomenclature/static/src/js/barcode_parser.js', function (require) {
 "use strict";
 
+const session = require('web.session');
 const BarcodeParser = require('barcodes.BarcodeParser');
 const FNC1_CHAR = String.fromCharCode(29);
 const {_lt} = require('web.core');
 
 BarcodeParser.include({
+
+    init: function() {
+        this._super(...arguments);
+        const gs1SeparatorsEncodings = session.gs1SeparatorsEncodings || [];
+        let encodings = gs1SeparatorsEncodings.map(encoding =>
+            // the encodings will be used in a regex, so we first need to escape all special characters
+            encoding.join('').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        )
+        encodings = encodings.join('|');
+        this.gs1SeparatorRegex = new RegExp(encodings, 'g');
+    },
+
+    _clean_translated_barcode: function(barcode) {
+        barcode = barcode.replace(this.gs1_separator_regex, this.gs1_separator);
+        return this._super(barcode);
+    },
+
     /**
      * Convert YYMMDD GS1 date into a Date object
      *
@@ -151,5 +169,8 @@ BarcodeParser.include({
     },
 });
 
-return BarcodeParser;
+return {
+    BarcodeParser: BarcodeParser,
+    FNC1_CHAR: FNC1_CHAR,
+};
 });
