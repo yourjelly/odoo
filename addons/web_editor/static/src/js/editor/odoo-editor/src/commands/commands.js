@@ -44,6 +44,7 @@ import {
     getRowIndex,
     parseHTML,
     formatSelection,
+    isVisibleEmpty,
 } from '../utils/utils.js';
 
 const TEXT_CLASSES_REGEX = /\btext-[^\s]*\b/g;
@@ -193,6 +194,9 @@ export const editorCommands = {
         }
 
         startNode = startNode || editor.document.getSelection().anchorNode;
+        if (isVisibleEmpty(startNode)) {
+            startNode = startNode.parentNode;
+        }
         if (startNode.nodeType === Node.ELEMENT_NODE) {
             if (selection.anchorOffset === 0) {
                 const textNode = editor.document.createTextNode('');
