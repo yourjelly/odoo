@@ -793,19 +793,17 @@ class AccountEdiFormat(models.Model):
             return super()._is_compatible_with_journal(journal)
         return journal.type in ('sale', 'purchase') and journal.country_code == 'IT'
 
-    def _is_required_for_invoice(self, invoice):
+    def _get_move_applicability(self, move):
         # OVERRIDE
         self.ensure_one()
         if self.code != 'fattura_pa':
-            return super()._is_required_for_invoice(invoice)
+            return super()._get_move_applicability(move)
 
-        is_self_invoice = self._l10n_it_edi_is_self_invoice(invoice)
-        return (
-            (invoice.is_sale_document() or (is_self_invoice and invoice.is_purchase_document()))
-            and invoice.country_code == 'IT'
-        )
+        is_it_purchase_document = self._l10n_it_edi_is_self_invoice(move) and move.is_purchase_document()
+        if move.country_code == 'IT' and (move.is_sale_document() or is_it_purchase_document):
+            return {'post': '_post_fattura_pa'}
 
-    def _export_as_xml(self, invoice):
+    def _l10n_it_edi_export_invoice_as_xml(self, invoice):
         ''' Create the xml file content.
         :return: The XML content as str.
         '''
@@ -819,12 +817,6 @@ class AccountEdiFormat(models.Model):
                 is a domestic invoice with a total amount of less than or equal to 400€ and the customer's address is incomplete."
             ))
         return content
-
-    def _get_invoice_edi_content(self, move):
-        #OVERRIDE
-        if self.code != 'fattura_pa':
-            return super()._get_invoice_edi_content(move)
-        return self._export_as_xml(move)
 
     def _check_move_configuration(self, move):
         # OVERRIDE
@@ -864,7 +856,7 @@ class AccountEdiFormat(models.Model):
 
         to_send = {}
         for invoice in invoices:
-            xml = "<?xml version='1.0' encoding='UTF-8'?>" + str(self._export_as_xml(invoice))
+            xml = "<?xml version='1.0' encoding='UTF-8'?>" + str(self._l10n_it_edi_export_invoice_as_xml(invoice))
             filename = self._l10n_it_edi_generate_electronic_invoice_filename(invoice)
             attachment = self.env['ir.attachment'].create({
                 'name': filename,
@@ -1030,12 +1022,12 @@ class AccountEdiFormat(models.Model):
 
         return to_return
 
-    def _post_fattura_pa(self, invoices):
+    def _post_fattura_pa(self, invoice):
         # OVERRIDE
-        if not invoices[0].l10n_it_edi_transaction:
-            return self._l10n_it_post_invoices_step_1(invoices)
+        if not invoice.l10n_it_edi_transaction:
+            return self._l10n_it_post_invoices_step_1(invoice)
         else:
-            return self._l10n_it_post_invoices_step_2(invoices)
+            return self._l10n_it_post_invoices_step_2(invoice)
 
     def _post_invoice_edi(self, invoices):
         # OVERRIDE
