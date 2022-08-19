@@ -850,6 +850,8 @@ class WebsocketConnectionHandler:
         """
         current_thread = threading.current_thread()
         current_thread.type = 'websocket'
+        # rename the thread to avoid tests waiting for a websocket request.
+        current_thread.name = f"odoo.websocket.request.{current_thread.ident}"
         for message in websocket.get_messages():
             with WebsocketRequest(db, httprequest, websocket) as req:
                 try:
@@ -858,6 +860,3 @@ class WebsocketConnectionHandler:
                     websocket.disconnect(CloseCode.SESSION_EXPIRED)
                 except Exception:
                     _logger.exception("Exception occurred during websocket request handling")
-
-
-CommonServer.on_stop(Websocket._on_server_stop)

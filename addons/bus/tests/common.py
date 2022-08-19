@@ -44,12 +44,8 @@ class WebsocketCase(common.HttpCase):
             wraps=_mocked_serve_forever
         )
         self._serve_forever_patch.start()
-
-    def tearDown(self):
-        # ensure websockets are closed after each test.
-        self._close_websockets()
-        self._serve_forever_patch.stop()
-        super().tearDown()
+        self.addCleanup(self._serve_forever_patch.stop)
+        self.addCleanup(self._close_websockets)
 
     def _close_websockets(self):
         """

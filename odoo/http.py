@@ -164,8 +164,8 @@ from .exceptions import UserError, AccessError, AccessDenied
 from .modules.module import get_manifest
 from .modules.registry import Registry
 from .service import security, model as service_model
-from .tools import (config, consteq, date_utils, file_path, profiler,
-                    resolve_attr, submap, unique, ustr,)
+from .tools import (config, consteq, date_utils, file_path, parse_version,
+                    profiler, resolve_attr, submap, unique, ustr,)
 from .tools.geoipresolver import GeoIPResolver
 from .tools.func import filter_kwargs, lazy_property
 from .tools.mimetypes import guess_mimetype
@@ -257,8 +257,7 @@ ROUTING_KEYS = {
     'alias', 'host', 'methods',
 }
 
-werkzeug_version = tuple(int(val) for val in werkzeug.__version__.split('.'))
-if werkzeug_version >= (2, 0, 2):
+if parse_version(werkzeug.__version__) >= parse_version('2.0.2'):
     # Werkzeug 2.0.2 adds the websocket option. If a websocket request
     # (ws/wss) is trying to access an HTTP route, a WebsocketMismatch
     # exception is raised. On the other hand, Werkzeug 0.16 does not
