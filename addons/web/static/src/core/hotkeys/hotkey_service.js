@@ -160,8 +160,29 @@ export const hotkeyService = {
                     (reg.bypassEditableProtection || !shouldProtectEditable) &&
                     (reg.global || reg.activeElement === activeElement)
             );
+<<<<<<< Updated upstream
             if (match) {
                 match.callback();
+=======
+
+            // First candidate
+            let winner = candidates.shift();
+            if (winner && winner.area) {
+                // If there is an area, find the closest one
+                for (const candidate of candidates.filter((c) => Boolean(c.area))) {
+                    if (candidate.area() && winner.area().contains(candidate.area())) {
+                        winner = candidate;
+                    }
+                }
+            }
+
+            // Dispatch actual hotkey to the matching registration
+            if (winner) {
+                winner.callback({
+                    area: winner.area && winner.area(),
+                    target,
+                });
+>>>>>>> Stashed changes
                 return true;
             }
             return false;
