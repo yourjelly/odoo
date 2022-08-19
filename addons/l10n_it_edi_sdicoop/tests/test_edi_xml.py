@@ -416,7 +416,7 @@ class TestItEdi(TestItEdiCommon):
                     2577.29
                 </xpath>
             ''')
-        invoice_etree = etree.fromstring(self.price_included_invoice._export_as_xml())
+        invoice_etree = etree.fromstring(self.price_included_invoice._l10n_it_edi_export_invoice_as_xml())
         # Remove the attachment and its details
         invoice_etree = self.with_applied_xpath(invoice_etree, "<xpath expr='.//Allegati' position='replace'/>")
         self.assertXmlTreeEqual(invoice_etree, expected_etree)
@@ -425,7 +425,7 @@ class TestItEdi(TestItEdiCommon):
         # The EDI can account for discounts, but a line with, for example, a 100% discount should still have
         # a corresponding tax with a base amount of 0
 
-        invoice_etree = etree.fromstring(self.partial_discount_invoice._export_as_xml())
+        invoice_etree = etree.fromstring(self.partial_discount_invoice._l10n_it_edi_export_invoice_as_xml())
         expected_etree = self.with_applied_xpath(
             etree.fromstring(self.edi_basis_xml),
             '''
@@ -482,7 +482,7 @@ class TestItEdi(TestItEdiCommon):
         self.assertXmlTreeEqual(invoice_etree, expected_etree)
 
     def test_fully_discounted_inovice(self):
-        invoice_etree = etree.fromstring(self.full_discount_invoice._export_as_xml())
+        invoice_etree = etree.fromstring(self.full_discount_invoice._l10n_it_edi_export_invoice_as_xml())
         expected_etree = self.with_applied_xpath(
             etree.fromstring(self.edi_basis_xml),
             '''
@@ -519,7 +519,7 @@ class TestItEdi(TestItEdiCommon):
         self.assertXmlTreeEqual(invoice_etree, expected_etree)
 
     def test_non_latin_and_latin_inovice(self):
-        invoice_etree = etree.fromstring(self.non_latin_and_latin_invoice._export_as_xml())
+        invoice_etree = etree.fromstring(self.non_latin_and_latin_invoice._l10n_it_edi_export_invoice_as_xml())
         expected_etree = self.with_applied_xpath(
             etree.fromstring(self.edi_basis_xml),
             '''
@@ -568,7 +568,7 @@ class TestItEdi(TestItEdiCommon):
         self.assertXmlTreeEqual(invoice_etree, expected_etree)
 
     def test_below_400_codice_simplified_invoice(self):
-        invoice_etree = etree.fromstring(self.below_400_codice_simplified_invoice._export_as_xml())
+        invoice_etree = etree.fromstring(self.below_400_codice_simplified_invoice._l10n_it_edi_export_invoice_as_xml())
         expected_etree = self.with_applied_xpath(
             etree.fromstring(self.edi_simplified_basis_xml),
             '''
@@ -598,7 +598,7 @@ class TestItEdi(TestItEdiCommon):
         self.assertXmlTreeEqual(invoice_etree, expected_etree)
 
     def test_total_400_VAT_simplified_invoice(self):
-        invoice_etree = etree.fromstring(self.total_400_VAT_simplified_invoice._export_as_xml())
+        invoice_etree = etree.fromstring(self.total_400_VAT_simplified_invoice._l10n_it_edi_export_invoice_as_xml())
         expected_etree = self.with_applied_xpath(
             etree.fromstring(self.edi_simplified_basis_xml),
             '''
@@ -636,7 +636,7 @@ class TestItEdi(TestItEdiCommon):
         self.assertEqual(res[self.pa_partner_invoice], {'attachment': self.pa_partner_invoice.l10n_it_edi_attachment_id, 'success': True})
 
     def test_zero_percent_taxes(self):
-        invoice_etree = etree.fromstring(self.zero_tax_invoice._export_as_xml())
+        invoice_etree = etree.fromstring(self.zero_tax_invoice._l10n_it_edi_export_invoice_as_xml())
         expected_etree = self.with_applied_xpath(
             etree.fromstring(self.edi_basis_xml),
             '''

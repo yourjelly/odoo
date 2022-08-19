@@ -163,10 +163,10 @@
                 <DatiRiepilogo>
                     <AliquotaIVA t-esc="format_numbers(tax.amount)"/>
                     <Natura t-if="has_exoneration" t-esc="kind_exoneration"/>
-                    <Arrotondamento t-if="tax_dict.get('rounding')" t-esc="format_numbers(tax_dict['rounding'])"/>
+                    <Arrotondamento t-if="tax_dict.get('rounding')" t-esc="format_numbers(-tax_dict['rounding'])"/>
                     <t t-if="rc_refund">
-                        <ImponibileImporto t-esc="format_monetary(tax_dict['base_amount_currency'], currency)"/>
-                        <Imposta t-esc="format_monetary(tax_dict['tax_amount_currency'], currency)"/>
+                        <ImponibileImporto t-esc="format_monetary(balance_multiplicator * tax_dict['base_amount_currency'], currency)"/>
+                        <Imposta t-esc="format_monetary(balance_multiplicator * tax_dict['tax_amount_currency'], currency)"/>
                     </t>
                     <t t-else="">
                         <ImponibileImporto t-esc="format_monetary(abs(tax_dict['base_amount_currency']), currency)"/>

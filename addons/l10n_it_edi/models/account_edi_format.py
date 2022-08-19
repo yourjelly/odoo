@@ -277,21 +277,20 @@ class AccountEdiFormat(models.Model):
                 and invoice.country_code == 'IT'
                 and invoice.l10n_it_send_state not in ('sent', 'delivered', 'delivered_accepted'))
 
-    def _is_required_for_invoice(self, invoice):
-        # OVERRIDE
+    def _get_move_applicability(self, move):
+        # EXTENDS account_edi
         self.ensure_one()
         if self.code != 'fattura_pa':
-            return super()._is_required_for_invoice(invoice)
+            return super()._get_move_applicability(move)
 
-        return self._l10n_it_edi_is_required_for_invoice(invoice)
+        if self._l10n_it_edi_is_required_for_invoice(move):
+            return {'post': '_post_fattura_pa'}
 
-    def _post_fattura_pa(self, invoices):
-        # TO OVERRIDE
-        invoice = invoices  # no batching ensure that we only have one invoice
+    def _post_fattura_pa(self, invoice):
         invoice.l10n_it_send_state = 'other'
         invoice._check_before_xml_exporting()
         if invoice.l10n_it_einvoice_id and invoice.l10n_it_send_state not in ['invalid', 'to_send']:
-            return {'error': _("You can't regenerate an E-Invoice when the first one is sent and there are no errors")}
+            return {invoice: {'error': _("You can't regenerate an E-Invoice when the first one is sent and there are no errors")}}
         if invoice.l10n_it_einvoice_id:
             invoice.l10n_it_einvoice_id.unlink()
         res = invoice.invoice_generate_xml()
@@ -304,15 +303,6 @@ class AccountEdiFormat(models.Model):
         if 'attachment' in res:
             res['success'] = True
         return {invoice: res}
-
-    def _post_invoice_edi(self, invoices, test_mode=False):
-        # OVERRIDE
-        self.ensure_one()
-        edi_result = super()._post_invoice_edi(invoices)
-        if self.code != 'fattura_pa':
-            return edi_result
-
-        return self._post_fattura_pa(invoices)
 
     # -------------------------------------------------------------------------
     # Import

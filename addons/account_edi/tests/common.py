@@ -5,7 +5,6 @@ from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 
 from contextlib import contextmanager
 from unittest.mock import patch
-from unittest import mock
 
 import base64
 
@@ -14,12 +13,17 @@ def _generate_mocked_needs_web_services(needs_web_services):
     return lambda edi_format: needs_web_services
 
 
-def _generate_mocked_support_batching(support_batching):
-    return lambda edi_format, move, state, company: support_batching
-
-
-def _mocked_get_batch_key(edi_format, move, state):
-    return ()
+def _mocked_get_move_applicability(edi_format, move):
+    if move.is_invoice():
+        return {
+            'post': '_post_invoice_edi',
+            'cancel': '_cancel_invoice_edi',
+        }
+    elif move.payment_id or move.statement_line_id:
+        return {
+            'post': '_post_payment_edi',
+            'cancel': '_cancel_invoice_edi',
+        }
 
 
 def _mocked_check_move_configuration_success(edi_format, move):
@@ -93,41 +97,33 @@ class AccountEdiTestCommon(AccountTestInvoicingCommon):
     # EDI helpers
     ####################################################
 
+    def _create_fake_edi_attachment(self):
+        return self.env['ir.attachment'].create({
+            'name': '_create_fake_edi_attachment.xml',
+            'datas': base64.encodebytes(b"<?xml version='1.0' encoding='UTF-8'?><Invoice/>"),
+            'mimetype': 'application/xml'
+        })
+
+    @contextmanager
+    def with_custom_method(self, method_name, method_content):
+        path = f'odoo.addons.account_edi.models.account_edi_format.AccountEdiFormat.{method_name}'
+        with patch(path, new=method_content, create=not hasattr(self.env['account.edi.format'], method_name)):
+            yield
+
     @contextmanager
     def mock_edi(self,
-                 _is_required_for_invoice_method=lambda edi_format, invoice: True,
-                 _is_required_for_payment_method=lambda edi_format, invoice: True,
-                 _support_batching_method=_generate_mocked_support_batching(False),
-                 _get_batch_key_method=_mocked_get_batch_key,
+                 _get_move_applicability_method=_mocked_get_move_applicability,
                  _needs_web_services_method=_generate_mocked_needs_web_services(False),
                  _check_move_configuration_method=_mocked_check_move_configuration_success,
-                 _post_invoice_edi_method=_mocked_post,
-                 _cancel_invoice_edi_method=_mocked_cancel_success,
-                 _post_payment_edi_method=_mocked_post,
-                 _cancel_payment_edi_method=_mocked_cancel_success,
                  ):
 
         try:
-            with patch('odoo.addons.account_edi.models.account_edi_format.AccountEdiFormat._is_required_for_invoice',
-                       new=_is_required_for_invoice_method), \
-                 patch('odoo.addons.account_edi.models.account_edi_format.AccountEdiFormat._is_required_for_payment',
-                       new=_is_required_for_payment_method), \
-                 patch('odoo.addons.account_edi.models.account_edi_format.AccountEdiFormat._needs_web_services',
+            with patch('odoo.addons.account_edi.models.account_edi_format.AccountEdiFormat._needs_web_services',
                        new=_needs_web_services_method), \
-                 patch('odoo.addons.account_edi.models.account_edi_format.AccountEdiFormat._support_batching',
-                       new=_support_batching_method), \
-                 patch('odoo.addons.account_edi.models.account_edi_format.AccountEdiFormat._get_batch_key',
-                       new=_get_batch_key_method), \
                  patch('odoo.addons.account_edi.models.account_edi_format.AccountEdiFormat._check_move_configuration',
                        new=_check_move_configuration_method), \
-                 patch('odoo.addons.account_edi.models.account_edi_format.AccountEdiFormat._post_invoice_edi',
-                       new=_post_invoice_edi_method), \
-                 patch('odoo.addons.account_edi.models.account_edi_format.AccountEdiFormat._cancel_invoice_edi',
-                       new=_cancel_invoice_edi_method), \
-                 patch('odoo.addons.account_edi.models.account_edi_format.AccountEdiFormat._post_payment_edi',
-                       new=_post_payment_edi_method), \
-                 patch('odoo.addons.account_edi.models.account_edi_format.AccountEdiFormat._cancel_payment_edi',
-                       new=_cancel_payment_edi_method):
+                 patch('odoo.addons.account_edi.models.account_edi_format.AccountEdiFormat._get_move_applicability',
+                       new=_get_move_applicability_method):
 
                 yield
         finally:

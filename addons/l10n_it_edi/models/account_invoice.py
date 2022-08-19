@@ -58,7 +58,7 @@ class AccountMove(models.Model):
         self.ensure_one()
         report_name = self.env['account.edi.format']._l10n_it_edi_generate_electronic_invoice_filename(self)
 
-        data = "<?xml version='1.0' encoding='UTF-8'?>" + str(self._export_as_xml())
+        data = "<?xml version='1.0' encoding='UTF-8'?>" + str(self._l10n_it_edi_export_invoice_as_xml())
         description = _('Italian invoice: %s', self.move_type)
         attachment = self.env['ir.attachment'].create({
             'name': report_name,
@@ -185,6 +185,7 @@ class AccountMove(models.Model):
         # Create file content.
         template_values = {
             'record': self,
+            'balance_multiplicator': -1 if self.is_inbound() else 1,
             'company': company,
             'sender': company,
             'sender_partner': company.partner_id,
@@ -222,7 +223,7 @@ class AccountMove(models.Model):
         }
         return template_values
 
-    def _export_as_xml(self):
+    def _l10n_it_edi_export_invoice_as_xml(self):
         '''DEPRECATED : this will be moved to AccountEdiFormat in a future version.
         Create the xml file content.
         :return: The XML content as str.

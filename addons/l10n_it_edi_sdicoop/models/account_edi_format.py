@@ -83,11 +83,18 @@ class AccountEdiFormat(models.Model):
     # Export
     # -------------------------------------------------------------------------
 
-    def _get_invoice_edi_content(self, move):
-        #OVERRIDE
-        if self.code != 'fattura_pa':
-            return super()._get_invoice_edi_content(move)
-        return move._export_as_xml()
+    def _get_move_applicability(self, move):
+        # EXTENDS l10n_it_edi
+        move_applicability = super()._get_move_applicability(move)
+        if not move_applicability or self.code != 'fattura_pa':
+            return move_applicability
+
+        move_applicability['edi_content'] = '_l10n_it_edi_xml_invoice_content'
+        move_applicability['post_batching'] = lambda invoice: (move.move_type, bool(move.l10n_it_edi_transaction))
+        return move_applicability
+
+    def _l10n_it_edi_xml_invoice_content(self, invoice):
+        return invoice._l10n_it_edi_export_invoice_as_xml()
 
     def _check_move_configuration(self, move):
         # OVERRIDE
@@ -117,20 +124,6 @@ class AccountEdiFormat(models.Model):
             and invoice.country_code == 'IT'
         )
 
-    def _support_batching(self, move=None, state=None, company=None):
-        # OVERRIDE
-        if self.code == 'fattura_pa':
-            return state == 'to_send' and move.is_invoice()
-
-        return super()._support_batching(move=move, state=state, company=company)
-
-    def _get_batch_key(self, move, state):
-        # OVERRIDE
-        if self.code != 'fattura_pa':
-            return super()._get_batch_key(move, state)
-
-        return move.move_type, bool(move.l10n_it_edi_transaction)
-
     def _l10n_it_post_invoices_step_1(self, invoices):
         ''' Send the invoices to the proxy.
         '''
@@ -138,7 +131,7 @@ class AccountEdiFormat(models.Model):
 
         to_send = {}
         for invoice in invoices:
-            xml = "<?xml version='1.0' encoding='UTF-8'?>" + str(invoice._export_as_xml())
+            xml = "<?xml version='1.0' encoding='UTF-8'?>" + str(invoice._l10n_it_edi_export_invoice_as_xml())
             filename = self._l10n_it_edi_generate_electronic_invoice_filename(invoice)
             attachment = self.env['ir.attachment'].create({
                 'name': filename,
