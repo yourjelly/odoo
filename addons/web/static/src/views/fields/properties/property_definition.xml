@@ -99,7 +99,7 @@
                             onTagsChange.bind="onTagsChange"/>
                     </td>
                 </tr>
-                <tr t-if="state.propertyDefinition.type === 'many2one' || state.propertyDefinition.type === 'many2many'">
+                <tr t-if="state.propertyDefinition.type === 'many2one' || state.propertyDefinition.type === 'many2many'" class="o_field_property_definition_model">
                     <td class="o_td_label align-top pe-2">
                         <b>Model</b>
                     </td>
