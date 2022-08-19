@@ -22,55 +22,7 @@
     </record>
 
     <!-- Food -->
-    <record id="pizza" model="product.product">
-        <field name="available_in_pos">True</field>
-        <field name="list_price">0</field>
-        <field name="name">Pizza</field>
-        <field name="type">product</field>
-        <field name="categ_id" ref="product.product_category_1"/>
-        <field name="pos_categ_id" ref="food"/>
-        <field name="uom_id" ref="uom.product_uom_unit" />
-        <field name="uom_po_id" ref="uom.product_uom_unit" />
-    </record>
-
-    <function model="ir.model.data" name="_update_xmlids">
-        <value model="base" eval="[{
-            'xml_id': 'pos_restaurant.pizza_product_template',
-            'record': obj().env.ref('pos_restaurant.pizza').product_tmpl_id,
-            'noupdate': True,
-        }]"/>
-    </function>
-
-    <record id="pizza_topping_attribute" model="product.attribute">
-        <field name="name">Extra Topping</field>
-        <field name="sequence">30</field>
-        <!-- <field name="display_type">select</field> -->
-        <field name="create_variant">no_variant</field>
-    </record>
-
-    <record id="pizza_topping_attribute_truffle_oil" model="product.attribute.value">
-        <field name="name">Truffle Oil</field>
-        <field name="sequence">1</field>
-        <field name="attribute_id" ref="pizza_topping_attribute"/>
-    </record>
-    <record id="pizza_topping_attribute_mozarella" model="product.attribute.value">
-        <field name="name">Mozarella Di Buffala</field>
-        <field name="sequence">2</field>
-        <field name="attribute_id" ref="pizza_topping_attribute"/>
-    </record>
-    <record id="pizza_topping_attribute_prosciutto" model="product.attribute.value">
-        <field name="name">Prosciutto Crudo</field>
-        <field name="sequence">3</field>
-        <field name="attribute_id" ref="pizza_topping_attribute"/>
-    </record>
-
-    <record id="pizza_topping" model="product.template.attribute.line">
-        <field name="product_tmpl_id" ref="pos_restaurant.pizza_product_template"/>
-        <field name="attribute_id" ref="pizza_topping_attribute"/>
-        <field name="value_ids" eval="[(6, 0, [ref('pizza_topping_attribute_truffle_oil'), ref('pizza_topping_attribute_mozarella'), ref('pizza_topping_attribute_prosciutto')])]"/>
-    </record>
-
-    <record id="pos_food_margherita" model="product.product">
+    <record id="pos_food_pizza_margherita" model="product.product">
         <field name="available_in_pos">True</field>
         <field name="list_price">7.0</field>
         <field name="name">Margherita</field>
@@ -79,6 +31,77 @@
         <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
         <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-pizza.png"/>
     </record>
+
+    <function model="ir.model.data" name="_update_xmlids">
+        <value model="base" eval="[{
+            'xml_id': 'pos_restaurant.pizza_margherita_product_template',
+            'record': obj().env.ref('pos_restaurant.pos_food_pizza_margherita').product_tmpl_id,
+            'noupdate': True,
+        }]"/>
+    </function>
+
+    <record id="pizza_margherita_truffle_oil_topping_attribute" model="product.attribute">
+        <field name="name">Truffle Oil</field>
+        <field name="sequence">1</field>
+        <field name="display_type">pills</field>
+        <field name="create_variant">no_variant</field>
+    </record>
+
+    <record id="pizza_margherita_truffle_oil_topping_attribute_value" model="product.attribute.value">
+        <field name="name">Truffle Topping</field>
+        <field name="sequence">1</field>
+        <field name="attribute_id" ref="pizza_margherita_truffle_oil_topping_attribute"/>
+    </record>
+
+    <record id="pizza_margherita_mozarella_topping_attribute" model="product.attribute">
+        <field name="name">Mozarella di Bufala</field>
+        <field name="sequence">2</field>
+        <field name="display_type">pills</field>
+        <field name="create_variant">no_variant</field>
+    </record>
+
+    <record id="pizza_margherita_mozarella_topping_attribute_value" model="product.attribute.value">
+        <field name="name">Mozzarella di Bufala Topping</field>
+        <field name="sequence">2</field>
+        <field name="attribute_id" ref="pizza_margherita_mozarella_topping_attribute"/>
+    </record>
+
+    <record id="pizza_margherita_prosciutto_topping_attribute" model="product.attribute">
+        <field name="name">Prosciutto Crudo</field>
+        <field name="sequence">3</field>
+        <field name="display_type">pills</field>
+        <field name="create_variant">no_variant</field>
+    </record>
+
+    <record id="pizza_margherita_prosciutto_topping_attribute_value" model="product.attribute.value">
+        <field name="name">Pro</field>
+        <field name="sequence">3</field>
+        <field name="attribute_id" ref="pizza_margherita_prosciutto_topping_attribute"/>
+    </record>
+
+    <record id="pizza_margherita_topping1" model="product.template.attribute.line">
+        <field name="product_tmpl_id" ref="pos_restaurant.pizza_margherita_product_template"/>
+        <field name="attribute_id" ref="pizza_margherita_truffle_oil_topping_attribute"/>
+        <field name="value_ids" eval="[(6, 0, [ref('pizza_margherita_truffle_oil_topping_attribute_value')])]"/>
+    </record>
+    <record id="pizza_margherita_topping2" model="product.template.attribute.line">
+        <field name="product_tmpl_id" ref="pos_restaurant.pizza_margherita_product_template"/>
+        <field name="attribute_id" ref="pizza_margherita_mozarella_topping_attribute"/>
+        <field name="value_ids" eval="[(6, 0, [ref('pizza_margherita_mozarella_topping_attribute_value')])]"/>
+    </record>
+    <record id="pizza_margherita_topping3" model="product.template.attribute.line">
+        <field name="product_tmpl_id" ref="pos_restaurant.pizza_margherita_product_template"/>
+        <field name="attribute_id" ref="pizza_margherita_prosciutto_topping_attribute"/>
+        <field name="value_ids" eval="[(6, 0, [ref('pizza_margherita_prosciutto_topping_attribute_value')])]"/>
+    </record>
+
+    <!-- <record id="pizza_margherita_attribute_value" model="product.template.attribute.value">
+        <field name="product_tmpl_id" ref="pos_restaurant.pizza_margherita_product_template"/>
+        <field name="attribute_line_id" ref="pizza_margherita_topping3"></field>
+        <field name="product_attribute_value_id" ref="pizza_margherita_prosciutto_topping_attribute_value"></field>
+        <field name="price_extra">18.00</field>
+    </record> -->
+
     <record id="pos_food_pepperoni" model="product.product">
         <field name="available_in_pos">True</field>
         <field name="list_price">8.50</field>
