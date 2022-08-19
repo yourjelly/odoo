@@ -1,456 +1,489 @@
 <?xml version="1.0"?>
 <odoo>
-    <record id="pos_category_miscellaneous" model="pos.category">
-        <field name="name">Miscellaneous</field>
-    </record>
+    <!-- <data noupdate="1"> -->
+        <record id="pos_category_miscellaneous" model="pos.category">
+            <field name="name">Miscellaneous</field>
+        </record>
 
-    <!-- Kitchen Printer -->
+        <!-- Kitchen Printer -->
 
-    <record id="kitchen_printer" model="restaurant.printer">
-        <field name="name">Kitchen Printer</field>
-        <field name="proxy_ip">localhost</field>
-        <field name="product_categories_ids" eval="[(6, 0, [ref('pos_restaurant.pos_category_miscellaneous')])]" />
-    </record>
+        <record id="kitchen_printer" model="restaurant.printer">
+            <field name="name">Kitchen Printer</field>
+            <field name="proxy_ip">localhost</field>
+            <field name="product_categories_ids" eval="[(6, 0, [ref('pos_restaurant.pos_category_miscellaneous')])]" />
+        </record>
 
-    <record id="product_category_pos_food" model="product.category">
-        <field name="parent_id" ref="point_of_sale.product_category_pos"/>
-        <field name="name">Food</field>
-    </record>
+        <record id="product_category_pos_food" model="product.category">
+            <field name="parent_id" ref="point_of_sale.product_category_pos"/>
+            <field name="name">Food</field>
+        </record>
 
-    <record id="food" model="pos.category">
-        <field name="name">Food</field>
-    </record>
+        <record id="food" model="pos.category">
+            <field name="name">Food</field>
+        </record>
 
-    <!-- Food -->
-    <record id="pos_food_pizza_margherita" model="product.product">
-        <field name="available_in_pos">True</field>
-        <field name="list_price">7.0</field>
-        <field name="name">Margherita</field>
-        <field name="taxes_id" eval="[(5,)]"/>
-        <field name="pos_categ_id" ref="food"/>
-        <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
-        <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-pizza.png"/>
-    </record>
+        <!-- Template -->
+        <record id="pizza_product_template" model="product.template">
+            <field name="name">Pizza Template</field>
+        </record>
 
-    <function model="ir.model.data" name="_update_xmlids">
-        <value model="base" eval="[{
-            'xml_id': 'pos_restaurant.pizza_margherita_product_template',
-            'record': obj().env.ref('pos_restaurant.pos_food_pizza_margherita').product_tmpl_id,
-            'noupdate': True,
-        }]"/>
-    </function>
+        <!-- Attributes  -->
+        <record id="truffle_oil_pizza_product_attribute" model="product.attribute">
+            <field name="name">Truffle Oil</field>
+            <field name="sequence">1</field>
+            <field name="display_type">pills</field>
+            <field name="create_variant">no_variant</field>
+        </record>
+        <record id="mozzarella_pizza_product_attribute" model="product.attribute">
+            <field name="name">Mozzarella di Buffala</field>
+            <field name="sequence">2</field>
+            <field name="display_type">pills</field>
+            <field name="create_variant">no_variant</field>
+        </record>
+        <record id="prosciutto_pizza_product_attribute" model="product.attribute">
+            <field name="name">Prosciutto Crudo</field>
+            <field name="sequence">3</field>
+            <field name="display_type">pills</field>
+            <field name="create_variant">no_variant</field>
+        </record>
 
-    <record id="pizza_margherita_truffle_oil_topping_attribute" model="product.attribute">
-        <field name="name">Truffle Oil</field>
-        <field name="sequence">1</field>
-        <field name="display_type">pills</field>
-        <field name="create_variant">no_variant</field>
-    </record>
+        <!-- Attribute Values -->
+        <record id="truffle_oil_topping_product_attribute_value_yes" model="product.attribute.value">
+            <field name="name">Truffle Oil Topping</field>
+            <field name="attribute_id" ref="truffle_oil_pizza_product_attribute"/>
+        </record>
+        <record id="truffle_oil_topping_product_attribute_value_no" model="product.attribute.value">
+            <field name="name">No Truffle Oil Topping</field>
+            <field name="attribute_id" ref="truffle_oil_pizza_product_attribute"/>
+        </record>
 
-    <record id="pizza_margherita_truffle_oil_topping_attribute_value" model="product.attribute.value">
-        <field name="name">Truffle Topping</field>
-        <field name="sequence">1</field>
-        <field name="attribute_id" ref="pizza_margherita_truffle_oil_topping_attribute"/>
-    </record>
+        <record id="mozzarella_topping_product_attribute_value_yes" model="product.attribute.value">
+            <field name="name">Mozzarella</field>
+            <field name="attribute_id" ref="mozzarella_pizza_product_attribute"/>
+        </record>
+        <record id="mozzarella_topping_product_attribute_value_no" model="product.attribute.value">
+            <field name="name">No Mozzarella</field>
+            <field name="attribute_id" ref="mozzarella_pizza_product_attribute"/>
+        </record>
+        <record id="prosciutto_topping_product_attribute_value_yes" model="product.attribute.value">
+            <field name="name">Prosciutto Topping</field>
+            <field name="attribute_id" ref="prosciutto_pizza_product_attribute"/>
+        </record>
+        <record id="prosciutto_topping_product_attribute_value_no" model="product.attribute.value">
+            <field name="name">No Prosciutto Topping</field>
+            <field name="attribute_id" ref="prosciutto_pizza_product_attribute"/>
+        </record>
 
-    <record id="pizza_margherita_mozarella_topping_attribute" model="product.attribute">
-        <field name="name">Mozarella di Bufala</field>
-        <field name="sequence">2</field>
-        <field name="display_type">pills</field>
-        <field name="create_variant">no_variant</field>
-    </record>
+        <!-- Attribute Lines -->
+        <record id="truffle_oil_template_attribute_line" model="product.template.attribute.line">
+            <field name="product_tmpl_id" ref="pos_restaurant.pizza_product_template"/>
+            <field name="attribute_id" ref="pos_restaurant.truffle_oil_pizza_product_attribute"/>
+            <field name="value_ids" eval="[(6,0,[ref('pos_restaurant.truffle_oil_topping_product_attribute_value_yes'), ref('pos_restaurant.truffle_oil_topping_product_attribute_value_no')])]"/>
+        </record>
+        <record id="mozzarella_template_attribute_line" model="product.template.attribute.line">
+            <field name="product_tmpl_id" ref="pos_restaurant.pizza_product_template"/>
+            <field name="attribute_id" ref="pos_restaurant.mozzarella_pizza_product_attribute"/>
+            <field name="value_ids" eval="[(6,0,[ref('pos_restaurant.mozzarella_topping_product_attribute_value_yes'), ref('pos_restaurant.mozzarella_topping_product_attribute_value_no')])]"/>
+        </record>
+        <record id="prosciutto_template_attribute_line" model="product.template.attribute.line">
+            <field name="product_tmpl_id" ref="pos_restaurant.pizza_product_template"/>
+            <field name="attribute_id" ref="pos_restaurant.prosciutto_pizza_product_attribute"/>
+            <field name="value_ids" eval="[(6,0,[ref('pos_restaurant.prosciutto_topping_product_attribute_value_yes'), ref('pos_restaurant.prosciutto_topping_product_attribute_value_no')])]"/>
+        </record>
 
-    <record id="pizza_margherita_mozarella_topping_attribute_value" model="product.attribute.value">
-        <field name="name">Mozzarella di Bufala Topping</field>
-        <field name="sequence">2</field>
-        <field name="attribute_id" ref="pizza_margherita_mozarella_topping_attribute"/>
-    </record>
+        <!-- Products -->
+        <record id="pos_food_pim" model="product.template">
+            <field name="available_in_pos">True</field>
+            <field name="list_price">7.0</field>
+            <field name="name">PimPizza</field>
+            <field name="pos_categ_id" ref="food"/>
+            <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
+            <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-pizza.png"/>
+            <field name="attribute_line_ids" eval="[(0,0,{
+                'attribute_id':ref('pos_restaurant.truffle_oil_pizza_product_attribute'),
+                'value_ids': [(6,0,[ref('pos_restaurant.truffle_oil_topping_product_attribute_value_yes'), ref('pos_restaurant.truffle_oil_topping_product_attribute_value_no')])],
+                'product_template_value_ids': [(0,0, {
+                    'product_attribute_value_id': ref('pos_restaurant.truffle_oil_topping_product_attribute_value_yes'),
+                    'price_extra': 3.0,
+                    })],
+                }),
+                (0,0,{
+                'attribute_id':ref('pos_restaurant.mozzarella_pizza_product_attribute'),
+                'value_ids': [(6,0,[ref('pos_restaurant.mozzarella_topping_product_attribute_value_yes'), ref('pos_restaurant.mozzarella_topping_product_attribute_value_no')])],
+                'product_template_value_ids': [(0,0, {
+                    'product_attribute_value_id': ref('pos_restaurant.mozzarella_topping_product_attribute_value_yes'),
+                    'price_extra': 3.0,
+                    })],
+                }),
+                (0,0,{
+                'attribute_id':ref('pos_restaurant.prosciutto_pizza_product_attribute'),
+                'value_ids': [(6,0,[ref('pos_restaurant.prosciutto_topping_product_attribute_value_yes'), ref('pos_restaurant.prosciutto_topping_product_attribute_value_no')])],
+                'product_template_value_ids': [(0,0, {
+                    'product_attribute_value_id': ref('pos_restaurant.prosciutto_topping_product_attribute_value_yes'),
+                    'price_extra': 3.0,
+                    })],
+                })]"/>
+        </record>
 
-    <record id="pizza_margherita_prosciutto_topping_attribute" model="product.attribute">
-        <field name="name">Prosciutto Crudo</field>
-        <field name="sequence">3</field>
-        <field name="display_type">pills</field>
-        <field name="create_variant">no_variant</field>
-    </record>
+        <!-- Products -->
+        <record id="pos_food_margherita" model="product.product">
+            <field name="available_in_pos">True</field>
+            <field name="list_price">7.0</field>
+            <field name="name">Margherita</field>
+            <field name="taxes_id" eval="[(5,)]"/>
+            <field name="pos_categ_id" ref="food"/>
+            <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
+            <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-pizza.png"/>
+        </record>
+        <record id="pos_food_pepperoni" model="product.product">
+            <field name="available_in_pos">True</field>
+            <field name="list_price">8.50</field>
+            <field name="name">Pepperoni</field>
+            <field name="taxes_id" eval="[(5,)]"/>
+            <field name="pos_categ_id" ref="food"/>
+            <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
+            <field name="image_1920" type="base64" file="pos_restaurant/static/img/pepperoni.jpg"/>
+        </record>
+        <record id="pos_food_vege" model="product.product">
+            <field name="available_in_pos">True</field>
+            <field name="list_price">6.0</field>
+            <field name="name">Vegetarian</field>
+            <field name="taxes_id" eval="[(5,)]"/>
+            <field name="pos_categ_id" ref="food"/>
+            <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
+            <field name="image_1920" type="base64" file="pos_restaurant/static/img/vegetarian.jpg"/>
+        </record>
+        <record id="pos_food_4formaggi" model="product.product">
+            <field name="available_in_pos">True</field>
+            <field name="list_price">5.5</field>
+            <field name="name">Pasta 4 formaggi </field>
+            <field name="taxes_id" eval="[(5,)]"/>
+            <field name="pos_categ_id" ref="food"/>
+            <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
+            <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-pasta-4f.jpg"/>
+        </record>
 
-    <record id="pizza_margherita_prosciutto_topping_attribute_value" model="product.attribute.value">
-        <field name="name">Pro</field>
-        <field name="sequence">3</field>
-        <field name="attribute_id" ref="pizza_margherita_prosciutto_topping_attribute"/>
-    </record>
+        <!-- Pos Config -->
+        <record model="pos.config" id="pos_config_main">
+            <field name="name">Restaurant</field>
+            <field name="module_pos_restaurant">True</field>
+            <field name="is_table_management">True</field>
+            <field name="iface_splitbill">True</field>
+            <field name="iface_printbill">True</field>
+            <field name="iface_orderline_notes">True</field>
+            <field name="printer_ids" eval="[(6, 0, [ref('pos_restaurant.kitchen_printer')])]" />
+            <field name="iface_start_categ_id" ref="food"/>
+            <field name="start_category">True</field>
+        </record>
 
-    <record id="pizza_margherita_topping1" model="product.template.attribute.line">
-        <field name="product_tmpl_id" ref="pos_restaurant.pizza_margherita_product_template"/>
-        <field name="attribute_id" ref="pizza_margherita_truffle_oil_topping_attribute"/>
-        <field name="value_ids" eval="[(6, 0, [ref('pizza_margherita_truffle_oil_topping_attribute_value')])]"/>
-    </record>
-    <record id="pizza_margherita_topping2" model="product.template.attribute.line">
-        <field name="product_tmpl_id" ref="pos_restaurant.pizza_margherita_product_template"/>
-        <field name="attribute_id" ref="pizza_margherita_mozarella_topping_attribute"/>
-        <field name="value_ids" eval="[(6, 0, [ref('pizza_margherita_mozarella_topping_attribute_value')])]"/>
-    </record>
-    <record id="pizza_margherita_topping3" model="product.template.attribute.line">
-        <field name="product_tmpl_id" ref="pos_restaurant.pizza_margherita_product_template"/>
-        <field name="attribute_id" ref="pizza_margherita_prosciutto_topping_attribute"/>
-        <field name="value_ids" eval="[(6, 0, [ref('pizza_margherita_prosciutto_topping_attribute_value')])]"/>
-    </record>
+        <!-- Floors: Main Floor -->
 
-    <!-- <record id="pizza_margherita_attribute_value" model="product.template.attribute.value">
-        <field name="product_tmpl_id" ref="pos_restaurant.pizza_margherita_product_template"/>
-        <field name="attribute_line_id" ref="pizza_margherita_topping3"></field>
-        <field name="product_attribute_value_id" ref="pizza_margherita_prosciutto_topping_attribute_value"></field>
-        <field name="price_extra">18.00</field>
-    </record> -->
+        <record id="floor_main" model="restaurant.floor">
+            <field name="name">Main Floor</field>
+            <field name="background_color">rgb(136,137,242)</field>
+            <field name="pos_config_id" ref="pos_restaurant.pos_config_main"/>
+        </record>
 
-    <record id="pos_food_pepperoni" model="product.product">
-        <field name="available_in_pos">True</field>
-        <field name="list_price">8.50</field>
-        <field name="name">Pepperoni</field>
-        <field name="taxes_id" eval="[(5,)]"/>
-        <field name="pos_categ_id" ref="food"/>
-        <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
-        <field name="image_1920" type="base64" file="pos_restaurant/static/img/pepperoni.jpg"/>
-    </record>
-    <record id="pos_food_vege" model="product.product">
-        <field name="available_in_pos">True</field>
-        <field name="list_price">6.0</field>
-        <field name="name">Vegetarian</field>
-        <field name="taxes_id" eval="[(5,)]"/>
-        <field name="pos_categ_id" ref="food"/>
-        <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
-        <field name="image_1920" type="base64" file="pos_restaurant/static/img/vegetarian.jpg"/>
-    </record>
-    <record id="pos_food_4formaggi" model="product.product">
-        <field name="available_in_pos">True</field>
-        <field name="list_price">5.5</field>
-        <field name="name">Pasta 4 formaggi </field>
-        <field name="taxes_id" eval="[(5,)]"/>
-        <field name="pos_categ_id" ref="food"/>
-        <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
-        <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-pasta-4f.jpg"/>
-    </record>
+        <record id="table_01" model="restaurant.table">
+            <field name="name">T1</field>
+            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="seats">4</field>
+            <field name="color">rgb(53,211,116)</field>
+            <field name="shape">square</field>
+            <field name="width">100</field>
+            <field name="height">100</field>
+            <field name="position_h">50</field>
+            <field name="position_v">50</field>
+        </record>
 
-    <!-- Pos Config -->
-    <record model="pos.config" id="pos_config_main">
-        <field name="name">Restaurant</field>
-        <field name="module_pos_restaurant">True</field>
-        <field name="is_table_management">True</field>
-        <field name="iface_splitbill">True</field>
-        <field name="iface_printbill">True</field>
-        <field name="iface_orderline_notes">True</field>
-        <field name="printer_ids" eval="[(6, 0, [ref('pos_restaurant.kitchen_printer')])]" />
-        <field name="iface_start_categ_id" ref="food"/>
-        <field name="start_category">True</field>
-    </record>
+        <record id="table_02" model="restaurant.table">
+            <field name="name">T2</field>
+            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="seats">4</field>
+            <field name="color">rgb(53,211,116)</field>
+            <field name="shape">square</field>
+            <field name="width">100</field>
+            <field name="height">100</field>
+            <field name="position_h">212</field>
+            <field name="position_v">50</field>
+        </record>
 
-    <!-- Floors: Main Floor -->
+        <record id="table_03" model="restaurant.table">
+            <field name="name">T3</field>
+            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="seats">4</field>
+            <field name="color">rgb(53,211,116)</field>
+            <field name="shape">square</field>
+            <field name="width">100</field>
+            <field name="height">100</field>
+            <field name="position_h">374</field>
+            <field name="position_v">50</field>
+        </record>
 
-    <record id="floor_main" model="restaurant.floor">
-        <field name="name">Main Floor</field>
-        <field name="background_color">rgb(136,137,242)</field>
-        <field name="pos_config_id" ref="pos_restaurant.pos_config_main"/>
-    </record>
+        <record id="table_04" model="restaurant.table">
+            <field name="name">T4</field>
+            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="seats">4</field>
+            <field name="color">rgb(53,211,116)</field>
+            <field name="shape">square</field>
+            <field name="width">100</field>
+            <field name="height">100</field>
+            <field name="position_h">536</field>
+            <field name="position_v">50</field>
+        </record>
 
-    <record id="table_01" model="restaurant.table">
-        <field name="name">T1</field>
-        <field name="floor_id" ref="pos_restaurant.floor_main"/>
-        <field name="seats">4</field>
-        <field name="color">rgb(53,211,116)</field>
-        <field name="shape">square</field>
-        <field name="width">100</field>
-        <field name="height">100</field>
-        <field name="position_h">50</field>
-        <field name="position_v">50</field>
-    </record>
+        <record id="table_05" model="restaurant.table">
+            <field name="name">T5</field>
+            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="seats">4</field>
+            <field name="color">rgb(53,211,116)</field>
+            <field name="shape">square</field>
+            <field name="width">100</field>
+            <field name="height">100</field>
+            <field name="position_h">698</field>
+            <field name="position_v">50</field>
+        </record>
 
-    <record id="table_02" model="restaurant.table">
-        <field name="name">T2</field>
-        <field name="floor_id" ref="pos_restaurant.floor_main"/>
-        <field name="seats">4</field>
-        <field name="color">rgb(53,211,116)</field>
-        <field name="shape">square</field>
-        <field name="width">100</field>
-        <field name="height">100</field>
-        <field name="position_h">212</field>
-        <field name="position_v">50</field>
-    </record>
+        <record id="table_06" model="restaurant.table">
+            <field name="name">T6</field>
+            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="seats">4</field>
+            <field name="color">rgb(53,211,116)</field>
+            <field name="shape">square</field>
+            <field name="width">100</field>
+            <field name="height">100</field>
+            <field name="position_h">860</field>
+            <field name="position_v">50</field>
+        </record>
 
-    <record id="table_03" model="restaurant.table">
-        <field name="name">T3</field>
-        <field name="floor_id" ref="pos_restaurant.floor_main"/>
-        <field name="seats">4</field>
-        <field name="color">rgb(53,211,116)</field>
-        <field name="shape">square</field>
-        <field name="width">100</field>
-        <field name="height">100</field>
-        <field name="position_h">374</field>
-        <field name="position_v">50</field>
-    </record>
+        <record id="table_07" model="restaurant.table">
+            <field name="name">T7</field>
+            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="seats">4</field>
+            <field name="color">rgb(235,109,109)</field>
+            <field name="shape">square</field>
+            <field name="width">100</field>
+            <field name="height">100</field>
+            <field name="position_h">50</field>
+            <field name="position_v">280</field>
+        </record>
 
-    <record id="table_04" model="restaurant.table">
-        <field name="name">T4</field>
-        <field name="floor_id" ref="pos_restaurant.floor_main"/>
-        <field name="seats">4</field>
-        <field name="color">rgb(53,211,116)</field>
-        <field name="shape">square</field>
-        <field name="width">100</field>
-        <field name="height">100</field>
-        <field name="position_h">536</field>
-        <field name="position_v">50</field>
-    </record>
+        <record id="table_08" model="restaurant.table">
+            <field name="name">T8</field>
+            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="seats">4</field>
+            <field name="color">rgb(235,109,109)</field>
+            <field name="shape">square</field>
+            <field name="width">100</field>
+            <field name="height">100</field>
+            <field name="position_h">212</field>
+            <field name="position_v">280</field>
+        </record>
 
-    <record id="table_05" model="restaurant.table">
-        <field name="name">T5</field>
-        <field name="floor_id" ref="pos_restaurant.floor_main"/>
-        <field name="seats">4</field>
-        <field name="color">rgb(53,211,116)</field>
-        <field name="shape">square</field>
-        <field name="width">100</field>
-        <field name="height">100</field>
-        <field name="position_h">698</field>
-        <field name="position_v">50</field>
-    </record>
+        <record id="table_09" model="restaurant.table">
+            <field name="name">T9</field>
+            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="seats">4</field>
+            <field name="color">rgb(235,109,109)</field>
+            <field name="shape">square</field>
+            <field name="width">100</field>
+            <field name="height">100</field>
+            <field name="position_h">698</field>
+            <field name="position_v">280</field>
+        </record>
 
-    <record id="table_06" model="restaurant.table">
-        <field name="name">T6</field>
-        <field name="floor_id" ref="pos_restaurant.floor_main"/>
-        <field name="seats">4</field>
-        <field name="color">rgb(53,211,116)</field>
-        <field name="shape">square</field>
-        <field name="width">100</field>
-        <field name="height">100</field>
-        <field name="position_h">860</field>
-        <field name="position_v">50</field>
-    </record>
+        <record id="table_10" model="restaurant.table">
+            <field name="name">T10</field>
+            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="seats">4</field>
+            <field name="color">rgb(235,109,109)</field>
+            <field name="shape">square</field>
+            <field name="width">100</field>
+            <field name="height">100</field>
+            <field name="position_h">860</field>
+            <field name="position_v">280</field>
+        </record>
 
-    <record id="table_07" model="restaurant.table">
-        <field name="name">T7</field>
-        <field name="floor_id" ref="pos_restaurant.floor_main"/>
-        <field name="seats">4</field>
-        <field name="color">rgb(235,109,109)</field>
-        <field name="shape">square</field>
-        <field name="width">100</field>
-        <field name="height">100</field>
-        <field name="position_h">50</field>
-        <field name="position_v">280</field>
-    </record>
+        <record id="table_11" model="restaurant.table">
+            <field name="name">T11</field>
+            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="seats">4</field>
+            <field name="color">rgb(78,210,190)</field>
+            <field name="shape">round</field>
+            <field name="width">210</field>
+            <field name="height">210</field>
+            <field name="position_h">400</field>
+            <field name="position_v">230</field>
+        </record>
 
-    <record id="table_08" model="restaurant.table">
-        <field name="name">T8</field>
-        <field name="floor_id" ref="pos_restaurant.floor_main"/>
-        <field name="seats">4</field>
-        <field name="color">rgb(235,109,109)</field>
-        <field name="shape">square</field>
-        <field name="width">100</field>
-        <field name="height">100</field>
-        <field name="position_h">212</field>
-        <field name="position_v">280</field>
-    </record>
+        <!-- Restaurant Floor: Patio -->
 
-    <record id="table_09" model="restaurant.table">
-        <field name="name">T9</field>
-        <field name="floor_id" ref="pos_restaurant.floor_main"/>
-        <field name="seats">4</field>
-        <field name="color">rgb(235,109,109)</field>
-        <field name="shape">square</field>
-        <field name="width">100</field>
-        <field name="height">100</field>
-        <field name="position_h">698</field>
-        <field name="position_v">280</field>
-    </record>
+        <record id="floor_patio" model="restaurant.floor">
+            <field name="name">Patio</field>
+            <field name="background_color">rgb(130, 233, 171)</field>
+            <field name="pos_config_id" ref="pos_restaurant.pos_config_main"/>
+        </record>
 
-    <record id="table_10" model="restaurant.table">
-        <field name="name">T10</field>
-        <field name="floor_id" ref="pos_restaurant.floor_main"/>
-        <field name="seats">4</field>
-        <field name="color">rgb(235,109,109)</field>
-        <field name="shape">square</field>
-        <field name="width">100</field>
-        <field name="height">100</field>
-        <field name="position_h">860</field>
-        <field name="position_v">280</field>
-    </record>
+        <!-- Patio: Left table row -->
 
-    <record id="table_11" model="restaurant.table">
-        <field name="name">T11</field>
-        <field name="floor_id" ref="pos_restaurant.floor_main"/>
-        <field name="seats">4</field>
-        <field name="color">rgb(78,210,190)</field>
-        <field name="shape">round</field>
-        <field name="width">210</field>
-        <field name="height">210</field>
-        <field name="position_h">400</field>
-        <field name="position_v">230</field>
-    </record>
+        <record id="table_21" model="restaurant.table">
+            <field name="name">T1</field>
+            <field name="floor_id" ref="pos_restaurant.floor_patio"/>
+            <field name="seats">2</field>
+            <field name="color">rgb(53,211,116)</field>
+            <field name="shape">square</field>
+            <field name="width">130</field>
+            <field name="height">75</field>
+            <field name="position_h">100</field>
+            <field name="position_v">50</field>
+        </record>
 
-    <!-- Restaurant Floor: Patio -->
+        <record id="table_22" model="restaurant.table">
+            <field name="name">T2</field>
+            <field name="floor_id" ref="pos_restaurant.floor_patio"/>
+            <field name="seats">2</field>
+            <field name="color">rgb(53,211,116)</field>
+            <field name="shape">square</field>
+            <field name="width">130</field>
+            <field name="height">75</field>
+            <field name="position_h">100</field>
+            <field name="position_v">166</field>
+        </record>
 
-    <record id="floor_patio" model="restaurant.floor">
-        <field name="name">Patio</field>
-        <field name="background_color">rgb(130, 233, 171)</field>
-        <field name="pos_config_id" ref="pos_restaurant.pos_config_main"/>
-    </record>
+        <record id="table_23" model="restaurant.table">
+            <field name="name">T3</field>
+            <field name="floor_id" ref="pos_restaurant.floor_patio"/>
+            <field name="seats">2</field>
+            <field name="color">rgb(53,211,116)</field>
+            <field name="shape">square</field>
+            <field name="width">130</field>
+            <field name="height">75</field>
+            <field name="position_h">100</field>
+            <field name="position_v">283</field>
+        </record>
 
-    <!-- Patio: Left table row -->
+        <record id="table_24" model="restaurant.table">
+            <field name="name">T4</field>
+            <field name="floor_id" ref="pos_restaurant.floor_patio"/>
+            <field name="seats">2</field>
+            <field name="color">rgb(53,211,116)</field>
+            <field name="shape">square</field>
+            <field name="width">130</field>
+            <field name="height">75</field>
+            <field name="position_h">100</field>
+            <field name="position_v">400</field>
+        </record>
 
-    <record id="table_21" model="restaurant.table">
-        <field name="name">T1</field>
-        <field name="floor_id" ref="pos_restaurant.floor_patio"/>
-        <field name="seats">2</field>
-        <field name="color">rgb(53,211,116)</field>
-        <field name="shape">square</field>
-        <field name="width">130</field>
-        <field name="height">75</field>
-        <field name="position_h">100</field>
-        <field name="position_v">50</field>
-    </record>
+        <!-- Patio: Right table row -->
 
-    <record id="table_22" model="restaurant.table">
-        <field name="name">T2</field>
-        <field name="floor_id" ref="pos_restaurant.floor_patio"/>
-        <field name="seats">2</field>
-        <field name="color">rgb(53,211,116)</field>
-        <field name="shape">square</field>
-        <field name="width">130</field>
-        <field name="height">75</field>
-        <field name="position_h">100</field>
-        <field name="position_v">166</field>
-    </record>
+        <record id="table_25" model="restaurant.table">
+            <field name="name">T5</field>
+            <field name="floor_id" ref="pos_restaurant.floor_patio"/>
+            <field name="seats">2</field>
+            <field name="color">rgb(53,211,116)</field>
+            <field name="shape">square</field>
+            <field name="width">130</field>
+            <field name="height">75</field>
+            <field name="position_h">800</field>
+            <field name="position_v">50</field>
+        </record>
 
-    <record id="table_23" model="restaurant.table">
-        <field name="name">T3</field>
-        <field name="floor_id" ref="pos_restaurant.floor_patio"/>
-        <field name="seats">2</field>
-        <field name="color">rgb(53,211,116)</field>
-        <field name="shape">square</field>
-        <field name="width">130</field>
-        <field name="height">75</field>
-        <field name="position_h">100</field>
-        <field name="position_v">283</field>
-    </record>
+        <record id="table_26" model="restaurant.table">
+            <field name="name">T6</field>
+            <field name="floor_id" ref="pos_restaurant.floor_patio"/>
+            <field name="seats">2</field>
+            <field name="color">rgb(53,211,116)</field>
+            <field name="shape">square</field>
+            <field name="width">130</field>
+            <field name="height">75</field>
+            <field name="position_h">800</field>
+            <field name="position_v">166</field>
+        </record>
 
-    <record id="table_24" model="restaurant.table">
-        <field name="name">T4</field>
-        <field name="floor_id" ref="pos_restaurant.floor_patio"/>
-        <field name="seats">2</field>
-        <field name="color">rgb(53,211,116)</field>
-        <field name="shape">square</field>
-        <field name="width">130</field>
-        <field name="height">75</field>
-        <field name="position_h">100</field>
-        <field name="position_v">400</field>
-    </record>
+        <record id="table_27" model="restaurant.table">
+            <field name="name">T7</field>
+            <field name="floor_id" ref="pos_restaurant.floor_patio"/>
+            <field name="seats">2</field>
+            <field name="color">rgb(53,211,116)</field>
+            <field name="shape">square</field>
+            <field name="width">130</field>
+            <field name="height">75</field>
+            <field name="position_h">800</field>
+            <field name="position_v">283</field>
+        </record>
 
-    <!-- Patio: Right table row -->
+        <record id="table_28" model="restaurant.table">
+            <field name="name">T8</field>
+            <field name="floor_id" ref="pos_restaurant.floor_patio"/>
+            <field name="seats">2</field>
+            <field name="color">rgb(53,211,116)</field>
+            <field name="shape">square</field>
+            <field name="width">130</field>
+            <field name="height">75</field>
+            <field name="position_h">800</field>
+            <field name="position_v">400</field>
+        </record>
 
-    <record id="table_25" model="restaurant.table">
-        <field name="name">T5</field>
-        <field name="floor_id" ref="pos_restaurant.floor_patio"/>
-        <field name="seats">2</field>
-        <field name="color">rgb(53,211,116)</field>
-        <field name="shape">square</field>
-        <field name="width">130</field>
-        <field name="height">75</field>
-        <field name="position_h">800</field>
-        <field name="position_v">50</field>
-    </record>
+        <!-- Patio: Center table block -->
 
-    <record id="table_26" model="restaurant.table">
-        <field name="name">T6</field>
-        <field name="floor_id" ref="pos_restaurant.floor_patio"/>
-        <field name="seats">2</field>
-        <field name="color">rgb(53,211,116)</field>
-        <field name="shape">square</field>
-        <field name="width">130</field>
-        <field name="height">75</field>
-        <field name="position_h">800</field>
-        <field name="position_v">166</field>
-    </record>
+        <record id="table_29" model="restaurant.table">
+            <field name="name">T9</field>
+            <field name="floor_id" ref="pos_restaurant.floor_patio"/>
+            <field name="seats">4</field>
+            <field name="color">rgb(235,191,109)</field>
+            <field name="shape">square</field>
+            <field name="width">130</field>
+            <field name="height">120</field>
+            <field name="position_h">330</field>
+            <field name="position_v">100</field>
+        </record>
 
-    <record id="table_27" model="restaurant.table">
-        <field name="name">T7</field>
-        <field name="floor_id" ref="pos_restaurant.floor_patio"/>
-        <field name="seats">2</field>
-        <field name="color">rgb(53,211,116)</field>
-        <field name="shape">square</field>
-        <field name="width">130</field>
-        <field name="height">75</field>
-        <field name="position_h">800</field>
-        <field name="position_v">283</field>
-    </record>
+        <record id="table_29" model="restaurant.table">
+            <field name="name">T9</field>
+            <field name="floor_id" ref="pos_restaurant.floor_patio"/>
+            <field name="seats">4</field>
+            <field name="color">rgb(235,191,109)</field>
+            <field name="shape">square</field>
+            <field name="width">130</field>
+            <field name="height">120</field>
+            <field name="position_h">330</field>
+            <field name="position_v">100</field>
+        </record>
 
-    <record id="table_28" model="restaurant.table">
-        <field name="name">T8</field>
-        <field name="floor_id" ref="pos_restaurant.floor_patio"/>
-        <field name="seats">2</field>
-        <field name="color">rgb(53,211,116)</field>
-        <field name="shape">square</field>
-        <field name="width">130</field>
-        <field name="height">75</field>
-        <field name="position_h">800</field>
-        <field name="position_v">400</field>
-    </record>
+        <record id="table_30" model="restaurant.table">
+            <field name="name">T10</field>
+            <field name="floor_id" ref="pos_restaurant.floor_patio"/>
+            <field name="seats">4</field>
+            <field name="color">rgb(235,191,109)</field>
+            <field name="shape">square</field>
+            <field name="width">130</field>
+            <field name="height">120</field>
+            <field name="position_h">560</field>
+            <field name="position_v">100</field>
+        </record>
 
-    <!-- Patio: Center table block -->
+        <record id="table_31" model="restaurant.table">
+            <field name="name">T11</field>
+            <field name="floor_id" ref="pos_restaurant.floor_patio"/>
+            <field name="seats">4</field>
+            <field name="color">rgb(235,191,109)</field>
+            <field name="shape">square</field>
+            <field name="width">130</field>
+            <field name="height">120</field>
+            <field name="position_h">330</field>
+            <field name="position_v">315</field>
+        </record>
 
-    <record id="table_29" model="restaurant.table">
-        <field name="name">T9</field>
-        <field name="floor_id" ref="pos_restaurant.floor_patio"/>
-        <field name="seats">4</field>
-        <field name="color">rgb(235,191,109)</field>
-        <field name="shape">square</field>
-        <field name="width">130</field>
-        <field name="height">120</field>
-        <field name="position_h">330</field>
-        <field name="position_v">100</field>
-    </record>
-
-    <record id="table_29" model="restaurant.table">
-        <field name="name">T9</field>
-        <field name="floor_id" ref="pos_restaurant.floor_patio"/>
-        <field name="seats">4</field>
-        <field name="color">rgb(235,191,109)</field>
-        <field name="shape">square</field>
-        <field name="width">130</field>
-        <field name="height">120</field>
-        <field name="position_h">330</field>
-        <field name="position_v">100</field>
-    </record>
-
-    <record id="table_30" model="restaurant.table">
-        <field name="name">T10</field>
-        <field name="floor_id" ref="pos_restaurant.floor_patio"/>
-        <field name="seats">4</field>
-        <field name="color">rgb(235,191,109)</field>
-        <field name="shape">square</field>
-        <field name="width">130</field>
-        <field name="height">120</field>
-        <field name="position_h">560</field>
-        <field name="position_v">100</field>
-    </record>
-
-    <record id="table_31" model="restaurant.table">
-        <field name="name">T11</field>
-        <field name="floor_id" ref="pos_restaurant.floor_patio"/>
-        <field name="seats">4</field>
-        <field name="color">rgb(235,191,109)</field>
-        <field name="shape">square</field>
-        <field name="width">130</field>
-        <field name="height">120</field>
-        <field name="position_h">330</field>
-        <field name="position_v">315</field>
-    </record>
-
-    <record id="table_32" model="restaurant.table">
-        <field name="name">T12</field>
-        <field name="floor_id" ref="pos_restaurant.floor_patio"/>
-        <field name="seats">4</field>
-        <field name="color">rgb(235,191,109)</field>
-        <field name="shape">square</field>
-        <field name="width">130</field>
-        <field name="height">120</field>
-        <field name="position_h">560</field>
-        <field name="position_v">315</field>
-    </record>
-
+        <record id="table_32" model="restaurant.table">
+            <field name="name">T12</field>
+            <field name="floor_id" ref="pos_restaurant.floor_patio"/>
+            <field name="seats">4</field>
+            <field name="color">rgb(235,191,109)</field>
+            <field name="shape">square</field>
+            <field name="width">130</field>
+            <field name="height">120</field>
+            <field name="position_h">560</field>
+            <field name="position_v">315</field>
+        </record>
+    <!-- </data> -->
 </odoo>
