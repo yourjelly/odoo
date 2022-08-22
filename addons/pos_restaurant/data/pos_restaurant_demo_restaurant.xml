@@ -92,10 +92,10 @@
         </record>
 
         <!-- Products -->
-        <record id="pos_food_pim" model="product.template">
+        <record id="pos_food_margherita" model="product.template">
             <field name="available_in_pos">True</field>
             <field name="list_price">7.0</field>
-            <field name="name">PimPizza</field>
+            <field name="name">Margherita</field>
             <field name="pos_categ_id" ref="food"/>
             <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
             <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-pizza.png"/>
@@ -126,33 +126,73 @@
         </record>
 
         <!-- Products -->
-        <record id="pos_food_margherita" model="product.product">
+        <record id="pos_food_pepperoni" model="product.template">
             <field name="available_in_pos">True</field>
             <field name="list_price">7.0</field>
-            <field name="name">Margherita</field>
-            <field name="taxes_id" eval="[(5,)]"/>
-            <field name="pos_categ_id" ref="food"/>
-            <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
-            <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-pizza.png"/>
-        </record>
-        <record id="pos_food_pepperoni" model="product.product">
-            <field name="available_in_pos">True</field>
-            <field name="list_price">8.50</field>
             <field name="name">Pepperoni</field>
-            <field name="taxes_id" eval="[(5,)]"/>
             <field name="pos_categ_id" ref="food"/>
             <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
             <field name="image_1920" type="base64" file="pos_restaurant/static/img/pepperoni.jpg"/>
+            <field name="attribute_line_ids" eval="[(0,0,{
+                'attribute_id':ref('pos_restaurant.truffle_oil_pizza_product_attribute'),
+                'value_ids': [(6,0,[ref('pos_restaurant.truffle_oil_topping_product_attribute_value_yes'), ref('pos_restaurant.truffle_oil_topping_product_attribute_value_no')])],
+                'product_template_value_ids': [(0,0, {
+                    'product_attribute_value_id': ref('pos_restaurant.truffle_oil_topping_product_attribute_value_yes'),
+                    'price_extra': 3.0,
+                    })],
+                }),
+                (0,0,{
+                'attribute_id':ref('pos_restaurant.mozzarella_pizza_product_attribute'),
+                'value_ids': [(6,0,[ref('pos_restaurant.mozzarella_topping_product_attribute_value_yes'), ref('pos_restaurant.mozzarella_topping_product_attribute_value_no')])],
+                'product_template_value_ids': [(0,0, {
+                    'product_attribute_value_id': ref('pos_restaurant.mozzarella_topping_product_attribute_value_yes'),
+                    'price_extra': 3.0,
+                    })],
+                }),
+                (0,0,{
+                'attribute_id':ref('pos_restaurant.prosciutto_pizza_product_attribute'),
+                'value_ids': [(6,0,[ref('pos_restaurant.prosciutto_topping_product_attribute_value_yes'), ref('pos_restaurant.prosciutto_topping_product_attribute_value_no')])],
+                'product_template_value_ids': [(0,0, {
+                    'product_attribute_value_id': ref('pos_restaurant.prosciutto_topping_product_attribute_value_yes'),
+                    'price_extra': 3.0,
+                    })],
+                })]"/>
         </record>
-        <record id="pos_food_vege" model="product.product">
+
+        <!-- Products -->
+        <record id="pos_food_vegetarian" model="product.template">
             <field name="available_in_pos">True</field>
-            <field name="list_price">6.0</field>
-            <field name="name">Vegetarian</field>
-            <field name="taxes_id" eval="[(5,)]"/>
+            <field name="list_price">7.0</field>
+            <field name="name">Vegetarian Pizza</field>
             <field name="pos_categ_id" ref="food"/>
             <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
             <field name="image_1920" type="base64" file="pos_restaurant/static/img/vegetarian.jpg"/>
+            <field name="attribute_line_ids" eval="[(0,0,{
+                'attribute_id':ref('pos_restaurant.truffle_oil_pizza_product_attribute'),
+                'value_ids': [(6,0,[ref('pos_restaurant.truffle_oil_topping_product_attribute_value_yes'), ref('pos_restaurant.truffle_oil_topping_product_attribute_value_no')])],
+                'product_template_value_ids': [(0,0, {
+                    'product_attribute_value_id': ref('pos_restaurant.truffle_oil_topping_product_attribute_value_yes'),
+                    'price_extra': 3.0,
+                    })],
+                }),
+                (0,0,{
+                'attribute_id':ref('pos_restaurant.mozzarella_pizza_product_attribute'),
+                'value_ids': [(6,0,[ref('pos_restaurant.mozzarella_topping_product_attribute_value_yes'), ref('pos_restaurant.mozzarella_topping_product_attribute_value_no')])],
+                'product_template_value_ids': [(0,0, {
+                    'product_attribute_value_id': ref('pos_restaurant.mozzarella_topping_product_attribute_value_yes'),
+                    'price_extra': 3.0,
+                    })],
+                }),
+                (0,0,{
+                'attribute_id':ref('pos_restaurant.prosciutto_pizza_product_attribute'),
+                'value_ids': [(6,0,[ref('pos_restaurant.prosciutto_topping_product_attribute_value_yes'), ref('pos_restaurant.prosciutto_topping_product_attribute_value_no')])],
+                'product_template_value_ids': [(0,0, {
+                    'product_attribute_value_id': ref('pos_restaurant.prosciutto_topping_product_attribute_value_yes'),
+                    'price_extra': 3.0,
+                    })],
+                })]"/>
         </record>
+
         <record id="pos_food_4formaggi" model="product.product">
             <field name="available_in_pos">True</field>
             <field name="list_price">5.5</field>
