@@ -338,8 +338,8 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         }
 
     def _export_invoice_vals(self, invoice):
-        def grouping_key_generator(tax_values):
-            tax = tax_values['tax_id']
+        def grouping_key_generator(base_line, tax_values):
+            tax = tax_values['tax_repartition_line'].tax_id
             tax_category_vals = self._get_tax_category_list(invoice, tax)[0]
             return {
                 'tax_category_id': tax_category_vals['id'],
@@ -357,7 +357,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         document_allowance_charge_vals_list = self._get_document_allowance_charge_vals_list(invoice)
         invoice_line_vals_list = []
         for line in invoice_lines:
-            line_taxes_vals = taxes_vals['invoice_line_tax_details'][line]
+            line_taxes_vals = taxes_vals['tax_details_per_record'][line]
             line_vals = self._get_invoice_line_vals(line, line_taxes_vals)
             invoice_line_vals_list.append(line_vals)
 
