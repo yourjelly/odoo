@@ -78,8 +78,8 @@ $o-td-label-padding-right: 8px;
 
     // Groups
     .o_group {
-        .o_wrap_label + .o_cell {
-            padding: 0px 36px 0px $o-td-label-padding-right;
+        .o_cell:first-child {
+            padding-bottom: $o-td-label-padding-right;
         }
         .o_checkbox_optional_field > .o_form_label {
             margin-right: $o-td-label-padding-right;
@@ -94,7 +94,6 @@ $o-td-label-padding-right: 8px;
     // Separators
     .o_horizontal_separator {
         color: $o-brand-primary;
-        font-weight: bold;
     }
 
     // Specific style classes

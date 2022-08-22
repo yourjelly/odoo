@@ -12,7 +12,7 @@
 </t>
 
 <t t-name="web.Form.InnerGroup" owl="1">
-    <div t-attf-class="{{ allClasses }} {{ props.class and props.class.indexOf('oe_subtotal_footer') >=0 ? 'd-grid gap-0' : 'd-sm-grid' }}" class="o_inner_group" t-if="props.slots" t-att-style="props.style">
+    <div t-attf-class="{{ allClasses }} {{ props.class and props.class.indexOf('oe_subtotal_footer') >=0 ? 'd-grid gap-0 text-end' : 'd-sm-grid' }}" class="o_inner_group" t-if="props.slots" t-att-style="props.style">
         <div t-if="props.slots.title" t-attf-style="grid-column: span {{ props.maxCols }}">
               <t t-slot="title" />
         </div>
@@ -20,17 +20,17 @@
             <t t-foreach="row" t-as="cell" t-key="cell_index">
 
                 <t t-if="cell.subType === 'item_component'">
-                    <div class="o_cell o_wrap_label w-100" t-attf-class="{{ props.class and props.class.indexOf('oe_subtotal_footer') >=0 ? '' : 'flex-grow-1 flex-sm-grow-0' }}">
+                    <div class="o_cell o_wrap_label w-100" t-attf-class="{{ props.class and props.class.indexOf('oe_subtotal_footer') >=0 ? 'w-auto py-1' : 'flex-grow-1 flex-sm-grow-0' }}">
                         <t t-component="cell.Component" t-if="cell.isVisible" t-props="cell.props"/>
                     </div>
-                    <div class="o_cell o_wrap_input" t-attf-class="{{ props.class and props.class.indexOf('oe_subtotal_footer') >=0 ? '' : 'flex-grow-1 flex-sm-grow-0' }}" t-attf-style="{{ cell.itemSpan -1 > 1 ? 'grid-column: span ' + (cell.itemSpan -1) + ';' : '' }}{{ cell.width ? 'width: ' + cell.width + '%' + ';' : '' }}">
+                    <div class="o_cell o_wrap_input" t-attf-class="{{ props.class and props.class.indexOf('oe_subtotal_footer') >=0 ? 'w-auto py-1' : 'flex-grow-1 flex-sm-grow-0' }}" t-attf-style="{{ cell.itemSpan -1 > 1 ? 'grid-column: span ' + (cell.itemSpan -1) + ';' : '' }}{{ cell.width ? 'width: ' + cell.width + '%' + ';' : '' }}">
                         <t t-slot="{{ cell.name }}" />
                     </div>
                 </t>
 
                 <t t-else="">
                     <div class="o_cell flex-grow-1 flex-sm-grow-0" t-attf-style="{{ cell.itemSpan > 1 ? 'grid-column: span ' + cell.itemSpan + ';' : '' }}{{ props.class and props.class.indexOf('oe_subtotal_footer') &lt; 0 and cell.width ? 'width: ' + cell.width + '%' + ';' : '' }}"
-                    t-attf-class="{{ cell.subType === 'label' ? 'o_wrap_label w-100' : null }}" t-if="cell.isVisible">
+                    t-attf-class="{{ cell.subType === 'label' ? 'o_wrap_label w-100' : null }}" t-att-class="{ 'py-1': props.class and props.class.indexOf('oe_subtotal_footer') >=0 }" t-if="cell.isVisible">
                         <t t-slot="{{ cell.name }}" />
                     </div>
                 </t>
