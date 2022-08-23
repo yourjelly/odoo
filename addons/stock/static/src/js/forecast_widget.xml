@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates id="template" xml:space="preserve">
+    <div t-name="stock.leadDaysPopOver" owl="1">
+        <h2>Lead Times</h2>
+        <hr/>
+        <p>
+            The forecasted stock on the <b><t t-esc="props.lead_days_date"/></b>
+            is <t t-if="props.qty_to_order &lt;= 0"><b><t t-esc="props.qty_forecast"/> <t t-esc="props.product_uom_name"/></b></t><t t-else="">
+            below the inventory <b>minimum of <t t-esc="props.product_min_qty"/> <t t-esc="props.product_uom_name"/>
+            : <t t-esc="props.qty_to_order"/> <t t-esc="props.product_uom_name"/> should be replenished</b> to reach the maximum of
+            <t t-esc="props.product_max_qty"/> <t t-esc="props.product_uom_name"/>.</t>
+        </p>
+        <table t-if="props.lead_days_description" class="table table-borderless table-sm">
+            <tbody>
+                <tr>
+                    <td>
+                        Today
+                    </td>
+                    <td class="text-end">
+                        <t t-out="props.today"/>
+                    </td>
+                </tr>
+                <tr t-foreach="props.lead_days_description" t-key="descr" t-as="descr">
+                    <td><t t-out="descr[0]"/></td>
+                    <td class="text-end"><t t-out="descr[1]"/></td>
+                </tr>
+                <tr class="table-info">
+                    <td>
+                        Forecasted Date
+                    </td>
+                    <td class="text-end text-nowrap">
+                        = <t t-out="props.lead_days_date"/>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div t-name="stock.replenishmentHistory" owl="1">
+        <h2>Sales History</h2>
+        <hr/>
+        <table t-if="props.replenishment_history" class="table table-borderless">
+            <tbody>
+                <t t-foreach="props.replenishment_history" t-key="line" t-as="line">
+                    <tr>
+                        <td><t t-esc="line.name"/></td>
+                        <td class="text-end text-nowrap" t-esc="line.quantity + ' ' + line.uom_name"/>
+                    </tr>
+                </t>
+            </tbody>
+        </table>
+    </div>
+
+    <t t-name="stock.forecastWidget" owl="1">
+        <span t-if="['draft', 'partially_available', 'assigned', 'cancel', 'done'].includes(props.record.data.state)" t-esc="reserved_availability_str"/>
+        <span t-elif="!forecast_expected_date_str and will_be_fulfilled" class="text-success">Available</span>
+        <span t-elif="forecast_expected_date_str and will_be_fulfilled" t-att-class="forecast_is_late ? 'text-danger' : 'text-warning'">Exp <t t-esc="forecast_expected_date_str"/></span>
+        <span t-else="" class="text-danger">Not Available</span>
+        <button t-if="props.record.data.product_type == 'product'" t-att="props.record.data.id ? {} : {'disabled': ''}" t-on-click="onOpenReport" class="o_forecast_report_button btn btn-link o_icon_button ms-2" title="Forecasted Report">
+            <i t-attf-class="fa fa-fw fa-area-chart {{ state != 'draft' and (!will_be_fulfilled or forecast_is_late) ? 'text-danger' : '' }}"/>
+        </button>
+    </t>
+</templates>

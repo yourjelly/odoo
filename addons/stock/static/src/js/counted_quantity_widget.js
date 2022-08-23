@@ -1,36 +1,42 @@
-/** @odoo-module alias=stock.counted_quantity_widget **/
+/** @odoo-module **/
 
-import BasicFields from 'web.basic_fields';
-import fieldRegistry from 'web.field_registry';
+import { FloatField } from "@web/views/fields/float/float_field";
+import { registry } from "@web/core/registry";
 
-const CountedQuantityWidgetField = BasicFields.FieldFloat.extend({
-    supportedFieldTypes: ['float'],
+const { useEffect, useRef } = owl;
 
-     _renderReadonly: function () {
-        if (this.recordData.inventory_quantity_set) {
-            this.el.textContent = this._formatValue(this.recordData.inventory_quantity);
-        } else {
-            this.el.textContent = "";
-        }
-    },
+export class CountedQuantityWidgetField extends FloatField {
+    setup() {
+        // Need to adapt useInputField to overide onInput and onChange
+        super.setup()
 
-    _onChange: function () {
-        if (!this.recordData.inventory_quantity_set) {
-            this.recordData.inventory_quantity_set = true;
-        }
-        this._super.apply(this);
-    },
+        const inputRef = useRef("numpadDecimal" || "input");
 
-    _isSameValue: function(value) {
-        // We want to trigger the update of the view when inserting 0
-        if (value == 0) {
-            return false;
-        }
-        return this._super(...arguments);
+        useEffect(
+            (inputEl) => {
+                if (inputEl) {
+                    inputEl.addEventListener("input", this.onInput.bind(this));
+                    return () => {
+                        inputEl.removeEventListener("input", this.onInput.bind(this));
+                    };
+                }
+            },
+            () => [inputRef.el]
+        );
     }
 
-});
+    onInput(ev) {
+        this.props.setDirty(true);
+        return this.props.record.update({'inventory_quantity_set': true});
+    }
 
-fieldRegistry.add('counted_quantity_widget', CountedQuantityWidgetField);
+    get formattedValue() {
+        if (this.props.readonly && ! this.props.value & ! this.props.record.data.inventory_quantity_set) {
+            return "";
+        }
+        return super.formattedValue;
+    }
 
-export default CountedQuantityWidgetField;
+};
+
+registry.category("fields").add("counted_quantity_widget", CountedQuantityWidgetField);
