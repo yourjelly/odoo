@@ -67,7 +67,6 @@ class AccountFiscalPositionTemplate(models.Model):
     name = fields.Char(translate=True)
     note = fields.Text(translate=True)
 
-
 class AccountJournal(models.Model):
     _inherit = 'account.journal'
 
