@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <odoo>
-    <!-- <data noupdate="1"> -->
+    <data noupdate="1">
         <record id="pos_category_miscellaneous" model="pos.category">
             <field name="name">Miscellaneous</field>
         </record>
@@ -48,47 +48,37 @@
         </record>
 
         <!-- Attribute Values -->
-        <record id="truffle_oil_topping_product_attribute_value_yes" model="product.attribute.value">
-            <field name="name">Truffle Oil Topping</field>
-            <field name="attribute_id" ref="truffle_oil_pizza_product_attribute"/>
-        </record>
         <record id="truffle_oil_topping_product_attribute_value_no" model="product.attribute.value">
             <field name="name">No Truffle Oil Topping</field>
+            <field name="sequence">1</field>
+            <field name="attribute_id" ref="truffle_oil_pizza_product_attribute"/>
+        </record>
+        <record id="truffle_oil_topping_product_attribute_value_yes" model="product.attribute.value">
+            <field name="name">Truffle Oil Topping</field>
+            <field name="sequence">2</field>
             <field name="attribute_id" ref="truffle_oil_pizza_product_attribute"/>
         </record>
 
-        <record id="mozzarella_topping_product_attribute_value_yes" model="product.attribute.value">
-            <field name="name">Mozzarella</field>
-            <field name="attribute_id" ref="mozzarella_pizza_product_attribute"/>
-        </record>
         <record id="mozzarella_topping_product_attribute_value_no" model="product.attribute.value">
             <field name="name">No Mozzarella</field>
+            <field name="sequence">1</field>
             <field name="attribute_id" ref="mozzarella_pizza_product_attribute"/>
+        </record>
+        <record id="mozzarella_topping_product_attribute_value_yes" model="product.attribute.value">
+            <field name="name">Mozzarella</field>
+            <field name="sequence">2</field>
+            <field name="attribute_id" ref="mozzarella_pizza_product_attribute"/>
+        </record>
+
+        <record id="prosciutto_topping_product_attribute_value_no" model="product.attribute.value">
+            <field name="name">No Prosciutto Topping</field>
+            <field name="sequence">1</field>
+            <field name="attribute_id" ref="prosciutto_pizza_product_attribute"/>
         </record>
         <record id="prosciutto_topping_product_attribute_value_yes" model="product.attribute.value">
             <field name="name">Prosciutto Topping</field>
+            <field name="sequence">2</field>
             <field name="attribute_id" ref="prosciutto_pizza_product_attribute"/>
-        </record>
-        <record id="prosciutto_topping_product_attribute_value_no" model="product.attribute.value">
-            <field name="name">No Prosciutto Topping</field>
-            <field name="attribute_id" ref="prosciutto_pizza_product_attribute"/>
-        </record>
-
-        <!-- Attribute Lines -->
-        <record id="truffle_oil_template_attribute_line" model="product.template.attribute.line">
-            <field name="product_tmpl_id" ref="pos_restaurant.pizza_product_template"/>
-            <field name="attribute_id" ref="pos_restaurant.truffle_oil_pizza_product_attribute"/>
-            <field name="value_ids" eval="[(6,0,[ref('pos_restaurant.truffle_oil_topping_product_attribute_value_yes'), ref('pos_restaurant.truffle_oil_topping_product_attribute_value_no')])]"/>
-        </record>
-        <record id="mozzarella_template_attribute_line" model="product.template.attribute.line">
-            <field name="product_tmpl_id" ref="pos_restaurant.pizza_product_template"/>
-            <field name="attribute_id" ref="pos_restaurant.mozzarella_pizza_product_attribute"/>
-            <field name="value_ids" eval="[(6,0,[ref('pos_restaurant.mozzarella_topping_product_attribute_value_yes'), ref('pos_restaurant.mozzarella_topping_product_attribute_value_no')])]"/>
-        </record>
-        <record id="prosciutto_template_attribute_line" model="product.template.attribute.line">
-            <field name="product_tmpl_id" ref="pos_restaurant.pizza_product_template"/>
-            <field name="attribute_id" ref="pos_restaurant.prosciutto_pizza_product_attribute"/>
-            <field name="value_ids" eval="[(6,0,[ref('pos_restaurant.prosciutto_topping_product_attribute_value_yes'), ref('pos_restaurant.prosciutto_topping_product_attribute_value_no')])]"/>
         </record>
 
         <!-- Products -->
@@ -101,7 +91,7 @@
             <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-pizza.png"/>
             <field name="attribute_line_ids" eval="[(0,0,{
                 'attribute_id':ref('pos_restaurant.truffle_oil_pizza_product_attribute'),
-                'value_ids': [(6,0,[ref('pos_restaurant.truffle_oil_topping_product_attribute_value_yes'), ref('pos_restaurant.truffle_oil_topping_product_attribute_value_no')])],
+                'value_ids': [(6,0,[ref('pos_restaurant.truffle_oil_topping_product_attribute_value_no'), ref('pos_restaurant.truffle_oil_topping_product_attribute_value_yes')])],
                 'product_template_value_ids': [(0,0, {
                     'product_attribute_value_id': ref('pos_restaurant.truffle_oil_topping_product_attribute_value_yes'),
                     'price_extra': 3.0,
@@ -109,7 +99,7 @@
                 }),
                 (0,0,{
                 'attribute_id':ref('pos_restaurant.mozzarella_pizza_product_attribute'),
-                'value_ids': [(6,0,[ref('pos_restaurant.mozzarella_topping_product_attribute_value_yes'), ref('pos_restaurant.mozzarella_topping_product_attribute_value_no')])],
+                'value_ids': [(6,0,[ref('pos_restaurant.mozzarella_topping_product_attribute_value_no'), ref('pos_restaurant.mozzarella_topping_product_attribute_value_yes')])],
                 'product_template_value_ids': [(0,0, {
                     'product_attribute_value_id': ref('pos_restaurant.mozzarella_topping_product_attribute_value_yes'),
                     'price_extra': 3.0,
@@ -117,7 +107,7 @@
                 }),
                 (0,0,{
                 'attribute_id':ref('pos_restaurant.prosciutto_pizza_product_attribute'),
-                'value_ids': [(6,0,[ref('pos_restaurant.prosciutto_topping_product_attribute_value_yes'), ref('pos_restaurant.prosciutto_topping_product_attribute_value_no')])],
+                'value_ids': [(6,0,[ref('pos_restaurant.prosciutto_topping_product_attribute_value_no'), ref('pos_restaurant.prosciutto_topping_product_attribute_value_yes')])],
                 'product_template_value_ids': [(0,0, {
                     'product_attribute_value_id': ref('pos_restaurant.prosciutto_topping_product_attribute_value_yes'),
                     'price_extra': 3.0,
@@ -367,7 +357,7 @@
         <!-- Patio: Left table row -->
 
         <record id="table_21" model="restaurant.table">
-            <field name="name">T1</field>
+            <field name="name">T21</field>
             <field name="floor_id" ref="pos_restaurant.floor_patio"/>
             <field name="seats">2</field>
             <field name="color">rgb(53,211,116)</field>
@@ -379,7 +369,7 @@
         </record>
 
         <record id="table_22" model="restaurant.table">
-            <field name="name">T2</field>
+            <field name="name">T22</field>
             <field name="floor_id" ref="pos_restaurant.floor_patio"/>
             <field name="seats">2</field>
             <field name="color">rgb(53,211,116)</field>
@@ -391,7 +381,7 @@
         </record>
 
         <record id="table_23" model="restaurant.table">
-            <field name="name">T3</field>
+            <field name="name">T23</field>
             <field name="floor_id" ref="pos_restaurant.floor_patio"/>
             <field name="seats">2</field>
             <field name="color">rgb(53,211,116)</field>
@@ -403,7 +393,7 @@
         </record>
 
         <record id="table_24" model="restaurant.table">
-            <field name="name">T4</field>
+            <field name="name">T24</field>
             <field name="floor_id" ref="pos_restaurant.floor_patio"/>
             <field name="seats">2</field>
             <field name="color">rgb(53,211,116)</field>
@@ -417,7 +407,7 @@
         <!-- Patio: Right table row -->
 
         <record id="table_25" model="restaurant.table">
-            <field name="name">T5</field>
+            <field name="name">T25</field>
             <field name="floor_id" ref="pos_restaurant.floor_patio"/>
             <field name="seats">2</field>
             <field name="color">rgb(53,211,116)</field>
@@ -429,7 +419,7 @@
         </record>
 
         <record id="table_26" model="restaurant.table">
-            <field name="name">T6</field>
+            <field name="name">T26</field>
             <field name="floor_id" ref="pos_restaurant.floor_patio"/>
             <field name="seats">2</field>
             <field name="color">rgb(53,211,116)</field>
@@ -441,7 +431,7 @@
         </record>
 
         <record id="table_27" model="restaurant.table">
-            <field name="name">T7</field>
+            <field name="name">T27</field>
             <field name="floor_id" ref="pos_restaurant.floor_patio"/>
             <field name="seats">2</field>
             <field name="color">rgb(53,211,116)</field>
@@ -453,7 +443,7 @@
         </record>
 
         <record id="table_28" model="restaurant.table">
-            <field name="name">T8</field>
+            <field name="name">T28</field>
             <field name="floor_id" ref="pos_restaurant.floor_patio"/>
             <field name="seats">2</field>
             <field name="color">rgb(53,211,116)</field>
@@ -467,19 +457,7 @@
         <!-- Patio: Center table block -->
 
         <record id="table_29" model="restaurant.table">
-            <field name="name">T9</field>
-            <field name="floor_id" ref="pos_restaurant.floor_patio"/>
-            <field name="seats">4</field>
-            <field name="color">rgb(235,191,109)</field>
-            <field name="shape">square</field>
-            <field name="width">130</field>
-            <field name="height">120</field>
-            <field name="position_h">330</field>
-            <field name="position_v">100</field>
-        </record>
-
-        <record id="table_29" model="restaurant.table">
-            <field name="name">T9</field>
+            <field name="name">T29</field>
             <field name="floor_id" ref="pos_restaurant.floor_patio"/>
             <field name="seats">4</field>
             <field name="color">rgb(235,191,109)</field>
@@ -491,7 +469,7 @@
         </record>
 
         <record id="table_30" model="restaurant.table">
-            <field name="name">T10</field>
+            <field name="name">T30</field>
             <field name="floor_id" ref="pos_restaurant.floor_patio"/>
             <field name="seats">4</field>
             <field name="color">rgb(235,191,109)</field>
@@ -503,7 +481,7 @@
         </record>
 
         <record id="table_31" model="restaurant.table">
-            <field name="name">T11</field>
+            <field name="name">T31</field>
             <field name="floor_id" ref="pos_restaurant.floor_patio"/>
             <field name="seats">4</field>
             <field name="color">rgb(235,191,109)</field>
@@ -515,7 +493,7 @@
         </record>
 
         <record id="table_32" model="restaurant.table">
-            <field name="name">T12</field>
+            <field name="name">T32</field>
             <field name="floor_id" ref="pos_restaurant.floor_patio"/>
             <field name="seats">4</field>
             <field name="color">rgb(235,191,109)</field>
@@ -525,5 +503,5 @@
             <field name="position_h">560</field>
             <field name="position_v">315</field>
         </record>
-    <!-- </data> -->
+    </data>
 </odoo>
