@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="kenya_invoice" inherit_id="account.report_invoice_document">
+        <xpath expr="//div[@id='qrcode']" position="before">
+            <div>
+                <b>Kenyan Control Unit Info</b>
+                <div t-if="o.country_code == 'KE'" id="l10n_ke_control_unit_information" class="row mt-4 mb-4">
+                    <div class="col-auto col-3 mw-100 mb-2">
+                        <p>
+                            <b>CU Invoice Number: </b><br></br>
+                            <span t-field="o.l10n_ke_control_unit_code"/>
+                        </p>
+                        <p>
+                            <b>CU Invoice Number: </b><br></br>
+                            <span t-field="o.l10n_ke_control_unit_serial_number"/>
+                        </p>
+                        <p>
+                            <b>CU Date and Time: </b><br></br>
+                            <span t-field="o.l10n_ke_control_unit_signing_datetime"/>
+                        </p>
+                    </div>
+                    <div class="col-auto col-3 mw-100 mb-2">
+                        <p t-if="o.l10n_ke_qrcode">
+                            <strong class="text-center">TIMS URL</strong><br/><br/>
+                            <img style="display:block;" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s'%('QR', o.l10n_ke_qrcode, 130, 130)"/>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </template>
+</odoo>

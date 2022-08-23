@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="demo_partner_ke" model="res.partner">
+        <field name="name">KenyaCo</field>
+        <field name="vat">A000123456F</field>
+    </record>
+
+    <record id="l10n_ke.demo_company_ke" model="res.company">
+        <field name="l10n_ke_device_sender_id">a4031de9-d11f-4b52-8cca-e1c7422f3c37</field>
+        <field name="l10n_ke_device_url">http://197.248.30.164:5000/EsdApi/deononline/signinvoice</field>
+    </record>
+</odoo>
