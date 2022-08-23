@@ -19,6 +19,7 @@ HTMLElement.prototype.oShiftEnter = function (offset) {
     const restore = prepareUpdate(this, offset);
 
     const brEl = document.createElement('br');
+    brEl.classList.add('oe_linebreak');
     const brEls = [brEl];
     if (offset >= this.childNodes.length) {
         this.appendChild(brEl);
@@ -27,6 +28,7 @@ HTMLElement.prototype.oShiftEnter = function (offset) {
     }
     if (isFakeLineBreak(brEl) && getState(...leftPos(brEl), DIRECTIONS.LEFT).cType !== CTYPES.BR) {
         const brEl2 = document.createElement('br');
+        brEl2.classList.add('oe_linebreak');
         brEl.before(brEl2);
         brEls.unshift(brEl2);
     }
@@ -39,6 +41,5 @@ HTMLElement.prototype.oShiftEnter = function (offset) {
             break;
         }
     }
-
     return brEls;
 };

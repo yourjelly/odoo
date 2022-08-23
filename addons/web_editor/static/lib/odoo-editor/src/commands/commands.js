@@ -562,11 +562,11 @@ export const editorCommands = {
         const selectedBlocks = [...new Set(getTraversedNodes(editor.editable, range).map(closestBlock))];
         for (const block of selectedBlocks) {
             if (
-                ['P', 'PRE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE'].includes(
+                ['P', 'PRE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE', '#text'].includes(
                     block.nodeName,
                 )
             ) {
-                setSelection(block, 0, block, nodeSize(block));
+                setSelection(range.startContainer, range.startOffset, range.endContainer, range.endOffset);
                 editor.historyPauseSteps();
                 editor.execCommand('removeFormat');
                 editor.historyUnpauseSteps();

@@ -841,6 +841,11 @@ const computedStyles = new WeakMap();
  * @param node
  */
 export function isBlock(node) {
+    if (node.parentNode) {
+        if (node.parentNode.nodeName === 'SPAN') {
+            return true;
+        }
+    }
     if (node.nodeType !== Node.ELEMENT_NODE) {
         return false;
     }
@@ -1577,13 +1582,27 @@ export function setTagName(el, newTagName) {
     if (el.tagName === newTagName) {
         return el;
     }
+    let hasClass = false;
     var n = document.createElement(newTagName);
     var attr = el.attributes;
-    for (var i = 0, len = attr.length; i < len; ++i) {
-        n.setAttribute(attr[i].name, attr[i].value);
-    }
-    while (el.firstChild) {
-        n.append(el.firstChild);
+    if (el.nodeName !== '#text') {
+        for (var i =0; i < el.childNodes.length ; i++) {
+            if(el.childNodes[i].className === 'oe_linebreak') {
+                hasClass = true;
+                break;
+            }
+        }
+        if ((el.parentElement.tagName !== 'P' && el.tagName === 'P') && !hasClass) {
+            return el;
+        }
+        for (var i = 0, len = attr.length; i < len; ++i) {
+            n.setAttribute(attr[i].name, attr[i].value);
+        }
+        while (el.firstChild) {
+            n.append(el.firstChild);
+        }
+    } else {
+        n.innerHTML =  el.wholeText;
     }
     if (el.tagName === 'LI') {
         el.append(n);

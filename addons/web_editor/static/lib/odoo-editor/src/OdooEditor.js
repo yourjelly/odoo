@@ -2365,7 +2365,7 @@ export class OdooEditor extends EventTarget {
                         }
                     }
                 }
-            } else if (['insertText', 'insertCompositionText'].includes(ev.inputType)) {
+            } else if (['insertText', 'insertCompositionText'].includes(ev.inputType) && ev.data) {
                 // insertCompositionText, courtesy of Samsung keyboard.
                 const selection = this.document.getSelection();
                 // Detect that text was selected and change behavior only if it is the case,
@@ -2424,7 +2424,7 @@ export class OdooEditor extends EventTarget {
                     }
                 }
                 this.historyStep();
-            } else if (ev.inputType === 'insertLineBreak') {
+            } else if (['insertLineBreak', 'insertText'].includes(ev.inputType)) {
                 this._compositionStep();
                 this.historyRollback();
                 ev.preventDefault();
