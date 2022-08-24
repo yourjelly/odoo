@@ -1431,7 +1431,7 @@ export class OdooEditor extends EventTarget {
             next &&
             !(next.previousSibling && next.previousSibling === joinWith) &&
             this.editable.contains(next) &&
-            oldText
+            end.nextSibling
         ) {
             const restore = preserveCursor(this.document);
             this.observerFlush();
