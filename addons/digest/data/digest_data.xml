@@ -91,7 +91,6 @@
                 font-weight: normal;
             }
             .kpi_cell {
-                float: left;
                 width: 33%;
                 text-align: center;
                 padding-top: 2px;
@@ -145,7 +144,6 @@
                 display: inline-block;
             }
             .preference_div {
-                clear: both;
                 background-color: #eeeeee;
                 text-align: center;
             }
@@ -223,8 +221,11 @@
                 .kpi_margin_margin {
                     margin-bottom: 5px;
                 }
-                .preference_div {
-                    padding: 15px;
+                .preference_div tr {
+                    padding-top: 15px;
+                    padding-bottom: 15px;
+                    padding-left: 15px;
+                    padding-right: 15px;
                 }
                 .preference {
                     font-size: 12px;
@@ -303,8 +304,11 @@
                 .kpi_margin_margin {
                     margin-bottom: 10px;
                 }
-                .preference_div {
-                    padding: 20px;
+                .preference_div tr {
+                    padding-top: 20px;
+                    padding-bottom: 20px;
+                    padding-right: 20px;
+                    padding-left: 20px;
                 }
                 .preference {
                     font-size: 15px;
@@ -362,30 +366,38 @@
     <div t-foreach="kpi_data" t-as="kpi_info" class="kpi_row_footer">
         <div t-if="kpi_info.get('kpi_col1') or kpi_info.get('kpi_col2') or kpi_info.get('kpi_col3')" t-att-data-field="kpi_info['kpi_name']">
             <div class="kpi_header">
-                <span t-esc="kpi_info['kpi_fullname']" style="vertical-align: middle;" />
-                <a t-if="kpi_info['kpi_action']" t-att-href="'/web#action=%s' % kpi_info['kpi_action']"><span class="button" id="button_open_report">Open Report</span></a>
             </div>
-            <div t-if="kpi_info.get('kpi_col1')" class="kpi_cell kpi_cell_border">
-                <div t-call="digest.digest_tool_kpi" >
-                    <t t-set="kpi_value" t-value="kpi_info['kpi_col1']['value']"/>
-                    <t t-set="kpi_margin" t-value="kpi_info['kpi_col1'].get('margin')"/>
-                    <t t-set="kpi_subtitle" t-value="kpi_info['kpi_col1']['col_subtitle']"/>
-                </div>
-            </div>
-            <div t-if="kpi_info.get('kpi_col2')" class="kpi_cell kpi_cell_center">
-                <div t-call="digest.digest_tool_kpi">
-                    <t t-set="kpi_value" t-value="kpi_info['kpi_col2']['value']"/>
-                    <t t-set="kpi_margin" t-value="kpi_info['kpi_col2'].get('margin')"/>
-                    <t t-set="kpi_subtitle" t-value="kpi_info['kpi_col2']['col_subtitle']"/>
-                </div>
-            </div>
-            <div t-if="kpi_info.get('kpi_col3')" class="kpi_cell kpi_cell_border">
-                <div t-call="digest.digest_tool_kpi">
-                    <t t-set="kpi_value" t-value="kpi_info['kpi_col3']['value']"/>
-                    <t t-set="kpi_margin" t-value="kpi_info['kpi_col3'].get('margin')"/>
-                    <t t-set="kpi_subtitle" t-value="kpi_info['kpi_col3']['col_subtitle']"/>
-                </div>
-            </div>
+            <table width="100%">
+                <tr>
+                    <td style="max-width: 80%;">
+                        <span t-esc="kpi_info['kpi_fullname']" style="vertical-align: middle;" />
+                        <a t-if="kpi_info['kpi_action']" t-att-href="'/web#action=%s' % kpi_info['kpi_action']"><span class="button" id="button_open_report">Open Report</span></a>
+                    </td>
+                </tr>
+                <tr>
+                    <td t-if="kpi_info.get('kpi_col1')" class="kpi_cell kpi_cell_border">
+                        <div t-call="digest.digest_tool_kpi" >
+                            <t t-set="kpi_value" t-value="kpi_info['kpi_col1']['value']"/>
+                            <t t-set="kpi_margin" t-value="kpi_info['kpi_col1'].get('margin')"/>
+                            <t t-set="kpi_subtitle" t-value="kpi_info['kpi_col1']['col_subtitle']"/>
+                        </div>
+                    </td>
+                    <td t-if="kpi_info.get('kpi_col2')" class="kpi_cell kpi_cell_center">
+                        <div t-call="digest.digest_tool_kpi">
+                            <t t-set="kpi_value" t-value="kpi_info['kpi_col2']['value']"/>
+                            <t t-set="kpi_margin" t-value="kpi_info['kpi_col2'].get('margin')"/>
+                            <t t-set="kpi_subtitle" t-value="kpi_info['kpi_col2']['col_subtitle']"/>
+                        </div>
+                    </td>
+                    <td t-if="kpi_info.get('kpi_col3')" class="kpi_cell kpi_cell_border">
+                        <div t-call="digest.digest_tool_kpi">
+                            <t t-set="kpi_value" t-value="kpi_info['kpi_col3']['value']"/>
+                            <t t-set="kpi_margin" t-value="kpi_info['kpi_col3'].get('margin')"/>
+                            <t t-set="kpi_subtitle" t-value="kpi_info['kpi_col3']['col_subtitle']"/>
+                        </div>
+                    </td>
+                </tr>
+            </table>
             <div class="kpi_trick" />
         </div>
     </div>
@@ -395,29 +407,33 @@
 
 <div>
     <div class="global_layout">
-        <div class="preference_div">
-            <div t-if="preferences" t-foreach="preferences" t-as="preference"
+        <table class="preference_div" width="100%">
+            <tr t-if="preferences" t-foreach="preferences" t-as="preference"
                 class="preference">
-                <t t-out="preference"/>
-            </div>
-            <div class="by_odoo">
-                Sent by <a href="https://www.odoo.com" target="_blank" class="odoo_link"><span class="odoo_link_text">Odoo</span></a>
-                <t t-if="unsubscribe_token">
-                    –
-                    <a t-attf-href="/digest/#{object.id}/unsubscribe?token=#{unsubscribe_token}&amp;user_id=#{user.id}"
-                       target="_blank" style="text-decoration: none;">
-                        <span style="color: #8f8f8f;">Unsubscribe</span>
-                    </a>
-                </t>
-                <t t-elif="object and object._name == 'digest.digest'">
-                    –
-                    <a t-att-href="'/web#view_type=form&amp;model=digest.digest&amp;id=%s' % object.id"
-                       target="_blank" style="text-decoration: none;">
-                        <span style="color: #8f8f8f;">Unsubscribe</span>
-                    </a>
-                </t>
-            </div>
-        </div>
+                <td>
+                    <t t-out="preference"/>
+                </td>
+            </tr>
+            <tr class="by_odoo">
+                <td>
+                    Sent by <a href="https://www.odoo.com" target="_blank" class="odoo_link"><span class="odoo_link_text">Odoo</span></a>
+                    <t t-if="unsubscribe_token">
+                        –
+                        <a t-attf-href="/digest/#{object.id}/unsubscribe?token=#{unsubscribe_token}&amp;user_id=#{user.id}"
+                           target="_blank" style="text-decoration: none;">
+                            <span style="color: #8f8f8f;">Unsubscribe</span>
+                        </a>
+                    </t>
+                    <t t-elif="object and object._name == 'digest.digest'">
+                        –
+                        <a t-att-href="'/web#view_type=form&amp;model=digest.digest&amp;id=%s' % object.id"
+                           target="_blank" style="text-decoration: none;">
+                            <span style="color: #8f8f8f;">Unsubscribe</span>
+                        </a>
+                    </t>
+                </td>
+            </tr>
+        </table>
     </div>
 </div>
 
@@ -437,20 +453,34 @@
 
     <!-- MOBILE BANNER -->
     <template id="digest_section_mobile">
-<div class="global_layout" style="overflow: auto;">
-    <div style="width: 50%; float: left; text-align: right;">
-        <img src="https://www.odoo.com/web/image/24717933/odoo-mobile.png" alt="Odoo Mobile" />
-    </div>
-    <div style="width: 50%; float: left;">
-        <p class="run_business">Run your business from anywhere with <b>Odoo Mobile</b>.</p>
-        <div>
-            <a href="https://play.google.com/store/apps/details?id=com.odoo.mobile" target="_blank"><img class="download_app" src="https://download.odoocdn.com/digests/digest/static/src/img/google_play.png" /></a>
+        <div class="global_layout" style="overflow: auto;">
+            <table style="width: 100%;">
+                <tr>
+                    <td style="width: 50%;" align="right">
+                        <img src="https://www.odoo.com/web/image/24717933/odoo-mobile.png" alt="Odoo Mobile" />
+                    </td>
+                    <td style="width: 50%;" align="left">
+                        <table>
+                            <tr>
+                                <td>
+                                    <p class="run_business" style="color: #2d2a26;">Run your business from anywhere with <b style="font-weight: bold;">Odoo Mobile</b>.</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="https://play.google.com/store/apps/details?id=com.odoo.mobile" target="_blank"><img class="download_app" height="75" style="max-height: 40px; margin-bottom: 5px;display: inline-block;" src="https://download.odoocdn.com/digests/digest/static/src/img/google_play.png" /></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="https://itunes.apple.com/us/app/odoo/id1272543640" target="_blank"><img class="download_app" height="75" style="max-height: 40px; margin-bottom: 5px;display: inline-block;" src="https://download.odoocdn.com/digests/digest/static/src/img/app_store.png" /></a>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
         </div>
-        <div>
-            <a href="https://itunes.apple.com/us/app/odoo/id1272543640" target="_blank"><img class="download_app" src="https://download.odoocdn.com/digests/digest/static/src/img/app_store.png" /></a>
-        </div>
-    </div>
-</div>
     </template>
 
 
