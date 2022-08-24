@@ -38,6 +38,7 @@
 
         <!-- Resource: product.product -->
         <record id="stock.product_cable_management_box" model="product.product">
+          <field name="available_in_pos">True</field>
           <field name="pos_categ_id" ref="point_of_sale.pos_category_miscellaneous"/>
         </record>
         <record id="wall_shelf" model="product.product">
