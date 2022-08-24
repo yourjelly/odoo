@@ -71,7 +71,7 @@
                 <tr>
                     <th>XML ID:</th>
                     <td>
-                        <t t-if='state.xmlids.length > 1'>
+                        <t t-if="state.xmlids and state.xmlids.length > 1">
                             <t t-foreach="state.xmlids" t-as="imd" t-key="imd['xmlid']">
                                 <div
                                     t-att-class='"p-0 " + (imd["xmlid"] === state.xmlid ? "fw-bolder " : "") + (imd["noupdate"] === true ? "fst-italic " : "")'
