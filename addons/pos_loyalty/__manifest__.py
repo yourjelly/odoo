@@ -11,7 +11,7 @@
     'data': [
         'security/ir.model.access.csv',
         'data/default_barcode_patterns.xml',
-        'data/gift_card_data.xml',
+        # 'data/gift_card_data.xml',
         'views/loyalty_card_views.xml',
         'views/loyalty_mail_views.xml',
         'views/pos_loyalty_menu_views.xml',

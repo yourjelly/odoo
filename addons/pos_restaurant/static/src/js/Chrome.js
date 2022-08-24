@@ -78,7 +78,7 @@ odoo.define('pos_restaurant.chrome', function (require) {
 
             /**
              * @override
-             * Load POS Restaurant Demo Data instead of POS
+             * Load POS Restaurant Demo Data too if pos_restaurant is installed
              */
             _selectionDemoList() {
                 return [...super._selectionDemoList(), ...[ // Syntaxic sugar
