@@ -49,7 +49,7 @@
 
         <!-- Attribute Values -->
         <record id="truffle_oil_topping_product_attribute_value_no" model="product.attribute.value">
-            <field name="name">No Truffle Oil Topping</field>
+            <field name="name">No Truffle Oil</field>
             <field name="sequence">1</field>
             <field name="attribute_id" ref="truffle_oil_pizza_product_attribute"/>
         </record>
@@ -71,7 +71,7 @@
         </record>
 
         <record id="prosciutto_topping_product_attribute_value_no" model="product.attribute.value">
-            <field name="name">No Prosciutto Topping</field>
+            <field name="name">No Prosciutto</field>
             <field name="sequence">1</field>
             <field name="attribute_id" ref="prosciutto_pizza_product_attribute"/>
         </record>
@@ -94,7 +94,7 @@
                 'value_ids': [(6,0,[ref('pos_restaurant.truffle_oil_topping_product_attribute_value_no'), ref('pos_restaurant.truffle_oil_topping_product_attribute_value_yes')])],
                 'product_template_value_ids': [(0,0, {
                     'product_attribute_value_id': ref('pos_restaurant.truffle_oil_topping_product_attribute_value_yes'),
-                    'price_extra': 3.0,
+                    'price_extra': 1.50,
                     })],
                 }),
                 (0,0,{
@@ -102,7 +102,7 @@
                 'value_ids': [(6,0,[ref('pos_restaurant.mozzarella_topping_product_attribute_value_no'), ref('pos_restaurant.mozzarella_topping_product_attribute_value_yes')])],
                 'product_template_value_ids': [(0,0, {
                     'product_attribute_value_id': ref('pos_restaurant.mozzarella_topping_product_attribute_value_yes'),
-                    'price_extra': 3.0,
+                    'price_extra': 2.0,
                     })],
                 }),
                 (0,0,{
@@ -110,7 +110,7 @@
                 'value_ids': [(6,0,[ref('pos_restaurant.prosciutto_topping_product_attribute_value_no'), ref('pos_restaurant.prosciutto_topping_product_attribute_value_yes')])],
                 'product_template_value_ids': [(0,0, {
                     'product_attribute_value_id': ref('pos_restaurant.prosciutto_topping_product_attribute_value_yes'),
-                    'price_extra': 3.0,
+                    'price_extra': 2.75,
                     })],
                 })]"/>
         </record>
@@ -128,7 +128,7 @@
                 'value_ids': [(6,0,[ref('pos_restaurant.truffle_oil_topping_product_attribute_value_yes'), ref('pos_restaurant.truffle_oil_topping_product_attribute_value_no')])],
                 'product_template_value_ids': [(0,0, {
                     'product_attribute_value_id': ref('pos_restaurant.truffle_oil_topping_product_attribute_value_yes'),
-                    'price_extra': 3.0,
+                    'price_extra': 1.50,
                     })],
                 }),
                 (0,0,{
@@ -136,7 +136,7 @@
                 'value_ids': [(6,0,[ref('pos_restaurant.mozzarella_topping_product_attribute_value_yes'), ref('pos_restaurant.mozzarella_topping_product_attribute_value_no')])],
                 'product_template_value_ids': [(0,0, {
                     'product_attribute_value_id': ref('pos_restaurant.mozzarella_topping_product_attribute_value_yes'),
-                    'price_extra': 3.0,
+                    'price_extra': 2.0,
                     })],
                 }),
                 (0,0,{
@@ -144,7 +144,7 @@
                 'value_ids': [(6,0,[ref('pos_restaurant.prosciutto_topping_product_attribute_value_yes'), ref('pos_restaurant.prosciutto_topping_product_attribute_value_no')])],
                 'product_template_value_ids': [(0,0, {
                     'product_attribute_value_id': ref('pos_restaurant.prosciutto_topping_product_attribute_value_yes'),
-                    'price_extra': 3.0,
+                    'price_extra': 2.75,
                     })],
                 })]"/>
         </record>
@@ -162,7 +162,7 @@
                 'value_ids': [(6,0,[ref('pos_restaurant.truffle_oil_topping_product_attribute_value_yes'), ref('pos_restaurant.truffle_oil_topping_product_attribute_value_no')])],
                 'product_template_value_ids': [(0,0, {
                     'product_attribute_value_id': ref('pos_restaurant.truffle_oil_topping_product_attribute_value_yes'),
-                    'price_extra': 3.0,
+                    'price_extra': 1.50,
                     })],
                 }),
                 (0,0,{
@@ -170,7 +170,7 @@
                 'value_ids': [(6,0,[ref('pos_restaurant.mozzarella_topping_product_attribute_value_yes'), ref('pos_restaurant.mozzarella_topping_product_attribute_value_no')])],
                 'product_template_value_ids': [(0,0, {
                     'product_attribute_value_id': ref('pos_restaurant.mozzarella_topping_product_attribute_value_yes'),
-                    'price_extra': 3.0,
+                    'price_extra': 2.0,
                     })],
                 }),
                 (0,0,{
@@ -178,7 +178,7 @@
                 'value_ids': [(6,0,[ref('pos_restaurant.prosciutto_topping_product_attribute_value_yes'), ref('pos_restaurant.prosciutto_topping_product_attribute_value_no')])],
                 'product_template_value_ids': [(0,0, {
                     'product_attribute_value_id': ref('pos_restaurant.prosciutto_topping_product_attribute_value_yes'),
-                    'price_extra': 3.0,
+                    'price_extra': 2.75,
                     })],
                 })]"/>
         </record>
