@@ -45,7 +45,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {HTMLAudioElement}
+         * @returns {HTMLAudioElement|FieldCommand}
          */
         _computeAudio() {
             if (!this.canPlayAudio) {

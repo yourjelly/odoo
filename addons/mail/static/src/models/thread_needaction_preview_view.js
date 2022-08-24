@@ -54,7 +54,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {TrackingValue|FieldCommand}
          */
         _computeLastTrackingValue() {
             if (this.thread.lastMessage && this.thread.lastMessage.lastTrackingValue) {
@@ -64,7 +64,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeMessageAuthorPrefixView() {
             if (

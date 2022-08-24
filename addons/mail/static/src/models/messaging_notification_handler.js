@@ -212,7 +212,7 @@ registerModel({
         },
         /**
          * @private
-         * @param {object} payload
+         * @param {Object} payload
          * @param {integer} payload.id
          * @param {string} payload.last_interest_dt
          */

@@ -90,7 +90,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeCallDemoView() {
             return (this.channel && this.channel.defaultDisplayMode === 'video_full_screen')

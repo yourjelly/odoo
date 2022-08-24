@@ -15,7 +15,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeAttachmentList() {
             return (this.chatter.thread && this.chatter.thread.allAttachments.length > 0)

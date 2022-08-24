@@ -28,7 +28,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeActivityMarkDonePopoverContentView() {
             if (this.activityViewOwnerAsMarkDone) {
@@ -38,7 +38,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {Ref}
+         * @returns {Ref|FieldCommand}
          */
         _computeAnchorRef() {
             if (this.activityViewOwnerAsMarkDone) {
@@ -60,7 +60,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeChannelInvitationForm() {
             if (this.threadViewTopbarOwnerAsInvite) {
@@ -70,7 +70,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {ActivityMarkDonePopoverContentView|ChannelInvitationForm|EmojiPickerView|FieldCommand}
          */
         _computeContent() {
             if (this.activityMarkDonePopoverContentView) {
@@ -121,7 +121,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeEmojiPickerView() {
             if (this.composerViewOwnerAsEmoji) {
@@ -134,7 +134,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {PopoverManager|FieldCommand}
          */
         _computeManager() {
             if (this.messaging.popoverManager) {

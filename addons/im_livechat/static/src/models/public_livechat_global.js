@@ -52,7 +52,7 @@ registerModel({
          * Compares the last message of the conversation to this livechat's operator id.
          *
          * @private
-         * @returns {boolean}
+         * @returns {boolean|FieldCommand}
          */
         _computeIsLastMessageFromCustomer() {
             if (!this.lastMessage) {
@@ -65,7 +65,7 @@ registerModel({
         },
         /**
           * @private
-          * @returns {FieldCommand}
+          * @returns {Message|FieldCommand}
           */
          _computeLastMessage() {
             if (this.messages.length === 0) {
@@ -75,7 +75,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeLivechatButtonView() {
             if (this.isAvailable && this.isAvailableForMe && this.hasLoadedQWebTemplate && this.env.services.public_livechat_service) {
@@ -112,10 +112,10 @@ registerModel({
                 }
                 this.update({ rule: result.rule });
             }
-            return this.loadQWebTemplate();
+            await this.loadQWebTemplate();
         },
         /**
-         * This override handles the following use cases:
+         * This method handles the following use cases:
          *
          * - If the chat is started for the first time (first visit of a visitor)
          *   We register the chatbot configuration and the rest of the behavior is triggered by various
@@ -130,7 +130,7 @@ registerModel({
          * - If we have a non-empty chat history, resume the chat script where the end-user left it by
          *   fetching the necessary information from the local storage.
          *
-         * @override
+         * @private
          */
         async _willStartChatbot() {
             if (this.rule) {

@@ -64,7 +64,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Thread|FieldCommand}
          */
         _computeThread() {
             if (this.activityView) {
@@ -104,7 +104,7 @@ registerModel({
          * @param {Object} param0.attachmentData
          * @param {Composer} param0.composer
          * @param {Thread} param0.thread
-         * @returns {Attachment}
+         * @returns {Attachment|undefined}
          */
         _onAttachmentUploaded({ attachmentData, composer, thread }) {
             if (attachmentData.error || !attachmentData.id) {

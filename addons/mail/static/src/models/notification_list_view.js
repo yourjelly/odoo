@@ -28,7 +28,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Thread[]|FieldCommand}
          */
         _computeFilteredThreads() {
             switch (this.filter) {
@@ -61,7 +61,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object[]|FieldCommand}
          */
         _computeNotificationGroupViews() {
             if (this.filter !== 'all') {
@@ -74,14 +74,14 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeNotificationRequestView() {
             return (this.filter === 'all' && this.messaging.isNotificationPermissionDefault) ? {} : clear();
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Array<NotificationRequestView|NotificationGroupView|ThreadNeedactionPreviewView|ThreadPreviewView>}
          */
         _computeNotificationViews() {
             const notifications = [];
@@ -95,7 +95,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object[]|FieldCommand}
          */
         _computeThreadNeedactionPreviewViews() {
             if (this.filter !== 'all') {
@@ -125,7 +125,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object[]}
          */
         _computeThreadPreviewViews() {
             return this.filteredThreads

@@ -73,7 +73,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {ActivityView|FieldCommand}
          */
         _computeActivityViewOwner() {
             if (this.popoverViewOwner.activityViewOwnerAsMarkDone) {

@@ -9,7 +9,7 @@ registerModel({
     recordMethods: {
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computePersonaImStatusIconView() {
             return this.partner.isImStatusSet ? {} : clear();

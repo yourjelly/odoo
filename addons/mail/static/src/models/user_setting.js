@@ -45,6 +45,7 @@ registerModel({
          * @param {event} ev
          * @param {Object} param1
          * @param {boolean} param1.ignoreModifiers
+         * @returns {boolean}
          */
         isPushToTalkKey(ev, { ignoreModifiers = false } = {}) {
             if (!this.usePushToTalk || !this.pushToTalkKey) {
@@ -61,6 +62,9 @@ registerModel({
                 ev.altKey === altKey
             );
         },
+        /**
+         * @returns {Object}
+         */
         pushToTalkKeyFormat() {
             if (!this.pushToTalkKey) {
                 return;
@@ -73,6 +77,9 @@ registerModel({
                 key: key || false,
             };
         },
+        /**
+         * @returns {string}
+         */
         pushToTalkKeyToString() {
             const { shiftKey, ctrlKey, altKey, key } = this.pushToTalkKeyFormat();
             const f = (k, name) => k ? name : '';

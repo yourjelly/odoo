@@ -30,7 +30,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {ChannelMember[]|FieldCommand}
          */
         _computeCallParticipants() {
             const callParticipants = this.thread.invitedMembers;

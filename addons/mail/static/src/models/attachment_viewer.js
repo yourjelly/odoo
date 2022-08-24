@@ -181,6 +181,7 @@ registerModel({
         },
         /**
          * @private
+         * @returns {Object|FieldCommand}
          */
         _computeAttachmentViewerViewable() {
             if (this.attachmentList) {
@@ -192,6 +193,7 @@ registerModel({
         },
         /**
          * @private
+         * @returns {Object[]|FieldCommand}
          */
         _computeAttachmentViewerViewables() {
             if (this.attachmentList) {

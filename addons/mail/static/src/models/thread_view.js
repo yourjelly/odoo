@@ -90,6 +90,7 @@ registerModel({
         },
         /**
          * @private
+         * @returns {Object|FieldCommand}
          */
         _computeCallView() {
             return (this.thread && this.thread.model === 'mail.channel' && this.thread.rtcSessions.length > 0)
@@ -98,7 +99,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeChannelMemberListView() {
             if (this.thread && this.thread.hasMemberListFeature && this.hasMemberList && this.isMemberListOpened) {
@@ -108,7 +109,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeComposerView() {
             if (!this.thread || this.thread.mailbox) {
@@ -148,7 +149,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {MessageView|FieldCommand}
          */
         _computeLastMessageView() {
             if (!this.messageListView) {
@@ -159,7 +160,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeMessageListView() {
             return (
@@ -169,7 +170,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {integer|undefined}
+         * @returns {integer|FieldCommand}
          */
         _computeThreadCacheInitialScrollHeight() {
             if (!this.threadCache) {
@@ -183,7 +184,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {integer|undefined}
+         * @returns {integer|FieldCommand}
          */
         _computeThreadCacheInitialScrollPosition() {
             if (!this.threadCache) {
@@ -200,7 +201,6 @@ registerModel({
          * the dependencies changes.
          *
          * @private
-         * @returns {boolean}
          */
         _computeThreadShouldBeSetAsSeen() {
             if (!this.thread) {
@@ -227,6 +227,7 @@ registerModel({
         },
         /**
          * @private
+         * @returns {Object|FieldCommand}
          */
         _computeTopbar() {
             return this.hasTopbar ? {} : clear();

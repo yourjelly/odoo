@@ -173,7 +173,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {boolean}
+         * @returns {boolean|undefined}
          */
         _computeIsOwnSession() {
             if (!this.messaging || !this.channelMember) {
@@ -236,7 +236,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Rtc|FieldCommand}
          */
         _computeRtcAsConnectedSession() {
             if (!this.messaging || !this.messaging.rtc) {

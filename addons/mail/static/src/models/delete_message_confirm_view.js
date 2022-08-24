@@ -27,14 +27,14 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Message}
          */
         _computeMessage() {
             return this.dialogOwner.messageActionViewOwnerAsDeleteConfirm.messageAction.messageActionListOwner.message;
         },
         /**
          * @private
-         * @returns {MessageView}
+         * @returns {Object|FieldCommand}
          */
         _computeMessageView() {
             return this.message ? { message: this.message } : clear();

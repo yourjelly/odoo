@@ -196,7 +196,6 @@ registerModel({
         /**
          * @param {Object} param0
          * @param {string} param0.feedback
-         * @returns {Object}
          */
         async markAsDoneAndScheduleNext({ feedback }) {
             const thread = this.thread;
@@ -243,7 +242,7 @@ registerModel({
          * value, to reduce the size the empty note takes on the UI.
          *
          * @private
-         * @returns {string|undefined}
+         * @returns {string|FieldCommand}
          */
         _computeNote() {
             if (this.note === '<p><br></p>') {

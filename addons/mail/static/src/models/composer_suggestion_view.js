@@ -28,7 +28,7 @@ registerModel({
         },
          /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {ComposerSuggestionListView|FieldCommand}
          */
         _computeComposerSuggestionListViewOwner() {
             if (this.composerSuggestionListViewExtraComposerSuggestionViewItemOwner) {
@@ -41,7 +41,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {string}
+         * @returns {string|FieldCommand}
          */
         _computeMentionText() {
             if (!this.suggestable) {
@@ -62,14 +62,14 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computePersonaImStatusIconView() {
             return this.suggestable && this.suggestable.partner && this.suggestable.partner.isImStatusSet ? {} : clear();
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {ComposerSuggestable|FieldCommand}
          */
         _computeSuggestable() {
             if (this.composerSuggestionListViewExtraComposerSuggestionViewItemOwner) {

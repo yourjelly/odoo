@@ -143,7 +143,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Thread|FieldCommand}
          */
         _computeFollowedThreadAsFollowerOfCurrentPartner() {
             if (!this.followedThread) {

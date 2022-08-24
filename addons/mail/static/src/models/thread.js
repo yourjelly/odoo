@@ -1036,7 +1036,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeComposer() {
             if (this.mailbox) {
@@ -1202,7 +1202,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {Message}
+         * @returns {Message|FieldCommand}
          */
         _computeLastCurrentPartnerMessageSeenByEveryone() {
             const otherPartnerSeenInfos =
@@ -1237,7 +1237,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {Message|undefined}
+         * @returns {Message|FieldCommand}
          */
         _computeLastMessage() {
             const {
@@ -1251,7 +1251,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {Message|undefined}
+         * @returns {Message|FieldCommand}
          */
         _computeLastNonTransientMessage() {
             const {
@@ -1300,7 +1300,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {Message|undefined}
+         * @returns {Message|FieldCommand}
          */
         _computeLastNeedactionMessageAsOriginThread() {
             const orderedNeedactionMessagesAsOriginThread = this.needactionMessagesAsOriginThread.sort(
@@ -1317,9 +1317,7 @@ registerModel({
         },
         /**
          * @private
-        /**
-         * @private
-         * @return {FieldCommand}
+         * @return {Messaging|FieldCommand}
          */
          _computeMessagingAsAllCurrentClientThreads() {
             // The current client is linked to this thread if any of
@@ -1338,7 +1336,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Messaging|FieldCommand}
          */
         _computeMessagingAsRingingThread() {
             if (this.rtcInvitingSession) {
@@ -1368,7 +1366,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {Message|undefined}
+         * @returns {Message|FieldCommand}
          */
         _computeMessageAfterNewMessageSeparator() {
             if (!this.channel) {
@@ -1421,7 +1419,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeCallInviteRequestPopup() {
             if (this.rtcInvitingSession) {
@@ -1431,7 +1429,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {Throttle}
+         * @returns {Object}
          */
         _computeThrottleNotifyCurrentPartnerTypingStatus() {
             return {
@@ -1447,7 +1445,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {string}
+         * @returns {string|FieldCommand}
          */
         _computeTypingStatusText() {
             if (this.orderedOtherTypingMembers.length === 0) {
@@ -1487,7 +1485,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {number}
+         * @returns {integer}
          */
         _computeVideoCount() {
             return this.rtcSessions.filter(session => session.videoStream).length;

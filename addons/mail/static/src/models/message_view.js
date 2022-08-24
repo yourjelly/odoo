@@ -190,7 +190,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeAttachmentList() {
             return (this.message && this.message.attachments.length > 0)
@@ -205,7 +205,7 @@ registerModel({
             return this.hasAuthorOpenChat ? this.env._t("Open chat") : '';
         },
         /**
-         * @returns {string}
+         * @returns {string|FieldCommand}
          */
         _computeDateFromNow() {
             if (!this.message) {
@@ -382,7 +382,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Message|FieldCommand}
          */
         _computeMessage() {
             if (this.messageListViewItemOwner) {
@@ -395,14 +395,14 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeMessageActionList() {
             return this.deleteMessageConfirmViewOwner ? clear() : {};
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeMessageInReplyToView() {
             return (
@@ -414,7 +414,7 @@ registerModel({
         },
         /**
          * @private
-         * @retuns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeMessageSeenIndicatorView() {
             if (

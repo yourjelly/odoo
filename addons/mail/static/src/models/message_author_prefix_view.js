@@ -10,7 +10,7 @@ registerModel({
     recordMethods: {
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Message|FieldCommand}
          */
         _computeMessage() {
             if (this.threadNeedactionPreviewViewOwner) {
@@ -23,7 +23,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Thread|FieldCommand}
          */
         _computeThread() {
             if (this.threadNeedactionPreviewViewOwner) {

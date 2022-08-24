@@ -96,7 +96,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {string|undefined}
+         * @returns {string}
          */
         _computeDefaultSource() {
             if (this.isImage) {
@@ -130,7 +130,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {string|undefined}
+         * @returns {string|FieldCommand}
          */
         _computeDisplayName() {
             const displayName = this.name || this.filename;
@@ -152,7 +152,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {string|undefined}
+         * @returns {string|FieldCommand}
          */
         _computeExtension() {
             const extension = this.filename && this.filename.split('.').pop();
@@ -260,7 +260,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Thread[]|FieldCommand}
          */
         _computeThreadsAsAttachmentsInWebClientView() {
             return (this.isPdf || this.isImage) && !this.isUploading ? this.allThreads : clear();

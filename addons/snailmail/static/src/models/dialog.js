@@ -21,7 +21,7 @@ addFields('Dialog', {
 addRecordMethods('Dialog', {
     /**
      * @private
-     * @returns {FieldCommand}
+     * @returns {Object|FieldCommand}
      */
     _computeSnailmailErrorView() {
         if (this.messageViewOwnerAsSnailmailError) {
@@ -33,8 +33,7 @@ addRecordMethods('Dialog', {
 
 patchRecordMethods('Dialog', {
     /**
-     * @private
-     * @returns {string}
+     * @override
      */
     _computeComponentClassName() {
         if (this.snailmailErrorView) {

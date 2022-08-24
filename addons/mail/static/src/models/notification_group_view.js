@@ -32,7 +32,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {string|undefined}
+         * @returns {string|FieldCommand}
          */
         _computeImageSrc() {
             if (this.notificationGroup.notification_type === 'email') {

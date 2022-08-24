@@ -8,7 +8,7 @@ registerModel({
     recordMethods: {
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object[]|FieldCommand}
          */
         _computeSidebarTiles() {
             return this.callView.filteredChannelMembers.map(channelMember => ({ channelMember }));

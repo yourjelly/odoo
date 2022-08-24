@@ -26,7 +26,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {RtcSession|FieldCommand}
          */
         _computeRtcSession() {
             if (this.callParticipantCardOwner.rtcSession) {

@@ -29,7 +29,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Attachment|FieldCommand}
          */
         _computeAttachment() {
             if (this.dialogOwner && this.dialogOwner.attachmentCardOwnerAsAttachmentDeleteConfirm) {
@@ -49,7 +49,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Chatter|FieldCommand}
          */
         _computeChatter() {
             if (

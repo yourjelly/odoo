@@ -64,7 +64,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeAddingItemAutocompleteInputView() {
             if (this.isOpen && this.isAddingItem) {
@@ -100,7 +100,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {DiscussSidebarCategoryItem}
          */
         _computeFilteredCategoryItems() {
             let categoryItems = this.categoryItems;

@@ -8,7 +8,7 @@ registerModel({
     recordMethods: {
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {EmojiCategoryView}
          */
         _computeActiveCategoryView() {
             if (!this.activeByUserCategoryView) {
@@ -18,7 +18,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object}
          */
         _computeDefaultActiveCategoryView() {
             return {
@@ -28,7 +28,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object[]}
          */
         _computeEmojiCategoryViews() {
             return this.messaging.emojiRegistry.allCategories.map(emojiCategory => ({ emojiCategory }));

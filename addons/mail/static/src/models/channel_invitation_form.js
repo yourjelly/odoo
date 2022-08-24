@@ -179,7 +179,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {string}
+         * @returns {string|FieldCommand}
          */
         _computeInviteButtonText() {
             if (!this.thread || !this.thread.channel) {
@@ -195,7 +195,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object[]|FieldCommand}
          */
         _computeSelectablePartnerViews() {
             if (this.selectablePartners.length === 0) {
@@ -205,7 +205,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object[]|FieldCommand}
          */
         _computeSelectedPartnerViews() {
             if (this.selectedPartners.length === 0) {
@@ -215,7 +215,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Thread|FieldCommand}
          */
         _computeThread() {
             if (

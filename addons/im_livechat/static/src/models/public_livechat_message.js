@@ -19,7 +19,7 @@ registerModel({
     recordMethods: {
         /**
          * @private
-         * @returns {FieldCommand|integer}
+         * @returns {integer|FieldCommand}
          */
         _computeAuthorId() {
             if (!(this.data.author_id && this.data.author_id[0])) {

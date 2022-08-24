@@ -96,7 +96,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeNotificationGroup() {
             if (!this.isFailure || !this.isFromCurrentUser) {

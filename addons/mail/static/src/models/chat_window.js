@@ -362,7 +362,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeCallSettingsMenu() {
             if (this.isCallSettingsMenuOpen) {
@@ -487,7 +487,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeNewMessageAutocompleteInputView() {
             if (this.hasNewMessageForm) {
@@ -504,7 +504,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {ThreadViewer}
+         * @returns {Object}
          */
         _computeThreadViewer() {
             return {
@@ -515,7 +515,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {integer|undefined}
+         * @returns {integer|FieldCommand}
          */
         _computeVisibleIndex() {
             if (!this.manager) {
@@ -552,7 +552,7 @@ registerModel({
          * @private
          * @param {Object} [param0={}]
          * @param {boolean} [param0.reverse=false]
-         * @returns {ChatWindow|undefined}
+         * @returns {ChatWindow}
          */
         _getNextVisibleUnfoldedChatWindow({ reverse = false } = {}) {
             const orderedVisible = this.manager.allOrderedVisible;

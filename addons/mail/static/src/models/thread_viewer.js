@@ -52,7 +52,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {ThreadViewer|undefined}
+         * @returns {Object|FieldCommand}
          */
         _computeThreadView() {
             return this.hasThreadView ? {} : clear();

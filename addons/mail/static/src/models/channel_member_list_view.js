@@ -21,7 +21,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Channel|FieldCommand}
          */
         _computeChannel() {
             if (this.chatWindowOwner) {
@@ -34,7 +34,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeOfflineCategoryView() {
             if (this.channel && this.channel.orderedOfflineMembers.length > 0) {
@@ -44,7 +44,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeOnlineCategoryView() {
             if (this.channel && this.channel.orderedOnlineMembers.length > 0) {

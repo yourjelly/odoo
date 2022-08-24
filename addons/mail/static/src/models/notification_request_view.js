@@ -24,7 +24,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object[]FieldCommand}
          */
         _computePersonaImStatusIconView() {
             return this.messaging.partnerRoot && this.messaging.partnerRoot.isImStatusSet ? {} : clear();

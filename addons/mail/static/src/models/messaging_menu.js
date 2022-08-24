@@ -121,7 +121,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
          _computeMobileMessagingNavbarView() {
             if (this.messaging.device && this.messaging.device.isSmall) {
@@ -131,7 +131,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeMobileNewMessageAutocompleteInputView() {
             if (this.isOpen && this.messaging.isInitialized && this.messaging.device.isSmall && this.isMobileNewMessageToggled) {
@@ -147,7 +147,7 @@ registerModel({
             return this.env._t("Search user...");
         },
         /**
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeNotificationListView() {
             return this.isOpen ? {} : clear();

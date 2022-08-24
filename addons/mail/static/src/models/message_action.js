@@ -20,7 +20,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {MessageActionList|FieldCommand}
          */
         _computeMessageActionListOwner() {
             if (this.messageActionListOwnerAsDelete) {
@@ -42,7 +42,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeMessageActionView() {
             /**

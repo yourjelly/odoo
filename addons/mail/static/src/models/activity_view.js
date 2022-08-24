@@ -105,7 +105,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeFileUploader() {
             return this.activity.category === 'upload_file' ? {} : clear();
@@ -136,7 +136,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object[]}
          */
         _computeMailTemplateViews() {
             return this.activity.mailTemplates.map(mailTemplate => ({ mailTemplate }));

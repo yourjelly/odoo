@@ -15,7 +15,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object[]}
          */
         _computeActivityViews() {
             return this.chatter.thread.activities.map(activity => {

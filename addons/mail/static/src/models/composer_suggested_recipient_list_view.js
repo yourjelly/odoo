@@ -27,7 +27,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object[]|FieldCommand}
          */
         _computeComposerSuggestedRecipientViews() {
             if (!this.thread) {
@@ -41,7 +41,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Thread}
          */
         _computeThread() {
             return this.composerViewOwner.composer.activeThread;

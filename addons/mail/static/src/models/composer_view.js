@@ -715,7 +715,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {boolean}
+         * @returns {Object|FieldCommand}
          */
         _computeAttachmentList() {
             return (this.composer && this.composer.attachments.length > 0)
@@ -724,7 +724,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeComposerSuggestedRecipientListView() {
             if (this.hasHeader && this.hasFollowers && !this.composer.isLog) {
@@ -734,7 +734,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Composer|FieldCommand}
          */
         _computeComposer() {
             if (this.threadView) {
@@ -770,7 +770,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeDropZoneView() {
             if (this.useDragVisibleDropZone.isVisible) {
@@ -972,7 +972,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {string[]}
+         * @returns {string[]|FieldCommand}
          */
          _computeSendShortcuts() {
             if (this.chatter) {
@@ -1004,7 +1004,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {string}
+         * @returns {string|FieldCommand}
          */
         _computeSuggestionDelimiter() {
             if (
@@ -1018,7 +1018,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {string}
+         * @returns {string|FieldCommand}
          */
         _computeSuggestionModelName() {
             switch (this.suggestionDelimiter) {
@@ -1036,7 +1036,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {string}
+         * @returns {string|FieldCommand}
          */
         _computeSuggestionSearchTerm() {
             if (
@@ -1324,7 +1324,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeComposerSuggestionListView() {
             if (this.hasSuggestions) {

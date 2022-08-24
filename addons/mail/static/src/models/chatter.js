@@ -185,7 +185,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeActivityBoxView() {
             if (this.thread && this.thread.hasActivities && this.thread.activities.length > 0) {
@@ -195,7 +195,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeDropZoneView() {
             if (this.useDragVisibleDropZone.isVisible) {
@@ -205,14 +205,14 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeFileUploader() {
             return this.thread ? {} : clear();
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeFollowButtonView() {
             if (this.hasFollowers && this.thread && (!this.thread.channel || this.thread.channel.channel_type !== 'chat')) {
@@ -222,7 +222,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeFollowerListMenuView() {
             if (this.hasFollowers && this.thread) {
@@ -260,7 +260,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {ThreadViewer}
+         * @returns {Object}
          */
         _computeThreadViewer() {
             return {

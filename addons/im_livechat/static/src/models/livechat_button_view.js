@@ -183,6 +183,7 @@ registerModel({
             return this.messaging.publicLivechatGlobal.options.button_background_color;
         },
         /**
+         * @private
          * @returns {string}
          */
         _computeButtonText() {
@@ -192,6 +193,7 @@ registerModel({
             return this.env._t("Chat with one of our collaborators");
         },
         /**
+         * @private
          * @returns {string}
          */
         _computeButtonTextColor() {
@@ -199,7 +201,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {integer}
+         * @returns {integer|FieldCommand}
          */
         _computeCurrentPartnerId() {
             if (!this.messaging.publicLivechatGlobal.isAvailable) {
@@ -353,7 +355,6 @@ registerModel({
          * Scrolling to the bottom allows the user to see the last messages properly when that happens.
          *
          * @private
-         * @override
          */
         _openChatWindowChatbot() {
             window.addEventListener('resize', () => {

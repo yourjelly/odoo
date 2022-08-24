@@ -9,7 +9,7 @@ registerModel({
     recordMethods: {
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object[]|FieldCommand}
          */
         _computeEmojiViews() {
             if (!this.emojiPickerViewOwner.emojiCategoryBarView.activeCategoryView) {

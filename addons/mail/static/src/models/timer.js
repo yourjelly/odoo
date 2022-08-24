@@ -92,6 +92,9 @@ registerModel({
                 return;
             }
         },
+        /**
+         * @private
+         */
         _onChangeDoReset() {
             if (!this.doReset) {
                 return;

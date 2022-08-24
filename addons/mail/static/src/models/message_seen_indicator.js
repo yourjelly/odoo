@@ -111,7 +111,7 @@ registerModel({
          * Manually called as not always called when necessary
          *
          * @private
-         * @returns {Partner[]}
+         * @returns {Partner[]|FieldCommand}
          * @see computeFetchedValues
          * @see computeSeenValues
          */
@@ -141,7 +141,7 @@ registerModel({
          * Manually called as not always called when necessary
          *
          * @private
-         * @returns {Partner[]}
+         * @returns {Partner[]|FieldCommand}
          * @see computeSeenValues
          */
         _computePartnersThatHaveSeen() {

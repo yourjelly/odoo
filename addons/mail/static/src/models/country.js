@@ -9,7 +9,7 @@ registerModel({
     recordMethods: {
         /**
          * @private
-         * @returns {string|undefined}
+         * @returns {string|FieldCommand}
          */
         _computeFlagUrl() {
             if (!this.code) {

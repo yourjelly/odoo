@@ -12,7 +12,7 @@ registerModel({
     recordMethods: {
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Channel|FieldCommand}
          */
         _computeChannel() {
             if (this.channelMemberListViewOwnerAsOffline) {
@@ -24,7 +24,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object[]|FieldCommand}
          */
         _computeChannelMemberViews() {
             if (this.members.length === 0) {
@@ -34,7 +34,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {ChannelMember[]|FieldCommand}
          */
         _computeMembers() {
             if (!this.exists()) {

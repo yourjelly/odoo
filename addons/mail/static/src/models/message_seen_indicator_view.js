@@ -9,7 +9,7 @@ registerModel({
     recordMethods: {
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeMessageSeenIndicator() {
             if (this.messageViewOwner.messageListViewItemOwner && this.messageViewOwner.messageListViewItemOwner.messageListViewOwner.threadViewOwner.thread) {

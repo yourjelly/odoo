@@ -189,7 +189,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {string|undefined}
+         * @returns {string|FieldCommand}
          */
         _computeActiveId() {
             if (!this.activeThread) {
@@ -270,7 +270,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeMobileMessagingNavbarView() {
             if (
@@ -284,14 +284,14 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeNotificationListView() {
             return (this.messaging.device.isSmall && this.activeMobileNavbarTabId !== 'mailbox') ? {} : clear();
         },
         /**
          * @private
-         * @returns {ThreadViewer}
+         * @returns {Object|ThreadViewer}
          */
         _computeThreadViewer() {
             return {

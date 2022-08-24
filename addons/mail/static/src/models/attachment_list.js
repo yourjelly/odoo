@@ -24,14 +24,23 @@ registerModel({
             const prevIndex = index === 0 ? this.attachments.length - 1 : index - 1;
             this.update({ selectedAttachment: this.attachments[prevIndex] });
         },
+        /**
+         * @private
+         * @returns {Object[]}
+         */
         _computeAttachmentImages() {
             return this.imageAttachments.map(attachment => ({ attachment }));
         },
+        /**
+         * @private
+         * @returns {Object[]}
+         */
         _computeAttachmentCards() {
             return this.nonImageAttachments.map(attachment => ({ attachment }));
         },
         /**
-         * @returns {FieldCommand}
+         * @private
+         * @returns {Attachment[]|FieldCommand}
          */
         _computeAttachments() {
             if (this.messageViewOwner) {
@@ -46,18 +55,21 @@ registerModel({
             return clear();
         },
         /**
+         * @private
          * @returns {Attachment[]}
          */
         _computeImageAttachments() {
             return this.attachments.filter(attachment => attachment.isImage);
         },
         /**
+         * @private
          * @returns {Attachment[]}
          */
         _computeNonImageAttachments() {
             return this.attachments.filter(attachment => !attachment.isImage);
         },
         /**
+         * @private
          * @returns {Attachment[]}
          */
         _computeViewableAttachments() {
@@ -107,7 +119,7 @@ registerModel({
          * @private
          * @returns {boolean}
          */
-         _computeIsInChatWindowAndIsAlignedRight() {
+        _computeIsInChatWindowAndIsAlignedRight() {
             return Boolean(
                 this.isInChatWindow &&
                 this.isCurrentUserOrGuestAuthor
@@ -117,7 +129,7 @@ registerModel({
          * @private
          * @returns {boolean}
          */
-         _computeIsInChatWindowAndIsAlignedLeft() {
+        _computeIsInChatWindowAndIsAlignedLeft() {
             return Boolean(
                 this.isInChatWindow &&
                 !this.isCurrentUserOrGuestAuthor

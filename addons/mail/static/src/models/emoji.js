@@ -8,7 +8,7 @@ registerModel({
     recordMethods: {
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {EmojiRegistry}
          */
         _computeEmojiRegistry() {
             return this.messaging.emojiRegistry;

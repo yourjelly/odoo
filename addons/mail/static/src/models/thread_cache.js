@@ -62,7 +62,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand|Message[]}
+         * @returns {Message[]|FieldCommand}
          */
         _computeFetchedMessages() {
             if (!this.thread) {
@@ -72,7 +72,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {Message|undefined}
+         * @returns {Message|FieldCommand}
          */
         _computeLastFetchedMessage() {
             const {
@@ -86,7 +86,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {Message|undefined}
+         * @returns {Message|FieldCommand}
          */
         _computeLastMessage() {
             const {
@@ -100,7 +100,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {Message[]}
+         * @returns {Message[]|FieldCommand}
          */
         _computeMessages() {
             if (!this.thread) {
@@ -140,7 +140,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {boolean}
+         * @returns {Object}
          */
         _computeHasToLoadMessages() {
             const res = { hasToLoadMessages: false };

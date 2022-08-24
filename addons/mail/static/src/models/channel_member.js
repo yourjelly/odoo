@@ -22,7 +22,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Channel|FieldCommand}
          */
         _computeChannelAsOfflineMember() {
             if (this.persona.partner) {
@@ -35,7 +35,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Channel|FieldCommand}
          */
         _computeChannelAsOnlineMember() {
             if (this.persona.partner) {

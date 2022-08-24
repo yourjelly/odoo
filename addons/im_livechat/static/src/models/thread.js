@@ -19,7 +19,7 @@ addFields('Thread', {
 addRecordMethods('Thread', {
     /**
      * @private
-     * @returns {FieldCommand}
+     * @returns {Messaging|FieldCommand}
      */
     _computeMessagingAsPinnedLivechat() {
         if (!this.messaging || !this.channel || this.channel.channel_type !== 'livechat' || !this.isPinned) {

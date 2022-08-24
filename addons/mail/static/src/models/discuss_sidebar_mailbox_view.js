@@ -10,7 +10,7 @@ registerModel({
     recordMethods: {
         /**
          * @private
-         * @returns {Mailbox}
+         * @returns {Mailbox|FieldCommand}
          */
         _computeMailbox() {
             if (this.discussViewOwnerAsHistory) {

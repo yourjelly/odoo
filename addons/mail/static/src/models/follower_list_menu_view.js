@@ -29,14 +29,14 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object[]}
          */
         _computeFollowerViews() {
             return this.chatterOwner.thread.followers.map(follower => ({ follower }));
         },
         /**
          * @private
-         * @returns {Boolean}
+         * @returns {boolean}
          */
         _computeIsDisabled() {
             return !this.chatterOwner.hasReadAccess;

@@ -8,7 +8,7 @@ registerModel({
     name: 'MessageListView',
     recordMethods: {
         /**
-         * @returns {Element|undefined}
+         * @returns {Element}
          */
         getScrollableElement() {
             if (this.threadViewOwner.threadViewer.chatter) {

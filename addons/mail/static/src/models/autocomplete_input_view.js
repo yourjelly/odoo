@@ -63,7 +63,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {string}
+         * @returns {string|FieldCommand}
          */
         _computePlaceholder() {
             if (this.chatWindowOwnerAsNewMessage) {

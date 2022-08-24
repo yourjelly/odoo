@@ -201,7 +201,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object[]|FieldCommand}
          */
         _computeHiddenChatWindowHeaderViews() {
             if (this.allOrderedHidden.length > 0) {
@@ -211,7 +211,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {ChatWindow|undefined}
+         * @returns {ChatWindow|FieldCommand}
          */
         _computeLastVisible() {
             const { length: l, [l - 1]: lastVisible } = this.allOrderedVisible;

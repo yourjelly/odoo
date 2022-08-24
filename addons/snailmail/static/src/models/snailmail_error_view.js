@@ -41,14 +41,14 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Message}
          */
         _computeMessage() {
             return this.dialogOwner.messageViewOwnerAsSnailmailError.message;
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Notification}
          */
         _computeNotification() {
             return this.message.notifications[0];

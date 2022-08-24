@@ -21,7 +21,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {Boolean}
+         * @returns {boolean}
          */
         _computeHasOpenChat() {
             return this.channelMember.persona.partner ? true : false;
@@ -35,7 +35,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computePersonaImStatusIconView() {
             if (this.channelMember.persona.guest && this.channelMember.persona.guest.im_status) {

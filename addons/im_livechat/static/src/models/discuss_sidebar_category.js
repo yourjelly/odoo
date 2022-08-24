@@ -16,8 +16,6 @@ addFields('DiscussSidebarCategory', {
 patchRecordMethods('DiscussSidebarCategory', {
     /**
      * @override
-     * @private
-     * @returns {boolean|FieldCommand}
      */
     _computeIsServerOpen() {
         // there is no server state for non-users (guests)
@@ -43,8 +41,6 @@ patchRecordMethods('DiscussSidebarCategory', {
     },
     /**
      * @override
-     * @private
-     * @returns {string|FieldCommand}
      */
     _computeServerStateKey() {
         if (this.discussAsLivechat) {

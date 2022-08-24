@@ -114,6 +114,7 @@ registerModel({
         },
         /**
          * @private
+         * @returns {boolean}
          */
         _computeIsSmall() {
             return Boolean(this.callView && this.callView.threadView.compact && !this.callView.isFullScreen);

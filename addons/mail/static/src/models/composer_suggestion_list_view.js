@@ -59,7 +59,7 @@ registerModel({
          * part of the suggestions.
          *
          * @private
-         * @returns {FieldCommand}
+         * @returns {ComposerSuggestionView}
          */
         _computeActiveSuggestionView() {
             if (this.suggestionViews.includes(this.rawActiveSuggestionView)) {
@@ -69,19 +69,19 @@ registerModel({
             return firstSuggestionView;
         },
         /**
-         * @returns {FieldCommand}
+         * @returns {Object[]}
          */
         _computeComposerSuggestionListViewExtraComposerSuggestionViewItems() {
             return this.composerViewOwner.extraSuggestions.map(suggestable => ({ suggestable }));
         },
         /**
-         * @returns {FieldCommand}
+         * @returns {Object[]}
          */
         _computeComposerSuggestionListViewMainComposerSuggestionViewItems() {
             return this.composerViewOwner.mainSuggestions.map(suggestable => ({ suggestable }));
         },
         /**
-         * @returns {FieldCommand}
+         * @returns {ComposerSuggestionView[]}
          */
         _computeSuggestionViews() {
             const mainSuggestionViews = this.composerSuggestionListViewMainComposerSuggestionViewItems.map(item => item.composerSuggestionView);

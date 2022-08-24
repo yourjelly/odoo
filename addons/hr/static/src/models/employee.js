@@ -88,7 +88,7 @@ registerModel({
          * them if applicable.
          */
         async checkIsUser() {
-            return this.messaging.models['Employee'].performRpcRead({
+            await this.messaging.models['Employee'].performRpcRead({
                 ids: [this.id],
                 fields: ['user_id', 'user_partner_id'],
                 context: { active_test: false },

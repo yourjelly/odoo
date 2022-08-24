@@ -128,13 +128,14 @@ registerModel({
         },
         /**
          * @private
+         * @returns {boolean}
          */
         _computeIsControllerFloating() {
             return Boolean(this.callView.isFullScreen || this.callView.activeRtcSession && !this.callView.threadView.compact);
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object[]}
          */
         _computeMainTiles() {
             if (this.callView.activeRtcSession) {

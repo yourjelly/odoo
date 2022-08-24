@@ -2,6 +2,7 @@
 
 import { registerModel } from '@mail/model/model_core';
 import { attr, one } from '@mail/model/model_field';
+import { clear } from '@mail/model/model_field_command';
 
 import { sprintf } from '@web/core/utils/strings';
 
@@ -10,11 +11,11 @@ registerModel({
     recordMethods: {
         /**
          * @private
-         * @returns {string}
+         * @returns {string|FieldCommand}
          */
         _computeAttachmentButtonText() {
             if (!this.chatter || !this.chatter.thread) {
-                return;
+                return clear();
             }
             const attachments = this.chatter.thread.allAttachments;
             switch (attachments.length) {

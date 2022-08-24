@@ -58,7 +58,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {boolean}
+         * @returns {boolean|FieldCommand}
          */
         _computeHasDownloadButton() {
             if (!this.attachment || !this.attachmentList) {
@@ -68,7 +68,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {number}
+         * @returns {integer|FieldCommand}
          */
         _computeHeight() {
             if (!this.attachmentList) {
@@ -86,11 +86,11 @@ registerModel({
         },
         /**
          * @private
-         * @returns {string}
+         * @returns {string|FieldCommand}
          */
         _computeImageUrl() {
             if (!this.attachment) {
-                return;
+                return clear();
             }
             if (!this.attachment.accessToken && this.attachment.originThread && this.attachment.originThread.model === 'mail.channel') {
                 return `/mail/channel/${this.attachment.originThread.id}/image/${this.attachment.id}/${this.width}x${this.height}`;
@@ -103,7 +103,7 @@ registerModel({
          * the height should be more constrained.
          *
          * @private
-         * @returns {number}
+         * @returns {integer}
          */
         _computeWidth() {
             return 1920;

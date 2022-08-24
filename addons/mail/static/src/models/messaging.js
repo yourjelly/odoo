@@ -301,7 +301,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object}
          */
         _computeNotificationHandler() {
             return {};

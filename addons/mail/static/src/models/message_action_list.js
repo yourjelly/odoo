@@ -9,7 +9,7 @@ registerModel({
     recordMethods: {
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeActionDelete() {
             if (this.message && this.message.canBeDeleted) {
@@ -19,7 +19,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeActionEdit() {
             if (this.message && this.message.canBeDeleted) {
@@ -29,7 +29,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeActionMarkAsRead() {
             if (
@@ -43,7 +43,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeActionReaction() {
             if (this.message && this.message.hasReactionIcon) {
@@ -53,7 +53,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeActionReplyTo() {
             if (
@@ -70,7 +70,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeActionToggleCompact() {
             if (this.messageView.isInChatWindow && (this.actionsWithoutCompactCount > this.compactThreshold)) {
@@ -80,7 +80,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeActionToggleStar() {
             if (this.message && this.message.canStarBeToggled) {
@@ -90,7 +90,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeFirstActionView() {
             if (this.actionViewsCount === 0) {
@@ -100,7 +100,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeLastActionView() {
             if (this.actionViewsCount === 0) {
@@ -108,6 +108,10 @@ registerModel({
             }
             return this.messageActionViews[this.actionViewsCount - 1];
         },
+        /**
+         * @private
+         * @returns {Array[]}
+         */
         _sortMessageActionViews() {
             return [
                 ['smaller-first', 'messageAction.sequence'],

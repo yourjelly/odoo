@@ -68,7 +68,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {CallView}
          */
         _computeCallView() {
             if (this.sidebarViewTileOwner) {
@@ -78,9 +78,9 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {ChannelMember}
          */
-         _computeChannelMember() {
+        _computeChannelMember() {
             if (this.sidebarViewTileOwner) {
                 return this.sidebarViewTileOwner.channelMember;
             }
@@ -141,7 +141,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeCallParticipantVideoView() {
             if (this.rtcSession && this.rtcSession.videoStream) {

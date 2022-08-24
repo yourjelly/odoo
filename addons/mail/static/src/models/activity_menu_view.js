@@ -64,7 +64,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object[]}
          */
         _computeActivityGroupViews() {
             return this.activityGroups.map(activityGroup => {
@@ -75,6 +75,7 @@ registerModel({
         },
         /**
          * @private
+         * @returns {integer}
          */
         _computeCounter() {
             return this.activityGroups.reduce((total, group) => total + group.total_count, this.extraCount);

@@ -519,7 +519,7 @@ registerModel({
          *   2. AND we don't expect a user input
          *
          * @private
-         * @returns {boolean}
+         * @returns {boolean|FieldCommand}
          */
         _computeShouldEndScript() {
             if (!this.currentStep) {

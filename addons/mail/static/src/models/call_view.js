@@ -67,6 +67,7 @@ registerModel({
 
         /**
          * @private
+         * @returns {number}
          */
         _computeAspectRatio() {
             const rtcAspectRatio = this.messaging.rtc.videoConfig && this.messaging.rtc.videoConfig.aspectRatio;
@@ -76,6 +77,7 @@ registerModel({
         },
         /**
          * @private
+         * @returns {Object|FieldCommand}
          */
         _computeCallSideBarView() {
             if (this.activeRtcSession && this.isSidebarOpen && !this.threadView.compact) {
@@ -83,6 +85,10 @@ registerModel({
             }
             return clear();
         },
+        /**
+         * @private
+         * @returns {ChannelMember[]}
+         */
         _computeFilteredChannelMembers() {
             if (!this.channel) {
                 return clear();
@@ -98,6 +104,7 @@ registerModel({
         },
         /**
          * @private
+         * @returns {boolean}
          */
         _computeIsMinimized() {
             if (!this.threadView || !this.thread) {
@@ -115,7 +122,7 @@ registerModel({
          * @private
          * @returns {string}
          */
-         _computeLayoutSettingsTitle() {
+        _computeLayoutSettingsTitle() {
             return this.env._t("Change Layout");
         },
         /**

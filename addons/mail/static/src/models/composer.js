@@ -11,7 +11,7 @@ registerModel({
     recordMethods: {
         /**
          * @private
-         * @returns {Thread}
+         * @returns {Thread|FieldCommand}
          */
         _computeActiveThread() {
             if (this.messageViewInEditing && this.messageViewInEditing.message && this.messageViewInEditing.message.originThread) {

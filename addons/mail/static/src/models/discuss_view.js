@@ -97,7 +97,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeMobileAddItemHeaderAutocompleteInputView() {
             if (

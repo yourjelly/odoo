@@ -30,7 +30,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {Thread|undefined}
+         * @returns {FieldCommand}
          */
         _computeThread() {
             const notificationsThreadIds = this.notifications

@@ -34,7 +34,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object[]|FieldCommand}
          */
         _computeFollowerSubtypeViews() {
             if (this.follower.subtypes.length === 0) {
@@ -44,7 +44,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {Array}
+         * @returns {Array[]}
          */
         _sortFollowerSubtypeViews() {
             return [

@@ -24,7 +24,7 @@ registerModel({
             }
         },
         /**
-         * @returns {FieldCommand}
+         * @returns {Messaging|FieldCommand}
          */
         _computeMessagingAsAnyMailbox() {
             if (!this.messaging) {
@@ -63,7 +63,7 @@ registerModel({
             }
         },
         /**
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeThread() {
             const threadId = (() => {

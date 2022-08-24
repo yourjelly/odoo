@@ -34,7 +34,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand|string}
+         * @returns {string|FieldCommand}
          */
         _computeName() {
             if (!this.data) {
@@ -44,7 +44,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeOperator() {
             if (!this.data) {
@@ -63,7 +63,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand|string}
+         * @returns {string|FieldCommand}
          */
         _computeStatus() {
             if (!this.data) {
@@ -73,7 +73,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand|string}
+         * @returns {string|FieldCommand}
          */
         _computeUuid() {
             if (!this.data) {

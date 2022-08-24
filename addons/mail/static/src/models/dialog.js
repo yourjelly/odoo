@@ -27,7 +27,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeAttachmentDeleteConfirmView() {
             if (this.attachmentCardOwnerAsAttachmentDeleteConfirm) {
@@ -40,7 +40,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeAttachmentViewer() {
             if (this.attachmentListOwnerAsAttachmentView) {
@@ -92,14 +92,14 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeDeleteMessageConfirmView() {
             return this.messageActionViewOwnerAsDeleteConfirm ? {} : clear();
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {Object|FieldCommand}
          */
         _computeFollowerSubtypeList() {
             return this.followerOwnerAsSubtypeList ? {} : clear();
@@ -121,7 +121,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {DialogManager|FieldCommand}
          */
         _computeManager() {
             if (this.messaging.dialogManager) {
@@ -131,7 +131,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {AttachmentViewer|AttachmentDeleteConfirmView|DeleteMessageConfirmView|FollowerSubtypeList|FieldCommand}
          */
         _computeRecord() {
             if (this.attachmentViewer) {
