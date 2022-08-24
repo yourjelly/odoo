@@ -48,10 +48,6 @@
     }
 }
 
-.o-dropdown-menu {
-    @extend .dropdown-menu;
-}
-
 // = Legacy submenus
 // Workaround appling owl 'vertical nested menu' design.
 // Should be removed once we'll support the 'horizontal' design.
