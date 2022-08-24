@@ -15,8 +15,7 @@ class PrinterInterface(Interface):
     _loop_delay = 120
     connection_type = 'printer'
 
-    def get_devices(self):
-        printer_devices = {}
+    def get_devices(self, printer_devices = {}):
         with cups_lock:
             printers = conn.getPrinters()
             devices = conn.getDevices()
