@@ -5,20 +5,13 @@
             <field name="name">Clothes</field>
         </record>
 
-        <record id="pos_category_miscellaneous" model="pos.category">
-            <field name="name">Miscellaneous</field>
-        </record>
-
         <record id="t_shirt" model="product.product">
             <field name="available_in_pos">True</field>
             <field name="list_price">20</field>
             <field name="name">T-Shirt</field>
-            <field name="default_code">CLOTH_0009</field>
+            <field name="default_code">CLOTH_0001</field>
             <field name="type">product</field>
-            <field name="weight">0.01</field>
-            <field name="to_weight">False</field>
-            <field name="barcode">2100002000003</field>
-            <field name="taxes_id" eval='[(5,)]'/>
+            <field name="barcode">2300002000003</field>
             <field name="categ_id" ref="product.product_category_1"/>
             <field name="pos_categ_id" ref="pos_category_clothes"/>
             <field name="uom_id" ref="uom.product_uom_unit" />
@@ -68,13 +61,11 @@
             <field name="available_in_pos">True</field>
             <field name="list_price">80</field>
             <field name="name">Jeans</field>
-            <field name="default_code">CLOTH_0008</field>
+            <field name="default_code">CLOTH_0002</field>
+            <field name="barcode">2300002000004</field>
             <field name="type">product</field>
-            <field name="weight">0.01</field>
-            <field name="taxes_id" eval='[(5,)]'/>
             <field name="categ_id" ref="product.product_category_1"/>
             <field name="pos_categ_id" ref="pos_category_clothes"/>
-            <field name="to_weight">False</field>
             <field name="uom_id" ref="uom.product_uom_unit" />
             <field name="uom_po_id" ref="uom.product_uom_unit" />
             <field name="image_1920" type="base64" file="point_of_sale/static/img/jeans.jpg"/>
@@ -84,11 +75,9 @@
             <field name="available_in_pos">True</field>
             <field name="list_price">50</field>
             <field name="name">Sweater</field>
-            <field name="default_code">CLOTH_0006</field>
+            <field name="default_code">CLOTH_0003</field>
+            <field name="barcode">2300002000005</field>
             <field name="type">product</field>
-            <field name="weight">0.01</field>
-            <field name="taxes_id" eval='[(5,)]'/>
-            <field name="to_weight">False</field>
             <field name="categ_id" ref="product.product_category_1"/>
             <field name="pos_categ_id" ref="pos_category_clothes"/>
             <field name="uom_id" ref="uom.product_uom_unit" />
@@ -100,12 +89,9 @@
             <field name="available_in_pos">True</field>
             <field name="list_price">60</field>
             <field name="name">Hoodie</field>
-            <field name="default_code">CLOTH_0001</field>
-            <field name="to_weight">False</field>
-            <field name="barcode">230000100008</field>
+            <field name="default_code">CLOTH_0004</field>
+            <field name="barcode">230000100006</field>
             <field name="type">product</field>
-            <field name="weight">0.01</field>
-            <field name="taxes_id" eval='[(5,)]'/>
             <field name="categ_id" ref="product.product_category_1"/>
             <field name="pos_categ_id" ref="pos_category_clothes"/>
             <field name="uom_id" ref="uom.product_uom_unit" />
@@ -149,10 +135,8 @@
             <field name="available_in_pos">True</field>
             <field name="list_price">25</field>
             <field name="name">Cap</field>
-            <field name="weight">0.01</field>
-            <field name="taxes_id" eval='[(5,)]'/>
-            <field name="default_code">CLOTH_0002</field>
-            <field name="to_weight">False</field>
+            <field name="default_code">CLOTH_0005</field>
+            <field name="barcode">2300002000007</field>
             <field name="categ_id" ref="product.product_category_1"/>
             <field name="pos_categ_id" ref="pos_category_clothes"/>
             <field name="uom_id" ref="uom.product_uom_unit" />

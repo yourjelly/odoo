@@ -4,10 +4,10 @@
         <record id="pos_category_miscellaneous" model="pos.category">
             <field name="name">Miscellaneous</field>
         </record>
-        <!-- Kitchen Printer -->
 
-        <record id="kitchen_printer" model="restaurant.printer">
-            <field name="name">Kitchen Printer</field>
+        <!-- Bar Printer -->
+        <record id="bar_printer" model="restaurant.printer">
+            <field name="name">Bar Printer</field>
             <field name="proxy_ip">localhost</field>
             <field name="product_categories_ids" eval="[(6, 0, [ref('pos_restaurant.pos_category_miscellaneous')])]" />
         </record>
@@ -48,8 +48,8 @@
         </record>
         <record id="pos_drink_spritz" model="product.product">
             <field name="available_in_pos">True</field>
-            <field name="list_price">9.0</field>
-            <field name="name">Aperol Spritz</field>
+            <field name="list_price">6.50</field>
+            <field name="name">Virgin Spritz</field>
             <field name="pos_categ_id" ref="drinks"/>
             <field name="categ_id" ref="pos_restaurant.product_category_pos_drinks"/>
             <field name="image_1920" type="base64" file="pos_restaurant/static/img/spritz.png"/>
