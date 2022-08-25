@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from odoo import fields, models, api
+from itertools import groupby
+
+from odoo import api, fields, models
+from odoo.tools.float_utils import float_compare, float_is_zero
+from odoo.tools.misc import groupby as odoo_groupby
 
 
 class AccountMove(models.Model):
@@ -31,11 +35,29 @@ class AccountMove(models.Model):
         return res
 
     def _post(self, soft=True):
-        # OVERRIDE
-
         # Don't change anything on moves used to cancel another ones.
         if self._context.get('move_reverse_cancel'):
             return super()._post(soft)
+
+        # Create correction layer if invoice price is different
+        stock_valuation_layers = self.env['stock.valuation.layer'].sudo()
+        valued_lines = self.env['account.move.line'].sudo()
+        for invoice in self:
+            if invoice.sudo().stock_valuation_layer_ids:
+                continue
+            if invoice.move_type in ('in_invoice', 'in_refund', 'in_receipt'):
+                valued_lines |= invoice.invoice_line_ids.filtered(
+                    lambda l: l.product_id and l.product_id.cost_method != 'standard')
+        if valued_lines:
+            stock_valuation_layers |= valued_lines._create_in_invoice_svl()
+
+        for (product, company), dummy in groupby(stock_valuation_layers, key=lambda svl: (svl.product_id, svl.company_id)):
+            product = product.with_company(company.id)
+            if product.cost_method == 'average' and not float_is_zero(product.quantity_svl, precision_rounding=product.uom_id.rounding):
+                product.sudo().with_context(disable_auto_svl=True).write({'standard_price': product.value_svl / product.quantity_svl})
+
+        if stock_valuation_layers:
+            stock_valuation_layers._validate_accounting_entries()
 
         # Create additional COGS lines for customer invoices.
         self.env['account.move.line'].create(self._stock_account_prepare_anglo_saxon_out_lines_vals())
@@ -43,8 +65,16 @@ class AccountMove(models.Model):
         # Post entries.
         posted = super()._post(soft)
 
+        for layer in stock_valuation_layers:
+            description = f"{layer.account_move_line_id.move_id.display_name} - {layer.product_id.display_name}"
+            layer.description = description
+            layer.account_move_id.ref = description
+            layer.account_move_id.line_ids.write({'name': description})
+
         # Reconcile COGS lines in case of anglo-saxon accounting with perpetual valuation.
-        posted._stock_account_anglo_saxon_reconcile_valuation()
+        # We don't have currency loss or gain at this point. The invoice price with the daily
+        # rate is used for the inventory valuation.
+        posted.with_context(no_exchange_difference=True)._stock_account_anglo_saxon_reconcile_valuation()
         return posted
 
     def button_draft(self):
@@ -208,23 +238,148 @@ class AccountMove(models.Model):
 class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
 
-    def _compute_account_id(self):
-        super()._compute_account_id()
-        input_lines = self.filtered(lambda line: (
-            line.product_id.type == 'product'
-            and line.move_id.company_id.anglo_saxon_accounting
-            and line.move_id.is_purchase_document()
-        ))
-        for line in input_lines:
-            line = line.with_company(line.move_id.journal_id.company_id)
-            fiscal_position = line.move_id.fiscal_position_id
-            accounts = line.product_id.product_tmpl_id.get_product_accounts(fiscal_pos=fiscal_position)
+    is_anglo_saxon_line = fields.Boolean(help="Technical field used to retrieve the anglo-saxon lines.")
+
+    def _create_in_invoice_svl(self):
+        svl_vals_list = []
+        for line in self:
+            line = line.with_company(line.company_id)
+            move = line.move_id.with_company(line.move_id.company_id)
+            po_line = line.purchase_line_id
+            uom = line.product_uom_id or line.product_id.uom_id
+
+            # Don't create value for more quantity than received
+            quantity = po_line.qty_received - (po_line.qty_invoiced - line.quantity)
+            quantity = max(min(line.quantity, quantity), 0)
+            if float_is_zero(quantity, precision_rounding=uom.rounding):
+                continue
+
+            layers = line._get_stock_valuation_layers(move)
+            # Retrieves SVL linked to a return.
+            if not layers:
+                continue
+
+            price_unit = -line.price_unit if move.move_type == 'in_refund' else line.price_unit
+            price_unit = price_unit * (1 - (line.discount or 0.0) / 100.0)
+            if line.tax_ids:
+                if line.discount and line.quantity:
+                    # We do not want to round the price unit since :
+                    # - It does not follow the currency precision
+                    # - It may include a discount
+                    # Since compute_all still rounds the total, we use an ugly workaround:
+                    # multiply then divide the price unit.
+                    price_unit *= line.quantity
+                    price_unit = line.tax_ids.with_context(round=False, force_sign=move._get_tax_force_sign()).compute_all(
+                        price_unit, currency=move.currency_id, quantity=1.0, is_refund=move.move_type == 'in_refund')['total_excluded']
+                    price_unit /= line.quantity
+                else:
+                    price_unit = line.tax_ids.compute_all(
+                        price_unit, currency=move.currency_id, quantity=1.0, is_refund=move.move_type == 'in_refund')['total_excluded']
+
+            moves_layers = self.env['stock.valuation.layer'].concat(*[layer[0] for layer in layers])
+            layers_price_unit = self._get_stock_valuation_layers_price_unit(moves_layers)
+            layers_price_unit = line.company_id.currency_id._convert(
+                layers_price_unit, po_line.currency_id, line.company_id, line.date, round=False)
+            price_difference = price_unit - layers_price_unit
+            price_difference = po_line.currency_id._convert(
+                price_difference, line.company_id.currency_id, line.company_id, line.date, round=False)
+            if float_is_zero(price_difference * line.quantity, precision_rounding=line.currency_id.rounding):
+                continue
+
+            svl_vals_list += line._prepare_in_invoice_svl_vals(move, layers, price_difference)
+        return self.env['stock.valuation.layer'].sudo().create(svl_vals_list)
+
+    def _get_computed_account(self):
+        # OVERRIDE to use the stock input account by default on vendor bills when dealing
+        # with anglo-saxon accounting.
+        self.ensure_one()
+        self = self.with_company(self.move_id.journal_id.company_id)
+        if self.product_id.type == 'product' \
+            and self.move_id.company_id.anglo_saxon_accounting \
+            and self.move_id.is_purchase_document():
+            fiscal_position = self.move_id.fiscal_position_id
+            accounts = self.product_id.product_tmpl_id.get_product_accounts(fiscal_pos=fiscal_position)
             if accounts['stock_input']:
-                line.account_id = accounts['stock_input']
+                return accounts['stock_input']
+        return super(AccountMoveLine, self)._get_computed_account()
+
+    def _get_price_difference(self, valued_moves):
+        if not valued_moves:
+            return 0
+        layers = valued_moves.stock_valuation_layer_ids
+        layers_price_unit = sum(layers.mapped('value')) / sum(layers.mapped('quantity'))
+        return self.price_unit - layers_price_unit
+
+    def _get_valued_in_moves(self):
+        return self.env['stock.move']
+
+    def _get_stock_valuation_layers(self, move):
+        layers = []
+        valued_moves = self._get_valued_in_moves()
+        if move.move_type == 'in_refund':
+            valued_moves = valued_moves.filtered(lambda stock_move: stock_move._is_out())
+        else:
+            valued_moves = valued_moves.filtered(lambda stock_move: stock_move._is_in())
+        move_layers = valued_moves.stock_valuation_layer_ids
+        # TODO Tricky, what do we do with already existing correction layers?
+        move_layers = move_layers.filtered(lambda svl: svl.remaining_qty)
+        invoice_layers_groupby_move_layer = {}
+        for move_layer, invoice_layers in odoo_groupby(
+                move_layers.stock_valuation_layer_ids.filtered(lambda svl: svl.account_move_line_id),
+                key=lambda svl: svl.stock_valuation_layer_id.id):
+            invoice_layers_groupby_move_layer[move_layer] = invoice_layers
+        for move_layer in move_layers:
+            invoice_layers = invoice_layers_groupby_move_layer.get(move_layer, self.env['stock.valuation.layer'])
+            layers.append((move_layer, invoice_layers))
+        return layers
+
+    def _get_stock_valuation_layers_price_unit(self, layers):
+        total_prices = sum(layers.mapped('value'))
+        total_quantity = abs(sum(layers.mapped('quantity')))
+        if not total_quantity:
+            return 0
+        return total_prices / total_quantity
 
     def _eligible_for_cogs(self):
         self.ensure_one()
         return self.product_id.type == 'product' and self.product_id.valuation == 'real_time'
+
+    def _prepare_common_svl_vals(self):
+        self.ensure_one()
+        return {
+            'account_move_line_id': self.id,
+            'company_id': self.company_id.id,
+            'product_id': self.product_id.id,
+            'description': self.move_id.name and '%s - %s' % (self.move_id.name, self.product_id.name) or self.product_id.name,
+        }
+
+    def _prepare_in_invoice_svl_vals(self, move, layers, price_difference):
+        svl_vals_list = []
+        invoiced_qty = self.quantity
+        for layer, invoice_layers in layers:
+            layer_qty_to_correct = layer.quantity - sum(invoice_layers.account_move_line_id.mapped('quantity'))
+            if float_is_zero(layer_qty_to_correct, layer.product_id.uom_id.rounding):
+                continue
+            layer_qty_to_correct = min(layer_qty_to_correct, invoiced_qty)
+            invoiced_qty -= layer_qty_to_correct
+
+            svl_vals = self.product_id._prepare_in_svl_vals(layer_qty_to_correct, price_difference)
+            svl_vals.update(
+                self._prepare_common_svl_vals(),
+                account_move_id=move.id,
+                quantity=0,
+                unit_cost=0,
+                remaining_qty=0,
+                remaining_value=0,
+                stock_valuation_layer_id=layer.id,
+            )
+            svl_vals_list.append(svl_vals)
+            # Adds the difference into the last SVL's remaining value.
+            layer.remaining_value += svl_vals['value']
+            if float_compare(invoiced_qty, 0, self.product_id.uom_id.rounding) <= 0:
+                break
+
+        return svl_vals_list
 
     def _stock_account_get_anglo_saxon_price_unit(self):
         self.ensure_one()

@@ -360,9 +360,9 @@ class StockMove(models.Model):
             valued_quantity = 0
             for valued_move_line in valued_move_lines:
                 valued_quantity += valued_move_line.product_uom_id._compute_quantity(valued_move_line.qty_done, move.product_id.uom_id)
-            unit_cost = abs(move._get_price_unit())  # May be negative (i.e. decrease an out move).
-            if move.product_id.cost_method == 'standard':
-                unit_cost = move.product_id.standard_price
+            unit_cost = move.product_id.standard_price
+            if move.product_id.cost_method != 'standard':
+                unit_cost = abs(move._get_price_unit())  # May be negative (i.e. decrease an out move).
             svl_vals = move.product_id._prepare_in_svl_vals(forced_quantity or valued_quantity, unit_cost)
             svl_vals.update(move._prepare_common_svl_vals())
             if forced_quantity:
@@ -471,12 +471,12 @@ class StockMove(models.Model):
         if credit_value != debit_value:
             # for supplier returns of product in average costing method, in anglo saxon mode
             diff_amount = debit_value - credit_value
-            price_diff_account = self.product_id.property_account_creditor_price_difference
+            # price_diff_account = self.product_id.property_account_creditor_price_difference
 
-            if not price_diff_account:
-                price_diff_account = self.product_id.categ_id.property_account_creditor_price_difference_categ
-            if not price_diff_account:
-                raise UserError(_('Configuration error. Please configure the price difference account on the product or its category to process this operation.'))
+            # if not price_diff_account:
+            #     price_diff_account = self.product_id.categ_id.property_account_creditor_price_difference_categ
+            # if not price_diff_account:
+            #     raise UserError(_('Configuration error. Please configure the price difference account on the product or its category to process this operation.'))
 
             rslt['price_diff_line_vals'] = {
                 'name': self.name,
@@ -487,7 +487,7 @@ class StockMove(models.Model):
                 'partner_id': partner_id,
                 'credit': diff_amount > 0 and diff_amount or 0,
                 'debit': diff_amount < 0 and -diff_amount or 0,
-                'account_id': price_diff_account.id,
+                # 'account_id': price_diff_account.id,
             }
         return rslt
 
@@ -501,12 +501,13 @@ class StockMove(models.Model):
 
     def _prepare_account_move_vals(self, credit_account_id, debit_account_id, journal_id, qty, description, svl_id, cost):
         self.ensure_one()
-
+        valuation_partner_id = self._get_partner_id_for_valuation_lines()
         move_ids = self._prepare_account_move_line(qty, cost, credit_account_id, debit_account_id, description)
         date = self._context.get('force_period_date', fields.Date.context_today(self))
         return {
             'journal_id': journal_id,
             'line_ids': move_ids,
+            'partner_id': valuation_partner_id,
             'date': date,
             'ref': description,
             'stock_move_id': self.id,
@@ -538,7 +539,6 @@ class StockMove(models.Model):
         if self.restrict_partner_id and self.restrict_partner_id != self.company_id.partner_id:
             # if the move isn't owned by the company, we don't make any valuation
             return am_vals
-
         company_from = self._is_out() and self.mapped('move_line_ids.location_id.company_id') or False
         company_to = self._is_in() and self.mapped('move_line_ids.location_dest_id.company_id') or False
 

@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _
-from odoo.tools.float_utils import float_round, float_is_zero
+from odoo.tools.float_utils import float_compare, float_round, float_is_zero
 from odoo.exceptions import UserError
 
 
@@ -29,10 +29,30 @@ class StockMove(models.Model):
     def _get_price_unit(self):
         """ Returns the unit price for the move"""
         self.ensure_one()
-        if self.purchase_line_id and self.product_id.id == self.purchase_line_id.product_id.id:
+        if self.purchase_line_id:
             price_unit_prec = self.env['decimal.precision'].precision_get('Product Price')
             line = self.purchase_line_id
             order = line.order_id
+            invoice_lines = line.invoice_lines.sorted('id', reverse=True)
+            if invoice_lines:
+                received_qty = line.product_uom._compute_quantity(line.qty_received, self.product_uom)
+                if self.state == 'done':
+                    received_qty -= self.quantity_done
+                invoiced_qty = line.product_uom._compute_quantity(line.qty_invoiced, self.product_uom)
+                if float_compare(invoiced_qty, received_qty, precision_rounding=self.product_uom.rounding) == 1:
+                    # Get the price unit from last invoice(s).
+                    total_invoiced_value = sum(invoice_lines.mapped('price_subtotal'))
+                    total_svl_value = sum(line.move_ids.stock_valuation_layer_ids.mapped('remaining_value'))
+                    total_value = total_invoiced_value - total_svl_value
+                    total_qty = invoiced_qty - max(0, received_qty)
+                    if not float_is_zero(total_value, precision_rounding=line.currency_id.rounding)\
+                       and not float_is_zero(total_qty, precision_rounding=self.product_uom.rounding):
+                        if self.quantity_done > total_qty:
+                            diff_qty = self.quantity_done - total_qty
+                            total_qty = self.quantity_done
+                            total_value += diff_qty * line.price_unit
+                        return total_value / total_qty
+
             price_unit = line.price_unit
             if line.taxes_id:
                 qty = line.product_qty or 1
@@ -48,7 +68,7 @@ class StockMove(models.Model):
                 price_unit = order.currency_id._convert(
                     price_unit, order.company_id.currency_id, order.company_id, fields.Date.context_today(self), round=False)
             return price_unit
-        return super(StockMove, self)._get_price_unit()
+        return super()._get_price_unit()
 
     def _generate_valuation_lines_data(self, partner_id, qty, debit_value, credit_value, debit_account_id, credit_account_id, description):
         """ Overridden from stock_account to support amount_currency on valuation lines generated from po
