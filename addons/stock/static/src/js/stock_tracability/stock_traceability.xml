@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <div t-name="stock.stockTracability" class="o_action" owl="1">
+        <StockTracabilityControlPanel/>
+        <StockTracabilityReport
+            lotId="lotId"
+            context="this.props.action.context"
+        />
+    </div>
+
+</templates>

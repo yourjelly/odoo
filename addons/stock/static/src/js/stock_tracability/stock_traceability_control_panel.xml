@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="stock.StockTracabilityControlPanel" owl="1">
+        <ControlPanel display="display">
+            <t t-set-slot="control-panel-bottom-left-buttons">
+                <div class="o_cp_buttons">
+                    <div class="o_list_buttons">
+                        <button t-on-click="print" type="button" class="btn btn-primary">Print</button>
+                    </div>
+                </div>
+            </t>
+        </ControlPanel>
+    </t>
+
+</templates>
