@@ -43,6 +43,14 @@
         $oe-link-color: o-color('o-cc3-link');
         color: if($oe-link-color, $oe-link-color, #008f8c);
     }
+    .oe-tabs {
+        display: inline-block;
+        white-space: pre-wrap;
+        max-width: 40px;
+        width: 40px;
+        border-bottom: 1px solid #77aaaa;
+        //background-color: #e7dbda;
+    }
 }
 
 .o_field_widgetTextHtml_fullscreen {

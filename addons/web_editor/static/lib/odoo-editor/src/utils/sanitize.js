@@ -1,6 +1,7 @@
 /** @odoo-module **/
 import {
     closestBlock,
+    closestElement,
     endPos,
     fillEmpty,
     getListMode,
@@ -13,7 +14,9 @@ import {
     isMediaElement,
     getDeepRange,
     isUnbreakable,
-    closestElement,
+    isUnremovable,
+    isEditorTab,
+    alignNodeOnGrid,
     getUrlsInfosInString,
     URL_REGEX,
 } from './utils.js';
@@ -96,7 +99,8 @@ class Sanitize {
             // Merge identical elements together
             while (
                 areSimilarElements(node, node.previousSibling) &&
-                !isUnbreakable(node)
+                !isUnbreakable(node) &&
+                !isEditorTab(node)
             ) {
                 getDeepRange(this.root, { select: true });
                 const restoreCursor = node.isConnected &&
@@ -167,6 +171,18 @@ class Sanitize {
             // Ensure a zero width space is present inside the FA element.
             if (isFontAwesome(node) && node.textContent !== '\u200B') {
                 node.textContent = '\u200B';
+            }
+
+            // Ensure the editor tabs allign of the 40px grid
+            if (isEditorTab(node)) {
+                if (isEditorTab(node.previousSibling)) {
+                    node.style.width = '40px';
+                } else {
+                    const editable = closestElement(node,'.odoo-editor-editable', true);
+                    if (editable && editable.firstElementChild) {
+                        alignNodeOnGrid(node, editable.firstElementChild);
+                    }
+                }
             }
 
             // Ensure elements which should not contain any content are tagged

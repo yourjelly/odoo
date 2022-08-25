@@ -1030,6 +1030,25 @@ export function isZWS(node) {
         node.textContent === '\u200B'
     );
 }
+export function isEditorTab(node) {
+    return (
+        node &&
+        (node.nodeName === 'SPAN') &&
+        node.classList.contains('oe-tabs')
+    );
+}
+export function alignNodeOnGrid(node, reference) {
+    const nodeRect = node.getBoundingClientRect();
+    const referenceRect = reference.getBoundingClientRect();
+    // Values from getBoundingClientRect() are all zeros
+    // during Editor startup or saving.
+    // We cannot recalculate the tabs width in thoses cases.
+    if (nodeRect.width && referenceRect.width) {
+        const width = (nodeRect.left - referenceRect.left) % 40;
+        node.style.width = (40 - width) + 'px';
+    }
+}
+
 export function isMediaElement(node) {
     return (
         isFontAwesome(node) ||
@@ -1161,7 +1180,7 @@ export function isInPre(node) {
  * Returns whether the given string (or given text node value)
  * has at least one visible character or one non colapsed whitespace characters in it.
  */
-const nonWhitespacesRegex = /[\S\u00A0]/;
+const nonWhitespacesRegex = /[\S\u00A0\u0009]/;
 export function isVisibleStr(value) {
     const str = typeof value === 'string' ? value : value.nodeValue;
     return nonWhitespacesRegex.test(str);
@@ -1679,7 +1698,6 @@ export function moveNodes(
  */
 export function prepareUpdate(...args) {
     const positions = [...args];
-
     // Check the state in each direction starting from each position.
     const restoreData = [];
     let el, offset;
@@ -1727,11 +1745,11 @@ export function getState(el, offset, direction, leftCType) {
     if (direction === DIRECTIONS.LEFT) {
         domPath = leftDOMPath(el, offset, reasons);
         inverseDOMPath = rightDOMPath(el, offset);
-        expr = /[^\S\u00A0]$/;
+        expr = /[^\S\u00A0\u0009]$/;
     } else {
         domPath = rightDOMPath(el, offset, reasons);
         inverseDOMPath = leftDOMPath(el, offset);
-        expr = /^[^\S\u00A0]/;
+        expr = /^[^\S\u00A0\u0009]/;
     }
 
     // TODO I think sometimes, the node we have to consider as the
@@ -1969,10 +1987,10 @@ export function enforceWhitespace(el, offset, direction, rule) {
     let expr;
     if (direction === DIRECTIONS.LEFT) {
         domPath = leftLeafOnlyNotBlockPath(el, offset);
-        expr = /[^\S\u00A0]+$/;
+        expr = /[^\S\u00A0\u0009]+$/;
     } else {
         domPath = rightLeafOnlyNotBlockPath(el, offset);
-        expr = /^[^\S\u00A0]+/;
+        expr = /^[^\S\u00A0\u0009]+/;
     }
 
     const invisibleSpaceTextNodes = [];
