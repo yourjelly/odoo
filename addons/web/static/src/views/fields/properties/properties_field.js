@@ -13,7 +13,7 @@ import { usePopover } from "@web/core/popover/popover_hook";
 import { sprintf } from "@web/core/utils/strings";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 
-const { Component, useRef, useState, useEffect, onWillStart } = owl;
+const { Component, useRef, useState, useEffect, onWillStart, onWillUpdateProps } = owl;
 
 export class PropertiesField extends Component {
     setup() {
@@ -28,11 +28,20 @@ export class PropertiesField extends Component {
             movedPropertyName: null,
         });
 
+        this._saveInitialPropertiesValues();
+
         const field = this.props.record.fields[this.props.name];
         this.definitionRecordField = field.definition_record;
 
         onWillStart(async () => {
             await this._checkDefinitionAccess();
+        });
+
+        onWillUpdateProps(async () => {
+            // reset the initials properties values if we saved the record
+            if (this.props.record.mode === 'readonly') {
+                this._saveInitialPropertiesValues();
+            }
         });
 
         useEffect(
@@ -174,7 +183,7 @@ export class PropertiesField extends Component {
             propertyDefinition.value = newValue;
         }
         propertyDefinition.definition_changed = true;
-        this.onPropertyDefinitionChange(propertyName, propertyDefinition);
+        this.onPropertyDefinitionChange(propertyDefinition);
     }
 
     /**
@@ -202,7 +211,7 @@ export class PropertiesField extends Component {
                 canChangeDefinition: this.state.canChangeDefinition,
                 propertyDefinition: this.propertiesList.find(property => property.name === propertyName),
                 context: this.context,
-                onChange: (propertyDefinition) => this.onPropertyDefinitionChange(propertyName, propertyDefinition),
+                onChange: this.onPropertyDefinitionChange.bind(this),
                 onDelete: () => this.onPropertyDelete(propertyName),
                 onPropertyMove: (direction) => this.onPropertyMove(propertyName, direction),
             },
@@ -221,14 +230,31 @@ export class PropertiesField extends Component {
     /**
      * The property definition or value has been changed.
      *
-     * @param {string} propertyName
      * @param {object} propertyDefinition
      */
-    onPropertyDefinitionChange(propertyName, propertyDefinition) {
+    onPropertyDefinitionChange(propertyDefinition) {
         propertyDefinition['definition_changed'] = true;
         const propertiesValues = this.propertiesList;
         const propertyIndex = propertiesValues.findIndex(
-            property => property.name === propertyName);
+            property => property.name === propertyDefinition.name);
+
+        // if the type / model are the same, restore the original name to not reset the children
+        // otherwise, generate a new value so all value of the record are reset
+        const initialValues = this.initialValues[propertyDefinition.name];
+        if (initialValues
+            && propertyDefinition.type === initialValues.type
+            && propertyDefinition.comodel === initialValues.comodel) {
+            // restore the original name
+            propertyDefinition.name = initialValues.name;
+        } else if (initialValues && initialValues.name === propertyDefinition.name) {
+            // generate a new new to reset all values on other records
+            // store the new generated name to be able to restore it
+            // if needed
+            const newName = uuid();
+            this.initialValues[newName] = initialValues;
+            propertyDefinition.name = newName;
+        }
+
         propertiesValues[propertyIndex] = propertyDefinition;
         this.props.update(propertiesValues);
     }
@@ -339,6 +365,28 @@ export class PropertiesField extends Component {
             'check_access_rights',
             ['write', false],
         );
+    }
+
+    /**
+     * If we change the type / model of a property, we will regenerate it's name
+     * (like if it was a new property) in order to reset the value of the children.
+     *
+     * But if we reset the old model / type, we want to be able to discard this
+     * modification (even if we save) and restore the original name.
+     *
+     * For that purpose, we save the original properties values.
+     */
+    _saveInitialPropertiesValues() {
+        // initial properties values, if the type or the model changed, the
+        // name will be regenerated in order to reset the value on the children
+        this.initialValues = {};
+        for (let propertiesValues of this.props.value || []) {
+            this.initialValues[propertiesValues.name] = {
+                name: propertiesValues.name,
+                type: propertiesValues.type,
+                comodel: propertiesValues.comodel,
+            };
+        }
     }
 }
 

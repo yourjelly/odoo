@@ -335,12 +335,12 @@ QUnit.module("Fields", (hooks) => {
         assert.ok(field, "The field must be in the view");
 
         const selectionValue = target.querySelector(
-            ".o_property_field[property-name=property_2] select");
+            ".o_property_field:nth-child(2) select");
         assert.ok(selectionValue);
         assert.strictEqual(selectionValue.value, "b");
 
         // Edit the selection property
-        await click(target, ".o_property_field[property-name=property_2] .o_field_property_open_popover");
+        await click(target, ".o_property_field:nth-child(2) .o_field_property_open_popover");
 
         const popover = target.querySelector(".o_property_field_popover");
         assert.ok(popover, "Should have opened the definition popover");
@@ -451,7 +451,7 @@ QUnit.module("Fields", (hooks) => {
         assert.ok(field, "The field must be in the view");
 
         // Edit the selection property
-        await click(target, ".o_property_field[property-name=property_2] .o_field_property_open_popover");
+        await click(target, ".o_property_field:nth-child(2) .o_field_property_open_popover");
 
         const popover = target.querySelector(".o_property_field_popover");
         assert.ok(popover, "Should have opened the definition popover");
@@ -461,7 +461,7 @@ QUnit.module("Fields", (hooks) => {
         assert.deepEqual(getLabels(), ["My Selection", "My Char", "My Char 3", "My Char 4"],
             "Should have moved up the property");
         const movedProperty = target.querySelector(
-            ".o_property_field[property-name=property_2] .o_property_field_highlight");
+            ".o_property_field:nth-child(1) .o_property_field_highlight");
         assert.ok(movedProperty, "Should highlight the moved property");
 
         // Move the property up again, should have no effect
@@ -480,7 +480,7 @@ QUnit.module("Fields", (hooks) => {
         await closePopover(target);
 
         const highlightProperty = target.querySelector(
-            ".o_property_field[property-name=property_2] .o_property_field_highlight");
+            ".o_property_field:nth-child(2) .o_property_field_highlight");
         assert.notOk(highlightProperty, "Should have removed the highlight");
     });
 
@@ -528,7 +528,7 @@ QUnit.module("Fields", (hooks) => {
         };
 
         await click(target, ".o_form_button_edit");
-        await click(target, ".o_property_field[property-name=property_2] .o_field_property_open_popover");
+        await click(target, ".o_property_field:nth-child(2) .o_field_property_open_popover");
         let popover = target.querySelector(".o_property_field_popover");
         // Select the tags type
         await click(popover, ".o_field_property_definition_type input");
@@ -570,7 +570,7 @@ QUnit.module("Fields", (hooks) => {
             "Should have created and selected the tag D");
 
         // Re-open the popover and check that the new tag has been added in the definition
-        await click(target, ".o_property_field[property-name=property_2] .o_field_property_open_popover");
+        await click(target, ".o_property_field:nth-child(2) .o_field_property_open_popover");
         await nextTick();
         popover = target.querySelector(".o_property_field_popover");
         assert.deepEqual(getVisibleTags(popover, ".o_tag"), ["A", "B", "C", "D"]);
@@ -587,7 +587,7 @@ QUnit.module("Fields", (hooks) => {
         assert.ok(secondTag.classList.contains("o_tag_color_11"), "Should have changed the tag color");
 
         // Open the popover and remove B from the definition
-        await click(target, ".o_property_field[property-name=property_2] .o_field_property_open_popover");
+        await click(target, ".o_property_field:nth-child(2) .o_field_property_open_popover");
         await click(target, ".o_property_field_popover .o_tag:nth-child(2) .o_delete");
         await closePopover();
         const tags = target.querySelectorAll(".o_property_field_value .o_tag");
@@ -640,7 +640,7 @@ QUnit.module("Fields", (hooks) => {
         });
 
         await click(target, ".o_form_button_edit");
-        await click(target, ".o_property_field[property-name=property_2] .o_field_property_open_popover");
+        await click(target, ".o_property_field:nth-child(2) .o_field_property_open_popover");
         let popover = target.querySelector(".o_property_field_popover");
         // Select the many2one type
         await click(popover, ".o_field_property_definition_type input");
@@ -666,11 +666,11 @@ QUnit.module("Fields", (hooks) => {
         await closePopover(target);
 
         // Quick create a user
-        await click(target, ".o_property_field[property-name=property_2] .o_property_field_value input");
-        await editInput(target, ".o_property_field[property-name=property_2] input", "New User");
+        await click(target, ".o_property_field:nth-child(2) .o_property_field_value input");
+        await editInput(target, ".o_property_field:nth-child(2) input", "New User");
         for (let i = 0; i < 50; ++i) await nextTick(); // wait until the dropdown appears
-        await click(target, ".o_property_field[property-name=property_2] .o_m2o_dropdown_option_create");
-        selectedUser = target.querySelector(".o_property_field[property-name=property_2] .o_property_field_value input");
+        await click(target, ".o_property_field:nth-child(2) .o_m2o_dropdown_option_create");
+        selectedUser = target.querySelector(".o_property_field:nth-child(2) .o_property_field_value input");
         assert.strictEqual(selectedUser.value, "Created:New User", "Should have created a new user");
     });
 
@@ -720,7 +720,7 @@ QUnit.module("Fields", (hooks) => {
         };
 
         await click(target, ".o_form_button_edit");
-        await click(target, ".o_property_field[property-name=property_2] .o_field_property_open_popover");
+        await click(target, ".o_property_field:nth-child(2) .o_field_property_open_popover");
         let popover = target.querySelector(".o_property_field_popover");
         // Select the many2many type
         await click(popover, ".o_field_property_definition_type input");
@@ -740,24 +740,24 @@ QUnit.module("Fields", (hooks) => {
         await closePopover(target);
 
         // Add Eve in the list
-        await click(target, ".o_property_field[property-name=property_2] input");
-        await click(target, ".o_property_field[property-name=property_2] .ui-menu-item:nth-child(3)");
+        await click(target, ".o_property_field:nth-child(2) input");
+        await click(target, ".o_property_field:nth-child(2) .ui-menu-item:nth-child(3)");
         assert.deepEqual(getSelectedUsers(), ["Eve"], "Should have selected the third user");
 
         // Add Bob in the list
-        await click(target, ".o_property_field[property-name=property_2] input");
-        await click(target, ".o_property_field[property-name=property_2] .ui-menu-item:nth-child(2)");
+        await click(target, ".o_property_field:nth-child(2) input");
+        await click(target, ".o_property_field:nth-child(2) .ui-menu-item:nth-child(2)");
         assert.deepEqual(getSelectedUsers(), ["Eve", "Bob"], "Should have selected the second user");
 
         // Quick create a user
-        await click(target, ".o_property_field[property-name=property_2] .o_property_field_value input");
-        await editInput(target, ".o_property_field[property-name=property_2] input", "New User");
+        await click(target, ".o_property_field:nth-child(2) .o_property_field_value input");
+        await editInput(target, ".o_property_field:nth-child(2) input", "New User");
         for (let i = 0; i < 50; ++i) await nextTick(); // wait until the dropdown appears
-        await click(target, ".o_property_field[property-name=property_2] .o_m2o_dropdown_option_create");
+        await click(target, ".o_property_field:nth-child(2) .o_m2o_dropdown_option_create");
         assert.deepEqual(getSelectedUsers(), ["Eve", "Bob", "Created:New User"], "Should have created a new user");
 
         // Remove Bob from the list
-        await click(target, ".o_property_field[property-name=property_2] .o_tag:nth-child(2) .o_delete");
+        await click(target, ".o_property_field:nth-child(2) .o_tag:nth-child(2) .o_delete");
         assert.deepEqual(getSelectedUsers(), ["Eve", "Created:New User"], "Should have removed Bob from the list");
     });
 });

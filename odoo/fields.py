@@ -3134,13 +3134,13 @@ class Properties(Field):
         the name_get of those records (and will be removed).
 
         [{
-            'name': 'discussion_color_code',
+            'name': '3adf37f3258cfe40f0907d9cbdd7d091',
             'string': 'Color Code',
             'type': 'char',
             'default': 'blue',
             'value': 'red',
         }, {
-            'name': 'moderator_partner_id',
+            'name': 'aa34746a6851ee4ea1f8d95746e45788',
             'string': 'Partner',
             'type': 'many2one',
             'comodel': 'test_new_api.partner',
@@ -3181,18 +3181,18 @@ class Properties(Field):
         E.G.
             Read this on the child table:
                 {
-                    'discussion_color_code': 'red',
-                    'moderator_partner_id': (1337, "res.partner"),
+                    '3adf37f3258cfe40f0907d9cbdd7d091': 'red',
+                    'aa34746a6851ee4ea1f8d95746e45788': 1337,
                 }
             Merge it with the definition record definition and return:
                 [{
-                    'name': 'discussion_color_code',
+                    'name': '3adf37f3258cfe40f0907d9cbdd7d091',
                     'string': 'Color Code',
                     'type': 'char',
                     'default': 'blue',
                     'value': 'red',
                 }, {
-                    'name': 'moderator_partner_id',
+                    'name': 'aa34746a6851ee4ea1f8d95746e45788',
                     'string': 'Partner',
                     'type': 'many2one',
                     'comodel': 'test_new_api.partner',
@@ -3231,6 +3231,7 @@ class Properties(Field):
         return super().convert_to_write(value, record)
 
     def convert_to_onchange(self, value, record, names):
+        self._add_display_name(value, record.env)
         return value
 
     def write(self, records, value):
@@ -3320,13 +3321,8 @@ class Properties(Field):
 
         for properties_value in properties_list_values:
             if properties_value.get('value') is None:
-                property_type = properties_value.get('type')
                 default = properties_value.get('default')
-                if property_type in ('many2one', 'many2many') and default:
-                    # need to add the model for the child value
-                    # 14 => (14, 'res.partner')
-                    properties_value['value'] = [default, properties_value.get('comodel')]
-                else:
+                if default:
                     properties_value['value'] = default
 
         return properties_list_values
@@ -3427,7 +3423,7 @@ class Properties(Field):
         for property_definition in values_list:
             property_value = property_definition.get('value')
             property_type = property_definition.get('type')
-            current_model = property_definition.get('comodel')
+            res_model = property_definition.get('comodel')
 
             if property_type not in cls.ALLOWED_TYPES:
                 raise ValueError(f'Wrong property type {property_type!r}')
@@ -3453,44 +3449,24 @@ class Properties(Field):
                 property_value = [tag for tag in property_value if tag in all_tags]
 
             elif property_type == 'many2one' and property_value:
-                # [1337, 'res.partner']
-                if not has_list_types(property_value, [int, str]):
+                if not isinstance(property_value, int):
                     raise ValueError(f'Wrong many2one value: {property_value!r}.')
 
-                res_id, res_model = property_value
-                if not current_model or res_model != current_model:
-                    # the model on the child does not match the model on the parent
-                    # maybe we have changed the model on the parent, we should reset
-                    # the many2one value
-                    property_value = False
-                elif check_existence and res_id:
+                if check_existence and property_value:
                     # many2one might have been deleted
-                    property_value = env[res_model].browse(res_id).exists().id
-                else:
-                    property_value = res_id
+                    property_value = env[res_model].browse(property_value).exists().id
 
             elif property_type == 'many2many' and property_value:
-                # [[1337, 1338, 1339], 'res.partner']
-                if not has_list_types(property_value, [(list, tuple), str]) \
-                   or not is_list_of(property_value[0], int):
+                if not is_list_of(property_value, int):
                     raise ValueError(f'Wrong many2many value: {property_value!r}.')
 
-                res_ids, res_model = property_value
-
-                if len(res_ids) != len(set(res_ids)):
+                if len(property_value) != len(set(property_value)):
                     # remove duplicated value and preserve order
-                    res_ids = list(dict.fromkeys(res_ids))
+                    property_value = list(dict.fromkeys(property_value))
 
-                if not current_model or res_model != current_model:
-                    # the model on the child does not match the model on the parent
-                    # maybe we have changed the model on the parent, we should reset
-                    # the many2many value
-                    property_value = False
-                elif check_existence and res_ids:
+                elif check_existence and property_value:
                     # many2many might have been deleted
-                    property_value = env[res_model].browse(res_ids).exists().ids
-                else:
-                    property_value = res_ids
+                    property_value = env[res_model].browse(property_value).exists().ids
 
             property_definition['value'] = property_value
 
@@ -3504,13 +3480,13 @@ class Properties(Field):
         E.G.
             Input list:
             [{
-                'name': 'discussion_color_code',
+                'name': '3adf37f3258cfe40f0907d9cbdd7d091',
                 'string': 'Color Code',
                 'type': 'char',
                 'default': 'blue',
                 'value': 'red',
             }, {
-                'name': 'moderator_partner_id',
+                'name': 'aa34746a6851ee4ea1f8d95746e45788',
                 'string': 'Partner',
                 'type': 'many2one',
                 'comodel': 'test_new_api.partner',
@@ -3519,8 +3495,8 @@ class Properties(Field):
 
             Output dict:
             {
-                'discussion_color_code': 'red',
-                'moderator_partner_id': (1337, "res.partner"),
+                '3adf37f3258cfe40f0907d9cbdd7d091': 'red',
+                'aa34746a6851ee4ea1f8d95746e45788': 1337,
             }
 
         :param values_list: List of properties definition and value
@@ -3536,21 +3512,12 @@ class Properties(Field):
             property_model = property_definition.get('comodel')
 
             if property_type in ('many2one', 'many2many') and property_model and property_value:
-                # keep the record id and the record model in the dict that will be stored in database
-                # many2one: (1337, "Mitchel Admin") => (1337, "res.partner")
-                # many2many: [(1336, "Marc Demo"), (1337, "Mitchel Admin")]
-                #            => [(1, 2, 3), 'res.partner']
-                if is_list_of(property_value, int) or isinstance(property_value, int):
-                    property_value = [property_value, property_model]
-
                 # check that value are correct before storing them in database
-                if property_type == 'many2many':
-                    if not has_list_types(property_value, [(tuple, list), str]):
-                        raise ValueError(f"Wrong many2many value {property_value!r}")
+                if property_type == 'many2many' and property_value and not is_list_of(property_value, int):
+                    raise ValueError(f"Wrong many2many value {property_value!r}")
 
-                elif property_type == 'many2one':
-                    if not has_list_types(property_value, [int, str]):
-                        raise ValueError(f"Wrong many2one value {property_value!r}")
+                elif property_type == 'many2one' and not isinstance(property_value, int):
+                    raise ValueError(f"Wrong many2one value {property_value!r}")
 
             dict_value[property_definition['name']] = property_value
 
@@ -3600,13 +3567,13 @@ class PropertiesDefinition(Field):
         might contain the name_get of those records (and will be removed).
 
         [{
-            'name': 'discussion_color_code',
+            'name': '3adf37f3258cfe40f0907d9cbdd7d091',
             'string': 'Color Code',
             'type': 'char',
             'default': 'blue',
             'default': 'red',
         }, {
-            'name': 'moderator_partner_id',
+            'name': 'aa34746a6851ee4ea1f8d95746e45788',
             'string': 'Partner',
             'type': 'many2one',
             'comodel': 'test_new_api.partner',

@@ -57,7 +57,7 @@ class PropertiesCase(TransactionCase):
             'author': cls.user.id,
             'attributes': {
                 'discussion_color_code': 'Test',
-                'moderator_partner_id': [cls.partner.id, 'test_new_api.partner'],
+                'moderator_partner_id': cls.partner.id,
             },
         })
 
@@ -98,7 +98,7 @@ class PropertiesCase(TransactionCase):
 
         self.message_1.attributes = [
             {'name': 'discussion_color_code', 'value': 'red'},
-            {'name': 'moderator_partner_id', 'value': [self.partner_2.id, 'test_new_api.partner']},
+            {'name': 'moderator_partner_id', 'value': self.partner_2.id},
         ]
         self.assertEqual(self.message_1.attributes[0]['value'], 'red')
 
@@ -141,7 +141,7 @@ class PropertiesCase(TransactionCase):
             elif properties['name'] == 'state':
                 properties['value'] = 'done'
             elif properties['name'] == 'moderator_partner_id':
-                properties['value'] = [self.partner_2.id, self.partner_2._name]
+                properties['value'] = self.partner_2.id
             properties['definition_changed'] = True
 
         (self.message_1 | self.message_3).write({'attributes': properties_values})
@@ -150,8 +150,8 @@ class PropertiesCase(TransactionCase):
         sql_values_3 = self._get_sql_properties(self.message_3)
 
         # definition of both child has been changed
-        self.assertEqual(sql_values_1, {'discussion_color_code': 'orange', 'moderator_partner_id': [self.partner_2.id, 'test_new_api.partner'], 'state': 'done'})
-        self.assertEqual(sql_values_3, {'discussion_color_code': 'orange', 'moderator_partner_id': [self.partner_2.id, 'test_new_api.partner'], 'state': 'done'})
+        self.assertEqual(sql_values_1, {'discussion_color_code': 'orange', 'moderator_partner_id': self.partner_2.id, 'state': 'done'})
+        self.assertEqual(sql_values_3, {'discussion_color_code': 'orange', 'moderator_partner_id': self.partner_2.id, 'state': 'done'})
 
     def test_properties_field_read_batch(self):
         values = self.message_1.read(['attributes'])[0]['attributes']
@@ -289,7 +289,7 @@ class PropertiesCase(TransactionCase):
         sql_properties_1 = self._get_sql_properties(messages[0])
         self.assertEqual(
             sql_properties_1,
-            {'moderator_partner_id': [self.partner.id, 'test_new_api.partner'],
+            {'moderator_partner_id': self.partner.id,
              'discussion_color_code': 'purple'})
         sql_properties_2 = self._get_sql_properties(messages[1])
         self.assertEqual(
@@ -472,10 +472,7 @@ class PropertiesCase(TransactionCase):
                 "type": "many2one",
                 "string": "Partner",
                 "comodel": "test_new_api.partner",
-                "value": [
-                    self.partner_2.id,
-                    "test_new_api.partner"
-                ]
+                "value": self.partner_2.id,
             },
         ]
 
@@ -484,7 +481,7 @@ class PropertiesCase(TransactionCase):
         sql_values = self._get_sql_properties(self.message_2)
         self.assertEqual(
             sql_values,
-            {'moderator_partner_id': [self.partner_2.id, 'test_new_api.partner'],
+            {'moderator_partner_id': self.partner_2.id,
              'discussion_color_code': False})
 
         # read the many2one
@@ -497,7 +494,7 @@ class PropertiesCase(TransactionCase):
         """Test the case where we unlink the many2one record."""
         self.message_2.attributes = [{
             'name': 'moderator_partner_id',
-            'value': [self.partner.id, 'test_new_api.partner'],
+            'value': self.partner.id,
         }]
 
         # remove the partner on message 2
@@ -511,7 +508,7 @@ class PropertiesCase(TransactionCase):
         # remove the partner, and use the read method
         self.message_2.attributes = [{
             'name': 'moderator_partner_id',
-            'value': [self.partner_2.id, self.partner_2._name],
+            'value': self.partner_2.id,
         }]
         self.partner_2.unlink()
 
@@ -552,46 +549,13 @@ class PropertiesCase(TransactionCase):
             }],
         )
 
-    def test_properties_field_many2one_model_change(self):
-        """Test the case where we change the model on the parent.
-
-        Check that if we change the model on the parent, we are able to detect this
-        change when we read the child properties, thanks to the model stored with
-        the record ID on the child (e.g. [5, 'res.partner']).
-        """
-        # 2 records of 2 different models have the same id
-        message = self.env['test_new_api.message'].browse(1).exists()
-        discussion = self.env['test_new_api.discussion'].browse(1).exists()
-        self.assertTrue(message and discussion)
-
-        self.discussion_1.attributes_definition = [{
-            'name': 'message',
-            'comodel': 'test_new_api.message',
-            'type': 'many2one',
-        }]
-        self.message_1.attributes = [{'name': 'message', 'value': [message.id, message._name]}]
-
-        # change the model on the parent, but do not change the property id
-        self.discussion_1.attributes_definition = [{
-            'name': 'message',
-            'comodel': 'test_new_api.discussion',
-            'type': 'many2one',
-        }]
-        sql_definition = self._get_sql_definition(self.discussion_1)
-        self.assertEqual(
-            sql_definition,
-            [{'name': 'message', 'comodel': 'test_new_api.discussion', 'type': 'many2one'}])
-
-        value = self.message_1.attributes[0]['value']
-        self.assertFalse(value)
-
     def test_properties_field_many2one_model_removed(self):
         """Test the case where we uninstall a module, and the model does not exist anymore."""
         # simulate a module uninstall, the model is not available now
         # when reading the model / many2one, it should return False
         self.message_1.attributes = [{
             'name': 'message',
-            'value': [self.message_3.id, self.message_3._name],
+            'value': self.message_3.id,
         }]
 
         self.env.flush_all()
@@ -863,7 +827,7 @@ class PropertiesCase(TransactionCase):
         self.message_1.attributes = self.message_1.read(['attributes'])[0]['attributes']
 
         sql_values = self._get_sql_properties(self.message_1)
-        self.assertEqual(sql_values, {'moderator_partner_ids': [partners[6:10].ids, 'test_new_api.partner']})
+        self.assertEqual(sql_values, {'moderator_partner_ids': partners[6:10].ids})
 
         # read and disable name_get
         properties = self.message_1.read(['attributes'], load=None)[0]['attributes']
@@ -877,7 +841,7 @@ class PropertiesCase(TransactionCase):
         self.env.flush_all()
         moderator_partner_ids = partners[6:10].ids
         moderator_partner_ids += moderator_partner_ids[2:]
-        new_value = json.dumps({"moderator_partner_ids": [moderator_partner_ids, 'test_new_api.partner']})
+        new_value = json.dumps({"moderator_partner_ids": moderator_partner_ids})
         self.env.cr.execute(
             """
             UPDATE test_new_api_message
@@ -905,7 +869,7 @@ class PropertiesCase(TransactionCase):
             'definition_changed': True,
         }]
         sql_properties = self._get_sql_properties(self.message_1)
-        self.assertEqual(sql_properties, {'partner_ids': [[partners[9].id], 'test_new_api.partner']})
+        self.assertEqual(sql_properties, {'partner_ids': [partners[9].id]})
         sql_definition = self._get_sql_definition(self.discussion_1)
         self.assertEqual(sql_definition, [{
             'name': 'partner_ids',
@@ -926,63 +890,6 @@ class PropertiesCase(TransactionCase):
                 'default': [(partners[8].id, partners[8].display_name)],
                 'value': [(partners[9].id, partners[9].display_name)],
             }])
-
-    def test_properties_field_many2many_model_change(self):
-        """Check the behavior of the many2many field if we change the model on the parent.
-
-        Even if some records of the new model have the same ids of the old records
-        on the old model, we should be able to detect that we change the model on the
-        parent, and therefore that those records are not valid anymore.
-        """
-        # We should have at least 2 records in 2 different models with the same id
-        # for this test to be coherent (otherwise the records will be filtered just
-        # because they do not exist and not because the point to a different model
-        # than the original one)
-        message = self.env['test_new_api.message'].browse(1).exists()
-        discussion = self.env['test_new_api.discussion'].browse(1).exists()
-        self.assertTrue(message and discussion)
-
-        messages = message | self.message_1 | self.message_2 | self.message_3
-
-        self.discussion_1.attributes_definition = [{
-            'name': 'messages',
-            'comodel': 'test_new_api.message',
-            'type': 'many2many',
-        }]
-        self.message_1.attributes = [
-            {
-                "name": "messages",
-                "comodel": "test_new_api.message",
-                "type": "many2many",
-                "value": messages.name_get(),
-            }
-        ]
-
-        self.env.invalidate_all()
-        self.assertEqual(self.message_1.attributes[0]['value'], messages.ids)
-
-        # change the model on the parent, but do not change the property id
-        self.discussion_1.attributes_definition = [{
-            'name': 'messages',
-            'comodel': 'test_new_api.discussion',
-            'type': 'many2many',
-        }]
-        sql_definition = self._get_sql_definition(self.discussion_1)
-        self.assertEqual(
-            sql_definition,
-            [{'name': 'messages', 'comodel': 'test_new_api.discussion', 'type': 'many2many'}])
-
-        value = self.message_1.attributes[0]['value']
-        self.assertFalse(value, msg='Should have detected the model change on the parent')
-
-        # old ids are still in the database until we write on the properties
-        sql_properties = self._get_sql_properties(self.message_1)
-        self.assertEqual(sql_properties, {'messages': [messages.ids, message._name]})
-
-        # the next time we write on the field, we should clean the old properties values
-        self.message_1.attributes = self.message_1.attributes
-        sql_properties = self._get_sql_properties(self.message_1)
-        self.assertEqual(sql_properties, {'messages': False})
 
     def test_properties_field_performance(self):
         with self.assertQueryCount(4):
@@ -1271,8 +1178,8 @@ class PropertiesCase(TransactionCase):
 
         sql_properties = self._get_sql_properties(self.message_1)
         expected_properties = {
-            'my_many2one': [self.partner_2.id, 'test_new_api.partner'],
-            'my_many2many': [[self.partner_2.id], 'test_new_api.partner'],
+            'my_many2one': self.partner_2.id,
+            'my_many2many': [self.partner_2.id],
         }
         self.assertEqual(expected_properties, sql_properties)
 
