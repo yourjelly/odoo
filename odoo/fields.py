@@ -3093,12 +3093,15 @@ class Properties(Field):
     type = 'properties'
     column_type = ('jsonb', 'jsonb')
     copy = False
-    readonly = False
     prefetch = False
 
+    # those fields are computed editable by default
     store = True
+    readonly = False
     precompute = True
 
+    # TODO should become "private" attributes
+    definition = None
     parent_field = None              # field on the current model that point to the parent
     parent_properties_field = None   # field on the parent which defined the Properties field definition
 
@@ -3117,6 +3120,7 @@ class Properties(Field):
             # (because it contains the definition)
             self._depends = (self.parent_field, )
 
+        # TODO simply make pylint ignore the error
         self.compute = self._compute
 
     def convert_to_column(self, value, record, values=None, validate=True):
@@ -3130,13 +3134,13 @@ class Properties(Field):
         the name_get of those records (and will be removed).
 
         [{
-            'name': 'discussion_color_code',
+            'name': '62e27ff88923485a',
             'string': 'Color Code',
             'type': 'char',
             'default': 'blue',
             'value': 'red',
         }, {
-            'name': 'moderator_partner_id',
+            'name': '8f623e24b92248d4',
             'string': 'Partner',
             'type': 'many2one',
             'comodel': 'test_new_api.partner',
@@ -3144,11 +3148,11 @@ class Properties(Field):
         }]
         """
         if not value:
-            return
+            return None
 
         if isinstance(value, str):
             # assume already JSONified
-            if not isinstance(json.loads(value), dict):
+            if validate and not isinstance(json.loads(value), dict):
                 raise ValueError(f"Wrong property value {value!r}")
             return value
 
@@ -3166,6 +3170,18 @@ class Properties(Field):
         return json.dumps(value)
 
     def convert_to_cache(self, value, record, validate=True):
+        # TODO: cache format: str (encoding a JSON) or None
+        # the JSON value is a dict mapping property names to their value, like
+        # {
+        #   "62e27ff88923485a": "hello",            # type 'char'
+        #   "c47591b92ac343a4": 42,                 # type 'int'
+        #   "4b0b4b5dfc7347ce": "212a51375e5a44b9", # type selection
+        #   "8f623e24b92248d4": 123,                # type many2one to res.partner
+        #   "8e7093dd58c54667": [53, 87, 99],       # type many2many to product.product
+        # }
+        # TODO: can't change type / ... once uuid set
+        # uuid generated in python
+        # can edit only labels / default
         return self.convert_to_column(value, record, validate)
 
     def convert_to_read(self, value, record, use_name_get=True):
@@ -3215,6 +3231,16 @@ class Properties(Field):
         return value
 
     def convert_to_record(self, value, record):
+        # refactor: cache value
+        #               |
+        #               | convert_to_record() returns the list without display names
+        #               v
+        #           record value
+        #               |
+        #               | convert_to_read() adds display names to many2one etc
+        #               v
+        #           read value
+        #
         return self.convert_to_read(value, record, use_name_get=False)
 
     def convert_to_write(self, value, record):
@@ -3305,6 +3331,7 @@ class Properties(Field):
 
         properties_definition = parent_id[self.parent_properties_field]
         if not properties_definition:
+            # should be {}
             return properties_values
 
         assert isinstance(properties_values, (list, dict))
@@ -3577,7 +3604,7 @@ class PropertiesDefinition(Field):
     """
     type = 'properties_definition'
     column_type = ('jsonb', 'jsonb')
-    copy = False
+    copy = False         # TODO: True?
     readonly = False
     prefetch = False
 
