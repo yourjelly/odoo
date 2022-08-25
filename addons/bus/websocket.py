@@ -412,16 +412,17 @@ class Websocket:
     def _send_next_frame(self):
         """ Send the next frame available in the outgoing frame queue. """
         frame = self._outgoing_frame_queue.get_nowait()
+        if frame.opcode is Opcode.CLOSE:
+            self.state = ConnectionState.CLOSING
+            # After sending a control frame indicating the connection
+            # should be closed, a peer does not send any further data.
+            self._selector.unregister(self._outgoing_frame_queue)
         self._send_frame(frame)
         if not isinstance(frame, CloseFrame):
             return
-        self.state = ConnectionState.CLOSING
         self._close_sent = True
         if frame.code not in CLEAN_CLOSE_CODES or self._close_received:
             return self._terminate()
-        # After sending a control frame indicating the connection
-        # should be closed, a peer does not send any further data.
-        self._selector.unregister(self._outgoing_frame_queue)
 
     def _process_next_message(self):
         """
@@ -554,6 +555,9 @@ class Websocket:
         exception and call `self.disconnect` in order to close the
         connection cleanly.
         """
+        if self.state is not ConnectionState.OPEN:
+            self.state = ConnectionState.CLOSED
+            return
         code, reason = CloseCode.SERVER_ERROR, str(exc)
         if isinstance(exc, (ConnectionClosed, OSError)):
             code = CloseCode.ABNORMAL_CLOSURE
