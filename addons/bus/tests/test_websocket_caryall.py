@@ -147,7 +147,8 @@ class TestWebsocketCaryall(WebsocketCase):
             # receiving the message.
             subscribe_done_event.wait(timeout=5)
             self.env['bus.bus']._sendone('channel1', 'notif type', 'message')
-            dispatch._dispatch_notifications(next(iter(dispatch._ws_to_subscription.keys())))
+            odoo_ws = list(Websocket._instances)[0]
+            odoo_ws.send_bus_notifications()
             self.assert_close_with_code(websocket, CloseCode.SESSION_EXPIRED)
 
     def test_channel_subscription_disconnect(self):
