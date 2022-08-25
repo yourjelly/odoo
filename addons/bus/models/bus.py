@@ -121,29 +121,30 @@ class ImDispatch(threading.Thread):
         self._ws_to_subscription = {}
         self._channels_to_ws = {}
 
-    def _dispatch_notifications(self, websocket):
+    def _dispatch_notifications(self, websockets):
         """
-        Dispatch notifications available for the given websocket. If the
+        Dispatch notifications available for all the websocket. If the
         session is expired, close the connection with the `SESSION_EXPIRED`
         close code.
         """
-        subscription = self._ws_to_subscription.get(websocket)
-        if not subscription:
-            return
-        session = root.session_store.get(websocket._session.sid)
-        if not session:
-            return websocket.disconnect(CloseCode.SESSION_EXPIRED)
-        with odoo.registry(session.db).cursor() as cr:
-            env = api.Environment(cr, session.uid, session.context)
-            if session.uid is not None and not check_session(session, env):
-                return websocket.disconnect(CloseCode.SESSION_EXPIRED)
-            notifications = env['bus.bus']._poll(
-                subscription.channels, subscription.last_notification_id)
-            if not notifications:
+        for websocket in websockets:
+            subscription = self._ws_to_subscription.get(websocket)
+            if not subscription:
                 return
-            with suppress(InvalidStateException):
-                subscription.last_notification_id = notifications[-1]['id']
-                websocket.send(notifications)
+            session = root.session_store.get(websocket._session.sid)
+            if not session:
+                return websocket.disconnect(CloseCode.SESSION_EXPIRED)
+            with odoo.registry(session.db).cursor() as cr:
+                env = api.Environment(cr, session.uid, session.context)
+                if session.uid is not None and not check_session(session, env):
+                    return websocket.disconnect(CloseCode.SESSION_EXPIRED)
+                notifications = env['bus.bus']._poll(
+                    subscription.channels, subscription.last_notification_id)
+                if not notifications:
+                    return
+                with suppress(InvalidStateException):
+                    subscription.last_notification_id = notifications[-1]['id']
+                    websocket.send(notifications)
 
     def subscribe(self, channels, last, db, websocket):
         """
@@ -158,7 +159,7 @@ class ImDispatch(threading.Thread):
         if not self.is_alive():
             self.start()
         # Dispatch past notifications if there are any.
-        self._dispatch_notifications(websocket)
+        self._dispatch_notifications([websocket])
 
     def unsubscribe(self, websocket):
         self._ws_to_subscription.pop(websocket, None)
@@ -187,8 +188,9 @@ class ImDispatch(threading.Thread):
                     websockets.update(
                         self._channels_to_ws.get(hashable(channel), [])
                     )
-                for websocket in websockets:
-                    self._dispatch_notifications(websocket)
+                threading.Thread(
+                    target=self._dispatch_notifications, args=[websockets]
+                ).start()
 
     def run(self):
         while True:
