@@ -3093,15 +3093,17 @@ class Properties(Field):
     type = 'properties'
     column_type = ('jsonb', 'jsonb')
     copy = False
-    readonly = False
     prefetch = False
+    write_sequence = 10                 # because it must be written after the definition field
 
+    # the field is computed editable by design (see the compute method below)
     store = True
+    readonly = False
     precompute = True
 
     definition = None
-    definition_record = None                # field on the current model that point to the definition record
-    definition_record_field = None          # field on the definition record which defined the Properties field definition
+    definition_record = None            # field on the current model that point to the definition record
+    definition_record_field = None      # field on the definition record which defined the Properties field definition
 
     _description_definition_record = property(attrgetter('definition_record'))
     _description_definition_record_field = property(attrgetter('definition_record_field'))
@@ -3113,15 +3115,14 @@ class Properties(Field):
 
     def _setup_attrs(self, model_class, name):
         super()._setup_attrs(model_class, name)
-        if self.definition:
-            assert self.definition.count(".") == 1
-            self.definition_record, self.definition_record_field = self.definition.rsplit('.', 1)
 
-            # this field always depends on the definition record
-            # (because it contains the definition)
-            self._depends = (self.definition_record, )
+        # determine definition_record and definition_record_field
+        assert isinstance(self.definition, str) and self.definition.count(".") == 1
+        self.definition_record, self.definition_record_field = self.definition.rsplit('.', 1)
 
+        # make the field computed, and set its dependencies
         self.compute = self._compute
+        self._depends = (self.definition_record,)
 
     def convert_to_column(self, value, record, values=None, validate=True):
         """Convert the value before inserting it in database.
