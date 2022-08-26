@@ -188,6 +188,8 @@ class Project(models.Model):
             self.task_ids._get_timesheet().write({
                 'so_line': False,
             })
+        if not self.sale_line_employee_ids.sale_line_id:
+            raise UserError(_('Sale Order Item is required'))
         return res
 
     def _update_timesheets_sale_line_id(self):
