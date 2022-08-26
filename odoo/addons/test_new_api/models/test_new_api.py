@@ -230,6 +230,11 @@ class EmailMessage(models.Model):
 
 
 class DiscussionPartner(models.Model):
+    """
+    Simplified model for partners.  Having a specific model avoids all the
+    overrides from other modules that may change which fields are being read,
+    how many queries it takes to use that model, etc.
+    """
     _name = 'test_new_api.partner'
     _description = 'Discussion Partner'
 
