@@ -330,6 +330,7 @@ class Picking(models.Model):
         help="Creation Date, usually the time of the order")
     date_done = fields.Datetime('Date of Transfer', copy=False, readonly=True, help="Date at which the transfer has been processed or cancelled.")
     delay_alert_date = fields.Datetime('Delay Alert Date', compute='_compute_delay_alert_date', search='_search_delay_alert_date')
+    planning_issues = fields.Integer('Number of planning issues found', compute='_compute_json_popover')
     json_popover = fields.Char('JSON data for the popover widget', compute='_compute_json_popover')
     location_id = fields.Many2one(
         'stock.location', "Source Location",
@@ -517,17 +518,20 @@ class Picking(models.Model):
     def _compute_json_popover(self):
         picking_no_alert = self.filtered(lambda p: p.state in ('done', 'cancel') or not p.delay_alert_date)
         picking_no_alert.json_popover = False
+        picking_no_alert.planning_issues = 0
         for picking in (self - picking_no_alert):
-            picking.json_popover = json.dumps({
-                'popoverTemplate': 'stock.PopoverStockRescheduling',
-                'delay_alert_date': format_datetime(self.env, picking.delay_alert_date, dt_format=False),
-                'late_elements': [{
+            late_elms = [{
                         'id': late_move.id,
                         'name': late_move.display_name,
                         'model': late_move._name,
                     } for late_move in picking.move_ids.filtered(lambda m: m.delay_alert_date).move_orig_ids._delay_alert_get_documents()
                 ]
+            picking.json_popover = json.dumps({
+                'popoverTemplate': 'stock.PopoverStockRescheduling',
+                'delay_alert_date': format_datetime(self.env, picking.delay_alert_date, dt_format=False),
+                'late_elements': late_elms
             })
+            picking.planning_issues = len(late_elms)
 
     @api.depends('move_type', 'immediate_transfer', 'move_ids.state', 'move_ids.picking_id')
     def _compute_state(self):
@@ -1404,7 +1408,7 @@ class Picking(models.Model):
                     quantity_left_todo = float_round(
                         ml.reserved_uom_qty - ml.qty_done,
                         precision_rounding=ml.product_uom_id.rounding,
-                        rounding_method='HALF-UP')
+                        rounding_method='UP')
                     done_to_keep = ml.qty_done
                     new_move_line = ml.copy(
                         default={'reserved_uom_qty': 0, 'qty_done': ml.qty_done})

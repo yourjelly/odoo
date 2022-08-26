@@ -45,7 +45,7 @@
                            optional="show" widget="badge" class="text-dark"/>
                     <field name="activity_exception_decoration" widget="activity_exception"/>
                     <field name="delay_alert_date" invisible="1"/>
-                    <field nolabel="1" name="json_popover" widget="stock_rescheduling_popover" attrs="{'invisible': [('json_popover', '=', False)]}"/>
+                    <field nolabel="1" name="planning_issues" widget="stock_rescheduling_popover" attrs="{'invisible': [('planning_issues', '=', 0)]}"/>
                 </tree>
             </field>
         </record>
