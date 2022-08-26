@@ -3149,7 +3149,7 @@ class Properties(Field):
         }]
         """
         if not value:
-            return
+            return None
 
         if isinstance(value, str):
             # assume already JSONified
@@ -3172,6 +3172,23 @@ class Properties(Field):
 
     def convert_to_cache(self, value, record, validate=True):
         return self.convert_to_column(value, record, validate)
+
+    def convert_to_record(self, value, record):
+        # cache format -> record format
+        properties_definition = self._get_properties_definition(record) or []
+        if not value or not properties_definition:
+            return properties_definition or []
+
+        assert isinstance(value, str)
+        value = json.loads(value)
+
+        if not isinstance(value, dict):
+            raise ValueError(f"Wrong property type {type(value)!r}")
+
+        value = self._dict_to_list(value, properties_definition)
+        self._parse_json_types(value, record.env, check_existence=True)
+
+        return value
 
     def convert_to_read(self, value, record, use_name_get=True):
         """Return the value used in a read / search_read.
@@ -3200,27 +3217,10 @@ class Properties(Field):
                     'value': [1337, 'Bob'],
                 }]
         """
-        properties_definition = self._get_properties_definition(record) or []
-        if not value or not properties_definition:
-            return properties_definition or []
-
-        if isinstance(value, str):
-            value = json.loads(value)
-
-        if isinstance(value, dict):
-            value = self._dict_to_list(value, properties_definition)
-            self._parse_json_types(value, record.env, check_existence=not use_name_get)
-
-        if not isinstance(value, list):
-            raise ValueError(f"Wrong property type {type(value)!r}")
-
+        # record format -> read format
         if use_name_get:
             self._add_display_name(value, record.env)
-
         return value
-
-    def convert_to_record(self, value, record):
-        return self.convert_to_read(value, record, use_name_get=False)
 
     def convert_to_write(self, value, record):
         """If we write a list on the child, update the definition record."""
@@ -3582,7 +3582,7 @@ class PropertiesDefinition(Field):
         }]
         """
         if not value:
-            return []
+            return None
 
         if isinstance(value, str):
             value = json.loads(value)
@@ -3599,22 +3599,20 @@ class PropertiesDefinition(Field):
     def convert_to_cache(self, value, record, validate=True):
         return self.convert_to_column(value, record, validate)
 
-    def convert_to_read(self, values_list, record, use_name_get=True):
-        if isinstance(values_list, str):
-            values_list = json.loads(values_list)
+    def convert_to_record(self, value, record):
+        # cache format -> record format
+        if not value:
+            return []
 
-        if not values_list:
-            return values_list
+        assert isinstance(value, str)
+        value = json.loads(value)
 
-        values_list = [
-            values for values in values_list
+        value = [
+            values for values in value
             if all(values.get(key) for key in self.REQUIRED_KEYS)
         ]
 
-        if use_name_get:
-            Properties._add_display_name(values_list, record.env, value_keys=('default',))
-
-        for property_definition in values_list:
+        for property_definition in value:
             # check if the model still exists in the environment, the module of the
             # model might have been uninstalled so the model might not exist anymore
             property_model = property_definition.get('comodel')
@@ -3637,10 +3635,13 @@ class PropertiesDefinition(Field):
                 except ValueError:
                     del property_definition['domain']
 
-        return values_list
+        return value
 
-    def convert_to_record(self, value, record):
-        return self.convert_to_read(value, record, use_name_get=False)
+    def convert_to_read(self, value, record, use_name_get=True):
+        # record format -> read format
+        if use_name_get:
+            Properties._add_display_name(value, record.env, value_keys=('default',))
+        return value
 
     @classmethod
     def _validate_properties_definition(cls, properties_definition, env):
