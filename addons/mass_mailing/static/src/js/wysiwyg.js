@@ -43,7 +43,9 @@ const MassMailingWysiwyg = Wysiwyg.extend({
         const linkCommands = commands.filter(command => command.name === 'Link' || command.name === 'Button');
         for (const linkCommand of linkCommands) {
             // Don't open the dialog: use the link tools.
-            linkCommand.callback = () => this.toggleLinkTools({forceDialog: false});
+            if(linkCommand.name === 'Link') {
+                linkCommand.callback = () => this.toggleLinkTools({forceDialog: false});
+            }
             // Remove the command if the selection is within a background-image.
             const superIsDisabled = linkCommand.isDisabled;
             linkCommand.isDisabled = () => {
