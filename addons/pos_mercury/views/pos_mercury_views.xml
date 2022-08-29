@@ -35,7 +35,7 @@
                                 to create one.
                             </p>
                         </div>
-                        <group col="2">
+                        <group>
                             <field name="merchant_id"/>
                             <field name="merchant_pwd"/>
                         </group>

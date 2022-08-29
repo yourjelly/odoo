@@ -18,7 +18,7 @@
         <field name="arch" type="xml">
             <form string="Registration revenues" edit="false" create="false">
                 <sheet>
-                    <group col="2">
+                    <group>
                         <group string="Event">
                             <field name="event_type_id"/>
                             <field name="event_id"/>
@@ -32,7 +32,7 @@
                             <field name="event_registration_state"/>
                         </group>
                     </group>
-                    <group col="2">
+                    <group>
                         <group string="Sale Order">
                             <field name="sale_order_partner_id"/>
                             <field name="sale_order_id"/>

@@ -59,7 +59,7 @@
                         attrs="{'invisible': ['|', '|', ('test_entry', '=', True), ('scoring_type', '=', 'no_scoring'), ('scoring_success', '=', True)]}"/>
                     <widget name="web_ribbon" title="Passed"
                         attrs="{'invisible': ['|', '|', ('test_entry', '=', True), ('scoring_type', '=', 'no_scoring'), ('scoring_success', '=', False)]}"/>
-                    <group col="2">
+                    <group>
                         <group>
                             <field name="survey_id"/>
                             <field name="create_date"/>

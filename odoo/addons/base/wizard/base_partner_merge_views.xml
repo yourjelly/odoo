@@ -54,7 +54,7 @@
                                 will be redirected to the destination contact.
                                 You can remove contacts from this list to avoid merging them.
                             </p>
-                            <group col="2">
+                            <group>
                                 <field name="dst_partner_id"
                                     domain="[('id', 'in', partner_ids or False)]"
                                     attrs="{'required': [('state', '=', 'selection')]}"

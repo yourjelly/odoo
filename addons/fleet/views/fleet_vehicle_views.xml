@@ -85,7 +85,7 @@
                         <label for="tag_ids"/>
                         <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}"/>
                     </div>
-                    <group col="2">
+                    <group>
                         <group string="Driver">
                             <field name="active" invisible="1"/>
                             <field name="vehicle_type" invisible="1"/>

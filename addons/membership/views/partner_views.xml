@@ -132,7 +132,7 @@
                                 <field name="state"/>
                             </tree>
                             <form string="Memberships">
-                                <group col="2">
+                                <group>
                                     <group>
                                         <field name="membership_id"/>
                                         <field name="date"/>

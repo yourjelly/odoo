@@ -41,7 +41,7 @@
         <field name="arch" type="xml">
             <form string="Attendee" create="0">
                 <sheet>
-                    <group col="2" name="main_content">
+                    <group name="main_content">
                         <group>
                             <field name="partner_id"/>
                             <field name="slide_id"/>

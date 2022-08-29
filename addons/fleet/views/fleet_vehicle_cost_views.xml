@@ -20,7 +20,7 @@
                     <div class="oe_title">
                         <h1><field name="name"/></h1>
                     </div>
-                    <group col="2">
+                    <group>
                         <group string="Contract Information">
                             <field name="user_id"/>
                             <field name="cost_subtype_id"/>
@@ -33,7 +33,7 @@
                             <field name="purchaser_id"/>
                         </group>
                     </group>
-                    <group col="2">
+                    <group>
                         <group>
                             <field name="amount" string="Activation Cost" help="Cost that is paid only once at the creation of the contract" widget="monetary"/>
                             <label for="cost_generated"/>
@@ -225,7 +225,7 @@
                 </header>
                 <sheet>
                     <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
-                    <group col="2">
+                    <group>
                         <group>
                             <field name="description" />
                             <field name="service_type_id" />

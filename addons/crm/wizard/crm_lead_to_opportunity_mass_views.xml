@@ -34,7 +34,7 @@
                 </group>
                 <group attrs="{'invisible': [('name', '!=', 'convert')]}" string="Customers" col="1">
                     <field name="action" class="oe_inline" widget="radio"/>
-                    <group col="2">
+                    <group>
                         <field name="partner_id"
                             widget="res_partner_many2one"
                             attrs="{'required': [('action', '=', 'exist')], 'invisible':[('action','!=','exist')]}"
