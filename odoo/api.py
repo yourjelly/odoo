@@ -682,7 +682,8 @@ class Environment(Mapping):
 
         :rtype: str
         """
-        return self.context.get('lang') or None
+        lang = self.context.get('lang')
+        return lang if lang and self['res.lang']._lang_get_id(lang) else None
 
     def clear(self):
         """ Clear all record caches, and discard all fields to recompute.
