@@ -1058,6 +1058,13 @@ class Task(models.Model):
 
         return vals
 
+    def _load_records_create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('partner_id'):
+                partner = self.env['res.partner'].browse(vals.get('partner_id'))
+                vals['partner_is_company'] = partner.is_company
+        return super()._load_records_create(vals_list)
+
     @api.model_create_multi
     def create(self, vals_list):
         default_stage = dict()
