@@ -108,6 +108,8 @@
             'stock/static/src/scss/stock_traceability_report.scss',
         ],
         'web.assets_backend': [
+            'stock/static/src/report_stock_forecasted/*',
+
             # legacy reports (delete when all reports are converted)
             'stock/static/src/legacy_web_report/utils.js',
             'stock/static/src/legacy_web_report/client_action.js',
@@ -117,7 +119,7 @@
             'stock/static/src/js/inventory_singleton_list_renderer.js',
             'stock/static/src/js/inventory_singleton_list_controller.js',
             'stock/static/src/js/inventory_singleton_list_view.js',
-            'stock/static/src/js/report_stock_forecasted.js',
+            #'stock/static/src/js/report_stock_forecasted.js',
             'stock/static/src/js/report_stock_reception.js',
             'stock/static/src/js/lazy_column_list.js',
             'stock/static/src/js/stock_orderpoint_list_controller.js',
@@ -143,6 +145,8 @@
             'stock/static/tests/stock_traceability_report_backend_tests.js',
         ],
         'web.assets_qweb': [
+            'stock/static/src/report_stock_forecasted/*.xml',
+
              # legacy reports (delete when all reports are converted)
             'stock/static/src/legacy_web_report/*.xml',
 

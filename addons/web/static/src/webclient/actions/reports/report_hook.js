@@ -16,6 +16,9 @@ export function useEnrichWithActionLinks(ref, selector = null) {
     useEffect(
         (element) => {
             // If we get an iframe, we need to wait until everything is loaded
+            if (!element){
+                return
+            }
             if (element.matches("iframe")) {
                 element.onload = () => enrich(comp, element, selector, true);
             } else {
