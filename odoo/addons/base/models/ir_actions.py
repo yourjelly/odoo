@@ -24,7 +24,7 @@ class IrActions(models.Model):
     _table = 'ir_actions'
     _order = 'name'
 
-    name = fields.Char(required=True)
+    name = fields.Char(required=True, translate=True)
     type = fields.Char(string='Action Type', required=True)
     xml_id = fields.Char(compute='_compute_xml_id', string="External ID")
     help = fields.Html(string='Action Description',
@@ -226,7 +226,6 @@ class IrActionsActWindow(models.Model):
             fvg = self.env[act.res_model].get_view(act.search_view_id.id, 'search')
             act.search_view = str(fvg)
 
-    name = fields.Char(string='Action Name', translate=True)
     type = fields.Char(default="ir.actions.act_window")
     view_id = fields.Many2one('ir.ui.view', string='View Ref.', ondelete='set null')
     domain = fields.Char(string='Domain Value',
@@ -358,7 +357,6 @@ class IrActionsActUrl(models.Model):
     _inherit = 'ir.actions.actions'
     _order = 'name'
 
-    name = fields.Char(string='Action Name', translate=True)
     type = fields.Char(default='ir.actions.act_url')
     url = fields.Text(string='Action URL', required=True)
     target = fields.Selection([('new', 'New Window'), ('self', 'This Window')],
@@ -407,7 +405,6 @@ class IrActionsServer(models.Model):
 #  - Command: x2Many commands namespace
 # To return an action, assign: action = {...}\n\n\n\n"""
 
-    name = fields.Char(string='Action Name', translate=True)
     type = fields.Char(default='ir.actions.server')
     usage = fields.Selection([
         ('ir_actions_server', 'Server Action'),
@@ -828,7 +825,6 @@ class IrActionsActClient(models.Model):
     _table = 'ir_act_client'
     _order = 'name'
 
-    name = fields.Char(string='Action Name', translate=True)
     type = fields.Char(default='ir.actions.client')
 
     tag = fields.Char(string='Client action tag', required=True,
