@@ -5,8 +5,8 @@ from odoo import models
 from odoo.tools.float_utils import float_is_zero, float_repr
 
 
-class ReplenishmentReport(models.AbstractModel):
-    _inherit = 'report.stock.report_product_product_replenishment'
+class StockForecasted(models.AbstractModel):
+    _inherit = 'stock.forecasted_product_product'
 
     def _compute_draft_quantity_count(self, product_template_ids, product_variant_ids, wh_location_ids):
         """ Overrides to computes the valuations of the stock. """

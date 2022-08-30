@@ -21,7 +21,6 @@
         'views/stock_lot_views.xml',
         'report/purchase_report_views.xml',
         'report/purchase_report_templates.xml',
-        'report/report_stock_forecasted.xml',
         'report/report_stock_rule.xml',
         'wizard/stock_replenishment_info.xml'
     ],
@@ -33,6 +32,9 @@
     'post_init_hook': '_create_buy_rules',
     'assets': {
         'web.assets_backend': [
+            'purchase_stock/static/**/*',
+        ],
+        'web.assets_qweb': [
             'purchase_stock/static/**/*',
         ],
     },

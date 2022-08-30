@@ -4,8 +4,29 @@
 from odoo import models
 
 
-class ReplenishmentReport(models.AbstractModel):
-    _inherit = 'report.stock.report_product_product_replenishment'
+class StockForecasted(models.AbstractModel):
+    _inherit = 'stock.forecasted_product_product'
+
+    def _serialize_docs(self, docs, product_template_ids=False, product_variant_ids=False):
+        res = super()._serialize_docs(docs, product_template_ids, product_variant_ids)
+        res['draft_sale_orders'] = docs['draft_sale_orders'].read(fields=['id', 'name'])
+        for i in range(len(docs['lines'])):
+            if not docs['lines'][i]['move_out'] or not docs['lines'][i]['move_out']['picking_id'] or not docs['lines'][i]['move_out']['picking_id']['sale_id']:
+                continue
+            picking = docs['lines'][i]['move_out']['picking_id']
+            res['lines'][i]['move_out'].update({
+                'picking_id' : {
+                    'id' : picking.id,
+                    'priority' : picking.priority,
+                    'sale_id' : {
+                        'id' : picking.sale_id.id,
+                        'amount_untaxed' : picking.sale_id.amount_untaxed,
+                        'currency_id' : picking.sale_id.currency_id.read(fields=['id', 'name'])[0],
+                        'partner_id' : picking.sale_id.partner_id.read(fields=['id', 'name'])[0],
+                    }
+                }
+            })
+        return res
 
     def _compute_draft_quantity_count(self, product_template_ids, product_variant_ids, wh_location_ids):
         res = super()._compute_draft_quantity_count(product_template_ids, product_variant_ids, wh_location_ids)

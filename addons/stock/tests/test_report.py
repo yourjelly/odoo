@@ -25,14 +25,14 @@ class TestReportsCommon(TransactionCase):
 
     def get_report_forecast(self, product_template_ids=False, product_variant_ids=False, context=False):
         if product_template_ids:
-            report = self.env['report.stock.report_product_template_replenishment']
+            report = self.env['stock.forecasted_product_template']
             product_ids = product_template_ids
         elif product_variant_ids:
-            report = self.env['report.stock.report_product_product_replenishment']
+            report = self.env['stock.forecasted_product_product']
             product_ids = product_template_ids
         if context:
             report = report.with_context(context)
-        report_values = report._get_report_values(docids=product_ids)
+        report_values = report.get_report_values(docids=product_ids)
         docs = report_values['docs']
         lines = docs['lines']
         return report_values, docs, lines
