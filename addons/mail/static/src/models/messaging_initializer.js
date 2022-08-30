@@ -46,6 +46,7 @@ registerModel({
          * @param {Object} param0.current_partner
          * @param {integer} param0.current_user_id
          * @param {Object} param0.current_user_settings
+         * @param {boolean} [param0.hasLinkPreviewFeature]
          * @param {integer} [param0.needaction_inbox_counter=0]
          * @param {Object} param0.partner_root
          * @param {Array[]} param0.publicPartners
@@ -60,12 +61,13 @@ registerModel({
             currentGuest,
             current_user_id,
             current_user_settings,
+            hasLinkPreviewFeature,
             menu_id,
             needaction_inbox_counter = 0,
             partner_root,
             publicPartners,
             shortcodes = [],
-            starred_counter = 0
+            starred_counter = 0,
         }) {
             const discuss = this.messaging.discuss;
             // partners first because the rest of the code relies on them
@@ -101,7 +103,7 @@ registerModel({
             }
             discuss.update({ menu_id });
             // company related data
-            this.messaging.update({ companyName });
+            this.messaging.update({ companyName, hasLinkPreviewFeature });
         },
         /**
          * @private

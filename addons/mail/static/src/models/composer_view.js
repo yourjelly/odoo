@@ -602,6 +602,14 @@ registerModel({
                 const message = messaging.models['Message'].insert(
                     messaging.models['Message'].convertData(messageData)
                 );
+                if (this.messaging.hasLinkPreviewFeature) {
+                    this.messaging.rpc({
+                        route: `/mail/link_preview`,
+                        params: {
+                            message_id: message.id
+                        }
+                    }, { shadow: true });
+                }
                 for (const threadView of message.originThread.threadViews) {
                     // Reset auto scroll to be able to see the newly posted message.
                     threadView.update({ hasAutoScrollOnMessageReceived: true });
@@ -846,7 +854,7 @@ registerModel({
             return Boolean(
                 (this.hasThreadName && this.composer.thread) ||
                 (this.hasFollowers && !this.composer.isLog) ||
-                this.threadView && this.threadView.replyingToMessageView
+                (this.threadView && this.threadView.replyingToMessageView)
             );
         },
         /**

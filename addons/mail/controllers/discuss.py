@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import json
 from collections import defaultdict
 from datetime import datetime, timedelta
 from psycopg2 import IntegrityError
@@ -573,3 +572,25 @@ class DiscussController(http.Controller):
         if guest_to_rename_sudo != guest and not request.env.user._is_admin():
             raise NotFound()
         guest_to_rename_sudo._update_name(name)
+
+    # --------------------------------------------------------------------------
+    # Link preview API
+    # --------------------------------------------------------------------------
+
+    @http.route('/mail/link_preview', methods=['POST'], type='json', auth='public')
+    def mail_link_preview(self, message_id):
+        if not request.env['mail.link.preview']._is_link_preview_enabled():
+            return
+        guest = request.env['mail.guest']._get_guest_from_request(request)
+        message = guest.env['mail.message'].search([('id', '=', int(message_id))])
+        if not message or (not message.is_current_user_or_guest_author and not guest.env.user._is_admin()):
+            raise NotFound()
+        guest.env['mail.link.preview']._create_link_previews(message)
+
+    @http.route('/mail/link_preview/delete', methods=['POST'], type='json', auth='public')
+    def mail_link_preview_delete(self, link_preview_id):
+        guest = request.env['mail.guest']._get_guest_from_request(request)
+        link_preview_sudo = guest.env['mail.link.preview'].sudo().search([('id', '=', int(link_preview_id))])
+        if not link_preview_sudo or (not link_preview_sudo.message_id.is_current_user_or_guest_author and not guest.env.user._is_admin()):
+            raise NotFound()
+        link_preview_sudo._delete_and_notify()

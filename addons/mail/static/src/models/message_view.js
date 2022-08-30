@@ -362,6 +362,9 @@ registerModel({
             }
             return clear();
         },
+        _computeLinkPreviewListView() {
+            return (this.message && this.message.linkPreviews.length > 0) ? {} : clear();
+        },
         /**
          * @private
          * @returns {FieldCommand}
@@ -564,6 +567,11 @@ registerModel({
         isSquashed: attr({
             compute: '_computeIsSquashed',
             default: false,
+        }),
+        linkPreviewListView: one('LinkPreviewListView', {
+            compute: '_computeLinkPreviewListView',
+            inverse: 'messageViewOwner',
+            isCausal: true,
         }),
         /**
          * Determines the message action list of this message view (if any).
