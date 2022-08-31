@@ -965,7 +965,7 @@ class Cache(object):
             cache_value = field_cache[record._ids[0]]
             if field.translate and cache_value:
                 lang = record.env.lang or 'en_US'
-                cache_value[lang]
+                return cache_value[lang]
             return cache_value
         except KeyError:
             if default is NOTHING:
@@ -984,7 +984,14 @@ class Cache(object):
             dirty must raise an exception
         """
         field_cache = self._set_field_cache(record, field)
-        field_cache[record._ids[0]] = value
+        if not field.translate or value is None:
+            field_cache[record._ids[0]] = value
+        else:
+            lang = record.env.lang or 'en_US'
+            if not field_cache.get(record._ids[0]):
+                field_cache[record._ids[0]] = {lang: value}
+            else:
+                field_cache[record._ids[0]][lang] = value
         if not check_dirty:
             return
         if dirty:
@@ -1006,13 +1013,33 @@ class Cache(object):
         Updating a dirty field without ``dirty=True`` is a programming error and
         raises an exception.
 
+        :param values: iterable cache_format values
         :param dirty: whether ``field`` must be made dirty on ``record`` after
             the update
         :param check_dirty: whether updating a dirty field without making it
             dirty must raise an exception
         """
         field_cache = self._set_field_cache(records, field)
-        field_cache.update(zip(records._ids, values))
+        if not field.translate:
+            field_cache.update(zip(records._ids, values))
+        else:
+            lang = records.env.lang or 'en_US'
+            for _id, value in zip(records._ids, values):
+                if value is None:
+                    field_cache[_id] = None
+                elif not field_cache.get(_id):  # cache miss or cache value is None
+                    field_cache[_id] = {lang: value}
+                else:
+                    field_cache[_id][lang] = value
+
+        self._post_update(records, field, values, dirty, check_dirty)
+
+    def update_raw(self, records, field, cache_values, dirty=False, check_dirty=True):
+        field_cache = self._set_field_cache(records, field)
+        field_cache.update(zip(records._ids, cache_values))
+        self._post_update(records, field, cache_values, dirty, check_dirty)
+
+    def _post_update(self, records, field, values, dirty=False, check_dirty=True):
         if not check_dirty:
             return
         if dirty:
@@ -1085,8 +1112,9 @@ class Cache(object):
             try:
                 cache_value = field_cache[record_id]
                 if cache_value:
-                    cache_value[lang]
-                vals.append(cache_value)
+                    vals.append(cache_value[lang])
+                else:
+                    vals.append(cache_value)
             except KeyError:
                 break
         return vals
@@ -1095,14 +1123,27 @@ class Cache(object):
         """ Return the subset of ``records`` that has not ``value`` for ``field``. """
         field_cache = self._get_field_cache(records, field)
         ids = []
-        for record_id in records._ids:
-            try:
-                val = field_cache[record_id]
-            except KeyError:
-                ids.append(record_id)
-            else:
-                if val != value:
+        if not field.translate:
+            for record_id in records._ids:
+                try:
+                    val = field_cache[record_id]
+                except KeyError:
                     ids.append(record_id)
+                else:
+                    if val != value:
+                        ids.append(record_id)
+        else:
+            lang = records.env.lang or 'en_US'
+            for record_id in records._ids:
+                try:
+                    val = field_cache[record_id]
+                    if val:
+                        val[lang]
+                except KeyError:
+                    ids.append(record_id)
+                else:
+                    if val != value:
+                        ids.append(record_id)
         return records.browse(ids)
 
     def get_fields(self, record):

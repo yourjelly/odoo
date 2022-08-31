@@ -6801,7 +6801,7 @@ class BaseModel(metaclass=MetaModel):
                             for value, new_line in zip(cache.get_values(lines, field), new_lines)
                         ])
                     else:
-                        cache.update(new_lines, field, cache.get_values(lines, field))
+                        cache.update_raw(new_lines, field, cache.get_values(lines, field))
 
         # Isolate changed values, to handle inconsistent data sent from the
         # client side: when a form view contains two one2many fields that
