@@ -520,7 +520,7 @@ class IrModuleModule(models.Model):
                 specific_arch_db[lang] = field.translate(
                     lambda term: specific_translation_dictionary.get(term, {lang: None})[lang], specific_arch_db_en)
             specific_arch_db['en_US'] = specific_arch_db_en
-            cache.update(View.browse(specific_id), field, [specific_arch_db], dirty=True)
+            cache.update_raw(View.browse(specific_id), field, [specific_arch_db], dirty=True)
 
         default_menu = self.env.ref('website.main_menu', raise_if_not_found=False)
         if not default_menu:
