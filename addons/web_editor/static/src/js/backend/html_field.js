@@ -70,16 +70,10 @@ export class HtmlField extends Component {
             iframeVisible: false,
         });
 
-        useBus(this.env.bus, "RELATIONAL_MODEL:WILL_SAVE_URGENTLY", () => this._commitChangesFromBus({urgent: true}));
-        useBus(this.env.bus, "RELATIONAL_MODEL:NEED_LOCAL_CHANGES", ({detail}) => this._commitChangesFromBus({proms: detail.proms}));
+        useBus(this.env.bus, "RELATIONAL_MODEL:WILL_SAVE_URGENTLY", () => this.commitChanges({ urgent: true }));
+        useBus(this.env.bus, "RELATIONAL_MODEL:NEED_LOCAL_CHANGES", () => this.commitChanges());
 
         this._onUpdateIframeId = 'onLoad_' + _.uniqueId('FieldHtml');
-
-        // The wysiwyg.getValue() could return sligthly different value each
-        // call. The commitChanges would in such cases continuously be called as
-        // the `prop.update` will trigger the bus event
-        // `RELATIONAL_MODEL:WILL_SAVE`.
-        this._lastUpdateFromBus = false;
 
         onWillStart(async () => {
             this.Wysiwyg = await this._getWysiwygClass();
@@ -259,23 +253,6 @@ export class HtmlField extends Component {
     _getCodeViewEl() {
         return this.state.showCodeView && this.codeViewRef.el;
     }
-    async _commitChangesFromBus({proms, urgent = false} = {}) {
-        if (this._skipNextBusChange) {
-            this._skipNextBusChange = false;
-            return;
-        }
-        const prom = new Promise(async (resolve) => {
-            if (!this._lastUpdateFromBus) {
-                this._lastUpdateFromBus = true;
-                await this.commitChanges({ urgent });
-            }
-            this._lastUpdateFromBus = false;
-            resolve();
-        });
-        if (proms) {
-            proms.push(prom);
-        }
-    }
     async _setupReadonlyIframe() {
         const iframeTarget = this.iframeRef.el.contentDocument.querySelector('#iframe_target');
         if (this.iframePromise && iframeTarget) {
@@ -451,7 +428,6 @@ export class HtmlField extends Component {
             checked: !checked,
         });
         if (value) {
-            this._skipNextBusChange = true;
             this.props.update(value);
         }
     }
@@ -480,7 +456,6 @@ export class HtmlField extends Component {
             rating,
         });
         if (value) {
-            this._skipNextBusChange = true;
             this.props.update(value);
         }
     }
