@@ -1870,7 +1870,7 @@ class Char(_String):
         ):
             # the column's varchar size does not match self.size; convert it
             sql.convert_column(model._cr, model._table, self.name, self.column_type[1])
-        super().update_db_column(self, model, column)
+        super().update_db_column(model, column)
 
     _related_size = property(attrgetter('size'))
     _related_trim = property(attrgetter('trim'))
