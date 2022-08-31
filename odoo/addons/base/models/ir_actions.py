@@ -24,7 +24,7 @@ class IrActions(models.Model):
     _table = 'ir_actions'
     _order = 'name'
 
-    name = fields.Char(required=True, translate=True)
+    name = fields.Char(string='Action Name', required=True, translate=True)
     type = fields.Char(string='Action Type', required=True)
     xml_id = fields.Char(compute='_compute_xml_id', string="External ID")
     help = fields.Html(string='Action Description',
