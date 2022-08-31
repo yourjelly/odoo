@@ -1269,7 +1269,7 @@ def _trans_load_data(cr, reader, lang, overwrite=False, force_overwrite=False, x
 
                     new_value_lang = field.translate(lambda term: translation_dictionary.get(term, {}).get(lang), value_en)
                     values[lang] = new_value_lang
-                    env.cache.update(Model.browse(id), field, [values], dirty=True)
+                    env.cache.update_raw(Model.browse(id), field, [values], dirty=True)
         for field_name in field_type['model']:
             field_translations = []
             for xmlid in field_name_to_xmlids[field_name]:
