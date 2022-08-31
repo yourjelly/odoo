@@ -105,6 +105,7 @@
                                         readonly="props.readonly"
                                         record="record"
                                         templates="props.archInfo.templateDocs"
+                                        isMuted="group.progressValue.active"
                                     />
                                 </t>
                             </t>

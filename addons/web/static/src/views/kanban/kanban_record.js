@@ -230,7 +230,11 @@ export class KanbanRecord extends Component {
         }
         if (group && record.model.hasProgressBars) {
             const progressBar = group.findProgressValueFromRecord(record);
-            classes.push(`oe_kanban_card_${progressBar.color}`);
+            if (this.props.isMuted && this.props.isMuted !== progressBar.value) {
+                classes.push("oe_kanban_card_muted");
+            } else {
+                classes.push(`oe_kanban_card_${progressBar.color}`);
+            }
         }
         if (archInfo.cardColorField) {
             const value = record.data[archInfo.cardColorField];
@@ -402,6 +406,7 @@ KanbanRecord.props = [
     "Compiler?",
     "forceGlobalClick?",
     "group?",
+    "isMuted?",
     "list",
     "openRecord?",
     "readonly?",

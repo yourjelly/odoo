@@ -14,6 +14,10 @@
             order: 1;
         }
 
+        .oe_kanban_card_muted {
+            margin-top: $o-kanban-inside-vgutter*0.5;
+        }
+
         .o_kanban_load_more {
             order: 2;
             padding: var(--KanbanRecord-padding-v) 0;
