@@ -315,11 +315,17 @@ class MailActivity(models.Model):
 
         # send notifications about activity creation
         todo_activities = activities.filtered(lambda act: act.date_deadline <= fields.Date.today())
+        records = [{'res_model': rec.res_model, 'res_id': rec.res_id} for rec in activities]
+        data = {
+            'activity_created': True,
+            'records': records
+        }
         if todo_activities:
-            self.env['bus.bus']._sendmany([
-                (activity.user_id.partner_id, 'mail.activity/updated', {'activity_created': True})
-                for activity in todo_activities
-            ])
+            data['todo_activities'] = todo_activities
+        self.env['bus.bus']._sendmany([
+            (activity.user_id.partner_id, 'mail.activity/updated', {'activity_created': True})
+            for activity in activities
+        ])
         return activities
 
     def read(self, fields=None, load='_classic_read'):
@@ -363,11 +369,17 @@ class MailActivity(models.Model):
 
     def unlink(self):
         todo_activities = self.filtered(lambda act: act.date_deadline <= fields.Date.today())
+        records = [{'res_model': rec.res_model, 'res_id': rec.res_id} for rec in self]
+        data = {
+            'activity_deleted': True,
+            'records': records,
+        }
         if todo_activities:
-            self.env['bus.bus']._sendmany([
-                [partner, 'mail.activity/updated', {'activity_deleted': True}]
-                for partner in todo_activities.user_id.partner_id
-            ])
+            data['todo_activities'] = todo_activities
+        self.env['bus.bus']._sendmany([
+            [activity.user_id.partner_id, 'mail.activity/updated', data]
+            for activity in self
+        ])
         return super(MailActivity, self).unlink()
 
     @api.model
