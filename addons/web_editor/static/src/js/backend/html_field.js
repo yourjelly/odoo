@@ -94,9 +94,6 @@ export class HtmlField extends Component {
             if (!newProps.readonly && this.state.iframeVisible) {
                 this.state.iframeVisible = false;
             }
-            if (newProps.value !== this.props.value) {
-                this._resetIframeValue = true;
-            }
         });
         useEffect(() => {
             (async () => {
@@ -279,8 +276,7 @@ export class HtmlField extends Component {
     async _setupReadonlyIframe() {
         const iframeTarget = this.iframeRef.el.contentDocument.querySelector('#iframe_target');
         if (this.iframePromise && iframeTarget) {
-            if (this._resetIframeValue) {
-                this._resetIframeValue = false;
+            if (iframeTarget.innerHTML !== this.props.value) {
                 iframeTarget.innerHTML = this.props.value;
             }
             return this.iframePromise;
