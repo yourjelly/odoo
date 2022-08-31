@@ -57,48 +57,6 @@ registerModel({
             }
         },
         /**
-         * @private
-         * @returns {boolean}
-         */
-        _computeHasDownloadButton() {
-            if (!this.attachment || !this.attachmentList) {
-                return clear();
-            }
-            return !this.attachmentList.composerViewOwner && !this.attachment.isUploading;
-        },
-        /**
-         * @private
-         * @returns {number}
-         */
-        _computeHeight() {
-            if (!this.attachmentList) {
-                return clear();
-            }
-            if (this.attachmentList.composerViewOwner) {
-                return 50;
-            }
-            if (this.attachmentList.attachmentBoxViewOwner) {
-                return 160;
-            }
-            if (this.attachmentList.messageViewOwner) {
-                return 300;
-            }
-        },
-        /**
-         * @private
-         * @returns {string}
-         */
-        _computeImageUrl() {
-            if (!this.attachment) {
-                return;
-            }
-            if (!this.attachment.accessToken && this.attachment.originThread && this.attachment.originThread.model === 'mail.channel') {
-                return `/mail/channel/${this.attachment.originThread.id}/image/${this.attachment.id}/${this.width}x${this.height}`;
-            }
-            const accessToken = this.attachment.accessToken ? `?access_token=${this.attachment.accessToken}` : '';
-            return `/web/image/${this.attachment.id}/${this.width}x${this.height}${accessToken}`;
-        },
-        /**
          * Returns an arbitrary high value, this is effectively a max-width and
          * the height should be more constrained.
          *
@@ -131,18 +89,45 @@ registerModel({
          * Determines whether `this` should display a download button.
          */
         hasDownloadButton: attr({
-            compute: '_computeHasDownloadButton',
+            compute() {
+                if (!this.attachment || !this.attachmentList) {
+                    return clear();
+                }
+                return !this.attachmentList.composerViewOwner && !this.attachment.isUploading;
+            },
             default: false,
         }),
         /**
          * Determines the max height of this attachment image in px.
          */
         height: attr({
-            compute: '_computeHeight',
+            compute() {
+                if (!this.attachmentList) {
+                    return clear();
+                }
+                if (this.attachmentList.composerViewOwner) {
+                    return 50;
+                }
+                if (this.attachmentList.attachmentBoxViewOwner) {
+                    return 160;
+                }
+                if (this.attachmentList.messageViewOwner) {
+                    return 300;
+                }
+            },
             required: true,
         }),
         imageUrl: attr({
-            compute: '_computeImageUrl',
+            compute() {
+                if (!this.attachment) {
+                    return;
+                }
+                if (!this.attachment.accessToken && this.attachment.originThread && this.attachment.originThread.model === 'mail.channel') {
+                    return `/mail/channel/${this.attachment.originThread.id}/image/${this.attachment.id}/${this.width}x${this.height}`;
+                }
+                const accessToken = this.attachment.accessToken ? `?access_token=${this.attachment.accessToken}` : '';
+                return `/web/image/${this.attachment.id}/${this.width}x${this.height}${accessToken}`;
+            },
         }),
         /**
          * Determines the max width of this attachment image in px.
