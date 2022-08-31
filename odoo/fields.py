@@ -1656,12 +1656,6 @@ class _String(Field):
             return None
         if not self.translate:
             return cache_value
-        if not callable(self.translate):
-            fallback_value = {'en_US': next(iter(cache_value.values()))} if 'en_US' not in cache_value else {}
-            # two values are used to update the db
-            # SQL: SET column_name = fallback_value || column_name || value (|| is a concatenate operator for jsonb)
-            return Json(cache_value), Json(fallback_value)
-        # assert 'en_US' in cache_value
         return Json(cache_value)
 
     def convert_to_cache(self, value, record, validate=True):

@@ -46,6 +46,7 @@ import babel.dates
 import dateutil.relativedelta
 import psycopg2
 import psycopg2.extensions
+from psycopg2.extras import Json
 from lxml import etree
 from lxml.builder import E
 
@@ -2888,8 +2889,6 @@ class BaseModel(metaclass=MetaModel):
             value = field.default(self)
             value = field.convert_to_write(value, self)
             value = field.convert_to_column(value, self)
-            if field.translate is True:
-                value = value[0]
         else:
             value = None
         # Write value if non-NULL, except for booleans for which False means
@@ -4193,10 +4192,12 @@ class BaseModel(metaclass=MetaModel):
             field = self._fields[name]
             assert field.store
             assert field.column_type
-            if field.translate is True and isinstance(val, tuple):
+            if field.translate is True and val:
+                val_adapted = val.adapted
+                val_fallback = Json({'en_US': next(iter(val_adapted.values()))} if 'en_US' not in val_adapted else {})
                 columns.append(f""""{name}" = %s || COALESCE("{name}", '{'{}'}'::jsonb) || %s""")
-                params.append(val[1])
-                params.append(val[0])
+                params.append(val_fallback)
+                params.append(val)
             else:
                 columns.append(f'"{name}" = %s')
                 params.append(val)
@@ -4467,9 +4468,10 @@ class BaseModel(metaclass=MetaModel):
                     for stored, row in zip(stored_list, rows):
                         if fname in stored:
                             colval = field.convert_to_column(stored[fname], self, stored)
-                            if field.translate and isinstance(colval, tuple):
-                                colval[0].adapted.update(colval[1].adapted)
-                                colval = colval[0]
+                            if field.translate is True and colval:
+                                value_adapted = colval.adapted
+                                if 'en_US' not in value_adapted:
+                                    value_adapted['en_US'] = next(iter(value_adapted.values()))
                             row.append(colval)
                         else:
                             row.append(SQL_DEFAULT)
