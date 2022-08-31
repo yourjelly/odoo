@@ -5,7 +5,7 @@ import base64
 import io
 import logging
 import os
-import re
+import warnings
 
 from odoo import api, fields, models, tools, _, Command
 from odoo.exceptions import ValidationError, UserError
@@ -105,9 +105,7 @@ class Company(models.Model):
             paperformat_euro = self.env.ref('base.paperformat_euro', False)
             if paperformat_euro:
                 company.write({'paperformat_id': paperformat_euro.id})
-        sup = super(Company, self)
-        if hasattr(sup, 'init'):
-            sup.init()
+        return super().init()
 
     def _get_company_address_field_names(self):
         """ Return a list of fields coming from the address partner to match
@@ -181,14 +179,6 @@ class Company(models.Model):
             newself = newself.sudo()
         return super(Company, newself.with_context(context))._name_search(name=name, args=args, operator=operator, limit=limit, name_get_uid=name_get_uid)
 
-    @api.model
-    @api.returns('self', lambda value: value.id)
-    def _company_default_get(self, object=False, field=False):
-        """ Returns the user's company
-            - Deprecated
-        """
-        _logger.warning("The method '_company_default_get' on res.company is deprecated and shouldn't be used anymore")
-        return self.env.company
 
     # deprecated, use clear_caches() instead
     def cache_restart(self):

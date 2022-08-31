@@ -28,17 +28,11 @@ class UserError(Exception):
         """
         super().__init__(message)
 
-    @property
-    def name(self):
-        warnings.warn(
-            "UserError attribute 'name' is a deprecated alias to args[0]",
-            DeprecationWarning)
-        return self.args[0]
-
 
 class RedirectWarning(Exception):
     """ Warning with a possibility to redirect the user instead of simply
-    displaying the warning message.
+    displaying the warning message. Using this RedirectWarning won't crash
+    if used as an UserError
 
     :param str message: exception message and frontend modal content
     :param int action_id: id of the action where to perform the redirection
@@ -49,14 +43,6 @@ class RedirectWarning(Exception):
     """
     def __init__(self, message, action, button_text, additional_context=None):
         super().__init__(message, action, button_text, additional_context)
-
-    # using this RedirectWarning won't crash if used as an UserError
-    @property
-    def name(self):
-        warnings.warn(
-            "RedirectWarning attribute 'name' is a deprecated alias to args[0]",
-            DeprecationWarning)
-        return self.args[0]
 
 
 class AccessDenied(UserError):
