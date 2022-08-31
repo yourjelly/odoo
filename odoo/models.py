@@ -3434,7 +3434,7 @@ class BaseModel(metaclass=MetaModel):
                         # TODO CWG: reckeck term_converter for key
                     translation_safe[field.translate.term_converter(key)] = new_term
                 new_translations[lang] = field.translate(lambda term: translation_safe.get(term) if term in translation_safe else None, old_value)
-            self.env.cache.set(self, field, new_translations, dirty=True)
+            self.env.cache.update_raw(self, field, [new_translations], dirty=True)
             self.modified([fname])
         return True
 
