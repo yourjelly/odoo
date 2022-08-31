@@ -4526,11 +4526,7 @@ class BaseModel(metaclass=MetaModel):
                 if field.type in ('one2many', 'many2many'):
                     cachetoclear.append((record, field))
                 else:
-                    if not field.translate:
-                        cache_value = field.convert_to_cache(value, record)
-                    else:
-                        # pass empty record for translate field to prevent _get_stored_translations
-                        cache_value = field.convert_to_cache(value, record.browse())
+                    cache_value = field.convert_to_cache(value, record)
                     self.env.cache.set(record, field, cache_value)
                     if field.type in ('many2one', 'many2one_reference') and self.pool.field_inverses[field]:
                         inverses_update[(field, cache_value)].append(record.id)

@@ -1646,26 +1646,19 @@ class _String(Field):
         cache_value = self.convert_to_cache(value, record)
         if cache_value is None:
             return None
-        if self.translate:
-            lang = record.env.lang or 'en_US'
-            cache_value = {'en_US': cache_value, lang: cache_value}
-        return self._convert_from_cache_to_column(cache_value)
+        cache_raw_value = cache_value if not self.translate else {'en_US': cache_value, record.env.lang or 'en_US': cache_value}
+        return self._convert_from_cache_to_column(cache_raw_value)
 
-    def _convert_from_cache_to_column(self, cache_value):
-        if cache_value is None:
+    def _convert_from_cache_to_column(self, cache_raw_value):
+        """ Convert from cache_raw value to column value """
+        if cache_raw_value is None:
             return None
-        if not self.translate:
-            return cache_value
-        return Json(cache_value)
+        return cache_raw_value if not self.translate else Json(cache_raw_value)
 
     def convert_to_cache(self, value, record, validate=True):
-        if value is False or value is None:
+        if value is None or value is False:
             return None
-        if not self.translate or isinstance(value, str):
-            return value
-        lang = record.env.lang or 'en_US'
-        # assert (isinstance(value, dict) and lang in value)
-        return value[lang]
+        return value
 
     def convert_to_record(self, value, record):
         if value is None:
