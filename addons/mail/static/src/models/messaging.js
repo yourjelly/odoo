@@ -327,6 +327,9 @@ registerModel({
         allMailboxes: many('Mailbox', {
             inverse: 'messagingAsAnyMailbox',
         }),
+        allPinnedChannels: many('Channel', {
+            inverse: 'messagingAsPinnedChannel',
+        }),
         /**
          * Inverse of the messaging field present on all models. This field
          * therefore contains all existing records.

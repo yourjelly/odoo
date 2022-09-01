@@ -241,6 +241,16 @@ registerModel({
         },
         /**
          * @private
+         * @returns {Messaging|FieldCommand}
+         */
+        _computeMessagingAsPinnedChannel() {
+            if (this.isPinned) {
+                return this.messaging;
+            }
+            return clear();
+        },
+        /**
+         * @private
          * @returns {MessagingMenu|FieldCommand}
          */
         _computeMessagingMenuAsPinnedAndUnreadChannel() {
@@ -394,6 +404,10 @@ registerModel({
         memberCount: attr(),
         memberOfCurrentUser: one('ChannelMember', {
             inverse: 'channelAsMemberOfCurrentUser',
+        }),
+        messagingAsPinnedChannel: one('Messaging', {
+            compute: '_computeMessagingAsPinnedChannel',
+            inverse: 'allPinnedChannels',
         }),
         messagingMenuAsPinnedAndUnreadChannel: one('MessagingMenu', {
             compute: '_computeMessagingMenuAsPinnedAndUnreadChannel',

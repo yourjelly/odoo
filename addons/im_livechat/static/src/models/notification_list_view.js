@@ -9,10 +9,7 @@ patchRecordMethods('NotificationListView', {
      */
     _computeFilteredChannels() {
         if (this.filter === 'livechat') {
-            return this.messaging.models['Channel'].all(channel =>
-                channel.channel_type === 'livechat' &&
-                channel.isPinned
-            );
+            return this.messaging.allPinnedChannels.filter(channel => channel.channel_type === 'livechat');
         }
         return this._super();
     },
