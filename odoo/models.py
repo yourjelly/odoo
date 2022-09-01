@@ -24,6 +24,7 @@
 import collections
 import contextlib
 import datetime
+import time
 import dateutil
 import fnmatch
 import functools
@@ -49,6 +50,7 @@ import psycopg2.extensions
 from lxml import etree
 from lxml.builder import E
 
+time_ns = time.time_ns.__call__
 import odoo
 from . import SUPERUSER_ID
 from . import api
@@ -5090,12 +5092,23 @@ class BaseModel(metaclass=MetaModel):
         new_ids, ids = partition(lambda i: isinstance(i, NewId), self._ids)
         if not ids:
             return self
+
+        # Special version without query
+        field_to_check = next((f for f in self._fields.values() if f.prefetch is True), None)
+        if field_to_check:
+            field_cache = self.env.cache._get_field_cache(self, field_to_check)
+            if all(_id in field_cache for _id in ids):
+                return self
+
         query = Query(self.env.cr, self._table, self._table_query)
         query.add_where(f'"{self._table}".id IN %s', [tuple(ids)])
         query_str, params = query.select()
         self.env.cr.execute(query_str, params)
         valid_ids = set([r[0] for r in self._cr.fetchall()] + new_ids)
-        return self.browse(i for i in self._ids if i in valid_ids)
+
+        result = self.browse(i for i in self._ids if i in valid_ids)
+
+        return result
 
     def _check_recursion(self, parent=None):
         """
