@@ -62,7 +62,7 @@ registerModel({
                     return this.messaging.models['Channel']
                         .all(channel =>
                             channel.channel_type === 'channel' &&
-                            channel.thread.isPinned
+                            channel.isPinned
                         )
                         .sort((c1, c2) => c1.displayName < c2.displayName ? -1 : 1);
                 }
@@ -70,14 +70,14 @@ registerModel({
                     return this.messaging.models['Channel']
                         .all(channel =>
                             channel.thread.isChatChannel &&
-                            channel.thread.isPinned
+                            channel.isPinned
                         )
                         .sort((c1, c2) => c1.displayName < c2.displayName ? -1 : 1);
                 }
                 case 'all': {
                     // "All" filter is for channels and chats
                     return this.messaging.models['Channel']
-                        .all(channel => channel.thread.isPinned)
+                        .all(channel => channel.isPinned)
                         .sort((c1, c2) => c1.displayName < c2.displayName ? -1 : 1);
                 }
             }

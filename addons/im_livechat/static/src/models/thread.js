@@ -22,7 +22,7 @@ addRecordMethods('Thread', {
      * @returns {FieldCommand}
      */
     _computeMessagingAsPinnedLivechat() {
-        if (!this.messaging || !this.channel || this.channel.channel_type !== 'livechat' || !this.isPinned) {
+        if (!this.messaging || !this.channel || this.channel.channel_type !== 'livechat' || !this.channel.isPinned) {
             return clear();
         }
         return this.messaging;

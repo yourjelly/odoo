@@ -259,7 +259,7 @@ registerModel({
                 }
                 channel = res[0].channel;
             }
-            if (!channel.thread.isPinned) {
+            if (!channel.isPinned) {
                 channel.thread.pin();
             }
 

@@ -11,7 +11,7 @@ patchRecordMethods('NotificationListView', {
         if (this.filter === 'livechat') {
             return this.messaging.models['Channel'].all(channel =>
                 channel.channel_type === 'livechat' &&
-                channel.thread.isPinned
+                channel.isPinned
             );
         }
         return this._super();

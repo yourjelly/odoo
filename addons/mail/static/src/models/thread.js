@@ -1161,16 +1161,6 @@ registerModel({
         },
         /**
          * @private
-         * @returns {boolean|FieldCommand}
-         */
-        _computeIsPinned() {
-            if (!this.channel) {
-                return clear();
-            }
-            return this.channel.isPendingPinned !== undefined ? this.channel.isPendingPinned : this.channel.isServerPinned;
-        },
-        /**
-         * @private
          * @returns {Message}
          */
         _computeLastCurrentPartnerMessageSeenByEveryone() {
@@ -1312,7 +1302,7 @@ registerModel({
             if (!this.messaging || !this.messaging.messagingMenu) {
                 return clear();
             }
-            if (this.channel && this.isPinned && this.channel.localMessageUnreadCounter > 0) {
+            if (this.channel && this.channel.isPinned && this.channel.localMessageUnreadCounter > 0) {
                 return this.messaging.messagingMenu;
             }
             return clear();
@@ -1789,13 +1779,6 @@ registerModel({
          */
         isLoadingAttachments: attr({
             default: false,
-        }),
-        /**
-         * Boolean that determines whether this thread is pinned
-         * in discuss and present in the messaging menu.
-         */
-        isPinned: attr({
-            compute: '_computeIsPinned',
         }),
         isTemporary: attr({
             default: false,

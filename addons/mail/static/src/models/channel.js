@@ -115,13 +115,10 @@ registerModel({
          * @returns {Object|FieldCommand}
          */
         _computeDiscussSidebarCategoryItem() {
-            if (!this.thread) {
-                return clear();
-            }
-            if (!this.thread.isPinned) {
-                return clear();
-            }
             if (!this.discussSidebarCategory) {
+                return clear();
+            }
+            if (!this.isPinned) {
                 return clear();
             }
             return { category: this.discussSidebarCategory };
@@ -144,6 +141,16 @@ registerModel({
                     .join(this.env._t(", "));
             }
             return this.thread.name;
+        },
+        /**
+         * @private
+         * @returns {boolean}
+         */
+        _computeIsPinned() {
+            if (this.isPendingPinned !== undefined) {
+                return this.isPendingPinned;
+            }
+            return this.isServerPinned;
         },
         /**
          * @private
@@ -289,6 +296,13 @@ registerModel({
          * interface and to notify the server of the new state.
          */
         isPendingPinned: attr(),
+        /**
+         * Boolean that determines whether this thread is pinned
+         * in discuss and present in the messaging menu.
+         */
+        isPinned: attr({
+            compute: '_computeIsPinned',
+        }),
         /**
          * Determine the last pin state known by the server, which is the pin
          * state displayed after initialization or when the last pending

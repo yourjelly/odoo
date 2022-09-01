@@ -197,7 +197,7 @@ registerModel({
             if (!this.thread) {
                 return clear();
             }
-            if (this.thread.channel && this.thread.isPinned) {
+            if (this.thread.channel && this.thread.channel.isPinned) {
                 return this.thread;
             }
             if (this.thread.mailbox) {

@@ -26,7 +26,7 @@ registerModel({
                 // avoid following dummy href
                 ev.preventDefault();
                 const channel = this.messaging.models['Channel'].insert({ id: Number(ev.target.dataset.oeId) });
-                if (!channel.thread.isPinned) {
+                if (!channel.isPinned) {
                     await channel.thread.join();
                     channel.update({ isServerPinned: true });
                 }

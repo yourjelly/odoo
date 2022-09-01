@@ -119,14 +119,13 @@ registerModel({
          */
         async _initChannels(channelsData) {
             return executeGracefully(channelsData.map(channelData => () => {
-                const convertedData = this.messaging.models['Thread'].convertData(channelData);
-                const channel = this.messaging.models['Thread'].insert(
-                    Object.assign({ model: 'mail.channel' }, convertedData)
+                const thread = this.messaging.models['Thread'].insert(
+                    this.messaging.models['Thread'].convertData(channelData)
                 );
                 // flux specific: channels received at init have to be
                 // considered pinned. task-2284357
-                if (!channel.isPinned) {
-                    channel.pin();
+                if (!thread.channel.isPinned) {
+                    thread.pin();
                 }
             }));
         },
