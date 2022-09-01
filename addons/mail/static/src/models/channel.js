@@ -241,6 +241,19 @@ registerModel({
         },
         /**
          * @private
+         * @returns {MessagingMenu|FieldCommand}
+         */
+        _computeMessagingMenuAsPinnedAndUnreadChannel() {
+            if (!this.messaging || !this.messaging.messagingMenu) {
+                return clear();
+            }
+            if (this.isPinned && this.localMessageUnreadCounter > 0) {
+                return this.messaging.messagingMenu;
+            }
+            return clear();
+        },
+        /**
+         * @private
          * @returns {integer}
          */
         _computeUnknownMemberCount() {
@@ -381,6 +394,10 @@ registerModel({
         memberCount: attr(),
         memberOfCurrentUser: one('ChannelMember', {
             inverse: 'channelAsMemberOfCurrentUser',
+        }),
+        messagingMenuAsPinnedAndUnreadChannel: one('MessagingMenu', {
+            compute: '_computeMessagingMenuAsPinnedAndUnreadChannel',
+            inverse: 'pinnedAndUnreadChannels',
         }),
         orderedOfflineMembers: many('ChannelMember', {
             inverse: 'channelAsOfflineMember',
