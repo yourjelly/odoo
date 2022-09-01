@@ -194,8 +194,8 @@ registerModel({
          * @see isPendingPinned
          */
         _onIsServerPinnedChanged() {
-            if (this.isServerPinned === this.thread.isPendingPinned) {
-                this.thread.update({ isPendingPinned: clear() });
+            if (this.isServerPinned === this.isPendingPinned) {
+                this.update({ isPendingPinned: clear() });
             }
         },
         /**
@@ -280,6 +280,15 @@ registerModel({
         id: attr({
             identifying: true,
         }),
+        /**
+         * Determines if there is a pending pin state change, which is a change
+         * of pin state requested by the client but not yet confirmed by the
+         * server.
+         *
+         * This field can be updated to immediately change the pin state on the
+         * interface and to notify the server of the new state.
+         */
+        isPendingPinned: attr(),
         /**
          * Determine the last pin state known by the server, which is the pin
          * state displayed after initialization or when the last pending
