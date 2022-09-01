@@ -8,6 +8,23 @@ registerModel({
     name: 'Channel',
     modelMethods: {
         /**
+         * Performs the `channel_pin` RPC on `mail.channel`.
+         *
+         * @param {Object} param0
+         * @param {number} param0.channelId
+         * @param {boolean} [param0.pinned=false]
+         */
+        async performRpcChannelPin({ channelId, pinned = false }) {
+            await this.messaging.rpc({
+                model: 'mail.channel',
+                method: 'channel_pin',
+                args: [[channelId]],
+                kwargs: {
+                    pinned,
+                },
+            }, { shadow: true });
+        },
+        /**
          * Performs the `channel_get` RPC on `mail.channel`.
          *
          * `openChat` is preferable in business code because it will avoid the
