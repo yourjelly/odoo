@@ -22,14 +22,13 @@ registerModel({
          * @returns {boolean|FieldCommand}
          */
         _computeIsFocusOnMount() {
-            if (this.discussViewOwnerAsMobileAddItemHeader) {
-                return true;
-            }
-            if (this.discussSidebarCategoryOwnerAsAddingItem) {
-                return true;
-            }
-            if (this.messagingMenuOwnerAsMobileNewMessageInput) {
-                return true;
+            switch (true) {
+                case this.discussViewOwnerAsMobileAddItemHeader:
+                    return true;
+                case this.discussSidebarCategoryOwnerAsAddingItem:
+                    return true;
+                case this.messagingMenuOwnerAsMobileNewMessageInput:
+                    return true;
             }
             return clear();
         },
@@ -38,11 +37,11 @@ registerModel({
          * @returns {boolean|FieldCommand}
          */
         _computeIsHtml() {
-            if (this.discussViewOwnerAsMobileAddItemHeader) {
-                return this.discussViewOwnerAsMobileAddItemHeader.discuss.isAddingChannel;
-            }
-            if (this.discussSidebarCategoryOwnerAsAddingItem) {
-                return this.discussSidebarCategoryOwnerAsAddingItem === this.messaging.discuss.categoryChannel;
+            switch (true) {
+                case this.discussViewOwnerAsMobileAddItemHeader:
+                    return this.discussViewOwnerAsMobileAddItemHeader.discuss.isAddingChannel;
+                case this.discussSidebarCategoryOwnerAsAddingItem:
+                    return this.discussSidebarCategoryOwnerAsAddingItem === this.messaging.discuss.categoryChannel;
             }
             return clear();
         },
@@ -51,13 +50,14 @@ registerModel({
          * @returns {string|FieldCommand}
          */
         _computeCustomClass() {
-            if (this.discussSidebarCategoryOwnerAsAddingItem) {
-                if (this.discussSidebarCategoryOwnerAsAddingItem === this.messaging.discuss.categoryChannel) {
-                    return 'o_DiscussSidebarCategory_newChannelAutocompleteSuggestions';
-                }
-            }
-            if (this.messagingMenuOwnerAsMobileNewMessageInput) {
-                return this.messagingMenuOwnerAsMobileNewMessageInput.viewId + '_mobileNewMessageInputAutocomplete';
+            switch (true) {
+                case this.discussSidebarCategoryOwnerAsAddingItem:
+                    if (this.discussSidebarCategoryOwnerAsAddingItem === this.messaging.discuss.categoryChannel) {
+                        return 'o_DiscussSidebarCategory_newChannelAutocompleteSuggestions';
+                    }
+                    return clear();
+                case this.messagingMenuOwnerAsMobileNewMessageInput:
+                    return this.messagingMenuOwnerAsMobileNewMessageInput.viewId + '_mobileNewMessageInputAutocomplete';
             }
             return clear();
         },
@@ -66,21 +66,18 @@ registerModel({
          * @returns {string}
          */
         _computePlaceholder() {
-            if (this.chatWindowOwnerAsNewMessage) {
-                return this.chatWindowOwnerAsNewMessage.newMessageFormInputPlaceholder;
-            }
-            if (this.discussViewOwnerAsMobileAddItemHeader) {
-                if (this.discussViewOwnerAsMobileAddItemHeader.discuss.isAddingChannel) {
-                    return this.discussViewOwnerAsMobileAddItemHeader.discuss.addChannelInputPlaceholder;
-                } else {
+            switch (true) {
+                case this.chatWindowOwnerAsNewMessage:
+                    return this.chatWindowOwnerAsNewMessage.newMessageFormInputPlaceholder;
+                case this.discussViewOwnerAsMobileAddItemHeader:
+                    if (this.discussViewOwnerAsMobileAddItemHeader.discuss.isAddingChannel) {
+                        return this.discussViewOwnerAsMobileAddItemHeader.discuss.addChannelInputPlaceholder;
+                    }
                     return this.discussViewOwnerAsMobileAddItemHeader.discuss.addChatInputPlaceholder;
-                }
-            }
-            if (this.discussSidebarCategoryOwnerAsAddingItem) {
-                return this.discussSidebarCategoryOwnerAsAddingItem.newItemPlaceholderText;
-            }
-            if (this.messagingMenuOwnerAsMobileNewMessageInput) {
-                return this.messagingMenuOwnerAsMobileNewMessageInput.mobileNewMessageInputPlaceholder;
+                case this.discussSidebarCategoryOwnerAsAddingItem:
+                    return this.discussSidebarCategoryOwnerAsAddingItem.newItemPlaceholderText;
+                case this.messagingMenuOwnerAsMobileNewMessageInput:
+                    return this.messagingMenuOwnerAsMobileNewMessageInput.mobileNewMessageInputPlaceholder;
             }
             return clear();
         },
