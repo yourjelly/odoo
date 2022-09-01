@@ -86,6 +86,16 @@ registerModel({
             });
         },
         /**
+         * Unpins this channel and notifies server of the change.
+         */
+        async unpin() {
+            this.update({ isPendingPinned: false });
+            if (this.messaging.isCurrentUserGuest) {
+                return;
+            }
+            await this.notifyPinStateToServer();
+        },
+        /**
          * @private
          * @returns {boolean}
          */
