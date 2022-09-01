@@ -25,15 +25,12 @@ registerModel({
             if (ev.target.closest('.o_channel_redirect')) {
                 // avoid following dummy href
                 ev.preventDefault();
-                const channel = this.messaging.models['Thread'].insert({
-                    id: Number(ev.target.dataset.oeId),
-                    model: 'mail.channel',
-                });
-                if (!channel.isPinned) {
-                    await channel.join();
+                const channel = this.messaging.models['Channel'].insert({ id: Number(ev.target.dataset.oeId) });
+                if (!channel.thread.isPinned) {
+                    await channel.thread.join();
                     channel.update({ isServerPinned: true });
                 }
-                channel.open();
+                channel.thread.open();
                 return;
             } else if (ev.target.closest('.o_mail_redirect')) {
                 ev.preventDefault();

@@ -228,15 +228,10 @@ registerModel({
          * @param {string} payload.last_interest_dt
          */
         _handleNotificationChannelLastInterestDateTimeChanged({ id, isServerPinned, last_interest_dt }) {
-            const channel = this.messaging.models['Thread'].findFromIdentifyingData({
-                id: id,
-                model: 'mail.channel',
-            });
+            const channel = this.messaging.models['Channel'].findFromIdentifyingData({ id: id });
             if (channel) {
-                channel.update({
-                    lastInterestDateTime: str_to_datetime(last_interest_dt),
-                    isServerPinned,
-                });
+                channel.update({ isServerPinned });
+                channel.thread.update({ lastInterestDateTime: str_to_datetime(last_interest_dt) });
             }
         },
         /**
@@ -560,22 +555,17 @@ registerModel({
          * @param {integer} payload.id
          */
         _handleNotificationChannelLeave({ id }) {
-            const thread = this.messaging.models['Thread'].findFromIdentifyingData({
-                id,
-                model: 'mail.channel',
-            });
-            if (!thread) {
+            const channel = this.messaging.models['Channel'].findFromIdentifyingData({ id });
+            if (!channel) {
                 return;
             }
-            const message = sprintf(this.env._t("You unsubscribed from %s."), thread.displayName);
+            const message = sprintf(this.env._t("You unsubscribed from %s."), channel.displayName);
             this.messaging.notify({ message, type: 'info' });
             // We assume that arriving here the server has effectively
             // unpinned the channel
-            thread.update({
-                isServerPinned: false,
-            });
-            if (thread.channel && thread.channel.memberOfCurrentUser) {
-                thread.channel.memberOfCurrentUser.delete();
+            channel.update({ isServerPinned: false });
+            if (channel.memberOfCurrentUser) {
+                channel.memberOfCurrentUser.delete();
             }
         },
         /**
@@ -584,22 +574,17 @@ registerModel({
          * @param {integer} payload.id
          */
         _handleNotificationChannelUnpin({ id }) {
-            const thread = this.messaging.models['Thread'].findFromIdentifyingData({
-                id,
-                model: 'mail.channel',
-            });
-            if (!thread) {
+            const channel = this.messaging.models['Channel'].findFromIdentifyingData({ id });
+            if (!channel) {
                 return;
             }
-            const message = sprintf(this.env._t("You unpinned your conversation with %s."), thread.displayName);
+            const message = sprintf(this.env._t("You unpinned your conversation with %s."), channel.displayName);
             this.messaging.notify({ message, type: 'info' });
             // We assume that arriving here the server has effectively
             // unpinned the channel
-            thread.update({
-                isServerPinned: false,
-            });
-            if (thread.channel && thread.channel.memberOfCurrentUser) {
-                thread.channel.memberOfCurrentUser.delete();
+            channel.update({ isServerPinned: false });
+            if (channel.memberOfCurrentUser) {
+                channel.memberOfCurrentUser.delete();
             }
         },
         /**

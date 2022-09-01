@@ -35,13 +35,13 @@ QUnit.test('closing a chat window with no message from admin side unpins it', as
     await afterNextRender(() => document.querySelector(`.o_MessagingMenu_toggler`).click());
     await afterNextRender(() => document.querySelector(`.o_NotificationList_preview`).click());
     await afterNextRender(() => document.querySelector(`.o_ChatWindowHeader_commandClose`).click());
-    const channels = await messaging.rpc({
+    const [thread] = await messaging.rpc({
         model: 'mail.channel',
         method: 'channel_info',
         args: [mailChannelId1],
     }, { shadow: true });
     assert.strictEqual(
-        channels[0].is_pinned,
+        thread.channel.isServerPinned,
         false,
         'Livechat channel should not be pinned',
     );

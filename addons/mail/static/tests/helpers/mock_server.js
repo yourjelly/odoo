@@ -1036,13 +1036,13 @@ patch(MockServer.prototype, 'mail', {
             if (memberOfCurrentUser) {
                 Object.assign(res, {
                     is_minimized: memberOfCurrentUser.is_minimized,
-                    is_pinned: memberOfCurrentUser.is_pinned,
                     last_interest_dt: memberOfCurrentUser.last_interest_dt,
                     message_unread_counter: memberOfCurrentUser.message_unread_counter,
                     state: memberOfCurrentUser.fold_state || 'open',
                 });
                 Object.assign(channelData, {
                     custom_channel_name: memberOfCurrentUser.custom_channel_name,
+                    isServerPinned: memberOfCurrentUser.is_pinned,
                     serverMessageUnreadCounter: memberOfCurrentUser.message_unread_counter,
                 });
                 if (memberOfCurrentUser.rtc_inviting_session_id) {

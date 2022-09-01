@@ -68,9 +68,6 @@ registerModel({
             if ('is_minimized' in data && 'state' in data) {
                 data2.serverFoldState = data.is_minimized ? data.state : 'closed';
             }
-            if ('is_pinned' in data) {
-                data2.isServerPinned = data.is_pinned;
-            }
             if ('last_interest_dt' in data && data.last_interest_dt) {
                 data2.lastInterestDateTime = str_to_datetime(data.last_interest_dt);
             }
@@ -1164,10 +1161,13 @@ registerModel({
         },
         /**
          * @private
-         * @returns {boolean}
+         * @returns {boolean|FieldCommand}
          */
         _computeIsPinned() {
-            return this.isPendingPinned !== undefined ? this.isPendingPinned : this.isServerPinned;
+            if (!this.channel) {
+                return clear();
+            }
+            return this.isPendingPinned !== undefined ? this.isPendingPinned : this.channel.isServerPinned;
         },
         /**
          * @private
@@ -1286,12 +1286,10 @@ registerModel({
         },
         /**
          * @private
-        /**
-         * @private
-         * @return {FieldCommand}
+         * @return {Messaging|FieldCommand}
          */
-         _computeMessagingAsAllCurrentClientThreads() {
-            if (!this.messaging || !this.channel || !this.channel.memberOfCurrentUser || !this.isServerPinned) {
+        _computeMessagingAsAllCurrentClientThreads() {
+            if (!this.messaging || !this.channel || !this.channel.memberOfCurrentUser || !this.channel.isServerPinned) {
                 return clear();
             }
             return this.messaging;
@@ -1486,18 +1484,6 @@ registerModel({
             this.messaging.messagingBus.trigger('o-thread-last-seen-by-current-partner-message-id-changed', {
                 thread: this,
             });
-        },
-        /**
-         * Handles change of pinned state coming from the server. Useful to
-         * clear pending state once server acknowledged the change.
-         *
-         * @private
-         * @see isPendingPinned
-         */
-        _onIsServerPinnedChanged() {
-            if (this.isServerPinned === this.isPendingPinned) {
-                this.update({ isPendingPinned: clear() });
-            }
         },
         /**
          * Handles change of fold state coming from the server. Useful to
@@ -1819,18 +1805,6 @@ registerModel({
          */
         isPinned: attr({
             compute: '_computeIsPinned',
-        }),
-        /**
-         * Determine the last pin state known by the server, which is the pin
-         * state displayed after initialization or when the last pending
-         * pin state change was confirmed by the server.
-         *
-         * This field should be considered read only in most situations. Only
-         * the code handling pin state change from the server should typically
-         * update it.
-         */
-        isServerPinned: attr({
-            default: false,
         }),
         isTemporary: attr({
             default: false,
@@ -2155,10 +2129,6 @@ registerModel({
         {
             dependencies: ['lastSeenByCurrentPartnerMessageId'],
             methodName: '_onChangeLastSeenByCurrentPartnerMessageId',
-        },
-        {
-            dependencies: ['isServerPinned'],
-            methodName: '_onIsServerPinnedChanged',
         },
         {
             dependencies: ['serverFoldState'],

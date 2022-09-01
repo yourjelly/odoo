@@ -61,7 +61,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {FieldCommand}
+         * @returns {ChannelMember[]|FieldCommand}
          */
         _computeCallParticipants() {
             if (!this.thread) {
@@ -187,6 +187,18 @@ registerModel({
             return this.memberCount - this.channelMembers.length;
         },
         /**
+         * Handles change of pinned state coming from the server. Useful to
+         * clear pending state once server acknowledged the change.
+         *
+         * @private
+         * @see isPendingPinned
+         */
+        _onIsServerPinnedChanged() {
+            if (this.isServerPinned === this.thread.isPendingPinned) {
+                this.thread.update({ isPendingPinned: clear() });
+            }
+        },
+        /**
          * @private
          * @returns {Array[]}
          */
@@ -269,6 +281,18 @@ registerModel({
             identifying: true,
         }),
         /**
+         * Determine the last pin state known by the server, which is the pin
+         * state displayed after initialization or when the last pending
+         * pin state change was confirmed by the server.
+         *
+         * This field should be considered read only in most situations. Only
+         * the code handling pin state change from the server should typically
+         * update it.
+         */
+        isServerPinned: attr({
+            default: false,
+        }),
+        /**
          * Local value of message unread counter, that means it is based on
          * initial server value and updated with interface updates.
          */
@@ -329,4 +353,10 @@ registerModel({
             compute: '_computeUnknownMemberCount',
         }),
     },
+    onChanges: [
+        {
+            dependencies: ['isServerPinned'],
+            methodName: '_onIsServerPinnedChanged',
+        },
+    ],
 });
