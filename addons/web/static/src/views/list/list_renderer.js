@@ -120,11 +120,11 @@ export class ListRenderer extends Component {
             handle: ".o_handle_cell",
             cursor: "grabbing",
             // Hooks
-            onStart: (_group, element) => {
+            onStart: ({ element }) => {
                 dataRowId = element.dataset.id;
                 element.classList.add("o_dragged");
             },
-            onStop: (_group, element) => element.classList.remove("o_dragged"),
+            onStop: ({ element }) => element.classList.remove("o_dragged"),
             onDrop: async ({ element, previous }) => {
                 if (this.props.list.editedRecord) {
                     this.props.list.unselectRecord(true);

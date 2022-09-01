@@ -56,22 +56,22 @@ export class KanbanRenderer extends Component {
                 connectGroups: () => this.canMoveRecords,
                 cursor: "move",
                 // Hooks
-                onStart: (group, element) => {
+                onStart: ({ element, group }) => {
                     dataRecordId = element.dataset.id;
                     if (group) {
                         dataGroupId = group.dataset.id;
                     }
                     element.classList.add("o_dragged", "shadow");
                 },
-                onGroupEnter: (group) => {
+                onGroupEnter: ({ group }) => {
                     group.classList.add("o_kanban_hover");
                     group.classList.remove("bg-100");
                 },
-                onGroupLeave: (group) => {
+                onGroupLeave: ({ group }) => {
                     group.classList.remove("o_kanban_hover");
                     group.classList.add("bg-100");
                 },
-                onStop: (group, element) => {
+                onStop: ({ element, group }) => {
                     group && group.classList && group.classList.remove("o_kanban_hover");
                     element.classList.remove("o_dragged", "shadow");
                 },
@@ -106,11 +106,11 @@ export class KanbanRenderer extends Component {
                 handle: ".o_column_title",
                 cursor: "move",
                 // Hooks
-                onStart: (_group, element) => {
+                onStart: ({ element }) => {
                     dataGroupId = element.dataset.id;
                     element.classList.add("o_dragged", "shadow");
                 },
-                onStop: (_group, element) => element.classList.remove("o_dragged", "shadow"),
+                onStop: ({ element }) => element.classList.remove("o_dragged", "shadow"),
                 onDrop: async ({ element, previous }) => {
                     element.classList.remove("o_group_draggable");
                     const refId = previous ? previous.dataset.id : null;

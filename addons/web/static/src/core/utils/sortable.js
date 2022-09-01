@@ -221,13 +221,14 @@ export function useSortable(params) {
     let started = false;
 
     /**
-     * These 2 variables store the initial offset between the initial mousedown
-     * position and the top-left corner of the dragged element.
+     * Stores the position of the mouse cursor.
      */
-    /** @type {number} */
-    let offsetX = 0;
-    /** @type {number} */
-    let offsetY = 0;
+    const mouse = { x: 0, y: 0 };
+    /**
+     * Stores the initial offset between the initial mousedown position and the
+     * top-left corner of the dragged element.
+     */
+    const offset = { x: 0, y: 0 };
 
     /**
      * Adds an event listener to be cleaned up after the next drag sequence
@@ -263,12 +264,12 @@ export function useSortable(params) {
      * Safely executes a handler from the `params`, so that the drag sequence can
      * be interrupted if an error occurs.
      * @param {string} callbackName
-     * @param  {...any} args
+     * @param  {Record<any, any>} args
      */
-    const execHandler = (callbackName, ...args) => {
+    const execHandler = (callbackName, args) => {
         if (typeof params[callbackName] === "function") {
             try {
-                params[callbackName](...args);
+                params[callbackName]({ ...mouse, ...args });
             } catch (err) {
                 dragStop(true, true);
                 throw err;
@@ -290,7 +291,7 @@ export function useSortable(params) {
                 element.after(ghost);
             }
         }
-        execHandler("onElementEnter", element);
+        execHandler("onElementEnter", { element });
     };
 
     /**
@@ -299,7 +300,7 @@ export function useSortable(params) {
      */
     const onElementMouseleave = (ev) => {
         const element = ev.currentTarget;
-        execHandler("onElementLeave", element);
+        execHandler("onElementLeave", { element });
     };
 
     /**
@@ -309,7 +310,7 @@ export function useSortable(params) {
     const onGroupMouseenter = (ev) => {
         const group = ev.currentTarget;
         group.appendChild(ghost);
-        execHandler("onGroupEnter", group);
+        execHandler("onGroupEnter", { group });
     };
 
     /**
@@ -318,7 +319,7 @@ export function useSortable(params) {
      */
     const onGroupMouseleave = (ev) => {
         const group = ev.currentTarget;
-        execHandler("onGroupLeave", group);
+        execHandler("onGroupLeave", { group });
     };
 
     /**
@@ -343,6 +344,8 @@ export function useSortable(params) {
      * @param {MouseEvent} ev
      */
     const onMousedown = (ev) => {
+        updateMouseFromEvent(ev);
+
         // A drag sequence can still be in progress if the mouseup occurred
         // outside of the window.
         dragStop(true);
@@ -358,8 +361,8 @@ export function useSortable(params) {
 
         currentElement = ev.target.closest(elementSelector);
         currentGroup = groupSelector && ev.target.closest(groupSelector);
-        offsetX = ev.clientX;
-        offsetY = ev.clientY;
+
+        Object.assign(offset, mouse);
     };
 
     /**
@@ -367,18 +370,20 @@ export function useSortable(params) {
      * @param {MouseEvent} ev
      */
     const onMousemove = (ev) => {
+        updateMouseFromEvent(ev);
+
         if (!enabled || !currentElement) {
             return;
         }
         if (started) {
             // Updates the position of the dragged element.
             currentElement.style.left = `${clamp(
-                ev.clientX - offsetX,
+                mouse.x - offset.x,
                 currentContainerRect.x,
                 currentContainerRect.x + currentContainerRect.width - currentElementRect.width
             )}px`;
             currentElement.style.top = `${clamp(
-                ev.clientY - offsetY,
+                mouse.y - offset.y,
                 currentContainerRect.y,
                 currentContainerRect.y + currentContainerRect.height - currentElementRect.height
             )}px`;
@@ -389,8 +394,12 @@ export function useSortable(params) {
 
     /**
      * Window "mouseup" event handler.
+     * @param {MousEvent} ev
      */
-    const onMouseup = () => dragStop(false);
+    const onMouseup = (ev) => {
+        updateMouseFromEvent(ev);
+        dragStop(false);
+    };
 
     /**
      * Main entry function to start a drag sequence.
@@ -443,14 +452,14 @@ export function useSortable(params) {
             }
         }
 
-        execHandler("onStart", currentGroup, currentElement);
+        execHandler("onStart", { element: currentElement, group: currentGroup });
 
         // Ghost is initially added right after the current element.
         currentElement.after(ghost);
 
         // Adjusts the offset
-        offsetX -= x;
-        offsetY -= y;
+        offset.x -= x;
+        offset.y -= y;
 
         addStyle(currentElement, {
             position: "fixed",
@@ -484,13 +493,13 @@ export function useSortable(params) {
     const dragStop = (cancelled, inErrorState) => {
         if (started) {
             if (!inErrorState) {
-                execHandler("onStop", currentGroup, currentElement);
+                execHandler("onStop", { element: currentElement, group: currentGroup });
                 const previous = ghost.previousElementSibling;
                 const next = ghost.nextElementSibling;
                 if (!cancelled && previous !== currentElement && next !== currentElement) {
                     execHandler("onDrop", {
-                        group: currentGroup,
                         element: currentElement,
+                        group: currentGroup,
                         previous,
                         next,
                         parent: groupSelector && ghost.closest(groupSelector),
@@ -512,6 +521,14 @@ export function useSortable(params) {
         ghost = null;
 
         started = false;
+    };
+
+    /**
+     * @param {MouseEvent} ev
+     */
+    const updateMouseFromEvent = (ev) => {
+        mouse.x = ev.clientX;
+        mouse.y = ev.clientY;
     };
 
     // OWL HOOKS
