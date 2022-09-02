@@ -146,6 +146,9 @@ class AccountChartTemplate(models.Model):
     default_cash_difference_expense_account_id = fields.Many2one('account.account.template', string="Cash Difference Expense Account")
     default_pos_receivable_account_id = fields.Many2one('account.account.template', string="PoS receivable account")
 
+    account_journal_early_pay_discount_expense_account_id = fields.Many2one(comodel_name='account.account.template', string='Cash Discount Write-Off Expense Account', )
+    account_journal_early_pay_discount_income_account_id = fields.Many2one(comodel_name='account.account.template', string='Cash Discount Write-Off Income Account', )
+
     property_account_receivable_id = fields.Many2one('account.account.template', string='Receivable Account')
     property_account_payable_id = fields.Many2one('account.account.template', string='Payable Account')
     property_account_expense_categ_id = fields.Many2one('account.account.template', string='Category of Expense Account')
@@ -204,6 +207,24 @@ class AccountChartTemplate(models.Model):
             'name': _("Bank Suspense Account"),
             'code': self.env['account.account']._search_new_account_code(company, code_digits, company.bank_account_code_prefix or ''),
             'account_type': 'asset_current',
+            'company_id': company.id,
+        })
+
+    @api.model
+    def _create_cash_discount_expense_account(self, company, code_digits):
+        return self.env['account.account'].create({
+            'name': _("Cash Discount Write-Off Expense Account"),
+            'code': 999997,
+            'account_type': 'expense',
+            'company_id': company.id,
+        })
+
+    @api.model
+    def _create_cash_discount_income_account(self, company, code_digits):
+        return self.env['account.account'].create({
+            'name': _("Cash Discount Write-Off Income Account"),
+            'code': 999998,
+            'account_type': 'income_other',
             'company_id': company.id,
         })
 
@@ -320,8 +341,12 @@ class AccountChartTemplate(models.Model):
         # Set default cash difference account on company
         if not company.account_journal_suspense_account_id:
             company.account_journal_suspense_account_id = self._create_liquidity_journal_suspense_account(company, self.code_digits)
+            # Set default cash discount write-off accounts
+            if not company.account_journal_early_pay_discount_expense_account_id:
+                company.account_journal_early_pay_discount_expense_account_id = self._create_cash_discount_expense_account(company, self.code_digits)
+            if not company.account_journal_early_pay_discount_income_account_id:
+                company.account_journal_early_pay_discount_income_account_id = self._create_cash_discount_income_account(company, self.code_digits)
 
-        if not company.account_journal_payment_debit_account_id:
             company.account_journal_payment_debit_account_id = self.env['account.account'].create({
                 'name': _("Outstanding Receipts"),
                 'code': self.env['account.account']._search_new_account_code(company, self.code_digits, company.bank_account_code_prefix or ''),

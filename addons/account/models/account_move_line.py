@@ -275,6 +275,7 @@ class AccountMoveLine(models.Model):
             ('payment_term', 'Payment Term'),
             ('line_section', 'Section'),
             ('line_note', 'Note'),
+            ('epd', 'Early Payment Discount')
         ],
         compute='_compute_display_type', store=True, readonly=False, precompute=True,
         required=True,
@@ -338,6 +339,9 @@ class AccountMoveLine(models.Model):
     tax_key = fields.Binary(compute='_compute_tax_key')
     compute_all_tax = fields.Binary(compute='_compute_all_tax')
     compute_all_tax_dirty = fields.Boolean(compute='_compute_all_tax')
+    epd_key = fields.Binary(compute='_compute_epd_key')
+    epd_needed = fields.Binary(compute='compute_epd_needed')
+    epd_dirty = fields.Boolean(compute='compute_epd_needed')
 
     # === Analytic fields === #
     analytic_line_ids = fields.One2many(
@@ -358,6 +362,21 @@ class AccountMoveLine(models.Model):
         compute="_compute_analytic_tag_ids", store=True, readonly=False,
         check_company=True,
         copy=True,
+    )
+
+    # === Early Pay fields === #
+    discount_date = fields.Date(
+        string='Discount Date',
+        store=True,
+        help='Last date at which the discounted amount must be paid in order for the Early Payment Discount to be granted'
+    )
+    discount_amount = fields.Monetary(
+        string='Discount Amount',
+        store=True,
+        help='Discounted amount to pay when the early payment discount is applied'
+    )
+    discount_percentage = fields.Float(
+        store=True,
     )
 
     # === Misc Information === #
@@ -404,7 +423,6 @@ class AccountMoveLine(models.Model):
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
-
     @api.depends('move_id')
     def _compute_display_type(self):
         for line in self.filtered(lambda l: not l.display_type):
@@ -895,14 +913,16 @@ class AccountMoveLine(models.Model):
                 amount_currency = sign * line.price_unit * (1 - line.discount / 100)
                 amount = sign * line.price_unit / line.currency_rate * (1 - line.discount / 100)
                 handle_price_include = True
+                quantity = line.quantity
             else:
                 amount_currency = line.amount_currency
                 amount = line.balance
                 handle_price_include = False
+                quantity = 1
             compute_all_currency = line.tax_ids.compute_all(
                 amount_currency,
                 currency=line.currency_id,
-                quantity=line.quantity,
+                quantity=quantity,
                 product=line.product_id,
                 partner=line.move_id.partner_id or line.partner_id,
                 is_refund=line.is_refund,
@@ -913,7 +933,7 @@ class AccountMoveLine(models.Model):
             compute_all = line.tax_ids.compute_all(
                 amount,
                 currency=line.company_id.currency_id,
-                quantity=line.quantity,
+                quantity=quantity,
                 product=line.product_id,
                 partner=line.move_id.partner_id or line.partner_id,
                 is_refund=line.is_refund,
@@ -948,6 +968,67 @@ class AccountMoveLine(models.Model):
                     'tax_tag_ids': [(6, 0, compute_all['base_tags'])],
                 }
 
+    @api.depends('tax_ids', 'account_id', 'company_id')
+    def _compute_epd_key(self):
+        for line in self:
+            if line.display_type == 'epd' and line.company_id.early_pay_discount_computation == 'mixed':
+                line.epd_key = frozendict({
+                    'account_id': line.account_id.id,
+                    'analytic_account_id': line.analytic_account_id.id,
+                    'analytic_tag_ids': [Command.set(line.analytic_tag_ids.ids)],
+                    'tax_ids': [Command.set(line.tax_ids.ids)],
+                    'tax_tag_ids': [Command.set(line.tax_tag_ids.ids)],
+                    'move_id': line.move_id.id,
+                })
+            else:
+                line.epd_key = False
+
+    @api.depends('move_id.needed_terms', 'account_id', 'analytic_account_id', 'analytic_tag_ids', 'tax_ids', 'tax_tag_ids', 'company_id')
+    def compute_epd_needed(self):
+        for line in self:
+            line.epd_dirty = True
+            line.epd_needed = False
+            if line.display_type != 'product' or not line.tax_ids.ids or line.company_id.early_pay_discount_computation != 'mixed':
+                continue
+
+            discount_percentages = [
+                x['discount_percentage'] / 100.0
+                for x in line.move_id.needed_terms.values()
+                if x.get('discount_percentage')
+            ]
+            if not discount_percentages:
+                continue
+
+            epd_needed = {}
+            for discount_percentage in discount_percentages:
+                epd_needed_vals = epd_needed.setdefault(
+                    frozendict({
+                        'move_id': line.move_id.id,
+                        'account_id': line.account_id.id,
+                        'analytic_account_id': line.analytic_account_id.id,
+                        'analytic_tag_ids': [Command.set(line.analytic_tag_ids.ids)],
+                        'tax_ids': [Command.set(line.tax_ids.ids)],
+                        'tax_tag_ids': [Command.set(line.tax_tag_ids.ids)],
+                        'display_type': 'epd',
+                    }),
+                    {'amount_currency': 0.0, 'balance': 0.0, 'price_subtotal': 0.0},
+                )
+                epd_needed_vals['amount_currency'] -= line.amount_currency * discount_percentage
+                epd_needed_vals['balance'] -= line.balance * discount_percentage
+                epd_needed_vals['price_subtotal'] -= line.price_subtotal * discount_percentage
+                epd_needed_vals = epd_needed.setdefault(
+                    frozendict({
+                        'move_id': line.move_id.id,
+                        'account_id': line.account_id.id,
+                        'display_type': 'epd',
+                    }),
+                    {'amount_currency': 0.0, 'balance': 0.0, 'price_subtotal': 0.0},
+                )
+                epd_needed_vals['amount_currency'] += line.amount_currency * discount_percentage
+                epd_needed_vals['balance'] += line.balance * discount_percentage
+                epd_needed_vals['price_subtotal'] += line.price_subtotal * discount_percentage
+            line.epd_needed = {k: frozendict(v) for k, v in epd_needed.items()}
+
     @api.depends('move_id.move_type', 'balance', 'tax_ids')
     def _compute_is_refund(self):
         for line in self:
@@ -966,7 +1047,7 @@ class AccountMoveLine(models.Model):
     @api.depends('date_maturity')
     def _compute_term_key(self):
         for line in self:
-            if line.display_type in 'payment_term':
+            if line.display_type == 'payment_term':
                 line.term_key = frozendict({
                     'move_id': line.move_id.id,
                     'date_maturity': fields.Date.to_date(line.date_maturity),
