@@ -1397,36 +1397,6 @@ registerModel({
             return this.activities.filter(activity => activity.state === 'today');
         },
         /**
-         * @private
-         * @returns {string|FieldCommand}
-         */
-        _computeTypingStatusText() {
-            if (!this.channel) {
-                return clear();
-            }
-            if (this.channel.orderedOtherTypingMembers.length === 0) {
-                return clear();
-            }
-            if (this.channel.orderedOtherTypingMembers.length === 1) {
-                return sprintf(
-                    this.env._t("%s is typing..."),
-                    this.getMemberName(this.channel.orderedOtherTypingMembers[0].persona)
-                );
-            }
-            if (this.channel.orderedOtherTypingMembers.length === 2) {
-                return sprintf(
-                    this.env._t("%s and %s are typing..."),
-                    this.getMemberName(this.channel.orderedOtherTypingMembers[0].persona),
-                    this.getMemberName(this.channel.orderedOtherTypingMembers[1].persona)
-                );
-            }
-            return sprintf(
-                this.env._t("%s, %s and more are typing..."),
-                this.getMemberName(this.channel.orderedOtherTypingMembers[0].persona),
-                this.getMemberName(this.channel.orderedOtherTypingMembers[1].persona)
-            );
-        },
-        /**
          * Compute an url string that can be used inside a href attribute
          *
          * @private
@@ -2108,13 +2078,6 @@ registerModel({
         threadNeedactionPreviewViews: many('ThreadNeedactionPreviewView', {
             inverse: 'thread',
             isCausal: true,
-        }),
-        /**
-         * Text that represents the status on this thread about typing members.
-         */
-        typingStatusText: attr({
-            compute: '_computeTypingStatusText',
-            default: '',
         }),
         /**
          * URL to access to the conversation.

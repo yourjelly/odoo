@@ -4,6 +4,8 @@ import { registerModel } from '@mail/model/model_core';
 import { attr, one, many } from '@mail/model/model_field';
 import { clear } from '@mail/model/model_field_command';
 
+import { sprintf } from '@web/core/utils/strings';
+
 registerModel({
     name: 'Channel',
     modelMethods: {
@@ -188,6 +190,33 @@ registerModel({
         },
         /**
          * @private
+         * @returns {string|FieldCommand}
+         */
+        _computeTypingStatusText() {
+            if (this.orderedOtherTypingMembers.length === 0) {
+                return clear();
+            }
+            if (this.orderedOtherTypingMembers.length === 1) {
+                return sprintf(
+                    this.env._t("%s is typing..."),
+                    this.thread.getMemberName(this.orderedOtherTypingMembers[0].persona)
+                );
+            }
+            if (this.orderedOtherTypingMembers.length === 2) {
+                return sprintf(
+                    this.env._t("%s and %s are typing..."),
+                    this.thread.getMemberName(this.orderedOtherTypingMembers[0].persona),
+                    this.thread.getMemberName(this.orderedOtherTypingMembers[1].persona)
+                );
+            }
+            return sprintf(
+                this.env._t("%s, %s and more are typing..."),
+                this.thread.getMemberName(this.orderedOtherTypingMembers[0].persona),
+                this.thread.getMemberName(this.orderedOtherTypingMembers[1].persona)
+            );
+        },
+        /**
+         * @private
          * @returns {integer}
          */
         _computeUnknownMemberCount() {
@@ -339,6 +368,13 @@ registerModel({
          * channel, including current partner.
          */
         typingMembers: many('ChannelMember'),
+        /**
+         * Text that represents the status of this channel about typing members.
+         */
+        typingStatusText: attr({
+            compute: '_computeTypingStatusText',
+            default: '',
+        }),
         /**
          * States how many members are currently unknown on the client side.
          * This is the difference between the total number of members of the

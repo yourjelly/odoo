@@ -7,7 +7,7 @@
                     <ThreadTypingIcon
                         className="'o_ThreadIcon_typing'"
                         animation="'pulse'"
-                        title="thread.typingStatusText"
+                        title="thread.channel.typingStatusText"
                     />
                 </t>
                 <t t-else="">

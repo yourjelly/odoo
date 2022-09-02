@@ -17,7 +17,7 @@
                         <ThreadTypingIcon
                             className="'o_ThreadIcon_typing flex-grow-1'"
                             animation="'pulse'"
-                            title="thread.typingStatusText"
+                            title="thread.channel.typingStatusText"
                         />
                     </t>
                     <t t-elif="thread.channel.correspondent.im_status === 'online'">
