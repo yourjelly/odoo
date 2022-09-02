@@ -3350,3 +3350,21 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         self.assertEqual(invoice.amount_untaxed, 82.64)
         self.assertEqual(invoice.amount_tax, 17.36)
         self.assertEqual(len(invoice.invoice_line_ids), 2)
+
+    def test_early_payment_discount(self):
+        invoice = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'invoice_date': '2022-02-20',
+            'partner_id': self.partner_a.id,
+            'invoice_payment_term_id': self.pay_terms_b.id,
+            'invoice_line_ids': [
+                Command.create({
+                    'product_id': self.product_a.id,
+                    'price_unit': 1000.0,
+                }),
+            ],
+        })
+        payment_terms = invoice.line_ids.filtered(lambda x: x.display_type == 'payment_term')
+
+        truc = invoice._get_invoice_counterpart_amls_for_early_payment_discount(payment_terms)
+        print(truc)
