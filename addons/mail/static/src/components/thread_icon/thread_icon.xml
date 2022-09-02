@@ -13,7 +13,7 @@
                     </t>
                 </t>
                 <t t-elif="thread.channel and thread.channel.channel_type === 'chat' and thread.channel.correspondent">
-                    <t t-if="thread.orderedOtherTypingMembers.length > 0">
+                    <t t-if="thread.channel.orderedOtherTypingMembers.length > 0">
                         <ThreadTypingIcon
                             className="'o_ThreadIcon_typing flex-grow-1'"
                             animation="'pulse'"

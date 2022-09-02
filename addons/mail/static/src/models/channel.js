@@ -181,6 +181,13 @@ registerModel({
         },
         /**
          * @private
+         * @returns {Member[]}
+         */
+        _computeOrderedOtherTypingMembers() {
+            return this.orderedTypingMembers.filter(member => !member.isMemberOfCurrentUser);
+        },
+        /**
+         * @private
          * @returns {integer}
          */
         _computeUnknownMemberCount() {
@@ -289,6 +296,12 @@ registerModel({
         orderedOnlineMembers: many('ChannelMember', {
             inverse: 'channelAsOnlineMember',
             sort: '_sortMembers',
+        }),
+        /**
+         * Ordered typing members on this thread, excluding the current partner.
+         */
+        orderedOtherTypingMembers: many('ChannelMember', {
+            compute: '_computeOrderedOtherTypingMembers',
         }),
         orderedTypingMembers: many('ChannelMember'),
         /**

@@ -1365,16 +1365,6 @@ registerModel({
         },
         /**
          * @private
-         * @returns {Partner[]|FieldCommand}
-         */
-        _computeOrderedOtherTypingMembers() {
-            if (!this.channel) {
-                return clear();
-            }
-            return this.channel.orderedTypingMembers.filter(member => !member.isMemberOfCurrentUser);
-        },
-        /**
-         * @private
          * @returns {Activity[]}
          */
         _computeOverdueActivities() {
@@ -1408,29 +1398,32 @@ registerModel({
         },
         /**
          * @private
-         * @returns {string}
+         * @returns {string|FieldCommand}
          */
         _computeTypingStatusText() {
-            if (this.orderedOtherTypingMembers.length === 0) {
+            if (!this.channel) {
                 return clear();
             }
-            if (this.orderedOtherTypingMembers.length === 1) {
+            if (this.channel.orderedOtherTypingMembers.length === 0) {
+                return clear();
+            }
+            if (this.channel.orderedOtherTypingMembers.length === 1) {
                 return sprintf(
                     this.env._t("%s is typing..."),
-                    this.getMemberName(this.orderedOtherTypingMembers[0].persona)
+                    this.getMemberName(this.channel.orderedOtherTypingMembers[0].persona)
                 );
             }
-            if (this.orderedOtherTypingMembers.length === 2) {
+            if (this.channel.orderedOtherTypingMembers.length === 2) {
                 return sprintf(
                     this.env._t("%s and %s are typing..."),
-                    this.getMemberName(this.orderedOtherTypingMembers[0].persona),
-                    this.getMemberName(this.orderedOtherTypingMembers[1].persona)
+                    this.getMemberName(this.channel.orderedOtherTypingMembers[0].persona),
+                    this.getMemberName(this.channel.orderedOtherTypingMembers[1].persona)
                 );
             }
             return sprintf(
                 this.env._t("%s, %s and more are typing..."),
-                this.getMemberName(this.orderedOtherTypingMembers[0].persona),
-                this.getMemberName(this.orderedOtherTypingMembers[1].persona)
+                this.getMemberName(this.channel.orderedOtherTypingMembers[0].persona),
+                this.getMemberName(this.channel.orderedOtherTypingMembers[1].persona)
             );
         },
         /**
@@ -1959,12 +1952,6 @@ registerModel({
          */
         orderedNonTransientMessages: many('Message', {
             compute: '_computeOrderedNonTransientMessages',
-        }),
-        /**
-         * Ordered typing members on this thread, excluding the current partner.
-         */
-        orderedOtherTypingMembers: many('ChannelMember', {
-            compute: '_computeOrderedOtherTypingMembers',
         }),
         originThreadAttachments: many('Attachment', {
             inverse: 'originThread',
