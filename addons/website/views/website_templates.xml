@@ -159,10 +159,22 @@
         <t t-if="website and website.google_analytics_key and not editable">
             <script id="tracking_code" async="1" t-attf-src="https://www.googletagmanager.com/gtag/js?id={{ website.google_analytics_key }}"></script>
             <script>
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', '<t t-esc="website.google_analytics_key"/>');
+                let allowOptionalCookies = !document.getElementById('cookies-consent-essential');
+                if (!allowOptionalCookies) {
+                    for (const cookie of (document.cookie || '').split(';')) {
+                        const keyValue = cookie.split('=');
+                        if (keyValue[0].trim() === 'accepted_cookie_types') {
+                            allowOptionalCookies = JSON.parse(keyValue[1]).optional;
+                            break;
+                        }
+                    }
+                }
+                if (allowOptionalCookies) {
+                    window.dataLayer = window.dataLayer || [];
+                    function gtag(){dataLayer.push(arguments);}
+                    gtag('js', new Date());
+                    gtag('config', '<t t-esc="website.google_analytics_key"/>');
+                }
             </script>
         </t>
         <t t-if="website and website.plausible_shared_key and not editable">
