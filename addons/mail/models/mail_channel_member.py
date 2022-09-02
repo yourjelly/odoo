@@ -17,6 +17,7 @@ class ChannelMember(models.Model):
     # identity
     partner_id = fields.Many2one('res.partner', string='Recipient', ondelete='cascade', index=True)
     guest_id = fields.Many2one(string="Guest", comodel_name='mail.guest', ondelete='cascade', readonly=True, index=True)
+    is_current_user = fields.Boolean(compute='_compute_is_current_user', help="States whether this member is the current user.")
     partner_email = fields.Char('Email', related='partner_id.email', readonly=False)
     # channel
     channel_id = fields.Many2one('mail.channel', string='Channel', ondelete='cascade', readonly=True, required=True)
@@ -33,6 +34,22 @@ class ChannelMember(models.Model):
     # RTC
     rtc_session_ids = fields.One2many(string="RTC Sessions", comodel_name='mail.channel.rtc.session', inverse_name='channel_member_id')
     rtc_inviting_session_id = fields.Many2one('mail.channel.rtc.session', string='Ringing session')
+
+    @api.depends_context('uid', 'guest')
+    def _compute_is_current_user(self):
+        current_guest = self.env['mail.guest']
+        guest = self.env['mail.guest']._get_guest_from_context()
+        if self.env.user._is_public and guest:
+            current_guest = guest
+        else:
+            current_partner = self.env.user.partner_id
+        for member in self:
+            if member.partner_id:
+                member.is_current_user = member.partner_id == current_partner
+            elif member.guest_id:
+                member.is_current_user = member.guest_id == current_guest
+            else:
+                member.is_current_user = False
 
     @api.depends('channel_id.message_ids', 'seen_message_id')
     def _compute_message_unread(self):
