@@ -290,6 +290,7 @@ registerModel({
             inverse: 'channelAsOnlineMember',
             sort: '_sortMembers',
         }),
+        orderedTypingMembers: many('ChannelMember'),
         /**
          * Message unread counter coming from server.
          *

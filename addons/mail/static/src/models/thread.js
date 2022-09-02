@@ -834,14 +834,14 @@ registerModel({
             // Manage typing member relation.
             const memberOfCurrentUser = this.channel.memberOfCurrentUser;
             const newOrderedTypingMembers = [
-                ...this.orderedTypingMembers.filter(member => member !== memberOfCurrentUser),
+                ...this.channel.orderedTypingMembers.filter(member => member !== memberOfCurrentUser),
                 memberOfCurrentUser,
             ];
-            this.update({
-                isCurrentPartnerTyping: true,
+            this.update({ isCurrentPartnerTyping: true });
+            this.channel.update({
                 orderedTypingMembers: newOrderedTypingMembers,
+                typingMembers: link(memberOfCurrentUser),
             });
-            this.channel.update({ typingMembers: link(memberOfCurrentUser) });
             // Notify typing status to other members.
             await this.throttleNotifyCurrentPartnerTypingStatus.do();
         },
@@ -853,11 +853,13 @@ registerModel({
         registerOtherMemberTypingMember(member) {
             this.update({ otherMembersLongTypingTimers: insert({ member }) });
             const newOrderedTypingMembers = [
-                ...this.orderedTypingMembers.filter(currentMember => currentMember !== member),
+                ...this.channel.orderedTypingMembers.filter(currentMember => currentMember !== member),
                 member,
             ];
-            this.update({ orderedTypingMembers: newOrderedTypingMembers });
-            this.channel.update({ typingMembers: link(member) });
+            this.channel.update({
+                orderedTypingMembers: newOrderedTypingMembers,
+                typingMembers: link(member),
+            });
         },
         /**
          * Renames this thread to the given new name.
@@ -935,12 +937,12 @@ registerModel({
             });
             // Manage typing member relation.
             const memberOfCurrentUser = this.channel.memberOfCurrentUser;
-            const newOrderedTypingMembers = this.orderedTypingMembers.filter(member => member !== memberOfCurrentUser);
-            this.update({
-                isCurrentPartnerTyping: false,
+            const newOrderedTypingMembers = this.channel.orderedTypingMembers.filter(member => member !== memberOfCurrentUser);
+            this.update({ isCurrentPartnerTyping: false });
+            this.channel.update({
                 orderedTypingMembers: newOrderedTypingMembers,
+                typingMembers: unlink(memberOfCurrentUser),
             });
-            this.channel.update({ typingMembers: unlink(memberOfCurrentUser) });
             // Notify typing status to other members.
             if (immediateNotify) {
                 this.throttleNotifyCurrentPartnerTypingStatus.clear();
@@ -955,9 +957,11 @@ registerModel({
          */
         unregisterOtherMemberTypingMember(member) {
             this.update({ otherMembersLongTypingTimers: insertAndUnlink({ member }) });
-            const newOrderedTypingMembers = this.orderedTypingMembers.filter(currentMember => currentMember !== member);
-            this.update({ orderedTypingMembers: newOrderedTypingMembers });
-            this.channel.update({ typingMembers: unlink(member) });
+            const newOrderedTypingMembers = this.channel.orderedTypingMembers.filter(currentMember => currentMember !== member);
+            this.channel.update({
+                orderedTypingMembers: newOrderedTypingMembers,
+                typingMembers: unlink(member),
+            });
         },
         /**
          * Unsubscribe current user from provided channel.
@@ -1361,10 +1365,13 @@ registerModel({
         },
         /**
          * @private
-         * @returns {Partner[]}
+         * @returns {Partner[]|FieldCommand}
          */
         _computeOrderedOtherTypingMembers() {
-            return this.orderedTypingMembers.filter(member => !member.isMemberOfCurrentUser);
+            if (!this.channel) {
+                return clear();
+            }
+            return this.channel.orderedTypingMembers.filter(member => !member.isMemberOfCurrentUser);
         },
         /**
          * @private
@@ -1959,10 +1966,6 @@ registerModel({
         orderedOtherTypingMembers: many('ChannelMember', {
             compute: '_computeOrderedOtherTypingMembers',
         }),
-        /**
-         * Ordered list of typing members.
-         */
-        orderedTypingMembers: many('ChannelMember'),
         originThreadAttachments: many('Attachment', {
             inverse: 'originThread',
             isCausal: true,
