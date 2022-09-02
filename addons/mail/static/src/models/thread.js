@@ -840,8 +840,8 @@ registerModel({
             this.update({
                 isCurrentPartnerTyping: true,
                 orderedTypingMembers: newOrderedTypingMembers,
-                typingMembers: link(memberOfCurrentUser),
             });
+            this.channel.update({ typingMembers: link(memberOfCurrentUser) });
             // Notify typing status to other members.
             await this.throttleNotifyCurrentPartnerTypingStatus.do();
         },
@@ -856,10 +856,8 @@ registerModel({
                 ...this.orderedTypingMembers.filter(currentMember => currentMember !== member),
                 member,
             ];
-            this.update({
-                orderedTypingMembers: newOrderedTypingMembers,
-                typingMembers: link(member),
-            });
+            this.update({ orderedTypingMembers: newOrderedTypingMembers });
+            this.channel.update({ typingMembers: link(member) });
         },
         /**
          * Renames this thread to the given new name.
@@ -941,8 +939,8 @@ registerModel({
             this.update({
                 isCurrentPartnerTyping: false,
                 orderedTypingMembers: newOrderedTypingMembers,
-                typingMembers: unlink(memberOfCurrentUser),
             });
+            this.channel.update({ typingMembers: unlink(memberOfCurrentUser) });
             // Notify typing status to other members.
             if (immediateNotify) {
                 this.throttleNotifyCurrentPartnerTypingStatus.clear();
@@ -958,10 +956,8 @@ registerModel({
         unregisterOtherMemberTypingMember(member) {
             this.update({ otherMembersLongTypingTimers: insertAndUnlink({ member }) });
             const newOrderedTypingMembers = this.orderedTypingMembers.filter(currentMember => currentMember !== member);
-            this.update({
-                orderedTypingMembers: newOrderedTypingMembers,
-                typingMembers: unlink(member),
-            });
+            this.update({ orderedTypingMembers: newOrderedTypingMembers });
+            this.channel.update({ typingMembers: unlink(member) });
         },
         /**
          * Unsubscribe current user from provided channel.
@@ -2123,11 +2119,6 @@ registerModel({
             inverse: 'thread',
             isCausal: true,
         }),
-        /**
-         * Members that are currently typing something in the composer of this
-         * thread, including current partner.
-         */
-        typingMembers: many('ChannelMember'),
         /**
          * Text that represents the status on this thread about typing members.
          */

@@ -356,13 +356,13 @@ registerModel({
                 return;
             }
             if (member.isTyping) {
-                if (member.channel.thread.typingMembers.includes(member)) {
+                if (member.channel.typingMembers.includes(member)) {
                     member.channel.thread.refreshOtherMemberTypingMember(member);
                 } else {
                     member.channel.thread.registerOtherMemberTypingMember(member);
                 }
             } else {
-                if (!member.channel.thread.typingMembers.includes(member)) {
+                if (!member.channel.typingMembers.includes(member)) {
                     // Ignore no longer typing notifications of members that
                     // are not registered as typing something.
                     return;

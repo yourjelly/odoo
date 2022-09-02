@@ -321,6 +321,11 @@ registerModel({
             required: true,
         }),
         /**
+         * Members that are currently typing something in the composer of this
+         * channel, including current partner.
+         */
+        typingMembers: many('ChannelMember'),
+        /**
          * States how many members are currently unknown on the client side.
          * This is the difference between the total number of members of the
          * channel as reported in memberCount and those actually in members.

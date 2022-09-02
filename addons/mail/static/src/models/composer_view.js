@@ -74,7 +74,7 @@ registerModel({
             ) {
                 return;
             }
-            if (this.composer.thread.typingMembers.includes(this.composer.thread.channel.memberOfCurrentUser)) {
+            if (this.composer.thread.channel.typingMembers.includes(this.composer.thread.channel.memberOfCurrentUser)) {
                 this.composer.thread.refreshCurrentPartnerIsTyping();
             } else {
                 this.composer.thread.registerCurrentPartnerIsTyping();
