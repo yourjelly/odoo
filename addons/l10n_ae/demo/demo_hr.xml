@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- JOB -->
+    <record id="demo_hr_job_ae_1" model="hr.job">
+        <field name="name">Sales Manager</field>
+        <field name="state">recruit</field>
+    </record>
+
+    <record id="demo_hr_job_ae_2" model="hr.job">
+        <field name="name">Sales Executive</field>
+        <field name="state">recruit</field>
+    </record>
+
+
+    <!-- HR CONTRACTS -->
+    <record id="demo_hr_contract_ae_1" model="hr.contract">
+        <field name="name">Sales Executive</field>
+        <field name="date_start">2020-07-12</field>
+        <field name="resource_calendar_id" ref="resource.resource_calendar_std" />
+        <field name="department_id" ref="hr.dep_sales" />
+        <field name="job_id" ref="demo_hr_job_ae_2" />
+        <field eval="30000.0" name="wage" />
+    </record>
+
+    <record id="demo_hr_contract_ae_2" model="hr.contract">
+        <field name="name">Ahmad - Sales Manager</field>
+        <field name="date_start">2020-07-12</field>
+        <field name="resource_calendar_id" ref="resource.resource_calendar_std" />
+        <field name="department_id" ref="hr.dep_sales" />
+        <field name="job_id" ref="demo_hr_job_ae_1" />
+        <field eval="75000.0" name="wage" />
+    </record>
+
+    <record id="demo_hr_contract_ae_3" model="hr.contract">
+        <field name="name">Sales Executive</field>
+        <field name="date_start">2020-07-12</field>
+        <field name="resource_calendar_id" ref="resource.resource_calendar_std" />
+        <field name="department_id" ref="hr.dep_sales" />
+        <field name="job_id" ref="demo_hr_job_ae_2" />
+        <field eval="25000.0" name="wage" />
+    </record>
+
+    <record id="demo_hr_contract_ae_4" model="hr.contract">
+        <field name="name">Sales Executive</field>
+        <field name="date_start">2020-07-12</field>
+        <field name="resource_calendar_id" ref="resource.resource_calendar_std" />
+        <field name="department_id" ref="hr.dep_sales" />
+        <field name="job_id" ref="demo_hr_job_ae_2" />
+        <field eval="30000.0" name="wage" />
+    </record>
+
+    <record id="demo_hr_contract_ae_5" model="hr.contract">
+        <field name="name">Sales Executive</field>
+        <field name="date_start">2020-07-12</field>
+        <field name="resource_calendar_id" ref="resource.resource_calendar_std" />
+        <field name="department_id" ref="hr.dep_sales" />
+        <field name="job_id" ref="demo_hr_job_ae_2" />
+        <field eval="25000.0" name="wage" />
+    </record>
+
+    <!-- EMPLOYEES -->
+    <record id="demo_hr_employee_ae_1" model="hr.employee">
+        <field name="name">Ahmad Abadi</field>
+        <field name="department_id" ref="hr.dep_sales"/>
+        <field name="job_id" ref="demo_hr_job_ae_1"/>
+        <field name="mobile_phone">+971 55 625 9666</field>
+        <field name="address_id" ref="partner_demo_company_ae" />
+        <field name="contract_id" ref="demo_hr_contract_ae_2" />
+        <field name="resource_calendar_id" ref="resource.resource_calendar_std" />
+    </record>
+
+    <record id="demo_hr_employee_ae_2" model="hr.employee">
+        <field name="name">Abdullah Khamees</field>
+        <field name="parent_id" ref="demo_hr_employee_ae_1" />
+        <field name="coach_id" ref="demo_hr_employee_ae_1" />
+        <field name="department_id" ref="hr.dep_sales"/>
+        <field name="job_id" ref="demo_hr_job_ae_1"/>
+        <field name="mobile_phone">+971 55 625 9800</field>
+        <field name="address_id" ref="partner_demo_company_ae" />
+        <field name="contract_id" ref="demo_hr_contract_ae_3" />
+        <field name="resource_calendar_id" ref="resource.resource_calendar_std" />
+    </record>
+
+    <record id="demo_hr_employee_ae_3" model="hr.employee">
+        <field name="name">Manal Abdulrahman</field>
+        <field name="parent_id" ref="demo_hr_employee_ae_1" />
+        <field name="coach_id" ref="demo_hr_employee_ae_1" />
+        <field name="department_id" ref="hr.dep_sales"/>
+        <field name="job_id" ref="demo_hr_job_ae_1"/>
+        <field name="mobile_phone">+971 55 900 2001</field>
+        <field name="address_id" ref="partner_demo_company_ae" />
+        <field name="contract_id" ref="demo_hr_contract_ae_1" />
+        <field name="resource_calendar_id" ref="resource.resource_calendar_std" />
+    </record>
+
+    <record id="demo_hr_employee_ae_4" model="hr.employee">
+        <field name="name">Sabah Mansour</field>
+        <field name="parent_id" ref="demo_hr_employee_ae_1" />
+        <field name="coach_id" ref="demo_hr_employee_ae_1" />
+        <field name="department_id" ref="hr.dep_sales"/>
+        <field name="job_id" ref="demo_hr_job_ae_1"/>
+        <field name="mobile_phone">+971 55 002 7410</field>
+        <field name="address_id" ref="partner_demo_company_ae" />
+        <field name="contract_id" ref="demo_hr_contract_ae_5" />
+        <field name="resource_calendar_id" ref="resource.resource_calendar_std" />
+    </record>
+
+    <record id="demo_hr_employee_ae_5" model="hr.employee">
+        <field name="name">Saeeda Shehhi</field>
+        <field name="parent_id" ref="demo_hr_employee_ae_1" />
+        <field name="coach_id" ref="demo_hr_employee_ae_1" />
+        <field name="department_id" ref="hr.dep_sales"/>
+        <field name="job_id" ref="demo_hr_job_ae_1"/>
+        <field name="mobile_phone">+971 55 600 2003</field>
+        <field name="address_id" ref="partner_demo_company_ae" />
+        <field name="contract_id" ref="demo_hr_contract_ae_4" />
+        <field name="resource_calendar_id" ref="resource.resource_calendar_std" />
+    </record>
+</odoo>

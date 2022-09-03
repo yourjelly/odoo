@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="demo_sale_ae_1" model="sale.order">
+        <field name="partner_id" ref="partner_demo_dubai_european_company" />
+        <field name="user_id" ref="base.user_demo" />
+        <field name="pricelist_id" ref="product.list0" />
+        <field name="team_id" ref="sales_team.team_sales_department" />
+        <field name="campaign_id" ref="utm.utm_campaign_email_campaign_products" />
+        <field name="company_id" ref="demo_company_ae" />
+        <field name="date_order">2022-07-12 13:29:14</field>
+    </record>
+
+    <record id="demo_sale_line_ae_1" model="sale.order.line">
+        <field name="order_id" ref="demo_sale_ae_1" />
+        <field name="product_id" ref="demo_product_ae_1" />
+        <field name="product_uom_qty">1.0</field>
+        <field name="price_unit">350.0</field>
+    </record>
+
+    <record id="demo_sale_line_ae_2" model="sale.order.line">
+        <field name="order_id" ref="demo_sale_ae_1" />
+        <field name="product_id" ref="demo_product_ae_2" />
+        <field name="product_uom_qty">1.0</field>
+        <field name="price_unit">500.0</field>
+    </record>
+
+    <record id="demo_sale_line_ae_3" model="sale.order.line">
+        <field name="order_id" ref="demo_sale_ae_1" />
+        <field name="product_id" ref="demo_product_ae_3" />
+        <field name="product_uom_qty">3.0</field>
+        <field name="price_unit">120.0</field>
+    </record>
+
+    <record id="demo_sale_ae_2" model="sale.order">
+        <field name="partner_id" ref="partner_demo_yellow_door_group" />
+        <field name="user_id" ref="base.user_demo" />
+        <field name="pricelist_id" ref="product.list0" />
+        <field name="team_id" ref="sales_team.team_sales_department" />
+        <field name="campaign_id" ref="utm.utm_campaign_email_campaign_products" />
+        <field name="company_id" ref="demo_company_ae" />
+        <field name="date_order">2022-07-12 13:28:07</field>
+    </record>
+
+    <record id="demo_sale_line_ae_4" model="sale.order.line">
+        <field name="order_id" ref="demo_sale_ae_2" />
+        <field name="product_id" ref="demo_product_ae_2" />
+        <field name="product_uom_qty">1.0</field>
+        <field name="price_unit">500.0</field>
+    </record>
+
+    <function model="sale.order" name="action_confirm" eval="[[ref('demo_sale_ae_1')]]"/>
+    <function model="sale.order" name="action_confirm" eval="[[ref('demo_sale_ae_2')]]"/>
+</odoo>

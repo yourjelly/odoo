@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="demo_product_ae_1" model="product.product">
+        <field name="name">2 Seat Couch</field>
+        <field name="sale_ok">True</field>
+        <field name="purchase_ok">True</field>
+        <field name="uom_id" ref="uom.product_uom_unit" />
+        <field name="uom_po_id" ref="uom.product_uom_unit" />
+        <field name="list_price">350.0</field>
+        <field name="standard_price">100.0</field>
+        <field name="categ_id" ref="product.product_category_all" />
+        <!-- <field name="taxes_id" eval="[(4,ref('uae_sale_tax_5_dubai'))]" /> -->
+    </record>
+
+    <record id="demo_product_ae_2" model="product.product">
+        <field name="name">3 Seat Couch</field>
+        <field name="sale_ok">True</field>
+        <field name="purchase_ok">True</field>
+        <field name="uom_id" ref="uom.product_uom_unit" />
+        <field name="uom_po_id" ref="uom.product_uom_unit" />
+        <field name="list_price">500.0</field>
+        <field name="standard_price">350.0</field>
+        <field name="categ_id" ref="product.product_category_all" />
+        <!-- <field name="taxes_id" eval="[(4,ref('uae_sale_tax_5_dubai'))]" /> -->
+    </record>
+
+    <record id="demo_product_ae_3" model="product.product">
+        <field name="name">Chair</field>
+        <field name="sale_ok">True</field>
+        <field name="purchase_ok">True</field>
+        <field name="uom_id" ref="uom.product_uom_unit" />
+        <field name="uom_po_id" ref="uom.product_uom_unit" />
+        <field name="list_price">120.0</field>
+        <field name="standard_price">40.0</field>
+        <field name="categ_id" ref="product.product_category_all" />
+        <!-- <field name="taxes_id" eval="[(4,ref('uae_sale_tax_5_dubai'))]" /> -->
+    </record>
+
+    <record id="demo_product_ae_4" model="product.product">
+        <field name="name">Paint (1 kg)</field>
+        <field name="sale_ok">True</field>
+        <field name="purchase_ok">True</field>
+        <field name="uom_id" ref="uom.product_uom_unit" />
+        <field name="uom_po_id" ref="uom.product_uom_unit" />
+        <field name="list_price">35.0</field>
+        <field name="standard_price">12.0</field>
+        <field name="categ_id" ref="product.product_category_all" />
+        <!-- <field name="taxes_id" eval="[(4,ref('uae_sale_tax_5_dubai'))]" /> -->
+    </record>
+
+    <record id="demo_product_ae_5" model="product.product">
+        <field name="name">Paint (2 kg)</field>
+        <field name="sale_ok">True</field>
+        <field name="purchase_ok">True</field>
+        <field name="uom_id" ref="uom.product_uom_unit" />
+        <field name="uom_po_id" ref="uom.product_uom_unit" />
+        <field name="list_price">35.0</field>
+        <field name="standard_price">0.0</field>
+        <field name="categ_id" ref="product.product_category_all" />
+        <!-- <field name="taxes_id" eval="[(4,ref('uae_sale_tax_5_dubai'))]" /> -->
+    </record>
+
+    <record id="demo_product_ae_6" model="product.product">
+        <field name="name">Service on Timesheet</field>
+        <field name="sale_ok">True</field>
+        <field name="purchase_ok">True</field>
+        <field name="purchase_ok">True</field>
+        <field name="uom_id" ref="uom.product_uom_unit" />
+        <field name="uom_po_id" ref="uom.product_uom_unit" />
+        <field name="list_price">40.0</field>
+        <field name="standard_price">0.0</field>
+        <field name="categ_id" ref="product.product_category_all" />
+        <!-- <field name="taxes_id" eval="[(4,ref('uae_sale_tax_5_dubai'))]" /> -->
+    </record>
+
+    <record id="demo_product_ae_7" model="product.product">
+        <field name="name">Wood (500 g/ unit)</field>
+        <field name="sale_ok">True</field>
+        <field name="purchase_ok">True</field>
+        <field name="uom_id" ref="uom.product_uom_unit" />
+        <field name="uom_po_id" ref="uom.product_uom_unit" />
+        <field name="list_price">20.0</field>
+        <field name="standard_price">5.0</field>
+        <field name="categ_id" ref="product.product_category_all" />
+        <!-- <field name="taxes_id" eval="[(4,ref('uae_sale_tax_5_dubai'))]" /> -->
+    </record>
+</odoo>

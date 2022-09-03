@@ -8,7 +8,7 @@
 United Arab Emirates accounting chart and localization.
 =======================================================
     """,
-    'depends': ['base', 'account'],
+    'depends': ['base', 'account', 'sale_stock', 'purchase_stock', 'hr_contract', 'hr_recruitment'],
     'data': [
         'data/l10n_ae_data.xml',
         'data/l10n_ae_chart_data.xml',
@@ -24,6 +24,12 @@ United Arab Emirates accounting chart and localization.
     ],
     'demo': [
         'demo/demo_company.xml',
+        'demo/demo_hr.xml',
+        'demo/demo_product.xml',
+        'demo/demo_invoice.xml',
+        'demo/demo_bills.xml',
+        'demo/demo_sale.xml',
+        'demo/demo_purchase.xml',
     ],
     'license': 'LGPL-3',
 }

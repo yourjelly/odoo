@@ -5,8 +5,8 @@
         <field name="vat"></field>
         <field name="street">A شارع ملقا</field>
         <field name="city">الشارقة</field>
-        <field name="country_id" ref="base.ae"/>
-        <field name="state_id" ref="base.state_ae_uq"/>
+        <field name="country_id" ref="base.ae" />
+        <field name="state_id" ref="base.state_ae_uq" />
         <field name="zip">81730</field>
         <field name="phone">+971 50 123 4567</field>
         <field name="email">info@company.aeexample.com</field>
@@ -15,20 +15,221 @@
 
     <record id="demo_company_ae" model="res.company">
         <field name="name">AE Company</field>
-        <field name="partner_id" ref="partner_demo_company_ae"/>
+        <field name="partner_id" ref="partner_demo_company_ae" />
     </record>
 
     <function model="res.company" name="_onchange_country_id">
-        <value eval="[ref('demo_company_ae')]"/>
+        <value eval="[ref('demo_company_ae')]" />
     </function>
 
     <function model="res.users" name="write">
-        <value eval="[ref('base.user_root'), ref('base.user_admin'), ref('base.user_demo')]"/>
-        <value eval="{'company_ids': [(4, ref('demo_company_ae'))]}"/>
+        <value eval="[ref('base.user_root'), ref('base.user_admin'), ref('base.user_demo')]" />
+        <value eval="{'company_ids': [(4, ref('demo_company_ae'))]}" />
     </function>
 
     <function model="account.chart.template" name="try_loading">
-        <value eval="[ref('l10n_ae.uae_chart_template_standard')]"/>
-        <value model="res.company" eval="obj().env.ref('l10n_ae.demo_company_ae')"/>
+        <value eval="[ref('l10n_ae.uae_chart_template_standard')]" />
+        <value model="res.company" eval="obj().env.ref('l10n_ae.demo_company_ae')" />
     </function>
+
+    <record id="partner_demo_dewa" model="res.partner">
+        <field name="name">Dubai Electricity and Water Authority - DEWA</field>
+        <field name="company_type">company</field>
+        <field name="street">Sheikh Rashid Road</field>
+        <field name="city">Dubai</field>
+        <field name="state_id" ref="base.state_ae_uq" />
+        <field name="country_id" ref="base.ae" />
+        <field name="phone">+971 4 601 9999</field>
+        <field name="website">http://dewa.gov.ae</field>
+        <field name="customer_rank">0</field>
+        <field name="supplier_rank">1</field>
+        
+    </record>
+
+    <record id="partner_demo_dewa_rep" model="res.partner">
+        <field name="name">Abdullah Al Mansoori</field>
+        <field name="company_type">person</field>
+        <field name="street">Sheikh Rashid Road</field>
+        <field name="city">Dubai</field>
+        <field name="state_id" ref="base.state_ae_uq" />
+        <field name="country_id" ref="base.ae" />
+        <field name="mobile">+971 55 475 4441</field>
+        <field name="email">abdulla.al@dewa.com</field>
+        <field name="customer_rank">0</field>
+        <field name="supplier_rank">1</field>
+        <field name="parent_id" ref="partner_demo_dewa" />
+        
+    </record>
+
+    <record id="partner_demo_dubai_european_company" model="res.partner">
+        <field name="name">Dubai European Company</field>
+        <field name="company_type">company</field>
+        <field name="street">Al Khail Road</field>
+        <field name="city">Dubai</field>
+        <field name="country_id" ref="base.ae" />
+        <field name="phone">+971 4 542 1598</field>
+        <field name="email">dec@dec.com</field>
+        <field name="customer_rank">5</field>
+        <field name="supplier_rank">0</field>
+        
+    </record>
+
+    <record id="partner_demo_dubai_european_company_rep" model="res.partner">
+        <field name="name">Mohammad Samir</field>
+        <field name="company_type">person</field>
+        <field name="street">Al Khail Road</field>
+        <field name="city">Dubai</field>
+        <field name="state_id" />
+        <field name="country_id" ref="base.ae" />
+        <field name="mobile">+971 55 987 4562</field>
+        <field name="email">mohammad.s@dec.com</field>
+        <field name="customer_rank">1</field>
+        <field name="supplier_rank">0</field>
+        <field name="parent_id" ref="partner_demo_dubai_european_company" />
+        
+    </record>
+
+<record id="partner_demo_four_style_carpentry" model="res.partner">
+        <field name="name">Four Style Carpentry</field>
+        <field name="company_type">company</field>
+        <field name="street">Sheikh Zayed Road</field>
+        <field name="city">Dubai</field>
+        <field name="state_id" ref="base.state_ae_uq" />
+        <field name="country_id" ref="base.ae" />
+        <field name="phone">+971 4 252 3698</field>
+        <field name="website">http://fourstylecarpentry.com</field>
+        <field name="customer_rank">0</field>
+        <field name="supplier_rank">3</field>
+        
+    </record>
+
+    <record id="partner_demo_four_style_carpentry_rep" model="res.partner">
+        <field name="name">Kamel Al Abadi</field>
+        <field name="company_type">person</field>
+        <field name="street">Sheikh Zayed Road</field>
+        <field name="city">Dubai</field>
+        <field name="state_id" ref="base.state_ae_uq" />
+        <field name="country_id" ref="base.ae" />
+        <field name="mobile">+971 55 787 9563</field>
+        <field name="email">kamel.a@fsc.com</field>
+        <field name="customer_rank">0</field>
+        <field name="supplier_rank">1</field>
+        <field name="parent_id" ref="partner_demo_four_style_carpentry" />
+        
+    </record>
+
+    <record id="partner_demo_kent_smoke_and_fire_curtains" model="res.partner">
+        <field name="name">Kent Smoke and Fire Curtains</field>
+        <field name="company_type">company</field>
+        <field name="street">Al Khail Road</field>
+        <field name="city">Dubai</field>
+        <field name="state_id" ref="base.state_ae_uq" />
+        <field name="country_id" ref="base.ae" />
+        <field name="phone">+971 4 288 2575</field>
+        <field name="website">http://kentsmokeandfirecurtains.com</field>
+        <field name="customer_rank">0</field>
+        <field name="supplier_rank">1</field>
+        
+    </record>
+
+    <record id="partner_demo_kent_smoke_and_fire_curtains_rep" model="res.partner">
+        <field name="name">Samar Abdullah</field>
+        <field name="company_type">person</field>
+        <field name="street">Al Khail Road</field>
+        <field name="city">Dubai</field>
+        <field name="state_id" ref="base.state_ae_uq" />
+        <field name="country_id" ref="base.ae" />
+        <field name="mobile">+971 55 998 5656</field>
+        <field name="email">samar.a@ksfc.com</field>
+        <field name="customer_rank">0</field>
+        <field name="supplier_rank">1</field>
+        <field name="parent_id" ref="partner_demo_kent_smoke_and_fire_curtains" />
+        
+    </record>
+
+    <record id="partner_demo_trading_paints" model="res.partner">
+        <field name="name">Trading Paints</field>
+        <field name="company_type">company</field>
+        <field name="street">Hessa Street</field>
+        <field name="city">Dubai</field>
+        <field name="state_id" ref="base.state_ae_uq" />
+        <field name="country_id" ref="base.ae" />
+        <field name="phone">+971 4 663 5421</field>
+        <field name="website">http://tradingpaints.com</field>
+        <field name="customer_rank">0</field>
+        <field name="supplier_rank">2</field>
+        
+    </record>
+
+    <record id="partner_demo_trading_paints_rep" model="res.partner">
+        <field name="name">Salah Abdulrahman</field>
+        <field name="company_type">person</field>
+        <field name="street">Hessa Street</field>
+        <field name="city">Dubai</field>
+        <field name="state_id" ref="base.state_ae_uq" />
+        <field name="country_id" ref="base.ae" />
+        <field name="mobile">+971 55 654 1587</field>
+        <field name="email">salah.a@tp.com</field>
+        <field name="website">False</field>
+        <field name="customer_rank">0</field>
+        <field name="supplier_rank">1</field>
+        <field name="parent_id" ref="partner_demo_trading_paints" />
+        
+    </record>
+
+<record id="partner_demo_uae_furniture_company" model="res.partner">
+        <field name="name">UAE Furniture Company</field>
+        <field name="company_type">company</field>
+        <field name="street">Sheikh Zayed Road E11</field>
+        <field name="city">Dubai</field>
+        <field name="country_id" ref="base.ae" />
+        <field name="phone">+971-4-1425369</field>
+        <field name="email">uaefuniture@uaefuniture.com</field>
+        <field name="website">http://www.uaefurniture.com</field>
+        <field name="customer_rank">2</field>
+        <field name="supplier_rank">0</field>
+        
+    </record>
+
+    <record id="partner_demo_uae_furniture_company_rep" model="res.partner">
+        <field name="name">Ahmad Abdullah</field>
+        <field name="company_type">person</field>
+        <field name="street">Sheikh Zayed Road E11</field>
+        <field name="city">Dubai</field>
+        <field name="country_id" ref="base.ae" />
+        <field name="mobile">+971 55 963 8521</field>
+        <field name="email">ahmad.a@uaefurniture.com</field>
+        <field name="customer_rank">1</field>
+        <field name="supplier_rank">0</field>
+        <field name="parent_id" ref="partner_demo_uae_furniture_company" />
+        
+    </record>
+
+    <record id="partner_demo_yellow_door_group" model="res.partner">
+        <field name="name">Yellow Door Group</field>
+        <field name="company_type">company</field>
+        <field name="street">Mohammad bin Zayed Road</field>
+        <field name="city">Dubai</field>
+        <field name="country_id" ref="base.ae" />
+        <field name="phone">+971 4 652 3574</field>
+        <field name="email">ydg@ydg.com</field>
+        <field name="customer_rank">3</field>
+        <field name="supplier_rank">0</field>
+        
+    </record>
+
+    <record id="partner_demo_yellow_door_group_rep" model="res.partner">
+        <field name="name">Yara Abdulrahman</field>
+        <field name="company_type">person</field>
+        <field name="street">Mohammad bin Zayed Road</field>
+        <field name="city">Dubai</field>
+        <field name="country_id" ref="base.ae" />
+        <field name="mobile">+971 55 625 3519</field>
+        <field name="email">yara.a@ydg.com</field>
+        <field name="customer_rank">1</field>
+        <field name="supplier_rank">0</field>
+        <field name="parent_id" ref="partner_demo_yellow_door_group" />
+        
+    </record>
+
 </odoo>

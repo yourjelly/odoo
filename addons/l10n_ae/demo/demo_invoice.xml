@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="True">
+    <record id="demo_invoice_ae_1" model="account.move">
+        <field name="partner_id" ref="partner_demo_dubai_european_company" />
+        <field name="invoice_user_id" ref="base.user_demo" />
+        <field name="invoice_payment_term_id" ref="account.account_payment_term_end_following_month" />
+        <field name="move_type">out_invoice</field>
+        <field name="invoice_date">2022-07-12</field>
+        <field name="company_id" ref="demo_company_ae" />
+        <field name="invoice_line_ids" eval="[
+            (0, 0, {'product_id': ref('demo_product_ae_2'), 'price_unit': 500.0, 'quantity': 1}),
+        ]" />
+    </record>
+
+    <record id="demo_invoice_ae_2" model="account.move">
+        <field name="partner_id" ref="partner_demo_uae_furniture_company" />
+        <field name="invoice_user_id" ref="base.user_demo" />
+        <field name="invoice_payment_term_id" ref="account.account_payment_term_end_following_month" />
+        <field name="move_type">out_invoice</field>
+        <field name="invoice_date">2022-07-12</field>
+        <field name="company_id" ref="demo_company_ae" />
+        <field name="invoice_line_ids" eval="[
+            (0, 0, {'product_id': ref('demo_product_ae_5'), 'price_unit': 35.0, 'quantity': 3}),
+            (0, 0, {'product_id': ref('demo_product_ae_7'), 'price_unit': 20.0, 'quantity': 15}),
+        ]" />
+    </record>
+
+    <record id="demo_invoice_ae_3" model="account.move">
+        <field name="partner_id" ref="partner_demo_dubai_european_company" />
+        <field name="invoice_user_id" ref="base.user_demo" />
+        <field name="invoice_payment_term_id" ref="account.account_payment_term_end_following_month" />
+        <field name="move_type">out_invoice</field>
+        <field name="invoice_date">2022-07-12</field>
+        <field name="company_id" ref="demo_company_ae" />
+        <field name="invoice_line_ids" eval="[
+            (0, 0, {'product_id': ref('demo_product_ae_1'), 'price_unit': 350, 'quantity': 1}),
+            (0, 0, {'product_id': ref('demo_product_ae_2'), 'price_unit': 500, 'quantity': 1}),
+            (0, 0, {'product_id': ref('demo_product_ae_3'), 'price_unit': 120, 'quantity': 3}),
+        ]" />
+    </record>
+
+    <record id="demo_invoice_ae_4" model="account.move">
+        <field name="partner_id" ref="partner_demo_yellow_door_group" />
+        <field name="invoice_user_id" ref="base.user_demo" />
+        <field name="invoice_payment_term_id" ref="account.account_payment_term_end_following_month" />
+        <field name="move_type">out_invoice</field>
+        <field name="invoice_date">2022-07-12</field>
+        <field name="company_id" ref="demo_company_ae" />
+        <field name="invoice_line_ids" eval="[
+            (0, 0, {'product_id': ref('demo_product_ae_2'), 'price_unit': 500, 'quantity': 1}),
+        ]" />
+    </record>
+
+    <record id="demo_payment_ae_1" model="account.payment">
+        <field name="partner_id" ref="partner_demo_dubai_european_company" />
+        <field name="partner_type">customer</field>
+        <field name="amount">1270.50</field>
+        <field name="payment_type">inbound</field>
+        <field name="date">2022-07-12</field>
+        <field name="company_id" ref="demo_company_ae" />
+        <field name="journal_id" model="account.journal"
+            eval="obj().search([
+                ('type', '=', 'bank'),
+                ('company_id', '=', ref('demo_company_ae'))], limit=1).id" />
+    </record>
+
+    <record id="demo_payment_ae_2" model="account.payment">
+        <field name="partner_id" ref="partner_demo_uae_furniture_company" />
+        <field name="partner_type">customer</field>
+        <field name="amount">405.00</field>
+        <field name="payment_type">inbound</field>
+        <field name="date">2022-07-12</field>
+        <field name="company_id" ref="demo_company_ae" />
+        <field name="journal_id" model="account.journal"
+            eval="obj().search([
+                ('type', '=', 'bank'),
+                ('company_id', '=', ref('demo_company_ae'))], limit=1).id" />
+    </record>
+
+    <record id="demo_payment_ae_3" model="account.payment">
+        <field name="partner_id" ref="partner_demo_dubai_european_company" />
+        <field name="partner_type">customer</field>
+        <field name="amount">1210.00</field>
+        <field name="payment_type">inbound</field>
+        <field name="date">2022-07-12</field>
+        <field name="company_id" ref="demo_company_ae" />
+        <field name="journal_id" model="account.journal"
+            eval="obj().search([
+                ('type', '=', 'bank'),
+                ('company_id', '=', ref('demo_company_ae'))], limit=1).id" />
+    </record>
+
+    <record id="demo_payment_ae_4" model="account.payment">
+        <field name="partner_id" ref="partner_demo_yellow_door_group" />
+        <field name="partner_type">customer</field>
+        <field name="amount">500.00</field>
+        <field name="payment_type">inbound</field>
+        <field name="date">2022-07-12</field>
+        <field name="company_id" ref="demo_company_ae" />
+        <field name="journal_id" model="account.journal"
+            eval="obj().search([
+                ('type', '=', 'bank'),
+                ('company_id', '=', ref('demo_company_ae'))], limit=1).id" />
+    </record>
+
+    <function model="account.payment" name="action_post">
+        <value eval="[ref('demo_payment_ae_1')]" />
+    </function>
+
+    <function model="account.payment" name="action_post">
+        <value eval="[ref('demo_payment_ae_2')]" />
+    </function>
+
+    <function model="account.payment" name="action_post">
+        <value eval="[ref('demo_payment_ae_3')]" />
+    </function>
+
+    <function model="account.payment" name="action_post">
+        <value eval="[ref('demo_payment_ae_4')]" />
+    </function>
+</odoo>
