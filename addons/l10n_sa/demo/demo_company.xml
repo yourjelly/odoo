@@ -5,31 +5,170 @@
         <field name="vat"></field>
         <field name="street">Al Amir Mohammed Bin Abdul Aziz Street</field>
         <field name="city">المدينة المنورة</field>
-        <field name="country_id" ref="base.sa"/>
-        
+        <field name="country_id" ref="base.sa" />
         <field name="zip">42317</field>
         <field name="phone">+966 51 234 5678</field>
         <field name="email">info@company.saexample.com</field>
         <field name="website">www.saexample.com</field>
     </record>
 
+    <record id="demo_partner_sa_1" model="res.partner">
+        <field name="name">Al Majed for Oud </field>
+        <field name="company_type">company</field>
+        <field name="street">False</field>
+        <field name="city">Riyadh</field>
+        <field name="country_id" ref="base.sa" />
+        <field name="phone">+966 9332 1005</field>
+        <field name="website">http://almajed4oud.com</field>
+        <field name="customer_rank">0</field>
+        <field name="supplier_rank">3</field>
+        
+    </record>
+
+    <record id="demo_partner_sa_2" model="res.partner">
+        <field name="name">Abdullah Al Ahmad</field>
+        <field name="company_type">person</field>
+        <field name="street">False</field>
+        <field name="city">Riyadh</field>
+        <field name="country_id" ref="base.sa" />
+        <field name="website">False</field>
+        <field name="customer_rank">0</field>
+        <field name="supplier_rank">1</field>
+        
+    </record>
+
+    <record id="demo_partner_sa_3" model="res.partner">
+        <field name="name">Dar Al Riyadh Group</field>
+        <field name="company_type">company</field>
+        <field name="street">False</field>
+        <field name="city">Riyadh</field>
+        <field name="state_id" />
+        <field name="country_id" ref="base.sa" />
+        <field name="phone">+966 9512 0012</field>
+        <field name="website">http://daralriyadh.com</field>
+        <field name="customer_rank">0</field>
+        <field name="supplier_rank">3</field>
+        
+    </record>
+
+    <record id="demo_partner_sa_4" model="res.partner">
+        <field name="name">Mohammad Aziz</field>
+        <field name="company_type">person</field>
+        <field name="city">Riyadh</field>
+        <field name="country_id" ref="base.sa" />
+        <field name="customer_rank">0</field>
+        <field name="supplier_rank">1</field>
+        
+    </record>
+
+    <record id="demo_partner_sa_5" model="res.partner">
+        <field name="name">Riyadh food Industries</field>
+        <field name="company_type">company</field>
+        <field name="city">Riyadh</field>
+        <field name="country_id" ref="base.sa" />
+        <field name="phone">+966 11 321 0002</field>
+        <field name="website">http://riyadhfoods.com</field>
+        <field name="customer_rank">2</field>
+        <field name="supplier_rank">0</field>
+        
+    </record>
+
+    <record id="demo_partner_sa_6" model="res.partner">
+        <field name="name">Khadija Mohammad</field>
+        <field name="company_type">person</field>
+        <field name="street">False</field>
+        <field name="city">Riyadh</field>
+        <field name="country_id" ref="base.sa" />
+        <field name="customer_rank">1</field>
+        <field name="supplier_rank">0</field>
+        
+    </record>
+
+    <record id="demo_partner_sa_7" model="res.partner">
+        <field name="name">Saudi Cable</field>
+        <field name="company_type">company</field>
+        <field name="city">Riyadh</field>
+        <field name="country_id" ref="base.sa" />
+        <field name="phone">+966 12 321 0012</field>
+        <field name="website">http://saudicable.com</field>
+        <field name="customer_rank">2</field>
+        <field name="supplier_rank">0</field>
+        
+    </record>
+
+    <record id="demo_partner_sa_8" model="res.partner">
+        <field name="name">Mohammad AlDosari</field>
+        <field name="company_type">person</field>
+        <field name="street">False</field>
+        <field name="city">Riyadh</field>
+        <field name="country_id" ref="base.sa" />
+        <field name="customer_rank">1</field>
+        <field name="supplier_rank">0</field>
+        
+    </record>
+
+    <record id="demo_partner_sa_9" model="res.partner">
+        <field name="name">Saudi Electricity</field>
+        <field name="company_type">company</field>
+        <field name="city">Riyadh</field>
+        <field name="country_id" ref="base.sa" />
+        <field name="phone">+966 11 456 2584</field>
+        <field name="website">http://se.com.sa</field>
+        <field name="customer_rank">3</field>
+        <field name="supplier_rank">0</field>
+        
+    </record>
+
+    <record id="demo_partner_sa_10" model="res.partner">
+        <field name="name">Amir Abdulaziz</field>
+        <field name="company_type">person</field>
+        <field name="street">False</field>
+        <field name="city">Riyadh</field>
+        <field name="country_id" ref="base.sa" />
+        <field name="customer_rank">1</field>
+        <field name="supplier_rank">0</field>
+        
+    </record>
+
+    <record id="demo_partner_sa_11" model="res.partner">
+        <field name="name">WEST GROUP</field>
+        <field name="company_type">company</field>
+        <field name="country_id" ref="base.sa" />
+        <field name="phone">+966 9200 12003</field>
+        <field name="website">http://westgroup.com.sa</field>
+        <field name="customer_rank">0</field>
+        <field name="supplier_rank">1</field>
+        
+    </record>
+
+    <record id="demo_partner_sa_12" model="res.partner">
+        <field name="name">Amal Qahtani</field>
+        <field name="company_type">person</field>
+        <field name="street">False</field>
+        <field name="city">Riyadh</field>
+        <field name="country_id" ref="base.sa" />
+        <field name="customer_rank">0</field>
+        <field name="supplier_rank">1</field>
+        
+    </record>
+
     <record id="demo_company_sa" model="res.company">
         <field name="name">SA Company</field>
         <field name="vat">123456789</field>
-        <field name="partner_id" ref="partner_demo_company_sa"/>
+        <field name="partner_id" ref="partner_demo_company_sa" />
     </record>
 
     <function model="res.company" name="_onchange_country_id">
-        <value eval="[ref('demo_company_sa')]"/>
+        <value eval="[ref('demo_company_sa')]" />
     </function>
 
     <function model="res.users" name="write">
-        <value eval="[ref('base.user_root'), ref('base.user_admin'), ref('base.user_demo')]"/>
-        <value eval="{'company_ids': [(4, ref('l10n_sa.demo_company_sa'))]}"/>
+        <value eval="[ref('base.user_root'), ref('base.user_admin'), ref('base.user_demo')]" />
+        <value eval="{'company_ids': [(4, ref('l10n_sa.demo_company_sa'))]}" />
     </function>
 
     <function model="account.chart.template" name="try_loading">
-        <value eval="[ref('l10n_sa.sa_chart_template_standard')]"/>
-        <value model="res.company" eval="obj().env.ref('l10n_sa.demo_company_sa')"/>
+        <value eval="[ref('l10n_sa.sa_chart_template_standard')]" />
+        <value model="res.company" eval="obj().env.ref('l10n_sa.demo_company_sa')" />
     </function>
 </odoo>

@@ -13,7 +13,8 @@ This initially includes chart of accounts of USA translated to Arabic.
 In future this module will include some payroll rules for ME .
 """,
     'website': 'http://www.dvit.me',
-    'depends': ['account', 'l10n_multilang'],
+    'depends': ['account', 'l10n_multilang', 'sale_stock', 'purchase_stock', 'hr_contract', 'hr_recruitment'],
+
     'data': [
         'data/account_data.xml',
         'data/account_chart_template_data.xml',
@@ -27,6 +28,10 @@ In future this module will include some payroll rules for ME .
     ],
     'demo': [
         'demo/demo_company.xml',
+        'demo/demo_hr.xml',
+        'demo/demo_product.xml',
+        'demo/demo_invoices.xml',
+        'demo/demo_bills.xml',
     ],
     'post_init_hook': 'load_translations',
     'license': 'LGPL-3',
