@@ -55,6 +55,12 @@ patch(MockServer.prototype, 'mail/models/mail_channel_member', {
                 'id': member.id,
                 'persona': persona,
             };
+            const [memberOfCurrentUser] = this.getRecords('mail.channel.member', [['channel_id', '=', member.channel_id], ['partner_id', '=', this.currentPartnerId]]);
+            if (memberOfCurrentUser === member) {
+                Object.assign(data, {
+                    'custom_channel_name': member.custom_channel_name,
+                });
+            }
             dataList.push(data);
         }
         return dataList;

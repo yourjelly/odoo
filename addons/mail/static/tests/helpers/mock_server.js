@@ -1042,7 +1042,6 @@ patch(MockServer.prototype, 'mail', {
                     state: memberOfCurrentUser.fold_state || 'open',
                 });
                 Object.assign(channelData, {
-                    custom_channel_name: memberOfCurrentUser.custom_channel_name,
                     serverMessageUnreadCounter: memberOfCurrentUser.message_unread_counter,
                 });
                 if (memberOfCurrentUser.rtc_inviting_session_id) {

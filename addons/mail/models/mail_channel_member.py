@@ -167,6 +167,9 @@ class ChannelMember(models.Model):
                 if member.guest_id:
                     persona = {'guest': member.guest_id._guest_format(fields=fields.get('persona', {}).get('guest')).get(member.guest_id)}
                 data['persona'] = persona
+            if member.is_current_user:
+                if 'custom_channel_name' in fields:
+                    data['custom_channel_name'] = member.custom_channel_name
             members_formatted_data[member] = data
         return members_formatted_data
 

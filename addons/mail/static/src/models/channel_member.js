@@ -103,6 +103,7 @@ registerModel({
             inverse: 'channelMember',
             isCausal: true,
         }),
+        custom_channel_name: attr(),
         id: attr({
             identifying: true,
         }),

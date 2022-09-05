@@ -789,7 +789,6 @@ class Channel(models.Model):
                     channel_data['serverMessageUnreadCounter'] = member.message_unread_counter
                     info['is_minimized'] = member.is_minimized
                     info['seen_message_id'] = member.seen_message_id.id
-                    channel_data['custom_channel_name'] = member.custom_channel_name
                     info['is_pinned'] = member.is_pinned
                     info['last_interest_dt'] = member.last_interest_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
                     if member.rtc_inviting_session_id:

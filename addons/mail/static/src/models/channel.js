@@ -136,14 +136,23 @@ registerModel({
             if (!this.thread) {
                 return;
             }
-            if (this.channel_type === 'chat' && this.correspondent) {
-                return this.custom_channel_name || this.thread.getMemberName(this.correspondent.persona);
-            }
-            if (this.channel_type === 'group' && !this.thread.name) {
-                return this.channelMembers
-                    .filter(channelMember => channelMember.persona)
-                    .map(channelMember => this.thread.getMemberName(channelMember.persona))
-                    .join(this.env._t(", "));
+            switch (this.channel_type) {
+                case 'chat':
+                    if (this.memberOfCurrentUser && this.memberOfCurrentUser.custom_channel_name) {
+                        return this.memberOfCurrentUser.custom_channel_name;
+                    }
+                    if (this.correspondent) {
+                        return this.thread.getMemberName(this.correspondent.persona);
+                    }
+                    break;
+                case 'group':
+                    if (!this.thread.name) {
+                        return this.channelMembers
+                            .filter(channelMember => channelMember.persona)
+                            .map(channelMember => this.thread.getMemberName(channelMember.persona))
+                            .join(this.env._t(", "));
+                    }
+                    break;
             }
             return this.thread.name;
         },
@@ -272,7 +281,6 @@ registerModel({
             compute: '_computeCorrespondentOfDmChat',
             inverse: 'dmChatWithCurrentPartner',
         }),
-        custom_channel_name: attr(),
         /**
          * Useful to compute `discussSidebarCategoryItem`.
          */
