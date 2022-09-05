@@ -36,7 +36,9 @@ export function useAutofocus({ refName, selectAll } = {}) {
     const comp = useComponent();
     const ref = useRef(refName || "autofocus");
     // Prevent autofocus in mobile
-    if (comp.env.isSmall) {
+    console.log(comp.env)
+    if (comp.env.isSmall || comp.env.isTouch) {
+        console.log("return ref")
         return ref;
     }
     // LEGACY
@@ -46,6 +48,7 @@ export function useAutofocus({ refName, selectAll } = {}) {
     // LEGACY
     useEffect(
         (el) => {
+            console.log("el focused")
             if (el) {
                 el.focus();
                 if (["INPUT", "TEXTAREA"].includes(el.tagName) && el.type !== "number") {

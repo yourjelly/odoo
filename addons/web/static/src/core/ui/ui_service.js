@@ -10,6 +10,7 @@ import { getActiveHotkey } from "../hotkeys/hotkey_service";
 
 const { EventBus, useEffect, useRef } = owl;
 
+const INPUTMODES = { touchstart: "touch", keydown: "keyboard" };
 export const SIZES = { XS: 0, VSM: 1, SM: 2, MD: 3, LG: 4, XL: 5, XXL: 6 };
 
 /**
@@ -120,6 +121,9 @@ export function getMediaQueryLists() {
 const MEDIAS = getMediaQueryLists();
 
 export const uiService = {
+    getInputMode() {
+        return ui.inputMode;
+    },
     getSize() {
         return MEDIAS.findIndex((media) => media.matches);
     },
@@ -169,6 +173,7 @@ export const uiService = {
 
         const ui = {
             bus,
+            inputMode: Boolean(navigator.maxTouchPoints) ? "touch" : "keyboard",
             size: this.getSize(),
             get activeElement() {
                 return activeElems[activeElems.length - 1];
@@ -178,6 +183,9 @@ export const uiService = {
             },
             get isSmall() {
                 return ui.size <= SIZES.SM;
+            },
+            get isTouch() {
+                return ui.inputMode === "touch";
             },
             block,
             unblock,
@@ -194,11 +202,27 @@ export const uiService = {
                 bus.trigger("resize");
             }
         };
+        const updateInputMode = (ev) => {
+            const prevMode = ui.inputMode;
+            const currMode = INPUTMODES[ev.type];
+            if (currMode !== prevMode) {
+                ui.inputMode = currMode;
+                bus.trigger("inputMode");
+            }
+        };
         browser.addEventListener("resize", debounce(updateSize, 100));
+        browser.addEventListener("touchstart", debounce(updateInputMode, 1000));
+        browser.addEventListener("keydown", debounce(updateInputMode, 1000));
 
         Object.defineProperty(env, "isSmall", {
             get() {
                 return ui.isSmall;
+            },
+        });
+
+        Object.defineProperty(env, "isTouch", {
+            get() {
+                return ui.inputMode === "touch";
             },
         });
 
