@@ -22,14 +22,15 @@ export class CopyButton extends Component {
 
     async onClick() {
         try {
+            const content = this.props.content || (this.props.computedContent && this.props.computedContent());
             // any kind of content can be copied into the clipboard using
             // the appropriate native methods
-            if (typeof this.props.content === "string") {
-                browser.navigator.clipboard.writeText(this.props.content).then(() => {
+            if (typeof content === "string") {
+                browser.navigator.clipboard.writeText(content).then(() => {
                     this.showTooltip();
                 });
             } else {
-                browser.navigator.clipboard.write(this.props.content).then(() => {
+                browser.navigator.clipboard.write(content).then(() => {
                     this.showTooltip();
                 });
             }
@@ -44,4 +45,5 @@ CopyButton.props = {
     copyText: { type: String, optional: true },
     successText: { type: String, optional: true },
     content: { type: [String, Object], optional: true },
+    computedContent: { type: Function, optional: true },
 };
