@@ -280,7 +280,6 @@ export async function testEditor(Editor = OdooEditor, spec, options = {}) {
     const selection = parseTextualSelection(testNode);
 
     const editor = new Editor(testNode, Object.assign({ toSanitize: false }, options));
-    let firefoxExecCommandError = false;
     let error = false;
     try {
         editor.keyboardType = 'PHYSICAL';
@@ -308,18 +307,10 @@ export async function testEditor(Editor = OdooEditor, spec, options = {}) {
         }
 
         if (spec.stepFunction) {
-            try {
-                await spec.stepFunction(editor);
-            } catch (err) {
-                if (typeof err === 'object' && err.name === 'NS_ERROR_FAILURE') {
-                    firefoxExecCommandError = true;
-                } else {
-                    throw err;
-                }
-            }
+            await spec.stepFunction(editor);
         }
 
-        if (spec.contentAfterEdit && !firefoxExecCommandError) {
+        if (spec.contentAfterEdit) {
             renderTextualSelection();
             const afterEditValue = testNode.innerHTML;
             window.chai.expect(afterEditValue).to.be.equal(
@@ -341,7 +332,7 @@ export async function testEditor(Editor = OdooEditor, spec, options = {}) {
 
     if (!error) {
         try {
-            if (spec.contentAfter && !firefoxExecCommandError) {
+            if (spec.contentAfter) {
                 renderTextualSelection();
 
                 // remove all check-ids (checklists, stars)
@@ -363,10 +354,6 @@ export async function testEditor(Editor = OdooEditor, spec, options = {}) {
 
     await testNode.remove();
 
-    if (firefoxExecCommandError) {
-        // FIXME
-        throw new Error('Firefox was not able to test this case because of an execCommand error');
-    }
     if (error) {
         throw error;
     }
