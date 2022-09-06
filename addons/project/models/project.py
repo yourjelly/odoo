@@ -253,6 +253,13 @@ class Project(models.Model):
         # Since project stages are order by sequence first, this should fetch the one with the lowest sequence number.
         return self.env['project.project.stage'].search([], limit=1)
 
+    def _search_is_favorite(self, operator, value):
+        if operator not in ['=', '!='] or not isinstance(value, bool):
+            raise NotImplementedError(_('Operation not supported'))
+        user_per_project_id = self.search_read([], ['favorite_user_ids'])
+        favorite_project_ids = [project['id'] for project in user_per_project_id if self.env.uid in project['favorite_user_ids']]
+        return [('id', 'in' if (operator == '=') == value else 'not in', favorite_project_ids)]
+
     def _compute_is_favorite(self):
         for project in self:
             project.is_favorite = self.env.user in project.favorite_user_ids
@@ -275,6 +282,49 @@ class Project(models.Model):
     @api.model
     def _read_group_stage_ids(self, stages, domain, order):
         return self.env['project.project.stage'].search([], order=order)
+
+    def _search(self, args, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
+        # copy paste from AUON task just change search from _search so it'll work in relational fields as well
+        """ Copy/paste from knowleg_article.search().
+            Allows to order but is_favorite even thought this field is compute not stored.
+        """
+        if count or not order or 'is_favorite' not in order:
+            return super(Project, self)._search(args, offset=offset, limit=limit, order=order, count=count)
+        order_items = [order_item.strip().lower() for order_item in (order or self._order).split(',')]
+        favorite_desc = any('is_favorite desc' in item for item in order_items)
+
+        # Search projects that are favorite of the current user.
+        new_domain = expression.AND([[('is_favorite', '=', True)], args])
+        new_order = ', '.join(item for item in order_items if 'is_favorite' not in item)
+        project_ids = super(Project, self)._search(new_domain, offset=0, limit=None, order=new_order, count=count).ids
+
+        # keep only requested window (offset + limit, or offset+)
+        project_ids_keep = project_ids[offset:(offset + limit)] if limit else project_ids[offset:]
+        # keep list of already skipped project ids to exclude them from future search
+        project_ids_skip = project_ids[:(offset + limit)] if limit else project_ids
+
+        # do not go further if limit is achieved
+        if limit and len(project_ids_keep) >= limit:
+            return self.browse(project_ids_keep)
+
+        # Fill with remaining projects. If a limit is given, simply remove count of
+        # already fetched. Otherwise keep none. If an offset is set we have to
+        # reduce it by already fetch results hereabove. Order is updated to exclude
+        # is_favorite when calling super() .
+        new_limit = (limit - len(project_ids_keep)) if limit else None
+        if offset:
+            project_offset = max((offset - len(project_ids), 0))
+        else:
+            project_offset = 0
+
+        other_project_res = super(Project, self)._search(
+            expression.AND([[('id', 'not in', project_ids_skip)], args]),
+            offset=project_offset, limit=new_limit, order=new_order, count=count
+        )
+        if favorite_desc:
+            return self.browse(project_ids_keep) + other_project_res
+        else:
+            return other_project_res + self.browse(project_ids_keep)
 
     name = fields.Char("Name", index='trigram', required=True, tracking=True, translate=True, default_export_compatible=True)
     description = fields.Html()
@@ -303,7 +353,7 @@ class Project(models.Model):
         default=_get_default_favorite_user_ids,
         string='Members')
     is_favorite = fields.Boolean(compute='_compute_is_favorite', inverse='_inverse_is_favorite', compute_sudo=True,
-        string='Show Project on Dashboard')
+         search='_search_is_favorite', string='Show Project on Dashboard')
     label_tasks = fields.Char(string='Use Tasks as', default='Tasks', help="Label used for tasks in this project (e.g. Tasks, Features, Tickets, etc).", translate=True)
     tasks = fields.One2many('project.task', 'project_id', string="Task Activities")
     resource_calendar_id = fields.Many2one(
