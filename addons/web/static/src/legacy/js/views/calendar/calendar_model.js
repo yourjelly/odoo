@@ -561,6 +561,7 @@ return AbstractModel.extend({
     _getColorIndex: function(actual_color_list, color_index) {
         var actual_color_list = actual_color_list || [0];
         var new_color_index = color_index % 50;
+        debugger;
         if (new_color_index !== color_index && actual_color_list.includes(new_color_index)) {
             new_color_index = this._getColorIndex(actual_color_list, new_color_index + 3);
         }
