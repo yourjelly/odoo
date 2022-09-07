@@ -134,14 +134,15 @@ function _placeColumns(columnEls, rowSize, rowGap, columnSize, columnGap) {
     let maxRowEnd = 0;
     const columnSpans = [];
     const columnCount = columnEls.length; // number of column in the grid.
+    const isBigBoxes = columnEls[0].closest('section.s_color_blocks_2');
     for (const columnEl of columnEls) {
         const style = window.getComputedStyle(columnEl);
         // Horizontal placement.
         const columnLeft = columnEl.offsetLeft;
         // Getting the width of the column.
         const paddingLeft = parseFloat(style.paddingLeft);
-        const width = parseFloat(columnEl.scrollWidth) - 2 * paddingLeft;
-        const columnSpan = Math.ceil((width + columnGap) / (columnSize + columnGap));
+        const width = parseFloat(columnEl.scrollWidth) - (isBigBoxes ? 0 : 2 * paddingLeft);
+        const columnSpan = Math.round((width + columnGap) / (columnSize + columnGap));
         const columnStart = Math.round(columnLeft / (columnSize + columnGap)) + 1;
         const columnEnd = columnStart + columnSpan;
 
@@ -152,9 +153,9 @@ function _placeColumns(columnEls, rowSize, rowGap, columnSize, columnGap) {
         const paddingBottom = parseFloat(style.paddingBottom);
         const rowOffsetTop = Math.floor((paddingTop + rowGap) / (rowSize + rowGap));
         // Getting the height of the column.
-        const height = parseFloat(columnEl.scrollHeight) - paddingTop - paddingBottom;
+        const height = parseFloat(columnEl.scrollHeight) - (isBigBoxes ? 0 : paddingTop + paddingBottom);
         const rowSpan = Math.ceil((height + rowGap) / (rowSize + rowGap));
-        const rowStart = Math.round(columnTop / (rowSize + rowGap)) + 1 + rowOffsetTop;
+        const rowStart = Math.round(columnTop / (rowSize + rowGap)) + 1 + (isBigBoxes ? 0 : rowOffsetTop);
         const rowEnd = rowStart + rowSpan;
 
         columnEl.style.gridArea = `${rowStart} / ${columnStart} / ${rowEnd} / ${columnEnd}`;
@@ -177,6 +178,17 @@ function _placeColumns(columnEls, rowSize, rowGap, columnSize, columnGap) {
 
         maxRowEnd = Math.max(rowEnd, maxRowEnd);
         columnSpans.push(columnSpan);
+    }
+
+    // If we are in the Big Boxes snippet, set the padding of the grid items to
+    // the original padding of the boxes so they look like in normal mode.
+    if (isBigBoxes) {
+        const style = window.getComputedStyle(columnEls[0]);
+        const paddingY = style.paddingTop;
+        const paddingX = style.paddingLeft;
+        const rowEl = columnEls[0].parentNode;
+        rowEl.style.setProperty('--grid-item-padding-y', paddingY);
+        rowEl.style.setProperty('--grid-item-padding-x', paddingX);
     }
 
     // Removing padding and offset classes.

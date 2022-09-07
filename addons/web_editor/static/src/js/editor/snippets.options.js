@@ -4438,7 +4438,7 @@ registry.sizing = SnippetOptionWidget.extend({
             // Hiding the move handle for some snippets so we can't drag them
             // and so we can't toggle the grid mode.
             const moveHandleEl = this.$overlay[0].querySelector('.o_move_handle');
-            const untoggleableColumns = '.s_masonry_block, .s_showcase, .s_features_grid, .s_website_form, .s_color_blocks_2';
+            const untoggleableColumns = '.s_masonry_block, .s_showcase, .s_features_grid, .s_website_form';
             const disableToggle = this.$target[0].closest(untoggleableColumns);
             moveHandleEl.classList.toggle('d-none', disableToggle || isMobileView);
 
@@ -5108,8 +5108,11 @@ registry.layout_column = SnippetOptionWidget.extend({
         // Removing the grid properties.
         delete rowEl.dataset.rowCount;
 
-        // Adding back an align-items-* class.
-        rowEl.classList.add('align-items-start');
+        // Adding back an align-items-* class (not if we are in Big Boxes).
+        const isBigBoxes = columnEls[0].closest('section.s_color_blocks_2');
+        if (!isBigBoxes) {
+            rowEl.classList.add('align-items-start');
+        }
     },
 });
 
