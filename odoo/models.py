@@ -3462,6 +3462,9 @@ class BaseModel(metaclass=MetaModel):
                 # non-column fields: for the sake of simplicity, we ignore inherited fields
                 other_fields.append(field)
 
+            if field.type == 'properties':
+                other_fields.append(field)
+
         if column_fields:
             cr, context = self.env.cr, self.env.context
 

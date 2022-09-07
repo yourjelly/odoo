@@ -3213,6 +3213,7 @@ class Properties(Field):
     #       }]
     #
     def convert_to_record(self, value, record):
+        assert len(record) in (0, 1)
         # value is in cache format
         definition = self._get_properties_definition(record)
         if not value or not definition:
@@ -3260,6 +3261,48 @@ class Properties(Field):
         self._add_display_name(value, record.env)
         return value
 
+    def read(self, records):
+        """Read everything needed in batch for the given records.
+
+        To retrieve relational properties names, or to check their existence,
+        we need to do some SQL queries. To reduce the number of queries when we read
+        in batch, we put in cache everything needed before calling
+        convert_to_record / convert_to_read.
+        """
+        definition_records_map = {
+            record: record[self.definition_record][self.definition_record_field]
+            for record in records
+        }
+
+        # ids per model we need to fetch in batch to put in cache
+        ids_per_model = defaultdict(list)
+
+        cached_values = list(records.env.cache.get_values(records, self))
+
+        for record, values in zip(records, cached_values):
+            definition = definition_records_map[record]
+            for property_definition in definition:
+                comodel = property_definition.get('comodel')
+                type_ = property_definition.get('type')
+                name = property_definition.get('name')
+                if not comodel or type_ not in ('many2one', 'many2many') or name not in values:
+                    continue
+
+                default = property_definition.get('default') or []
+                value = values[name] or []
+
+                if type_ == 'many2one':
+                    default = [default] if default else []
+                    value = [value] if value else []
+
+                ids_per_model[comodel].extend(default + value)
+
+        for model, ids in ids_per_model.items():
+            try:
+                records.env[model].browse(ids).exists().mapped('display_name')
+            except AccessError:
+                pass
+
     def write(self, records, value):
         """Check if the properties definition has been changed.
 
@@ -3299,7 +3342,9 @@ class Properties(Field):
                     property_definition.pop('value', None)
                 container[self.definition_record_field] = properties_definition
 
-        return super().write(records, value)
+        ret = super().write(records, value)
+        self.read(records)  # update the cache of the relational properties
+        return ret
 
     def _compute(self, records):
         """Add the default properties value when the container is changed."""
@@ -3482,7 +3527,7 @@ class Properties(Field):
 
                 if check_existence and property_value:
                     # many2one might have been deleted
-                    property_value = env[res_model].browse(property_value).exists().id
+                    property_value = cls._filter_in_cache(env[res_model].browse(property_value)).id
 
             elif property_type == 'many2many' and property_value:
                 if not is_list_of(property_value, int):
@@ -3494,9 +3539,19 @@ class Properties(Field):
 
                 elif check_existence and property_value:
                     # many2many might have been deleted
-                    property_value = env[res_model].browse(property_value).exists().ids
+                    property_value = cls._filter_in_cache(env[res_model].browse(property_value)).ids
 
             property_definition['value'] = property_value
+
+    @classmethod
+    def _filter_in_cache(cls, records):
+        field_to_check = next((f for f in records._fields.values() if f.prefetch is True), None)
+        if not field_to_check or not records.check_access_rights('read', False):
+            return records
+
+        field_cache = records.env.cache._get_field_cache(records, field_to_check)
+        cached_ids = [_id for _id in records.ids if _id in field_cache]
+        return records.env[records._name].browse(cached_ids)
 
     @classmethod
     def _list_to_dict(cls, values_list):
