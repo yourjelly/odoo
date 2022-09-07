@@ -2794,10 +2794,19 @@ export class OdooEditor extends EventTarget {
         }
     }
     _makeHint(block, text, temporary = false) {
-        const content = block && block.innerHTML.trim();
+        let content = block && block.innerHTML.trim();
+        let range = this.document.getSelection().getRangeAt(0);
+        let pblock = block.childNodes[range.endOffset];
+        if(pblock != undefined && pblock.nodeName === "BR") {
+            let newp = document.createElement('p');
+            block.replaceChild(newp, pblock);
+            newp.appendChild(pblock);
+            block = newp;
+            content = block && block.innerHTML.trim();
+        }
         if (
             block &&
-            (content === '' || content === '<br>') &&
+            (content === '' || content == '<br>') &&
             ancestors(block, this.editable).includes(this.editable)
         ) {
             this.observerUnactive();
