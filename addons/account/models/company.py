@@ -98,7 +98,10 @@ class ResCompany(models.Model):
     account_setup_coa_state = fields.Selection(ONBOARDING_STEP_STATES, string="State of the onboarding charts of account step", default='not_done')
     account_setup_taxes_state = fields.Selection(ONBOARDING_STEP_STATES, string="State of the onboarding Taxes step", default='not_done')
     account_onboarding_invoice_layout_state = fields.Selection(ONBOARDING_STEP_STATES, string="State of the onboarding invoice layout step", default='not_done')
-    account_onboarding_create_invoice_state = fields.Selection(ONBOARDING_STEP_STATES, string="State of the onboarding create invoice step", default='not_done')
+    account_onboarding_create_invoice_state = fields.Selection(ONBOARDING_STEP_STATES,
+                                                               string="State of the onboarding create invoice step",
+                                                               compute='_compute_account_onboarding_create_invoice_state')
+    account_onboarding_create_invoice_state_flag = fields.Boolean(default=False, store=True)
     account_onboarding_sale_tax_state = fields.Selection(ONBOARDING_STEP_STATES, string="State of the onboarding sale tax step", default='not_done')
 
     # account dashboard onboarding
@@ -200,6 +203,16 @@ class ResCompany(models.Model):
             self.get_account_invoice_onboarding_steps_states_names()
         )
 
+    def _compute_account_onboarding_create_invoice_state(self):
+        for record in self:
+            if not self.env.company.account_onboarding_create_invoice_state_flag:
+                if self.env['account.move'].search([('company_id', '=', record.id), ('move_type', '=', 'out_invoice')], limit=1):
+                    record.account_onboarding_create_invoice_state = 'done'
+                    self.env.company.account_onboarding_create_invoice_state_flag = True
+                else:
+                    record.account_onboarding_create_invoice_state = 'not_done'
+            else:
+                record.account_onboarding_create_invoice_state = 'done'
     # YTI FIXME: Define only one method that returns {'account': [], 'sale': [], ...}
     def get_account_invoice_onboarding_steps_states_names(self):
         """ Necessary to add/edit steps from other modules (payment acquirer in this case). """
@@ -477,8 +490,7 @@ class ResCompany(models.Model):
 
     @api.model
     def action_open_account_onboarding_create_invoice(self):
-        action = self.env["ir.actions.actions"]._for_xml_id("account.action_open_account_onboarding_create_invoice")
-        return action
+        return self.env["ir.actions.actions"]._for_xml_id("account.action_open_account_onboarding_create_invoice")
 
     @api.model
     def action_open_taxes_onboarding(self):
