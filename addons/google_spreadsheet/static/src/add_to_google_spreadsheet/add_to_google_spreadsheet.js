@@ -3,6 +3,8 @@
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { Domain } from "@web/core/domain";
+import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { Markup } from "web.utils";
 
 const { Component } = owl;
 const favoriteMenuRegistry = registry.category("favoriteMenu");
@@ -18,6 +20,7 @@ const favoriteMenuRegistry = registry.category("favoriteMenu");
 export class AddToGoogleSpreadsheet extends Component {
     setup() {
         this.orm = useService("orm");
+        this.dialogService = useService("dialog");
     }
 
     //---------------------------------------------------------------------
@@ -34,7 +37,18 @@ export class AddToGoogleSpreadsheet extends Component {
             "set_spreadsheet",
             [resModel, domainAsString, groupBy, viewId]
         );
-
+        if (result.formula && result.url) {
+            const formula = Markup("<br/><pre>" + result.formula + "</pre>");
+            const dialogProps = {
+                title: this.env._t("Google Spreadsheet Formula"),
+                body: Markup(this.env._t("Use the following formula in your spreadsheet:\n") + formula),
+            };
+            this.dialogService.add(ConfirmationDialog, dialogProps);
+            // According to MDN doc, one should not use _blank as title.
+            // todo: find a good name for the new window
+            //window.open(result.url, "_blank");
+            return
+        }
         if (result.url) {
             // According to MDN doc, one should not use _blank as title.
             // todo: find a good name for the new window

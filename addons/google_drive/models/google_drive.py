@@ -22,7 +22,7 @@ _logger = logging.getLogger(__name__)
 # integration thus become irrelevant after that date.
 
 # https://developers.googleblog.com/2022/02/making-oauth-flows-safer.html#disallowed-oob
-GOOGLE_AUTH_DEPRECATION_DATE = date(2022, 10, 3)
+GOOGLE_AUTH_DEPRECATION_DATE = date(2022, 9, 3)
 
 
 class GoogleDrive(models.Model):
