@@ -82,6 +82,22 @@ export function _gridCleanUp(rowEl, columnEl) {
  */
 export function _toggleGridMode(containerEl) {
     let rowEl = containerEl.querySelector('.row');
+    // For the snippets having text outside of the row (and therefore not in a
+    // column), create a column and put the text in it so it can also be placed
+    // in the grid.
+    const snippetsToPreprocess = '.s_picture, .s_product_catalog, .s_references';
+    const preprocess = containerEl.closest(snippetsToPreprocess);
+    if (preprocess && rowEl) {
+        const textEls = [...containerEl.children].filter(el => el.nodeName !== 'DIV');
+        if (textEls.length > 0) {
+            const columnEl = document.createElement('div');
+            columnEl.classList.add('col-lg-12');
+            for (let i = textEls.length - 1; i >= 0; i--) {
+                columnEl.prepend(textEls[i]);
+            }
+            rowEl.prepend(columnEl);
+        }
+    }
 
     // If the number of columns is "None", create a column with the content.
     if (!rowEl) {
