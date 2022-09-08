@@ -135,27 +135,48 @@ function _placeColumns(columnEls, rowSize, rowGap, columnSize, columnGap) {
     const columnSpans = [];
     const columnCount = columnEls.length; // number of column in the grid.
     const isBigBoxes = columnEls[0].closest('section.s_color_blocks_2');
+    const imageColumns = []; // array of boolean telling if it is a column with only an image.
+
     for (const columnEl of columnEls) {
+        // Finding out if the images are alone in their column so they can be
+        // displayed as expected (thanks to the class that will be added).
+        let isImageColumn = false;
+        const imageEls = columnEl.querySelectorAll(':scope > img');
+        const columnChildren = [...columnEl.children].filter(el => el.nodeName !== 'BR');
+        if (imageEls.length === 1 && columnChildren.length === 1) {
+            // If there is only one image and if this image is the only "real"
+            // child of the column, we need to check if there is text in it.
+            const textNodeEls = [...columnEl.childNodes].filter(el => el.nodeType === 3);
+            const areTextNodesEmpty = [...textNodeEls].every(textNodeEl => textNodeEl.nodeValue.trim() === '');
+            isImageColumn = areTextNodesEmpty;
+        }
+
+        // Placing the column.
         const style = window.getComputedStyle(columnEl);
         // Horizontal placement.
-        const columnLeft = columnEl.offsetLeft;
+        const columnLeft = isImageColumn ? imageEls[0].offsetLeft : columnEl.offsetLeft;
         // Getting the width of the column.
         const paddingLeft = parseFloat(style.paddingLeft);
-        const width = parseFloat(columnEl.scrollWidth) - (isBigBoxes ? 0 : 2 * paddingLeft);
-        const columnSpan = Math.round((width + columnGap) / (columnSize + columnGap));
+        const width = isImageColumn ? parseFloat(imageEls[0].scrollWidth)
+            : parseFloat(columnEl.scrollWidth) - (isBigBoxes ? 0 : 2 * paddingLeft);
+        let columnSpan = Math.round((width + columnGap) / (columnSize + columnGap));
+        if (columnSpan < 1) {
+            columnSpan = 1;
+        }
         const columnStart = Math.round(columnLeft / (columnSize + columnGap)) + 1;
         const columnEnd = columnStart + columnSpan;
 
         // Vertical placement.
-        const columnTop = columnEl.offsetTop;
+        const columnTop = isImageColumn ? imageEls[0].offsetTop : columnEl.offsetTop;
         // Getting the top and bottom paddings and computing the row offset.
         const paddingTop = parseFloat(style.paddingTop);
         const paddingBottom = parseFloat(style.paddingBottom);
         const rowOffsetTop = Math.floor((paddingTop + rowGap) / (rowSize + rowGap));
         // Getting the height of the column.
-        const height = parseFloat(columnEl.scrollHeight) - (isBigBoxes ? 0 : paddingTop + paddingBottom);
+        const height = isImageColumn ? parseFloat(imageEls[0].scrollHeight)
+            : parseFloat(columnEl.scrollHeight) - (isBigBoxes ? 0 : paddingTop + paddingBottom);
         const rowSpan = Math.ceil((height + rowGap) / (rowSize + rowGap));
-        const rowStart = Math.round(columnTop / (rowSize + rowGap)) + 1 + (isBigBoxes ? 0 : rowOffsetTop);
+        const rowStart = Math.round(columnTop / (rowSize + rowGap)) + 1 + (isBigBoxes || isImageColumn ? 0 : rowOffsetTop);
         const rowEnd = rowStart + rowSpan;
 
         columnEl.style.gridArea = `${rowStart} / ${columnStart} / ${rowEnd} / ${columnEnd}`;
@@ -178,6 +199,7 @@ function _placeColumns(columnEls, rowSize, rowGap, columnSize, columnGap) {
 
         maxRowEnd = Math.max(rowEnd, maxRowEnd);
         columnSpans.push(columnSpan);
+        imageColumns.push(isImageColumn);
     }
 
     // If we are in the Big Boxes snippet, set the padding of the grid items to
@@ -191,14 +213,25 @@ function _placeColumns(columnEls, rowSize, rowGap, columnSize, columnGap) {
         rowEl.style.setProperty('--grid-item-padding-x', paddingX);
     }
 
-    // Removing padding and offset classes.
     for (const [i, columnEl] of [...columnEls].entries()) {
+        // Removing padding and offset classes.
         const regex = /^(pt|pb|col-|offset-)/;
         const toRemove = [...columnEl.classList].filter(c => {
             return regex.test(c);
         });
         columnEl.classList.remove(...toRemove);
         columnEl.classList.add('col-lg-' + columnSpans[i]);
+
+        // If the column only has an image, remove the line breaks and
+        // textnodes, add the grid class and set the width to default.
+        if (imageColumns[i]) {
+            columnEl.querySelectorAll('br').forEach(el => el.remove());
+            const textNodeEls = [...columnEl.childNodes].filter(el => el.nodeType === 3);
+            textNodeEls.forEach(el => el.remove());
+            const imageEl = columnEl.querySelector('img');
+            imageEl.classList.add('o_grid_item_image');
+            imageEl.style.removeProperty('width');
+        }
     }
 
     return maxRowEnd;

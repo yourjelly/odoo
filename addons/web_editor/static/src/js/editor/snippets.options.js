@@ -4966,7 +4966,7 @@ registry.layout_column = SnippetOptionWidget.extend({
 
             // Create a default image and add it to the new column.
             const imgEl = document.createElement('img');
-            imgEl.classList.add('img', 'img-fluid', 'mx-auto');
+            imgEl.classList.add('img', 'img-fluid', 'mx-auto', 'o_grid_item_image');
             imgEl.src = '/web/image/website.s_text_image_default_image';
             imgEl.alt = '';
             imgEl.loading = 'lazy';
@@ -5104,6 +5104,8 @@ registry.layout_column = SnippetOptionWidget.extend({
             columnEl.classList.remove('o_grid_item');
             columnEl.style.removeProperty('grid-area');
             columnEl.style.removeProperty('z-index');
+            const imageEls = columnEl.querySelectorAll('.o_grid_item_image');
+            imageEls.forEach(imageEl => imageEl.classList.remove('o_grid_item_image'));
         }
         // Removing the grid properties.
         delete rowEl.dataset.rowCount;
