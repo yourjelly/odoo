@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from time import time_ns
 import pytz
 
 from collections import defaultdict
@@ -9,7 +10,7 @@ from dateutil.relativedelta import relativedelta
 
 from odoo import api, exceptions, fields, models, _, Command
 from odoo.osv import expression
-from odoo.tools.misc import clean_context
+from odoo.tools.misc import OrderedSet, clean_context
 
 
 class MailActivity(models.Model):
@@ -395,18 +396,14 @@ class MailActivity(models.Model):
         # check read access rights before checking the actual rules on the given ids
         super(MailActivity, self.with_user(access_rights_uid or self._uid)).check_access_rights('read')
 
-        self.flush_model(['res_model', 'res_id'])
-        activities_to_check = []
-        for sub_ids in self._cr.split_for_in_conditions(ids):
-            self._cr.execute("""
-                SELECT DISTINCT activity.id, activity.res_model, activity.res_id
-                FROM "%s" activity
-                WHERE activity.id = ANY (%%(ids)s) AND activity.res_id != 0""" % self._table, dict(ids=list(sub_ids)))
-            activities_to_check += self._cr.dictfetchall()
+        activities = self.browse(ids)
+        # Load in cache fields necessary to check document security
+        # We can sudo here because ir.access and ir.rule (by `super()._search`) has been already checked
+        activities.sudo()._read(['res_model', 'res_id'])
 
-        activity_to_documents = {}
-        for activity in activities_to_check:
-            activity_to_documents.setdefault(activity['res_model'], set()).add(activity['res_id'])
+        activity_to_documents = defaultdict(OrderedSet)
+        for act in activities:
+            activity_to_documents[act.res_model].add(act.res_id)
 
         allowed_ids = set()
         for doc_model, doc_ids in activity_to_documents.items():
@@ -417,20 +414,17 @@ class MailActivity(models.Model):
             else:
                 doc_operation = 'read'
             DocumentModel = self.env[doc_model].with_user(access_rights_uid or self._uid)
-            right = DocumentModel.check_access_rights(doc_operation, raise_exception=False)
-            if right:
-                valid_docs = DocumentModel.browse(doc_ids)._filter_access_rules(doc_operation)
-                valid_doc_ids = set(valid_docs.ids)
-                allowed_ids.update(
-                    activity['id'] for activity in activities_to_check
-                    if activity['res_model'] == doc_model and activity['res_id'] in valid_doc_ids)
+            if not DocumentModel.check_access_rights(doc_operation, raise_exception=False):
+                continue
+            valid_docs = DocumentModel.browse(doc_ids)._filter_access_rules(doc_operation)
+            valid_doc_ids = set(valid_docs._ids)
+            allowed_ids |= set(act.id for act in activities if act.res_id in valid_doc_ids)
 
         if count:
             return len(allowed_ids)
         else:
             # re-construct a list based on ids, because 'allowed_ids' does not keep the original order
-            id_list = [id for id in ids if id in allowed_ids]
-            return id_list
+            return [id for id in ids if id in allowed_ids]
 
     @api.model
     def _read_group_raw(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
