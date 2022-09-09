@@ -11,6 +11,8 @@ var Widget = require('web.Widget');
 
 var QWeb = core.qweb;
 
+var Dialog = require('web.Dialog');
+
 var AddToGoogleSpreadsheetMenu = Widget.extend({
     events: _.extend({}, Widget.prototype.events, {
         'click .add_to_spreadsheet': '_onAddToSpreadsheetClick',
@@ -62,9 +64,27 @@ var AddToGoogleSpreadsheetMenu = Widget.extend({
         var domain = searchQuery.domain;
         var groupBys = pyUtils.eval('groupbys', searchQuery.groupBys).join(" ");
         var ds = new data.DataSet(this, 'google.drive.config');
+        this.dialog = null;
+        var self = this;
 
         ds.call('set_spreadsheet', [modelName, Domain.prototype.arrayToString(domain), groupBys, list_view_id])
             .then(function (res) {
+                if (res.deprecated) {
+                    var content = $('<div>').html(
+                        "<p>To insert this data inside of a Google Sheet:</p>" +
+                        "<ul>" +
+                        "<li>Duplicate the <a href='"+res.url+"' target='_blank'>Spreadsheet Template</a></li>" +
+                        "<li>Setup your Odoo credentials in the sheet via the <code>Odoo &gt; Settings</code> menu</li>" +
+                        "<li>Paste the following formula in your spreadsheet:<br/><code>"+res.formula+"</code></li>" +
+                        "</ul>"
+                    );
+                    self.dialog = new Dialog(this, {
+                        title: _('Google Spreadsheet'),
+                        $content: content,
+                    })
+                    self.dialog.open();
+                    return;
+                }
                 if (res.url){
                     window.open(res.url, '_blank');
                 }
