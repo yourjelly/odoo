@@ -1,9 +1,7 @@
-odoo.define('website_sale_delivery_giftcard.test', function (require) {
-    'use strict';
+/** @odoo-module alias=website_sale_delivery_giftcard.test **/
 
-    require("website_sale.tour");
-    var tour = require("web_tour.tour");
-    const tourUtils = require('website_sale.tour_utils');
+import tour from 'web_tour.tour';
+import wsTourUtils from "website_sale.tour_utils";
 
     tour.register('shop_sale_giftcard_delivery', {
         test: true,
@@ -23,7 +21,7 @@ odoo.define('website_sale_delivery_giftcard.test', function (require) {
                 content: "click on 'Add to Cart' button",
                 trigger: "a:contains(ADD TO CART)",
             },
-            tourUtils.goToCart(1),
+            wsTourUtils.goToCart(1),
             {
                 content: "go to checkout",
                 trigger: 'a[href="/shop/checkout?express=1"]',
@@ -60,6 +58,5 @@ odoo.define('website_sale_delivery_giftcard.test', function (require) {
                 extra_trigger: 'button[name="o_payment_submit_button"]',
                 run() {} // this is a check
             },
-        ]
-    );
-});
+    ]
+);
