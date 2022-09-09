@@ -179,6 +179,28 @@ FALSE_DOMAIN = [FALSE_LEAF]
 _logger = logging.getLogger(__name__)
 
 
+
+# IDEA:
+# - [('many2one.field_1', <op>, <value>), ('many2one.field_1', <op>, <value>)]
+# => Should be optimized in one subquery not two
+# - Allow recursive Domain 'any'/'all'
+# - Avoid extra () in the end request
+# - Left Join when it is better than IN (subquery) ?????????????? How to know, depends on where the condition is?
+# - Exists / Not exists ? to replace IN (when).
+# - <selection_field> NOT IN (values) -> should be reverse the condition to be able to use index. (same for != equals maybe ?)
+# - Have a class domain to have utils method (by example to know if some condition is apply in root level, can be usefull to some optimisation)
+
+class Domain():
+    # Immutable or Mutable +1
+
+    def __init__(self, domain_list=()) -> None:
+        self.domain = domain_list
+        # How to represent data -> graph maybe ?
+        ...
+
+    ...
+
+
 # --------------------------------------------------
 # Generic domain manipulation
 # --------------------------------------------------
