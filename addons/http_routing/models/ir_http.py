@@ -650,7 +650,7 @@ class IrHttp(models.AbstractModel):
         return response
 
     @api.model
-    @tools.ormcache('path', 'query_args')
+    @tools.cache_longterm('path')
     def url_rewrite(self, path, query_args=None):
         new_url = False
         router = http.root.get_db_router(request.db).bind('')

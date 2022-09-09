@@ -125,8 +125,7 @@ class WebsiteRewrite(models.Model):
         return res
 
     def _invalidate_routing(self):
-        # call clear_caches on this worker to reload routing table
-        self.env['ir.http'].clear_caches()
+        self.env.registry._clear_cache_longterm()
 
     def refresh_routes(self):
         self.env['website.route']._refresh()

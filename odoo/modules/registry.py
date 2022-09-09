@@ -116,6 +116,7 @@ class Registry(Mapping):
         self._ordinary_tables = None
         self._constraint_queue = deque()
         self.__cache = LRU(8192)
+        self.__cache_longterm = LRU(8192)
 
         # modules fully loaded (maintained during init phase by `loading` module)
         self._init_modules = set()
@@ -145,6 +146,7 @@ class Registry(Mapping):
         # invalidated (i.e. cleared).
         self.registry_sequence = None
         self.cache_sequence = None
+        self.cache_longterm_sequence = None
 
         # Flags indicating invalidation of the registry or the cache.
         self._invalidation_flags = threading.local()
@@ -572,6 +574,12 @@ class Registry(Mapping):
         self.__cache.clear()
         self.cache_invalidated = True
 
+    def _clear_cache_longterm(self):
+        """ Clear the cache and mark it as invalidated. """
+        self['ir.http']._clear_routing_map()
+        self.__cache_longterm.clear()
+        self.cache_longterm_invalidated = True
+
     def clear_caches(self):
         """ Clear the caches associated to methods decorated with
         ``tools.ormcache`` or ``tools.ormcache_multi`` for all the models.
@@ -615,6 +623,15 @@ class Registry(Mapping):
     def cache_invalidated(self, value):
         self._invalidation_flags.cache = value
 
+    @property
+    def cache_longterm_invalidated(self):
+        """ Determine whether the current thread has modified the cache. """
+        return getattr(self._invalidation_flags, 'cache_longterm', False)
+
+    @cache_longterm_invalidated.setter
+    def cache_longterm_invalidated(self, value):
+        self._invalidation_flags.cache_longterm = value
+
     def setup_signaling(self):
         """ Setup the inter-process signaling on this registry. """
         if self.in_test_mode():
@@ -631,13 +648,16 @@ class Registry(Mapping):
                 cr.execute("SELECT nextval('base_registry_signaling')")
                 cr.execute("CREATE SEQUENCE base_cache_signaling INCREMENT BY 1 START WITH 1")
                 cr.execute("SELECT nextval('base_cache_signaling')")
+                cr.execute("CREATE SEQUENCE base_cache_longterm_signaling INCREMENT BY 1 START WITH 1")
+                cr.execute("SELECT nextval('base_cache_longterm_signaling')")
 
             cr.execute(""" SELECT base_registry_signaling.last_value,
-                                  base_cache_signaling.last_value
-                           FROM base_registry_signaling, base_cache_signaling""")
-            self.registry_sequence, self.cache_sequence = cr.fetchone()
-            _logger.debug("Multiprocess load registry signaling: [Registry: %s] [Cache: %s]",
-                          self.registry_sequence, self.cache_sequence)
+                                  base_cache_signaling.last_value,
+                                  base_cache_longterm_signaling.last_value
+                           FROM base_registry_signaling, base_cache_signaling, base_cache_longterm_signaling""")
+            self.registry_sequence, self.cache_sequence, self.cache_longterm_sequence = cr.fetchone()
+            _logger.debug("Multiprocess load registry signaling: [Registry: %s] [Cache: %s] [LongTermCache: %s]",
+                          self.registry_sequence, self.cache_sequence, self.cache_longterm_sequence)
 
     def check_signaling(self):
         """ Check whether the registry has changed, and performs all necessary
@@ -648,11 +668,17 @@ class Registry(Mapping):
 
         with closing(self.cursor()) as cr:
             cr.execute(""" SELECT base_registry_signaling.last_value,
-                                  base_cache_signaling.last_value
-                           FROM base_registry_signaling, base_cache_signaling""")
-            r, c = cr.fetchone()
-            _logger.debug("Multiprocess signaling check: [Registry - %s -> %s] [Cache - %s -> %s]",
-                          self.registry_sequence, r, self.cache_sequence, c)
+                                  base_cache_signaling.last_value,
+                                  base_cache_longterm_signaling.last_value
+                             FROM base_registry_signaling,
+                                  base_cache_signaling,
+                                  base_cache_longterm_signaling""")
+            r, c, cl = cr.fetchone()
+            _logger.debug(
+                "Multiprocess signaling check: [Registry - %s -> %s] [Cache - %s -> %s] [LongTermCache - %s -> %s]",
+                self.registry_sequence, r,
+                self.cache_sequence, c,
+                self.cache_longterm_sequence, cl)
             # Check if the model registry must be reloaded
             if self.registry_sequence != r:
                 _logger.info("Reloading the model registry after database signaling.")
@@ -666,8 +692,14 @@ class Registry(Mapping):
             # would be inherited from the master process (first request in pre-fork mode)
             self.cache_invalidated = False
 
+            if self.cache_longterm_sequence != cl:
+                _logger.info("Invalidating longterm cache after database signaling.")
+                self._clear_cache_longterm()
+                self.cache_longterm_invalidated = False
+
             self.registry_sequence = r
             self.cache_sequence = c
+            self.cache_longterm_sequence = cl
 
         return self
 
@@ -681,14 +713,20 @@ class Registry(Mapping):
 
         # no need to notify cache invalidation in case of registry invalidation,
         # because reloading the registry implies starting with an empty cache
-        elif self.cache_invalidated and not self.in_test_mode():
-            _logger.info("At least one model cache has been invalidated, signaling through the database.")
+        elif (self.cache_invalidated or self.cache_longterm_invalidated) and not self.in_test_mode():
             with closing(self.cursor()) as cr:
-                cr.execute("select nextval('base_cache_signaling')")
-                self.cache_sequence = cr.fetchone()[0]
+                if self.cache_invalidated:
+                    _logger.info("At least one model cache has been invalidated, signaling through the database.")
+                    cr.execute("select nextval('base_cache_signaling')")
+                    self.cache_sequence = cr.fetchone()[0]
+                if self.cache_longterm_invalidated:
+                    _logger.info("Long-term cache has been invalidated, signaling through the database.")
+                    cr.execute("select nextval('base_cache_longterm_signaling')")
+                    self.cache_longterm_sequence = cr.fetchone()[0]
 
         self.registry_invalidated = False
         self.cache_invalidated = False
+        self.cache_longterm_invalidated = False
 
     def reset_changes(self):
         """ Reset the registry and cancel all invalidations. """
@@ -699,6 +737,14 @@ class Registry(Mapping):
         if self.cache_invalidated:
             self.__cache.clear()
             self.cache_invalidated = False
+
+        # TODO: decide whether we want to invalidate long-term cache here?
+        # This is called e.g. for rolling back a dry-run import, so unless we're
+        # actually touching long-term cached data, the cost of discarding the
+        # long-term cache seems too high to be automatic for each rollback.
+        if self.cache_longterm_invalidated and self.in_test_mode():
+            self.__cache_longterm.clear()
+            self.cache_longterm_invalidated = False
 
     @contextmanager
     def manage_changes(self):

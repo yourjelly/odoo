@@ -769,6 +769,7 @@ class TransactionCase(BaseCase):
         self.addCleanup(envs.clear)
 
         self.addCleanup(self.registry.clear_caches)
+        self.addCleanup(self.registry._clear_cache_longterm)
         self.addCleanup(self.env.clear)
 
         # flush everything in setUpClass before introducing a savepoint

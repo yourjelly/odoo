@@ -68,11 +68,6 @@ class Http(models.AbstractModel):
         return super(Http, cls).routing_map(key=key)
 
     @classmethod
-    def clear_caches(cls):
-        super()._clear_routing_map()
-        return super().clear_caches()
-
-    @classmethod
     def _slug_matching(cls, adapter, endpoint, **kw):
         for arg in kw:
             if isinstance(kw[arg], models.BaseModel):

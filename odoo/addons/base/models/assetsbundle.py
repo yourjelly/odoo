@@ -265,6 +265,7 @@ class AssetsBundle(object):
             self._unlink_attachments(attachments)
             # force bundle invalidation on other workers
             self.env['ir.qweb'].clear_caches()
+            self.env.registry._clear_cache_longterm()
 
         return True
 
