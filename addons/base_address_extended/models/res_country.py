@@ -16,3 +16,7 @@ class ResCountry(models.Model):
              "\n%(street_number)s: the house number"
              "\n%(street_number2)s: the door number",
         default='%(street_number)s/%(street_number2)s %(street_name)s', required=True)
+
+    @api.onchange("street_format")
+    def onchange_street_format(self):
+        self.street_format = self.street_format.strip()
