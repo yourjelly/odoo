@@ -813,10 +813,7 @@ class AccountReconcileModel(models.Model):
             if 'rejected' in status:
                 return
 
-            result = {
-                'amls': self.env['account.move.line'],
-                'amls_values_list': amls_values_list,
-            }
+            result = {'amls': self.env['account.move.line']}
             for aml_values in amls_values_list:
                 result['amls'] |= aml_values['aml']
 
@@ -848,7 +845,8 @@ class AccountReconcileModel(models.Model):
             # Manage the early payment discount.
             if same_currency_mode \
                 and aml.move_id.move_type in ('out_invoice', 'out_receipt', 'in_invoice', 'in_receipt') \
-                and aml.move_id.payment_state == 'not_paid' \
+                and not aml.matched_debit_ids \
+                and not aml.matched_credit_ids \
                 and aml.discount_date \
                 and st_line.date <= aml.discount_date:
 
@@ -857,7 +855,6 @@ class AccountReconcileModel(models.Model):
                     **aml_values,
                     'amount_residual': st_line.company_currency_id.round(aml.discount_amount / rate),
                     'amount_residual_currency': aml.discount_amount,
-                    'early_payment': True,
                 })
             else:
                 amls_with_epd_values_list.append(aml_values)
