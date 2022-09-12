@@ -73,16 +73,21 @@ def att_names(name):
     yield f"t-attf-{name}"
 
 
-def transfer_field_to_modifiers(field, modifiers):
+def transfer_field_to_modifiers(field, modifiers, view_editable):
     default_values = {}
     state_exceptions = {}
-    for attr in ('invisible', 'readonly', 'required'):
+    attributes = ('invisible',)
+    if view_editable:
+        attributes += ('readonly', 'required',)
+    for attr in attributes:
         state_exceptions[attr] = []
         default_values[attr] = bool(field.get(attr))
-    for state, modifs in field.get("states", {}).items():
-        for modif in modifs:
-            if default_values[modif[0]] != modif[1]:
-                state_exceptions[modif[0]].append(state)
+
+    if view_editable:
+        for state, modifs in field.get("states", {}).items():
+            for modif in modifs:
+                if default_values[modif[0]] != modif[1]:
+                    state_exceptions[modif[0]].append(state)
 
     for attr, default_value in default_values.items():
         if state_exceptions[attr]:
@@ -1083,14 +1088,16 @@ actual arch.
             self._raise_view_error(_('Model not found: %(model)s', model=model_name), root)
         model = self.env[model_name]
 
-        self._postprocess_on_change(root, model)
-
         name_manager = NameManager(model, parent=parent_name_manager)
 
         root_info = {
             'view_type': root.tag,
+            'view_editable': self._editable_node(root, name_manager),
             'mobile': options.get('mobile'),
         }
+
+        if root_info['view_editable']:
+            self._postprocess_on_change(root, model)
 
         # use a stack to recursively traverse the tree
         stack = [(root, editable)]
@@ -1217,14 +1224,14 @@ actual arch.
                         self._postprocess_view(
                             child, field.comodel_name, editable=node_info['editable'], parent_name_manager=name_manager,
                         )
-                if field.type in ('many2one', 'many2many'):
+                if node_info['view_editable'] and field.type in ('many2one', 'many2many'):
                     node.set('model_access_rights', field.comodel_name)
 
             name_manager.has_field(node, node.get('name'), attrs)
 
             field_info = name_manager.field_info.get(node.get('name'))
             if field_info:
-                transfer_field_to_modifiers(field_info, node_info['modifiers'])
+                transfer_field_to_modifiers(field_info, node_info['modifiers'], node_info['view_editable'])
 
     def _postprocess_tag_form(self, node, name_manager, node_info):
         result = name_manager.model.view_header_get(False, node.tag)
