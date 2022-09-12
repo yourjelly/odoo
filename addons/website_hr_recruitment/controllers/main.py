@@ -85,7 +85,7 @@ class WebsiteHrRecruitment(http.Controller):
         # Browse jobs as superuser, because address is restricted
         jobs = details[0].get('results', Jobs).sudo()
 
-        # Deduce offices, departments and countries offices of those jobs
+        # Deduce offices, departments and countries offices
         def sort(items, key):
             """ Sort items alphabetically followed by None if present
 
@@ -102,27 +102,76 @@ class WebsiteHrRecruitment(http.Controller):
                 items.append(None)
             return items
 
-        offices = sort(set(j.address_id or None for j in jobs), 'city')
-        departments = sort(set(j.department_id or None for j in jobs), 'name')
-        countries = sort(set(o and o.country_id or None for o in offices), 'name')
-
-        total = len(jobs)
-
-        count_per_country = {'all': total}
-        for c, jobs_list in groupby(jobs, lambda job: job.address_id.country_id):
+        # Countries
+        if country or is_remote:
+            cross_country_options = options.copy()
+            cross_country_options.update({
+                'allowFuzzy': False,
+                'country': None,
+                'is_remote': False,
+            })
+            cross_country_total, cross_country_details, _ = request.website._search_with_fuzzy("jobs",
+                fuzzy_search_term or search, limit=1000, order="is_published desc, sequence, no_of_recruitment desc",
+                options=cross_country_options)
+            # Browse jobs as superuser, because address is restricted
+            cross_country_jobs = cross_country_details[0].get('results', Jobs).sudo()
+        else:
+            cross_country_total = total
+            cross_country_jobs = jobs
+        country_offices = set(j.address_id or None for j in cross_country_jobs)
+        countries = sort(set(o and o.country_id or None for o in country_offices), 'name')
+        count_per_country = {'all': cross_country_total}
+        for c, jobs_list in groupby(cross_country_jobs, lambda job: job.address_id.country_id):
             count_per_country[c] = len(jobs_list)
-        count_per_department = {'all': total}
-        for d, jobs_list in groupby(jobs, lambda job: job.department_id):
-            count_per_department[d] = len(jobs_list)
-        count_other_department = len(jobs.filtered(lambda job: not job.department_id))
-        if count_other_department:
-            count_per_department[None] = count_other_department
-        count_per_office = {'all': total}
-        for o, jobs_list in groupby(jobs, lambda job: job.address_id):
-            count_per_office[o] = len(jobs_list)
-        count_remote = len(jobs.filtered(lambda job: not job.address_id))
+        count_remote = len(cross_country_jobs.filtered(lambda job: not job.address_id))
         if count_remote:
             count_per_country[None] = count_remote
+
+        # Departments
+        if department or is_other_department:
+            cross_department_options = options.copy()
+            cross_department_options.update({
+                'allowFuzzy': False,
+                'department': None,
+                'is_other_department': False,
+            })
+            cross_department_total, cross_department_details, _ = request.website._search_with_fuzzy("jobs",
+                fuzzy_search_term or search, limit=1000, order="is_published desc, sequence, no_of_recruitment desc",
+                options=cross_department_options)
+            cross_department_jobs = cross_department_details[0].get('results', Jobs)
+        else:
+            cross_department_total = total
+            cross_department_jobs = jobs
+        departments = sort(set(j.department_id or None for j in cross_department_jobs), 'name')
+        count_per_department = {'all': cross_department_total}
+        for d, jobs_list in groupby(cross_department_jobs, lambda job: job.department_id):
+            count_per_department[d] = len(jobs_list)
+        count_other_department = len(cross_department_jobs.filtered(lambda job: not job.department_id))
+        if count_other_department:
+            count_per_department[None] = count_other_department
+
+        # Offices
+        if office_id or is_remote:
+            cross_office_options = options.copy()
+            cross_office_options.update({
+                'allowFuzzy': False,
+                'office_id': None,
+                'is_remote': False,
+            })
+            cross_office_total, cross_office_details, _ = request.website._search_with_fuzzy("jobs",
+                fuzzy_search_term or search, limit=1000, order="is_published desc, sequence, no_of_recruitment desc",
+                options=cross_office_options)
+            # Browse jobs as superuser, because address is restricted
+            cross_office_jobs = cross_office_details[0].get('results', Jobs).sudo()
+        else:
+            cross_office_total = total
+            cross_office_jobs = jobs
+        offices = sort(set(j.address_id or None for j in cross_office_jobs), 'city')
+        count_per_office = {'all': cross_office_total}
+        for o, jobs_list in groupby(cross_office_jobs, lambda job: job.address_id):
+            count_per_office[o] = len(jobs_list)
+        count_remote = len(cross_office_jobs.filtered(lambda job: not job.address_id))
+        if count_remote:
             count_per_office[None] = count_remote
 
         pager = request.website.pager(
