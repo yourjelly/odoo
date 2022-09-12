@@ -90,7 +90,7 @@ QUnit.module("Record Component", (hooks) => {
         setupViewRegistries();
     });
 
-    QUnit.test("display a simple field", async function (assert) {
+    QUnit.skipWOWL("display a simple field", async function (assert) {
         class Parent extends Component {}
         Parent.components = { Record, Field };
         Parent.template = xml`
@@ -115,7 +115,7 @@ QUnit.module("Record Component", (hooks) => {
         ]);
     });
 
-    QUnit.test("can be updated with different resId", async function (assert) {
+    QUnit.skipWOWL("can be updated with different resId", async function (assert) {
         class Parent extends Component {
             setup() {
                 this.state = useState({
@@ -146,7 +146,7 @@ QUnit.module("Record Component", (hooks) => {
         assert.verifySteps(["/web/dataset/call_kw/partner/read"]);
     });
 
-    QUnit.test("predefined fields and values", async function (assert) {
+    QUnit.skipWOWL("predefined fields and values", async function (assert) {
         class Parent extends Component {
             setup() {
                 this.fields = {

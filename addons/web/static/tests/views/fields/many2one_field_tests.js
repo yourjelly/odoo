@@ -1436,7 +1436,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.test("standalone many2one field", async function (assert) {
+    QUnit.skipWOWL("standalone many2one field", async function (assert) {
         class Comp extends owl.Component {
             setup() {
                 this.fields = {

@@ -435,6 +435,16 @@ export class Record extends DataPoint {
      * @param {string} fieldName
      * @returns {boolean}
      */
+    isInvisible(fieldName) {
+        const { invisible } = this.activeFields[fieldName].modifiers || {};
+        return evalDomain(invisible, this.evalContext);
+    }
+
+    /**
+     * FIXME: memoize this at some point?
+     * @param {string} fieldName
+     * @returns {boolean}
+     */
     isReadonly(fieldName) {
         const { readonly } = this.activeFields[fieldName].modifiers || {};
         return evalDomain(readonly, this.evalContext);
