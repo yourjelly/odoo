@@ -394,7 +394,10 @@ export function clickEdit(htmlElement) {
     }
 }
 
-export function clickSave(htmlElement) {
+export async function clickSave(htmlElement) {
+    if (htmlElement.querySelectorAll(".o_form_status_indicator").length) {
+        await mouseEnter(htmlElement, ".o_form_status_indicator");
+    }
     if (htmlElement.querySelectorAll(".o_form_button_save").length) {
         return click(htmlElement, ".o_form_button_save");
     } else if (htmlElement.querySelectorAll(".o_list_button_save").length) {
@@ -404,7 +407,10 @@ export function clickSave(htmlElement) {
     }
 }
 
-export function clickDiscard(htmlElement) {
+export async function clickDiscard(htmlElement) {
+    if (htmlElement.querySelectorAll(".o_form_status_indicator").length) {
+        await mouseEnter(htmlElement, ".o_form_status_indicator");
+    }
     if (htmlElement.querySelectorAll(".o_form_button_cancel").length) {
         return click(htmlElement, ".o_form_button_cancel");
     } else if (htmlElement.querySelectorAll(".o_list_button_discard").length) {

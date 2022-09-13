@@ -8,7 +8,7 @@ const { Component, xml } = owl;
 
 export class FormLabel extends Component {
     get className() {
-        const { invalid, empty } = fieldVisualFeedback(
+        const { invalid, empty, readonly } = fieldVisualFeedback(
             this.props.fieldInfo.FieldComponent,
             this.props.record,
             this.props.fieldName,
@@ -18,7 +18,7 @@ export class FormLabel extends Component {
         if (invalid) {
             classes.push("o_field_invalid");
         }
-        if (empty) {
+        if (empty || readonly) {
             classes.push("o_form_label_empty");
         }
         return classes.join(" ");

@@ -6,6 +6,7 @@ import {
     addRow,
     click,
     clickEdit,
+    clickDiscard,
     clickSave,
     dragAndDrop,
     editInput,
@@ -12378,5 +12379,126 @@ QUnit.module("Views", (hooks) => {
         await click(target.querySelector(".o_list_view .o_list_button_add"));
         assert.containsOnce(target, ".o_form_view .o_field_x2many .o_kanban_renderer");
         assert.containsNone(target, ".o_view_nocontent");
+    });
+
+    QUnit.test("status indicator: saved state", async (assert) => {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            resId: 1,
+            serverData,
+            arch: `<form><field name="foo"/></form>`,
+        });
+
+        assert.containsOnce(target, ".o_form_status_indicator");
+        assert.containsOnce(target, ".o_form_status_indicator_buttons");
+        assert.containsOnce(target, ".o_form_status_indicator_buttons_hidden");
+        assert.containsN(target, ".o_form_status_indicator_buttons button", 2);
+        assert.strictEqual(
+            target.querySelector(".o_form_status_indicator").textContent,
+            "SaveDiscard"
+        );
+    });
+
+    QUnit.test("status indicator: dirty state", async (assert) => {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            resId: 1,
+            serverData,
+            arch: `<form><field name="foo"/></form>`,
+        });
+
+        assert.strictEqual(
+            target.querySelector(".o_form_status_indicator").textContent,
+            "SaveDiscard"
+        );
+        assert.containsOnce(target, ".o_form_status_indicator_buttons_hidden");
+        await editInput(target, ".o_field_widget input", "dirty");
+        assert.strictEqual(
+            target.querySelector(".o_form_status_indicator").textContent,
+            "Unsaved changesSaveDiscard"
+        );
+        assert.containsNone(target, ".o_form_status_indicator_buttons_hidden");
+    });
+
+    QUnit.test("status indicator: save dirty state", async (assert) => {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            resId: 1,
+            serverData,
+            arch: `<form><field name="foo"/></form>`,
+        });
+
+        assert.strictEqual(target.querySelector(".o_field_widget input").value, "yop");
+        await editInput(target, ".o_field_widget input", "dirty");
+        assert.containsNone(target, ".o_form_status_indicator_buttons_hidden");
+        assert.strictEqual(
+            target.querySelector(".o_form_status_indicator").textContent,
+            "Unsaved changesSaveDiscard"
+        );
+        await clickSave(target);
+        assert.containsOnce(target, ".o_form_status_indicator_buttons_hidden");
+        assert.strictEqual(
+            target.querySelector(".o_form_status_indicator").textContent,
+            "SaveDiscard"
+        );
+        assert.strictEqual(target.querySelector(".o_field_widget input").value, "dirty");
+    });
+
+    QUnit.test("status indicator: discard dirty state", async (assert) => {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            resId: 1,
+            serverData,
+            arch: `<form><field name="foo"/></form>`,
+        });
+
+        assert.strictEqual(target.querySelector(".o_field_widget input").value, "yop");
+        await editInput(target, ".o_field_widget input", "dirty");
+        assert.containsNone(target, ".o_form_status_indicator_buttons_hidden");
+        assert.strictEqual(
+            target.querySelector(".o_form_status_indicator").textContent,
+            "Unsaved changesSaveDiscard"
+        );
+        await clickDiscard(target);
+        assert.containsOnce(target, ".o_form_status_indicator_buttons_hidden");
+        assert.strictEqual(
+            target.querySelector(".o_form_status_indicator").textContent,
+            "SaveDiscard"
+        );
+        assert.strictEqual(target.querySelector(".o_field_widget input").value, "yop");
+    });
+
+    QUnit.test("status indicator: invalid state", async (assert) => {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            resId: 1,
+            serverData,
+            arch: `<form><field name="foo" required="1"/></form>`,
+            mockRPC(route, { method }) {
+                if (method === "write") {
+                    return Promise.reject(false);
+                }
+            },
+        });
+
+        assert.strictEqual(
+            target.querySelector(".o_form_status_indicator").textContent,
+            "SaveDiscard"
+        );
+        await editInput(target, ".o_field_widget input", "");
+        assert.strictEqual(
+            target.querySelector(".o_form_status_indicator").textContent,
+            "Unsaved changesSaveDiscard"
+        );
+        await clickSave(target);
+        assert.strictEqual(
+            target.querySelector(".o_form_status_indicator").textContent,
+            "Unable to saveSaveDiscard"
+        );
     });
 });
