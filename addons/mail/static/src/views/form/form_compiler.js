@@ -5,8 +5,8 @@ import { registry } from "@web/core/registry";
 import { SIZES } from "@web/core/ui/ui_service";
 import { patch } from "@web/core/utils/patch";
 import { append, createElement, setAttributes } from "@web/core/utils/xml";
+import { ViewCompiler, getModifier } from "@web/views/view_compiler";
 import { FormCompiler } from "@web/views/form/form_compiler";
-
 
 function compileChatter(node, params) {
     let hasActivities = false;
@@ -44,9 +44,9 @@ function compileChatter(node, params) {
         "hasParentReloadOnFollowersUpdate": hasParentReloadOnFollowersUpdate,
         "hasParentReloadOnMessagePosted": hasParentReloadOnMessagePosted,
         "isAttachmentBoxVisibleInitially": isAttachmentBoxVisibleInitially,
-        "threadId": "props.record.resId or undefined",
-        "threadModel": "props.record.resModel",
-        "webRecord": "props.record",
+        "threadId": params.threadId,
+        "threadModel": params.threadModel,
+        "webRecord": params.webRecord,
     });
     const chatterContainerHookXml = createElement("div");
     chatterContainerHookXml.classList.add("o_FormRenderer_chatterContainer");
@@ -59,21 +59,97 @@ function compileAttachmentPreview(node, params) {
     webClientViewAttachmentViewContainerHookXml.classList.add('o_attachment_preview');
     const webClientViewAttachmentViewContainerXml = createElement("WebClientViewAttachmentViewContainer");
     setAttributes(webClientViewAttachmentViewContainerXml, {
-        "threadId": "props.record.resId or undefined",
-        "threadModel": "props.record.resModel",
+        "threadId": params.threadId,
+        "threadModel": params.threadModel,
     });
     append(webClientViewAttachmentViewContainerHookXml, webClientViewAttachmentViewContainerXml);
     return webClientViewAttachmentViewContainerHookXml;
 }
 
+function compile(res, inSheet) {
+    const chatterContainerHookXml = res.querySelector(".o_FormRenderer_chatterContainer");
+    if (!chatterContainerHookXml) {
+        return res; // no chatter, keep the result as it is
+    }
+
+    const chatterContainerXml = chatterContainerHookXml.querySelector("ChatterContainer");
+    if (inSheet) {
+        setAttributes(chatterContainerXml, {
+            hasExternalBorder: "true",
+            hasMessageListScrollAdjust: "false",
+        });
+        return res; // if chatter is inside sheet, keep it there
+    }
+
+    setAttributes(chatterContainerHookXml, {
+        "t-attf-class": `{{ uiService.size >= ${SIZES.XXL} ? "o-aside" : "" }}`,
+    });
+
+    return res;
+}
+
+export class MailFormCompiler extends ViewCompiler {
+    setup() {
+        this.compilers.push({ selector: "t", fn: this.compileT });
+        this.compilers.push({ selector: "div.oe_chatter", fn: this.compileChatter });
+        this.compilers.push({
+            selector: "div.o_attachment_preview",
+            fn: this.compileAttachmentPreview,
+        });
+    }
+
+    compile(node, params) {
+        const res = super.compile(node, params);
+        return compile(res.children[0], false);
+    }
+
+    compileT(node, params) {
+        const compiledRoot = createElement("t");
+        for (const child of node.childNodes) {
+            const invisible = getModifier(child, "invisible");
+            let compiledChild = this.compileNode(child, params, false);
+            compiledChild = this.applyInvisible(invisible, compiledChild, {
+                ...params,
+                recordExpr: "model.root",
+            });
+            append(compiledRoot, compiledChild);
+        }
+        return compiledRoot;
+    }
+
+    compileChatter(node) {
+        return compileChatter(node, {
+            threadId: "model.root.resId or undefined",
+            threadModel: "model.root.resModel",
+            webRecord: "model.root",
+        });
+    }
+
+    compileAttachmentPreview(node) {
+        return compileAttachmentPreview(node, {
+            threadId: "model.root.resId or undefined",
+            threadModel: "model.root.resModel",
+        });
+    }
+}
+
 registry.category("form_compilers").add("chatter_compiler", {
     selector: "div.oe_chatter",
-    fn: compileChatter,
+    fn: (node) =>
+        compileChatter(node, {
+            threadId: "props.record.resId or undefined",
+            threadModel: "props.record.resModel",
+            webRecord: "props.record",
+        }),
 });
 
 registry.category("form_compilers").add("attachment_preview_compiler", {
     selector: "div.o_attachment_preview",
-    fn: compileAttachmentPreview,
+    fn: (node) =>
+        compileAttachmentPreview(node, {
+            threadId: "props.record.resId or undefined",
+            threadModel: "props.record.resModel",
+        }),
 });
 
 patch(FormCompiler.prototype, 'mail', {
