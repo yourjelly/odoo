@@ -391,18 +391,44 @@ odoo.define('point_of_sale.Chrome', function(require) {
 
         // MISC METHODS //
 
+        /*
+        ** Selection of demo data
+        */
+        _selectionDemoList() {
+            return [
+                {
+                    id:"0",
+                    label: this.env._t("Shop selling beautiful clothes"),
+                    item: ['point_of_sale', 'point_of_sale_demo_clothes'],
+                },
+                {
+                    id:"1",
+                    label: this.env._t("Shop selling stylish furniture"),
+                    item: ['point_of_sale', 'point_of_sale_demo_furniture'],
+                },
+                {
+                    id:"2",
+                    label: this.env._t("Bakery selling succulent breads and pastries"),
+                    item: ['point_of_sale', 'point_of_sale_demo_bakery'],
+                },
+            ]
+        }
+
         async _loadDemoData() {
-            const { confirmed } = await this.showPopup('ConfirmPopup', {
-                title: this.env._t('You do not have any products'),
-                body: this.env._t(
-                    'Would you like to load demo data?'
-                ),
-                confirmText: this.env._t('Yes'),
-                cancelText: this.env._t('No')
+            const selectionList = this._selectionDemoList()
+            const { confirmed, payload: selectedOption } = await this.showPopup('SelectionPopup',
+            {
+                title: this.env._t("Let's load some demo data by pretending you want to open a"),
+                list: selectionList,
+                cancelText: "Empty POS"
             });
             if (confirmed) {
                 await this.rpc({
                     'route': '/pos/load_onboarding_data',
+                    params: {
+                        module_name: selectedOption[0],
+                        file_name: selectedOption[1]
+                    },
                 });
                 this.env.pos.load_server_data();
             }
