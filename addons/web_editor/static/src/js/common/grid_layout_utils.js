@@ -267,3 +267,26 @@ export function _reloadLazyImages(columnEl) {
         imageEl.src = src;
     }
 }
+/**
+ * Computes the column and row spans of the column thanks to its width and
+ * height and returns them. Also adds the grid classes to the column.
+ *
+ * @private
+ * @param {Element} rowEl
+ * @param {Element} columnEl
+ * @param {Number} columnWidth the width in pixels of the column.
+ * @param {Number} columnHeight the height in pixels of the column.
+ * @returns {Object}
+ */
+export function _convertColumnToGrid(rowEl, columnEl, columnWidth, columnHeight) {
+    // Computing the column and row spans.
+    const gridProp = _getGridProperties(rowEl);
+    const columnColCount = Math.round((columnWidth + gridProp.columnGap) / (gridProp.columnSize + gridProp.columnGap));
+    const columnRowCount = Math.ceil((columnHeight + gridProp.rowGap) / (gridProp.rowSize + gridProp.rowGap));
+
+    // Adding the grid classes.
+    columnEl.classList.add('g-col-lg-' + columnColCount, 'g-height-' + columnRowCount);
+    columnEl.classList.add('o_grid_item');
+
+    return {columnColCount: columnColCount, columnRowCount: columnRowCount};
+}
