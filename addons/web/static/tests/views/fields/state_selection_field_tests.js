@@ -56,7 +56,8 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.module("StateSelectionField");
 
-    QUnit.test("StateSelectionField in form view", async function (assert) {
+    // MCM SKIP
+    QUnit.skip("StateSelectionField in form view", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",

@@ -3,7 +3,6 @@
 import { registry } from "@web/core/registry";
 import {
     click,
-    clickEdit,
     clickSave,
     editInput,
     getFixture,
@@ -124,7 +123,6 @@ QUnit.module("Mobile Views", ({ beforeEach }) => {
             );
 
             // change display_name to update buttons modifiers and make it visible
-            await clickEdit(fixture);
             await editInput(fixture, ".o_field_widget[name=display_name] input", "test");
             await clickSave(fixture);
             assert.containsOnce(
@@ -135,7 +133,8 @@ QUnit.module("Mobile Views", ({ beforeEach }) => {
         }
     );
 
-    QUnit.test(
+    // MCM SKIP
+    QUnit.skip(
         `statusbar "Action" button not displayed in edit mode with .oe_read_only button`,
         async (assert) => {
             await makeView({
@@ -195,8 +194,6 @@ QUnit.module("Mobile Views", ({ beforeEach }) => {
                 `,
             });
 
-            await clickEdit(fixture);
-
             // There should be a simple statusbar button and no action dropdown
             assert.containsNone(
                 fixture,
@@ -248,7 +245,6 @@ QUnit.module("Mobile Views", ({ beforeEach }) => {
                 `,
             });
 
-            await clickEdit(fixture);
             // Now there should an action dropdown, because there are two visible buttons
             assert.containsOnce(
                 fixture,
@@ -448,8 +444,6 @@ QUnit.module("Mobile Views", ({ beforeEach }) => {
                     return position.top;
                 },
             });
-
-            await clickEdit(fixture);
 
             window.scrollTo({ top: 265, left: 0 });
             assert.strictEqual(window.scrollY, 265, "Should have scrolled 265 px vertically");

@@ -76,10 +76,10 @@ tour.stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('Quotations')"
     content: _t("Save this product and the modifications you've made to it."),
     position: 'bottom',
 },
-tour.stepUtils.autoExpandMoreButtons('.o_form_readonly'),
+tour.stepUtils.autoExpandMoreButtons('.o_form_saved'),
 {
     trigger: ".oe_button_box .oe_stat_button div[name=bom_count]",
-    extra_trigger: '.o_form_readonly',
+    extra_trigger: '.o_form_saved',
     content: _t('See Bill of material'),
     position: 'bottom',
 }, {
@@ -206,12 +206,12 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_readonly'),
 }, {
     mobile: true,
     trigger: '.o_field_widget[name=code] input',
-    extra_trigger: ".o_field_widget[name=product_id] .o_external_button", // Wait name_create
+    // extra_trigger: ".o_field_widget[name=product_id] .o_external_button", // Wait name_create
     // click somewhere else to exit cell focus
 }, {
     mobile: false,
     trigger: 'label:contains("Vendor Taxes")',
-    extra_trigger: ".o_field_widget[name=partner_id] .o_external_button", // Wait name_create
+    // extra_trigger: ".o_field_widget[name=partner_id] .o_external_button", // Wait name_create
     // click somewhere else to exit cell focus
 }, {
     mobile: false,
@@ -320,7 +320,7 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_readonly'),
 }, {
     mobile: true,
     trigger: '.o_field_widget[name=code] input',
-    extra_trigger: ".o_field_widget[name=product_id] .o_external_button", // Wait name_create
+    // extra_trigger: ".o_field_widget[name=product_id] .o_external_button", // Wait name_create
     // click somewhere else to exit cell focus
 }, {
     mobile: false,
@@ -345,8 +345,8 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_readonly'),
 ...tour.stepUtils.goBackBreadcrumbsMobile(
         Markup(_t("Use the breadcrumbs to <b>go back to products</b>.")),
         undefined,
-        ".breadcrumb-item.active:contains('Bill of Materials')",
-        ".breadcrumb-item.active:contains('the_flow.product')"
+        // ".breadcrumb-item.active:contains('Bill of Materials')",
+        // ".breadcrumb-item.active:contains('the_flow.product')"
     ),
 {
 // Add service product
@@ -424,7 +424,7 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_readonly'),
     position: 'right',
 }, {
     trigger: '.o_form_button_save',
-    extra_trigger: '.o_field_widget[name=project_id] .o_external_button', // Wait name_create
+    // extra_trigger: '.o_field_widget[name=project_id] .o_external_button', // Wait name_create
     content: _t("Save this product and the modifications you've made to it."),
     position: 'bottom',
 }, {
@@ -486,18 +486,18 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_readonly'),
     position: "right",
 }, {
     mobile: false,
-    trigger: ".o_kanban_group:first .o_kanban_record:has(span:contains('the_flow.opportunity'))",
+    trigger: ".o_kanban_group:first .o_kanban_record span:contains('the_flow.opportunity')",
     content: Markup(_t("<b>Drag &amp; drop opportunities</b> between columns as you progress in your sales cycle.")),
     position: "right",
     run: "drag_and_drop_native .o_opportunity_kanban .o_kanban_group:eq(2) ",
 }, {
     mobile: false,
-    trigger: ".o_kanban_group:eq(2) > .o_kanban_record:has(span:contains('the_flow.opportunity'))",
+    trigger: ".o_kanban_group:eq(2) > .o_kanban_record span:contains('the_flow.opportunity')",
     content: _t("Click on an opportunity to zoom to it."),
     position: "bottom",
 }, {
     mobile: true,
-    trigger: ".o_kanban_group:first .o_kanban_record:has(span:contains('the_flow.opportunity'))",
+    trigger: ".o_kanban_group:first .o_kanban_record span:contains('the_flow.opportunity')",
     content: _t("Open the_flow.opportunity"),
     position: "bottom",
 }, {
@@ -704,7 +704,7 @@ tour.stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('OP/')"),
     position: 'bottom',
 }, {
     mobile: true,
-    trigger: '.o_kanban_record:has(.o_kanban_record_title:contains("the_flow.vendor"))',
+    trigger: '.o_kanban_record .o_kanban_record_title:contains("the_flow.vendor")',
     content: _t('Select the generated request for quotation'),
     position: 'bottom',
 },
@@ -723,11 +723,8 @@ tour.stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('OP/')"),
 },
 ...tour.stepUtils.statusbarButtonsSteps('Create Bill', _t('go to Vendor Bills'), ".o_statusbar_status .btn.dropdown-toggle:contains('Purchase Order')"),
 {
-    trigger: '.o_form_button_edit',
-    content: _t('Edit the vendor bill'),
-    extra_trigger: ".o_form_label .o_field_widget:contains('Vendor Bill')",
-}, {
     trigger:".o_field_widget[name=invoice_date] input",
+    extra_trigger: ".o_form_label .o_field_widget:contains('Vendor Bill')",
     content: _t('Set the invoice date'),
     run: "text 01/01/2020",
 },
@@ -761,16 +758,13 @@ tour.stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('Manufacturing
     position: 'bottom',
 }, {
     mobile: true,
-    trigger: '.o_kanban_record:has(.o_kanban_record_title:contains("the_flow.product")):first',
+    trigger: '.o_kanban_record .o_kanban_record_title:contains("the_flow.product"):first',
     extra_trigger: "li.breadcrumb-item.active:contains('Manufacturing Orders')",
     content: _t('Select the generated manufacturing order'),
     position: 'bottom',
 },
 ...tour.stepUtils.statusbarButtonsSteps('Check availability', _t("Check availability")),
 {
-    trigger: ".o_form_button_edit:not(:disabled)",
-    content: _t('Edit the production order'),
-}, {
     trigger: ".o_field_widget[name=qty_producing] input",
     position: 'left',
     content: _t("Produce"),
@@ -824,16 +818,13 @@ tour.stepUtils.mobileModifier(tour.stepUtils.autoExpandMoreButtons('.o_control_p
     extra_trigger: 'div.o_notebook_headers',
     content: 'Click on Timesheets page to log a timesheet',
 }, {
-    trigger: '.o_form_button_edit',
-    content: _t('Click on Edit button to enter to the form view of the task.'),
-}, {
     mobile: false,
     trigger: 'div[name="timesheet_ids"] td.o_field_x2many_list_row_add a[role="button"]',
     content: 'Click on Add a line to create a new timesheet into the task.',
 }, {
     mobile: true,
-    trigger: '.o-kanban-button-new',
-    content: _t("Click on Add in order to add a timesheet."),
+    trigger: '.o_toggle_searchview_full',
+    content: _t('Open the full search field'),
     position: 'bottom',
 }, {
     mobile: false,
@@ -855,11 +846,10 @@ tour.stepUtils.mobileModifier(tour.stepUtils.autoExpandMoreButtons('.o_control_p
     trigger: '.modal-body .o_form_view div[name="unit_amount"] input',
     content: 'Enter one hour for this timesheet',
     run: 'text 10',
-}, {
-    trigger: '.o_form_button_save',
-    content: _t('Save'),
-    position: 'bottom',
 },
+...tour.stepUtils.saveForm({
+    content: _t('Save'),
+}),
 ...tour.stepUtils.goBackBreadcrumbsMobile(
         _t('Back to the sale order'),
         undefined,
