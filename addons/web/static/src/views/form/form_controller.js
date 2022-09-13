@@ -15,6 +15,8 @@ import { standardViewProps } from "@web/views/standard_view_props";
 import { isX2Many } from "@web/views/utils";
 import { useViewButtons } from "@web/views/view_button/view_button_hook";
 import { useSetupView } from "@web/views/view_hook";
+import { FormStatusIndicator } from "./form_status_indicator/form_status_indicator";
+import { useFormErrorDialog } from "./form_error_dialog/form_error_dialog";
 
 const { Component, onWillStart, useEffect, useRef, onRendered, useState, toRaw } = owl;
 
@@ -95,6 +97,10 @@ export class FormController extends Component {
         this.viewService = useService("view");
         this.ui = useService("ui");
         useBus(this.ui.bus, "resize", this.render);
+        useFormErrorDialog(async () => {
+            await this.discard();
+            this.env.config.historyBack();
+        });
 
         this.archInfo = this.props.archInfo;
         const activeFields = this.archInfo.activeFields;
@@ -103,6 +109,16 @@ export class FormController extends Component {
         const beforeLoadProm = new Promise((r) => {
             this.beforeLoadResolver = r;
         });
+
+        const { create, edit } = this.archInfo.activeActions;
+        this.canCreate = create && !this.props.preventCreate;
+        this.canEdit = edit && !this.props.preventEdit;
+
+        let mode = this.props.mode || "edit";
+        if (!this.canEdit) {
+            mode = "readonly";
+        }
+
         this.model = useModel(
             this.props.Model,
             {
@@ -113,17 +129,13 @@ export class FormController extends Component {
                 activeFields,
                 viewMode: "form",
                 rootType: "record",
-                mode: this.props.mode,
+                mode,
                 beforeLoadProm,
             },
             {
                 ignoreUseSampleModel: true,
             }
         );
-        const { create, edit } = this.archInfo.activeActions;
-
-        this.canCreate = create && !this.props.preventCreate;
-        this.canEdit = edit && !this.props.preventEdit;
 
         this.cpButtonsRef = useRef("cpButtons");
 
@@ -235,9 +247,9 @@ export class FormController extends Component {
                         !isInEdition &&
                         !rootRef.el.querySelector(".o_content").contains(document.activeElement)
                     ) {
-                        const elementToFocus =
-                            rootRef.el.querySelector(".o_content button.btn-primary") ||
-                            rootRef.el.querySelector(".o_control_panel .o_form_button_edit");
+                        const elementToFocus = rootRef.el.querySelector(
+                            ".o_content button.btn-primary"
+                        );
                         if (elementToFocus) {
                             elementToFocus.focus();
                         }
@@ -301,9 +313,16 @@ export class FormController extends Component {
                 key: "delete",
                 description: this.env._t("Delete"),
                 callback: () => this.deleteRecord(),
+                isDeleteAction: true,
             });
         }
         return Object.assign({}, this.props.info.actionMenus, { other: otherActionItems });
+    }
+
+    async beforeAction(item) {
+        if ((this.model.root.isDirty || this.model.root.isVirtual) && !item.isDeleteAction) {
+            await this.model.root.save({ stayInEdition: true });
+        }
     }
 
     async duplicateRecord() {
@@ -325,11 +344,7 @@ export class FormController extends Component {
     }
 
     disableButtons() {
-        const btns = this.cpButtonsRef.el.querySelectorAll(".o_cp_buttons button");
-        for (const btn of btns) {
-            btn.setAttribute("disabled", "1");
-        }
-        return btns;
+        return [];
     }
     enableButtons(btns) {
         for (const btn of btns) {
@@ -424,7 +439,7 @@ export class FormController extends Component {
 }
 
 FormController.template = `web.FormView`;
-FormController.components = { ActionMenus, Layout };
+FormController.components = { ActionMenus, FormStatusIndicator, Layout };
 FormController.props = {
     ...standardViewProps,
     discardRecord: { type: Function, optional: true },
