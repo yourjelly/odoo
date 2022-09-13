@@ -183,22 +183,39 @@ _logger = logging.getLogger(__name__)
 # IDEA:
 # - [('many2one.field_1', <op>, <value>), ('many2one.field_1', <op>, <value>)]
 # => Should be optimized in one subquery not two
+# - When making a subquery _name_search avoid the order clause => NO_ORDER sentinel ?
 # - Allow recursive Domain 'any'/'all'
 # - Avoid extra () in the end request
 # - Left Join when it is better than IN (subquery) ?????????????? How to know, depends on where the condition is?
-# - Exists / Not exists ? to replace IN (when).
-# - <selection_field> NOT IN (values) -> should be reverse the condition to be able to use index. (same for != equals maybe ?)
+# - Exists / Not exists ? to replace IN (when)?
+# - Optimization Selection field:
+#   - <selection_field> NOT IN (values) -> should be reverse the condition to be able to use index. (same for != equals maybe ?)
+#   - falsy condition IN/NOT IN/=/=! values if the field is a static selection
 # - Have a class domain to have utils method (by example to know if some condition is apply in root level, can be usefull to some optimisation)
 
-class Domain():
-    # Immutable or Mutable +1
 
-    def __init__(self, domain_list=()) -> None:
-        self.domain = domain_list
-        # How to represent data -> graph maybe ?
-        ...
 
-    ...
+# class Domain():
+#     # Immutable or Mutable +1
+
+#     def __init__(self, domain_list=()) -> None:
+#         self.domain = domain_list
+#         # How to represent data -> tree, node are a leaf or a operator which contains other nodes
+#         # ['&', <leaf>, <leaf>, '|', <leaf>, <leaf>]
+#         # {'&' : [<leaf>, <leaf>, {'|': [<leaf>, <leaf>]}]
+#         tree = {}
+#         if not domain_list:
+#             return
+        
+#         while
+#         for leaf in domain_list:
+#             if leaf == '&':
+                
+#             else:
+                
+
+#     def __repr__(self):
+
 
 
 # --------------------------------------------------
@@ -1045,7 +1062,7 @@ class expression(object):
             # Two cases: right is a boolean or a list. The boolean case is an
             # abuse and handled for backward compatibility.
             if isinstance(right, bool):
-                _logger.warning("The domain term '%s' should use the '=' or '!=' operator." % (leaf,))
+                _logger.warning("The domain term '%s' should use the '=' or '!=' operator.", leaf)
                 if (operator == 'in' and right) or (operator == 'not in' and not right):
                     query = '(%s."%s" IS NOT NULL)' % (table_alias, left)
                 else:
