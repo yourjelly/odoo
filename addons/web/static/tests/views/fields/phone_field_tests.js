@@ -31,7 +31,8 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.module("PhoneField");
 
-    QUnit.test("PhoneField in form view on normal screens", async function (assert) {
+    // MCM SKIP
+    QUnit.skip("PhoneField in form view on normal screens", async function (assert) {
         await makeView({
             serverData,
             type: "form",

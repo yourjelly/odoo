@@ -191,7 +191,8 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.test("RemainingDaysField on a date field in form view", async function (assert) {
+    // MCM SKIP
+    QUnit.skip("RemainingDaysField on a date field in form view", async function (assert) {
         patchDate(2017, 9, 8, 15, 35, 11); // October 8 2017, 15:35:11
         serverData.models.partner.records = [
             { id: 1, date: "2017-10-08" }, // today
@@ -236,7 +237,8 @@ QUnit.module("Fields", (hooks) => {
         assert.hasClass(target.querySelector(".o_field_widget > div"), "text-danger");
     });
 
-    QUnit.test("RemainingDaysField on a datetime field in form view", async function (assert) {
+    // MCM SKIP
+    QUnit.skip("RemainingDaysField on a datetime field in form view", async function (assert) {
         patchDate(2017, 9, 8, 15, 35, 11); // October 8 2017, 15:35:11
         serverData.models.partner.records = [
             { id: 1, datetime: "2017-10-08 10:00:00" }, // today

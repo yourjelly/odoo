@@ -139,5 +139,5 @@ tour.register('sale_matrix_tour', {
     }
 }, {
     trigger: 'span:contains("Confirm")',  // apply the matrix
-}, ...tour.stepUtils.saveForm('.o_field_cell.o_data_cell.o_list_number:contains("8.20")'),
+}, ...tour.stepUtils.saveForm({ extra_trigger: '.o_field_cell.o_data_cell.o_list_number:contains("8.20")' }),
 ]);

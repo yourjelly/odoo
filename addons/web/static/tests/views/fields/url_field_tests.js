@@ -37,7 +37,8 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.module("UrlField");
 
-    QUnit.test("UrlField in form view", async function (assert) {
+    // MCM SKIP
+    QUnit.skip("UrlField in form view", async function (assert) {
         await makeView({
             serverData,
             type: "form",
@@ -106,7 +107,8 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.test("UrlField takes text from proper attribute", async function (assert) {
+    // MCM SKIP
+    QUnit.skip("UrlField takes text from proper attribute", async function (assert) {
         await makeView({
             serverData,
             type: "form",
@@ -122,7 +124,8 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.test("UrlField: href attribute and website_path option", async function (assert) {
+    // MCM SKIP
+    QUnit.skip("UrlField: href attribute and website_path option", async function (assert) {
         serverData.models.partner.fields.url1 = {
             string: "Url 1",
             type: "char",
@@ -245,11 +248,6 @@ QUnit.module("Fields", (hooks) => {
             resId: 1,
         });
 
-        assert.containsOnce(target, "[name=foo]");
-        assert.strictEqual(target.querySelector("[name=foo]").textContent, "");
-
-        await click(target.querySelector(".o_form_button_edit"));
-
         assert.containsOnce(target, ".o_field_widget[name=foo] input");
         assert.strictEqual(target.querySelector("[name=foo] input").value, "");
     });
@@ -281,8 +279,6 @@ QUnit.module("Fields", (hooks) => {
             "yop",
             "the starting value should be displayed properly"
         );
-        await click(target.querySelector(".o_form_button_edit"));
-
         assert.strictEqual(
             target.querySelector(".o_field_widget[name=foo2] input").value,
             "foo2",

@@ -213,7 +213,8 @@ QUnit.module("Fields", (hooks) => {
         assert.verifySteps(["open record"]);
     });
 
-    QUnit.test("image fields with empty value", async function (assert) {
+    // MCM SKIP
+    QUnit.skip("image fields with empty value", async function (assert) {
         serverData.models.partner.records[0].foo = false;
 
         await makeView({

@@ -1,12 +1,6 @@
 /** @odoo-module **/
 
-import {
-    click,
-    clickEdit,
-    clickSave,
-    getFixture,
-    selectDropdownItem,
-} from "@web/../tests/helpers/utils";
+import { click, clickSave, getFixture, selectDropdownItem } from "@web/../tests/helpers/utils";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 
 let serverData;
@@ -379,7 +373,6 @@ QUnit.module("Fields", (hooks) => {
                 </form>`,
         });
 
-        await clickEdit(target);
         assert.containsN(
             target,
             ".o_field_many2many_tags_avatar.o_field_widget .badge",
