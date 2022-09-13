@@ -5,9 +5,10 @@ import { Domain } from "@web/core/domain";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";
 import { _lt } from "@web/core/l10n/translation";
+import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 
-const { Component, useState } = owl;
+const { Component, onWillStart, useState } = owl;
 
 const { DateTime } = luxon;
 
@@ -98,6 +99,8 @@ function parseField(field, value) {
 function formatField(field, value) {
     if (FIELD_TYPES[field.type] === "char") {
         return value;
+    } else if (field.isProperty && field.type === "selection") {
+        return value;
     }
     const type = field.type === "id" ? "integer" : field.type;
     const format = formatters.contains(type) ? formatters.get(type) : (v) => v;
@@ -106,12 +109,65 @@ function formatField(field, value) {
 
 export class CustomFilterItem extends Component {
     setup() {
+        this.orm = useService("orm");
+
         this.conditions = useState([]);
+
+        const allFieldsByName = this.env.searchModel.searchViewFields;
+        const allFields = Object.values(allFieldsByName);
+
         // Format, filter and sort the fields props
-        this.fields = Object.values(this.env.searchModel.searchViewFields)
+        this.fields = allFields
             .filter((field) => this.validateField(field))
             .concat({ string: "ID", type: "id", name: "id" })
             .sort(({ string: a }, { string: b }) => (a > b ? 1 : a < b ? -1 : 0));
+
+        const propertiesFields = allFields.filter(field => field.type === "properties");
+
+        onWillStart(async () => {
+            for (let propertiesField of propertiesFields) {
+
+                const definitionRecord = propertiesField.definition_record;
+                const definitionRecordModel = allFieldsByName[definitionRecord].relation;
+                const definitionRecordField = propertiesField.definition_record_field;
+
+                const result = await this.orm.call(
+                    definitionRecordModel,
+                    "search_read",
+                    [[], ["display_name", definitionRecordField]]);
+
+                for (let values of result) {
+                    const definitionRecordName = values.display_name;
+                    const definition = values[definitionRecordField];
+                    for (let property of definition) {
+
+                        let propertyType = property.type;
+                        if (propertyType === "tags") {
+                            propertyType = "char";
+                        }
+
+                        if (!FIELD_TYPES[propertyType]) {
+                            throw Error("Wrong type " + propertyType);
+                        }
+
+                        const propertyDefinition = {
+                            "name": `${propertiesField.name}.${property.name}`,
+                            "searchable": true,
+                            "store": true,
+                            "string": `${property.string} (${definitionRecordName})`,
+                            "type": property.type,
+                            "isProperty": true,
+                        };
+
+                        if (property.type === "selection") {
+                            propertyDefinition.selection = property.selection;
+                        }
+
+                        this.fields.push(propertyDefinition);
+                    }
+                }
+            }
+        });
 
         // Give access to constants variables to the template.
         this.OPERATORS = FIELD_OPERATORS;

@@ -1213,6 +1213,67 @@ class PropertiesCase(TransactionCase):
         }
         self.assertEqual(expected_properties, sql_properties)
 
+    def test_properties_field_search(self):
+        # search on text properties
+        self.message_1.attributes = [{
+            'name': 'b97300923a1c251e',
+            'type': 'char',
+            'value': 'Test',
+            'definition_changed': True,
+        }]
+        self.message_2.attributes = {'b97300923a1c251e': 'TeSt'}
+
+        messages = self.env['test_new_api.message'].search([('attributes.b97300923a1c251e', '=', 'Test')])
+        self.assertEqual(messages, self.message_1, "Should be able to search on a properties field")
+        messages = self.env['test_new_api.message'].search([('attributes.b97300923a1c251e', 'ilike', 'test')])
+        self.assertEqual(messages, self.message_1 | self.message_2)
+        messages = self.env['test_new_api.message'].search([('attributes.b97300923a1c251e', 'in', ['Test', 'testT'])])
+        self.assertEqual(messages, self.message_1)
+        messages = self.env['test_new_api.message'].search([('attributes.b97300923a1c251e', 'in', ['Test', 'TeSt'])])
+        self.assertEqual(messages, self.message_1 | self.message_2)
+        messages = self.env['test_new_api.message'].search([('attributes.b97300923a1c251e', 'not in', ['bouh', 'TeSt'])])
+        self.assertEqual(messages, self.message_1)
+
+        for search in ['b97300923a1c251e!', 'b97300923a!1c251e', '!b97300923a1c251e', 'b97300923a1c251e.test']:
+            with self.assertRaises(AssertionError):
+                self.env['test_new_api.message'].search([(f'attributes.{search}', '=', 'Test')])
+
+        # search on number
+        self.message_1.attributes = [{
+            'name': '3e66697e3c9b10c1',
+            'type': 'float',
+            'value': 3.14,
+            'definition_changed': True,
+        }]
+        self.message_2.attributes = {'3e66697e3c9b10c1': 5.55}
+        messages = self.env['test_new_api.message'].search([('attributes.3e66697e3c9b10c1', '>', 4.4)])
+        self.assertEqual(messages, self.message_2)
+        messages = self.env['test_new_api.message'].search([('attributes.3e66697e3c9b10c1', '<', 4.4)])
+        self.assertEqual(messages, self.message_1)
+        messages = self.env['test_new_api.message'].search([('attributes.3e66697e3c9b10c1', '>', 1.1)])
+        self.assertEqual(messages, self.message_1 | self.message_2)
+        messages = self.env['test_new_api.message'].search([('attributes.3e66697e3c9b10c1', '<=', 1.1)])
+        self.assertFalse(messages)
+
+        # search on boolean
+        self.message_1.attributes = [{
+            'name': '70401f673ac87299',
+            'type': 'boolean',
+            'value': True,
+            'definition_changed': True,
+        }]
+        self.message_2.attributes = {'70401f673ac87299': False}
+        messages = self.env['test_new_api.message'].search([('attributes.70401f673ac87299', '=', True)])
+        self.assertEqual(messages, self.message_1)
+        messages = self.env['test_new_api.message'].search([('attributes.70401f673ac87299', '=', False)])
+        self.assertEqual(messages, self.message_2)
+        messages = self.env['test_new_api.message'].search([('attributes.70401f673ac87299', 'in', [True, False])])
+        self.assertEqual(messages, self.message_1 | self.message_2)
+        messages = self.env['test_new_api.message'].search([('attributes.70401f673ac87299', 'not in', [True])])
+        self.assertEqual(messages, self.message_2)
+        messages = self.env['test_new_api.message'].search([('attributes.70401f673ac87299', 'not in', [False])])
+        self.assertEqual(messages, self.message_1)
+
     def test_properties_field_security(self):
         """Check the access right related to the Properties fields."""
         MultiTag = type(self.env['test_new_api.multi.tag'])

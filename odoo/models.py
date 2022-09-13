@@ -1849,7 +1849,7 @@ class BaseModel(metaclass=MetaModel):
         :rtype: list
         """
         return [
-            'context', 'currency_field', 'definition_record', 'digits', 'domain', 'group_operator', 'groups', 'help',
+            'context', 'currency_field', 'definition_record', 'definition_record_field', 'digits', 'domain', 'group_operator', 'groups', 'help',
             'name', 'readonly', 'related', 'relation', 'relation_field', 'required', 'searchable', 'selection', 'size',
             'sortable', 'store', 'string', 'translate', 'trim', 'type',
         ]

@@ -114,6 +114,7 @@ start the server specifying the ``--unaccent`` flag.
 
 """
 import collections.abc
+import json
 import logging
 import reprlib
 import traceback
@@ -123,9 +124,8 @@ from datetime import date, datetime, time
 from psycopg2.sql import Composable, SQL
 
 import odoo.modules
-from ..models import BaseModel
+from ..models import BaseModel, regex_object_name
 from odoo.tools import pycompat, Query, _generate_table_alias
-
 
 # Domain operators.
 NOT_OPERATOR = '!'
@@ -710,6 +710,33 @@ class expression(object):
                 query = comodel.with_context(**field.context)._where_calc(domain)
                 subquery, subparams = query.select('"%s"."%s"' % (comodel._table, field.inverse_name))
                 push(('id', 'inselect', (subquery, subparams)), model, alias, internal=True)
+
+            elif field.type in ('properties', ):
+                assert len(path) == 2
+                assert "." not in path[1]
+                assert operator in ('=', '!=', '>', '>=', '<', '<=', 'in', 'not in', 'like', 'ilike')
+                assert regex_object_name.match(path[1]), "Wrong property name"
+                convert = ""
+
+                def _convert_json_type(value):
+                    if isinstance(value, str):
+                        return value
+                    elif isinstance(value, (int, float, bool)):
+                        return json.dumps(value)
+                    elif isinstance(right, (list, tuple)):
+                        return [_convert_json_type(r) for r in right]
+
+                    raise ValueError(f"Wrong value {value!r}.")
+
+                right = _convert_json_type(right)
+
+                if operator == 'in':
+                    operator, convert = '=', 'ANY'
+                elif operator == 'not in':
+                    operator, convert = '!=', 'ALL'
+
+                expr = f"""("{alias}"."{path[0]}" ->> '{path[1]}' {operator} {convert}(%s))"""
+                push_result(expr, [right])
 
             elif len(path) > 1 and field.store and field.auto_join:
                 raise NotImplementedError('auto_join attribute not supported on field %s' % field)
