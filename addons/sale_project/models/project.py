@@ -12,7 +12,7 @@ from odoo.tools import Query
 class Project(models.Model):
     _inherit = 'project.project'
 
-    allow_billable = fields.Boolean("Billable", help="Invoice your time and material from tasks.")
+    allow_billable = fields.Boolean("Billable", default=True, help="Invoice your time and material from tasks.")
     sale_line_id = fields.Many2one(
         'sale.order.line', 'Sales Order Item', copy=False,
         compute="_compute_sale_line_id", store=True, readonly=False, index='btree_not_null',
