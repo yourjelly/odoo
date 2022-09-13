@@ -1041,6 +1041,13 @@ var SnippetEditor = Widget.extend({
             }
         }
 
+        // Storing the position of the grid before the insertion of the
+        // dropzones.
+        let gridStartPosition;
+        if (rowEl.classList.contains('o_grid_mode')) {
+            gridStartPosition = rowEl.getBoundingClientRect();
+        }
+
         this.trigger_up('activate_snippet', {$snippet: this.$target.parent()});
         this.trigger_up('activate_insertion_zones', {
             $selectorSiblings: $selectorSiblings,
@@ -1048,6 +1055,16 @@ var SnippetEditor = Widget.extend({
             canBeSanitizedUnless: canBeSanitizedUnless,
             selectorGrids: selectorGrids,
         });
+
+        // If the added dropzones made the screen scroll, making the grid go
+        // lower than where it originally was with a sort of jump, we need to
+        // scroll so the grid is at the center of the screen.
+        if (rowEl.classList.contains('o_grid_mode')) {
+            const gridNewPosition = rowEl.getBoundingClientRect();
+            if (gridNewPosition.top - gridStartPosition.top !== 0) {
+                rowEl.scrollIntoView({block: 'center'});
+            }
+        }
 
         this.$body.addClass('move-important');
 
