@@ -485,13 +485,12 @@ QUnit.module("ActionManager", (hooks) => {
         );
     });
 
-    // MCM SKIP
-    QUnit.skip("Props are updated and kept when switching/restoring views", async (assert) => {
+    QUnit.test("Props are updated and kept when switching/restoring views", async (assert) => {
         serverData.views["partner,false,form"] = /* xml */ `
             <form>
                 <group>
                     <field name="display_name" />
-                    <field name="m2o" />
+                    <field name="m2o" open_target="current" />
                 </group>
             </form>
         `;
@@ -1238,8 +1237,7 @@ QUnit.module("ActionManager", (hooks) => {
         );
     });
 
-    // MCM SKIP
-    QUnit.skip("can open a many2one external window", async function (assert) {
+    QUnit.test("can open a many2one external window", async function (assert) {
         serverData.models.partner.records[0].bar = 2;
         serverData.views["partner,false,search"] = `
             <search>
@@ -1250,7 +1248,7 @@ QUnit.module("ActionManager", (hooks) => {
         serverData.views["partner,false,form"] = `
             <form>
                 <field name="foo"/>
-                <field name="bar"/>
+                <field name="bar" open_target="new"/>
             </form>`;
         const mockRPC = async (route, args) => {
             assert.step(route);
@@ -2241,8 +2239,7 @@ QUnit.module("ActionManager", (hooks) => {
         });
     });
 
-    // MCM SKIP
-    QUnit.skip("window action in target new fails (onchange)", async (assert) => {
+    QUnit.test("window action in target new fails (onchange)", async (assert) => {
         /*
          * By-pass QUnit's and test's error handling because the error service needs to be active
          */
