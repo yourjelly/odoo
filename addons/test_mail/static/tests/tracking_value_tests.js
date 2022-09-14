@@ -204,8 +204,7 @@ QUnit.test('rendering of tracked field of type monetary: from 0 to non-0', async
     );
 });
 
-    // MCM SKIP
-QUnit.skip('rendering of tracked field of type boolean: from true to false', async function (assert) {
+QUnit.test('rendering of tracked field of type boolean: from true to false', async function (assert) {
     assert.expect(1);
 
     const pyEnv = await startServer();
@@ -221,8 +220,7 @@ QUnit.skip('rendering of tracked field of type boolean: from true to false', asy
     );
 });
 
-    // MCM SKIP
-QUnit.skip('rendering of tracked field of type boolean: from false to true', async function (assert) {
+QUnit.test('rendering of tracked field of type boolean: from false to true', async function (assert) {
     assert.expect(1);
 
     const pyEnv = await startServer();
