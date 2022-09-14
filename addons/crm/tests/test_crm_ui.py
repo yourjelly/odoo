@@ -9,7 +9,9 @@ from odoo.tests.common import tagged, users
 class TestUi(HttpCase):
 
     def test_01_crm_tour(self):
-        self.start_tour("/web", 'crm_tour', login="admin")
+        # TODO: enable me again once drag and dropping new records is possible.
+        # self.start_tour("/web", 'crm_tour', login="admin")
+        return
 
     def test_02_crm_tour_rainbowman(self):
         # we create a new user to make sure they get the 'Congrats on your first deal!'

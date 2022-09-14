@@ -22,7 +22,7 @@ odoo.define('crm.crm_email_and_phone_propagation', function (require) {
             run: 'click',
         }, {
             trigger: '.o_form_button_save',
-            extra_trigger: '.o_form_editable input[name="email_from"]',
+            extra_trigger: '.o_form_editable .o_field_widget[name=email_from] input',
             content: 'Save the lead',
             run: 'click',
         }, {
@@ -47,12 +47,16 @@ odoo.define('crm.crm_email_and_phone_propagation', function (require) {
             content: 'Edit the lead',
             run: 'click',
         }, {
-            trigger: '.o_form_editable input[name="email_from"]',
-            extra_trigger: '.o_form_editable input[name="phone"]',
+            trigger: '.o_form_editable .o_field_widget[name=email_from] input',
+            extra_trigger: '.o_form_editable .o_field_widget[name=phone] input',
             content: 'Remove the email and the phone',
-            run: function () {
-                $('input[name="email_from"]').val('').trigger("change");
-                $('input[name="phone"]').val('').trigger("change");
+            run: function (action) {
+                $('.o_form_editable .o_field_widget[name=email_from] input').val('');
+                $('.o_form_editable .o_field_widget[name=email_from] input')[0].dispatchEvent(new Event("input", { bubbles: true }));
+                $('.o_form_editable .o_field_widget[name=email_from] input')[0].dispatchEvent(new Event("change", { bubbles: true }));
+                $('.o_form_editable .o_field_widget[name=phone] input').val('');
+                $('.o_form_editable .o_field_widget[name=phone] input')[0].dispatchEvent(new Event("input", { bubbles: true }));
+                $('.o_form_editable .o_field_widget[name=phone] input')[0].dispatchEvent(new Event("change", { bubbles: true }));
             },
         }, {
             trigger: '.o_form_button_save',

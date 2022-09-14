@@ -74,13 +74,10 @@
             'crm/static/src/models/*.js',
         ],
         'web.assets_qweb': [
-            'crm/static/src/xml/crm_kanban.xml',
-            'crm/static/src/xml/forecast_kanban.xml',
+            'crm/static/src/views/**/*.xml',
         ],
         'web.assets_backend': [
-            'crm/static/src/js/crm_form.js',
-            'crm/static/src/js/crm_kanban.js',
-            'crm/static/src/js/forecast/*',
+            'crm/static/src/views/**/*.js',
             'crm/static/src/js/tours/crm.js',
             'crm/static/src/scss/crm.scss',
             'crm/static/src/scss/crm_team_member_views.scss',
