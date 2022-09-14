@@ -186,7 +186,13 @@ export class HtmlField extends Component {
     }
     updateValue() {
         const value = this.getEditingValue();
-        if (value !== null && value !== this.props.value) {
+        const innerElRegExp = /^<p style="margin-bottom: 0px;">(.*)<\/p>$/;
+        const innerEl = innerElRegExp.exec(value);
+
+        if (
+            value !== null &&
+            !(value === this.props.value.toString() || innerEl[1] === this.props.value.toString())
+        ) {
             if (this.props.setDirty) {
                 this.props.setDirty(true);
             }
