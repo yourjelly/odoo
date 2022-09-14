@@ -49,7 +49,7 @@ export class Widget extends Component {
         delete props.name;
         delete props.node;
 
-        return { ...propsFromAttrs, ...props };
+        return { node, ...propsFromAttrs, ...props };
     }
 }
 Widget.template = xml/*xml*/ `
