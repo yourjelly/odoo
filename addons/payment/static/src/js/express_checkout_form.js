@@ -81,7 +81,6 @@ publicWidget.registry.PaymentExpressCheckoutForm = publicWidget.Widget.extend({
             'flow': 'direct',
             'tokenization_requested': false,
             'landing_route': this.txContext.landingRoute,
-            'add_id_to_landing_route': true,
             'access_token': this.txContext.accessToken,
             'csrf_token': core.csrf_token,
         };
@@ -115,7 +114,10 @@ publicWidget.registry.PaymentExpressCheckoutForm = publicWidget.Widget.extend({
      * @param {number} newMinorAmount - The new minor amount.
      * @return {undefined}
      */
-    _updateAmount(providerData, newAmount, newMinorAmount) {},
+    _updateAmount(providerData, newAmount, newMinorAmount) {
+        this.txContext.amount = parseFloat(newAmount);
+        this.txContext.minorAmount = parseInt(newMinorAmount);
+    },
 
 });
 

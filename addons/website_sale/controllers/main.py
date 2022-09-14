@@ -1490,7 +1490,7 @@ class WebsiteSale(http.Controller):
         }
 
     @http.route('/shop/payment/validate', type='http', auth="public", website=True, sitemap=False)
-    def shop_payment_validate(self, transaction_id=None, sale_order_id=None, **post):
+    def shop_payment_validate(self, sale_order_id=None, **post):
         """ Method that should be called by the server when receiving an update
         for a transaction. State at this point :
 
@@ -1502,13 +1502,7 @@ class WebsiteSale(http.Controller):
             order = request.env['sale.order'].sudo().browse(sale_order_id)
             assert order.id == request.session.get('sale_last_order_id')
 
-        if transaction_id:
-            tx = request.env['payment.transaction'].sudo().browse(int(transaction_id))
-            assert tx in order.transaction_ids
-        elif order:
-            tx = order.get_portal_last_transaction()
-        else:
-            tx = None
+        tx = order.get_portal_last_transaction()
 
         if not order or (order.amount_total and not tx):
             return request.redirect('/shop')
@@ -1729,8 +1723,6 @@ class PaymentPortal(payment_portal.PaymentPortal):
         if last_tx:
             PaymentPostProcessing.remove_transactions(last_tx)
         request.session['__website_sale_last_tx_id'] = tx_sudo.id
-        if kwargs.pop('add_id_to_landing_route', False):
-            tx_sudo.landing_route += f'?transaction_id={tx_sudo.id}'
 
         self._validate_transaction_for_order(tx_sudo, order_id)
 

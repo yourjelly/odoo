@@ -408,7 +408,6 @@ class PaymentTransaction(models.Model):
         """ Return a dict of values used to process the transaction.
 
         The returned dict contains the following entries:
-            - tx_id: The transaction, as a `payment.transaction` id
             - provider_id: The provider handling the transaction, as a `payment.provider` id
             - provider_code: The code of the provider
             - reference: The reference of the transaction
@@ -425,7 +424,6 @@ class PaymentTransaction(models.Model):
         self.ensure_one()
 
         processing_values = {
-            'tx_id': self.id,
             'provider_id': self.provider_id.id,
             'provider_code': self.provider_code,
             'reference': self.reference,

@@ -215,9 +215,8 @@ paymentExpressCheckoutForm.include({
         if (providerData.providerCode !== 'stripe') {
             return this._super(...arguments);
         }
+        console.log('test');
 
-        this.txContext.amount = parseFloat(newAmount);
-        this.txContext.minorAmount = parseInt(newMinorAmount);
         this.stripeExpressCheckoutForm.update({
             total: {
                 amount: parseInt(newMinorAmount),
