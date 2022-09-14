@@ -366,6 +366,13 @@ export class KanbanDynamicGroupList extends DynamicGroupList {
     }
 
     /**
+     * @returns {Array} list of fields that should be requested when doing the read_group request
+     */
+    getFieldsToAggregate() {
+        return [this.model.progressAttributes.sumField.name];
+    }
+
+    /**
      * @param {KanbanGroup[]} groups
      * @param {boolean} withProgressBars
      * @returns {Promise<void>}
@@ -388,7 +395,7 @@ export class KanbanDynamicGroupList extends DynamicGroupList {
         // If we have a sumField, the aggregates must be re-fetched
         if (sumField) {
             const domain = Domain.or(groups.map((g) => g.getProgressBarDomain())).toList();
-            fieldNames.push(sumField.name);
+            fieldNames.push(...this.getFieldsToAggregate());
             promises.webReadGroup = this.model.orm.webReadGroup(
                 this.resModel,
                 domain,
