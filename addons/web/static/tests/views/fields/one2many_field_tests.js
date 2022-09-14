@@ -11644,6 +11644,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
+    // MCM SKIP
     QUnit.skip(
         "when Navigating to a one2many with tabs, the button add a line receives the focus",
         async function (assert) {
@@ -11682,6 +11683,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
+    // MCM SKIP
     QUnit.skip(
         "Navigate to a one2many with tab then tab again focus the next field",
         async function (assert) {
@@ -11743,6 +11745,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
+    // MCM SKIP
     QUnit.skip(
         "when Navigating to a one2many with tabs, not filling any field and hitting tab, no line is added and the next field is focused",
         async function (assert) {
@@ -11817,6 +11820,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
+    // MCM SKIP
     QUnit.skip(
         "when Navigating to a one2many with tabs, editing in a popup, the popup should receive the focus then give it back",
         async function (assert) {
