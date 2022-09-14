@@ -86,13 +86,13 @@ QUnit.module("SlideCategoryOneToManyField", (hooks) => {
         assert.strictEqual(rows[1].querySelector("td[name=name]").getAttribute("colspan"), null);
     });
 
-    // MCM SKIP
-    QUnit.skip("click on section behaves as usual in readonly mode", async (assert) => {
+    QUnit.test("click on section behaves as usual in readonly mode", async (assert) => {
         await makeView({
             type: "form",
             resModel: "partner",
             resId: 1,
             serverData,
+            mode: "readonly",
             arch: `
                 <form>
                     <field name="lines" widget="slide_category_one2many">
