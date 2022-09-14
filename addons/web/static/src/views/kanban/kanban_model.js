@@ -270,7 +270,16 @@ class KanbanGroup extends Group {
     updateAggregates(groupData) {
         const fname = this.groupByField.name;
         const { sumField } = this.model.progressAttributes;
-        const group = groupData.find((g) => this.valueEquals(g[fname]));
+        const group = groupData.find((g) => {
+            let value = g[fname];
+            if (["date", "datetime"].includes(this.groupByField.type) && g.__range[this.model.root.groupBy[0]]) {
+                const dateString = g.__range[this.model.root.groupBy[0]].to;
+                const dateValue = this._parseServerValue(this.groupByField, dateString);
+                const granularity = this.groupByField.type === "date" ? "day" : "second";
+                value = dateValue.minus({ [granularity]: 1 });
+            }
+            return this.valueEquals(value);
+        });
         if (sumField) {
             this.aggregates[sumField.name] = group ? group[sumField.name] : 0;
         }
