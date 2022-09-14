@@ -55,12 +55,6 @@ class TestProjectProfitabilityCommon(Common):
 @tagged('-at_install', 'post_install')
 class TestSaleProjectProfitability(TestProjectProfitabilityCommon, TestSaleCommon):
     def test_project_profitability(self):
-        self.assertFalse(self.project.allow_billable, 'The project should be non billable.')
-        self.assertDictEqual(
-            self.project._get_profitability_items(False),
-            self.project_profitability_items_empty,
-            'No data for the project profitability should be found since the project is not billable, so no SOL is linked to the project.'
-        )
         self.project.write({'allow_billable': True})
         self.assertTrue(self.project.allow_billable, 'The project should be billable.')
         self.project.sale_line_id = self.delivery_service_order_line
