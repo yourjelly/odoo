@@ -181,9 +181,8 @@ QUnit.module("ViewDialogs", (hooks) => {
         );
     });
 
-    // MCM SKIP
-    QUnit.skip("Form dialog and subview with _view_ref contexts", async function (assert) {
-        assert.expect(1);
+    QUnit.test("Form dialog and subview with _view_ref contexts", async function (assert) {
+        assert.expect(2);
 
         serverData.models.instrument.records = [{ id: 1, name: "Tromblon", badassery: [1] }];
         serverData.models.partner.records[0].instrument = 1;
@@ -210,7 +209,7 @@ QUnit.module("ViewDialogs", (hooks) => {
             serverData,
             arch: `<form>
                     <field name="name"/>
-                    <field name="instrument" context="{'tree_view_ref': 'some_tree_view'}"/>
+                    <field name="instrument" context="{'tree_view_ref': 'some_tree_view'}" open_target="new"/>
                    </form>`,
             mockRPC: function (route, args) {
                 if (args.method === "get_formview_id") {
