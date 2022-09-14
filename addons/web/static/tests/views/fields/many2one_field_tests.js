@@ -1162,15 +1162,14 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    // MCM SKIP
-    QUnit.skip("many2one in non edit mode", async function (assert) {
+    QUnit.test("many2one in non edit mode (with value)", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
             resId: 1,
             serverData,
             arch: `
-                <form>
+                <form edit="0">
                     <field name="trululu" />
                 </form>`,
         });
@@ -1182,12 +1181,23 @@ QUnit.module("Fields", (hooks) => {
             "#id=4&model=partner",
             "href should contain id and model"
         );
+    });
+
+    QUnit.test("many2one in non edit mode (without value)", async function (assert) {
+        serverData.models.partner.records[0].trululu = false;
+
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            resId: 1,
+            serverData,
+            arch: `
+                <form edit="0">
+                    <field name="trululu" />
+                </form>`,
+        });
 
         // Remove value from many2one and then save, there should be no link anymore
-        await click(target, ".o_form_button_edit");
-        await editInput(target, ".o_field_many2one input", "");
-
-        await click(target, ".o_form_button_save");
         assert.containsNone(target, "a.o_form_uri");
     });
 
@@ -1329,8 +1339,34 @@ QUnit.module("Fields", (hooks) => {
         assert.verifySteps(["search: ", "search: first", "search: first", "search: first"]);
     });
 
-    // MCM SKIP
-    QUnit.skip("many2one field with option always_reload", async function (assert) {
+    QUnit.test("many2one field with option always_reload (readonly)", async function (assert) {
+        let count = 0;
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            resId: 2,
+            serverData,
+            arch: `
+                <form>
+                    <field name="trululu" options="{'always_reload': 1}" readonly="1" />
+                </form>`,
+            mockRPC(route, { method }) {
+                if (method === "name_get") {
+                    count++;
+                    return Promise.resolve([[1, "first record\nand some address"]]);
+                }
+            },
+        });
+
+        assert.strictEqual(count, 1, "an extra name_get should have been done");
+        assert.ok(
+            target.querySelector("a.o_form_uri").textContent.includes("and some address"),
+            "should display additional result"
+        );
+        assert.containsNone(target, ".o_field_many2one_extra");
+    });
+
+    QUnit.test("many2one field with option always_reload (edit)", async function (assert) {
         let count = 0;
         await makeView({
             type: "form",
@@ -1350,22 +1386,15 @@ QUnit.module("Fields", (hooks) => {
         });
 
         assert.strictEqual(count, 1, "an extra name_get should have been done");
-        assert.ok(
-            target.querySelector("a.o_form_uri").textContent.includes("and some address"),
-            "should display additional result"
-        );
-
-        await click(target, ".o_form_button_edit");
         assert.strictEqual(
             target.querySelector(".o_field_widget[name='trululu'] input").value,
             "first record",
             "actual field value should be displayed to be edited"
         );
-
-        await click(target, ".o_form_button_save");
-        assert.ok(
-            target.querySelector("a.o_form_uri").textContent.includes("and some address"),
-            "should still display additional result"
+        assert.containsOnce(target, ".o_field_many2one_extra");
+        assert.strictEqual(
+            target.querySelector(".o_field_many2one_extra").textContent,
+            "and some address"
         );
     });
 
