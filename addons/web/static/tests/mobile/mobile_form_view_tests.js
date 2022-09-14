@@ -133,7 +133,8 @@ QUnit.module("Mobile Views", ({ beforeEach }) => {
         }
     );
 
-    QUnit.test(
+    // MCM SKIP
+    QUnit.skip(
         `statusbar "Action" button not displayed in edit mode with .oe_read_only button`,
         async (assert) => {
             await makeView({

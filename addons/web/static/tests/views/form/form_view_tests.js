@@ -857,8 +857,7 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass(target.querySelector(".o_field_widget[name=foo]"), "o_group_col_6");
     });
 
-    // MCM SKIP
-    QUnit.skip("Form and subview with _view_ref contexts", async function (assert) {
+    QUnit.test("Form and subview with _view_ref contexts", async function (assert) {
         assert.expect(3);
 
         serverData.models.product.fields.partner_type_ids = {
@@ -938,7 +937,7 @@ QUnit.module("Views", (hooks) => {
             views: [[false, "form"]],
         });
 
-        await click(target.querySelector('.o_field_widget[name="product_id"] a'));
+        await click(target.querySelector('.o_field_widget[name="product_id"] .o_external_button'));
     });
 
     QUnit.test("invisible fields are properly hidden", async function (assert) {
@@ -2228,7 +2227,7 @@ QUnit.module("Views", (hooks) => {
     );
 
     // MCM SKIP
-    QUnit.skip("empty fields have o_form_empty class in readonly mode", async function (assert) {
+    QUnit.debug("empty fields have o_form_empty class in readonly mode", async function (assert) {
         serverData.models.partner.fields.foo.default = false; // no default value for this test
         serverData.models.partner.records[1].foo = false; // 1 is record with id=2
         serverData.models.partner.records[1].trululu = false; // 1 is record with id=2
@@ -2259,12 +2258,13 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(
             target,
             ".o_field_empty",
-            "in edit mode, only empty readonly fields should have the o_field_empty class"
+            "in edit mode, empty and readonly fields should have the o_field_empty class"
         );
-        assert.containsOnce(
+        assert.containsN(
             target,
             ".o_form_label_empty",
-            "in edit mode, only labels associated to empty readonly fields should have the o_form_label_empty class"
+            2,
+            "in edit mode, labels associated to empty or readonly fields should have the o_form_label_empty class"
         );
 
         await editInput(target, ".o_field_widget[name=foo] input", "test");
@@ -2274,10 +2274,10 @@ QUnit.module("Views", (hooks) => {
             ".o_field_empty",
             "after readonly modifier change, the o_field_empty class should have been removed"
         );
-        assert.containsNone(
+        assert.containsOnce(
             target,
             ".o_form_label_empty",
-            "after readonly modifier change, the o_form_label_empty class should have been removed"
+            "after readonly modifier change, the o_form_label_empty class should have been removed from readonly field"
         );
 
         await editInput(target, ".o_field_widget[name=foo] input", "hello");
