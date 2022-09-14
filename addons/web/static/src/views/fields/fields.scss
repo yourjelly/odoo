@@ -38,7 +38,7 @@
 
         &:hover, &:focus-within {
             .o_external_button {
-                display: unset;
+                visibility: visible;
             }
         }
     }
