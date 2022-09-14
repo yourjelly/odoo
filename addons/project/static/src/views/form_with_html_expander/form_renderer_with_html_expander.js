@@ -10,6 +10,7 @@ export class FormRendererWithHtmlExpander extends FormRenderer {
         super.setup();
         this.ui = useService('ui');
         const ref = useRef('compiled_view_root');
+        debugger
         useEffect(
             (el, size) => {
                 if (el && size === 6) {

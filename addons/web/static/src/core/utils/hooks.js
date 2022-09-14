@@ -78,6 +78,7 @@ export function useSpellCheck() {
             }
             return () => {
                 if (el) {
+                    debugger
                     el.removeEventListener("focus", toggleSpellcheck);
                     el.removeEventListener("blur", toggleSpellcheck);
                 }

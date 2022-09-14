@@ -16,6 +16,7 @@ import {
 } from "@web/core/utils/hooks";
 import { getAdjacentPreviousSiblings, getAdjacentNextSiblings } from '@web_editor/js/editor/odoo-editor/src/utils/utils';
 import { toInline } from 'web_editor.convertInline';
+import { useSpellCheck } from '@web/core/utils/hooks';
 
 const {
     markup,
@@ -33,7 +34,9 @@ const {
 export class HtmlFieldWysiwygAdapterComponent extends ComponentAdapter {
     setup() {
         super.setup();
+        console.log(this.Wysiwyg)
         useSubEnv(legacyEnv);
+        useSpellCheck();
 
         let started = false;
         onMounted(() => {
