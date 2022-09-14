@@ -7087,7 +7087,8 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.test("in edit mode, first field is focused", async function (assert) {
+    // MCM SKIP
+    QUnit.skip("in edit mode, first field is focused", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
