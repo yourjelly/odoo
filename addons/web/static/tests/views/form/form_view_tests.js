@@ -7108,7 +7108,8 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.test("autofocus fields are focused", async function (assert) {
+    // MCM SKIP
+    QUnit.skip("autofocus fields are focused", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
