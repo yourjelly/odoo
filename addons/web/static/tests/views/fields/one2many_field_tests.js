@@ -10332,7 +10332,6 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    // MCM SKIP
     QUnit.skip(
         "one2many with many2many_tags in list and list in form with a limit",
         async function (assert) {
@@ -10690,8 +10689,7 @@ QUnit.module("Fields", (hooks) => {
         await click(target.querySelector(".o_data_row .o_field_boolean input"));
     });
 
-    // MCM SKIP
-    QUnit.skip("update a one2many from a custom field widget", async function (assert) {
+    QUnit.test("update a one2many from a custom field widget", async function (assert) {
         // In this test, we define a custom field widget to render/update a one2many
         // field. For the update part, we ensure that updating primitive fields of a sub
         // record works. There is no guarantee that updating a relational field on the sub
@@ -10739,6 +10737,7 @@ QUnit.module("Fields", (hooks) => {
             type: "form",
             resModel: "partner",
             serverData,
+            mode: "readonly",
             arch: `
                 <form>
                     <field name="p" widget="my_relational_field"/>

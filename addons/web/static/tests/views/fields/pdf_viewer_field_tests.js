@@ -74,9 +74,8 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(getIframeViewerParams(), "model=partner&field=document&id=1");
     });
 
-    // MCM SKIP
-    QUnit.skip("PdfViewerField: upload rendering", async function (assert) {
-        assert.expect(6);
+    QUnit.test("PdfViewerField: upload rendering", async function (assert) {
+        assert.expect(5);
 
         await makeView({
             type: "form",
@@ -100,7 +99,6 @@ QUnit.module("Fields", (hooks) => {
 
         await clickSave(target);
 
-        assert.strictEqual(getIframeProtocol(), "http");
-        assert.strictEqual(getIframeViewerParams(), "model=partner&field=document&id=2");
+        assert.strictEqual(getIframeProtocol(), "blob");
     });
 });
