@@ -34,8 +34,9 @@ var RunningTourActionHelper = core.Class.extend({
     text_blur: function (text, element) {
         this._text_blur(this._get_action_values(element), text);
     },
-    drag_and_drop: function (to, element) {
-        this._drag_and_drop_jquery(this._get_action_values(element), to);
+    drag_and_drop: function (toSel, element) {
+        const to = get_jquery_element_from_selector(toSel)[0];
+        this._drag_and_drop(this._get_action_values(element).$element[0], to);
     },
     drag_and_drop_native: function (toSel, element) {
         const to = get_jquery_element_from_selector(toSel)[0];
