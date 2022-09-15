@@ -213,8 +213,7 @@ QUnit.module("Fields", (hooks) => {
         assert.verifySteps(["open record"]);
     });
 
-    // MCM SKIP
-    QUnit.skip("image fields with empty value", async function (assert) {
+    QUnit.test("image fields with empty value", async function (assert) {
         serverData.models.partner.records[0].foo = false;
 
         await makeView({
@@ -229,7 +228,7 @@ QUnit.module("Fields", (hooks) => {
         });
 
         assert.hasClass(
-            target.querySelector('div[name="foo"].o_field_empty'),
+            target.querySelector('div[name="foo"]'),
             "o_field_image_url",
             "the widget should have the correct class"
         );
