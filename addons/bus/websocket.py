@@ -810,7 +810,7 @@ class WebsocketConnectionHandler:
         ))
         # Force save the session. Session must be persisted to handle
         # WebSocket authentication.
-        request.session.is_dirty = True
+        # request.session.is_dirty = True
         return response
 
     @classmethod
