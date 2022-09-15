@@ -47,7 +47,7 @@ odoo.define('web.SearchBar', function (require) {
                 inputValue: "",
             });
 
-            this.autoCompleteSources = this.model.get('filters', f => f.type === 'field').map(
+            this.autoCompleteSources = this.model.get('filters', f => f.type === 'field' && !f.isProperty).map(
                 filter => this._createSource(filter)
             );
             this.noResultItem = [null, this.env._t("(no result)")];

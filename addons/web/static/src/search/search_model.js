@@ -219,6 +219,7 @@ export class SearchModel extends EventBus {
         this.globalDomain = domain || [];
         this.globalGroupBy = groupBy || [];
         this.globalOrderBy = orderBy || [];
+        this.searchItemsProperties = {};
         this.hideCustomGroupBy = hideCustomGroupBy;
 
         this.searchMenuTypes = new Set(config.searchMenuTypes || ["filter", "groupBy", "favorite"]);
@@ -937,6 +938,81 @@ export class SearchModel extends EventBus {
             this.query.push({ searchItemId, intervalId });
         }
         this._notify();
+    }
+
+    /**
+     * Because it require a RPC call to get the properties search items,
+     * it's done lazily, only when we need them.
+     *
+     * @param {Object} searchItem
+     * @param {string} definitionRecordModel
+     * @param {string} definitionRecordField
+     */
+    async fillSearchItemsProperty(searchItem, definitionRecordModel, definitionRecordField) {
+        if (this.searchItemsProperties[searchItem.id]) {
+            // we already fetched the properties definition
+            return;
+        }
+
+        const result = await this.fetchPropertiesDefinition(
+            definitionRecordModel, definitionRecordField);
+
+        for (const [definitionRecordName, definitions] of result) {
+            for (const definition of definitions) {
+                const fieldName = `${searchItem.fieldName}.${definition.name}`;
+
+                const item = Object.values(this.searchItems).find(item => item.fieldName === fieldName);
+
+                if (item) {
+                    // already in the list, can happen if we unfold the properties field
+                    // open a form view, edit the property and then go back to the search view
+                    // the label of the property might have been changed
+                    item["description"] = `${definition.string} (${definitionRecordName})`;
+                    continue;
+                }
+
+                this.searchItems[this.nextId] = {
+                    "isActive": false,
+                    "type": "field",
+                    "fieldName": fieldName,
+                    "fieldType": "properties",
+                    "description": `${definition.string} (${definitionRecordName})`,
+                    "groupId": this.nextGroupId,
+                    "id": this.nextId,
+                    "autocompleteValues": [],
+                    "definition": definition,
+                    "isProperty": true,
+                    "propertyItemId": searchItem.id,
+                };
+
+                this.nextId++;
+                this.nextGroupId++;
+            }
+        }
+
+        this.searchItemsProperties[searchItem.id] = true;
+    }
+
+    /**
+     * Fetch the properties definitions.
+     *
+     * @param {string} definitionRecordModel
+     * @param {string} definitionRecordField
+     */
+    async fetchPropertiesDefinition(definitionRecordModel, definitionRecordField) {
+        let domain = [];
+        if (this.context.active_id) {
+            // assume the active id is the definition record
+            // and show only its properties
+            domain = [['id', '=', this.context.active_id]];
+        }
+
+        const result = await this.orm.call(
+            definitionRecordModel,
+            "search_read",
+            [domain, ["display_name", definitionRecordField]]);
+
+        return result.map(values => [values["display_name"], values[definitionRecordField]]);
     }
 
     //--------------------------------------------------------------------------
