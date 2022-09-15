@@ -2226,8 +2226,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    // MCM SKIP
-    QUnit.skip("empty fields have o_form_empty class in readonly mode", async function (assert) {
+    QUnit.test("empty fields have o_form_empty class in readonly mode", async function (assert) {
         serverData.models.partner.fields.foo.default = false; // no default value for this test
         serverData.models.partner.records[1].foo = false; // 1 is record with id=2
         serverData.models.partner.records[1].trululu = false; // 1 is record with id=2
@@ -2258,13 +2257,12 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(
             target,
             ".o_field_empty",
-            "in edit mode, empty and readonly fields should have the o_field_empty class"
+            "in edit mode, only empty readonly fields should have the o_field_empty class"
         );
-        assert.containsN(
+        assert.containsOnce(
             target,
             ".o_form_label_empty",
-            2,
-            "in edit mode, labels associated to empty or readonly fields should have the o_form_label_empty class"
+            "in edit mode, only labels associated to empty readonly fields should have the o_form_label_empty class"
         );
 
         await editInput(target, ".o_field_widget[name=foo] input", "test");
@@ -2274,10 +2272,10 @@ QUnit.module("Views", (hooks) => {
             ".o_field_empty",
             "after readonly modifier change, the o_field_empty class should have been removed"
         );
-        assert.containsOnce(
+        assert.containsNone(
             target,
             ".o_form_label_empty",
-            "after readonly modifier change, the o_form_label_empty class should have been removed from readonly field"
+            "after readonly modifier change, the o_form_label_empty class should have been removed"
         );
 
         await editInput(target, ".o_field_widget[name=foo] input", "hello");
@@ -2294,8 +2292,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    // MCM SKIP
-    QUnit.skip(
+    QUnit.test(
         "empty fields' labels still get the empty class after widget rerender",
         async function (assert) {
             serverData.models.partner.fields.foo.default = false; // no default value for this test
@@ -2345,8 +2342,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    // MCM SKIP
-    QUnit.skip(
+    QUnit.test(
         'empty inner readonly fields don\'t have o_form_empty class in "create" mode',
         async function (assert) {
             serverData.models.partner.fields.product_id.readonly = true;
@@ -2370,8 +2366,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    // MCM SKIP
-    QUnit.skip(
+    QUnit.test(
         "label tag added for fields have o_form_empty class in readonly mode if field is empty",
         async function (assert) {
             serverData.models.partner.fields.foo.default = false; // no default value for this test
@@ -3196,8 +3191,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".o_field_widget").textContent, "ok");
     });
 
-    // MCM SKIP
-    QUnit.skip("can create a record with default values", async function (assert) {
+    QUnit.test("can create a record with default values", async function (assert) {
         assert.expect(5);
 
         await makeView({
@@ -3226,7 +3220,10 @@ QUnit.module("Views", (hooks) => {
 
         await click(target.querySelector(".o_form_button_create"));
         assert.containsOnce(target, ".o_form_editable");
-        assert.strictEqual(target.querySelector("input").value, "My little Foo Value");
+        assert.strictEqual(
+            target.querySelector(".o_field_char input").value,
+            "My little Foo Value"
+        );
 
         await clickSave(target);
         assert.containsOnce(target, ".o_form_editable");
@@ -3307,8 +3304,7 @@ QUnit.module("Views", (hooks) => {
         await click(target.querySelector(".o_field_x2many_list_row_add a"));
     });
 
-    // MCM SKIP
-    QUnit.skip("reference field in one2many list", async function (assert) {
+    QUnit.test("reference field in one2many list", async function (assert) {
         serverData.models.partner.records[0].reference = "partner,2";
         serverData.views = {
             "partner,false,form": '<form><field name="display_name"/></form>',
@@ -3324,7 +3320,7 @@ QUnit.module("Views", (hooks) => {
                     <field name="partner_ids">
                         <tree editable="bottom">
                             <field name="display_name"/>
-                            <field name="reference"/>
+                            <field name="reference" open_target="new"/>
                         </tree>
                     </field>
                 </form>`,
@@ -3356,8 +3352,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    // MCM SKIP
-    QUnit.skip("there is no Actions menu when creating a new record", async function (assert) {
+    QUnit.test("there is an Actions menu when creating a new record", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -3371,7 +3366,7 @@ QUnit.module("Views", (hooks) => {
 
         await click(target.querySelector(".o_form_button_create"));
 
-        assert.containsNone(target, ".o_cp_action_menus");
+        assert.containsOnce(target, ".o_cp_action_menus");
 
         await clickSave(target);
 
@@ -3461,8 +3456,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    // MCM SKIP
-    QUnit.skip("form view properly change its title", async function (assert) {
+    QUnit.test("form view properly change its title", async function (assert) {
         serverData.views = {
             "partner,false,form": '<form><field name="foo"/></form>',
             "partner,false,search": "<search/>",
@@ -3958,8 +3952,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    // MCM SKIP
-    QUnit.skip("discard changes on a non dirty form view", async function (assert) {
+    QUnit.test("discard changes on a non dirty form view", async function (assert) {
         let nbWrite = 0;
         await makeView({
             type: "form",
@@ -4058,8 +4051,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".o_field_widget input").value, "01/25/2017");
     });
 
-    // MCM SKIP
-    QUnit.skip("discard changes on relational data on new record", async function (assert) {
+    QUnit.test("discard changes on relational data on new record", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -4181,8 +4173,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["history-back"]);
     });
 
-    // MCM SKIP
-    QUnit.skip("discard changes on a duplicated record", async function (assert) {
+    QUnit.test("discard changes on a duplicated record", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -4645,8 +4636,7 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass(target.querySelectorAll(".o_notebook .nav-link")[1], "active");
     });
 
-    // MCM SKIP
-    QUnit.skip("pager is hidden in create mode", async function (assert) {
+    QUnit.test("pager is hidden in create mode", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -4671,8 +4661,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".o_pager_limit").textContent, "3");
     });
 
-    // MCM SKIP
-    QUnit.skip("switching to another record, in readonly mode", async function (assert) {
+    QUnit.test("switching to another record", async function (assert) {
         patchWithCleanup(browser, {
             setTimeout(fn) {
                 return fn(); // update the router hash directly
@@ -4687,18 +4676,15 @@ QUnit.module("Views", (hooks) => {
             resIds: [1, 2],
         });
 
-        assert.containsOnce(target, ".o_form_readonly");
         assert.strictEqual(target.querySelector(".o_pager_value").textContent, "1");
         assert.strictEqual(form.env.services.router.current.hash.id, 1);
 
         await click(target.querySelector(".o_pager_next"));
         assert.strictEqual(target.querySelector(".o_pager_value").textContent, "2");
-        assert.containsOnce(target, ".o_form_readonly");
         assert.strictEqual(form.env.services.router.current.hash.id, 2);
     });
 
-    // MCM SKIP
-    QUnit.skip("modifiers are reevaluated when creating new record", async function (assert) {
+    QUnit.test("modifiers are reevaluated when creating new record", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -4720,8 +4706,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".foo_field");
     });
 
-    // MCM SKIP
-    QUnit.skip("empty readonly fields are visible on new records", async function (assert) {
+    QUnit.test("empty readonly fields are visible on new records", async function (assert) {
         serverData.models.partner.fields.foo.readonly = true;
         serverData.models.partner.fields.foo.default = undefined;
         serverData.models.partner.records[0].foo = undefined;
@@ -4859,6 +4844,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_field_invalid");
     });
 
+    // MCM SKIP
     QUnit.skip("changes in a readonly form view are saved directly", async function (assert) {
         let nbWrite = 0;
         await makeView({
@@ -5653,8 +5639,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_list_view");
     });
 
-    // MCM SKIP
-    QUnit.skip("onchanges that complete after discarding", async function (assert) {
+    QUnit.test("onchanges that complete after discarding", async function (assert) {
         serverData.models.partner.onchanges = {
             foo: function (obj) {
                 obj.int_field = obj.foo.length + 1000;
@@ -6589,7 +6574,6 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    // MCM SKIP
     QUnit.skip("oe_read_only className is handled in list views", async function (assert) {
         await makeView({
             type: "form",
@@ -6958,8 +6942,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target.querySelector(".o_form_view"), "button.infooter");
     });
 
-    // MCM SKIP
-    QUnit.skip("open new record even with warning message", async function (assert) {
+    QUnit.test("open new record even with warning message", async function (assert) {
         serverData.models.partner.onchanges = { foo: true };
 
         await makeView({
@@ -7087,8 +7070,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    // MCM SKIP
-    QUnit.skip("in edit mode, first field is focused", async function (assert) {
+    QUnit.test("no field should be focused", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -7097,25 +7079,34 @@ QUnit.module("Views", (hooks) => {
             resId: 1,
         });
 
+        assert.strictEqual(document.activeElement, document.body);
+    });
+
+    QUnit.test("in create mode, first field is focused", async function (assert) {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: '<form><field name="foo"/><field name="bar"/></form>',
+        });
+
         assert.strictEqual(
             document.activeElement,
             target.querySelector('.o_field_widget[name="foo"] input')
         );
         assert.strictEqual(
             target.querySelector('.o_field_widget[name="foo"] input').selectionStart,
-            3,
+            target.querySelector('.o_field_widget[name="foo"] input').value.length,
             "cursor should be at the end"
         );
     });
 
-    // MCM SKIP
-    QUnit.skip("autofocus fields are focused", async function (assert) {
+    QUnit.test("autofocus fields are focused", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
             serverData,
             arch: '<form><field name="int_field"/><field name="foo" default_focus="1"/></form>',
-            resId: 1,
         });
         assert.strictEqual(
             document.activeElement,
@@ -7171,14 +7162,13 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    // MCM SKIP
-    QUnit.skip("In READ mode, focus the first primary button of the form", async function (assert) {
+    QUnit.test("In READ mode, focus the first primary button of the form", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
             serverData,
             arch: `
-                    <form>
+                    <form edit="0">
                         <field name="state" invisible="1"/>
                         <header>
                             <button name="post" class="btn-primary firstButton" string="Confirm" type="object"/>
@@ -7196,34 +7186,6 @@ QUnit.module("Views", (hooks) => {
         });
         assert.strictEqual(target.querySelector("button.firstButton"), document.activeElement);
     });
-
-    QUnit.skip(
-        "In READ mode, focus EDIT button no primary button on the form",
-        async function (assert) {
-            await makeView({
-                type: "form",
-                resModel: "partner",
-                serverData,
-                arch: `
-                    <form>
-                        <field name="state" invisible="1"/>
-                        <header>
-                            <button name="post" class="not-primary" string="Confirm" type="object"/>
-                            <button name="post" class="not-primary" string="Confirm2" type="object"/>
-                        </header>
-                        <sheet>
-                            <group>
-                                <div class="oe_title">
-                                    <field name="display_name"/>
-                                </div>
-                            </group>
-                        </sheet>
-                    </form>`,
-                resId: 2,
-            });
-            assert.strictEqual(target.querySelector(".o_form_button_edit"), document.activeElement);
-        }
-    );
 
     QUnit.test("check scroll on small height screens", async function (assert) {
         serverData.views = {
@@ -7422,8 +7384,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["get_views", "read", "read", "read"]);
     });
 
-    // MCM SKIP
-    QUnit.skip("onchanges are applied before checking if it can be saved", async function (assert) {
+    QUnit.test("onchanges are applied before checking if it can be saved", async function (assert) {
         serverData.models.partner.onchanges.foo = function (obj) {};
         serverData.models.partner.fields.foo.required = true;
 
@@ -8350,8 +8311,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".alert", "should have closed the translate alert");
     });
 
-    // MCM SKIP
-    QUnit.skip("can save without any dirty translatable fields", async function (assert) {
+    QUnit.test("can save without any dirty translatable fields", async function (assert) {
         serverData.models.partner.fields.foo.translate = true;
 
         patchWithCleanup(localization, {
@@ -8382,7 +8342,7 @@ QUnit.module("Views", (hooks) => {
             ".alert .o_field_translate",
             "should not have a translation alert"
         );
-        assert.containsOnce(target, ".o_form_readonly");
+        assert.containsOnce(target, ".o_form_saved");
         assert.verifySteps([]);
     });
 
@@ -9276,8 +9236,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    // MCM SKIP
-    QUnit.skip("delete a duplicated record", async function (assert) {
+    QUnit.test("delete a duplicated record", async function (assert) {
         assert.expect(5);
 
         const newRecordID = 6; // ids from 1 to 5 are already taken so the new record will have id 6
@@ -9315,7 +9274,7 @@ QUnit.module("Views", (hooks) => {
         await click(target.querySelector(".modal-footer .btn-primary"));
 
         assert.strictEqual(
-            target.querySelector(".o_field_widget").textContent,
+            target.querySelector(".o_field_widget input").value,
             "first record",
             "should have come back to previous record"
         );
@@ -9408,15 +9367,14 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    // MCM SKIP
-    QUnit.skip("reload event is handled only once", async function (assert) {
+    QUnit.test("reload event is handled only once", async function (assert) {
         // In this test, several form controllers are nested (two of them are
         // opened in dialogs). When the users clicks on save in the last
         // opened dialog, a 'reload' event is triggered up to reload the (direct)
         // parent view. If this event isn't stopPropagated by the first controller
         // catching it, it will crash when the other one will try to handle it,
         // as this one doesn't know at all the dataPointID to reload.
-        const arch = `<form><field name="display_name"/><field name="trululu"/></form>`;
+        const arch = `<form><field name="display_name"/><field name="trululu" open_target="new"/></form>`;
         serverData.views = {
             "partner,false,form": arch,
         };
@@ -9718,8 +9676,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    // MCM SKIP
-    QUnit.skip("do not change pager when discarding current record", async function (assert) {
+    QUnit.test("do not change pager when discarding current record", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -10424,8 +10381,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_notification");
     });
 
-    // MCM SKIP
-    QUnit.skip(
+    QUnit.test(
         "one2many create record dialog shouldn't have a 'remove' button",
         async function (assert) {
             await makeView({
@@ -10938,8 +10894,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    // MCM SKIP
-    QUnit.skip("Auto save: save when page changed", async function (assert) {
+    QUnit.test("Auto save: save when page changed", async function (assert) {
         assert.expect(10);
 
         serverData.actions[1] = {
@@ -11002,17 +10957,17 @@ QUnit.module("Views", (hooks) => {
             "second record",
         ]);
         assert.strictEqual(
-            target.querySelector('.o_field_widget[name="name"]').textContent,
+            target.querySelector('.o_field_widget[name="name"] input').value,
             "name"
         );
 
         await click(target.querySelector(`.o_pager button.o_pager_previous`));
-        assert.containsOnce(target, ".o_form_readonly");
+        assert.containsOnce(target, ".o_form_saved");
         assert.deepEqual(getNodesTextContent(target.querySelectorAll(".breadcrumb li")), [
             "Partner",
             "first record",
         ]);
-        assert.strictEqual(target.querySelector('.o_field_widget[name="name"]').textContent, "aaa");
+        assert.strictEqual(target.querySelector('.o_field_widget[name="name"] input').value, "aaa");
     });
 
     QUnit.test("Auto save: save when breadcrumb clicked", async function (assert) {

@@ -18,8 +18,11 @@ export class FormLabel extends Component {
         if (invalid) {
             classes.push("o_field_invalid");
         }
-        if (empty || readonly) {
+        if (empty) {
             classes.push("o_form_label_empty");
+        }
+        if (readonly) {
+            classes.push("o_form_label_readonly");
         }
         return classes.join(" ");
     }
