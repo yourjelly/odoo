@@ -10,14 +10,15 @@ import { fuzzyTest } from "@web/core/utils/search";
 import { Component, useExternalListener, useRef, useState } from "@odoo/owl";
 const parsers = registry.category("parsers");
 
-const CHAR_FIELDS = ["char", "html", "many2many", "many2one", "one2many", "text"];
+const CHAR_FIELDS = ["char", "html", "many2many", "many2one", "one2many", "text", "properties"];
+const FOLDABLE_TYPES = ["properties", "many2one", "many2many"];
 
 let nextItemId = 1;
 
 export class SearchBar extends Component {
     setup() {
         this.fields = this.env.searchModel.searchViewFields;
-        this.searchItems = this.env.searchModel.getSearchItems((f) => f.type === "field");
+        this.searchItems = this.env.searchModel.getSearchItems((f) => ["field", "field_property"].includes(f.type));
         this.root = useRef("root");
 
         // core state
@@ -98,17 +99,39 @@ export class SearchBar extends Component {
             return;
         }
 
-        for (const searchItem of this.searchItems) {
-            const field = this.fields[searchItem.fieldName];
-            const type = field.type === "reference" ? "char" : field.type;
-            /** @todo do something with respect to localization (rtl) */
-            const preposition = this.env._t(["date", "datetime"].includes(type) ? "at" : "for");
+        // move properties under their related field
+        const searchItems = [...this.searchItems];
+        searchItems.sort((a, b) => (a.propertyItemId || a.id) - (b.propertyItemId || b.id));
 
-            if (["selection", "boolean"].includes(type)) {
-                const options = field.selection || [
-                    [true, this.env._t("Yes")],
-                    [false, this.env._t("No")],
-                ];
+        for (const searchItem of searchItems) {
+            const field = this.fields[searchItem.fieldName];
+            let type = field.type === "reference" ? "char" : field.type;
+
+            if (type === "properties" && searchItem.type === "field_property") {
+                // take the definition type instead
+                type = searchItem.definition.type
+
+                if (!this.state.expanded.includes(searchItem.propertyItemId)) {
+                    // properties field not unfolded, do not show the option
+                    continue;
+                }
+            }
+
+            /** @todo do something with respect to localization (rtl) */
+            let preposition = this.env._t(["date", "datetime"].includes(type) ? "at" : "for");
+
+            if (field.type === "properties" && (searchItem.type === "field" || FOLDABLE_TYPES.includes(type))) {
+                // Do not chose preposition for foldable properties
+                // or the properties item itself
+                preposition = null;
+            }
+
+            if (["selection", "boolean", "tags"].includes(type)) {
+                const options = searchItem.selection
+                    || searchItem.tags
+                    || field.selection
+                    || [[true, this.env._t("Yes")], [false, this.env._t("No")]];
+
                 for (const [value, label] of options) {
                     if (fuzzyTest(trimmedQuery.toLowerCase(), label.toLowerCase())) {
                         this.items.push({
@@ -120,6 +143,7 @@ export class SearchBar extends Component {
                             /** @todo check if searchItem.operator is fine (here and elsewhere) */
                             operator: searchItem.operator || "=",
                             value,
+                            isProperty: searchItem.type === "field_property",
                         });
                     }
                 }
@@ -158,9 +182,19 @@ export class SearchBar extends Component {
                 label: this.state.query,
                 operator: searchItem.operator || (CHAR_FIELDS.includes(type) ? "ilike" : "="),
                 value,
+                isProperty: searchItem.type === "field_property",
             };
 
-            if (type === "many2one") {
+            if (field.type === "properties") {
+                item.isParent = searchItem.type !== "field_property"
+                    || FOLDABLE_TYPES.includes(searchItem.definition.type);
+                item.unselectable = (
+                    searchItem.type !== "field_property"
+                    || FOLDABLE_TYPES.includes(searchItem.definition.type)
+                    || searchItem.definition.type === "many2one"
+                );
+                item.isExpanded = this.state.expanded.includes(item.searchItemId);
+            } else if (type === "many2one") {
                 item.isParent = true;
                 item.isExpanded = this.state.expanded.includes(item.searchItemId);
             }
@@ -181,6 +215,13 @@ export class SearchBar extends Component {
     async computeSubItems(searchItemId, query) {
         const searchItem = this.searchItems.find((i) => i.id === searchItemId);
         const field = this.fields[searchItem.fieldName];
+        const operator = searchItem.operator || "=";
+
+        if (field.type === "properties" && searchItem.type !== "field_property") {
+            await this._getPropertiesSearchItems(searchItem, field, query);
+            return [];
+        }
+
         let domain = [];
         if (searchItem.domain) {
             try {
@@ -189,7 +230,9 @@ export class SearchBar extends Component {
                 // Pass
             }
         }
-        const options = await this.orm.call(field.relation, "name_search", [], {
+        const relation = field.relation || searchItem.relation;
+
+        const options = await this.orm.call(relation, "name_search", [], {
             args: domain,
             context: { ...this.env.searchModel.globalContext, ...field.context },
             limit: 8,
@@ -197,7 +240,6 @@ export class SearchBar extends Component {
         });
         const subItems = [];
         if (options.length) {
-            const operator = searchItem.operator || "=";
             for (const [value, label] of options) {
                 subItems.push({
                     id: nextItemId++,
@@ -218,6 +260,27 @@ export class SearchBar extends Component {
             });
         }
         return subItems;
+    }
+
+    /**
+     * Compute the properties items, only when we unfold the properties field
+     * (will fetch the properties definition on the parent to generate the items).
+     *
+     * @param {Object} searchItem
+     * @param {Object} field
+     */
+    async _getPropertiesSearchItems(searchItem, field) {
+        const definitionRecord = field.definition_record;
+        const definitionRecordModel = this.fields[definitionRecord].relation;
+        const definitionRecordField = field.definition_record_field;
+
+        const propertiesSearchItems = await this.env.searchModel.getSearchItemsProperty(
+            searchItem, definitionRecord, definitionRecordModel, definitionRecordField);
+
+        const searchItems = this.searchItems.filter(
+            item => item.propertyItemId !== searchItem.id);
+
+        this.searchItems = [...searchItems, ...propertiesSearchItems];
     }
 
     /**
