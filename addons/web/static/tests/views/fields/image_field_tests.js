@@ -313,8 +313,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    // MCM SKIP
-    QUnit.skip("ImageField: zoom and zoom_delay options", async function (assert) {
+    QUnit.test("ImageField: zoom and zoom_delay options (readonly)", async (assert) => {
         serverData.models.partner.records[0].document = MY_IMAGE;
 
         await makeView({
@@ -324,7 +323,7 @@ QUnit.module("Fields", (hooks) => {
             serverData,
             arch: `
                 <form>
-                    <field name="document" widget="image" options="{'zoom': true, 'zoom_delay': 600}" />
+                    <field name="document" widget="image" options="{'zoom': true, 'zoom_delay': 600}" readonly="1" />
                 </form>`,
         });
         // data-tooltip attribute is used by the tooltip service
@@ -338,6 +337,21 @@ QUnit.module("Fields", (hooks) => {
             "600",
             "tooltip has the right delay"
         );
+    });
+
+    QUnit.test("ImageField: zoom and zoom_delay options (edit)", async function (assert) {
+        serverData.models.partner.records[0].document = MY_IMAGE;
+
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            resId: 1,
+            serverData,
+            arch: `
+                <form>
+                    <field name="document" widget="image" options="{'zoom': true, 'zoom_delay': 600}" />
+                </form>`,
+        });
 
         assert.ok(
             !target.querySelector(".o_field_image img").dataset["tooltipInfo"],
@@ -345,9 +359,8 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    // MCM SKIP
-    QUnit.skip(
-        "ImageField displays the right images with zoom and preview_image options",
+    QUnit.test(
+        "ImageField displays the right images with zoom and preview_image options (readonly)",
         async function (assert) {
             serverData.models.partner.records[0].document = "3 kb";
             serverData.models.partner.records[0].__last_update = "2022-08-05 08:37:00";
@@ -359,7 +372,7 @@ QUnit.module("Fields", (hooks) => {
                 serverData,
                 arch: `
                 <form>
-                    <field name="document" widget="image" options="{'zoom': true, 'preview_image': 'document_preview', 'zoom_delay': 600}" />
+                    <field name="document" widget="image" options="{'zoom': true, 'preview_image': 'document_preview', 'zoom_delay': 600}" readonly="1" />
                 </form>`,
             });
 
@@ -487,8 +500,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    // MCM SKIP
-    QUnit.skip("unique in url doesn't change on onchange", async (assert) => {
+    QUnit.test("unique in url doesn't change on onchange", async (assert) => {
         serverData.models.partner.onchanges = {
             foo: () => {},
         };
@@ -541,8 +553,8 @@ QUnit.module("Fields", (hooks) => {
 
         await clickSave(target);
         assert.verifySteps(["write", "read"]);
-        // different unique: the record has been written
-        assert.strictEqual(getUnique(target.querySelector(".o_field_image img")), "1659692220000");
+
+        assert.strictEqual(getUnique(target.querySelector(".o_field_image img")), "1659688620000");
     });
 
     QUnit.test("unique in url change on record change", async (assert) => {
