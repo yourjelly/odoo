@@ -1231,6 +1231,7 @@ var SnippetEditor = Widget.extend({
             // Some drop zones might have been disabled.
             $el = $el.filter(this.$dropZones);
             if ($el.length) {
+                $el.after(this.$target);
                 // If the column is not dropped inside a dropzone.
                 if ($el[0].classList.contains('oe_grid_zone')) {
                     // Case when a column is dropped near a grid.
@@ -1261,7 +1262,6 @@ var SnippetEditor = Widget.extend({
                     }
                 }
 
-                $el.after(this.$target);
                 this.dropped = true;
             }
         }
