@@ -119,15 +119,8 @@ function arraytoMap(array) {
  * @param {Object} target
  */
 function execute(op, source, target) {
-    const {
-        query,
-        nextId,
-        nextGroupId,
-        nextGroupNumber,
-        searchItems,
-        searchPanelInfo,
-        sections,
-    } = source;
+    const { query, nextId, nextGroupId, nextGroupNumber, searchItems, searchPanelInfo, sections } =
+        source;
 
     target.nextGroupId = nextGroupId;
     target.nextGroupNumber = nextGroupNumber;
@@ -516,7 +509,7 @@ export class SearchModel extends EventBus {
      */
     addAutoCompletionValues(searchItemId, autocompleteValue) {
         const searchItem = this.searchItems[searchItemId];
-        if (searchItem.type !== "field") {
+        if (!["field", "field_property"].includes(searchItem.type)) {
             return;
         }
         const { label, value, operator } = autocompleteValue;
@@ -713,9 +706,11 @@ export class SearchModel extends EventBus {
             return searchItem.comparison;
         }
         const { dateFilterId, comparisonOptionId } = searchItem;
-        const { fieldName, fieldType, description: dateFilterDescription } = this.searchItems[
-            dateFilterId
-        ];
+        const {
+            fieldName,
+            fieldType,
+            description: dateFilterDescription,
+        } = this.searchItems[dateFilterId];
         const selectedGeneratorIds = this._getSelectedGeneratorIds(dateFilterId);
         // compute range and range description
         const { domain: range, description: rangeDescription } = constructDateDomain(
@@ -725,16 +720,14 @@ export class SearchModel extends EventBus {
             selectedGeneratorIds
         );
         // compute comparisonRange and comparisonRange description
-        const {
-            domain: comparisonRange,
-            description: comparisonRangeDescription,
-        } = constructDateDomain(
-            this.referenceMoment,
-            fieldName,
-            fieldType,
-            selectedGeneratorIds,
-            comparisonOptionId
-        );
+        const { domain: comparisonRange, description: comparisonRangeDescription } =
+            constructDateDomain(
+                this.referenceMoment,
+                fieldName,
+                fieldType,
+                selectedGeneratorIds,
+                comparisonOptionId
+            );
         return {
             comparisonId: comparisonOptionId,
             fieldName,
@@ -852,6 +845,7 @@ export class SearchModel extends EventBus {
         switch (searchItem.type) {
             case "dateFilter":
             case "dateGroupBy":
+            case "field_property":
             case "field": {
                 return;
             }
@@ -939,9 +933,103 @@ export class SearchModel extends EventBus {
         this._notify();
     }
 
+    /**
+     * Generate the searchItems corresponding to the properties.
+     * @param {Object} searchItem
+     * @returns {Object[]}
+     */
+    async getSearchItemsProperties(searchItem) {
+        if (searchItem.type !== "field" || searchItem.fieldType !== "properties") {
+            return [];
+        }
+        const field = this.searchViewFields[searchItem.fieldName];
+        const definitionRecord = field.definition_record;
+        const definitionRecordModel = this.searchViewFields[definitionRecord].relation;
+        const definitionRecordField = field.definition_record_field;
+
+        const result = await this._fetchPropertiesDefinition(
+            definitionRecordModel,
+            definitionRecordField
+        );
+
+        const searchItemIds = new Set();
+        const existingFieldProperties = {};
+        for (const item of Object.values(this.searchItems)) {
+            if (item.type === "field_property" && item.propertyItemId === searchItem.id) {
+                existingFieldProperties[item.propertyFieldDefinition.name] = item;
+            }
+        }
+
+        for (const { definitionRecordId, definitionRecordName, definitions } of result) {
+            for (const definition of definitions) {
+                const existingSearchItem = existingFieldProperties[definition.name];
+                if (existingSearchItem) {
+                    // already in the list, can happen if we unfold the properties field
+                    // open a form view, edit the property and then go back to the search view
+                    // the label of the property might have been changed
+                    existingSearchItem.description = `${definition.string} (${definitionRecordName})`;
+                    searchItemIds.add(existingSearchItem.id);
+                    continue;
+                }
+                const id = this.nextId++;
+                const newSearchItem = {
+                    id,
+                    type: "field_property",
+                    fieldName: searchItem.fieldName,
+                    propertyDomain: [definitionRecord, "=", definitionRecordId],
+                    propertyFieldDefinition: definition,
+                    propertyItemId: searchItem.id,
+                    description: `${definition.string} (${definitionRecordName})`,
+                    groupId: this.nextGroupId++,
+                };
+                if (["many2many", "tags"].includes(definition.type)) {
+                    newSearchItem.operator = "in";
+                }
+                this.searchItems[id] = newSearchItem;
+                searchItemIds.add(id);
+            }
+        }
+
+        return this.getSearchItems((searchItem) => searchItemIds.has(searchItem.id));
+    }
+
     //--------------------------------------------------------------------------
     // Private methods
     //--------------------------------------------------------------------------
+
+    /**
+     * Fetch the properties definitions.
+     *
+     * @param {string} definitionRecordModel
+     * @param {string} definitionRecordField
+     * @return {Object[]} A list of objects of the form
+     *      {
+     *          definitionRecordId: <id of the parent record>
+     *          definitionRecordName: <display name of the parent record>
+     *          definitions: <list of properties definitions>
+     *      }
+     */
+    async _fetchPropertiesDefinition(definitionRecordModel, definitionRecordField) {
+        const domain = [];
+        if (this.context.active_id) {
+            // assume the active id is the definition record
+            // and show only its properties
+            domain.push(["id", "=", this.context.active_id]);
+        }
+
+        const result = await this.orm.webSearchRead(definitionRecordModel, domain, [
+            "display_name",
+            definitionRecordField,
+        ]);
+
+        return result.records.map((values) => {
+            return {
+                definitionRecordId: values.id,
+                definitionRecordName: values.display_name,
+                definitions: values[definitionRecordField],
+            };
+        });
+    }
 
     /**
      * Activate the default favorite (if any) or all default filters.
@@ -1168,6 +1256,9 @@ export class SearchModel extends EventBus {
      * for some reason.
      */
     _enrichItem(searchItem) {
+        if (searchItem.type === "field" && searchItem.fieldType === "properties") {
+            return { ...searchItem };
+        }
         const queryElements = this.query.filter(
             (queryElem) => queryElem.searchItemId === searchItem.id
         );
@@ -1204,6 +1295,7 @@ export class SearchModel extends EventBus {
                 );
                 break;
             case "field":
+            case "field_property":
                 enrichSearchItem.autocompleteValues = queryElements.map(
                     (queryElem) => queryElem.autocompleteValue
                 );
@@ -1463,6 +1555,7 @@ export class SearchModel extends EventBus {
             for (const activeItem of group.activeItems) {
                 const searchItem = this.searchItems[activeItem.searchItemId];
                 switch (searchItem.type) {
+                    case "field_property":
                     case "field": {
                         type = "field";
                         title = searchItem.description;
@@ -1539,8 +1632,13 @@ export class SearchModel extends EventBus {
                     self: label.trim(),
                     raw_value: value,
                 });
-            } else {
+            } else if (field.type === "field") {
                 domain = [[field.fieldName, operator, value]];
+            } else if (field.type === "field_property") {
+                domain = [
+                    field.propertyDomain,
+                    [`${field.fieldName}.${field.propertyFieldDefinition.name}`, operator, value],
+                ];
             }
             return new Domain(domain);
         });
@@ -1877,6 +1975,7 @@ export class SearchModel extends EventBus {
         const { searchItemId } = activeItem;
         const searchItem = this.searchItems[searchItemId];
         switch (searchItem.type) {
+            case "field_property":
             case "field": {
                 return this._getFieldDomain(searchItem, activeItem.autocompletValues);
             }
