@@ -4,8 +4,16 @@ import {
     makeFakeLocalizationService,
     makeFakeNotificationService,
 } from "@web/../tests/helpers/mock_services";
-import { click, clickSave, editInput, getFixture, nextTick } from "@web/../tests/helpers/utils";
+import {
+    click,
+    clickSave,
+    editInput,
+    getFixture,
+    nextTick,
+    patchWithCleanup,
+} from "@web/../tests/helpers/utils";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
+import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 
 let serverData;
@@ -47,12 +55,15 @@ QUnit.module("Fields", (hooks) => {
         };
 
         setupViewRegistries();
+
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+        });
     });
 
     QUnit.module("ProgressBarField");
 
-    // MCM SKIP
-    QUnit.skip("ProgressBarField: max_value should update", async function (assert) {
+    QUnit.test("ProgressBarField: max_value should update", async function (assert) {
         assert.expect(3);
 
         serverData.models.partner.records[0].float_field = 2;
@@ -102,8 +113,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    // MCM SKIP
-    QUnit.skip(
+    QUnit.test(
         "ProgressBarField: value should update in edit mode when typing in input",
         async function (assert) {
             assert.expect(6);
@@ -166,8 +176,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    // MCM SKIP
-    QUnit.skip(
+    QUnit.test(
         "ProgressBarField: value should update in edit mode when typing in input with field max value",
         async function (assert) {
             assert.expect(5);
@@ -206,6 +215,8 @@ QUnit.module("Fields", (hooks) => {
             assert.strictEqual(input.value, "99", "Initial value in input is still correct");
 
             await editInput(target, ".o_progressbar_value.o_input", "69");
+            document.activeElement.blur();
+            await nextTick();
 
             await clickSave(target);
 
@@ -217,8 +228,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    // MCM SKIP
-    QUnit.skip(
+    QUnit.test(
         "ProgressBarField: max value should update in edit mode when typing in input with field max value",
         async function (assert) {
             assert.expect(5);
@@ -252,13 +262,13 @@ QUnit.module("Fields", (hooks) => {
             );
 
             assert.ok(target.querySelector(".o_form_view .o_form_editable"), "Form in edit mode");
-
             await click(target.querySelector(".o_progress"));
-
             const input = target.querySelector(".o_progressbar_value.o_input");
             assert.strictEqual(input.value, "0.44", "Initial value in input is correct");
 
             await editInput(target, ".o_progressbar_value.o_input", "69");
+            document.activeElement.blur();
+            await nextTick();
 
             await clickSave(target);
 
@@ -270,8 +280,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    // MCM SKIP
-    QUnit.skip(
+    QUnit.test(
         "ProgressBarField: update both max value and current value in edit mode when both options are given",
         async function (assert) {
             assert.expect(10);
@@ -330,6 +339,8 @@ QUnit.module("Fields", (hooks) => {
             await click(target.querySelector(".o_progress"));
             await editInput(target, ".o_progressbar input:nth-of-type(1)", "2000");
             await editInput(target, ".o_progressbar input:nth-of-type(2)", "69");
+            document.activeElement.blur();
+            await nextTick();
 
             await clickSave(target);
 
@@ -341,8 +352,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    // MCM SKIP
-    QUnit.skip("ProgressBarField: Standard readonly mode is readonly", async function (assert) {
+    QUnit.test("ProgressBarField: Standard readonly mode is readonly", async function (assert) {
         serverData.models.partner.records[0].int_field = 99;
 
         await makeView({
@@ -350,7 +360,7 @@ QUnit.module("Fields", (hooks) => {
             type: "form",
             resModel: "partner",
             arch: `
-                <form>
+                <form edit="0">
                     <field name="float_field" invisible="1"/>
                     <field name="int_field" widget="progressbar" options="{'editable': true, 'max_value': 'float_field', 'edit_max_value': true}"/>
                 </form>`,
@@ -376,8 +386,7 @@ QUnit.module("Fields", (hooks) => {
         ]);
     });
 
-    // MCM SKIP
-    QUnit.skip("ProgressBarField: field is editable in kanban", async function (assert) {
+    QUnit.test("ProgressBarField: field is editable in kanban", async function (assert) {
         assert.expect(7);
 
         serverData.models.partner.fields.int_field.readonly = true;
@@ -477,8 +486,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsNone(target, ".o_progressbar_value.o_input");
     });
 
-    // MCM SKIP
-    QUnit.skip(
+    QUnit.test(
         "ProgressBarField: readonly and editable attrs/options in kanban",
         async function (assert) {
             assert.expect(4);
@@ -545,71 +553,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    // MCM SKIP
-    QUnit.skip(
-        "ProgressBar: value should update in readonly mode with right parameter when typing in input with field value",
-        async function (assert) {
-            assert.expect(7);
-            serverData.models.partner.records[0].int_field = 99;
-
-            await makeView({
-                serverData,
-                type: "form",
-                resModel: "partner",
-                arch: `
-                    <form>
-                        <field name="int_field" widget="progressbar" title="ProgressBarTitle" options="{'editable': true, 'editable_readonly': true}" />
-                    </form>`,
-                resId: 1,
-                mockRPC(route, args) {
-                    if (args.method === "write") {
-                        assert.strictEqual(
-                            args.args[1].int_field,
-                            69,
-                            "New value of progress bar saved"
-                        );
-                    }
-                },
-            });
-
-            assert.strictEqual(
-                target.querySelector(".o_progressbar_value").textContent,
-                "99%",
-                "Initial value should be correct"
-            );
-            assert.strictEqual(
-                target.querySelector(".o_progressbar_title").textContent,
-                "ProgressBarTitle"
-            );
-
-            await click(target.querySelector(".o_progress"));
-
-            assert.strictEqual(
-                target.querySelector(".o_progressbar_value.o_input").value,
-                "99",
-                "Initial value in input is correct"
-            );
-            assert.strictEqual(
-                target.querySelector(".o_progressbar_title").textContent,
-                "ProgressBarTitle"
-            );
-
-            await editInput(target, ".o_field_widget input", "69.6");
-
-            assert.strictEqual(
-                target.querySelector(".o_progressbar_value").textContent,
-                "69%",
-                "New value should be different than initial after changing it"
-            );
-            assert.strictEqual(
-                target.querySelector(".o_progressbar_title").textContent,
-                "ProgressBarTitle"
-            );
-        }
-    );
-
-    // MCM SKIP
-    QUnit.skip(
+    QUnit.test(
         "ProgressBarField: write float instead of int works, in locale",
         async function (assert) {
             assert.expect(5);
@@ -657,6 +601,8 @@ QUnit.module("Fields", (hooks) => {
             assert.strictEqual(input.value, "99", "Initial value in input is correct");
 
             await editInput(target, ".o_field_widget input", "1#037:9");
+            document.activeElement.blur();
+            await nextTick();
 
             await clickSave(target);
 
@@ -668,8 +614,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    // MCM SKIP
-    QUnit.skip(
+    QUnit.test(
         "ProgressBarField: write gibbrish instead of int throws warning",
         async function (assert) {
             serverData.models.partner.records[0].int_field = 99;
@@ -709,7 +654,7 @@ QUnit.module("Fields", (hooks) => {
 
             await editInput(target, ".o_progressbar_value.o_input", "trente sept virgule neuf");
             await clickSave(target);
-            assert.containsOnce(target, ".o_form_button_save", "The form has not been saved");
+            assert.containsOnce(target, ".o_form_dirty", "The form has not been saved");
             assert.verifySteps(["Show error message"], "The error message was shown correctly");
         }
     );
