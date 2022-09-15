@@ -929,7 +929,7 @@ var SnippetEditor = Widget.extend({
         var self = this;
 
         // Snippets for which the grid mode should not be toggled on drag.
-        const untoggleableColumns = '.s_masonry_block, .s_showcase, .s_features_grid, .s_website_form, .s_media_list, .s_table_of_content, .s_process_steps';
+        const untoggleableColumns = '.s_masonry_block:not([data-vxml]), .s_showcase, .s_features_grid, .s_website_form, .s_media_list, .s_table_of_content, .s_process_steps';
         const disableToggle = self.$target[0].closest(untoggleableColumns);
         // Number of grid columns and rows in the grid item (BS column).
         let columnColCount;
