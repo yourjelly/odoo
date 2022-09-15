@@ -7,18 +7,18 @@ import { makeCleanupManager, makeDraggableManager } from "./draggable_helper";
 const { useEffect, useEnv, useExternalListener, onWillUnmount } = owl;
 
 /**
- * @typedef SortableParams
+ * @typedef DraggableParams
  *
  * MANDATORY
  *
  * @property {{ el: HTMLElement | null }} ref
- * @property {string} elements defines sortable elements
+ * @property {string} elements defines draggable elements
  *
  * OPTIONAL
  *
- * @property {boolean | () => boolean} [enable] whether the sortable system should
+ * @property {boolean | () => boolean} [enable] whether the draggable system should
  *  be enabled.
- * @property {string | () => string} [groups] defines parent groups of sortable
+ * @property {string | () => string} [groups] defines parent groups of draggable
  *  elements. This allows to add `onGroupEnter` and `onGroupLeave` callbacks to
  *  work on group elements during the dragging sequence.
  * @property {string | () => string} [handle] additional selector for when the dragging
@@ -34,9 +34,9 @@ const { useEffect, useEnv, useExternalListener, onWillUnmount } = owl;
  * @property {(group: HTMLElement | null, element: HTMLElement) => any} [onStart]
  *  called when a dragging sequence is initiated.
  * @property {(element: HTMLElement) => any} [onElementEnter] called when the cursor
- *  enters another sortable element.
+ *  enters another draggable element.
  * @property {(element: HTMLElement) => any} [onElementLeave] called when the cursor
- *  leaves another sortable element.
+ *  leaves another draggable element.
  * @property {(group: HTMLElement) => any} [onGroupEnter] (if a `groups` is specified):
  *  will be called when the cursor enters another group element.
  * @property {(group: HTMLElement) => any} [onGroupLeave] (if a `groups` is specified):
@@ -59,8 +59,8 @@ const { useEffect, useEnv, useExternalListener, onWillUnmount } = owl;
  */
 
 const LEFT_CLICK = 0;
-const MANDATORY_SORTABLE_PARAMS = ["ref", "elements"];
-const SORTABLE_PARAMS = {
+const MANDATORY_DRAGGABLE_PARAMS = ["ref", "elements"];
+const DRAGGABLE_PARAMS = {
     enable: ["boolean", "function"],
     ref: ["object"],
     elements: ["string"],
@@ -82,12 +82,12 @@ function cancelEvent(ev) {
 }
 
 /**
- * @param {SortableParams} params
+ * @param {DraggableParams} params
  * @returns {[string, string | boolean][]}
  */
 function computeParams(params) {
     const computedParams = { enable: true };
-    for (const prop in SORTABLE_PARAMS) {
+    for (const prop in DRAGGABLE_PARAMS) {
         if (prop in params) {
             computedParams[prop] = params[prop];
             if (typeof params[prop] === "function") {
@@ -108,16 +108,16 @@ function cssValueToNumber(val) {
 }
 
 /**
- * Basic error builder for the sortable hook.
+ * Basic error builder for the draggable hook.
  * @param {string} reason
  * @returns {Error}
  */
-function sortableError(reason) {
-    return new Error(`Unable to use sortable feature: ${reason}.`);
+function draggableError(reason) {
+    return new Error(`Unable to use draggable feature: ${reason}.`);
 }
 
 /**
- * Sortable feature hook.
+ * Draggable feature hook.
  *
  * This hook needs 2 things to work:
  *
@@ -125,26 +125,26 @@ function sortableError(reason) {
  * calculate boundaries of dragged elements;
  *
  * 2) an `elements` selector string or function that will determine which elements
- * are sortable in the reference element.
+ * are draggable in the reference element.
  *
  * All other parameters are optional and define the constraints of the dragged elements
  * (and the appearance of the cursor during a dragging sequence), or the different
  * available handlers triggered during the drag sequence.
- * @see SortableParams
+ * @see DraggableParams
  *
- * @param {SortableParams} params
+ * @param {DraggableParams} params
  */
-export function useSortable(params) {
+export function useDraggable(params) {
     const env = useEnv();
     const cleanupManager = makeCleanupManager();
     const { ref } = params;
 
     // Basic error handling asserting that the parameters are valid.
-    for (const prop in SORTABLE_PARAMS) {
-        if (params[prop] && !SORTABLE_PARAMS[prop].includes(typeof params[prop])) {
-            throw sortableError(`invalid type for property "${prop}" in parameters`);
-        } else if (!params[prop] && MANDATORY_SORTABLE_PARAMS.includes(prop)) {
-            throw sortableError(`missing required property "${prop}" in parameters`);
+    for (const prop in DRAGGABLE_PARAMS) {
+        if (params[prop] && !DRAGGABLE_PARAMS[prop].includes(typeof params[prop])) {
+            throw draggableError(`invalid type for property "${prop}" in parameters`);
+        } else if (!params[prop] && MANDATORY_DRAGGABLE_PARAMS.includes(prop)) {
+            throw draggableError(`missing required property "${prop}" in parameters`);
         }
     }
 
@@ -437,7 +437,7 @@ export function useSortable(params) {
             // Selectors
             elementSelector = actualParams.elements;
             if (!elementSelector) {
-                throw sortableError(`no value found by "elements" selector: ${elementSelector}`);
+                throw draggableError(`no value found by "elements" selector: ${elementSelector}`);
             }
             const allSelectors = [elementSelector];
             cursor = actualParams.cursor;

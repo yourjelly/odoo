@@ -577,8 +577,7 @@ export function useSortable(params) {
         () => [ref.el]
     );
     // Other global mouse event listeners.
-    const debouncedMousemove = debounce(onMousemove, "animationFrame", true);
-    useExternalListener(window, "mousemove", debouncedMousemove);
+    useExternalListener(window, "mousemove", debounce(onMousemove, "animationFrame", true));
     useExternalListener(window, "mouseup", onMouseup);
     useExternalListener(window, "keydown", onKeydown, true);
     onWillUnmount(() => dragStop(true));
