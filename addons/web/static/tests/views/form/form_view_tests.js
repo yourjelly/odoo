@@ -2227,7 +2227,7 @@ QUnit.module("Views", (hooks) => {
     );
 
     // MCM SKIP
-    QUnit.debug("empty fields have o_form_empty class in readonly mode", async function (assert) {
+    QUnit.skip("empty fields have o_form_empty class in readonly mode", async function (assert) {
         serverData.models.partner.fields.foo.default = false; // no default value for this test
         serverData.models.partner.records[1].foo = false; // 1 is record with id=2
         serverData.models.partner.records[1].trululu = false; // 1 is record with id=2
