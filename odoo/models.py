@@ -4010,6 +4010,11 @@ class BaseModel(metaclass=MetaModel):
                 records_to_inverse[field] = self.filtered('id')
             if field in self.pool.fields_with_relational_triggers:
                 relational_names.append(fname)
+            if field in self.pool.fields_with_relational_triggers:
+                if not (field.relational or self.pool.field_inverses[field]):
+                    Model = self.env[field.model_name]
+                    print("For ", self, field, [dep for dep in Model._dependent_fields(field) if dep.relational or dep in self.pool.field_inverses])
+                    print("BECUASE ", self, field, [self.pool.field_inverses[dep] for dep in Model._dependent_fields(field) if dep.relational or dep in self.pool.field_inverses])
             if field.inverse or (field.compute and not field.readonly):
                 if field.store or field.type not in ('one2many', 'many2many'):
                     # Protect the field from being recomputed while being

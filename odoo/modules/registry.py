@@ -328,6 +328,7 @@ class Registry(Mapping):
     @lazy_property
     def field_triggers(self):
         # determine field dependencies
+        s = time.time_ns()
         dependencies = {}
         for Model in self.models.values():
             if Model._abstract:
@@ -365,6 +366,7 @@ class Registry(Mapping):
                         tree = tree.setdefault(label, {})
                     tree.setdefault(None, OrderedSet()).add(field)
 
+        print(f"field_triggers take {(time.time_ns() - s) / 1_000_000} ms")
         return triggers
 
     @lazy_property
@@ -373,6 +375,8 @@ class Registry(Mapping):
         Return a set of fields that, when modified, cause relational fields to
         change, and thereby indirect field recomputations.
         '''
+        self.field_triggers
+        s = time.time_ns()
         result = set()
 
         for field in self.field_triggers:
@@ -384,10 +388,11 @@ class Registry(Mapping):
 
             Model = self.models[field.model_name]
             for dep in Model._dependent_fields(field):
-                if dep in result or dep.relational or dep in self.field_inverses:
+                if dep.relational or dep in self.field_inverses:
                     result.add(field)
                     break
 
+        print(f"fields_with_relational_triggers take {(time.time_ns() - s) / 1_000_000} ms")
         return result
 
     def post_init(self, func, *args, **kwargs):
