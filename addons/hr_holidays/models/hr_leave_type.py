@@ -328,6 +328,8 @@ class HolidaysType(models.Model):
                                     leave_unit = 'hours'
                                 if holiday_status_id.requires_allocation != 'no':
                                     for available_allocation in sorted_available_allocations:
+                                        if available_allocation.date_to and available_allocation.date_to < leave.date_from.date():
+                                            continue
                                         virtual_remaining_leaves = (available_allocation.number_of_days if leave_unit == 'days' else available_allocation.number_of_hours_display) - allocations_days_consumed[employee_id][holiday_status_id][available_allocation]['virtual_leaves_taken']
                                         max_leaves = min(virtual_remaining_leaves, leave_duration)
                                         days_consumed[available_allocation]['virtual_leaves_taken'] += max_leaves
@@ -337,7 +339,6 @@ class HolidaysType(models.Model):
                                     if leave_duration > 0:
                                         # There are not enough allocation for the number of leaves
                                         days_consumed[False]['virtual_remaining_leaves'] -= leave_duration
-                                        return allocations_days_consumed
                                 else:
                                     days_consumed[False]['virtual_leaves_taken'] += leave_duration
                                     if leave.state == 'validate':
@@ -404,6 +405,9 @@ class HolidaysType(models.Model):
             } for employee_id in employee_ids
         }
 
+        if not date:
+            date = fields.Date.to_date(self.env.context.get('default_date_from')) or fields.Date.context_today(self)
+
         allocations_days_consumed = self._get_employees_days_per_allocation(employee_ids, date)
 
         leave_keys = ['max_leaves', 'leaves_taken', 'remaining_leaves', 'virtual_remaining_leaves', 'virtual_leaves_taken']
@@ -412,6 +416,8 @@ class HolidaysType(models.Model):
             for holiday_status_id in allocations_days_consumed[employee_id]:
                 for allocation in allocations_days_consumed[employee_id][holiday_status_id]:
                     if allocation:
+                        if allocation.date_to and allocation.date_to < date:
+                            continue
                         for leave_key in leave_keys:
                             result[employee_id][holiday_status_id if isinstance(holiday_status_id, int) else holiday_status_id.id][leave_key] += allocations_days_consumed[employee_id][holiday_status_id][allocation][leave_key]
                     else:
@@ -419,6 +425,7 @@ class HolidaysType(models.Model):
                         for leave_key in leave_keys:
                             if allocations_days_consumed[employee_id][holiday_status_id][False].get(leave_key):
                                 result[employee_id][holiday_status_id if isinstance(holiday_status_id, int) else holiday_status_id.id][leave_key] = allocations_days_consumed[employee_id][holiday_status_id][False][leave_key]
+
         return result
 
     @api.model
