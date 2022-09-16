@@ -173,7 +173,8 @@ export class FormController extends Component {
         useViewButtons(this.model, rootRef, { beforeExecuteAction });
         useSetupView({
             rootRef,
-            beforeLeave: () => {
+            beforeLeave: async () => {
+                await this.model.root.askChanges(); // ensures that isDirty is correct
                 if (this.model.root.isDirty) {
                     return this.model.root.save({ noReload: true, stayInEdition: true });
                 }
@@ -197,9 +198,13 @@ export class FormController extends Component {
                     limit: 1,
                     total: resIds.length,
                     onUpdate: async ({ offset }) => {
-                        const canProceed = await this.model.root.save({ stayInEdition: true });
+                        await this.model.root.askChanges(); // ensures that isDirty is correct
+                        let canProceed = true;
+                        if (this.model.root.isDirty) {
+                            canProceed = await this.model.root.save({ stayInEdition: true });
+                        }
                         if (canProceed) {
-                            this.model.load({ resId: resIds[offset] });
+                            return this.model.load({ resId: resIds[offset] });
                         }
                     },
                 };
