@@ -333,7 +333,7 @@
                             </t>
                         </div>
                         <input type="text" class="form-control form-control-sm" placeholder="Search" t-att-value='search' name="search"/>
-                        <button class="btn btn-secondary o_wait_lazy_js" type="submit">
+                        <button class="btn btn-secondary" type="submit">
                             <span class="fa fa-search"/>
                         </button>
                     </div>

@@ -167,7 +167,6 @@ Help your customers with this chat, and analyse their feedback.
             'web/static/src/legacy/js/core/ram_storage.js',
             'web/static/src/legacy/js/core/abstract_storage_service.js',
             'web/static/src/legacy/js/common_env.js',
-            'web/static/src/legacy/js/public/lazyloader.js',
             'web/static/src/legacy/js/public/public_env.js',
             'web/static/src/legacy/js/public/public_root.js',
             'web/static/src/legacy/js/public/public_root_instance.js',

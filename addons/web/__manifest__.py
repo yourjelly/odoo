@@ -311,7 +311,6 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/session.js',
             'web/static/src/legacy/js/core/cookie_utils.js',
             'web/static/src/legacy/js/core/menu.js',
-            'web/static/src/legacy/js/public/lazyloader.js',
         ],
         'web.assets_frontend': [
             # TODO the 'assets_frontend' bundle now includes 'assets_common'
@@ -356,7 +355,6 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/legacy/scss/fontawesome_overridden.scss',
 
             'web/static/src/legacy/scss/base_frontend.scss',
-            'web/static/src/legacy/scss/lazyloader.scss',
 
             ('include', 'web.assets_frontend_minimal'),
 
@@ -480,7 +478,6 @@ This module provides the core of the Odoo Web Client.
             ('remove', 'web/static/src/session.js'),
             ('remove', 'web/static/src/legacy/js/core/cookie_utils.js'),
             ('remove', 'web/static/src/legacy/js/core/menu.js'),
-            ('remove', 'web/static/src/legacy/js/public/lazyloader.js'),
         ],
         'web.assets_backend_prod_only': [
             'web/static/src/main.js',
