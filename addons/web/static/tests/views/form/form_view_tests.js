@@ -4360,7 +4360,6 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".o_pager_value").textContent, "1");
         assert.strictEqual(target.querySelector(".o_pager_limit").textContent, "2");
 
-        await click(target.querySelector(".o_form_button_edit"));
         await editInput(target, ".o_field_widget[name=foo] input", "");
         await click(target.querySelector(".o_pager_next"));
         assert.strictEqual(target.querySelector(".breadcrumb").innerText, "first record");
