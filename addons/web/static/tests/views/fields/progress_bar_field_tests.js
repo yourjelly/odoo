@@ -157,7 +157,7 @@ QUnit.module("Fields", (hooks) => {
             );
 
             await editInput(target, ".o_progressbar_value.o_input", "69");
-            target.querySelector(".o_progressbar_value.o_input").blur();
+            await click(target, ".o_form_view");
 
             await nextTick();
             assert.strictEqual(
@@ -215,8 +215,6 @@ QUnit.module("Fields", (hooks) => {
             assert.strictEqual(input.value, "99", "Initial value in input is still correct");
 
             await editInput(target, ".o_progressbar_value.o_input", "69");
-            document.activeElement.blur();
-            await nextTick();
 
             await clickSave(target);
 
@@ -267,8 +265,6 @@ QUnit.module("Fields", (hooks) => {
             assert.strictEqual(input.value, "0.44", "Initial value in input is correct");
 
             await editInput(target, ".o_progressbar_value.o_input", "69");
-            document.activeElement.blur();
-            await nextTick();
 
             await clickSave(target);
 
@@ -280,8 +276,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    // MCM SKIP
-    QUnit.skip(
+    QUnit.test(
         "ProgressBarField: update both max value and current value in edit mode when both options are given",
         async function (assert) {
             assert.expect(10);
@@ -329,7 +324,7 @@ QUnit.module("Fields", (hooks) => {
             await nextTick();
             assert.strictEqual(document.activeElement, maxVal, "Second input is focused");
 
-            maxVal.blur();
+            await click(target, ".o_form_view");
             await nextTick();
             assert.containsNone(
                 target,
@@ -340,8 +335,6 @@ QUnit.module("Fields", (hooks) => {
             await click(target.querySelector(".o_progress"));
             await editInput(target, ".o_progressbar input:nth-of-type(1)", "2000");
             await editInput(target, ".o_progressbar input:nth-of-type(2)", "69");
-            document.activeElement.blur();
-            await nextTick();
 
             await clickSave(target);
 
@@ -602,8 +595,6 @@ QUnit.module("Fields", (hooks) => {
             assert.strictEqual(input.value, "99", "Initial value in input is correct");
 
             await editInput(target, ".o_field_widget input", "1#037:9");
-            document.activeElement.blur();
-            await nextTick();
 
             await clickSave(target);
 
