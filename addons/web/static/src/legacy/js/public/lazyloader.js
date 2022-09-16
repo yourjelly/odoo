@@ -76,10 +76,10 @@ var _allScriptsLoaded = new Promise(function (resolve) {
     stopWaitingLazy();
 });
 if (document.readyState === 'complete') {
-    setTimeout(_loadScripts, 0);
+    setTimeout(_loadScripts, 1000);
 } else {
     window.addEventListener('load', function () {
-        setTimeout(_loadScripts, 0);
+        setTimeout(_loadScripts, 1000);
     });
 }
 
