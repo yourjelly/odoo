@@ -156,26 +156,17 @@ function _placeColumns(columnEls, rowSize, rowGap, columnSize, columnGap) {
     const imageColumns = []; // array of boolean telling if it is a column with only an image.
 
     for (const columnEl of columnEls) {
-        // Finding out if the images are alone in their column so they can be
-        // displayed as expected (thanks to the class that will be added).
-        let isImageColumn = false;
-        const imageEls = columnEl.querySelectorAll(':scope > img');
-        const columnChildren = [...columnEl.children].filter(el => el.nodeName !== 'BR');
-        if (imageEls.length === 1 && columnChildren.length === 1) {
-            // If there is only one image and if this image is the only "real"
-            // child of the column, we need to check if there is text in it.
-            const textNodeEls = [...columnEl.childNodes].filter(el => el.nodeType === 3);
-            const areTextNodesEmpty = [...textNodeEls].every(textNodeEl => textNodeEl.nodeValue.trim() === '');
-            isImageColumn = areTextNodesEmpty;
-        }
+        // Finding out if the images are alone in their column.
+        let isImageColumn = _checkIfImageColumn(columnEl);
+        const imageEl = columnEl.querySelector('img');
 
         // Placing the column.
         const style = window.getComputedStyle(columnEl);
         // Horizontal placement.
-        const columnLeft = isImageColumn ? imageEls[0].offsetLeft : columnEl.offsetLeft;
+        const columnLeft = isImageColumn ? imageEl.offsetLeft : columnEl.offsetLeft;
         // Getting the width of the column.
         const paddingLeft = parseFloat(style.paddingLeft);
-        const width = isImageColumn ? parseFloat(imageEls[0].scrollWidth)
+        const width = isImageColumn ? parseFloat(imageEl.scrollWidth)
             : parseFloat(columnEl.scrollWidth) - (isBigBoxes ? 0 : 2 * paddingLeft);
         let columnSpan = Math.round((width + columnGap) / (columnSize + columnGap));
         if (columnSpan < 1) {
@@ -185,13 +176,13 @@ function _placeColumns(columnEls, rowSize, rowGap, columnSize, columnGap) {
         const columnEnd = columnStart + columnSpan;
 
         // Vertical placement.
-        const columnTop = isImageColumn ? imageEls[0].offsetTop : columnEl.offsetTop;
+        const columnTop = isImageColumn ? imageEl.offsetTop : columnEl.offsetTop;
         // Getting the top and bottom paddings and computing the row offset.
         const paddingTop = parseFloat(style.paddingTop);
         const paddingBottom = parseFloat(style.paddingBottom);
         const rowOffsetTop = Math.floor((paddingTop + rowGap) / (rowSize + rowGap));
         // Getting the height of the column.
-        const height = isImageColumn ? parseFloat(imageEls[0].scrollHeight)
+        const height = isImageColumn ? parseFloat(imageEl.scrollHeight)
             : parseFloat(columnEl.scrollHeight) - (isBigBoxes ? 0 : paddingTop + paddingBottom);
         const rowSpan = Math.ceil((height + rowGap) / (rowSize + rowGap));
         const rowStart = Math.round(columnTop / (rowSize + rowGap)) + 1 + (isBigBoxes || isImageColumn ? 0 : rowOffsetTop);
@@ -240,15 +231,9 @@ function _placeColumns(columnEls, rowSize, rowGap, columnSize, columnGap) {
         columnEl.classList.remove(...toRemove);
         columnEl.classList.add('col-lg-' + columnSpans[i]);
 
-        // If the column only has an image, remove the line breaks and
-        // textnodes, add the grid class and set the width to default.
+        // If the column only has an image, convert it.
         if (imageColumns[i]) {
-            columnEl.querySelectorAll('br').forEach(el => el.remove());
-            const textNodeEls = [...columnEl.childNodes].filter(el => el.nodeType === 3);
-            textNodeEls.forEach(el => el.remove());
-            const imageEl = columnEl.querySelector('img');
-            imageEl.classList.add('o_grid_item_image');
-            imageEl.style.removeProperty('width');
+            _convertImageColumn(columnEl);
         }
     }
 
@@ -281,6 +266,12 @@ export function _reloadLazyImages(columnEl) {
  * @returns {Object}
  */
 export function _convertColumnToGrid(rowEl, columnEl, columnWidth, columnHeight) {
+    // First, checking if the column only contains an image and if it is the
+    // case, converting it.
+    if (_checkIfImageColumn(columnEl)) {
+        _convertImageColumn(columnEl);
+    }
+
     // Computing the column and row spans.
     const gridProp = _getGridProperties(rowEl);
     const columnColCount = Math.round((columnWidth + gridProp.columnGap) / (gridProp.columnSize + gridProp.columnGap));
@@ -291,4 +282,43 @@ export function _convertColumnToGrid(rowEl, columnEl, columnWidth, columnHeight)
     columnEl.classList.add('o_grid_item');
 
     return {columnColCount: columnColCount, columnRowCount: columnRowCount};
+}
+/**
+ * Checks whether the column only contains an image or not. An image is
+ * considered alone if the column only contains empty textnodes and line breaks
+ * in addition to the image.
+ *
+ * @private
+ * @param {Element} columnEl
+ * @returns {Boolean}
+ */
+export function _checkIfImageColumn(columnEl) {
+    let isImageColumn = false;
+    const imageEls = columnEl.querySelectorAll(':scope > img');
+    const columnChildrenEls = [...columnEl.children].filter(el => el.nodeName !== 'BR');
+    if (imageEls.length === 1 && columnChildrenEls.length === 1) {
+        // If there is only one image and if this image is the only "real"
+        // child of the column, we need to check if there is text in it.
+        const textNodeEls = [...columnEl.childNodes].filter(el => el.nodeType === 3);
+        const areTextNodesEmpty = [...textNodeEls].every(textNodeEl => textNodeEl.nodeValue.trim() === '');
+        isImageColumn = areTextNodesEmpty;
+    }
+    return isImageColumn;
+}
+/**
+ * Removes the line breaks and textnodes of the column, adds the grid class to
+ * the image it contains and sets its width to default so it can be displayed
+ * as expected. Also blocks the edition of the column.
+ *
+ * @private
+ * @param {Element} columnEl a column containing only an image.
+ */
+function _convertImageColumn(columnEl) {
+    columnEl.querySelectorAll('br').forEach(el => el.remove());
+    const textNodeEls = [...columnEl.childNodes].filter(el => el.nodeType === 3);
+    textNodeEls.forEach(el => el.remove());
+    const imageEl = columnEl.querySelector('img');
+    imageEl.classList.add('o_grid_item_image');
+    columnEl.contentEditable = false;
+    imageEl.style.removeProperty('width');
 }

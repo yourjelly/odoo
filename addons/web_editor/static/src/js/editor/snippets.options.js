@@ -4959,6 +4959,7 @@ registry.layout_column = SnippetOptionWidget.extend({
         if (elementType === 'image') {
             // Set the columns properties.
             newColumnEl.classList.add('col-lg-6', 'g-col-lg-6', 'g-height-6');
+            newColumnEl.contentEditable = false;
             numberColumns = 6;
             numberRows = 6;
 
@@ -5103,7 +5104,10 @@ registry.layout_column = SnippetOptionWidget.extend({
             columnEl.style.removeProperty('grid-area');
             columnEl.style.removeProperty('z-index');
             const imageEls = columnEl.querySelectorAll('.o_grid_item_image');
-            imageEls.forEach(imageEl => imageEl.classList.remove('o_grid_item_image'));
+            imageEls.forEach(imageEl => {
+                imageEl.classList.remove('o_grid_item_image');
+                columnEl.removeAttribute('contentEditable');
+            });
         }
         // Removing the grid properties.
         delete rowEl.dataset.rowCount;

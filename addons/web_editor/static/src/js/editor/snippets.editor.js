@@ -956,8 +956,6 @@ var SnippetEditor = Widget.extend({
                 this.dragState.columnColCount = columnColCount;
                 this.dragState.columnRowCount = columnRowCount;
 
-                // Deactivate the snippet so the overlay doesn't show.
-                this.trigger_up('deactivate_snippet', {$snippet: self.$target});
                 // Storing the current grid and grid area to use them for the
                 // history.
                 this.dragState.previousGrid = rowEl;
@@ -969,9 +967,20 @@ var SnippetEditor = Widget.extend({
                 // If the column comes from a snippet that doesn't toggle the
                 // grid mode on drag, store its width and height to use them
                 // when the column goes over a grid dropzone.
-                this.dragState.columnWidth = parseFloat(this.$target[0].scrollWidth);
-                this.dragState.columnHeight = parseFloat(this.$target[0].scrollHeight);
+                const isImageColumn = gridUtils._checkIfImageColumn(this.$target[0]);
+                if (isImageColumn) {
+                    // Store the image width and height if the column only
+                    // contains an image.
+                    const imageEl = this.$target[0].querySelector('img');
+                    this.dragState.columnWidth = parseFloat(imageEl.scrollWidth);
+                    this.dragState.columnHeight = parseFloat(imageEl.scrollHeight);
+                } else {
+                    this.dragState.columnWidth = parseFloat(this.$target[0].scrollWidth);
+                    this.dragState.columnHeight = parseFloat(this.$target[0].scrollHeight);
+                }
             }
+            // Deactivate the snippet so the overlay doesn't show.
+            this.trigger_up('deactivate_snippet', {$snippet: self.$target});
         }
 
         const isPopup = this.$target[0].closest('div.s_popup');
@@ -1222,6 +1231,11 @@ var SnippetEditor = Widget.extend({
             // Case when dropping a grid item in a non-grid dropzone.
             this.$target[0].classList.remove('o_grid_item');
             this.$target[0].style.removeProperty('grid-area');
+            const gridImageEl = this.$target[0].querySelector('.o_grid_item_image');
+            if (gridImageEl) {
+                gridImageEl.classList.remove('o_grid_item_image');
+                this.$target[0].removeAttribute('contentEditable');
+            }
         }
 
         // TODO lot of this is duplicated code of the d&d feature of snippets
@@ -1259,6 +1273,11 @@ var SnippetEditor = Widget.extend({
                         this.$target[0].classList.remove('o_grid_item');
                         this.$target[0].style.removeProperty('z-index');
                         this.$target[0].style.removeProperty('grid-area');
+                        const gridImageEl = this.$target[0].querySelector('.o_grid_item_image');
+                        if (gridImageEl) {
+                            gridImageEl.classList.remove('o_grid_item_image');
+                            this.$target[0].removeAttribute('contentEditable');
+                        }
                     }
                 }
 
