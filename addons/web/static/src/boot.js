@@ -182,7 +182,11 @@
                 };
             }
 
-            while (jobs.length) {
+            function loop() {
+                if (!jobs.length) {
+                    return;
+                }
+
                 job = undefined;
                 for (var i = 0; i < jobs.length; i++) {
                     if (isReady(jobs[i])) {
@@ -191,10 +195,17 @@
                     }
                 }
                 if (!job) {
-                    break;
+                    return;
                 }
+
                 processJob(job);
+
+                setTimeout(() => {
+                    loop();
+                }, 1);
             }
+
+            loop();
 
             return services;
         },
