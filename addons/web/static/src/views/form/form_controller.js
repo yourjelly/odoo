@@ -174,6 +174,7 @@ export class FormController extends Component {
         useSetupView({
             rootRef,
             beforeLeave: async () => {
+                await this.model.root.askChanges(); // ensures that isDirty is correct
                 if (this.model.root.isDirty) {
                     return this.model.root.save({ noReload: true, stayInEdition: true });
                 }
