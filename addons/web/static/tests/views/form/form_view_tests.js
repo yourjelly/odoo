@@ -11809,8 +11809,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["error"]);
     });
 
-    // MCM SKIP
-    QUnit.skip(
+    QUnit.test(
         "form with an initial mode (readonly) -- create new record from an existing one",
         async (assert) => {
             await makeView({
@@ -11823,7 +11822,6 @@ QUnit.module("Views", (hooks) => {
             });
 
             assert.containsOnce(target, ".o_form_readonly");
-            assert.containsOnce(target, ".o_form_button_edit");
             assert.containsOnce(target, ".o_form_button_create");
 
             await click(target, ".o_form_button_create");
@@ -11833,22 +11831,19 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.test(
-        "form with an initial mode (readonly) -- new record from scratch",
-        async (assert) => {
-            await makeView({
-                type: "form",
-                resModel: "partner", // no resId: important
-                serverData,
-                arch: `<form><field name="display_name" /></form>`,
-                mode: "readonly", // important
-            });
+    QUnit.test("form with an initial mode (edit) -- new record from scratch", async (assert) => {
+        await makeView({
+            type: "form",
+            resModel: "partner", // no resId: important
+            serverData,
+            arch: `<form><field name="display_name" /></form>`,
+            mode: "readonly", // important
+        });
 
-            assert.containsOnce(target, ".o_form_editable");
-            assert.containsOnce(target, ".o_form_button_save");
-            assert.containsOnce(target, ".o_form_button_cancel");
-        }
-    );
+        assert.containsOnce(target, ".o_form_editable");
+        assert.containsOnce(target, ".o_form_button_save");
+        assert.containsOnce(target, ".o_form_button_cancel");
+    });
 
     QUnit.test("save a form view with an invisible required field", async function (assert) {
         serverData.models.partner.fields.text = { string: "Text", type: "char", required: 1 };
@@ -11939,8 +11934,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    // MCM SKIP
-    QUnit.skip("onSave/onDiscard props", async function (assert) {
+    QUnit.test("onSave/onDiscard props", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -11951,10 +11945,10 @@ QUnit.module("Views", (hooks) => {
             onDiscard: () => assert.step("discard"),
         });
 
-        await click(target, ".o_form_button_edit");
-        await click(target, ".o_form_button_save");
-        await click(target, ".o_form_button_edit");
-        await click(target, ".o_form_button_cancel");
+        await editInput(target, ".o_field_widget input", "test");
+        await clickSave(target);
+        await editInput(target, ".o_field_widget input", "test");
+        await clickDiscard(target);
         assert.verifySteps(["save", "discard"]);
     });
 
