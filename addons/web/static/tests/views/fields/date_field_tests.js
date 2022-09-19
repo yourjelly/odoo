@@ -390,8 +390,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    // MCM SKIP
-    QUnit.skip(
+    QUnit.test(
         "DateField with warn_future option: do not overwrite datepicker option",
         async function (assert) {
             // Making sure we don't have a legit default value
