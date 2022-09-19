@@ -227,7 +227,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.test("widget many2many_tags_avatar in kanban view", async function (assert) {
+    QUnit.debug("widget many2many_tags_avatar in kanban view", async function (assert) {
         assert.expect(12);
 
         const records = [];
