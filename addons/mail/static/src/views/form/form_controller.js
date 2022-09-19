@@ -4,6 +4,7 @@ import { useModels } from "@mail/component_hooks/use_models";
 import { ChatterContainer } from "@mail/components/chatter_container/chatter_container";
 import { WebClientViewAttachmentViewContainer } from "@mail/components/web_client_view_attachment_view_container/web_client_view_attachment_view_container";
 
+import { SIZES } from "@web/core/ui/ui_service";
 import { useService } from "@web/core/utils/hooks";
 import { patch } from "@web/core/utils/patch";
 import { FormController } from "@web/views/form/form_controller";
@@ -15,27 +16,30 @@ import { MailFormCompiler } from "./form_compiler";
 patch(FormController.prototype, "mail", {
     setup() {
         this._super();
-        if (this.env.services.messaging) {
-            useModels();
-        }
         this.uiService = useService("ui");
 
-        const { archInfo } = this.props;
-        const { arch, xmlDoc } = archInfo;
+        if (this.uiService.size >= SIZES.XXL) {
+            if (this.env.services.messaging) {
+                useModels();
+            }
 
-        const template = document.createElement("t");
-        const xmlDocAttachmentPreview = xmlDoc.querySelector("div.o_attachment_preview");
-        if (xmlDocAttachmentPreview && xmlDocAttachmentPreview.parentNode.nodeName === "form") {
-            template.appendChild(xmlDocAttachmentPreview);
+            const { archInfo } = this.props;
+            const { arch, xmlDoc } = archInfo;
+
+            const template = document.createElement("t");
+            const xmlDocAttachmentPreview = xmlDoc.querySelector("div.o_attachment_preview");
+            if (xmlDocAttachmentPreview && xmlDocAttachmentPreview.parentNode.nodeName === "form") {
+                template.appendChild(xmlDocAttachmentPreview);
+            }
+
+            const xmlDocChatter = xmlDoc.querySelector("div.oe_chatter");
+            if (xmlDocChatter && xmlDocChatter.parentNode.nodeName === "form") {
+                template.appendChild(xmlDocChatter);
+            }
+
+            const mailTemplates = useViewCompiler(MailFormCompiler, arch, { Mail: template }, {});
+            this.mailTemplate = mailTemplates.Mail;
         }
-
-        const xmlDocChatter = xmlDoc.querySelector("div.oe_chatter");
-        if (xmlDocChatter && xmlDocChatter.parentNode.nodeName === "form") {
-            template.appendChild(xmlDocChatter);
-        }
-
-        const mailTemplates = useViewCompiler(MailFormCompiler, arch, { Mail: template }, {});
-        this.mailTemplate = mailTemplates.Mail;
     },
     /**
      * @returns {Messaging|undefined}
