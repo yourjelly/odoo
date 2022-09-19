@@ -411,8 +411,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    // MCM SKIP
-    QUnit.skip(
+    QUnit.test(
         "DatetimeField with date/datetime widget (with day change)",
         async function (assert) {
             patchTimeZone(-240);
