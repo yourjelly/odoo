@@ -656,7 +656,7 @@ QUnit.module("Views", (hooks) => {
                 resModel: "user",
                 serverData,
                 arch: `
-                <form>
+                <form edit="0">
                     <field name="partner_ids">
                         <tree editable="top">
                             <field name="display_name"/>
@@ -4389,7 +4389,6 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".o_pager_value").textContent, "1");
         assert.strictEqual(target.querySelector(".o_pager_limit").textContent, "2");
 
-        await click(target.querySelector(".o_form_button_edit"));
         await editInput(target, ".o_field_widget[name=foo] input", "");
         triggerHotkey("alt+n");
         await nextTick();
@@ -4430,15 +4429,6 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".breadcrumb").innerText, "first record");
         assert.hasClass(target.querySelector(".o_field_widget[name=foo]"), "o_required_modifier");
         assert.strictEqual(target.querySelector(".o_pager_value").textContent, "1");
-
-        // same, but in edit mode
-        await click(target.querySelector(".o_form_button_edit"));
-        assert.containsOnce(target, ".o_form_editable");
-
-        await click(target.querySelector(".o_pager_next"));
-        assert.containsOnce(target, ".o_form_editable");
-        assert.strictEqual(target.querySelector(".breadcrumb").innerText, "second record");
-        assert.strictEqual(target.querySelector(".o_pager_value").textContent, "2");
     });
 
     QUnit.test("keynav: switching to another record from a dirty one", async function (assert) {

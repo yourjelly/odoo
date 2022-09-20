@@ -91,7 +91,7 @@ QUnit.module("Fields", (hooks) => {
         // save
         await clickSave(target);
         assert.strictEqual(
-            target.querySelector("input[type='tel']").textContent,
+            target.querySelector("input[type='tel']").value,
             "new",
             "new value should be displayed properly"
         );
