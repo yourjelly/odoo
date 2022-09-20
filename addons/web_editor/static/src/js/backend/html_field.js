@@ -8,15 +8,22 @@ import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { getWysiwygClass } from 'web_editor.loader';
 import { QWebPlugin } from '@web_editor/js/backend/QWebPlugin';
 import { TranslationButton } from "@web/views/fields/translation_button";
+import { ModelFieldSelectorPopover } from "@web/core/model_field_selector/model_field_selector_popover";
 import { QWeb } from 'web.core';
 import ajax from 'web.ajax';
 import {
     useBus,
     useService,
 } from "@web/core/utils/hooks";
-import { getAdjacentPreviousSiblings, getAdjacentNextSiblings } from '@web_editor/js/editor/odoo-editor/src/utils/utils';
+import { usePopover } from "@web/core/popover/popover_hook";
+import { useModelField } from "@web/core/model_field_selector/model_field_hook";
+import {
+    getAdjacentPreviousSiblings,
+    getAdjacentNextSiblings,
+    rightPos,
+    setSelection
+} from '@web_editor/js/editor/odoo-editor/src/utils/utils';
 import { toInline } from 'web_editor.convertInline';
-
 const {
     markup,
     Component,
@@ -30,6 +37,23 @@ const {
     onWillUnmount,
 } = owl;
 
+function useUniquePopover() {
+    console.warn("useUniquePopover");
+    const popover = usePopover();
+    let remove = null;
+    return Object.assign(Object.create(popover), {
+        add(target, component, props, options) {
+            if (remove) {
+                remove();
+            }
+            remove = popover.add(target, component, props, options);
+            return () => {
+                remove();
+                remove = null;
+            };
+        },
+    });
+}
 export class HtmlFieldWysiwygAdapterComponent extends ComponentAdapter {
     setup() {
         super.setup();
@@ -45,6 +69,7 @@ export class HtmlFieldWysiwygAdapterComponent extends ComponentAdapter {
     }
 
     updateWidget(newProps) {
+        console.log('html_field:: updateWidget', newProps);
         const lastValue = String(this.props.widgetArgs[0].value || '');
         const lastCollaborationChannel = this.props.widgetArgs[0].collaborationChannel;
         const newValue = String(newProps.widgetArgs[0].value || '');
@@ -65,6 +90,10 @@ export class HtmlField extends Component {
         this.codeViewRef = useRef("codeView");
         this.iframeRef = useRef("iframe");
         this.codeViewButtonRef = useRef("codeViewButton");
+
+        this.chain = [];
+        this.popover = useUniquePopover();
+        console.log('this.popover', this.popover);
 
         this.rpc = useService("rpc");
 
@@ -232,6 +261,136 @@ export class HtmlField extends Component {
             this.props.update(value);
 
         }
+    }
+
+    /**
+     * TODO DUPLICATE CODE from '@web/static/src/core/model_field_selector/model_field_selector.js'
+     */
+    async loadChain(resModel, fieldName) {
+        console.warn("loadChain", resModel, fieldName);
+        if ("01".includes(fieldName)) {
+            console.log("loadChain:: >> if");
+            return [{ resModel, field: { string: fieldName } }];
+        }
+        const fieldNameChain = this.getFieldNameChain(fieldName);
+        console.log("loadChain::fieldNameChain", fieldNameChain);
+        let currentNode = {
+            resModel,
+            field: null,
+        };
+        const chain = [currentNode];
+        console.log("loadChain::chain", chain);
+        for (const fieldName of fieldNameChain) {
+            const fieldsInfo = await this.modelField.loadModelFields(currentNode.resModel);
+            Object.assign(currentNode, {
+                field: { ...fieldsInfo[fieldName], name: fieldName },
+            });
+            if (fieldsInfo[fieldName].relation) {
+                currentNode = {
+                    resModel: fieldsInfo[fieldName].relation,
+                    field: null,
+                };
+                chain.push(currentNode);
+            }
+        }
+        console.log("loadChain::chain end", chain);
+        return chain;
+    }
+    update(chain) {
+        this.dynamicPlaceholderChain = chain;
+        console.log('popover update callback', chain);
+        if (this.dynamicPlaceholderChain) {
+            let dynamicPlaceholder = "object." + this.dynamicPlaceholderChain.join('.');
+            const defaultValue = 'TODO FIX DEFAULT VALUE'; // ev.data.defaultValue;
+            dynamicPlaceholder += defaultValue && defaultValue !== '' ? ` or '''${defaultValue}'''` : '';
+            console.log("dynamicPlaceholder str", dynamicPlaceholder);
+
+            const t = document.createElement('T');
+            t.setAttribute('t-out', dynamicPlaceholder);
+            this.wysiwyg.odooEditor.execCommand('insert', t);
+            setSelection(...rightPos(t));
+            this.wysiwyg.odooEditor.editable.focus();
+        }
+    }
+    validate(chain) {
+        console.log('popover VALIDATE callback', chain);
+        // this.props.update(chain.join("."));
+    }
+    close() {
+        console.log('popover CLOSE callback');
+        this.wysiwyg.odooEditor.editable.focus();
+    }
+
+    /**
+     * Open a Model Field Selector which can select fields
+     * to create a dynamic placeholder <t-out> Element in the field HTML
+     * with or without a default text value.
+     *
+     * @override
+     * @public
+     * @param {String} baseModel
+     * @param {Array} chain
+     *
+     */
+    async openDynamicPlaceholder(baseModel, chain = []) {
+        console.warn('new open dp');
+        console.log('this', this);
+        console.log('dynamicPlaceholder', this.props.dynamicPlaceholder);
+
+        if (this.props.readonly || !this.props.dynamicPlaceholder) {
+            return;
+        }
+
+        console.log('baseModel', baseModel);
+        this.chain = await this.loadChain(baseModel, "");
+        console.log('loadChain result', this.chain);
+
+        this.dynamicPlaceholderChain = this.chain;
+
+        this.popover.add(
+            this.wysiwyg.$editable[0],
+            this.constructor.components.DynamicplaceholderPopover,
+            {
+                chain: this.chain,
+                update: this.update.bind(this),
+                validate: this.validate.bind(this),
+                showSearchInput: true,
+                isDebugMode: false,
+                loadChain: this.loadChain.bind(this),
+                positionTarget: this.wysiwyg.$editable[0],
+                filter: (model) => !["one2many", "boolean", "many2many"].includes(model.type),
+            },
+            {
+                closeOnClickAway: true,
+                onClose: this.close.bind(this),
+            }
+        );
+
+        // let modelSelector;
+        // const onFieldChanged = (ev) => {
+        //     this.wysiwyg.odooEditor.editable.focus();
+        //     if (ev.data.chain.length) {
+        //         let dynamicPlaceholder = "object." + ev.data.chain.join('.');
+        //         const defaultValue = ev.data.defaultValue;
+        //         dynamicPlaceholder += defaultValue && defaultValue !== '' ? ` or '''${defaultValue}'''` : '';
+        //
+        //         const t = document.createElement('T');
+        //         t.setAttribute('t-out', dynamicPlaceholder);
+        //         this.wysiwyg.odooEditor.execCommand('insert', t);
+        //         setSelection(...rightPos(t));
+        //         this.wysiwyg.odooEditor.editable.focus();
+        //     }
+        //     modelSelector.destroy();
+        // };
+        //
+        // const onFieldCancel = () => {
+        //     this.wysiwyg.odooEditor.editable.focus();
+        //     modelSelector.destroy();
+        // };
+        //
+        // modelSelector = await this._openNewModelSelector(
+        //     baseModel, chain, onFieldChanged, onFieldCancel
+        // );
     }
     async commitChanges({ urgent } = {}) {
         if (this._isDirty() || urgent) {
@@ -458,6 +617,7 @@ HtmlField.template = "web_editor.HtmlField";
 HtmlField.components = {
     TranslationButton,
     HtmlFieldWysiwygAdapterComponent,
+    DynamicplaceholderPopover: ModelFieldSelectorPopover,
 };
 HtmlField.props = {
     ...standardFieldProps,
@@ -466,13 +626,13 @@ HtmlField.props = {
     fieldName: { type: String, optional: true },
     codeview: { type: Boolean, optional: true },
     isCollaborative: { type: Boolean, optional: true },
+    dynamicPlaceholder: { type: Boolean, optional: false },
     cssReadonlyAssetId: { type: String, optional: true },
     cssEditAssetId: { type: String, optional: true },
     isInlineStyle: { type: Boolean, optional: true },
     wrapper: { type: String, optional: true },
     wysiwygOptions: { type: Object },
 };
-
 HtmlField.displayName = _lt("Html");
 HtmlField.supportedTypes = ["html"];
 
@@ -485,6 +645,7 @@ HtmlField.extractProps = ({ attrs, field }) => {
 
         isCollaborative: attrs.options.collaborative,
         cssReadonlyAssetId: attrs.options.cssReadonly,
+        dynamicPlaceholder: attrs.options.dynamic_placeholder,
         cssEditAssetId: attrs.options.cssEdit,
         isInlineStyle: attrs.options['style-inline'],
         wrapper: attrs.options.wrapper,

@@ -31,6 +31,8 @@ export function usePopover() {
          * @returns {function()}
          */
         add(target, Component, props, options = {}) {
+            // console.log('usePopover :: add', target, Component, props, options);
+            // console.log('usePopover :: =====> service ', service);
             const newOptions = Object.create(options);
             newOptions.onClose = function () {
                 removeFns.delete(removeFn);

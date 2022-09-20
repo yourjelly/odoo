@@ -3,13 +3,19 @@
 import { sortBy } from "../utils/arrays";
 import { useModelField } from "./model_field_hook";
 
+import { useAutofocus } from "@web/core/utils/hooks";
+import { usePosition } from "@web/core/position_hook";
 import { fuzzyLookup } from "@web/core/utils/search";
-import { useAutofocus } from "../utils/hooks";
 
-const { Component, onWillStart } = owl;
+const {
+    Component,
+    onWillStart,
+    useEffect,
+} = owl;
 
 export class ModelFieldSelectorPopover extends Component {
     setup() {
+        console.warn('ModelFieldSelectorPopover::setup', this.props);
         this.chain = Array.from(this.props.chain);
         this.modelField = useModelField();
         this.fields = {};
@@ -19,13 +25,28 @@ export class ModelFieldSelectorPopover extends Component {
         if (!this.env.isSmall) {
             useAutofocus();
         }
+        //this.searchInput = useAutofocus();
+
+        if (this.props.positionTarget) {
+            console.log('positionTarget > ', this.props.positionTarget);
+            usePosition(this.props.positionTarget);
+        }
 
         onWillStart(async () => {
+            console.warn('ModelFieldSelectorPopover::onWillStart');
+            console.log(this.el);
             await this.loadFields();
+        });
+
+        useEffect(() => {
+            (async () => {
+                console.log('useEffect');
+            })();
         });
     }
 
     get currentNode() {
+        console.warn('ModelFieldSelectorPopover::currentNode', this.chain[this.chain.length - 1]);
         return this.chain[this.chain.length - 1];
     }
     get currentFieldName() {
@@ -38,6 +59,7 @@ export class ModelFieldSelectorPopover extends Component {
     }
 
     async loadFields() {
+        console.warn('ModelFieldSelectorPopover::loadFields');
         this.fields = await this.modelField.loadModelFields(this.currentNode.resModel);
         this.fieldKeys = this.sortedKeys(this.fields);
     }
@@ -46,6 +68,7 @@ export class ModelFieldSelectorPopover extends Component {
         return sortBy(keys, (key) => obj[key].string);
     }
     async update() {
+        console.warn('ModelFieldSelectorPopover::update');
         const fieldNameChain = this.fieldNameChain;
         this.fullFieldName = fieldNameChain.join(".");
         await this.props.update(fieldNameChain);
@@ -102,10 +125,12 @@ Object.assign(ModelFieldSelectorPopover, {
     props: {
         chain: Array,
         update: Function,
+        validate: { type: Function, optional: true, default: () => {}},
         showSearchInput: Boolean,
         isDebugMode: Boolean,
         loadChain: Function,
         filter: Function,
         close: Function,
+        positionTarget: { type: HTMLElement, optional: true },
     },
 });

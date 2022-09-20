@@ -548,6 +548,7 @@ function enforceImagesResponsivity(editable) {
  * @param {JQuery} [$iframe] the iframe containing the editable, if any
  */
 async function toInline($editable, cssRules, $iframe) {
+    console.warn('to Inline');
     $editable.removeClass('odoo-editor-editable');
     const editable = $editable.get(0);
     const iframe = $iframe && $iframe.get(0);

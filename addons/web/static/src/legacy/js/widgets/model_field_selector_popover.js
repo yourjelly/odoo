@@ -85,6 +85,7 @@ var ModelFieldSelectorPopover = Widget.extend({
     init: function (parent, model, chain, options) {
         this._super.apply(this, arguments);
 
+        console.log('old model field selector popover');
         this.model = model;
         this.chain = chain;
         this.options = _.extend({
@@ -135,6 +136,8 @@ var ModelFieldSelectorPopover = Widget.extend({
         this.$defaultValueInput = this.$el.find(".o_field_selector_default_value_input > input");
 
         this._render();
+
+        this.$el.css('border', "1px solid #ff5555");
         return this._super.apply(this, arguments).then(() => {
             this.trigger_up("field_selector_started");
         });

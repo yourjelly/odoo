@@ -114,6 +114,7 @@ var DynamicPlaceholderFieldMixin = {
      */
     _openNewModelSelector: async function (baseModel, chain, onFieldChanged = null, onFieldCancel = null) {
         const triggerKeyReplaceRegex = new RegExp(`${this.DYNAMIC_PLACEHOLDER_TRIGGER_KEY}$`);
+        console.warn('_openNewModelSelector');
 
         const modelSelector = new ModelFieldSelectorPopover(
             this,

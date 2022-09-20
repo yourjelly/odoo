@@ -28,7 +28,6 @@ export class ModelFieldSelector extends Component {
         this.popover = useUniquePopover();
         this.modelField = useModelField();
         this.chain = [];
-
         onWillStart(async () => {
             this.chain = await this.loadChain(this.props.resModel, this.props.fieldName);
         });
@@ -71,6 +70,7 @@ export class ModelFieldSelector extends Component {
         return chain;
     }
     update(chain) {
+        console.log('update, chain :', chain);
         this.props.update(chain.join("."));
     }
 

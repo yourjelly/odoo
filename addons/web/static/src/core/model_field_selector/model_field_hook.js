@@ -6,6 +6,7 @@ export function useModelField() {
     const view = useService("view");
 
     const loadModelFields = (resModel) => {
+        console.warn("model field hook :: loadModelFields");
         return view.loadFields(resModel, {
             attributes: [
                 "store",
@@ -20,6 +21,7 @@ export function useModelField() {
     };
 
     const loadChain = async (resModel, fieldName) => {
+        console.warn("model field hook :: loadChain");
         const fieldNameChain = fieldName.length ? fieldName.split(".") : [];
         let currentNode = {
             resModel,

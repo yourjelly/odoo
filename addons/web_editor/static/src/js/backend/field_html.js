@@ -131,6 +131,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(DynamicPlaceholderFieldMixin)
         this.isRendered = false;
         this._onUpdateIframeId = 'onLoad_' + _.uniqueId('FieldHtml');
         await this._super();
+        console.warn('will start', this.nodeOptions)
         if (this.nodeOptions.cssReadonly) {
             this.cssReadonly = await ajax.loadAsset(this.nodeOptions.cssReadonly);
         }

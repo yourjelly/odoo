@@ -42,6 +42,7 @@ export class MassMailingHtmlField extends HtmlField {
     }
 
     get wysiwygOptions() {
+        console.warn('wys option', this.props);
         return {
             ...super.wysiwygOptions,
             onIframeUpdated: this.env.onIframeUpdated,
@@ -58,10 +59,7 @@ export class MassMailingHtmlField extends HtmlField {
                     description: this.env._t('Insert personalized content'),
                     fontawesome: 'fa-magic',
                     callback: () => {
-                        const baseModel =
-                            this.recordData && this.recordData.mailing_model_real
-                                ? this.recordData.mailing_model_real
-                                : undefined;
+                        const baseModel = this.props.record.data.mailing_model_real;
                         if (baseModel) {
                             // The method openDynamicPlaceholder need to be triggered
                             // after the focus from powerBox prevalidate.
