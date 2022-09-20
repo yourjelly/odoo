@@ -1730,3 +1730,11 @@ class RelatedTranslation3(models.Model):
     parent_id = fields.Many2one('test_new_api.related_translation_2', string='Parent Model')
     name = fields.Char('Name Related', related='parent_id.name', readonly=False)
     html = fields.Html('HTML Related', related='parent_id.html', readonly=False)
+
+class RelatedTranslation4(models.Model):
+    _name = 'test_new_api.related_translation_4'
+    _description = 'A model to test translation for related fields'
+
+    parent_id = fields.Many2one('test_new_api.related_translation_1', string='Parent Model')
+    name = fields.Char('Name Related', related='parent_id.name', readonly=False, store=True)
+    html = fields.Html('HTML Related', related='parent_id.html', readonly=False, store=True)

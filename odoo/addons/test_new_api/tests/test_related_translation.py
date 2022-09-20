@@ -42,6 +42,9 @@ class TestRelatedTranslation(odoo.tests.TransactionCase):
         cls.test3 = cls.env['test_new_api.related_translation_3'].with_context(lang='en_US').create({
             'parent_id': cls.test2.id,
         })
+        cls.test4 = cls.env['test_new_api.related_translation_4'].with_context(lang='en_US').create({
+            'parent_id': cls.test1.id,
+        })
 
     def test_read(self):
         self.assertEqual(self.test1.with_context(lang='en_US').name, 'Knife')
@@ -66,6 +69,8 @@ class TestRelatedTranslation(odoo.tests.TransactionCase):
         self.assertEqual(self.test2.with_context(lang='fr_FR').name, 'Nouveau couteau')
         self.assertEqual(self.test3.with_context(lang='en_US').name, 'New knife')
         self.assertEqual(self.test3.with_context(lang='fr_FR').name, 'Nouveau couteau')
+        self.assertEqual(self.test4.with_context(lang='en_US').name, 'New knife')
+        self.assertEqual(self.test4.with_context(lang='fr_FR').name, 'Nouveau couteau')
 
     def test_write_from_related(self):
         self.test2.with_context(lang='en_US').name = 'New knife'
@@ -82,6 +87,10 @@ class TestRelatedTranslation(odoo.tests.TransactionCase):
         self.assertEqual(self.test2.with_context(lang='fr_FR').name, 'Nouveau couteau')
         self.assertEqual(self.test3.with_context(lang='en_US').name, 'New knife')
         self.assertEqual(self.test3.with_context(lang='fr_FR').name, 'Nouveau couteau')
+        self.test4.with_context(lang='fr_FR').name = 'Nouveau couteau'
+        self.test4.with_context(lang='en_US').name = 'New knife'
+        self.assertEqual(self.test1.with_context(lang='en_US').name, 'New knife')
+        self.assertEqual(self.test1.with_context(lang='fr_FR').name, 'Nouveau couteau')
 
     def test_translate_from_ori(self):
         self.test1.update_field_translations('name', {'en_US': 'New knife'})
@@ -98,6 +107,8 @@ class TestRelatedTranslation(odoo.tests.TransactionCase):
         self.assertEqual(self.test2.with_context(lang='fr_FR').name, 'Nouveau couteau')
         self.assertEqual(self.test3.with_context(lang='en_US').name, 'New knife')
         self.assertEqual(self.test3.with_context(lang='fr_FR').name, 'Nouveau couteau')
+        self.assertEqual(self.test4.with_context(lang='en_US').name, 'New knife')
+        self.assertEqual(self.test4.with_context(lang='fr_FR').name, 'Nouveau couteau')
 
     def test_translate_from_related(self):
         self.test2.update_field_translations('name', {'en_US': 'New knife'})
@@ -114,6 +125,10 @@ class TestRelatedTranslation(odoo.tests.TransactionCase):
         self.assertEqual(self.test2.with_context(lang='fr_FR').name, 'Nouveau couteau')
         self.assertEqual(self.test3.with_context(lang='en_US').name, 'New knife')
         self.assertEqual(self.test3.with_context(lang='fr_FR').name, 'Nouveau couteau')
+        self.test4.update_field_translations('name', {'en_US': 'New knife'})
+        self.test4.update_field_translations('name', {'fr_FR': 'Nouveau couteau'})
+        self.assertEqual(self.test1.with_context(lang='en_US').name, 'New knife')
+        self.assertEqual(self.test1.with_context(lang='fr_FR').name, 'Nouveau couteau')
 
     def test_import_from_po(self):
         self.assertEqual(self.test2.with_context(lang='fr_FR').name, 'Couteau')
@@ -143,6 +158,8 @@ class TestRelatedTranslation(odoo.tests.TransactionCase):
         self.assertEqual(self.test2.with_context(lang='fr_FR').html, '<p>Nouveau couteau</p><p>Fourchette</p><p>Cuiller</p>')
         self.assertEqual(self.test3.with_context(lang='en_US').html, '<p>Knife</p><p>Fork</p><p>Spoon</p>')
         self.assertEqual(self.test3.with_context(lang='fr_FR').html, '<p>Nouveau couteau</p><p>Fourchette</p><p>Cuiller</p>')
+        self.assertEqual(self.test4.with_context(lang='en_US').html, '<p>Knife</p><p>Fork</p><p>Spoon</p>')
+        self.assertEqual(self.test4.with_context(lang='fr_FR').html, '<p>Nouveau couteau</p><p>Fourchette</p><p>Cuiller</p>')
 
     def test_translate_from_related_term(self):
         self.assertEqual(self.test1.with_context(lang='en_US').html, '<p>Knife</p><p>Fork</p><p>Spoon</p>')
@@ -158,6 +175,8 @@ class TestRelatedTranslation(odoo.tests.TransactionCase):
         self.assertEqual(self.test2.with_context(lang='fr_FR').html, '<p>Nouveau couteau</p><p>Fourchette</p><p>Cuiller</p>')
         self.assertEqual(self.test3.with_context(lang='en_US').html, '<p>Knife</p><p>Fork</p><p>Spoon</p>')
         self.assertEqual(self.test3.with_context(lang='fr_FR').html, '<p>Nouveau couteau</p><p>Fourchette</p><p>Cuiller</p>')
+        self.assertEqual(self.test4.with_context(lang='en_US').html, '<p>Knife</p><p>Fork</p><p>Spoon</p>')
+        self.assertEqual(self.test4.with_context(lang='fr_FR').html, '<p>Nouveau couteau</p><p>Fourchette</p><p>Cuiller</p>')
 
     def test_translate_change_many2one(self):
         self.assertEqual(self.test2.with_context(lang='en_US').name, 'Knife')
@@ -172,3 +191,13 @@ class TestRelatedTranslation(odoo.tests.TransactionCase):
         self.assertEqual(self.test2.with_context(lang='fr_FR').name, 'Couteau 2')
         self.assertEqual(self.test3.with_context(lang='en_US').html, '<p>Knife 2</p><p>Fork 2</p><p>Spoon 2</p>')
         self.assertEqual(self.test3.with_context(lang='fr_FR').html, '<p>Couteau 2</p><p>Fourchette 2</p><p>Cuiller 2</p>')
+        self.test4.with_context(lang='fr_FR').parent_id = self.test12
+        self.assertEqual(self.test4.with_context(lang='en_US').name, 'Knife 2')
+        self.assertEqual(self.test4.with_context(lang='fr_FR').name, 'Couteau 2')
+        self.assertEqual(self.test4.with_context(lang='en_US').html, '<p>Knife 2</p><p>Fork 2</p><p>Spoon 2</p>')
+        self.assertEqual(self.test4.with_context(lang='fr_FR').html, '<p>Couteau 2</p><p>Fourchette 2</p><p>Cuiller 2</p>')
+        self.test2.invalidate_recordset()
+        self.assertEqual(self.test4.with_context(lang='en_US').name, 'Knife 2')
+        self.assertEqual(self.test4.with_context(lang='fr_FR').name, 'Couteau 2')
+        self.assertEqual(self.test4.with_context(lang='en_US').html, '<p>Knife 2</p><p>Fork 2</p><p>Spoon 2</p>')
+        self.assertEqual(self.test4.with_context(lang='fr_FR').html, '<p>Couteau 2</p><p>Fourchette 2</p><p>Cuiller 2</p>')
