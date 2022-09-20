@@ -4,7 +4,6 @@ import "@crm/../tests/mock_server";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 import {
     click,
-    clickEdit,
     clickSave,
     dragAndDrop,
     getFixture,
