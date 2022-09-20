@@ -4,7 +4,7 @@ import logging
 import json
 import re
 
-from odoo import models, fields
+from odoo import models, fields, _
 from odoo.tools.float_utils import json_float_round
 
 _logger = logging.getLogger(__name__)
@@ -150,6 +150,14 @@ class AccountMove(models.Model):
 
     def l10n_ke_set_response_data(self, response):
         invoice = self.browse(int(response['invoice_id']))
+
+        if response['invoiceType'] == 'DUPLICATE':
+            invoice.message_post(body=_(
+                " The invoice sent is a duplicate of an existing invoice"
+                " on the system. The data associated with the original is"
+                " applied to this invoice."
+            ))
+
         invoice.l10n_ke_qrcode = response['qrCode']
         invoice.l10n_ke_control_unit_code = response['controlCode']
         invoice.l10n_ke_control_unit_signing_datetime = response['systemSigningDate']
