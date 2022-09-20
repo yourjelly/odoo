@@ -131,7 +131,7 @@ export class HtmlField extends Component {
             if (this.resizerHandleObserver) {
                 this.resizerHandleObserver.disconnect();
             }
-            this.updateValue();
+            // this.updateValue();
         });
     }
 
@@ -388,10 +388,7 @@ export class HtmlField extends Component {
         $odooEditor.removeClass('odoo-editor-editable');
         $editable.html(html);
 
-        // Prevent history reverts.
-        this.wysiwyg.odooEditor.observerUnactive('toInline');
         await toInline($editable, this.cssRules, this.wysiwyg.$iframe);
-        this.wysiwyg.odooEditor.observerActive('toInline');
         $odooEditor.addClass('odoo-editor-editable');
 
         this.wysiwyg.setValue($editable.html());
