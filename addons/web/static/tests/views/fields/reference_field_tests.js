@@ -919,8 +919,6 @@ QUnit.module("Fields", (hooks) => {
                 </form>`,
         });
 
-        await click(target, ".o_form_button_edit");
-
         const groups = target.querySelectorAll(".o_group");
 
         assert.containsNone(

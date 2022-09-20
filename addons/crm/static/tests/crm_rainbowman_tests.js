@@ -125,6 +125,7 @@ QUnit.module('Crm Rainbowman Triggers', {
             ...this.testFormView,
             resId: 6,
             mockRPC: getMockRpc(assert),
+            mode: "readonly",
         });
 
         await click(target.querySelector(".o_statusbar_status button[data-value='3']"));
@@ -139,7 +140,6 @@ QUnit.module('Crm Rainbowman Triggers', {
             resId: 6,
             mockRPC: getMockRpc(assert),
         });
-        await clickEdit(target);
 
         await click(target.querySelector(".o_statusbar_status button[data-value='3']"));
         assert.verifySteps([]); // no message displayed yet
@@ -155,6 +155,7 @@ QUnit.module('Crm Rainbowman Triggers', {
             ...this.testFormView,
             resId: 2,
             mockRPC: getMockRpc(assert),
+            mode: "readonly",
         });
 
         await click(target.querySelector(".o_statusbar_status button[data-value='3']"));
@@ -168,6 +169,7 @@ QUnit.module('Crm Rainbowman Triggers', {
             ...this.testFormView,
             resId: 1,
             mockRPC: getMockRpc(assert),
+            mode: "readonly",
         });
 
         await click(target.querySelector(".o_statusbar_status button[data-value='3']"));
@@ -181,6 +183,7 @@ QUnit.module('Crm Rainbowman Triggers', {
             ...this.testFormView,
             resId: 8,
             mockRPC: getMockRpc(assert),
+            mode: "readonly",
         });
 
         await click(target.querySelector(".o_statusbar_status button[data-value='3']"));
@@ -194,6 +197,7 @@ QUnit.module('Crm Rainbowman Triggers', {
             ...this.testFormView,
             resId: 10,
             mockRPC: getMockRpc(assert),
+            mode: "readonly",
         });
 
         await click(target.querySelector(".o_statusbar_status button[data-value='3']"));
@@ -207,6 +211,7 @@ QUnit.module('Crm Rainbowman Triggers', {
             ...this.testFormView,
             resId: 1,
             mockRPC: getMockRpc(assert),
+            mode: "readonly",
         });
 
         await click(target.querySelector(".o_statusbar_status button[data-value='2']"));
