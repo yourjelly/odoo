@@ -119,6 +119,7 @@ import reprlib
 import traceback
 import warnings
 from datetime import date, datetime, time
+from collections import defaultdict, deque
 
 from psycopg2.sql import Composable, SQL
 
@@ -194,27 +195,6 @@ _logger = logging.getLogger(__name__)
 # - Have a class domain to have utils method (by example to know if some condition is apply in root level, can be usefull to some optimisation)
 
 
-
-# class Domain():
-#     # Immutable or Mutable +1
-
-#     def __init__(self, domain_list=()) -> None:
-#         self.domain = domain_list
-#         # How to represent data -> tree, node are a leaf or a operator which contains other nodes
-#         # ['&', <leaf>, <leaf>, '|', <leaf>, <leaf>]
-#         # {'&' : [<leaf>, <leaf>, {'|': [<leaf>, <leaf>]}]
-#         tree = {}
-#         if not domain_list:
-#             return
-        
-#         while
-#         for leaf in domain_list:
-#             if leaf == '&':
-                
-#             else:
-                
-
-#     def __repr__(self):
 
 
 
@@ -427,7 +407,7 @@ def is_leaf(element, internal=False):
 
 
 def is_boolean(element):
-    return element == TRUE_LEAF or element == FALSE_LEAF
+    return element in (TRUE_LEAF, FALSE_LEAF)
 
 
 def check_leaf(element, internal=False):
@@ -448,6 +428,57 @@ def get_unaccent_wrapper(cr):
     if odoo.registry(cr.dbname).has_unaccent:
         return _unaccent_wrapper
     return lambda x: x
+
+
+class Domain():
+    # Immutable or Mutable +1
+    OPPOSITE_KEY_OPERATORS = {
+        '&': '|',
+        '|': '&',
+    }
+
+    def __init__(self, domain=()) -> None:
+        # How to represent data -> tree, node are a leaf or a operator which contains other nodes
+        # OR only list of list with a root operator
+        # Key accepted = ['&', '|']
+        self.tree = {}
+        if not domain:
+            return
+
+        domain = distribute_not(normalize_domain(domain))
+        # [()] => {}
+        # ['&', '|', <leaf1>, <leaf2>, <leaf3>] 
+        # => {'&' : [{'|': [<leaf1>, <leaf3>]}, <leaf3>]}
+        # ['&', <leaf1>, '&', <leaf2>, '&', <leaf3>, '&', '|', <leaf4>, <leaf5>, <leaf6>]
+        # {'&': [<leaf1>, <leaf2>, <leaf3>, {'|': [<leaf4>, <leaf5>]}, <leaf6>]}
+        
+        
+        
+        op_fifo = deque()
+        final_tree = defaultdict(list)
+        tree_stack = [final_tree]
+        for leaf in domain:
+            if is_operator(leaf):
+                op_fifo.append(leaf)
+                op_fifo.append(leaf)
+            elif is_leaf(leaf):
+                op = op_fifo.popleft() if op_fifo else '&'
+                tree = tree_stack[-1]
+                if self.OPPOSITE_KEY_OPERATORS[op] in tree:
+                    # into Subtree
+                    new_tree = defaultdict(list)
+                    tree_stack.append(new_tree)
+                    tree[self.OPPOSITE_KEY_OPERATORS[op]].append(new_tree)
+                    tree = new_tree
+                tree[op].append(leaf)
+            else:
+                raise ValueError(f"Invalid leaf {leaf}")
+
+    def __iter__(self):
+        ...
+    
+    def __repr__(self):
+        ...
 
 
 class expression(object):
@@ -483,6 +514,10 @@ class expression(object):
 
         # parse the domain expression
         self.parse()
+        if '|' in self.expression:
+            print(domain)
+            print(self.expression)
+            print(self.query)
 
     def _unaccent(self, field):
         if getattr(field, 'unaccent', False):

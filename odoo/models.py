@@ -5101,7 +5101,7 @@ class BaseModel(metaclass=MetaModel):
         self._flush_search(domain, order=order)
 
         query = self._where_calc(domain)
-        self._apply_ir_rules(query, 'read')
+        self._apply_ir_rules(query, 'read')  # TODO: why after is_false, in some case ir_rule can translate by False
         query.limit = limit
 
         if count:
