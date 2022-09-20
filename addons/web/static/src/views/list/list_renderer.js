@@ -355,6 +355,9 @@ export class ListRenderer extends Component {
     }
 
     canUseFormatter(column, record) {
+        console.log(column);
+        console.log(record);
+        //debugger
         return (
             !record.isInEdition && !column.widget && record.fields[column.name].type !== "boolean"
         );
