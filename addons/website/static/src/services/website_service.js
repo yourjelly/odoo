@@ -42,6 +42,8 @@ export const websiteService = {
         let blockingProcesses = [];
         let modelNamesProm = null;
         const modelNames = {};
+        let invalidateSnippetCache = false;
+        let lastWebsiteId = null;
 
         const context = reactive({
             showNewContentModal: false,
@@ -71,6 +73,10 @@ export const websiteService = {
         });
         return {
             set currentWebsiteId(id) {
+                if (id && id !== lastWebsiteId) {
+                    invalidateSnippetCache = true;
+                    lastWebsiteId = id;
+                }
                 currentWebsiteId = id;
                 websiteSystrayRegistry.trigger('EDIT-WEBSITE');
             },
@@ -124,6 +130,7 @@ export const websiteService = {
                         // the editable selector because it's the common
                         // denominator of editable pages.
                         editable: !!document.getElementById('wrapwrap'),
+                        lang: (document.documentElement.getAttribute('lang')).replace('-', '_'),
                         viewXmlid: viewXmlid,
                         lang: document.documentElement.getAttribute('lang').replace('-', '_'),
                         direction: document.documentElement.querySelector('#wrapwrap.o_rtl') ? 'rtl' : 'ltr',
@@ -166,6 +173,13 @@ export const websiteService = {
             set actionJsId(jsId) {
                 actionJsId = jsId;
             },
+            get invalidateSnippetCache() {
+                return invalidateSnippetCache;
+            },
+            set invalidateSnippetCache(value) {
+                invalidateSnippetCache = value;
+            },
+
             goToWebsite({ websiteId, path, edition, translation } = {}) {
                 action.doAction('website.website_preview', {
                     clearBreadcrumbs: true,

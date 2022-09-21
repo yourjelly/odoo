@@ -124,6 +124,36 @@ class TestUiTranslate(odoo.tests.HttpCase):
         })
         self.start_tour(self.env['website'].get_client_action_url('/'), 'rte_translator', login='admin', timeout=120)
 
+    def test_translate_menu_name(self):
+        parseltongue = self.env['res.lang'].create({
+            'name': 'Parseltongue',
+            'code': 'pa_GB',
+            'iso_code': 'pa_GB',
+            'url_code': 'pa_GB',
+        })
+        self.env['res.lang']._activate_lang('pa_GB')
+        default_website = self.env.ref('website.default_website')
+        default_website.language_ids = self.env.ref('base.lang_en') + parseltongue
+        default_website.default_lang_id = self.env.ref('base.lang_en')
+        website_1_menu = self.env['website.menu'].search(['&', ('website_id', '=', 1), ('parent_id', '=', False)])
+        new_menu = self.env['website.menu'].create({
+            'name': 'Menu to edit',
+            'parent_id': website_1_menu.id,
+            'website_id': 1,
+            'url': '/englishURL',
+        })
+
+        # Timeout needed because it can take a long time to install a lang on a website.
+        self.start_tour(self.env['website'].get_client_action_url('/'), 'translate_menu_name', login='admin', timeout=120)
+
+        self.assertNotEqual(new_menu.name, 'value pa-GB', msg="The new menu should not have its value edited, only its translation")
+        translation = self.env['ir.translation'].search([
+            ('name', '=', 'website.menu,name'),
+            ('res_id', '=', new_menu.id),
+            ('lang', '=', parseltongue.code)
+        ], limit=1)
+        self.assertEqual(translation.value, 'value pa-GB', msg="The new translation should be set")
+
 
 @odoo.tests.common.tagged('post_install', '-at_install')
 class TestUi(odoo.tests.HttpCase):
@@ -317,3 +347,16 @@ class TestUi(odoo.tests.HttpCase):
 
     def test_23_website_multi_edition(self):
         self.start_tour('/@?enable_editor=1', 'website_multi_edition', login='admin')
+
+    def test_24_snippet_cache_across_websites(self):
+        default_website = self.env.ref('website.default_website')
+        self.env['ir.ui.view'].with_context(website_id=default_website.id).save_snippet(name="custom_snippet_test",
+                                                                                        arch="""
+                                                                                            <section class="s_text_block">
+                                                                                                <div class="custom_snippet_website_1">Custom Snippet Website 1</div>
+                                                                                            </section>
+                                                                                        """,
+                                                                                        thumbnail_url="/website/static/src/img/snippets_thumbs/s_text_block.svg",
+                                                                                        snippet_key="s_text_block",
+                                                                                        template_key="website.snippets")
+        self.start_tour('/@/', 'snippet_cache_across_websites', login='admin')

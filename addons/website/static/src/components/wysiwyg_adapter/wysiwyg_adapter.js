@@ -203,11 +203,13 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
         return $(this.editable);
     }
     get _context() {
+        const currentWebsite = this.websiteService.currentWebsite;
         return Object.assign({},
             this.userService.context,
             {
-                website_id: this.websiteService.currentWebsite.id,
-                lang: this.websiteService.currentWebsite.metadata.lang,
+                website_id: currentWebsite.id,
+                lang: currentWebsite.metadata.lang,
+                user_lang: this.userService.context.lang,
             },
         );
     }
