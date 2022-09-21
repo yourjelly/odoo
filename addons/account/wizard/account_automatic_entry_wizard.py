@@ -3,6 +3,7 @@ from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools.misc import format_date, formatLang
 
+from markupsafe import Markup
 from collections import defaultdict
 from itertools import groupby
 import json
@@ -346,17 +347,17 @@ class AutomaticEntryWizard(models.TransientModel):
                 accrual_move_lines = accrual_move.mapped('line_ids').filtered(lambda line: line.account_id == accrual_account)[accrual_move_offsets[accrual_move]:accrual_move_offsets[accrual_move]+2]
                 accrual_move_offsets[accrual_move] += 2
                 (accrual_move_lines + destination_move_lines).filtered(lambda line: not line.currency_id.is_zero(line.balance)).reconcile()
-            move.message_post(body=self._format_strings(_('Adjusting Entries have been created for this invoice:<ul><li>%(link1)s cancelling '
+            move.message_post(body=Markup(self._format_strings(_('Adjusting Entries have been created for this invoice:<ul><li>%(link1)s cancelling '
                                                           '{percent:.2f}%% of {amount}</li><li>%(link0)s postponing it to {new_date}</li></ul>',
                                                           link0=self._format_move_link(destination_move),
                                                           link1=self._format_move_link(accrual_move),
-                                                          ), move, amount))
+                                                          ), move, amount)))
             destination_messages += [self._format_strings(_('Adjusting Entry {link}: {percent:.2f}% of {amount} recognized from {date}'), move, amount)]
             accrual_move_messages[accrual_move] += [self._format_strings(_('Adjusting Entry for {link}: {percent:.2f}% of {amount} recognized on {new_date}'), move, amount)]
 
-        destination_move.message_post(body='<br/>\n'.join(destination_messages))
+        destination_move.message_post(body=Markup('<br/>\n'.join(destination_messages)))
         for accrual_move, messages in accrual_move_messages.items():
-            accrual_move.message_post(body='<br/>\n'.join(messages))
+            accrual_move.message_post(body=Markup('<br/>\n'.join(messages)))
 
         # open the generated entries
         action = {

@@ -6,6 +6,7 @@ from uuid import uuid4
 from odoo.addons.mail.tests.common import MailCommon, mail_new_test_user
 from odoo.tests.common import Form, users
 
+from markupsafe import Markup
 
 # samples use effective TLDs from the Mozilla public suffix
 # list at http://publicsuffix.org
@@ -157,7 +158,7 @@ class TestPartner(MailCommon):
         p1.message_subscribe(partner_ids=p3.ids)
         p1_act1 = p1.activity_schedule(act_type_xmlid='mail.mail_activity_data_todo')
         p1_msg1 = p1.message_post(
-            body='<p>Log on P1</p>',
+            body=Markup('<p>Log on P1</p>'),
             subtype_id=self.env.ref('mail.mt_comment').id
         )
         self.assertEqual(p1.activity_ids, p1_act1)

@@ -3,6 +3,8 @@
 
 from odoo import models, fields, _
 
+from markupsafe import Markup
+
 class Users(models.Model):
     _inherit = 'res.users'
 
@@ -33,6 +35,6 @@ class Users(models.Model):
         channel_info = self.env['mail.channel'].channel_get([odoobot_id, self.partner_id.id])
         channel = self.env['mail.channel'].browse(channel_info['id'])
         message = _("Hello,<br/>Odoo's chat helps employees collaborate efficiently. I'm here to help you discover its features.<br/><b>Try to send me an emoji</b> <span class=\"o_odoobot_command\">:)</span>")
-        channel.sudo().message_post(body=message, author_id=odoobot_id, message_type="comment", subtype_xmlid="mail.mt_comment")
+        channel.sudo().message_post(body=Markup(message), author_id=odoobot_id, message_type="comment", subtype_xmlid="mail.mt_comment")
         self.sudo().odoobot_state = 'onboarding_emoji'
         return channel

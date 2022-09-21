@@ -7,6 +7,7 @@ from functools import wraps
 from requests import HTTPError
 import pytz
 from dateutil.parser import parse
+from markupsafe import Markup
 
 from odoo import api, fields, models, registry, _
 from odoo.tools import ormcache_context, email_normalize
@@ -214,7 +215,7 @@ class GoogleSync(models.AbstractModel):
 
             if event:
                 event.message_post(
-                    body=body,
+                    body=Markup(body),
                     message_type='comment',
                     subtype_xmlid='mail.mt_note',
                 )

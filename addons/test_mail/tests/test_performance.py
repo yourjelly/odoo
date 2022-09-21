@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from contextlib import nullcontext
+from markupsafe import Markup
 
 from odoo.addons.base.tests.common import TransactionCaseWithUserDemo
 from odoo.addons.mail.tests.common import MailCommon
@@ -620,7 +621,7 @@ class TestMailAPIPerformance(BaseMailPerformance):
 
         with self.assertQueryCount(__system__=4, employee=7):
             record.message_post(
-                body='<p>Test message_post as log</p>',
+                body=Markup('<p>Test message_post as log</p>'),
                 subtype_xmlid='mail.mt_note',
                 message_type='comment')
 
@@ -631,7 +632,7 @@ class TestMailAPIPerformance(BaseMailPerformance):
 
         with self.assertQueryCount(__system__=4, employee=7):
             record.message_post(
-                body='<p>Test Post Performances basic</p>',
+                body=Markup('<p>Test Post Performances basic</p>'),
                 partner_ids=[],
                 message_type='comment',
                 subtype_xmlid='mail.mt_comment')
@@ -644,7 +645,7 @@ class TestMailAPIPerformance(BaseMailPerformance):
 
         with self.assertQueryCount(__system__=24, employee=27):
             record.message_post(
-                body='<p>Test Post Performances with an email ping</p>',
+                body=Markup('<p>Test Post Performances with an email ping</p>'),
                 partner_ids=self.customer.ids,
                 message_type='comment',
                 subtype_xmlid='mail.mt_comment')
@@ -656,7 +657,7 @@ class TestMailAPIPerformance(BaseMailPerformance):
 
         with self.assertQueryCount(__system__=14, employee=18):
             record.message_post(
-                body='<p>Test Post Performances with an inbox ping</p>',
+                body=Markup('<p>Test Post Performances with an inbox ping</p>'),
                 partner_ids=self.user_test.partner_id.ids,
                 message_type='comment',
                 subtype_xmlid='mail.mt_comment')
@@ -838,7 +839,7 @@ class TestMailComplexPerformance(BaseMailPerformance):
         # about 20 (19?) queries per additional customer group
         with self.assertQueryCount(__system__=35, employee=36):
             record.message_post(
-                body='<p>Test Post Performances</p>',
+                body=Markup('<p>Test Post Performances</p>'),
                 message_type='comment',
                 subtype_xmlid='mail.mt_comment')
 
@@ -1290,7 +1291,7 @@ class TestMailHeavyPerformancePost(BaseMailPerformance):
         enable_logging = self.cr._enable_logging() if self.warm else nullcontext()
         with self.assertQueryCount(employee=49), enable_logging:
             record_container.with_context({}).message_post(
-                body='<p>Test body <img src="cid:cid1"> <img src="cid:cid2"></p>',
+                body=Markup('<p>Test body <img src="cid:cid1"> <img src="cid:cid2"></p>'),
                 subject='Test Subject',
                 message_type='notification',
                 subtype_xmlid=None,

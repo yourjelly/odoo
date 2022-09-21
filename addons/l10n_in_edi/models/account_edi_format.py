@@ -119,12 +119,12 @@ class AccountEdiFormat(models.Model):
                 if not response.get("error"):
                     error = []
                     odoobot = self.env.ref("base.partner_root")
-                    invoices.message_post(author_id=odoobot.id, body=_(
+                    invoices.message_post(author_id=odoobot.id, body=markupsafe.Markup(_(
                         "Somehow this invoice had been submited to government before." \
                         "<br/>Normally, this should not happen too often" \
                         "<br/>Just verify value of invoice by uploade json to government website " \
                         "<a href='https://einvoice1.gst.gov.in/Others/VSignedInvoice'>here<a>."
-                    ))
+                    )))
             if "no-credit" in error_codes:
                 res[invoices] = {
                     "success": False,
@@ -179,12 +179,12 @@ class AccountEdiFormat(models.Model):
                 if "9999" in error_codes:
                     response = {}
                     odoobot = self.env.ref("base.partner_root")
-                    invoices.message_post(author_id=odoobot.id, body=_(
+                    invoices.message_post(author_id=odoobot.id, body=markupsafe.Markup(_(
                         "Somehow this invoice had been cancelled to government before." \
                         "<br/>Normally, this should not happen too often" \
                         "<br/>Just verify by logging into government website " \
                         "<a href='https://einvoice1.gst.gov.in'>here<a>."
-                    ))
+                    )))
                 if "no-credit" in error_codes:
                     res[invoice] = {
                         "success": False,

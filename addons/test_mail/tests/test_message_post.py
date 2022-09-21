@@ -5,7 +5,7 @@ import base64
 
 from datetime import datetime, timedelta
 from freezegun import freeze_time
-from markupsafe import escape
+from markupsafe import escape, Markup
 from unittest.mock import patch
 
 from odoo import tools
@@ -659,7 +659,7 @@ class TestMessagePost(TestMessagePostCommon, CronMixinCase):
              self.assertMsgWithoutNotifications(), \
              self.capture_triggers(cron_id) as capt:
             msg = test_record.message_post(
-                body='<p>Test</p>',
+                body=Markup('<p>Test</p>'),
                 message_type='comment',
                 subject='Subject',
                 subtype_xmlid='mail.mt_comment',
@@ -706,7 +706,7 @@ class TestMessagePost(TestMessagePostCommon, CronMixinCase):
              self.mock_mail_gateway(mail_unlink_sent=False), \
              self.capture_triggers(cron_id) as capt:
             msg = test_record.message_post(
-                body='<p>Test</p>',
+                body=Markup('<p>Test</p>'),
                 message_type='comment',
                 subject='Subject',
                 subtype_xmlid='mail.mt_comment',
@@ -734,7 +734,7 @@ class TestMessagePost(TestMessagePostCommon, CronMixinCase):
         with freeze_time(now), \
              self.assertMsgWithoutNotifications():
             msg = test_record.message_post(
-                body='<p>Test</p>',
+                body=Markup('<p>Test</p>'),
                 message_type='comment',
                 subject='Subject',
                 subtype_xmlid='mail.mt_comment',
@@ -820,7 +820,7 @@ class TestMessagePost(TestMessagePostCommon, CronMixinCase):
     def test_multiline_subject(self):
         with self.mock_mail_gateway():
             msg = self.test_record.with_user(self.user_employee).message_post(
-                body='<p>Test Body</p>',
+                body=Markup('<p>Test Body</p>'),
                 partner_ids=[self.partner_1.id, self.partner_2.id],
                 subject='1st line\n2nd line',
             )
@@ -837,7 +837,7 @@ class TestMessagePost(TestMessagePostCommon, CronMixinCase):
                 ]
             ), patch.object(MailTestSimple, 'check_access_rights', return_value=True):
             new_msg = self.test_record.with_user(self.user_portal).message_post(
-                body='<p>Test</p>',
+                body=Markup('<p>Test</p>'),
                 message_type='comment',
                 subject='Subject',
                 subtype_xmlid='mail.mt_comment',
@@ -846,7 +846,7 @@ class TestMessagePost(TestMessagePostCommon, CronMixinCase):
 
         with self.assertRaises(AccessError):
             self.test_record.with_user(self.user_portal).message_post(
-                body='<p>Test</p>',
+                body=Markup('<p>Test</p>'),
                 message_type='comment',
                 subject='Subject',
                 subtype_xmlid='mail.mt_comment',
@@ -859,7 +859,7 @@ class TestMessagePost(TestMessagePostCommon, CronMixinCase):
 
         with self.mock_mail_gateway():
             parent_msg = test_record.message_post(
-                body='<p>Test</p>',
+                body=Markup('<p>Test</p>'),
                 message_type='comment',
                 subject='Test Subject',
                 subtype_xmlid='mail.mt_comment',
@@ -872,7 +872,7 @@ class TestMessagePost(TestMessagePostCommon, CronMixinCase):
                 [{'content': '<p>Test Answer</p>', 'notif': [{'partner': self.partner_1, 'type': 'email'}]}]
             ):
             msg = test_record.message_post(
-                body='<p>Test Answer</p>',
+                body=Markup('<p>Test Answer</p>'),
                 message_type='comment',
                 parent_id=parent_msg.id,
                 partner_ids=[self.partner_1.id],
@@ -895,7 +895,7 @@ class TestMessagePost(TestMessagePostCommon, CronMixinCase):
         # post a reply to the reply: check parent is the first one
         with self.mock_mail_gateway():
             new_msg = test_record.message_post(
-                body='<p>Test Answer Bis</p>',
+                body=Markup('<p>Test Answer Bis</p>'),
                 message_type='comment',
                 subtype_xmlid='mail.mt_comment',
                 parent_id=msg.id,
@@ -1252,7 +1252,7 @@ class TestMessagePostLang(TestMailCommon, TestRecipients):
 
         with self.mock_mail_gateway():
             test_records[1].message_post(
-                body='<p>Hello</p>',
+                body=Markup('<p>Hello</p>'),
                 email_layout_xmlid='mail.test_layout',
                 message_type='comment',
                 subject='Subject',

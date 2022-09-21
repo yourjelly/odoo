@@ -6,6 +6,7 @@ from odoo.exceptions import AccessError
 from odoo.tests import tagged
 from odoo.tests import users
 
+from markupsafe import Markup
 
 @tagged('mail_followers')
 class BaseFollowersTest(TestMailCommon):
@@ -645,7 +646,7 @@ class RecipientsNotificationTest(TestMailCommon):
                   'status': 'sent', 'type': 'inbox'}],
                 message_info={'content': 'User Choice Notification'}):
             test.message_post(
-                body='<p>User Choice Notification</p>',
+                body=Markup('<p>User Choice Notification</p>'),
                 message_type='comment',
                 partner_ids=shared_partner.ids,
                 subtype_xmlid='mail.mt_comment',

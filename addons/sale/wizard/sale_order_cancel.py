@@ -5,6 +5,7 @@ from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 from odoo.tools import formataddr
 
+from markupsafe import Markup
 
 class SaleOrderCancel(models.TransientModel):
     _name = 'sale.order.cancel'
@@ -85,7 +86,7 @@ class SaleOrderCancel(models.TransientModel):
         self.ensure_one()
         self.order_id.message_post(
             subject=self.subject,
-            body=self.body,
+            body=Markup(self.body),
             message_type='comment',
             email_from=self.email_from,
             email_layout_xmlid='mail.mail_notification_light',

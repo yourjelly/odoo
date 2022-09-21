@@ -10,6 +10,7 @@ from freezegun import freeze_time
 from OpenSSL.SSL import Error as SSLError
 from socket import gaierror, timeout
 from unittest.mock import call, patch
+from markupsafe import Markup
 
 from odoo import api, Command, tools
 from odoo.addons.base.models.ir_mail_server import MailDeliveryException
@@ -38,7 +39,7 @@ class TestMailMail(TestMailCommon):
             'email_from': 'ignasse@example.com',
         }).with_context({})
 
-        cls.test_message = cls.test_record.message_post(body='<p>Message</p>', subject='Subject')
+        cls.test_message = cls.test_record.message_post(body=Markup('<p>Message</p>'), subject='Subject')
         cls.test_mail = cls.env['mail.mail'].create([{
             'body': '<p>Body</p>',
             'email_from': False,

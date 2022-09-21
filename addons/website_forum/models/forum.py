@@ -5,6 +5,7 @@ import logging
 import math
 import re
 
+from markupsafe import Markup
 from datetime import datetime
 
 from odoo import api, fields, models, tools, SUPERUSER_ID, _
@@ -827,7 +828,7 @@ class Post(models.Model):
         values = {
             'author_id': self_sudo.create_uid.partner_id.id,  # use sudo here because of access to res.users model
             'email_from': self_sudo.create_uid.email_formatted,  # use sudo here because of access to res.users model
-            'body': tools.html_sanitize(self.content, sanitize_attributes=True, strip_style=True, strip_classes=True),
+            'body': Markup(tools.html_sanitize(self.content, sanitize_attributes=True, strip_style=True, strip_classes=True)),
             'message_type': 'comment',
             'subtype_xmlid': 'mail.mt_comment',
             'date': self.create_date,

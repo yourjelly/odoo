@@ -6,6 +6,7 @@ import logging
 from collections import defaultdict
 from hashlib import sha512
 from secrets import choice
+from markupsafe import Markup
 
 from odoo import _, api, fields, models, tools, Command
 from odoo.addons.base.models.avatar_mixin import get_hsl_from_seed
@@ -313,7 +314,7 @@ class Channel(models.Model):
         self.env['bus.bus']._sendone(partner, 'mail.channel/leave', channel_info)
         notification = _('<div class="o_mail_notification">left the channel</div>')
         # post 'channel left' message as root since the partner just unsubscribed from the channel
-        self.sudo().message_post(body=notification, subtype_xmlid="mail.mt_comment", author_id=partner.id)
+        self.sudo().message_post(body=Markup(notification), subtype_xmlid="mail.mt_comment", author_id=partner.id)
         self.env['bus.bus']._sendone(self, 'mail.channel/insert', {
             'channelMembers': [('insert-and-unlink', {'id': member_id})],
             'id': self.id,
@@ -387,9 +388,9 @@ class Channel(models.Model):
                             '<div class="o_mail_notification">invited %s to the channel</div>',
                             member.partner_id._get_html_link(),
                         )
-                    member.channel_id.message_post(body=notification, message_type="notification", subtype_xmlid="mail.mt_comment")
+                    member.channel_id.message_post(body=Markup(notification), message_type="notification", subtype_xmlid="mail.mt_comment")
             for member in new_members.filtered(lambda member: member.guest_id):
-                member.channel_id.message_post(body=_('<div class="o_mail_notification">joined the channel</div>'), message_type="notification", subtype_xmlid="mail.mt_comment")
+                member.channel_id.message_post(body=Markup(_('<div class="o_mail_notification">joined the channel</div>')), message_type="notification", subtype_xmlid="mail.mt_comment")
                 guest = member.guest_id
                 if guest:
                     notifications.append((guest, 'mail.channel/joined', {
@@ -1052,7 +1053,7 @@ class Channel(models.Model):
         group = self.env['res.groups'].search([('id', '=', group_id)]) if group_id else None
         new_channel.group_public_id = group.id if group else None
         notification = _('<div class="o_mail_notification">created <a href="#" class="o_channel_redirect" data-oe-id="%s">#%s</a></div>', new_channel.id, new_channel.name)
-        new_channel.message_post(body=notification, message_type="notification", subtype_xmlid="mail.mt_comment")
+        new_channel.message_post(body=Markup(notification), message_type="notification", subtype_xmlid="mail.mt_comment")
         channel_info = new_channel.channel_info()[0]
         self.env['bus.bus']._sendone(self.env.user.partner_id, 'mail.channel/legacy_insert', channel_info)
         return channel_info

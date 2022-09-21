@@ -5,6 +5,7 @@ from odoo.tools import float_repr
 from odoo.exceptions import UserError
 
 from zeep import Client
+from markupsafe import Markup
 
 # -------------------------------------------------------------------------
 # UNIT OF MEASURE
@@ -258,9 +259,9 @@ class AccountEdiCommon(models.AbstractModel):
             logs = self._import_fill_invoice_form(journal, tree, invoice, qty_factor)
         if invoice:
             if logs:
-                body = _(
+                body = Markup(_(
                     "<strong>Format used to import the invoice: %s</strong> <p><li> %s </li></p>",
-                    str(self._description), "</li><li>".join(logs)
+                    str(self._description), "</li><li>".join(logs))
                 )
             else:
                 body = _("<strong>Format used to import the invoice: %s</strong>", str(self._description))
@@ -582,11 +583,11 @@ class AccountEdiCommon(models.AbstractModel):
 
         if errors_cnt == 0:
             invoice.with_context(no_new_invoice=True).message_post(
-                body=f"<font style='color:Green;'><strong>ECOSIO: All clear for format {ecosio_format}!</strong></font>"
+                body=Markup(f"<font style='color:Green;'><strong>ECOSIO: All clear for format {ecosio_format}!</strong></font>")
             )
         else:
             invoice.with_context(no_new_invoice=True).message_post(
-                body=f"<font style='color:Tomato;'><strong>ECOSIO ERRORS/WARNINGS for format {ecosio_format}</strong></font>: <ul> "
-                     + "\n".join(report) + " </ul>"
+                body=Markup(f"<font style='color:Tomato;'><strong>ECOSIO ERRORS/WARNINGS for format {ecosio_format}</strong></font>: <ul> "
+                     + "\n".join(report) + " </ul>")
             )
         return response

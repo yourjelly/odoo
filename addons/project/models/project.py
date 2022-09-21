@@ -7,6 +7,7 @@ from pytz import UTC
 from collections import defaultdict
 from datetime import timedelta, datetime, time
 from random import randint
+from markupsafe import Markup
 
 from odoo import api, Command, fields, models, tools, SUPERUSER_ID, _, _lt
 from odoo.addons.rating.models import rating_data
@@ -2265,7 +2266,7 @@ class Task(models.Model):
                     'child_subtype': child_subtype_info,
                 })
                 for p in parent_ids:
-                    p.message_post(body=body, subtype_id=subtype, tracking_value_ids=depends_tracking_value_ids)
+                    p.message_post(body=Markup(body), subtype_id=subtype, tracking_value_ids=depends_tracking_value_ids)
         return changes, tracking_value_ids
 
     def _track_template(self, changes):

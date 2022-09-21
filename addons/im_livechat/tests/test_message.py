@@ -4,6 +4,7 @@
 from odoo import Command
 from odoo.tests.common import users, tagged, TransactionCase
 
+from markupsafe import Markup
 
 @tagged('post_install', '-at_install')
 class TestImLivechatMessage(TransactionCase):
@@ -39,8 +40,8 @@ class TestImLivechatMessage(TransactionCase):
         })
         message = channel_livechat_1.message_post(
             author_id=record_rating.partner_id.id,
-            body="<img src='%s' alt=':%s/5' style='width:18px;height:18px;float:left;margin-right: 5px;'/>%s"
-            % (record_rating.rating_image_url, record_rating.rating, record_rating.feedback),
+            body=Markup("<img src='%s' alt=':%s/5' style='width:18px;height:18px;float:left;margin-right: 5px;'/>%s"
+            % (record_rating.rating_image_url, record_rating.rating, record_rating.feedback)),
             rating_id=record_rating.id,
         )
         self.assertEqual(message.message_format(), [{

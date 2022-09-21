@@ -4,6 +4,7 @@
 from unittest.mock import patch
 from unittest.mock import DEFAULT
 from werkzeug.urls import url_parse, url_decode
+from markupsafe import Markup
 
 from odoo import exceptions
 from odoo.addons.test_mail.models.test_mail_models import MailTestSimple
@@ -36,7 +37,7 @@ class TestAPI(TestMailCommon, TestRecipients):
         # post a note
         message = ticket_record.message_post(
             attachment_ids=attachments.ids,
-            body="<p>Initial Body</p>",
+            body=Markup("<p>Initial Body</p>"),
             message_type="comment",
             partner_ids=self.partner_1.ids,
         )
@@ -76,7 +77,7 @@ class TestAPI(TestMailCommon, TestRecipients):
 
         # cannot edit user comments (subtype)
         message = ticket_record.message_post(
-            body="<p>Initial Body</p>",
+            body=Markup("<p>Initial Body</p>"),
             message_type="comment",
             subtype_id=self.env.ref('mail.mt_comment').id,
         )
@@ -110,7 +111,7 @@ class TestChatterTweaks(TestMailCommon, TestRecipients):
     def test_post_no_subscribe_author(self):
         original = self.test_record.message_follower_ids
         self.test_record.with_user(self.user_employee).with_context({'mail_create_nosubscribe': True}).message_post(
-            body='Test Body', message_type='comment', subtype_xmlid='mail.mt_comment')
+            body=Markup('Test Body'), message_type='comment', subtype_xmlid='mail.mt_comment')
         self.assertEqual(self.test_record.message_follower_ids.mapped('partner_id'), original.mapped('partner_id'))
 
     @mute_logger('odoo.addons.mail.models.mail_mail')

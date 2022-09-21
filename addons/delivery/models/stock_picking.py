@@ -6,7 +6,7 @@ import json
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
-
+from markupsafe import Markup
 
 class StockQuantPackage(models.Model):
     _inherit = "stock.quant.package"
@@ -200,7 +200,7 @@ class StockPicking(models.Model):
             price=self.carrier_price,
             currency=order_currency.name
         )
-        self.message_post(body=msg)
+        self.message_post(body=Markup(msg))
         self._add_delivery_cost_to_so()
 
     def _check_carrier_details_compliance(self):
@@ -242,7 +242,7 @@ class StockPicking(models.Model):
             msg = "Tracking links for shipment: <br/>"
             for tracker in carrier_trackers:
                 msg += '<a href=' + tracker[1] + '>' + tracker[0] + '</a><br/>'
-            self.message_post(body=msg)
+            self.message_post(body=Markup(msg))
             return self.env["ir.actions.actions"]._for_xml_id("delivery.act_delivery_trackers_url")
 
         client_action = {

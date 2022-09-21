@@ -790,7 +790,7 @@ Or send your receipts at <a href="mailto:%(email)s?subject=Lunch%%20with%%20cust
             expense.message_post(
                 partner_ids=expense.employee_id.user_id.partner_id.ids,
                 subject='Re: %s' % msg_dict.get('subject', ''),
-                body=body,
+                body=Markup(body),
                 subtype_id=self.env.ref('mail.mt_note').id,
                 email_layout_xmlid='mail.mail_notification_light',
             )

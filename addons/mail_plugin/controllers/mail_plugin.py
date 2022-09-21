@@ -6,6 +6,7 @@ import json
 import logging
 import requests
 from werkzeug.exceptions import Forbidden
+from markupsafe import Markup
 
 from odoo import http, tools, _
 from odoo.addons.iap.tools import iap_tools
@@ -250,7 +251,7 @@ class MailPluginController(http.Controller):
                 for name, content in attachments
             ]
 
-        request.env[model].browse(res_id).message_post(body=message, attachments=attachments)
+        request.env[model].browse(res_id).message_post(body=Markup(message), attachments=attachments)
         return True
 
     @http.route('/mail_plugin/get_translations', type="json", auth="outlook", cors="*")

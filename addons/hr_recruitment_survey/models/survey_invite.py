@@ -3,6 +3,7 @@
 from odoo import fields, models, _
 from odoo.tools.misc import clean_context
 
+from markupsafe import Markup
 
 class SurveyInvite(models.TransientModel):
     _inherit = "survey.invite"
@@ -24,7 +25,7 @@ class SurveyInvite(models.TransientModel):
             partner_link = partner._get_html_link()
             content = _('The survey %(survey_link)s has been sent to %(partner_link)s', survey_link=survey_link, partner_link=partner_link)
             body = '<p>%s</p>' % content
-            self.applicant_id.message_post(body=body)
+            self.applicant_id.message_post(body=Markup(body))
         return super().action_invite()
 
 

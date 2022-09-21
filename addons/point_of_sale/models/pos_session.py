@@ -4,6 +4,7 @@
 from collections import defaultdict
 from datetime import timedelta
 from itertools import groupby
+from markupsafe import Markup
 
 from odoo import api, fields, models, _, Command
 from odoo.exceptions import AccessError, UserError, ValidationError
@@ -1491,7 +1492,7 @@ class PosSession(models.Model):
                         'model': 'account.bank.statement',
                         'res_id': self.cash_register_id.id,
                     })
-            self.message_post(body=message)
+            self.message_post(body=Markup(message))
 
     def action_view_order(self):
         return {
@@ -1541,7 +1542,7 @@ class PosSession(models.Model):
         message_content = [f"Cash {extras['translatedType']}", f'- Amount: {extras["formattedAmount"]}']
         if reason:
             message_content.append(f'- Reason: {reason}')
-        self.message_post(body='<br/>\n'.join(message_content))
+        self.message_post(body=Markup('<br/>\n'.join(message_content)))
 
     def get_onboarding_data(self):
         return {

@@ -3,6 +3,7 @@
 
 import base64
 from unittest.mock import patch
+from markupsafe import Markup
 
 from odoo.addons.mail.tests.common import mail_new_test_user
 from odoo.addons.test_mail.tests.common import TestMailCommon
@@ -482,7 +483,7 @@ class TestMessageAccess(TestMailCommon):
         test_record.message_subscribe((partner_1 | self.user_admin.partner_id).ids)
 
         message = test_record.message_post(
-            body='<p>This is First Message</p>', subject='Subject',
+            body=Markup('<p>This is First Message</p>'), subject='Subject',
             message_type='comment', subtype_xmlid='mail.mt_note')
         # portal user have no rights to read the message
         with self.assertRaises(AccessError):
@@ -495,7 +496,7 @@ class TestMessageAccess(TestMailCommon):
             # parent message is accessible to references notification mail values
             # for _notify method and portal user have no rights to send the message for this model
             new_msg = test_record.with_user(self.user_portal).message_post(
-                body='<p>This is Second Message</p>',
+                body=Markup('<p>This is Second Message</p>'),
                 subject='Subject',
                 parent_id=message.id,
                 message_type='comment',

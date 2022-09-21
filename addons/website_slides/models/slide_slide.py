@@ -779,7 +779,7 @@ class Slide(models.Model):
                 kwargs['reply_to'] = reply_to
             slide.channel_id.with_context(mail_create_nosubscribe=True).message_post(
                 subject=subject,
-                body=html_body,
+                body=Markup(html_body),
                 subtype_xmlid='website_slides.mt_channel_slide_published',
                 email_layout_xmlid='mail.mail_notification_light',
                 **kwargs,

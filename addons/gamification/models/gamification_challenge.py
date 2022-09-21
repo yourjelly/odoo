@@ -6,6 +6,7 @@ import logging
 from datetime import date, timedelta
 
 from dateutil.relativedelta import relativedelta, MO
+from markupsafe import Markup
 
 from odoo import api, models, fields, _, exceptions
 from odoo.tools import ustr
@@ -585,14 +586,14 @@ class Challenge(models.Model):
 
             # send to every follower and participant of the challenge
             challenge.message_post(
-                body=body_html,
+                body=Markup(body_html),
                 partner_ids=challenge.mapped('user_ids.partner_id.id'),
                 subtype_xmlid='mail.mt_comment',
                 email_layout_xmlid='mail.mail_notification_light',
                 )
             if challenge.report_message_group_id:
                 challenge.report_message_group_id.message_post(
-                    body=body_html,
+                    body=Markup(body_html),
                     subtype_xmlid='mail.mt_comment')
 
         else:
@@ -613,7 +614,7 @@ class Challenge(models.Model):
                 )
                 if challenge.report_message_group_id:
                     challenge.report_message_group_id.message_post(
-                        body=body_html,
+                        body=Markup(body_html),
                         subtype_xmlid='mail.mt_comment',
                         email_layout_xmlid='mail.mail_notification_light',
                     )
@@ -723,7 +724,7 @@ class Challenge(models.Model):
 
                 challenge.message_post(
                     partner_ids=[user.partner_id.id for user in challenge.user_ids],
-                    body=message_body)
+                    body=Markup(message_body))
                 if commit:
                     commit()
 

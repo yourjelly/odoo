@@ -5,6 +5,7 @@ from odoo import SUPERUSER_ID, tools
 from odoo.http import request, route
 from odoo.addons.bus.controllers.main import BusController
 
+from markupsafe import Markup
 
 class MailChatController(BusController):
 
@@ -37,7 +38,7 @@ class MailChatController(BusController):
         message = mail_channel.with_context(mail_create_nosubscribe=True).message_post(
             author_id=author_id,
             email_from=email_from,
-            body=body,
+            body=Markup(body),
             message_type='comment',
             subtype_xmlid='mail.mt_comment'
         )

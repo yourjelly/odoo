@@ -3,6 +3,7 @@
 
 from odoo import api, fields, models, _
 
+from markupsafe import Markup
 
 class EventBoothRegistration(models.Model):
     """event.booth.registrations are used to allow multiple partners to book the same booth.
@@ -71,7 +72,7 @@ class EventBoothRegistration(models.Model):
         ])
         for order in other_registrations.sale_order_line_id.order_id:
             order.sudo().message_post(
-                body=body,
+                body=Markup(body),
                 partner_ids=order.user_id.partner_id.ids,
             )
             order.sudo()._action_cancel()

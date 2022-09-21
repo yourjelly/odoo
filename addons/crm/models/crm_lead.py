@@ -7,6 +7,7 @@ import threading
 from collections import OrderedDict, defaultdict
 from datetime import date, datetime, timedelta
 from psycopg2 import sql
+from markupsafe import Markup
 
 from odoo import api, fields, models, tools, SUPERUSER_ID
 from odoo.addons.iap.tools import iap_tools
@@ -1275,7 +1276,7 @@ class Lead(models.Model):
         meeting_usertime = fields.Datetime.to_string(fields.Datetime.context_timestamp(self, meet_date))
         html_time = "<time datetime='%s+00:00'>%s</time>" % (meeting_date, meeting_usertime)
         message = _("Meeting scheduled at '%s'<br> Subject: %s <br> Duration: %s") % (html_time, meeting_subject, duration)
-        return self.message_post(body=message)
+        return self.message_post(body=Markup(message))
 
     # ------------------------------------------------------------
     # MERGE AND CONVERT LEADS / OPPORTUNITIES

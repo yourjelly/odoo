@@ -3,6 +3,7 @@
 
 from odoo.tests import common
 
+from markupsafe import Markup
 
 class ChatbotCase(common.TransactionCase):
 
@@ -135,7 +136,7 @@ class ChatbotCase(common.TransactionCase):
 
     @classmethod
     def _post_answer_and_trigger_next_step(cls, mail_channel, answer, chatbot_script_answer=False):
-        mail_message = mail_channel.message_post(body=answer)
+        mail_message = mail_channel.message_post(body=Markup(answer))
         if chatbot_script_answer:
             cls.env['chatbot.message'].search([
                 ('mail_message_id', '=', mail_message.id)

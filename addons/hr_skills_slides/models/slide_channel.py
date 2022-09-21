@@ -4,6 +4,7 @@
 from odoo import fields, models, _
 from odoo.tools import html2plaintext
 
+from markupsafe import Markup
 
 class SlideChannelPartner(models.Model):
     _inherit = 'slide.channel.partner'
@@ -51,7 +52,7 @@ class SlideChannelPartner(models.Model):
                 msg = _('The employee has completed the course <a href="%(link)s">%(course)s</a>',
                     link=scp.channel_id.website_url,
                     course=scp.channel_id.name)
-                self.env.user.employee_id.message_post(body=msg)
+                self.env.user.employee_id.message_post(body=Markup(msg))
 
 class Channel(models.Model):
     _inherit = 'slide.channel'
@@ -63,7 +64,7 @@ class Channel(models.Model):
             msg = _('The employee subscribed to the course <a href="%(link)s">%(course)s</a>',
                 link=self.website_url,
                 course=self.name)
-            self.env.user.employee_id.message_post(body=msg)
+            self.env.user.employee_id.message_post(body=Markup(msg))
 
         return res
 
@@ -74,6 +75,6 @@ class Channel(models.Model):
             msg = _('The employee left the course <a href="%(link)s">%(course)s</a>',
                 link=self.website_url,
                 course=self.name)
-            self.env.user.employee_id.message_post(body=msg)
+            self.env.user.employee_id.message_post(body=Markup(msg))
 
         return res

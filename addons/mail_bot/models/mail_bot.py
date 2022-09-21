@@ -3,6 +3,7 @@
 
 import itertools
 import random
+from markupsafe import Markup
 
 from odoo import models, _
 
@@ -30,7 +31,7 @@ class MailBot(models.AbstractModel):
             if answer:
                 message_type = values.get('message_type', 'comment')
                 subtype_id = values.get('subtype_id', self.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment'))
-                record.with_context(mail_create_nosubscribe=True).sudo().message_post(body=answer, author_id=odoobot_id, message_type=message_type, subtype_id=subtype_id)
+                record.with_context(mail_create_nosubscribe=True).sudo().message_post(body=Markup(answer), author_id=odoobot_id, message_type=message_type, subtype_id=subtype_id)
 
     def _get_answer(self, record, body, values, command=False):
         # onboarding

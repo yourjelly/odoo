@@ -4,6 +4,7 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 
+from markupsafe import Markup
 
 class HrPlanWizard(models.TransientModel):
     _name = 'hr.plan.wizard'
@@ -91,7 +92,7 @@ class HrPlanWizard(models.TransientModel):
                 for activity in activities:
                     body += '<li>%s</li>' % activity
                 body += '</ul>'
-            employee.message_post(body=body)
+            employee.message_post(body=Markup(body))
 
         if len(self.employee_ids) == 1:
             return {

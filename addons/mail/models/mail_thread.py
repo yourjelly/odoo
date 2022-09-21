@@ -23,7 +23,7 @@ from email import message_from_string
 from lxml import etree
 from werkzeug import urls
 from xmlrpc import client as xmlrpclib
-from markupsafe import Markup
+from markupsafe import Markup,escape
 
 from odoo import _, api, exceptions, fields, models, tools, registry, SUPERUSER_ID, Command
 from odoo.exceptions import MissingError, AccessError
@@ -1241,7 +1241,7 @@ class MailThread(models.AbstractModel):
         if self._detect_loop_sender(message, msg_dict, routes):
             return
 
-        thread_id = self._message_route_process(message, msg_dict, routes)
+        thread_id = self._message_route_process(Markup(message), msg_dict, routes)
         return thread_id
 
     @api.model
@@ -1976,6 +1976,8 @@ class MailThread(models.AbstractModel):
             msg_values['email_add_signature'] = True
         if not msg_values.get('record_name'):
             msg_values['record_name'] = self.display_name
+        if '&lt;a' in escape(body) or '&lt;div' in escape(body) or '&lt;b' in escape(body) or '&lt;i' in escape(body):
+            raise Exception("Markup expected by message_post" + body) 
         msg_values.update({
             'author_id': author_id,
             'author_guest_id': author_guest_id,

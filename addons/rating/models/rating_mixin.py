@@ -256,7 +256,7 @@ class RatingMixin(models.AbstractModel):
             else:
                 self.message_post(
                     author_id=rating.partner_id.id or None,  # None will set the default author in mail_thread.py
-                    body=rating_body,
+                    body=markupsafe.Markup(rating_body),
                     rating_id=rating.id,
                     scheduled_date=scheduled_datetime,
                     subtype_id=subtype_id,

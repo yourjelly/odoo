@@ -3,6 +3,7 @@
 
 from collections import defaultdict
 from datetime import timedelta
+from markupsafe import Markup
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
@@ -1019,7 +1020,7 @@ class SaleOrderLine(models.Model):
                     msg += _("Delivered Quantity: %s", line.qty_delivered) + "<br/>"
                 msg += _("Invoiced Quantity: %s", line.qty_invoiced) + "<br/>"
             msg += "</ul>"
-            order.message_post(body=msg)
+            order.message_post(body=Markup(msg))
 
     def _check_line_unlink(self):
         """

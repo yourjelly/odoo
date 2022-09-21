@@ -6,6 +6,8 @@ from odoo.exceptions import UserError
 from odoo.osv.expression import AND
 from odoo.tools.float_utils import float_compare, float_is_zero, float_round
 
+from markupsafe import Markup
+
 class StockPickingBatch(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _name = "stock.picking.batch"
@@ -233,11 +235,11 @@ class StockPickingBatch(models.Model):
             if all(float_is_zero(line.qty_done, precision_rounding=line.product_uom_id.rounding) for line in picking.move_line_ids if line.state not in ('done', 'cancel')):
                 empty_pickings.add(picking.id)
             picking.message_post(
-                body="<b>%s:</b> %s <a href=#id=%s&view_type=form&model=stock.picking.batch>%s</a>" % (
+                body=Markup("<b>%s:</b> %s <a href=#id=%s&view_type=form&model=stock.picking.batch>%s</a>" % (
                     _("Transferred by"),
                     _("Batch Transfer"),
                     picking.batch_id.id,
-                    picking.batch_id.name))
+                    picking.batch_id.name)))
 
         if len(empty_pickings) == len(pickings):
             return pickings.button_validate()

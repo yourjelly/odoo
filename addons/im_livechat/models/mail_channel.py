@@ -6,7 +6,6 @@ from odoo.tools import email_normalize, html_escape, html2plaintext, plaintext2h
 
 from markupsafe import Markup
 
-
 class MailChannel(models.Model):
     """ Chat Session
         Reprensenting a conversation between users.
@@ -121,7 +120,7 @@ class MailChannel(models.Model):
                 return
             # Notify that the visitor has left the conversation
             self.message_post(author_id=self.env.ref('base.partner_root').id,
-                              body=self._get_visitor_leave_message(**kwargs), message_type='comment', subtype_xmlid='mail.mt_comment')
+                              body=Markup(self._get_visitor_leave_message(**kwargs)), message_type='comment', subtype_xmlid='mail.mt_comment')
 
     # Rating Mixin
 
@@ -185,7 +184,7 @@ class MailChannel(models.Model):
 
         return self.with_context(mail_create_nosubscribe=True).message_post(
             author_id=chatbot_script.operator_partner_id.id,
-            body=body,
+            body=Markup(body),
             message_type='comment',
             subtype_xmlid='mail.mt_comment',
         )

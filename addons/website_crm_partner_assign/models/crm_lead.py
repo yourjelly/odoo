@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import random
+from markupsafe import Markup
 
 from odoo import api, fields, models, _
 from odoo.exceptions import AccessDenied, AccessError, UserError
@@ -193,7 +194,7 @@ class CrmLead(models.Model):
         if comment:
             message += '<p>%s</p>' % html_escape(comment)
         for lead in self:
-            lead.message_post(body=message)
+            lead.message_post(body=Markup(message))
             lead.sudo().convert_opportunity(lead.partner_id)  # sudo required to convert partner data
 
     def partner_desinterested(self, comment=False, contacted=False, spam=False):
@@ -206,7 +207,7 @@ class CrmLead(models.Model):
         self.message_unsubscribe(partner_ids=partner_ids.ids)
         if comment:
             message += '<p>%s</p>' % html_escape(comment)
-        self.message_post(body=message)
+        self.message_post(body=Markup(message))
         values = {
             'partner_assigned_id': False,
         }
