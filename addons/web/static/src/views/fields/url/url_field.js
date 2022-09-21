@@ -5,11 +5,18 @@ import { _lt } from "@web/core/l10n/translation";
 import { useInputField } from "../input_field_hook";
 import { standardFieldProps } from "../standard_field_props";
 
-const { Component } = owl;
+const { Component, useState } = owl;
 
 export class UrlField extends Component {
     setup() {
         useInputField({ getValue: () => this.props.value || "" });
+        this.state = useState({
+            isEditing: !this.canDisplayAsLink,
+        });
+    }
+
+    get canDisplayAsLink() {
+        return Boolean(this.props.value);
     }
 
     get formattedHref() {
@@ -23,6 +30,13 @@ export class UrlField extends Component {
             value = shouldaddPrefix ? `http://${this.props.value}` : this.props.value;
         }
         return value;
+    }
+
+    toggleEdition(ev, shouldSave) {
+        if (shouldSave) {
+            this.props.update(ev.target.previousElementSibling.value);
+        }
+        this.state.isEditing = !this.state.isEditing;
     }
 }
 
@@ -46,3 +60,10 @@ UrlField.extractProps = ({ attrs }) => {
 };
 
 registry.category("fields").add("url", UrlField);
+
+export class ListUrlField extends UrlField {
+    get canDisplayAsLink() {
+        return this.props.readonly;
+    }
+}
+registry.category("fields").add("list.url", ListUrlField);

@@ -37,8 +37,7 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.module("UrlField");
 
-    // MCM SKIP
-    QUnit.skip("UrlField in form view", async function (assert) {
+    QUnit.test("UrlField in form view", async function (assert) {
         await makeView({
             serverData,
             type: "form",
@@ -64,8 +63,8 @@ QUnit.module("Fields", (hooks) => {
         );
         assert.strictEqual(matchingEl.textContent, "yop", "the value should be displayed properly");
 
-        // switch to edit mode and check the result
-        await click(target.querySelector(".o_form_button_edit"));
+        // edit the field and check the result
+        await click(target.querySelector(".o_field_widget .fa-pencil"));
         assert.containsOnce(
             target,
             '.o_field_widget input[type="text"]',
@@ -80,7 +79,7 @@ QUnit.module("Fields", (hooks) => {
         await editInput(target, ".o_field_widget input[type='text']", "limbo");
 
         // save
-        await click(target.querySelector(".o_form_button_save"));
+        await click(target.querySelector(".o_field_widget .fa-eye"));
         const editedElement = target.querySelector("a.o_field_widget.o_form_uri");
         assert.containsOnce(
             target,
@@ -95,10 +94,10 @@ QUnit.module("Fields", (hooks) => {
         );
         assert.strictEqual(editedElement.textContent, "limbo", "the new value should be displayed");
 
-        await click(target.querySelector(".o_form_button_edit"));
+        await click(target.querySelector(".o_field_widget .fa-pencil"));
         await editInput(target, ".o_field_widget input[type='text']", "/web/limbo");
 
-        await click(target.querySelector(".o_form_button_save"));
+        await click(target.querySelector(".o_field_widget .fa-eye"));
         assert.hasAttrValue(
             target.querySelector(".o_field_widget[name='foo'] a"),
             "href",
@@ -107,8 +106,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    // MCM SKIP
-    QUnit.skip("UrlField takes text from proper attribute", async function (assert) {
+    QUnit.test("UrlField takes text from proper attribute", async function (assert) {
         await makeView({
             serverData,
             type: "form",
@@ -124,8 +122,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    // MCM SKIP
-    QUnit.skip("UrlField: href attribute and website_path option", async function (assert) {
+    QUnit.test("UrlField: href attribute and website_path option", async function (assert) {
         serverData.models.partner.fields.url1 = {
             string: "Url 1",
             type: "char",
