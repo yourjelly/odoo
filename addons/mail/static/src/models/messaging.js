@@ -93,6 +93,9 @@ addRecordMethods('Messaging', {
         const { message, ...options } = params;
         return this.env.services.notification.add(message, options);
     },
+    onClickEmoji(ev) {
+        this.messaging.messagingBus.trigger('add_emoji', { emoji: ev.currentTarget.dataset.codepoints });
+    },
     /**
      * Opens a chat with the provided person and returns it.
      *
@@ -278,6 +281,9 @@ addFields('Messaging', {
         default: {},
         isCausal: true,
         readonly: true,
+    }),
+    emojiPicker: one('PopoverView', {
+        inverse: 'messagingEmojiPicker'
     }),
     emojiRegistry: one('EmojiRegistry', {
         default: {},

@@ -59,7 +59,7 @@ For more specific needs, you may also assign custom-defined actions
 (technically: Server Actions) to be triggered for each incoming mail.
     """,
     'website': 'https://www.odoo.com/app/discuss',
-    'depends': ['base', 'base_setup', 'bus', 'web_tour'],
+    'depends': ['base', 'base_setup', 'bus', 'web_tour', 'web_editor'],
     'data': [
         'data/mail_groups.xml',
         'wizard/mail_blacklist_remove_views.xml',
@@ -178,6 +178,9 @@ For more specific needs, you may also assign custom-defined actions
         ],
         'web._assets_primary_variables': [
             'mail/static/src/scss/variables/primary_variables.scss',
+        ],
+        'web_editor.assets_wysiwyg': [
+            'mail/static/src/web_editor_emoji_command/*',
         ],
         'web.assets_backend': [
             # depends on BS variables, can't be loaded in assets_primary or assets_secondary
