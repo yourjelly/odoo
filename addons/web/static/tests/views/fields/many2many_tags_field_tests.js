@@ -20,6 +20,7 @@ import {
     triggerHotkey,
 } from "@web/../tests/helpers/utils";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
+import { registry } from "@web/core/registry";
 
 let serverData;
 let target;
@@ -66,10 +67,19 @@ QUnit.module("Fields", (hooks) => {
                     fields: {
                         name: { string: "Partner Type", type: "char" },
                         color: { string: "Color index", type: "integer" },
+                        status: {
+                            string: "Status",
+                            type: "selection",
+                            selection: [
+                                [1, "Low"],
+                                [2, "Medium"],
+                                [3, "High"],
+                            ],
+                        },
                     },
                     records: [
-                        { id: 12, display_name: "gold", color: 2 },
-                        { id: 14, display_name: "silver", color: 5 },
+                        { id: 12, display_name: "gold", color: 2, status: false },
+                        { id: 14, display_name: "silver", color: 5, status: 1 },
                     ],
                 },
                 turtle: {
@@ -352,6 +362,32 @@ QUnit.module("Fields", (hooks) => {
         click(target.querySelector(".o_field_many2many_tags .badge :nth-child(1)"));
         assert.verifySteps(["selectRecord"]);
         await nextTick();
+
+        assert.containsNone(target, ".o_colorlist");
+    });
+
+    QUnit.test("extend Many2ManyTagsField with fieldsToFetch", async function (assert) {
+        serverData.models.partner.records[0].timmy = [12, 14];
+        patchWithCleanup(registry.category("fields").get("many2many_tags"), {
+            fieldsToFetch: { status: { type: "selection" } },
+        });
+
+        await makeView({
+            type: "list",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <tree>
+                    <field name="timmy" widget="many2many_tags"/>
+                    <field name="foo"/>
+                </tree>`,
+            selectRecord: () => {
+                assert.step("selectRecord");
+            },
+        });
+
+        assert.containsN(target, ".o_field_many2many_tags .badge", 2, "there should be 2 tags");
+        assert.containsNone(target, ".badge.dropdown-toggle", "the tags should not be dropdowns");
 
         assert.containsNone(target, ".o_colorlist");
     });
