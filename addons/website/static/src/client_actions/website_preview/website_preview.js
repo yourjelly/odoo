@@ -9,6 +9,7 @@ import { WebsiteTranslator } from '../../components/translator/translator';
 import { unslugHtmlDataObject } from '../../services/website_service';
 import {OptimizeSEODialog} from '@website/components/dialog/seo';
 import { routeToUrl } from "@web/core/browser/router_service";
+import { getFaviconEl } from 'website.utils';
 
 const { Component, onWillStart, onMounted, onWillUnmount, useRef, useEffect, useState } = owl;
 
@@ -93,6 +94,34 @@ export class WebsitePreview extends Component {
             this.websiteService.websiteRootInstance = undefined;
             this.websiteService.pageDocument = null;
         });
+
+        /**
+         * This removes the 'Odoo' prefix of the title service to display
+         * cleanly the frontend's document title (see _replaceBrowserUrl), and
+         * replaces the backend favicon with the frontend's one.
+         * These changes are reverted when the component is unmounted.
+         */
+        useEffect(() => {
+            const backendIconEl = getFaviconEl();
+            // Save initial backend values.
+            const { href: backendIconHref } = backendIconEl;
+            const { zopenerp } = this.title.getParts();
+            this.iframe.el.addEventListener('load', () => {
+                // Replace backend values with frontend's ones.
+                this.title.setParts({ zopenerp: null });
+                const frontendIconEl = getFaviconEl(this.iframe.el.contentDocument);
+                if (frontendIconEl) {
+                    backendIconEl.href = frontendIconEl.href;
+                }
+            }, { once: true });
+            return () => {
+                // Restore backend initial values when leaving.
+                this.title.setParts({ zopenerp, action: null });
+                if (backendIconEl.href !== backendIconHref) {
+                    backendIconEl.href = backendIconHref;
+                }
+            };
+        }, () => []);
 
         useEffect(() => {
             // When reaching a "regular" url of the webclient's router, an

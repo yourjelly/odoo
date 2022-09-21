@@ -382,6 +382,18 @@ function generateGMapLink(dataset) {
         + '&ie=UTF8&iwloc=&output=embed';
 }
 
+/**
+ * @param {Document} doc
+ * @returns {HTMLElement}
+ */
+function getFaviconEl(doc = document) {
+    let faviconEl = doc.querySelector("link[rel='icon']");
+    if (!faviconEl) {
+        faviconEl = doc.querySelector("link[rel='shortcut icon']");
+    }
+    return faviconEl;
+}
+
 return {
     loadAnchors: loadAnchors,
     autocompleteWithPages: autocompleteWithPages,
@@ -392,5 +404,6 @@ return {
     svgToPNG: svgToPNG,
     generateGMapIframe: generateGMapIframe,
     generateGMapLink: generateGMapLink,
+    getFaviconEl,
 };
 });
