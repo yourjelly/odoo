@@ -32,7 +32,11 @@ export class FormStatusIndicator extends Component {
     }
     async save() {
         this.state.disableBtns = true;
-        await this.props.save();
+        try {
+            await this.props.save();
+        } catch {
+            // could not save, should re-enable button
+        }
         this.state.disableBtns = false;
     }
 }

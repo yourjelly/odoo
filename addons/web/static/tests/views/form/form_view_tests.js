@@ -8810,8 +8810,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    // MCM SKIP
-    QUnit.skip("form view is not broken if save operation fails", async function (assert) {
+    QUnit.test("form view is not broken if save operation fails", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -10183,7 +10182,6 @@ QUnit.module("Views", (hooks) => {
 
         const webClient = await createWebClient({ serverData });
         await doAction(webClient, 1);
-
         await click(target.querySelector(".o_control_panel .o-kanban-button-new"));
 
         //cannot save because there is a required field
