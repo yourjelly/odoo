@@ -595,8 +595,8 @@ class Registry(Mapping):
             This method should only be used for testing because the cache long
             term is not supposed to be invalidated.
         """
-        if not self.in_test_mode():
-            _logger.warning("The long term cache cannot be invalidated.")
+        # if not self.in_test_mode():
+        #     _logger.warning("The long term cache cannot be invalidated.")
         self.__ormcache_longterm.clear()
 
     def clear_caches(self):

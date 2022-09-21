@@ -7,6 +7,7 @@ import os.path
 import re
 import markupsafe
 
+from datetime import datetime
 from lxml import etree, html
 from lxml.builder import E
 from copy import deepcopy
@@ -1531,10 +1532,16 @@ class TestQWebBasic(TransactionCase):
 
         partner.barcode = '4012345678901'
         view.arch = """<div t-field="partner.barcode" t-options="{'widget': 'barcode', 'symbology': 'EAN13', 'width': 100, 'height': 30, 'img_style': 'width:100%;', 'img_alt': 'Barcode'}"/>"""
+        # Force the write_date because cache long term use to generate the key.
+        # Write_date is filtered in write method, we must change the cache to update the db value.
+        # Note that it seems that _render + write + _render (in the same request) can lead to incoherent result
+        # Also because the write_date doesn't change for all transaction
+        self.env.transaction.cache.set(view, type(view).write_date, datetime.now(), dirty=True)
         ean_rendered = self.env['ir.qweb']._render(view.id, values={'partner': partner}).strip()
         self.assertRegex(ean_rendered, r'<div><img style="width:100%;" alt="Barcode" src="data:image/png;base64,\S+"></div>')
 
         view.arch = """<div t-field="partner.barcode" t-options="{'widget': 'barcode', 'symbology': 'auto', 'width': 100, 'height': 30, 'img_style': 'width:100%;', 'img_alt': 'Barcode'}"/>"""
+        self.env.transaction.cache.set(view, type(view).write_date, datetime.now(), dirty=True)
         auto_rendered = self.env['ir.qweb']._render(view.id, values={'partner': partner}).strip()
         self.assertRegex(auto_rendered, r'<div><img style="width:100%;" alt="Barcode" src="data:image/png;base64,\S+"></div>')
 
@@ -1575,7 +1582,6 @@ class TestQWebBasic(TransactionCase):
             QWeb.with_context(preserve_comments=False)._render(view.id),
             markupsafe.Markup('<p></p>'),
             "Should not have the comment")
-        QWeb.clear_caches()
         self.assertEqual(
             QWeb.with_context(preserve_comments=True)._render(view.id),
             markupsafe.Markup(f'<p>{comment}</p>'),
@@ -1596,7 +1602,6 @@ class TestQWebBasic(TransactionCase):
             QWeb.with_context(preserve_comments=False)._render(view.id),
             markupsafe.Markup('<p></p>'),
             "Should not have the processing instruction")
-        QWeb.clear_caches()
         self.assertEqual(
             QWeb.with_context(preserve_comments=True)._render(view.id),
             markupsafe.Markup(f'<p>{p_instruction}</p>'),

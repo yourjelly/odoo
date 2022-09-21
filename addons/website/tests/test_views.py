@@ -5,6 +5,7 @@ import unittest
 from itertools import zip_longest
 from lxml import etree as ET, html
 from lxml.html import builder as h
+from datetime import datetime
 
 from odoo.tests import common, HttpCase, tagged
 
@@ -217,6 +218,7 @@ class TestViewSaving(TestViewSavingCommon):
         # common text nodes should be be escaped client side
         replacement = u'world &amp;amp; &amp;lt;b&amp;gt;cie'
         view.save(replacement, xpath='/t/p')
+        self.env.transaction.cache.set(view, type(view).write_date, datetime.now(), dirty=True)
         self.assertIn(replacement, view.arch, 'common text node should not be escaped server side')
         self.assertIn(
             replacement,
