@@ -18,6 +18,7 @@ class AccountMove(models.Model):
     l10n_ke_control_unit_code = fields.Char(string="Control unit code")
     l10n_ke_control_unit_signing_datetime = fields.Char(string="Control unit date and time")
     l10n_ke_control_unit_serial_number = fields.Char(string="Control unit serial number")
+    l10n_ke_middleware_number = fields.Integer(string="Middleware integer invoice")
 
     # -------------------------------------------------------------------------
     # HELPERS
@@ -158,10 +159,14 @@ class AccountMove(models.Model):
                 " applied to this invoice."
             ))
 
-        invoice.l10n_ke_qrcode = response['qrCode']
-        invoice.l10n_ke_control_unit_code = response['controlCode']
-        invoice.l10n_ke_control_unit_signing_datetime = response['systemSigningDate']
-        invoice.l10n_ke_control_unit_serial_number = response['serialNo']
-        invoice_dict = {'request': json.loads(invoice.l10n_ke_json),
-                        'response': response}
-        invoice.l10n_ke_json = json.dumps(invoice_dict)
+        invoice.update({
+            'l10n_ke_qrcode': response['qrCode'],
+            'l10n_ke_control_unit_code': response['controlCode'],
+            'l10n_ke_control_unit_signing_datetime': response['systemSigningDate'],
+            'l10n_ke_control_unit_serial_number': response['serialNo'],
+            'l10n_ke_middleware_number': response['middlewareInvoiceNumber'],
+            'l10n_ke_json': json.dumps({
+                'request': json.loads(invoice.l10n_ke_json),
+                'response': response,
+            })
+        })
