@@ -661,7 +661,7 @@ class IrHttp(models.AbstractModel):
 
     @api.model
     def url_rewrite(self, path, query_args=None):
-        cache_key = self.get_rewrite_cache_key()
+        cache_key = self._get_url_rewrite_cache_key()
         return self._cached_url_rewrite(path, query_args=query_args, cache_key=cache_key)
 
     @api.model
