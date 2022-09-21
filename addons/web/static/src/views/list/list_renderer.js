@@ -676,7 +676,7 @@ export class ListRenderer extends Component {
             if (record.isRequired(column.name)) {
                 classNames.push("o_required_modifier");
             }
-            if (record.isInvalid(column.name)) {
+            if (record.isInvalid(column.name) && record.isDirty) {
                 classNames.push("o_invalid_cell");
             }
             if (this.canUseFormatter(column, record)) {

@@ -840,14 +840,15 @@ export class StaticList extends DataPoint {
             const editedRecord = this.editedRecord;
             if (editedRecord && editedRecord.id === record.id && mode === "readonly") {
                 const valid = await record.checkValidity();
-                if (valid) {
+                if (valid || !record.isDirty) {
                     this.editedRecord = null;
+                    return true;
                 }
-                return valid;
+                return false;
             }
             if (editedRecord) {
                 const isValid = await editedRecord.checkValidity();
-                if (!isValid) {
+                if (!isValid && editedRecord.isDirty) {
                     if (editedRecord.canBeAbandoned) {
                         this.abandonRecord(editedRecord.id);
                     } else {
