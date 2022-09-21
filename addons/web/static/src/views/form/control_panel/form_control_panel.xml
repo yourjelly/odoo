@@ -12,7 +12,7 @@
                         <t t-slot="control-panel-status-indicator" />
                     </t>
                 </div>
-                <div class="o_cp_bottom_right w-auto flex-grow-1 flex-shrink-1">
+                <div class="o_cp_bottom_right w-auto">
                     <t t-slot="control-panel-action-menu" t-if="display['bottom-left']"/>
                     <div class="o_cp_pager" role="search">
                         <Pager t-if="pagerProps and pagerProps.total > 0" t-props="pagerProps"/>

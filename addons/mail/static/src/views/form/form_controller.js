@@ -17,6 +17,7 @@ patch(FormController.prototype, "mail", {
     setup() {
         this._super();
         this.uiService = useService("ui");
+        this.hasAttachmentViewer = false;
 
         if (this.uiService.size >= SIZES.XXL) {
             if (this.env.services.messaging) {
@@ -29,12 +30,14 @@ patch(FormController.prototype, "mail", {
             const template = document.createElement("t");
             const xmlDocAttachmentPreview = xmlDoc.querySelector("div.o_attachment_preview");
             if (xmlDocAttachmentPreview && xmlDocAttachmentPreview.parentNode.nodeName === "form") {
+                // TODO hasAttachmentViewer should also depend on the groups= and/or invisible modifier on o_attachment_preview (see invoice form)
                 template.appendChild(xmlDocAttachmentPreview);
-            }
-
-            const xmlDocChatter = xmlDoc.querySelector("div.oe_chatter");
-            if (xmlDocChatter && xmlDocChatter.parentNode.nodeName === "form") {
-                template.appendChild(xmlDocChatter);
+                this.hasAttachmentViewer = true;
+            } else {
+                const xmlDocChatter = xmlDoc.querySelector("div.oe_chatter");
+                if (xmlDocChatter && xmlDocChatter.parentNode.nodeName === "form") {
+                    template.appendChild(xmlDocChatter);
+                }
             }
 
             const mailTemplates = useViewCompiler(MailFormCompiler, arch, { Mail: template }, {});

@@ -153,9 +153,9 @@ registry.category("form_compilers").add("attachment_preview_compiler", {
 });
 
 patch(FormCompiler.prototype, 'mail', {
-    compile() {
+    compile(node, params) {
         // TODO no chatter if in dialog?
-        const res = this._super(...arguments);
+        const res = this._super(node, params);
         const chatterContainerHookXml = res.querySelector('.o_FormRenderer_chatterContainer');
         if (!chatterContainerHookXml) {
             return res; // no chatter, keep the result as it is
@@ -173,13 +173,8 @@ patch(FormCompiler.prototype, 'mail', {
         if (!parentXml) {
             return res; // miss-config: a sheet-bg is required for the rest
         }
-        const webClientViewAttachmentViewHookXml = res.querySelector('.o_attachment_preview');
-        // TODO hasAttachmentViewer should also depend on the groups= and/or invisible modifier on o_attachment_preview (see invoice form)
-        if (webClientViewAttachmentViewHookXml) {
+        if (params.hasAttachmentViewer) {
             // in sheet bg (attachment viewer present)
-            setAttributes(webClientViewAttachmentViewHookXml, {
-                't-if': `hasAttachmentViewer() and uiService.size >= ${SIZES.XXL}`,
-            });
             const sheetBgChatterContainerHookXml = chatterContainerHookXml.cloneNode(true);
             sheetBgChatterContainerHookXml.classList.add('o-isInFormSheetBg');
             setAttributes(sheetBgChatterContainerHookXml, {
@@ -194,7 +189,7 @@ patch(FormCompiler.prototype, 'mail', {
             });
         }
         // after sheet bg (standard position, either aside or below)
-        if (webClientViewAttachmentViewHookXml) {
+        if (params.hasAttachmentViewer) {
             setAttributes(chatterContainerHookXml, {
                 't-if': `!(hasAttachmentViewer() and uiService.size >= ${SIZES.XXL})`,
                 't-attf-class': `{{ uiService.size >= ${SIZES.XXL} and !(hasAttachmentViewer() and uiService.size >= ${SIZES.XXL}) ? "o-aside" : "" }}`,
