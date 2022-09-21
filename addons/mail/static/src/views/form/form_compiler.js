@@ -66,28 +66,6 @@ function compileAttachmentPreview(node, params) {
     return webClientViewAttachmentViewContainerHookXml;
 }
 
-function compile(res, inSheet) {
-    const chatterContainerHookXml = res.querySelector(".o_FormRenderer_chatterContainer");
-    if (!chatterContainerHookXml) {
-        return res; // no chatter, keep the result as it is
-    }
-
-    const chatterContainerXml = chatterContainerHookXml.querySelector("ChatterContainer");
-    if (inSheet) {
-        setAttributes(chatterContainerXml, {
-            hasExternalBorder: "true",
-            hasMessageListScrollAdjust: "false",
-        });
-        return res; // if chatter is inside sheet, keep it there
-    }
-
-    setAttributes(chatterContainerHookXml, {
-        "t-attf-class": `{{ uiService.size >= ${SIZES.XXL} ? "o-aside" : "" }}`,
-    });
-
-    return res;
-}
-
 export class MailFormCompiler extends ViewCompiler {
     setup() {
         this.compilers.push({ selector: "t", fn: this.compileT });
@@ -99,8 +77,18 @@ export class MailFormCompiler extends ViewCompiler {
     }
 
     compile(node, params) {
-        const res = super.compile(node, params);
-        return compile(res.children[0], false);
+        const res = super.compile(node, params).children[0];
+        const chatterContainerHookXml = res.querySelector(".o_FormRenderer_chatterContainer");
+        if (!chatterContainerHookXml) {
+            return res; // no chatter, keep the result as it is
+        }
+
+        setAttributes(chatterContainerHookXml, {
+            "t-if": `uiService.size >= ${SIZES.XXL}`,
+            "t-attf-class": `{{ uiService.size >= ${SIZES.XXL} ? "o-aside" : "" }}`,
+        });
+
+        return res;
     }
 
     compileT(node, params) {
@@ -206,6 +194,7 @@ patch(FormCompiler.prototype, 'mail', {
                 "hasMessageListScrollAdjust": `uiService.size >= ${SIZES.XXL}`,
             });
             setAttributes(chatterContainerHookXml, {
+                't-if': `uiService.size < ${SIZES.XXL}`,
                 't-attf-class': `{{ uiService.size >= ${SIZES.XXL} ? "o-aside" : "" }}`,
             });
         }
