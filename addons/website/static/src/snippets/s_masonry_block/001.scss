@@ -3,3 +3,15 @@
     flex-direction: column;
     justify-content: center;
 }
+
+.s_masonry_block[data-vcss='001'] .row.o_grid_mode {
+    --grid-item-padding-y: 0px;
+    --grid-item-padding-x: 0px;
+
+    > div {
+        @include media-breakpoint-down(md) {
+            padding-top: 24px !important;
+            padding-bottom: 8px !important;
+        }
+    }
+}
