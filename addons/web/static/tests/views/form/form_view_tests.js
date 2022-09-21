@@ -6474,129 +6474,6 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    // MCM SKIP
-    QUnit.skip(
-        "oe_read_only and oe_edit_only classNames on fields inside groups",
-        async function (assert) {
-            await makeView({
-                type: "form",
-                resModel: "partner",
-                serverData,
-                arch: `
-                    <form>
-                        <group>
-                            <field name="foo" class="oe_read_only"/>
-                            <field name="bar" class="oe_edit_only"/>
-                        </group>
-                    </form>`,
-                resId: 1,
-            });
-
-            assert.isVisible(target.querySelector(".o_field_widget[name=foo]"));
-            assert.isVisible(target.querySelector(".o_form_label"));
-            assert.isNotVisible(target.querySelector(".o_field_widget[name=bar]"));
-            assert.isNotVisible(target.querySelectorAll(".o_form_label")[1]);
-
-            await click(target.querySelector(".o_form_button_edit"));
-            assert.containsOnce(
-                target,
-                ".o_form_view .o_form_editable",
-                "form should be in readonly mode"
-            );
-            assert.isNotVisible(target.querySelector(".o_field_widget[name=foo]"));
-            assert.isNotVisible(target.querySelector(".o_form_label"));
-            assert.isVisible(target.querySelector(".o_field_widget[name=bar]"));
-            assert.isVisible(target.querySelectorAll(".o_form_label")[1]);
-        }
-    );
-
-    QUnit.skip("oe_read_only className is handled in list views", async function (assert) {
-        await makeView({
-            type: "form",
-            resModel: "partner",
-            serverData,
-            arch: `
-                <form>
-                    <sheet>
-                        <field name="p">
-                            <tree editable="top">
-                                <field name="foo"/>
-                                <field name="display_name" class="oe_read_only"/>
-                                <field name="bar"/>
-                            </tree>
-                        </field>
-                    </sheet>
-                </form>`,
-            resId: 1,
-        });
-
-        assert.strictEqual(
-            target.querySelector('th[data-name="foo"]').style.width,
-            "100%",
-            'As the only visible char field, "foo" should take 100% of the remaining space'
-        );
-
-        assert.containsNone(
-            target,
-            "th.oe_read_only",
-            'the column with "oe_read_only" should not be visible in edit mode'
-        );
-        assert.containsOnce(target, ".o_form_view .o_form_editable", "form should be in edit mode");
-        assert.isNotVisible(
-            target.querySelector('th[data-name="display_name"]'),
-            "display_name cell should not be visible in edit mode"
-        );
-
-        await click(target.querySelector(".o_field_x2many_list_row_add a"));
-
-        assert.containsNone(
-            target,
-            "th.oe_read_only",
-            'the column with "oe_read_only" should not be visible in edit mode'
-        );
-
-        await clickSave(target);
-
-        assert.doesNotHaveClass(
-            target.querySelector('[name="display_name"]'),
-            "oe_read_only",
-            "display_name input should not have oe_read_only class"
-        );
-    });
-
-    QUnit.test("oe_edit_only className is handled in list views", async function (assert) {
-        await makeView({
-            type: "form",
-            resModel: "partner",
-            serverData,
-            arch: `
-                <form>
-                    <sheet>
-                        <field name="p">
-                            <tree editable="top">
-                                <field name="foo"/>
-                                <field name="display_name" class="oe_edit_only"/>
-                                <field name="bar"/>
-                            </tree>
-                        </field>
-                    </sheet>
-                </form>`,
-            resId: 1,
-        });
-
-        assert.containsOnce(target, ".o_form_view .o_form_editable", "form should be in edit mode");
-        assert.isVisible(
-            target.querySelector('.o_field_one2many thead th[data-name="display_name"]'),
-            "display_name cell should be visible in edit mode"
-        );
-
-        await click(target.querySelector(".o_field_x2many_list_row_add a"));
-        assert.isVisible(
-            target.querySelector(".o_selected_row .o_data_cell.oe_edit_only"),
-            "display_name cell should be visible in edit mode"
-        );
-    });
-
     QUnit.test("*_view_ref in context are passed correctly", async function (assert) {
         serverData.views = {
             "partner_type,module.tree_view_ref,list": "<tree/>",
@@ -8933,7 +8810,8 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.test("form view is not broken if save operation fails", async function (assert) {
+    // MCM SKIP
+    QUnit.skip("form view is not broken if save operation fails", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",

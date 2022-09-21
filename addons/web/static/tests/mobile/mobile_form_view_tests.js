@@ -133,44 +133,6 @@ QUnit.module("Mobile Views", ({ beforeEach }) => {
         }
     );
 
-    // MCM SKIP
-    QUnit.skip(
-        `statusbar "Action" button not displayed in edit mode with .oe_read_only button`,
-        async (assert) => {
-            await makeView({
-                type: "form",
-                resModel: "partner",
-                serverData,
-                arch: `
-                    <form>
-                        <header>
-                            <button string="Share" type="action" class="oe_highlight oe_read_only" />
-                            <button string="Email" type="action" class="oe_highlight oe_read_only" />
-                        </header>
-                        <sheet>
-                            <group>
-                                <field name="display_name" />
-                            </group>
-                        </sheet>
-                    </form>
-                `,
-            });
-
-            assert.containsNone(
-                fixture,
-                ".o_statusbar_buttons .dropdown",
-                "dropdown should not be there"
-            );
-
-            await clickSave(fixture);
-            assert.containsOnce(
-                fixture,
-                ".o_statusbar_buttons .dropdown",
-                "dropdown should not be there"
-            );
-        }
-    );
-
     QUnit.test(
         `statusbar "Action" button shouldn't be displayed for only one visible button`,
         async (assert) => {

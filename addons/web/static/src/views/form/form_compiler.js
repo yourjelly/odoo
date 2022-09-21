@@ -331,13 +331,6 @@ export class FormCompiler extends ViewCompiler {
                             : `props.record.fields.${fieldName}.string`,
                         fieldInfo: `props.archInfo.fieldNodes[${fieldId}]`,
                     };
-                    // note: remove this oe_read/edit_only logic when form view
-                    // will always be in edit mode
-                    if (child.classList.contains("oe_read_only")) {
-                        props.className = `'oe_read_only'`;
-                    } else if (child.classList.contains("oe_edit_only")) {
-                        props.className = `'oe_edit_only'`;
-                    }
                     mainSlot.setAttribute("props", objectToString(props));
                     mainSlot.setAttribute("Component", "constructor.components.FormLabel");
                     mainSlot.setAttribute("subType", "'item_component'");
@@ -424,9 +417,6 @@ export class FormCompiler extends ViewCompiler {
             const slot = createElement("t", {
                 "t-set-slot": `button_${slotId++}`,
                 isVisible: button.getAttribute("t-if") || true,
-                displayInReadOnly:
-                    button.hasAttribute("className") &&
-                    button.getAttribute("className").includes("oe_read_only"),
             });
             append(slot, button);
             append(statusBarButtons, slot);

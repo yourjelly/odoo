@@ -10243,40 +10243,6 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(target.querySelector('th[data-name="date"]').offsetWidth, width);
     });
 
-    QUnit.test("editable one2many list with oe_read_only button", async function (assert) {
-        await makeView({
-            type: "form",
-            resModel: "partner",
-            serverData,
-            arch: `
-                <form>
-                    <field name="turtles">
-                        <tree editable="bottom">
-                            <field name="turtle_foo"/>
-                            <button name="do_it" type="object" class="oe_read_only"/>
-                        </tree>
-                    </field>
-                </form>`,
-            resId: 1,
-        });
-
-        // // should have two visible columns in readonly: foo + readonly button
-        // assert.containsOnce(target, ".o_form_view .o_form_readonly");
-        // assert.containsN(target, ".o_field_x2many_list thead th", 2);
-        // assert.containsN(target, ".o_field_x2many_list tbody .o_data_row td", 2);
-        // assert.containsN(target, ".o_field_x2many_list tfoot td", 2);
-        // assert.containsNone(target, ".o_list_actions_header");
-
-        // await clickEdit(target);
-
-        // should have two visible columns in edit: foo + trash
-        assert.containsOnce(target, ".o_form_view .o_form_editable");
-        assert.containsN(target, ".o_field_x2many_list thead th", 2);
-        assert.containsN(target, ".o_field_x2many_list tbody .o_data_row td", 2);
-        assert.containsN(target, ".o_field_x2many_list tfoot td", 2);
-        assert.containsOnce(target, ".o_list_actions_header");
-    });
-
     QUnit.test(
         "one2many reset by onchange (of another field) while being edited",
         async function (assert) {

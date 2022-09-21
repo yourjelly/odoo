@@ -235,7 +235,7 @@ QUnit.module("Form Compiler", (hooks) => {
         const expected = /*xml*/ `
             <div class="o_form_statusbar position-relative d-flex justify-content-between border-bottom">
                <StatusBarButtons readonly="!props.record.isInEdition">
-                  <t t-set-slot="button_0" isVisible="true" displayInReadOnly="false">
+                  <t t-set-slot="button_0" isVisible="true">
                      <div>someDiv</div>
                   </t>
                </StatusBarButtons>
