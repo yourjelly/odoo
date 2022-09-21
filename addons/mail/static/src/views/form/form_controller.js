@@ -5,7 +5,6 @@ import { ChatterContainer } from "@mail/components/chatter_container/chatter_con
 import { WebClientViewAttachmentViewContainer } from "@mail/components/web_client_view_attachment_view_container/web_client_view_attachment_view_container";
 
 import { browser } from "@web/core/browser/browser";
-import { SIZES } from "@web/core/ui/ui_service";
 import { useService } from "@web/core/utils/hooks";
 import { patch } from "@web/core/utils/patch";
 import { useDebounced } from "@web/core/utils/timing";
