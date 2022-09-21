@@ -650,18 +650,8 @@ class IrHttp(models.AbstractModel):
         return response
 
     @api.model
-    @tools.ormcache()
-    def _get_url_rewrite_cache_key(self):
-        self.env.cr.execute("""
-            SELECT SUM(extract(epoch from r.write_date)), array_agg(r.id)
-            FROM website_rewrite as r
-        """)
-        write_sum, ids = self.env.cr.fetchone()
-        return write_sum, tuple(ids)
-
-    @api.model
     def url_rewrite(self, path, query_args=None):
-        cache_key = self._get_url_rewrite_cache_key()
+        cache_key = self.env['website']._get_cache_longterm_key(), self.env['website.rewrite']._get_cache_longterm_key()
         return self._cached_url_rewrite(path, query_args=query_args, cache_key=cache_key)
 
     @api.model

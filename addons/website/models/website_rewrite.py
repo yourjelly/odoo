@@ -4,7 +4,7 @@
 import re
 import werkzeug
 
-from odoo import models, fields, api, _
+from odoo import models, fields, api, _, tools
 from odoo.exceptions import ValidationError
 
 import logging
@@ -100,6 +100,13 @@ class WebsiteRewrite(models.Model):
                     routing_map.add(rule)
                 except ValueError as e:
                     raise ValidationError(_('"URL to" is invalid: %s') % e)
+
+    @api.model
+    @tools.ormcache()
+    def _get_cache_longterm_key(self):
+        self.env.cr.execute("""SELECT SUM(extract(epoch from write_date)), array_agg(id) FROM website_rewrite""")
+        write_sum, ids = self.env.cr.fetchone()
+        return write_sum, ids and tuple(ids)
 
     def name_get(self):
         result = []

@@ -260,6 +260,13 @@ class Website(models.Model):
         return result
 
     @api.model
+    @tools.ormcache()
+    def _get_cache_longterm_key(self):
+        self.env.cr.execute("""SELECT SUM(extract(epoch from write_date)), array_agg(id) FROM website""")
+        write_sum, ids = self.env.cr.fetchone()
+        return write_sum, tuple(ids)
+
+    @api.model
     def _handle_create_write(self, vals):
         self._handle_favicon(vals)
         self._handle_domain(vals)

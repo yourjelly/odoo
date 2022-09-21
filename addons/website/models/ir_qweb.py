@@ -5,7 +5,7 @@ import logging
 
 from collections import OrderedDict
 
-from odoo import models
+from odoo import models, api
 from odoo.http import request
 from odoo.tools import lazy
 from odoo.addons.base.models.assetsbundle import AssetsBundle
@@ -55,6 +55,9 @@ class IrQWeb(models.AbstractModel):
     def _get_template_cache_keys(self):
         """ Return the list of context keys to use for caching ``_compile``. """
         return super()._get_template_cache_keys() + ['website_id']
+
+    def _get_cache_longterm_key(self, view_id):
+        return super()._get_cache_longterm_key(view_id) + self.env['website']._get_cache_longterm_key()
 
     def _prepare_frontend_environment(self, values):
         """ Update the values and context with website specific value
