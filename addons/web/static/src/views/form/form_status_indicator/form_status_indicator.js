@@ -26,14 +26,14 @@ export class FormStatusIndicator extends Component {
     }
 
     async discard() {
-        // this.state.disableBtns = true;
+        this.state.disableBtns = true;
         await this.props.discard();
-        // this.state.disableBtns = false;
+        this.state.disableBtns = false;
     }
     async save() {
-        // this.state.disableBtns = true;
+        this.state.disableBtns = true;
         await this.props.save();
-        // this.state.disableBtns = false;
+        this.state.disableBtns = false;
     }
 }
 FormStatusIndicator.template = "web.FormStatusIndicator";

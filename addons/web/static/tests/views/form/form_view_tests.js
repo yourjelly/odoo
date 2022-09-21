@@ -2984,8 +2984,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".o_field_widget[name=foo] input").value, "apple");
     });
 
-    // MCM SKIP
-    QUnit.skip("disable buttons until reload data from server", async function (assert) {
+    QUnit.test("disable buttons until reload data from server", async function (assert) {
         let def = undefined;
         await makeView({
             type: "form",
@@ -3009,12 +3008,14 @@ QUnit.module("Views", (hooks) => {
 
         // Save button should be disabled
         assert.hasAttrValue(target.querySelector(".o_form_button_save"), "disabled", "disabled");
+        assert.hasAttrValue(target.querySelector(".o_form_button_cancel"), "disabled", "disabled");
         // Release the 'read' call
         def.resolve();
         await nextTick();
 
-        // Edit button should be enabled after the reload
-        assert.hasAttrValue(target.querySelector(".o_form_button_edit"), "disabled", undefined);
+        // Save button should be enabled after the reload
+        assert.hasAttrValue(target.querySelector(".o_form_button_save"), "disabled", undefined);
+        assert.hasAttrValue(target.querySelector(".o_form_button_cancel"), "disabled", undefined);
     });
 
     QUnit.test("properly apply onchange in simple case", async function (assert) {
@@ -5630,8 +5631,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["onchange is done"]);
     });
 
-    // MCM SKIP
-    QUnit.skip("discarding before save returns", async function (assert) {
+    QUnit.test("discarding before save returns", async function (assert) {
         const def = makeDeferred();
         let form;
         patchWithCleanup(FormController.prototype, {
@@ -5677,9 +5677,8 @@ QUnit.module("Views", (hooks) => {
         def.resolve();
         await nextTick();
         assert.containsNone(target, ".modal", "Confirm dialog should not be displayed");
-        assert.containsOnce(target, ".o_form_view .o_form_readonly");
         assert.strictEqual(
-            target.querySelector('.o_field_widget[name="foo"]').textContent,
+            target.querySelector('.o_field_widget[name="foo"] input').value,
             "1234",
             "value should have been saved and rerendered in readonly"
         );
@@ -6493,11 +6492,6 @@ QUnit.module("Views", (hooks) => {
                 resId: 1,
             });
 
-            assert.containsOnce(
-                target,
-                ".o_form_view .o_form_readonly",
-                "form should be in readonly mode"
-            );
             assert.isVisible(target.querySelector(".o_field_widget[name=foo]"));
             assert.isVisible(target.querySelector(".o_form_label"));
             assert.isNotVisible(target.querySelector(".o_field_widget[name=bar]"));
