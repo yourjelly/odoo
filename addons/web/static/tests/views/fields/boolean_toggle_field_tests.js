@@ -211,9 +211,9 @@ QUnit.module("Fields", (hooks) => {
                 serverData,
                 resModel: "partner",
                 arch: `
-                    <list editable="bottom">
+                    <tree editable="bottom">
                         <field name="bar" widget="boolean_toggle" />
-                    </list>
+                    </tree>
                 `,
             });
 

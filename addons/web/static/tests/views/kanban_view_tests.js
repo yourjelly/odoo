@@ -4307,7 +4307,14 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("prevent drag and drop of record if grouped by readonly", async (assert) => {
+        // Whether the kanban is grouped by foo, bar or state,
+        // the user must not be able to drag and drop from one group to another,
+        // as foo, bar or state are made readonly one way or another.
+        // foo is readonly in the model fields. foo is passed in the arch but without specifying readonly.
+        // bar is readonly in the model fields. bar is not passed in the arch.
+        // state is not readonly in the model. state is passed in the arch specifying readonly="1".
         serverData.models.partner.fields.foo.readonly = true;
+        serverData.models.partner.fields.bar.readonly = true;
         const kanban = await makeView({
             type: "kanban",
             resModel: "partner",
@@ -4374,6 +4381,24 @@ QUnit.module("Views", (hooks) => {
 
         // should still be able to resequence
         assert.deepEqual(getCardTexts(0), ["blipGHI", "blipDEF"]);
+
+        await reload(kanban, { groupBy: ["bar"] });
+
+        assert.containsN(target, ".o_kanban_group:first-child .o_kanban_record", 1);
+        assert.containsN(target, ".o_kanban_group:nth-child(2) .o_kanban_record", 3);
+        assert.containsN(target, ".o_kanban_group:nth-child(3) .o_kanban_record", 0);
+
+        // first record of first column moved to the bottom of second column
+        await dragAndDrop(
+            ".o_kanban_group:first-child .o_kanban_record",
+            ".o_kanban_group:nth-child(2)"
+        );
+
+        // should not be draggable
+        assert.containsN(target, ".o_kanban_group:first-child .o_kanban_record", 1);
+        assert.containsN(target, ".o_kanban_group:nth-child(2) .o_kanban_record", 3);
+        assert.containsN(target, ".o_kanban_group:nth-child(3) .o_kanban_record", 0);
+
     });
 
     QUnit.test("prevent drag and drop if grouped by date/datetime field", async (assert) => {
