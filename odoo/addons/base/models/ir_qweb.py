@@ -549,6 +549,7 @@ class IrQWeb(models.AbstractModel):
             * ``inherit_branding_auto`` (bool) add the branding on fields
             * ``minimal_qcontext``(bool) To use the minimum context and options
                 from ``_prepare_environment``
+            * ``preserve_comments``(bool) To preserve xml comment in the final render
 
         :returns: bytes marked as markup-safe (decode to :class:`markupsafe.Markup`
                   instead of `str`)
@@ -572,17 +573,37 @@ class IrQWeb(models.AbstractModel):
     # assume cache will be invalidated by third party on write to ir.ui.view
     def _get_template_cache_keys(self):
         """ Return the list of context keys to use for caching ``_compile``. """
-        return ['lang', 'inherit_branding', 'edit_translations', 'profile']
+        return ['lang', 'inherit_branding', 'edit_translations', 'profile', 'preserve_comments']
 
     @tools.conditional(
         'xml' not in tools.config['dev_mode'],
         tools.ormcache('template', 'tuple(self.env.context.get(k) for k in self._get_template_cache_keys())'),
     )
-    def _get_view_id(self, template):
+    def _get_view_key_info(self, template):
         try:
-            return self.env['ir.ui.view'].sudo().with_context(load_all_views=True)._get_view_id(template)
+            view_id = self.env['ir.ui.view'].sudo().with_context(load_all_views=True)._get_view_id(template)
+            if not view_id:
+                return None, None, None
+            self.env["ir.ui.view"].flush_model(['model', 'write_date', 'inherit_id'])
+            query = """
+                WITH RECURSIVE ir_ui_view_inherits AS (
+                    SELECT ir_ui_view.id, ir_ui_view.write_date, ir_ui_view.model
+                    FROM ir_ui_view
+                    WHERE id = %s
+                UNION
+                    SELECT ir_ui_view.id, ir_ui_view.write_date, ir_ui_view.model
+                    FROM ir_ui_view
+                    INNER JOIN ir_ui_view_inherits parent ON parent.id = ir_ui_view.inherit_id
+                    WHERE ir_ui_view.active IS TRUE
+                )
+                SELECT SUM(extract(epoch from v.write_date)), array_agg(v.id)
+                FROM ir_ui_view_inherits v
+            """
+            self.env.cr.execute(query, [view_id])
+            write_sum, all_view_ids = self.env.cr.fetchone()
+            return view_id, write_sum, tuple(all_view_ids)
         except Exception:
-            return None
+            return None, None, None
 
     @QwebTracker.wrap_compile
     def _compile(self, template, cache=None):
@@ -590,12 +611,16 @@ class IrQWeb(models.AbstractModel):
             self = self.with_context(is_t_cache_disabled=True)
             ref = None
         else:
-            ref = self._get_view_id(template)
+            ref, timestamp, all_view_ids = self._get_view_key_info(template)
 
         # define the base key cache for code in cache and t-cache feature
         base_key_cache = None
         if ref:
-            base_key_cache = self._get_cache_key(tuple([ref] + [self.env.context.get(k) for k in self._get_template_cache_keys()]))
+            base_key_cache = self._get_cache_key(tuple(
+                    [ref, all_view_ids, timestamp] +
+                    [self.env.context.get(k) for k in self._get_template_cache_keys()]
+                ))
+
         self = self.with_context(__qweb_base_key_cache=base_key_cache)
 
         # generate the template functions and the root function name
@@ -2435,7 +2460,7 @@ class IrQWeb(models.AbstractModel):
     # in '_compile' method contains the write_date of all inherited views.
     @tools.conditional(
         'xml' not in tools.config['dev_mode'],
-        tools.ormcache('cache_key'),
+        tools.ormcache_longterm('cache_key'),
     )
     def _get_cached_values(self, cache_key, get_value):
         """ generate value from the function if the result is not cached. """
@@ -2446,12 +2471,12 @@ class IrQWeb(models.AbstractModel):
         # in non-xml-debug mode we want assets to be cached forever, and the admin can force a cache clear
         # by restarting the server after updating the source code (or using the "Clear server cache" in debug tools)
         'xml' not in tools.config['dev_mode'],
-        tools.ormcache('bundle', 'css', 'js', 'debug', 'async_load', 'defer_load', 'lazy_load', 'media', 'tuple(self.env.context.get(k) for k in self._get_template_cache_keys())'),
+        tools.ormcache_longterm('bundle', 'css', 'js', 'debug', 'async_load', 'defer_load', 'lazy_load', 'media', 'tuple(self.env.context.get(k) for k in self._get_template_cache_keys())'),
     )
     def _generate_asset_nodes_cache(self, bundle, css=True, js=True, debug=False, async_load=False, defer_load=False, lazy_load=False, media=None):
         return self._generate_asset_nodes(bundle, css, js, debug, async_load, defer_load, lazy_load, media)
 
-    @tools.ormcache('bundle', 'defer_load', 'lazy_load', 'media', 'tuple(self.env.context.get(k) for k in self._get_template_cache_keys())')
+    @tools.ormcache_longterm('bundle', 'defer_load', 'lazy_load', 'media', 'tuple(self.env.context.get(k) for k in self._get_template_cache_keys())')
     def _get_asset_content(self, bundle, defer_load=False, lazy_load=False, media=None):
         asset_paths = self.env['ir.asset']._get_asset_paths(bundle=bundle, css=True, js=True)
 

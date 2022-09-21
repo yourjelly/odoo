@@ -108,25 +108,5 @@ class WebsiteRewrite(models.Model):
             result.append((rewrite.id, name))
         return result
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        rewrites = super().create(vals_list)
-        self._invalidate_routing()
-        return rewrites
-
-    def write(self, vals):
-        res = super(WebsiteRewrite, self).write(vals)
-        self._invalidate_routing()
-        return res
-
-    def unlink(self):
-        res = super(WebsiteRewrite, self).unlink()
-        self._invalidate_routing()
-        return res
-
-    def _invalidate_routing(self):
-        # call clear_caches on this worker to reload routing table
-        self.env['ir.http'].clear_caches()
-
     def refresh_routes(self):
         self.env['website.route']._refresh()
