@@ -56,8 +56,7 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.module("StateSelectionField");
 
-    // MCM SKIP
-    QUnit.skip("StateSelectionField in form view", async function (assert) {
+    QUnit.test("StateSelectionField in form view", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -119,8 +118,6 @@ QUnit.module("Fields", (hooks) => {
             "should have one grey status since selection is the first, normal state"
         );
 
-        // switch to edit mode and check the result
-        await click(target.querySelector(".o_form_button_edit"));
         assert.containsNone(target, ".dropdown-menu", "there should still not be a dropdown");
         assert.containsNone(
             target,
