@@ -11609,8 +11609,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    // MCM SKIP
-    QUnit.skip(
+    QUnit.test(
         "when Navigating to a one2many with tabs, the button add a line receives the focus",
         async function (assert) {
             await makeView({
@@ -11637,6 +11636,7 @@ QUnit.module("Fields", (hooks) => {
                 resId: 1,
             });
 
+            target.querySelector("[name=qux] input").focus();
             assert.strictEqual(target.querySelector("[name=qux] input"), document.activeElement);
 
             getNextTabableElement(target).focus(); // go inside one2many
@@ -11648,8 +11648,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    // MCM SKIP
-    QUnit.skip(
+    QUnit.test(
         "Navigate to a one2many with tab then tab again focus the next field",
         async function (assert) {
             serverData.models.partner.records[0].turtles = [];
@@ -11682,6 +11681,7 @@ QUnit.module("Fields", (hooks) => {
                 resId: 1,
             });
 
+            target.querySelector("[name=qux] input").focus();
             assert.strictEqual(document.activeElement, target.querySelector("[name=qux] input"));
 
             getNextTabableElement(target).focus(); // go inside one2many
@@ -11710,8 +11710,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    // MCM SKIP
-    QUnit.skip(
+    QUnit.test(
         "when Navigating to a one2many with tabs, not filling any field and hitting tab, no line is added and the next field is focused",
         async function (assert) {
             serverData.models.partner.records[0].turtles = [];
@@ -11744,6 +11743,7 @@ QUnit.module("Fields", (hooks) => {
                 resId: 1,
             });
 
+            target.querySelector("[name=qux] input").focus();
             assert.strictEqual(document.activeElement, target.querySelector("[name=qux] input"));
 
             getNextTabableElement(target).focus(); // go inside one2many
@@ -11785,8 +11785,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    // MCM SKIP
-    QUnit.skip(
+    QUnit.debug(
         "when Navigating to a one2many with tabs, editing in a popup, the popup should receive the focus then give it back",
         async function (assert) {
             serverData.models.partner.records[0].turtles = [];
@@ -11824,6 +11823,7 @@ QUnit.module("Fields", (hooks) => {
                 resId: 1,
             });
 
+            target.querySelector("[name=qux] input").focus();
             assert.strictEqual(target.querySelector("[name=qux] input"), document.activeElement);
 
             getNextTabableElement(target).focus(); // go inside one2many
