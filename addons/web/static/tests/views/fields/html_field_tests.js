@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { clickSave, editInput, getFixture } from "@web/../tests/helpers/utils";
+import { editInput, getFixture } from "@web/../tests/helpers/utils";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 import { registry } from "@web/core/registry";
 import { HtmlField } from "@web/views/fields/html/html_field";
@@ -34,8 +34,21 @@ QUnit.module("Fields", ({ beforeEach }) => {
 
     QUnit.module("HtmlField");
 
-    // MCM SKIP
-    QUnit.skip("html fields are correctly rendered", async (assert) => {
+    QUnit.test("html fields are correctly rendered (readonly)", async (assert) => {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            resId: 1,
+            serverData,
+            arch: /* xml */ `<form><field name="txt" readonly="1" /></form>`,
+        });
+
+        assert.containsOnce(target, "div.kek");
+        assert.strictEqual(target.querySelector(".o_field_html .kek").style.color, "red");
+        assert.strictEqual(target.querySelector(".o_field_html").textContent, "some text");
+    });
+
+    QUnit.test("html fields are correctly rendered (edit)", async (assert) => {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -54,10 +67,5 @@ QUnit.module("Fields", ({ beforeEach }) => {
 
         await editInput(textarea, null, BLUE_TEXT);
         assert.strictEqual(textarea.value, BLUE_TEXT);
-
-        await clickSave(target);
-
-        assert.strictEqual(target.querySelector(".o_field_html .kek").style.color, "blue");
-        assert.strictEqual(target.querySelector(".o_field_html").textContent, "hello world");
     });
 });
