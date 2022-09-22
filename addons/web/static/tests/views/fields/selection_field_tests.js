@@ -111,6 +111,7 @@ QUnit.module("Fields", (hooks) => {
             },
         });
 
+        // MCM SKIP to remove/uncomment!
         // assert.containsNone(target, "select");
         // assert.strictEqual(
         //     target.querySelector(".o_field_widget[name='product_id']").textContent,
@@ -140,8 +141,6 @@ QUnit.module("Fields", (hooks) => {
         //     "red",
         //     "should have set the raw-value attr for selection field correctly"
         // );
-
-        // await click(target, ".o_form_button_edit");
 
         assert.containsN(target, "select", 3);
         assert.containsOnce(

@@ -385,9 +385,7 @@ export function clickCreate(htmlElement) {
 }
 
 export function clickEdit(htmlElement) {
-    if (htmlElement.querySelectorAll(".o_form_button_edit").length) {
-        return click(htmlElement, ".o_form_button_edit");
-    } else if (htmlElement.querySelectorAll(".o_list_button_edit").length) {
+    if (htmlElement.querySelectorAll(".o_list_button_edit").length) {
         return click(htmlElement, ".o_list_button_edit");
     } else {
         throw new Error("No edit button found to be clicked.");
