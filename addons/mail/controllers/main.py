@@ -213,6 +213,7 @@ class MailController(http.Controller):
         if model and res_id:
             record_mapping = self.upgrade_record_mapping(model, res_id)
             if record_mapping:
+                model, res_id = record_mapping
                 url = "/mail/view?%s" % url_encode(
                     {"model": model, "res_id": res_id, "access_token": access_token, **kwargs}
                 )
