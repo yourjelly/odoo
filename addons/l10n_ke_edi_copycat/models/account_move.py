@@ -5,6 +5,8 @@ import json
 import re
 
 from odoo import models, fields, api, _
+from odoo.exceptions import UserError
+from odoo.tools import html_escape
 from odoo.tools.float_utils import json_float_round
 
 _logger = logging.getLogger(__name__)
@@ -20,7 +22,7 @@ class AccountMove(models.Model):
     # Computed fields
     l10n_ke_control_unit_code = fields.Char(string='Control unit code', compute='_compute_l10n_ke_control_unit_info')
     l10n_ke_control_unit_serial_number = fields.Char(string='Control unit serial number', compute='_compute_l10n_ke_control_unit_info')
-    l10n_ke_middleware_number = fields.Integer(string='Middleware integer invoice', compute='_compute_l10n_ke_control_unit_info', store=True)
+    l10n_ke_middleware_number = fields.Integer(string='Middleware integer invoice', compute='_compute_l10n_ke_control_unit_info', store=True, copy=False)
     l10n_ke_qrcode = fields.Char(string='KRA QR Code', compute='_compute_l10n_ke_control_unit_info')
     l10n_ke_edi_status = fields.Char(compute='_compute_l10n_ke_control_unit_info')
 
@@ -46,9 +48,69 @@ class AccountMove(models.Model):
     # HELPERS
     # -------------------------------------------------------------------------
 
+    @api.model
     def _l10n_ke_remove_special_chars(self, name, length=False):
         new_name = re.sub('[^A-Za-z0-9 ]+', '', name)
         return new_name if not length else new_name[:length]
+
+    @api.model
+    def _format_error_message(self, error_title, errors):
+        bullet_list_msg = ''.join('<li>%s</li>' % html_escape(msg) for msg in errors)
+        return
+
+    # -------------------------------------------------------------------------
+    # CHECKS
+    # -------------------------------------------------------------------------
+    def _l10n_ke_check_communication_configuration(self):
+        """ Checks to be run regarding regarding the request itself """
+        errors = []
+        # Ensure that the proxy device address is set
+        if not self.company_id.l10n_ke_device_proxy_url:
+            errors.append(_("The address of the proxy device must be defined on the company."))
+
+        # Ensure that the sender id is set
+        if not self.company_id.l10n_ke_device_proxy_url:
+            errors.append(_("The sender id for the fiscal device must be defined on the company."))
+
+        return errors
+
+    def _l10n_ke_check_move_configuration(self):
+        """ Checks to be run on the move before sending to the fiscal device """
+        self.ensure_one()
+        errors = []
+
+        if self.move_type not in ['out_invoice', 'out_refund']:
+            errors.append(_("The document being sent must be a customer invoice or a credit note."))
+
+        # The credit note / debit note should refer to the middleware number (reciept number)
+        # of the original invoice to which it relates.
+        if self.move_type == 'out_refund' and not self.reversed_entry_id.l10n_ke_middleware_number:
+            errors.append(_("This credit note must reference the previous invoice, and this previous invoice must have already been submitted."))
+
+        # The systemUser is a required field
+        if not self.user_id.name:
+            errors.append(_("The document being sent must be associated to a named user."))
+
+        # The systemUser is a required field
+        if not self.user_id.name:
+            errors.append(_("The document being sent must be associated to a named user."))
+
+        return errors
+
+    def _l10n_ke_check_move_lines_configuration(self):
+        """ Checks to be run on the move lines before sending to the fiscal device """
+        self.ensure_one()
+        errors = []
+
+        for line in self.invoice_line_ids.filtered(lambda l: not l.display_type):
+            if not line.tax_ids or len(line.tax_ids) > 1:
+                errors.append(_("In line %s, you must select one and only one VAT tax.", line.name))
+
+            if line.quantity <= 0:
+                errors.append(_("In line %s, the quantity must be positive.", line.name))
+
+        return errors
+
 
     # -------------------------------------------------------------------------
     # EXPORT
@@ -142,11 +204,11 @@ class AccountMove(models.Model):
             'senderId': self.company_id.l10n_ke_device_sender_id,
             'invoiceCategory': invoice_type_dict.get(self.move_type),
             'traderSystemInvoiceNumber': self._l10n_ke_remove_special_chars(self.name),
-            'relevantInvoiceNumber': self.reversed_entry_id.sequence_number and str(self.reversed_entry_id.sequence_number) or "",
+            'relevantInvoiceNumber': self.reversed_entry_id and self._l10n_ke_remove_special_chars(self.reversed_entry_id.name) or "",
             'pinOfBuyer': self.partner_id.vat or "",
             'invoiceType': 'Original',
             'exemptionNumber': self.partner_id.l10n_ke_exemption_number or '',
-            'totalInvoiceAmount': self.amount_total, #TODO: is this field doing any checks?
+            'totalInvoiceAmount': self.amount_total,
             'systemUser': self._l10n_ke_remove_special_chars(self.user_id.name or ''),
         }
 
@@ -158,8 +220,18 @@ class AccountMove(models.Model):
 
     def l10n_ke_action_post_send_invoices(self):
 
-        # TODO CHECKS
         self.ensure_one()
+
+        # Run configuration tests before sending the invoice
+        errors = (
+            self._l10n_ke_check_communication_configuration() +
+            self._l10n_ke_check_move_configuration() +
+            self._l10n_ke_check_move_lines_configuration()
+        )
+        if errors:
+            error_title = _("Invalid configuration:")
+            raise UserError(error_title + '\n' + '\n'.join(errors))
+
         self.l10n_ke_json_request = self._l10n_ke_edi_copycat_prepare_export_values()
         return {
             'type': 'ir.actions.client',
