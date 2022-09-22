@@ -1087,17 +1087,27 @@ class TranslationModuleReader:
         module, fabsolutepath, _, display_path = self._verified_module_filepaths(fname, path, root)
         if not module:
             return
+        terms = []
         with open(fabsolutepath) as file:
             data = json.load(file)
-            for sheet in data.get("sheets", []):
-                for cell in sheet["cells"].values():
-                    content = cell.get("content", "")
-                    re.match("_t", content)
-                    if "content" in cell and cell["content"]
+            for sheet in data.get('sheets', []):
+                for cell in sheet['cells'].values():
+                    content = cell.get('content', '')
+                    terms += re.findall('_t\("(.+?)"\)', content, re.IGNORECASE)
+                for figure in sheet['figures']:
+                    terms.append(figure['data']['title'])
+                    if 'baselineDescr' in figure['data']:
+                        terms.append(figure['data']['baselineDescr'])
+            pivots = data.get('pivots', dict()).values()
+            lists = data.get('lists', dict()).values()
+            for data_source in list(pivots) + list(lists):
+                terms.append(data_source['name'])
+            for global_filter in data.get('globalFilters', []):
+                terms.append(global_filter['label'])
 
-                    if "ODOO.TRANSLATE" in cell["content"]:
-                        self._push_translation(module, "code", display_path, 1,
-                                        encode(cell["content"]))
+        for term in terms:
+            self._push_translation(module, 'code', display_path, 0,
+                        encode(term), [WEB_TRANSLATION_COMMENT])
 
 
     def _export_translatable_resources(self):
@@ -1107,7 +1117,7 @@ class TranslationModuleReader:
         - the python strings marked with _() or _lt()
         - the javascript strings marked with _t() or _lt() inside static/src/js/
         - the strings inside Qweb files inside static/src/xml/
-        - the spreadsheet TODO
+        - the spreadsheet data files
         """
 
         # Also scan these non-addon paths
@@ -1124,7 +1134,7 @@ class TranslationModuleReader:
                 for fname in fnmatch.filter(files, '*.py'):
                     self._babel_extract_terms(fname, path, root,
                                               extract_keywords={'_': None, '_lt': None})
-                if fnmatch.fnmatch(root, '*/data/files/*'):
+                if fnmatch.fnmatch(root, '*/data/*'):
                     for fname in fnmatch.filter(files, "*_dashboard.json"):
                         self._extract_spreadsheet_terms(fname, path, root)
                 if fnmatch.fnmatch(root, '*/static/src*'):
