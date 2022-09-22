@@ -164,8 +164,7 @@ QUnit.module('mail', {}, function () {
         assert.strictEqual(target.querySelector(".o_field_many2one_avatar_user input").value, "Luigi")
     });
 
-    // MCM SKIP
-    QUnit.skip('many2one_avatar_user widget edited by the smart action "Assign to me"', async function (assert) {
+    QUnit.test('many2one_avatar_user widget edited by the smart action "Assign to me"', async function (assert) {
         assert.expect(4);
 
         const pyEnv = await startServer();
