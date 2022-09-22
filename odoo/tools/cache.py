@@ -117,7 +117,10 @@ class ormcache_context(ormcache):
         sign = signature(self.method)
         args = str(sign)[1:-1]
         cont_expr = "(context or {})" if 'context' in sign.parameters else "self._context"
-        keys_expr = "tuple(%s.get(k) for k in %r)" % (cont_expr, self.keys)
+        if isinstance(self.keys, str):
+            keys_expr = "tuple(%s.get(k) for k in %s)" % (cont_expr, self.keys)
+        else:
+            keys_expr = "tuple(%s.get(k) for k in %r)" % (cont_expr, self.keys)
         if self.args:
             code = "lambda %s: (%s, %s)" % (args, ", ".join(self.args), keys_expr)
         else:
@@ -138,6 +141,10 @@ class ormcache_longterm(ormcache):
     def clear(self, model, *args):
         """ Override clear cache, raise error."""
         raise ValueError("Should not clear the cache longterm.")
+
+
+class ormcache_longterm_context(ormcache_context, ormcache_longterm):
+    pass
 
 
 class ormcache_multi(ormcache):

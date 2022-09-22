@@ -272,7 +272,7 @@ class IrAsset(models.Model):
         return misc.topological_sort({manif['name']: manif['depends'] for manif in manifs})
 
     @api.model
-    @tools.ormcache_context(keys='install_module')
+    @tools.ormcache_context(keys=('install_module',))
     def _get_installed_addons_list(self):
         """
         Returns the list of all installed addons.
