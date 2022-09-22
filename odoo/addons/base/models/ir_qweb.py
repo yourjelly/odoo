@@ -884,7 +884,6 @@ class IrQWeb(models.AbstractModel):
             'Mapping': Mapping,
             'Markup': Markup,
             'escape': escape,
-            'frozenset': frozenset,
             'VOID_ELEMENTS': VOID_ELEMENTS,
             'QWebException': QWebException,
             'Exception': Exception,
