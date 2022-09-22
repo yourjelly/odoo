@@ -1,14 +1,8 @@
 /** @odoo-module **/
 
-const { Component, useState } = owl;
+const { Component } = owl;
 
 export class FormStatusIndicator extends Component {
-    setup() {
-        this.state = useState({
-            disableBtns: false,
-        });
-    }
-
     get displayButtons() {
         return this.indicatorMode !== "saved";
     }
@@ -26,18 +20,10 @@ export class FormStatusIndicator extends Component {
     }
 
     async discard() {
-        this.state.disableBtns = true;
         await this.props.discard();
-        this.state.disableBtns = false;
     }
     async save() {
-        this.state.disableBtns = true;
-        try {
-            await this.props.save();
-        } catch {
-            // could not save, should re-enable button
-        }
-        this.state.disableBtns = false;
+        await this.props.save();
     }
 }
 FormStatusIndicator.template = "web.FormStatusIndicator";
@@ -45,4 +31,5 @@ FormStatusIndicator.props = {
     model: Object,
     save: Function,
     discard: Function,
+    isDisabled: Boolean,
 };

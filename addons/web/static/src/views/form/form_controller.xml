@@ -7,7 +7,7 @@
                 <Layout className="model.useSampleModel ? 'o_view_sample_data' : ''" display="display">
                     <t t-set-slot="layout-buttons">
                         <t t-if="footerArchInfo and env.inDialog">
-                            <t t-component="props.Renderer" record="model.root" Compiler="props.Compiler" archInfo="footerArchInfo"/>
+                            <t t-component="props.Renderer" record="model.root" Compiler="props.Compiler" archInfo="footerArchInfo" enableViewButtons.bind="enableButtons" disableViewButtons.bind="disableButtons"/>
                         </t>
                         <t t-else="">
                             <t t-call="{{ props.buttonTemplate }}"/>
@@ -29,15 +29,15 @@
                     </t>
                     <t t-set-slot="control-panel-status-indicator">
                         <t t-if="canEdit">
-                            <FormStatusIndicator model="model" discard.bind="discard" save.bind="save" />
+                            <FormStatusIndicator model="model" discard.bind="discard" save.bind="save" isDisabled="state.isDisabled" />
                         </t>
                     </t>
                     <t t-set-slot="control-panel-create-button">
                         <t t-if="!model.root.isVirtual and canCreate">
-                            <button type="button" class="btn btn-outline-primary o_form_button_create" data-tooltip="Create record" t-on-click.stop="create">Create</button>
+                            <button type="button" class="btn btn-outline-primary o_form_button_create" data-tooltip="Create record" t-on-click.stop="create" t-att-disabled="state.isDisabled">Create</button>
                         </t>
                     </t>
-                    <t t-component="props.Renderer" record="model.root" Compiler="props.Compiler" archInfo="archInfo" translateAlert="translateAlert"/>
+                    <t t-component="props.Renderer" record="model.root" Compiler="props.Compiler" archInfo="archInfo" translateAlert="translateAlert" enableViewButtons.bind="enableButtons" disableViewButtons.bind="disableButtons"/>
                 </Layout>
             </div>
         </div>

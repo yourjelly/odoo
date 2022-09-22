@@ -111,37 +111,6 @@ QUnit.module("Fields", (hooks) => {
             },
         });
 
-        // MCM SKIP to remove/uncomment!
-        // assert.containsNone(target, "select");
-        // assert.strictEqual(
-        //     target.querySelector(".o_field_widget[name='product_id']").textContent,
-        //     "xphone",
-        //     "should have rendered the many2one field correctly"
-        // );
-        // assert.hasAttrValue(
-        //     target.querySelector(".o_field_widget[name='product_id'] span"),
-        //     "raw-value",
-        //     "37",
-        //     "should have set the raw-value attr for many2one field correctly"
-        // );
-
-        // assert.strictEqual(
-        //     target.querySelector(".o_field_widget[name='trululu']").textContent,
-        //     "",
-        //     "should have rendered the unset many2one field correctly"
-        // );
-        // assert.strictEqual(
-        //     target.querySelector(".o_field_widget[name='color']").textContent,
-        //     "Red",
-        //     "should have rendered the selection field correctly"
-        // );
-        // assert.hasAttrValue(
-        //     target.querySelector(".o_field_widget[name='color'] span"),
-        //     "raw-value",
-        //     "red",
-        //     "should have set the raw-value attr for selection field correctly"
-        // );
-
         assert.containsN(target, "select", 3);
         assert.containsOnce(
             target,

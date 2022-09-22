@@ -96,6 +96,9 @@ export class FormController extends Component {
         this.user = useService("user");
         this.viewService = useService("view");
         this.ui = useService("ui");
+        this.state = useState({
+            isDisabled: false,
+        });
         useBus(this.ui.bus, "resize", this.render);
         useFormErrorDialog(async () => {
             await this.discard();
@@ -344,12 +347,11 @@ export class FormController extends Component {
     }
 
     disableButtons() {
-        return [];
+        this.state.isDisabled = true;
     }
-    enableButtons(btns) {
-        for (const btn of btns) {
-            btn.removeAttribute("disabled");
-        }
+
+    enableButtons() {
+        this.state.isDisabled = false;
     }
 
     async edit() {
@@ -359,10 +361,11 @@ export class FormController extends Component {
     async create() {
         this.disableButtons();
         await this.model.load({ resId: null });
+        this.enableButtons();
     }
 
     async save(params = {}) {
-        const disabledButtons = this.disableButtons();
+        this.disableButtons();
         const record = this.model.root;
         let saved = false;
 
@@ -375,13 +378,17 @@ export class FormController extends Component {
                 ...record.dirtyTranslatableFields,
             ]);
         }
-
-        if (this.props.saveRecord) {
-            saved = await this.props.saveRecord(record, params);
-        } else {
-            saved = await record.save();
+        try {
+            if (this.props.saveRecord) {
+                saved = await this.props.saveRecord(record, params);
+            } else {
+                saved = await record.save();
+            }
+        } catch {
+            // if the save failed, we want to re-enable buttons
+            this.enableButtons();
         }
-        this.enableButtons(disabledButtons);
+        this.enableButtons();
         if (saved && this.props.onSave) {
             this.props.onSave(record);
         }

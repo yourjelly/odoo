@@ -175,6 +175,13 @@ export class FormCompiler extends ViewCompiler {
         return hasContent ? buttonBox : null;
     }
 
+    compileButton(el, params) {
+        const compiled = super.compileButton(el, params);
+        compiled.setAttribute("disableViewButtons", "props.disableViewButtons");
+        compiled.setAttribute("enableViewButtons", "props.enableViewButtons");
+        return compiled;
+    }
+
     /**
      * @override
      */

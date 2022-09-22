@@ -2807,10 +2807,10 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["read1", "willStart"]);
 
         await click(target.querySelector(".o_form_statusbar button.p"));
-        assert.verifySteps(["willUpdateProps", "read2", "willUpdateProps"]);
+        assert.verifySteps(["read2", "willUpdateProps", "willUpdateProps"]);
 
         await click(target.querySelector(".o_form_statusbar button.p"));
-        assert.verifySteps(["willUpdateProps", "read3", "willUpdateProps"]);
+        assert.verifySteps(["willUpdateProps", "read3", "willUpdateProps", "willUpdateProps"]);
     });
 
     QUnit.test("buttons in form view, new record", async function (assert) {
@@ -8474,8 +8474,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    // MCM SKIP
-    QUnit.skip("buttons are disabled until status bar action is resolved", async function (assert) {
+    QUnit.test("buttons are disabled until status bar action is resolved", async function (assert) {
         const def = makeDeferred();
         const actionService = {
             start() {
@@ -8514,8 +8513,8 @@ QUnit.module("Views", (hooks) => {
 
         assert.containsN(
             target,
-            ".o_form_buttons_view button:not(:disabled)",
-            2,
+            ".o_control_panel button:not(.fa):not(:disabled)",
+            3,
             "control panel buttons should be enabled"
         );
         assert.containsN(
@@ -8535,8 +8534,8 @@ QUnit.module("Views", (hooks) => {
         // The unresolved promise lets us check the state of the buttons
         assert.containsN(
             target,
-            ".o_form_buttons_view button:disabled",
-            2,
+            ".o_control_panel button:not(.fa):disabled",
+            3,
             "control panel buttons should be disabled"
         );
         assert.containsN(
@@ -8555,8 +8554,8 @@ QUnit.module("Views", (hooks) => {
         await nextTick();
         assert.containsN(
             target,
-            ".o_form_buttons_view button:not(:disabled)",
-            2,
+            ".o_control_panel button:not(.fa):not(:disabled)",
+            3,
             "control panel buttons should be enabled"
         );
         assert.containsN(
@@ -8572,8 +8571,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    // MCM SKIP
-    QUnit.skip("buttons are disabled until button box action is resolved", async function (assert) {
+    QUnit.test("buttons are disabled until button box action is resolved", async function (assert) {
         const def = makeDeferred();
         const actionService = {
             start() {
@@ -8612,8 +8610,8 @@ QUnit.module("Views", (hooks) => {
 
         assert.containsN(
             target,
-            ".o_form_buttons_view button:not(:disabled)",
-            2,
+            ".o_control_panel button:not(.fa):not(:disabled)",
+            3,
             "control panel buttons should be enabled"
         );
         assert.containsN(
@@ -8633,8 +8631,8 @@ QUnit.module("Views", (hooks) => {
         // The unresolved promise lets us check the state of the buttons
         assert.containsN(
             target,
-            ".o_form_buttons_view button:disabled",
-            2,
+            ".o_control_panel button:not(.fa):disabled",
+            3,
             "control panel buttons should be disabled"
         );
         assert.containsN(
@@ -8653,8 +8651,8 @@ QUnit.module("Views", (hooks) => {
         await nextTick();
         assert.containsN(
             target,
-            ".o_form_buttons_view button:not(:disabled)",
-            2,
+            ".o_control_panel button:not(.fa):not(:disabled)",
+            3,
             "control panel buttons should be enabled"
         );
         assert.containsN(
