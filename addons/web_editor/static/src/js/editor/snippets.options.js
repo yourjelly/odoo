@@ -4958,14 +4958,14 @@ registry.layout_column = SnippetOptionWidget.extend({
 
         if (elementType === 'image') {
             // Set the columns properties.
-            newColumnEl.classList.add('col-lg-6', 'g-col-lg-6', 'g-height-6');
+            newColumnEl.classList.add('col-lg-6', 'g-col-lg-6', 'g-height-6', 'o_grid_item_image');
             newColumnEl.contentEditable = false;
             numberColumns = 6;
             numberRows = 6;
 
             // Create a default image and add it to the new column.
             const imgEl = document.createElement('img');
-            imgEl.classList.add('img', 'img-fluid', 'mx-auto', 'o_grid_item_image');
+            imgEl.classList.add('img', 'img-fluid', 'mx-auto');
             imgEl.src = '/web/image/website.s_text_image_default_image';
             imgEl.alt = '';
             imgEl.loading = 'lazy';
@@ -5103,11 +5103,10 @@ registry.layout_column = SnippetOptionWidget.extend({
             columnEl.classList.remove('o_grid_item');
             columnEl.style.removeProperty('grid-area');
             columnEl.style.removeProperty('z-index');
-            const imageEls = columnEl.querySelectorAll('.o_grid_item_image');
-            imageEls.forEach(imageEl => {
-                imageEl.classList.remove('o_grid_item_image');
+            if (columnEl.classList.contains('o_grid_item_image')) {
+                columnEl.classList.remove('o_grid_item_image');
                 columnEl.removeAttribute('contentEditable');
-            });
+            }
         }
         // Removing the grid properties.
         delete rowEl.dataset.rowCount;

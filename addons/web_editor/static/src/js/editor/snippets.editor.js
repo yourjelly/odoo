@@ -1258,9 +1258,8 @@ var SnippetEditor = Widget.extend({
             // Case when dropping a grid item in a non-grid dropzone.
             this.$target[0].classList.remove('o_grid_item');
             this.$target[0].style.removeProperty('grid-area');
-            const gridImageEl = this.$target[0].querySelector('.o_grid_item_image');
-            if (gridImageEl) {
-                gridImageEl.classList.remove('o_grid_item_image');
+            if (this.$target[0].classList.contains('o_grid_item_image')) {
+                this.$target[0].classList.remove('o_grid_item_image');
                 this.$target[0].removeAttribute('contentEditable');
             }
         }
@@ -1300,9 +1299,8 @@ var SnippetEditor = Widget.extend({
                         this.$target[0].classList.remove('o_grid_item');
                         this.$target[0].style.removeProperty('z-index');
                         this.$target[0].style.removeProperty('grid-area');
-                        const gridImageEl = this.$target[0].querySelector('.o_grid_item_image');
-                        if (gridImageEl) {
-                            gridImageEl.classList.remove('o_grid_item_image');
+                        if (this.$target[0].classList.contains('o_grid_item_image')) {
+                            this.$target[0].classList.remove('o_grid_item_image');
                             this.$target[0].removeAttribute('contentEditable');
                         }
                     }

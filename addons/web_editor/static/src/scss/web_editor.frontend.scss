@@ -71,9 +71,11 @@
 .o_grid_item {
     word-break: break-word;
 
-    > .o_grid_item_image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover !important;
+    &.o_grid_item_image {
+        > img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover !important;
+        }
     }
 }
