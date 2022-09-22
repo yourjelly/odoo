@@ -2124,9 +2124,8 @@ QUnit.module("ActionManager", (hooks) => {
         );
     });
 
-    // MCM SKIP
-    QUnit.skip("do not restore after action button clicked", async function (assert) {
-        assert.expect(5);
+    QUnit.test("do not restore after action button clicked", async function (assert) {
+        assert.expect(4);
         const mockRPC = async (route, args) => {
             if (route === "/web/dataset/call_button" && args.method === "do_something") {
                 return true;
@@ -2142,17 +2141,15 @@ QUnit.module("ActionManager", (hooks) => {
         const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 3, { viewType: "form", props: { resId: 1 } });
         await legacyExtraNextTick();
-        assert.isVisible(target.querySelector(".o_form_buttons_view .o_form_button_edit"));
-        await click(target.querySelector(".o_form_buttons_view .o_form_button_edit"));
-        await legacyExtraNextTick();
-        assert.isVisible(target.querySelector(".o_form_buttons_edit .o_form_button_save"));
+        await editInput(target, "div[name='display_name'] input", "Edited value");
+        assert.isVisible(target.querySelector(".o_form_button_save"));
         assert.isVisible(target.querySelector(".o_statusbar_buttons button[name=do_something]"));
         await click(target.querySelector(".o_statusbar_buttons button[name=do_something]"));
         await legacyExtraNextTick();
-        assert.isVisible(target.querySelector(".o_form_buttons_edit .o_form_button_save"));
-        await click(target.querySelector(".o_form_buttons_edit .o_form_button_save"));
+        assert.isVisible(target.querySelector(".o_form_button_save"));
+        await click(target.querySelector(".o_form_button_save"));
         await legacyExtraNextTick();
-        assert.isVisible(target.querySelector(".o_form_buttons_view .o_form_button_edit"));
+        assert.isNotVisible(target.querySelector(".o_form_buttons_view .o_form_button_save"));
     });
 
     QUnit.test("debugManager is active for (legacy) views", async function (assert) {
