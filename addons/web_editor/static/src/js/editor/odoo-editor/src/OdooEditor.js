@@ -3870,7 +3870,22 @@ export class OdooEditor extends EventTarget {
         const clipboardHtml = ev.clipboardData.getData('text/html');
         if (odooEditorHtml) {
             const fragment = parseHTML(odooEditorHtml);
-            DOMPurify.sanitize(fragment, { IN_PLACE: true });
+
+            // DOMPurify.sanitize remove an attribute that contains a ">" for
+            // security reasons. Make an exception for `data-user-data`.
+            // Encoding it hides the character ">".
+            for (const el of fragment.querySelectorAll('[data-user-data]')) {
+                el.setAttribute('data-user-data', encodeURIComponent(el.getAttribute('data-user-data')));
+            }
+
+            DOMPurify.sanitize(fragment, {
+                IN_PLACE: true,
+            });
+
+            for (const el of fragment.querySelectorAll('[data-user-data]')) {
+                el.setAttribute('data-user-data', decodeURIComponent(el.getAttribute('data-user-data')));
+            }
+
             if (fragment.hasChildNodes()) {
                 this.execCommand('insert', fragment);
             }
