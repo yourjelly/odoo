@@ -115,10 +115,6 @@ class PurchaseReport(models.Model):
                 left join uom_uom line_uom on (line_uom.id=l.product_uom)
                 left join uom_uom product_uom on (product_uom.id=t.uom_id)
                 left join account_analytic_account analytic_account on (l.account_analytic_id = analytic_account.id)
-                left join currency_rate cr on (cr.currency_id = po.currency_id and
-                    cr.company_id = po.company_id and
-                    cr.date_start <= coalesce(po.date_order, now()) and
-                    (cr.date_end is null or cr.date_end > coalesce(po.date_order, now())))
                 left join {currency_table} ON currency_table.company_id = po.company_id
         """.format(
             currency_table=self.env['res.currency']._get_query_currency_table({'multi_company': True, 'date': {'date_to': fields.Date.today()}}),
