@@ -650,13 +650,11 @@ class IrHttp(models.AbstractModel):
         return response
 
     @api.model
+    @tools.ormcache_longterm(
+        'self.env["website"]._get_cache_longterm_key()',
+        'self.env["website.rewrite"]._get_cache_longterm_key()',
+        'path', 'query_args')
     def url_rewrite(self, path, query_args=None):
-        cache_key = self.env['website']._get_cache_longterm_key(), self.env['website.rewrite']._get_cache_longterm_key()
-        return self._cached_url_rewrite(path, query_args=query_args, cache_key=cache_key)
-
-    @api.model
-    @tools.ormcache_longterm('path', 'query_args', 'cache_key')
-    def _cached_url_rewrite(self, path, query_args=None, cache_key=None):  # pylint: disable=unused-argument
         new_url = False
         router = http.root.get_db_router(request.db).bind('')
         endpoint = False

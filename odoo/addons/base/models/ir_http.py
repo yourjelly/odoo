@@ -163,26 +163,23 @@ class IrHttp(models.AbstractModel):
     def _generate_routing_rules(cls, modules, converters):
         return http._generate_routing_rules(modules, False, converters)
 
-    def get_modules():
+    @classmethod
+    def get_modules(cls):
         installed = request.env.registry._init_modules.union(odoo.conf.server_wide_modules)
         if tools.config['test_enable'] and odoo.modules.module.current_test:
             installed.add(odoo.modules.module.current_test)
         return tuple(sorted(installed))
 
     @classmethod
+    @tools.ormcache_longterm('cls.get_modules()', 'key')
     def routing_map(cls, key=None):
-        mods = cls.get_modules()
-        return cls._get_routing_map(mods, key=key)
-
-    @classmethod
-    @tools.ormcache_longterm('mods', 'key')
-    def _get_routing_map(cls, mods, key=None):
         _logger.info("Generating routing map for key %s" % str(key))
         # Note : when routing map is generated, we put it on the class `cls`
         # to make it available for all instance. Since `env` create an new instance
         # of the model, each instance will regenared its own routing map and thus
         # regenerate its EndPoint. The routing map should be static.
         routing_map = werkzeug.routing.Map(strict_slashes=False, converters=cls._get_converters())
+        mods = cls.get_modules()
         for url, endpoint in cls._generate_routing_rules(mods, converters=cls._get_converters()):
             routing = submap(endpoint.routing, ROUTING_KEYS)
             if routing['methods'] is not None and 'OPTIONS' not in routing['methods']:

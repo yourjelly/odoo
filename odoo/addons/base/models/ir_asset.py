@@ -283,6 +283,13 @@ class IrAsset(models.Model):
         # Third source: the currently loading module from the context (similar to ir_ui_view)
         return self.env.registry._init_modules.union(odoo.conf.server_wide_modules or []).union(self.env.context.get('install_module', []))
 
+    @api.model
+    @tools.ormcache()
+    def _get_cache_longterm_key(self):
+        self.env.cr.execute("""SELECT SUM(extract(epoch from write_date)), array_agg(id) FROM ir_asset""")
+        write_sum, ids = self.env.cr.fetchone()
+        return write_sum, frozenset(ids or ())
+
     def _get_paths(self, path_def, installed, extensions=None):
         """
         Returns a list of file paths matching a given glob (path_def) as well as

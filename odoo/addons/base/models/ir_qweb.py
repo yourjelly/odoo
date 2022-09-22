@@ -2442,12 +2442,20 @@ class IrQWeb(models.AbstractModel):
         # in non-xml-debug mode we want assets to be cached forever, and the admin can force a cache clear
         # by restarting the server after updating the source code (or using the "Clear server cache" in debug tools)
         'xml' not in tools.config['dev_mode'],
-        tools.ormcache_longterm_context('bundle', 'css', 'js', 'debug', 'async_load', 'defer_load', 'lazy_load', 'media', keys='self._get_template_cache_keys()'),
+        tools.ormcache_longterm_context(
+            'frozenset(self.env.registry._init_modules)',
+            'self.env["ir.asset"]._get_cache_longterm_key()',
+            'bundle', 'css', 'js', 'debug', 'async_load', 'defer_load', 'lazy_load', 'media',
+            keys='self._get_template_cache_keys()'),
     )
     def _generate_asset_nodes_cache(self, bundle, css=True, js=True, debug=False, async_load=False, defer_load=False, lazy_load=False, media=None):
         return self._generate_asset_nodes(bundle, css, js, debug, async_load, defer_load, lazy_load, media)
 
-    @tools.ormcache_longterm_context('frozenset(self.env.registry._init_modules)', 'bundle', 'defer_load', 'lazy_load', 'media', keys='self._get_template_cache_keys()')
+    @tools.ormcache_longterm_context(
+        'frozenset(self.env.registry._init_modules)',
+        'self.env["ir.asset"]._get_cache_longterm_key()',
+        'bundle', 'defer_load', 'lazy_load', 'media',
+        keys='self._get_template_cache_keys()')
     def _get_asset_content(self, bundle, defer_load=False, lazy_load=False, media=None):
         asset_paths = self.env['ir.asset']._get_asset_paths(bundle=bundle, css=True, js=True)
 
