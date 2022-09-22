@@ -131,7 +131,7 @@ export class HtmlField extends Component {
             if (this.resizerHandleObserver) {
                 this.resizerHandleObserver.disconnect();
             }
-            // this.updateValue();
+            this.updateValue();
         });
     }
 
@@ -186,7 +186,8 @@ export class HtmlField extends Component {
     }
     updateValue() {
         const value = this.getEditingValue();
-        if (value !== null && value !== this.props.value) {
+        const lastValue = (this.props.value || "").toString();
+        if (value !== null && !(!lastValue && value === "<p><br></p>") && value !== lastValue) {
             if (this.props.setDirty) {
                 this.props.setDirty(true);
             }
