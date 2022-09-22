@@ -148,7 +148,7 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_saved'),
 }, {
     mobile: false,
     trigger: ".o_field_widget[name=partner_id] input",
-    extra_trigger: ".modal-dialog",
+    extra_trigger: ".breadcrumb-item.active:contains(the_flow.component1)",
     content: _t('Select a seller'),
     position: 'top',
     run: "text the_flow.vendor",
@@ -215,14 +215,14 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_saved'),
     // click somewhere else to exit cell focus
 }, {
     mobile: false,
-    trigger: ".modal-footer .o_form_button_save",
-    content: _t('Save'),
+    trigger: '.breadcrumb .o_back_button',
+    content: _t('Go back'),
     position: 'bottom',
 }, {
 // Add second component
     mobile: false,
     trigger: ".o_field_x2many_list_row_add > a",
-    extra_trigger: "body:not(:has(table.o_list_table div.o_field_widget[name='product_id'] input))",
+    extra_trigger: ".breadcrumb-item.active:contains('the_flow.product')",
     content: _t("Click here to add some lines."),
     position: "bottom",
 }, {
@@ -290,7 +290,7 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_saved'),
 }, {
     mobile: false,
     trigger: ".o_field_widget[name=partner_id] input",
-    extra_trigger: ".modal-dialog",
+    extra_trigger: ".breadcrumb-item.active:contains(the_flow.component2)",
     content: _t('Select a seller'),
     position: 'top',
     run: "text the_flow.vendor",
@@ -328,12 +328,12 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_saved'),
     // click somewhere else to exit cell focus
 }, {
     mobile: false,
-    trigger: ".modal-footer .o_form_button_save",
-    content: _t('Save'),
+    trigger: '.breadcrumb .o_back_button',
+    content: _t('Go back'),
     position: 'bottom',
 }, {
     trigger: '.o_form_button_save',
-    extra_trigger: ".o_field_widget[name=bom_line_ids] tr:nth-child(3):has(.o_field_x2many_list_row_add)",
+    extra_trigger: ".breadcrumb-item.active:contains('the_flow.product')",
     content: _t('Save the bom.'),
     position: 'bottom',
 }, {
