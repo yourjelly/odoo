@@ -241,6 +241,7 @@ class MailController(http.Controller):
     def mail_action_assign(self, model, res_id, token=None):
         record_mapping = self.upgrade_record_mapping(model, res_id)
         if record_mapping:
+            model, res_id = record_mapping
             url = "/mail/assign?%s" % url_encode(
                 {"model": model, "res_id": res_id, "token": token}
             )
