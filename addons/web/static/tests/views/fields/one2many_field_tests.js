@@ -11785,7 +11785,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.debug(
+    QUnit.test(
         "when Navigating to a one2many with tabs, editing in a popup, the popup should receive the focus then give it back",
         async function (assert) {
             serverData.models.partner.records[0].turtles = [];
