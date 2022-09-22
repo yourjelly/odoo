@@ -5,6 +5,7 @@ import fnmatch
 import functools
 import inspect
 import io
+import json
 import locale
 import logging
 import os
@@ -1082,6 +1083,23 @@ class TranslationModuleReader:
         finally:
             src_file.close()
 
+    def _extract_spreadsheet_terms(self, fname, path, root):
+        module, fabsolutepath, _, display_path = self._verified_module_filepaths(fname, path, root)
+        if not module:
+            return
+        with open(fabsolutepath) as file:
+            data = json.load(file)
+            for sheet in data.get("sheets", []):
+                for cell in sheet["cells"].values():
+                    content = cell.get("content", "")
+                    re.match("_t", content)
+                    if "content" in cell and cell["content"]
+
+                    if "ODOO.TRANSLATE" in cell["content"]:
+                        self._push_translation(module, "code", display_path, 1,
+                                        encode(cell["content"]))
+
+
     def _export_translatable_resources(self):
         """ Export translations for static terms
 
@@ -1089,6 +1107,7 @@ class TranslationModuleReader:
         - the python strings marked with _() or _lt()
         - the javascript strings marked with _t() or _lt() inside static/src/js/
         - the strings inside Qweb files inside static/src/xml/
+        - the spreadsheet TODO
         """
 
         # Also scan these non-addon paths
@@ -1105,6 +1124,9 @@ class TranslationModuleReader:
                 for fname in fnmatch.filter(files, '*.py'):
                     self._babel_extract_terms(fname, path, root,
                                               extract_keywords={'_': None, '_lt': None})
+                if fnmatch.fnmatch(root, '*/data/files/*'):
+                    for fname in fnmatch.filter(files, "*_dashboard.json"):
+                        self._extract_spreadsheet_terms(fname, path, root)
                 if fnmatch.fnmatch(root, '*/static/src*'):
                     # Javascript source files
                     for fname in fnmatch.filter(files, '*.js'):
