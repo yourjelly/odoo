@@ -19,7 +19,8 @@
                         <group>
                             <group>
                                 <field name="l10n_ke_qrcode"/>
-                                <field name="l10n_ke_json"/>
+                                <field name="l10n_ke_json_request" readonly="1"/>
+                                <field name="l10n_ke_json_response" readonly="1"/>
                             </group>
                         </group>
                     </page>

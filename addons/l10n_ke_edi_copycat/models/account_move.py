@@ -4,7 +4,7 @@ import logging
 import json
 import re
 
-from odoo import models, fields, _
+from odoo import models, fields, api, _
 from odoo.tools.float_utils import json_float_round
 
 _logger = logging.getLogger(__name__)
@@ -13,12 +13,34 @@ _logger = logging.getLogger(__name__)
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
-    l10n_ke_qrcode = fields.Char(string="KRA QR Code", copy=False)
-    l10n_ke_json = fields.Char(string="Technical field with the json answer/response.  Put in an attachment afterwards", copy=False)
-    l10n_ke_control_unit_code = fields.Char(string="Control unit code")
-    l10n_ke_control_unit_signing_datetime = fields.Char(string="Control unit date and time")
-    l10n_ke_control_unit_serial_number = fields.Char(string="Control unit serial number")
-    l10n_ke_middleware_number = fields.Integer(string="Middleware integer invoice")
+    l10n_ke_json_request = fields.Char('Technical field with the json request.', copy=False)
+    l10n_ke_json_response = fields.Char('Technical field with the json response.', copy=False)
+    l10n_ke_control_unit_signing_datetime = fields.Date(string='KRA signing date and time')
+
+    # Computed fields
+    l10n_ke_control_unit_code = fields.Char(string='Control unit code', compute='_compute_l10n_ke_control_unit_info')
+    l10n_ke_control_unit_serial_number = fields.Char(string='Control unit serial number', compute='_compute_l10n_ke_control_unit_info')
+    l10n_ke_middleware_number = fields.Integer(string='Middleware integer invoice', compute='_compute_l10n_ke_control_unit_info', store=True)
+    l10n_ke_qrcode = fields.Char(string='KRA QR Code', compute='_compute_l10n_ke_control_unit_info')
+    l10n_ke_edi_status = fields.Char(compute='_compute_l10n_ke_control_unit_info')
+
+    # -------------------------------------------------------------------------
+    # COMPUTE
+    # -------------------------------------------------------------------------
+
+    @api.depends('l10n_ke_json_response')
+    def _compute_l10n_ke_control_unit_info(self):
+        """ All of these fields can be computed from the single repsonse """
+
+        for move in self:
+            response = {}
+            if move.l10n_ke_json_response:
+                # When the request is initally sent, the content of the json field will be only the request, for this reason, the dict here can be empty
+                response = json.loads(move.l10n_ke_json_response)
+            move.l10n_ke_qrcode = response.get('qrCode')
+            move.l10n_ke_control_unit_code = response.get('controlCode')
+            move.l10n_ke_control_unit_serial_number = response.get('serialNo')
+            move.l10n_ke_middleware_number = response.get('middlewareInvoiceNumber')
 
     # -------------------------------------------------------------------------
     # HELPERS
@@ -135,13 +157,15 @@ class AccountMove(models.Model):
         return json.dumps(invoice_dict)
 
     def l10n_ke_action_post_send_invoices(self):
+
+        # TODO CHECKS
         self.ensure_one()
-        self.l10n_ke_json = self._l10n_ke_edi_copycat_prepare_export_values()
+        self.l10n_ke_json_request = self._l10n_ke_edi_copycat_prepare_export_values()
         return {
             'type': 'ir.actions.client',
             'tag': 'action_post_send_invoice',
             'params': {
-                'invoice': self.l10n_ke_json,
+                'invoice': self.l10n_ke_json_request,
                 'invoice_id': self.id,
                 'device_proxy_url': self.company_id.l10n_ke_device_proxy_url,
                 'device_url': self.company_id.l10n_ke_device_url,
@@ -154,19 +178,12 @@ class AccountMove(models.Model):
 
         if response['invoiceType'] == 'DUPLICATE':
             invoice.message_post(body=_(
-                " The invoice sent is a duplicate of an existing invoice"
+                "The invoice sent is a duplicate of an existing invoice"
                 " on the system. The data associated with the original is"
                 " applied to this invoice."
             ))
 
         invoice.update({
-            'l10n_ke_qrcode': response['qrCode'],
-            'l10n_ke_control_unit_code': response['controlCode'],
-            'l10n_ke_control_unit_signing_datetime': response['systemSigningDate'],
-            'l10n_ke_control_unit_serial_number': response['serialNo'],
-            'l10n_ke_middleware_number': response['middlewareInvoiceNumber'],
-            'l10n_ke_json': json.dumps({
-                'request': json.loads(invoice.l10n_ke_json),
-                'response': response,
-            })
+            'l10n_ke_control_unit_signing_datetime': fields.Datetime.now(),
+            'l10n_ke_json_response': json.dumps(response),
         })
