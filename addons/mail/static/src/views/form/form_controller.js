@@ -20,7 +20,7 @@ patch(FormController.prototype, "mail", {
     setup() {
         this._super();
         this.uiService = useService("ui");
-        this.hasAttachmentViewer = false;
+        this.hasAttachmentViewerInArch = false;
 
         if (this.env.services.messaging) {
             useModels();
@@ -34,12 +34,12 @@ patch(FormController.prototype, "mail", {
         if (xmlDocAttachmentPreview && xmlDocAttachmentPreview.parentNode.nodeName === "form") {
             // TODO hasAttachmentViewer should also depend on the groups= and/or invisible modifier on o_attachment_preview (see invoice form)
             template.appendChild(xmlDocAttachmentPreview);
-            this.hasAttachmentViewer = true;
-        } else {
-            const xmlDocChatter = xmlDoc.querySelector("div.oe_chatter");
-            if (xmlDocChatter && xmlDocChatter.parentNode.nodeName === "form") {
-                template.appendChild(xmlDocChatter.cloneNode(true));
-            }
+            this.hasAttachmentViewerInArch = true;
+        }
+
+        const xmlDocChatter = xmlDoc.querySelector("div.oe_chatter");
+        if (xmlDocChatter && xmlDocChatter.parentNode.nodeName === "form") {
+            template.appendChild(xmlDocChatter.cloneNode(true));
         }
 
         const mailTemplates = useViewCompiler(MailFormCompiler, arch, { Mail: template }, {});
@@ -59,12 +59,12 @@ patch(FormController.prototype, "mail", {
      * @returns {boolean}
      */
     hasAttachmentViewer() {
-        if (!this.getMessaging() || !this.props.record.resId) {
+        if (!this.getMessaging() || !this.model.root.resId) {
             return false;
         }
         const thread = this.getMessaging().models['Thread'].insert({
-            id: this.props.record.resId,
-            model: this.props.record.resModel,
+            id: this.model.root.resId,
+            model: this.model.root.resModel,
         });
         return thread.attachmentsInWebClientView.length > 0;
     },

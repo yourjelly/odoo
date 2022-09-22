@@ -8,7 +8,7 @@
             </t>
         </xpath>
         <xpath expr="//Layout/t[@t-component='props.Renderer']" position="attributes">
-            <attribute name="hasAttachmentViewer">hasAttachmentViewer</attribute>
+            <attribute name="hasAttachmentViewer">hasAttachmentViewerInArch</attribute>
         </xpath>
     </t>
 
