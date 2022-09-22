@@ -844,6 +844,16 @@ class TransactionCase(BaseCase):
 
         self.patch(self.registry['res.partner'], '_get_gravatar_image', lambda *a: False)
 
+    @classmethod
+    def update_write_date_for_cache_longterm(cls, record):
+        """ Force the write_date because cache long term use to generate the key.
+        Write_date is filtered in write method, we must change the cache to update the db value.
+        Note that it seems that _render + write + _render (in the same request) can lead to incoherent result
+        Also because the write_date doesn't change for all transaction
+        """
+        record.env.transaction.cache.set(record, type(record).write_date, datetime.now(), dirty=True)
+        record.flush_recordset(['write_date'])
+
 
 class SavepointCase(TransactionCase):
     @classmethod

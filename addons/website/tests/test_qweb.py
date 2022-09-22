@@ -106,10 +106,7 @@ class TestQwebProcessAtt(TransactionCase):
         self.website.cdn_activated = True
         self.website.cdn_url = "http://test.cdn"
         self.website.cdn_filters = "\n".join(["^(/[a-z]{2}_[A-Z]{2})?/a$", "^(/[a-z]{2})?/a$", "^/b$"])
-        # Force the write_date because cache long term use to generate the key.
-        # Write_date is filtered in write method, we must change the cache to update the db value.
-        # Also because the write_date doesn't change for all transaction
-        self.env.transaction.cache.set(self.website, type(self.website).write_date, datetime.now(), dirty=True)
+        TransactionCase.update_write_date_for_cache_longterm(self.website)
         self.website.flush_recordset()
 
     def _test_att(self, url, expect, tag='a', attribute='href'):
