@@ -1197,7 +1197,8 @@ export function isBlock(node) {
         return false;
     }
     // The node might not be in the DOM, in which case it has no CSS values.
-    if (window.document !== node.ownerDocument) {
+    const activeElement = window.document.activeElement;
+    if (window.document !== node.ownerDocument && activeElement && activeElement.contentDocument !== node.ownerDocument) {
         return blockTagNames.includes(tagName);
     }
     // We won't call `getComputedStyle` more than once per node.
