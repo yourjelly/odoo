@@ -1122,19 +1122,19 @@ actual arch.
 
         root_info = {
             'view_type': root.tag,
-            'view_editable': editable and self._editable_node(root, name_manager),
+            'view_editable': editable and self._editable_view(root),
             'mobile': options.get('mobile'),
         }
 
         # use a stack to recursively traverse the tree
-        stack = [(root, editable)]
+        stack = [(root,)]
         while stack:
-            node, editable = stack.pop()
+            node, = stack.pop()
 
             # compute default
             tag = node.tag
             parent = node.getparent()
-            node_info = dict(root_info, modifiers={}, editable=editable and self._editable_node(node, name_manager))
+            node_info = dict(root_info, modifiers={})
 
             # tag-specific postprocessing
             postprocessor = getattr(self, f"_postprocess_tag_{tag}", None)
@@ -1149,7 +1149,7 @@ actual arch.
 
             # if present, iterate on node_info['children'] instead of node
             for child in reversed(node_info.get('children', node)):
-                stack.append((child, node_info['editable']))
+                stack.append((child,))
 
         name_manager.update_available_fields()
         root.set('model_access_rights', model._name)
@@ -1201,6 +1201,7 @@ actual arch.
             attrs = {'id': node.get('id'), 'select': node.get('select')}
             field = name_manager.model._fields.get(node.get('name'))
             if field:
+                is_editable = self._editable_field(node, name_manager, view_editable=node_info['view_editable'])
                 if field.groups:
                     if node.get('groups'):
                         # if the node has a group (e.g. "base.group_no_one")
@@ -1249,9 +1250,9 @@ actual arch.
                     if child.tag in ('form', 'tree', 'graph', 'kanban', 'calendar'):
                         node_info['children'] = []
                         self._postprocess_view(
-                            child, field.comodel_name, editable=node_info['editable'], parent_name_manager=name_manager,
+                            child, field.comodel_name, editable=is_editable, parent_name_manager=name_manager,
                         )
-                if node_info['editable'] and field.type in ('many2one', 'many2many'):
+                if is_editable and field.type in ('many2one', 'many2many'):
                     node.set('model_access_rights', field.comodel_name)
 
             name_manager.has_field(node, node.get('name'), attrs)
@@ -1304,21 +1305,34 @@ actual arch.
     # view editability
     #-------------------------------------------------------------------
 
-    def _editable_node(self, node, name_manager):
-        """ Return whether the given node must be considered editable. """
-        func = getattr(self, f"_editable_tag_{node.tag}", None)
+    def _editable_view(self, node):
+        """ Return whether the given view must be considered editable. """
+        func = getattr(self, f"_editable_view_{node.tag}", None)
         if func is not None:
-            return func(node, name_manager)
+            return func(node)
         # by default views are non-editable
-        return node.tag not in (item[0] for item in type(self).type.selection)
+        return False
 
-    def _editable_tag_form(self, node, name_manager):
+    def _editable_view_form(self, node):
         return True
 
-    def _editable_tag_tree(self, node, name_manager):
+    def _editable_view_tree(self, node):
         return node.get('editable')
 
-    def _editable_tag_field(self, node, name_manager):
+    def _editable_view_kanban(self, node):
+        # You can group by a field and drag record from one column to another.
+        # According if the field is readonly or not, you can drag and drop from one column to another.
+        # Onchanges are triggered.
+        # So, consider kanban as editable so the readonly modifier is passed and `on_change="1" is set`.
+        return True
+
+    def _editable_field(self, node, name_manager, view_editable):
+        if not view_editable and not node.get('widget'):
+            # If the view is not editable
+            # then the field is not editable
+            # except if the field has a widget
+            # e.g. widget="handle" in non-editable list
+            return False
         field = name_manager.model._fields.get(node.get('name'))
         return field is None or field.is_editable() and (
             node.get('readonly') not in ('1', 'True')
@@ -1349,18 +1363,20 @@ actual arch.
         model = self.env[model_name].with_context(lang=None)
         name_manager = NameManager(model)
 
+        root_info = {
+            'view_editable': editable and self._editable_view(node),
+        }
+
         # use a stack to recursively traverse the tree
-        stack = [(node, editable, full)]
+        stack = [(node, full)]
         while stack:
-            node, editable, validate = stack.pop()
+            node, validate = stack.pop()
 
             # compute default
             tag = node.tag
             validate = validate or node.get('__validate__')
-            node_info = {
-                'editable': editable and self._editable_node(node, name_manager),
-                'validate': validate,
-            }
+
+            node_info = dict(root_info, validate=validate)
 
             # tag-specific validation
             validator = getattr(self, f"_validate_tag_{tag}", None)
@@ -1371,7 +1387,7 @@ actual arch.
                 self._validate_attrs(node, name_manager, node_info)
 
             for child in reversed(node):
-                stack.append((child, node_info['editable'], validate))
+                stack.append((child, validate))
 
         name_manager.check(self)
 
@@ -1437,10 +1453,11 @@ actual arch.
 
         field = name_manager.model._fields.get(name)
         if field:
+            is_editable = self._editable_field(node, name_manager, view_editable=node_info['view_editable'])
             if validate and field.relational:
                 domain = (
                     node.get('domain')
-                    or node_info['editable'] and field._description_domain(self.env)
+                    or is_editable and field._description_domain(self.env)
                 )
                 if isinstance(domain, str):
                     # dynamic domain: in [('foo', '=', bar)], field 'foo' must
@@ -1464,7 +1481,7 @@ actual arch.
                     continue
                 node.remove(child)
                 sub_manager = self._validate_view(
-                    child, field.comodel_name, editable=node_info['editable'], full=validate,
+                    child, field.comodel_name, editable=is_editable, full=validate,
                 )
                 for fname, groups_uses in sub_manager.mandatory_parent_fields.items():
                     for groups, use in groups_uses.items():
@@ -1580,6 +1597,7 @@ actual arch.
             return
         field = name_manager.model._fields.get(name)
         if field:
+            is_editable = self._editable_field(node, name_manager, view_editable=node_info['view_editable'])
             if node_info['validate']:
                 if field.type != 'many2one':
                     msg = _(
@@ -1587,7 +1605,7 @@ actual arch.
                         name=field.name, type=field.type,
                     )
                     self._raise_view_error(msg, node)
-                domain = node_info['editable'] and field._description_domain(self.env)
+                domain = is_editable and field._description_domain(self.env)
                 if isinstance(domain, str):
                     desc = f"domain of field '{name}'"
                     fnames, vnames = self._get_domain_identifiers(node, domain, desc)

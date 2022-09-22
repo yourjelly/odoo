@@ -250,7 +250,7 @@ export class MockServer {
         } else {
             doc = arch;
         }
-        const editableView = editable && this._editableNode(doc, modelName);
+        const editableView = editable && this._editableView(doc);
         const inTreeView = doc.tagName === "tree";
         const inFormView = doc.tagName === "form";
         // mock _postprocess_access_rights
@@ -276,7 +276,7 @@ export class MockServer {
                 fieldNodes[fieldName] = {
                     node,
                     isInvisible: node.getAttribute("invisible"),
-                    isEditable: editableView && this._editableNode(node, modelName),
+                    isEditable: this._editableField(node, modelName, editableView),
                 };
                 // 'transfer_field_to_modifiers' simulation
                 const field = fields[fieldName];
@@ -418,7 +418,7 @@ export class MockServer {
                 });
             }
             // add onchanges
-            if (name in onchanges) {
+            if (isEditable && name in onchanges) {
                 node.setAttribute("on_change", "1");
             }
         });
@@ -462,25 +462,37 @@ export class MockServer {
         };
     }
 
-    _editableNode(node, modelName) {
+    _editableView(node) {
         if (node.tagName === "form") {
             return true;
         } else if (node.tagName === "tree") {
             return !!node.getAttribute("editable");
-        } else if (node.tagName === "field") {
-            const fname = node.getAttribute("name");
-            const field = this.models[modelName].fields[fname];
-            return (
-                (!field.readonly ||
-                    (field.states &&
-                        _.any(Object.values(field.states), function (item) {
-                            return item.includes("readonly");
-                        }))) &&
-                (!["1", "True"].includes(node.getAttribute("readonly")) ||
-                    !_.isEmpty(evaluateExpr(node.getAttribute("attrs") || "{}")))
-            );
+        } else if (node.tagName === "kanban") {
+            // You can group by a field and drag record from one column to another
+            // and this even trigger the onchanges. So, consider kanban as editable.
+            return true;
         }
-        return false;
+    }
+
+    _editableField(node, modelName, editableView) {
+        if (!editableView && !node.getAttribute("widget")){
+            // If the view is not editable
+            // then the field is not editable
+            // except if the field has a widget
+            // e.g. widget="handle" in non-editable list
+            return false;
+        }
+        const fname = node.getAttribute("name");
+        const field = this.models[modelName].fields[fname];
+        return (
+            (!field.readonly ||
+                (field.states &&
+                    _.any(Object.values(field.states), function (item) {
+                        return item.includes("readonly");
+                    }))) &&
+            (!["1", "True"].includes(node.getAttribute("readonly")) ||
+                !_.isEmpty(evaluateExpr(node.getAttribute("attrs") || "{}")))
+        );
     }
 
     /**

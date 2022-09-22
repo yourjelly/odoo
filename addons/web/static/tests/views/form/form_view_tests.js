@@ -3389,7 +3389,7 @@ QUnit.module("Views", (hooks) => {
                 arch: `
                     <form>
                         <field name="p" widget="one2many">
-                            <tree><field name="foo"/></tree>
+                            <tree editable="bottom"><field name="foo"/></tree>
                         </field>
                     </form>`,
                 mockRPC(route, args) {
