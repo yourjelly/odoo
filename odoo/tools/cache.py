@@ -133,7 +133,7 @@ class ormcache_longterm(ormcache):
     """
     def lru(self, model):
         counter = STAT_LONGTERM[(model.pool.db_name, model._name, self.method)]
-        return model.pool._Registry__ormcache_longterm, (model._name, self.method), counter
+        return model.pool._Registry__cache_longterm, (model._name, self.method), counter
 
     def clear(self, model, *args):
         """ Override clear cache, raise error."""
@@ -237,7 +237,7 @@ def log_ormcache_stats(sig=None, frame=None):
         me.dbname = dbname
         # show entries sorted by model name, method name
         _log_cache_stats(reg._Registry__cache.d, STAT)
-        _log_cache_stats(reg._Registry__ormcache_longterm.d, STAT_LONGTERM, suffix="(LT)")
+        _log_cache_stats(reg._Registry__cache_longterm.d, STAT_LONGTERM, suffix="(LT)")
 
     me.dbname = me_dbname
 

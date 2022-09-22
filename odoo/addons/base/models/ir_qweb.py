@@ -576,9 +576,9 @@ class IrQWeb(models.AbstractModel):
         return ['lang', 'inherit_branding', 'edit_translations', 'profile', 'preserve_comments']
 
     def _get_cache_longterm_key(self, view_id):
-        return (tuple([view_id])
+        return ((view_id,)
             + self.env["ir.ui.view"]._get_cache_longterm_key(view_id)
-            + tuple([self.env.context.get(k) for k in self._get_template_cache_keys()]))
+            + tuple(self.env.context.get(k) for k in self._get_template_cache_keys()))
 
     @QwebTracker.wrap_compile
     def _compile(self, template, cache=None):

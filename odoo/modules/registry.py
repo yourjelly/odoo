@@ -123,7 +123,7 @@ class Registry(Mapping):
         # This cache does not communicate with other workers, and should never
         # be invalidated! Cache keys should be chosen wisely. The keys
         # themselves may partly be in the normal orm cache.
-        self.__ormcache_longterm = LRU(8192)
+        self.__cache_longterm = LRU(8192)
 
         # modules fully loaded (maintained during init phase by `loading` module)
         self._init_modules = set()
@@ -597,7 +597,7 @@ class Registry(Mapping):
         """
         # if not self.in_test_mode():
         #     _logger.warning("The long term cache cannot be invalidated.")
-        self.__ormcache_longterm.clear()
+        self.__cache_longterm.clear()
 
     def clear_caches(self):
         """ Clear the caches associated to methods decorated with

@@ -1969,7 +1969,7 @@ actual arch.
         """
         self.env.cr.execute(query, [view_id])
         write_sum, all_view_ids = self.env.cr.fetchone()
-        return write_sum, all_view_ids and tuple(all_view_ids)
+        return write_sum, frozenset(all_view_ids or ())
 
     @api.model
     def _get(self, view_ref):

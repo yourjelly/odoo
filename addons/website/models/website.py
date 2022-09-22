@@ -264,7 +264,7 @@ class Website(models.Model):
     def _get_cache_longterm_key(self):
         self.env.cr.execute("""SELECT SUM(extract(epoch from write_date)), array_agg(id) FROM website""")
         write_sum, ids = self.env.cr.fetchone()
-        return write_sum, tuple(ids)
+        return write_sum, frozenset(ids)
 
     @api.model
     def _handle_create_write(self, vals):

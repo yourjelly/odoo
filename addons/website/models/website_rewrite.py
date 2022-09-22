@@ -106,7 +106,7 @@ class WebsiteRewrite(models.Model):
     def _get_cache_longterm_key(self):
         self.env.cr.execute("""SELECT SUM(extract(epoch from write_date)), array_agg(id) FROM website_rewrite""")
         write_sum, ids = self.env.cr.fetchone()
-        return write_sum, ids and tuple(ids)
+        return write_sum, frozenset(ids or ())
 
     def name_get(self):
         result = []
