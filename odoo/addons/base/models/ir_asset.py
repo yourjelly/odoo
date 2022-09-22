@@ -288,7 +288,9 @@ class IrAsset(models.Model):
     def _get_cache_longterm_key(self):
         self.env.cr.execute("""SELECT SUM(extract(epoch from write_date)), array_agg(id) FROM ir_asset""")
         write_sum, ids = self.env.cr.fetchone()
-        return write_sum, frozenset(ids or ())
+        self.env.cr.execute("""SELECT SUM(extract(epoch from write_date)), array_agg(id) FROM ir_attachment WHERE url LIKE '%/web/assets/%' """)
+        attachment_write_sum, attachment_ids = self.env.cr.fetchone()
+        return write_sum, frozenset(ids or ()), attachment_write_sum, frozenset(attachment_ids or ())
 
     def _get_paths(self, path_def, installed, extensions=None):
         """

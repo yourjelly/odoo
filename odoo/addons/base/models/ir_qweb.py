@@ -2120,6 +2120,11 @@ class IrQWeb(models.AbstractModel):
         if len(el) > 0:
             raise SyntaxError("t-call-assets cannot contain children nodes")
 
+        if not compile_context.get('call_assets_nocache'):
+            compile_context['call_assets_nocache'] = True
+            el.attrib['t-nocache'] = ''
+            return self._compile_node(el, compile_context, level)
+
         code = self._flush_text(compile_context, level)
         xmlid = el.attrib.pop('t-call-assets')
         css = self._compile_bool(el.attrib.pop('t-css', True))
