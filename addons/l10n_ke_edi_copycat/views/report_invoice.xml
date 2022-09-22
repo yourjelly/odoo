@@ -11,11 +11,11 @@
                             <span t-field="o.l10n_ke_control_unit_code"/>
                         </p>
                         <p>
-                            <b>CU Invoice Number: </b><br></br>
+                            <b>CU Serial Number: </b><br></br>
                             <span t-field="o.l10n_ke_control_unit_serial_number"/>
                         </p>
                         <p>
-                            <b>CU Date and Time: </b><br></br>
+                            <b>Date and Time of Signing: </b><br></br>
                             <span t-field="o.l10n_ke_control_unit_signing_datetime"/>
                         </p>
                     </div>
