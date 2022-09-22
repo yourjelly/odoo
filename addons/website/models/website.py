@@ -229,10 +229,6 @@ class Website(models.Model):
 
         result = super(Website, self - public_user_to_change_websites).write(values)
 
-        if 'cdn_activated' in values or 'cdn_url' in values or 'cdn_filters' in values:
-            # invalidate the caches from static node at compile time
-            self.env['ir.qweb'].clear_caches()
-
         # invalidate cache for `company.website_id` to be recomputed
         if 'sequence' in values or 'company_id' in values:
             (original_company | self.company_id)._compute_website_id()
@@ -258,13 +254,6 @@ class Website(models.Model):
                     })
 
         return result
-
-    @api.model
-    @tools.ormcache()
-    def _get_cache_longterm_key(self):
-        self.env.cr.execute("""SELECT SUM(extract(epoch from write_date)), array_agg(id) FROM website""")
-        write_sum, ids = self.env.cr.fetchone()
-        return write_sum, frozenset(ids)
 
     @api.model
     def _handle_create_write(self, vals):
@@ -1382,6 +1371,13 @@ class Website(models.Model):
             'default_lang_id': self.default_lang_id.id,
             'homepage_url': self.homepage_url,
         }
+
+    @api.model
+    @tools.ormcache()
+    def _get_cache_longterm_key(self):
+        self.env.cr.execute("""SELECT SUM(extract(epoch from write_date)), array_agg(id) FROM website""")
+        write_sum, ids = self.env.cr.fetchone()
+        return write_sum, frozenset(ids)
 
     def _get_cached(self, field):
         return self._get_cached_values()[field]

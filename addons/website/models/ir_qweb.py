@@ -57,6 +57,8 @@ class IrQWeb(models.AbstractModel):
         return super()._get_template_cache_keys() + ['website_id']
 
     def _get_cache_longterm_key(self, view_id):
+        """ Add the website information to take care the website cdn in compiled view.
+        """
         return super()._get_cache_longterm_key(view_id) + self.env['website']._get_cache_longterm_key()
 
     def _prepare_frontend_environment(self, values):
