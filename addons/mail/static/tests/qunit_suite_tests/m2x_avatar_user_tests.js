@@ -160,7 +160,7 @@ QUnit.module('mail', {}, function () {
             "Yoshi",
           ])
         await click(target, "#o_command_3")
-        await legacyExtraNextTick();
+        await nextTick();
         assert.strictEqual(target.querySelector(".o_field_many2one_avatar_user input").value, "Luigi")
     });
 
@@ -192,14 +192,14 @@ QUnit.module('mail', {}, function () {
 
         // Assign me (Luigi)
         triggerHotkey("alt+shift+i")
-        await legacyExtraNextTick();
+        await nextTick();
         assert.strictEqual(target.querySelector(".o_field_many2one_avatar_user input").value, "Luigi")
 
         // Unassign me
         triggerHotkey("control+k");
         await nextTick();
         await click([...target.querySelectorAll(".o_command")][idx])
-        await legacyExtraNextTick();
+        await nextTick();
         assert.strictEqual(target.querySelector(".o_field_many2one_avatar_user input").value, "")
     });
 
