@@ -582,7 +582,6 @@ class IrQWeb(models.AbstractModel):
 
     @QwebTracker.wrap_compile
     def _compile(self, template, cache=None):
-
         ref, cache_key = None, None
         if isinstance(template, etree._Element):
             self = self.with_context(is_t_cache_disabled=True)
@@ -885,6 +884,7 @@ class IrQWeb(models.AbstractModel):
             'Mapping': Mapping,
             'Markup': Markup,
             'escape': escape,
+            'frozenset': frozenset,
             'VOID_ELEMENTS': VOID_ELEMENTS,
             'QWebException': QWebException,
             'Exception': Exception,
