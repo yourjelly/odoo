@@ -858,8 +858,7 @@ QUnit.module("ActionManager", (hooks) => {
         }
     );
 
-    // MCM SKIP
-    QUnit.skip(
+    QUnit.test(
         "requests for execute_action of type object raises error: re-enables buttons",
         async function (assert) {
             assert.expect(3);
@@ -871,8 +870,10 @@ QUnit.module("ActionManager", (hooks) => {
             const webClient = await createWebClient({ serverData, mockRPC });
             await doAction(webClient, 3, { viewType: "form" });
             assert.containsOnce(target, ".o_form_view");
-            // click on 'Execute action', to execute action 4 in a dialog
-            testUtils.dom.click(target.querySelector('.o_form_view button[name="object"]'));
+            // save to ensure the presence of the create button
+            await click(target.querySelector(".o_form_button_save"));
+            // click on 'Execute action', to execute action 4 in a dialogdebugger
+            click(target.querySelector('.o_form_view button[name="object"]'));
             assert.ok(target.querySelector(".o_form_button_create").disabled);
             await nextTick();
             await legacyExtraNextTick();
