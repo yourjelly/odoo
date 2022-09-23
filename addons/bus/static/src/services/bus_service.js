@@ -89,7 +89,7 @@ export const busService = {
             worker.addEventListener('message', handleMessage);
         }
         send('update_last_notification_id', multiTab.getSharedValue('last_notification_id', 0));
-        browser.addEventListener('unload', () => send('leave'));
+        browser.addEventListener('pagehide', () => send('leave'));
 
 
         return {
