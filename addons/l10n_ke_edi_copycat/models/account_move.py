@@ -116,8 +116,9 @@ class AccountMove(models.Model):
                 errors.append(_("In line %s you must select one and only one VAT tax.", line.name))
             elif line.tax_ids.amount == 0:
                 # In the case where taxes are zero rated, HS code, is mandatory
-                if not line.product_id or not line.product_id.l10n_ke_hs_code
-
+                if not line.product_id or not line.product_id.l10n_ke_hs_code or not line.product_id.l10n_ke_hs_description:
+                    errors.append(_("Line %s features a tax that is zero rated or exempt. The HS code and HS description are " +
+                                    "required, please set them for the product on the line."))
 
             if line.quantity <= 0:
                 errors.append(_("In line %s the quantity must be positive.", line.name))
