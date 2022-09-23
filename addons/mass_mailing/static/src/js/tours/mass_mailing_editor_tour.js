@@ -48,9 +48,9 @@ odoo.define('mass_mailing.mass_mailing_editor_tour', function (require) {
         run: 'text Test',
     }, {
         trigger: '.o_form_view', // blur previous input
-    }, {
-        trigger: 'button.o_form_button_save',
-    }, {
+    },
+    ...tour.stepUtils.saveForm(),
+    {
         trigger: 'iframe .o_editable',
         run: () => {},
     }]);
