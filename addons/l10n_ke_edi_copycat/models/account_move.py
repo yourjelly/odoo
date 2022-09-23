@@ -58,6 +58,17 @@ class AccountMove(models.Model):
         bullet_list_msg = ''.join('<li>%s</li>' % html_escape(msg) for msg in errors)
         return
 
+    @api.model
+    def _l10n_ke_edi_is_managing_invoice_negative_lines_allowed(self):
+        """ Negative lines are not allowed, making some features unavailable like sale_coupon or global discounts.
+        This method allows odoo to distribute the negative discount lines to each others making such features
+        available.
+
+        :return: True if odoo needs to distribute the negative discount lines, False otherwise.
+        """
+        param_name = 'l10n_ke_edi.manage_invoice_negative_lines'
+        return bool(self.env['ir.config_parameter'].sudo().get_param(param_name))
+
     # -------------------------------------------------------------------------
     # CHECKS
     # -------------------------------------------------------------------------
@@ -91,10 +102,6 @@ class AccountMove(models.Model):
         if not self.user_id.name:
             errors.append(_("The document being sent must be associated to a named user."))
 
-        # The systemUser is a required field
-        if not self.user_id.name:
-            errors.append(_("The document being sent must be associated to a named user."))
-
         return errors
 
     def _l10n_ke_check_move_lines_configuration(self):
@@ -102,12 +109,18 @@ class AccountMove(models.Model):
         self.ensure_one()
         errors = []
 
+        negative_lines_allowed = self._l10n_ke_edi_is_managing_invoice_negative_lines_allowed()
+
         for line in self.invoice_line_ids.filtered(lambda l: not l.display_type):
             if not line.tax_ids or len(line.tax_ids) > 1:
-                errors.append(_("In line %s, you must select one and only one VAT tax.", line.name))
+                errors.append(_("In line %s you must select one and only one VAT tax.", line.name))
 
             if line.quantity <= 0:
-                errors.append(_("In line %s, the quantity must be positive.", line.name))
+                errors.append(_("In line %s the quantity must be positive.", line.name))
+
+            if line.price_subtotal <= 0 and not negative_lines_allowed:
+                errors.append(_("The amount on line %s is negative, negative amounts are not accepted by the " +
+                                "Kenyan government. Please create a credit note instead.", line.name))
 
         return errors
 
