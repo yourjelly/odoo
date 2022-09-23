@@ -124,7 +124,8 @@ class IrQWeb(models.AbstractModel):
         website = ir_http.get_request_website()
         if not website and self.env.context.get('website_id'):
             website = self.env['website'].browse(self.env.context['website_id'])
-        if website and tagName == 'img' and 'loading' not in atts:
+        if website and tagName == 'img' and 'loading' not in atts \
+                and 'src' in atts and '/logo/' not in atts['src']:
             atts['loading'] = 'lazy'  # default is auto
 
         if self.env.context.get('inherit_branding') or self.env.context.get('rendering_bundle') or \
