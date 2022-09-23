@@ -49,6 +49,9 @@ tour.register('purchase_matrix_tour', {
 },
 // Open the matrix through the pencil button next to the product in line edit mode.
 {
+    trigger: '.o_form_button_edit:contains("Edit")',
+    run: 'click' // Edit Sales Order.
+}, {
     trigger: 'span:contains("Matrix (PAV11, PAV22, PAV31)\nPA4: PAV41")',
     extra_trigger: '.o_form_editable',
     run: 'click'
