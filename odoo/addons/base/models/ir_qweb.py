@@ -2409,15 +2409,18 @@ class IrQWeb(models.AbstractModel):
             cache_key = (cache_key,)
         keys = []
         for item in cache_key:
-            try:
-                # use try catch instead of isinstance to detect lazy values
-                keys.append(item._name)
-                keys.append(tuple(item.ids))
-                dates = item.mapped('write_date')
-                if dates:
-                    keys.append(max(dates).timestamp())
-            except AttributeError:
-                keys.append(repr(item))
+            if hasattr(item, '_get_qweb_t_cache_key'):
+                keys.append(item._get_qweb_t_cache_key())
+            else:
+                try:
+                    # use try catch instead of isinstance to detect lazy values
+                    keys.append(item._name)
+                    keys.append(tuple(item.ids))
+                    dates = item.mapped('write_date')
+                    if dates:
+                        keys.append(max(dates).timestamp())
+                except AttributeError:
+                    keys.append(repr(item))
         return tuple(keys)
 
     def _load_values(self, cache_key, get_value, loaded_values=None):

@@ -1379,6 +1379,11 @@ class Website(models.Model):
         write_sum, ids = self.env.cr.fetchone()
         return write_sum, frozenset(ids)
 
+    @tools.ormcache('self.id')
+    def _get_qweb_t_cache_key(self):
+        menu_key = tuple((menu.id, menu.write_date) for menu in self.menu_id.search(['|', ('id', '=', self.id), ('id', 'child_of', self.menu_id.id)]))
+        return self.id, self.write_date, menu_key
+
     def _get_cached(self, field):
         return self._get_cached_values()[field]
 
