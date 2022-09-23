@@ -8837,8 +8837,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    // MCM SKIP
-    QUnit.skip(
+    QUnit.test(
         "form view is not broken if save failed in readonly mode on field changed",
         async function (assert) {
             let failFlag = false;
@@ -8852,6 +8851,7 @@ QUnit.module("Views", (hooks) => {
                             <field name="trululu" widget="statusbar" options="{'clickable': '1'}"/>
                         </header>
                     </form>`,
+                mode: "readonly",
                 resId: 1,
                 mockRPC(route, args) {
                     if (args.method === "write") {
