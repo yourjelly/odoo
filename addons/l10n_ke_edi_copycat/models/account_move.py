@@ -27,7 +27,7 @@ class AccountMove(models.Model):
     l10n_ke_edi_status = fields.Char(compute='_compute_l10n_ke_control_unit_info')
 
     # -------------------------------------------------------------------------
-    # COMPUTE
+    # COMPUTE FUNCTIONS
     # -------------------------------------------------------------------------
 
     @api.depends('l10n_ke_json_response')
@@ -203,7 +203,7 @@ class AccountMove(models.Model):
         invoice_dict = {
             'senderId': self.company_id.l10n_ke_device_sender_id,
             'invoiceCategory': invoice_type_dict.get(self.move_type),
-            'traderSystemInvoiceNumber': self._l10n_ke_remove_special_chars(self.name),
+            'traderSystemInvoiceNumber': self._l10n_ke_remove_special_chars(self.name)[-15:],  # This field has a max length of 15
             'relevantInvoiceNumber': self.reversed_entry_id and self._l10n_ke_remove_special_chars(self.reversed_entry_id.name) or "",
             'pinOfBuyer': self.partner_id.vat or "",
             'invoiceType': 'Original',
@@ -219,7 +219,6 @@ class AccountMove(models.Model):
         return json.dumps(invoice_dict)
 
     def l10n_ke_action_post_send_invoices(self):
-
         self.ensure_one()
 
         # Run configuration tests before sending the invoice
