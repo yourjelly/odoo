@@ -61,7 +61,7 @@ return Class.extend({
     goBackBreadcrumbsMobile(description, ...extraTrigger) {
         return extraTrigger.map(element => ({
             mobile: true,
-            trigger: '.breadcrumb-item:not(.d-none):first',
+            trigger: '.breadcrumb-item.o_back_button',
             extra_trigger: element,
             content: description,
             position: 'bottom',

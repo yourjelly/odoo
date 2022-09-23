@@ -7,7 +7,12 @@
                 <div class="o_cp_top_left w-auto d-flex flex-grow-1">
                     <t t-if="display['top-left']">
                         <t t-slot="control-panel-breadcrumb">
-                            <t t-call="web.Breadcrumbs" t-if="!env.config.noBreadcrumbs"/>
+                            <t t-if="env.isSmall">
+                                <t t-call="web.Breadcrumbs.Small" t-if="!env.config.noBreadcrumbs"/>
+                            </t>
+                            <t t-else="">
+                                <t t-call="web.Breadcrumbs" t-if="!env.config.noBreadcrumbs"/>
+                            </t>
                         </t>
                         <t t-slot="control-panel-status-indicator" />
                     </t>
