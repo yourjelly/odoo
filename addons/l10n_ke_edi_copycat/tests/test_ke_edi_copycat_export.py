@@ -32,13 +32,13 @@ class TestKeEdi(AccountTestInvoicingCommon):
 
         # ==== Products ====
         cls.product_a.write({
-            'l10n_ke_hsn_code': '10021000',
-            'l10n_ke_hsn_name': 'Wry rye joke',
+            'l10n_ke_hs_code': '10021000',
+            'l10n_ke_hs_description': 'Wry rye joke',
         })
 
         cls.product_b.write({
-            'l10n_ke_hsn_code': '19021100',
-            'l10n_ke_hsn_name': 'Pasta la vista',
+            'l10n_ke_hs_code': '19021100',
+            'l10n_ke_hs_description': 'Pasta la vista',
         })
 
         # ==== Taxes ====

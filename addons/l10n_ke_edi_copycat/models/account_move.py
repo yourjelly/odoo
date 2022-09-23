@@ -49,9 +49,9 @@ class AccountMove(models.Model):
     # -------------------------------------------------------------------------
 
     @api.model
-    def _l10n_ke_remove_special_chars(self, name, length=False):
+    def _l10n_ke_remove_special_chars(self, name):
         new_name = re.sub('[^A-Za-z0-9 ]+', '', name)
-        return new_name if not length else new_name[:length]
+        return new_name
 
     @api.model
     def _format_error_message(self, error_title, errors):
@@ -112,8 +112,12 @@ class AccountMove(models.Model):
         negative_lines_allowed = self._l10n_ke_edi_is_managing_invoice_negative_lines_allowed()
 
         for line in self.invoice_line_ids.filtered(lambda l: not l.display_type):
-            if not line.tax_ids or len(line.tax_ids) > 1:
+            if len(line.tax_ids) != 1:
                 errors.append(_("In line %s you must select one and only one VAT tax.", line.name))
+            elif line.tax_ids.amount == 0:
+                # In the case where taxes are zero rated, HS code, is mandatory
+                if not line.product_id or not line.product_id.l10n_ke_hs_code
+
 
             if line.quantity <= 0:
                 errors.append(_("In line %s the quantity must be positive.", line.name))
@@ -193,9 +197,9 @@ class AccountMove(models.Model):
             letter = tax_percentage_dict.get(percentage, 'D')
             uom = line.product_uom_id and line.product_uom_id.name or ''
             invoice_line_dict = {
-                'hsDesc': line.product_id.l10n_ke_hsn_name or '', # TODO commodity codes etc
-                'hsCode': line.product_id.l10n_ke_hsn_code or '', # TODO commodity codes etc
-                'namePLU': self._l10n_ke_remove_special_chars(line.name, 38),
+                'hsDesc': line.product_id.l10n_ke_hs_description or '', # TODO commodity codes etc
+                'hsCode': line.product_id.l10n_ke_hs_code or '', # TODO commodity codes etc
+                'namePLU': self._l10n_ke_remove_special_chars(line.name)[:38],
                 'taxRate': percentage,
                 'unitPrice': json_float_round(l['price_unit'], 2), #TODO: check
                 'discount': l['discount'],
@@ -217,7 +221,7 @@ class AccountMove(models.Model):
             'senderId': self.company_id.l10n_ke_device_sender_id,
             'invoiceCategory': invoice_type_dict.get(self.move_type),
             'traderSystemInvoiceNumber': self._l10n_ke_remove_special_chars(self.name)[-15:],  # This field has a max length of 15
-            'relevantInvoiceNumber': self.reversed_entry_id and self._l10n_ke_remove_special_chars(self.reversed_entry_id.name) or "",
+            'relevantInvoiceNumber': self.reversed_entry_id and self.reversed_entry_id.l10n_ke_middleware_number or "",
             'pinOfBuyer': self.partner_id.vat or "",
             'invoiceType': 'Original',
             'exemptionNumber': self.partner_id.l10n_ke_exemption_number or '',
