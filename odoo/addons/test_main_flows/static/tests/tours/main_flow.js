@@ -332,11 +332,6 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_saved'),
     content: _t('Go back'),
     position: 'bottom',
 }, {
-    trigger: '.o_form_button_save',
-    extra_trigger: ".breadcrumb-item.active:contains('the_flow.product')",
-    content: _t('Save the bom.'),
-    position: 'bottom',
-}, {
     mobile: false,
     trigger: ".breadcrumb-item:first",
     content: Markup(_t("Use the breadcrumbs to <b>go back to products</b>.")),
@@ -345,8 +340,8 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_saved'),
 ...tour.stepUtils.goBackBreadcrumbsMobile(
         Markup(_t("Use the breadcrumbs to <b>go back to products</b>.")),
         undefined,
-        // ".breadcrumb-item.active:contains('Bill of Materials')",
-        // ".breadcrumb-item.active:contains('the_flow.product')"
+        ".breadcrumb-item.active:contains('Bill of Materials')",
+        ".breadcrumb-item.active:contains('the_flow.product')"
     ),
 {
 // Add service product
@@ -615,12 +610,6 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_saved'),
 },
 ...tour.stepUtils.statusbarButtonsSteps('Confirm', Markup(_t("<p>Confirm this quotation</p>"))),
 {
-    trigger: ".o_form_button_save",
-    extra_trigger: ".o_statusbar_status .btn-primary:contains('Sales Order')",
-    content: Markup(_t("<p>Save this quotation</p>")),
-    position: "bottom"
-// Reordering rule
-}, {
     edition: "enterprise",
     trigger: '.o_menu_toggle',
     content: _t('Go back to the home menu'),
@@ -763,13 +752,23 @@ tour.stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('Manufacturing
     content: _t('Select the generated manufacturing order'),
     position: 'bottom',
 },
-...tour.stepUtils.statusbarButtonsSteps('Check availability', _t("Check availability")),
+...tour.stepUtils.statusbarButtonsSteps('Unreserve', _t("Unreserve")),
 {
     trigger: ".o_field_widget[name=qty_producing] input",
+    extra_trigger: ".o_field_widget[name=move_raw_ids] tr[data-id]:first .o_field_widget[name=forecast_availability]:contains('Available')",
     position: 'left',
     content: _t("Produce"),
     run: "text 1",
 },
+...tour.stepUtils.statusbarButtonsSteps('Check availability', _t("Check availability")),
+{
+    trigger: ".o_field_widget[name=qty_producing] input",
+    extra_trigger: ".o_field_widget[name=move_raw_ids] tr[data-id]:first .o_field_widget[name=forecast_availability]:contains('1')",
+    position: 'left',
+    content: _t("Produce"),
+    run: "text 1",
+},
+
 ...tour.stepUtils.statusbarButtonsSteps('Mark as Done', _t("Mark as Done"), ".o_statusbar_status .btn.dropdown-toggle:contains('To Close')"),
 {
     edition: "enterprise",
@@ -823,7 +822,7 @@ tour.stepUtils.mobileModifier(tour.stepUtils.autoExpandMoreButtons('.o_control_p
     content: 'Click on Add a line to create a new timesheet into the task.',
 }, {
     mobile: true,
-    trigger: '.o_toggle_searchview_full',
+    trigger: '.o-kanban-button-new',
     content: _t('Open the full search field'),
     position: 'bottom',
 }, {
@@ -846,10 +845,10 @@ tour.stepUtils.mobileModifier(tour.stepUtils.autoExpandMoreButtons('.o_control_p
     trigger: '.modal-body .o_form_view div[name="unit_amount"] input',
     content: 'Enter one hour for this timesheet',
     run: 'text 10',
+}, {
+    content: "save",
+    trigger: ".o_form_button_save",
 },
-...tour.stepUtils.saveForm({
-    content: _t('Save'),
-}),
 ...tour.stepUtils.goBackBreadcrumbsMobile(
         _t('Back to the sale order'),
         undefined,
