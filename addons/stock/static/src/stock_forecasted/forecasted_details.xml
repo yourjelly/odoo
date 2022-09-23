@@ -36,7 +36,7 @@
                             <button t-if="line.move_out and line.move_out.picking_id"
                                 class="btn btn-sm btn-primary o_report_replenish_unreserve"
                                 name="unreserve_link"
-                                t-on-click="() => this._unreserve('stock.picking', line.move_out.picking_id.id)">
+                                t-on-click="() => this._unreserve('stock.forecasted_product_product', line.move_out.picking_id.id)">
                                 Unreserve
                             </button>
                         </t>
@@ -45,7 +45,7 @@
                                 <button t-if="displayReserve(line)"
                                     class="btn btn-sm btn-primary o_report_replenish_reserve"
                                     name="reserve_link"
-                                    t-on-click="() => this._reserve('stock.picking', line.move_out.picking_id.id)">
+                                    t-on-click="() => this._reserve('stock.forecasted_product_product', line.move_out.picking_id.id)">
                                     Reserve
                                 </button>
                             </t>
