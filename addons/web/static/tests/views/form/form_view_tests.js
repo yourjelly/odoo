@@ -2937,7 +2937,7 @@ QUnit.module("Views", (hooks) => {
             resId: 2,
         });
 
-        assert.containsOnce(target, ".o_form_readonly button[data-hotkey=v]");
+        assert.containsOnce(target, ".o_form_view button[data-hotkey=v]");
         triggerHotkey("alt+v");
         await nextTick();
         assert.verifySteps(["validate"]);
