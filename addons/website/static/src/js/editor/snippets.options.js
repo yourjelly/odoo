@@ -2905,7 +2905,9 @@ options.registry.ConditionalVisibility = options.Class.extend({
      * @override
      */
     async onTargetHide() {
-        this.$target[0].classList.add('o_conditional_hidden');
+        if (this.$target[0].classList.contains('o_snippet_invisible')) {
+            this.$target[0].classList.add('o_conditional_hidden');
+        }
     },
     /**
      * @override
@@ -2922,7 +2924,9 @@ options.registry.ConditionalVisibility = options.Class.extend({
         // snippet will be shown naturally (as the CSS rules won't apply).
         // Without this, the "eye" icon of the visibility panel would be shut
         // when entering edit mode.
-        this.trigger_up('snippet_option_visibility_update', { show: true });
+        if (this.$target[0].classList.contains('o_snippet_invisible')) {
+            this.trigger_up('snippet_option_visibility_update', { show: true });
+        }
     },
 
     //--------------------------------------------------------------------------
