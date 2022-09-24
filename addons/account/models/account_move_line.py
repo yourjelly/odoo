@@ -1058,6 +1058,18 @@ class AccountMoveLine(models.Model):
             else:
                 line.term_key = False
 
+    def _get_plan_params(self):
+        # EXTENDS analytic_mixin
+        params = super()._get_plan_params()
+        params['product'] = self.product_id.id if self.product_id else None
+        params['account'] = self.account_id.id
+        return params
+
+    # @api.onchange('account_id', 'partner_id', 'product_id')
+    # def _compute_plans_and_distribution(self):
+    #     print('onchange _compute_plans_and_distribution')
+    #     super()._compute_plans_and_distribution()
+
     @api.depends('account_id', 'partner_id', 'product_id')
     def _compute_analytic_distribution_stored_char(self):
         for line in self:
@@ -1069,8 +1081,10 @@ class AccountMoveLine(models.Model):
                 "account_prefix": line.account_id.code,
                 "company_id": line.company_id.id,
             })
+            # this seems like it will override the SO distribution
             line.analytic_distribution_stored_char = distribution or line.analytic_distribution_stored_char
             line._compute_analytic_distribution()
+            line._compute_plans_and_distribution()
 
     # -------------------------------------------------------------------------
     # INVERSE METHODS

@@ -14,7 +14,7 @@ import { useOpenMany2XRecord } from "@web/views/fields/relational_utils";
 import { parseFloat as oParseFloat } from "@web/views/fields/parsers";
 import { formatPercentage } from "@web/views/fields/formatters";
 
-const { Component, useState, useRef, useExternalListener, onWillUpdateProps, onWillStart, onPatched } = owl;
+const { Component, useState, useRef, useExternalListener, onWillUpdateProps, onWillStart, onPatched, useEffect } = owl;
 
 
 export class AnalyticDistribution extends Component {
@@ -414,9 +414,7 @@ export class AnalyticDistribution extends Component {
     }
 
     async save() {
-        const currentDistribution = this.listForJson;
-        const dataToSave = currentDistribution;
-        await this.props.update(dataToSave);
+        await this.props.update(this.listForJson);
         this.validate();
     }
 
@@ -601,3 +599,40 @@ AnalyticDistributionForm.template = "analytic_distribution_form";
 
 registry.category("fields").add("analytic_distribution", AnalyticDistribution);
 registry.category("fields").add("form.analytic_distribution", AnalyticDistributionForm);
+
+export class analytic extends AnalyticDistribution {
+    setup() {
+        super.setup();
+        this.nextId = 10000;
+        useEffect(
+            () => this.widgetDataChanged(),
+            () => [this.props.value]
+        )
+    }
+
+    async willStart() {
+        this.state.list = this.props.value;
+    }
+
+    async willUpdate(nextProps) {
+        return;
+    }
+
+    widgetDataChanged() {
+        console.log('widgetDataChanged');
+        this.state.list = this.props.value;
+    }
+
+    get listForJson() {
+        return this.list;
+    }
+
+    autoFill() {
+        for (const group of Object.values(this.list)) {
+            if (this.remainderByGroup(group.id) && group.all_account_count) {
+                this.addLineToGroup(group.id);
+            }
+        }
+    }
+}
+registry.category("fields").add("analytic_prepared", analytic);

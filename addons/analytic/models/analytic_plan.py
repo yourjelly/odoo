@@ -144,7 +144,8 @@ class AccountAnalyticPlan(models.Model):
                         "name": plan.name,
                         "color": plan.color,
                         "applicability": applicability,
-                        "all_account_count": plan.all_account_count
+                        "all_account_count": plan.all_account_count,
+                        "distribution": []
                     })
         # If we have accounts that are already selected (before the applicability rules changed or from a model),
         # we want the plans that were unavailable to be shown in the list (and in optional, because the previous
@@ -157,8 +158,10 @@ class AccountAnalyticPlan(models.Model):
                     "name": plan.name,
                     "color": plan.color,
                     "applicability": 'optional',
-                    "all_account_count": plan.all_account_count
+                    "all_account_count": plan.all_account_count,
+                    "distribution": []
                 })
+        print(list_plans)
         return sorted(list_plans, key=lambda d: (d['applicability'], d['id']))
 
     def _get_applicability(self, **kwargs):

@@ -188,11 +188,10 @@
                     <field name="amount_residual" sum="Total Residual" string="Residual" readonly="1" optional="hide" attrs="{'invisible':[('is_account_reconcile', '=', False)]}"/>
                     <field name="amount_residual_currency" sum="Total Residual in Currency" string="Residual in Currency" readonly="1" optional="hide" attrs="{'invisible':['|', ('is_same_currency', '=', True), ('is_account_reconcile', '=', False)]}"/>
                     <field name="analytic_distribution_stored_char" invisible="1"/>
-                    <field name="analytic_distribution" widget="analytic_distribution"
+                    <field name="analytic_distribution_widget" widget="analytic_prepared"
                            groups="analytic.group_analytic_accounting"
                            optional="show"
-                           options="{'product_field': 'product_id', 'account_field': 'account_id', 'force_applicability': 'optional'}"
-                           />
+                           options="{'force_applicability': 'optional'}"/>
 
                     <field name="parent_state" invisible="1"/>
                     <field name="account_type" invisible="1"/>
@@ -276,7 +275,7 @@
                     <field name="tax_base_amount" sum="Total Base Amount"/>
                     <field name="tax_audit"/>
                 </field>
-                <field name="analytic_distribution" position="attributes">
+                <field name="analytic_distribution_widget" position="attributes">
                     <attribute name="optional">hide</attribute>
                 </field>
                 <field name="debit" position="attributes">
@@ -879,11 +878,14 @@
                                                domain="[('deprecated', '=', False), ('account_type', 'not in', ('asset_receivable', 'liability_payable')), ('company_id', '=', parent.company_id), ('is_off_balance', '=', False)]"
                                                attrs="{'required': [('display_type', 'not in', ('line_note', 'line_section'))]}"/>
                                         <field name="analytic_distribution_stored_char" invisible="1"/>
-                                        <field name="analytic_distribution" widget="analytic_distribution"
+                                        <!-- <field name="analytic_distribution" widget="analytic_distribution"
                                                groups="analytic.group_analytic_accounting"
                                                optional="show"
                                                options="{'product_field': 'product_id', 'account_field': 'account_id'}"
-                                               business_domain_compute="parent.move_type in ['out_invoice', 'out_refund', 'out_receipt'] and 'sale' or parent.move_type in ['in_invoice', 'in_refund', 'in_receipt'] and 'purchase' or 'general'"/>
+                                               business_domain_compute="parent.move_type in ['out_invoice', 'out_refund', 'out_receipt'] and 'sale' or parent.move_type in ['in_invoice', 'in_refund', 'in_receipt'] and 'purchase' or 'general'"/> -->
+                                        <field name="analytic_distribution_widget" widget="analytic_prepared"
+                                               groups="analytic.group_analytic_accounting"
+                                               optional="show"/>
                                         <field name="quantity" optional="show"/>
                                         <field name="product_uom_category_id" invisible="1"/>
                                         <field name="product_uom_id" string="UoM" groups="uom.group_uom" optional="show"/>
@@ -1034,6 +1036,7 @@
                                            'default_partner_id': commercial_partner_id,
                                            'default_currency_id': currency_id or company_currency_id,
                                            'kanban_view_ref': 'account.account_move_line_view_kanban_mobile',
+                                           'business_domain': move_type in ['out_invoice', 'out_refund', 'out_receipt'] and 'sale' or move_type in ['in_invoice', 'in_refund', 'in_receipt'] and 'purchase' or 'general',
                                        }"
                                        attrs="{'invisible': [('payment_state', '=', 'invoicing_legacy'), ('move_type', '!=', 'entry')]}">
                                     <tree editable="bottom" string="Journal Items" decoration-muted="display_type in ('line_section', 'line_note')" default_order="sequence, id">
@@ -1050,11 +1053,14 @@
                                                attrs="{'column_invisible': [('parent.move_type', '!=', 'entry')]}"/>
                                         <field name="name" widget="section_and_note_text" optional="show"/>
                                         <field name="analytic_distribution_stored_char" invisible="1"/>
-                                        <field name="analytic_distribution" widget="analytic_distribution"
+                                        <!-- <field name="analytic_distribution" widget="analytic_distribution"
                                                groups="analytic.group_analytic_accounting"
                                                optional="show"
                                                options="{'product_field': 'product_id', 'account_field': 'account_id'}"
-                                               business_domain_compute="parent.move_type in ['out_invoice', 'out_refund', 'out_receipt'] and 'sale' or parent.move_type in ['in_invoice', 'in_refund', 'in_receipt'] and 'purchase' or 'general'"/>
+                                               business_domain_compute="parent.move_type in ['out_invoice', 'out_refund', 'out_receipt'] and 'sale' or parent.move_type in ['in_invoice', 'in_refund', 'in_receipt'] and 'purchase' or 'general'"/> -->
+                                        <field name="analytic_distribution_widget" widget="analytic_prepared"
+                                               groups="analytic.group_analytic_accounting"
+                                               optional="show"/>
                                         <field name="date_maturity"
                                                optional="hide"
                                                invisible="context.get('view_no_maturity')"
@@ -1414,7 +1420,7 @@
         </record>
 
         <record id="action_account_moves_all" model="ir.actions.act_window">
-            <field name="context">{'journal_type':'general', 'search_default_posted':1}</field>
+            <field name="context">{'journal_type':'general', 'search_default_posted':1, 'force_applicability': 'optional'}</field>
             <field name="name">Journal Items</field>
             <field name="res_model">account.move.line</field>
             <field name="domain">[('display_type', 'not in', ('line_section', 'line_note')), ('parent_state', '!=', 'cancel')]</field>
