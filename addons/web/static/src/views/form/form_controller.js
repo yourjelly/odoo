@@ -100,10 +100,6 @@ export class FormController extends Component {
             isDisabled: false,
         });
         useBus(this.ui.bus, "resize", this.render);
-        useFormErrorDialog(async () => {
-            await this.discard();
-            this.env.config.historyBack();
-        });
 
         this.archInfo = this.props.archInfo;
         const activeFields = this.archInfo.activeFields;

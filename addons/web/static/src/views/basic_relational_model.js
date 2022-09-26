@@ -722,11 +722,22 @@ export class Record extends DataPoint {
             await this.model.__bm__.save(this.__bm_handle__, saveOptions);
         } catch (_e) {
             resolveSavePromise();
+            // optionally ? opt-in ? better name, more technical (__machin) ?
+            _e.formValidationError = true;
+            const canProceed = await new Promise((resolve) => {
+                _e.onDiscard = async () => {
+                    await this.discard();
+                    resolve(true);
+                };
+                _e.onStayHere = () => resolve(false);
+            });
+
             if (!this.isInEdition) {
+                // todo: remove this if
                 await this.load();
                 this.model.notify();
             }
-            return false;
+            return canProceed;
         }
         this.__syncData(true);
         if (shouldSwitchToReadonly) {
