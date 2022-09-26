@@ -117,7 +117,11 @@ class HolidaysType(models.Model):
         """
         date_to = self._context.get('default_date_from') or fields.Date.today().strftime('%Y-1-1')
         date_from = self._context.get('default_date_to') or fields.Date.today().strftime('%Y-12-31')
-        employee_id = self._context.get('default_employee_id', self._context.get('employee_id')) or self.env.user.employee_id.id
+        employee_ids = self._context.get('employee_ids', [])
+        if self._context.get('from_manager_leave_form') and employee_ids and employee_ids[0][2]:
+            employee_ids = employee_ids[0][2]
+        else:
+            employee_ids = [self._context.get('default_employee_id', self._context.get('employee_id')) or self.env.user.employee_id.id]
 
         if not isinstance(value, bool):
             raise ValueError('Invalid value: %s' % (value))
@@ -131,13 +135,15 @@ class HolidaysType(models.Model):
         FROM
             hr_leave_allocation alloc
         WHERE
-            alloc.employee_id = %s AND
+            alloc.employee_id IN %(emp_ids)s AND
             alloc.active = True AND alloc.state = 'validate' AND
-            (alloc.date_to >= %s OR alloc.date_to IS NULL) AND
-            alloc.date_from <= %s 
-        '''
+            (alloc.date_to >= %(date_to)s OR alloc.date_to IS NULL) AND
+            alloc.date_from <= %(date_from)s
+        GROUP BY employee_id,id
+        HAVING COUNT(DISTINCT alloc.employee_id) = %(total_row)s;
 
-        self._cr.execute(query, (employee_id or None, date_to, date_from))
+        '''
+        self.env.cr.execute(query, {'emp_ids': tuple(employee_ids), 'date_to':date_to, 'date_from': date_from, 'total_row': len(employee_ids)})
 
         return [('id', new_operator, [x['holiday_status_id'] for x in self._cr.dictfetchall()])]
 

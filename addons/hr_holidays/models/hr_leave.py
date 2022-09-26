@@ -469,8 +469,21 @@ class HolidaysRequest(models.Model):
 
     @api.depends('employee_id')
     def _compute_from_employee_id(self):
+        allocations_read_group = self.env['hr.leave.allocation'].read_group(
+            domain=[('employee_ids', 'in', self.mapped('employee_ids').ids), ('holiday_status_id.requires_allocation', '=', 'yes')],
+            fields=['holiday_status_id', 'employee_ids:array_agg(id)'],
+            groupby=['holiday_status_id'],
+            lazy=False,
+        )
+        allocations_dict = {allocation['holiday_status_id'][0]: allocation['employee_ids'] for allocation in allocations_read_group}
+
         for holiday in self:
             holiday.manager_id = holiday.employee_id.parent_id.id
+            employee_ids = holiday.employee_ids._origin.ids
+            holiday_status_id = holiday.holiday_status_id._origin.id
+            if allocations_dict and holiday_status_id and len(employee_ids) > 1:
+                if not all(employee_id in employee_ids for employee_id in allocations_dict.get(holiday_status_id, False)):
+                    holiday.holiday_status_id = False
             if holiday.employee_id.user_id != self.env.user and self._origin.employee_id != holiday.employee_id:
                 holiday.holiday_status_id = False
 
