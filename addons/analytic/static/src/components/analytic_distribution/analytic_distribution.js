@@ -62,11 +62,14 @@ export class AnalyticDistribution extends Component {
         });
         this.lastProduct = this.props.product_field && this.props.record.data[this.props.product_field];
         this.lastAccount = this.props.account_field && this.props.record.data[this.props.account_field];
+        this.allPlans = [];
     }
 
     // Lifecycle
     async willStart() {
-        await this.fetchAllPlans(this.props);
+        if (this.props.record.isInEdition) {
+            await this.fetchAllPlans(this.props);
+        }
         await this.formatData(this.props);
     }
 
@@ -77,10 +80,13 @@ export class AnalyticDistribution extends Component {
         // This should only execute when these fields have changed, therefore we use the `_field` props.
         // (consider including the plans in the computed json, python side)
         let valueChanged = JSON.stringify(this.props.value) !== JSON.stringify(nextProps.value);
-        if (!this.props.force_applicability) {
+        if (!this.props.force_applicability || this.props.record.isInEdition) {
             const currentProduct = this.props.product_field && this.props.record.data[this.props.product_field];
             const currentAccount = this.props.account_field && this.props.record.data[this.props.account_field];
-            const shouldFetchPlans = valueChanged || !shallowEqual(this.lastProduct, currentProduct) || !shallowEqual(this.lastAccount, currentAccount);
+            const shouldFetchPlans = valueChanged ||
+                                     !shallowEqual(this.lastProduct, currentProduct) ||
+                                     !shallowEqual(this.lastAccount, currentAccount) ||
+                                     !this.allPlans.length;
             if (shouldFetchPlans) {
                 this.lastProduct = currentProduct;
                 this.lastAccount = currentAccount;
@@ -102,7 +108,11 @@ export class AnalyticDistribution extends Component {
         }
 
         let res = Object.assign({}, ...this.allPlans.map((plan) => ({[plan.id]: {...plan, distribution: []}})));
-        records.map((record) => {
+        for (const record of records) {
+            if (!res[record.root_plan_id[0]]) {
+                // plans are not retrieved if record is not in edition mode
+                res[record.root_plan_id[0]] = {distribution: []};
+            }
             res[record.root_plan_id[0]].distribution.push({
                 analytic_account_id: record.id,
                 percentage: data[record.id],
@@ -111,7 +121,7 @@ export class AnalyticDistribution extends Component {
                 analytic_account_name: record.name,
                 color: record.color,
             });
-        });
+        }
 
         this.state.list = res;
     }
