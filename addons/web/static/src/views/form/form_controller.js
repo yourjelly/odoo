@@ -385,15 +385,10 @@ export class FormController extends Component {
                 ...record.dirtyTranslatableFields,
             ]);
         }
-        try {
-            if (this.props.saveRecord) {
-                saved = await this.props.saveRecord(record, params);
-            } else {
-                saved = await record.save();
-            }
-        } catch {
-            // if the save failed, we want to re-enable buttons
-            this.enableButtons();
+        if (this.props.saveRecord) {
+            saved = await this.props.saveRecord(record, params);
+        } else {
+            saved = await record.save();
         }
         this.enableButtons();
         if (saved && this.props.onSave) {
