@@ -1437,7 +1437,8 @@ export class OdooEditor extends EventTarget {
     // -------------------------------------------------------------------------
 
     onExternalMultiselectionUpdate(selection) {
-        this._multiselectionDisplayClient(selection);
+        this._drawClientSelection(selection);
+        this._drawClientAvatar(selection);
         const { clientId } = selection;
         if (this._collabSelectionInfos.has(clientId)) {
             this._collabSelectionInfos.get(clientId).selection = selection;
@@ -1456,11 +1457,12 @@ export class OdooEditor extends EventTarget {
             }
         }
         for (const { selection } of this._collabSelectionInfos.values()) {
-            this._multiselectionDisplayClient(selection);
+            this._drawClientSelection(selection);
+            this._drawClientAvatar(selection);
         }
     }
 
-    _multiselectionDisplayClient({ selection, color, clientId, clientAvatarUrl = '', clientName = this.options._t('Anonymous') }) {
+    _drawClientSelection({ selection, color, clientId, clientName = this.options._t('Anonymous') }) {
         let clientRects;
 
         const anchorNode = this.idFind(selection.anchorNodeOid);
@@ -1527,6 +1529,30 @@ export class OdooEditor extends EventTarget {
         caretTopSquare.setAttribute('data-client-name', clientName);
         caretElement.append(caretTopSquare);
 
+        if (direction === DIRECTIONS.LEFT) {
+            const rect = clientRects[0];
+            caretElement.style.height = `${rect.height * 1.2}px`;
+            caretElement.style.top = `${rect.y - containerRect.y}px`;
+            caretElement.style.left = `${rect.x - containerRect.x}px`;
+        } else {
+            const rect = peek(clientRects);
+            caretElement.style.height = `${rect.height * 1.2}px`;
+            caretElement.style.top = `${rect.y - containerRect.y}px`;
+            caretElement.style.left = `${rect.right - containerRect.x}px`;
+        }
+        this._multiselectionRemoveClient(clientId);
+        this._collabSelectionsContainer.append(caretElement, ...indicators);
+    }
+
+    _drawClientAvatar({ selection, clientId, clientAvatarUrl = '', clientName = this.options._t('Anonymous') }) {
+        const anchorNode = this.idFind(selection.anchorNodeOid);
+        const focusNode = this.idFind(selection.focusNodeOid);
+        if (!anchorNode || !focusNode) {
+            return;
+        }
+
+        const containerRect = this._collabSelectionsContainer.getBoundingClientRect();
+
         // Draw user avatar.
         const selectionInfo = this._collabSelectionInfos.get(clientId);
         let caretAvatar = selectionInfo && selectionInfo.avatarElement;
@@ -1590,19 +1616,6 @@ export class OdooEditor extends EventTarget {
                 };
             }
         }
-        if (direction === DIRECTIONS.LEFT) {
-            const rect = clientRects[0];
-            caretElement.style.height = `${rect.height * 1.2}px`;
-            caretElement.style.top = `${rect.y - containerRect.y}px`;
-            caretElement.style.left = `${rect.x - containerRect.x}px`;
-        } else {
-            const rect = peek(clientRects);
-            caretElement.style.height = `${rect.height * 1.2}px`;
-            caretElement.style.top = `${rect.y - containerRect.y}px`;
-            caretElement.style.left = `${rect.right - containerRect.x}px`;
-        }
-        this._multiselectionRemoveClient(clientId);
-        this._collabSelectionsContainer.append(caretElement, ...indicators);
     }
 
     multiselectionRemove(clientId) {
