@@ -210,6 +210,7 @@ export class WebsocketWorker {
             // this case.
             return;
         }
+        console.debug("%c[onClose]", "color: #c6e; font-weight: bold;", code, reason);
         this.broadcast('disconnect', { code, reason });
         if (code === WEBSOCKET_CLOSE_CODES.CLEAN) {
             // WebSocket was closed on purpose, do not try to reconnect.
@@ -229,7 +230,8 @@ export class WebsocketWorker {
      * Triggered when a connection failed or failed to established.
      * Apply an exponential back off to the reconnect attempts.
      */
-    _onWebsocketError() {
+    _onWebsocketError(ev) {
+        console.debug("%c[onError]", "color: #c6e; font-weight: bold;", ev);
         this.connectRetryDelay = this.connectRetryDelay * 1.5 + 500 * Math.random();
         this.connectTimeout = setTimeout(this._start.bind(this), this.connectRetryDelay);
     }
@@ -241,6 +243,7 @@ export class WebsocketWorker {
     */
     _onWebsocketMessage(messageEv) {
         const notifications = JSON.parse(messageEv.data);
+        console.debug("%c[onMessage]", "color: #c6e; font-weight: bold;", notifications);
         this.lastNotificationId = notifications[notifications.length - 1].id;
         this.broadcast('notification', notifications);
     }
