@@ -101,10 +101,11 @@ export class ListController extends Component {
                     }
                 }
             },
-            beforeUnload: () => {
+            beforeUnload: (ev) => {
                 const editedRecord = this.model.root.editedRecord;
                 if (editedRecord) {
-                    return editedRecord.urgentSave();
+                    ev.preventDefault(); // should be sufficient according to spec but...
+                    ev.returnValue = "unsaved changes"; // needed by some browsers according to MDN
                 }
             },
             getLocalState: () => {

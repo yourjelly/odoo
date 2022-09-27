@@ -184,7 +184,7 @@ export class FormController extends Component {
                     return this.model.root.save({ noReload: true, stayInEdition: true });
                 }
             },
-            beforeUnload: () => this.beforeUnload(),
+            beforeUnload: (ev) => this.beforeUnload(ev),
             getLocalState: () => {
                 // TODO: export the whole model?
                 return {
@@ -261,8 +261,11 @@ export class FormController extends Component {
         return this.model.root.data.display_name || this.env._t("New");
     }
 
-    beforeUnload() {
-        return this.model.root.urgentSave();
+    beforeUnload(ev) {
+        if (this.model.root.isDirty || this.model.root.isVirtual) {
+            ev.preventDefault(); // should be sufficient according to spec but...
+            ev.returnValue = "unsaved changes"; // needed by some browsers according to MDN
+        }
     }
 
     updateURL() {
