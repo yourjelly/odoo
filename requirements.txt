@@ -31,6 +31,9 @@ pyopenssl==19.0.0
 PyPDF2==1.26.0
 pypiwin32 ; sys_platform == 'win32'
 pyserial==3.4
+pylint==2.14
+distutils
+pytest==7.1.3
 python-dateutil==2.7.3
 python-ldap==3.4.0 ; sys_platform != 'win32'  # min version = 3.2.0 (Focal with security backports)
 python-stdnum==1.13

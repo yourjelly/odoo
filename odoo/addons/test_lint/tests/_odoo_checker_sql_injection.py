@@ -1,7 +1,8 @@
 import os
 
 import astroid
-from pylint import checkers, interfaces
+from pylint.checkers import BaseChecker
+
 
 DFTL_CURSOR_EXPR = [
     'self.env.cr', 'self._cr',  # new api
@@ -10,8 +11,8 @@ DFTL_CURSOR_EXPR = [
 ]
 
 
-class OdooBaseChecker(checkers.BaseChecker):
-    __implements__ = interfaces.IAstroidChecker
+class OdooBaseChecker(BaseChecker):
+    #__implements__ = interfaces.IAstroidChecker # Depreciated
     name = 'odoo'
 
     msgs = {
@@ -40,8 +41,8 @@ class OdooBaseChecker(checkers.BaseChecker):
         """
         infered = checkers.utils.safe_infer(node)
         # The package 'psycopg2' must be installed to infer
-        # ignore sql.SQL().format
-        if infered and infered.pytype().startswith('psycopg2'):
+        # ignore sql.SQL().format or variable that can be infered as constant
+        if infered and (infered.pytype().startswith('psycopg2') or  isinstance(infered, astroid.Const)):
             return True
         if isinstance(node, astroid.Call):
             node = node.func
@@ -50,8 +51,6 @@ class OdooBaseChecker(checkers.BaseChecker):
         return (isinstance(node, astroid.Attribute)
             and isinstance(node.expr, astroid.Name)
             and node.attrname.startswith('_')
-            # cr.execute('SELECT * FROM %s' % 'table') is OK since that is a constant
-            or isinstance(node, astroid.Const)
         )
 
     def _check_concatenation(self, node):
@@ -140,11 +139,9 @@ class OdooBaseChecker(checkers.BaseChecker):
 
         return True
 
-    @checkers.utils.check_messages('sql-injection')
     def visit_call(self, node):
         if self._check_sql_injection_risky(node):
             self.add_message('sql-injection', node=node)
-
 
 def register(linter):
     linter.register_checker(OdooBaseChecker(linter))
