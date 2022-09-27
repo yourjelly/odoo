@@ -819,7 +819,10 @@ class TransactionCase(BaseCase):
         cls.cr = cls.registry.cursor()
         cls.addClassCleanup(cls.cr.close)
 
+
         cls.env = api.Environment(cls.cr, odoo.SUPERUSER_ID, {})
+
+
 
     def setUp(self):
         super().setUp()

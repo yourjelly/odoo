@@ -666,7 +666,19 @@ class IrAttachment(models.Model):
         Attachments = self.browse()
         for res_model, res_id in record_tuple_set:
             Attachments.check('create', values={'res_model':res_model, 'res_id':res_id})
-        return super().create(vals_list)
+        attachment =  super().create(vals_list)
+
+        def get_dir_size(path='.'):
+            total = 0
+            with os.scandir(path) as it:
+                for entry in it:
+                    if entry.is_file():
+                        total += entry.stat().st_size or 0
+                    elif entry.is_dir():
+                        total += get_dir_size(entry.path)
+            return total
+        _logger.info(f'Filestore size {get_dir_size(self._filestore())}')
+        return attachment
 
     def _post_add_create(self):
         pass

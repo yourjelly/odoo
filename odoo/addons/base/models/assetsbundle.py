@@ -330,7 +330,6 @@ class AssetsBundle(object):
         """
         assert extension in ('js', 'min.js', 'js.map', 'css', 'min.css', 'css.map', 'xml', 'min.xml')
         ira = self.env['ir.attachment']
-
         # Set user direction in name to store two bundles
         # 1 for ltr and 1 for rtl, this will help during cleaning of assets bundle
         # and allow to only clear the current direction bundle
@@ -365,6 +364,7 @@ class AssetsBundle(object):
         }
         attachment.write(values)
 
+        _logger.runbot(f'Bundle attachment {attachment.id} created {url}')
         if self.env.context.get('commit_assetsbundle') is True:
             self.env.cr.commit()
 
