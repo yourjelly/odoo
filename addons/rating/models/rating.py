@@ -23,8 +23,8 @@ class Rating(models.Model):
         return [(model.model, model.name) for model in self.env['ir.model'].sudo().search([])]
 
     create_date = fields.Datetime(string="Submitted on")
-    res_name = fields.Char(string='Resource name', compute='_compute_res_name', store=True, help="The name of the rated resource.")
-    res_model_id = fields.Many2one('ir.model', 'Related Document Model', index=True, ondelete='cascade', help='Model of the followed resource')
+    res_name = fields.Char(string='Resource name', compute='_compute_res_name', store=True)
+    res_model_id = fields.Many2one('ir.model', 'Related Document Model', index=True, ondelete='cascade')
     res_model = fields.Char(string='Document Model', related='res_model_id.model', store=True, index=True, readonly=True)
     res_id = fields.Many2oneReference(string='Document', model_field='res_model', required=True, index=True)
     resource_ref = fields.Reference(
@@ -37,22 +37,19 @@ class Rating(models.Model):
     parent_ref = fields.Reference(
         string='Parent Ref', selection='_selection_target_model',
         compute='_compute_parent_ref', readonly=True)
-    rated_partner_id = fields.Many2one('res.partner', string="Rated Operator",
-        help="User that has been rated; corresponds to the user assigned to the record for which a rating request has been sent.")
+    rated_partner_id = fields.Many2one('res.partner', string="Rated Operator")
     rated_partner_name = fields.Char(related="rated_partner_id.name")
-    partner_id = fields.Many2one('res.partner', string='Customer', help="Customer that submitted the rating.")
-    rating = fields.Float(string="Rating Value", group_operator="avg", default=0, help="Rating value: 0=Unhappy, 5=Happy")
+    partner_id = fields.Many2one('res.partner', string='Customer')
+    rating = fields.Float(string="Rating Value", group_operator="avg", default=0)
     rating_image = fields.Binary('Image', compute='_compute_rating_image')
     rating_image_url = fields.Char('Image URL', compute='_compute_rating_image')
-    rating_text = fields.Selection(rating_data.RATING_TEXT, string='Rating', store=True, compute='_compute_rating_text', readonly=True,
-        help="Rating left by the customer. It can be either satisfied, okay or dissatisfied.")
-    feedback = fields.Text('Comment', help="Feedback left by the customer who submitted the rating.")
+    rating_text = fields.Selection(rating_data.RATING_TEXT, string='Rating', store=True, compute='_compute_rating_text', readonly=True)
+    feedback = fields.Text('Comment')
     message_id = fields.Many2one(
         'mail.message', string="Message",
-        index=True, ondelete='cascade',
-        help="Associated message when posting a review. Mainly used in website addons.")
-    is_internal = fields.Boolean('Visible Internally Only', readonly=False, related='message_id.is_internal', store=True)
-    access_token = fields.Char('Security Token', default=_default_access_token, help="Access token to set the rating of the value")
+        index=True, ondelete='cascade')
+    is_internal = fields.Boolean('Visible Internally Only', readonly=False, related='message_id.is_internal', store=True, help="")
+    access_token = fields.Char('Security Token', default=_default_access_token)
     consumed = fields.Boolean(string="Filled Rating")
 
     _sql_constraints = [

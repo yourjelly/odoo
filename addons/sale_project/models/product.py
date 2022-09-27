@@ -33,13 +33,10 @@ class ProductTemplate(models.Model):
         creating a new project based on the selected template.")
     project_id = fields.Many2one(
         'project.project', 'Project', company_dependent=True,
-        domain="[('company_id', '=', current_company_id)]",
-        help='Billable project in which a task will automatically be created when a sales order is confirmed. You must select a project for each of your companies.')
+        domain="[('company_id', '=', current_company_id)]")
     project_template_id = fields.Many2one(
         'project.project', 'Project Template', company_dependent=True, copy=True,
-        domain="[('company_id', '=', current_company_id)]",
-        help='Billable project that will be used as a template when automatically creating a project (and a task) on the confirmation of a sales order.\n'
-             'The stages, tasks and configuration of this project will be copied.')
+        domain="[('company_id', '=', current_company_id)]")
     service_policy = fields.Selection('_selection_service_policy', string="Service Invoicing Policy", compute='_compute_service_policy', inverse='_inverse_service_policy')
     service_type = fields.Selection(selection_add=[
         ('milestones', 'Project Milestones'),
