@@ -177,19 +177,10 @@ var FieldHtml = basic_fields.DebouncedField.extend(DynamicPlaceholderFieldMixin)
             return this._super();
         }
         var _super = this._super.bind(this);
-        // Do not wait for the resolution of the cleanForSave promise to update
-        // the internal value in case this happens during an urgentSave as the
-        // beforeunload event does not play well with asynchronicity. It is
-        // better to have a partially cleared value than to lose changes. When
-        // this function is called outside of an urgentSave context, the full
-        // cleaning is still awaited below and `_super` will reupdate the value.
-        const fullClean = this.wysiwyg.cleanForSave();
+        await this.wysiwyg.cleanForSave();
         this._setValue(this._getValue());
         this._isDirty = this.wysiwyg.isDirty();
-        await fullClean;
         await this.wysiwyg.saveModifiedImages(this.$content);
-        // Update the value to the fully cleaned version.
-        this._setValue(this._getValue());
         _super();
     },
     /**
