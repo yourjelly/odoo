@@ -1419,6 +1419,67 @@ class PropertiesCase(TransactionCase):
                 self.env['test_new_api.message'].search(
                     domain=[], order=f'attribut{c}es.b97300923a1c251e ASC')
 
+    def test_properties_field_read_group(self):
+        Model = self.env['test_new_api.message']
+        (self.message_1 | self.message_2 | self.message_3).discussion = self.discussion_1
+        # search on text properties
+        self.message_1.attributes = [{
+            'name': '3f32ce8a40059c4b',
+            'type': 'char',
+            'value': 'qsd',
+            'definition_changed': True,
+        }, {
+            'name': '6bee1c2180749249',
+            'type': 'integer',
+            'value': 1337,
+            'definition_changed': True,
+        }]
+        self.message_2.attributes = {'3f32ce8a40059c4b': 'qsd', '6bee1c2180749249': 5}
+        self.message_3.attributes = {'3f32ce8a40059c4b': 'boum', '6bee1c2180749249': 1337}
+        self.env.flush_all()
+
+        # group by the char property
+        with self.assertQueryCount(1):
+            result = Model.read_group(
+                domain=[],
+                fields=['name', 'attributes'],
+                groupby=['attributes.3f32ce8a40059c4b'],
+            )
+        self.assertEqual(len(result), 3)
+
+        # check counts
+        count_by_values = {
+            value['attributes.3f32ce8a40059c4b']: value['attributes_count']
+            for value in result
+        }
+        self.assertEqual(count_by_values['boum'], 1)
+        self.assertEqual(count_by_values['qsd'], 2)
+
+        # check domains
+        domain_by_values = {
+            value['attributes.3f32ce8a40059c4b']: value['__domain']
+            for value in result
+        }
+        self.assertEqual(domain_by_values['boum'], [('attributes.3f32ce8a40059c4b', '=', 'boum')])
+        self.assertEqual(domain_by_values['qsd'], [('attributes.3f32ce8a40059c4b', '=', 'qsd')])
+
+        # group by the integer property
+        with self.assertQueryCount(1):
+            result = Model.read_group(
+                domain=[],
+                fields=['name', 'attributes'],
+                groupby=['attributes.6bee1c2180749249'],
+            )
+
+        self.assertEqual(len(result), 3)
+        count_by_values = {
+            value['attributes.6bee1c2180749249']: value['attributes_count']
+            for value in result
+        }
+
+        self.assertEqual(count_by_values[5], 1)
+        self.assertEqual(count_by_values[1337], 2)
+
     def test_properties_field_security(self):
         """Check the access right related to the Properties fields."""
         MultiTag = type(self.env['test_new_api.multi.tag'])

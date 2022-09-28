@@ -2469,7 +2469,7 @@ class BaseModel(metaclass=MetaModel):
             if is_many2one_id:
                 order_field = order_field[:-3]
             if order_field == 'id' or order_field in groupby_fields:
-                order_field_name = order_field.split(':')[0]
+                order_field_name = order_field.split(':')[0].split('.')[0]
                 if self._fields[order_field_name].type == 'many2one' and not is_many2one_id:
                     order_clause = self._generate_order_by(order_part, query)
                     order_clause = order_clause.replace('ORDER BY ', '')
@@ -2500,7 +2500,9 @@ class BaseModel(metaclass=MetaModel):
             field name, type, time information, qualified name, ...
         """
         split = gb.split(':')
-        field = self._fields.get(split[0])
+
+        fieldname = split[0].split('.')[0]
+        field = self._fields.get(fieldname)
         if not field:
             raise ValueError("Invalid field %r on model %r" % (split[0], self._name))
         field_type = field.type
@@ -2540,7 +2542,7 @@ class BaseModel(metaclass=MetaModel):
         if field_type == 'boolean':
             qualified_field = "coalesce(%s,false)" % qualified_field
         return {
-            'field': split[0],
+            'field': fieldname,
             'groupby': gb,
             'type': field_type,
             'display_format': display_formats[gb_function or 'month'] if temporal else None,
@@ -2626,6 +2628,9 @@ class BaseModel(metaclass=MetaModel):
                         (gb['field'], '>=', range_start),
                         (gb['field'], '<', range_end),
                     ]
+                elif ftype == 'properties' and '.' in gb['groupby']:
+                    d = [(gb['groupby'], '=', value)]
+
             elif ftype in ('date', 'datetime'):
                 # Set the __range of the group containing records with an unset
                 # date/datetime field value to False.
@@ -2704,7 +2709,7 @@ class BaseModel(metaclass=MetaModel):
         groupby = [groupby] if isinstance(groupby, str) else groupby[:1] if lazy else OrderedSet(groupby)
         groupby_dates = [
             groupby_description for groupby_description in groupby
-            if self._fields[groupby_description.split(':')[0]].type in ('date', 'datetime')    # e.g. 'date:month'
+            if self._fields[groupby_description.split(':')[0].split('.')[0]].type in ('date', 'datetime')    # e.g. 'date:month'
         ]
         if not groupby_dates:
             return result
@@ -2897,6 +2902,11 @@ class BaseModel(metaclass=MetaModel):
         :param query: query object on which the JOIN should be added
         :return: qualified name of field, to be used in SELECT clause
         """
+        property_name = None
+        if '.' in fname:
+            fname, property_name = fname.split('.', 1)
+            check_property_name(property_name)
+
         # INVARIANT: alias is the SQL alias of model._table in query
         model, field = self, self._fields[fname]
         while field.inherited:
@@ -2934,6 +2944,8 @@ class BaseModel(metaclass=MetaModel):
             if lang == 'en_US':
                 return f'"{alias}"."{fname}"->>\'en_US\''
             return f'COALESCE("{alias}"."{fname}"->>\'{lang}\', "{alias}"."{fname}"->>\'en_US\')'
+        elif field.type == 'properties' and property_name:
+            return f""" "{alias}"."{fname}" -> '{property_name}' """
         else:
             return '"%s"."%s"' % (alias, fname)
 
