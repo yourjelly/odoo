@@ -6,6 +6,7 @@ import { evaluateExpr } from "@web/core/py_js/py";
 import { getNextTabableElement, getPreviousTabableElement } from "@web/core/utils/ui";
 import { usePosition } from "@web/core/position_hook";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
+import { shallowEqual } from "@web/core/utils/arrays";
 import { AnalyticAutoComplete } from "../autocomplete/autocomplete";
 
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
@@ -59,11 +60,16 @@ export class AnalyticDistribution extends Component {
             },
             fieldString: this.env._t("Analytic Distribution Template"),
         });
+        this.allPlans = [];
+        this.lastAccount = this.props.account_field ? this.props.record.data[this.props.account_field] : false;
+        this.lastProduct = this.props.product_field ? this.props.record.data[this.props.product_field] : false;
     }
 
     // Lifecycle
     async willStart() {
-        await this.fetchAllPlans(this.props);
+        if (this.editingRecord) {
+            await this.fetchAllPlans(this.props);
+        }
         await this.formatData(this.props);
     }
 
@@ -72,23 +78,28 @@ export class AnalyticDistribution extends Component {
         // and thus different applicabilities apply
         // or a model applies that contains unavailable plans
         // This should only execute when these fields have changed, therefore we use the `_field` props.
-        // (consider including the plans in the computed json, python side)
         const valueChanged = JSON.stringify(this.props.value) !== JSON.stringify(nextProps.value);
-        if (this.applicabilityParamsChanged(nextProps) || valueChanged) {
-            await this.fetchAllPlans(nextProps);
-            await this.formatData(nextProps);
+        if (valueChanged) {
+            if (this.props.force_applicability) {
+                this.formatData(nextProps);
+            } else {
+                this.fetchPlansAndFormatData(nextProps);
+            }
+            return;
+        }
+
+        const currentAccount = this.props.account_field ? this.props.record.data[this.props.account_field] : false;
+        const currentProduct = this.props.product_field ? this.props.record.data[this.props.product_field] : false;
+        if (!shallowEqual(this.lastProduct, currentProduct) || !shallowEqual(this.lastAccount, currentAccount)) {
+            this.lastAccount = currentAccount;
+            this.lastProduct = currentProduct;
+            await this.fetchPlansAndFormatData(nextProps);
+            return;
         }
     }
 
-    applicabilityParamsChanged(nextProps) {
-        if (this.props.force_applicability) {
-            return false;
-        }
-        if (this.props.account_field && this.props.record.data[this.props.account_field] !== nextProps.record.data[this.props.account_field] ||
-            this.props.product_field && this.props.record.data[this.props.product_field] !== nextProps.record.data[this.props.product_field]) {
-            return true;
-        }
-        return false;
+    patched() {
+        this.focusToSelector();
     }
 
     async formatData(nextProps) { 
@@ -98,9 +109,12 @@ export class AnalyticDistribution extends Component {
         if (records.length < data.length) {
             console.log('removing tags... value should be updated');
         }
-
         let res = Object.assign({}, ...this.allPlans.map((plan) => ({[plan.id]: {...plan, distribution: []}})));
         records.map((record) => {
+            if (!res[record.root_plan_id[0]]) {
+                // plans might not be available - data is formatted for the tags
+                res[record.root_plan_id[0]] = { distribution: [] }
+            }
             res[record.root_plan_id[0]].distribution.push({
                 analytic_account_id: record.id,
                 percentage: data[record.id],
@@ -114,8 +128,9 @@ export class AnalyticDistribution extends Component {
         this.state.list = res;
     }
 
-    patched() {
-        this.focusToSelector();
+    async fetchPlansAndFormatData(props = null) {
+        await this.fetchAllPlans(props || this.props);
+        await this.formatData(props || this.props);
     }
 
     // ORM
@@ -297,6 +312,10 @@ export class AnalyticDistribution extends Component {
         return this.state.list;
     }
 
+    get needsPlans() {
+        return this.editingRecord && !this.allPlans.length;
+    }
+
     get sortedList() {
         return Object.values(this.list).sort((a, b) => {
             const aApp = a.applicability,
@@ -402,15 +421,11 @@ export class AnalyticDistribution extends Component {
     validate() {
         for (const group_id in this.list) {
             if (this.groupStatus(group_id) === 'red') {
-                this.invalidate();
+                this.props.record.setInvalidField(this.props.name);
                 return false;
             }
         }
         return true;
-    }
-
-    invalidate() {
-        this.props.record.setInvalidField(this.props.name);
     }
 
     async save() {
@@ -441,7 +456,10 @@ export class AnalyticDistribution extends Component {
         this.state.showDropdown = false;
     }
 
-    openAnalyticEditor() {
+    async openAnalyticEditor() {
+        if (this.needsPlans) {
+            await this.fetchPlansAndFormatData(this.props);
+        }
         this.autoFill();
         const incompletePlan = this.firstIncompletePlanId;
         this.setFocusSelector(incompletePlan ? `#plan_${incompletePlan} .incomplete`: ".analytic_json_popup");
