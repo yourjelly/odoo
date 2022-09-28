@@ -7,7 +7,8 @@ import unittest
 from unittest.mock import patch
 
 from odoo import Command
-from odoo.exceptions import AccessError
+
+from odoo.exceptions import AccessError, UserError
 from odoo.tests.common import Form, TransactionCase, users
 from odoo.tools import mute_logger
 
@@ -1498,6 +1499,86 @@ class PropertiesCase(TransactionCase):
         self.assertNotIn(self.message_1, result)
         self.assertNotIn(self.message_2, result)
 
+    @mute_logger('odoo.fields')
+    def test_properties_field_search_orderby_string(self):
+        """Test that we can order record by properties string values."""
+        (self.message_1 | self.message_2 | self.message_3).discussion = self.discussion_1
+        self.message_1.attributes = [{
+            'name': 'b97300923a1c251e',
+            'type': 'char',
+            'value': 'BB',
+            'definition_changed': True,
+        }]
+        self.message_2.attributes = {'b97300923a1c251e': 'AA'}
+        self.message_3.attributes = {'b97300923a1c251e': 'CC'}
+
+        self.env.flush_all()
+
+        result = self.env['test_new_api.message'].search(
+            domain=[['attributes.b97300923a1c251e', '!=', False]],
+            order='attributes.b97300923a1c251e ASC')
+        self.assertEqual(result[0], self.message_2)
+        self.assertEqual(result[1], self.message_1)
+        self.assertEqual(result[2], self.message_3)
+
+        result = self.env['test_new_api.message'].search(
+            domain=[['attributes.b97300923a1c251e', '!=', False]],
+            order='attributes.b97300923a1c251e DESC')
+        self.assertEqual(result[0], self.message_3)
+        self.assertEqual(result[1], self.message_1)
+        self.assertEqual(result[2], self.message_2)
+
+    @mute_logger('odoo.fields')
+    def test_properties_field_search_orderby_integer(self):
+        """Test that we can order record by properties integer values."""
+        (self.message_1 | self.message_2 | self.message_3).discussion = self.discussion_1
+        self.message_1.attributes = [{
+            'name': 'b97300923a1c251e',
+            'type': 'integer',
+            'value': 22,
+            'definition_changed': True,
+        }]
+        self.message_2.attributes = {'b97300923a1c251e': 111}
+        self.message_3.attributes = {'b97300923a1c251e': 33}
+
+        self.env.flush_all()
+
+        result = self.env['test_new_api.message'].search(
+            domain=[['attributes.b97300923a1c251e', '!=', False]],
+            order='attributes.b97300923a1c251e ASC')
+        self.assertEqual(result[0], self.message_1)
+        self.assertEqual(result[1], self.message_3)
+        self.assertEqual(result[2], self.message_2)
+
+        result = self.env['test_new_api.message'].search(
+            domain=[['attributes.b97300923a1c251e', '!=', False]],
+            order='attributes.b97300923a1c251e DESC')
+        self.assertEqual(result[0], self.message_2)
+        self.assertEqual(result[1], self.message_3)
+        self.assertEqual(result[2], self.message_1)
+
+    @mute_logger('odoo.fields')
+    def test_properties_field_search_orderby_injection(self):
+        """Check the restriction on the property name."""
+        self.message_1.attributes = [{
+            'name': 'b97300923a1c251e',
+            'type': 'integer',
+            'value': 22,
+            'definition_changed': True,
+        }]
+
+        for c in ['"', "'", '/', '-']:
+            with self.assertRaises(UserError):
+                self.env['test_new_api.message'].search(
+                    domain=[], order=f'attributes.b97300923a1c251e{c} ASC')
+            with self.assertRaises(UserError):
+                self.env['test_new_api.message'].search(
+                    domain=[], order=f'attributes.b97300{c}923a1c251e ASC')
+            with self.assertRaises(UserError):
+                self.env['test_new_api.message'].search(
+                    domain=[], order=f'attribut{c}es.b97300923a1c251e ASC')
+
+    @mute_logger('odoo.fields')
     def test_properties_field_security(self):
         """Check the access right related to the Properties fields."""
         MultiTag = type(self.env['test_new_api.multi.tag'])
