@@ -28,7 +28,7 @@ class TestProductConfiguratorUi(HttpCase, TestProductConfiguratorCommon):
     # FIXME VFE/SAD
     # Tour finished with an open form view in edition mode.
     # Form views in edition mode are automatically saved when the page is closed, which leads to stray network requests and inconsistencies.
-    def _test_01_product_configurator(self):
+    def test_01_product_configurator(self):
         self.start_tour("/web", 'sale_product_configurator_tour', login='salesman')
 
     def test_02_product_configurator_advanced(self):
