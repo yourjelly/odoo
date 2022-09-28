@@ -1157,6 +1157,8 @@ class Field(MetaField('DummyField', (object,), {})):
                     recs._fetch_field(self)
                 except AccessError:
                     record._fetch_field(self)
+                if not env.cache.contains(record, self) and record.exists():
+                    _logger.warning("Exists it still useful")
                 if not env.cache.contains(record, self) and not record.exists():
                     raise MissingError("\n".join([
                         _("Record does not exist or has been deleted."),

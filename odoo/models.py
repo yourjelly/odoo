@@ -25,6 +25,7 @@ import collections
 import contextlib
 import copy
 import datetime
+import traceback
 import dateutil
 import fnmatch
 import functools
@@ -2528,7 +2529,7 @@ class BaseModel(metaclass=MetaModel):
                 'year': dateutil.relativedelta.relativedelta(years=1)
             }
             if tz_convert:
-                qualified_field = "timezone('%s', timezone('UTC',%s))" % (self._context.get('tz', 'UTC'), qualified_field)
+                qualified_field = "timezone('%s', timezone('UTC', %s))" % (self._context.get('tz', 'UTC'), qualified_field)
             qualified_field = "date_trunc('%s', %s::timestamp)" % (gb_function or 'month', qualified_field)
         if field_type == 'boolean':
             qualified_field = "coalesce(%s,false)" % qualified_field
@@ -2552,12 +2553,8 @@ class BaseModel(metaclass=MetaModel):
         """
         value = False if value is None else value
         gb = groupby_dict.get(key)
-        if gb and gb['type'] in ('date', 'datetime') and value:
-            if isinstance(value, str):
-                dt_format = DEFAULT_SERVER_DATETIME_FORMAT if gb['type'] == 'datetime' else DEFAULT_SERVER_DATE_FORMAT
-                value = datetime.datetime.strptime(value, dt_format)
-            if gb['tz_convert']:
-                value = pytz.timezone(self._context['tz']).localize(value)
+        if gb and gb['type'] in ('date', 'datetime') and value and gb['tz_convert']:
+            value = pytz.timezone(self._context['tz']).localize(value)
         return value
 
     @api.model
@@ -2660,16 +2657,16 @@ class BaseModel(metaclass=MetaModel):
 
         :param list domain: :ref:`A search domain <reference/orm/domains>`. Use an empty
                      list to match all records.
-        :param list fields: list of fields present in the list view specified on the object.
-                Each element is either 'field' (field name, using the default aggregation),
-                or 'field:agg' (aggregate field with aggregation function 'agg'),
-                or 'name:agg(field)' (aggregate field with 'agg' and return it as 'name').
+        :param list fields: list of field specifications to aggregate.
+                Each element is either 'field_name' (using the default aggregation),
+                or 'field_name:agg' (aggregate field with aggregation function 'agg'),
+                or 'name:agg(field_name)' (aggregate field with 'agg' and return it as 'name').
                 The possible aggregation functions are the ones provided by
                 `PostgreSQL <https://www.postgresql.org/docs/current/static/functions-aggregate.html>`_
                 and 'count_distinct', with the expected meaning.
         :param list groupby: list of groupby descriptions by which the records will be grouped.
-                A groupby description is either a field (then it will be grouped by that field)
-                or a string 'field:granularity'. Right now, the only supported granularities
+                A groupby description is either a field name (then it will be grouped by that field)
+                or a string 'field_name:granularity'. Right now, the only supported granularities
                 are 'day', 'week', 'month', 'quarter' or 'year', and they only make sense for
                 date/datetime fields.
         :param int offset: optional number of records to skip
@@ -2718,27 +2715,31 @@ class BaseModel(metaclass=MetaModel):
     def _read_group_raw(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
         self.check_access_rights('read')
         query = self._where_calc(domain)
+        # TODO remove this crap, if not fields, just don't aggregate on anything.
+        # Also poeple need to send crappy `fields` which will be discard after because group_operator is not set
+        if not fields:
+            _logger.warning("Aggregate on every think: what is the purpose of that ?")
+            traceback.print_stack()
+
         fields = fields or [f.name for f in self._fields.values() if f.store]
 
         groupby = [groupby] if isinstance(groupby, str) else list(OrderedSet(groupby))
         groupby_list = groupby[:1] if lazy else groupby
         annotated_groupbys = [self._read_group_process_groupby(gb, query) for gb in groupby_list]
         groupby_fields = [g['field'] for g in annotated_groupbys]
-        order = orderby or ','.join([g for g in groupby_list])
         groupby_dict = {gb['groupby']: gb for gb in annotated_groupbys}
+        order = orderby or ','.join(groupby_list)
 
         self._apply_ir_rules(query, 'read')
         for gb in groupby_fields:
-            if gb not in self._fields:
-                raise UserError(_("Unknown field %r in 'groupby'", gb))
             if not self._fields[gb].base_field.groupable:
                 raise UserError(_(
                     "Field %s is not a stored field, only stored fields (regular or "
                     "many2many) are valid for the 'groupby' parameter", self._fields[gb],
                 ))
 
-        aggregated_fields = []
-        select_terms = []
+        aggregated_fields = []          # list of aggregated field (can differ from field name with 'name:func(fname)' notation)
+        select_terms = []               # list of SQL terms to fetch
         fnames = []                     # list of fields to flush
 
         for fspec in fields:
@@ -2789,7 +2790,7 @@ class BaseModel(metaclass=MetaModel):
             select_terms.append(term)
 
         for gb in annotated_groupbys:
-            select_terms.append('%s as "%s" ' % (gb['qualified_field'], gb['groupby']))
+            select_terms.append('%s AS "%s"' % (gb['qualified_field'], gb['groupby']))
 
         self._flush_search(domain, fields=fnames + groupby_fields)
 
@@ -2801,8 +2802,7 @@ class BaseModel(metaclass=MetaModel):
             count_field = '_'
         count_field += '_count'
 
-        prefix_terms = lambda prefix, terms: (prefix + " " + ",".join(terms)) if terms else ''
-        prefix_term = lambda prefix, term: ('%s %s' % (prefix, term)) if term else ''
+        prefix_terms = lambda prefix, terms: f'{prefix} {", ".join(terms)}' if terms else ''
 
         query = """
             SELECT min("%(table)s".id) AS id, count("%(table)s".id) AS "%(count_field)s" %(extra_fields)s
@@ -2810,18 +2810,17 @@ class BaseModel(metaclass=MetaModel):
             %(where)s
             %(groupby)s
             %(orderby)s
-            %(limit)s
-            %(offset)s
+            %(limit)s %(offset)s
         """ % {
             'table': self._table,
             'count_field': count_field,
-            'extra_fields': prefix_terms(',', select_terms),
+            'extra_fields': prefix_terms(', ', select_terms),
             'from': from_clause,
-            'where': prefix_term('WHERE', where_clause),
+            'where': prefix_terms('WHERE', [where_clause] if where_clause else None),
             'groupby': prefix_terms('GROUP BY', groupby_terms),
             'orderby': prefix_terms('ORDER BY', orderby_terms),
-            'limit': prefix_term('LIMIT', int(limit) if limit else None),
-            'offset': prefix_term('OFFSET', int(offset) if limit else None),
+            'limit': prefix_terms('LIMIT', [str(int(limit))] if limit else None),
+            'offset': prefix_terms('OFFSET', [str(int(offset))] if offset else None),
         }
         self._cr.execute(query, where_clause_params)
         fetched_data = self._cr.dictfetchall()
@@ -2891,7 +2890,7 @@ class BaseModel(metaclass=MetaModel):
         :return: qualified name of field, to be used in SELECT clause
         """
         # INVARIANT: alias is the SQL alias of model._table in query
-        model, field = self, self._fields[fname]
+        field = self._fields[fname]
         while field.inherited:
             # retrieve the parent model where field is inherited from
             parent_model = self.env[field.related_field.model_name]
@@ -2900,9 +2899,9 @@ class BaseModel(metaclass=MetaModel):
             parent_alias = query.left_join(
                 alias, parent_fname, parent_model._table, 'id', parent_fname,
             )
-            model, alias, field = parent_model, parent_alias, field.related_field
+            alias, field = parent_alias, field.related_field
 
-        if field.type == 'many2many':
+        if field.type == 'many2many':  # TODO: still not used in front-end
             # special case for many2many fields: prepare a query on the comodel
             # in order to reuse the mechanism _apply_ir_rules, then inject the
             # query as an extra condition of the left join
