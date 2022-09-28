@@ -5,8 +5,9 @@ import { useService } from "@web/core/utils/hooks";
 import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
 import { ForecastKanbanColumnQuickCreate } from "@crm/views/forecast_kanban/forecast_kanban_column_quick_create";
 import { INTERVAL_OPTIONS } from "@web/search/utils/dates";
+import { CrmKanbanRenderer } from "@crm/views/crm_kanban/crm_kanban_renderer";
 
-export class ForecastKanbanRenderer extends KanbanRenderer {
+export class ForecastKanbanRenderer extends CrmKanbanRenderer {
     setup() {
         super.setup(...arguments);
         this.fillTemporalService = useService("fillTemporalService");
