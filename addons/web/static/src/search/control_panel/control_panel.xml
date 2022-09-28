@@ -65,7 +65,7 @@
                     <div class="o_mobile_search_header">
                         <button
                             type="button"
-                            class="o_mobile_search_button btn"
+                            class="o_mobile_search_button btn btn-link text-reset"
                             t-on-click="() => state.showMobileSearch = false"
                         >
                             <i class="fa fa-arrow-left"/>
@@ -73,7 +73,7 @@
                         </button>
                         <button
                             type="button"
-                            class="o_mobile_search_button btn"
+                            class="o_mobile_search_button btn btn-link text-reset"
                             t-on-click="() => env.searchModel.clearQuery()"
                         >
                             CLEAR
