@@ -76,7 +76,7 @@ $o-wevent-color: mix(map-get($theme-colors, 'primary'), $body-color, $o-wevent-c
     .o_wevent_index_topbar_filters {
         .dropdown-toggle {
             border: $border-width solid mix(map-get($theme-colors, 'primary'), map-get($grays, '400'));
-            @extend .o_wevent_theme_bg_light;
+            
             @include border-radius($dropdown-border-radius);
             &:hover, &:focus {
                 border-color: map-get($theme-colors, 'primary');
@@ -96,12 +96,12 @@ $o-wevent-color: mix(map-get($theme-colors, 'primary'), $body-color, $o-wevent-c
             min-width: 12rem;
             max-height: 250px;
             overflow-y: auto;
-            @extend .o_wevent_theme_bg_light;
+            
         }
     }
 
     .o_wevent_event_searchbar_form > input {
-        @extend .o_wevent_theme_bg_light;
+        
     }
 
     /*
@@ -166,7 +166,7 @@ $o-wevent-color: mix(map-get($theme-colors, 'primary'), $body-color, $o-wevent-c
 
             // Left panel
             .o_wevent_online_page_aside {
-                @extend .o_wevent_theme_bg_base;
+                
                 // Left panel: content display
                 .o_wevent_online_page_aside_content {
                     border: 1px solid $border-color;

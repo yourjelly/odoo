@@ -9,7 +9,7 @@
         top: 10%;
 
         .o_view_nocontent_expense_receipt:before {
-            @extend %o-nocontent-init-image;
+            
             width: 300px;
             height: 230px;
             background: transparent url(/hr_expense/static/img/nocontent.png) no-repeat center;

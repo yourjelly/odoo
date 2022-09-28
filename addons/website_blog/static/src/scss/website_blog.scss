@@ -296,7 +296,7 @@ $o-wblog-loader-size: 50px;
 }
 
 #o_wblog_post_content_jump {
-    @extend .o_scroll_button;
+    
     width: $o-wblog-loader-size;
     height: $o-wblog-loader-size;
     background-color: rgba(black, 0.5);

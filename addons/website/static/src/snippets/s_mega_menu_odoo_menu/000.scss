@@ -7,7 +7,7 @@
         .row > div:not(.o_cc) {
             // TODO this should be replaced by proper structure and color
             // classes
-            @extend %s_mega_menu_gray_area;
+            
 
             &::before {
                 @include o-position-absolute(0, 0, 0, 0);

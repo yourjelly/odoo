@@ -25,19 +25,19 @@
     // = General components & behaviours
     // --------------------------------------------------------------------------
     .dropdown.show > .dropdown-toggle {
-        @extend %-main-navbar-entry-active;
+        
     }
 
     .o_nav_entry {
-        @extend %-main-navbar-entry-base;
-        @extend %-main-navbar-entry-spacing;
-        @extend %-main-navbar-entry-bg-hover;
+        
+        
+        
     }
 
     .dropdown-toggle {
-        @extend %-main-navbar-entry-base;
-        @extend %-main-navbar-entry-spacing;
-        @extend %-main-navbar-entry-bg-hover;
+        
+        
+        
         border: 0;
     }
 
@@ -58,14 +58,14 @@
     // = Navbar Sections & Children
     // --------------------------------------------------------------------------
     .o_navbar_apps_menu .dropdown-toggle {
-        @extend %-main-navbar-entry-base;
+        
         padding-left: $o-horizontal-padding;
         font-size: $o-navbar-brand-font-size;
     }
 
     .o_menu_brand {
-        @extend %-main-navbar-entry-base;
-        @extend %-main-navbar-entry-spacing;
+        
+        
         padding-left: 0;
         font-size: $o-navbar-brand-font-size;
 
@@ -89,9 +89,9 @@
 
     .o_menu_systray > * {
         > a, > .dropdown > a, > button, > label { // <label> is required by website
-            @extend %-main-navbar-entry-base;
-            @extend %-main-navbar-entry-spacing;
-            @extend %-main-navbar-entry-bg-hover;
+            
+            
+            
 
             @include media-breakpoint-up(lg) {
                 padding: 0 $o-horizontal-padding * .6;

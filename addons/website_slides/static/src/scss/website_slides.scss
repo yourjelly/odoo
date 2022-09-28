@@ -30,7 +30,7 @@ $line-height-truncate: 1.25em;
         -webkit-line-clamp: $limit;
     }
     .o_wslides_desc_truncate_#{$limit}_badges {
-        @extend .o_wslides_desc_truncate_#{$limit};
+        
         max-height: $limit * $line-height-truncate * 1.2;
     }
 }

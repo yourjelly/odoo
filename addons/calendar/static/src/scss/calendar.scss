@@ -1,5 +1,5 @@
 .o_calendar_invitation {
-    @extend .o_status;
+    
 
     &.accepted {
         background-color: map-get($theme-colors, 'success');
@@ -49,10 +49,10 @@
     }
 
     .o_accepted {
-        @extend .text-success;
+        
     }
     .o_declined {
-        @extend .text-danger;
+        
     }
 }
 .o_meeting_filter {

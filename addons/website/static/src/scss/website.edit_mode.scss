@@ -82,11 +82,11 @@ $-editor-messages-margin-x: 2%;
 
     &.oe_structure.oe_empty, &[data-oe-type=html], .oe_structure.oe_empty {
         &#wrap:empty, &#wrap > .oe_drop_zone.oe_insert:not(.oe_vertical):only-child {
-            @extend %o-editor-messages;
+            
             padding: 112px 0px;
         }
         > .oe_drop_zone.oe_insert:not(.oe_vertical):only-child {
-            @extend %o-editor-messages;
+            
             height: auto;
             color: $o-brand-odoo;
         }

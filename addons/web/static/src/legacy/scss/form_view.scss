@@ -61,11 +61,11 @@ $o-form-label-margin-right: 0px;
         }
     }
     .oe_left {
-        @extend .oe_inline;
+        
         float: left!important;
     }
     .oe_right {
-        @extend .oe_inline;
+        
         float: right!important;
     }
 
@@ -748,7 +748,7 @@ $o-form-label-margin-right: 0px;
 
     // Specific style classes
     .o_group.o_inner_group.oe_subtotal_footer {
-        @extend .oe_right;
+        
 
         > tbody > tr > td {
             padding: 0;

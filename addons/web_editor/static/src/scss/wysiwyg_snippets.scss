@@ -147,7 +147,7 @@ body.editor_enable.editor_has_snippets {
 %we-generic-link {
     color: $o-we-sidebar-content-field-color;
     @include we-svg-icon();
-    @extend %we-generic-clickable;
+    
 
     &:not([disabled]) {
         &.active, &:hover {
@@ -157,7 +157,7 @@ body.editor_enable.editor_has_snippets {
 }
 
 %we-generic-button {
-    @extend %we-generic-clickable;
+    
     @include o-text-overflow(block);
     @include we-svg-icon($o-we-sidebar-content-field-clickable-color, $o-we-sidebar-content-field-clickable-color);
 
@@ -177,7 +177,7 @@ body.editor_enable.editor_has_snippets {
 }
 
 %we-generic-tab-button {
-    @extend %we-generic-link;
+    
     display: inline-flex;
     flex: 1 1 auto;
     justify-content: center;
@@ -300,7 +300,7 @@ body.editor_enable.editor_has_snippets {
         color: $o-we-sidebar-tabs-color;
 
         > button {
-            @extend %we-generic-tab-button;
+            
         }
     }
 
@@ -424,7 +424,7 @@ body.editor_enable.editor_has_snippets {
                 padding: 0;
             }
             .btn {
-                @extend %we-generic-link;
+                
                 padding-top: 0;
                 padding-bottom: 0;
                 padding-left: 0;
@@ -433,7 +433,7 @@ body.editor_enable.editor_has_snippets {
                 display: none;
             }
             we-input.o_we_user_value_widget {
-                @extend %we-generic-text-input;
+                
                 cursor: pointer;
                 > div {
                     display: flex;
@@ -442,7 +442,7 @@ body.editor_enable.editor_has_snippets {
                     cursor: text;
                 }
                 we-button {
-                    @extend %we-generic-clickable;
+                    
                     cursor: pointer;
                     flex: 1 1 auto;
                     line-height: 17px;
@@ -461,7 +461,7 @@ body.editor_enable.editor_has_snippets {
         flex: 1;
 
         @mixin we-icon-button($icon, $color: $o-we-sidebar-content-field-control-item-color, $align: right) {
-            @extend %we-icon-button;
+            
             padding-#{$align}: 2 * $o-we-sidebar-content-field-control-item-spacing + $o-we-sidebar-content-field-control-item-size;
 
             &::after {
@@ -481,11 +481,11 @@ body.editor_enable.editor_has_snippets {
         }
 
         we-button, we-toggler {
-            @extend %we-generic-button;
+            
         }
 
         #removeFormat, #oe-table-delete-table, .o_we_highlight_animated_text {
-            @extend %we-generic-link;
+            
         }
 
         .oe-toolbar {
@@ -505,7 +505,7 @@ body.editor_enable.editor_has_snippets {
             }
 
             .btn {
-                @extend %we-generic-button;
+                
                 display: flex;
                 padding: ($o-we-sidebar-content-field-height * .12) ($o-we-sidebar-content-field-button-group-button-spacing - 2);
             }
@@ -694,23 +694,23 @@ body.editor_enable.editor_has_snippets {
         // END toolbar
 
         #oe-table-options {
-            @extend we-customizeblock-option;
+            
 
             .btn {
-                @extend %we-generic-button;
+                
             }
 
             .oe-table-row {
-                @extend we-row;
+                
             }
 
             .oe-table-label {
-                @extend we-title;
+                
             }
         }
 
         we-button.o_we_link {
-            @extend %we-generic-link;
+            
             margin-top: 0;
             border: 0;
             padding: 0;
@@ -852,7 +852,7 @@ body.editor_enable.editor_has_snippets {
             align-items: center;
             width: $o-we-sidebar-content-indent;
 
-            @extend %we-generic-link;
+            
         }
 
         //----------------------------------------------------------------------
@@ -860,7 +860,7 @@ body.editor_enable.editor_has_snippets {
         //----------------------------------------------------------------------
 
         .o_we_user_value_widget {
-            @extend %o-we-inline;
+            
             margin-top: $o-we-sidebar-content-field-spacing;
 
             > div {
@@ -1167,7 +1167,7 @@ body.editor_enable.editor_has_snippets {
 
         // Inputs
         we-input.o_we_user_value_widget {
-            @extend %we-generic-text-input;
+            
             > div {
                 flex: 0 1 auto;
                 width: $o-we-sidebar-content-field-input-max-width;
@@ -1195,7 +1195,7 @@ body.editor_enable.editor_has_snippets {
         .o_we_so_color_palette.o_we_user_value_widget {
 
             .o_we_color_preview {
-                @extend %o-preview-alpha-background;
+                
                 flex: 0 0 auto;
                 display: block;
                 width: $o-we-sidebar-content-field-colorpicker-size;
@@ -1529,7 +1529,7 @@ body.editor_enable.editor_has_snippets {
 
         we-row {
             position: relative;
-            @extend %o-we-inline;
+            
             margin-top: $o-we-sidebar-content-field-spacing;
 
             .o_we_user_value_widget {
@@ -1674,7 +1674,7 @@ body.editor_enable.editor_has_snippets {
         }
         @for $level from 1 through 3 {
             .o_we_sublevel_#{$level} {
-                @extend %o_we_sublevel;
+                
 
                 @if $level > 1 {
                     > we-title {
@@ -1742,7 +1742,7 @@ body.editor_enable.editor_has_snippets {
 }
 
 .o_we_cc_preview_wrapper {
-    @extend %o-preview-alpha-background;
+    
     font-family: sans-serif !important;
     font-size: 15px !important;
     padding: $o-we-sidebar-content-field-spacing $o-we-sidebar-content-field-spacing $o-we-sidebar-content-field-spacing*.8;
@@ -1791,11 +1791,11 @@ body.editor_enable.editor_has_snippets {
                         inset 0 0 0 4px white;
 
     .o_we_colorpicker_switch_pane_btn {
-        @extend %we-generic-tab-button;
+        
         flex: 0 1 auto;
     }
     .o_colorpicker_reset {
-        @extend %we-generic-button;
+        
         border: 0;
         background-color: transparent;
     }
@@ -1859,7 +1859,7 @@ body.editor_enable.editor_has_snippets {
                 }
             }
             .o_custom_gradient_scale {
-                @extend %o-preview-alpha-background;
+                
                 cursor: copy;
                 div {
                     height: 20px;
@@ -2225,7 +2225,7 @@ body.editor_enable.editor_has_snippets {
                     display: flex;
                 }
                 .o_overlay_move_options > *, .o_overlay_edit_options > *, > we-button {
-                    @extend %we-generic-button;
+                    
                     margin: 0 1px 0;
                     min-width: 22px;
                     padding: 0 $o-we-sidebar-content-field-button-group-button-spacing * .5;
@@ -2443,7 +2443,7 @@ we-select.o_we_shape_menu {
             width: 100%;
         }
         .o_we_shape_btn_content {
-            @extend %o-preview-alpha-background;
+            
             width: 100%;
             height: 75px;
         }

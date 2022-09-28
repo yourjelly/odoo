@@ -124,16 +124,16 @@
         margin: 0.25rem 0;
 
         a {
-            @extend .alert-link;
+            
             &:hover {opacity: 0.8;}
         }
 
         // alias -error to -danger
         &.alert-error {
-            @extend .alert-danger;
+            
         }
         &.text-error {
-            @extend .text-danger;
+            
         }
     }
 

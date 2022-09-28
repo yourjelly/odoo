@@ -154,7 +154,7 @@ $o-we-toolbar-color-clickable-active: $o-we-bg-darkest;
 
             &[data-name="transparent_grayscale"], &[data-name="theme"], &[data-name="reset"], &[data-name="custom"] {
                 .o_we_color_btn {
-                    @extend %o-preview-alpha-background;
+                    
 
                     &::before, &::after {
                         box-shadow: inherit;
@@ -362,7 +362,7 @@ $o-we-toolbar-color-clickable-active: $o-we-bg-darkest;
         }
 
         .o_we_colorpicker_switch_panel button {
-            @extend .btn;
+            
             margin-bottom: -1px;
 
             &.active {
@@ -508,11 +508,11 @@ body .modal {
 }
 
 img.o_we_selected_image {
-    @extend %o-we-selected-image;
+    
 }
 
 .fa.o_we_selected_image::before {
-    @extend %o-we-selected-image;
+    
 }
 // Override default image selection color from portal. It prevents your from
 // seeing the images' quality clearly in the wysiwyg.

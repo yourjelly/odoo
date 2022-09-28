@@ -111,11 +111,11 @@
         }
     }
     .oe_left {
-        @extend .oe_inline;
+        
         float: left!important;
     }
     .oe_right {
-        @extend .oe_inline;
+        
         float: right!important;
     }
 
@@ -359,7 +359,7 @@
     }
 
     .o_statusbar_status .o_arrow_button:not(.disabled) {
-        @extend .btn-light;
+        
 
         &:hover, &:focus, &:active {
             &:after {
@@ -784,7 +784,7 @@
 
     // Specific style classes
     .o_group.o_inner_group.oe_subtotal_footer {
-        @extend .oe_right;
+        
         border-top: 1px solid $border-color;
 
         > tbody > tr > td {

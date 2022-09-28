@@ -228,7 +228,7 @@ $-seen-urls: ();
     @include o-apply-colors('menu-custom');
     $-menu-color: o-color('menu-custom') or o-color('menu');
     @if ($-menu-color and color-contrast($-menu-color) != $color-contrast-dark) {
-        @extend .navbar-dark;
+        
     }
     @include o-add-gradient('menu-gradient');
 }
@@ -334,7 +334,7 @@ font[class*='bg-'] {
         border-bottom-right-radius: $size;
     }
     &.rounded-empty-circle {
-        @extend .rounded-circle;
+        
         border-width: ceil(1.4 * $border-width);
         border-style: solid;
         background: transparent;
@@ -342,7 +342,7 @@ font[class*='bg-'] {
 }
 // Smaller container
 .o_container_small {
-    @extend .container;
+    
     @include media-breakpoint-up(lg) {
         max-width: map-get($container-max-widths, md);
     }
@@ -400,7 +400,7 @@ font[class*='bg-'] {
 
 // Background videos
 .o_bg_video_container {
-    @extend %o-we-background-layer;
+    
 }
 .o_bg_video_iframe {
     position: relative;
@@ -410,7 +410,7 @@ font[class*='bg-'] {
     @include o-position-absolute(0, 0 ,0 ,0);
 }
 .o_background_video, .parallax {
-    @extend %o-we-background-layer-parent;
+    
 }
 
 // Probably outdated
@@ -468,16 +468,16 @@ table.table_desc tr td {
     min-height: 100vh !important;
 }
 .o_half_screen_height {
-    @extend .o_full_screen_height;
+    
     min-height: 55vh !important;
 }
 
 // TODO remove cover_full and cover_mid classes (kept for compatibility for now)
 .cover_full {
-    @extend .o_full_screen_height;
+    
 }
 .cover_mid {
-    @extend .o_half_screen_height;
+    
 }
 
 // Allows custom border radius without contents overflowing.
@@ -724,7 +724,7 @@ table.table_desc tr td {
     }
 
     > .s_parallax_bg {
-        @extend %o-we-background-layer;
+        
     }
     @include media-breakpoint-up(xl) {
         // Fixed backgrounds are disabled when using a mobile/tablet device,
@@ -2251,5 +2251,5 @@ ul.o_checklist > li.o_checked::after {
 
 // Odoo dropdown menu
 .o_dropdown_menu {
-    @extend .dropdown-menu;
+    
 }

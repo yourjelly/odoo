@@ -29,7 +29,7 @@
 
         .o_configurator_typing_text {
             font-size: 28px;
-            @extend %o_configurator_titles_weight;
+            
 
             @include media-breakpoint-up(md) {
                 font-size: 32px;
@@ -46,7 +46,7 @@
 
         @for $i from 1 through 6 {
             .h#{$i} {
-                @extend %o_configurator_titles_weight;
+                
             }
         }
 

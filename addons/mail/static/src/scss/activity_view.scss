@@ -50,13 +50,13 @@
             @include o-position-absolute($bottom: 0, $right: 0);
 
             &.planned {
-                @extend .text-success;
+                
             }
             &.overdue {
-                @extend .text-danger;
+                
             }
             &.today {
-                @extend .text-warning;
+                
             }
         }
     }

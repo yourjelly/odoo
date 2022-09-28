@@ -140,11 +140,11 @@ li > p {
 }
 .container {
     .container, .container-fluid {
-        @extend %o-double-container-no-padding;
+        
     }
 }
 .container-fluid .container-fluid {
-    @extend %o-double-container-no-padding;
+    
 }
 #wrap {
     .container, .container-fluid {
@@ -182,7 +182,7 @@ li > p {
     border-bottom-color: $border-color;
 }
 .o_page_header {
-    @extend %o-page-header;
+    
 }
 
 // Images spacing
@@ -294,7 +294,7 @@ img, .media_iframe_video, .o_image {
 
 .o_portal {
     .breadcrumb {
-        @extend %o-portal-breadcrumbs;
+        
     }
 
     > tbody.o_portal_report_tbody {
@@ -311,7 +311,7 @@ img, .media_iframe_video, .o_image {
         .breadcrumb {
             padding-left: 0;
             padding-right: 0;
-            @extend %o-portal-breadcrumbs;
+            
         }
 
         @if ($o-portal-use-default-colors) {
@@ -526,16 +526,16 @@ form label {
 }
 
 .o_portal_security_body {
-    @extend .mx-auto;
+    
     max-width: map-get($container-max-widths, sm);
     section {
-        @extend .mt-4;
+        
         form.oe_reset_password_form {
             max-width: initial;
             margin: initial;
         }
         label, button {
-            @extend .text-nowrap;
+            
         }
     }
     section[name="portal_deactivate_account"] {

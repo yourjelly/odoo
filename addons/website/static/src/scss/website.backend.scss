@@ -377,7 +377,7 @@
         height: 100%;
 
         div.is_mobile {
-            @extend %o-mobile-phone;
+            
             @include media-breakpoint-up(md) {
                 position: relative;
             }

@@ -42,7 +42,7 @@
 // Invalid
 .o_field_invalid:not(:focus-within) {
     &.o_input, .o_input, &.o_form_label {
-        @extend .text-danger;
+        
     }
 }
 
@@ -368,7 +368,7 @@
 
     // Specific success color for toggle_button widget
     .fa.o_toggle_button_success {
-        @extend .text-success;
+        
     }
 
     // Handle widget
