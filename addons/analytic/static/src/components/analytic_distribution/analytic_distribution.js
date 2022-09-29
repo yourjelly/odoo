@@ -79,22 +79,17 @@ export class AnalyticDistribution extends Component {
         // or a model applies that contains unavailable plans
         // This should only execute when these fields have changed, therefore we use the `_field` props.
         const valueChanged = JSON.stringify(this.props.value) !== JSON.stringify(nextProps.value);
-        if (valueChanged) {
-            if (this.props.force_applicability) {
-                this.formatData(nextProps);
-            } else {
-                this.fetchPlansAndFormatData(nextProps);
-            }
-            return;
-        }
-
         const currentAccount = this.props.account_field ? this.props.record.data[this.props.account_field] : false;
         const currentProduct = this.props.product_field ? this.props.record.data[this.props.product_field] : false;
-        if (!shallowEqual(this.lastProduct, currentProduct) || !shallowEqual(this.lastAccount, currentAccount)) {
-            this.lastAccount = currentAccount;
-            this.lastProduct = currentProduct;
-            await this.fetchPlansAndFormatData(nextProps);
-            return;
+        const accountChanged = !shallowEqual(this.lastAccount, currentAccount);
+        const productChanged = !shallowEqual(this.lastProduct, currentProduct);
+        if (valueChanged || accountChanged || productChanged) {
+            if (!this.props.force_applicability) {
+                await this.fetchAllPlans(nextProps);
+            }
+            this.lastAccount = accountChanged && currentAccount || this.lastAccount;
+            this.lastProduct = productChanged && currentProduct || this.lastProduct;
+            await this.formatData(nextProps);
         }
     }
 
@@ -109,13 +104,13 @@ export class AnalyticDistribution extends Component {
         if (records.length < data.length) {
             console.log('removing tags... value should be updated');
         }
-        let res = Object.assign({}, ...this.allPlans.map((plan) => ({[plan.id]: {...plan, distribution: []}})));
+        let widgetData = Object.assign({}, ...this.allPlans.map((plan) => ({[plan.id]: {...plan, distribution: []}})));
         records.map((record) => {
-            if (!res[record.root_plan_id[0]]) {
-                // plans might not be available - data is formatted for the tags
-                res[record.root_plan_id[0]] = { distribution: [] }
+            if (!widgetData[record.root_plan_id[0]]) {
+                // plans might not have been retrieved
+                widgetData[record.root_plan_id[0]] = { distribution: [] }
             }
-            res[record.root_plan_id[0]].distribution.push({
+            widgetData[record.root_plan_id[0]].distribution.push({
                 analytic_account_id: record.id,
                 percentage: data[record.id],
                 id: this.nextId++,
@@ -125,12 +120,7 @@ export class AnalyticDistribution extends Component {
             });
         });
 
-        this.state.list = res;
-    }
-
-    async fetchPlansAndFormatData(props = null) {
-        await this.fetchAllPlans(props || this.props);
-        await this.formatData(props || this.props);
+        this.state.list = widgetData;
     }
 
     // ORM
@@ -312,10 +302,6 @@ export class AnalyticDistribution extends Component {
         return this.state.list;
     }
 
-    get needsPlans() {
-        return this.editingRecord && !this.allPlans.length;
-    }
-
     get sortedList() {
         return Object.values(this.list).sort((a, b) => {
             const aApp = a.applicability,
@@ -457,8 +443,9 @@ export class AnalyticDistribution extends Component {
     }
 
     async openAnalyticEditor() {
-        if (this.needsPlans) {
-            await this.fetchPlansAndFormatData(this.props);
+        if (!this.allPlans.length) {
+            await this.fetchAllPlans(this.props);
+            await this.formatData(this.props);
         }
         this.autoFill();
         const incompletePlan = this.firstIncompletePlanId;
