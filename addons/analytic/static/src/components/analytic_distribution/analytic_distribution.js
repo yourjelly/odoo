@@ -163,7 +163,9 @@ export class AnalyticDistribution extends Component {
         if (limit) {
             args['limit'] = limit;
         }
-        return await this.orm.call("account.analytic.account", "search_read", [], args);
+        // return await this.orm.call("account.analytic.account", "search_read", [], args);
+        const res = await this.props.record.model.orm.webSearchRead("account.analytic.account", args.domain, args.fields, {});
+        return res.records;
     }
 
     // Autocomplete
