@@ -2,9 +2,10 @@ import json
 import os
 import tempfile
 import unittest
+
+from contextlib import contextmanager
 from subprocess import run, PIPE
 from textwrap import dedent
-import pylint.testutils
 
 from odoo import tools
 from odoo.tests.common import TransactionCase
@@ -15,10 +16,23 @@ try:
     import pylint
 except ImportError:
     pylint = None
+
 try:
     pylint_bin = tools.which('pylint')
 except IOError:
     pylint_bin = None
+
+
+class UnittestLinter():
+    current_file = 'not_test_checkers.py'
+
+    def __init__(self):
+        self._messages = []
+        self.stats = {}
+
+    def add_message(self, msg_id, line=None, node=None, args=None, confidence=None, col_offset=None):
+        self._messages.append(msg_id)
+
 
 HERE = os.path.dirname(os.path.realpath(__file__))
 @unittest.skipUnless(pylint and pylint_bin, "testing lints requires pylint")
@@ -92,130 +106,105 @@ class TestSqlLint(TransactionCase):
             self.env.cr.execute(f'select name from {self._table}')
         """)
         self.assertFalse(r, f'underscore-attributes are allowable\n{errs}')
+
+
+    @contextmanager
+    def assertMessages(self, *messages):
+        self.linter._messages = []
+        yield
+        self.assertEqual(self.linter._messages, list(messages))
+
     def test_sql_injection_detection(self):
-        checker_test_object = pylint.testutils.CheckerTestCase()
-        checker_test_object.CHECKER_CLASS = (_odoo_checker_sql_injection.OdooBaseChecker)
-        checker_test_object.setup_method()
-        checker_test_object.checker.linter.current_file = 'not_test_checkers.py'
+        self.linter = UnittestLinter()
+        checker = _odoo_checker_sql_injection.OdooBaseChecker(self.linter)
+
         node = _odoo_checker_sql_injection.astroid.extract_node("""
         def get_parner(self,arg):
             my_injection_variable= "aaa" % arg #Uninferable
             self.env.cr.execute('select * from hello where id = %s' % my_injection_variable) #@
         """)
-        with checker_test_object.assertAddsMessages(
-            pylint.testutils.MessageTest(
-                msg_id="sql-injection",
-                node=node,
-                line=4,
-                col_offset=4,
-                end_line=4,
-                end_col_offset=84,
-            ),
-        ): checker_test_object.checker.visit_call(node) 
+
+        with self.assertMessages("sql-injection"):
+            checker.visit_call(node)
 
         node = _odoo_checker_sql_injection.astroid.extract_node("""
         def get_parner(self):
             my_injection_variable= "aaa" + "aaa" #Const
             self.env.cr.execute('select * from hello where id = %s' % my_injection_variable) #@
         """)
-        with checker_test_object.assertNoMessages(): checker_test_object.checker.visit_call(node) 
+        with self.assertMessages():
+            checker.visit_call(node)
 
         node = _odoo_checker_sql_injection.astroid.extract_node("""
         def get_parner(self, arg):
             my_injection_variable= "aaaaaaaa" + arg #Uninferable
             self.env.cr.execute('select * from hello where id = %s' % my_injection_variable) #@
         """)
-        with checker_test_object.assertAddsMessages(
-            pylint.testutils.MessageTest(
-                msg_id="sql-injection",
-                node=node,
-                line=4,
-                col_offset=4,
-                end_line=4,
-                end_col_offset=84,
-            ),
-        ): checker_test_object.checker.visit_call(node) 
+
+        with self.assertMessages("sql-injection"):
+            checker.visit_call(node)
 
         node = _odoo_checker_sql_injection.astroid.extract_node("""
         def get_parner(self):
             arg1 = "a"
             arg2 = "b" + arg1
-            arg3 = arg2 + arg1 + arg2 
+            arg3 = arg2 + arg1 + arg2
             arg4 = arg1 + "d"
             my_injection_variable= arg1 + arg2 + arg3 + arg4
             self.env.cr.execute('select * from hello where id = %s' % my_injection_variable) #@
         """)
 
-        with checker_test_object.assertNoMessages(): checker_test_object.checker.visit_call(node) 
+        with self.assertMessages():
+            checker.visit_call(node)
 
         node = _odoo_checker_sql_injection.astroid.extract_node("""
         def get_parner(self, arg):
             my_injection_variable= f"aaaaaaaa" #Uninferable
             self.env.cr.execute('select * from hello where id = %s' % my_injection_variable) #@
         """)
-        with checker_test_object.assertAddsMessages(
-            pylint.testutils.MessageTest(
-                msg_id="sql-injection",
-                node=node,
-                line=4,
-                col_offset=4,
-                end_line=4,
-                end_col_offset=84,
-            ),
-        ): checker_test_object.checker.visit_call(node) 
+        with self.assertMessages("sql-injection"):
+            checker.visit_call(node)
 
         node = _odoo_checker_sql_injection.astroid.extract_node("""
         def get_parner(self, arg):
             my_injection_variable= "aaaaaaaa".format() # Const
             self.env.cr.execute('select * from hello where id = %s' % my_injection_variable) #@
         """)
-        with checker_test_object.assertNoMessages(): checker_test_object.checker.visit_call(node) 
+        with self.assertMessages():
+            checker.visit_call(node)
 
         node = _odoo_checker_sql_injection.astroid.extract_node("""
         def get_parner(self, arg):
             my_injection_variable= "aaaaaaaa {test}".format(test="aaa") # Const
             self.env.cr.execute('select * from hello where id = %s' % my_injection_variable) #@
         """)
-        with checker_test_object.assertNoMessages(): checker_test_object.checker.visit_call(node) 
+        with self.assertMessages():
+            checker.visit_call(node)
 
         node = _odoo_checker_sql_injection.astroid.extract_node("""
         def get_parner(self, arg):
-            my_injection_variable= "aaaaaaaa {test}".format(test=arg) #Uninferable             
+            my_injection_variable= "aaaaaaaa {test}".format(test=arg) #Uninferable
             self.env.cr.execute('select * from hello where id = %s' % my_injection_variable) #@
         """)
-        with checker_test_object.assertAddsMessages(
-            pylint.testutils.MessageTest(
-                msg_id="sql-injection",
-                node=node,
-                line=4,
-                col_offset=4,
-                end_line=4,
-                end_col_offset=84,
-            ),
-        ): checker_test_object.checker.visit_call(node) 
+        with self.assertMessages("sql-injection"):
+            checker.visit_call(node)
 
         node = _odoo_checker_sql_injection.astroid.extract_node("""
         def get_parner(self, arg):
             my_injection_variable= "aaaaaaaa {test}".format(test="aaa" + arg) #Uninferable
             self.env.cr.execute('select * from hello where id = %s' % my_injection_variable) #@
         """)
-        with checker_test_object.assertAddsMessages(
-            pylint.testutils.MessageTest(
-                msg_id="sql-injection",
-                node=node,
-                line=4,
-                col_offset=4,
-                end_line=4,
-                end_col_offset=84,
-            ),
-        ): checker_test_object.checker.visit_call(node) 
+        with self.assertMessages("sql-injection"):
+            checker.visit_call(node)
+
         node = _odoo_checker_sql_injection.astroid.extract_node("""
         def get_parner(self):
             arg = "aaa"
             my_injection_variable= "aaaaaaaa {test}".format(test="aaa" + arg) #Const
             self.env.cr.execute('select * from hello where id = %s' % my_injection_variable)#@
         """)
-        with checker_test_object.assertNoMessages(): checker_test_object.checker.visit_call(node) 
+        with self.assertMessages():
+            checker.visit_call(node)
 
         node = _odoo_checker_sql_injection.astroid.extract_node("""
         def get_parner(self):
@@ -223,16 +212,8 @@ class TestSqlLint(TransactionCase):
             my_injection_variable= "aaaaaaaa {test}".format(test="aaa" + arg) #Uninferable
             self.env.cr.execute('select * from hello where id = %s' % my_injection_variable) #@
         """)
-        with checker_test_object.assertAddsMessages(
-            pylint.testutils.MessageTest(
-                msg_id="sql-injection",
-                node=node,
-                line=5,
-                col_offset=4,
-                end_line=5,
-                end_col_offset=84,
-            ),
-        ): checker_test_object.checker.visit_call(node) 
+        with self.assertMessages("sql-injection"):
+            checker.visit_call(node)
 
         node = _odoo_checker_sql_injection.astroid.extract_node("""
         def get_parner(self):
@@ -241,7 +222,8 @@ class TestSqlLint(TransactionCase):
             my_injection_variable= "aaaaaaaa {test}".format(test=test()) #Const
             self.env.cr.execute('select * from hello where id = %s' % my_injection_variable) #@
         """)
-        with checker_test_object.assertNoMessages(): checker_test_object.checker.visit_call(node) 
+        with self.assertMessages():
+            checker.visit_call(node)
 
         node = _odoo_checker_sql_injection.astroid.extract_node("""
         def get_parner(self):
@@ -249,45 +231,23 @@ class TestSqlLint(TransactionCase):
             my_injection_variable= Template('$arg').substitute(arg=arg) #Uninferable
             self.env.cr.execute('select * from hello where id = %s' % my_injection_variable) #@
         """)
-        with checker_test_object.assertAddsMessages(
-            pylint.testutils.MessageTest(
-                msg_id="sql-injection",
-                node=node,
-                line=5,
-                col_offset=4,
-                end_line=5,
-                end_col_offset=84,
-            ),
-        ): checker_test_object.checker.visit_call(node) 
+        with self.assertMessages("sql-injection"):
+            checker.visit_call(node)
 
         node = _odoo_checker_sql_injection.astroid.extract_node("""
         def get_parner(self,arg):
             my_injection_variable= Template('$arg').substitute(arg=arg) #Uninferable
             self.env.cr.execute('select * from hello where id = %s' % my_injection_variable) #@
         """)
-        with checker_test_object.assertAddsMessages(
-            pylint.testutils.MessageTest(
-                msg_id="sql-injection",
-                node=node,
-                line=4,
-                col_offset=4,
-                end_line=4,
-                end_col_offset=84,
-            ),
-        ): checker_test_object.checker.visit_call(node) 
+
+        with self.assertMessages("sql-injection"):
+            checker.visit_call(node)
 
         node = _odoo_checker_sql_injection.astroid.extract_node("""
         def get_parner(self,arg):
             my_injection_variable= "aaa" % arg
             self.env.cr.execute('select * from hello where id = %s' % my_injection_variable) #@
         """)
-        with checker_test_object.assertAddsMessages(
-            pylint.testutils.MessageTest(
-                msg_id="sql-injection",
-                node=node,
-                line=4,
-                col_offset=4,
-                end_line=4,
-                end_col_offset=84,
-            ),
-        ): checker_test_object.checker.visit_call(node) 
+
+        with self.assertMessages("sql-injection"):
+            checker.visit_call(node)

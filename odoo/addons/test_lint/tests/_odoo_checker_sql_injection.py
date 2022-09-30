@@ -1,7 +1,8 @@
 import os
 
 import astroid
-from pylint.checkers import BaseChecker
+from pylint import checkers
+from pylint.checkers import BaseChecker, utils
 
 
 DFTL_CURSOR_EXPR = [
@@ -39,7 +40,7 @@ class OdooBaseChecker(BaseChecker):
         """
         :type node: NodeNG
         """
-        infered = checkers.utils.safe_infer(node)
+        infered = utils.safe_infer(node)
         # The package 'psycopg2' must be installed to infer
         # ignore sql.SQL().format or variable that can be infered as constant
         if infered and (infered.pytype().startswith('psycopg2') or  isinstance(infered, astroid.Const)):
