@@ -18,3 +18,7 @@ class Job(models.Model):
             <span class="text-muted small">Days to get an Offer</span>
             <h6>4 Days after Interview</h6>
         """)
+
+    def toggle_active(self):
+        self.filtered('active').website_published = False
+        return super().toggle_active()
