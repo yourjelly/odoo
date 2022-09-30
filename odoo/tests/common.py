@@ -2125,10 +2125,10 @@ class Form(object):
 
             node_modifiers = {}
             for modifier, domain in json.loads(f.get('modifiers', '{}')).items():
-                if isinstance(domain, int):
+                if isinstance(domain, str):
+                    domain = safe_eval(domain, eval_context)
+                if isinstance(domain, (int, bool)):
                     node_modifiers[modifier] = [TRUE_LEAF] if domain else [FALSE_LEAF]
-                elif isinstance(domain, str):
-                    node_modifiers[modifier] = normalize_domain(safe_eval(domain, eval_context))
                 else:
                     node_modifiers[modifier] = normalize_domain(domain)
 

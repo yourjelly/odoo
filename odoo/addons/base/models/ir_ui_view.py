@@ -29,7 +29,7 @@ from odoo.tools import safe_eval, lazy, lazy_property, frozendict
 from odoo.tools.view_validation import valid_view, get_variable_names, get_domain_identifiers, get_dict_asts
 from odoo.tools.translate import xml_translate, TRANSLATED_ATTRS
 from odoo.models import check_method_name
-from odoo.osv.expression import expression
+from odoo.osv.expression import expression, normalize_domain
 
 _logger = logging.getLogger(__name__)
 
@@ -62,7 +62,7 @@ def att_names(name):
 def transfer_field_to_modifiers(field, modifiers):
     default_values = {}
     state_exceptions = {}
-    for attr in ('invisible', 'readonly', 'required'):
+    for attr in ('column_invisible', 'invisible', 'readonly', 'required'):
         state_exceptions[attr] = []
         default_values[attr] = bool(field.get(attr))
     for state, modifs in field.get("states", {}).items():
@@ -81,10 +81,14 @@ def transfer_node_to_modifiers(node, modifiers):
     # Don't deal with groups, it is done by check_group().
     attrs = node.attrib.pop('attrs', None)
     if attrs:
+        if 'xml' in config['dev_mode']:
+            _logger.warning("Attribute 'attrs' is deprecated: %s", attrs)
         modifiers.update(ast.literal_eval(attrs.strip()))
 
     states = node.attrib.pop('states', None)
     if states:
+        if 'xml' in config['dev_mode']:
+            _logger.warning("Attribute 'states' is deprecated: %s", states)
         states = states.split(',')
         if 'invisible' in modifiers and isinstance(modifiers['invisible'], list):
             # TODO combine with AND or OR, use implicit AND for now.
@@ -93,11 +97,11 @@ def transfer_node_to_modifiers(node, modifiers):
             modifiers['invisible'] = [('state', 'not in', states)]
 
     context_dependent_modifiers = []
-    for attr in ('invisible', 'readonly', 'required'):
+    for attr in ('column_invisible', 'invisible', 'readonly', 'required'):
         value_str = node.attrib.pop(attr, None)
         if value_str:
 
-            if (attr == 'invisible'
+            if (attr == 'invisible' and '[' not in value_str
                     and any(parent.tag == 'tree' for parent in node.iterancestors())
                     and not any(parent.tag == 'header' for parent in node.iterancestors())):
                 # Invisible in a tree view has a specific meaning, make it a
@@ -110,14 +114,18 @@ def transfer_node_to_modifiers(node, modifiers):
                 value = str2bool(value_str)
             except ValueError:
                 # if str2bool fails, it means it's something else than 1/True/0/False,
-                # meaning most-likely `context.get('...')`,
+                # meaning most-likely `context.get('...')` and/or a domain,
                 # which should be evaluated after retrieving the view arch from the cache
-                value = value_str
-                context_dependent_modifiers.append(attr)
+                try:
+                    value = ast.literal_eval(value_str.strip())
+                except ValueError:
+                    value = value_str
+                    if 'context.' in value_str:
+                        context_dependent_modifiers.append(attr)
 
-            if value or (attr not in modifiers or not isinstance(modifiers[attr], list)):
-                # Don't set the attribute to False if a dynamic value was
-                # provided (i.e. a domain from attrs or states).
+            if attr in modifiers and not isinstance(modifiers[attr], bool):
+                modifiers[attr] = f'{value} and {normalize_domain(modifiers[attr])}'
+            else:
                 modifiers[attr] = value
 
     if context_dependent_modifiers:
@@ -444,14 +452,21 @@ actual arch.
                         view_name = ('%s (%s)' % (view.name, view.xml_id)) if view.xml_id else view.name
                         _logger.warning('Invalid view %s definition in %s \n%s', view_name, view.arch_fs, view.arch)
             except ValueError as e:
-                lines = etree.tostring(combined_arch, encoding='unicode').splitlines(keepends=True)
-                fivelines = "".join(lines[max(0, e.context["line"]-3):e.context["line"]+2])
-                err = ValidationError(_(
-                    "Error while validating view near:\n\n%(fivelines)s\n%(error)s",
-                    fivelines=fivelines, error=tools.ustr(e),
-                ))
-                err.context = e.context
-                raise err.with_traceback(e.__traceback__) from None
+                if hasattr(e, 'context'):
+                    lines = etree.tostring(combined_arch, encoding='unicode').splitlines(keepends=True)
+                    fivelines = "".join(lines[max(0, e.context["line"]-3):e.context["line"]+2])
+                    err = ValidationError(_(
+                        "Error while validating view near:\n\n%(fivelines)s\n%(error)s",
+                        fivelines=fivelines, error=tools.ustr(e),
+                    ))
+                    err.context = e.context
+                    raise err.with_traceback(e.__traceback__) from None
+                else:
+                    err = ValidationError(_(
+                        "Error while validating view:\n\n%(error)s", error=tools.ustr(e.__context__),
+                    ))
+                    err.context = {'name': 'invalid view'}
+                    raise err.with_traceback(e.__context__.__traceback__) from None
 
         return True
 
@@ -1485,10 +1500,14 @@ actual arch.
                         # most (~95%) elements are 1/True/0/False
                         res = str2bool(val)
                     except ValueError:
-                        res = safe_eval.safe_eval(val, {'context': self._context})
-                    if res not in (1, 0, True, False, None):
+                        try:
+                            res = safe_eval.safe_eval(val, {'context': self._context})
+                        except Exception:
+                            msg = _("Invalid condition format in %(use)s: %(expr)s", expr=val, use=attribute)
+                            self._raise_view_error(msg, node)
+                    if res not in (1, 0, True, False, None) and not isinstance(res, list):
                         msg = _(
-                            'Attribute %(attribute)s evaluation expects a boolean, got %(value)s',
+                            'Attribute %(attribute)s evaluation expects a boolean or a domain, got %(value)s',
                             attribute=attribute, value=val,
                         )
                         self._raise_view_error(msg, node)
@@ -1702,6 +1721,25 @@ actual arch.
                         if vnames:
                             name_manager.must_have_fields(node, vnames, f"attrs ({expr})")
 
+            elif attr in ('column_invisible', 'invisible', 'required', 'readonly'):
+                val_ast = ast.parse(expr.strip(), mode='eval').body
+                if isinstance(val_ast, ast.BoolOp):
+                    # context condition and domains used in readonly, invisible, ...
+                    # and thus are only executed client side
+                    for sub_ast in val_ast.values:
+                        if isinstance(sub_ast, ast.List):
+                            fnames, vnames = self._get_domain_identifiers(node, sub_ast, attr, expr)
+                            name_manager.must_have_fields(node, fnames | vnames, f"{attr} ({expr})")
+                if isinstance(val_ast, ast.List):
+                    # domains used in for readonly, invisible, ...
+                    # and thus are only executed client side
+                    fnames, vnames = self._get_domain_identifiers(node, val_ast, attr, expr)
+                    name_manager.must_have_fields(node, fnames | vnames, f"{attr} ({expr})")
+                else:
+                    vnames = get_variable_names(val_ast)
+                    if vnames:
+                        name_manager.must_have_fields(node, vnames, f"{attr} ({expr})")
+
             elif attr == 'context':
                 for key, val_ast in get_dict_asts(expr).items():
                     if key == 'group_by':  # only in context
@@ -1882,9 +1920,9 @@ actual arch.
     def _get_domain_identifiers(self, node, domain, use, expr=None):
         try:
             return get_domain_identifiers(domain)
-        except ValueError:
-            msg = _("Invalid domain format %(expr)s in %(use)s", expr=expr or domain, use=use)
-            self._raise_view_error(msg, node)
+        except ValueError as e:
+            msg = _("Invalid domain format in %(use)s: %(expr)s", expr=expr or domain, use=use)
+            self._raise_view_error(msg, node, from_exception=e)
 
     def _check_field_paths(self, node, field_paths, model_name, use):
         """ Check whether the given field paths (dot-separated field names)

@@ -1734,6 +1734,7 @@ class TestViews(ViewCase):
                 string="Replacement title"
             ))
 
+    @mute_logger('odoo.addons.base.models.ir_ui_view')
     def test_modifiers(self):
         def _test_modifiers(what, expected):
             modifiers = {}
@@ -1769,6 +1770,10 @@ class TestViews(ViewCase):
             """<field name="a" attrs="{'invisible': [['b', '=', 'c']]}"/>""",
             {"invisible": [["b", "=", "c"]]},
         )
+        _test_modifiers(
+            """<field name="a" invisible="[['b', '=', 'c']]"/>""",
+            {"invisible": [["b", "=", "c"]]},
+        )
 
         # fields in a tree view
         tree = etree.fromstring('''
@@ -1779,7 +1784,7 @@ class TestViews(ViewCase):
                 <field name="a"/>
                 <field name="a" invisible="0"/>
                 <field name="a" invisible="1"/>
-                <field name="a" attrs="{'invisible': [['b', '=', 'c']]}"/>
+                <field name="a" invisible="[['b', '=', 'c']]"/>
             </tree>
         ''')
         _test_modifiers(tree[0][0], {"invisible": True})
@@ -2183,10 +2188,6 @@ class TestViews(ViewCase):
         self.assertValid(arch % '1')
         self.assertValid(arch % '0')
         self.assertValid(arch % 'True')
-        self.assertInvalid(
-            arch % "[('model', '=', '1')]",
-            "Attribute readonly evaluation expects a boolean, got [('model', '=', '1')]",
-        )
 
     def test_modifier_attribute_using_context(self):
         view = self.assertValid("""
@@ -2258,7 +2259,7 @@ class TestViews(ViewCase):
                     <filter string="Dummy" name="draft" domain="['name', '=', 'dummy']"/>
                 </search>
             """,
-            """Invalid domain format ['name', '=', 'dummy'] in domain of <filter name="draft">""",
+            """Invalid domain format in domain of <filter name="draft">: ['name', '=', 'dummy']""",
         )
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
@@ -2317,13 +2318,13 @@ class TestViews(ViewCase):
             <form string="View">
                 <field name="name"/>%s
                 <field name="inherit_id"
-                       attrs="{'readonly': [('model', '=', 'ir.ui.view')]}"/>
+                       readonly="[('model', '=', 'ir.ui.view')]"/>
             </form>
         """
         self.assertValid(arch % '<field name="model"/>')
         self.assertInvalid(
             arch % '',
-            """Field 'model' used in attrs ({'readonly': [('model', '=', 'ir.ui.view')]}) must be present in view but is missing""",
+            """Field 'model' used in readonly ([('model', '=', 'ir.ui.view')]) must be present in view but is missing""",
         )
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
@@ -2338,8 +2339,80 @@ class TestViews(ViewCase):
         """
         self.assertInvalid(
             arch,
-            """Invalid domain format {'readonly': [('model', 'ir.ui.view')]} in attrs""",
+            """Invalid domain format in attrs: {'readonly': [('model', 'ir.ui.view')]}""",
         )
+
+    @mute_logger('odoo.addons.base.models.ir_ui_view')
+    def test_attrs_invalid_domain_2(self):
+        arch = """
+            <form string="View">
+                <field name="name"/>
+                <field name="model"/>
+                <field name="inherit_id"
+                       readonly="[('model', 'ir.ui.view')]"/>
+            </form>
+        """
+        self.assertInvalid(
+            arch,
+            """Invalid domain format in readonly: [('model', 'ir.ui.view')]""",
+        )
+
+    @mute_logger('odoo.addons.base.models.ir_ui_view')
+    def test_attrs_invalid_domain_3(self):
+        arch = """
+            <form string="View">
+                <field name="name"/>
+                <field name="model"/>
+                <field name="inherit_id"
+                       readonly="context.get('truc') and or [('model', '=', 'ir.ui.view')]"/>
+            </form>
+        """
+        self.assertInvalid(
+            arch,
+            """Invalid condition format in readonly: context.get('truc') and or [('model', '=', 'ir.ui.view')]""",
+        )
+
+    @mute_logger('odoo.addons.base.models.ir_ui_view')
+    def test_attrs_invalid_domain_4(self):
+        arch = """
+            <form string="View">
+                <field name="name"/>
+                <field name="model"/>
+                <field name="inherit_id"
+                       readonly="bidule.get('truc') or [('model', '=', 'ir.ui.view')]"/>
+            </form>
+        """
+        self.assertInvalid(
+            arch,
+            """Invalid condition format in readonly: bidule.get('truc') or [('model', '=', 'ir.ui.view')]""",
+        )
+
+    @mute_logger('odoo.addons.base.models.ir_ui_view')
+    def test_attrs_invalid_domain_5(self):
+        arch = """
+            <form string="View">
+                <field name="name"/>
+                <field name="model"/>
+                <field name="inherit_id"
+                       readonly="context.get('truc') or context.get('toto') or [('model', 'ir.ui.view')]"/>
+            </form>
+        """
+        self.assertInvalid(
+            arch,
+            """Invalid domain format in readonly: context.get('truc') or context.get('toto') or [('model', 'ir.ui.view')]""",
+        )
+
+    @mute_logger('odoo.addons.base.models.ir_ui_view')
+    def test_attrs_conditional_domain(self):
+        arch = """
+            <form string="View">
+                <field name="name"/>
+                <field name="model"/>
+                <field name="inherit_id"
+                       readonly="context.get('truc') or context.get('toto') or [('model', '=', 'ir.ui.view')]"/>
+            </form>
+        """
+        self.assertValid(arch)
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
     def test_attrs_subfield(self):
@@ -2350,7 +2423,7 @@ class TestViews(ViewCase):
                     <form string="Children">
                         <field name="name"/>%s
                         <field name="inherit_id"
-                               attrs="{'readonly': [('model', '=', 'ir.ui.view')]}"/>
+                               readonly="[('model', '=', 'ir.ui.view')]"/>
                     </form>
                 </field>
             </form>
@@ -2358,11 +2431,11 @@ class TestViews(ViewCase):
         self.assertValid(arch % ('', '<field name="model"/>'))
         self.assertInvalid(
             arch % ('', ''),
-            """Field 'model' used in attrs ({'readonly': [('model', '=', 'ir.ui.view')]}) must be present in view but is missing.""",
+            """Field 'model' used in readonly ([('model', '=', 'ir.ui.view')]) must be present in view but is missing.""",
         )
         self.assertInvalid(
             arch % ('<field name="model"/>', ''),
-            """Field 'model' used in attrs ({'readonly': [('model', '=', 'ir.ui.view')]}) must be present in view but is missing.""",
+            """Field 'model' used in readonly ([('model', '=', 'ir.ui.view')]) must be present in view but is missing.""",
         )
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
@@ -2374,7 +2447,7 @@ class TestViews(ViewCase):
                     <form string="Children">
                         <field name="name"/>%s
                         <field name="inherit_id"
-                               attrs="{'readonly': [('parent.model', '=', 'ir.ui.view')]}"/>
+                               readonly="[('parent.model', '=', 'ir.ui.view')]"/>
                     </form>
                 </field>
             </form>
@@ -2382,11 +2455,11 @@ class TestViews(ViewCase):
         self.assertValid(arch % ('<field name="model"/>', ''))
         self.assertInvalid(
             arch % ('', ''),
-            """Field 'model' used in attrs ({'readonly': [('parent.model', '=', 'ir.ui.view')]}) must be present in view but is missing.""",
+            """Field 'model' used in readonly ([('parent.model', '=', 'ir.ui.view')]) must be present in view but is missing.""",
         )
         self.assertInvalid(
             arch % ('', '<field name="model"/>'),
-            """Field 'model' used in attrs ({'readonly': [('parent.model', '=', 'ir.ui.view')]}) must be present in view but is missing.""",
+            """Field 'model' used in readonly ([('parent.model', '=', 'ir.ui.view')]) must be present in view but is missing.""",
         )
 
     def test_attrs_groups_behavior(self):
@@ -2422,6 +2495,7 @@ class TestViews(ViewCase):
         self.assertTrue(tree.xpath('//div[@id="foo"]'))
         self.assertTrue(tree.xpath('//div[@id="bar"]'))
 
+    @mute_logger('odoo.addons.base.models.ir_ui_view')
     def test_attrs_groups_validation(self):
         def validate(arch, valid=False, parent=False):
             parent = 'parent.' if parent else ''
@@ -2927,14 +3001,14 @@ class TestViews(ViewCase):
                 %s
                 <groupby name="model_data_id">
                     %s
-                    <button type="object" name="action_archive" attrs="{'invisible': [('noupdate', '=', True)]}" string="Button1"/>
+                    <button type="object" name="action_archive" invisible="[('noupdate', '=', True)]" string="Button1"/>
                 </groupby>
             </tree>
         """
         self.assertValid(arch % ('', '<field name="noupdate"/>'))
         self.assertInvalid(
             arch % ('', ''),
-            """Field 'noupdate' used in attrs ({'invisible': [('noupdate', '=', True)]}) must be present in view but is missing.""",
+            """Field 'noupdate' used in invisible ([('noupdate', '=', True)]) must be present in view but is missing.""",
         )
         self.assertInvalid(
             arch % ('<field name="noupdate"/>', ''),

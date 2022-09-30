@@ -261,7 +261,7 @@ class TestMultiCompanyProject(TestMultiCompanyCommon):
                 # For `parent_id` to  be visible in the view, you need
                 # 1. The debug mode
                 # 2. `allow_subtasks` to be true
-                # <field name="parent_id" attrs="{'invisible': [('allow_subtasks', '=', False)]}" groups="base.group_no_one"/>
+                # <field name="parent_id" invisible="[('allow_subtasks', '=', False)]" groups="base.group_no_one"/>
                 # `allow_subtasks` is a related to `allow_subtasks` on the project
                 # as the point of the test is to test the behavior of the task `_compute_project_id` when there is no project,
                 # `allow_subtasks` is by default invisible, and you shouldn't therefore be able to change it.
@@ -286,7 +286,7 @@ class TestMultiCompanyProject(TestMultiCompanyCommon):
         # For `parent_id` to  be visible in the view, you need
         # 1. The debug mode
         # 2. `allow_subtasks` to be true
-        # <field name="parent_id" attrs="{'invisible': [('allow_subtasks', '=', False)]}" groups="base.group_no_one"/>
+        # <field name="parent_id" invisible="[('allow_subtasks', '=', False)]" groups="base.group_no_one"/>
         # `allow_subtasks` is a related to `allow_subtasks` on the project
         # as the point of the test is to test the behavior of the task `_compute_project_id` when there is no project,
         # `allow_subtasks` is by default invisible, and you shouldn't therefore be able to change it.
