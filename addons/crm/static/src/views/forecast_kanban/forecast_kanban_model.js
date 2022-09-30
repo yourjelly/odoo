@@ -2,6 +2,7 @@
 
 import { KanbanModel } from "@web/views/kanban/kanban_model";
 import { CrmKanbanModel, CrmKanbanGroup } from "@crm/views/crm_kanban/crm_kanban_model";
+import { KanbanDynamicGroupList } from "@web/views/kanban/kanbal_model";
 
 export class ForecastKanbanModel extends CrmKanbanModel {
     setup(params, { fillTemporalService }) {
@@ -98,6 +99,15 @@ export class ForecastKanbanDynamicGroupList extends ForecastKanbanModel.DynamicG
         const result = await super._loadGroups(...arguments);
         this.domain = previousDomain;
         return result;
+    }
+
+    /**
+     * @override
+     *
+     * Restore standard behavior for moving records.
+     */
+    async moveRecord(dataRecordId, dataGroupId, refId, targetGroupId) {
+        KanbanDynamicGroupList.moveRecord(dataRecordId, dataGroupId, refId, targetGroupId);
     }
 }
 
