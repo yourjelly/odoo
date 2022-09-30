@@ -1,4 +1,4 @@
-.o_legacy_list_view {
+:focus-within.o_legacy_list_view {
     position: relative;
     height: 100%;
 
@@ -193,7 +193,7 @@
         }
         thead th:focus-within,
         tbody.o_keyboard_navigation td:focus-within {
-            background-color: $o-form-lightsecondary;
+            background-color: $o-gray-100;
             outline: none;
         }
 
