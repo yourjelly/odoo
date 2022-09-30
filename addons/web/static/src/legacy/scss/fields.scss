@@ -46,11 +46,6 @@
     }
 }
 
-// Empty
-.o_field_empty {
-    display: none;
-}
-
 // Numbers
 .o_field_number {
     white-space: nowrap;
@@ -614,4 +609,9 @@ button.o_field_float_toggle {
 // Selection fields
 select.o_field_widget.o_input {
     padding: 1px;  // Other inputs get a 1px padding automatically added by the browsers but selects do not
+}
+
+// Empty
+.o_field_empty {
+    display: none;
 }
