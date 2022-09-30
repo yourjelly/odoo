@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
 <t t-name="web.Form.OuterGroup" owl="1">
-    <div class="o_group row g-2 gx-lg-5 align-items-start" t-attf-class="{{ allClasses }} {{ props.hasOuterTemplate and props.class ? '' : 'my-3' }}" t-att-style="props.style">
+    <div class="o_group row g-2 gx-lg-5 align-items-start mx-0" t-attf-class="{{ allClasses }} {{ props.hasOuterTemplate and props.class ? '' : 'my-3' }}" t-att-style="props.style">
         <t t-slot="title" t-if="props.slots.title" />
         <t t-foreach="getItems()" t-as="item" t-key="item_index">
             <span class="o_newline" t-if="item.newline" />
@@ -24,7 +24,7 @@
                         <t t-component="cell.Component" t-if="cell.isVisible" t-props="cell.props"/>
                     </div>
                     <div
-                        class="o_cell o_wrap_input flex-grow-1 flex-sm-grow-0" 
+                        class="o_cell o_wrap_input flex-grow-1 flex-sm-grow-0"
                         t-attf-style="{{ cell.itemSpan -1 > 1 ? 'grid-column: span ' + (cell.itemSpan -1) + ';' : '' }}{{ cell.width ? 'width: ' + cell.width + '%' + ';' : '' }}"
                     >
                         <t t-slot="{{ cell.name }}" />

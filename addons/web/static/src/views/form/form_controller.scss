@@ -90,7 +90,7 @@
         @extend .oe_inline;
         float: left!important;
     }
-    .oe_right {
+    .oe_right:not(.oe_subtotal_footer) {
         @extend .oe_inline;
         float: right!important;
     }
@@ -275,10 +275,10 @@
             display: flex;
             align-items: center;
             align-content: space-around;
-            
+
             > .o_arrow_button {
                 font-weight: $font-weight-bold;
-    
+
                 // Last element at the right should respect overall padding
                 &:first-of-type {
                     padding-right: $o-horizontal-padding;
@@ -395,6 +395,9 @@
 
     // Groups
     .o_group {
+        &.row:not([class*="col-"] ) {
+            width: 100%;
+        }
         .o_form_label {
             font-weight: $font-weight-normal;
         }
@@ -638,7 +641,7 @@
                     box-shadow: inset 0 1px 0 $border-color;
                     > td {
                         border:none;
-    
+
                         &:empty {
                             padding: 0;
                         }
@@ -722,8 +725,9 @@
         &.oe_right {
             margin-left: auto;
         }
-        @extend .oe_right;
         border-top: 1px solid $border-color;
+        padding-left: 0;
+        padding-right: 0;
 
         .o_cell {
             padding: 0;
