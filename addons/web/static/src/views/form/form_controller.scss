@@ -989,6 +989,11 @@
         .o_notebook {
             > .tab-content {
                 > .tab-pane.active {
+                    .o_inner_group {
+                        @include media-breakpoint-up(sm) {
+                            grid-template-columns: 1fr auto;
+                        }
+                    }
                     .oe_subtotal_footer {
                         width: 100% !important;
                         tr {
