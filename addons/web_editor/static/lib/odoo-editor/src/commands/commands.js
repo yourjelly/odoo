@@ -184,6 +184,41 @@ function insert(editor, data, isText = true) {
     }
 
     currentNode = lastChildNode || currentNode;
+    let parentIsLi = currentNode.parentElement.closest('LI');
+    const currParent = currentNode.parentElement;
+    for (var i = 0; i < insertedNodes.length; i++) {
+        if (insertedNodes[i].nodeName === "P") {
+            insertedNodes[i].outerHTML = '<li>' + insertedNodes[i].innerHTML + '</li>';
+        }
+    }
+    while (currentNode && ['UL','OL','LI'].includes(currentNode.nodeName)) {
+        if (currentNode.parentElement !== "DIV" && currentNode.parentElement.nodeName === 'LI') {
+            //for the case when we are pasting list after a paragraph
+            //avoid adding class to div
+            currentNode.parentElement.classList.add('oe-nested');
+        }
+        if (currentNode.parentElement && currentNode.parentElement.parentElement.nodeName === "OL") {
+            if (['UL'].includes(currentNode.nodeName)) {
+                currentNode.firstChild.oToggleList(0,"OL");
+                currentNode = currParent.firstChild;
+            }
+        } else if (parentIsLi) {
+            if (parentIsLi.id) {
+                currentNode.classList.add('o_checklist');
+            } else {
+                currentNode.removeAttribute("class");
+            }
+            if (['OL'].includes(currentNode.nodeName)) {
+                currentNode.firstChild.oToggleList(0, parentIsLi.id ? 'CL' : 'UL');
+                currentNode = currParent.firstChild;
+            }
+        }
+        if (currentNode.lastElementChild) {
+            currentNode = currentNode.lastElementChild;
+        } else {
+            break;
+        }
+    }
     selection.removeAllRanges();
     const newRange = new Range();
     const lastPosition = rightPos(currentNode);
