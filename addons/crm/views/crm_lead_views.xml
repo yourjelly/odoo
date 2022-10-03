@@ -625,8 +625,12 @@
                 <xpath expr="//field[@name='expected_revenue']" position="replace">
                     <field name="prorated_revenue"/>
                 </xpath>
+                <xpath expr="//field[@name='recurring_revenue_monthly']" position="replace">
+                    <field name="recurring_revenue_monthly_prorated"/>
+                </xpath>
                 <xpath expr="//progressbar" position="attributes">
                     <attribute name="sum_field">prorated_revenue</attribute>
+                    <attribute name="recurring_revenue_sum_field">recurring_revenue_monthly_prorated</attribute>
                 </xpath>
                 <xpath expr="//t[@t-set='lost_ribbon']" position="after">
                     <t t-set="won_ribbon" t-value="record.active.raw_value and record.probability and record.probability.raw_value == 100"/>
