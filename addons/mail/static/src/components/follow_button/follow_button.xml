@@ -4,14 +4,29 @@
     <t t-name="mail.FollowButton" owl="1">
         <t t-if="followButtonView">
             <div class="o_FollowButton d-flex" t-attf-class="{{ className }}" t-ref="root">
+                <!-- Translatable strings -->
+                <t t-set="followingString">Following</t>
+                <t t-set="unfollowString">Unfollow</t>
+
+                <!-- Hidden element used to set the button maximum size -->
+                <t t-set="invisibleSpacer">
+                    <span class="invisible">
+                        <i class="fa fa-fw fa fa-eye-slash"/> <t t-out="followingString.length > unfollowString.length ? followingString : unfollowString"></t>
+                    </span>
+                </t>
+
                 <t t-if="followButtonView.chatterOwner.thread and followButtonView.chatterOwner.thread.isCurrentPartnerFollowing">
-                    <button class="o_FollowButton_unfollow btn pe-0" t-att-class="{ 'o_ChatterTopbar_button': followButtonView.chatterOwner, 'o-following text-success': !followButtonView.isUnfollowButtonHighlighted, 'o-unfollow text-warning': followButtonView.isUnfollowButtonHighlighted }" t-att-disabled="followButtonView.isDisabled" t-on-click="followButtonView.onClickUnfollow" t-on-mouseenter="followButtonView.onMouseEnterUnfollow" t-on-mouseleave="followButtonView.onMouseleaveUnfollow">
-                        <t t-if="followButtonView.isUnfollowButtonHighlighted">
-                            <i class="oi oi-close oi-large"/> Unfollow
-                        </t>
-                        <t t-else="">
-                            <i class="fa fa-check"/> Following
-                        </t>
+                    <button class="o_FollowButton_unfollow btn px-0" t-att-class="{ 'o_ChatterTopbar_button': followButtonView.chatterOwner, 'o-following text-success': !followButtonView.isUnfollowButtonHighlighted, 'o-unfollow text-warning': followButtonView.isUnfollowButtonHighlighted }" t-att-disabled="followButtonView.isDisabled" t-on-click="followButtonView.onClickUnfollow" t-on-mouseenter="followButtonView.onMouseEnterUnfollow" t-on-mouseleave="followButtonView.onMouseleaveUnfollow">
+                        <div class="position-relative">
+                            <t t-out="invisibleSpacer"/>
+
+                            <span t-if="followButtonView.isUnfollowButtonHighlighted" class="position-absolute end-0 top-0 bottom-0 text-warning">
+                                <i class="fa fa-fw fa-times"/> Unfollow
+                            </span>
+                            <span t-else="" class="d-block position-absolute end-0 top-0 bottom-0">
+                                <i class="fa fa-fw fa-check"/> Following
+                            </span>
+                        </div>
                     </button>
                 </t>
                 <t t-else="">
