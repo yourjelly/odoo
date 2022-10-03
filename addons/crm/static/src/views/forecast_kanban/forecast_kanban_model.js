@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { KanbanModel, KanbanDynamicGroupList } from "@web/views/kanban/kanban_model";
+import { KanbanDynamicGroupList } from "@web/views/kanban/kanban_model";
 import { CrmKanbanModel, CrmKanbanGroup } from "@crm/views/crm_kanban/crm_kanban_model";
 
 export class ForecastKanbanModel extends CrmKanbanModel {
