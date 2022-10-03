@@ -64,6 +64,12 @@ class StockPickingBatch(models.Model):
     is_wave = fields.Boolean('This batch is a wave')
     show_set_qty_button = fields.Boolean(compute='_compute_show_qty_button')
     show_clear_qty_button = fields.Boolean(compute='_compute_show_qty_button')
+    product_ids = fields.Many2many(
+        'product.product', 'Products', store=False, search='_search_product_ids',
+        help="Technical filed for search in search panel")
+    package_ids = fields.Many2many(
+        'stock.quant.package', 'Packages', store=False, search='_search_package_ids',
+        help="Technical filed for search in search panel")
 
     @api.depends('state', 'show_validate',
                  'picking_ids.show_set_qty_button',
@@ -135,6 +141,12 @@ class StockPickingBatch(models.Model):
     def _compute_scheduled_date(self):
         for rec in self:
             rec.scheduled_date = min(rec.picking_ids.filtered('scheduled_date').mapped('scheduled_date'), default=False)
+
+    def _search_product_ids(self, operator, value):
+        return [('picking_ids.move_ids.product_id', operator, value)]
+
+    def _search_package_ids(self, operator, value):
+        return ['|', ('picking_ids.move_line_ids.package_id.name', operator, value), ('picking_ids.move_line_ids.result_package_id.name', operator, value)]
 
     @api.onchange('scheduled_date')
     def onchange_scheduled_date(self):

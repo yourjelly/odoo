@@ -222,6 +222,10 @@
         <field name="arch" type="xml">
             <search string="Search Batch Transfer">
                 <field name="name" string="Batch Transfer"/>
+                <field name="product_ids"/>
+                <field name="package_ids"
+                    string="Package"
+                    groups="stock.group_tracking_lot"/>
                 <field name="picking_type_id" invisible="1"/>
                 <field name="user_id"/>
                 <filter name="to_do_transfers" string="To Do" domain="[('user_id', 'in', [uid, False])]"/>
