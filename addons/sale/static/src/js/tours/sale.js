@@ -26,10 +26,12 @@ tour.register("sale_tour", {
     extra_trigger: ".o_sale_order",
     content: _t("Start by checking your company's data."),
     position: "bottom",
+    tour_filters: ['company_setup']
 }, {
     trigger: ".modal-content button[name='action_save_onboarding_company_step']",
     content: _t("Looks good. Let's continue."),
     position: "left",
+    tour_filters: ['company_setup']
 }, {
     trigger: 'a.o_onboarding_step_action.btn[data-method=action_open_base_document_layout]',
     extra_trigger: ".o_sale_order",

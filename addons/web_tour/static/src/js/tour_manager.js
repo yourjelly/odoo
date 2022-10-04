@@ -1,31 +1,31 @@
 odoo.define('web_tour.TourManager', function(require) {
 "use strict";
 
-var core = require('web.core');
-var config = require('web.config');
-var local_storage = require('web.local_storage');
-var mixins = require('web.mixins');
-var utils = require('web_tour.utils');
-var TourStepUtils = require('web_tour.TourStepUtils');
-var RunningTourActionHelper = require('web_tour.RunningTourActionHelper');
-var ServicesMixin = require('web.ServicesMixin');
-var session = require('web.session');
-var Tip = require('web_tour.Tip');
-const {Markup} = require('web.utils');
+const core = require('web.core');
+const config = require('web.config');
+const local_storage = require('web.local_storage');
+const mixins = require('web.mixins');
+const utils = require('web_tour.utils');
+const TourStepUtils = require('web_tour.TourStepUtils');
+const RunningTourActionHelper = require('web_tour.RunningTourActionHelper');
+const ServicesMixin = require('web.ServicesMixin');
+const session = require('web.session');
+const Tip = require('web_tour.Tip');
+const { Markup } = require('web.utils');
 const { config: transitionConfig } = require("@web/core/transition");
 
-var _t = core._t;
+const _t = core._t;
 const { markup } = owl;
 
-var RUNNING_TOUR_TIMEOUT = 10000;
+const RUNNING_TOUR_TIMEOUT = 10000;
 
-var get_step_key = utils.get_step_key;
-var get_debugging_key = utils.get_debugging_key;
-var get_running_key = utils.get_running_key;
-var get_running_delay_key = utils.get_running_delay_key;
-var get_first_visible_element = utils.get_first_visible_element;
-var do_before_unload = utils.do_before_unload;
-var get_jquery_element_from_selector = utils.get_jquery_element_from_selector;
+const get_step_key = utils.get_step_key;
+const get_debugging_key = utils.get_debugging_key;
+const get_running_key = utils.get_running_key;
+const get_running_delay_key = utils.get_running_delay_key;
+const get_first_visible_element = utils.get_first_visible_element;
+const do_before_unload = utils.do_before_unload;
+const get_jquery_element_from_selector = utils.get_jquery_element_from_selector;
 
 return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
     init: function(parent, consumed_tours, disabled = false) {
@@ -148,10 +148,16 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
 
         return tour.wait_for.then((function () {
             tour.current_step = parseInt(local_storage.getItem(get_step_key(name))) || 0;
-            tour.steps = _.filter(tour.steps, (function (step) {
-                return (!step.edition || step.edition === this.edition) &&
-                    (step.mobile === undefined || step.mobile === config.device.isMobile);
-            }).bind(this));
+            tour.steps = tours.steps.filter(
+                step => {
+                    const isTourFilterEnabled = (filter) => session.tour_filters[filter] ? true: false;
+                    return (
+                        (!step.edition || step.edition === this.edition) &&
+                        (step.mobile === undefined || step.mobile === config.device.isMobile) &&
+                        (!step.filters || step.filters.some(isTourFilterEnabled))
+                    );
+                }
+            );
 
             if (tour_is_consumed || tour.current_step >= tour.steps.length) {
                 local_storage.removeItem(get_step_key(name));

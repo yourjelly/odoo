@@ -5,7 +5,6 @@ from odoo import api, fields, models
 
 
 class Tour(models.Model):
-
     _name = "web_tour.tour"
     _description = "Tours"
     _log_access = False
@@ -24,3 +23,11 @@ class Tour(models.Model):
     def get_consumed_tours(self):
         """ Returns the list of consumed tours for the current user """
         return [t.name for t in self.search([('user_id', '=', self.env.uid)])]
+
+    @api.model
+    def _get_tour_filters(self):
+        """TODO docstring
+
+        :rtype: dict
+        """
+        return {}

@@ -14,4 +14,5 @@ class Http(models.AbstractModel):
             demo_modules_count = self.env['ir.module.module'].sudo().search_count([('demo', '=', True)])
             result['web_tours'] = request.env['web_tour.tour'].get_consumed_tours()
             result['tour_disable'] = demo_modules_count > 0
+        result['tour_filters'] = self.env['web_tour.tour']._get_tour_filters()
         return result
