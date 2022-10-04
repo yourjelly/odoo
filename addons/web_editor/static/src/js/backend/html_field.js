@@ -238,6 +238,17 @@ export class HtmlField extends Component {
     async commitChanges({ urgent } = {}) {
         if (this._isDirty() || urgent) {
             if (this.wysiwyg) {
+                if (this.wysiwyg.preSavePromise && urgent) {
+                    // When collaboration mode is and there is a potential
+                    // Unsynchronised and Lost History Conflict (ULHC), if we
+                    // try to update the current value while preSavePromise is
+                    // not resolved in urgent save we could erase a record that
+                    // was updated while being offline.
+                    // To prevent the record field from being updated, we set
+                    // it to undefined.
+                    await this.props.update();
+                }
+                await this.wysiwyg.preSavePromise;
                 await this.wysiwyg.saveModifiedImages();
                 if (this.props.isInlineStyle) {
                     await this._toInline();
@@ -408,7 +419,7 @@ export class HtmlField extends Component {
         }]));
     }
     _onWysiwygBlur() {
-        this.commitChanges({ urgent: true });
+        this.commitChanges();
     }
     async _onReadonlyClickChecklist(ev) {
         if (ev.offsetX > 0) {

@@ -77,13 +77,14 @@ const Wysiwyg = Widget.extend({
     },
     init: function (parent, options) {
         this._super.apply(this, arguments);
+        window.wysiwyg = this;
         this.id = ++id;
         this.options = options;
         // autohideToolbar is true by default (false by default if navbar present).
         this.options.autohideToolbar = typeof this.options.autohideToolbar === 'boolean'
             ? this.options.autohideToolbar
             : !options.snippets;
-        this._collaborationChannel = this.options.collaborationChannel;
+        this.collaborationChannel = this.options.collaborationChannel;
         this.saving_mutex = new concurrency.Mutex();
         // Keeps track of color palettes per event name.
         this.colorpickers = {};
@@ -395,9 +396,9 @@ const Wysiwyg = Widget.extend({
         }
     },
     setupCollaboration() {
-        const modelName = this._collaborationChannel.collaborationModelName;
-        const fieldName = this._collaborationChannel.collaborationFieldName;
-        const resId = this._collaborationChannel.collaborationResId;
+        const modelName = this.collaborationChannel.collaborationModelName;
+        const fieldName = this.collaborationChannel.collaborationFieldName;
+        const resId = this.collaborationChannel.collaborationResId;
         const channelName = `editor_collaboration:${modelName}:${fieldName}:${resId}`;
 
         if (
@@ -407,7 +408,7 @@ const Wysiwyg = Widget.extend({
             return;
         }
 
-        this._collaborationChannelName = channelName;
+        this.collaborationChannelName = channelName;
         Wysiwyg.activeCollaborationChannelNames.add(channelName);
 
         this._setupCollaborationBus();
@@ -561,7 +562,7 @@ const Wysiwyg = Widget.extend({
         }, CHECK_OFFLINE_TIME);
 
         this._peerToPeerLoading = new Promise(async (resolve) => {
-            this._currentRecord = await this._getCurrentRecord();
+            this.currentCollaborationRecord = await this._getCurrentRecord();
             this._iceServers = await this._getIceServers();
             this.ptp = this._getNewPtp();
 
@@ -641,8 +642,8 @@ const Wysiwyg = Widget.extend({
      */
     destroy: function () {
         Wysiwyg.activeWysiwygs.delete(this);
-        if (this._collaborationChannelName) {
-            Wysiwyg.activeCollaborationChannelNames.delete(this._collaborationChannelName);
+        if (this.collaborationChannelName) {
+            Wysiwyg.activeCollaborationChannelNames.delete(this.collaborationChannelName);
         }
 
         if (this.ptp) {
@@ -2319,9 +2320,9 @@ const Wysiwyg = Widget.extend({
         }
     },
     _setupCollaborationBus() {
-        const modelName = this._collaborationChannel.collaborationModelName;
-        const fieldName = this._collaborationChannel.collaborationFieldName;
-        const resId = this._collaborationChannel.collaborationResId;
+        const modelName = this.collaborationChannel.collaborationModelName;
+        const fieldName = this.collaborationChannel.collaborationFieldName;
+        const resId = this.collaborationChannel.collaborationResId;
         const collaborationBusListener = ({ detail: notifications}) => {
             for (const { payload, type } of notifications) {
                 if (
@@ -2335,11 +2336,11 @@ const Wysiwyg = Widget.extend({
             }
         }
         this.call('bus_service', 'addEventListener', 'notification', collaborationBusListener);
-        this.call('bus_service', 'addChannel', this._collaborationChannelName);
+        this.call('bus_service', 'addChannel', this.collaborationChannelName);
         this._collaborationStopBus = () => {
-            Wysiwyg.activeCollaborationChannelNames.delete(this._collaborationChannelName);
+            Wysiwyg.activeCollaborationChannelNames.delete(this.collaborationChannelName);
             this.call('bus_service', 'removeEventListener', 'notification', collaborationBusListener);
-            this.call('bus_service', 'deleteChannel', this._collaborationChannelName);
+            this.call('bus_service', 'deleteChannel', this.collaborationChannelName);
         }
     },
     _getRpcMutex() {
@@ -2358,9 +2359,9 @@ const Wysiwyg = Widget.extend({
         ];
     },
     async _getCurrentRecord() {
-        const modelName = this._collaborationChannel.collaborationModelName;
-        const fieldName = this._collaborationChannel.collaborationFieldName;
-        const resId = this._collaborationChannel.collaborationResId;
+        const modelName = this.collaborationChannel.collaborationModelName;
+        const fieldName = this.collaborationChannel.collaborationFieldName;
+        const resId = this.collaborationChannel.collaborationResId;
         const records = await this._rpc({
             model: modelName,
             method: "read",
@@ -2398,8 +2399,8 @@ const Wysiwyg = Widget.extend({
             this.preSavePromiseReject = undefined;
         }
         try {
-            const fieldName = this._collaborationChannel.collaborationFieldName;
-            const currentContent = this._currentRecord[fieldName];
+            const fieldName = this.collaborationChannel.collaborationFieldName;
+            const currentContent = this.currentCollaborationRecord[fieldName];
             const dbRecord = await this._getCurrentRecord();
             const dbContent = dbRecord[fieldName];
 
@@ -2413,7 +2414,7 @@ const Wysiwyg = Widget.extend({
                 });
                 dialog.open({shouldFocusButtons:true});
 
-                this._currentRecord = dbRecord;
+                this.currentCollaborationRecord = dbRecord;
                 this.resetEditor(dbRecord[fieldName]);
             }
             this.preSavePromiseResolve();
@@ -2436,7 +2437,7 @@ const Wysiwyg = Widget.extend({
         this.ptp.stop();
         if (collaborationChannel) {
             this._collaborationStopBus();
-            this._collaborationChannel = collaborationChannel;
+            this.collaborationChannel = collaborationChannel;
             this.setupCollaboration();
         }
         this._currentClientId = this._generateClientId();

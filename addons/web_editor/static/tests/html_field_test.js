@@ -10,6 +10,7 @@ QUnit.module("Fields", ({ beforeEach }) => {
     let serverData;
     let target;
     let currentWysiwyg;
+    let currentHtmlField;
 
     beforeEach(() => {
         serverData = {
@@ -27,6 +28,10 @@ QUnit.module("Fields", ({ beforeEach }) => {
         setupViewRegistries();
 
         patchWithCleanup(HtmlField.prototype, {
+            setup() {
+                currentHtmlField = this;
+                return this._super.apply(this, arguments);
+            },
             startWysiwyg: function (wysiwyg) {
                 currentWysiwyg = wysiwyg;
 
@@ -131,5 +136,52 @@ QUnit.module("Fields", ({ beforeEach }) => {
 
         assert.strictEqual(resetCalled, false);
         assert.strictEqual(currentWysiwyg.odooEditor.editable.innerHTML, RED_TEXT);
+    });
+    QUnit.only("should not save if the wysiwyg.preSavePromise is not finished", async (assert) => {
+        // This case can happen if a user was 1) disconnected, 2) reconnected,
+        // 3) the preSavePromise was not resolved because of the rpc sent by
+        // _getCurrentRecord did not finish its roundtrip, and 4) an urgent save
+        // is triggered.
+        assert.expect(2);
+
+        let calledPartnerWrites = [];
+        const formView = await makeView({
+            type: "form",
+            resModel: "partner",
+            resId: 1,
+            serverData,
+            arch: /* xml */ `<form><field name="txt" options="{'collaborative': true}"/></form>`,
+            mockRPC: function(route, args) {
+                if (route === "/web/dataset/call_kw/partner/write") {
+                    calledPartnerWrites.push(args);
+                }
+            }
+        });
+
+        // Do some change in the document that sets it dirty.
+        currentWysiwyg.odooEditor.editable.querySelector('.kek').innerText = 'foo';
+        currentWysiwyg.odooEditor.historyStep();
+        await currentHtmlField.commitChanges();
+        // Wait for the currentHtmlField to have it's props updated by
+        // currentHtmlField.props.update().
+        await new Promise((r) => setTimeout(r));
+
+        currentWysiwyg._signalOffline();
+
+        patchWithCleanup(currentWysiwyg, {
+            // Simulate a request that never responds.
+            _getCurrentRecord() {
+                return new Promise(() => {});
+            },
+        });
+
+        currentWysiwyg._signalOnline();
+
+        formView.model.root.urgentSave();
+        // Wait for the urgent save to make the RPC call.
+        await new Promise(r => setTimeout(r));
+
+        assert.strictEqual(calledPartnerWrites.length, 1);
+        assert.strictEqual(calledPartnerWrites[0].args[1].txt, undefined);
     });
 });
