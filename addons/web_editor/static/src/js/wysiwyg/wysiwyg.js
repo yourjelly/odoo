@@ -83,6 +83,7 @@ const Wysiwyg = Widget.extend({
         this.options.autohideToolbar = typeof this.options.autohideToolbar === 'boolean'
             ? this.options.autohideToolbar
             : !options.snippets;
+        this._collaborationChannel = this.options.collaborationChannel;
         this.saving_mutex = new concurrency.Mutex();
         // Keeps track of color palettes per event name.
         this.colorpickers = {};
@@ -142,7 +143,7 @@ const Wysiwyg = Widget.extend({
             // Hack: check if mail module is installed.
             this.getSession()['notification_type']
         ) {
-            editorCollaborationOptions = this.setupCollaboration(options.collaborationChannel);
+            editorCollaborationOptions = this.setupCollaboration();
         }
 
         const getYoutubeVideoElement = async (url) => {
@@ -393,10 +394,10 @@ const Wysiwyg = Widget.extend({
             }
         }
     },
-    setupCollaboration(collaborationChannel) {
-        const modelName = collaborationChannel.collaborationModelName;
-        const fieldName = collaborationChannel.collaborationFieldName;
-        const resId = collaborationChannel.collaborationResId;
+    setupCollaboration() {
+        const modelName = this._collaborationChannel.collaborationModelName;
+        const fieldName = this._collaborationChannel.collaborationFieldName;
+        const resId = this._collaborationChannel.collaborationResId;
         const channelName = `editor_collaboration:${modelName}:${fieldName}:${resId}`;
 
         if (
@@ -409,25 +410,7 @@ const Wysiwyg = Widget.extend({
         this._collaborationChannelName = channelName;
         Wysiwyg.activeCollaborationChannelNames.add(channelName);
 
-        const collaborationBusListener = ({ detail: notifications}) => {
-            for (const { payload, type } of notifications) {
-                if (
-                    type === 'editor_collaboration' &&
-                    payload.model_name === modelName &&
-                    payload.field_name === fieldName &&
-                    payload.res_id === resId
-                ) {
-                    this._peerToPeerLoading.then(() => this.ptp.handleNotification(payload));
-                }
-            }
-        }
-        this.call('bus_service', 'addEventListener', 'notification', collaborationBusListener);
-        this.call('bus_service', 'addChannel', this._collaborationChannelName);
-        this._collaborationStopBus = () => {
-            Wysiwyg.activeCollaborationChannelNames.delete(this._collaborationChannelName);
-            this.call('bus_service', 'removeEventListener', 'notification', collaborationBusListener);
-            this.call('bus_service', 'deleteChannel', this._collaborationChannelName);
-        }
+        this._setupCollaborationBus();
 
         // const syncHistory = async (fromClientId) => {
         // }
@@ -439,24 +422,7 @@ const Wysiwyg = Widget.extend({
                 return clientA.startTime < clientB.startTime;
             }
         };
-        const rpcMutex = new Mutex();
-
-        this._getCurrentRecord = async () => {
-            const records = await this._rpc({
-                model: modelName,
-                method: "read",
-                args: [
-                    [resId],
-                    [fieldName, 'write_date']
-                ],
-            });
-            records[0].body = records[0][fieldName];
-            return records[0];
-        }
-        this._getRecordWriteDate = (record) => {
-            const dateString = record.write_date.replace(/^(\d{4}-\d{2}-\d{2}) ((\d{2}:?){3})$/, '$1T$2Z');
-            return new Date(dateString);
-        }
+        const rpcMutex = this._getRpcMutex();
 
         this._getNewPtp = () => {
             // Wether or not the history has been sent or received at least once.
@@ -596,19 +562,7 @@ const Wysiwyg = Widget.extend({
 
         this._peerToPeerLoading = new Promise(async (resolve) => {
             this._currentRecord = await this._getCurrentRecord();
-            let iceServers = await this._rpc({route: '/web_editor/get_ice_servers'});
-            if (!iceServers.length) {
-                iceServers = [
-                    {
-                        urls: [
-                            'stun:stun1.l.google.com:19302',
-                            'stun:stun2.l.google.com:19302',
-                        ],
-                    }
-                ];
-            }
-            this._iceServers = iceServers;
-
+            this._iceServers = await this._getIceServers();
             this.ptp = this._getNewPtp();
 
             resolve();
@@ -2364,6 +2318,56 @@ const Wysiwyg = Widget.extend({
             this.options.onWysiwygBlur && this.options.onWysiwygBlur();
         }
     },
+    _setupCollaborationBus() {
+        const modelName = this._collaborationChannel.collaborationModelName;
+        const fieldName = this._collaborationChannel.collaborationFieldName;
+        const resId = this._collaborationChannel.collaborationResId;
+        const collaborationBusListener = ({ detail: notifications}) => {
+            for (const { payload, type } of notifications) {
+                if (
+                    type === 'editor_collaboration' &&
+                    payload.model_name === modelName &&
+                    payload.field_name === fieldName &&
+                    payload.res_id === resId
+                ) {
+                    this._peerToPeerLoading.then(() => this.ptp.handleNotification(payload));
+                }
+            }
+        }
+        this.call('bus_service', 'addEventListener', 'notification', collaborationBusListener);
+        this.call('bus_service', 'addChannel', this._collaborationChannelName);
+        this._collaborationStopBus = () => {
+            Wysiwyg.activeCollaborationChannelNames.delete(this._collaborationChannelName);
+            this.call('bus_service', 'removeEventListener', 'notification', collaborationBusListener);
+            this.call('bus_service', 'deleteChannel', this._collaborationChannelName);
+        }
+    },
+    _getRpcMutex() {
+        return new Mutex();
+    },
+    async _getIceServers() {
+        const iceServers = await this._rpc({route: '/web_editor/get_ice_servers'});
+        if (iceServers.length) return iceServers;
+        return [
+            {
+                urls: [
+                    'stun:stun1.l.google.com:19302',
+                    'stun:stun2.l.google.com:19302',
+                ],
+            }
+        ];
+    },
+    async _getCurrentRecord() {
+        const modelName = this._collaborationChannel.collaborationModelName;
+        const fieldName = this._collaborationChannel.collaborationFieldName;
+        const resId = this._collaborationChannel.collaborationResId;
+        const records = await this._rpc({
+            model: modelName,
+            method: "read",
+            args: [[resId], [fieldName]],
+        });
+        return records[0];
+    },
     _signalOffline: function () {
         if (!this._isOnline) {
             return;
@@ -2394,14 +2398,12 @@ const Wysiwyg = Widget.extend({
             this.preSavePromiseReject = undefined;
         }
         try {
-            const fieldName = this.options.collaborationChannel.collaborationFieldName;
+            const fieldName = this._collaborationChannel.collaborationFieldName;
             const currentContent = this._currentRecord[fieldName];
-            const currentRecordDate = this._getRecordWriteDate(this._currentRecord);
             const dbRecord = await this._getCurrentRecord();
             const dbContent = dbRecord[fieldName];
-            const dbRecordDate = this._getRecordWriteDate(dbRecord);
 
-            if (currentContent !== dbContent && dbRecordDate !== currentRecordDate) {
+            if (currentContent !== dbContent) {
                 const $dialogContent = $(QWeb.render('web_editor.collaboration-reset-dialog'));
                 $dialogContent.append($(this.odooEditor.editable).clone());
                 const dialog = new Dialog(this, {
@@ -2411,7 +2413,8 @@ const Wysiwyg = Widget.extend({
                 });
                 dialog.open({shouldFocusButtons:true});
 
-                this.resetEditor(dbRecord.body);
+                this._currentRecord = dbRecord;
+                this.resetEditor(dbRecord[fieldName]);
             }
             this.preSavePromiseResolve();
             resetPreSavePromise();
@@ -2433,7 +2436,8 @@ const Wysiwyg = Widget.extend({
         this.ptp.stop();
         if (collaborationChannel) {
             this._collaborationStopBus();
-            this.setupCollaboration(collaborationChannel);
+            this._collaborationChannel = collaborationChannel;
+            this.setupCollaboration();
         }
         this._currentClientId = this._generateClientId();
         this._startCollaborationTime = new Date().getTime();
