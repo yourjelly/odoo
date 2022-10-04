@@ -257,7 +257,7 @@ const Wysiwyg = Widget.extend({
         this.$editable.on('click', '.o_image, .media_iframe_video', e => e.preventDefault());
         this.showTooltip = true;
         this.$editable.on('dblclick', mediaSelector, function () {
-            if (this.parentElement && this.parentElement.isContentEditable) {
+            if (this.parentElement.isContentEditable || (this.parentElement && this.parentElement.isContentEditable)) {
                 self.showTooltip = false;
                 const $el = $(this);
                 let params = {node: $el};
@@ -1667,8 +1667,8 @@ const Wysiwyg = Widget.extend({
         this.toolbar.$el.find('#mediaParagraphDropdownButton').attr('id', 'paragraphDropdownButton');
         // Only show the media tools in the toolbar if the current selected
         // snippet is a media.
-        const isInMedia = $target.is(mediaSelector) && !$target.parent().hasClass('o_stars') &&
-            e.target && e.target.parentElement && e.target.parentElement.isContentEditable;
+        const isInMedia = $target.is(mediaSelector) && e.target && !$target.parent().hasClass('o_stars') &&
+            (e.target.isContentEditable || (e.target.parentElement && e.target.parentElement.isContentEditable));
         this.toolbar.$el.find([
             '#image-shape',
             '#image-width',
