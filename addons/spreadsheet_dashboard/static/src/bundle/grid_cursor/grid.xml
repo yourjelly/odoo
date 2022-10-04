@@ -1,5 +1,5 @@
 <odoo>
-    <t t-name="spreadsheet_dashboard.o-spreadsheet-Grid" t-inherit="spreadsheet.o-spreadsheet-Grid" t-inherit-mode="extension" owl="1">
+    <t t-name="spreadsheet_dashboard.o-spreadsheet-GridOverlay" t-inherit="spreadsheet.o-spreadsheet-GridOverlay" t-inherit-mode="extension" owl="1">
         <xpath expr="//div[hasclass('o-grid-overlay')]" position="inside">
             <div t-if="env.model.getters.isDashboard()"
                  t-foreach="getClickableCells()"

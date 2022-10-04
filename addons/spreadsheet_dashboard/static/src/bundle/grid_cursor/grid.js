@@ -5,7 +5,7 @@ import spreadsheet from "@spreadsheet/o_spreadsheet/o_spreadsheet_extended";
 import { getNumberOfPivotFormulas } from "@spreadsheet/pivot/pivot_helpers";
 import { patch } from "@web/core/utils/patch";
 
-const { Grid } = spreadsheet.components;
+const { GridOverlay } = spreadsheet.components;
 
 function positionToZone(position) {
     return { left: position.col, right: position.col, top: position.row, bottom: position.row };
@@ -23,7 +23,7 @@ function positionToZone(position) {
 /* Used for t-key */
 let key = 0;
 
-patch(Grid.prototype, "spreadsheet_dashboard_grid_cursor", {
+patch(GridOverlay.prototype, "spreadsheet_dashboard_grid_cursor", {
     getCellClickableStyle(coordinates) {
         return `
       top: ${coordinates.top}px;
