@@ -3124,7 +3124,18 @@ class BaseModel(metaclass=MetaModel):
         data = [(record, {'id': record._ids[0]}) for record in self]
         use_name_get = (load == '_classic_read')
         for name in fnames:
-            convert = self._fields[name].convert_to_read
+            field = self._fields[name]
+            if field.type == 'properties':
+                values_list = [record[name] for record, _ in data]
+                records = self.browse([record.id for record, _ in data])
+
+                results = field.convert_to_read_multi(values_list, records, use_name_get)
+
+                for vals, result in zip(data, results):
+                    vals[1][name] = result
+                continue
+
+            convert = field.convert_to_read
             for record, vals in data:
                 # missing records have their vals empty
                 if not vals:
