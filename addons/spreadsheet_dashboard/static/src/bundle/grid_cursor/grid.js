@@ -6,10 +6,7 @@ import { getNumberOfPivotFormulas } from "@spreadsheet/pivot/pivot_helpers";
 import { patch } from "@web/core/utils/patch";
 
 const { GridOverlay } = spreadsheet.components;
-
-function positionToZone(position) {
-    return { left: position.col, right: position.col, top: position.row, bottom: position.row };
-}
+const { positionToZone } = spreadsheet.helpers;
 
 /**
  * @typedef ClickableCell
