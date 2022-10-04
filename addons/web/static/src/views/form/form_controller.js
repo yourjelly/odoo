@@ -258,7 +258,7 @@ export class FormController extends Component {
 
         const { activeNotebookPages, fieldsToTranslate } = this.props.state || {};
         this.fieldsToTranslate = useState(fieldsToTranslate || {});
-        this.activeNotebookPages = activeNotebookPages || {};
+        this.activeNotebookPages = { ...activeNotebookPages };
     }
 
     displayName() {
