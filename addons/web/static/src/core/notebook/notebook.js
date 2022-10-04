@@ -2,7 +2,7 @@
 
 import { scrollTo } from "@web/core/utils/scrolling";
 
-const { Component, onWillDestroy, onWillUpdateProps, useEffect, useRef, useState } = owl;
+const { Component, onPatched, onWillDestroy, onWillUpdateProps, useEffect, useRef, useState } = owl;
 
 /**
  * A notebook component that will render only the current page and allow
@@ -62,6 +62,10 @@ export class Notebook extends Component {
         this.state.currentPage = this.computeActivePage(this.props.defaultPage, true);
         const onAnchorClicked = this.onAnchorClicked.bind(this);
         this.env.bus.addEventListener("SCROLLER:ANCHOR_LINK_CLICKED", onAnchorClicked);
+        this.switchingPage = false;
+        onPatched(() => {
+            this.switchingPage = false;
+        });
         useEffect(
             () => {
                 this.props.onPageUpdate(this.state.currentPage);
@@ -75,7 +79,8 @@ export class Notebook extends Component {
         );
         onWillUpdateProps((nextProps) => {
             const activateDefault =
-                this.props.defaultPage !== nextProps.defaultPage || !this.defaultVisible;
+                !this.switchingPage &&
+                (this.props.defaultPage !== nextProps.defaultPage || !this.defaultVisible);
             this.pages = this.computePages(nextProps);
             this.state.currentPage = this.computeActivePage(nextProps.defaultPage, activateDefault);
         });
@@ -91,6 +96,11 @@ export class Notebook extends Component {
     get page() {
         const page = this.pages.find((e) => e[0] === this.state.currentPage)[1];
         return page.Component && page;
+    }
+
+    setCurrentPage(page) {
+        this.state.currentPage = page;
+        this.switchingPage = true;
     }
 
     onAnchorClicked(ev) {
