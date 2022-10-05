@@ -682,25 +682,13 @@ class Field(MetaField('DummyField', (object,), {})):
         if self.translate and self.store and self.related_field.translate and self.related_field.store:
             Cache = records.env.cache
             related_field_cache = Cache._get_field_cache(values[0], self.related_field)
-            dirty_ids = Cache._dirty.get(self.related_field, ())
-            dirty_records = records.browse()
-            dirty_values = []
-            clean_records = records.browse()
-            clean_values = []
             for record, value in zip(records, values):
-                _value = value[self.related_field.name]
-                if not value._ids:
-                    record[self.name] = self._process_related(_value)
-                elif value._ids[0] in dirty_ids:
-                    dirty_records = dirty_records + record
-                    dirty_values.append(value)
-                else:
-                    clean_records = clean_records + record
-                    clean_values.append(value)
-            related_cache_raw_values = [related_field_cache[value._ids[0]].copy() for value in dirty_values]
-            Cache.update_raw(dirty_records, self, related_cache_raw_values, dirty=True)
-            related_cache_raw_values = [related_field_cache[value._ids[0]].copy() for value in clean_values]
-            Cache.update_raw(clean_records, self, related_cache_raw_values, dirty=False)
+                value[self.related_field.name]
+            related_cache_raw_values = [
+                related_field_cache[value._ids[0]].copy() if isinstance(related_field_cache[value._ids[0]], dict) else None
+                for value in values
+            ]
+            Cache.update_raw(records, self, related_cache_raw_values, dirty=True)
         else:
             for record, value in zip(records, values):
                 record[self.name] = self._process_related(value[self.related_field.name])
