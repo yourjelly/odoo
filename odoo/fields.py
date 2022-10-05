@@ -57,6 +57,7 @@ NoneType = type(None)
 Default = object()                      # default value for __init__() methods
 
 stored_translated_related_fields = set()
+stored_translated_computed_fields = set()
 
 def first(records):
     """ Return the first record in ``records``, with the same prefetching. """
@@ -513,6 +514,10 @@ class Field(MetaField('DummyField', (object,), {})):
             else:
                 self.setup_nonrelated(model)
             self._setup_done = True
+            if self.compute and self.store and self.translate:
+                if str(self) not in stored_translated_computed_fields:
+                    stored_translated_computed_fields.add(str(self))
+                    _logger.warning("%s is a stored computed translated field" % self)
 
     #
     # Setup of non-related fields
@@ -627,7 +632,7 @@ class Field(MetaField('DummyField', (object,), {})):
         if self.related and self.store and self.translate:
             if str(self) not in stored_translated_related_fields:
                 stored_translated_related_fields.add(str(self))
-                _logger.warning("%s a stored  related translated field" % self)
+                _logger.warning("%s is a stored related translated field" % self)
 
 
     def traverse_related(self, record):
