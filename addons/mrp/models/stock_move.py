@@ -351,9 +351,9 @@ class StockMove(models.Model):
             moves_ids_to_return |= phantom_moves.action_explode().ids
         return self.env['stock.move'].browse(moves_ids_to_return)
 
-    def action_show_details(self):
+    def action_show_details(self, automatic=False):
         self.ensure_one()
-        action = super().action_show_details()
+        action = super().action_show_details(automatic)
         if self.raw_material_production_id:
             action['views'] = [(self.env.ref('mrp.view_stock_move_operations_raw').id, 'form')]
             action['context']['show_destination_location'] = False

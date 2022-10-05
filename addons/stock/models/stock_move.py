@@ -159,6 +159,7 @@ class StockMove(models.Model):
     quantity_done = fields.Float(
         'Quantity Done', compute='_quantity_done_compute', digits='Product Unit of Measure',
         inverse='_quantity_done_set', store=True)
+    quantity_done_sml = fields.Float('Quantity to Correct', compute='_compute_quantity_done_sml')
     show_operations = fields.Boolean(related='picking_id.picking_type_id.show_operations')
     picking_code = fields.Selection(related='picking_id.picking_type_id.code', readonly=True)
     show_details_visible = fields.Boolean('Details Visible', compute='_compute_show_details_visible')
@@ -320,7 +321,16 @@ class StockMove(models.Model):
             else:
                 move.delay_alert_date = False
 
-    @api.depends('move_line_ids.qty_done', 'move_line_ids.product_uom_id', 'move_line_nosuggest_ids.qty_done', 'picking_type_id.show_reserved')
+    @api.depends('move_line_ids.qty_done', 'move_line_ids.product_uom_id', 'move_line_nosuggest_ids.qty_done')
+    def _compute_quantity_done_sml(self):
+        self.quantity_done_sml = 0
+        for move in self:
+            quantity = 0
+            for move_line in move._get_move_lines():
+                quantity += move_line.product_uom_id._compute_quantity(move_line.qty_done, self.product_uom, round=False)
+            move.quantity_done_sml = quantity
+
+    @api.depends('move_line_ids.qty_done', 'move_line_ids.product_uom_id', 'move_line_nosuggest_ids.qty_done')
     def _quantity_done_compute(self):
         """ This field represents the sum of the move lines `qty_done`. It allows the user to know
         if there is still work to do.
@@ -333,11 +343,7 @@ class StockMove(models.Model):
         if not any(self._ids):
             # onchange
             for move in self:
-                quantity_done = 0
-                for move_line in move._get_move_lines():
-                    quantity_done += move_line.product_uom_id._compute_quantity(
-                        move_line.qty_done, move.product_uom, round=False)
-                move.quantity_done = quantity_done
+                move.quantity_done = move.quantity_done_sml
         else:
             # compute
             move_lines_ids = set()
@@ -362,19 +368,25 @@ class StockMove(models.Model):
                 )
 
     def _quantity_done_set(self):
-        quantity_done = self[0].quantity_done  # any call to create will invalidate `move.quantity_done`
-        for move in self:
-            move_lines = move._get_move_lines()
-            if not move_lines:
-                if quantity_done:
-                    # do not impact reservation here
-                    move_line = self.env['stock.move.line'].create(dict(move._prepare_move_line_vals(), qty_done=quantity_done))
-                    move.write({'move_line_ids': [(4, move_line.id)]})
-                    move_line._apply_putaway_strategy()
-            elif len(move_lines) == 1:
-                move_lines[0].qty_done = quantity_done
+        moves_to_assign = self.filtered(lambda m: m.picking_id.immediate_transfer and m.reserved_availability != m.quantity_done)
+        # moves_to_assign._action_confirm()
+
+        def _process_descrease(move):
+            move._do_unreserve()
+            move._get_move_lines().unlink()
+            _process_increase(move, move.quantity_done)
+
+        def _process_increase(move, quantity):
+            move.product_uom_qty = move.quantity_done
+            move._action_assign()
+            move._set_quantity_done(quantity)
+
+        for move in moves_to_assign:
+            delta_qty = move.quantity_done - move.quantity_done_sml
+            if float_compare(delta_qty, 0, precision_rounding=move.product_uom.rounding) > 0:
+                _process_increase(move, delta_qty)
             else:
-                move._multi_line_quantity_done_set(quantity_done)
+                _process_descrease(move)
 
     def _multi_line_quantity_done_set(self, quantity_done):
         move_lines = self._get_move_lines()
@@ -595,6 +607,12 @@ class StockMove(models.Model):
                 move.location_id.name, move.location_dest_id.name)))
         return res
 
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('quantity_done') and 'lot_ids' in vals:
+                vals.pop('lot_ids')
+        return super().create(vals_list)
+
     def write(self, vals):
         # Handle the write on the initial demand by updating the reserved quantity and logging
         # messages according to the state of the stock.move records.
@@ -656,10 +674,13 @@ class StockMove(models.Model):
             odoobot_id = self.env['ir.model.data']._xmlid_to_res_id("base.partner_root")
             doc.message_post(body=msg, author_id=odoobot_id, subject=msg_subject)
 
-    def action_show_details(self):
+    def action_show_details(self, automatic=False):
         """ Returns an action that will open a form view (in a popup) allowing to work on all the
         move lines of a particular move. This form view is used when "show operations" is not
         checked on the picking type.
+
+        : params automatic: If set the action could return None if the `stock.move` could be
+            easily increase/decrease.
         """
         self.ensure_one()
 
@@ -667,6 +688,10 @@ class StockMove(models.Model):
         # reserved move lines. We do this by displaying `move_line_nosuggest_ids`. We use
         # different views to display one field or another so that the webclient doesn't have to
         # fetch both.
+        if automatic and\
+                self.product_id.tracking == 'none' and\
+                self.quantity_done == self.quantity_done_sml:
+            return
         if self.picking_type_id.show_reserved:
             view = self.env.ref('stock.view_stock_move_operations')
         else:
@@ -692,7 +717,8 @@ class StockMove(models.Model):
                 show_source_location=self.picking_type_id.code != 'incoming',
                 show_destination_location=self.picking_type_id.code != 'outgoing',
                 show_package=not self.location_id.usage == 'supplier',
-                show_reserved_quantity=self.state != 'done' and not self.picking_id.immediate_transfer and self.picking_type_id.code != 'incoming'
+                show_reserved_quantity=self.state != 'done' and not self.picking_id.immediate_transfer and self.picking_type_id.code != 'incoming',
+                initial_quantity_done=(self.picking_id.immediate_transfer and self.quantity_done_sml != self.quantity_done) and self.quantity_done or False,
             ),
         }
 
@@ -1431,7 +1457,7 @@ class StockMove(models.Model):
         self.ensure_one()
         if location_id.should_bypass_reservation():
             return self.product_qty
-        return self.env['stock.quant']._get_available_quantity(self.product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict, allow_negative=allow_negative)
+        return self.env['stock.quant']._get_available_quantity(self.product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict, allow_negative=allow_negative)        
 
     def _action_assign(self):
         """ Reserve stock moves by creating their stock move lines. A stock move is
@@ -1897,6 +1923,7 @@ class StockMove(models.Model):
         @param qty: quantity in the UoM of move.product_uom
         """
         existing_smls = self.move_line_ids
+
         self.move_line_ids = self._set_quantity_done_prepare_vals(qty)
         # `_set_quantity_done_prepare_vals` may return some commands to create new SMLs
         # These new SMLs need to be redirected thanks to putaway rules
