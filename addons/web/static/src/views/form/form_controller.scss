@@ -87,6 +87,20 @@
     .oe_inline, .o_field_widget.oe_inline > * {
         width: auto!important;
     }
+    .oe_inline.o_field_float_time input {
+        width: 5ch !important;
+    }
+    @for $i from 2 through 7 {
+        .oe_inline.o_input_#{$i}ch input{
+            width: 1ch * $i !important;
+        }
+    }
+    .oe_inline.o_input_10ch input{
+        width: 10ch !important;
+    }
+    .oe_inline.o_input_15ch input{
+        width: 15ch !important;
+    }
     .oe_left {
         @extend .oe_inline;
         float: left!important;
