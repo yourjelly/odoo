@@ -20,10 +20,10 @@
                         <div class="position-relative">
                             <t t-out="invisibleSpacer"/>
 
-                            <span t-if="followButtonView.isUnfollowButtonHighlighted" class="position-absolute end-0 top-0 bottom-0 text-warning">
+                            <span t-if="followButtonView.isUnfollowButtonHighlighted" class="o_FollowButton_text position-absolute end-0 top-0 bottom-0 text-warning">
                                 <i class="fa fa-fw fa-times"/> Unfollow
                             </span>
-                            <span t-else="" class="d-block position-absolute end-0 top-0 bottom-0">
+                            <span t-else="" class="o_FollowButton_text d-block position-absolute end-0 top-0 bottom-0">
                                 <i class="fa fa-fw fa-check"/> Following
                             </span>
                         </div>
