@@ -84,7 +84,7 @@ def query_insert(cr, table, rows):
         rows=",".join("%s" for row in rows),
     )
     params = [tuple(row[col] for col in cols) for row in rows]
-    cr.execute(query, params)
+    cr.execute(query, params) # pylint: disable=sql-injection
     return [row[0] for row in cr.fetchall()]
 
 
@@ -98,7 +98,7 @@ def query_update(cr, table, values, selectors):
         assignment=",".join('"{0}"=%({0})s'.format(s) for s in setters),
         condition=" AND ".join('"{0}"=%({0})s'.format(s) for s in selectors),
     )
-    cr.execute(query, values)
+    cr.execute(query, values) # pylint: disable=sql-injection
     return [row[0] for row in cr.fetchall()]
 
 
@@ -1414,7 +1414,7 @@ class IrModelSelection(models.Model):
                     model.invalidate_model([fname])
                     # replace the value by the new one in the field's corresponding column
                     query = f'UPDATE "{model._table}" SET "{fname}"=%s WHERE "{fname}"=%s'
-                    self.env.cr.execute(query, [vals['value'], selection.value])
+                    self.env.cr.execute(query, [vals['value'], selection.value]) # pylint: disable=sql-injection
 
         result = super().write(vals)
 
