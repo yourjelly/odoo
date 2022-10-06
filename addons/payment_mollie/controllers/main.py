@@ -34,7 +34,7 @@ class MollieController(http.Controller):
         """
         _logger.info("handling redirection from Mollie with data:\n%s", pprint.pformat(data))
         request.env['payment.transaction'].sudo()._handle_notification_data('mollie', data)
-        return request.redirect('/payment/status')
+        return request.redirect('/@/payment/status')
 
     @http.route(_webhook_url, type='http', auth='public', methods=['POST'], csrf=False)
     def mollie_webhook(self, **data):
