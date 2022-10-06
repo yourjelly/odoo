@@ -34,8 +34,8 @@ FormRenderer.include({
         this.chatterFields = params.chatterFields;
         this.mailFields = params.mailFields;
         this.messaging = undefined;
-        if (owl.Component.env.services.messaging) {
-            owl.Component.env.services.messaging.get().then(messaging => this.messaging = messaging);
+        if (odoo.__WOWL_DEBUG__.app.env.services.messaging) {
+            odoo.__WOWL_DEBUG__.app.env.services.messaging.get().then(messaging => this.messaging = messaging);
         }
         this._chatterContainerComponent = undefined;
         /**

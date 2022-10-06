@@ -44,6 +44,7 @@ export async function startWebClient(Webclient) {
         translateFn: env._t,
     });
     renderToString.app = app;
+    odoo.__WOWL_DEBUG__ = { app };
     setLoadXmlDefaultApp(app);
     const root = await app.mount(document.body);
     const classList = document.body.classList;
@@ -60,7 +61,7 @@ export async function startWebClient(Webclient) {
         classList.add("o_touch_device");
     }
     // delete odoo.debug; // FIXME: some legacy code rely on this
-    odoo.__WOWL_DEBUG__ = { root };
+    odoo.__WOWL_DEBUG__.root = root;
     odoo.isReady = true;
 
     // Update Favicons

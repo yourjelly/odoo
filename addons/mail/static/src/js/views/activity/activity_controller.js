@@ -67,7 +67,7 @@ var ActivityController = BasicController.extend({
             multiSelect: false,
             context: state.context,
             onSelected: async resIds => {
-                const messaging = await owl.Component.env.services.messaging.get();
+                const messaging = await odoo.__WOWL_DEBUG__.app.env.services.messaging.get();
                 const thread = messaging.models['Thread'].insert({ id: resIds[0], model: this.model.modelName });
                 await messaging.openActivityForm({ thread });
                 this.trigger_up('reload');
