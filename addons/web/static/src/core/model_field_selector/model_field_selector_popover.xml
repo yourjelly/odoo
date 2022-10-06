@@ -15,7 +15,7 @@
                 </t>
                 <div class="o_field_selector_title" t-esc="currentFieldName" />
                 <i
-                    class="fa fa-times o_field_selector_popover_option o_field_selector_close"
+                    class="fa fa-times o_field_selector_popover_option o_field_selector_close cursor-pointer"
                     title="Close"
                     role="img"
                     aria-label="Close"
