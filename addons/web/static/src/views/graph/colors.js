@@ -13,16 +13,16 @@ const COLORS_BRIGHT = [
     "#ff9896",
     "#9467bd",
     "#c5b0d5",
-    "#8c564b",
+    "#875a7b", // Enterprise
     "#c49c94",
     "#e377c2",
-    "#f7b6d2",
+    "#dcd0d9", // Primary for dashbaords
     "#7f7f7f",
     "#c7c7c7",
     "#bcbd22",
     "#dbdb8d",
     "#17becf",
-    "#9edae5",
+    "#a5d8d7", // Secondary for dashbaords
 ];
 
 const COLORS_DARK = [
@@ -36,16 +36,16 @@ const COLORS_DARK = [
     "#ffb6c1",
     "#ba87e9",
     "#eadbf6",
-    "#d36650",
+    "#c568af", // Enterprise
     "#ecc1b8",
     "#fda9e3",
-    "#ff69b4",
+    "#BB86FC", // Primary for dashbaords
     "#808080",
     "#f2e8e8",
     "#fcfe2d",
     "#f8f8bc",
-    "#33ecff",
-    "#d3f6fc",
+    "#17becf",
+    "#10efed", // Secondary for dashbaords
 ];
 
 export const COLORS = isDark() ? COLORS_DARK : COLORS_BRIGHT;
