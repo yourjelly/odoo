@@ -300,10 +300,10 @@
         height: 10px;
     }
     ::-webkit-scrollbar-thumb {
-        background: #D3D1CB;
+        background: var(--oePowerbox__ScrollbarThumb-background-color, #D3D1CB);
     }
     ::-webkit-scrollbar-track {
-        background: #EDECE9;
+        background: var(--oePowerbox__ScrollbarTrack-background-color, #EDECE9);
     }
 }
 .oe-powerbox-mainWrapper {
