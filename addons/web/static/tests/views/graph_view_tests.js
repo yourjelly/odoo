@@ -29,6 +29,7 @@ import { registry } from "@web/core/registry";
 import { BORDER_WHITE, DEFAULT_BG, COLORS, hexToRGBA } from "@web/views/graph/colors";
 import { GraphArchParser } from "@web/views/graph/graph_arch_parser";
 import { patchWithCleanup } from "../helpers/utils";
+import { getCookie } from "web.utils.cookies";
 
 const serviceRegistry = registry.category("services");
 
@@ -327,7 +328,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(stacked, true, "bar charts should be stacked by default");
         checkLabels(assert, graph, ["Total"]);
         checkDatasets(assert, graph, ["backgroundColor", "borderColor", "data", "label", "stack"], {
-            backgroundColor: "#1f77b4",
+            backgroundColor: getCookie("color_scheme") == "dark" ? "#00ffff" : "#1f77b4",
             borderColor: undefined,
             data: [8],
             label: "Count",
@@ -358,7 +359,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, "div.o_graph_canvas_container canvas");
         checkLabels(assert, graph, ["false", "true"]);
         checkDatasets(assert, graph, ["backgroundColor", "borderColor", "data", "label"], {
-            backgroundColor: "#1f77b4",
+            backgroundColor: getCookie("color_scheme") == "dark" ? "#00ffff" : "#1f77b4",
             borderColor: undefined,
             data: [5, 3],
             label: "Count",
@@ -389,13 +390,13 @@ QUnit.module("Views", (hooks) => {
             ["backgroundColor", "borderColor", "data", "label"],
             [
                 {
-                    backgroundColor: "#1f77b4",
+                    backgroundColor: getCookie("color_scheme") == "dark" ? "#00ffff" : "#1f77b4",
                     borderColor: undefined,
                     data: [1, 3],
                     label: "xphone",
                 },
                 {
-                    backgroundColor: "#ff7f0e",
+                    backgroundColor: getCookie("color_scheme") == "dark" ? "#ff6347" : "#ff7f0e",
                     borderColor: undefined,
                     data: [4, 0],
                     label: "xpad",
@@ -435,13 +436,13 @@ QUnit.module("Views", (hooks) => {
             ["backgroundColor", "borderColor", "data", "label"],
             [
                 {
-                    backgroundColor: "#1f77b4",
+                    backgroundColor: getCookie("color_scheme") == "dark" ? "#00ffff" : "#1f77b4",
                     borderColor: undefined,
                     data: [6],
                     label: "True group",
                 },
                 {
-                    backgroundColor: "#ff7f0e",
+                    backgroundColor: getCookie("color_scheme") == "dark" ? "#ff6347" : "#ff7f0e",
                     borderColor: undefined,
                     data: [17],
                     label: "False group",
@@ -505,13 +506,13 @@ QUnit.module("Views", (hooks) => {
             ["backgroundColor", "borderColor", "data", "label"],
             [
                 {
-                    backgroundColor: "#1f77b4",
+                    backgroundColor: getCookie("color_scheme") == "dark" ? "#00ffff" : "#1f77b4",
                     borderColor: undefined,
                     data: [14, 0, 0, 0],
                     label: "True group",
                 },
                 {
-                    backgroundColor: "#ff7f0e",
+                    backgroundColor: getCookie("color_scheme") == "dark" ? "#ff6347" : "#ff7f0e",
                     borderColor: undefined,
                     data: [12, -4, 2, 0],
                     label: "False group",
@@ -576,7 +577,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, "div.o_graph_canvas_container canvas");
         checkLabels(assert, graph, ["Undefined", "black", "red"]);
         checkDatasets(assert, graph, ["backgroundColor", "borderColor", "data", "label"], {
-            backgroundColor: "#1f77b4",
+            backgroundColor: getCookie("color_scheme") == "dark" ? "#00ffff" : "#1f77b4",
             borderColor: undefined,
             data: [8, 10, 13],
             label: "Revenue",
@@ -619,7 +620,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, "div.o_graph_canvas_container canvas");
         checkLabels(assert, graph, ["Undefined", "black", "red", "red (2)"]);
         checkDatasets(assert, graph, ["backgroundColor", "borderColor", "data", "label"], {
-            backgroundColor: "#1f77b4",
+            backgroundColor: getCookie("color_scheme") == "dark" ? "#00ffff" : "#1f77b4",
             borderColor: undefined,
             data: [8, 10, 14, 13],
             label: "Revenue",
@@ -701,13 +702,13 @@ QUnit.module("Views", (hooks) => {
                 ["backgroundColor", "borderColor", "data", "label"],
                 [
                     {
-                        backgroundColor: "#1f77b4",
+                        backgroundColor: getCookie("color_scheme") == "dark" ? "#00ffff" : "#1f77b4",
                         borderColor: undefined,
                         data: [14, 0],
                         label: "February 2021",
                     },
                     {
-                        backgroundColor: "#ff7f0e",
+                        backgroundColor: getCookie("color_scheme") == "dark" ? "#ff6347" : "#ff7f0e",
                         borderColor: undefined,
                         data: [12, 5, 15, 2],
                         label: "January 2021",
@@ -817,25 +818,25 @@ QUnit.module("Views", (hooks) => {
                 ["backgroundColor", "borderColor", "data", "label"],
                 [
                     {
-                        backgroundColor: "#1f77b4",
+                        backgroundColor: getCookie("color_scheme") == "dark" ? "#00ffff" : "#1f77b4",
                         borderColor: undefined,
                         data: [14, 0],
                         label: "February 2021 / W05 2021",
                     },
                     {
-                        backgroundColor: "#ff7f0e",
+                        backgroundColor: getCookie("color_scheme") == "dark" ? "#ff6347" : "#ff7f0e",
                         borderColor: undefined,
                         data: [0, 0],
                         label: "February 2021 / W07 2021",
                     },
                     {
-                        backgroundColor: "#aec7e8",
+                        backgroundColor: getCookie("color_scheme") == "dark" ? "#00ced1" : "#aec7e8",
                         borderColor: undefined,
                         data: [12, 0],
                         label: "January 2021 / W01 2021",
                     },
                     {
-                        backgroundColor: "#ffbb78",
+                        backgroundColor: getCookie("color_scheme") == "dark" ? "#ffd700" : "#ffbb78",
                         borderColor: undefined,
                         data: [0, 5],
                         label: "January 2021 / W02 2021",
@@ -894,8 +895,8 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(mode, "line");
         checkLabels(assert, graph, ["", "Total", ""]);
         checkDatasets(assert, graph, ["backgroundColor", "borderColor", "data", "label", "stack"], {
-            backgroundColor: "rgba(31,119,180,0.4)",
-            borderColor: "#1f77b4",
+            backgroundColor: getCookie("color_scheme") == "dark" ? "rgba(0,255,255,0.4)" : "rgba(31,119,180,0.4)",
+            borderColor: getCookie("color_scheme") == "dark" ? "#00ffff" : "#1f77b4",
             data: [undefined, 8],
             label: "Count",
             stack: undefined,
@@ -919,8 +920,8 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, "div.o_graph_canvas_container canvas");
         checkLabels(assert, graph, ["false", "true"]);
         checkDatasets(assert, graph, ["backgroundColor", "borderColor", "data", "label"], {
-            backgroundColor: "rgba(31,119,180,0.4)",
-            borderColor: "#1f77b4",
+            backgroundColor: getCookie("color_scheme") == "dark" ? "rgba(0,255,255,0.4)" : "rgba(31,119,180,0.4)",
+            borderColor: getCookie("color_scheme") == "dark" ? "#00ffff" : "#1f77b4",
             data: [5, 3],
             label: "Count",
         });
@@ -951,13 +952,13 @@ QUnit.module("Views", (hooks) => {
             [
                 {
                     backgroundColor: undefined,
-                    borderColor: "#1f77b4",
+                    borderColor: getCookie("color_scheme") == "dark" ? "#00ffff" : "#1f77b4",
                     data: [1, 3],
                     label: "xphone",
                 },
                 {
                     backgroundColor: undefined,
-                    borderColor: "#ff7f0e",
+                    borderColor: getCookie("color_scheme") == "dark" ? "#ff6347" : "#ff7f0e",
                     data: [4, 0],
                     label: "xpad",
                 },
@@ -1004,8 +1005,8 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, "div.o_graph_canvas_container canvas");
         checkLabels(assert, graph, ["black", "red"]);
         checkDatasets(assert, graph, ["backgroundColor", "borderColor", "data", "label"], {
-            backgroundColor: "rgba(31,119,180,0.4)",
-            borderColor: "#1f77b4",
+            backgroundColor: getCookie("color_scheme") == "dark" ? "rgba(0,255,255,0.4)" : "rgba(31,119,180,0.4)",
+            borderColor: getCookie("color_scheme") == "dark" ? "#00ffff" : "#1f77b4",
             data: [10, 13],
             label: "Revenue",
         });
@@ -1093,15 +1094,15 @@ QUnit.module("Views", (hooks) => {
         const expectedDatasets = [
             {
                 backgroundColor: undefined,
-                borderColor: "#1f77b4",
+                borderColor: getCookie("color_scheme") == "dark" ? "#00ffff" : "#1f77b4",
                 originIndex: 0,
-                pointBackgroundColor: "#1f77b4",
+                pointBackgroundColor: getCookie("color_scheme") == "dark" ? "#00ffff" : "#1f77b4",
             },
             {
                 backgroundColor: undefined,
-                borderColor: "#ff7f0e",
+                borderColor: getCookie("color_scheme") == "dark" ? "#ff6347" : "#ff7f0e",
                 originIndex: 0,
-                pointBackgroundColor: "#ff7f0e",
+                pointBackgroundColor: getCookie("color_scheme") == "dark" ? "#ff6347" : "#ff7f0e",
             },
         ];
         const keysToEvaluate = [
@@ -1236,14 +1237,14 @@ QUnit.module("Views", (hooks) => {
             ["backgroundColor", "borderColor", "data", "label"],
             [
                 {
-                    backgroundColor: "rgba(31,119,180,0.4)",
-                    borderColor: "#1f77b4",
+                    backgroundColor: getCookie("color_scheme") == "dark" ? "rgba(0,255,255,0.4)" : "rgba(31,119,180,0.4)",
+                    borderColor: getCookie("color_scheme") == "dark" ? "#00ffff" : "#1f77b4",
                     data: [undefined, 6],
                     label: "True group",
                 },
                 {
                     backgroundColor: undefined,
-                    borderColor: "#ff7f0e",
+                    borderColor: getCookie("color_scheme") == "dark" ? "#ff6347" : "#ff7f0e",
                     data: [undefined, 17],
                     label: "False group",
                 },
@@ -1298,14 +1299,14 @@ QUnit.module("Views", (hooks) => {
             ["backgroundColor", "borderColor", "data", "label"],
             [
                 {
-                    backgroundColor: "rgba(31,119,180,0.4)",
-                    borderColor: "#1f77b4",
+                    backgroundColor: getCookie("color_scheme") == "dark" ? "rgba(0,255,255,0.4)" : "rgba(31,119,180,0.4)",
+                    borderColor: getCookie("color_scheme") == "dark" ? "#00ffff" : "#1f77b4",
                     data: [14, 0, 0, 0],
                     label: "True group",
                 },
                 {
                     backgroundColor: undefined,
-                    borderColor: "#ff7f0e",
+                    borderColor: getCookie("color_scheme") == "dark" ? "#ff6347" : "#ff7f0e",
                     data: [12, -4, 2, 0],
                     label: "False group",
                 },
@@ -1412,14 +1413,14 @@ QUnit.module("Views", (hooks) => {
                 ["backgroundColor", "borderColor", "data", "label"],
                 [
                     {
-                        backgroundColor: "rgba(31,119,180,0.4)",
-                        borderColor: "#1f77b4",
+                        backgroundColor: getCookie("color_scheme") == "dark" ? "rgba(0,255,255,0.4)" : "rgba(31,119,180,0.4)",
+                        borderColor: getCookie("color_scheme") == "dark" ? "#00ffff" : "#1f77b4",
                         data: [14, 0],
                         label: "February 2021",
                     },
                     {
                         backgroundColor: undefined,
-                        borderColor: "#ff7f0e",
+                        borderColor: getCookie("color_scheme") == "dark" ? "#ff6347" : "#ff7f0e",
                         data: [12, 5, 15, 2],
                         label: "January 2021",
                     },
@@ -1521,25 +1522,25 @@ QUnit.module("Views", (hooks) => {
                 [
                     {
                         backgroundColor: undefined,
-                        borderColor: "#1f77b4",
+                        borderColor: getCookie("color_scheme") == "dark" ? "#00ffff" : "#1f77b4",
                         data: [14, 0],
                         label: "February 2021 / W05 2021",
                     },
                     {
                         backgroundColor: undefined,
-                        borderColor: "#ff7f0e",
+                        borderColor: getCookie("color_scheme") == "dark" ? "#ff6347" : "#ff7f0e",
                         data: [0, 0],
                         label: "February 2021 / W07 2021",
                     },
                     {
                         backgroundColor: undefined,
-                        borderColor: "#aec7e8",
+                        borderColor: getCookie("color_scheme") == "dark" ? "#00ced1" : "#aec7e8",
                         data: [12, 0],
                         label: "January 2021 / W01 2021",
                     },
                     {
                         backgroundColor: undefined,
-                        borderColor: "#ffbb78",
+                        borderColor: getCookie("color_scheme") == "dark" ? "#ffd700" : "#ffbb78",
                         data: [0, 5],
                         label: "January 2021 / W02 2021",
                     },
@@ -1609,7 +1610,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(mode, "pie");
         checkLabels(assert, graph, ["Total"]);
         checkDatasets(assert, graph, ["backgroundColor", "borderColor", "data", "label", "stack"], {
-            backgroundColor: ["#1f77b4"],
+            backgroundColor: getCookie("color_scheme") == "dark" ? ["#00ffff"] : ["#1f77b4"],
             borderColor: BORDER_WHITE,
             data: [8],
             label: "",
@@ -1634,7 +1635,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, "div.o_graph_canvas_container canvas");
         checkLabels(assert, graph, ["false", "true"]);
         checkDatasets(assert, graph, ["backgroundColor", "borderColor", "data"], {
-            backgroundColor: ["#1f77b4", "#ff7f0e"],
+            backgroundColor: getCookie("color_scheme") == "dark" ? ["#00ffff", "#ff6347"] : ["#1f77b4", "#ff7f0e"],
             borderColor: BORDER_WHITE,
             data: [5, 3],
         });
@@ -1659,7 +1660,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, "div.o_graph_canvas_container canvas");
         checkLabels(assert, graph, ["Undefined", "black", "red"]);
         checkDatasets(assert, graph, ["backgroundColor", "borderColor", "data"], {
-            backgroundColor: ["#1f77b4", "#ff7f0e", "#aec7e8"],
+            backgroundColor: getCookie("color_scheme") == "dark" ? ["#00ffff", "#ff6347", "#00ced1"] : ["#1f77b4", "#ff7f0e", "#aec7e8"],
             borderColor: BORDER_WHITE,
             data: [8, 10, 13],
         });
@@ -1700,7 +1701,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, "div.o_graph_canvas_container canvas");
         checkLabels(assert, graph, ["false / xphone", "false / xpad", "true / xphone"]);
         checkDatasets(assert, graph, ["backgroundColor", "borderColor", "data", "label"], {
-            backgroundColor: ["#1f77b4", "#ff7f0e", "#aec7e8"],
+            backgroundColor: getCookie("color_scheme") == "dark" ? ["#00ffff", "#ff6347", "#00ced1"] : ["#1f77b4", "#ff7f0e", "#aec7e8"],
             borderColor: BORDER_WHITE,
             data: [1, 4, 3],
             label: "",
@@ -1746,13 +1747,13 @@ QUnit.module("Views", (hooks) => {
             ["backgroundColor", "borderColor", "data", "label"],
             [
                 {
-                    backgroundColor: ["#1f77b4"],
+                    backgroundColor: getCookie("color_scheme") == "dark" ? ["#00ffff"] : ["#1f77b4"],
                     borderColor: BORDER_WHITE,
                     data: [6],
                     label: "True group",
                 },
                 {
-                    backgroundColor: ["#1f77b4"],
+                    backgroundColor: getCookie("color_scheme") == "dark" ? ["#00ffff"] : ["#1f77b4"],
                     borderColor: BORDER_WHITE,
                     data: [17],
                     label: "False group",
@@ -1816,13 +1817,13 @@ QUnit.module("Views", (hooks) => {
             ["backgroundColor", "borderColor", "data", "label"],
             [
                 {
-                    backgroundColor: ["#1f77b4", "#ff7f0e", "#aec7e8"],
+                    backgroundColor: getCookie("color_scheme") == "dark" ? ["#00ffff", "#ff6347", "#00ced1"] : ["#1f77b4", "#ff7f0e", "#aec7e8"],
                     borderColor: BORDER_WHITE,
                     data: [14, 0, 0],
                     label: "True group",
                 },
                 {
-                    backgroundColor: ["#1f77b4", "#ff7f0e", "#aec7e8"],
+                    backgroundColor: getCookie("color_scheme") == "dark" ? ["#00ffff", "#ff6347", "#00ced1"] : ["#1f77b4", "#ff7f0e", "#aec7e8"],
                     borderColor: BORDER_WHITE,
                     data: [12, 5, 2],
                     label: "False group",
@@ -1926,13 +1927,13 @@ QUnit.module("Views", (hooks) => {
                 ["backgroundColor", "borderColor", "data", "label"],
                 [
                     {
-                        backgroundColor: ["#1f77b4", "#ff7f0e", "#aec7e8", "#ffbb78"],
+                        backgroundColor: getCookie("color_scheme") == "dark" ? ["#00ffff", "#ff6347", "#00ced1", "#ffd700"] : ["#1f77b4", "#ff7f0e", "#aec7e8", "#ffbb78"],
                         borderColor: BORDER_WHITE,
                         data: [1, 1, 0, 0],
                         label: "February 2021",
                     },
                     {
-                        backgroundColor: ["#1f77b4", "#ff7f0e", "#aec7e8", "#ffbb78"],
+                        backgroundColor: getCookie("color_scheme") == "dark" ? ["#00ffff", "#ff6347", "#00ced1", "#ffd700"] : ["#1f77b4", "#ff7f0e", "#aec7e8", "#ffbb78"],
                         borderColor: BORDER_WHITE,
                         data: [1, 1, 1, 1],
                         label: "January 2021",
@@ -2051,13 +2052,13 @@ QUnit.module("Views", (hooks) => {
                 ["backgroundColor", "borderColor", "data", "label"],
                 [
                     {
-                        backgroundColor: ["#1f77b4", "#ff7f0e", "#aec7e8"],
+                        backgroundColor: getCookie("color_scheme") == "dark" ? ["#00ffff", "#ff6347", "#00ced1"] : ["#1f77b4", "#ff7f0e", "#aec7e8"],
                         borderColor: BORDER_WHITE,
                         data: [14, 0, 0],
                         label: "February 2021",
                     },
                     {
-                        backgroundColor: ["#1f77b4", "#ff7f0e", "#aec7e8"],
+                        backgroundColor: getCookie("color_scheme") == "dark" ? ["#00ffff", "#ff6347", "#00ced1"] : ["#1f77b4", "#ff7f0e", "#aec7e8"],
                         borderColor: BORDER_WHITE,
                         data: [0, 12, 5],
                         label: "January 2021",
@@ -2151,13 +2152,13 @@ QUnit.module("Views", (hooks) => {
             ["backgroundColor", "borderColor", "data", "label"],
             [
                 {
-                    backgroundColor: ["#1f77b4"],
+                    backgroundColor: getCookie("color_scheme") == "dark" ? ["#00ffff"] : ["#1f77b4"],
                     borderColor: BORDER_WHITE,
                     data: [1],
                     label: "True group",
                 },
                 {
-                    backgroundColor: ["#1f77b4", DEFAULT_BG],
+                    backgroundColor: getCookie("color_scheme") == "dark" ? ["#00ffff", DEFAULT_BG] : ["#1f77b4", DEFAULT_BG],
                     borderColor: BORDER_WHITE,
                     data: [undefined, 1],
                     label: "False group",
@@ -2235,7 +2236,7 @@ QUnit.module("Views", (hooks) => {
         });
         checkLabels(assert, graph, ["Total"]);
         checkDatasets(assert, graph, ["backgroundColor", "data", "label", "originIndex", "stack"], {
-            backgroundColor: "#1f77b4",
+            backgroundColor: getCookie("color_scheme") == "dark" ? "#00ffff" : "#1f77b4",
             data: [8],
             label: "Count",
             originIndex: 0,
