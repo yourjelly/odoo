@@ -1750,6 +1750,14 @@ const Wysiwyg = Widget.extend({
         let selection = this.odooEditor.document.getSelection();
         const anchorNode = selection.anchorNode;
         if (anchorNode && closestElement(anchorNode, '.oe-blackbox')) {
+            this.toolbar.$el.addClass('d-none');
+            return;
+        }
+        const eMouseupTarget = e && e.type === 'mouseup' && e.target;
+        const closestFa = eMouseupTarget && closestElement(eMouseupTarget, '.fa');
+        if (eMouseupTarget && (closestElement(eMouseupTarget, '.oe-blackbox') ||
+            (closestFa && closestFa.parentElement && !closestFa.parentElement.isContentEditable))) {
+            this.toolbar.$el.addClass('d-none');
             return;
         }
 
