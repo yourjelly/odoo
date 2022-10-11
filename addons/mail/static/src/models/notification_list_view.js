@@ -80,7 +80,7 @@ registerModel({
                     case 'chat': {
                         return this.messaging.models['Channel']
                             .all(channel =>
-                                channel.thread.isChatChannel &&
+                                channel.isChat &&
                                 channel.thread.isPinned
                             )
                             .sort((c1, c2) => c1.displayName < c2.displayName ? -1 : 1);

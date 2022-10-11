@@ -300,7 +300,7 @@ registerModel({
             if (!isChatWithOdooBot) {
                 const isOdooFocused = this.env.services['presence'].isOdooFocused();
                 // Notify if out of focus
-                if (!isOdooFocused && channel.thread.isChatChannel) {
+                if (!isOdooFocused && channel.isChat) {
                     this._notifyNewChannelMessageWhileOutOfFocus({
                         channel,
                         message,

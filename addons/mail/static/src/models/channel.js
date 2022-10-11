@@ -179,6 +179,24 @@ registerModel({
             identifying: true,
         }),
         /**
+         * States whether this channel is qualified as chat.
+         *
+         * Useful to list chat channels, like in messaging menu with the filter
+         * 'chat'.
+         */
+        isChat: attr({
+            compute() {
+                switch (this.channel_type) {
+                    case 'chat':
+                    case 'group':
+                        return true;
+                    default:
+                        return false;
+                }
+            },
+            default: false,
+        }),
+        /**
          * Local value of message unread counter, that means it is based on
          * initial server value and updated with interface updates.
          */

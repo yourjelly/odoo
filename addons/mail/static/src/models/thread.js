@@ -1387,21 +1387,6 @@ registerModel({
                 return ['chat', 'channel', 'group'].includes(this.channel.channel_type);
             },
         }),
-        /**
-         * States whether this thread is a `mail.channel` qualified as chat.
-         *
-         * Useful to list chat channels, like in messaging menu with the filter
-         * 'chat'.
-         */
-        isChatChannel: attr({
-            compute() {
-                if (!this.channel) {
-                    return clear();
-                }
-                return ['chat', 'group'].includes(this.channel.channel_type);
-            },
-            default: false,
-        }),
         isCurrentPartnerFollowing: attr({
             compute() {
                 return this.followers.some(follower =>

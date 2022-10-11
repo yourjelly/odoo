@@ -33,5 +33,10 @@ registerPatch({
                 return this._super();
             },
         },
+        isChat: {
+            compute() {
+                return this.channel_type === 'livechat' || this._super();
+            },
+        },
     },
 });
