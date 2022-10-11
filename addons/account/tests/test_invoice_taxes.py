@@ -128,17 +128,7 @@ class TestInvoiceTaxes(AccountTestInvoicingCommon):
         '''
         invoice = self._create_invoice([(100, self.env['account.tax'])])
         invoice.invoice_line_ids[0].tax_ids = self.percent_tax_1
-        # vals = {
-        #     'line_ids': [
-        #         [1, invoice.invoice_line_ids.id, {'tax_ids': [[6, False, [self.percent_tax_1.id]]]}],
-        #         [4, invoice.line_ids.filtered(lambda l: l not in invoice.invoice_line_ids).id, False],
-        #     ],
-        # }
-        # print('about to write\n%s' % vals)
-        # invoice.write(vals)
-        for line in invoice.line_ids:
-            print("%s %s %s" % (line.name, line.tax_ids.mapped('name'), line.tax_line_id.display_name))
-        self.assertRecordValues(invoice.line_ids.filtered('tax_line_id').sorted(lambda x: x.name), [
+        self.assertRecordValues(invoice.line_ids.filtered('tax_line_id'), [
             {'name': self.percent_tax_1.name,       'tax_base_amount': 100, 'balance': -21, 'tax_ids': []},
         ])
 
