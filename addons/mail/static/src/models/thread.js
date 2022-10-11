@@ -1299,15 +1299,6 @@ registerModel({
             },
         }),
         /**
-         * States whether this thread should has the invite feature. Only makes
-         * sense for channels.
-         */
-        hasInviteFeature: attr({
-            compute() {
-                return this.model === 'mail.channel';
-            },
-        }),
-        /**
          * Determines whether it makes sense for this thread to have a member list.
          */
         hasMemberListFeature: attr({

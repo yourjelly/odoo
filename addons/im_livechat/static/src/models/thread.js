@@ -21,14 +21,6 @@ registerPatch({
         },
     },
     fields: {
-        hasInviteFeature: {
-            compute() {
-                if (this.channel && this.channel.channel_type === 'livechat') {
-                    return true;
-                }
-                return this._super();
-            },
-        },
         hasMemberListFeature: {
             compute() {
                 if (this.channel && this.channel.channel_type === 'livechat') {

@@ -57,7 +57,7 @@
                             <i class="fa fa-lg fa-video-camera text-700"/>
                         </button>
                     </t>
-                    <t t-if="threadViewTopbar.thread and threadViewTopbar.thread.hasInviteFeature">
+                    <t t-if="threadViewTopbar.thread and threadViewTopbar.thread.channel">
                         <button class="o_ThreadViewTopbar_inviteButton o_ThreadViewTopbar_button btn px-2 border-none rounded shadow-none"  t-attf-class="{{ threadViewTopbar.invitePopoverView ? 'o-isActive' : '' }}" title="Add users" t-on-click="threadViewTopbar.onClickInviteButton" t-ref="inviteButton">
                             <i class="fa fa-lg fa-user-plus text-700"/>
                         </button>

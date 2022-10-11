@@ -486,7 +486,7 @@ registerModel({
         hasInviteFeature: attr({
             compute() {
                 return Boolean(
-                    this.thread && this.thread.hasInviteFeature &&
+                    this.thread && this.thread.channel &&
                     this.messaging && this.messaging.device && this.messaging.device.isSmall
                 );
             },
