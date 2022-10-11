@@ -197,6 +197,21 @@ registerModel({
             default: false,
         }),
         /**
+         * Determines whether this channel can be renamed.
+         */
+        isRenamable: attr({
+            compute() {
+                switch (this.channel_type) {
+                    case 'channel':
+                    case 'chat':
+                    case 'group':
+                        return true;
+                    default:
+                        return false;
+                }
+            },
+        }),
+        /**
          * Local value of message unread counter, that means it is based on
          * initial server value and updated with interface updates.
          */

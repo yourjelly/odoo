@@ -1375,18 +1375,6 @@ registerModel({
                 return ['channel', 'group'].includes(this.channel.channel_type);
             },
         }),
-        /**
-         * Determines whether this thread can be renamed.
-         * Only makes sense for channels.
-         */
-        isChannelRenamable: attr({
-            compute() {
-                if (!this.channel) {
-                    return clear();
-                }
-                return ['chat', 'channel', 'group'].includes(this.channel.channel_type);
-            },
-        }),
         isCurrentPartnerFollowing: attr({
             compute() {
                 return this.followers.some(follower =>
