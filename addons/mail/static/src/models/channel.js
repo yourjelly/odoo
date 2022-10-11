@@ -197,6 +197,20 @@ registerModel({
             default: false,
         }),
         /**
+         * Determines whether the description can be changed.
+         */
+        isDescriptionEditable: attr({
+            compute() {
+                switch (this.channel_type) {
+                    case 'channel':
+                    case 'group':
+                        return true;
+                    default:
+                        return false;
+                }
+            },
+        }),
+        /**
          * Determines whether this channel can be renamed.
          */
         isRenamable: attr({

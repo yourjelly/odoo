@@ -1363,18 +1363,6 @@ registerModel({
          * List of members that have been invited to the RTC call of this channel.
          */
         invitedMembers: many('ChannelMember'),
-        /**
-         * Determines whether this description can be changed.
-         * Only makes sense for channels.
-         */
-        isChannelDescriptionChangeable: attr({
-            compute() {
-                if (!this.channel) {
-                    return clear();
-                }
-                return ['channel', 'group'].includes(this.channel.channel_type);
-            },
-        }),
         isCurrentPartnerFollowing: attr({
             compute() {
                 return this.followers.some(follower =>
@@ -1391,13 +1379,17 @@ registerModel({
          */
         isDescriptionEditableByCurrentUser: attr({
             compute() {
+                if (!this.channel) {
+                    return clear();
+                }
                 return Boolean(
                     this.messaging &&
                     this.messaging.currentUser &&
                     this.messaging.currentUser.isInternalUser &&
-                    this.isChannelDescriptionChangeable
+                    this.channel.isDescriptionEditable
                 );
             },
+            default: false,
         }),
         /**
          * States whether `this` is currently loading attachments.
