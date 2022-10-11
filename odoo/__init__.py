@@ -3,6 +3,8 @@
 
 """ OpenERP core library."""
 
+jov = {}
+
 
 #----------------------------------------------------------
 # odoo must be a namespace package for odoo.addons to become one too
