@@ -6,7 +6,7 @@
         <field name="description">Perc IVA A</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -31,7 +31,7 @@
         <field name="description">Perc Ganancias A</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -656,7 +656,7 @@
         <field name="description">Perc IIBB CABA A</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -681,7 +681,7 @@
         <field name="description">Perc IIBB ARBA A</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -706,7 +706,7 @@
         <field name="description">Perc IIBB Catamarca A</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -731,7 +731,7 @@
         <field name="description">Perc IIBB Córdoba A</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -756,7 +756,7 @@
         <field name="description">Perc IIBB Corrientes A</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -781,7 +781,7 @@
         <field name="description">Perc IIBB Entre Ríos A</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -806,7 +806,7 @@
         <field name="description">Perc IIBB Jujuy A</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -831,7 +831,7 @@
         <field name="description">Perc IIBB Mendoza A</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -856,7 +856,7 @@
         <field name="description">Perc IIBB La Rioja A</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -881,7 +881,7 @@
         <field name="description">Perc IIBB Salta A</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -906,7 +906,7 @@
         <field name="description">Perc IIBB San Juan A</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -931,7 +931,7 @@
         <field name="description">Perc IIBB San Luis A</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -956,7 +956,7 @@
         <field name="description">Perc IIBB Santa Fe A</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -981,7 +981,7 @@
         <field name="description">Perc IIBB Santiago del Estero A</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -1006,7 +1006,7 @@
         <field name="description">Perc IIBB Tucumán A</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -1031,7 +1031,7 @@
         <field name="description">Perc IIBB Chaco A</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -1056,7 +1056,7 @@
         <field name="description">Perc IIBB Chubut A</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -1081,7 +1081,7 @@
         <field name="description">Perc IIBB Formosa A</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -1106,7 +1106,7 @@
         <field name="description">Perc IIBB Misiones A</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -1131,7 +1131,7 @@
         <field name="description">Perc IIBB Neuquén A</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -1156,7 +1156,7 @@
         <field name="description">Perc IIBB La Pampa A</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -1181,7 +1181,7 @@
         <field name="description">Perc IIBB Río Negro A</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -1206,7 +1206,7 @@
         <field name="description">Perc IIBB Santa Cruz A</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -1231,7 +1231,7 @@
         <field name="description">Perc IIBB Tierra del Fuego A</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -1258,7 +1258,7 @@
         <field name="name">IVA No Corresponde</field>
         <field name="active" eval="False"/>
         <field name="sequence">2</field>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -1282,7 +1282,7 @@
         <field name="description">IVA No Corresponde</field>
         <field name="name">IVA No Corresponde</field>
         <field name="sequence">2</field>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -1306,7 +1306,7 @@
         <field name="description">IVA No Gravado</field>
         <field name="name">IVA No Gravado</field>
         <field name="sequence">2</field>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -1330,7 +1330,7 @@
         <field name="description">IVA No Gravado</field>
         <field name="name">IVA No Gravado</field>
         <field name="sequence">2</field>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -1354,7 +1354,7 @@
         <field name="description">IVA Exento</field>
         <field name="name">IVA Exento</field>
         <field name="sequence">2</field>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -1378,7 +1378,7 @@
         <field name="description">IVA Exento</field>
         <field name="name">IVA Exento</field>
         <field name="sequence">2</field>
-        <field name="amount_type">fixed</field>
+        <field name="amount_type">percent</field>
         <field eval="0.0" name="amount"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
