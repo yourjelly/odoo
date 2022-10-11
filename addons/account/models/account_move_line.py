@@ -1417,9 +1417,6 @@ class AccountMoveLine(models.Model):
             if any(self.env['account.move']._field_will_change(line, vals, field_name) for field_name in protected_fields['reconciliation']):
                 line._check_reconciliation()
 
-        # if 'balance' in vals and not self._context.get('skip_invoice_sync'):
-        #     import pudb; pu.db
-        print(vals, self._context)
         move_container = {'records': self.move_id, 'self': self, 'line_to_write': line_to_write}
         with self.move_id._check_balanced(move_container),\
              self.move_id._sync_dynamic_lines(move_container),\

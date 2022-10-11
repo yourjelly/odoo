@@ -45,11 +45,6 @@ TYPE_REVERSE_MAP = {
 }
 
 
-import logging
-_logger = logging.getLogger(__name__)
-
-jov_sync_dynamic_line_depth = 0
-
 class AccountMove(models.Model):
     _name = "account.move"
     _inherit = ['portal.mixin', 'mail.thread', 'mail.activity.mixin', 'sequence.mixin']
@@ -1686,8 +1681,6 @@ class AccountMove(models.Model):
             error_msg = _("An error has occurred.")
             for move_id, sum_debit, sum_credit in unbalanced_moves:
                 move = self.browse(move_id)
-                _logger.info(move.line_ids.mapped(lambda l: "{} debit: {} credit: {}".format(l.display_name, l.debit, l.credit)), stack_info=True)
-
                 error_msg += _(
                     "\n\n"
                     "The move (%s) is not balanced.\n"
@@ -2000,59 +1993,12 @@ class AccountMove(models.Model):
             dirty_recs = container['records'].mapped('.'.join(path)).filtered(dirty_fname)
             return dirty_recs, dirty_fname
 
-
-        if needed_dirty_fname == 'line_ids.compute_all_tax_dirty':
-            _logger.info('trying to find on %s' % container['records'])
-            if container['records']._context.get('jov'):
-                ueouoeu
-                yield
-                return
-            # with self._disable_recursion(container, 'jov', default=True, target=False) as disabled:
-            #     if disabled:
-            #         return
-
         existing_before = existing()
         needed_before = needed()
         dirty_recs_before, dirty_fname = dirty()
         dirty_recs_before[dirty_fname] = False
-        old_tax_names = self.line_ids.mapped("tax_ids").mapped("display_name")
-        are_old_taxes_jov = len(old_tax_names) < 4
-
-        global jov_sync_dynamic_line_depth
-
-        def printer(s):
-            _logger.info("  " * jov_sync_dynamic_line_depth + s)
-
-        if jov_sync_dynamic_line_depth == 0:
-            _logger.info("stack", stack_info=True)
-
-        if are_old_taxes_jov:
-            printer("old taxes")
-        else:
-            printer("new taxes")
-
-        if dirty_fname == 'compute_all_tax_dirty':
-            container['records'].env = container['records'].with_context(jov=True).env
-            _logger.info('set on %s' % container['records'])
-            #import pudb; pu.db
-            printer("wrote false on compute_all_tax_dirty")
-
-        # from odoo import jov
-        # if jov.get('debug'):
-        #     import pudb; pu.db
-
-        jov_sync_dynamic_line_depth += 1
         yield
-        jov_sync_dynamic_line_depth -= 1
-        # if are_old_taxes_jov and self.line_ids.filtered(lambda l: len(l.tax_ids) > 1):
-        #     import pudb; pu.db
-
-        # if dirty_fname == 'compute_all_tax_dirty':
-        #     container['records'].line_ids._compute_all_tax()
         dirty_recs_after, dirty_fname = dirty()
-        if dirty_fname == 'compute_all_tax_dirty' and self.line_ids.filtered(lambda l: len(l.tax_ids) > 1) and are_old_taxes_jov:
-            printer("taxes changed and %s is %s" % (dirty_fname, container['records'].line_ids.mapped(dirty_fname)))
-
         if dirty_recs_before and not dirty_recs_after:  # TODO improve filter
             return
         existing_after = existing()
@@ -2066,11 +2012,6 @@ class AccountMove(models.Model):
             if bline == aline
         }
 
-        # if needed_after:
-        #     import pudb; pu.db
-
-        # print("needed_after: %s" % needed_after)
-        # print("needed_before: %s" % needed_before)
         # # do not alter manually inputted values if there is no change done in business field
         # if set(needed_before) == set(needed_after) and all(
         #     needed_before[key]['amount_currency'] == needed_after[key]['amount_currency']
@@ -2081,10 +2022,6 @@ class AccountMove(models.Model):
         #         if 'amount_currency' in needed_after[key]:
         #             del needed_after[key]['amount_currency']
         #             del needed_before[key]['amount_currency']
-        # print("after:")
-        # print(needed_after)
-        # print("before:")
-        # print(needed_before)
         if needed_after == needed_before:
             return
 
@@ -2115,25 +2052,15 @@ class AccountMove(models.Model):
             )
         }
 
-        # print("before while")
-        # print("to_create: %s" % to_create)
-        # print("to_delete: %s" % to_delete)
         while to_delete and to_create:
             key, values = to_create.popitem()
             line_id = to_delete.pop()
             self.env['account.move.line'].browse(line_id).write(
                 {**key, **values, 'display_type': line_type}
             )
-
-        # print("after while")
-        # print("to_create: %s" % to_create)
-        # print("to_delete: %s" % to_delete)
-
         if to_delete:
             self.env['account.move.line'].browse(to_delete).with_context(dynamic_unlink=True).unlink()
         if to_create:
-            # import pudb; pu.db
-            # print("creating %s" % to_create.items())
             self.env['account.move.line'].create([
                 {**key, **values, 'display_type': line_type}
                 for key, values in to_create.items()
@@ -3951,16 +3878,12 @@ class AccountMove(models.Model):
     def _disable_recursion(self, container, key, default=None, target=True):
         previous_env = {key: container[key].env for key in container}
         previous_key = previous_env['records'].context.get(key, default)
-        # import pudb; pu.db
 
-        # orig = self.env
-        # self.env = self.with_context(**{key: target}).env
         for recordset in container.values():
             recordset.env = recordset.with_context(**{key: target}).env
         try:
             yield previous_key == target
         finally:
-            # self.env = orig
             for key, recordset in container.items():
                 recordset.env = previous_env[key]
 
