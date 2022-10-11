@@ -3,10 +3,12 @@
 
 from unittest.mock import Mock
 
+from odoo.tests import tagged
 from odoo.addons.iap.tools import iap_tools
 from odoo.addons.mail_plugin.tests.common import TestMailPluginControllerCommon
 
 
+@tagged('-at_install', 'post_install')
 class TestMailPluginController(TestMailPluginControllerCommon):
 
     def test_enrich_and_create_company(self):

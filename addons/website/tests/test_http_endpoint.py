@@ -3,9 +3,10 @@
 from unittest.mock import sentinel
 
 from odoo.http import EndPoint
-from odoo.tests import HttpCase
+from odoo.tests import HttpCase, tagged
 
 
+@tagged('-at_install', 'post_install')
 class TestHttpEndPoint(HttpCase):
 
     def test_http_endpoint_equality(self):

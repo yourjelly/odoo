@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.tests.common import HttpCase
+from odoo.tests.common import HttpCase, tagged
 
 EXTRA_REQUEST = 5
 """ During tests, the query on 'base_registry_signaling, base_cache_signaling'
@@ -32,6 +32,7 @@ class UtilPerf(HttpCase):
         return self.registry.test_cr.sql_log_count - sql_count - EXTRA_REQUEST
 
 
+@tagged('-at_install', 'post_install')
 class TestStandardPerformance(UtilPerf):
     def test_10_perf_sql_img_controller(self):
         self.authenticate('demo', 'demo')
@@ -55,6 +56,7 @@ class TestStandardPerformance(UtilPerf):
         self.assertEqual(self._get_url_hot_query(url, cache=False), 4)
 
 
+@tagged('-at_install', 'post_install')
 class TestWebsitePerformance(UtilPerf):
 
     def setUp(self):

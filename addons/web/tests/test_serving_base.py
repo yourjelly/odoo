@@ -900,7 +900,7 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
 
         self.assertXMLEqual(contents, expected)
 
-@tagged('static_templates')
+@tagged('-at_install', 'post_install', 'static_templates')
 class TestHttpStaticInheritance(HttpCase):
     def test_static_attachments(self):
         url = '/test_module/test_file.xml'

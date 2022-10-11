@@ -9,7 +9,7 @@ from odoo.tests import tagged, users
 from odoo.tests.common import HttpCase
 
 
-@tagged('portal')
+@tagged('-at_install', 'post_install', 'portal')
 class TestPortal(HttpCase, TestMailFullCommon, TestMailFullRecipients):
 
     def setUp(self):

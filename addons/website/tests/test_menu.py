@@ -2,7 +2,7 @@
 
 import json
 
-from odoo.tests import common
+from odoo.tests import common, tagged
 
 
 class TestMenu(common.TransactionCase):
@@ -117,6 +117,7 @@ class TestMenu(common.TransactionCase):
         self.assertEqual(total_menu_items - 1 - self.nb_website, Menu.search_count([]), "Deleting a default menu item should delete its 'copies' (same URL) from website's menu trees. In this case, the default child menu and its copies on website 1 and website 2")
 
 
+@tagged('-at_install', 'post_install')
 class TestMenuHttp(common.HttpCase):
     def test_01_menu_page_m2o(self):
         # 1. Create a page with a menu
