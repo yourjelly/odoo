@@ -1375,23 +1375,6 @@ registerModel({
             default: false,
         }),
         /**
-         * States whether this thread description is editable by the current user.
-         */
-        isDescriptionEditableByCurrentUser: attr({
-            compute() {
-                if (!this.channel) {
-                    return clear();
-                }
-                return Boolean(
-                    this.messaging &&
-                    this.messaging.currentUser &&
-                    this.messaging.currentUser.isInternalUser &&
-                    this.channel.isDescriptionEditable
-                );
-            },
-            default: false,
-        }),
-        /**
          * States whether `this` is currently loading attachments.
          */
         isLoadingAttachments: attr({

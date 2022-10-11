@@ -211,6 +211,18 @@ registerModel({
             },
         }),
         /**
+         * States whether the description is editable by the current user.
+         */
+        isDescriptionEditableByCurrentUser: attr({
+            compute() {
+                return (
+                    Boolean(this.messaging.currentUser) &&
+                    this.messaging.currentUser.isInternalUser &&
+                    this.isDescriptionEditable
+                );
+            },
+        }),
+        /**
          * Determines whether this channel can be renamed.
          */
         isRenamable: attr({

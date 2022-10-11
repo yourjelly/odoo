@@ -121,7 +121,7 @@ registerModel({
          * @param {MouseEvent} ev
          */
         onClickTopbarThreadDescription(ev) {
-            if (!this.thread || !this.thread.isDescriptionEditableByCurrentUser) {
+            if (!this.thread || !this.thread.channel.isDescriptionEditableByCurrentUser) {
                 return;
             }
             const selection = window.getSelection();
@@ -592,8 +592,12 @@ registerModel({
          */
         hasDescriptionArea: attr({
             compute() {
-                return Boolean(this.thread && (this.thread.description || this.thread.isDescriptionEditableByCurrentUser));
+                if (!this.thread || !this.thread.channel) {
+                    return clear();
+                }
+                return Boolean(this.thread.description) || this.thread.channel.isDescriptionEditableByCurrentUser;
             },
+            default: false,
         }),
         /**
          * Determines whether the guest is currently being renamed.
@@ -620,7 +624,7 @@ registerModel({
             compute() {
                 return Boolean(
                     this.isMouseOverThreadDescription &&
-                    this.thread.isDescriptionEditableByCurrentUser
+                    this.thread.channel.isDescriptionEditableByCurrentUser
                 );
             },
         }),
