@@ -17,7 +17,7 @@ class TestSessionInfo(common.HttpCase):
         cls.company_c = cls.env['res.company'].create({'name': "C"})
         cls.companies = [cls.company_a, cls.company_b, cls.company_c]
 
-        cls.user_password = "info"
+        cls.user_password = "sessinfo"
         cls.user = common.new_test_user(
             cls.env,
             "session",
