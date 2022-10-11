@@ -8,5 +8,6 @@ class IrQweb(models.AbstractModel):
         # if this module is installed, we are in a test environement.
         # pregenerate assets at the end of the loading to speedup tests
         registry = self.env.registry
+        print('WE ARE IN TEST ENV')
         if registry.updated_modules and not registry.ready:
             self._pregenerate_assets_bundles()
