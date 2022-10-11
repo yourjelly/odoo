@@ -1476,6 +1476,8 @@ class HttpCase(TransactionCase):
 
     def url_open(self, url, data=None, files=None, timeout=10, headers=None, allow_redirects=True, head=False):
         if url.startswith('/'):
+            if not self.env.registry.loaded:
+                self._logger.warning('HttpCase test should be in post_install only')
             url = "http://%s:%s%s" % (HOST, odoo.tools.config['http_port'], url)
         if head:
             return self.opener.head(url, data=data, files=files, timeout=timeout, headers=headers, allow_redirects=False)
