@@ -32,7 +32,7 @@ class UtilPerf(HttpCase):
         return self.registry.test_cr.sql_log_count - sql_count - EXTRA_REQUEST
 
 
-@tagged('-at_install', 'post_install')
+@tagged('website_performance')
 class TestStandardPerformance(UtilPerf):
     def test_10_perf_sql_img_controller(self):
         self.authenticate('demo', 'demo')
@@ -56,7 +56,7 @@ class TestStandardPerformance(UtilPerf):
         self.assertEqual(self._get_url_hot_query(url, cache=False), 4)
 
 
-@tagged('-at_install', 'post_install')
+@tagged('website_performance')
 class TestWebsitePerformance(UtilPerf):
 
     def setUp(self):

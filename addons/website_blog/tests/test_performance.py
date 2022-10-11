@@ -7,7 +7,7 @@ from odoo.addons.website.tests.test_performance import UtilPerf
 import random
 
 
-@tagged('-at_install', 'post_install')
+@tagged('website_blog_performance')
 class TestBlogPerformance(UtilPerf):
     def setUp(self):
         super().setUp()
