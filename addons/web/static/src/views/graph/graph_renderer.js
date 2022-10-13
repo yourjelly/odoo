@@ -1,12 +1,13 @@
 /** @odoo-module **/
 
 import { _lt } from "@web/core/l10n/translation";
-import { BORDER_WHITE, DEFAULT_BG, getColor, hexToRGBA } from "./colors";
+import { getBorderWhite, DEFAULT_BG, getColor, hexToRGBA } from "./colors";
 import { formatFloat } from "@web/views/fields/formatters";
 import { SEP } from "./graph_model";
 import { sortBy } from "@web/core/utils/arrays";
 import { loadJS } from "@web/core/assets";
 import { renderToString } from "@web/core/utils/render";
+import { useService } from '@web/core/utils/hooks';
 
 const { Component, onWillUnmount, useEffect, useRef, onWillStart } = owl;
 
@@ -47,6 +48,7 @@ export class GraphRenderer extends Component {
         this.rootRef = useRef("root");
         this.canvasRef = useRef("canvas");
         this.containerRef = useRef("container");
+        this.cookies = useService("cookie");
 
         this.chart = null;
         this.tooltip = null;
@@ -211,7 +213,7 @@ export class GraphRenderer extends Component {
                 dataset.stack = domains[dataset.originIndex].description || "";
             }
             // set dataset color
-            dataset.backgroundColor = getColor(index);
+            dataset.backgroundColor = getColor(index, this.cookies.current.color_scheme);
         }
 
         return data;
@@ -281,7 +283,7 @@ export class GraphRenderer extends Component {
                         const hidden = metaData.some((data) => data[index] && data[index].hidden);
                         const fullText = label;
                         const text = shortenLabel(fullText);
-                        const fillStyle = label === NO_DATA ? DEFAULT_BG : getColor(index);
+                        const fillStyle = label === NO_DATA ? DEFAULT_BG : getColor(index, this.cookies.current.color_scheme);
                         return { text, fullText, fillStyle, hidden, index };
                     });
                     return labels;
@@ -327,15 +329,15 @@ export class GraphRenderer extends Component {
             if (groupBy.length <= 1 && domains.length > 1) {
                 if (dataset.originIndex === 0) {
                     dataset.fill = "origin";
-                    dataset.backgroundColor = hexToRGBA(getColor(0), LINE_FILL_TRANSPARENCY);
-                    dataset.borderColor = getColor(0);
+                    dataset.backgroundColor = hexToRGBA(getColor(0, this.cookies.current.color_scheme), LINE_FILL_TRANSPARENCY);
+                    dataset.borderColor = getColor(0, this.cookies.current.color_scheme);
                 } else if (dataset.originIndex === 1) {
-                    dataset.borderColor = getColor(1);
+                    dataset.borderColor = getColor(1, this.cookies.current.color_scheme);
                 } else {
-                    dataset.borderColor = getColor(index);
+                    dataset.borderColor = getColor(index, this.cookies.current.color_scheme);
                 }
             } else {
-                dataset.borderColor = getColor(index);
+                dataset.borderColor = getColor(index, this.cookies.current.color_scheme);
             }
             if (data.labels.length === 1) {
                 // shift of the real value to right. This is done to
@@ -361,7 +363,7 @@ export class GraphRenderer extends Component {
         if (data.datasets.length === 1 && data.datasets[0].originIndex === 0) {
             const dataset = data.datasets[0];
             dataset.fill = "origin";
-            dataset.backgroundColor = hexToRGBA(getColor(0), LINE_FILL_TRANSPARENCY);
+            dataset.backgroundColor = hexToRGBA(getColor(0, this.cookies.current.color_scheme), LINE_FILL_TRANSPARENCY);
         }
         // center the points in the chart (without that code they are put
         // on the left and the graph seems empty)
@@ -379,10 +381,10 @@ export class GraphRenderer extends Component {
         const data = this.model.data;
         // style/complete data
         // give same color to same groups from different origins
-        const colors = data.labels.map((_, index) => getColor(index));
+        const colors = data.labels.map((_, index) => getColor(index, this.cookies.current.color_scheme));
         for (const dataset of data.datasets) {
             dataset.backgroundColor = colors;
-            dataset.borderColor = BORDER_WHITE;
+            dataset.borderColor = getBorderWhite(this.cookies.current.color_scheme);
         }
         // make sure there is a zone associated with every origin
         const representedOriginIndexes = new Set(
@@ -400,7 +402,7 @@ export class GraphRenderer extends Component {
                     data: fakeData,
                     trueLabels: fakeTrueLabels,
                     backgroundColor: [...colors, DEFAULT_BG],
-                    borderColor: BORDER_WHITE,
+                    borderColor: getBorderWhite(this.cookies.current.color_scheme),
                 });
                 addNoDataToLegend = true;
             }
