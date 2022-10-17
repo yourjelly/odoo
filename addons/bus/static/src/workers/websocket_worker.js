@@ -33,6 +33,8 @@ export const WEBSOCKET_CLOSE_CODES = Object.freeze({
     RECONNECTING: 4003,
 });
 
+export const WEBSOCKET_WORKER_VERSION = '1.0.0';
+
 /**
  * This class regroups the logic necessary in order for the
  * SharedWorker/Worker to work. Indeed, Safari and some minor browsers

@@ -55,7 +55,7 @@ class WebsocketController(Controller):
         return {}
 
     @route('/bus/websocket_worker_bundle', type='http', auth='public', cors='*')
-    def get_websocket_worker_bundle(self):
+    def get_websocket_worker_bundle(self, **kw):
         bundle = 'bus.websocket_worker_assets'
         files, _ = request.env["ir.qweb"]._get_asset_content(bundle)
         asset = AssetsBundle(bundle, files)

@@ -1,5 +1,7 @@
 /** @odoo-module **/
 
+import { WEBSOCKET_WORKER_VERSION } from "@bus/workers/websocket_worker";
+
 import { browser } from "@web/core/browser/browser";
 import { registry } from '@web/core/registry';
 import { session } from '@web/session';
@@ -26,7 +28,7 @@ export const busService = {
         }
         const bus = new EventBus();
         const workerClass = 'SharedWorker' in window ? browser.SharedWorker : browser.Worker;
-        const worker = new workerClass('/bus/websocket_worker_bundle', {
+        const worker = new workerClass(`/bus/websocket_worker_bundle?version=${WEBSOCKET_WORKER_VERSION}`, {
             name: 'SharedWorker' in window ? 'odoo:websocket_shared_worker' : 'odoo:websocket_worker',
         });
 
