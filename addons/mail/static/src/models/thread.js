@@ -47,9 +47,6 @@ registerModel({
             if ('defaultDisplayMode' in data) {
                 data2.defaultDisplayMode = data.defaultDisplayMode;
             }
-            if ('description' in data) {
-                data2.description = data.description;
-            }
             if ('model' in data) {
                 data2.model = data.model;
             }
@@ -421,11 +418,11 @@ registerModel({
          * @param {string} description
          */
         async changeDescription(description) {
-            this.update({ description });
+            this.channel.update({ description });
             return this.messaging.rpc({
                 model: 'mail.channel',
                 method: 'channel_change_description',
-                args: [[this.id]],
+                args: [[this.channel.id]],
                 kwargs: { description },
             });
         },
@@ -1205,10 +1202,6 @@ registerModel({
          * start a call in full screen.
          */
         defaultDisplayMode: attr(),
-        /**
-         * States the description of this thread. Only applies to channels.
-         */
-        description: attr(),
         displayName: attr({
             compute() {
                 if (this.channel) {

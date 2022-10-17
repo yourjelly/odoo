@@ -378,6 +378,7 @@ patch(MockServer.prototype, 'mail/models/mail_channel', {
             const channelData = {
                 avatarCacheKey: channel.avatarCacheKey,
                 channel_type: channel.channel_type,
+                description: channel.description,
                 id: channel.id,
                 memberCount: channel.member_count,
             };

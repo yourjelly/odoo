@@ -123,6 +123,7 @@ registerModel({
             inverse: 'dmChatWithCurrentPartner',
         }),
         custom_channel_name: attr(),
+        description: attr(),
         /**
          * Useful to compute `discussSidebarCategoryItem`.
          */

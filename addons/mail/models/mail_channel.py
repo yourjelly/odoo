@@ -762,6 +762,7 @@ class Channel(models.Model):
             channel_data = {
                 'avatarCacheKey': channel._get_avatar_cache_key(),
                 'channel_type': channel.channel_type,
+                'description': channel.description,
                 'id': channel.id,
                 'memberCount': channel.member_count,
             }
@@ -769,7 +770,6 @@ class Channel(models.Model):
                 'id': channel.id,
                 'name': channel.name,
                 'defaultDisplayMode': channel.default_display_mode,
-                'description': channel.description,
                 'uuid': channel.uuid,
                 'state': 'open',
                 'is_minimized': False,
