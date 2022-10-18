@@ -38,6 +38,20 @@ registerModel({
         },
     },
     recordMethods: {
+        /**
+         * Changes description of the channel to the given new description.
+         *
+         * @param {string} description
+         */
+        async changeDescription(description) {
+            this.update({ description });
+            return this.messaging.rpc({
+                model: 'mail.channel',
+                method: 'channel_change_description',
+                args: [[this.id]],
+                kwargs: { description },
+            });
+        },
         async fetchChannelMembers() {
             const channelData = await this.messaging.rpc({
                 model: 'mail.channel',

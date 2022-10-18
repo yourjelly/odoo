@@ -415,7 +415,7 @@ registerModel({
                 pendingThreadDescription: clear(),
             });
             if (newDescription !== this.thread.channel.description) {
-                this.thread.changeDescription(newDescription);
+                this.thread.channel.changeDescription(newDescription);
             }
         },
         /**

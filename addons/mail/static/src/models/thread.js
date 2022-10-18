@@ -412,21 +412,6 @@ registerModel({
     },
     recordMethods: {
         /**
-         * Changes description of the thread to the given new description.
-         * Only makes sense for channels.
-         *
-         * @param {string} description
-         */
-        async changeDescription(description) {
-            this.channel.update({ description });
-            return this.messaging.rpc({
-                model: 'mail.channel',
-                method: 'channel_change_description',
-                args: [[this.channel.id]],
-                kwargs: { description },
-            });
-        },
-        /**
          * Client-side ending of the call.
          */
         endCall() {
