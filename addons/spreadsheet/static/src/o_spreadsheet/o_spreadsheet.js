@@ -32655,6 +32655,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 this.selectedMatchIndex = nextIndex;
                 this.selection.selectCell(matches[nextIndex].col, matches[nextIndex].row);
             }
+            if (this.searchMatches.length === 1)
+                this.selection.selectCell(matches[0].col, matches[0].row);
             for (let index = 0; index < this.searchMatches.length; index++) {
                 this.searchMatches[index].selected = index === this.selectedMatchIndex;
             }
@@ -41780,8 +41782,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     Object.defineProperty(exports, '__esModule', { value: true });
 
     exports.__info__.version = '2.0.0';
-    exports.__info__.date = '2022-10-17T06:58:51.904Z';
-    exports.__info__.hash = 'ab6f7e4';
+    exports.__info__.date = '2022-10-18T07:00:26.011Z';
+    exports.__info__.hash = 'e361bdc';
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
 //# sourceMappingURL=o_spreadsheet.js.map
