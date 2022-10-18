@@ -440,7 +440,7 @@ registerModel({
         }),
         channelMemberListView: one('ChannelMemberListView', {
             compute() {
-                if (this.thread && this.thread.hasMemberListFeature && this.isMemberListOpened) {
+                if (this.thread && this.thread.channel && this.thread.channel.hasMemberListFeature && this.isMemberListOpened) {
                     return {};
                 }
                 return clear();

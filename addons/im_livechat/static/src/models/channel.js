@@ -33,6 +33,11 @@ registerPatch({
                 return this._super();
             },
         },
+        hasMemberListFeature: {
+            compute() {
+                return this.channel_type === 'livechat' || this._super();
+            },
+        },
         hasSeenIndicators: {
             compute() {
                 return this.channel_type === 'livechat' || this._super();

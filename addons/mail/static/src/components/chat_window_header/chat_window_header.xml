@@ -45,12 +45,12 @@
                             </div>
                         </t>
                     </t>
-                    <t t-if="chatWindowHeaderView.chatWindowOwner.thread and chatWindowHeaderView.chatWindowOwner.thread.hasMemberListFeature and !chatWindowHeaderView.chatWindowOwner.isMemberListOpened">
+                    <t t-if="chatWindowHeaderView.chatWindowOwner.thread and chatWindowHeaderView.chatWindowOwner.thread.channel and chatWindowHeaderView.chatWindowOwner.thread.channel.hasMemberListFeature and !chatWindowHeaderView.chatWindowOwner.isMemberListOpened">
                         <div class="o_ChatWindowHeader_command o_ChatWindowHeader_commandShowMemberList cursor-pointer d-flex align-items-center h-100 px-3 py-0 m-0" t-att-class="{ 'o-isDeviceSmall': messaging.device.isSmall, 'opacity-50 opacity-100-hover': !messaging.device.isSmall}"  title="Show Member List" t-on-click="chatWindowHeaderView.chatWindowOwner.onClickShowMemberList">
                             <i class="fa fa-users"/>
                         </div>
                     </t>
-                    <t t-if="chatWindowHeaderView.chatWindowOwner.thread and chatWindowHeaderView.chatWindowOwner.thread.hasMemberListFeature and chatWindowHeaderView.chatWindowOwner.isMemberListOpened">
+                    <t t-if="chatWindowHeaderView.chatWindowOwner.thread and chatWindowHeaderView.chatWindowOwner.thread.channel and chatWindowHeaderView.chatWindowOwner.thread.channel.hasMemberListFeature and chatWindowHeaderView.chatWindowOwner.isMemberListOpened">
                         <div class="o_ChatWindowHeader_command o_ChatWindowHeader_commandHideMemberList cursor-pointer d-flex align-items-center h-100 px-3 py-0 m-0" t-att-class="{ 'o-isDeviceSmall': messaging.device.isSmall, 'opacity-50 opacity-100-hover': !messaging.device.isSmall }" title="Hide Member List" t-on-click="chatWindowHeaderView.chatWindowOwner.onClickHideMemberList">
                             <i class="fa fa-users"/>
                         </div>

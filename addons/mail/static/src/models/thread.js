@@ -1277,17 +1277,6 @@ registerModel({
             },
         }),
         /**
-         * Determines whether it makes sense for this thread to have a member list.
-         */
-        hasMemberListFeature: attr({
-            compute() {
-                if (!this.channel) {
-                    return clear();
-                }
-                return ['channel', 'group'].includes(this.channel.channel_type);
-            },
-        }),
-        /**
          * States whether there is a server request for joining or leaving the RTC session.
          * TODO Should maybe be on messaging (after messaging env rebase) to lock the rpc across all threads.
          */

@@ -191,6 +191,21 @@ registerModel({
             },
         }),
         /**
+         * Determines whether it makes sense for this channel to have a member
+         * list.
+         */
+        hasMemberListFeature: attr({
+            compute() {
+                switch (this.channel_type) {
+                    case 'channel':
+                    case 'group':
+                        return true;
+                    default:
+                        return false;
+                }
+            },
+        }),
+        /**
          * Determine whether this channel has the seen indicators (V and VV)
          * enabled or not.
          */

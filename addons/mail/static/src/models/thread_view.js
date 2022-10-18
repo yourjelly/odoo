@@ -223,7 +223,7 @@ registerModel({
         }),
         channelMemberListView: one('ChannelMemberListView', {
             compute() {
-                if (this.thread && this.thread.hasMemberListFeature && this.hasMemberList && this.isMemberListOpened) {
+                if (this.thread && this.thread.channel && this.thread.channel.hasMemberListFeature && this.hasMemberList && this.isMemberListOpened) {
                     return {};
                 }
                 return clear();

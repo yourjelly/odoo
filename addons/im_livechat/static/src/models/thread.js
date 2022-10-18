@@ -21,14 +21,6 @@ registerPatch({
         },
     },
     fields: {
-        hasMemberListFeature: {
-            compute() {
-                if (this.channel && this.channel.channel_type === 'livechat') {
-                    return true;
-                }
-                return this._super();
-            },
-        },
         /**
          * If set, current thread is a livechat.
          */
