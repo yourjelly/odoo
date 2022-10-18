@@ -190,6 +190,16 @@ registerModel({
                 return this.thread.name;
             },
         }),
+        /**
+         * Determine whether this channel has the seen indicators (V and VV)
+         * enabled or not.
+         */
+        hasSeenIndicators: attr({
+            compute() {
+                return this.channel_type === 'chat';
+            },
+            default: false,
+        }),
         id: attr({
             identifying: true,
         }),

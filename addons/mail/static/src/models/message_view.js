@@ -512,7 +512,8 @@ registerModel({
                     this.message.isCurrentUserOrGuestAuthor &&
                     this.messageListViewItemOwner &&
                     this.messageListViewItemOwner.messageListViewOwner.threadViewOwner.thread &&
-                    this.messageListViewItemOwner.messageListViewOwner.threadViewOwner.thread.hasSeenIndicators
+                    this.messageListViewItemOwner.messageListViewOwner.threadViewOwner.thread.channel &&
+                    this.messageListViewItemOwner.messageListViewOwner.threadViewOwner.thread.channel.hasSeenIndicators
                 ) {
                     return {};
                 }

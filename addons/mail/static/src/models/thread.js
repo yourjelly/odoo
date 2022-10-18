@@ -1295,19 +1295,6 @@ registerModel({
             default: false,
         }),
         /**
-         * Determine whether this thread has the seen indicators (V and VV)
-         * enabled or not.
-         */
-        hasSeenIndicators: attr({
-            compute() {
-                if (!this.channel) {
-                    return clear();
-                }
-                return ['chat', 'livechat'].includes(this.channel.channel_type);
-            },
-            default: false,
-        }),
-        /**
          * States whether current user has write access for the record. If yes, few other operations
          * (like adding other followers to the thread) are enabled for the user.
          */
