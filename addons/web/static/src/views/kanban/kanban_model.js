@@ -408,6 +408,7 @@ export class KanbanDynamicGroupList extends DynamicGroupList {
         // If we have a sumField, the aggregates must be re-fetched
         if (this.sumFields.length) {
             const domain = Domain.or(groups.map((g) => g.getProgressBarDomain())).toList();
+            // TODO: new read group, lazy is true for group_extand
             promises.webReadGroup = this.model.orm.webReadGroup(
                 this.resModel,
                 domain,

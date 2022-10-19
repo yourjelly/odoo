@@ -45,6 +45,7 @@ class StockQuant(models.Model):
         if 'value' not in fields:
             return super(StockQuant, self).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
         res = super(StockQuant, self).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+        # TODO: can be refactor if we instroduced groupby on fields
         for group in res:
             if group.get('__domain'):
                 quants = self.search(group['__domain'])

@@ -955,6 +955,7 @@ export class PivotModel extends Model {
         const measureSpecs = this._getMeasureSpecs(config);
         const groupBy = rowGroupBy.concat(colGroupBy);
         const kwargs = { lazy: false, context: this.searchParams.context };
+        // TODO should use the new read_group but this on need label for date/datetime/many2one
         const subGroups = await this.orm.readGroup(
             config.metaData.resModel,
             groupDomain,

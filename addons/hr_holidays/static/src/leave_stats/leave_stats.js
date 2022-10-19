@@ -87,6 +87,7 @@ export class LeaveStatsComponent extends Component {
 
         const dateFrom = date.startOf('year');
         const dateTo = date.endOf('year');
+        // TODO need the display_name of holiday_status_id
         this.state.leaves = await this.orm.readGroup(
             'hr.leave',
             [
