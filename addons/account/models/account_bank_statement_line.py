@@ -376,6 +376,7 @@ class AccountBankStatementLine(models.Model):
             if (el == 'statement_id' or el == 'journal_id' or el.startswith('date')) and 'running_balance' in fields:
                 show_running_balance = True
                 break
+        # TODO: how to use 
         if show_running_balance:
             for group_line in result:
                 group_line['running_balance'] = self.search(group_line.get('__domain'), limit=1).running_balance or 0.0

@@ -85,6 +85,7 @@ class Note(models.Model):
 
     @api.model
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
+        # TODO
         if groupby and groupby[0] == "stage_id" and (len(groupby) == 1 or lazy):
             stages = self.env['note.stage'].search([('user_id', '=', self.env.uid)])
             if stages:  # if the user has some stages

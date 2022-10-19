@@ -127,11 +127,14 @@ class Base(models.AbstractModel):
 
         :returns: array of groups
         """
+        # TODO: with the new web_read_group ?
         groups = self.read_group(domain, fields, groupby, offset=offset, limit=limit,
                                  orderby=orderby, lazy=lazy)
 
         if expand and len(groupby) == 1:
             for group in groups:
+                # TODO: Not very efficient, web_search_read make a extra count that we already have (__count of group)
+                # + search_read don't batch between groups :/
                 group['__data'] = self.web_search_read(domain=group['__domain'], fields=fields,
                                                        offset=0, limit=expand_limit,
                                                        order=expand_orderby)
