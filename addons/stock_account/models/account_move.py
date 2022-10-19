@@ -278,6 +278,10 @@ class AccountMoveLine(models.Model):
             move = line.move_id.with_company(line.move_id.company_id)
             po_line = line.purchase_line_id
             uom = line.product_uom_id or line.product_id.uom_id
+            price_unit = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+
+            if price_unit == po_line.price_unit:
+                continue
 
             # Don't create value for more quantity than received
             quantity = po_line.qty_received - (po_line.qty_invoiced - line.quantity)
@@ -290,18 +294,9 @@ class AccountMoveLine(models.Model):
             if not layers:
                 continue
 
-            price_unit = -line.price_unit if move.move_type == 'in_refund' else line.price_unit
-            price_unit = price_unit * (1 - (line.discount or 0.0) / 100.0)
-            if line.tax_ids:
-                prec = 1e+6
-                price_unit *= prec
-                price_unit = line.tax_ids.with_context(round=False).compute_all(
-                    price_unit, currency=move.currency_id, quantity=1.0, is_refund=move.move_type == 'in_refund',
-                    fixed_multiplicator=move.direction_sign,
-                )['total_excluded']
-                price_unit /= prec
+            price_unit = -price_unit if move.move_type == 'in_refund' else price_unit
             layers_price_unit = line._get_stock_valuation_layers_price_unit(layers)
-            layers_to_correct = line._get_stock_layer_price_difference(layers, layers_price_unit, price_unit)
+            layers_to_correct = line._get_stock_layer_price_difference(layers, layers_price_unit, price_unit, quantity)
             svl_vals_list += line._prepare_in_invoice_svl_vals(layers_to_correct)
         return self.env['stock.valuation.layer'].sudo().create(svl_vals_list)
 
@@ -323,7 +318,7 @@ class AccountMoveLine(models.Model):
             price_unit_by_layer[layer] = layer.value / layer.quantity
         return price_unit_by_layer
 
-    def _get_stock_layer_price_difference(self, layers, layers_price_unit, price_unit):
+    def _get_stock_layer_price_difference(self, layers, layers_price_unit, price_unit, quantity):
         po_line = self.purchase_line_id
         invoice_lines = po_line.invoice_lines - self
         invoices_qty = 0
@@ -335,6 +330,8 @@ class AccountMoveLine(models.Model):
                 invoices_qty -= layer.quantity
                 continue
             qty_to_correct = layer.quantity - invoices_qty
+            qty_to_correct = min(quantity, qty_to_correct)
+            quantity -= qty_to_correct
             layer_price_unit = self.company_id.currency_id._convert(
                 layers_price_unit[layer], po_line.currency_id, self.company_id, self.date, round=False)
             price_difference = price_unit - layer_price_unit
