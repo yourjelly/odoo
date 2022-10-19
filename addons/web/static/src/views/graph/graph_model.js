@@ -404,6 +404,8 @@ export class GraphModel extends Model {
         // for instance [1, "ABC"] [3, "ABC"] should be distinguished.
         domains.forEach((domain, originIndex) => {
             proms.push(
+                // TODO: new read group need fill_temporal: true
+                // __domain can be recreated by the JS
                 this.orm
                     .webReadGroup(
                         resModel,
@@ -411,7 +413,7 @@ export class GraphModel extends Model {
                         measures,
                         groupBy.map((gb) => gb.spec),
                         {
-                            lazy: false, // what is this thing???
+                            lazy: false, // what is this thing??? TODO: it is for the group_extand (only use by kanban + __context)
                             context: { fill_temporal: true, ...this.searchParams.context },
                         }
                     )

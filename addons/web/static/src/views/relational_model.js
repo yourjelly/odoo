@@ -2405,6 +2405,7 @@ export class DynamicGroupList extends DynamicList {
             (o) => o.name === firstGroupByName || this.fields[o.name].group_operator !== undefined
         );
         const orderby = orderByToString(_orderBy);
+        // TODO: new read group + why send all this.fieldNames not only the one with group_aggregator and visible in the list
         const { groups, length } = await this.model.orm.webReadGroup(
             this.resModel,
             this.domain,
@@ -2412,7 +2413,7 @@ export class DynamicGroupList extends DynamicList {
             [this.firstGroupBy],
             {
                 orderby,
-                lazy: true,
+                lazy: true,  // TODO: not correct, it returns group_extand but it shouldn't for the list view
                 expand: this.expand,
                 expand_orderby: this.expand ? orderByToString(this.orderBy) : null,
                 expand_limit: this.expand ? this.limitByGroup : null,
