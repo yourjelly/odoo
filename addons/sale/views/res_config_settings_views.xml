@@ -167,7 +167,7 @@
                     <h2>Quotations &amp; Orders</h2>
                     <div class="row mt16 o_settings_container" name="quotation_order_setting_container">
                         <div class="col-12 col-lg-6 o_setting_box" id="sale_config_online_confirmation_sign">
-                            <div class="o_setting_right_pane">
+                            <div class="o_setting_right_pane" name="quotation_order_default_value">
                                 <span class="o_form_label">
                                     Default values
                                 </span>
