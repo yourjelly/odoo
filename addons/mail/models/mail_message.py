@@ -364,8 +364,8 @@ class Message(models.Model):
                                 LEFT JOIN "mail_message_subtype" as subtype
                                 ON message.subtype_id = subtype.id
                                 WHERE message.message_type = %%s AND
-                                    (message.is_internal IS TRUE OR message.subtype_id IS NULL OR subtype.internal IS TRUE) AND
-                                    message.id = ANY (%%s)''' % (self._table), ('comment', self.ids,))
+                                    ((message.is_internal IS TRUE AND message.author_id != %%s) OR message.subtype_id IS NULL OR subtype.internal IS TRUE) AND
+                                    message.id = ANY (%%s)''' % (self._table), ('comment', self.env.user.partner_id.id, self.ids,))
             if self._cr.fetchall():
                 raise AccessError(
                     _('The requested operation cannot be completed due to security restrictions. Please contact your system administrator.\n\n(Document type: %s, Operation: %s)', self._description, operation)
@@ -1231,4 +1231,6 @@ class Message(models.Model):
                 ], ids=[res_id])
 
     def _get_search_domain_share(self):
+        if not self.env['res.users'].has_group('base.group_user'):
+            return ['&', '&', '|', ('is_internal', '=', False), ('author_id', '=', self.env.user.partner_id.id), ('subtype_id', '!=', False), ('subtype_id.internal', '=', False)]
         return ['&', '&', ('is_internal', '=', False), ('subtype_id', '!=', False), ('subtype_id.internal', '=', False)]

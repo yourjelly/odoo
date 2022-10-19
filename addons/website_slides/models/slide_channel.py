@@ -666,7 +666,9 @@ class Channel(models.Model):
     def _rating_domain(self):
         """ Only take the published rating into account to compute avg and count """
         domain = super(Channel, self)._rating_domain()
-        return expression.AND([domain, [('is_internal', '=', False)]])
+        if not self.env['res.users'].has_group('base.group_user'):
+            return expression.AND([domain, ['|', ('is_internal', '=', False), '&', ('is_internal', '=', True), ('message_id.author_id', '=', self.env.user.partner_id.id)]])
+        return domain
 
     def _action_request_access(self, partner):
         activities = self.env['mail.activity']
