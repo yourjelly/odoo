@@ -33,7 +33,7 @@ registerModel({
          * Handles the click on the cancel button
          */
         async onClickCancel() {
-            const { chatter } = this.activityBoxView; // save value before deleting activity
+            const { chatter } = this.owner; // save value before deleting activity
             await this.activity.deleteServerRecord();
             if (chatter.exists() && chatter.component) {
                 chatter.reloadParentView();
@@ -50,7 +50,7 @@ registerModel({
          * Handles the click on the edit button
          */
         async onClickEdit() {
-            const { chatter } = this.activityBoxView;
+            const { chatter } = this.owner;
             await this.activity.edit();
             if (chatter.exists() && chatter.component) {
                 chatter.reloadParentView();
@@ -72,7 +72,7 @@ registerModel({
             identifying: true,
             inverse: 'activityViews',
         }),
-        activityBoxView: one('ActivityBoxView', {
+        owner: one('ActivityBoxView', {
             identifying: true,
             inverse: 'activityViews',
         }),

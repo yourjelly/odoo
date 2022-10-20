@@ -21,7 +21,7 @@ registerModel({
                     return { activity };
                 });
             },
-            inverse: 'activityBoxView',
+            inverse: 'owner',
         }),
         chatter: one('Chatter', {
             identifying: true,

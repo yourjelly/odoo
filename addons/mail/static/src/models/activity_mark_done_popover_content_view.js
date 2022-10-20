@@ -27,7 +27,7 @@ registerModel({
          * Handles click on this "Done" button.
          */
         async onClickDone() {
-            const chatter = this.activityViewOwner && this.activityViewOwner.activityBoxView.chatter;
+            const chatter = this.activityViewOwner && this.activityViewOwner.owner.chatter;
             const webRecord = this.webRecord;
             const thread = this.activity.thread;
             await this.activity.markAsDone({
@@ -44,7 +44,7 @@ registerModel({
          * Handles click on this "Done & Schedule Next" button.
          */
         async onClickDoneAndScheduleNext() {
-            const chatter = this.activityViewOwner && this.activityViewOwner.activityBoxView.chatter;
+            const chatter = this.activityViewOwner && this.activityViewOwner.owner.chatter;
             const webRecord = this.webRecord;
             const thread = this.activity.thread;
             const activityListViewOwner = this.activityListViewItemOwner && this.activityListViewItemOwner.activityListViewOwner;

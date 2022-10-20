@@ -100,7 +100,7 @@ registerModel({
             const chatter = (
                 (this.chatterOwner) ||
                 (this.attachmentBoxView && this.attachmentBoxView.chatter) ||
-                (this.activityView && this.activityView.activityBoxView.chatter)
+                (this.activityView && this.activityView.owner.chatter)
             ); // save before async
             const activity = (
                 this.activityView && this.activityView.activity ||
