@@ -2018,6 +2018,33 @@ export class DynamicRecordList extends DynamicList {
         }
     }
 
+    async _updateRecords(domain, kwargs) {
+        const { records: rawRecords, length } =
+            this.data ||
+            (await this.model.orm.webSearchRead(
+                this.resModel,
+                domain,
+                this.fieldNames,
+                kwargs
+            ));
+
+        const records = await Promise.all(
+            rawRecords.map(async (data) => {
+                const record = this.model.createDataPoint("record", {
+                    resModel: this.resModel,
+                    resId: data.id,
+                    fields: this.fields,
+                    activeFields: this.activeFields,
+                    rawContext: this.rawContext,
+                    onRecordWillSwitchMode: this.onRecordWillSwitchMode,
+                });
+                await record.load({ values: data });
+                return record;
+            })
+        );
+        return [records, length];
+    }
+
     /**
      * @returns {Promise<Record[]>}
      */
@@ -2039,29 +2066,7 @@ export class DynamicRecordList extends DynamicList {
             kwargs.limit = this.loadedCount;
             kwargs.offset = 0;
         }
-        const { records: rawRecords, length } =
-            this.data ||
-            (await this.model.orm.webSearchRead(
-                this.resModel,
-                this.domain,
-                this.fieldNames,
-                kwargs
-            ));
-
-        const records = await Promise.all(
-            rawRecords.map(async (data) => {
-                const record = this.model.createDataPoint("record", {
-                    resModel: this.resModel,
-                    resId: data.id,
-                    fields: this.fields,
-                    activeFields: this.activeFields,
-                    rawContext: this.rawContext,
-                    onRecordWillSwitchMode: this.onRecordWillSwitchMode,
-                });
-                await record.load({ values: data });
-                return record;
-            })
-        );
+        const [records, length] = await this._updateRecords(this.domain, kwargs);
 
         delete this.data;
         if (length === this.countLimit + 1) {
