@@ -5,6 +5,16 @@ from odoo.exceptions import UserError, ValidationError
 
 
 @tagged('post_install', '-at_install')
+class TestTests(AccountTestInvoicingCommon):
+    def test_1(self):
+        pass
+    def test_2(self):
+        pass
+    def test_3(self):
+        pass
+
+
+@tagged('post_install', '-at_install')
 class TestAccountAccount(AccountTestInvoicingCommon):
 
     def test_changing_account_company(self):

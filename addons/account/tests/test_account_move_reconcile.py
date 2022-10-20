@@ -13,9 +13,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
     '''
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
-
+    def postSetUpClass(cls, chart_template_ref=None):
         cls.receivable_account = cls.company_data['default_account_receivable']
         cls.extra_receivable_account_1 = cls.copy_account(cls.receivable_account)
         cls.extra_receivable_account_2 = cls.copy_account(cls.receivable_account)

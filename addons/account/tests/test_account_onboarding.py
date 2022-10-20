@@ -8,9 +8,7 @@ from odoo.tests.common import tagged
 class TestTourRenderInvoiceReport(AccountTestInvoicingHttpCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
-
+    def postSetUpClass(cls, chart_template_ref=None):
         cls.env.user.write({
             'groups_id': [
                 (6, 0, (cls.env.ref('account.group_account_manager') + cls.env.ref('base.group_system')).ids),

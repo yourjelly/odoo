@@ -8,8 +8,7 @@ from odoo.tests import tagged
 class TaxReportTest(AccountTestInvoicingCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def postSetUpClass(cls, chart_template_ref=None):
         cls.test_country_1 = cls.env['res.country'].create({
             'name': "The Old World",
             'code': 'YY',

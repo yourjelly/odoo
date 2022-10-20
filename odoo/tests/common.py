@@ -56,7 +56,7 @@ from odoo.modules.registry import Registry
 from odoo.osv import expression
 from odoo.osv.expression import normalize_domain, TRUE_LEAF, FALSE_LEAF
 from odoo.service import security
-from odoo.sql_db import BaseCursor, Cursor
+from odoo.sql_db import BaseCursor, Cursor, Savepoint
 from odoo.tools import float_compare, single_email_re, profiler, lower_logging
 from odoo.tools.misc import find_in_path
 from odoo.tools.safe_eval import safe_eval
@@ -289,6 +289,8 @@ else:
                                                                         info=exc)
 
 class OdooSuite(BackportSuite):
+    _savepoints = []
+
     def _handleClassSetUp(self, test, result):
         previous_test_class = getattr(result, '_previousTestClass', None)
         if not (
@@ -304,6 +306,20 @@ class OdooSuite(BackportSuite):
         with result.collectStats(test_id):
             super()._handleClassSetUp(test, result)
 
+        print('setup', test, result)
+        print(test.__class__.__mro__)
+        print(self._savepoints)
+        for test_class in type(test).__mro__[::-1][len(self._savepoints):]:
+            savepoint = None
+            if hasattr(test_class, 'postSetUpClass'):
+                print('call postsetup in', test_class)
+                test_class.setOdooEnv()
+                print(test_class.env, test_class)
+                getattr(test_class, 'postSetUpClass')()
+                savepoint = f"postsetup_{len(self._savepoints)}"
+                test_class.cr.execute('SAVEPOINT %s' % savepoint)
+            self._savepoints.append((test_class, savepoint))
+
     def _tearDownPreviousClass(self, test, result):
         previous_test_class = getattr(result, '_previousTestClass', None)
         if not (
@@ -318,6 +334,11 @@ class OdooSuite(BackportSuite):
         test_id = f'{previous_test_class.__module__}.{previous_test_class.__qualname__}.tearDownClass'
         with result.collectStats(test_id):
             super()._tearDownPreviousClass(test, result)
+
+        for test_class, savepoint in self._savepoints[::-1]:
+            if savepoint and test_class not in type(test).__mro__:
+                print('release savepoint', savepoint)
+                test_class.cr.execute('RELEASE %s' % savepoint)
 
 
 class MetaCase(type):
@@ -834,7 +855,13 @@ class TransactionCase(BaseCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        print('setupclass', cls)
+        cls.setOdooEnv()
 
+    @classmethod
+    def setOdooEnv(cls):
+        if cls.registry:
+            return
         cls.addClassCleanup(cls._gc_filestore)
 
         cls.registry = odoo.registry(get_db_name())

@@ -8,9 +8,7 @@ from odoo import fields
 class TestAccountInvoiceReport(AccountTestInvoicingCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
-
+    def postSetUpClass(cls, chart_template_ref=None):
         cls.invoices = cls.env['account.move'].create([
             {
                 'move_type': 'out_invoice',

@@ -14,9 +14,7 @@ from collections import defaultdict
 class TestAccountMoveInRefundOnchanges(AccountTestInvoicingCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
-
+    def postSetUpClass(cls, chart_template_ref=None):
         cls.invoice = cls.init_invoice('in_refund', products=cls.product_a+cls.product_b)
 
         cls.product_line_vals_1 = {

@@ -9,9 +9,7 @@ from odoo import Command
 class TestAccountAnalyticAccount(AccountTestInvoicingCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
-
+    def postSetUpClass(cls, chart_template_ref=None):
         cls.env.user.groups_id += cls.env.ref('analytic.group_analytic_accounting')
 
         # By default, tests are run with the current user set on the first company.

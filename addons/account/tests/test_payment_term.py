@@ -10,8 +10,7 @@ from odoo.tests.common import Form
 @tagged('post_install', '-at_install')
 class TestAccountPaymentTerms(AccountTestInvoicingCommon):
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def postSetUpClass(cls, chart_template_ref=None):
         cls.pay_term_today = cls.env['account.payment.term'].create({
             'name': 'Today',
             'line_ids': [

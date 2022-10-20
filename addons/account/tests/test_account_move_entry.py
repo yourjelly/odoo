@@ -13,9 +13,7 @@ from collections import defaultdict
 class TestAccountMove(AccountTestInvoicingCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
-
+    def postSetUpClass(cls, chart_template_ref=None):
         tax_repartition_line = cls.company_data['default_tax_sale'].refund_repartition_line_ids\
             .filtered(lambda line: line.repartition_type == 'tax')
         cls.test_move = cls.env['account.move'].create({

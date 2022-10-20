@@ -9,6 +9,7 @@ import base64
 from lxml import etree
 
 
+tagged('post_install', '-at_install')
 class AccountTestInvoicingCommon(TransactionCase):
 
     @classmethod
@@ -26,10 +27,8 @@ class AccountTestInvoicingCommon(TransactionCase):
                 return account.copy(default={**(default or {}), 'code': new_code})
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super(AccountTestInvoicingCommon, cls).setUpClass()
-
-        assert 'post_install' in cls.test_tags, 'This test requires a CoA to be installed, it should be tagged "post_install"'
+    def postSetUpClass(cls, chart_template_ref=None):
+        # assert 'post_install' in cls.test_tags, 'This test requires a CoA to be installed, it should be tagged "post_install"'
 
         if chart_template_ref:
             chart_template = cls.env.ref(chart_template_ref)
@@ -551,8 +550,7 @@ class TestAccountReconciliationCommon(AccountTestInvoicingCommon):
     """
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def postSetUpClass(cls, chart_template_ref=None):
 
         cls.company = cls.company_data['company']
         cls.company.currency_id = cls.env.ref('base.EUR')

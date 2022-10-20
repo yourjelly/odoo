@@ -10,9 +10,7 @@ from odoo import fields, Command
 class TestAccountBankStatementLine(AccountTestInvoicingCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
-
+    def postSetUpClass(cls, chart_template_ref=None):
         # We need a third currency as you could have a company's currency != journal's currency !=
         cls.currency_data_2 = cls.setup_multi_currency_data(default_values={
             'name': 'Dark Chocolate Coin',

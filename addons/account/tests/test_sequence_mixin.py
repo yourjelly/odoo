@@ -15,8 +15,7 @@ import psycopg2
 
 class TestSequenceMixinCommon(AccountTestInvoicingCommon):
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def postSetUpClass(cls, chart_template_ref=None):
         cls.test_move = cls.create_move()
 
     @classmethod
@@ -386,8 +385,7 @@ class TestSequenceMixin(TestSequenceMixinCommon):
 @tagged('post_install', '-at_install')
 class TestSequenceMixinDeletion(TestSequenceMixinCommon):
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def postSetUpClass(cls, chart_template_ref=None):
         journal = cls.env['account.journal'].create({
             'name': 'Test sequences - deletion',
             'code': 'SEQDEL',

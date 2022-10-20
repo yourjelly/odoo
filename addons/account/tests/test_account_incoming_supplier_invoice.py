@@ -9,9 +9,7 @@ import json
 class TestAccountIncomingSupplierInvoice(AccountTestInvoicingCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
-
+    def postSetUpClass(cls, chart_template_ref=None):
         cls.env['ir.config_parameter'].sudo().set_param('mail.catchall.domain', 'test-company.odoo.com')
 
         cls.internal_user = cls.env['res.users'].create({

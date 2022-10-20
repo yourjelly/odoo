@@ -9,9 +9,7 @@ from odoo import Command
 class TestAccountPaymentRegister(AccountTestInvoicingCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
-
+    def postSetUpClass(cls, chart_template_ref=None):
         cls.currency_data_3 = cls.setup_multi_currency_data({
             'name': "Umbrella",
             'symbol': '☂',

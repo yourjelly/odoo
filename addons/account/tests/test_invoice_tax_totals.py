@@ -8,9 +8,7 @@ from odoo.tests import tagged
 class TestTaxTotals(AccountTestInvoicingCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
-
+    def postSetUpClass(cls, chart_template_ref=None):
         cls.tax_group1 = cls.env['account.tax.group'].create({
             'name': '1',
             'sequence': 1

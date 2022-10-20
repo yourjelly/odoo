@@ -1976,6 +1976,8 @@ class BaseModel(metaclass=MetaModel):
             for gb in annotated_groupbys
             for key in ('field', 'groupby')
         }
+        if self._name == 'account.move.line':
+            print(orderby, groupby_fields, annotated_groupbys)
         for order_part in orderby.split(','):
             order_split = order_part.split()  # potentially ["field:group_func", "desc"]
             order_field = order_split[0]
@@ -2005,6 +2007,8 @@ class BaseModel(metaclass=MetaModel):
                 _logger.warning('%s: read_group order by `%s` ignored, cannot sort on empty columns (not grouped/aggregated)',
                              self._name, order_part)
 
+        if self._name == 'account.move.line':
+            print(groupby_terms, orderby_terms)
         return groupby_terms, orderby_terms
 
     @api.model
@@ -2344,6 +2348,9 @@ class BaseModel(metaclass=MetaModel):
             'limit': prefix_term('LIMIT', int(limit) if limit else None),
             'offset': prefix_term('OFFSET', int(offset) if limit else None),
         }
+        if self._name == 'account.move.line':
+            print(domain, fields, groupby, offset, limit, orderby, lazy)
+            print(query)
         self._cr.execute(query, where_clause_params)
         fetched_data = self._cr.dictfetchall()
 

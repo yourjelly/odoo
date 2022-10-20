@@ -325,7 +325,8 @@ class Base(models.AbstractModel):
             domain,
             [(field_name, '!=', False)],
         ])
-        groups = self.read_group(domain, [field_name], [field_name], limit=limit)
+        print(domain, field_name)
+        groups = self.read_group(domain, [field_name], [field_name], limit=limit, orderby=f"{field_name}.id", lazy=False)
 
         domain_image = {}
         for group in groups:
@@ -338,6 +339,7 @@ class Base(models.AbstractModel):
                 values['__count'] = group[field_name + '_count']
             domain_image[id] = values
 
+        print(domain_image)
         return domain_image
 
 

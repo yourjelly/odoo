@@ -8,8 +8,7 @@ from odoo import fields, Command
 class TestAccountEarlyPaymentDiscount(AccountTestInvoicingCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def postSetUpClass(cls, chart_template_ref=None):
         # Payment Terms
         cls.early_pay_10_percents_10_days = cls.env['account.payment.term'].create({
             'name': '10% discount if paid within 10 days',
