@@ -670,16 +670,27 @@ class ProductProduct(models.Model):
         # if True, consider the incoming moves
         is_returned = self.env.context.get('is_returned', False)
 
+        move_valuation_result = self.env['stock.valuation.layer'].sudo().read_group([
+            ('stock_move_id', 'in', stock_moves.ids),
+        ], ['stock_move_id', 'quantity'], ['stock_move_id'])
+        move_valuation = {data['stock_move_id'][0]: data['quantity'] for data in move_valuation_result}
+
         returned_quantities = defaultdict(float)
         for move in stock_moves:
             if move.origin_returned_move_id:
-                returned_quantities[move.origin_returned_move_id.id] += abs(sum(move.sudo().stock_valuation_layer_ids.mapped('quantity')))
+                returned_quantities[move.origin_returned_move_id.id] += abs(move_valuation.get(move.id, 0))
         candidates = stock_moves\
             .sudo()\
-            .filtered(lambda m: is_returned == bool(m.origin_returned_move_id and sum(m.stock_valuation_layer_ids.mapped('quantity')) >= 0))\
+            .filtered(lambda m: is_returned == bool(m.origin_returned_move_id and move_valuation.get(m.id, 0) >= 0))\
             .mapped('stock_valuation_layer_ids')\
             .sorted()
         qty_to_take_on_candidates = qty_to_invoice
+
+        stock_valuation_value_result = self.env['stock.valuation.layer'].read_group([
+            ('stock_valuation_layer_id', 'in', candidates.ids),
+        ], ['stock_valuation_layer_id', 'value'], ['stock_valuation_layer_id'])
+        stock_valuation_value = {data['stock_valuation_layer_id'][0]: data['value'] for data in stock_valuation_value_result}
+
         tmp_value = 0  # to accumulate the value taken on the candidates
         for candidate in candidates:
             if not candidate.quantity:
@@ -699,7 +710,7 @@ class ProductProduct(models.Model):
 
             qty_to_take_on_candidates -= qty_taken_on_candidate
             tmp_value += qty_taken_on_candidate * \
-                ((candidate.value + sum(candidate.stock_valuation_layer_ids.mapped('value'))) / candidate.quantity)
+                ((candidate.value + stock_valuation_value.get(candidate.id, 0)) / candidate.quantity)
             if float_is_zero(qty_to_take_on_candidates, precision_rounding=candidate.uom_id.rounding):
                 break
 
