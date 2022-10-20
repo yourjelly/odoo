@@ -400,6 +400,10 @@ class IrAttachment(models.Model):
                            self._table, ['res_model', 'res_id'])
         return res
 
+    def _can_bypass_serving_attachments_check(self):
+        self.ensure_one()
+        return self.user_has_groups(','.join(self.get_serving_groups()))
+
     @api.constrains('type', 'url')
     def _check_serving_attachments(self):
         if self.env.is_admin():
@@ -409,10 +413,8 @@ class IrAttachment(models.Model):
             # ir.http's dispatch exception handling
             # XDO note: this should be done in check(write), constraints for access rights?
             # XDO note: if read on sudo, read twice, one for constraints, one for _inverse_datas as user
-            if attachment.type == 'binary' and attachment.url:
-                has_group = self.env.user.has_group
-                if not any(has_group(g) for g in attachment.get_serving_groups()):
-                    raise ValidationError("Sorry, you are not allowed to write on this document")
+            if attachment.type == 'binary' and attachment.url and not attachment._can_bypass_serving_attachments_check():
+                raise ValidationError("Sorry, you are not allowed to write on this document")
 
     @api.model
     def check(self, mode, values=None):
