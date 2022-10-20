@@ -13,5 +13,5 @@ class ResUsers(models.Model):
         # So to avoid to create a new module bridge, with a lot of code, we prefer to make a check
         # here for website's user.
         assert mode in ('read', 'write')
-        website_group_required = (mode == 'write') and 'website.group_website_designer' or 'website.group_website_publisher'
-        return self.has_group('base.group_erp_manager') or self.has_group(website_group_required)
+        group_required = (mode == 'write') and 'website.group_website_designer' or 'base.group_user'
+        return self.has_group('base.group_erp_manager') or self.has_group(group_required)
