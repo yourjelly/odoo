@@ -224,6 +224,18 @@ class ProjectCustomerPortal(CustomerPortal):
         task_sudo.attachment_ids.generate_access_token()
         values = self._task_get_page_view_values(task_sudo, access_token, project=project_sudo, **kw)
         values['project'] = project_sudo
+
+        history = request.session.get('my_project_tasks_history', [])
+        try:
+            current_task_index = history.index(task_id)
+        except ValueError:
+            return request.render("project.portal_my_task", values)
+
+        size = len(history)
+        task_url = f"/my/project/{project_id}/task/%s?model=project.project&res_id={values['user'].id}&access_token={access_token}"
+        values['prev_record'] = task_url % history[(current_task_index - 1) % size] if size > 1 else False
+        values['next_record'] = task_url % history[(current_task_index + 1) % size] if size > 1 else False
+
         return request.render("project.portal_my_task", values)
 
     # ------------------------------------------------------------
@@ -248,6 +260,7 @@ class ProjectCustomerPortal(CustomerPortal):
             'user': request.env.user,
             'project_accessible': project_accessible,
         }
+
         return self._get_page_view_values(task, access_token, values, history, False, **kwargs)
 
     def _task_get_searchbar_sortings(self):
