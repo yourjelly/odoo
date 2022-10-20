@@ -8,10 +8,22 @@ class ResUsers(models.Model):
 
     def _has_unsplash_key_rights(self, mode='write'):
         self.ensure_one()
-        # Website has no dependency to web_unsplash, we cannot warranty the order of the execution
-        # of the overwrite done in 5ef8300.
-        # So to avoid to create a new module bridge, with a lot of code, we prefer to make a check
-        # here for website's user.
         assert mode in ('read', 'write')
-        group_required = (mode == 'write') and 'website.group_website_designer' or 'base.group_user'
-        return self.has_group('base.group_erp_manager') or self.has_group(group_required)
+
+        # Some modules like website/mass_mailing hav no dependency to
+        # web_unsplash, we cannot warranty the order of the execution of the
+        # overwrite that would be done in those modules, as in 5ef8300.
+        # T avoid to create a new module bridge for each of those modules, with
+        # a lot of code, we prefer to make a check here for those cases.
+
+        if self.has_group('base.group_erp_manager'):
+            return True
+
+        if mode == 'write':
+            return self.has_group('website.group_website_designer')
+
+        return self.user_has_groups(','.join([
+            'website.group_website_publisher',
+            'mass_mailing.group_mass_mailing_user',
+            # 'project.group_project_user',  # etc..
+        ]))
