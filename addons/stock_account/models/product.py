@@ -670,18 +670,18 @@ class ProductProduct(models.Model):
         # if True, consider the incoming moves
         is_returned = self.env.context.get('is_returned', False)
 
-        move_valuation_result = self.env['stock.valuation.layer'].sudo().read_group([
+        move_valuation_quantity_result = self.env['stock.valuation.layer'].sudo().read_group([
             ('stock_move_id', 'in', stock_moves.ids),
         ], ['stock_move_id', 'quantity'], ['stock_move_id'])
-        move_valuation = {data['stock_move_id'][0]: data['quantity'] for data in move_valuation_result}
+        move_valuation_quantity = {data['stock_move_id'][0]: data['quantity'] for data in move_valuation_quantity_result}
 
         returned_quantities = defaultdict(float)
         for move in stock_moves:
             if move.origin_returned_move_id:
-                returned_quantities[move.origin_returned_move_id.id] += abs(move_valuation.get(move.id, 0))
+                returned_quantities[move.origin_returned_move_id.id] += abs(move_valuation_quantity.get(move.id, 0))
         candidates = stock_moves\
             .sudo()\
-            .filtered(lambda m: is_returned == bool(m.origin_returned_move_id and move_valuation.get(m.id, 0) >= 0))\
+            .filtered(lambda m: is_returned == bool(m.origin_returned_move_id and move_valuation_quantity.get(m.id, 0) >= 0))\
             .mapped('stock_valuation_layer_ids')\
             .sorted()
         qty_to_take_on_candidates = qty_to_invoice
