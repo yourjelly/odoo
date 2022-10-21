@@ -939,7 +939,28 @@ export class OdooEditor extends EventTarget {
             }
         }
         if (sideEffect) {
+            const anchorNode = this.idFind(step.selection.anchorNodeOid);
+            const focusNode = this.idFind(step.selection.focusNodeOid) || anchorNode;
+            let link;
+            if (anchorNode === focusNode) {
+                link = closestElement(anchorNode, 'a');
+            }
+            this.resetContenteditableLink();
             this._activateContenteditable();
+            console.log('link : ', link, link.outerHTML);
+            console.log('cond : ', link.hasAttribute('contenteditable'));
+            if (
+                link &&
+                //link.hasAttribute('contenteditable') &&
+                link.isContentEditable &&
+                !link.querySelector('div') &&
+                !closestElement(anchorNode, '.o_not_editable')
+            ) {
+                const restore = preserveCursor(this.document);
+                console.log('ça passe');
+                this.setContenteditableLink(link);
+                restore();
+            }
             this.historySetSelection(step);
             this.dispatchEvent(new Event('historyRevert'));
         }
@@ -2469,7 +2490,13 @@ export class OdooEditor extends EventTarget {
             const selection = this.document.getSelection();
             if (selection.isCollapsed) {
                 ev.preventDefault();
-                this._applyCommand('oDeleteBackward');
+                const inputEvent = new InputEvent('input', {
+                    inputType: 'deleteContentBackward',
+                    data: null,
+                    bubbles: true,
+                    cancelable: false,
+                });
+               this._onInput(inputEvent);
             }
         } else if (ev.key === 'Tab') {
             // Tab
@@ -2654,6 +2681,7 @@ export class OdooEditor extends EventTarget {
 
     clean() {
         this.observerUnactive();
+        this.resetContenteditableLink();
         for (const hint of this.editable.querySelectorAll('.oe-hint')) {
             hint.classList.remove('oe-hint', 'oe-command-temporary-hint');
             if (hint.classList.length === 0) {
