@@ -36,61 +36,11 @@ const cartHandlerMixin = {
         }).then(async data => {
             sessionStorage.setItem('website_sale_cart_quantity', data.cart_quantity);
             if (data.cart_quantity && (data.cart_quantity !== parseInt($(".my_cart_quantity").text()))) {
-                // No animation if the product's page images are hidden
-                if ($('div[data-image_width]').data('image_width') !== 'none') {
-                    await animateClone($('header .o_wsale_my_cart').first(), this.$itemImgContainer, 25, 40);
-                }
                 updateCartNavBar(data);
             }
         });
     },
 };
-
-function animateClone($cart, $elem, offsetTop, offsetLeft) {
-    if (!$cart.length) {
-        return Promise.resolve();
-    }
-    $cart.find('.o_animate_blink').addClass('o_red_highlight o_shadow_animation').delay(500).queue(function () {
-        $(this).removeClass("o_shadow_animation").dequeue();
-    }).delay(2000).queue(function () {
-        $(this).removeClass("o_red_highlight").dequeue();
-    });
-    return new Promise(function (resolve, reject) {
-        if(!$elem) resolve();
-        var $imgtodrag = $elem.find('img').eq(0);
-        if ($imgtodrag.length) {
-            var $imgclone = $imgtodrag.clone()
-                .offset({
-                    top: $imgtodrag.offset().top,
-                    left: $imgtodrag.offset().left
-                })
-                .removeClass()
-                .addClass('o_website_sale_animate')
-                .appendTo(document.body)
-                .css({
-                    // Keep the same size on cloned img.
-                    width: $imgtodrag.width(),
-                    height: $imgtodrag.height(),
-                })
-                .animate({
-                    top: $cart.offset().top + offsetTop,
-                    left: $cart.offset().left + offsetLeft,
-                    width: 75,
-                    height: 75,
-                }, 1000, 'easeInOutExpo');
-
-            $imgclone.animate({
-                width: 0,
-                height: 0,
-            }, function () {
-                resolve();
-                $(this).detach();
-            });
-        } else {
-            resolve();
-        }
-    });
-}
 
 /**
  * Updates both navbar cart
@@ -136,7 +86,6 @@ function showWarning(message) {
 }
 
 return {
-    animateClone: animateClone,
     updateCartNavBar: updateCartNavBar,
     cartHandlerMixin: cartHandlerMixin,
     showWarning: showWarning,

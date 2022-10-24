@@ -113,14 +113,7 @@ var ProductComparison = publicWidget.Widget.extend(VariantMixin, {
                 if (!productId) {
                     return;
                 }
-                self._addNewProducts(productId).then(function () {
-                    website_sale_utils.animateClone(
-                        $('#comparelist .o_product_panel_header'),
-                        $elem.closest('form'),
-                        -50,
-                        10
-                    );
-                });
+                self._addNewProducts(productId);
             });
         } else {
             this.$('.o_comparelist_limit_warning').show();
