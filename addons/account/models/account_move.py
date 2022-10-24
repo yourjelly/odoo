@@ -4680,7 +4680,7 @@ class AccountMoveLine(models.Model):
                 # to compute the residual amount for each of them.
                 # ==========================================================================
 
-                for line in move_values['to_process_lines'].filtered(lambda x: not x.reconciled):
+                for line in move_values['to_process_lines']:
 
                     vals = {
                         'currency_id': line.currency_id.id,
@@ -4689,6 +4689,7 @@ class AccountMoveLine(models.Model):
                         'tax_tag_ids': [(6, 0, line._convert_tags_for_cash_basis(line.tax_tag_ids).ids)],
                         'debit': line.debit,
                         'credit': line.credit,
+                        'amount_currency': line.amount_currency,
                     }
 
                     if line.tax_repartition_line_id:
@@ -4702,6 +4703,7 @@ class AccountMoveLine(models.Model):
                             account_vals_to_fix[grouping_key].update({
                                 'debit': balance if balance > 0 else 0,
                                 'credit': -balance if balance < 0 else 0,
+                                'amount_currency': account_vals_to_fix[grouping_key]['amount_currency'] + line.amount_currency,
                                 'tax_base_amount': account_vals_to_fix[grouping_key]['tax_base_amount'] + line.tax_base_amount,
                             })
                         else:
@@ -4729,13 +4731,14 @@ class AccountMoveLine(models.Model):
                             # cash basis tax is used alone on several lines of the invoices
                             account_vals_to_fix[grouping_key]['debit'] += vals['debit']
                             account_vals_to_fix[grouping_key]['credit'] += vals['credit']
+                            account_vals_to_fix[grouping_key]['amount_currency'] += vals['amount_currency']
 
                 # ==========================================================================
                 # Subtract the balance of all previously generated cash basis journal entries
                 # in order to retrieve the residual balance of each involved transfer account.
                 # ==========================================================================
 
-                cash_basis_moves = self.env['account.move'].search([('tax_cash_basis_move_id', '=', move.id)])
+                cash_basis_moves = self.env['account.move'].search([('tax_cash_basis_move_id', '=', move.id)], order='date') # order is important later
                 for line in cash_basis_moves.line_ids:
                     grouping_key = None
                     if line.tax_repartition_line_id:
@@ -4756,6 +4759,7 @@ class AccountMoveLine(models.Model):
 
                     account_vals_to_fix[grouping_key]['debit'] -= line.debit
                     account_vals_to_fix[grouping_key]['credit'] -= line.credit
+                    account_vals_to_fix[grouping_key]['amount_currency'] -= line.amount_currency
 
                 # ==========================================================================
                 # Generate the exchange difference journal items:
@@ -4763,60 +4767,116 @@ class AccountMoveLine(models.Model):
                 # - fix rounding issues on the tax account/base tax account.
                 # ==========================================================================
 
+                caba_rounding_diff_label = _("Cash basis rounding difference")
                 for values in account_vals_to_fix.values():
                     balance = values['debit'] - values['credit']
 
-                    if move.company_currency_id.is_zero(balance):
-                        continue
+                    if move.company_id.currency_id.id == values['currency_id']:
+                        # If we're not in multicurrency, the difference between balances is due to cash basis rounding
 
-                    if values.get('tax_repartition_line_id'):
-                        # Tax line.
-                        tax_repartition_line = self.env['account.tax.repartition.line'].browse(values['tax_repartition_line_id'])
-                        account = tax_repartition_line.account_id or self.env['account.account'].browse(values['account_id'])
+                        if move.company_currency_id.is_zero(balance):
+                            continue
 
-                        sequence = len(exchange_diff_move_vals['line_ids'])
-                        exchange_diff_move_vals['line_ids'] += [
-                            (0, 0, {
-                                **values,
-                                'name': _('Currency exchange rate difference (cash basis)'),
-                                'debit': balance if balance > 0.0 else 0.0,
-                                'credit': -balance if balance < 0.0 else 0.0,
-                                'account_id': account.id,
-                                'sequence': sequence,
-                            }),
-                            (0, 0, {
-                                **values,
-                                'name': _('Currency exchange rate difference (cash basis)'),
-                                'debit': -balance if balance < 0.0 else 0.0,
-                                'credit': balance if balance > 0.0 else 0.0,
-                                'account_id': values['account_id'],
-                                'tax_ids': [],
-                                'tax_tag_ids': [],
-                                'tax_repartition_line_id': False,
-                                'sequence': sequence + 1,
-                            }),
-                        ]
-                    else:
-                        # Base line.
-                        sequence = len(exchange_diff_move_vals['line_ids'])
-                        exchange_diff_move_vals['line_ids'] += [
-                            (0, 0, {
-                                **values,
-                                'name': _('Currency exchange rate difference (cash basis)'),
-                                'debit': balance if balance > 0.0 else 0.0,
-                                'credit': -balance if balance < 0.0 else 0.0,
-                                'sequence': sequence,
-                            }),
-                            (0, 0, {
-                                **values,
-                                'name': _('Currency exchange rate difference (cash basis)'),
-                                'debit': -balance if balance < 0.0 else 0.0,
-                                'credit': balance if balance > 0.0 else 0.0,
-                                'tax_ids': [],
-                                'tax_tag_ids': [],
-                                'sequence': sequence + 1,
-                            }),
-                        ]
+                        if values.get('tax_repartition_line_id'):
+                            # Tax line.
+                            _add_tax_line_caba_exchange_diff_line_vals(
+                                exchange_diff_move_vals['line_ids'],
+                                values,
+                                caba_rounding_diff_label,
+                                balance,
+                                0,
+                            )
+                        else:
+                            # Base line.
+                            _add_base_line_caba_exchange_diff_line_vals(
+                                exchange_diff_move_vals['line_ids'],
+                                values,
+                                caba_rounding_diff_label,
+                                balance,
+                                0,
+                            )
+
+                    elif not self.env['res.currency'].browse(values['currency_id']).is_zero(values['amount_currency']):
+                        # Then, there is a rounding error due to multiple payments on the foreign currency amount
+
+                        # To know which rate to use for the adjustment, get the rate used by the most recent cash basis move
+                        caba_adjustment_currency_rates = {}
+                        currency_line = cash_basis_moves[-1].line_ids.filtered(lambda x: x.currency_id.id == values['currency_id'])[0]
+                        caba_adjustment_currency_rates[currency_line.currency_id.id] = currency_line.balance / currency_line.amount_currency
+
+                        balance = caba_adjustment_currency_rates[values['currency_id']] * values['amount_currency']
+
+                        if values.get('tax_repartition_line_id'):
+                            # Tax line
+                            _add_tax_line_caba_exchange_diff_line_vals(
+                                exchange_diff_move_vals['line_ids'],
+                                values,
+                                caba_rounding_diff_label,
+                                balance,
+                                values['amount_currency'],
+                            )
+
+                        else:
+                            # Base line
+                            _add_base_line_caba_exchange_diff_line_vals(
+                                exchange_diff_move_vals['line_ids'],
+                                values,
+                                caba_rounding_diff_label,
+                                balance,
+                                values['amount_currency'],
+                            )
+
+        def _add_tax_line_caba_exchange_diff_line_vals(existing_line_vals_list, values, label, balance, amount_currency):
+            tax_repartition_line = self.env['account.tax.repartition.line'].browse(values['tax_repartition_line_id'])
+            account = tax_repartition_line.account_id or self.env['account.account'].browse(values['account_id'])
+
+            sequence = len(existing_line_vals_list)
+            existing_line_vals_list.extend([
+                (0, 0, {
+                    **values,
+                    'name': label,
+                    'debit': balance if balance > 0.0 else 0.0,
+                    'credit': -balance if balance < 0.0 else 0.0,
+                    'amount_currency': amount_currency,
+                    'account_id': account.id,
+                    'sequence': sequence,
+                }),
+                (0, 0, {
+                    **values,
+                    'name': label,
+                    'debit': -balance if balance < 0.0 else 0.0,
+                    'credit': balance if balance > 0.0 else 0.0,
+                    'amount_currency': -amount_currency,
+                    'account_id': values['account_id'],
+                    'tax_ids': [],
+                    'tax_tag_ids': [],
+                    'tax_repartition_line_id': False,
+                    'sequence': sequence + 1,
+                }),
+            ])
+
+        def _add_base_line_caba_exchange_diff_line_vals(existing_line_vals_list, values, label, balance, amount_currency):
+            sequence = len(existing_line_vals_list)
+            existing_line_vals_list.extend([
+                (0, 0, {
+                    **values,
+                    'name': label,
+                    'debit': balance if balance > 0.0 else 0.0,
+                    'credit': -balance if balance < 0.0 else 0.0,
+                    'amount_currency': amount_currency,
+                    'sequence': sequence,
+                }),
+                (0, 0, {
+                    **values,
+                    'name': label,
+                    'debit': -balance if balance < 0.0 else 0.0,
+                    'credit': balance if balance > 0.0 else 0.0,
+                    'amount_currency': -amount_currency,
+                    'tax_ids': [],
+                    'tax_tag_ids': [],
+                    'sequence': sequence + 1,
+                }),
+            ])
 
         if not self:
             return self.env['account.move']
@@ -4993,6 +5053,35 @@ class AccountMoveLine(models.Model):
                 'partial_reconcile_ids': [(6, 0, involved_partials.ids)],
                 'reconciled_line_ids': [(6, 0, involved_lines.ids)],
             })
+
+
+            # === Cash basis rounding autoreconciliation ===
+            # In case a cash basis rounding difference line got created for the transition account, we reconcile it with the corresponding lines
+            # on the cash basis moves (so that it reaches full reconciliation and creates an exchange difference entry for this account as well)
+
+            if is_cash_basis_needed and exchange_move:
+                caba_transition_accounts = self.env['account.account']
+                caba_transition_lines_to_reconcile = defaultdict(lambda: self.env['account.move.line'])
+
+                for invoice_line in involved_lines.move_id.filtered(lambda x: x.is_invoice(include_receipts=True)).line_ids:
+                    if invoice_line.tax_line_id.cash_basis_transition_account_id == invoice_line.account_id:
+                        caba_transition_accounts |= invoice_line.account_id
+
+                        if not invoice_line.reconciled:
+                            caba_transition_lines_to_reconcile[invoice_line.account_id] += invoice_line
+
+                for exchange_line in exchange_move.line_ids:
+                    if exchange_line.account_id in caba_transition_accounts:
+                        caba_transition_lines_to_reconcile[exchange_line.account_id] += exchange_line
+
+                caba_moves = self.env['account.move'].search([('tax_cash_basis_rec_id', 'in', involved_partials.ids)])
+                for caba_line in caba_moves.line_ids:
+                    if not caba_line.reconciled and caba_line.account_id in caba_transition_accounts:
+                        caba_transition_lines_to_reconcile[caba_line.account_id] += caba_line
+
+                for account, amls_to_reconcile in caba_transition_lines_to_reconcile.items():
+                    if account.reconcile:
+                        amls_to_reconcile.reconcile()
 
         # Trigger action for paid invoices
         not_paid_invoices\
