@@ -913,6 +913,13 @@ export class OdooEditor extends EventTarget {
                     continue;
                 }
             }
+            if (record.target && [Node.TEXT_NODE, Node.ELEMENT_NODE].includes(record.target.nodeType)) {
+                const closestProtected = closestElement(record.target, '[data-oe-protected="true"]');
+                if (closestProtected && closestProtected.nodeType === Node.ELEMENT_NODE &&
+                    closestProtected.dataset.oeProtected && record.target !== closestProtected) {
+                    continue;
+                }
+            }
             filteredRecords.push(record);
         }
         return this.options.filterMutationRecords(filteredRecords);
@@ -3293,7 +3300,7 @@ export class OdooEditor extends EventTarget {
     _onSelectionChange() {
         const selection = this.document.getSelection();
         const anchorNode = selection.anchorNode;
-        if (anchorNode && closestElement(anchorNode, '.oe-blackbox')) {
+        if (anchorNode && closestElement(anchorNode, '[data-oe-protected="true"]')) {
             return;
         }
 
@@ -3477,6 +3484,13 @@ export class OdooEditor extends EventTarget {
                 emptyElement.removeAttribute('data-oe-zws-empty-inline');
             }
         }
+
+        // Clean all protected nodes because they are not sanitized
+        const protectedNodes = element.querySelectorAll('[data-oe-protected="true"]');
+        for (const node of protectedNodes) {
+            node.replaceChildren();
+        }
+
         sanitize(element);
 
         // Remove contenteditable=false on elements
@@ -3508,7 +3522,7 @@ export class OdooEditor extends EventTarget {
     _handleCommandHint() {
         const selection = this.document.getSelection();
         const anchorNode = selection.anchorNode;
-        if (anchorNode && closestElement(anchorNode, '.oe-blackbox')) {
+        if (anchorNode && closestElement(anchorNode, '[data-oe-protected="true"]')) {
             return;
         }
 
@@ -3582,7 +3596,7 @@ export class OdooEditor extends EventTarget {
     _fixSelectionOnContenteditableFalse() {
         const selection = this.document.getSelection();
         const anchorNode = selection.anchorNode;
-        if (anchorNode && closestElement(anchorNode, '.oe-blackbox')) {
+        if (anchorNode && closestElement(anchorNode, '[data-oe-protected="true"]')) {
             return;
         }
         // When the browser set the selection inside a node that is
