@@ -581,7 +581,7 @@ Or send your receipts at <a href="mailto:%(email)s?subject=Lunch%%20with%%20cust
         '''
         main function that is called when trying to create the accounting entries related to an expense
         '''
-        moves = self.env['account.move'].create([
+        moves = self.env['account.move'].with_context(force_price_include=True).create([
             {
                 'journal_id': (
                     sheet.bank_journal_id
