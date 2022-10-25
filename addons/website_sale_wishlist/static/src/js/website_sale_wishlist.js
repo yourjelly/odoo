@@ -108,7 +108,7 @@ publicWidget.registry.ProductWishlist = publicWidget.Widget.extend(VariantMixin,
                     self.wishlistProductIDs.push(productId);
                     sessionStorage.setItem('website_sale_wishlist_product_ids', JSON.stringify(self.wishlistProductIDs));
                     self._updateWishlistView();
-                    wSaleUtils.animateClone($navButton, $el.closest('form'), 25, 40);
+                    // wSaleUtils.animateClone($navButton, $el.closest('form'), 25, 40);
                     // It might happen that `onChangeVariant` is called at the same time as this function.
                     // In this case we need to set the button to disabled again.
                     // Do this only if the productID is still the same.
@@ -171,7 +171,7 @@ publicWidget.registry.ProductWishlist = publicWidget.Widget.extend(VariantMixin,
         var tr = $(e.currentTarget).parents('tr');
         var product = tr.data('product-id');
         $('.o_wsale_my_cart').removeClass('d-none');
-        wSaleUtils.animateClone($navButton, tr, 25, 40);
+        // wSaleUtils.animateClone($navButton, tr, 25, 40)
 
         if ($('#b2b_wish').is(':checked')) {
             return this._addToCart(product, tr.find('add_qty').val() || 1);
