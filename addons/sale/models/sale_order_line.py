@@ -1082,13 +1082,6 @@ class SaleOrderLine(models.Model):
             res['account_id'] = False
         return res
 
-    def _prepare_procurement_values(self, group_id=False):
-        """ Prepare specific key for moves or other components that will be created from a stock rule
-        coming from a sale order line. This method could be override in order to add other custom key that could
-        be used in move/po creation.
-        """
-        return {}
-
     #=== CORE METHODS OVERRIDES ===#
 
     def name_get(self):

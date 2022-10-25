@@ -229,9 +229,12 @@ class SaleOrderLine(models.Model):
         """ Prepare specific key for moves or other components that will be created from a stock rule
         coming from a sale order line. This method could be override in order to add other custom key that could
         be used in move/po creation.
+
+        :return: procurement values
+        :rtype: dict
         """
-        values = super(SaleOrderLine, self)._prepare_procurement_values(group_id)
         self.ensure_one()
+
         # Use the delivery date if there is else use date_order and lead time
         date_deadline = self.order_id.commitment_date or (self.order_id.date_order + timedelta(days=self.customer_lead or 0.0))
         date_planned = date_deadline - timedelta(days=self.order_id.company_id.security_lead)

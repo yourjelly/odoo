@@ -232,5 +232,5 @@ class TestSaleProject(TransactionCase):
         self.assertEqual(self.project_global.tasks.sale_line_id.id, sale_order_line.id, "The project tasks should be linked to the SOL from the SO")
 
         self.project_global.sale_line_id = sale_order_line
-        sale_order.with_context({'disable_cancel_warning': True}).action_cancel()
+        sale_order._action_cancel()
         self.assertFalse(self.project_global.sale_line_id, "The project should not be linked to the SOL anymore")

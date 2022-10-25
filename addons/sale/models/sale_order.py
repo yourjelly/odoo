@@ -780,6 +780,7 @@ class SaleOrder(models.Model):
 
         self.with_context(context)._action_confirm()
         if self.env.user.has_group('sale.group_auto_done_setting'):
+            # TODO VFE should be a company setting and not a res.group ...
             self.action_done()
 
         return True
@@ -1003,17 +1004,24 @@ class SaleOrder(models.Model):
         down_payment_line_ids = []
         invoiceable_line_ids = []
         pending_section = None
+        pending_dp_section = None
         precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
 
         for line in self.order_line:
             if line.display_type == 'line_section':
                 # Only invoice the section if one of its lines is invoiceable
-                pending_section = line
+                if line.is_downpayment:
+                    pending_dp_section = line
+                else:
+                    pending_section = line
                 continue
             if line.display_type != 'line_note' and float_is_zero(line.qty_to_invoice, precision_digits=precision):
                 continue
             if line.qty_to_invoice > 0 or (line.qty_to_invoice < 0 and final) or line.display_type == 'line_note':
                 if line.is_downpayment:
+                    if pending_dp_section:
+                        down_payment_line_ids.append(pending_dp_section.id)
+                        pending_dp_section = None
                     # Keep down payment lines separately, to put them together
                     # at the end of the invoice, in a specific dedicated section.
                     down_payment_line_ids.append(line.id)
@@ -1053,18 +1061,7 @@ class SaleOrder(models.Model):
                 continue
 
             invoice_line_vals = []
-            down_payment_section_added = False
             for line in invoiceable_lines:
-                if not down_payment_section_added and line.is_downpayment:
-                    # Create a dedicated section for the down payments
-                    # (put at the end of the invoiceable_lines)
-                    invoice_line_vals.append(
-                        Command.create(
-                            order._prepare_down_payment_section_line(sequence=invoice_item_sequence)
-                        ),
-                    )
-                    down_payment_section_added = True
-                    invoice_item_sequence += 1
                 invoice_line_vals.append(
                     Command.create(
                         line._prepare_invoice_line(sequence=invoice_item_sequence)
@@ -1389,29 +1386,6 @@ class SaleOrder(models.Model):
         for order in self:
             analytic = self.env['account.analytic.account'].create(order._prepare_analytic_account_data(prefix))
             order.analytic_account_id = analytic
-
-    @api.model
-    def _prepare_down_payment_section_line(self, **optional_values):
-        """
-        Prepare the dict of values to create a new down payment section for a sales order line.
-
-        :param optional_values: any parameter that should be added to the returned down payment section
-        """
-        context = {'lang': self.partner_id.lang}
-        down_payments_section_line = {
-            'display_type': 'line_section',
-            'name': _('Down Payments'),
-            'product_id': False,
-            'product_uom_id': False,
-            'quantity': 0,
-            'discount': 0,
-            'price_unit': 0,
-            'account_id': False
-        }
-        del context
-        if optional_values:
-            down_payments_section_line.update(optional_values)
-        return down_payments_section_line
 
     #=== HOOKS ===#
 
