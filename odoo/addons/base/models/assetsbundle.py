@@ -366,6 +366,7 @@ class AssetsBundle(object):
         attachment.write(values)
 
         if self.env.context.get('commit_assetsbundle') is True:
+            _logger.warning("dbo: commit assets")
             self.env.cr.commit()
 
         self.clean_attachments(extension)

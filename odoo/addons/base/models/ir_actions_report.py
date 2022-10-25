@@ -449,6 +449,7 @@ class IrActionsReport(models.Model):
         try:
             wkhtmltopdf = [_get_wkhtmltopdf_bin()] + command_args + files_command_args + paths + [pdf_report_path]
             process = subprocess.Popen(wkhtmltopdf, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            1/0
             out, err = process.communicate()
 
             if process.returncode not in [0, 1]:

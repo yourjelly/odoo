@@ -114,6 +114,11 @@ class ReportController(http.Controller):
 
                 if docids:
                     # Generic report:
+                    ids = [int(x) for x in docids.split(",")]
+                    report = request.env['ir.actions.report']._get_report_from_name(reportname)
+                    obj = request.env[report.model].browse(ids)
+                    if getattr(obj, 'message_post'):
+                        obj.message_post(body='did this get committed?! (1)')
                     response = self.report_routes(reportname, docids=docids, converter=converter, context=context)
                 else:
                     # Particular report:
@@ -129,6 +134,8 @@ class ReportController(http.Controller):
                 if docids:
                     ids = [int(x) for x in docids.split(",")]
                     obj = request.env[report.model].browse(ids)
+                    if getattr(obj, 'message_post'):
+                        obj.message_post(body='did this get committed?! (2)')
                     if report.print_report_name and not len(obj) > 1:
                         report_name = safe_eval(report.print_report_name, {'object': obj, 'time': time})
                         filename = "%s.%s" % (report_name, extension)
