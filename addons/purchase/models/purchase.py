@@ -469,6 +469,12 @@ class PurchaseOrder(models.Model):
 
     def button_confirm(self):
         for order in self:
+            if self.env.context.get('validate_analytic', False):
+                for line in order.order_line.filtered(lambda order_line: not order_line.display_type):
+                    line._validate_distribution(**{
+                        'product': line.product_id.id,
+                        'business_domain': 'purchase'
+                    })
             if order.state not in ['draft', 'sent']:
                 continue
             order._add_supplier_to_product()

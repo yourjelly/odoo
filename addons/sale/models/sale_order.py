@@ -765,6 +765,13 @@ class SaleOrder(models.Model):
                 "It is not allowed to confirm an order in the following states: %s",
                 ", ".join(self._get_forbidden_state_confirm()),
             ))
+        if self.env.context.get('validate_analytic', False):
+            for order in self:
+                for line in order.order_line.filtered(lambda order_line: not order_line.display_type and order_line.state == 'draft'):
+                    line._validate_distribution(**{
+                        'product': line.product_id.id,
+                        'business_domain': 'sale'
+                    })
 
         for order in self:
             if order.partner_id in order.message_partner_ids:

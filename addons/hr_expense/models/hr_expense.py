@@ -1141,7 +1141,12 @@ class HrExpenseSheet(models.Model):
 
     def approve_expense_sheets(self):
         self._check_can_approve()
-
+        if self.env.context.get('validate_analytic', False):
+            for line in self.expense_line_ids:
+                line._validate_distribution(**{
+                    'account': line.account_id.id,
+                    'business_domain': 'expense'
+                })
         duplicates = self.expense_line_ids.duplicate_expense_ids.filtered(lambda exp: exp.state in ['approved', 'done'])
         if duplicates:
             action = self.env["ir.actions.act_window"]._for_xml_id('hr_expense.hr_expense_approve_duplicate_action')
