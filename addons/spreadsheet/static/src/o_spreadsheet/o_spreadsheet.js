@@ -22399,9 +22399,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             useGridDrawing("canvas", this.env.model, () => this.env.model.getters.getSheetViewDimensionWithHeaders());
             owl.useEffect(() => this.focus(), () => [this.env.model.getters.getActiveSheetId()]);
             this.onMouseWheel = useWheelHandler((deltaX, deltaY) => {
-                this.moveCanvas(deltaX, deltaY);
-                this.hoveredCell.col = undefined;
-                this.hoveredCell.row = undefined;
+                // this.moveCanvas(deltaX, deltaY);
+                // this.hoveredCell.col = undefined;
+                // this.hoveredCell.row = undefined;
             });
         }
         onCellHovered({ col, row }) {
@@ -22458,6 +22458,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             });
         }
         moveCanvas(deltaX, deltaY) {
+            // move canvas
             const { offsetScrollbarX, offsetScrollbarY } = this.env.model.getters.getActiveSheetScrollInfo();
             this.env.model.dispatch("SET_VIEWPORT_OFFSET", {
                 offsetX: offsetScrollbarX + deltaX,
@@ -36894,10 +36895,10 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             owl.onPatched(() => this.focusSheet());
         }
         focusSheet() {
-            const div = this.bottomBarRef.el.querySelector(`[data-id="${this.env.model.getters.getActiveSheetId()}"]`);
-            if (div && div.scrollIntoView) {
-                div.scrollIntoView();
-            }
+            // const div = this.bottomBarRef.el.querySelector(`[data-id="${this.env.model.getters.getActiveSheetId()}"]`);
+            // if (div && div.scrollIntoView) {
+            //     div.scrollIntoView();
+            // }
         }
         addSheet() {
             const activeSheetId = this.env.model.getters.getActiveSheetId();

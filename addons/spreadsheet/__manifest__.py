@@ -19,7 +19,7 @@
             # Load all o_spreadsheet templates first to allow to inherit them
             'spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml',
             'spreadsheet/static/src/**/*.xml',
-            ('remove', 'spreadsheet/static/src/assets_backend/**/*')
+            # ('remove', 'spreadsheet/static/src/assets_backend/**/*')
         ],
         'web.assets_backend': [
             'spreadsheet/static/src/**/*.scss',
