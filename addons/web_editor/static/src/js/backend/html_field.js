@@ -248,7 +248,7 @@ export class HtmlField extends Component {
             const selection = this.wysiwyg.odooEditor.document.getSelection();
             selectionIsInForbidenSnippet = this.wysiwyg.closestElement(
                 selection.anchorNode,
-                'div[data-snippet="s_cover"], div[data-snippet="s_masonry_block"]'
+                { selector: 'div[data-snippet="s_cover"], div[data-snippet="s_masonry_block"]' }
             );
         }
         return selectionIsInForbidenSnippet ? commands.filter((o) => o.title !== "Dynamic Placeholder") : commands;

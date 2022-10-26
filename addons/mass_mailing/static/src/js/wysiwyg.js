@@ -52,7 +52,7 @@ const MassMailingWysiwyg = Wysiwyg.extend({
                 } else {
                     const selection = this.odooEditor.document.getSelection();
                     const range = selection.rangeCount && selection.getRangeAt(0);
-                    return !!range && !!closestElement(range.startContainer, '[style*=background-image]');
+                    return !!range && !!closestElement(range.startContainer, { selector: '[style*=background-image]' });
                 }
             }
         }
@@ -67,7 +67,7 @@ const MassMailingWysiwyg = Wysiwyg.extend({
         // background-image.
         const selection = this.odooEditor.document.getSelection();
         const range = selection.rangeCount && selection.getRangeAt(0);
-        const isWithinBackgroundImage = !!range && !!closestElement(range.startContainer, '[style*=background-image]');
+        const isWithinBackgroundImage = !!range && !!closestElement(range.startContainer, { selector: '[style*=background-image]' });
         if (isWithinBackgroundImage) {
             this.toolbar.$el.find('#create-link').toggleClass('d-none', true);
         }

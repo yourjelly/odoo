@@ -278,22 +278,34 @@ export function getFurthestUneditableParent(node, parentLimit) {
     }
     return nonEditableElement;
 }
+export function nodeElement(node) {
+    return node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement;
+}
 /**
- * Returns the closest HTMLElement of the provided Node
- * if a 'selector' is provided, Returns the closest HTMLElement that match the selector
+ * Returns the closest HTMLElement of the provided Node. If a 'selector' is
+ * provided, returns the closest HTMLElement that match the selector. If a
+ * predicat is provided, the first closest that match the predicat will be
+ * returned. Any returned element will be contained within the editable.
  *
  * @param {Node} node
- * @param {string} [selector=undefined]
- * @param {boolean} [restrictToEditable=false]
- * @returns {HTMLElement}
+ * @param {string} [selector='*']
+ * @param {string} [predicat=() => true]
+ * @returns {HTMLElement|null}
  */
-export function closestElement(node, selector) {
-    const element = node.nodeType === Node.TEXT_NODE ? node.parentElement : node;
-    if (selector && element) {
-        const elementFound = element.closest(selector);
-        return elementFound && elementFound.querySelector('.odoo-editor-editable') ? null : elementFound;
+export function closestElement(node, { selector = "*", predicat = () => true } = {}) {
+    let elementFound = nodeElement(node).closest(selector);
+    while (elementFound) {
+        if (predicat(elementFound)) {
+            break
+        } else {
+            elementFound = elementFound.parentElement && elementFound.parentElement.closest(selector);
+        }
     }
-    return selector && element ? element.closest(selector) : element || node;
+    if (!elementFound || !elementFound.querySelector('.odoo-editor-editable')) {
+        return null;
+    } else {
+        return elementFound;
+    }
 }
 
 /**
@@ -1392,12 +1404,16 @@ export function containsUnremovable(node) {
 export function getInSelection(document, selector) {
     const selection = document.getSelection();
     const range = selection && !!selection.rangeCount && selection.getRangeAt(0);
+    if (!range) return;
+    const closestCommon = closestElement(range.commonAncestorContainer);
     return (
         range &&
-        (closestElement(range.startContainer, selector) ||
-            [...closestElement(range.commonAncestorContainer).querySelectorAll(selector)].find(
+        (
+            closestElement(range.startContainer, selector) ||
+            closestCommon && [...closestCommon.querySelectorAll(selector)].find(
                 node => range.intersectsNode(node),
-            ))
+            )
+        )
     );
 }
 
