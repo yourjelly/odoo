@@ -10,7 +10,7 @@ registerModel({
         /**
          * Performs the `channel_get` RPC on `mail.channel`.
          *
-         * `openChat` is preferable in business code because it will avoid the
+         * `requestOpenChat` is preferable in business code because it will avoid the
          * RPC if the chat already exists.
          *
          * @param {Object} param0

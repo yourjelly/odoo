@@ -17,7 +17,7 @@ registerModel({
             if (isEventHandled(ev, 'PersonaImStatusIcon.Click') || !this.channelMember.persona.partner) {
                 return;
             }
-            this.channelMember.persona.partner.openChat();
+            this.channelMember.persona.requestOpenChat();
         },
     },
     fields: {

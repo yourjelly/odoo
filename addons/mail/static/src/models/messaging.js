@@ -37,28 +37,6 @@ registerPatch({
             }
         },
         /**
-         * Open the form view of the record with provided id and model.
-         * Gets the chat with the provided person and returns it.
-         *
-         * If a chat is not appropriate, a notification is displayed instead.
-         *
-         * @param {Object} param0
-         * @param {integer} [param0.partnerId]
-         * @param {integer} [param0.userId]
-         * @param {Object} [options]
-         * @returns {Channel|undefined}
-         */
-        async getChat({ partnerId, userId }) {
-            if (userId) {
-                const user = this.messaging.models['User'].insert({ id: userId });
-                return user.getChat();
-            }
-            if (partnerId) {
-                const partner = this.messaging.models['Partner'].insert({ id: partnerId });
-                return partner.getChat();
-            }
-        },
-        /**
          * Handles the response of the user when prompted whether push
          * notifications are granted or denied.
          *
@@ -127,22 +105,25 @@ registerPatch({
             });
         },
         /**
-         * Opens a chat with the provided person and returns it.
+         * Opens a chat with the provided person and returns it. If a
+         * chat is not appropriate or cannot be created, a notification
+         * is displayed instead.
          *
-         * If a chat is not appropriate, a notification is displayed instead.
-         *
-         * @param {Object} person forwarded to @see `getChat()`
+         * @param {Object} person
+         * @param {Number} [person.partnerId]
+         * @param {Number} [person.userid]
          * @param {Object} [options] forwarded to @see `Thread:open()`
          */
-        async openChat(person, options) {
-            const chat = await this.getChat(person);
-            if (!this.exists() || !chat) {
+        async requestOpenChat(person, options) {
+            const persona = await this.messaging.models['Persona'].getFromIdentifyingId(person);
+            if (!persona) {
+                this.messaging.notify({
+                    message: this.env._t('You can only chat with users having a dedicated partner.'),
+                    type: 'info',
+                });
                 return;
             }
-            await chat.thread.open(options);
-            if (!this.exists()) {
-                return;
-            }
+            await persona.requestOpenChat(options);
         },
         /**
          * Opens the form view of the record with provided id and model.

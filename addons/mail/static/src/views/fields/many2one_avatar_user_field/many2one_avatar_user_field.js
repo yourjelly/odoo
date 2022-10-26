@@ -2,18 +2,18 @@
 
 import { registry } from "@web/core/registry";
 import { Many2OneAvatarField } from "@web/views/fields/many2one_avatar/many2one_avatar_field";
-import { useOpenChat } from "@mail/views/open_chat_hook";
+import { useRequestOpenChat } from "@mail/views/open_chat_hook";
 import { useAssignUserCommand } from "@mail/views/fields/assign_user_command_hook";
 
 export class Many2OneAvatarUserField extends Many2OneAvatarField {
     setup() {
         super.setup();
-        this.openChat = useOpenChat(this.props.relation);
+        this.requestOpenChat = useRequestOpenChat(this.props.relation);
         useAssignUserCommand();
     }
 
     onClickAvatar() {
-        this.openChat(this.props.value[0]);
+        this.requestOpenChat(this.props.value[0]);
     }
 }
 Many2OneAvatarUserField.template = "mail.Many2OneAvatarUserField";

@@ -54,7 +54,7 @@ registerModel({
          * @param {integer} ui.item.id
          */
         onMobileNewMessageInputSelect(ev, ui) {
-            this.messaging.openChat({ partnerId: ui.item.id });
+            this.messaging.requestOpenChat({ partnerId: ui.item.id });
         },
         /**
          * @param {Object} req

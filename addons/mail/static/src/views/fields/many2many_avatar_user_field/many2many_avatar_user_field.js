@@ -6,7 +6,7 @@ import {
     Many2ManyTagsAvatarField,
     ListKanbanMany2ManyTagsAvatarField,
 } from "@web/views/fields/many2many_tags_avatar/many2many_tags_avatar_field";
-import { useOpenChat } from "@mail/views/open_chat_hook";
+import { useRequestOpenChat } from "@mail/views/open_chat_hook";
 import { useAssignUserCommand } from "@mail/views/fields/assign_user_command_hook";
 
 export class Many2ManyAvatarUserTagsList extends TagsList {}
@@ -15,7 +15,7 @@ Many2ManyAvatarUserTagsList.template = "mail.Many2ManyAvatarUserTagsList";
 export class Many2ManyTagsAvatarUserField extends Many2ManyTagsAvatarField {
     setup() {
         super.setup();
-        this.openChat = useOpenChat(this.props.relation);
+        this.requestOpenChat = useRequestOpenChat(this.props.relation);
         useAssignUserCommand();
     }
 
@@ -23,7 +23,7 @@ export class Many2ManyTagsAvatarUserField extends Many2ManyTagsAvatarField {
         return super.tags.map((tag) => ({
             ...tag,
             onImageClicked: () => {
-                this.openChat(tag.resId);
+                this.requestOpenChat(tag.resId);
             },
         }));
     }
@@ -39,7 +39,7 @@ registry.category("fields").add("many2many_avatar_user", Many2ManyTagsAvatarUser
 export class KanbanMany2ManyTagsAvatarUserField extends ListKanbanMany2ManyTagsAvatarField {
     setup() {
         super.setup();
-        this.openChat = useOpenChat(this.props.relation);
+        this.requestOpenChat = useRequestOpenChat(this.props.relation);
         useAssignUserCommand();
     }
 
@@ -53,7 +53,7 @@ export class KanbanMany2ManyTagsAvatarUserField extends ListKanbanMany2ManyTagsA
         return super.tags.map((tag) => ({
             ...tag,
             onImageClicked: () => {
-                this.openChat(recordFromId(tag.id).resId);
+                this.requestOpenChat(recordFromId(tag.id).resId);
             },
         }));
     }

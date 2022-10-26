@@ -114,11 +114,8 @@ registerModel({
          * @param {integer} ui.item.id
          */
         async onAutocompleteSelect(ev, ui) {
-            const chat = await this.messaging.getChat({ partnerId: ui.item.id });
-            if (!chat) {
-                return;
-            }
-            this.messaging.chatWindowManager.openThread(chat.thread, {
+            this.messaging.requestOpenChat({ partnerId: ui.item.id }, {
+                inChatWindow: true,
                 makeActive: true,
                 replaceNewMessage: true,
             });

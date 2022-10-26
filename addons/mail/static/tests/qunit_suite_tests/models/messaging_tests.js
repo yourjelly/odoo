@@ -8,7 +8,7 @@ QUnit.module('mail', {}, function () {
 QUnit.module('models', {}, function () {
 QUnit.module('messaging_tests.js', {}, function () {
 
-QUnit.test('openChat: display notification for partner without user', async function (assert) {
+QUnit.test('requestOpenChat: display notification for partner without user', async function (assert) {
     assert.expect(2);
 
     const pyEnv = await startServer();
@@ -29,10 +29,10 @@ QUnit.test('openChat: display notification for partner without user', async func
         },
     });
 
-    await messaging.openChat({ partnerId: resPartnerId1 });
+    await messaging.requestOpenChat({ partnerId: resPartnerId1 });
 });
 
-QUnit.test('openChat: display notification for wrong user', async function (assert) {
+QUnit.test('requestOpenChat: display notification for wrong user', async function (assert) {
     assert.expect(2);
 
     const pyEnv = await startServer();
@@ -46,7 +46,7 @@ QUnit.test('openChat: display notification for wrong user', async function (asse
                 );
                 assert.strictEqual(
                     message,
-                    "You can only chat with existing users.",
+                    "You can only chat with users having a dedicated partner.",
                     "should display the correct information in the notification"
                 );
             }),
@@ -54,10 +54,10 @@ QUnit.test('openChat: display notification for wrong user', async function (asse
     });
 
     // userId not in the server data
-    await messaging.openChat({ userId: 4242 });
+    await messaging.requestOpenChat({ userId: 4242 });
 });
 
-QUnit.test('openChat: open new chat for user', async function (assert) {
+QUnit.test('requestOpenChat: open new chat for user', async function (assert) {
     assert.expect(3);
 
     const pyEnv = await startServer();
@@ -69,13 +69,13 @@ QUnit.test('openChat: open new chat for user', async function (assert) {
     const existingChat = partner ? partner.dmChatWithCurrentPartner : undefined;
     assert.notOk(existingChat, 'a chat should not exist with the target partner initially');
 
-    await messaging.openChat({ partnerId: resPartnerId1 });
+    await messaging.requestOpenChat({ partnerId: resPartnerId1 });
     const chat = messaging.models['Partner'].findFromIdentifyingData({ id: resPartnerId1 }).dmChatWithCurrentPartner;
     assert.ok(chat, 'a chat should exist with the target partner');
     assert.strictEqual(chat.thread.threadViews.length, 1, 'the chat should be displayed in a `ThreadView`');
 });
 
-QUnit.test('openChat: open existing chat for user', async function (assert) {
+QUnit.test('requestOpenChat: open existing chat for user', async function (assert) {
     assert.expect(5);
 
     const pyEnv = await startServer();
@@ -93,7 +93,7 @@ QUnit.test('openChat: open existing chat for user', async function (assert) {
     assert.ok(existingChat, 'a chat should initially exist with the target partner');
     assert.strictEqual(existingChat.thread.threadViews.length, 0, 'the chat should not be displayed in a `ThreadView`');
 
-    await messaging.openChat({ partnerId: resPartnerId1 });
+    await messaging.requestOpenChat({ partnerId: resPartnerId1 });
     assert.ok(existingChat, 'a chat should still exist with the target partner');
     assert.strictEqual(existingChat.id, mailChannelId1, 'the chat should be the existing chat');
     assert.strictEqual(existingChat.thread.threadViews.length, 1, 'the chat should now be displayed in a `ThreadView`');

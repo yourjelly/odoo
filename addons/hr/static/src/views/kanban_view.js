@@ -6,9 +6,9 @@ import { kanbanView } from '@web/views/kanban/kanban_view';
 import { KanbanModel } from '@web/views/kanban/kanban_model';
 
 export class EmployeeKanbanRecord extends KanbanModel.Record {
-    async openChat(employeeId) {
+    async requestOpenChat(employeeId) {
         const messaging = await this.model.env.services.messaging.get();
-        messaging.openChat({ employeeId });
+        messaging.requestOpenChat({ employeeId });
     }
 }
 

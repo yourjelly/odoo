@@ -39,7 +39,7 @@ commandProviderRegistry.add("partner", {
                     suggestions.push({
                         Component: DialogCommand,
                         action() {
-                            partner.openChat();
+                            partner.persona.requestOpenChat();
                         },
                         name: partner.nameOrDisplayName,
                         props: {

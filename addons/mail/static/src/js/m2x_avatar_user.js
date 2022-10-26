@@ -45,7 +45,7 @@ const M2XAvatarMixin = {
      */
     async _openChat(params) {
         const messaging = await Component.env.services.messaging.get();
-        messaging.openChat(params);
+        messaging.requestOpenChat(params);
     },
 };
 

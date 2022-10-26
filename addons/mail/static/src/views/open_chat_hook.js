@@ -11,7 +11,7 @@ export const helpers = {
     },
 }
 
-export function useOpenChat(resModel) {
+export function useRequestOpenChat(resModel) {
     const messagingService = useService("messaging");
     if (!helpers.SUPPORTED_M2X_AVATAR_MODELS.includes(resModel)) {
         throw new Error(
@@ -22,6 +22,6 @@ export function useOpenChat(resModel) {
     }
     return async (id) => {
         const messaging = await messagingService.get();
-        messaging.openChat(helpers.buildOpenChatParams(resModel, id));
+        messaging.requestOpenChat(helpers.buildOpenChatParams(resModel, id));
     };
 }

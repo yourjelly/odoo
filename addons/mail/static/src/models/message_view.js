@@ -37,7 +37,7 @@ registerModel({
                 return;
             } else if (ev.target.closest('.o_mail_redirect')) {
                 ev.preventDefault();
-                this.messaging.openChat({
+                this.messaging.requestOpenChat({
                     partnerId: Number(ev.target.dataset.oeId)
                 });
                 return;
@@ -77,7 +77,7 @@ registerModel({
             if (!this.hasAuthorOpenChat) {
                 return;
             }
-            this.message.author.openChat();
+            this.message.author.persona.requestOpenChat();
         },
         /**
          * @param {MouseEvent} ev
@@ -87,7 +87,7 @@ registerModel({
             if (!this.message.author) {
                 return;
             }
-            this.message.author.openChat();
+            this.message.author.persona.requestOpenChat();
         },
         /**
          * @param {MouseEvent} ev

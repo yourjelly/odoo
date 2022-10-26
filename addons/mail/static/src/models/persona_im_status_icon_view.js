@@ -17,7 +17,7 @@ registerModel({
             if (!this.hasOpenChat || !this.persona.partner) {
                 return;
             }
-            this.persona.partner.openChat();
+            this.persona.requestOpenChat();
         },
     },
     fields: {
