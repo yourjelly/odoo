@@ -8,6 +8,23 @@
         right: 0;
     }
 
+    // p {
+    //     margin: 0;
+    //     padding-top: 0.5rem;
+    //     padding-bottom: 0.5rem;
+    // }
+    // p:first {
+    //     padding-top: 0rem;
+    // }
+
+
+    .note-editable {
+        font: inherit !important;
+        font-family: inherit !important;
+        line-height: inherit !important;
+        color: inherit !important;
+    }
+
     iframe {
         display: block;
         width: 100%;

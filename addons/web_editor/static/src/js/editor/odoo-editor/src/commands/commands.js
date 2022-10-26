@@ -44,6 +44,7 @@ import {
     getRowIndex,
     parseHTML,
     formatSelection,
+    resetUnbreakable,
 } from '../utils/utils.js';
 
 const TEXT_CLASSES_REGEX = /\btext-[^\s]*\b/g;
@@ -709,10 +710,7 @@ export const editorCommands = {
                 for (const column of columns) {
                     const columnContents = unwrapContents(column);
                     for (const node of columnContents) {
-                        node.ouid = undefined; // Allow move out of unbreakable
-                        for (const descendant of descendants(node)) {
-                            descendant.ouid = undefined; // Allow move out of unbreakable
-                        }
+                        resetUnbreakable(node);
                     }
                 }
             }
@@ -729,10 +727,7 @@ export const editorCommands = {
             row.classList.add('row');
             container.append(row);
             const block = closestBlock(anchor);
-            block.ouid = undefined; // Allow move out of unbreakable
-            for (const descendant of descendants(block)) {
-                descendant.ouid = undefined; // Allow move out of unbreakable
-            }
+            resetUnbreakable(block);
             const columnSize = Math.floor(12 / numberOfColumns);
             const columns = [];
             for (let i = 0; i < numberOfColumns; i++) {
@@ -747,6 +742,7 @@ export const editorCommands = {
                 const p = document.createElement('p');
                 p.append(document.createElement('br'));
                 p.classList.add('oe-hint');
+                // todo: add _t translation
                 p.setAttribute('placeholder', 'New column...');
                 column.append(p);
             }
@@ -774,6 +770,7 @@ export const editorCommands = {
                     const p = document.createElement('p');
                     p.append(document.createElement('br'));
                     p.classList.add('oe-hint');
+                    // todo: add _t translation
                     p.setAttribute('placeholder', 'New column...');
                     column.append(p);
                     lastColumn.after(column);
@@ -791,10 +788,7 @@ export const editorCommands = {
                     const column = columns.pop();
                     const columnContents = unwrapContents(column);
                     for (const node of columnContents) {
-                        node.ouid = undefined; // Allow move out of unbreakable
-                        for (const descendant of descendants(node)) {
-                            descendant.ouid = undefined; // Allow move out of unbreakable
-                        }
+                        resetUnbreakable(node);
                     }
                     contents.unshift(...columnContents);
                 }

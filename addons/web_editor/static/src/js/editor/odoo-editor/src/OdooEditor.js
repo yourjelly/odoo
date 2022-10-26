@@ -67,6 +67,8 @@ import {
     pxToFloat,
     parseHTML,
     splitTextNode,
+    resetUnbreakable,
+    closestWithPredicat,
 } from './utils/utils.js';
 import { editorCommands } from './commands/commands.js';
 import { Powerbox } from './powerbox/Powerbox.js';
@@ -211,6 +213,7 @@ function getImageUrl (file) {
 export class OdooEditor extends EventTarget {
     constructor(editable, options = {}) {
         super();
+        window.editor = this;
 
         this.options = defaultOptions(
             {
@@ -230,7 +233,7 @@ export class OdooEditor extends EventTarget {
                 getPowerboxElement: () => {
                     const selection = document.getSelection();
                     if (selection.isCollapsed && selection.rangeCount) {
-                        return closestElement(selection.anchorNode, 'P, DIV');
+                        return closestElement(selection.anchorNode, { selector: 'P, DIV' });
                     }
                 },
                 preHistoryUndo: () => {},
@@ -316,9 +319,17 @@ export class OdooEditor extends EventTarget {
         // Collaborator selection and caret display.
         this._collabSelectionInfos = new Map();
         this._collabSelectionColor = `hsl(${(Math.random() * 360).toFixed(0)}, 75%, 50%)`;
-        this._collabSelectionsContainer = this.document.createElement('div');
-        this._collabSelectionsContainer.classList.add('oe-collaboration-selections-container');
-        this.editable.before(this._collabSelectionsContainer);
+
+        this._absoluteContainer = this.document.createElement('div');
+        this._absoluteContainer.classList.add('oe-absolute-container');
+        this.editable.before(this._absoluteContainer);
+
+        this._collabSelectionsContainer = this._makeAbsoluteContainer('oe-selection-container');
+        this._avatarContainer = this._makeAbsoluteContainer('oe-avatar-container');
+        this._widgetContainer = this._makeAbsoluteContainer('oe-widget-container');
+        this._dropzoneContainer = this._makeAbsoluteContainer('oe-dropzone-container');
+        this._dropzoneHintContainer = this._makeAbsoluteContainer('oe-dropzone-hint-container');
+        // this._currentDropHintContainer = this._makeAbsoluteContainer('oe-dropzone-container');
 
         this.idSet(editable);
         this._historyStepsActive = true;
@@ -662,7 +673,7 @@ export class OdooEditor extends EventTarget {
         this._removeDomListener();
         this.powerbox.destroy();
         this.powerboxTablePicker.el.remove();
-        this._collabSelectionsContainer.remove();
+        this._absoluteContainer.remove();
         this._resizeObserver.disconnect();
         clearInterval(this._snapshotInterval);
         this._pluginCall('destroy', []);
@@ -1438,7 +1449,7 @@ export class OdooEditor extends EventTarget {
 
     onExternalMultiselectionUpdate(selection) {
         this._drawClientSelection(selection);
-        this._drawClientAvatar(selection);
+        this._updateAnchorWidgets();
         const { clientId } = selection;
         if (this._collabSelectionInfos.has(clientId)) {
             this._collabSelectionInfos.get(clientId).selection = selection;
@@ -1449,17 +1460,17 @@ export class OdooEditor extends EventTarget {
 
     multiselectionRefresh() {
         // Refresh the selection but keep the relevant images to avoid flickering.
-        const avatars = [...this._collabSelectionInfos.values()].map(info => info.avatarElement);
-        for (const element of this._collabSelectionsContainer.childNodes) {
-            const isAvatarElement = element.classList && element.classList.contains('oe-collaboration-caret-avatar');
-            if (!(isAvatarElement && avatars.includes(element))) {
-                element.remove();
-            }
-        }
+        // const avatars = [...this._collabSelectionInfos.values()].map(info => info.avatarElement);
+        // for (const element of this._collabSelectionsContainer.childNodes) {
+        //     const isAvatarElement = element.classList && element.classList.contains('oe-collaboration-caret-avatar');
+        //     if (!(isAvatarElement && avatars.includes(element))) {
+        //         element.remove();
+        //     }
+        // }
         for (const { selection } of this._collabSelectionInfos.values()) {
             this._drawClientSelection(selection);
-            this._drawClientAvatar(selection);
         }
+        this._updateAnchorWidgets();
     }
 
     _drawClientSelection({ selection, color, clientId, clientName = this.options._t('Anonymous') }) {
@@ -1542,6 +1553,230 @@ export class OdooEditor extends EventTarget {
         }
         this._multiselectionRemoveClient(clientId);
         this._collabSelectionsContainer.append(caretElement, ...indicators);
+    }
+
+    _updateAnchorWidgets(newAnchorWidget) {
+        const allowedElements = 'h1, h2, h3, p, hr, pre, blockquote, ul, ol, table, .o_knowledge_behavior_anchor';
+        const isNodeMovable = (node) => node.parentElement &&
+                node.parentElement.getAttribute('contentEditable') === 'true';
+        let movingElement = newAnchorWidget && closestWithPredicat(newAnchorWidget, {
+            selector: allowedElements,
+            // todo: think about blackbox & whitebox
+            predicat: isNodeMovable,
+        });
+        // console.log(`movingElement:`, movingElement);
+        // Retrive the first list container from the ancestors.
+        const listContainer = movingElement && ancestors(movingElement, this.editable)
+            .reverse()
+            .find(n => ['UL', 'OL'].includes(n.tagName));
+        movingElement = listContainer || movingElement;
+        if (movingElement && movingElement === this._currentAnchorWidget) {
+            return;
+        }
+        this._widgetContainer.textContent = '';
+        this._currentAnchorWidget = movingElement;
+        if (!this._currentAnchorWidget) {
+            return;
+        }
+
+        const containerRect = this._widgetContainer.getBoundingClientRect();
+        const anchorBlockRect = movingElement.getBoundingClientRect();
+
+        let widgetContainer = this.document.createElement('div');
+        widgetContainer.className = 'oe-sidewidget-container';
+        const widgetContainerWidth = 25;
+        widgetContainer.style['width'] = `${widgetContainerWidth}px`;
+        widgetContainer.style['height'] = `${anchorBlockRect.height}px`;
+
+        let moveWidget = this.document.createElement('div');
+        moveWidget.className = 'oe-sidewidget-move fa fa-arrows';
+        widgetContainer.append(moveWidget);
+
+        widgetContainer.style.top = `${anchorBlockRect.y - containerRect.y}px`;
+        const closestList = closestElement(this._currentAnchorWidget, { selector: 'ul, ol' }); // Prevent overlap bullets.
+
+        const anchorX = closestList ? closestList.getBoundingClientRect().x : anchorBlockRect.x;
+        widgetContainer.style.left = `${anchorX - containerRect.x - widgetContainerWidth}px`;
+
+        this._widgetContainer.append(widgetContainer);
+
+        moveWidget.addEventListener('mousedown', () => {
+            const elements = [...new Set([...this.editable.querySelectorAll(allowedElements)])]
+                .filter(node =>
+                    node.parentElement && node.parentElement.isContentEditable &&
+                    ![node, ...ancestors(node)].includes(movingElement) &&
+                    isNodeMovable(node)
+                );
+
+            this._dropzoneContainer.textContent = '';
+
+            this.editable.classList.add('oe-editor-dragging');
+
+            // Uncomment line for debugging hook positions
+            this._dropzoneContainer.classList.add('debug');
+
+            for (const element of elements) {
+                const originalRect = element.getBoundingClientRect();
+                const style = getComputedStyle(element);
+                const marginTop = parseInt(style.marginTop, 10);
+                const marginBottom = parseInt(style.marginBottom, 10);
+                const marginLeft = parseInt(style.marginLeft, 10);
+                const marginRight = parseInt(style.marginRight, 10);
+
+                const rect = new DOMRect(
+                    originalRect.left - marginLeft,
+                    originalRect.top - marginTop,
+                    originalRect.width + marginLeft + marginRight,
+                    originalRect.height + marginTop + marginBottom,
+                );
+                // const rect = new DOMRect(
+                //     originalRect.left,
+                //     originalRect.top,
+                //     originalRect.width,
+                //     // originalRect.height,
+                //     // originalRect.width + marginLeft + marginRight,
+                //     originalRect.height + marginBottom,
+                // );
+
+                // const dropzoneBoxOriginal = document.createElement('div');
+                // dropzoneBoxOriginal.className = `oe-dropzone-box oe-dropzone-box-original`;
+                // dropzoneBoxOriginal.style.top = `${originalRect.top - containerRect.top}px`;
+                // dropzoneBoxOriginal.style.left = `${originalRect.left - containerRect.left}px`;
+                // dropzoneBoxOriginal.style.width = `${originalRect.width}px`;
+                // dropzoneBoxOriginal.style.height = `${originalRect.height}px`;
+
+                const dropzoneBox = document.createElement('div');
+                dropzoneBox.className = `oe-dropzone-box`;
+                dropzoneBox.style.top = `${rect.top - containerRect.top}px`;
+                dropzoneBox.style.left = `${rect.left - containerRect.left}px`;
+                dropzoneBox.style.width = `${rect.width}px`;
+                dropzoneBox.style.height = `${rect.height}px`;
+
+                const dropzoneHintBox = document.createElement('div');
+                dropzoneHintBox.className = `oe-dropzone-box`;
+                dropzoneHintBox.style.top = `${rect.top - containerRect.top}px`;
+                dropzoneHintBox.style.left = `${rect.left - containerRect.left}px`;
+                dropzoneHintBox.style.width = `${rect.width}px`;
+                dropzoneHintBox.style.height = `${rect.height}px`;
+
+                const sideElements = {};
+
+                const removeDropHint = () => {
+                    console.warn('removeDropHint');
+                    if (this._currentDropHint) {
+                        this._currentDropHint.remove();
+                        this._currentDropHint = null;
+                    }
+                    this._currentDropHintCommand = null;
+                }
+
+                for (const direction of ['north', 'south']) {
+                    const sideElement = document.createElement('div');
+                    sideElement.className = `oe-dropzone-box-side oe-dropzone-box-side-${direction}`;
+                    sideElements[direction] = sideElement;
+                    dropzoneBox.append(sideElement);
+                    sideElement.addEventListener('mouseenter', () => {
+                        this._currentZone = [direction];
+
+                        removeDropHint();
+                        this._currentDropHint = document.createElement('div');
+                        this._currentDropHint.className = `oe-current-drop-hint`;
+                        const currentDropHintSize = 4;
+                        const currentDropHintSizeHalf = currentDropHintSize / 2;
+
+                        if (direction === 'north') {
+                            this._currentDropHint.style['top'] = `-${currentDropHintSizeHalf}px`;
+                            this._currentDropHint.style['width'] = `100%`;
+                            this._currentDropHint.style['height'] = `${currentDropHintSize}px`;
+                            dropzoneHintBox.append(this._currentDropHint);
+                            this._currentDropHintElementPosition = ['top', element];
+                        } else if (direction === 'south') {
+                            this._currentDropHint.style['bottom'] = `-${currentDropHintSizeHalf}px`;
+                            this._currentDropHint.style['width'] = `100%`;
+                            this._currentDropHint.style['height'] = `${currentDropHintSize}px`;
+                            dropzoneHintBox.append(this._currentDropHint);
+                            this._currentDropHintElementPosition = ['bottom', element];
+                        } else if (direction === 'west') {
+                            this._currentDropHint.style['left'] = `-${currentDropHintSizeHalf}px`;
+                            this._currentDropHint.style['height'] = `100%`;
+                            this._currentDropHint.style['width'] = `${currentDropHintSize}px`;
+                            dropzoneHintBox.append(this._currentDropHint);
+                            this._currentDropHintElementPosition = ['left', element];
+                        } else if (direction === 'east') {
+                            this._currentDropHint.style['right'] = `-${currentDropHintSizeHalf}px`;
+                            this._currentDropHint.style['height'] = `100%`;
+                            this._currentDropHint.style['width'] = `${currentDropHintSize}px`;
+                            dropzoneHintBox.append(this._currentDropHint);
+                            this._currentDropHintElementPosition = ['right', element];
+                        }
+                    });
+                    dropzoneBox.addEventListener('mouseleave', () => {
+                        removeDropHint();
+                    });
+                }
+
+                // this._dropzoneContainer.append(dropzoneBoxOriginal);
+                this._dropzoneContainer.append(dropzoneBox);
+                this._dropzoneHintContainer.append(dropzoneHintBox);
+            }
+
+            const mousemove = (e) => {
+                e.preventDefault();
+            }
+            const mouseup = () => {
+                console.warn('mouseup');
+                if (this._currentDropHintElementPosition) {
+                    const [position, focusElelement] = this._currentDropHintElementPosition;
+                    if (position === 'top') {
+                        focusElelement.before(movingElement);
+                    } else if (position === 'bottom') {
+                        focusElelement.after(movingElement);
+                    } else if (position === 'left') {
+                        // // const container = document.createElement('div');
+                        // const container = parseHTML(`
+                        //     <div class="container o_text_columns">
+                        //         <div class="row"></div>
+                        //     </div>
+                        // `).childNodes[0];
+
+                        // console.log(`container:`, container);
+                        // focusElelement.before(container);
+
+                        // const createCol = (el) => {
+                        //     const col = document.createElement('div');
+                        //     col.className = 'col col-lg-6';
+                        //     col.append(el);
+                        //     return col;
+                        // }
+                        // container.querySelector('.row').append(
+                        //     ...[createCol(movingElement), createCol(focusElelement)]
+                        // );
+                    } else if (position === 'right') {
+                    }
+                    setSelection(
+                        movingElement,
+                        movingElement.childNodes.length
+                    );
+                    resetUnbreakable(movingElement);
+                    this.historyStep();
+                }
+                this.editable.classList.remove('oe-editor-dragging');
+                this._dropzoneContainer.textContent = '';
+                this._dropzoneHintContainer.textContent = '';
+
+                this.document.removeEventListener('mousemove', mousemove);
+                this.document.removeEventListener('mouseup', mouseup);
+                document.removeEventListener('mouseup', mouseup);
+            }
+            this.document.addEventListener('mousemove', mousemove);
+            this.document.addEventListener('mouseup', mouseup);
+            if (this.document !== document) {
+                document.addEventListener('mouseup', mouseup);
+            }
+        })
+    }
+    _setZone() {
+
     }
 
     _drawClientAvatar({ selection, clientId, clientAvatarUrl = '', clientName = this.options._t('Anonymous') }) {
@@ -2530,8 +2765,14 @@ export class OdooEditor extends EventTarget {
         if (!this.options.autohideToolbar && this.toolbar.style.visibility !== 'visible') {
             this.toolbar.style.visibility = 'visible';
         }
-
         const sel = this.document.getSelection();
+        // if (!sel.rangeCount || closestElement(sel.focusNode) || closestElement(sel.anchorNode)) {
+        //     if (this.options.autohideToolbar) {
+        //         this.toolbar.style.visibility = 'hidden';
+        //     }
+        //     return;
+        // }
+
         if (!hasTableSelection(this.editable)) {
             if (this.editable.classList.contains('o_col_resize') || this.editable.classList.contains('o_row_resize')) {
                 show = false;
@@ -2576,7 +2817,7 @@ export class OdooEditor extends EventTarget {
         }
         if (sel.rangeCount) {
             const closestStartContainer = closestElement(sel.getRangeAt(0).startContainer, '*');
-            const selectionStartStyle = getComputedStyle(closestStartContainer);
+            const selectionStartStyle = closestStartContainer && getComputedStyle(closestStartContainer);
 
             // queryCommandState does not take stylesheets into account
             for (const format of ['bold', 'italic', 'underline', 'strikeThrough', 'switchDirection']) {
@@ -3696,6 +3937,21 @@ export class OdooEditor extends EventTarget {
         }
     }
 
+    /**
+     * Make an absolute container to organise floating elements inside it's own
+     * box and z-index isolation.
+     *
+     * @param {*} className A class to add to the container in order to make
+     *              the container more visible in the devtool and potentially
+     *              add css rules for the container and it's children.
+     */
+    _makeAbsoluteContainer(className) {
+        const container = this.document.createElement('div');
+        container.className = `oe-absolute-container ${className}`;
+        this._absoluteContainer.append(container);
+        return container;
+    }
+
     _onMouseup(ev) {
         this._currentMouseState = ev.type;
 
@@ -3860,11 +4116,33 @@ export class OdooEditor extends EventTarget {
             this.toolbar.style.pointerEvents = 'auto';
         }
     }
-
+    isNodeInEditable(node) {
+        return Boolean([node, ...ancestors(node, this.editable)].includes(this.editable));
+    }
+    getEditableNode(node) {
+        return this.isNodeInEditable(node) &&
+            [node, ...ancestors(node, this.editable)].find(node => node.isContentEditable);
+    }
     _onMousemove(ev) {
-        if (this._currentMouseState === 'mousedown' && !this._isResizingTable) {
-            this._handleSelectionInTable(ev);
-        }
+        // console.log(`ev.target:`, ev.target);
+        // if (!ev.target.isContentEditable) {
+        //     return;
+        // }
+        // console.log(`this._isResizingTable:`, this._isResizingTable);
+
+        // if (this._currentMouseState === 'mousedown' && !this._isResizingTable) {
+        //     this._handleSelectionInTable(ev);
+        // }
+
+        this._updateAnchorWidgets(ev.target);
+        // const editableNode = this.getEditableNode(ev.target);
+
+        // if (editableNode && editableNode !== this.editable) {
+        //     this._updateAnchorWidgets(editableNode);
+        // } else {
+        //     this._updateAnchorWidgets();
+        // }
+
         if (!this._rowUi.classList.contains('o_open') && !this._columnUi.classList.contains('o_open')) {
             const column = closestElement(ev.target, 'td');
             if (this._isResizingTable || !column || !column.isContentEditable || !ev.target || ev.target.nodeType !== Node.ELEMENT_NODE) {
