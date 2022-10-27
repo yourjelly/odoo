@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.addons.account.tests.common import AccountTestInvoicingCommon
+from odoo.addons.account.tests.test_invoice_tax_totals import TestTaxTotals
 from odoo.addons.mail.tests.common import mail_new_test_user
 
 
-class TestExpenseCommon(AccountTestInvoicingCommon):
+class TestExpenseCommon(TestTaxTotals):
 
     @classmethod
     def setUpClass(cls, chart_template_ref=None):
@@ -55,6 +55,3 @@ class TestExpenseCommon(AccountTestInvoicingCommon):
 
         # Ensure products can be expensed.
         (cls.product_a + cls.product_b).write({'can_be_expensed': True})
-        # Taxes on the products are included in price
-        (cls.product_a.supplier_taxes_id + cls.product_b.supplier_taxes_id).write({'price_include': True})
-        cls.company_data['default_tax_purchase'].write({'price_include': True})
