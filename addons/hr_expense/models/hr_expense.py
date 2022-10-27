@@ -312,6 +312,8 @@ class HrExpense(models.Model):
             distribution = self.env['account.analytic.distribution.model']._get_distribution({
                 'product_id': expense.product_id.id,
                 'product_categ_id': expense.product_id.categ_id.id,
+                'partner_id': expense.employee_id.sudo().address_home_id.commercial_partner_id.id,
+                'partner_category_id': expense.employee_id.sudo().address_home_id.commercial_partner_id.category_id.ids,
                 'account_prefix': expense.account_id.code,
                 'company_id': expense.company_id.id,
             })
