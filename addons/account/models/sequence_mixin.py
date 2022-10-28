@@ -3,7 +3,7 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 from odoo.tools.misc import format_date
-from odoo.tools import frozendict
+from odoo.tools import frozendict, date_utils
 
 import re
 from collections import defaultdict
@@ -25,6 +25,7 @@ class SequenceMixin(models.AbstractModel):
     _sequence_index = False
     _sequence_monthly_regex = r'^(?P<prefix1>.*?)(?P<year>((?<=\D)|(?<=^))((19|20|21)\d{2}|(\d{2}(?=\D))))(?P<prefix2>\D*?)(?P<month>(0[1-9]|1[0-2]))(?P<prefix3>\D+?)(?P<seq>\d*)(?P<suffix>\D*?)$'
     _sequence_yearly_regex = r'^(?P<prefix1>.*?)(?P<year>((?<=\D)|(?<=^))((19|20|21)?\d{2}))(?P<prefix2>\D+?)(?P<seq>\d*)(?P<suffix>\D*?)$'
+    _sequence_yearly_financial_regex = r'^(?P<prefix1>.*?)(?P<fyear_start>((?<=\D)|(?<=^))((19|20|21)\d{2}))(?P<prefix2>\D)(?P<fyear_end>((?<=\D)|(?<=^))((19|20|21)\d{2}))(?P<prefix3>\D+?)(?P<seq>\d*)(?P<suffix>\D*?)$'
     _sequence_fixed_regex = r'^(?P<prefix1>.*?)(?P<seq>\d{0,9})(?P<suffix>\D*?)$'
 
     sequence_prefix = fields.Char(compute='_compute_split_sequence', store=True)
@@ -50,6 +51,9 @@ class SequenceMixin(models.AbstractModel):
     def _must_check_constrains_date_sequence(self):
         return True
 
+    def _year_match(self, format_value, date):
+        return format_value == date.year % 10 ** len(str(format_value))
+
     def _sequence_matches_date(self):
         self.ensure_one()
         date = fields.Date.to_date(self[self._sequence_date_field])
@@ -59,10 +63,17 @@ class SequenceMixin(models.AbstractModel):
             return True
 
         format_values = self._get_sequence_format_param(sequence)[1]
-        year_match = (
-            not format_values["year"]
-            or format_values["year"] == date.year % 10 ** len(str(format_values["year"]))
-        )
+        # this stays true if not format_values["year"]
+        year_match = True
+        if format_values["year"]:
+            year_match = self._year_match(format_values["year"], date)
+        if 'company_id' in self and format_values["fyear_start"] and format_values["fyear_end"]:
+            company = self.company_id
+            fyear_start, fyear_end = date_utils.get_fiscal_year(date, day=company.fiscalyear_last_day, month=int(company.fiscalyear_last_month))
+            year_match = (
+                self._year_match(format_values["fyear_start"], fyear_start or date)
+                and self._year_match(format_values["fyear_end"], fyear_end or date)
+            )
         month_match = not format_values['month'] or format_values['month'] == date.month
         return year_match and month_match
 
@@ -115,6 +126,7 @@ class SequenceMixin(models.AbstractModel):
         """
         for regex, ret_val, requirements in [
             (self._sequence_monthly_regex, 'month', ['seq', 'month', 'year']),
+            (self._sequence_yearly_financial_regex, 'fyear_start', ['seq', 'fyear_start', 'fyear_end']),
             (self._sequence_yearly_regex, 'year', ['seq', 'year']),
             (self._sequence_fixed_regex, 'never', ['seq']),
         ]:
@@ -220,28 +232,43 @@ class SequenceMixin(models.AbstractModel):
         regex = self._sequence_fixed_regex
         if sequence_number_reset == 'year':
             regex = self._sequence_yearly_regex
+        elif sequence_number_reset == 'fyear_start':
+            regex = self._sequence_yearly_financial_regex
         elif sequence_number_reset == 'month':
             regex = self._sequence_monthly_regex
-
         format_values = re.match(regex, previous).groupdict()
         format_values['seq_length'] = len(format_values['seq'])
         format_values['year_length'] = len(format_values.get('year', ''))
+        format_values['fyear_start_length'] = len(format_values.get('fyear_start', ''))
+        format_values['fyear_end_length'] = len(format_values.get('fyear_end', ''))
         if not format_values.get('seq') and 'prefix1' in format_values and 'suffix' in format_values:
             # if we don't have a seq, consider we only have a prefix and not a suffix
             format_values['prefix1'] = format_values['suffix']
             format_values['suffix'] = ''
-        for field in ('seq', 'year', 'month'):
+        for field in ('seq', 'year', 'month', 'fyear_start', 'fyear_end'):
             format_values[field] = int(format_values.get(field) or 0)
 
-        placeholders = re.findall(r'(prefix\d|seq|suffix\d?|year|month)', regex)
+        placeholders = re.findall(r'(prefix\d|seq|suffix\d?|year|month|fyear_start|fyear_end)', regex)
         format = ''.join(
             "{seq:0{seq_length}d}" if s == 'seq' else
             "{month:02d}" if s == 'month' else
             "{year:0{year_length}d}" if s == 'year' else
+            "{fyear_start:0{fyear_start_length}d}" if s == 'fyear_start' else
+            "{fyear_end:0{fyear_end_length}d}" if s == 'fyear_start' else
             "{%s}" % s
             for s in placeholders
         )
         return format, format_values
+
+    def _get_year_by_length(self, date, length):
+        """Get the year from a date, with a given length.
+
+        :param date: the date from which we want to extract the year
+        :param length: the length of the year we want to extract
+
+        :return: the year as an integer
+        """
+        return date.year % (10 ** length)
 
     def _set_next_sequence(self):
         """Set the next sequence.
@@ -261,10 +288,14 @@ class SequenceMixin(models.AbstractModel):
         format, format_values = self._get_sequence_format_param(last_sequence)
         if new:
             format_values['seq'] = 0
-            format_values['year'] = self[self._sequence_date_field].year % (10 ** format_values['year_length'])
+            format_values['year'] = self._get_year_by_length(self[self._sequence_date_field], format_values['year_length'])
             format_values['month'] = self[self._sequence_date_field].month
+            if 'company_id' in self:
+                company = self.company_id
+                fyear_start, fyear_end = date_utils.get_fiscal_year(self[self._sequence_date_field], day=company.fiscalyear_last_day, month=int(company.fiscalyear_last_month))
+                format_values['fyear_start'] = self._get_year_by_length(fyear_start, format_values['fyear_start_length'])
+                format_values['fyear_end'] = self._get_year_by_length(fyear_end, format_values['fyear_end_length'])
         format_values['seq'] = format_values['seq'] + 1
-
         self[self._sequence_field] = format.format(**format_values)
         self._compute_split_sequence()
 

@@ -1,7 +1,7 @@
 from psycopg2 import DatabaseError
 
 from odoo import models
-from odoo.tools import mute_logger
+from odoo.tools import mute_logger, date_utils
 
 
 class SequenceMixin(models.AbstractModel):
@@ -21,9 +21,13 @@ class SequenceMixin(models.AbstractModel):
         format_string, format_values = self._get_sequence_format_param(last_sequence)
         if new:
             format_values['seq'] = 0
-            format_values['year'] = self[self._sequence_date_field].year % (10 ** format_values['year_length'])
+            format_values['year'] = self._get_year_by_length(self[self._sequence_date_field], format_values['year_length'])
             format_values['month'] = self[self._sequence_date_field].month
-
+            if 'company_id' in self:
+                company = self.company_id
+                fyear_start, fyear_end = date_utils.get_fiscal_year(self[self._sequence_date_field], day=company.fiscalyear_last_day, month=int(company.fiscalyear_last_month))
+                format_values['fyear_start'] = self._get_year_by_length(fyear_start, format_values['fyear_start_length'])
+                format_values['fyear_end'] = self._get_year_by_length(fyear_end, format_values['fyear_end_length'])
         # before flushing inside the savepoint (which may be rolled back!), make sure everything
         # is already flushed, otherwise we could lose non-sequence fields values, as the ORM believes
         # them to be flushed.
