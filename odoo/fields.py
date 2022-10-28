@@ -4222,11 +4222,9 @@ class _RelationalMulti(_Relational):
                 raise ValueError("Wrong value for %s: %s" % (self, value))
             records_commands_list[idx] = (recs, value)
 
-        record_ids = {rid for recs, cs in records_commands_list for rid in recs._ids}
-        if all(record_ids):
+        if all(rid for recs, __ in records_commands_list for rid in recs._ids):
             return self.write_real(records_commands_list, create)
         else:
-            assert not any(record_ids)
             return self.write_new(records_commands_list)
 
 
@@ -4340,8 +4338,8 @@ class One2many(_RelationalMulti):
         model = records_commands_list[0][0].browse()
         comodel = model.env[self.comodel_name].with_context(**self.context)
 
-        ids = {rid for recs, cs in records_commands_list for rid in recs.ids}
-        records = records_commands_list[0][0].browse(ids)
+        ids = OrderedSet(rid for recs, _ in records_commands_list for rid in recs._ids)
+        records = model.browse(ids)
 
         if self.store:
             inverse = self.inverse_name
@@ -4445,7 +4443,7 @@ class One2many(_RelationalMulti):
         cache = model.env.cache
         comodel = model.env[self.comodel_name].with_context(**self.context)
 
-        ids = {record.id for records, _ in records_commands_list for record in records}
+        ids = OrderedSet(id_ for records, _ in records_commands_list for id_ in records._ids)
         records = model.browse(ids)
 
         def browse(ids):
@@ -4866,9 +4864,8 @@ class Many2many(_RelationalMulti):
         set = OrderedSet
         old_relation = {record.id: set(record[self.name]._ids) for records, _ in records_commands_list for record in records}
         new_relation = {x: set(ys) for x, ys in old_relation.items()}
-        ids = set(old_relation.keys())
 
-        records = model.browse(ids)
+        records = model.browse(old_relation.keys())
 
         for recs, commands in records_commands_list:
             for command in commands:
