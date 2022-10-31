@@ -994,7 +994,7 @@ class PosGlobalState extends PosModel {
      * Mirror JS method of:
      * _compute_amount in addons/account/models/account.py
      */
-    _compute_all(tax, base_amount, quantity, price_exclude) {
+    _compute_amount(tax, base_amount, quantity, price_exclude) {
         if(price_exclude === undefined)
             var price_include = tax.price_include;
         else
@@ -1098,13 +1098,13 @@ class PosGlobalState extends PosModel {
                 }
                 if(tax.price_include){
                     if(tax.amount_type === 'percent')
-                        incl_percent_amount += tax.amount;
+                        incl_percent_amount += tax.amount * tax.sum_repartition_factor;
                     else if(tax.amount_type === 'division')
-                        incl_division_amount += tax.amount;
+                        incl_division_amount += tax.amount * tax.sum_repartition_factor;
                     else if(tax.amount_type === 'fixed')
-                        incl_fixed_amount += Math.abs(quantity) * tax.amount
+                        incl_fixed_amount += Math.abs(quantity) * tax.amount * tax.sum_repartition_factor;
                     else{
-                        var tax_amount = self._compute_all(tax, base, quantity);
+                        var tax_amount = self._compute_amount(tax, base, quantity);
                         incl_fixed_amount += tax_amount;
                         cached_tax_amounts[i] = tax_amount;
                     }
@@ -1129,37 +1129,38 @@ class PosGlobalState extends PosModel {
         var taxes_vals = [];
         i = 0;
         var cumulated_tax_included_amount = 0;
-        _(taxes.reverse()).each(function(tax){
+        _(taxes).each(function(tax){
             if(tax.price_include || tax.is_base_affected)
                 var tax_base_amount = base;
             else
                 var tax_base_amount = total_excluded;
 
-            if(!skip_checkpoint && tax.price_include && total_included_checkpoints[i] !== undefined){
+            if(!skip_checkpoint && tax.price_include && total_included_checkpoints[i] !== undefined && tax.sum_repartition_factor != 0){
                 var tax_amount = total_included_checkpoints[i] - (base + cumulated_tax_included_amount);
                 cumulated_tax_included_amount = 0;
             }else
-                var tax_amount = self._compute_all(tax, tax_base_amount, quantity, true);
+                var tax_amount = self._compute_amount(tax, tax_base_amount, quantity, true);
 
             tax_amount = round_pr(tax_amount, currency_rounding);
+            var factorized_tax_amount = round_pr(tax_amount * tax.sum_repartition_factor, currency_rounding)
 
             if(tax.price_include && total_included_checkpoints[i] === undefined)
-                cumulated_tax_included_amount += tax_amount;
+                cumulated_tax_included_amount += factorized_tax_amount;
 
             taxes_vals.push({
                 'id': tax.id,
                 'name': tax.name,
-                'amount': sign * tax_amount,
+                'amount': sign * factorized_tax_amount,
                 'base': sign * round_pr(tax_base_amount, currency_rounding),
             });
 
             if(tax.include_base_amount){
-                base += tax_amount;
+                base += factorized_tax_amount;
                 if(!tax.price_include)
                     skip_checkpoint = true;
             }
 
-            total_included += tax_amount;
+            total_included += factorized_tax_amount;
             i += 1;
         });
 
@@ -1997,8 +1998,8 @@ class Orderline extends PosModel {
      * Mirror JS method of:
      * _compute_amount in addons/account/models/account.py
      */
-    _compute_all(tax, base_amount, quantity, price_exclude) {
-        return this.pos._compute_all(tax, base_amount, quantity, price_exclude);
+    _compute_amount(tax, base_amount, quantity, price_exclude) {
+        return this.pos._compute_amount(tax, base_amount, quantity, price_exclude);
     }
     /**
      * Mirror JS method of:
