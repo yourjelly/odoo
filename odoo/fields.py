@@ -1398,25 +1398,23 @@ class Monetary(Field):
 
     def convert_to_column(self, value, record, values=None, validate=True):
         # retrieve currency from values or record
-        currency_field = record._fields[self.currency_field]
+        c_field = record._fields[self.currency_field]
         if values and self.currency_field in values:
-            field = record._fields[self.currency_field]
-            currency = field.convert_to_cache(values[self.currency_field], record, validate)
-            currency = field.convert_to_record(currency, record)
+            currency = c_field.convert_to_cache(values[self.currency_field], record, validate)
+            currency = c_field.convert_to_record(currency, record)
+        elif values and c_field.related and c_field.related[0] in values:
+            # c_field.related[0] is a relation field, let convert_to_record to return a appropriate recordset
+            relation_field = record._fields[c_field.related[0]]
+            currency = relation_field.convert_to_cache(values[c_field.related[0]], record, validate)
+            currency = relation_field.convert_to_record(currency, record)[:1]
+            for field in c_field.related[1:]:
+                currency = currency[field][:1]
         else:
             # Note: this is wrong if 'record' is several records with different
             # currencies, which is functional nonsense and should not happen
             # BEWARE: do not prefetch other fields, because 'value' may be in
             # cache, and would be overridden by the value read from database!
             currency = record[:1].with_context(prefetch_fields=False)[self.currency_field]
-
-        if not currency and currency_field.related and values and currency_field.related[0] in values:
-            related_field_name = currency_field.related[0]
-            related_field = record._fields[related_field_name]
-            related_model_name = related_field.comodel_name
-            currency = record.env[related_model_name].browse(values[related_field_name])
-            for field in currency_field.related[1:]:
-                currency = currency[field][:1]
 
         value = float(value or 0.0)
         if currency:
