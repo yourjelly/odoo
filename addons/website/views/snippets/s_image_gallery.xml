@@ -130,6 +130,8 @@
     </xpath>
 </template>
 
+<data noupdate="1">
+
 <record id="website.s_image_gallery_000_js" model="ir.asset">
     <field name="name">Image gallery 000 JS</field>
     <field name="bundle">web.assets_frontend</field>
@@ -148,5 +150,7 @@
     <field name="bundle">web.assets_frontend</field>
     <field name="path">website/static/src/snippets/s_image_gallery/001.scss</field>
 </record>
+
+</data>
 
 </odoo>

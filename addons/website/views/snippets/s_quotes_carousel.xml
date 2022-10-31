@@ -72,6 +72,8 @@
     </section>
 </template>
 
+<data noupdate="1">
+
 <record id="website.s_quotes_carousel_000_scss" model="ir.asset">
     <field name="name">Quotes carousel 000 SCSS</field>
     <field name="bundle">web.assets_frontend</field>
@@ -84,5 +86,7 @@
     <field name="bundle">web.assets_frontend</field>
     <field name="path">website/static/src/snippets/s_quotes_carousel/001.scss</field>
 </record>
+
+</data>
 
 </odoo>

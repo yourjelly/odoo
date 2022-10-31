@@ -303,6 +303,8 @@
 </template>
 
 <!-- Assets -->
+<data noupdate="1">
+
 <record id="website.s_masonry_block_000_scss" model="ir.asset">
     <field name="name">Masonry block 000 SCSS</field>
     <field name="bundle">web.assets_frontend</field>
@@ -322,5 +324,7 @@
     <field name="path">website/static/src/snippets/s_masonry_block/000_variables.scss</field>
     <field name="active" eval="False"/>
 </record>
+
+</data>
 
 </odoo>

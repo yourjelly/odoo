@@ -44,6 +44,8 @@
     </xpath>
 </template>
 
+<data noupdate="1">
+
 <record id="website.s_google_map_000_scss" model="ir.asset">
     <field name="name">Google map 000 SCSS</field>
     <field name="bundle">web.assets_frontend</field>
@@ -55,5 +57,7 @@
     <field name="bundle">web.assets_frontend</field>
     <field name="path">website/static/src/snippets/s_google_map/000.js</field>
 </record>
+
+</data>
 
 </odoo>

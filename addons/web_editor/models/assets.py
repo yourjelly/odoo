@@ -8,7 +8,7 @@ import uuid
 
 from lxml import etree
 
-from odoo import models
+from odoo import api, models
 from odoo.tools import misc
 from odoo.addons.base.models.assetsbundle import EXTENSIONS
 
@@ -234,3 +234,15 @@ class Assets(models.AbstractModel):
             dict
         """
         return {}
+
+    @api.model
+    def _make_noupdate(self, bundle_names):
+        """
+        Makes the assets of the specified bundles "noupdate".
+
+        :param bundle_names: list of bundles to make "noupdate"
+        """
+        assets = self.env['ir.asset'].search([['bundle', 'in', bundle_names]])
+        assets_ids = [asset.id for asset in assets]
+        model_data = self.env['ir.model.data'].search([['model', '=', 'ir.asset'], ['noupdate', '=', False], ['res_id', 'in', assets_ids]])
+        model_data.write({'noupdate': True})

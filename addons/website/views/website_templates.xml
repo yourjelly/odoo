@@ -2043,6 +2043,8 @@
 </template>
 
 <!-- Effect options -->
+<data noupdate="1">
+
 <record id="website.ripple_effect_scss" model="ir.asset">
     <field name="key">website.ripple_effect_scss</field>
     <field name="name">Ripple effect SCSS</field>
@@ -2058,6 +2060,8 @@
     <field name="path">/website/static/src/js/content/ripple_effect.js</field>
     <field name="active" eval="False"/>
 </record>
+
+</data>
 
 <!-- Error and special pages -->
 <template id="website_info" name="Odoo Information">

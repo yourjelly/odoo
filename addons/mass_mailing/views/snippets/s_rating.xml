@@ -56,6 +56,8 @@
     </xpath>
 </template>
 
+<data noupdate="1">
+
 <record id="mass_mailing.s_rating_000_scss" model="ir.asset">
     <field name="name">Rating 000 SCSS</field>
     <field name="bundle">web.assets_frontend</field>
@@ -68,5 +70,7 @@
     <field name="bundle">web.assets_frontend</field>
     <field name="path">mass_mailing/static/src/snippets/s_rating/001.scss</field>
 </record>
+
+</data>
 
 </odoo>

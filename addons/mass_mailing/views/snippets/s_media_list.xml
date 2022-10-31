@@ -45,10 +45,14 @@
     </div>
 </template>
 
+<data noupdate="1">
+
 <record id="mass_mailing.s_media_list_001_scss" model="ir.asset">
     <field name="name">Media list 001 SCSS</field>
     <field name="bundle">web.assets_frontend</field>
     <field name="path">mass_mailing/static/src/snippets/s_media_list/001.scss</field>
 </record>
+
+</data>
 
 </odoo>

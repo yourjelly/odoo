@@ -80,6 +80,8 @@
     </xpath>
 </template>
 
+<data noupdate="1">
+
 <record id="website_payment.s_donation_000_js" model="ir.asset">
     <field name="name">Donation 000 JS</field>
     <field name="bundle">web.assets_frontend</field>
@@ -91,5 +93,7 @@
     <field name="bundle">web.assets_frontend</field>
     <field name="path">website_payment/static/src/snippets/s_donation/000.scss</field>
 </record>
+
+</data>
 
 </odoo>

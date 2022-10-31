@@ -59,6 +59,8 @@
     </section>
 </template>
 
+<data noupdate="1">
+
 <record id="website.s_product_list_000_variables_scss" model="ir.asset">
     <field name="name">Product list 000 variables SCSS</field>
     <field name="bundle">web._assets_primary_variables</field>
@@ -70,5 +72,7 @@
     <field name="bundle">web.assets_frontend</field>
     <field name="path">website/static/src/snippets/s_product_list/000.scss</field>
 </record>
+
+</data>
 
 </odoo>

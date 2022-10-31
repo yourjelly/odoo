@@ -18,6 +18,8 @@
     </xpath>
 </template>
 
+<data noupdate="1">
+
 <record id="website.s_badge_000_variables_scss" model="ir.asset">
     <field name="name">Badge 000 variables SCSS</field>
     <field name="bundle">web._assets_primary_variables</field>
@@ -29,5 +31,7 @@
     <field name="bundle">web.assets_frontend</field>
     <field name="path">website/static/src/snippets/s_badge/000.scss</field>
 </record>
+
+</data>
 
 </odoo>

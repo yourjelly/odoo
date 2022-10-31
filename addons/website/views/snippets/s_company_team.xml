@@ -65,10 +65,14 @@ Meanwhile, this is fixed in JS (see COMPANY_TEAM_CONTENTEDITABLE).
     </section>
 </template>
 
+<data noupdate="1">
+
 <record id="website.s_company_team_000_scss" model="ir.asset">
     <field name="name">Company team 000 SCSS</field>
     <field name="bundle">web.assets_frontend</field>
     <field name="path">website/static/src/snippets/s_company_team/000.scss</field>
 </record>
+
+</data>
 
 </odoo>

@@ -132,6 +132,8 @@
 </template>
 
 <!-- Assets -->
+<data noupdate="1">
+
 <record id="website_blog.s_blog_posts_000_scss" model="ir.asset">
     <field name="name">Blog posts 000 SCSS</field>
     <field name="bundle">web.assets_frontend</field>
@@ -143,5 +145,7 @@
     <field name="bundle">web.assets_frontend</field>
     <field name="path">website_blog/static/src/snippets/s_blog_posts/000.js</field>
 </record>
+
+</data>
 
 </odoo>

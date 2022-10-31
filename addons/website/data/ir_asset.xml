@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
+    <data noupdate="1">
 
         <record id="website.user_custom_bootstrap_overridden_scss" model="ir.asset">
             <field name="name">User custom bootstrap overridden SCSS</field>
