@@ -2374,7 +2374,7 @@ export class OdooEditor extends EventTarget {
             ev.data === null &&
             this._lastBeforeInputType === 'insertParagraph';
         if (this.keyboardType === KEYBOARD_TYPES.PHYSICAL || !wasCollapsed) {
-            if (ev.inputType === 'deleteContentBackward') {
+            if (ev.inputType === 'deleteContentBackward' && wasCollapsed) {
                 this._compositionStep();
                 this.historyRollback();
                 ev.preventDefault();
