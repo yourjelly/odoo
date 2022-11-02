@@ -697,6 +697,19 @@ class TestNestedO2M(TransactionCase):
         self.assertEqual(r.line_ids.line_ids.v, 0)
         self.assertEqual(r.line_ids.line_ids.vv, 0)
 
+    def test_o2m_account_edit_o2m_directly(self):
+        form = Form(self.env['test.account'].with_context(default_name="turlututu"))
+        form.name2 = "tsoin tsoin"
+        record = form.save()
+        self.assertEqual(record.nb_lines, 2) # This is broken on this branch
+
+    def test_o2m_account_edit_o2m_after_compute(self):
+        form = Form(self.env['test.account'].with_context(default_name="turlututu"))
+        form.name3 = "tsoin tsoin"
+        record = form.save()
+        self.assertEqual(record.nb_lines, 2)
+
+
 class TestEdition(TransactionCase):
     """ These use the context manager form as we don't need the record
     post-save (we already have it) and it's easier to see what bits act on

@@ -314,3 +314,53 @@ class O2MChangesChildrenLines(models.Model):
     parent_id = fields.Many2one('o2m_changes_children')
     v = fields.Integer()
     vv = fields.Integer()
+
+
+class TestAccount(models.Model):
+    _name = _description = 'test.account'
+
+    name = fields.Char()
+    name2 = fields.Char()
+    name3 = fields.Char()
+    nb_lines = fields.Integer(
+        compute='_compute_nb_lines',
+        store=True,
+        readonly=False,
+    )
+    line_ids = fields.One2many(
+        comodel_name='test.account.lines',
+        inverse_name='parent_id',
+        compute='_compute_line_ids',
+        store=True,
+        readonly=False,
+    )
+
+    @api.depends('name')
+    def _compute_line_ids(self):
+        for record in self:
+            record.line_ids = [Command.create({'name': record.name})]
+
+    @api.onchange('name2')
+    def _onchange_name2(self):
+        if self.name2:
+            self.line_ids = [Command.create({'name': self.name2})]
+
+    @api.onchange('name3')
+    def _onchange_name3(self):
+        self.line_ids
+        if self.name3:
+            self.line_ids = [Command.create({'name': self.name3})]
+
+    @api.depends('line_ids')
+    def _compute_nb_lines(self):
+        for record in self:
+            record.nb_lines = len(record.line_ids)
+
+
+class TestAccountLines(models.Model):
+    _name = _description = 'test.account.lines'
+
+    name = fields.Char()
+    parent_id = fields.Many2one(comodel_name='test.account')
+
+

@@ -226,4 +226,17 @@
             </form>
         </field>
     </record>
+
+    <record id="test_account" model="ir.ui.view">
+        <field name="name">test.account.form</field>
+        <field name="model">test.account</field>
+        <field name="arch" type="xml">
+            <form>
+                <field name="name"/>
+                <field name="name2"/>
+                <field name="name3"/>
+                <field name="nb_lines"/>
+            </form>
+        </field>
+    </record>
 </odoo>
