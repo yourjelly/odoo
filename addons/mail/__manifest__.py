@@ -116,6 +116,7 @@ For more specific needs, you may also assign custom-defined actions
     'assets': {
         'mail.assets_core_messaging': [
             'mail/static/src/model/*.js',
+            'mail/static/src/setup/core/*.js',
             'mail/static/src/core_models/*.js',
         ],
         'mail.assets_messaging': [
@@ -142,6 +143,13 @@ For more specific needs, you may also assign custom-defined actions
             'web/static/src/scss/bootstrap_review.scss',
             'web/static/src/webclient/webclient.scss',
             'web/static/src/core/utils/*.scss',
+            # Bus assets
+            'bus/static/src/*.js',
+            'bus/static/src/services/**/*.js',
+            'bus/static/src/setup/core/*.js',
+            'bus/static/src/setup/public/*.js',
+            'bus/static/src/workers/websocket_worker.js',
+            'bus/static/src/workers/websocket_worker_utils.js',
             # depends on BS variables, can't be loaded in assets_primary or assets_secondary
             'mail/static/src/scss/variables/derived_variables.scss',
             'mail/static/src/scss/composer.scss',
@@ -156,6 +164,7 @@ For more specific needs, you may also assign custom-defined actions
             'mail/static/src/js/utils.js',
             ('include', 'mail.assets_messaging'),
             'mail/static/src/public/*',
+            'mail/static/src/setup/public/*.js',
             'mail/static/src/services/*.js',
             ('remove', 'mail/static/src/services/systray_service.js'),
             'mail/static/src/utils/*.js',
@@ -182,6 +191,7 @@ For more specific needs, you may also assign custom-defined actions
             'mail/static/src/scss/variables/primary_variables.scss',
         ],
         'web.assets_backend': [
+            'mail/static/src/setup/backend/setup_backend_helpers.js',
             # depends on BS variables, can't be loaded in assets_primary or assets_secondary
             'mail/static/src/scss/variables/derived_variables.scss',
             # defines mixins and variables used by multiple components
@@ -212,7 +222,7 @@ For more specific needs, you may also assign custom-defined actions
             'mail/static/src/components/*/*.dark.scss',
         ],
         'web.assets_backend_prod_only': [
-            'mail/static/src/main.js',
+            'mail/static/src/setup/backend/setup_backend.js',
         ],
         'mail.assets_discuss_public_test_tours': [
             'mail/static/tests/tours/discuss_public_tour.js',
