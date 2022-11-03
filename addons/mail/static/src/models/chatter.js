@@ -246,6 +246,22 @@ registerModel({
         attachmentBoxView: one('AttachmentBoxView', {
             inverse: 'chatter',
         }),
+        /**
+         * Determines the label on the attachment button of the topbar.
+         */
+        attachmentButtonText: attr({
+            compute() {
+                if (!this.thread) {
+                    return clear();
+                }
+                const attachments = this.thread.allAttachments;
+                if (attachments.length === 0) {
+                    return clear();
+                }
+                return attachments.length;
+            },
+            default: "",
+        }),
         attachmentsLoaderTimer: one('Timer', {
             inverse: 'chatterOwnerAsAttachmentsLoader',
         }),
@@ -351,6 +367,11 @@ registerModel({
                 return Boolean(this.thread && this.hasMessageList);
             },
         }),
+        hasTopBar: attr({
+            compute() {
+                return this.thread ? true : clear();
+            },
+        }),
         hasWriteAccess: attr({
             compute() {
                 return Boolean(this.thread && !this.thread.isTemporary && this.thread.hasWriteAccess);
@@ -426,12 +447,6 @@ registerModel({
                     order: 'desc',
                     thread: this.thread ? this.thread : clear(),
                 };
-            },
-            inverse: 'chatter',
-        }),
-        topbar: one('ChatterTopbar', {
-            compute() {
-                return this.thread ? {} : clear();
             },
             inverse: 'chatter',
         }),
