@@ -279,6 +279,9 @@ export class Powerbox {
                 const parentContextRect = this.getContextFromParentRect();
                 left += parentContextRect.left;
                 top += parentContextRect.top;
+                if (this.el.offsetHeight + top > window.innerHeight) {
+                    top = top - this.el.offsetHeight
+                }
             }
             this.el.style.left = `${left}px`;
             this.el.style.top = `${top}px`;
