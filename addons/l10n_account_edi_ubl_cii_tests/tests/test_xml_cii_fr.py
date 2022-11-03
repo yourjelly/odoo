@@ -214,6 +214,31 @@ class TestCIIFR(TestUBLCommon):
     # Test import
     ####################################################
 
+    def test_import_tax_included(self):
+        """
+        Tests whether the tax included / tax excluded are correctly decoded when
+        importing a document. The imported xml represents the following invoice:
+
+        Description         Quantity    Unit Price    Taxes            Amount
+        ---------------------------------------------------------------------
+        Corner Desk Right          1           100    5% (incl)         95.24
+        Large Cabinet              1           100    5% (not incl)       100
+        -----------------------
+        Untaxed Amount: 195.24
+        Taxes: 9.76
+        -----------------------
+        Total: 205
+        """
+        self._assert_imported_invoice_from_file(
+            subfolder='tests/test_files/from_odoo',
+            filename='facturx_out_invoice_tax_incl.xml',
+            amount_total=205,
+            amount_tax=9.76,
+            list_line_subtotals=[95.24, 100],
+            move_type='in_invoice',
+        )
+
+
     def test_import_fnfe_examples(self):
         # Source: official documentation of the FNFE (subdirectory: "5. FACTUR-X 1.0.06 - Examples")
         subfolder = 'tests/test_files/from_factur-x_doc'
