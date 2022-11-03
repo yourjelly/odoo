@@ -11,6 +11,7 @@ class ProductLabelLayout(models.TransientModel):
     move_line_ids = fields.Many2many('stock.move.line')
     picking_quantity = fields.Selection([
         ('picking', 'Transfer Quantities'),
+        ('full', 'Complete Quantities'),
         ('custom', 'Custom')], string="Quantity to print", required=True, default='custom')
     print_format = fields.Selection(selection_add=[
         ('zpl', 'ZPL Labels'),
@@ -35,5 +36,18 @@ class ProductLabelLayout(models.TransientModel):
                     qties[line.product_id.id] += line.qty_done
             # Pass only products with some quantity done to the report
             data['quantity_by_product'] = {p: int(q) for p, q in qties.items() if q}
+            data['custom_barcodes'] = custom_barcodes
+
+        if self.picking_quantity == 'full' and self.move_line_ids:
+            qties = defaultdict(int)
+            custom_barcodes = defaultdict(list)
+            uom_unit = self.env.ref('uom.product_uom_categ_unit', raise_if_not_found=False)
+            for line in self.move_line_ids:
+                if line.product_uom_id.category_id == uom_unit:
+                    if (line.lot_id or line.lot_name):
+                        custom_barcodes[line.product_id.id].append((line.lot_id.name or line.lot_name, int(line.product_uom_qty)))
+                        continue
+                    qties[line.product_id.id] += line.product_uom_qty
+            data['quantity_by_product'] = {p: int(q) for p, q in qties.items()}
             data['custom_barcodes'] = custom_barcodes
         return xml_id, data

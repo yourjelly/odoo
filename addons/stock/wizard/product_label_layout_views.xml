@@ -12,7 +12,7 @@
             </xpath>
             <xpath expr='//field[@name="custom_quantity"]' position="attributes">
                 <attribute name="attrs">
-                    {'invisible': [('picking_quantity', '=', 'picking')]}
+                    {'invisible': [('picking_quantity', '!=', 'custom')]}
                 </attribute>
             </xpath>
         </field>
