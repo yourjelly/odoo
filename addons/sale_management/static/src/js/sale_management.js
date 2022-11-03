@@ -42,10 +42,24 @@ publicWidget.registry.SaleUpdateLineButton = publicWidget.Widget.extend({
      * @param {Object} data: contains order html details
      */
     _refreshOrderUI(data){
-        const $saleTemplate = $(data['sale_template']);
+        const $saleTemplate = $(data.sale_template);
         if ($saleTemplate.length) {
             this.$('#portal_sale_content').html($saleTemplate);
         }
+
+        let $orderAmountUntaxed = $('[data-id="total_untaxed"]').find('span, b'),
+            $orderAmountTotal = $('[data-id="total_amount"]').find('span, b'),
+            $orderAmountUndiscounted = $('[data-id="amount_undiscounted"]').find('span, b');
+
+        if (!$orderAmountUntaxed.length) {
+            $orderAmountUntaxed = $orderAmountTotal.eq(1);
+            $orderAmountTotal = $orderAmountTotal.eq(0).add($orderAmountTotal.eq(2));
+        }
+
+        $orderAmountUntaxed.text(data.order_amount_untaxed);
+        $orderAmountTotal.text(data.order_amount_total);
+        $orderAmountUndiscounted.text(data.order_amount_undiscounted);
+
     },
 
     /**

@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from functools import partial
+
 from odoo.exceptions import AccessError, MissingError
 from odoo.http import request, route
+from odoo.tools import formatLang
 
 from odoo.addons.sale.controllers import portal
 
@@ -15,7 +18,13 @@ class CustomerPortal(portal.CustomerPortal):
         :return: rendered html of the order portal details
         :rtype: dict
         """
+        currency = order_sudo.currency_id
+        format_price = partial(formatLang, request.env, digits=currency.decimal_places)
         return {
+            'order_amount_total': format_price(order_sudo.amount_total),
+            'order_amount_untaxed': format_price(order_sudo.amount_untaxed),
+            'order_amount_tax': format_price(order_sudo.amount_tax),
+            'order_amount_undiscounted': format_price(order_sudo.amount_undiscounted),
             'sale_template': request.env['ir.ui.view']._render_template(
                 'sale.sale_order_portal_content', {
                     'sale_order': order_sudo,
