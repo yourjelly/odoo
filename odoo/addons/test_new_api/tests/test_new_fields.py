@@ -5,9 +5,10 @@
 # test cases for new-style fields
 #
 import base64
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from datetime import date, datetime, time
 import io
+import logging
 from PIL import Image
 import psycopg2
 
@@ -18,6 +19,8 @@ from odoo.tests import common
 from odoo.tools import mute_logger, float_repr
 from odoo.tools.date_utils import add, subtract, start_of, end_of
 from odoo.tools.image import image_data_uri
+
+_logger = logging.getLogger(__name__)
 
 
 class TestFields(TransactionCaseWithUserDemo):
@@ -4165,3 +4168,42 @@ class TestModifiedPerformance(common.TransactionCase):
         self.assertEqual(self.modified_line_a_child.total_price_quantity, 30)
         self.assertEqual(self.modified_line_a.total_price_quantity, 35)
         self.assertEqual(self.modified_line_a.total_price, 7)
+
+
+@common.tagged('-at_install', 'post_install')
+class TestSharedFields(common.TransactionCase):
+    def test_shared_fields(self):
+        total = 0
+        count = defaultdict(int)
+        count_related = defaultdict(int)
+        for Model in self.registry.values():
+            for field in Model._fields.values():
+                total += 1
+                count[(field._toplevel, field.automatic)] += 1
+                if field.related:
+                    count_related[(field._toplevel, field.inherited)] += 1
+
+        def percentage(toplevel, automatic):
+            return int(100 * count[(toplevel, automatic)] / total + 0.5)
+
+        def percentage_related(toplevel, inherited):
+            return int(100 * count_related[(toplevel, inherited)] / total + 0.5)
+
+        _logger.info(
+            "%d models, %d fields\n"
+            "\n"
+            "              | user-def | automatic\n"
+            "    ----------+----------+-----------\n"
+            "       shared |    %2d%%   |    %2d%%\n"
+            "     toplevel |    %2d%%   |    %2d%%\n"
+            "\n"
+            "      related | user-def | inherited\n"
+            "    ----------+----------+-----------\n"
+            "       shared |    %2d%%   |    %2d%%\n"
+            "     toplevel |    %2d%%   |    %2d%%\n",
+            len(self.registry), total,
+            percentage(False, False), percentage(False, True),
+            percentage(True, False), percentage(True, True),
+            percentage_related(False, False), percentage_related(False, True),
+            percentage_related(True, False), percentage_related(True, True),
+        )
