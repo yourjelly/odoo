@@ -1490,11 +1490,12 @@ export function getUrlsInfosInString(string) {
     let infos = [],
         match;
     while ((match = URL_REGEX_WITH_INFOS.exec(string))) {
+        const cleanUrl = match[0].replaceAll('\u200b', '');
         infos.push({
-            url: match[2] ? match[0] : 'https://' + match[0],
-            label: match[0],
+            url: match[2] ? cleanUrl : 'https://' + cleanUrl,
+            label: cleanUrl,
             index: match.index,
-            length: match[0].length,
+            length: cleanUrl.length,
         });
     }
     return infos;
