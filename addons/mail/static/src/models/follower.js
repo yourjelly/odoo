@@ -159,7 +159,7 @@ registerModel({
             },
         }),
         followerSubtypeListDialog: one('Dialog', { inverse: 'followerOwnerAsSubtypeList' }),
-        followerViews: many('FollowerView', { inverse: 'follower' }),
+        followerListMenuViews: many('FollowerListMenuView', { inverse: 'followers' }),
         id: attr({ identifying: true }),
         isActive: attr({ default: true }),
         /**

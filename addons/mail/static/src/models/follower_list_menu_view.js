@@ -29,6 +29,23 @@ registerModel({
         /**
          * @param {MouseEvent} ev
          */
+        onClickFollowerDetails(ev, follower) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            follower.openProfile();
+            this.hide();
+        },
+        /**
+         * @param {MouseEvent} ev
+         */
+        onClickFollowerEdit(ev, follower) {
+            ev.preventDefault();
+            follower.showSubtypes();
+            this.hide();
+        },
+        /**
+         * @param {MouseEvent} ev
+         */
         onClickFollowersButton(ev) {
             this.update({ isDropdownOpen: !this.isDropdownOpen });
         },
@@ -43,6 +60,16 @@ registerModel({
                     this.hide();
                     break;
             }
+        },
+        /**
+         * @param {MouseEvent} ev
+         */
+        onClickFollowerRemove(ev, follower) {
+            follower.remove();
+            if (this.chatterOwner) {
+                this.chatterOwner.reloadParentView({ fieldNames: ['message_follower_ids'] });
+            }
+            this.hide();
         },
         /**
          * Close the dropdown when clicking outside of it.
@@ -63,9 +90,9 @@ registerModel({
     fields: {
         chatterOwner: one('Chatter', { identifying: true, inverse: 'followerListMenuView' }),
         dropdownRef: attr({ ref: 'dropdown' }),
-        followerViews: many('FollowerView', { inverse: 'followerListMenuViewOwner',
+        followers: many('Follower', { inverse: 'followerListMenuViews',
             compute() {
-                return this.chatterOwner.thread.followers.map(follower => ({ follower }));
+                return this.chatterOwner.thread.followers;
             },
         }),
         isDisabled: attr({
