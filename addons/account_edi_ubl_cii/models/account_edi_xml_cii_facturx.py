@@ -2,6 +2,8 @@
 from odoo import models, _
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT, float_repr, is_html_empty, html2plaintext, cleanup_xml_node
 from lxml import etree
+import json
+import re
 
 from datetime import datetime
 
@@ -104,12 +106,29 @@ class AccountEdiXmlCII(models.AbstractModel):
         # don't create a bridge to get the date range from the timesheet_ids
         return [invoice.invoice_date]
 
+    def _get_comment(self, invoice):
+        """ Create the comment passed in the 'IncludedNote/Content' tag.
+
+        Unfortunately, there is nothing to indicate if the tax is price_include or not, because this concept
+        does not exists in Factur-X. In Factur-X (and also UBL), all amounts are tax excluded, until we compute the
+        tax. This also means that we need to adapt the price_unit in case of price_include taxes in Factur-X.
+
+        For instance: a 100$ product with a price_include tax 10% means the gross unit price of the item
+        is not 100$ but 100/(1+0.1) = 90,909.
+        """
+        comment = html2plaintext(invoice.narration) if invoice.narration else ""
+        technical_comment = "\nOdoo technical tax details: " + json.dumps({
+            i: {'tax_amount': line.tax_ids.mapped('amount'), 'price_include': line.tax_ids.mapped('price_include'), 'price_unit': line.price_unit}
+            for i, line in enumerate(invoice.invoice_line_ids)
+        })
+        return comment + technical_comment
+
     def _get_exchanged_document_vals(self, invoice):
         return {
             'id': invoice.name,
             'type_code': '380' if invoice.move_type == 'out_invoice' else '381',
             'issue_date_time': invoice.invoice_date,
-            'included_note': html2plaintext(invoice.narration) if invoice.narration else "",
+            'included_note': self._get_comment(invoice),
         }
 
     def _export_invoice_vals(self, invoice):
@@ -166,6 +185,14 @@ class AccountEdiXmlCII(models.AbstractModel):
         for line_vals in template_values['invoice_line_vals_list']:
             line = line_vals['line']
             line_vals['unece_uom_code'] = self._get_uom_unece_code(line)
+            line_vals['gross_price_unit'] = line.price_unit
+            # the gross_price_unit should be the price tax excluded !
+            # if price_unit = 100 and tax 10% price_include -> then the gross_price_unit is 91
+            # TODO: handle multiple taxes
+            for tax in line.tax_ids:
+                if tax.price_include:
+                    line_vals['gross_price_unit'] = line_vals['price_subtotal_unit'] / (1 + tax.amount/100)
+            line_vals['rebate'] = line_vals['gross_price_unit'] - line_vals['price_subtotal_unit']
 
         # data used for ApplicableHeaderTradeSettlement / ApplicableTradeTax (at the end of the xml)
         for tax_detail_vals in template_values['tax_details']['tax_details'].values():
@@ -250,7 +277,8 @@ class AccountEdiXmlCII(models.AbstractModel):
         narration = ""
         note_node = tree.find('./{*}ExchangedDocument/{*}IncludedNote/{*}Content')
         if note_node is not None:
-            narration += note_node.text + "\n"
+            # remove everything starting from 'Odoo technical tax details: '
+            narration += re.sub("\nOdoo technical tax details: .*", "", note_node.text) + "\n"
 
         payment_terms_node = tree.find('.//{*}SpecifiedTradePaymentTerms/{*}Description')
         if payment_terms_node is not None:
@@ -290,6 +318,14 @@ class AccountEdiXmlCII(models.AbstractModel):
                                  '{*}SpecifiedTradeSettlementHeaderMonetarySummation/{*}TotalPrepaidAmount')
         self._import_fill_invoice_down_payment(invoice_form, prepaid_node, qty_factor)
 
+        # ==== Content: potential info about price_include taxes ====
+        content_node = tree.find('./{*}ExchangedDocument/{*}IncludedNote/{*}Content')
+        price_include_details = {}
+        if content_node is not None:
+            search = re.search(r"Odoo technical tax details: (.*)", content_node.text)
+            if search:
+                price_include_details = json.loads(search.group(1))
+
         # ==== invoice_line_ids ====
 
         line_nodes = tree.findall('./{*}SupplyChainTradeTransaction/{*}IncludedSupplyChainTradeLineItem')
@@ -297,12 +333,13 @@ class AccountEdiXmlCII(models.AbstractModel):
             for i, invl_el in enumerate(line_nodes):
                 with invoice_form.invoice_line_ids.new() as invoice_line_form:
                     invoice_line_form.sequence = i
-                    invl_logs = self._import_fill_invoice_line_form(journal, invl_el, invoice_form, invoice_line_form, qty_factor)
+                    tmp = price_include_details[str(i)] if str(i) in price_include_details else {}
+                    invl_logs = self._import_fill_invoice_line_form(journal, invl_el, invoice_form, invoice_line_form, qty_factor, tmp)
                     logs += invl_logs
 
         return invoice_form, logs
 
-    def _import_fill_invoice_line_form(self, journal, tree, invoice_form, invoice_line_form, qty_factor):
+    def _import_fill_invoice_line_form(self, journal, tree, invoice_form, invoice_line_form, qty_factor, price_include_line_details):
         logs = []
 
         def _find_value(xpath, element=tree):
@@ -340,15 +377,33 @@ class AccountEdiXmlCII(models.AbstractModel):
                 _("Could not retrieve the unit of measure for line with label '%s'. Did you install the inventory "
                   "app and enabled the 'Units of Measure' option ?", invoice_line_form.name))
 
+        # get price_subtotal
+        price_subtotal = None
+        line_total_amount_node = tree.find(xpath_dict['line_total_amount'])
+        if line_total_amount_node is not None:
+            price_subtotal = float(line_total_amount_node.text)
+
         # Taxes
         taxes = []
         tax_nodes = tree.findall('.//{*}ApplicableTradeTax/{*}RateApplicablePercent')
         for tax_node in tax_nodes:
+            price_include = False
+            # Handle price_include taxes
+            if price_include_line_details and any(price_include_line_details['price_include']) and price_subtotal is not None:
+                price_include = True
+                # reset price_unit since it's tax excluded while it should be tax included (if the tax is price_include)
+                invoice_line_form.price_unit = price_include_line_details['price_unit']
+                # recompute the discount such that:
+                # price_subtotal = price_unit_tax_excluded * quantity * (1 - discount/100)
+                price_unit_tax_excluded = invoice_line_form.price_unit/(1 + float(tax_node.text)/100)
+                invoice_line_form.discount = round(100 * (-price_subtotal / (price_unit_tax_excluded * invoice_line_form.quantity) + 1), 2)
+
             tax = self.env['account.tax'].search([
                 ('company_id', '=', journal.company_id.id),
                 ('amount', '=', float(tax_node.text)),
                 ('amount_type', '=', 'percent'),
                 ('type_tax_use', '=', journal.type),
+                ('price_include', '=', price_include),
             ], limit=1)
             if tax:
                 taxes.append(tax)

@@ -29,9 +29,9 @@
                     <ram:SpecifiedLineTradeAgreement>
                         <!-- Line information: unit_price (discount is below the taxes) -->
                         <ram:GrossPriceProductTradePrice>
-                            <ram:ChargeAmount t-out="format_monetary(line.price_unit, 2)"/>
+                            <ram:ChargeAmount t-out="format_monetary(line_vals['gross_price_unit'], 2)"/>
                             <!-- Discount. -->
-                            <ram:AppliedTradeAllowanceCharge t-if="line.discount">
+                            <ram:AppliedTradeAllowanceCharge t-if="line_vals.get('rebate')">
                                 <ram:ChargeIndicator>
                                     <udt:Indicator>false</udt:Indicator>
                                 </ram:ChargeIndicator>
@@ -40,8 +40,7 @@
                         </ram:GrossPriceProductTradePrice>
                         <!-- Line unit price, with discount applied -->
                         <ram:NetPriceProductTradePrice>
-                            <ram:ChargeAmount
-                                t-out="format_monetary(line_vals['price_subtotal_unit'], 2)"/>
+                            <ram:ChargeAmount t-out="format_monetary(line_vals['price_subtotal_unit'], 2)"/>
                         </ram:NetPriceProductTradePrice>
                     </ram:SpecifiedLineTradeAgreement>
 
@@ -61,17 +60,6 @@
                                 <ram:RateApplicablePercent t-out="tax_detail_vals['amount']"/>
                             </ram:ApplicableTradeTax>
                         </t>
-
-                        <!-- Discount. -->
-                        <!-- A discount in percent can only be on the whole document (CalculationPercent), not on a line... -->
-                        <ram:SpecifiedTradeAllowanceCharge t-if="line.discount">
-                            <ram:ChargeIndicator>
-                                <udt:Indicator>false</udt:Indicator>
-                            </ram:ChargeIndicator>
-                            <ram:ActualAmount t-out="format_monetary(line.price_unit * line.discount/100, 2)"/>
-                            <!-- https://unece.org/fileadmin/DAM/trade/untdid/d16b/tred/tred5189.htm -->
-                            <ram:ReasonCode>95</ram:ReasonCode>
-                        </ram:SpecifiedTradeAllowanceCharge>
 
                         <!-- Subtotal. -->
                         <ram:SpecifiedTradeSettlementLineMonetarySummation>

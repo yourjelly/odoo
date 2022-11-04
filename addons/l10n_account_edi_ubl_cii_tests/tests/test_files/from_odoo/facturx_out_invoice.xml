@@ -11,7 +11,8 @@
       <udt:DateTimeString format="102">20170101</udt:DateTimeString>
     </ram:IssueDateTime>
     <ram:IncludedNote>
-      <ram:Content>test narration</ram:Content>
+      <ram:Content>test narration
+Odoo technical tax details: {"0": {"tax_amount": [21.0], "price_include": [false], "price_unit": 990.0}, "1": {"tax_amount": [12.0], "price_include": [false], "price_unit": 100.0}, "2": {"tax_amount": [12.0], "price_include": [false], "price_unit": 100.0}}</ram:Content>
     </ram:IncludedNote>
   </rsm:ExchangedDocument>
   <rsm:SupplyChainTradeTransaction>

@@ -110,6 +110,7 @@ class TestUBLCommon(AccountEdiTestCommon):
             'currency_id': currency_id,
         }])
         self.assertEqual(invoice.invoice_line_ids.mapped('price_subtotal'), list_line_subtotals)
+        return invoice
 
     # -------------------------------------------------------------------------
     # EXPORT HELPERS

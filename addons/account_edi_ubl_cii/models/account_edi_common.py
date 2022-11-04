@@ -461,10 +461,9 @@ class AccountEdiCommon(models.AbstractModel):
         rebate_node = tree.find(xpath_dict['rebate'])
         net_price_unit_node = tree.find(xpath_dict['net_price_unit'])
         if rebate_node is not None:
-            if net_price_unit_node is not None and gross_price_unit_node is not None:
-                rebate = float(gross_price_unit_node.text) - float(net_price_unit_node.text)
-            else:
-                rebate = float(rebate_node.text)
+            rebate = float(rebate_node.text)
+        elif net_price_unit_node is not None and gross_price_unit_node is not None:
+            rebate = float(gross_price_unit_node.text) - float(net_price_unit_node.text)
 
         # net_price_unit (mandatory)
         net_price_unit = None

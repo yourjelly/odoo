@@ -74,6 +74,22 @@ class TestCIIFR(TestUBLCommon):
             'country_id': cls.env.ref('base.fr').id,
         })
 
+        cls.tax_5_incl = cls.env['account.tax'].create({
+            'name': '5 % included',
+            'amount_type': 'percent',
+            'amount': 5,
+            'type_tax_use': 'purchase',
+            'price_include': True,
+        })
+
+        cls.tax_5_not_incl = cls.env['account.tax'].create({
+            'name': '5 % not included',
+            'amount_type': 'percent',
+            'amount': 5,
+            'type_tax_use': 'purchase',
+            'price_include': False,
+        })
+
     @classmethod
     def setup_company_data(cls, company_name, chart_template):
         # OVERRIDE
@@ -219,24 +235,32 @@ class TestCIIFR(TestUBLCommon):
         Tests whether the tax included / tax excluded are correctly decoded when
         importing a document. The imported xml represents the following invoice:
 
-        Description         Quantity    Unit Price    Taxes            Amount
-        ---------------------------------------------------------------------
-        Corner Desk Right          1           100    5% (incl)         95.24
-        Large Cabinet              1           100    5% (not incl)       100
+        Description         Quantity    Unit Price    Disc (%)   Taxes            Amount
+        --------------------------------------------------------------------------------
+        Corner Desk Right          1           100          0    5% (incl)         95.24
+        Large Cabinet              1           100          0    5% (not incl)       100
+        Large Cabinet              1           200         10    5% (incl)        171.43
+        Large Cabinet              1           200         10    5% (not incl)       180
         -----------------------
-        Untaxed Amount: 195.24
-        Taxes: 9.76
+        Untaxed Amount: 546.67
+        Taxes: 27.33
         -----------------------
-        Total: 205
+        Total: 574
         """
-        self._assert_imported_invoice_from_file(
+        invoice = self._assert_imported_invoice_from_file(
             subfolder='tests/test_files/from_odoo',
             filename='facturx_out_invoice_tax_incl.xml',
-            amount_total=205,
-            amount_tax=9.76,
-            list_line_subtotals=[95.24, 100],
+            amount_total=574,
+            amount_tax=27.33,
+            list_line_subtotals=[95.24, 100, 171.43, 180],
             move_type='in_invoice',
         )
+        self.assertEqual(invoice.invoice_line_ids.mapped('price_unit'), [100, 100, 200, 200])
+        self.assertEqual(invoice.invoice_line_ids.mapped('discount'), [0, 0, 10, 10])
+        self.assertEqual(invoice.invoice_line_ids[0].tax_ids, self.tax_5_incl)
+        self.assertEqual(invoice.invoice_line_ids[1].tax_ids, self.tax_5_not_incl)
+        self.assertEqual(invoice.invoice_line_ids[2].tax_ids, self.tax_5_incl)
+        self.assertEqual(invoice.invoice_line_ids[3].tax_ids, self.tax_5_not_incl)
 
 
     def test_import_fnfe_examples(self):
