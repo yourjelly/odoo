@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="uae_sale_tax_5_dubai" model="account.tax.template">
-        <field name="name">VAT 5% (Dubai)</field>
+        <field name="name">5% (Dubai)</field>
+        <field name="description">VAT 5% (Dubai)</field>
         <field name="type_tax_use">sale</field>
         <field name="amount">5</field>
         <field name="amount_type">percent</field>
-        <field name="description">VAT 5%</field>
+        <field name="label_invoice">5%</field>
         <field name="tax_group_id" ref="ae_tax_group_5"/>
         <field name="chart_template_id" ref="uae_chart_template_standard"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -32,11 +33,12 @@
         ]"/>
     </record>
     <record id="uae_sale_tax_5_abu_dhabi" model="account.tax.template">
-        <field name="name">VAT 5% (Abu Dhabi)</field>
+        <field name="name">5% (Abu Dhabi)</field>
+        <field name="description">VAT 5% (Abu Dhabi)</field>
         <field name="type_tax_use">sale</field>
         <field name="amount">5</field>
         <field name="amount_type">percent</field>
-        <field name="description">VAT 5%</field>
+        <field name="label_invoice">5%</field>
         <field name="tax_group_id" ref="ae_tax_group_5"/>
         <field name="chart_template_id" ref="uae_chart_template_standard"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -63,11 +65,12 @@
         ]"/>
     </record>
     <record id="uae_sale_tax_5_sharjah" model="account.tax.template">
-        <field name="name">VAT 5% (Sharjah)</field>
+        <field name="name">5% (Sharjah)</field>
+        <field name="description">VAT 5% (Sharjah)</field>
         <field name="type_tax_use">sale</field>
         <field name="amount">5</field>
         <field name="amount_type">percent</field>
-        <field name="description">VAT 5%</field>
+        <field name="label_invoice">5%</field>
         <field name="tax_group_id" ref="ae_tax_group_5"/>
         <field name="chart_template_id" ref="uae_chart_template_standard"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -94,11 +97,12 @@
         ]"/>
     </record>
     <record id="uae_sale_tax_5_ajman" model="account.tax.template">
-        <field name="name">VAT 5% (Ajman)</field>
+        <field name="name">5% (Ajman)</field>
+        <field name="description">VAT 5% (Ajman)</field>
         <field name="type_tax_use">sale</field>
         <field name="amount">5</field>
         <field name="amount_type">percent</field>
-        <field name="description">VAT 5%</field>
+        <field name="label_invoice">5%</field>
         <field name="tax_group_id" ref="ae_tax_group_5"/>
         <field name="chart_template_id" ref="uae_chart_template_standard"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -125,11 +129,12 @@
         ]"/>
     </record>
     <record id="uae_sale_tax_5_umm_al_quwain" model="account.tax.template">
-        <field name="name">VAT 5% (Umm Al Quwain)</field>
+        <field name="name">5% (Umm Al Quwain)</field>
+        <field name="description">VAT 5% (Umm Al Quwain)</field>
         <field name="type_tax_use">sale</field>
         <field name="amount">5</field>
         <field name="amount_type">percent</field>
-        <field name="description">VAT 5%</field>
+        <field name="label_invoice">5%</field>
         <field name="tax_group_id" ref="ae_tax_group_5"/>
         <field name="chart_template_id" ref="uae_chart_template_standard"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -156,11 +161,12 @@
         ]"/>
     </record>
     <record id="uae_sale_tax_5_ras_al_khaima" model="account.tax.template">
-        <field name="name">VAT 5% (Ras Al-Khaima)</field>
+        <field name="name">5% (Ras Al-Khaima)</field>
+        <field name="description">VAT 5% (Ras Al-Khaima)</field>
         <field name="type_tax_use">sale</field>
         <field name="amount">5</field>
         <field name="amount_type">percent</field>
-        <field name="description">VAT 5%</field>
+        <field name="label_invoice">5%</field>
         <field name="tax_group_id" ref="ae_tax_group_5"/>
         <field name="chart_template_id" ref="uae_chart_template_standard"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -187,11 +193,12 @@
         ]"/>
     </record>
     <record id="uae_sale_tax_5_fujairah" model="account.tax.template">
-        <field name="name">VAT 5% (Fujairah)</field>
+        <field name="name">5% S (Fujairah)</field>
+        <field name="description">VAT 5% (Fujairah)</field>
         <field name="type_tax_use">sale</field>
         <field name="amount">5</field>
         <field name="amount_type">percent</field>
-        <field name="description">VAT 5%</field>
+        <field name="label_invoice">5%</field>
         <field name="tax_group_id" ref="ae_tax_group_5"/>
         <field name="chart_template_id" ref="uae_chart_template_standard"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -219,10 +226,11 @@
     </record>
     <record id="uae_sale_tax_exempted" model="account.tax.template">
         <field name="name">Exempted Tax</field>
+        <field name="description">Exempted Tax</field>
         <field name="type_tax_use">sale</field>
         <field name="amount">0</field>
         <field name="amount_type">percent</field>
-        <field name="description">Exempted</field>
+        <field name="label_invoice">Exempted</field>
         <field name="tax_group_id" ref="ae_tax_group_exempted"/>
         <field name="chart_template_id" ref="uae_chart_template_standard"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -245,7 +253,7 @@
         <field name="type_tax_use">sale</field>
         <field name="amount">0</field>
         <field name="amount_type">percent</field>
-        <field name="description">VAT 0%</field>
+        <field name="label_invoice">VAT 0%</field>
         <field name="tax_group_id" ref="ae_tax_group_0"/>
         <field name="chart_template_id" ref="uae_chart_template_standard"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -268,7 +276,7 @@
         <field name="type_tax_use">sale</field>
         <field name="amount">0</field>
         <field name="amount_type">percent</field>
-        <field name="description">Export Tax</field>
+        <field name="label_invoice">Export Tax</field>
         <field name="chart_template_id" ref="uae_chart_template_standard"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {'repartition_type': 'base'}),
@@ -284,7 +292,7 @@
         <field name="type_tax_use">sale</field>
         <field name="amount">5</field>
         <field name="amount_type">percent</field>
-        <field name="description">Supplies subject to reverse charge provisions</field>
+        <field name="label_invoice">Supplies subject to reverse charge provisions</field>
         <field name="chart_template_id" ref="uae_chart_template_standard"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
@@ -326,7 +334,7 @@
         <field name="type_tax_use">sale</field>
         <field name="amount">5</field>
         <field name="amount_type">percent</field>
-        <field name="description">Supplies subject to reverse charge provisions</field>
+        <field name="label_invoice">Supplies subject to reverse charge provisions</field>
         <field name="chart_template_id" ref="uae_chart_template_standard"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
@@ -368,7 +376,7 @@
         <field name="type_tax_use">sale</field>
         <field name="amount">5</field>
         <field name="amount_type">percent</field>
-        <field name="description">Supplies subject to reverse charge provisions</field>
+        <field name="label_invoice">Supplies subject to reverse charge provisions</field>
         <field name="chart_template_id" ref="uae_chart_template_standard"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
@@ -410,7 +418,7 @@
         <field name="type_tax_use">sale</field>
         <field name="amount">5</field>
         <field name="amount_type">percent</field>
-        <field name="description">Supplies subject to reverse charge provisions</field>
+        <field name="label_invoice">Supplies subject to reverse charge provisions</field>
         <field name="chart_template_id" ref="uae_chart_template_standard"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
@@ -452,7 +460,7 @@
         <field name="type_tax_use">sale</field>
         <field name="amount">5</field>
         <field name="amount_type">percent</field>
-        <field name="description">Supplies subject to reverse charge provisions</field>
+        <field name="label_invoice">Supplies subject to reverse charge provisions</field>
         <field name="chart_template_id" ref="uae_chart_template_standard"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
@@ -494,7 +502,7 @@
         <field name="type_tax_use">sale</field>
         <field name="amount">5</field>
         <field name="amount_type">percent</field>
-        <field name="description">Supplies subject to reverse charge provisions</field>
+        <field name="label_invoice">Supplies subject to reverse charge provisions</field>
         <field name="chart_template_id" ref="uae_chart_template_standard"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
@@ -536,7 +544,7 @@
         <field name="type_tax_use">sale</field>
         <field name="amount">5</field>
         <field name="amount_type">percent</field>
-        <field name="description">Supplies subject to reverse charge provisions</field>
+        <field name="label_invoice">Supplies subject to reverse charge provisions</field>
         <field name="chart_template_id" ref="uae_chart_template_standard"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
@@ -578,7 +586,7 @@
         <field name="type_tax_use">sale</field>
         <field name="amount">5.0</field>
         <field name="amount_type">percent</field>
-        <field name="description">Tax Refunds provided to Tourists under the Tax Refunds for Tourists Scheme</field>
+        <field name="label_invoice">Tax Refunds provided to Tourists under the Tax Refunds for Tourists Scheme</field>
         <field name="chart_template_id" ref="uae_chart_template_standard"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
@@ -609,7 +617,7 @@
         <field name="type_tax_use">purchase</field>
         <field name="amount">5</field>
         <field name="amount_type">percent</field>
-        <field name="description">VAT 5%</field>
+        <field name="label_invoice">VAT 5%</field>
         <field name="tax_group_id" ref="ae_tax_group_5"/>
         <field name="chart_template_id" ref="uae_chart_template_standard"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -640,7 +648,7 @@
         <field name="type_tax_use">purchase</field>
         <field name="amount">0</field>
         <field name="amount_type">percent</field>
-        <field name="description">Exempted Tax</field>
+        <field name="label_invoice">Exempted Tax</field>
         <field name="tax_group_id" ref="ae_tax_group_exempted"/>
         <field name="chart_template_id" ref="uae_chart_template_standard"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -657,7 +665,7 @@
         <field name="type_tax_use">purchase</field>
         <field name="amount">0</field>
         <field name="amount_type">percent</field>
-        <field name="description">VAT 0%</field>
+        <field name="label_invoice">VAT 0%</field>
         <field name="tax_group_id" ref="ae_tax_group_0"/>
         <field name="chart_template_id" ref="uae_chart_template_standard"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -674,7 +682,7 @@
         <field name="type_tax_use">purchase</field>
         <field name="amount">5</field>
         <field name="amount_type">percent</field>
-        <field name="description">Import Tax</field>
+        <field name="label_invoice">Import Tax</field>
         <field name="chart_template_id" ref="uae_chart_template_standard"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
@@ -704,7 +712,7 @@
         <field name="type_tax_use">purchase</field>
         <field name="amount">5</field>
         <field name="amount_type">percent</field>
-        <field name="description">Supplies subject to reverse charge provisions</field>
+        <field name="label_invoice">Supplies subject to reverse charge provisions</field>
         <field name="chart_template_id" ref="uae_chart_template_standard"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
