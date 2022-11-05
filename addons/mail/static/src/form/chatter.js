@@ -22,15 +22,16 @@ export class Chatter extends Component {
             metadata: null,
         });
 
-        (this.thread = this.getThread(this.props.resId)), useChildSubEnv({ inChatter: true });
+        this.load();
+        useChildSubEnv({ inChatter: true });
 
         onWillUpdateProps((nextProps) => {
             if (nextProps.resId !== this.props.resId) {
-                this.thread = this.getThread(nextProps.resId);
+                this.load(nextProps.resId);
             }
         });
     }
-    getThread(resId) {
+    load(resId = this.props.resId) {
         const thread = this.messaging.getChatterThread(this.props.resModel, resId);
         this.rpc("/mail/thread/data", {
             request_list: ["activities", "followers", "attachments", "messages"],
@@ -41,7 +42,7 @@ export class Chatter extends Component {
                 this.state.metadata = result;
             }
         });
-        return thread;
+        this.thread = thread;
     }
 
     toggleComposer() {
@@ -67,7 +68,7 @@ export class Chatter extends Component {
             {
                 onClose: () => {
                     // to force a reload for this thread
-                    this.getThread(this.props.resId);
+                    this.load();
                 },
             }
         );
