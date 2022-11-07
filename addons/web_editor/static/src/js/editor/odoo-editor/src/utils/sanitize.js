@@ -137,7 +137,7 @@ function sanitizeNode(node, root) {
         if (isEditorTab(tabPreviousSibling)) {
             node.style.width = '40px';
         } else {
-            const editable = closestElement(node, '.odoo-editor-editable');
+            const editable = closestElement(node, { selector: '.odoo-editor-editable' });
             if (editable?.firstElementChild) {
                 const nodeRect = node.getBoundingClientRect();
                 const referenceRect = editable.firstElementChild.getBoundingClientRect();
@@ -206,7 +206,7 @@ export function sanitize(nodeToSanitize, root = nodeToSanitize) {
         }
 
         // Update link URL if label is a new valid link.
-        const startEl = start && closestElement(start, 'a');
+        const startEl = start && closestElement(start, { selector: 'a' });
         if (startEl && root.contains(startEl)) {
             const linkLabel = startEl.innerText;
             const urlInfo = getUrlsInfosInString(linkLabel);

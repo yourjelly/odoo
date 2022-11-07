@@ -369,8 +369,8 @@ export class Wysiwyg extends Component {
             getPowerboxElement: () => {
                 const selection = (this.options.document || document).getSelection();
                 if (selection.isCollapsed && selection.rangeCount) {
-                    const baseNode = closestElement(selection.anchorNode, 'P:not([t-field]), DIV:not([t-field])');
-                    const fieldContainer = closestElement(selection.anchorNode, '[data-oe-field]');
+                    const baseNode = closestElement(selection.anchorNode, { selector: 'P:not([t-field]), DIV:not([t-field])' });
+                    const fieldContainer = closestElement(selection.anchorNode, { selector: '[data-oe-field]' });
                     if (!baseNode ||
                         (
                             fieldContainer &&
@@ -1582,7 +1582,7 @@ export class Wysiwyg extends Component {
         // selection when the modal is closed.
         const restoreSelection = preserveCursor(this.odooEditor.document);
 
-        const $editable = $(OdooEditorLib.closestElement(range.startContainer, '.o_editable') || this.odooEditor.editable);
+        const $editable = $(OdooEditorLib.closestElement(range.startContainer, { selector: '.o_editable' }) || this.odooEditor.editable);
         const model = $editable.data('oe-model');
         const field = $editable.data('oe-field');
         const type = $editable.data('oe-type');
@@ -2020,7 +2020,7 @@ export class Wysiwyg extends Component {
             const containerSelector = '#wrap>*, .oe_structure>*, [contenteditable]';
             const container =
                 (selection &&
-                    closestElement(selection.anchorNode, containerSelector)) ||
+                    closestElement(selection.anchorNode, { selector: containerSelector })) ||
                 // In case a suitable container could not be found then the
                 // selection is restricted inside the editable area.
                 this.$editable.find(containerSelector);
@@ -2372,7 +2372,7 @@ export class Wysiwyg extends Component {
                             return true;
                         }
                         const anchor = this.odooEditor.document.getSelection().anchorNode;
-                        const row = closestElement(anchor, '.o_text_columns .row');
+                        const row = closestElement(anchor, { selector: '.o_text_columns .row' });
                         return row && row.childElementCount === 2;
                     },
                 },
@@ -2388,7 +2388,7 @@ export class Wysiwyg extends Component {
                             return true;
                         }
                         const anchor = this.odooEditor.document.getSelection().anchorNode;
-                        const row = closestElement(anchor, '.o_text_columns .row');
+                        const row = closestElement(anchor, { selector: '.o_text_columns .row' });
                         return row && row.childElementCount === 3;
                     },
                 },
@@ -2404,7 +2404,7 @@ export class Wysiwyg extends Component {
                             return true;
                         }
                         const anchor = this.odooEditor.document.getSelection().anchorNode;
-                        const row = closestElement(anchor, '.o_text_columns .row');
+                        const row = closestElement(anchor, { selector: '.o_text_columns .row' });
                         return row && row.childElementCount === 4;
                     },
                 },
@@ -2420,7 +2420,7 @@ export class Wysiwyg extends Component {
                             return true;
                         }
                         const anchor = this.odooEditor.document.getSelection().anchorNode;
-                        const row = closestElement(anchor, '.o_text_columns .row');
+                        const row = closestElement(anchor, { selector: '.o_text_columns .row' });
                         return !row;
                     },
                 },

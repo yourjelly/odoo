@@ -108,7 +108,7 @@ HTMLElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false, 
             // removed if it is paragraph-like.
             throw UNREMOVABLE_ROLLBACK_CODE;
         }
-        const closestLi = closestElement(this, 'li');
+        const closestLi = closestElement(this, { selector: 'li' });
         if ((closestLi && !closestLi.previousElementSibling) || !isBlock(this) || isSelfClosingElement(this)) {
             /**
              * Backspace at the beginning of an inline node, nothing has to be

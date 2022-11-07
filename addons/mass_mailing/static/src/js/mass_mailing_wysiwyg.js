@@ -138,7 +138,7 @@ export class MassMailingWysiwyg extends Wysiwyg {
                 } else {
                     const selection = this.odooEditor.document.getSelection();
                     const range = selection.rangeCount && selection.getRangeAt(0);
-                    return !!range && !!closestElement(range.startContainer, '[style*=background-image]');
+                    return !!range && !!closestElement(range.startContainer, { selector: '[style*=background-image]' });
                 }
             }
         }
@@ -154,7 +154,7 @@ export class MassMailingWysiwyg extends Wysiwyg {
         const selection = this.odooEditor.document.getSelection();
         if (!selection) return;
         const range = selection.rangeCount && selection.getRangeAt(0);
-        const isWithinBackgroundImage = !!range && !!closestElement(range.startContainer, '[style*=background-image]');
+        const isWithinBackgroundImage = !!range && !!closestElement(range.startContainer, { selector: '[style*=background-image]' });
         if (isWithinBackgroundImage) {
             this.toolbarEl.querySelector('#create-link').classList.toggle('d-none', true);
         }

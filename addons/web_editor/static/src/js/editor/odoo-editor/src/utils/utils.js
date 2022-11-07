@@ -283,22 +283,23 @@ export function getFurthestUneditableParent(node, parentLimit) {
     return nonEditableElement;
 }
 /**
- * Returns the closest HTMLElement of the provided Node
- * if a 'selector' is provided, Returns the closest HTMLElement that match the selector
+ * Returns the closest HTMLElement of the provided Node. If a 'selector' is
+ * provided, returns the closest HTMLElement that match the selector. If a
+ * predicate is provided, the first closest that match the predicate will be
+ * returned. Any returned element will be contained within the editable.
  *
  * @param {Node} node
- * @param {string} [selector=undefined]
- * @returns {HTMLElement}
+ * @param {string} [selector='*']
+ * @param {string} [predicate=() => true]
+ * @returns {HTMLElement|null}
  */
-export function closestElement(node, selector) {
-    let element = node;
-    while (element && element.nodeType !== Node.ELEMENT_NODE) {
-        element = element.parentNode;
-    }
-    if (element && selector) {
-        element = element.closest(selector);
-    }
-    return element && element.querySelector('.odoo-editor-editable') ? null : element;
+export function closestElement(node, { selector = "*", predicate = () => true } = {}) {
+    let element = node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement;
+    do {
+        element = selector ? element && element.closest(selector) : element;
+    } while (element && predicate && !predicate(element) && (element = element.parentElement));
+
+    return element?.closest('.odoo-editor-editable') && element;
 }
 
 /**
@@ -473,7 +474,7 @@ export function hasValidSelection(editable) {
  *     positions which are not possible, like the cursor inside an image).
  */
 export function getNormalizedCursorPosition(node, offset, full = true) {
-    const editable = closestElement(node, '.odoo-editor-editable');
+    const editable = closestElement(node, { selector: '.odoo-editor-editable' });
     let closest = closestElement(node);
     while (
         closest &&
@@ -679,7 +680,7 @@ export function getTraversedNodes(editable, range = getDeepRange(editable)) {
     while (node && node !== range.endContainer) {
         node = iterator.nextNode();
         if (node) {
-            const selectedTable = closestElement(node, '.o_selected_table');
+            const selectedTable = closestElement(node, { selector: '.o_selected_table' });
             if (selectedTable) {
                 for (const selectedTd of selectedTable.querySelectorAll('.o_selected_td')) {
                     traversedNodes.add(selectedTd);
@@ -708,7 +709,7 @@ export function getSelectedNodes(editable) {
     const range = sel.getRangeAt(0);
     return [...new Set(getTraversedNodes(editable).flatMap(
         node => {
-            const td = closestElement(node, '.o_selected_td');
+            const td = closestElement(node, { selector: '.o_selected_td' });
             if (td) {
                 return descendants(td);
             } else if (range.isPointInRange(node, 0) && range.isPointInRange(node, nodeSize(node))) {
@@ -884,7 +885,7 @@ export function isSelectionInSelectors(selector) {
     if (anchor && anchor.nodeType && anchor.nodeType !== Node.ELEMENT_NODE) {
         anchor = anchor.parentElement;
     }
-    if (anchor && closestElement(anchor, selector)) {
+    if (anchor && closestElement(anchor, { selector })) {
         return true;
     }
     return false;
@@ -1383,7 +1384,7 @@ export function isMediaElement(node) {
  * @returns {boolean}
  */
 export function isProtected(node) {
-    const closestProtectedElement = closestElement(node, '[data-oe-protected]');
+    const closestProtectedElement = closestElement(node, { selector: '[data-oe-protected]' });
     if (closestProtectedElement) {
         return ["", "true"].includes(closestProtectedElement.dataset.oeProtected);
     }
@@ -1413,7 +1414,7 @@ export function getInSelection(document, selector) {
     const selection = document.getSelection();
     const range = selection && !!selection.rangeCount && selection.getRangeAt(0);
     if (range) {
-        const selectorInStartAncestors = closestElement(range.startContainer, selector);
+        const selectorInStartAncestors = closestElement(range.startContainer, { selector });
         if (selectorInStartAncestors) {
             return selectorInStartAncestors;
         } else {
@@ -1433,7 +1434,7 @@ export function getInSelection(document, selector) {
  * @returns {number}
  */
 export function getRowIndex(trOrTd) {
-    const tr = closestElement(trOrTd, 'tr');
+    const tr = closestElement(trOrTd, { selector: 'tr' });
     const trParent = tr && tr.parentElement;
     if (!trParent) {
         return -1;
@@ -1541,7 +1542,7 @@ export function getOuid(node, optimize = false) {
  * @returns {boolean}
  */
 export function isHtmlContentSupported(node) {
-    return !closestElement(node, '[data-oe-model]:not([data-oe-field="arch"]):not([data-oe-type="html"]),[data-oe-translation-id]', true);
+    return !closestElement(node, { selector: '[data-oe-model]:not([data-oe-field="arch"]):not([data-oe-type="html"]),[data-oe-translation-id]' });
 }
 /**
  * Returns whether the given node is a element that could be considered to be

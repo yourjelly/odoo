@@ -614,7 +614,7 @@ export class WysiwygAdapterComponent extends Wysiwyg {
             const $separatorBody = $(selector);
             const $clonedBody = $separatorBody.clone().removeClass('oe_snippet_body');
             const range = this.getDeepRange();
-            const block = this.closestElement(range.endContainer, 'p, div, ol, ul, cl, h1, h2, h3, h4, h5, h6');
+            const block = this.closestElement(range.endContainer, { selector: 'p, div, ol, ul, cl, h1, h2, h3, h4, h5, h6' });
             if (block) {
                 block.after($clonedBody[0]);
                 this.snippetsMenu.callPostSnippetDrop($clonedBody);
