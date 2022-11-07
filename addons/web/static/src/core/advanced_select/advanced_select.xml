@@ -9,8 +9,7 @@
                 class="'o_advanced_select ' + props.class"
                 togglerClass="'o_advanced_select_toggler d-flex flex-row align-items-center flex-nowrap btn btn-secondary w-100 bg-light ' + props.togglerClass"
                 menuClass="'o_advanced_select_menu ' + (props.searchable ? 'pt-0' : '')"
-                position="'bottom'"
-                isDocked="'vertical'"
+                position="'bottom-fit'"
                 beforeOpen="() => this.loadGroups('')"
                 onOpened.bind="onOpened"
             >

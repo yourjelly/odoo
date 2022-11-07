@@ -109,7 +109,6 @@ export class Dropdown extends Component {
         const positioningOptions = {
             popper: "menuRef",
             position,
-            isDocked: this.props.isDocked,
             onPositioned: (el, { direction, variant }) => {
                 if (this.parentDropdown && ["right", "left"].includes(direction)) {
                     // Correctly align sub dropdowns items with its parent's
@@ -341,10 +340,6 @@ Dropdown.props = {
         optional: true,
     },
     hotkey: {
-        type: String,
-        optional: true,
-    },
-    isDocked: {
         type: String,
         optional: true,
     },

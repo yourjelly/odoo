@@ -13,8 +13,7 @@
                 togglerClass="'o_select_toggler d-flex flex-row align-items-center flex-nowrap btn btn-secondary w-100 bg-light ' + props.togglerClass"
                 menuClass="'o_select_menu ' + (props.searchable ? 'pt-0' : '')"
                 onOpened.bind="clearSearch"
-                position="'bottom'"
-                isDocked="'vertical'"
+                position="'bottom-fit'"
             >
                 <t t-set-slot="toggler">
                     <span class="o_select_toggler_slot text-start">
