@@ -276,8 +276,7 @@
                                 groups="base.group_no_one"/>
                         <button name="%(resource_resource_action_from_calendar)d" type="action"
                                 string="Work Resources" icon="fa-cogs"
-                                class="oe_stat_button"
-                                groups="base.group_user"/>
+                                class="oe_stat_button"/>
                     </div>
                     <h1>
                         <field name="name"/>

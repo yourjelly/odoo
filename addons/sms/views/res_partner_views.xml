@@ -18,7 +18,7 @@
                 <div class="o_row o_row_readonly">
                     <button name="phone_action_blacklist_remove" class="fa fa-ban text-danger"
                         title="This phone number is blacklisted for SMS Marketing. Click to unblacklist."
-                        type="object" context="{'default_phone': phone}" groups="base.group_user"
+                        type="object" context="{'default_phone': phone}"
                         attrs="{'invisible': [('phone_blacklisted', '=', False)]}"/>
                     <field name="phone" widget="phone"/>
                 </div>
@@ -30,7 +30,7 @@
                 <div class="o_row o_row_readonly">
                     <button name="phone_action_blacklist_remove" class="fa fa-ban text-danger"
                         title="This phone number is blacklisted for SMS Marketing. Click to unblacklist."
-                        type="object" context="{'default_phone': mobile}" groups="base.group_user"
+                        type="object" context="{'default_phone': mobile}"
                         attrs="{'invisible': [('mobile_blacklisted', '=', False)]}"/>
                     <field name="mobile" widget="phone"/>
                 </div>

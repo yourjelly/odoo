@@ -61,7 +61,7 @@
                     <button name="action_send_guidelines" type="object" class="btn btn-secondary" string="Send Guidelines"/>
                 </header>
                 <sheet>
-                    <div class="oe_button_box" name="button_box" groups="base.group_user" attrs="{'invisible': [('can_manage_group', '=', False)]}">
+                    <div class="oe_button_box" name="button_box" attrs="{'invisible': [('can_manage_group', '=', False)]}">
                         <button name="%(mail_group.mail_group_member_action)d"
                                 type="action"
                                 context="{'search_default_mail_group_id': active_id}"

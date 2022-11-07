@@ -144,7 +144,7 @@
                             <div class="oe_kanban_global_area oe_kanban_global_click o_kanban_attachment">
                                 <div class="row">
                                     <div class="offset-10">
-                                        <div class="o_dropdown_kanban dropdown" groups="base.group_user">
+                                        <div class="o_dropdown_kanban dropdown">
                                             <a role="button" class="dropdown-toggle o-no-caret btn" data-bs-toggle="dropdown" href="#" aria-label="Dropdown menu" title="Dropdown menu">
                                                 <span class="fa fa-ellipsis-v"/>
                                             </a>

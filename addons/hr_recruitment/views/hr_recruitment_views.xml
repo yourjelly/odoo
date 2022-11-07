@@ -383,7 +383,7 @@
                                 <t t-if="record.partner_mobile.raw_value"><i class="fa fa-mobile mr4" role="img" aria-label="Mobile" title="Mobile"/><field name="partner_mobile" widget="phone"/><br/></t>
                                 <div class="o_kanban_record_bottom mt4">
                                     <div class="oe_kanban_bottom_left">
-                                        <div class="float-start mr4" groups="base.group_user">
+                                        <div class="float-start mr4">
                                             <field name="priority" widget="priority"/>
                                         </div>
                                         <div class="o_kanban_inline_block mr8">

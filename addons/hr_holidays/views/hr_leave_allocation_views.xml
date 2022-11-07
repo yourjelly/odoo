@@ -373,7 +373,7 @@
                                     <div class="text-muted o_kanban_record_subtitle">
                                         <t t-esc="record.holiday_status_id.value"/>
                                     </div>
-                                    <div class="o_dropdown_kanban dropdown" groups="base.group_user">
+                                    <div class="o_dropdown_kanban dropdown">
                                         <a role="button" class="dropdown-toggle o-no-caret btn" data-bs-toggle="dropdown" href="#" aria-label="Dropdown menu" title="Dropdown menu">
                                             <span class="fa fa-ellipsis-v"/>
                                         </a>

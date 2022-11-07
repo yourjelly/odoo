@@ -57,7 +57,6 @@
                         icon="fa-calendar"
                         type="action"
                         context="{'search_default_employee_id': employee_ids, 'search_default_check_in_filter': '1'}"
-                        groups="base.group_user"
                         help="Worked hours last month">
                     <div class="o_field_widget o_stat_info">
                         <span class="o_stat_value">
@@ -76,7 +75,6 @@
                         type="action"
                         attrs="{'invisible': [('total_overtime', '=', 0.0)]}"
                         context="{'search_default_employee_id': employee_ids}"
-                        groups="base.group_user"
                         help="Amount of extra hours">
                     <div class="o_stat_info">
                         <span class="o_stat_value text-success" attrs="{'invisible': [('total_overtime', '&lt;', 0)]}">

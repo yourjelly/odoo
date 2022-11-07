@@ -399,7 +399,6 @@
         <menuitem name="Website"
             id="menu_website_configuration"
             sequence="95"
-            groups="base.group_user"
             web_icon="website,static/description/icon.svg"/>
 
         <menuitem id="menu_site"

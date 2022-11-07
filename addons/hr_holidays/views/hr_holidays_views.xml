@@ -5,8 +5,7 @@
         name="Time Off"
         id="menu_hr_holidays_root"
         sequence="225"
-        web_icon="hr_holidays,static/description/icon.svg"
-        groups="base.group_user"/>
+        web_icon="hr_holidays,static/description/icon.svg"/>
 
     <menuitem
         id="menu_hr_holidays_my_leaves"

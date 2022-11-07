@@ -54,7 +54,7 @@
                     </notebook>
                 </sheet>
                 <div class="oe_chatter">
-                    <field name="message_follower_ids" options="{'post_refresh':True}" groups="base.group_user"/>
+                    <field name="message_follower_ids" options="{'post_refresh':True}"/>
                     <field name="activity_ids"/>
                     <field name="message_ids"/>
                 </div>

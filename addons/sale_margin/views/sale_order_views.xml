@@ -7,8 +7,8 @@
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='tax_totals']" position="after">
-                <label for="margin" groups="base.group_user"/>
-                <div class="text-nowrap" groups="base.group_user">
+                <label for="margin"/>
+                <div class="text-nowrap">
                     <field name="margin" class="oe_inline"/>
                     <field name="amount_untaxed" invisible="1"/>
                     <span class="oe_inline" attrs="{'invisible': [('amount_untaxed', '=', 0)]}">
@@ -25,7 +25,7 @@
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='order_line']/form//field[@name='price_unit']" position="after">
-                <field name="purchase_price" groups="base.group_user"/>
+                <field name="purchase_price"/>
             </xpath>
         </field>
     </record>

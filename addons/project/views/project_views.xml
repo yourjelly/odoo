@@ -461,7 +461,7 @@
                         <field name="stage_id" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}" groups="project.group_project_stages"/>
                     </header>
                 <sheet string="Project">
-                    <div class="oe_button_box" name="button_box" groups="base.group_user">
+                    <div class="oe_button_box" name="button_box">
                         <button class="oe_stat_button" name="project_update_all_action" type="object" groups="project.group_project_manager">
                             <div class="ps-4">
                                 <field name="last_update_color" invisible="1"/>
@@ -628,7 +628,7 @@
                     </notebook>
                 </sheet>
                 <div class="oe_chatter">
-                    <field name="message_follower_ids" options="{'post_refresh':True}" help="Follow this project to automatically track the events associated to tasks and issues of this project." groups="base.group_user"/>
+                    <field name="message_follower_ids" options="{'post_refresh':True}" help="Follow this project to automatically track the events associated to tasks and issues of this project."/>
                     <field name="activity_ids"/>
                     <field name="message_ids"/>
                 </div>
@@ -857,7 +857,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="container o_kanban_card_manage_pane dropdown-menu" role="menu" groups="base.group_user">
+                                    <div class="container o_kanban_card_manage_pane dropdown-menu" role="menu">
                                         <div class="row">
                                             <div class="col-6 o_kanban_card_manage_section o_kanban_manage_view">
                                                 <div role="menuitem" class="o_kanban_card_manage_title">
@@ -897,7 +897,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <a class="o_kanban_manage_toggle_button o_dropdown_kanban" href="#" groups="base.group_user">
+                                    <a class="o_kanban_manage_toggle_button o_dropdown_kanban" href="#">
                                         <i class="fa fa-ellipsis-v" role="img" aria-label="Manage" title="Manage"/>
                                     </a>
                                     <span>
@@ -1352,7 +1352,7 @@
                     </notebook>
                     </sheet>
                     <div class="oe_chatter">
-                        <field name="message_follower_ids" options="{'post_refresh':True}" groups="base.group_user"/>
+                        <field name="message_follower_ids" options="{'post_refresh':True}"/>
                         <field name="activity_ids"/>
                         <field name="message_ids"/>
                     </div>
@@ -1450,7 +1450,7 @@
                                         </t>
                                         <t t-else="record.email_from.raw_value"><span><field name="email_from"/></span></t>
                                     </div>
-                                    <div class="o_dropdown_kanban dropdown" t-if="!selection_mode" groups="base.group_user">
+                                    <div class="o_dropdown_kanban dropdown" t-if="!selection_mode">
                                         <a role="button" class="dropdown-toggle o-no-caret btn" data-bs-toggle="dropdown" data-bs-display="static" href="#" aria-label="Dropdown menu" title="Dropdown menu">
                                             <span class="fa fa-ellipsis-v"/>
                                         </a>
@@ -1483,7 +1483,7 @@
                                         </b>
                                     </div>
                                     <div class="oe_kanban_bottom_right" t-if="!selection_mode">
-                                        <field name="kanban_state" widget="state_selection" groups="base.group_user"/>
+                                        <field name="kanban_state" widget="state_selection"/>
                                         <t t-if="record.user_ids.raw_value"><field name="user_ids" widget="many2many_avatar_user"/></t>
                                     </div>
                                 </div>

@@ -9,9 +9,9 @@
             <xpath expr="//group[@name='note_group']" position="before">
                 <div class="oe_right">
                     <button name="%(sale_loyalty.sale_loyalty_coupon_wizard_action)d" class="btn btn-secondary"
-                        string="Coupon Code" type="action" groups="base.group_user" states="draft,sent,sale"/>
+                        string="Coupon Code" type="action" states="draft,sent,sale"/>
                     <button name="action_open_reward_wizard" class="btn btn-secondary"
-                        string="Promotions" type="object" groups="base.group_user" states="draft,sent,sale"
+                        string="Promotions" type="object" states="draft,sent,sale"
                         help="Update current promotional lines and select new rewards if applicable."/>
                 </div>
             </xpath>

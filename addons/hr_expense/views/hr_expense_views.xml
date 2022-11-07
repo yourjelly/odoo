@@ -504,7 +504,7 @@
                         <div class="oe_title">
                             <label for="name" string="Product Name"/>
                             <h1><field name="name" placeholder="e.g. Lunch"/></h1>
-                            <div name="options" groups="base.group_user" invisible="1">
+                            <div name="options" invisible="1">
                                 <div>
                                     <field name="can_be_expensed"/>
                                     <label for="can_be_expensed"/>
@@ -1076,7 +1076,7 @@
 
         <menuitem id="menu_hr_expense_root" name="Expenses" sequence="230" web_icon="hr_expense,static/description/icon.svg"/>
 
-        <menuitem id="menu_hr_expense_my_expenses" name="My Expenses" sequence="1" parent="menu_hr_expense_root" groups="base.group_user"/>
+        <menuitem id="menu_hr_expense_my_expenses" name="My Expenses" sequence="1" parent="menu_hr_expense_root"/>
         <menuitem id="menu_hr_expense_my_expenses_all" sequence="1" parent="menu_hr_expense_my_expenses" action="hr_expense_actions_my_all" name="My Expenses"/>
         <menuitem id="menu_hr_expense_sheet_my_reports" sequence="2" parent="menu_hr_expense_my_expenses" action="action_hr_expense_sheet_my_all" name="My Reports"/>
 

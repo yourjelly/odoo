@@ -13,7 +13,7 @@
                     <div class="o_row o_row_readonly">
                         <button name="mail_action_blacklist_remove" class="fa fa-ban text-danger"
                             title="This email is blacklisted for mass mailings. Click to unblacklist."
-                            type="object" context="{'default_email': email}" groups="base.group_user"
+                            type="object" context="{'default_email': email}"
                             attrs="{'invisible': [('is_blacklisted', '=', False)]}"/>
                         <field name="email" widget="email" context="{'gravatar_image': True}" attrs="{'required': [('user_ids','!=', [])]}"/>
                     </div>

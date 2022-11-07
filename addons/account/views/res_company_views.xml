@@ -11,7 +11,7 @@
             </xpath>
             <xpath expr="//sheet" position="after">
                 <div class="oe_chatter">
-                    <field name="message_follower_ids" groups="base.group_user"/>
+                    <field name="message_follower_ids"/>
                     <field name="message_ids"/>
                 </div>
             </xpath>

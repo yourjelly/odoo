@@ -36,8 +36,8 @@
                         <!-- visible wizard -->
                         <div attrs="{'invisible': [('composition_mode', '=', 'mass_mail')]}">
                             <group>
-                                <label for="partner_ids" string="Recipients" groups="base.group_user"/>
-                                <div groups="base.group_user">
+                                <label for="partner_ids" string="Recipients"/>
+                                <div>
                                     <span attrs="{'invisible': [('composition_mode', '!=', 'mass_mail')]}">
                                         <strong>Email mass mailing</strong> on
                                         <span>the selected records</span>
