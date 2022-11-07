@@ -12,7 +12,7 @@ Model({
         async _created() {
             browser.addEventListener('keydown', this._onKeyDown);
             browser.addEventListener('keyup', this._onKeyUp);
-            this.update({ userDevices: await this.messaging.browser.navigator.mediaDevices.enumerateDevices() });
+            this.update({ userDevices: await this.queryAudioDevices() });
         },
         _willDelete() {
             browser.removeEventListener('keydown', this._onKeyDown);
@@ -20,6 +20,14 @@ Model({
         },
     },
     recordMethods: {
+        async queryAudioDevices() {
+            const query = await navigator.permissions.query({ name: "microphone" });
+            if (query.state === 'prompt') {
+                await navigator.mediaDevices.getUserMedia({ audio: true }).catch(() => {});
+            }
+            const audioDevices = await this.messaging.browser.navigator.mediaDevices.enumerateDevices();
+            return audioDevices.filter(device => device.deviceId && device.label);
+        },
         onChangeBackgroundBlurAmount(ev) {
             this.userSetting.update({
                 backgroundBlurAmount: Number(ev.target.value),
