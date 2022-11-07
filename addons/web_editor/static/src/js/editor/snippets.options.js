@@ -47,8 +47,8 @@ import {
 var qweb = core.qweb;
 var _t = core._t;
 const preserveCursor = OdooEditorLib.preserveCursor;
-const descendants = OdooEditorLib.descendants;
 const { DateTime } = luxon;
+const resetUnbreakable = OdooEditorLib.resetUnbreakable;
 
 /**
  * @param {HTMLElement} el
@@ -5108,9 +5108,7 @@ registry.layout_column = SnippetOptionWidget.extend({
         let $row = this.$('> .row');
         if (!$row.length) {
             const restoreCursor = preserveCursor(this.$target[0].ownerDocument);
-            for (const node of descendants(this.$target[0])) {
-                node.ouid = undefined;
-            }
+            resetUnbreakable(this.$target[0]);
             $row = this.$target.contents().wrapAll($('<div class="row"><div class="col-lg-12"/></div>')).parent().parent();
             restoreCursor();
         }
@@ -5123,9 +5121,7 @@ registry.layout_column = SnippetOptionWidget.extend({
         await new Promise(resolve => setTimeout(resolve));
         if (nbColumns === 0) {
             const restoreCursor = preserveCursor(this.$target[0].ownerDocument);
-            for (const node of descendants($row[0])) {
-                node.ouid = undefined;
-            }
+            resetUnbreakable($row[0]);
             $row.contents().unwrap().contents().unwrap();
             restoreCursor();
             this.trigger_up('activate_snippet', {$snippet: this.$target});

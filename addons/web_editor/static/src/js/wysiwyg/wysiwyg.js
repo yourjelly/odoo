@@ -43,6 +43,7 @@ import {
 import { requireWysiwygLegacyModule } from "@web_editor/js/frontend/loader";
 import { isCSSColor } from '@web/core/utils/colors';
 import { EmojiPicker } from '@web/core/emoji_picker/emoji_picker';
+import { MoveNodePlugin } from '@web_editor/js/wysiwyg/MoveNodePlugin';
 
 const OdooEditor = OdooEditorLib.OdooEditor;
 const getDeepRange = OdooEditorLib.getDeepRange;
@@ -405,7 +406,7 @@ export class Wysiwyg extends Component {
             },
             commands: powerboxOptions.commands,
             categories: powerboxOptions.categories,
-            plugins: options.editorPlugins,
+            plugins: (options.editorPlugins || []).concat([ MoveNodePlugin ]),
             direction: options.direction || localization.direction || 'ltr',
             collaborationClientAvatarUrl: `${browser.location.origin}/web/image?model=res.users&field=avatar_128&id=${encodeURIComponent(session.uid)}`,
             renderingClasses: ['o_dirty', 'o_transform_removal', 'oe_edited_link', 'o_menu_loading'],

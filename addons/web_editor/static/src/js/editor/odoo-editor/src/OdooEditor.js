@@ -365,6 +365,7 @@ export class OdooEditor extends EventTarget {
             this.historySetInitialId(this.options.initialHistoryId);
         }
 
+        this._pluginCall('start', [editable]);
         this._pluginCall('sanitizeElement', [editable]);
 
         // ------
@@ -840,11 +841,24 @@ export class OdooEditor extends EventTarget {
      * @param {*} className A class to add to the container in order to make
      *              the container more visible in the devtool and potentially
      *              add css rules for the container and it's children.
+     * @param {string}  options.position How the container should be added.
+     * @param {string}  options.targetContainerId An existing container from
+     *              which we add the created container depending.
      */
-    makeAbsoluteContainer(className) {
+    makeAbsoluteContainer(className, { position = 'append', targetContainerId = undefined } = {}) {
         const container = this.document.createElement('div');
         container.className = `oe-absolute-container ${className}`;
-        this._mainAbsoluteContainer.append(container);
+        let targetElement = targetContainerId && this._mainAbsoluteContainer.querySelector(`.oe-absolute-container.${targetContainerId}`);
+        if (!targetElement || position === 'append') {
+            targetElement = targetElement || this._mainAbsoluteContainer;
+            targetElement.append(container);
+        } else if (position === 'prepend') {
+            targetElement.prepend(container);
+        } else if (position === 'after') {
+            targetElement.after(container);
+        } else if (position === 'before') {
+            targetElement.before(container);
+        }
         return container;
     }
 
@@ -3362,6 +3376,22 @@ export class OdooEditor extends EventTarget {
         this.observer.takeRecords();
     }
 
+    disableAvatarForElement(element) {
+        this.enableAvatars();
+        for (const info of this._collabSelectionInfos.values()) {
+            if (info.avatarTargetElement === element) {
+                if (!info.avatarElement.classList.contains('opacity-0')) {
+                    info.avatarElement.classList.add('opacity-0');
+                }
+            }
+        }
+    }
+    enableAvatars() {
+        for (const element of this._avatarsContainer.querySelectorAll('.oe-collaboration-caret-avatar.opacity-0')) {
+            element.classList.remove('opacity-0');
+        }
+    }
+
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
@@ -4994,7 +5024,7 @@ export class OdooEditor extends EventTarget {
     _pluginAdd(Plugin) {
         this._plugins.push(new Plugin({ editor: this }));
     }
-    _pluginCall(method, args) {
+    _pluginCall(method, args = []) {
         for (const plugin of this._plugins) {
             if (plugin[method]) {
                 plugin[method](...args);
