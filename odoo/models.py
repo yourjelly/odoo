@@ -465,6 +465,7 @@ class BaseModel(metaclass=MetaModel):
     the :attr:`~odoo.models.BaseModel._register` attribute may be set to False.
     """
     __slots__ = ['env', '_ids', '_prefetch_ids']
+    env: api.Environment
 
     _auto = False
     """Whether a database table should be created.
