@@ -246,19 +246,22 @@ class AccountMove(models.Model):
             or (partner.country_id.code == 'IT' and '0000000')
             or 'XXXXXXX')
 
+        # Reference line for finding the conversion rate used in the document
+        document_total, conversion_rate = self.amount_total, None
+        if convert_to_euros and self.invoice_line_ids:
+            conversion_line = self.invoice_line_ids.sorted(lambda l: abs(l.balance), reverse=True)[0]
+            if conversion_line:
+                conversion_rate_float = abs(conversion_line.balance / conversion_line.amount_currency)
+                document_total = document_total * conversion_rate_float
+                conversion_rate = float_repr(conversion_rate_float, precision_digits=5)
+
         # Self-invoices are technically -100%/+100% repartitioned
         # but functionally need to be exported as 100%
-        document_total = self.amount_total
         if is_self_invoice:
-            document_total += sum([abs(v['tax_amount_currency']) for k, v in tax_details['tax_details'].items()])
+            tax_key = 'tax_amount_currency' if not convert_to_euros else 'tax_amount'
+            document_total += sum([abs(v[tax_key]) for k, v in tax_details['tax_details'].items()])
             if reverse_charge_refund:
                 document_total = -abs(document_total)
-
-        # Reference line for finding the conversion rate used in the document
-        conversion_line = self.invoice_line_ids.sorted(lambda l: abs(l.balance), reverse=True)[0] if self.invoice_line_ids else None
-        conversion_rate = float_repr(
-            abs(conversion_line.balance / conversion_line.amount_currency), precision_digits=5,
-        ) if convert_to_euros and conversion_line else None
 
         invoice_lines = self._l10n_it_edi_prepare_fatturapa_line_details(reverse_charge_refund, is_downpayment, convert_to_euros)
         tax_details = self._l10n_it_edi_prepare_fatturapa_tax_details(tax_details, reverse_charge_refund)
