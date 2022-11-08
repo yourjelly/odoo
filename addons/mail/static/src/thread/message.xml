@@ -14,7 +14,7 @@
                 <span class="o-mail-own-name">
                     <strong class="o_redirect me-1 text-truncate cursor-pointer">
                     <t t-esc="author.name"/>
-                    </strong> - 
+                    </strong> -
                 </span>
                 <small class="text-muted opacity-50 ms-2" t-att-title="message.dateTimeStr">
                     <RelativeTime datetime="message.dateTime" />
@@ -47,12 +47,14 @@
                         <t t-out="message.body"/>
                     </div>
                 </t>
-                <div class="o-mail-message-actions invisible">
+                <div t-if="!props.hideActions" class="o-mail-message-actions invisible">
                     <div class="rounded-1 shadow-sm">
                         <i class="cursor-pointer px-1 py-2 fa fa-lg"
-                            t-att-class="message.isStarred ? 'fa-star' : 'fa-star-o'" 
+                            t-att-class="message.isStarred ? 'fa-star' : 'fa-star-o'"
                             t-on-click="toggleStar"
                             role="button" tabindex="0" title="Mark as Todo" aria-label="Mark as Todo"></i>
+                        <i class="cursor-pointer px-1 py-2 fa fa-lg fa-trash" t-if="canBeDeleted" t-on-click="onClickDelete"
+                            role="button" tabindex="0" title="Delete" aria-label="Delete"></i>
                     </div>
                 </div>
             </div>
