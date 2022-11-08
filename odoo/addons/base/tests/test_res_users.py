@@ -506,3 +506,14 @@ class TestUsersGroupWarning(TransactionCase):
             UserForm._perform_onchange([self.field_service_categ_field])
 
             self.assertFalse(UserForm.user_group_warning)
+
+    def test_write_partner_users(self):
+        User = self.env['res.users']
+        test_user = User.create({'name': 'Test User', 'login': 'test_user'})
+        partner = test_user.partner_id
+
+        with self.assertRaises(ValueError):
+            test_user.partner_id = False
+
+        with self.assertRaises(ValueError):
+            partner.user_ids = False

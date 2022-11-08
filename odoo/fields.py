@@ -1088,6 +1088,9 @@ class Field(MetaField('DummyField', (object,), {})):
         :param value: a value in any format
         :return: the subset of `records` that have been modified
         """
+        if records and not value and self.required:
+            raise ValueError("Required value for %s" % (self,))
+
         # discard recomputation of self on records
         records.env.remove_to_compute(self, records)
 
@@ -3004,6 +3007,9 @@ class Many2one(_Relational):
         return super(Many2one, self).convert_to_onchange(value, record, names)
 
     def write(self, records, value):
+        if records and not value and self.required:
+            raise ValueError("Required value for %s" % (self,))
+
         # discard recomputation of self on records
         records.env.remove_to_compute(self, records)
 
