@@ -1,0 +1,3174 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* l10n_ua
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.1alpha1+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-11-04 15:03+0000\n"
+"PO-Revision-Date: 2022-11-04 15:03+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_852
+#: model:account.account,name:l10n_ua.2_ua_psbp_852
+#: model:account.account.template,name:l10n_ua.ua_psbp_852
+msgid "(Not used) Other expenses, extraordinary expenses"
+msgstr "(не використовується) Інші затрати за елементами, надзвичайні затрати"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_794
+#: model:account.account,name:l10n_ua.2_ua_psbp_794
+#: model:account.account.template,name:l10n_ua.ua_psbp_794
+msgid "(Not used) Extraordinary incomes"
+msgstr "(не використовується) Результат надзвичайних подій"
+
+#. module: l10n_ua
+#: model:account.tax,description:l10n_ua.1_purchase_tax_template_vat14_psbo
+#: model:account.tax,description:l10n_ua.1_sale_tax_template_vat14_psbo
+#: model:account.tax,description:l10n_ua.2_purchase_tax_template_vat14_psbo
+#: model:account.tax,description:l10n_ua.2_sale_tax_template_vat14_psbo
+#: model:account.tax.template,description:l10n_ua.purchase_tax_template_vat14
+#: model:account.tax.template,description:l10n_ua.purchase_tax_template_vat14_psbo
+#: model:account.tax.template,description:l10n_ua.sale_tax_template_vat14
+#: model:account.tax.template,description:l10n_ua.sale_tax_template_vat14_psbo
+msgid "+ VAT 14%"
+msgstr "+ ПДВ 14%"
+
+#. module: l10n_ua
+#: model:account.tax,description:l10n_ua.1_purchase_tax_template_vat20_psbo
+#: model:account.tax,description:l10n_ua.1_sale_tax_template_vat20_psbo
+#: model:account.tax,description:l10n_ua.2_purchase_tax_template_vat20_psbo
+#: model:account.tax,description:l10n_ua.2_sale_tax_template_vat20_psbo
+#: model:account.tax.template,description:l10n_ua.purchase_tax_template_vat20
+#: model:account.tax.template,description:l10n_ua.purchase_tax_template_vat20_psbo
+#: model:account.tax.template,description:l10n_ua.sale_tax_template_vat20
+#: model:account.tax.template,description:l10n_ua.sale_tax_template_vat20_psbo
+msgid "VAT 20%"
+msgstr "+ ПДВ 20%"
+
+#. module: l10n_ua
+#: model:account.tax,description:l10n_ua.1_purchase_tax_template_vat7_psbo
+#: model:account.tax,description:l10n_ua.1_sale_tax_template_vat7_psbo
+#: model:account.tax,description:l10n_ua.2_purchase_tax_template_vat7_psbo
+#: model:account.tax,description:l10n_ua.2_sale_tax_template_vat7_psbo
+#: model:account.tax.template,description:l10n_ua.purchase_tax_template_vat7
+#: model:account.tax.template,description:l10n_ua.purchase_tax_template_vat7_psbo
+#: model:account.tax.template,description:l10n_ua.sale_tax_template_vat7
+#: model:account.tax.template,description:l10n_ua.sale_tax_template_vat7_psbo
+msgid "+ VAT 7%"
+msgstr "+ ПДВ 7%"
+
+#. module: l10n_ua
+#: model:account.tax.group,name:l10n_ua.tax_group_vat_free
+msgid "Exempted VAT"
+msgstr "Звільнено від ПДВ"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_l10n_ua_psbo_chart_template_liquidity_transfer
+#: model:account.account,name:l10n_ua.2_l10n_ua_psbo_chart_template_liquidity_transfer
+msgid "Liquidity Transfer"
+msgstr ""
+
+#. module: l10n_ua
+#: model:account.tax.group,name:l10n_ua.tax_group_not_vat
+msgid "No VAT"
+msgstr "Не є ПДВ"
+
+#. module: l10n_ua
+#: model:account.tax.group,name:l10n_ua.tax_group_vat0
+msgid "VAT 0%"
+msgstr "ПДВ 0%"
+
+#. module: l10n_ua
+#: model:account.tax.group,name:l10n_ua.tax_group_vat14
+msgid "VAT 14%"
+msgstr "ПДВ 14%"
+
+#. module: l10n_ua
+#: model:account.tax.group,name:l10n_ua.tax_group_vat20
+msgid "VAT 20%"
+msgstr "ПДВ 20%"
+
+#. module: l10n_ua
+#: model:account.tax.group,name:l10n_ua.tax_group_vat7
+msgid "VAT 7%"
+msgstr "ПДВ 7%"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1206
+msgid "Unified Social Contribution (USC)"
+msgstr "ЄСВ"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_115
+#: model:account.account,name:l10n_ua.2_ua_psbp_115
+#: model:account.account.template,name:l10n_ua.ua_psbp_115
+msgid "Packing stock"
+msgstr "Інвентарна тара"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_100
+#: model:account.account,name:l10n_ua.2_ua_psbp_100
+#: model:account.account.template,name:l10n_ua.ua_psbp_100
+msgid "Investment properties"
+msgstr "Інвестиційна нерухомість"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1040
+msgid "Investments"
+msgstr "Інвестиції"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_143
+#: model:account.account,name:l10n_ua.2_ua_psbp_143
+#: model:account.account.template,name:l10n_ua.ua_psbp_143
+msgid "Investments in unrelated parties"
+msgstr "Інвестиції непов’язаним сторонам"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_141
+#: model:account.account,name:l10n_ua.2_ua_psbp_141
+#: model:account.account.template,name:l10n_ua.ua_psbp_141
+msgid ""
+"Investments involving parties by accounting for participation in capital"
+msgstr "Інвестиції пов’язаним сторонам за методом обліку участі в капіталі"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_106
+#: model:account.account,name:l10n_ua.2_ua_psbp_106
+#: model:account.account.template,name:l10n_ua.ua_psbp_106
+msgid "Other fixtures and fittings, tools and equipments"
+msgstr "Інструменти, прилади та інвентар"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_183
+#: model:account.account,name:l10n_ua.2_ua_psbp_183
+#: model:account.account.template,name:l10n_ua.ua_psbp_183
+msgid "Other receivables"
+msgstr "Інша дебіторська заборгованість"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_422
+#: model:account.account,name:l10n_ua.2_ua_psbp_422
+#: model:account.account.template,name:l10n_ua.ua_psbp_422
+msgid "Other invested capital"
+msgstr "Інший  вкладений капітал"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_453
+#: model:account.account,name:l10n_ua.2_ua_psbp_453
+#: model:account.account.template,name:l10n_ua.ua_psbp_453
+msgid "Another withdrawn capital"
+msgstr "Інший вилучений капітал"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_425
+#: model:account.account,name:l10n_ua.2_ua_psbp_425
+#: model:account.account.template,name:l10n_ua.ua_psbp_425
+msgid "Other additional capital"
+msgstr "Інший додатковий капітал"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_403
+#: model:account.account,name:l10n_ua.2_ua_psbp_403
+#: model:account.account.template,name:l10n_ua.ua_psbp_403
+msgid "Other registered capital"
+msgstr "Інший зареєстрований капітал"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_414
+#: model:account.account,name:l10n_ua.2_ua_psbp_414
+#: model:account.account.template,name:l10n_ua.ua_psbp_414
+msgid "Other capital in assessments"
+msgstr "Інший капітал у дооцінках"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_2500
+msgid "Other expenses"
+msgstr "Інші витрати"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_977
+#: model:account.account,name:l10n_ua.2_ua_psbp_977
+#: model:account.account.template,name:l10n_ua.ua_psbp_977
+msgid "Other activity costs"
+msgstr "Інші витрати діяльності"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_816
+#: model:account.account,name:l10n_ua.2_ua_psbp_816
+#: model:account.account.template,name:l10n_ua.ua_psbp_816
+msgid "Other costs to wages and salaries"
+msgstr "Інші витрати на оплату праці"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_949
+#: model:account.account,name:l10n_ua.2_ua_psbp_949
+#: model:account.account.template,name:l10n_ua.ua_psbp_949
+msgid "Other operating expenses"
+msgstr "Інші витрати операційної діяльності"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_55
+#: model:account.account,name:l10n_ua.2_ua_psbp_55
+#: model:account.account.template,name:l10n_ua.ua_ias_1330
+#: model:account.account.template,name:l10n_ua.ua_psbp_55
+msgid "Other long-term loans"
+msgstr "Інші довгострокові зобов’язання"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_505
+#: model:account.account,name:l10n_ua.2_ua_psbp_505
+#: model:account.account.template,name:l10n_ua.ua_psbp_505
+msgid "Other long-term loans in domestic currency"
+msgstr "Інші довгострокові позики в національній валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_506
+#: model:account.account,name:l10n_ua.2_ua_psbp_506
+#: model:account.account.template,name:l10n_ua.ua_psbp_506
+msgid "Other long-term loans in foreign currency"
+msgstr "Інші довгострокові позики в іноземній валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_746
+#: model:account.account,name:l10n_ua.2_ua_psbp_746
+#: model:account.account.template,name:l10n_ua.ua_psbp_746
+msgid "Other income"
+msgstr "Інші доходи"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_719
+#: model:account.account,name:l10n_ua.2_ua_psbp_719
+#: model:account.account.template,name:l10n_ua.ua_psbp_719
+msgid "Other income from operational activity"
+msgstr "Інші доходи від операційної діяльності"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_733
+#: model:account.account,name:l10n_ua.2_ua_psbp_733
+#: model:account.account.template,name:l10n_ua.ua_psbp_733
+msgid "Other income from financial operations"
+msgstr "Інші доходи від фінансових операцій"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_851
+#: model:account.account,name:l10n_ua.2_ua_psbp_851
+#: model:account.account.template,name:l10n_ua.ua_psbp_851
+msgid "Other expenses by elements, income tax"
+msgstr "Інші затрати за елементами, податок на прибуток"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1220
+msgid "Other short-term obligations"
+msgstr "Інші короткострокові зобов’язання"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_484
+#: model:account.account,name:l10n_ua.2_ua_psbp_484
+#: model:account.account.template,name:l10n_ua.ua_psbp_484
+msgid "Other means for target funding"
+msgstr "Інші кошти цільового фінансування"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_209
+#: model:account.account,name:l10n_ua.2_ua_psbp_209
+#: model:account.account.template,name:l10n_ua.ua_psbp_209
+msgid "Other materials"
+msgstr "Інші матеріали"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_809
+#: model:account.account,name:l10n_ua.2_ua_psbp_809
+#: model:account.account.template,name:l10n_ua.ua_psbp_809
+msgid "Other material expenses"
+msgstr "Інші матеріальні витрати"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_752
+#: model:account.account,name:l10n_ua.2_ua_psbp_752
+#: model:account.account.template,name:l10n_ua.ua_psbp_752
+msgid "Other extraordinary incomes"
+msgstr "Інші надзвичайні доходи"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_127
+#: model:account.account,name:l10n_ua.2_ua_psbp_127
+#: model:account.account.template,name:l10n_ua.ua_psbp_127
+msgid "Other intangible assets"
+msgstr "Інші нематеріальні активи"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_184
+#: model:account.account,name:l10n_ua.2_ua_psbp_184
+#: model:account.account.template,name:l10n_ua.ua_psbp_184
+msgid "Other non-current assets"
+msgstr "Інші необоротні активи"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_1171
+#: model:account.account,name:l10n_ua.2_ua_psbp_1171
+#: model:account.account.template,name:l10n_ua.ua_psbp_1171
+msgid "Other non-current tangible assets"
+msgstr "Інші необоротні матеріальні активи"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1131
+msgid "Other current assets"
+msgstr "Інші оборотні активи"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_84
+#: model:account.account,name:l10n_ua.2_ua_psbp_84
+#: model:account.account.template,name:l10n_ua.ua_psbp_84
+msgid "Other operating costs"
+msgstr "Інші операційні витрати"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_1091
+#: model:account.account,name:l10n_ua.2_ua_psbp_1091
+#: model:account.account.template,name:l10n_ua.ua_psbp_1091
+msgid "Other fixed assets"
+msgstr "Інші основні засоби"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1207
+msgid "Other taxes"
+msgstr "Інші податки"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_352
+#: model:account.account,name:l10n_ua.2_ua_psbp_352
+#: model:account.account.template,name:l10n_ua.ua_psbp_352
+msgid "Other current financial investments"
+msgstr "Інші поточні фінансові інвестиції"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_313
+#: model:account.account,name:l10n_ua.2_ua_psbp_313
+#: model:account.account.template,name:l10n_ua.ua_psbp_313
+msgid "Other bank accounts in domestic currency"
+msgstr "Інші рахунки в банку в національній валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_314
+#: model:account.account,name:l10n_ua.2_ua_psbp_314
+#: model:account.account.template,name:l10n_ua.ua_psbp_314
+msgid "Other bank accounts in foreign currency"
+msgstr "Інші рахунки в банку в іноземній валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_952
+#: model:account.account,name:l10n_ua.2_ua_psbp_952
+#: model:account.account.template,name:l10n_ua.ua_psbp_952
+msgid "Other financial costs"
+msgstr "Інші фінансові витрати"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_142
+#: model:account.account,name:l10n_ua.2_ua_psbp_142
+#: model:account.account.template,name:l10n_ua.ua_psbp_142
+msgid "Shares in affiliated undertakings"
+msgstr "Інші інвестиції пов’язаним сторонам"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1302
+msgid "Mortgage loans"
+msgstr "Іпотека"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1144
+msgid "Advance on USC"
+msgstr "Аванс по ЄСВ"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1141
+msgid "Advance on income tax"
+msgstr "Аванс по податку на прибуток"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1210
+msgid "Advances received from suppliers and customers"
+msgstr "Аванси одержані від покупців та замовників"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1130
+msgid "Advance to suppliers"
+msgstr "Аванси партнерам"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1013
+msgid "Cars"
+msgstr "Автомобілі"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_125
+#: model:account.account,name:l10n_ua.2_ua_psbp_125
+#: model:account.account.template,name:l10n_ua.ua_psbp_125
+msgid "Copyright and related rights"
+msgstr "Авторське право та суміжні з ним права"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1004
+msgid "Copyright, patents, and other rights"
+msgstr "Авторські права, патенти, та інші права"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_92
+#: model:account.account,name:l10n_ua.2_ua_psbp_92
+#: model:account.account.template,name:l10n_ua.ua_ias_2300
+#: model:account.account.template,name:l10n_ua.ua_psbp_92
+msgid "Administrative expenses"
+msgstr "Адміністративні витрати"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_833
+#: model:account.account,name:l10n_ua.2_ua_psbp_833
+#: model:account.account.template,name:l10n_ua.ua_ias_1009
+#: model:account.account.template,name:l10n_ua.ua_psbp_833
+msgid "Intangible assets depreciation"
+msgstr "Амортизація нематеріальних активів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_831
+#: model:account.account,name:l10n_ua.2_ua_psbp_831
+#: model:account.account.template,name:l10n_ua.ua_ias_1019
+#: model:account.account.template,name:l10n_ua.ua_psbp_831
+msgid "Depreciation of fixed assets"
+msgstr "Амортизація основних засобів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_832
+#: model:account.account,name:l10n_ua.2_ua_psbp_832
+#: model:account.account.template,name:l10n_ua.ua_psbp_832
+msgid "Depreciation of other non-current tangible assets"
+msgstr "Амортизація інших необоротних матеріальних активів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_108
+#: model:account.account,name:l10n_ua.2_ua_psbp_108
+#: model:account.account.template,name:l10n_ua.ua_psbp_108
+msgid "Perennial lands"
+msgstr "Багаторічні насадження"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_424
+#: model:account.account,name:l10n_ua.2_ua_psbp_424
+#: model:account.account.template,name:l10n_ua.ua_psbp_424
+msgid "Unpaid non-current assets"
+msgstr "Безоплатно одержані необоротні активи"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_483
+#: model:account.account,name:l10n_ua.2_ua_psbp_483
+#: model:account.account.template,name:l10n_ua.ua_psbp_483
+msgid "Charity and donations"
+msgstr "Бланодійна допомога"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_24
+#: model:account.account,name:l10n_ua.2_ua_psbp_24
+#: model:account.account.template,name:l10n_ua.ua_psbp_24
+msgid "Defect in production"
+msgstr "Брак у виробництві"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_103
+#: model:account.account,name:l10n_ua.2_ua_psbp_103
+#: model:account.account.template,name:l10n_ua.ua_psbp_103
+msgid "Buildings and structures"
+msgstr "Будинки та споруди"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_205
+#: model:account.account,name:l10n_ua.2_ua_psbp_205
+#: model:account.account.template,name:l10n_ua.ua_psbp_205
+msgid "Construction materials"
+msgstr "Будівельні матеріали"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1011
+msgid "Buildings"
+msgstr "Будівлі"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_111
+#: model:account.account,name:l10n_ua.2_ua_psbp_111
+#: model:account.account.template,name:l10n_ua.ua_psbp_111
+msgid "Library Funds"
+msgstr "Бібліотечні фонди"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1030
+msgid "Biological assets"
+msgstr "Біологічні активи"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_1542
+#: model:account.account,name:l10n_ua.2_ua_psbp_1542
+#: model:account.account.template,name:l10n_ua.ua_psbp_1542
+msgid "Production of intangible assets"
+msgstr "Виготовлення нематеріальних активів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_1522
+#: model:account.account,name:l10n_ua.2_ua_psbp_1522
+#: model:account.account.template,name:l10n_ua.ua_psbp_1522
+msgid "Production and modernization of fixed assets"
+msgstr "Виготовлення та модернізація основних засобів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_1532
+#: model:account.account,name:l10n_ua.2_ua_psbp_1532
+#: model:account.account.template,name:l10n_ua.ua_psbp_1532
+msgid "Manufacturing and upgrading other non-current fixed assets"
+msgstr "Виготовлення та модернізація інших необоротних матеріальних активів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_948
+#: model:account.account,name:l10n_ua.2_ua_psbp_948
+#: model:account.account.template,name:l10n_ua.ua_psbp_948
+msgid "Recognized fines and penalties"
+msgstr "Визнані штрафи, пені, неустойки"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1402
+msgid "Withdrawn capital"
+msgstr "Вилучений капітал"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_451
+#: model:account.account,name:l10n_ua.2_ua_psbp_451
+#: model:account.account.template,name:l10n_ua.ua_psbp_451
+msgid "Withdrawn shares"
+msgstr "Вилучені акції"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_452
+#: model:account.account,name:l10n_ua.2_ua_psbp_452
+#: model:account.account.template,name:l10n_ua.ua_psbp_452
+msgid "Withdrawn deposits and shares"
+msgstr "Вилучені вклади й паї"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_811
+#: model:account.account,name:l10n_ua.2_ua_psbp_811
+#: model:account.account.template,name:l10n_ua.ua_psbp_811
+msgid "Labor expenses"
+msgstr "Виплати за окладами й тарифами"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_704
+#: model:account.account,name:l10n_ua.2_ua_psbp_704
+#: model:account.account.template,name:l10n_ua.ua_psbp_704
+msgid "Deduction from income"
+msgstr "Вирахування з доходу"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_7092
+#: model:account.account,name:l10n_ua.2_ua_psbp_7092
+#: model:account.account.template,name:l10n_ua.ua_psbp_7092
+msgid "Sales income"
+msgstr "Вирахування з доходу від роздрібного продажу"
+
+#. module: l10n_ua
+#: model:account.tax,name:l10n_ua.1_simple_tax_purchase_other_psbo
+#: model:account.tax,name:l10n_ua.2_simple_tax_purchase_other_psbo
+#: model:account.tax.template,name:l10n_ua.simple_tax_purchase_other_psbo
+msgid "Other expenses"
+msgstr "Витрати  інші"
+
+#. module: l10n_ua
+#: model:account.tax,name:l10n_ua.1_simple_tax_purchase_esv_psbo
+#: model:account.tax,name:l10n_ua.2_simple_tax_purchase_esv_psbo
+#: model:account.tax.template,name:l10n_ua.simple_tax_purchase_esv_psbo
+msgid "USC expenses"
+msgstr "Витрати ЄСВ"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_805
+#: model:account.account,name:l10n_ua.2_ua_psbp_805
+#: model:account.account.template,name:l10n_ua.ua_psbp_805
+msgid "Costs of buildings materials"
+msgstr "Витрати будівельних матеріалів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_970
+#: model:account.account,name:l10n_ua.2_ua_psbp_970
+#: model:account.account.template,name:l10n_ua.ua_psbp_970
+msgid "Changes in the value of financial investments"
+msgstr "Витрати від зміни вартості фінансових інструментів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_940
+#: model:account.account,name:l10n_ua.2_ua_psbp_940
+#: model:account.account.template,name:l10n_ua.ua_psbp_940
+msgid ""
+"Costs from initial recognition and from changes in the value of assets "
+"accounted for fair value"
+msgstr ""
+"Витрати від первісного визнання та від зміни вартості активів, які "
+"обліковуються за справедливою вартістю"
+
+#. module: l10n_ua
+#: model:account.tax,name:l10n_ua.1_simple_tax_purchase_product_psbo
+#: model:account.tax,name:l10n_ua.2_simple_tax_purchase_product_psbo
+#: model:account.tax.template,name:l10n_ua.simple_tax_purchase_product_psbo
+msgid "Tax on Sales of goods"
+msgstr "Витрати від продажу  товарів"
+
+#. module: l10n_ua
+#: model:account.tax,description:l10n_ua.1_simple_tax_purchase_product_psbo
+#: model:account.tax,description:l10n_ua.2_simple_tax_purchase_product_psbo
+#: model:account.tax.template,description:l10n_ua.simple_tax_purchase_product
+#: model:account.tax.template,description:l10n_ua.simple_tax_purchase_product_psbo
+#: model:account.tax.template,name:l10n_ua.simple_tax_purchase_product
+msgid "Tax on Sales of goods"
+msgstr "Витрати від продажу товарів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_806
+#: model:account.account,name:l10n_ua.2_ua_psbp_806
+#: model:account.account.template,name:l10n_ua.ua_psbp_806
+msgid "Costs of Spare parts"
+msgstr "Витрати запасних частин"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_802
+#: model:account.account,name:l10n_ua.2_ua_psbp_802
+#: model:account.account.template,name:l10n_ua.ua_psbp_802
+msgid "Costs of purchase of semi-finished products and components"
+msgstr "Витрати купівельних напівфабрикатів та комплектуючих виробів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_39
+#: model:account.account,name:l10n_ua.2_ua_psbp_39
+#: model:account.account.template,name:l10n_ua.ua_ias_1320
+#: model:account.account.template,name:l10n_ua.ua_psbp_39
+msgid "Deferred expenses"
+msgstr "Витрати майбутніх періодів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_807
+#: model:account.account,name:l10n_ua.2_ua_psbp_807
+#: model:account.account.template,name:l10n_ua.ua_psbp_807
+msgid "Cost of agricultural materials"
+msgstr "Витрати матеріалів сільськогосподарського призначення"
+
+#. module: l10n_ua
+#: model:account.tax,description:l10n_ua.1_simple_tax_purchase_esv_psbo
+#: model:account.tax,description:l10n_ua.2_simple_tax_purchase_esv_psbo
+#: model:account.tax.template,description:l10n_ua.simple_tax_purchase_esv
+#: model:account.tax.template,description:l10n_ua.simple_tax_purchase_esv_psbo
+#: model:account.tax.template,name:l10n_ua.simple_tax_purchase_esv
+msgid "USC Tax"
+msgstr "Витрати на ЄСВ"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_941
+#: model:account.account,name:l10n_ua.2_ua_psbp_941
+#: model:account.account.template,name:l10n_ua.ua_psbp_941
+msgid "Research and development costs"
+msgstr "Витрати на дослідження і розробки"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_93
+#: model:account.account,name:l10n_ua.2_ua_psbp_93
+#: model:account.account.template,name:l10n_ua.ua_ias_2400
+#: model:account.account.template,name:l10n_ua.ua_psbp_93
+msgid "Selling expenses"
+msgstr "Витрати на збут"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_942
+#: model:account.account,name:l10n_ua.2_ua_psbp_942
+#: model:account.account.template,name:l10n_ua.ua_psbp_942
+msgid "Foreign currency exchange losses"
+msgstr "Витрати на купівлю-продаж іноземної валюти"
+
+#. module: l10n_ua
+#: model:account.tax,name:l10n_ua.1_simple_tax_purchase_salary_psbo
+#: model:account.tax,name:l10n_ua.2_simple_tax_purchase_salary_psbo
+#: model:account.tax.template,name:l10n_ua.simple_tax_purchase_salary_psbo
+msgid "Wages and salaries Tax"
+msgstr "Витрати на оплату праці"
+
+#. module: l10n_ua
+#: model:account.tax,description:l10n_ua.1_simple_tax_purchase_salary_psbo
+#: model:account.tax,description:l10n_ua.2_simple_tax_purchase_salary_psbo
+#: model:account.tax.template,description:l10n_ua.simple_tax_purchase_salary
+#: model:account.tax.template,description:l10n_ua.simple_tax_purchase_salary_psbo
+#: model:account.tax.template,name:l10n_ua.simple_tax_purchase_salary
+msgid "Cost for wages of employees"
+msgstr "Витрати на оплату праці найманих працівників"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_803
+#: model:account.account,name:l10n_ua.2_ua_psbp_803
+#: model:account.account.template,name:l10n_ua.ua_psbp_803
+msgid "Fuel and energy consumption"
+msgstr "Витрати палива й енергії"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_801
+#: model:account.account,name:l10n_ua.2_ua_psbp_801
+#: model:account.account.template,name:l10n_ua.ua_psbp_801
+msgid "Costs of raw materials"
+msgstr "Витрати сировини й матеріалів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_804
+#: model:account.account,name:l10n_ua.2_ua_psbp_804
+#: model:account.account.template,name:l10n_ua.ua_psbp_804
+msgid "Costs of packing and packing materials"
+msgstr "Витрати тари й тарних матеріалів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_808
+#: model:account.account,name:l10n_ua.2_ua_psbp_808
+#: model:account.account.template,name:l10n_ua.ua_psbp_808
+msgid "Costs of goods"
+msgstr "Витрати товарів"
+
+#. module: l10n_ua
+#: model:account.tax,description:l10n_ua.1_simple_tax_purchase_other_psbo
+#: model:account.tax,description:l10n_ua.2_simple_tax_purchase_other_psbo
+#: model:account.tax.template,description:l10n_ua.simple_tax_purchase_other
+#: model:account.tax.template,description:l10n_ua.simple_tax_purchase_other_psbo
+#: model:account.tax.template,name:l10n_ua.simple_tax_purchase_other
+msgid "Other costs"
+msgstr "Витрати інші"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_404
+#: model:account.account,name:l10n_ua.2_ua_psbp_404
+#: model:account.account.template,name:l10n_ua.ua_psbp_404
+msgid "Contributions to unregistered statutory capital"
+msgstr "Внески до незареєстрованого статутного капіталу"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_683
+#: model:account.account,name:l10n_ua.2_ua_psbp_683
+#: model:account.account.template,name:l10n_ua.ua_psbp_683
+msgid "Internal farm settlements"
+msgstr "Внутрішньогосподарські розрахунки"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_682
+#: model:account.account,name:l10n_ua.2_ua_psbp_682
+#: model:account.account.template,name:l10n_ua.ua_psbp_682
+msgid "Internal settlements"
+msgstr "Внутрішні розрахунки"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_972
+#: model:account.account,name:l10n_ua.2_ua_psbp_972
+#: model:account.account.template,name:l10n_ua.ua_psbp_972
+msgid "Loss from assets value changes"
+msgstr "Втрати від зменшення корисності активів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_946
+#: model:account.account,name:l10n_ua.2_ua_psbp_946
+#: model:account.account.template,name:l10n_ua.ua_psbp_946
+msgid "Loss from stock value changes"
+msgstr "Втрати від знецінення запасів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_974
+#: model:account.account,name:l10n_ua.2_ua_psbp_974
+#: model:account.account.template,name:l10n_ua.ua_psbp_974
+msgid "Loss from non-operational exchange rate difference"
+msgstr "Втрати від неопераційних курсових різниць"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_945
+#: model:account.account,name:l10n_ua.2_ua_psbp_945
+#: model:account.account.template,name:l10n_ua.ua_psbp_945
+msgid "Loss from operational exchange rate difference"
+msgstr "Втрати від операційної курсової різниці"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_962
+#: model:account.account,name:l10n_ua.2_ua_psbp_962
+#: model:account.account.template,name:l10n_ua.ua_psbp_962
+msgid "Losses from joint activities"
+msgstr "Втрати від спільної діяльності"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_961
+#: model:account.account,name:l10n_ua.2_ua_psbp_961
+#: model:account.account.template,name:l10n_ua.ua_psbp_961
+msgid "Losses from investment in associated enterprises"
+msgstr "Втрати від інвестицій в асоційовані підприємства"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_963
+#: model:account.account,name:l10n_ua.2_ua_psbp_963
+#: model:account.account.template,name:l10n_ua.ua_psbp_963
+msgid "Losses from investment in subsidiaries"
+msgstr "Втрати від інвестицій в дочірні підприємства"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1121
+msgid "Shipped from warehouse but unpaid"
+msgstr "Відвантажено зі складу без рахунку-фактури"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_821
+#: model:account.account,name:l10n_ua.2_ua_psbp_821
+#: model:account.account.template,name:l10n_ua.ua_psbp_821
+msgid "Payments for mandatory public social insurance"
+msgstr "Відрахування на загальнообов'язкове державне соціальне страхування"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_822
+#: model:account.account,name:l10n_ua.2_ua_psbp_822
+#: model:account.account.template,name:l10n_ua.ua_psbp_822
+msgid "Social insurance (not used)"
+msgstr "Відрахування на соціальне страхування (не використовується)"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_824
+#: model:account.account,name:l10n_ua.2_ua_psbp_824
+#: model:account.account.template,name:l10n_ua.ua_psbp_824
+msgid "Payments for Individual insurance"
+msgstr "Відрахування на індивідуальне страхування"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_951
+#: model:account.account,name:l10n_ua.2_ua_psbp_951
+#: model:account.account.template,name:l10n_ua.ua_psbp_951
+msgid "Loan interests"
+msgstr "Відсотки за кредит"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_732
+#: model:account.account,name:l10n_ua.2_ua_psbp_732
+#: model:account.account.template,name:l10n_ua.ua_psbp_732
+msgid "Interests received"
+msgstr "Відсотки одержані"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_504
+#: model:account.account,name:l10n_ua.2_ua_psbp_504
+#: model:account.account.template,name:l10n_ua.ua_psbp_504
+msgid "Long-term bank loans in foreign currency"
+msgstr "Відстрочені довгострокові кредити банків в іноземній валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_503
+#: model:account.account,name:l10n_ua.2_ua_psbp_503
+#: model:account.account.template,name:l10n_ua.ua_psbp_503
+msgid "Long-term bank loans in national currency"
+msgstr "Відстрочені довгострокові кредити банків у національній валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_604
+#: model:account.account,name:l10n_ua.2_ua_psbp_604
+#: model:account.account.template,name:l10n_ua.ua_psbp_604
+msgid "Deferred short-term bank loans in foreign currency"
+msgstr "Відстрочені короткострокові кредити банків в іноземній валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_603
+#: model:account.account,name:l10n_ua.2_ua_psbp_603
+#: model:account.account.template,name:l10n_ua.ua_psbp_603
+msgid "Deferred short-term bank loans in national currency"
+msgstr "Відстрочені короткострокові кредити банків у національній валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_17
+#: model:account.account,name:l10n_ua.2_ua_psbp_17
+#: model:account.account.template,name:l10n_ua.ua_ias_1180
+#: model:account.account.template,name:l10n_ua.ua_psbp_17
+msgid "Deferred tax assets"
+msgstr "Відстрочені податкові активи"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_54
+#: model:account.account,name:l10n_ua.2_ua_psbp_54
+#: model:account.account.template,name:l10n_ua.ua_ias_1310
+#: model:account.account.template,name:l10n_ua.ua_psbp_54
+msgid "Deferred tax obligations"
+msgstr "Відстрочені податкові зобов’язання"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_751
+#: model:account.account,name:l10n_ua.2_ua_psbp_751
+#: model:account.account.template,name:l10n_ua.ua_psbp_751
+msgid "Compensation for damages from extraordinary events"
+msgstr "Відшкодування збитків від надзвичайних подій"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_716
+#: model:account.account,name:l10n_ua.2_ua_psbp_716
+#: model:account.account.template,name:l10n_ua.ua_psbp_716
+msgid "Reversal of previously written off assets"
+msgstr "Відшкодування раніше списаних активів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_64123
+#: model:account.account,name:l10n_ua.2_ua_psbp_64123
+#: model:account.account.template,name:l10n_ua.ua_psbp_64123
+msgid "Negative balance from VAT until 01.02.2015"
+msgstr "Від’ємний залишок з ПДВ до 01.02.2015 року"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_12051
+msgid "Military collection"
+msgstr "Військовий збір"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_26
+#: model:account.account,name:l10n_ua.2_ua_psbp_26
+#: model:account.account.template,name:l10n_ua.ua_ias_1102
+#: model:account.account.template,name:l10n_ua.ua_psbp_26
+msgid "Finished goods"
+msgstr "Готова продукція"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_331
+#: model:account.account,name:l10n_ua.2_ua_psbp_331
+#: model:account.account.template,name:l10n_ua.ua_psbp_331
+msgid "Monetary documents in national currency"
+msgstr "Грошові документи в національній валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_332
+#: model:account.account,name:l10n_ua.2_ua_psbp_332
+#: model:account.account.template,name:l10n_ua.ua_psbp_332
+msgid "Monetary documents in foreign currency"
+msgstr "Грошові документи в іноземній валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_333
+#: model:account.account,name:l10n_ua.2_ua_psbp_333
+#: model:account.account.template,name:l10n_ua.ua_psbp_333
+msgid "Money in the national currency"
+msgstr "Грошові кошти в дорозі в національній валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_334
+#: model:account.account,name:l10n_ua.2_ua_psbp_334
+#: model:account.account.template,name:l10n_ua.ua_psbp_334
+msgid "Cash transfers in foreign currency"
+msgstr "Грошові кошти в дорозі в іноземній валюті"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1020
+msgid "Goodwill"
+msgstr "Гудвіл"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_193
+#: model:account.account,name:l10n_ua.2_ua_psbp_193
+#: model:account.account.template,name:l10n_ua.ua_psbp_193
+msgid "Goodwill during privatization (corporatization)"
+msgstr "Гудвіл при приватизації (корпоратизації)"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_191
+#: model:account.account,name:l10n_ua.2_ua_psbp_191
+#: model:account.account.template,name:l10n_ua.ua_psbp_191
+msgid "Goodwill upon acquisition"
+msgstr "Гудвіл при придбаннi"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_234
+#: model:account.account,name:l10n_ua.2_ua_psbp_234
+#: model:account.account.template,name:l10n_ua.ua_psbp_234
+msgid "Old production"
+msgstr "Давальницьке виробництво"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1120
+msgid "Account receivable for goods and services"
+msgstr "Дебіторська заборгованість за товари та послуги"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1122
+msgid "Account receivable for goods and services (PoS)"
+msgstr "Дебіторська заборгованість за товари та послуги (PoS)"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_731
+#: model:account.account,name:l10n_ua.2_ua_psbp_731
+#: model:account.account.template,name:l10n_ua.ua_psbp_731
+msgid "Dividends received"
+msgstr "Дивіденди одержані"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_523
+#: model:account.account,name:l10n_ua.2_ua_psbp_523
+#: model:account.account.template,name:l10n_ua.ua_psbp_523
+msgid "Discounts on issued bonds"
+msgstr "Дисконт за випущеними облігаціями"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1170
+msgid "Long-term receivables"
+msgstr "Довгострокова дебіторська заборгованість"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_162
+#: model:account.account,name:l10n_ua.2_ua_psbp_162
+#: model:account.account.template,name:l10n_ua.ua_psbp_162
+msgid ""
+"Long-term biological assets of crops which are estimated at original cost"
+msgstr ""
+"Довгострокові біологічні активи рослинництва, які оцінені за первісною "
+"вартістю"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_161
+#: model:account.account,name:l10n_ua.2_ua_psbp_161
+#: model:account.account.template,name:l10n_ua.ua_psbp_161
+msgid "Long-term biological assets of crops which are estimated at fair cost"
+msgstr ""
+"Довгострокові біологічні активи рослинництва, які оцінені за справедливою "
+"вартістю"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_164
+#: model:account.account,name:l10n_ua.2_ua_psbp_164
+#: model:account.account.template,name:l10n_ua.ua_psbp_164
+msgid ""
+"Long-term biological assets of animal husbandry which are estimated at "
+"original cost"
+msgstr ""
+"Довгострокові біологічні активи тваринництва, які оцінені за первісною "
+"вартістю"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_163
+#: model:account.account,name:l10n_ua.2_ua_psbp_163
+#: model:account.account.template,name:l10n_ua.ua_psbp_163
+msgid ""
+"Long-term biological assets of animal husbandry which are estimated at fair "
+"cost"
+msgstr ""
+"Довгострокові біологічні активи тваринництва, які оцінені за справедливою "
+"вартістю"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_182
+#: model:account.account,name:l10n_ua.2_ua_psbp_182
+#: model:account.account.template,name:l10n_ua.ua_psbp_182
+msgid "Long-term bills received"
+msgstr "Довгострокові векселі одержані"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_511
+#: model:account.account,name:l10n_ua.2_ua_psbp_511
+#: model:account.account.template,name:l10n_ua.ua_psbp_511
+msgid "Long-term bills issued in national currency"
+msgstr "Довгострокові векселі, видані в національній валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_512
+#: model:account.account,name:l10n_ua.2_ua_psbp_512
+#: model:account.account.template,name:l10n_ua.ua_psbp_512
+msgid "Long-term bills issued in foreign currency"
+msgstr "Довгострокові векселі, видані в іноземній валюті"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1301
+msgid "Long-term credits"
+msgstr "Довгострокові кредити"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_502
+#: model:account.account,name:l10n_ua.2_ua_psbp_502
+#: model:account.account.template,name:l10n_ua.ua_psbp_502
+msgid "Long-term bank loans in foreign currency"
+msgstr "Довгострокові кредити банків в іноземній валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_501
+#: model:account.account,name:l10n_ua.2_ua_psbp_501
+#: model:account.account.template,name:l10n_ua.ua_psbp_501
+msgid "Long-term bank loans in national currency"
+msgstr "Довгострокові кредити банків у національній валюті"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1300
+msgid "Long-term loans"
+msgstr "Довгострокові позики"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1160
+msgid "Long-term investment"
+msgstr "Довгострокові інвестиції"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_472
+#: model:account.account,name:l10n_ua.2_ua_psbp_472
+#: model:account.account.template,name:l10n_ua.ua_psbp_472
+msgid "Additional pension provision"
+msgstr "Додаткове пенсійне забезпечення"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1403
+msgid "Additional paid-in capital"
+msgstr "Додатковий оплачений капітал"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_412
+#: model:account.account,name:l10n_ua.2_ua_psbp_412
+#: model:account.account.template,name:l10n_ua.ua_psbp_412
+msgid "Revaluation (depreciation) of intangible assets"
+msgstr "Дооцінка (уцінка) нематеріальних активів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_411
+#: model:account.account,name:l10n_ua.2_ua_psbp_411
+#: model:account.account.template,name:l10n_ua.ua_psbp_411
+msgid "Revaluation (depreciation) of fixed assets"
+msgstr "Дооцінка (уцінка) основних засобів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_413
+#: model:account.account,name:l10n_ua.2_ua_psbp_413
+#: model:account.account.template,name:l10n_ua.ua_psbp_413
+msgid "Revaluation (depreciation) of financial assets"
+msgstr "Дооцінка (уцінка) фінансових інструментів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_232
+#: model:account.account,name:l10n_ua.2_ua_psbp_232
+#: model:account.account.template,name:l10n_ua.ua_psbp_232
+msgid "Auxiliary production"
+msgstr "Допоміжні виробництва"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_718
+#: model:account.account,name:l10n_ua.2_ua_psbp_718
+#: model:account.account.template,name:l10n_ua.ua_psbp_718
+msgid "Income from current assets received free of charge"
+msgstr "Дохiд вiд безоплатно одержаних оборотних активiв"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_743
+#: model:account.account,name:l10n_ua.2_ua_psbp_743
+#: model:account.account.template,name:l10n_ua.ua_psbp_743
+msgid "Income from the sale of properties"
+msgstr "Доход от реализации имущественных комплексов"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_69
+#: model:account.account,name:l10n_ua.2_ua_psbp_69
+#: model:account.account.template,name:l10n_ua.ua_psbp_69
+msgid "Future income"
+msgstr "Доходи майбутніх періодів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_745
+#: model:account.account,name:l10n_ua.2_ua_psbp_745
+#: model:account.account.template,name:l10n_ua.ua_psbp_745
+msgid "Income from non-current assets received free of charge"
+msgstr "Дохід від безоплатно одержаних активів"
+
+#. module: l10n_ua
+#: model:account.tax,name:l10n_ua.1_simple_tax_sale_gift_psbo
+#: model:account.tax,name:l10n_ua.2_simple_tax_sale_gift_psbo
+#: model:account.tax.template,name:l10n_ua.simple_tax_sale_gift_psbo
+msgid "Income from goods received free of charge"
+msgstr "Дохід від безоплатно отриманих  товарів"
+
+#. module: l10n_ua
+#: model:account.tax,description:l10n_ua.1_simple_tax_sale_gift_psbo
+#: model:account.tax,description:l10n_ua.2_simple_tax_sale_gift_psbo
+#: model:account.tax.template,description:l10n_ua.simple_tax_sale_gift
+#: model:account.tax.template,description:l10n_ua.simple_tax_sale_gift_psbo
+#: model:account.tax.template,name:l10n_ua.simple_tax_sale_gift
+msgid "Income from goods received free of charge"
+msgstr "Дохід від безоплатно отриманих товарів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_742
+#: model:account.account,name:l10n_ua.2_ua_psbp_742
+#: model:account.account.template,name:l10n_ua.ua_psbp_742
+msgid "Income from equity assets"
+msgstr "Дохід від відновлення корисності активів"
+
+#. module: l10n_ua
+#: model:account.tax,name:l10n_ua.1_simple_tax_sale_old_psbo
+#: model:account.tax,name:l10n_ua.2_simple_tax_sale_old_psbo
+#: model:account.tax.template,name:l10n_ua.simple_tax_sale_old_psbo
+msgid "Income from debt on which the statute of limitations has been expired."
+msgstr "Дохід від заборгованності за якою минув строк позивної давності"
+
+#. module: l10n_ua
+#: model:account.tax,description:l10n_ua.1_simple_tax_sale_old_psbo
+#: model:account.tax,description:l10n_ua.2_simple_tax_sale_old_psbo
+#: model:account.tax.template,description:l10n_ua.simple_tax_sale_old
+#: model:account.tax.template,description:l10n_ua.simple_tax_sale_old_psbo
+#: model:account.tax.template,name:l10n_ua.simple_tax_sale_old
+msgid ""
+"Income from debt, on which the statute of limitations has been expired."
+msgstr "Дохід від заборгованності, за якою минув строк позивної давності"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_740
+#: model:account.account,name:l10n_ua.2_ua_psbp_740
+#: model:account.account.template,name:l10n_ua.ua_psbp_740
+msgid "Income from changes in the value of financial assets"
+msgstr "Дохід від зміни вартості фінансових інструментів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_711
+#: model:account.account,name:l10n_ua.2_ua_psbp_711
+#: model:account.account.template,name:l10n_ua.ua_psbp_711
+msgid "Income from foreign currency exchange rate differences"
+msgstr "Дохід від купівлі-продажу іноземної валюти"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_744
+#: model:account.account,name:l10n_ua.2_ua_psbp_744
+#: model:account.account.template,name:l10n_ua.ua_psbp_744
+msgid "Income from non-operational exchange rate differences"
+msgstr "Дохід від неопераційної курсової різниці"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_714
+#: model:account.account,name:l10n_ua.2_ua_psbp_714
+#: model:account.account.template,name:l10n_ua.ua_psbp_714
+msgid "Income from operational exchange rate differences"
+msgstr "Дохід від операційної курсової різниці"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_713
+#: model:account.account,name:l10n_ua.2_ua_psbp_713
+#: model:account.account.template,name:l10n_ua.ua_psbp_713
+msgid "Income from operating loan assets"
+msgstr "Дохід від операційної оренди активів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_710
+#: model:account.account,name:l10n_ua.2_ua_psbp_710
+#: model:account.account.template,name:l10n_ua.ua_psbp_710
+msgid ""
+"Income from initial recognition and from changes in the value of assets "
+"accounted at fair cost"
+msgstr ""
+"Дохід від первісного визнання та від зміни вартості активів, які "
+"обліковуються за справедливою вартістю"
+
+#. module: l10n_ua
+#: model:account.tax,name:l10n_ua.1_simple_tax_sale_product_psbo
+#: model:account.tax,name:l10n_ua.2_simple_tax_sale_product_psbo
+#: model:account.tax.template,name:l10n_ua.simple_tax_sale_product_psbo
+msgid "Revenue from the sale of goods"
+msgstr "Дохід від продажу  товарів"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_2000
+msgid "Revenue from Sale (Category No. 1)"
+msgstr "Дохід від продажу (категорія № 1)"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_2001
+msgid "Revenue from Sale (Category No. 2)"
+msgstr "Дохід від продажу (категорія № 2)"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_2002
+msgid "Revenue from Sale (Category No. 3)"
+msgstr "Дохід від продажу (категорія № 3)"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_2003
+msgid "Revenue from Sale (Category No. 4)"
+msgstr "Дохід від продажу (категорія № 4)"
+
+#. module: l10n_ua
+#: model:account.tax,description:l10n_ua.1_simple_tax_sale_product_psbo
+#: model:account.tax,description:l10n_ua.2_simple_tax_sale_product_psbo
+#: model:account.tax.template,description:l10n_ua.simple_tax_sale_product
+#: model:account.tax.template,description:l10n_ua.simple_tax_sale_product_psbo
+#: model:account.tax.template,name:l10n_ua.simple_tax_sale_product
+msgid "Revenue from the sale of goods"
+msgstr "Дохід від продажу товарів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_701
+#: model:account.account,name:l10n_ua.2_ua_psbp_701
+#: model:account.account.template,name:l10n_ua.ua_psbp_701
+msgid "Revenue from the sale of finished products"
+msgstr "Дохід від реалізації готової продукції"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_703
+#: model:account.account,name:l10n_ua.2_ua_psbp_703
+#: model:account.account.template,name:l10n_ua.ua_psbp_703
+msgid "Revenue from the sale of works and services"
+msgstr "Дохід від реалізації робіт і послуг"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_702
+#: model:account.account,name:l10n_ua.2_ua_psbp_702
+#: model:account.account.template,name:l10n_ua.ua_psbp_702
+msgid "Revenue from the sale of goods"
+msgstr "Дохід від реалізації товарів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_741
+#: model:account.account,name:l10n_ua.2_ua_psbp_741
+#: model:account.account.template,name:l10n_ua.ua_psbp_741
+msgid "Income from financial investments"
+msgstr "Дохід від реалізації фінансових інвестицій"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_712
+#: model:account.account,name:l10n_ua.2_ua_psbp_712
+#: model:account.account.template,name:l10n_ua.ua_psbp_712
+msgid "Revenue from the sale of other current assets"
+msgstr "Дохід від реалізації інших оборотних активів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_7091
+#: model:account.account,name:l10n_ua.2_ua_psbp_7091
+#: model:account.account.template,name:l10n_ua.ua_psbp_7091
+msgid "Income from retail sales"
+msgstr "Дохід від роздрібного продажу"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_717
+#: model:account.account,name:l10n_ua.2_ua_psbp_717
+#: model:account.account.template,name:l10n_ua.ua_psbp_717
+msgid "Revenue from creditor debt"
+msgstr "Дохід від списання кредиторської заборгованості"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_722
+#: model:account.account,name:l10n_ua.2_ua_psbp_722
+#: model:account.account.template,name:l10n_ua.ua_psbp_722
+msgid "Revenue from joint activity"
+msgstr "Дохід від спільної діяльності"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_721
+#: model:account.account,name:l10n_ua.2_ua_psbp_721
+#: model:account.account.template,name:l10n_ua.ua_psbp_721
+msgid "Income from investment in associate enterprises"
+msgstr "Дохід від інвестицій в асоційовані підприємства"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_723
+#: model:account.account,name:l10n_ua.2_ua_psbp_723
+#: model:account.account.template,name:l10n_ua.ua_psbp_723
+msgid "Income from investment in subsidiary enterprises"
+msgstr "Дохід від інвестицій в дочірні підприємства"
+
+#. module: l10n_ua
+#: model:account.tax,description:l10n_ua.1_simple_tax_sale_15_psbo
+#: model:account.tax,description:l10n_ua.2_simple_tax_sale_15_psbo
+#: model:account.tax.template,description:l10n_ua.simple_tax_sale_15
+#: model:account.tax.template,description:l10n_ua.simple_tax_sale_15_psbo
+msgid "Sale Tax 15%"
+msgstr "Дохід за ставкою 15%"
+
+#. module: l10n_ua
+#: model:account.tax,name:l10n_ua.1_simple_tax_sale_15_psbo
+#: model:account.tax,name:l10n_ua.2_simple_tax_sale_15_psbo
+#: model:account.tax.template,name:l10n_ua.simple_tax_sale_15_psbo
+msgid "Sale Tax 15%"
+msgstr "Дохід, за ставкою 15%"
+
+#. module: l10n_ua
+#: model:account.tax.template,name:l10n_ua.simple_tax_sale_15
+msgid "Sale Tax 15%"
+msgstr "Дохід, що оподатковується за ставкою 15%"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_3512
+#: model:account.account,name:l10n_ua.2_ua_psbp_3512
+#: model:account.account.template,name:l10n_ua.ua_psbp_3512
+msgid "Cash equivalents (in foreign currency)"
+msgstr "Еквіваленти грошових коштів (в іноземній валюті)"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_3511
+#: model:account.account,name:l10n_ua.2_ua_psbp_3511
+#: model:account.account.template,name:l10n_ua.ua_psbp_3511
+msgid "Cash equivalents (in national currency)"
+msgstr "Еквіваленти грошових коштів (у національній валюті)"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_335
+#: model:account.account,name:l10n_ua.2_ua_psbp_335
+#: model:account.account.template,name:l10n_ua.ua_psbp_335
+msgid "Electronic money denominated in national currency"
+msgstr "Електронні гроші, номіновані в національній валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_421
+#: model:account.account,name:l10n_ua.2_ua_psbp_421
+#: model:account.account.template,name:l10n_ua.ua_psbp_421
+msgid "Issued capital"
+msgstr "Емісійний дохід"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1401
+msgid "Issued capital"
+msgstr "Емісійний фонд"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1408
+msgid "Exchange rate differences"
+msgstr "Ефект курсових різниць"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_651
+#: model:account.account,name:l10n_ua.2_ua_psbp_651
+#: model:account.account.template,name:l10n_ua.ua_psbp_651
+msgid "Mandatory public social insurance"
+msgstr ""
+"За розрахунками із загальнообов'язкового державного соціального страхування"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_652
+#: model:account.account,name:l10n_ua.2_ua_psbp_652
+#: model:account.account.template,name:l10n_ua.ua_psbp_652
+msgid "Social insurance"
+msgstr "За соціальним страхуванням"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_656
+#: model:account.account,name:l10n_ua.2_ua_psbp_656
+#: model:account.account.template,name:l10n_ua.ua_psbp_656
+msgid "Insurance of accidents"
+msgstr "За страхуванням від нещасних випадків"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_655
+#: model:account.account,name:l10n_ua.2_ua_psbp_655
+#: model:account.account.template,name:l10n_ua.ua_psbp_655
+msgid "Insurance of property"
+msgstr "За страхуванням майна"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_653
+#: model:account.account,name:l10n_ua.2_ua_psbp_653
+#: model:account.account.template,name:l10n_ua.ua_psbp_653
+msgid "Insurance for unemployment (not used)"
+msgstr "За страхуванням на випадок безробіття (не використовується)"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_654
+#: model:account.account,name:l10n_ua.2_ua_psbp_654
+#: model:account.account.template,name:l10n_ua.ua_psbp_654
+msgid "Individual insurance"
+msgstr "За індивідуальним страхуванням"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_471
+#: model:account.account,name:l10n_ua.2_ua_psbp_471
+#: model:account.account.template,name:l10n_ua.ua_psbp_471
+msgid "Provision of vacation pay"
+msgstr "Забезпечення виплат відпусток"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_478
+#: model:account.account,name:l10n_ua.2_ua_psbp_478
+#: model:account.account.template,name:l10n_ua.ua_psbp_478
+msgid "Provision for the restoration of land areas"
+msgstr "Забезпечення відновлення земельних ділянок"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_473
+#: model:account.account,name:l10n_ua.2_ua_psbp_473
+#: model:account.account.template,name:l10n_ua.ua_psbp_473
+msgid "Provision for guaranteed obligations"
+msgstr "Забезпечення гарантійних зобов’язань"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_477
+#: model:account.account,name:l10n_ua.2_ua_psbp_477
+#: model:account.account.template,name:l10n_ua.ua_psbp_477
+msgid "Provision of financial incentives"
+msgstr "Забезпечення матеріального заохочення"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_474
+#: model:account.account,name:l10n_ua.2_ua_psbp_474
+#: model:account.account.template,name:l10n_ua.ua_psbp_474
+msgid "Provision for other costs and payments"
+msgstr "Забезпечення інших витрат і платежів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_476
+#: model:account.account,name:l10n_ua.2_ua_psbp_476
+#: model:account.account.template,name:l10n_ua.ua_psbp_476
+msgid "Provision related to financial activities"
+msgstr "Забезпечення, пов'язане з фінансовою діяльністю"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_475
+#: model:account.account,name:l10n_ua.2_ua_psbp_475
+#: model:account.account.template,name:l10n_ua.ua_psbp_475
+msgid "Provision related to investment activities"
+msgstr "Забезпечення, пов'язане з інвестиційною діяльністю"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_181
+#: model:account.account,name:l10n_ua.2_ua_psbp_181
+#: model:account.account.template,name:l10n_ua.ua_psbp_181
+msgid "Lease debts"
+msgstr "Заборгованість за майно, що передано у фінансову оренду"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_91
+#: model:account.account,name:l10n_ua.2_ua_psbp_91
+#: model:account.account.template,name:l10n_ua.ua_psbp_91
+msgid "Production costs"
+msgstr "Загальновиробничі витрати"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1001
+msgid "Titles and names of publications"
+msgstr "Заголовки та назви видань"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_64122
+#: model:account.account,name:l10n_ua.2_ua_psbp_64122
+#: model:account.account.template,name:l10n_ua.ua_psbp_64122
+msgid "VAT balance after 01.02.2015"
+msgstr "Залишок на лицьовомцу рахунку з ПДВ після 01.02.2015 року"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1100
+msgid "Stocks (Warehouses)"
+msgstr "Запаси (Склад)"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_207
+#: model:account.account,name:l10n_ua.2_ua_psbp_207
+#: model:account.account.template,name:l10n_ua.ua_psbp_207
+msgid "Spare parts"
+msgstr "Запасні частини"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1208
+msgid "Wages and rewards"
+msgstr "Заробітна плата та винагороди"
+
+#. module: l10n_ua
+#: model:account.tax,description:l10n_ua.1_purchase_tax_template_vat_free_psbo
+#: model:account.tax,description:l10n_ua.1_sale_tax_template_vat_free_psbo
+#: model:account.tax,description:l10n_ua.2_purchase_tax_template_vat_free_psbo
+#: model:account.tax,description:l10n_ua.2_sale_tax_template_vat_free_psbo
+#: model:account.tax.template,description:l10n_ua.purchase_tax_template_vat_free
+#: model:account.tax.template,description:l10n_ua.purchase_tax_template_vat_free_psbo
+#: model:account.tax.template,description:l10n_ua.sale_tax_template_vat_free
+#: model:account.tax.template,description:l10n_ua.sale_tax_template_vat_free_psbo
+msgid "Exempt from VAT"
+msgstr "Звільнено від ПДВ"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_101
+#: model:account.account,name:l10n_ua.2_ua_psbp_101
+#: model:account.account.template,name:l10n_ua.ua_psbp_101
+msgid "Real estate"
+msgstr "Земельні ділянки"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1010
+msgid "Land"
+msgstr "Земля"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_131
+#: model:account.account,name:l10n_ua.2_ua_psbp_131
+#: model:account.account.template,name:l10n_ua.ua_psbp_131
+msgid "Deprecation of fixed assets"
+msgstr "Знос основних засобів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_135
+#: model:account.account,name:l10n_ua.2_ua_psbp_135
+#: model:account.account.template,name:l10n_ua.ua_psbp_135
+msgid "Deprecation of real estate"
+msgstr "Знос інвестиційної нерухомості"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_132
+#: model:account.account,name:l10n_ua.2_ua_psbp_132
+#: model:account.account.template,name:l10n_ua.ua_psbp_132
+msgid "Deprecation of other non-current tangible assets"
+msgstr "Знос інших необоротних матеріальних активів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_532
+#: model:account.account,name:l10n_ua.2_ua_psbp_532
+#: model:account.account.template,name:l10n_ua.ua_psbp_532
+msgid "Obligation for the lease of property complexes"
+msgstr "Зобов’язання з оренди цілісних майнових комплексів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_531
+#: model:account.account,name:l10n_ua.2_ua_psbp_531
+#: model:account.account.template,name:l10n_ua.ua_psbp_531
+msgid "Obligation for financial lease"
+msgstr "Зобов’язання з фінансової оренди"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_521
+#: model:account.account,name:l10n_ua.2_ua_psbp_521
+#: model:account.account.template,name:l10n_ua.ua_psbp_521
+msgid "Bond obligations"
+msgstr "Зобов’язання за облігаціями"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_151
+#: model:account.account,name:l10n_ua.2_ua_psbp_151
+#: model:account.account.template,name:l10n_ua.ua_psbp_151
+msgid "Capital invested in construction"
+msgstr "Капітальне будівництво"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_102
+#: model:account.account,name:l10n_ua.2_ua_psbp_102
+#: model:account.account.template,name:l10n_ua.ua_psbp_102
+msgid "Expenditure on land improvements"
+msgstr "Капітальні витрати на поліпшення  земель"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_813
+#: model:account.account,name:l10n_ua.2_ua_psbp_813
+#: model:account.account.template,name:l10n_ua.ua_psbp_813
+msgid "Compensation payments"
+msgstr "Компенсаційні виплати"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1002
+msgid "Computer software"
+msgstr "Комп’ютерне програмне забезпечення"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_6433
+#: model:account.account,name:l10n_ua.2_ua_psbp_6433
+#: model:account.account.template,name:l10n_ua.ua_psbp_6433
+msgid "Tax obligation adjustment"
+msgstr "Коригування податкових зобов’язань"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_6443
+#: model:account.account,name:l10n_ua.2_ua_psbp_6443
+#: model:account.account.template,name:l10n_ua.ua_psbp_6443
+msgid "Tax credit adjustment"
+msgstr "Коригування податкового кредиту"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1240
+msgid "Short-term interests of long-term loans"
+msgstr "Короткострокова частка за довгострокові позики"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_621
+#: model:account.account,name:l10n_ua.2_ua_psbp_621
+#: model:account.account.template,name:l10n_ua.ua_psbp_621
+msgid "Short-term bills issued in national currency"
+msgstr "Короткострокові векселі, видані в національній валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_622
+#: model:account.account,name:l10n_ua.2_ua_psbp_622
+#: model:account.account.template,name:l10n_ua.ua_psbp_622
+msgid "Short-term bills issued in foreign currency"
+msgstr "Короткострокові векселі, видані в іноземній валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_341
+#: model:account.account,name:l10n_ua.2_ua_psbp_341
+#: model:account.account.template,name:l10n_ua.ua_psbp_341
+msgid "Short-term bills received in national currency"
+msgstr "Короткострокові векселі, одержані в національній валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_342
+#: model:account.account,name:l10n_ua.2_ua_psbp_342
+#: model:account.account.template,name:l10n_ua.ua_psbp_342
+msgid "Short-term bills received in foreign currency"
+msgstr "Короткострокові векселі, одержані в іноземній валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_602
+#: model:account.account,name:l10n_ua.2_ua_psbp_602
+#: model:account.account.template,name:l10n_ua.ua_psbp_602
+msgid "Short-term bank loans in foreign currency"
+msgstr "Короткострокові кредити банків в іноземній валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_601
+#: model:account.account,name:l10n_ua.2_ua_psbp_601
+#: model:account.account.template,name:l10n_ua.ua_psbp_601
+msgid "Short-term bank loans in national currency"
+msgstr "Короткострокові кредити банків у національній валюті"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1230
+msgid "Short-term loans"
+msgstr "Короткострокові позики"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1150
+msgid "Short-term financial investment"
+msgstr "Короткострокові фінансові інвестиції"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_482
+#: model:account.account,name:l10n_ua.2_ua_psbp_482
+#: model:account.account.template,name:l10n_ua.ua_psbp_482
+msgid "Result from budget and government special funds"
+msgstr "Кошти з бюджету та державних цільових фондів"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1142
+msgid "Cost on SEA VAT"
+msgstr "Кошти на СЕА ПДВ"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_481
+#: model:account.account,name:l10n_ua.2_ua_psbp_481
+#: model:account.account.template,name:l10n_ua.ua_psbp_481
+msgid "Result exempted from taxation"
+msgstr "Кошти, що вилучено з під оподаткування"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1200
+msgid "Credit debt for goods and services"
+msgstr "Кредиторська заборгованість за товари та послуги"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_202
+#: model:account.account,name:l10n_ua.2_ua_psbp_202
+#: model:account.account.template,name:l10n_ua.ua_psbp_202
+msgid "Purchase of semi-finished products and consumables"
+msgstr "Купівельні напівфабрикати та комплектуючі вироби"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1003
+msgid "Licenses and privileges"
+msgstr "Ліцензії та привілеї"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_112
+#: model:account.account,name:l10n_ua.2_ua_psbp_112
+#: model:account.account.template,name:l10n_ua.ua_psbp_112
+msgid "Low-value non-current tangible assets"
+msgstr "Малоцінні необоротні матеріальні активи"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_22
+#: model:account.account,name:l10n_ua.2_ua_psbp_22
+#: model:account.account.template,name:l10n_ua.ua_psbp_22
+msgid "Low-value and fast-wearing items"
+msgstr "Малоцінні та швидкозношувані предмети"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_208
+#: model:account.account,name:l10n_ua.2_ua_psbp_208
+#: model:account.account.template,name:l10n_ua.ua_psbp_208
+msgid "Agricultural purpose materials"
+msgstr "Матеріали сільськогосподарського призначення"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_206
+#: model:account.account,name:l10n_ua.2_ua_psbp_206
+#: model:account.account.template,name:l10n_ua.ua_psbp_206
+msgid "Materials transferred to recycling"
+msgstr "Матеріали, передані в переробку"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_104
+#: model:account.account,name:l10n_ua.2_ua_psbp_104
+#: model:account.account.template,name:l10n_ua.ua_ias_1012
+#: model:account.account.template,name:l10n_ua.ua_psbp_104
+msgid "Machines and equipment"
+msgstr "Машини та обладнання"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1014
+msgid "Furniture and accessories"
+msgstr "Меблі та приладдя"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1000
+msgid "Brand names"
+msgstr "Назви брендів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_133
+#: model:account.account,name:l10n_ua.2_ua_psbp_133
+#: model:account.account.template,name:l10n_ua.ua_psbp_133
+msgid "Accumulated depreciation of intangible assets"
+msgstr "Накопичена амортизацiя нематеріальних активів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_134
+#: model:account.account,name:l10n_ua.2_ua_psbp_134
+#: model:account.account.template,name:l10n_ua.ua_psbp_134
+msgid "Accumulated depreciation of long-term biological assets"
+msgstr "Накопичена амортизація довгострокових біологічних активів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_423
+#: model:account.account,name:l10n_ua.2_ua_psbp_423
+#: model:account.account.template,name:l10n_ua.ua_psbp_423
+msgid "Exchange rate differences"
+msgstr "Накопичені курсові різниці"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_25
+#: model:account.account,name:l10n_ua.2_ua_psbp_25
+#: model:account.account.template,name:l10n_ua.ua_psbp_25
+msgid "Semi-finished products"
+msgstr "Напівфабрикати"
+
+#. module: l10n_ua
+#: model:account.tax,description:l10n_ua.1_purchase_tax_template_vat_not_psbo
+#: model:account.tax,description:l10n_ua.1_sale_tax_template_vat_not_psbo
+#: model:account.tax,description:l10n_ua.2_purchase_tax_template_vat_not_psbo
+#: model:account.tax,description:l10n_ua.2_sale_tax_template_vat_not_psbo
+#: model:account.tax.template,description:l10n_ua.purchase_tax_template_vat_not
+#: model:account.tax.template,description:l10n_ua.purchase_tax_template_vat_not_psbo
+#: model:account.tax.template,description:l10n_ua.sale_tax_template_vat_not
+#: model:account.tax.template,description:l10n_ua.sale_tax_template_vat_not_psbo
+msgid "Not subject to VAT"
+msgstr "Не є об'єктом ПДВ"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_192
+#: model:account.account,name:l10n_ua.2_ua_psbp_192
+#: model:account.account.template,name:l10n_ua.ua_psbp_192
+msgid "Negative Goodwill"
+msgstr "Негативный гудвил"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1101
+msgid "Work in progress products"
+msgstr "Незавершене виробництво"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_238
+#: model:account.account,name:l10n_ua.2_ua_psbp_238
+#: model:account.account.template,name:l10n_ua.ua_psbp_238
+msgid "Unfinished construction contracts"
+msgstr "Незавершені будівельні контракти"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_166
+#: model:account.account,name:l10n_ua.2_ua_psbp_166
+#: model:account.account.template,name:l10n_ua.ua_psbp_166
+msgid "Unmature long-term biological assets evaluated at original cost"
+msgstr ""
+"Незрілі довгострокові біологічні активи, які оцінюються за первісною "
+"вартістю"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_165
+#: model:account.account,name:l10n_ua.2_ua_psbp_165
+#: model:account.account.template,name:l10n_ua.ua_psbp_165
+msgid "Immature long-term biological assets evaluated at fair cost"
+msgstr ""
+"Незрілі довгострокові біологічні активи, які оцінюються за справедливою "
+"вартістю"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1005
+msgid "Intangible assets at the development stage"
+msgstr "Нематеріальні активи на етапі розробки"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_286
+#: model:account.account,name:l10n_ua.2_ua_psbp_286
+#: model:account.account.template,name:l10n_ua.ua_psbp_286
+msgid "Non-current assets and disposal groups held for sale"
+msgstr "Необоротні активи та групи вибуття, утримувані для продажу"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_1172
+#: model:account.account,name:l10n_ua.2_ua_psbp_1172
+#: model:account.account.template,name:l10n_ua.ua_psbp_1172
+msgid "Non-current tangible assets intended for sell"
+msgstr "Необоротні матеріальні активи призначені для продажу"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_46
+#: model:account.account,name:l10n_ua.2_ua_psbp_46
+#: model:account.account.template,name:l10n_ua.ua_ias_1405
+#: model:account.account.template,name:l10n_ua.ua_psbp_46
+msgid "Unpaid capital"
+msgstr "Неоплачений капітал"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_442
+#: model:account.account,name:l10n_ua.2_ua_psbp_442
+#: model:account.account.template,name:l10n_ua.ua_psbp_442
+msgid "Uncovered losses"
+msgstr "Непокриті збитки"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1406
+msgid "Undivided profit (uncovered losses)"
+msgstr "Нерозподілений прибуток (непокритий збиток)"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_947
+#: model:account.account,name:l10n_ua.2_ua_psbp_947
+#: model:account.account.template,name:l10n_ua.ua_psbp_947
+msgid "Shortages and losses from deterioration of values"
+msgstr "Нестачі і втрати від псування цінностей"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_235
+#: model:account.account,name:l10n_ua.2_ua_psbp_235
+#: model:account.account.template,name:l10n_ua.ua_psbp_235
+msgid "Maintenance and repair of fixed assets"
+msgstr "Обслуговування і ремонт необоротних активів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_233
+#: model:account.account,name:l10n_ua.2_ua_psbp_233
+#: model:account.account.template,name:l10n_ua.ua_psbp_233
+msgid "Maintenance production costs"
+msgstr "Обслуговуючі виробництва"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_715
+#: model:account.account,name:l10n_ua.2_ua_psbp_715
+#: model:account.account.template,name:l10n_ua.ua_psbp_715
+msgid "Received fines and penalties"
+msgstr "Одержані штрафи, пені, неустойки"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_814
+#: model:account.account,name:l10n_ua.2_ua_psbp_814
+#: model:account.account.template,name:l10n_ua.ua_psbp_814
+msgid "Vacation pay"
+msgstr "Оплата відпусток"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_815
+#: model:account.account,name:l10n_ua.2_ua_psbp_815
+#: model:account.account.template,name:l10n_ua.ua_psbp_815
+msgid "Payment of other unworked time"
+msgstr "Оплата іншого невідпрацьованого часу"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_231
+#: model:account.account,name:l10n_ua.2_ua_psbp_231
+#: model:account.account.template,name:l10n_ua.ua_psbp_231
+msgid "Main production costs"
+msgstr "Основне виробництво"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_1092
+#: model:account.account,name:l10n_ua.2_ua_psbp_1092
+#: model:account.account.template,name:l10n_ua.ua_psbp_1092
+msgid "Fixed assets intended for sale"
+msgstr "Основні засоби призначені для продажу"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1201
+msgid "Received in stock without invoice"
+msgstr "Отримано на склад без рахунку-фактури"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1015
+msgid "Office equipment"
+msgstr "Офісне обладнання"
+
+#. module: l10n_ua
+#: model:account.account.tag,name:l10n_ua.acc_tag_vat
+#: model:account.account.template,name:l10n_ua.ua_ias_1203
+msgid "VAT"
+msgstr "ПДВ"
+
+#. module: l10n_ua
+#: model:account.tax,description:l10n_ua.1_purchase_tax_template_vat0_psbo
+#: model:account.tax,description:l10n_ua.1_sale_tax_template_vat0_psbo
+#: model:account.tax,description:l10n_ua.2_purchase_tax_template_vat0_psbo
+#: model:account.tax,description:l10n_ua.2_sale_tax_template_vat0_psbo
+#: model:account.tax.template,description:l10n_ua.purchase_tax_template_vat0
+#: model:account.tax.template,description:l10n_ua.purchase_tax_template_vat0_psbo
+#: model:account.tax.template,description:l10n_ua.sale_tax_template_vat0
+#: model:account.tax.template,description:l10n_ua.sale_tax_template_vat0_psbo
+msgid "VAT 0%"
+msgstr "ПДВ 0%"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1205
+msgid "Personal income tax"
+msgstr "ПДФО"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_402
+#: model:account.account,name:l10n_ua.2_ua_psbp_402
+#: model:account.account.template,name:l10n_ua.ua_psbp_402
+msgid "Share capital"
+msgstr "Пайовий капітал"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_203
+#: model:account.account,name:l10n_ua.2_ua_psbp_203
+#: model:account.account.template,name:l10n_ua.ua_psbp_203
+msgid "Fuel"
+msgstr "Паливо"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1143
+msgid "Overpayment of VAT"
+msgstr "Переплата по лицьовому рахунку з ПДВ"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_705
+#: model:account.account,name:l10n_ua.2_ua_psbp_705
+#: model:account.account.template,name:l10n_ua.ua_psbp_705
+msgid "Reinsurance"
+msgstr "Перестрахування"
+
+#. module: l10n_ua
+#: model:account.chart.template,name:l10n_ua.l10n_ua_ias_chart_template
+msgid "IFRS Chart of Accounts"
+msgstr "План рахунків МСФЗ"
+
+#. module: l10n_ua
+#: model:account.chart.template,name:l10n_ua.l10n_ua_psbo_chart_template
+msgid "PSBO Chat of Accounts"
+msgstr "План рахунків ПСБО"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_385
+#: model:account.account,name:l10n_ua.2_ua_psbp_385
+#: model:account.account.template,name:l10n_ua.ua_psbp_385
+msgid "Reserves for own shares"
+msgstr "По заборгованості за внутрішні розрахунки"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_382
+#: model:account.account,name:l10n_ua.2_ua_psbp_382
+#: model:account.account.template,name:l10n_ua.ua_psbp_382
+msgid "Trade receivables customer"
+msgstr "По заборгованості за розрахунки з бюджетом"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_383
+#: model:account.account,name:l10n_ua.2_ua_psbp_383
+#: model:account.account.template,name:l10n_ua.ua_psbp_383
+msgid "Trade receivables for issued advances"
+msgstr "По заборгованості за розрахунки за виданими авансами"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_384
+#: model:account.account,name:l10n_ua.2_ua_psbp_384
+#: model:account.account.template,name:l10n_ua.ua_psbp_384
+msgid "Trade receivables for accrued income"
+msgstr "По заборгованості за розрахунки за нарахованими доходами"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_381
+#: model:account.account,name:l10n_ua.2_ua_psbp_381
+#: model:account.account.template,name:l10n_ua.ua_psbp_381
+msgid "Trade receivable for goods, work, services"
+msgstr "По заборгованості за товари, роботи, послуги"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_386
+#: model:account.account,name:l10n_ua.2_ua_psbp_386
+#: model:account.account.template,name:l10n_ua.ua_psbp_386
+msgid "Other debt"
+msgstr "По іншій дебіторській заборгованості"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_6441
+#: model:account.account,name:l10n_ua.2_ua_psbp_6441
+#: model:account.account.template,name:l10n_ua.ua_psbp_6441
+msgid "Tax credit"
+msgstr "Податковий кредит"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_6442
+#: model:account.account,name:l10n_ua.2_ua_psbp_6442
+#: model:account.account.template,name:l10n_ua.ua_psbp_6442
+msgid "Tax credit unconfirmed"
+msgstr "Податковий кредит непідтверджений"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1140
+msgid "Tax credit for VAT"
+msgstr "Податковий кредит по ПДВ"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_6431
+#: model:account.account,name:l10n_ua.2_ua_psbp_6431
+#: model:account.account.template,name:l10n_ua.ua_psbp_6431
+msgid "Withholding Tax"
+msgstr "Податкові зобов’язання"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_6434
+#: model:account.account,name:l10n_ua.2_ua_psbp_6434
+#: model:account.account.template,name:l10n_ua.ua_psbp_6434
+msgid "Withholding Tax (retail)"
+msgstr "Податкові зобов’язання (роздріб)"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_6432
+#: model:account.account,name:l10n_ua.2_ua_psbp_6432
+#: model:account.account.template,name:l10n_ua.ua_psbp_6432
+msgid "Withholding Tax unconfirmed"
+msgstr "Податкові зобов’язання непідтверджені"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1204
+msgid "Withholding Tax VAT"
+msgstr "Податкові зобов’язання по ПДВ"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1202
+#: model:account.account.template,name:l10n_ua.ua_ias_2600
+msgid "Income tax"
+msgstr "Податок на прибуток"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_981
+#: model:account.account,name:l10n_ua.2_ua_psbp_981
+#: model:account.account.template,name:l10n_ua.ua_psbp_981
+msgid "Income tax from all activities"
+msgstr "Податок на прибуток від усіх видів діяльності"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_611
+#: model:account.account,name:l10n_ua.2_ua_psbp_611
+#: model:account.account.template,name:l10n_ua.ua_psbp_611
+msgid "Current debt on long-term obligations in national currency"
+msgstr ""
+"Поточна заборгованість за довгостроковими зобов’язаннями в національній "
+"валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_612
+#: model:account.account,name:l10n_ua.2_ua_psbp_612
+#: model:account.account.template,name:l10n_ua.ua_psbp_612
+msgid "Current debt on long-term obligations in foreign currency"
+msgstr ""
+"Поточна заборгованість за довгостроковими зобов’язаннями в іноземній валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_211
+#: model:account.account,name:l10n_ua.2_ua_psbp_211
+#: model:account.account.template,name:l10n_ua.ua_psbp_211
+msgid "Current biological assets of crops estimated at fair cost"
+msgstr ""
+"Поточні біологічні активи рослинництва, які оцінені за справедливою вартістю"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_213
+#: model:account.account,name:l10n_ua.2_ua_psbp_213
+#: model:account.account.template,name:l10n_ua.ua_psbp_213
+msgid ""
+"Current biological assets of animal husbandry estimated at original cost"
+msgstr ""
+"Поточні біологічні активи тваринництва, які оцінені за первісною вартістю"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_212
+#: model:account.account,name:l10n_ua.2_ua_psbp_212
+#: model:account.account.template,name:l10n_ua.ua_psbp_212
+msgid "Current biological assets of animal husbandry estimated at fair cost"
+msgstr ""
+"Поточні біологічні активи тваринництва, які оцінені за справедливою вартістю"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_311
+#: model:account.account,name:l10n_ua.2_ua_psbp_311
+#: model:account.account.template,name:l10n_ua.ua_psbp_311
+msgid "Bank accounts in national currency"
+msgstr "Поточні рахунки в національній валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_312
+#: model:account.account,name:l10n_ua.2_ua_psbp_312
+#: model:account.account.template,name:l10n_ua.ua_psbp_312
+msgid "Bank accounts in foreign currency"
+msgstr "Поточні рахунки в іноземній валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_122
+#: model:account.account,name:l10n_ua.2_ua_psbp_122
+#: model:account.account.template,name:l10n_ua.ua_psbp_122
+msgid "Property usage rights"
+msgstr "Права користування майном"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_121
+#: model:account.account,name:l10n_ua.2_ua_psbp_121
+#: model:account.account.template,name:l10n_ua.ua_psbp_121
+msgid "Rights to use natural resources"
+msgstr "Права користування природними ресурсами"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_123
+#: model:account.account,name:l10n_ua.2_ua_psbp_123
+#: model:account.account.template,name:l10n_ua.ua_psbp_123
+msgid "Rights of commercial designations"
+msgstr "Права на комерційні позначення"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_124
+#: model:account.account,name:l10n_ua.2_ua_psbp_124
+#: model:account.account.template,name:l10n_ua.ua_psbp_124
+msgid "Industrial property rights"
+msgstr "Права на об’єкти промислової власності"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_116
+#: model:account.account,name:l10n_ua.2_ua_psbp_116
+#: model:account.account.template,name:l10n_ua.ua_psbp_116
+msgid "Rental items"
+msgstr "Предмети прокату"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_522
+#: model:account.account,name:l10n_ua.2_ua_psbp_522
+#: model:account.account.template,name:l10n_ua.ua_psbp_522
+msgid "Premiums on conversion of bonds into shares"
+msgstr "Премія за випущеними облігаціями"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_812
+#: model:account.account,name:l10n_ua.2_ua_psbp_812
+#: model:account.account.template,name:l10n_ua.ua_psbp_812
+msgid "Bonuses and incentives"
+msgstr "Премії та заохочення"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_441
+#: model:account.account,name:l10n_ua.2_ua_psbp_441
+#: model:account.account.template,name:l10n_ua.ua_psbp_441
+msgid "Retained earnings"
+msgstr "Прибуток нерозподілений"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_443
+#: model:account.account,name:l10n_ua.2_ua_psbp_443
+#: model:account.account.template,name:l10n_ua.ua_psbp_443
+msgid "Revenues used in the reporting period"
+msgstr "Прибуток, використаний у звітному періоді"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_1531
+#: model:account.account,name:l10n_ua.2_ua_psbp_1531
+#: model:account.account.template,name:l10n_ua.ua_psbp_1531
+msgid "Purchase of other non-current tangible assets"
+msgstr "Придбання  інших необоротних матеріальних активів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_155
+#: model:account.account,name:l10n_ua.2_ua_psbp_155
+#: model:account.account.template,name:l10n_ua.ua_psbp_155
+msgid "Acquisition (cultivation) of long-term biological assets"
+msgstr "Придбання (вирощування) довгострокових біологічних активів"
+
+#. module: l10n_ua
+#: model:account.tax,name:l10n_ua.1_purchase_tax_template_vat_not_psbo
+#: model:account.tax,name:l10n_ua.2_purchase_tax_template_vat_not_psbo
+#: model:account.tax.template,name:l10n_ua.purchase_tax_template_vat_not_psbo
+msgid "Not subject to VAT"
+msgstr "Придбання Не є об'єктом ПДВ"
+
+#. module: l10n_ua
+#: model:account.tax,name:l10n_ua.1_purchase_tax_template_vat0_psbo
+#: model:account.tax,name:l10n_ua.2_purchase_tax_template_vat0_psbo
+#: model:account.tax.template,name:l10n_ua.purchase_tax_template_vat0_psbo
+msgid "VAT purchase 0%"
+msgstr "Придбання ПДВ 0%"
+
+#. module: l10n_ua
+#: model:account.tax,name:l10n_ua.1_purchase_tax_template_vat14_psbo
+#: model:account.tax,name:l10n_ua.2_purchase_tax_template_vat14_psbo
+#: model:account.tax.template,name:l10n_ua.purchase_tax_template_vat14_psbo
+msgid "VAT purchase 14%"
+msgstr "Придбання ПДВ 14%"
+
+#. module: l10n_ua
+#: model:account.tax,name:l10n_ua.1_purchase_tax_template_vat20_psbo
+#: model:account.tax,name:l10n_ua.2_purchase_tax_template_vat20_psbo
+#: model:account.tax.template,name:l10n_ua.purchase_tax_template_vat20_psbo
+msgid "VAT purchase 20%"
+msgstr "Придбання ПДВ 20%"
+
+#. module: l10n_ua
+#: model:account.tax,name:l10n_ua.1_purchase_tax_template_vat7_psbo
+#: model:account.tax,name:l10n_ua.2_purchase_tax_template_vat7_psbo
+#: model:account.tax.template,name:l10n_ua.purchase_tax_template_vat7_psbo
+msgid "VAT purchase 7%"
+msgstr "Придбання ПДВ 7%"
+
+#. module: l10n_ua
+#: model:account.tax,name:l10n_ua.1_purchase_tax_template_vat14incl_psbo
+#: model:account.tax,name:l10n_ua.2_purchase_tax_template_vat14incl_psbo
+#: model:account.tax.template,name:l10n_ua.purchase_tax_template_vat14incl
+#: model:account.tax.template,name:l10n_ua.purchase_tax_template_vat14incl_psbo
+msgid "VAT purchase 14%"
+msgstr "Придбання в т. ч. ПДВ 14%"
+
+#. module: l10n_ua
+#: model:account.tax,name:l10n_ua.1_purchase_tax_template_vat20incl_psbo
+#: model:account.tax,name:l10n_ua.2_purchase_tax_template_vat20incl_psbo
+#: model:account.tax.template,name:l10n_ua.purchase_tax_template_vat20incl
+#: model:account.tax.template,name:l10n_ua.purchase_tax_template_vat20incl_psbo
+msgid "VAT purchase 20%"
+msgstr "Придбання в т. ч. ПДВ 20%"
+
+#. module: l10n_ua
+#: model:account.tax,name:l10n_ua.1_purchase_tax_template_vat7incl_psbo
+#: model:account.tax,name:l10n_ua.2_purchase_tax_template_vat7incl_psbo
+#: model:account.tax.template,name:l10n_ua.purchase_tax_template_vat7incl
+#: model:account.tax.template,name:l10n_ua.purchase_tax_template_vat7incl_psbo
+msgid "VAT 7%"
+msgstr "Придбання в т. ч. ПДВ 7%"
+
+#. module: l10n_ua
+#: model:account.tax.template,name:l10n_ua.purchase_tax_template_vat0
+msgid "VAT purchase 0%"
+msgstr "Придбання з ПДВ 0%"
+
+#. module: l10n_ua
+#: model:account.tax.template,name:l10n_ua.purchase_tax_template_vat14
+msgid "VAT purchase 14%"
+msgstr "Придбання з ПДВ 14%"
+
+#. module: l10n_ua
+#: model:account.tax.template,name:l10n_ua.purchase_tax_template_vat20
+msgid "VAT purchase 20%"
+msgstr "Придбання з ПДВ 20%"
+
+#. module: l10n_ua
+#: model:account.tax.template,name:l10n_ua.purchase_tax_template_vat7
+msgid "VAT purchase 7%"
+msgstr "Придбання з ПДВ 7%"
+
+#. module: l10n_ua
+#: model:account.tax,name:l10n_ua.1_purchase_tax_template_vat_free_psbo
+#: model:account.tax,name:l10n_ua.2_purchase_tax_template_vat_free_psbo
+#: model:account.tax.template,name:l10n_ua.purchase_tax_template_vat_free_psbo
+msgid "Exempted from VAT"
+msgstr "Придбання звільнене від  ПДВ"
+
+#. module: l10n_ua
+#: model:account.tax.template,name:l10n_ua.purchase_tax_template_vat_free
+msgid "Exempted from VAT"
+msgstr "Придбання звільнене від ПДВ"
+
+#. module: l10n_ua
+#: model:account.tax.template,name:l10n_ua.purchase_tax_template_vat_not
+msgid "Not subject to VAT"
+msgstr "Придбання не є об'єктом ПДВ"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_1541
+#: model:account.account,name:l10n_ua.2_ua_psbp_1541
+#: model:account.account.template,name:l10n_ua.ua_psbp_1541
+msgid "Acquisition of intangible assets"
+msgstr "Придбання нематеріальних активів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_1521
+#: model:account.account,name:l10n_ua.2_ua_psbp_1521
+#: model:account.account.template,name:l10n_ua.ua_psbp_1521
+msgid "Purchase of fixed assets"
+msgstr "Придбання основних засобів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_114
+#: model:account.account,name:l10n_ua.2_ua_psbp_114
+#: model:account.account.template,name:l10n_ua.ua_psbp_114
+msgid "Natural resources"
+msgstr "Природні ресурси"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_27
+#: model:account.account,name:l10n_ua.2_ua_psbp_27
+#: model:account.account.template,name:l10n_ua.ua_psbp_27
+msgid "Agricultural products"
+msgstr "Продукція сільськогосподарського виробництва"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_239
+#: model:account.account,name:l10n_ua.2_ua_psbp_239
+#: model:account.account.template,name:l10n_ua.ua_psbp_239
+msgid "Intermediate accounts"
+msgstr "Проміжні рахунки"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_605
+#: model:account.account,name:l10n_ua.2_ua_psbp_605
+#: model:account.account.template,name:l10n_ua.ua_psbp_605
+msgid "Overdue loans in national currency"
+msgstr "Прострочені позики в національній валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_606
+#: model:account.account,name:l10n_ua.2_ua_psbp_606
+#: model:account.account.template,name:l10n_ua.ua_psbp_606
+msgid "Overdue loans in foreign currency"
+msgstr "Прострочені позики в іноземній валюті"
+
+#. module: l10n_ua
+#: model:account.tax,name:l10n_ua.1_sale_tax_template_vat_not_psbo
+#: model:account.tax,name:l10n_ua.2_sale_tax_template_vat_not_psbo
+#: model:account.tax.template,name:l10n_ua.sale_tax_template_vat_not_psbo
+msgid "Not subject to VAT"
+msgstr "Реалізація Не є об'єктом ПДВ"
+
+#. module: l10n_ua
+#: model:account.tax,name:l10n_ua.1_sale_tax_template_vat0_psbo
+#: model:account.tax,name:l10n_ua.2_sale_tax_template_vat0_psbo
+#: model:account.tax.template,name:l10n_ua.sale_tax_template_vat0_psbo
+msgid "VAT implementation 0%"
+msgstr "Реалізація ПДВ 0%"
+
+#. module: l10n_ua
+#: model:account.tax,name:l10n_ua.1_sale_tax_template_vat14_psbo
+#: model:account.tax,name:l10n_ua.2_sale_tax_template_vat14_psbo
+#: model:account.tax.template,name:l10n_ua.sale_tax_template_vat14_psbo
+msgid "VAT Sale 14%"
+msgstr "Реалізація ПДВ 14%"
+
+#. module: l10n_ua
+#: model:account.tax,name:l10n_ua.1_sale_tax_template_vat20_psbo
+#: model:account.tax,name:l10n_ua.2_sale_tax_template_vat20_psbo
+#: model:account.tax.template,name:l10n_ua.sale_tax_template_vat20_psbo
+msgid "VAT Sale 20%"
+msgstr "Реалізація ПДВ 20%"
+
+#. module: l10n_ua
+#: model:account.tax,name:l10n_ua.1_sale_tax_template_vat7_psbo
+#: model:account.tax,name:l10n_ua.2_sale_tax_template_vat7_psbo
+#: model:account.tax.template,name:l10n_ua.sale_tax_template_vat7_psbo
+msgid "VAT Sale 7%"
+msgstr "Реалізація ПДВ 7%"
+
+#. module: l10n_ua
+#: model:account.tax,name:l10n_ua.1_sale_tax_template_vat14incl_psbo
+#: model:account.tax,name:l10n_ua.2_sale_tax_template_vat14incl_psbo
+#: model:account.tax.template,name:l10n_ua.sale_tax_template_vat14incl
+#: model:account.tax.template,name:l10n_ua.sale_tax_template_vat14incl_psbo
+msgid "VAT Sale 14% included"
+msgstr "Реалізація в т. ч. ПДВ 14%"
+
+#. module: l10n_ua
+#: model:account.tax,name:l10n_ua.1_sale_tax_template_vat20incl_psbo
+#: model:account.tax,name:l10n_ua.2_sale_tax_template_vat20incl_psbo
+#: model:account.tax.template,name:l10n_ua.sale_tax_template_vat20incl
+#: model:account.tax.template,name:l10n_ua.sale_tax_template_vat20incl_psbo
+msgid "VAT Sale 20% included"
+msgstr "Реалізація в т. ч. ПДВ 20%"
+
+#. module: l10n_ua
+#: model:account.tax,name:l10n_ua.1_sale_tax_template_vat7incl_psbo
+#: model:account.tax,name:l10n_ua.2_sale_tax_template_vat7incl_psbo
+#: model:account.tax.template,name:l10n_ua.sale_tax_template_vat7incl
+#: model:account.tax.template,name:l10n_ua.sale_tax_template_vat7incl_psbo
+msgid "VAT Sale 7% included"
+msgstr "Реалізація в т. ч. ПДВ 7%"
+
+#. module: l10n_ua
+#: model:account.tax.template,name:l10n_ua.sale_tax_template_vat0
+msgid "VAT Sale 0%"
+msgstr "Реалізація з ПДВ 0%"
+
+#. module: l10n_ua
+#: model:account.tax.template,name:l10n_ua.sale_tax_template_vat14
+msgid "VAT Sale 14%"
+msgstr "Реалізація з ПДВ 14%"
+
+#. module: l10n_ua
+#: model:account.tax.template,name:l10n_ua.sale_tax_template_vat20
+msgid "VAT Sale 20%"
+msgstr "Реалізація з ПДВ 20%"
+
+#. module: l10n_ua
+#: model:account.tax.template,name:l10n_ua.sale_tax_template_vat7
+msgid "VAT Sale 7%"
+msgstr "Реалізація з ПДВ 7%"
+
+#. module: l10n_ua
+#: model:account.tax,name:l10n_ua.1_sale_tax_template_vat_free_psbo
+#: model:account.tax,name:l10n_ua.2_sale_tax_template_vat_free_psbo
+#: model:account.tax.template,name:l10n_ua.sale_tax_template_vat_free_psbo
+msgid "Sale not subject to VAT"
+msgstr "Реалізація звільнена від  ПДВ"
+
+#. module: l10n_ua
+#: model:account.tax.template,name:l10n_ua.sale_tax_template_vat_free
+msgid "Sale not subject to VAT"
+msgstr "Реалізація звільнена від ПДВ"
+
+#. module: l10n_ua
+#: model:account.tax.template,name:l10n_ua.sale_tax_template_vat_not
+msgid "Sale not subject to VAT"
+msgstr "Реалізація не є об'єктом ПДВ"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1404
+msgid "Revaluation reserve"
+msgstr "Резерв переоцінки"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_492
+#: model:account.account,name:l10n_ua.2_ua_psbp_492
+#: model:account.account.template,name:l10n_ua.ua_psbp_492
+msgid "Life insurance reserves"
+msgstr "Резерви із страхування життя"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_43
+#: model:account.account,name:l10n_ua.2_ua_psbp_43
+#: model:account.account.template,name:l10n_ua.ua_psbp_43
+msgid "Reserve capital"
+msgstr "Резервний капітал"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_496
+#: model:account.account,name:l10n_ua.2_ua_psbp_496
+#: model:account.account.template,name:l10n_ua.ua_psbp_496
+msgid "Results of change in life insurance reserves"
+msgstr "Результат зміни резервів із страхування життя"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_495
+#: model:account.account,name:l10n_ua.2_ua_psbp_495
+#: model:account.account.template,name:l10n_ua.ua_psbp_495
+msgid "Result of changes in technical reserves"
+msgstr "Результат зміни технічних резервів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_791
+#: model:account.account,name:l10n_ua.2_ua_psbp_791
+#: model:account.account.template,name:l10n_ua.ua_psbp_791
+msgid "Result of operational activity"
+msgstr "Результат операцiйної діяльності"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_792
+#: model:account.account,name:l10n_ua.2_ua_psbp_792
+#: model:account.account.template,name:l10n_ua.ua_psbp_792
+msgid "Results of financial transactions"
+msgstr "Результат фінансових операцій"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_793
+#: model:account.account,name:l10n_ua.2_ua_psbp_793
+#: model:account.account.template,name:l10n_ua.ua_psbp_793
+msgid "Result of other normal activities"
+msgstr "Результат іншої звичайної діяльності"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_361
+#: model:account.account,name:l10n_ua.2_ua_psbp_361
+#: model:account.account.template,name:l10n_ua.ua_psbp_361
+msgid "Amount owed by domestic customers"
+msgstr "Розрахунки з вітчизняними покупцями"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_366
+#: model:account.account,name:l10n_ua.2_ua_psbp_366
+#: model:account.account.template,name:l10n_ua.ua_psbp_366
+msgid "Amount owed by domestic customers (PoS)"
+msgstr "Розрахунки з вітчизняними покупцями (PoS)"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_631
+#: model:account.account,name:l10n_ua.2_ua_psbp_631
+#: model:account.account.template,name:l10n_ua.ua_psbp_631
+msgid "Amount owed to domestic suppliers"
+msgstr "Розрахунки з вітчизняними постачальниками"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_662
+#: model:account.account,name:l10n_ua.2_ua_psbp_662
+#: model:account.account.template,name:l10n_ua.ua_psbp_662
+msgid "Amount owed to depositors"
+msgstr "Розрахунки з депонентами"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_378
+#: model:account.account,name:l10n_ua.2_ua_psbp_378
+#: model:account.account.template,name:l10n_ua.ua_psbp_378
+msgid "Amount owed by state trust funds"
+msgstr "Розрахунки з державними цільовими фондами"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_3721
+#: model:account.account,name:l10n_ua.2_ua_psbp_3721
+#: model:account.account.template,name:l10n_ua.ua_psbp_3721
+msgid "Amount owed by accountable individuals in national currency"
+msgstr "Розрахунки з підзвітними особами в національній валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_3722
+#: model:account.account,name:l10n_ua.2_ua_psbp_3722
+#: model:account.account.template,name:l10n_ua.ua_psbp_3722
+msgid "Amount owed by accountable individuals in foreign currency"
+msgstr "Розрахунки з підзвітними особами в іноземній валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_3773
+#: model:account.account,name:l10n_ua.2_ua_psbp_3773
+#: model:account.account.template,name:l10n_ua.ua_psbp_3773
+msgid "Amount owed by workers and employees on other operations"
+msgstr "Розрахунки з робітниками та службовцями по інших операціях"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_365
+#: model:account.account,name:l10n_ua.2_ua_psbp_365
+#: model:account.account.template,name:l10n_ua.ua_psbp_365
+msgid "Amount owed by retail customers"
+msgstr "Розрахунки з роздрібними покупцями"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_363
+#: model:account.account,name:l10n_ua.1_ua_psbp_633
+#: model:account.account,name:l10n_ua.2_ua_psbp_363
+#: model:account.account,name:l10n_ua.2_ua_psbp_633
+#: model:account.account.template,name:l10n_ua.ua_psbp_363
+#: model:account.account.template,name:l10n_ua.ua_psbp_633
+msgid "Amount owed by PFG members"
+msgstr "Розрахунки з учасниками ПФГ"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_362
+#: model:account.account,name:l10n_ua.2_ua_psbp_362
+#: model:account.account.template,name:l10n_ua.ua_psbp_362
+msgid "Amount owed by foreign customers"
+msgstr "Розрахунки з іноземними покупцями"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_632
+#: model:account.account,name:l10n_ua.2_ua_psbp_632
+#: model:account.account.template,name:l10n_ua.ua_psbp_632
+msgid "Amount owed by foreign suppliers"
+msgstr "Розрахунки з іноземними постачальниками"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_3771
+#: model:account.account,name:l10n_ua.2_ua_psbp_3771
+#: model:account.account.template,name:l10n_ua.ua_psbp_3771
+msgid "Amount owed by other debtors (in national currency)"
+msgstr "Розрахунки з іншими дебіторами (в національній валюті)"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_3772
+#: model:account.account,name:l10n_ua.2_ua_psbp_3772
+#: model:account.account.template,name:l10n_ua.ua_psbp_3772
+msgid "Amount owed by other debtors (in foreign currency)"
+msgstr "Розрахунки з іншими дебіторами (в іноземній валюті)"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_6851
+#: model:account.account,name:l10n_ua.2_ua_psbp_6851
+#: model:account.account.template,name:l10n_ua.ua_psbp_6851
+msgid "Amount owed to other creditors (in national currency)"
+msgstr "Розрахунки з іншими кредиторами (в національній валюті)"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_6852
+#: model:account.account,name:l10n_ua.2_ua_psbp_6852
+#: model:account.account.template,name:l10n_ua.ua_psbp_6852
+msgid "Amount owed to other creditors (in foreign currency)"
+msgstr "Розрахунки з іншими кредиторами (в іноземній валюті)"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_6412
+#: model:account.account,name:l10n_ua.2_ua_psbp_6412
+#: model:account.account.template,name:l10n_ua.ua_psbp_6412
+msgid "Due VAT"
+msgstr "Розрахунки за ПДВ"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_64121
+#: model:account.account,name:l10n_ua.2_ua_psbp_64121
+#: model:account.account.template,name:l10n_ua.ua_psbp_64121
+msgid "Due VAT in the EA VAT system"
+msgstr "Розрахунки за ПДВ в системі ЕА ПДВ"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_6411
+#: model:account.account,name:l10n_ua.2_ua_psbp_6411
+#: model:account.account.template,name:l10n_ua.ua_psbp_6411
+msgid "Due income tax"
+msgstr "Розрахунки за ПДФО"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_6811
+#: model:account.account,name:l10n_ua.2_ua_psbp_6811
+#: model:account.account.template,name:l10n_ua.ua_psbp_6811
+msgid "Avans calculations are obtained in national currency"
+msgstr "Розрахунки за авансами одержаними в національній валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_6812
+#: model:account.account,name:l10n_ua.2_ua_psbp_6812
+#: model:account.account.template,name:l10n_ua.ua_psbp_6812
+msgid "Payments for advances received in foreign currency"
+msgstr "Розрахунки за авансами одержаними в іноземній валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_6416
+#: model:account.account,name:l10n_ua.2_ua_psbp_6416
+#: model:account.account.template,name:l10n_ua.ua_psbp_6416
+msgid "Excise duty"
+msgstr "Розрахунки за акцизом"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_3711
+#: model:account.account,name:l10n_ua.2_ua_psbp_3711
+#: model:account.account.template,name:l10n_ua.ua_psbp_3711
+msgid "Payments for advances received (in national currency)"
+msgstr "Розрахунки за виданими авансами (в національній валюті)"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_3712
+#: model:account.account,name:l10n_ua.2_ua_psbp_3712
+#: model:account.account.template,name:l10n_ua.ua_psbp_3712
+msgid "Payments for advances received (in foreign currency)"
+msgstr "Розрахунки за виданими авансами (в іноземній валюті)"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_375
+#: model:account.account,name:l10n_ua.2_ua_psbp_375
+#: model:account.account.template,name:l10n_ua.ua_psbp_375
+msgid "Settlements for compensation damages"
+msgstr "Розрахунки за відшкодуванням завданих збитків"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_661
+#: model:account.account,name:l10n_ua.2_ua_psbp_661
+#: model:account.account.template,name:l10n_ua.ua_psbp_661
+msgid "Wages and salaries"
+msgstr "Розрахунки за заробітною платою"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_684
+#: model:account.account,name:l10n_ua.2_ua_psbp_684
+#: model:account.account.template,name:l10n_ua.ua_psbp_684
+msgid "Settlements based on accrued interests"
+msgstr "Розрахунки за нарахованими відсотками"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_671
+#: model:account.account,name:l10n_ua.2_ua_psbp_671
+#: model:account.account.template,name:l10n_ua.ua_psbp_671
+msgid "Settlements based on accrued dividends"
+msgstr "Розрахунки за нарахованими дивідендами"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_373
+#: model:account.account,name:l10n_ua.2_ua_psbp_373
+#: model:account.account.template,name:l10n_ua.ua_psbp_373
+msgid "Settlements based on accrued income"
+msgstr "Розрахунки за нарахованими доходами"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_6413
+#: model:account.account,name:l10n_ua.2_ua_psbp_6413
+#: model:account.account.template,name:l10n_ua.ua_psbp_6413
+msgid "Settlements of Income tax"
+msgstr "Розрахунки за податком на прибуток"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_376
+#: model:account.account,name:l10n_ua.2_ua_psbp_376
+#: model:account.account.template,name:l10n_ua.ua_psbp_376
+msgid "Payments for loans to members of credit unions"
+msgstr "Розрахунки за позиками членам кредитних спілок"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_374
+#: model:account.account,name:l10n_ua.2_ua_psbp_374
+#: model:account.account.template,name:l10n_ua.ua_psbp_374
+msgid "Settlements for Claims"
+msgstr "Розрахунки за претензіями"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_663
+#: model:account.account,name:l10n_ua.1_ua_psbp_672
+#: model:account.account,name:l10n_ua.2_ua_psbp_663
+#: model:account.account,name:l10n_ua.2_ua_psbp_672
+#: model:account.account.template,name:l10n_ua.ua_psbp_663
+#: model:account.account.template,name:l10n_ua.ua_psbp_672
+msgid "Settlements for other payments"
+msgstr "Розрахунки за іншими виплатами"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_6853
+#: model:account.account,name:l10n_ua.2_ua_psbp_6853
+#: model:account.account.template,name:l10n_ua.ua_psbp_6853
+msgid "Settlements on executive letters"
+msgstr "Розрахунки по виконавчих листах"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_6415
+#: model:account.account,name:l10n_ua.2_ua_psbp_6415
+#: model:account.account.template,name:l10n_ua.ua_psbp_6415
+msgid "Settlements on Military levy"
+msgstr "Розрахунки по військовому збору"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_364
+#: model:account.account,name:l10n_ua.2_ua_psbp_364
+#: model:account.account.template,name:l10n_ua.ua_psbp_364
+msgid "Settlements on guaranteed provision"
+msgstr "Розрахунки по гарантійному забезпеченню"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_642
+#: model:account.account,name:l10n_ua.2_ua_psbp_642
+#: model:account.account.template,name:l10n_ua.ua_psbp_642
+msgid "Settlements for legal provision"
+msgstr "Розрахунки по обов’язкових платежах"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_379
+#: model:account.account,name:l10n_ua.2_ua_psbp_379
+#: model:account.account.template,name:l10n_ua.ua_psbp_379
+msgid "Settlements for operations with derivatives"
+msgstr "Розрахунки по операціям з дериватимами"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_6414
+#: model:account.account,name:l10n_ua.2_ua_psbp_6414
+#: model:account.account.template,name:l10n_ua.ua_psbp_6414
+msgid "Single tax settlement"
+msgstr "Розрахунки по єдиному податку"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_680
+#: model:account.account,name:l10n_ua.2_ua_psbp_680
+#: model:account.account.template,name:l10n_ua.ua_psbp_680
+msgid ""
+"Calculations related to non-current assets and disposal groups held for sale"
+msgstr ""
+"Розрахунки, пов'язані з необоротними активами та групами вибуття, "
+"утримуваними для продажу"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_973
+#: model:account.account,name:l10n_ua.2_ua_psbp_973
+#: model:account.account.template,name:l10n_ua.ua_psbp_973
+msgid "Cost of realized property complexes"
+msgstr "Себестоимость реализованных имущественных комплексов"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_201
+#: model:account.account,name:l10n_ua.2_ua_psbp_201
+#: model:account.account.template,name:l10n_ua.ua_psbp_201
+msgid "Raw materials and materials"
+msgstr "Сировина й матеріали"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_2200
+msgid "Sales (Category No. 1)"
+msgstr "Собівартість продажу (категорія № 1)"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_2201
+msgid "Sales (Category No. 2)"
+msgstr "Собівартість продажу (категорія № 2)"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_2202
+msgid "Sales (Category No. 3)"
+msgstr "Собівартість продажу (категорія № 3)"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_2203
+msgid "Sales (Category No. 4)"
+msgstr "Собівартість продажу (категорія № 4)"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_943
+#: model:account.account,name:l10n_ua.2_ua_psbp_943
+#: model:account.account.template,name:l10n_ua.ua_psbp_943
+msgid "Cost of realized production stocks"
+msgstr "Собівартість реалізованих виробничих запасів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_903
+#: model:account.account,name:l10n_ua.2_ua_psbp_903
+#: model:account.account.template,name:l10n_ua.ua_psbp_903
+msgid "Cost of realized work and services"
+msgstr "Собівартість реалізованих робіт і послуг"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_902
+#: model:account.account,name:l10n_ua.2_ua_psbp_902
+#: model:account.account.template,name:l10n_ua.ua_psbp_902
+msgid "Cost of goods sold"
+msgstr "Собівартість реалізованих товарів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_971
+#: model:account.account,name:l10n_ua.2_ua_psbp_971
+#: model:account.account.template,name:l10n_ua.ua_psbp_971
+msgid "Cost of realized financial investments"
+msgstr "Собівартість реалізованих фінансових інвестицій"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_901
+#: model:account.account,name:l10n_ua.2_ua_psbp_901
+#: model:account.account.template,name:l10n_ua.ua_psbp_901
+msgid "Cost of the sold finished products"
+msgstr "Собівартість реалізованої  готової продукції"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_315
+#: model:account.account,name:l10n_ua.2_ua_psbp_315
+#: model:account.account.template,name:l10n_ua.ua_psbp_315
+msgid "Special bank accounts in national currency"
+msgstr "Спеціальні рахунки в національній валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_316
+#: model:account.account,name:l10n_ua.2_ua_psbp_316
+#: model:account.account.template,name:l10n_ua.ua_psbp_316
+msgid "Special bank accounts in foreign currency"
+msgstr "Спеціальні рахунки в іноземній валюті"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_976
+#: model:account.account,name:l10n_ua.2_ua_psbp_976
+#: model:account.account.template,name:l10n_ua.ua_psbp_976
+msgid "Write off of non-current assets"
+msgstr "Списання необоротних активів"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_401
+#: model:account.account,name:l10n_ua.2_ua_psbp_401
+#: model:account.account.template,name:l10n_ua.ua_ias_1400
+#: model:account.account.template,name:l10n_ua.ua_psbp_401
+msgid "Share capital"
+msgstr "Статутний капітал"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_904
+#: model:account.account,name:l10n_ua.2_ua_psbp_904
+#: model:account.account.template,name:l10n_ua.ua_psbp_904
+msgid "Insurance payments"
+msgstr "Страховi виплати"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_76
+#: model:account.account,name:l10n_ua.2_ua_psbp_76
+#: model:account.account.template,name:l10n_ua.ua_psbp_76
+msgid "Insurance refunds"
+msgstr "Страхові платежі"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_823
+#: model:account.account,name:l10n_ua.2_ua_psbp_823
+#: model:account.account.template,name:l10n_ua.ua_psbp_823
+msgid "Unemployment insurance (not used)"
+msgstr "Страхування на випадок безробіття (не використовується)"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_944
+#: model:account.account,name:l10n_ua.2_ua_psbp_944
+#: model:account.account.template,name:l10n_ua.ua_psbp_944
+msgid "Doubtful and bad debts"
+msgstr "Сумнівні та безнадійні борги"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_204
+#: model:account.account,name:l10n_ua.2_ua_psbp_204
+#: model:account.account.template,name:l10n_ua.ua_psbp_204
+msgid "Packing and packing materials"
+msgstr "Тара й тарні матеріали"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_284
+#: model:account.account,name:l10n_ua.2_ua_psbp_284
+#: model:account.account.template,name:l10n_ua.ua_psbp_284
+msgid "Packing under goods"
+msgstr "Тара під товарами"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_107
+#: model:account.account,name:l10n_ua.2_ua_psbp_107
+#: model:account.account.template,name:l10n_ua.ua_psbp_107
+msgid "Animals"
+msgstr "Тварини"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_491
+#: model:account.account,name:l10n_ua.2_ua_psbp_491
+#: model:account.account.template,name:l10n_ua.ua_psbp_491
+msgid "Technical reserves"
+msgstr "Технічні резерви"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_113
+#: model:account.account,name:l10n_ua.2_ua_psbp_113
+#: model:account.account.template,name:l10n_ua.ua_psbp_113
+msgid "Temporary (untitled) buildings"
+msgstr "Тимчасові (нетитульні) споруди"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_289
+#: model:account.account,name:l10n_ua.2_ua_psbp_289
+#: model:account.account.template,name:l10n_ua.ua_psbp_289
+msgid "Trade goods (by purchase cost)"
+msgstr "Товари в торгівлі (за покупною вартістю)"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_282
+#: model:account.account,name:l10n_ua.2_ua_psbp_282
+#: model:account.account.template,name:l10n_ua.ua_psbp_282
+msgid "Trade goods (for sale cost)"
+msgstr "Товари в торгівлі (за продажною вартістю)"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_2811
+#: model:account.account,name:l10n_ua.2_ua_psbp_2811
+#: model:account.account.template,name:l10n_ua.ua_psbp_2811
+msgid "Goods shipped from warehouse"
+msgstr "Товари відвантажені зі складу"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_283
+#: model:account.account,name:l10n_ua.2_ua_psbp_283
+#: model:account.account.template,name:l10n_ua.ua_psbp_283
+msgid "Goods on commission"
+msgstr "Товари на комісії"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_281
+#: model:account.account,name:l10n_ua.2_ua_psbp_281
+#: model:account.account.template,name:l10n_ua.ua_psbp_281
+msgid "Goods in stock"
+msgstr "Товари на складі"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_2812
+#: model:account.account,name:l10n_ua.2_ua_psbp_2812
+#: model:account.account.template,name:l10n_ua.ua_psbp_2812
+msgid "Goods received in stock"
+msgstr "Товари отримані на склад"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_285
+#: model:account.account,name:l10n_ua.2_ua_psbp_285
+#: model:account.account.template,name:l10n_ua.ua_psbp_285
+msgid "Trade markup"
+msgstr "Торгова націнка"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_280
+#: model:account.account,name:l10n_ua.2_ua_psbp_280
+#: model:account.account.template,name:l10n_ua.ua_psbp_280
+msgid "Transport and procurement costs"
+msgstr "Транспортно-заготівельні витрати"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_200
+#: model:account.account,name:l10n_ua.2_ua_psbp_200
+#: model:account.account.template,name:l10n_ua.ua_psbp_200
+msgid "Transport and procurement costs (materials)"
+msgstr "Транспортно-заготівельні витрати (матеріали)"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_105
+#: model:account.account,name:l10n_ua.2_ua_psbp_105
+#: model:account.account.template,name:l10n_ua.ua_psbp_105
+msgid "Transportation"
+msgstr "Транспортні засоби"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_6435
+#: model:account.account,name:l10n_ua.2_ua_psbp_6435
+#: model:account.account.template,name:l10n_ua.ua_psbp_6435
+msgid "Conditional sale"
+msgstr "Умовний продаж"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_975
+#: model:account.account,name:l10n_ua.2_ua_psbp_975
+#: model:account.account.template,name:l10n_ua.ua_psbp_975
+msgid "Depreciation of fixed assets and financial investments"
+msgstr "Уцінка необоротних активів і фінансових інвестицій"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_2100
+msgid "Financial results"
+msgstr "Фінансовий результат"
+
+#. module: l10n_ua
+#: model:account.account.template,name:l10n_ua.ua_ias_1407
+msgid "Minority share"
+msgstr "Частка меншості"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_494
+#: model:account.account,name:l10n_ua.2_ua_psbp_494
+#: model:account.account.template,name:l10n_ua.ua_psbp_494
+msgid "Share of reinsurers in life insurance reserves"
+msgstr "Частка перестраховиків у резервах із страхування життя"
+
+#. module: l10n_ua
+#: model:account.account,name:l10n_ua.1_ua_psbp_493
+#: model:account.account,name:l10n_ua.2_ua_psbp_493
+#: model:account.account.template,name:l10n_ua.ua_psbp_493
+msgid "Share of reinsurers in technical reserves"
+msgstr "Частка перестраховиків у технічних резервах"
+
+#. module: l10n_ua
+#: model:account.tax,description:l10n_ua.1_sale_tax_template_vat7incl_psbo
+#: model:account.tax,description:l10n_ua.2_sale_tax_template_vat7incl_psbo
+#: model:account.tax.template,description:l10n_ua.sale_tax_template_vat7incl
+#: model:account.tax.template,description:l10n_ua.sale_tax_template_vat7incl_psbo
+msgid "including VAT 7%"
+msgstr "в т .ч. ПДВ 7%"
+
+#. module: l10n_ua
+#: model:account.tax,description:l10n_ua.1_purchase_tax_template_vat14incl_psbo
+#: model:account.tax,description:l10n_ua.1_sale_tax_template_vat14incl_psbo
+#: model:account.tax,description:l10n_ua.2_purchase_tax_template_vat14incl_psbo
+#: model:account.tax,description:l10n_ua.2_sale_tax_template_vat14incl_psbo
+#: model:account.tax.template,description:l10n_ua.purchase_tax_template_vat14incl
+#: model:account.tax.template,description:l10n_ua.purchase_tax_template_vat14incl_psbo
+#: model:account.tax.template,description:l10n_ua.sale_tax_template_vat14incl
+#: model:account.tax.template,description:l10n_ua.sale_tax_template_vat14incl_psbo
+msgid "including VAT 14%"
+msgstr "в т. ч. ПДВ 14%"
+
+#. module: l10n_ua
+#: model:account.tax,description:l10n_ua.1_purchase_tax_template_vat20incl_psbo
+#: model:account.tax,description:l10n_ua.1_sale_tax_template_vat20incl_psbo
+#: model:account.tax,description:l10n_ua.2_purchase_tax_template_vat20incl_psbo
+#: model:account.tax,description:l10n_ua.2_sale_tax_template_vat20incl_psbo
+#: model:account.tax.template,description:l10n_ua.purchase_tax_template_vat20incl
+#: model:account.tax.template,description:l10n_ua.purchase_tax_template_vat20incl_psbo
+#: model:account.tax.template,description:l10n_ua.sale_tax_template_vat20incl
+#: model:account.tax.template,description:l10n_ua.sale_tax_template_vat20incl_psbo
+msgid "including VAT 20%"
+msgstr "в т. ч. ПДВ 20%"
+
+#. module: l10n_ua
+#: model:account.tax,description:l10n_ua.1_purchase_tax_template_vat7incl_psbo
+#: model:account.tax,description:l10n_ua.2_purchase_tax_template_vat7incl_psbo
+#: model:account.tax.template,description:l10n_ua.purchase_tax_template_vat7incl
+#: model:account.tax.template,description:l10n_ua.purchase_tax_template_vat7incl_psbo
+msgid "including VAT 7%"
+msgstr "в т. ч. ПДВ 7%"

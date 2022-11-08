@@ -8,8 +8,8 @@
         <record id="sale_tax_template_vat20_psbo" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_psbo_chart_template"/>
             <field name="sequence">9</field>
-            <field name="name">Реалізація ПДВ 20%</field>
-            <field name="description">+ ПДВ 20%</field>
+            <field name="name">VAT Sale 20%</field>
+            <field name="description">VAT 20%</field>
             <field name="amount">20</field>
             <field name="type_tax_use">sale</field>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -32,8 +32,8 @@
         <record id="sale_tax_template_vat20incl_psbo" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_psbo_chart_template"/>
             <field name="sequence">9</field>
-            <field name="name">Реалізація в т. ч. ПДВ 20%</field>
-            <field name="description">в т. ч. ПДВ 20%</field>
+            <field name="name">VAT Sale 20% included</field>
+            <field name="description">including VAT 20%</field>
             <field name="amount">20</field>
             <field name="type_tax_use">sale</field>
             <field name="price_include" eval="1"/>
@@ -56,8 +56,8 @@
         <record id="sale_tax_template_vat14_psbo" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_psbo_chart_template"/>
             <field name="sequence">10</field>
-            <field name="name">Реалізація ПДВ 14%</field>
-            <field name="description">+ ПДВ 14%</field>
+            <field name="name">VAT Sale 14%</field>
+            <field name="description">+ VAT 14%</field>
             <field name="amount">14</field>
             <field name="type_tax_use">sale</field>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -80,8 +80,8 @@
         <record id="sale_tax_template_vat14incl_psbo" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_psbo_chart_template"/>
             <field name="sequence">10</field>
-            <field name="name">Реалізація в т. ч. ПДВ 14%</field>
-            <field name="description">в т. ч. ПДВ 14%</field>
+            <field name="name">VAT Sale 14% included</field>
+            <field name="description">including VAT 14%</field>
             <field name="amount">14</field>
             <field name="type_tax_use">sale</field>
             <field name="price_include" eval="1"/>
@@ -104,8 +104,8 @@
         <record id="sale_tax_template_vat7_psbo" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_psbo_chart_template"/>
             <field name="sequence">11</field>
-            <field name="name">Реалізація ПДВ 7%</field>
-            <field name="description">+ ПДВ 7%</field>
+            <field name="name">VAT Sale 7%</field>
+            <field name="description">+ VAT 7%</field>
             <field name="amount">7</field>
             <field name="type_tax_use">sale</field>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -127,8 +127,8 @@
         <record id="sale_tax_template_vat7incl_psbo" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_psbo_chart_template"/>
             <field name="sequence">11</field>
-            <field name="name">Реалізація в т. ч. ПДВ 7%</field>
-            <field name="description">в т .ч. ПДВ 7%</field>
+            <field name="name">VAT Sale 7% included</field>
+            <field name="description">including VAT 7%</field>
             <field name="amount">7</field>
             <field name="type_tax_use">sale</field>
             <field name="price_include" eval="1"/>
@@ -151,8 +151,8 @@
         <record id="sale_tax_template_vat0_psbo" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_psbo_chart_template"/>
             <field name="sequence">12</field>
-            <field name="name">Реалізація ПДВ 0%</field>
-            <field name="description">ПДВ 0%</field>
+            <field name="name">VAT implementation 0%</field>
+            <field name="description">VAT 0%</field>
             <field name="amount">0</field>
             <field name="type_tax_use">sale</field>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -167,8 +167,8 @@
         <record id="sale_tax_template_vat_free_psbo" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_psbo_chart_template"/>
             <field name="sequence">13</field>
-            <field name="name">Реалізація звільнена від  ПДВ</field>
-            <field name="description">Звільнено від ПДВ</field>
+            <field name="name">Sale not subject to VAT</field>
+            <field name="description">Exempted VAT</field>
             <field name="amount">0</field>
             <field name="type_tax_use">sale</field>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -183,8 +183,8 @@
         <record id="sale_tax_template_vat_not_psbo" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_psbo_chart_template"/>
             <field name="sequence">14</field>
-            <field name="name">Реалізація Не є об'єктом ПДВ</field>
-            <field name="description">Не є об'єктом ПДВ</field>
+            <field name="name">Not subject to VAT</field>
+            <field name="description">Not subject to VAT</field>
             <field name="amount">0</field>
             <field name="type_tax_use">sale</field>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -199,8 +199,8 @@
         <record id="purchase_tax_template_vat20_psbo" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_psbo_chart_template"/>
             <field name="sequence">19</field>
-            <field name="name">Придбання ПДВ 20%</field>
-            <field name="description">+ ПДВ 20%</field>
+            <field name="name">VAT purchase 20%</field>
+            <field name="description">VAT 20%</field>
             <field name="amount">20</field>
             <field name="type_tax_use">purchase</field>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -222,8 +222,8 @@
         <record id="purchase_tax_template_vat20incl_psbo" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_psbo_chart_template"/>
             <field name="sequence">19</field>
-            <field name="name">Придбання в т. ч. ПДВ 20%</field>
-            <field name="description">в т. ч. ПДВ 20%</field>
+            <field name="name">VAT purchase 20%</field>
+            <field name="description">including VAT 20%</field>
             <field name="amount">20</field>
             <field name="type_tax_use">purchase</field>
             <field name="price_include" eval="1"/>
@@ -246,8 +246,8 @@
         <record id="purchase_tax_template_vat14_psbo" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_psbo_chart_template"/>
             <field name="sequence">20</field>
-            <field name="name">Придбання ПДВ 14%</field>
-            <field name="description">+ ПДВ 14%</field>
+            <field name="name">VAT purchase 14%</field>
+            <field name="description">+ VAT 14%</field>
             <field name="amount">14</field>
             <field name="type_tax_use">purchase</field>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -269,8 +269,8 @@
         <record id="purchase_tax_template_vat14incl_psbo" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_psbo_chart_template"/>
             <field name="sequence">20</field>
-            <field name="name">Придбання в т. ч. ПДВ 14%</field>
-            <field name="description">в т. ч. ПДВ 14%</field>
+            <field name="name">VAT purchase 14%</field>
+            <field name="description">including VAT 14%</field>
             <field name="amount">14</field>
             <field name="type_tax_use">purchase</field>
             <field name="price_include" eval="1"/>
@@ -293,8 +293,8 @@
         <record id="purchase_tax_template_vat7_psbo" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_psbo_chart_template"/>
             <field name="sequence">21</field>
-            <field name="name">Придбання ПДВ 7%</field>
-            <field name="description">+ ПДВ 7%</field>
+            <field name="name">VAT purchase 7%</field>
+            <field name="description">+ VAT 7%</field>
             <field name="amount">7</field>
             <field name="type_tax_use">purchase</field>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -316,8 +316,8 @@
         <record id="purchase_tax_template_vat7incl_psbo" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_psbo_chart_template"/>
             <field name="sequence">21</field>
-            <field name="name">Придбання в т. ч. ПДВ 7%</field>
-            <field name="description">в т. ч. ПДВ 7%</field>
+            <field name="name">VAT 7%</field>
+            <field name="description">including VAT 7%</field>
             <field name="amount">7</field>
             <field name="type_tax_use">purchase</field>
             <field name="price_include" eval="1"/>
@@ -340,8 +340,8 @@
         <record id="purchase_tax_template_vat0_psbo" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_psbo_chart_template"/>
             <field name="sequence">22</field>
-            <field name="name">Придбання ПДВ 0%</field>
-            <field name="description">ПДВ 0%</field>
+            <field name="name">VAT purchase 0%</field>
+            <field name="description">VAT 0%</field>
             <field name="amount">0</field>
             <field name="type_tax_use">purchase</field>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -356,8 +356,8 @@
         <record id="purchase_tax_template_vat_free_psbo" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_psbo_chart_template"/>
             <field name="sequence">23</field>
-            <field name="name">Придбання звільнене від  ПДВ</field>
-            <field name="description">Звільнено від ПДВ</field>
+            <field name="name">Exempted from VAT</field>
+            <field name="description">Exempted VAT</field>
             <field name="amount">0</field>
             <field name="type_tax_use">purchase</field>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -372,8 +372,8 @@
         <record id="purchase_tax_template_vat_not_psbo" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_psbo_chart_template"/>
             <field name="sequence">24</field>
-            <field name="name">Придбання Не є об'єктом ПДВ</field>
-            <field name="description">Не є об'єктом ПДВ</field>
+            <field name="name">Not subject to VAT</field>
+            <field name="description">Not subject to VAT</field>
             <field name="amount">0</field>
             <field name="type_tax_use">purchase</field>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -390,32 +390,32 @@
         <record id="simple_tax_sale_product_psbo" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_psbo_chart_template"/>
             <field name="sequence">30</field>
-            <field name="name">Дохід від продажу  товарів</field>
-            <field name="description">Дохід від продажу товарів</field>
+            <field name="name">Revenue from the sale of goods</field>
+            <field name="description">Revenue from the sale of goods</field>
             <field name="amount">0</field>
             <field name="type_tax_use">sale</field>
         </record>
         <record id="simple_tax_sale_gift_psbo" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_psbo_chart_template"/>
             <field name="sequence">31</field>
-            <field name="name">Дохід від безоплатно отриманих  товарів</field>
-            <field name="description">Дохід від безоплатно отриманих товарів</field>
+            <field name="name">Income from goods received free of charge</field>
+            <field name="description">Income from goods received free of charge</field>
             <field name="amount">0</field>
             <field name="type_tax_use">sale</field>
         </record>
         <record id="simple_tax_sale_old_psbo" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_psbo_chart_template"/>
             <field name="sequence">32</field>
-            <field name="name">Дохід від заборгованності за якою минув строк позивної давності</field>
-            <field name="description">Дохід від заборгованності, за якою минув строк позивної давності</field>
+            <field name="name">Income from debt on which the statute of limitations has been expired.</field>
+            <field name="description">Income from debt, on which the statute of limitations has been expired.</field>
             <field name="amount">0</field>
             <field name="type_tax_use">sale</field>
         </record>
         <record id="simple_tax_sale_15_psbo" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_psbo_chart_template"/>
             <field name="sequence">33</field>
-            <field name="name">Дохід, за ставкою 15%</field>
-            <field name="description">Дохід за ставкою 15%</field>
+            <field name="name">Sale Tax 15%</field>
+            <field name="description">Sale Tax 15%</field>
             <field name="amount">0</field>
             <field name="type_tax_use">sale</field>
         </record>
@@ -423,32 +423,32 @@
         <record id="simple_tax_purchase_product_psbo" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_psbo_chart_template"/>
             <field name="sequence">40</field>
-            <field name="name">Витрати від продажу  товарів</field>
-            <field name="description">Витрати від продажу товарів</field>
+            <field name="name">Tax on Sales of goods</field>
+            <field name="description">Tax on Sales of goods</field>
             <field name="amount">0</field>
             <field name="type_tax_use">purchase</field>
         </record>
         <record id="simple_tax_purchase_salary_psbo" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_psbo_chart_template"/>
             <field name="sequence">41</field>
-            <field name="name">Витрати на оплату праці</field>
-            <field name="description">Витрати на оплату праці найманих працівників</field>
+            <field name="name">Wages and salaries Tax</field>
+            <field name="description">Cost for wages of employees</field>
             <field name="amount">0</field>
             <field name="type_tax_use">purchase</field>
         </record>
         <record id="simple_tax_purchase_esv_psbo" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_psbo_chart_template"/>
             <field name="sequence">42</field>
-            <field name="name">Витрати ЄСВ</field>
-            <field name="description">Витрати на ЄСВ</field>
+            <field name="name">USC expenses</field>
+            <field name="description">USC Tax</field>
             <field name="amount">0</field>
             <field name="type_tax_use">purchase</field>
         </record>
         <record id="simple_tax_purchase_other_psbo" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_psbo_chart_template"/>
             <field name="sequence">43</field>
-            <field name="name">Витрати  інші</field>
-            <field name="description">Витрати інші</field>
+            <field name="name">Other expenses</field>
+            <field name="description">Other costs</field>
             <field name="amount">0</field>
             <field name="type_tax_use">purchase</field>
         </record>
@@ -460,8 +460,8 @@
         <record id="sale_tax_template_vat20" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_ias_chart_template"/>
             <field name="sequence">9</field>
-            <field name="name">Реалізація з ПДВ 20%</field>
-            <field name="description">+ ПДВ 20%</field>
+            <field name="name">VAT Sale 20%</field>
+            <field name="description">VAT 20%</field>
             <field name="amount">20</field>
             <field name="type_tax_use">sale</field>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -483,8 +483,8 @@
         <record id="sale_tax_template_vat20incl" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_ias_chart_template"/>
             <field name="sequence">9</field>
-            <field name="name">Реалізація в т. ч. ПДВ 20%</field>
-            <field name="description">в т. ч. ПДВ 20%</field>
+            <field name="name">VAT Sale 20% included</field>
+            <field name="description">including VAT 20%</field>
             <field name="amount">20</field>
             <field name="type_tax_use">sale</field>
             <field name="price_include" eval="1"/>
@@ -507,8 +507,8 @@
         <record id="sale_tax_template_vat14" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_ias_chart_template"/>
             <field name="sequence">10</field>
-            <field name="name">Реалізація з ПДВ 14%</field>
-            <field name="description">+ ПДВ 14%</field>
+            <field name="name">VAT Sale 14%</field>
+            <field name="description">+ VAT 14%</field>
             <field name="amount">14</field>
             <field name="type_tax_use">sale</field>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -530,8 +530,8 @@
         <record id="sale_tax_template_vat14incl" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_ias_chart_template"/>
             <field name="sequence">10</field>
-            <field name="name">Реалізація в т. ч. ПДВ 14%</field>
-            <field name="description">в т. ч. ПДВ 14%</field>
+            <field name="name">VAT Sale 14% included</field>
+            <field name="description">including VAT 14%</field>
             <field name="amount">14</field>
             <field name="type_tax_use">sale</field>
             <field name="price_include" eval="1"/>
@@ -554,8 +554,8 @@
         <record id="sale_tax_template_vat7" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_ias_chart_template"/>
             <field name="sequence">11</field>
-            <field name="name">Реалізація з ПДВ 7%</field>
-            <field name="description">+ ПДВ 7%</field>
+            <field name="name">VAT Sale 7%</field>
+            <field name="description">+ VAT 7%</field>
             <field name="amount">7</field>
             <field name="type_tax_use">sale</field>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -577,8 +577,8 @@
         <record id="sale_tax_template_vat7incl" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_ias_chart_template"/>
             <field name="sequence">11</field>
-            <field name="name">Реалізація в т. ч. ПДВ 7%</field>
-            <field name="description">в т .ч. ПДВ 7%</field>
+            <field name="name">VAT Sale 7% included</field>
+            <field name="description">including VAT 7%</field>
             <field name="amount">7</field>
             <field name="type_tax_use">sale</field>
             <field name="price_include" eval="1"/>
@@ -601,8 +601,8 @@
         <record id="sale_tax_template_vat0" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_ias_chart_template"/>
             <field name="sequence">12</field>
-            <field name="name">Реалізація з ПДВ 0%</field>
-            <field name="description">ПДВ 0%</field>
+            <field name="name">VAT Sale 0%</field>
+            <field name="description">VAT 0%</field>
             <field name="amount">0</field>
             <field name="type_tax_use">sale</field>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -617,8 +617,8 @@
         <record id="sale_tax_template_vat_free" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_ias_chart_template"/>
             <field name="sequence">13</field>
-            <field name="name">Реалізація звільнена від ПДВ</field>
-            <field name="description">Звільнено від ПДВ</field>
+            <field name="name">Sale not subject to VAT</field>
+            <field name="description">Exempted VAT</field>
             <field name="amount">0</field>
             <field name="type_tax_use">sale</field>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -633,8 +633,8 @@
         <record id="sale_tax_template_vat_not" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_ias_chart_template"/>
             <field name="sequence">14</field>
-            <field name="name">Реалізація не є об'єктом ПДВ</field>
-            <field name="description">Не є об'єктом ПДВ</field>
+            <field name="name">Sale not subject to VAT</field>
+            <field name="description">Not subject to VAT</field>
             <field name="amount">0</field>
             <field name="type_tax_use">sale</field>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -649,8 +649,8 @@
         <record id="purchase_tax_template_vat20" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_ias_chart_template"/>
             <field name="sequence">19</field>
-            <field name="name">Придбання з ПДВ 20%</field>
-            <field name="description">+ ПДВ 20%</field>
+            <field name="name">VAT purchase 20%</field>
+            <field name="description">VAT 20%</field>
             <field name="amount">20</field>
             <field name="type_tax_use">purchase</field>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -672,8 +672,8 @@
         <record id="purchase_tax_template_vat20incl" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_ias_chart_template"/>
             <field name="sequence">19</field>
-            <field name="name">Придбання в т. ч. ПДВ 20%</field>
-            <field name="description">в т. ч. ПДВ 20%</field>
+            <field name="name">VAT purchase 20%</field>
+            <field name="description">including VAT 20%</field>
             <field name="amount">20</field>
             <field name="type_tax_use">purchase</field>
             <field name="price_include" eval="1"/>
@@ -696,8 +696,8 @@
         <record id="purchase_tax_template_vat14" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_ias_chart_template"/>
             <field name="sequence">20</field>
-            <field name="name">Придбання з ПДВ 14%</field>
-            <field name="description">+ ПДВ 14%</field>
+            <field name="name">VAT purchase 14%</field>
+            <field name="description">+ VAT 14%</field>
             <field name="amount">14</field>
             <field name="type_tax_use">purchase</field>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -719,8 +719,8 @@
         <record id="purchase_tax_template_vat14incl" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_ias_chart_template"/>
             <field name="sequence">20</field>
-            <field name="name">Придбання в т. ч. ПДВ 14%</field>
-            <field name="description">в т. ч. ПДВ 14%</field>
+            <field name="name">VAT purchase 14%</field>
+            <field name="description">including VAT 14%</field>
             <field name="amount">14</field>
             <field name="type_tax_use">purchase</field>
             <field name="price_include" eval="1"/>
@@ -743,8 +743,8 @@
         <record id="purchase_tax_template_vat7" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_ias_chart_template"/>
             <field name="sequence">21</field>
-            <field name="name">Придбання з ПДВ 7%</field>
-            <field name="description">+ ПДВ 7%</field>
+            <field name="name">VAT purchase 7%</field>
+            <field name="description">+ VAT 7%</field>
             <field name="amount">7</field>
             <field name="type_tax_use">purchase</field>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -766,8 +766,8 @@
         <record id="purchase_tax_template_vat7incl" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_ias_chart_template"/>
             <field name="sequence">21</field>
-            <field name="name">Придбання в т. ч. ПДВ 7%</field>
-            <field name="description">в т. ч. ПДВ 7%</field>
+            <field name="name">VAT 7%</field>
+            <field name="description">including VAT 7%</field>
             <field name="amount">7</field>
             <field name="type_tax_use">purchase</field>
             <field name="price_include" eval="1"/>
@@ -790,8 +790,8 @@
         <record id="purchase_tax_template_vat0" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_ias_chart_template"/>
             <field name="sequence">22</field>
-            <field name="name">Придбання з ПДВ 0%</field>
-            <field name="description">ПДВ 0%</field>
+            <field name="name">VAT purchase 0%</field>
+            <field name="description">VAT 0%</field>
             <field name="amount">0</field>
             <field name="type_tax_use">purchase</field>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -806,8 +806,8 @@
         <record id="purchase_tax_template_vat_free" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_ias_chart_template"/>
             <field name="sequence">23</field>
-            <field name="name">Придбання звільнене від ПДВ</field>
-            <field name="description">Звільнено від ПДВ</field>
+            <field name="name">Exempted from VAT</field>
+            <field name="description">Exempted VAT</field>
             <field name="amount">0</field>
             <field name="type_tax_use">purchase</field>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -822,8 +822,8 @@
         <record id="purchase_tax_template_vat_not" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_ias_chart_template"/>
             <field name="sequence">24</field>
-            <field name="name">Придбання не є об'єктом ПДВ</field>
-            <field name="description">Не є об'єктом ПДВ</field>
+            <field name="name">Not subject to VAT</field>
+            <field name="description">Not subject to VAT</field>
             <field name="amount">0</field>
             <field name="type_tax_use">purchase</field>
             <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -840,32 +840,32 @@
         <record id="simple_tax_sale_product" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_ias_chart_template"/>
             <field name="sequence">30</field>
-            <field name="name">Дохід від продажу товарів</field>
-            <field name="description">Дохід від продажу товарів</field>
+            <field name="name">Revenue from the sale of goods</field>
+            <field name="description">Revenue from the sale of goods</field>
             <field name="amount">0</field>
             <field name="type_tax_use">sale</field>
         </record>
         <record id="simple_tax_sale_gift" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_ias_chart_template"/>
             <field name="sequence">31</field>
-            <field name="name">Дохід від безоплатно отриманих товарів</field>
-            <field name="description">Дохід від безоплатно отриманих товарів</field>
+            <field name="name">Income from goods received free of charge</field>
+            <field name="description">Income from goods received free of charge</field>
             <field name="amount">0</field>
             <field name="type_tax_use">sale</field>
         </record>
         <record id="simple_tax_sale_old" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_ias_chart_template"/>
             <field name="sequence">32</field>
-            <field name="name">Дохід від заборгованності, за якою минув строк позивної давності</field>
-            <field name="description">Дохід від заборгованності, за якою минув строк позивної давності</field>
+            <field name="name">Income from debt, on which the statute of limitations has been expired.</field>
+            <field name="description">Income from debt, on which the statute of limitations has been expired.</field>
             <field name="amount">0</field>
             <field name="type_tax_use">sale</field>
         </record>
         <record id="simple_tax_sale_15" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_ias_chart_template"/>
             <field name="sequence">33</field>
-            <field name="name">Дохід, що оподатковується за ставкою 15%</field>
-            <field name="description">Дохід за ставкою 15%</field>
+            <field name="name">Sale Tax 15%</field>
+            <field name="description">Sale Tax 15%</field>
             <field name="amount">0</field>
             <field name="type_tax_use">sale</field>
         </record>
@@ -873,32 +873,32 @@
         <record id="simple_tax_purchase_product" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_ias_chart_template"/>
             <field name="sequence">40</field>
-            <field name="name">Витрати від продажу товарів</field>
-            <field name="description">Витрати від продажу товарів</field>
+            <field name="name">Tax on Sales of goods</field>
+            <field name="description">Tax on Sales of goods</field>
             <field name="amount">0</field>
             <field name="type_tax_use">purchase</field>
         </record>
         <record id="simple_tax_purchase_salary" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_ias_chart_template"/>
             <field name="sequence">41</field>
-            <field name="name">Витрати на оплату праці найманих працівників</field>
-            <field name="description">Витрати на оплату праці найманих працівників</field>
+            <field name="name">Cost for wages of employees</field>
+            <field name="description">Cost for wages of employees</field>
             <field name="amount">0</field>
             <field name="type_tax_use">purchase</field>
         </record>
         <record id="simple_tax_purchase_esv" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_ias_chart_template"/>
             <field name="sequence">42</field>
-            <field name="name">Витрати на ЄСВ</field>
-            <field name="description">Витрати на ЄСВ</field>
+            <field name="name">USC Tax</field>
+            <field name="description">USC Tax</field>
             <field name="amount">0</field>
             <field name="type_tax_use">purchase</field>
         </record>
         <record id="simple_tax_purchase_other" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_ua_ias_chart_template"/>
             <field name="sequence">43</field>
-            <field name="name">Витрати інші</field>
-            <field name="description">Витрати інші</field>
+            <field name="name">Other costs</field>
+            <field name="description">Other costs</field>
             <field name="amount">0</field>
             <field name="type_tax_use">purchase</field>
         </record>

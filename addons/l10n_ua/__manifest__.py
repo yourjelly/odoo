@@ -1,18 +1,15 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-# Copyright (C) 2019 Bohdan Lisnenko <bohdan.lisnenko@erp.co.ua>, ERP Ukraine
-
 {
     'name': 'Ukraine - Accounting',
-    'author': 'ERP Ukraine',
-    'website': 'https://erp.co.ua',
-    'version': '1.4',
-    'description': """
-Ukraine - Chart of accounts.
-============================
-    """,
+    'version': '1.0',
     'category': 'Accounting/Localizations/Account Charts',
-    'depends': ['account'],
+    'author': 'Odoo S.A.',
+    'description': """
+        Chart of accounts and Taxes for Ukraine
+    """,
+    'depends': [
+        'account', 'base_vat', 'l10n_multilang',
+    ],
     'data': [
         'data/account_chart_template.xml',
         'data/account.account.template.csv',
@@ -24,5 +21,6 @@ Ukraine - Chart of accounts.
     'demo': [
         'demo/demo_company.xml',
     ],
+    'post_init_hook': 'load_translations',
     'license': 'LGPL-3',
 }
