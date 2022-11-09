@@ -650,7 +650,7 @@ QUnit.module('fields', {}, function () {
         });
 
         QUnit.test('embedded one2many with handle widget', async function (assert) {
-            assert.expect(10);
+            assert.expect(11);
 
             var nbConfirmChange = 0;
             testUtils.mock.patch(ListRenderer, {
@@ -704,7 +704,7 @@ QUnit.module('fields', {}, function () {
             );
 
             assert.strictEqual(nbConfirmChange, 1, "should have confirmed changes only once");
-            assert.verifySteps(["0", "1"],
+            assert.verifySteps(["0", "1", "2"],
                 "sequences values should be incremental starting from the previous minimum one");
 
             assert.strictEqual(form.$('td.o_data_cell:not(.o_handle_cell)').text(), "blipyopkawa",
@@ -717,7 +717,7 @@ QUnit.module('fields', {}, function () {
             }), [
                     { id: 1, turtle_foo: "yop", turtle_int: 1 },
                     { id: 2, turtle_foo: "blip", turtle_int: 0 },
-                    { id: 3, turtle_foo: "kawa", turtle_int: 21 }
+                    { id: 3, turtle_foo: "kawa", turtle_int: 2 }
                 ], "should have save the changed sequence");
 
             assert.strictEqual(form.$('td.o_data_cell:not(.o_handle_cell)').text(), "blipyopkawa",

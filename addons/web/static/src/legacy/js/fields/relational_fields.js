@@ -2031,12 +2031,35 @@ var FieldOne2Many = FieldX2Many.extend({
             } else if (!this.creatingRecord) {
                 this.creatingRecord = true;
                 this.trigger_up('edited_list', { id: this.value.id });
+                let newSequence = 0;
+                let position = 0;
+                if (this.renderer.handleField) {
+                    const records = this.renderer.state.data;
+                    const sequences = records.map(record => record.data[self.renderer.handleField]);
+                    newSequence = _.min(sequences) - 1;
+                    if ((self.editable || data.forceEditable) === 'bottom') {
+                        newSequence = _.max(sequences) + 1;
+                        position = sequences.length;
+                    }
+                }
                 this._setValue({
                     operation: 'CREATE',
                     position: this.editable || data.forceEditable,
                     context: data.context,
                 }, {
                     allowWarning: data.allowWarning
+                }).then(function () {
+                    if (self.renderer.handleField) {
+                        const data = {};
+                        data[self.renderer.handleField] = newSequence;
+                        return self._setValue({
+                            operation: 'UPDATE',
+                            id: self.renderer.state.data[position].id,
+                            data: data,
+                        }, {
+                            allowWarning: data.allowWarning
+                        });
+                    }
                 }).then(function () {
                     self.creatingRecord = false;
                 }).then(function (){
