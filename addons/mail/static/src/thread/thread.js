@@ -3,12 +3,12 @@
 import { Component, onWillStart, onWillUpdateProps } from "@odoo/owl";
 import { useMessaging } from "../messaging_hook";
 import { useAutoScroll } from "../utils";
-import { Message } from "./message";
+import { InteractibleMessage } from "./zinteractible_message";
 
 export class Thread extends Component {
     static template = "mail.thread";
     static props = ["id"];
-    static components = { Message };
+    static components = { InteractibleMessage };
 
     setup() {
         this.messaging = useMessaging();
