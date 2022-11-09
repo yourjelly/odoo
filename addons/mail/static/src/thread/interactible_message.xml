@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+<t t-name="mail.interactible_message" owl="1">
+    <Message message="props.message" squashed="props.squashed">
+        <t t-set-slot="actions">
+            <div class="o-mail-message-actions invisible">
+                <div class="rounded-1 shadow-sm">
+                    <i class="cursor-pointer px-1 py-2 fa fa-lg"
+                        t-att-class="message.isStarred ? 'fa-star' : 'fa-star-o'"
+                        t-on-click="toggleStar"
+                        role="button" tabindex="0" title="Mark as Todo" aria-label="Mark as Todo"></i>
+                    <i class="cursor-pointer px-1 py-2 fa fa-lg fa-trash" t-if="canBeDeleted" t-on-click="onClickDelete"
+                        role="button" tabindex="0" title="Delete" aria-label="Delete"></i>
+                </div>
+            </div>
+        </t>
+    </Message>
+</t>
+</templates>
+

@@ -23,7 +23,7 @@
                         <t t-call="mail.notification_message"/>
                     </t>
                     <t t-else="">
-                        <Message message="msg" squashed="isSquashed(msg, prevMsg)"/>
+                        <InteractibleMessage message="msg" squashed="isSquashed(msg, prevMsg)"/>
                     </t>
                     <t t-set="prevMsg" t-value="msg"/>
                 </t>

@@ -1,0 +1,42 @@
+/** @odoo-module */
+
+import { useMessaging } from "../messaging_hook";
+import { RelativeTime } from "./relative_time";
+import { Message } from "./message";
+import { Component } from "@odoo/owl";
+import { useService } from "@web/core/utils/hooks";
+import { MessageDeleteDialog } from '@mail/thread/message_delete_dialog';
+
+export class InteractibleMessage extends Component {
+    static template = "mail.interactible_message";
+    static components = { RelativeTime, Message };
+    static props = ["message", "squashed?"];
+
+    setup() {
+        this.messaging = useMessaging();
+        this.action = useService("action");
+        this.user = useService("user");
+        this.message = this.props.message;
+        this.author = this.messaging.partners[this.message.authorId];
+    }
+
+    get canBeDeleted() {
+        if (!this.user.isAdmin && this.message.authorId !== this.messaging.user.partnerId) {
+            return false;
+        }
+        if (this.message.type !== "comment") {
+            return false;
+        }
+        return this.message.isNote || this.message.resModel === "mail.channel";
+    }
+
+    toggleStar() {
+        this.messaging.toggleStar(this.props.message.id);
+    }
+
+    onClickDelete() {
+        this.env.services.dialog.add(MessageDeleteDialog, {
+            message: this.message,
+        });
+    }
+}
