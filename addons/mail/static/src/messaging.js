@@ -482,11 +482,19 @@ export class Messaging {
             removeFromArray(this.discuss.starred.messages, message.id);
         }
         removeFromArray(this.threads[message.resId].messages, message.id);
-        return this.rpc("/mail/message/update_content", {
-            attachment_ids: [],
-            body: "",
-            message_id: message.id,
-        });
+        try {
+            return await this.rpc("/mail/message/update_content", {
+                attachment_ids: [],
+                body: "",
+                message_id: message.id,
+            });
+        } catch (error) {
+            const thread = this.threads[message.resId];
+            thread.messages = [...thread.messages, message.id].sort();
+            this.discuss.starred.messages.push(message.id);
+            this.discuss.starred.counter++;
+            throw error;
+        }
     }
 
     async unstarAll() {
