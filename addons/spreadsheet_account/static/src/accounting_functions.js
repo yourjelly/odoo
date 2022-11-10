@@ -138,7 +138,10 @@ const ODOO_FIN_ARGS = `
     include_unposted (boolean, default=TRUE) ${_t("Set to TRUE to include unposted entries.")}
 `;
 
+const ODOO_FUNCTION_CATEGORY_NAME = "Odoo";
+
 functionRegistry.add("ODOO.CREDIT", {
+    category: ODOO_FUNCTION_CATEGORY_NAME,
     description: _t("Get the total credit for the specified account(s) and period."),
     args: args(ODOO_FIN_ARGS),
     returns: ["NUMBER"],
@@ -173,6 +176,7 @@ functionRegistry.add("ODOO.CREDIT", {
 });
 
 functionRegistry.add("ODOO.DEBIT", {
+    category: ODOO_FUNCTION_CATEGORY_NAME,
     description: _t("Get the total debit for the specified account(s) and period."),
     args: args(ODOO_FIN_ARGS),
     returns: ["NUMBER"],
@@ -207,6 +211,7 @@ functionRegistry.add("ODOO.DEBIT", {
 });
 
 functionRegistry.add("ODOO.BALANCE", {
+    category: ODOO_FUNCTION_CATEGORY_NAME,
     description: _t("Get the total balance for the specified account(s) and period."),
     args: args(ODOO_FIN_ARGS),
     returns: ["NUMBER"],
@@ -250,6 +255,7 @@ functionRegistry.add("ODOO.BALANCE", {
 });
 
 functionRegistry.add("ODOO.FISCALYEAR.START", {
+    category: ODOO_FUNCTION_CATEGORY_NAME,
     description: _t("Returns the starting date of the fiscal year encompassing the provided date."),
     args: args(`
         date (date) ${_t("Reference date.")}
@@ -267,6 +273,7 @@ functionRegistry.add("ODOO.FISCALYEAR.START", {
 });
 
 functionRegistry.add("ODOO.FISCALYEAR.END", {
+    category: ODOO_FUNCTION_CATEGORY_NAME,
     description: _t("Returns the ending date of the fiscal year encompassing the provided date."),
     args: args(`
         date (date) ${_t("Reference date.")}
@@ -284,6 +291,7 @@ functionRegistry.add("ODOO.FISCALYEAR.END", {
 });
 
 functionRegistry.add("ODOO.ACCOUNT.GROUP", {
+    category: ODOO_FUNCTION_CATEGORY_NAME,
     description: _t("Returns the account ids of a given group."),
     args: args(`
         type (string) ${_t("Account type.")}

@@ -13039,7 +13039,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         TEXT: TEXT
     });
 
-    const categories$1 = [
+    const categories = [
         { name: _lt("Database"), functions: database },
         { name: _lt("Date"), functions: date },
         { name: _lt("Financial"), functions: financial },
@@ -13100,7 +13100,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         return arg === null || arg === void 0 ? void 0 : arg.value;
     }
     const functionRegistry = new FunctionRegistry();
-    for (let category of categories$1) {
+    for (let category of categories) {
         const fns = category.functions;
         for (let name in fns) {
             const addDescr = fns[name];
@@ -13119,7 +13119,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
     }
 
-    const functions$4 = functionRegistry.content;
     const topbarMenuRegistry = new MenuItemRegistry();
     topbarMenuRegistry
         .add("file", { name: _lt("File"), sequence: 10 })
@@ -13565,39 +13564,40 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             action: (env) => setStyle(env, { fontSize: fs.pt }),
         });
     }
-    // Formula All functions
+    // Formula All functions and functions by categories
     const insertAllFunctionItemSequence = 50;
-    topbarMenuRegistry.addChild("insert_function_all", ["insert", "insert_function"], {
+    function createFormulaFunctionMenuItems(fnNames) {
+        return fnNames.sort().map((fnName, i) => createFullMenuItem(fnName, {
+            name: fnName,
+            sequence: i * 10,
+            action: (env) => env.model.dispatch("START_EDITION", { text: `=${fnName}(` }),
+        }));
+    }
+    topbarMenuRegistry
+        .addChild("insert_function_all", ["insert", "insert_function"], {
         name: _lt("All"),
         sequence: insertAllFunctionItemSequence,
-    });
-    for (const [i, key] of Object.keys(functions$4).sort().entries()) {
-        topbarMenuRegistry.addChild(`insert_function_all_${key.toLowerCase()}`, ["insert", "insert_function", "insert_function_all"], {
-            name: key.toUpperCase(),
-            sequence: i * 10,
-            action: (env) => env.model.dispatch("START_EDITION", { text: `=${key.toUpperCase()}(` }),
-        });
-    }
-    // Formula functions by categories
-    const categories = [
-        ...new Set(Object.keys(functions$4).map((key) => functions$4[key].category)),
-    ].filter(isDefined$1);
-    for (const [i, category] of categories.sort().entries()) {
-        const categoryItemName = `insert_function_${category.toLowerCase()}`;
-        topbarMenuRegistry.addChild(categoryItemName, ["insert", "insert_function"], {
-            name: category,
-            sequence: insertAllFunctionItemSequence + i * 10,
-        });
-        const functionsInCategory = Object.keys(functions$4).filter((key) => functions$4[key].category === category);
-        for (const [i, key] of functionsInCategory.sort().entries()) {
-            const functionItemName = categoryItemName + `_${key.toLowerCase()}`;
-            topbarMenuRegistry.addChild(functionItemName, ["insert", "insert_function", categoryItemName], {
-                name: key.toUpperCase(),
-                sequence: i * 10,
-                action: (env) => env.model.dispatch("START_EDITION", { text: `=${key.toUpperCase()}(` }),
+    })
+        // Formula All functions
+        .addChild("all_function_list", ["insert", "insert_function", "insert_function_all"], (env) => {
+        const fnNames = Object.keys(functionRegistry.content);
+        return createFormulaFunctionMenuItems(fnNames);
+    })
+        // Formula functions by categories
+        .addChild("caregories_function_list", ["insert", "insert_function"], (env) => {
+        const functions = functionRegistry.content;
+        const categories = [
+            ...new Set(Object.keys(functions).map((key) => functions[key].category)),
+        ].filter(isDefined$1);
+        return categories.sort().map((category, i) => {
+            const functionsInCategory = Object.keys(functions).filter((key) => functions[key].category === category);
+            return createFullMenuItem(category, {
+                name: category,
+                sequence: insertAllFunctionItemSequence + i * 10,
+                children: createFormulaFunctionMenuItems(functionsInCategory),
             });
-        }
-    }
+        });
+    });
 
     class OTRegistry extends Registry {
         /**
@@ -19242,7 +19242,12 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     }
                     break;
                 case "START_EDITION":
-                    this.startEdition(cmd.text, cmd.selection);
+                    if (this.mode !== "inactive") {
+                        this.setContent(cmd.text || "", cmd.selection);
+                    }
+                    else {
+                        this.startEdition(cmd.text, cmd.selection);
+                    }
                     this.updateRangeColor();
                     break;
                 case "STOP_EDITION":
@@ -42378,8 +42383,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     Object.defineProperty(exports, '__esModule', { value: true });
 
     exports.__info__.version = '2.0.0';
-    exports.__info__.date = '2022-11-10T08:10:07.068Z';
-    exports.__info__.hash = '5e45be5';
+    exports.__info__.date = '2022-11-10T13:26:04.661Z';
+    exports.__info__.hash = '05c7e4c';
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
 //# sourceMappingURL=o_spreadsheet.js.map
