@@ -471,7 +471,7 @@ class TestPerformance(SavepointCaseWithUserDemo):
                        "test_performance_base"."write_uid" AS "write_uid",
                        "test_performance_base"."write_date" AS "write_date"
                 FROM "test_performance_base"
-                WHERE "test_performance_base".id IN %s
+                WHERE "test_performance_base"."id" IN %s
             ''',
         ]
         with self.assertQueries(queries, flush=False):

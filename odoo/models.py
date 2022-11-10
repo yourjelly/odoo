@@ -2326,7 +2326,7 @@ class BaseModel(metaclass=MetaModel):
         prefix_term = lambda prefix, term: ('%s %s' % (prefix, term)) if term else ''
 
         query = """
-            SELECT min("%(table)s".id) AS id, count("%(table)s".id) AS "%(count_field)s" %(extra_fields)s
+            SELECT min("%(table)s"."id") AS "id", count("%(table)s"."id") AS "%(count_field)s" %(extra_fields)s
             FROM %(from)s
             %(where)s
             %(groupby)s
@@ -3225,7 +3225,7 @@ class BaseModel(metaclass=MetaModel):
             qual_names = [qualify(field) for field in [self._fields['id']] + column_fields]
 
             # determine the actual query to execute (last parameter is added below)
-            query.add_where(f'"{self._table}".id IN %s')
+            query.add_where(f'"{self._table}"."id" IN %s')
             query_str, params = query.select(*qual_names)
 
             result = []
@@ -3467,7 +3467,7 @@ class BaseModel(metaclass=MetaModel):
 
         # determine ids in database that satisfy ir.rules
         valid_ids = set()
-        query.add_where(f'"{self._table}".id IN %s')
+        query.add_where(f'"{self._table}"."id" IN %s')
         query_str, params = query.select()
         self._flush_search([])
         for sub_ids in self._cr.split_for_in_conditions(self.ids):
@@ -4804,7 +4804,7 @@ class BaseModel(metaclass=MetaModel):
         if not ids:
             return self
         query = Query(self.env.cr, self._table, self._table_query)
-        query.add_where(f'"{self._table}".id IN %s', [tuple(ids)])
+        query.add_where(f'"{self._table}"."id" IN %s', [tuple(ids)])
         query_str, params = query.select()
         self.env.cr.execute(query_str, params)
         valid_ids = set([r[0] for r in self._cr.fetchall()] + new_ids)
@@ -4825,7 +4825,7 @@ class BaseModel(metaclass=MetaModel):
         # must ignore 'active' flag, ir.rules, etc. => direct SQL query
         cr = self._cr
         self.flush_model([parent])
-        query = 'SELECT "%s" FROM "%s" WHERE id = %%s' % (parent, self._table)
+        query = 'SELECT "%s" FROM "%s" WHERE "id" = %%s' % (parent, self._table)
         for id in self.ids:
             current_id = id
             while current_id:

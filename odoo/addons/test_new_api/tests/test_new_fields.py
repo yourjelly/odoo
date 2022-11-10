@@ -2587,7 +2587,7 @@ class TestFields(TransactionCaseWithUserDemo):
                 "test_new_api_prefetch"."write_uid" AS "write_uid",
                 "test_new_api_prefetch"."write_date" AS "write_date"
             FROM "test_new_api_prefetch"
-            WHERE "test_new_api_prefetch".id IN %s
+            WHERE "test_new_api_prefetch"."id" IN %s
         """]):
             records.mapped('name')  # fetch all fields with prefetch=True
 
@@ -2598,7 +2598,7 @@ class TestFields(TransactionCaseWithUserDemo):
                 "test_new_api_prefetch"."hermione" AS "hermione",
                 "test_new_api_prefetch"."ron" AS "ron"
             FROM "test_new_api_prefetch"
-            WHERE "test_new_api_prefetch".id IN %s
+            WHERE "test_new_api_prefetch"."id" IN %s
         """]):
             records.mapped('harry')  # fetch all fields with prefetch='Harry Potter'
             records.mapped('hermione')  # fetched already
@@ -2610,7 +2610,7 @@ class TestFields(TransactionCaseWithUserDemo):
                 "test_new_api_prefetch"."hansel" AS "hansel",
                 "test_new_api_prefetch"."gretel" AS "gretel"
             FROM "test_new_api_prefetch"
-            WHERE "test_new_api_prefetch".id IN %s
+            WHERE "test_new_api_prefetch"."id" IN %s
         """]):
             records.mapped('hansel')  # fetch all fields with prefetch='Hansel and Gretel'
             records.mapped('gretel')  # fetched already
@@ -3343,7 +3343,7 @@ class TestSelectionUpdates(common.TransactionCase):
             self.env[self.MODEL_BASE].create({})
         with self.assertQueryCount(1):
             record = self.env[self.MODEL_BASE].create({'my_selection': 'foo'})
-        with self.assertQueryCount(3):  # SELECT, SELECT (related field), UPDATE
+        with self.assertQueryCount(1):
             record.my_selection = 'bar'
 
     def test_selection_related_readonly(self):
@@ -3357,7 +3357,7 @@ class TestSelectionUpdates(common.TransactionCase):
         related_record = self.env[self.MODEL_BASE].create({'my_selection': 'foo'})
         with self.assertQueryCount(2):  # defaults (related field), INSERT
             record = self.env[self.MODEL_RELATED_UPDATE].create({'selection_id': related_record.id})
-        with self.assertQueryCount(3):
+        with self.assertQueryCount(2):
             record.related_selection = 'bar'
 
 
@@ -3629,7 +3629,7 @@ def select(model, *fnames):
         f'"{table}"."{fname}" AS "{fname}"'
         for fname in ['id'] + list(fnames)
     )
-    return f'SELECT {terms} FROM "{table}" WHERE "{table}".id IN %s'
+    return f'SELECT {terms} FROM "{table}" WHERE "{table}"."id" IN %s'
 
 
 def insert(model, *fnames, rowcount=1):
@@ -4154,7 +4154,7 @@ class TestModifiedPerformance(common.TransactionCase):
                "test_new_api_modified_line"."create_date" AS "create_date", "test_new_api_modified_line"."write_uid" AS "write_uid",
                "test_new_api_modified_line"."write_date" AS "write_date"
          FROM "test_new_api_modified_line"
-        WHERE "test_new_api_modified_line".id IN %s
+        WHERE "test_new_api_modified_line"."id" IN %s
         """] * 2, flush=False):
             # Two requests:
             # - one for fetch modified_line_a_child_child data (invalidate just before)
