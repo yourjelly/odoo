@@ -2454,16 +2454,16 @@ const Wysiwyg = Widget.extend({
         return Math.floor(Math.random() * Math.pow(2, 52)).toString();
     },
     resetEditor: function (value, { collaborationChannel } = {}) {
-        if (!this.ptp) {
+        this.ptp && this.ptp.stop();
+        this._collaborationStopBus();
+        this.options.collaborationChannel = collaborationChannel;
+        // If there is no collaborationResId, the record has been deleted.
+        if (!collaborationChannel || !collaborationChannel.collaborationResId) {
             this.setValue(value);
             this.odooEditor.historyReset();
             return;
         }
-        this.ptp.stop();
-        if (collaborationChannel) {
-            this._collaborationStopBus();
-            this.setupCollaboration(collaborationChannel);
-        }
+        this.setupCollaboration(collaborationChannel);
         this._currentClientId = this._generateClientId();
         this._startCollaborationTime = new Date().getTime();
         this.ptp = this._getNewPtp();
