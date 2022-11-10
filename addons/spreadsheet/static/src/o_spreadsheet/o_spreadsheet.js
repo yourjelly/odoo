@@ -2110,25 +2110,42 @@
          * Check that a zone is valid regarding the order of top-bottom and left-right.
          * Left should be smaller than right, top should be smaller than bottom.
          * If it's not the case, simply invert them, and invert the linked parts
-         * (in place!)
          */
         orderZone() {
-            if (this._zone.right !== undefined && this._zone.right < this._zone.left) {
-                let right = this._zone.right;
-                this._zone.right = this._zone.left;
-                this._zone.left = right;
-                let rightFixed = this.parts[1].colFixed;
-                this.parts[1].colFixed = this.parts[0].colFixed;
-                this.parts[0].colFixed = rightFixed;
+            var _a, _b, _c, _d, _e, _f, _g, _h;
+            const zone = { ...this._zone };
+            let parts = this.parts;
+            if (zone.right !== undefined && zone.right < zone.left) {
+                let right = zone.right;
+                zone.right = zone.left;
+                zone.left = right;
+                parts = [
+                    {
+                        colFixed: ((_a = parts[1]) === null || _a === void 0 ? void 0 : _a.colFixed) || false,
+                        rowFixed: ((_b = parts[0]) === null || _b === void 0 ? void 0 : _b.rowFixed) || false,
+                    },
+                    {
+                        colFixed: ((_c = parts[0]) === null || _c === void 0 ? void 0 : _c.colFixed) || false,
+                        rowFixed: ((_d = parts[1]) === null || _d === void 0 ? void 0 : _d.rowFixed) || false,
+                    },
+                ];
             }
-            if (this._zone.bottom !== undefined && this._zone.bottom < this._zone.top) {
-                let bottom = this._zone.bottom;
-                this._zone.bottom = this._zone.top;
-                this._zone.top = bottom;
-                let bottomFixed = this.parts[1].rowFixed;
-                this.parts[1].rowFixed = this.parts[0].rowFixed;
-                this.parts[0].rowFixed = bottomFixed;
+            if (zone.bottom !== undefined && zone.bottom < zone.top) {
+                let bottom = zone.bottom;
+                zone.bottom = zone.top;
+                zone.top = bottom;
+                parts = [
+                    {
+                        colFixed: ((_e = parts[0]) === null || _e === void 0 ? void 0 : _e.colFixed) || false,
+                        rowFixed: ((_f = parts[1]) === null || _f === void 0 ? void 0 : _f.rowFixed) || false,
+                    },
+                    {
+                        colFixed: ((_g = parts[1]) === null || _g === void 0 ? void 0 : _g.colFixed) || false,
+                        rowFixed: ((_h = parts[0]) === null || _h === void 0 ? void 0 : _h.rowFixed) || false,
+                    },
+                ];
             }
+            return this.clone({ zone, parts });
         }
         /**
          *
@@ -2770,7 +2787,7 @@
      * This function will compare the modifications of selection to determine
      * a cell that is part of the new zone and not the previous one.
      */
-    function findCellInNewZone(oldZone, currentZone) {
+    function findCellInNewZone(oldZone, currentZone, viewport) {
         let col, row;
         const { left: oldLeft, right: oldRight, top: oldTop, bottom: oldBottom } = oldZone;
         const { left, right, top, bottom } = currentZone;
@@ -2781,7 +2798,8 @@
             col = right;
         }
         else {
-            col = left;
+            // left and right don't change
+            col = viewport.left > left || left > viewport.right ? viewport.left : left;
         }
         if (top != oldTop) {
             row = top;
@@ -2790,7 +2808,8 @@
             row = bottom;
         }
         else {
-            row = top;
+            // top and bottom don't change
+            row = viewport.top > top || top > viewport.bottom ? viewport.top : top;
         }
         return { col, row };
     }
@@ -3087,74 +3106,76 @@
         CommandResult[CommandResult["NotEnoughSheets"] = 8] = "NotEnoughSheets";
         CommandResult[CommandResult["MissingSheetName"] = 9] = "MissingSheetName";
         CommandResult[CommandResult["DuplicatedSheetName"] = 10] = "DuplicatedSheetName";
-        CommandResult[CommandResult["ForbiddenCharactersInSheetName"] = 11] = "ForbiddenCharactersInSheetName";
-        CommandResult[CommandResult["WrongSheetMove"] = 12] = "WrongSheetMove";
-        CommandResult[CommandResult["WrongSheetPosition"] = 13] = "WrongSheetPosition";
-        CommandResult[CommandResult["InvalidAnchorZone"] = 14] = "InvalidAnchorZone";
-        CommandResult[CommandResult["SelectionOutOfBound"] = 15] = "SelectionOutOfBound";
-        CommandResult[CommandResult["TargetOutOfSheet"] = 16] = "TargetOutOfSheet";
-        CommandResult[CommandResult["WrongCutSelection"] = 17] = "WrongCutSelection";
-        CommandResult[CommandResult["WrongPasteSelection"] = 18] = "WrongPasteSelection";
-        CommandResult[CommandResult["WrongPasteOption"] = 19] = "WrongPasteOption";
-        CommandResult[CommandResult["WrongFigurePasteOption"] = 20] = "WrongFigurePasteOption";
-        CommandResult[CommandResult["EmptyClipboard"] = 21] = "EmptyClipboard";
-        CommandResult[CommandResult["EmptyRange"] = 22] = "EmptyRange";
-        CommandResult[CommandResult["InvalidRange"] = 23] = "InvalidRange";
-        CommandResult[CommandResult["InvalidZones"] = 24] = "InvalidZones";
-        CommandResult[CommandResult["InvalidSheetId"] = 25] = "InvalidSheetId";
-        CommandResult[CommandResult["InputAlreadyFocused"] = 26] = "InputAlreadyFocused";
-        CommandResult[CommandResult["MaximumRangesReached"] = 27] = "MaximumRangesReached";
-        CommandResult[CommandResult["InvalidChartDefinition"] = 28] = "InvalidChartDefinition";
-        CommandResult[CommandResult["InvalidDataSet"] = 29] = "InvalidDataSet";
-        CommandResult[CommandResult["InvalidLabelRange"] = 30] = "InvalidLabelRange";
-        CommandResult[CommandResult["InvalidScorecardKeyValue"] = 31] = "InvalidScorecardKeyValue";
-        CommandResult[CommandResult["InvalidScorecardBaseline"] = 32] = "InvalidScorecardBaseline";
-        CommandResult[CommandResult["InvalidGaugeDataRange"] = 33] = "InvalidGaugeDataRange";
-        CommandResult[CommandResult["EmptyGaugeRangeMin"] = 34] = "EmptyGaugeRangeMin";
-        CommandResult[CommandResult["GaugeRangeMinNaN"] = 35] = "GaugeRangeMinNaN";
-        CommandResult[CommandResult["EmptyGaugeRangeMax"] = 36] = "EmptyGaugeRangeMax";
-        CommandResult[CommandResult["GaugeRangeMaxNaN"] = 37] = "GaugeRangeMaxNaN";
-        CommandResult[CommandResult["GaugeRangeMinBiggerThanRangeMax"] = 38] = "GaugeRangeMinBiggerThanRangeMax";
-        CommandResult[CommandResult["GaugeLowerInflectionPointNaN"] = 39] = "GaugeLowerInflectionPointNaN";
-        CommandResult[CommandResult["GaugeUpperInflectionPointNaN"] = 40] = "GaugeUpperInflectionPointNaN";
-        CommandResult[CommandResult["GaugeLowerBiggerThanUpper"] = 41] = "GaugeLowerBiggerThanUpper";
-        CommandResult[CommandResult["InvalidAutofillSelection"] = 42] = "InvalidAutofillSelection";
-        CommandResult[CommandResult["WrongComposerSelection"] = 43] = "WrongComposerSelection";
-        CommandResult[CommandResult["MinBiggerThanMax"] = 44] = "MinBiggerThanMax";
-        CommandResult[CommandResult["LowerBiggerThanUpper"] = 45] = "LowerBiggerThanUpper";
-        CommandResult[CommandResult["MidBiggerThanMax"] = 46] = "MidBiggerThanMax";
-        CommandResult[CommandResult["MinBiggerThanMid"] = 47] = "MinBiggerThanMid";
-        CommandResult[CommandResult["FirstArgMissing"] = 48] = "FirstArgMissing";
-        CommandResult[CommandResult["SecondArgMissing"] = 49] = "SecondArgMissing";
-        CommandResult[CommandResult["MinNaN"] = 50] = "MinNaN";
-        CommandResult[CommandResult["MidNaN"] = 51] = "MidNaN";
-        CommandResult[CommandResult["MaxNaN"] = 52] = "MaxNaN";
-        CommandResult[CommandResult["ValueUpperInflectionNaN"] = 53] = "ValueUpperInflectionNaN";
-        CommandResult[CommandResult["ValueLowerInflectionNaN"] = 54] = "ValueLowerInflectionNaN";
-        CommandResult[CommandResult["MinInvalidFormula"] = 55] = "MinInvalidFormula";
-        CommandResult[CommandResult["MidInvalidFormula"] = 56] = "MidInvalidFormula";
-        CommandResult[CommandResult["MaxInvalidFormula"] = 57] = "MaxInvalidFormula";
-        CommandResult[CommandResult["ValueUpperInvalidFormula"] = 58] = "ValueUpperInvalidFormula";
-        CommandResult[CommandResult["ValueLowerInvalidFormula"] = 59] = "ValueLowerInvalidFormula";
-        CommandResult[CommandResult["InvalidSortZone"] = 60] = "InvalidSortZone";
-        CommandResult[CommandResult["WaitingSessionConfirmation"] = 61] = "WaitingSessionConfirmation";
-        CommandResult[CommandResult["MergeOverlap"] = 62] = "MergeOverlap";
-        CommandResult[CommandResult["TooManyHiddenElements"] = 63] = "TooManyHiddenElements";
-        CommandResult[CommandResult["Readonly"] = 64] = "Readonly";
-        CommandResult[CommandResult["InvalidViewportSize"] = 65] = "InvalidViewportSize";
-        CommandResult[CommandResult["InvalidScrollingDirection"] = 66] = "InvalidScrollingDirection";
-        CommandResult[CommandResult["FigureDoesNotExist"] = 67] = "FigureDoesNotExist";
-        CommandResult[CommandResult["InvalidConditionalFormatId"] = 68] = "InvalidConditionalFormatId";
-        CommandResult[CommandResult["InvalidCellPopover"] = 69] = "InvalidCellPopover";
-        CommandResult[CommandResult["EmptyTarget"] = 70] = "EmptyTarget";
-        CommandResult[CommandResult["InvalidFreezeQuantity"] = 71] = "InvalidFreezeQuantity";
-        CommandResult[CommandResult["FrozenPaneOverlap"] = 72] = "FrozenPaneOverlap";
-        CommandResult[CommandResult["ValuesNotChanged"] = 73] = "ValuesNotChanged";
-        CommandResult[CommandResult["InvalidFilterZone"] = 74] = "InvalidFilterZone";
-        CommandResult[CommandResult["FilterOverlap"] = 75] = "FilterOverlap";
-        CommandResult[CommandResult["FilterNotFound"] = 76] = "FilterNotFound";
-        CommandResult[CommandResult["MergeInFilter"] = 77] = "MergeInFilter";
-        CommandResult[CommandResult["NonContinuousTargets"] = 78] = "NonContinuousTargets";
+        CommandResult[CommandResult["DuplicatedSheetId"] = 11] = "DuplicatedSheetId";
+        CommandResult[CommandResult["ForbiddenCharactersInSheetName"] = 12] = "ForbiddenCharactersInSheetName";
+        CommandResult[CommandResult["WrongSheetMove"] = 13] = "WrongSheetMove";
+        CommandResult[CommandResult["WrongSheetPosition"] = 14] = "WrongSheetPosition";
+        CommandResult[CommandResult["InvalidAnchorZone"] = 15] = "InvalidAnchorZone";
+        CommandResult[CommandResult["SelectionOutOfBound"] = 16] = "SelectionOutOfBound";
+        CommandResult[CommandResult["TargetOutOfSheet"] = 17] = "TargetOutOfSheet";
+        CommandResult[CommandResult["WrongCutSelection"] = 18] = "WrongCutSelection";
+        CommandResult[CommandResult["WrongPasteSelection"] = 19] = "WrongPasteSelection";
+        CommandResult[CommandResult["WrongPasteOption"] = 20] = "WrongPasteOption";
+        CommandResult[CommandResult["WrongFigurePasteOption"] = 21] = "WrongFigurePasteOption";
+        CommandResult[CommandResult["EmptyClipboard"] = 22] = "EmptyClipboard";
+        CommandResult[CommandResult["EmptyRange"] = 23] = "EmptyRange";
+        CommandResult[CommandResult["InvalidRange"] = 24] = "InvalidRange";
+        CommandResult[CommandResult["InvalidZones"] = 25] = "InvalidZones";
+        CommandResult[CommandResult["InvalidSheetId"] = 26] = "InvalidSheetId";
+        CommandResult[CommandResult["InputAlreadyFocused"] = 27] = "InputAlreadyFocused";
+        CommandResult[CommandResult["MaximumRangesReached"] = 28] = "MaximumRangesReached";
+        CommandResult[CommandResult["InvalidChartDefinition"] = 29] = "InvalidChartDefinition";
+        CommandResult[CommandResult["InvalidDataSet"] = 30] = "InvalidDataSet";
+        CommandResult[CommandResult["InvalidLabelRange"] = 31] = "InvalidLabelRange";
+        CommandResult[CommandResult["InvalidScorecardKeyValue"] = 32] = "InvalidScorecardKeyValue";
+        CommandResult[CommandResult["InvalidScorecardBaseline"] = 33] = "InvalidScorecardBaseline";
+        CommandResult[CommandResult["InvalidGaugeDataRange"] = 34] = "InvalidGaugeDataRange";
+        CommandResult[CommandResult["EmptyGaugeRangeMin"] = 35] = "EmptyGaugeRangeMin";
+        CommandResult[CommandResult["GaugeRangeMinNaN"] = 36] = "GaugeRangeMinNaN";
+        CommandResult[CommandResult["EmptyGaugeRangeMax"] = 37] = "EmptyGaugeRangeMax";
+        CommandResult[CommandResult["GaugeRangeMaxNaN"] = 38] = "GaugeRangeMaxNaN";
+        CommandResult[CommandResult["GaugeRangeMinBiggerThanRangeMax"] = 39] = "GaugeRangeMinBiggerThanRangeMax";
+        CommandResult[CommandResult["GaugeLowerInflectionPointNaN"] = 40] = "GaugeLowerInflectionPointNaN";
+        CommandResult[CommandResult["GaugeUpperInflectionPointNaN"] = 41] = "GaugeUpperInflectionPointNaN";
+        CommandResult[CommandResult["GaugeLowerBiggerThanUpper"] = 42] = "GaugeLowerBiggerThanUpper";
+        CommandResult[CommandResult["InvalidAutofillSelection"] = 43] = "InvalidAutofillSelection";
+        CommandResult[CommandResult["WrongComposerSelection"] = 44] = "WrongComposerSelection";
+        CommandResult[CommandResult["MinBiggerThanMax"] = 45] = "MinBiggerThanMax";
+        CommandResult[CommandResult["LowerBiggerThanUpper"] = 46] = "LowerBiggerThanUpper";
+        CommandResult[CommandResult["MidBiggerThanMax"] = 47] = "MidBiggerThanMax";
+        CommandResult[CommandResult["MinBiggerThanMid"] = 48] = "MinBiggerThanMid";
+        CommandResult[CommandResult["FirstArgMissing"] = 49] = "FirstArgMissing";
+        CommandResult[CommandResult["SecondArgMissing"] = 50] = "SecondArgMissing";
+        CommandResult[CommandResult["MinNaN"] = 51] = "MinNaN";
+        CommandResult[CommandResult["MidNaN"] = 52] = "MidNaN";
+        CommandResult[CommandResult["MaxNaN"] = 53] = "MaxNaN";
+        CommandResult[CommandResult["ValueUpperInflectionNaN"] = 54] = "ValueUpperInflectionNaN";
+        CommandResult[CommandResult["ValueLowerInflectionNaN"] = 55] = "ValueLowerInflectionNaN";
+        CommandResult[CommandResult["MinInvalidFormula"] = 56] = "MinInvalidFormula";
+        CommandResult[CommandResult["MidInvalidFormula"] = 57] = "MidInvalidFormula";
+        CommandResult[CommandResult["MaxInvalidFormula"] = 58] = "MaxInvalidFormula";
+        CommandResult[CommandResult["ValueUpperInvalidFormula"] = 59] = "ValueUpperInvalidFormula";
+        CommandResult[CommandResult["ValueLowerInvalidFormula"] = 60] = "ValueLowerInvalidFormula";
+        CommandResult[CommandResult["InvalidSortZone"] = 61] = "InvalidSortZone";
+        CommandResult[CommandResult["WaitingSessionConfirmation"] = 62] = "WaitingSessionConfirmation";
+        CommandResult[CommandResult["MergeOverlap"] = 63] = "MergeOverlap";
+        CommandResult[CommandResult["TooManyHiddenElements"] = 64] = "TooManyHiddenElements";
+        CommandResult[CommandResult["Readonly"] = 65] = "Readonly";
+        CommandResult[CommandResult["InvalidViewportSize"] = 66] = "InvalidViewportSize";
+        CommandResult[CommandResult["InvalidScrollingDirection"] = 67] = "InvalidScrollingDirection";
+        CommandResult[CommandResult["FigureDoesNotExist"] = 68] = "FigureDoesNotExist";
+        CommandResult[CommandResult["InvalidConditionalFormatId"] = 69] = "InvalidConditionalFormatId";
+        CommandResult[CommandResult["InvalidCellPopover"] = 70] = "InvalidCellPopover";
+        CommandResult[CommandResult["EmptyTarget"] = 71] = "EmptyTarget";
+        CommandResult[CommandResult["InvalidFreezeQuantity"] = 72] = "InvalidFreezeQuantity";
+        CommandResult[CommandResult["FrozenPaneOverlap"] = 73] = "FrozenPaneOverlap";
+        CommandResult[CommandResult["ValuesNotChanged"] = 74] = "ValuesNotChanged";
+        CommandResult[CommandResult["InvalidFilterZone"] = 75] = "InvalidFilterZone";
+        CommandResult[CommandResult["FilterOverlap"] = 76] = "FilterOverlap";
+        CommandResult[CommandResult["FilterNotFound"] = 77] = "FilterNotFound";
+        CommandResult[CommandResult["MergeInFilter"] = 78] = "MergeInFilter";
+        CommandResult[CommandResult["NonContinuousTargets"] = 79] = "NonContinuousTargets";
+        CommandResult[CommandResult["DuplicatedFigureId"] = 80] = "DuplicatedFigureId";
     })(exports.CommandResult || (exports.CommandResult = {}));
 
     var DIRECTION;
@@ -4676,7 +4697,7 @@
                 });
             }
         }
-        if (result.isCancelledBecause(60 /* CommandResult.InvalidSortZone */)) {
+        if (result.isCancelledBecause(61 /* CommandResult.InvalidSortZone */)) {
             const { col, row } = anchor;
             env.model.selection.selectZone({ cell: { col, row }, zone });
             env.raiseError(_lt("Cannot sort. To sort, select only cells or only merges that have the same size."));
@@ -4686,7 +4707,7 @@
     function interactiveCut(env) {
         const result = env.model.dispatch("CUT");
         if (!result.isSuccessful) {
-            if (result.isCancelledBecause(17 /* CommandResult.WrongCutSelection */)) {
+            if (result.isCancelledBecause(18 /* CommandResult.WrongCutSelection */)) {
                 env.raiseError(_lt("This operation is not allowed with multiple selections."));
             }
         }
@@ -4699,13 +4720,13 @@
     };
     function interactiveAddFilter(env, sheetId, target) {
         const result = env.model.dispatch("CREATE_FILTER_TABLE", { target, sheetId });
-        if (result.isCancelledBecause(75 /* CommandResult.FilterOverlap */)) {
+        if (result.isCancelledBecause(76 /* CommandResult.FilterOverlap */)) {
             env.raiseError(AddFilterInteractiveContent.filterOverlap);
         }
-        else if (result.isCancelledBecause(77 /* CommandResult.MergeInFilter */)) {
+        else if (result.isCancelledBecause(78 /* CommandResult.MergeInFilter */)) {
             env.raiseError(AddFilterInteractiveContent.mergeInFilter);
         }
-        else if (result.isCancelledBecause(78 /* CommandResult.NonContinuousTargets */)) {
+        else if (result.isCancelledBecause(79 /* CommandResult.NonContinuousTargets */)) {
             env.raiseError(AddFilterInteractiveContent.nonContinuousTargets);
         }
     }
@@ -4718,16 +4739,16 @@
     };
     function handlePasteResult(env, result) {
         if (!result.isSuccessful) {
-            if (result.reasons.includes(18 /* CommandResult.WrongPasteSelection */)) {
+            if (result.reasons.includes(19 /* CommandResult.WrongPasteSelection */)) {
                 env.raiseError(PasteInteractiveContent.wrongPasteSelection);
             }
             else if (result.reasons.includes(2 /* CommandResult.WillRemoveExistingMerge */)) {
                 env.raiseError(PasteInteractiveContent.willRemoveExistingMerge);
             }
-            else if (result.reasons.includes(20 /* CommandResult.WrongFigurePasteOption */)) {
+            else if (result.reasons.includes(21 /* CommandResult.WrongFigurePasteOption */)) {
                 env.raiseError(PasteInteractiveContent.wrongFigurePasteOption);
             }
-            else if (result.reasons.includes(72 /* CommandResult.FrozenPaneOverlap */)) {
+            else if (result.reasons.includes(73 /* CommandResult.FrozenPaneOverlap */)) {
                 env.raiseError(PasteInteractiveContent.frozenPaneOverlap);
             }
         }
@@ -5694,7 +5715,7 @@
                 if (result.reasons.includes(10 /* CommandResult.DuplicatedSheetName */)) {
                     interactiveRenameSheet(env, sheetId, _lt("A sheet with the name %s already exists. Please select another name.", name));
                 }
-                if (result.reasons.includes(11 /* CommandResult.ForbiddenCharactersInSheetName */)) {
+                if (result.reasons.includes(12 /* CommandResult.ForbiddenCharactersInSheetName */)) {
                     interactiveRenameSheet(env, sheetId, _lt("Some used characters are not allowed in a sheet name (Forbidden characters are %s).", FORBIDDEN_SHEET_CHARS.join(" ")));
                 }
             }
@@ -5769,24 +5790,24 @@
 
     const CfTerms = {
         Errors: {
-            [23 /* CommandResult.InvalidRange */]: _lt("The range is invalid"),
-            [48 /* CommandResult.FirstArgMissing */]: _lt("The argument is missing. Please provide a value"),
-            [49 /* CommandResult.SecondArgMissing */]: _lt("The second argument is missing. Please provide a value"),
-            [50 /* CommandResult.MinNaN */]: _lt("The minpoint must be a number"),
-            [51 /* CommandResult.MidNaN */]: _lt("The midpoint must be a number"),
-            [52 /* CommandResult.MaxNaN */]: _lt("The maxpoint must be a number"),
-            [53 /* CommandResult.ValueUpperInflectionNaN */]: _lt("The first value must be a number"),
-            [54 /* CommandResult.ValueLowerInflectionNaN */]: _lt("The second value must be a number"),
-            [44 /* CommandResult.MinBiggerThanMax */]: _lt("Minimum must be smaller then Maximum"),
-            [47 /* CommandResult.MinBiggerThanMid */]: _lt("Minimum must be smaller then Midpoint"),
-            [46 /* CommandResult.MidBiggerThanMax */]: _lt("Midpoint must be smaller then Maximum"),
-            [45 /* CommandResult.LowerBiggerThanUpper */]: _lt("Lower inflection point must be smaller than upper inflection point"),
-            [55 /* CommandResult.MinInvalidFormula */]: _lt("Invalid Minpoint formula"),
-            [57 /* CommandResult.MaxInvalidFormula */]: _lt("Invalid Maxpoint formula"),
-            [56 /* CommandResult.MidInvalidFormula */]: _lt("Invalid Midpoint formula"),
-            [58 /* CommandResult.ValueUpperInvalidFormula */]: _lt("Invalid upper inflection point formula"),
-            [59 /* CommandResult.ValueLowerInvalidFormula */]: _lt("Invalid lower inflection point formula"),
-            [22 /* CommandResult.EmptyRange */]: _lt("A range needs to be defined"),
+            [24 /* CommandResult.InvalidRange */]: _lt("The range is invalid"),
+            [49 /* CommandResult.FirstArgMissing */]: _lt("The argument is missing. Please provide a value"),
+            [50 /* CommandResult.SecondArgMissing */]: _lt("The second argument is missing. Please provide a value"),
+            [51 /* CommandResult.MinNaN */]: _lt("The minpoint must be a number"),
+            [52 /* CommandResult.MidNaN */]: _lt("The midpoint must be a number"),
+            [53 /* CommandResult.MaxNaN */]: _lt("The maxpoint must be a number"),
+            [54 /* CommandResult.ValueUpperInflectionNaN */]: _lt("The first value must be a number"),
+            [55 /* CommandResult.ValueLowerInflectionNaN */]: _lt("The second value must be a number"),
+            [45 /* CommandResult.MinBiggerThanMax */]: _lt("Minimum must be smaller then Maximum"),
+            [48 /* CommandResult.MinBiggerThanMid */]: _lt("Minimum must be smaller then Midpoint"),
+            [47 /* CommandResult.MidBiggerThanMax */]: _lt("Midpoint must be smaller then Maximum"),
+            [46 /* CommandResult.LowerBiggerThanUpper */]: _lt("Lower inflection point must be smaller than upper inflection point"),
+            [56 /* CommandResult.MinInvalidFormula */]: _lt("Invalid Minpoint formula"),
+            [58 /* CommandResult.MaxInvalidFormula */]: _lt("Invalid Maxpoint formula"),
+            [57 /* CommandResult.MidInvalidFormula */]: _lt("Invalid Midpoint formula"),
+            [59 /* CommandResult.ValueUpperInvalidFormula */]: _lt("Invalid upper inflection point formula"),
+            [60 /* CommandResult.ValueLowerInvalidFormula */]: _lt("Invalid lower inflection point formula"),
+            [23 /* CommandResult.EmptyRange */]: _lt("A range needs to be defined"),
             Unexpected: _lt("The rule is invalid for an unknown reason"),
         },
         ColorScale: _lt("Color scale"),
@@ -5813,20 +5834,20 @@
         Errors: {
             Unexpected: _lt("The chart definition is invalid for an unknown reason"),
             // BASIC CHART ERRORS (LINE | BAR | PIE)
-            [29 /* CommandResult.InvalidDataSet */]: _lt("The dataset is invalid"),
-            [30 /* CommandResult.InvalidLabelRange */]: _lt("Labels are invalid"),
+            [30 /* CommandResult.InvalidDataSet */]: _lt("The dataset is invalid"),
+            [31 /* CommandResult.InvalidLabelRange */]: _lt("Labels are invalid"),
             // SCORECARD CHART ERRORS
-            [31 /* CommandResult.InvalidScorecardKeyValue */]: _lt("The key value is invalid"),
-            [32 /* CommandResult.InvalidScorecardBaseline */]: _lt("The baseline value is invalid"),
+            [32 /* CommandResult.InvalidScorecardKeyValue */]: _lt("The key value is invalid"),
+            [33 /* CommandResult.InvalidScorecardBaseline */]: _lt("The baseline value is invalid"),
             // GAUGE CHART ERRORS
-            [33 /* CommandResult.InvalidGaugeDataRange */]: _lt("The data range is invalid"),
-            [34 /* CommandResult.EmptyGaugeRangeMin */]: _lt("A minimum range limit value is needed"),
-            [35 /* CommandResult.GaugeRangeMinNaN */]: _lt("The minimum range limit value must be a number"),
-            [36 /* CommandResult.EmptyGaugeRangeMax */]: _lt("A maximum range limit value is needed"),
-            [37 /* CommandResult.GaugeRangeMaxNaN */]: _lt("The maximum range limit value must be a number"),
-            [38 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */]: _lt("Minimum range limit must be smaller than maximum range limit"),
-            [39 /* CommandResult.GaugeLowerInflectionPointNaN */]: _lt("The lower inflection point value must be a number"),
-            [40 /* CommandResult.GaugeUpperInflectionPointNaN */]: _lt("The upper inflection point value must be a number"),
+            [34 /* CommandResult.InvalidGaugeDataRange */]: _lt("The data range is invalid"),
+            [35 /* CommandResult.EmptyGaugeRangeMin */]: _lt("A minimum range limit value is needed"),
+            [36 /* CommandResult.GaugeRangeMinNaN */]: _lt("The minimum range limit value must be a number"),
+            [37 /* CommandResult.EmptyGaugeRangeMax */]: _lt("A maximum range limit value is needed"),
+            [38 /* CommandResult.GaugeRangeMaxNaN */]: _lt("The maximum range limit value must be a number"),
+            [39 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */]: _lt("Minimum range limit must be smaller than maximum range limit"),
+            [40 /* CommandResult.GaugeLowerInflectionPointNaN */]: _lt("The lower inflection point value must be a number"),
+            [41 /* CommandResult.GaugeUpperInflectionPointNaN */]: _lt("The upper inflection point value must be a number"),
         },
     };
     const NumberFormatTerms = {
@@ -5845,4808 +5866,6 @@
         Custom: _lt("Custom"),
     };
     const MergeErrorMessage = _lt("Merged cells are preventing this operation. Unmerge those cells and try again.");
-
-    function interactiveFreezeColumnsRows(env, dimension, base) {
-        const sheetId = env.model.getters.getActiveSheetId();
-        const cmd = dimension === "COL" ? "FREEZE_COLUMNS" : "FREEZE_ROWS";
-        const result = env.model.dispatch(cmd, { sheetId, quantity: base });
-        if (result.isCancelledBecause(62 /* CommandResult.MergeOverlap */)) {
-            env.raiseError(MergeErrorMessage);
-        }
-    }
-
-    const topbarMenuRegistry = new MenuItemRegistry();
-    topbarMenuRegistry
-        .add("file", { name: _lt("File"), sequence: 10 })
-        .add("edit", { name: _lt("Edit"), sequence: 20 })
-        .add("view", { name: _lt("View"), sequence: 30 })
-        .add("insert", { name: _lt("Insert"), sequence: 40 })
-        .add("format", { name: _lt("Format"), sequence: 50 })
-        .add("data", { name: _lt("Data"), sequence: 60 })
-        .addChild("save", ["file"], {
-        name: _lt("Save"),
-        description: "Ctrl+S",
-        sequence: 10,
-        action: () => console.log("Not implemented"),
-    })
-        .addChild("undo", ["edit"], {
-        name: _lt("Undo"),
-        description: "Ctrl+Z",
-        sequence: 10,
-        action: UNDO_ACTION,
-    })
-        .addChild("redo", ["edit"], {
-        name: _lt("Redo"),
-        description: "Ctrl+Y",
-        sequence: 20,
-        action: REDO_ACTION,
-        separator: true,
-    })
-        .addChild("copy", ["edit"], {
-        name: _lt("Copy"),
-        description: "Ctrl+C",
-        sequence: 30,
-        isReadonlyAllowed: true,
-        action: COPY_ACTION,
-    })
-        .addChild("cut", ["edit"], {
-        name: _lt("Cut"),
-        description: "Ctrl+X",
-        sequence: 40,
-        action: CUT_ACTION,
-    })
-        .addChild("paste", ["edit"], {
-        name: _lt("Paste"),
-        description: "Ctrl+V",
-        sequence: 50,
-        action: PASTE_ACTION,
-    })
-        .addChild("paste_special", ["edit"], {
-        name: _lt("Paste special"),
-        sequence: 60,
-        separator: true,
-        isVisible: IS_NOT_CUT_OPERATION,
-    })
-        .addChild("paste_special_value", ["edit", "paste_special"], {
-        name: _lt("Paste value only"),
-        sequence: 10,
-        action: PASTE_VALUE_ACTION,
-    })
-        .addChild("paste_special_format", ["edit", "paste_special"], {
-        name: _lt("Paste format only"),
-        sequence: 20,
-        action: PASTE_FORMAT_ACTION,
-    })
-        .addChild("sort_range", ["data"], {
-        name: _lt("Sort range"),
-        sequence: 62,
-        isVisible: IS_ONLY_ONE_RANGE,
-        separator: true,
-    })
-        .addChild("sort_ascending", ["data", "sort_range"], {
-        name: _lt("Ascending (A ⟶ Z)"),
-        sequence: 10,
-        action: SORT_CELLS_ASCENDING,
-    })
-        .addChild("sort_descending", ["data", "sort_range"], {
-        name: _lt("Descending (Z ⟶ A)"),
-        sequence: 20,
-        action: SORT_CELLS_DESCENDING,
-    })
-        .addChild("find_and_replace", ["edit"], {
-        name: _lt("Find and replace"),
-        description: "Ctrl+H",
-        sequence: 65,
-        isReadonlyAllowed: true,
-        action: OPEN_FAR_SIDEPANEL_ACTION,
-        separator: true,
-    })
-        .addChild("edit_delete_cell_values", ["edit"], {
-        name: _lt("Delete values"),
-        sequence: 70,
-        action: DELETE_CONTENT_ACTION,
-    })
-        .addChild("edit_delete_row", ["edit"], {
-        name: REMOVE_ROWS_NAME,
-        sequence: 80,
-        action: REMOVE_ROWS_ACTION,
-    })
-        .addChild("edit_delete_column", ["edit"], {
-        name: REMOVE_COLUMNS_NAME,
-        sequence: 90,
-        action: REMOVE_COLUMNS_ACTION,
-    })
-        .addChild("edit_delete_cell_shift_up", ["edit"], {
-        name: _lt("Delete cell and shift up"),
-        sequence: 93,
-        action: DELETE_CELL_SHIFT_UP,
-    })
-        .addChild("edit_delete_cell_shift_left", ["edit"], {
-        name: _lt("Delete cell and shift left"),
-        sequence: 97,
-        action: DELETE_CELL_SHIFT_LEFT,
-    })
-        .addChild("edit_unhide_columns", ["edit"], {
-        name: _lt("Unhide all columns"),
-        sequence: 100,
-        action: UNHIDE_ALL_COLUMNS_ACTION,
-        isVisible: (env) => env.model.getters.getHiddenColsGroups(env.model.getters.getActiveSheetId()).length > 0,
-    })
-        .addChild("edit_unhide_rows", ["edit"], {
-        name: _lt("Unhide all rows"),
-        sequence: 100,
-        action: UNHIDE_ALL_ROWS_ACTION,
-        isVisible: (env) => env.model.getters.getHiddenRowsGroups(env.model.getters.getActiveSheetId()).length > 0,
-    })
-        .addChild("insert_row_before", ["insert"], {
-        name: MENU_INSERT_ROWS_BEFORE_NAME,
-        sequence: 10,
-        action: INSERT_ROWS_BEFORE_ACTION,
-        isVisible: (env) => env.model.getters.getActiveCols().size === 0,
-    })
-        .addChild("insert_row_after", ["insert"], {
-        name: MENU_INSERT_ROWS_AFTER_NAME,
-        sequence: 20,
-        action: INSERT_ROWS_AFTER_ACTION,
-        isVisible: (env) => env.model.getters.getActiveCols().size === 0,
-        separator: true,
-    })
-        .addChild("insert_column_before", ["insert"], {
-        name: MENU_INSERT_COLUMNS_BEFORE_NAME,
-        sequence: 30,
-        action: INSERT_COLUMNS_BEFORE_ACTION,
-        isVisible: (env) => env.model.getters.getActiveRows().size === 0,
-    })
-        .addChild("insert_column_after", ["insert"], {
-        name: MENU_INSERT_COLUMNS_AFTER_NAME,
-        sequence: 40,
-        action: INSERT_COLUMNS_AFTER_ACTION,
-        isVisible: (env) => env.model.getters.getActiveRows().size === 0,
-        separator: true,
-    })
-        .addChild("insert_insert_cell_shift_down", ["insert"], {
-        name: _lt("Insert cells and shift down"),
-        sequence: 43,
-        action: INSERT_CELL_SHIFT_DOWN,
-    })
-        .addChild("insert_insert_cell_shift_right", ["insert"], {
-        name: _lt("Insert cells and shift right"),
-        sequence: 47,
-        action: INSERT_CELL_SHIFT_RIGHT,
-        separator: true,
-    })
-        .addChild("insert_chart", ["insert"], {
-        name: _lt("Chart"),
-        sequence: 50,
-        action: CREATE_CHART,
-    })
-        .addChild("insert_link", ["insert"], {
-        name: _lt("Link"),
-        separator: true,
-        sequence: 60,
-        action: INSERT_LINK,
-    })
-        .addChild("insert_sheet", ["insert"], {
-        name: _lt("New sheet"),
-        sequence: 70,
-        action: CREATE_SHEET_ACTION,
-        separator: true,
-    })
-        .addChild("unfreeze_panes", ["view"], {
-        name: _lt("Unfreeze"),
-        sequence: 4,
-        isVisible: (env) => {
-            const { xSplit, ySplit } = env.model.getters.getPaneDivisions(env.model.getters.getActiveSheetId());
-            return xSplit + ySplit > 0;
-        },
-        action: (env) => env.model.dispatch("UNFREEZE_COLUMNS_ROWS", {
-            sheetId: env.model.getters.getActiveSheetId(),
-        }),
-    })
-        .addChild("freeze_panes", ["view"], {
-        name: _lt("Freeze"),
-        sequence: 5,
-        separator: true,
-    })
-        .addChild("unfreeze_rows", ["view", "freeze_panes"], {
-        name: _lt("No rows"),
-        action: (env) => env.model.dispatch("UNFREEZE_ROWS", {
-            sheetId: env.model.getters.getActiveSheetId(),
-        }),
-        isReadonlyAllowed: true,
-        sequence: 5,
-        isVisible: (env) => !!env.model.getters.getPaneDivisions(env.model.getters.getActiveSheetId()).ySplit,
-    })
-        .addChild("freeze_first_row", ["view", "freeze_panes"], {
-        name: _lt("1 row"),
-        action: (env) => interactiveFreezeColumnsRows(env, "ROW", 1),
-        isReadonlyAllowed: true,
-        sequence: 10,
-    })
-        .addChild("freeze_second_row", ["view", "freeze_panes"], {
-        name: _lt("2 rows"),
-        action: (env) => interactiveFreezeColumnsRows(env, "ROW", 2),
-        isReadonlyAllowed: true,
-        sequence: 15,
-    })
-        .addChild("freeze_current_row", ["view", "freeze_panes"], {
-        name: _lt("Up to current row"),
-        action: (env) => {
-            const { bottom } = env.model.getters.getSelectedZone();
-            interactiveFreezeColumnsRows(env, "ROW", bottom + 1);
-        },
-        isReadonlyAllowed: true,
-        sequence: 20,
-        separator: true,
-    })
-        .addChild("unfreeze_columns", ["view", "freeze_panes"], {
-        name: _lt("No columns"),
-        action: (env) => env.model.dispatch("UNFREEZE_COLUMNS", {
-            sheetId: env.model.getters.getActiveSheetId(),
-        }),
-        isReadonlyAllowed: true,
-        sequence: 25,
-        isVisible: (env) => !!env.model.getters.getPaneDivisions(env.model.getters.getActiveSheetId()).xSplit,
-    })
-        .addChild("freeze_first_col", ["view", "freeze_panes"], {
-        name: _lt("1 column"),
-        action: (env) => interactiveFreezeColumnsRows(env, "COL", 1),
-        isReadonlyAllowed: true,
-        sequence: 30,
-    })
-        .addChild("freeze_second_col", ["view", "freeze_panes"], {
-        name: _lt("2 columns"),
-        action: (env) => interactiveFreezeColumnsRows(env, "COL", 2),
-        isReadonlyAllowed: true,
-        sequence: 35,
-    })
-        .addChild("freeze_current_col", ["view", "freeze_panes"], {
-        name: _lt("Up to current column"),
-        action: (env) => {
-            const { right } = env.model.getters.getSelectedZone();
-            interactiveFreezeColumnsRows(env, "COL", right + 1);
-        },
-        isReadonlyAllowed: true,
-        sequence: 40,
-    })
-        .addChild("view_gridlines", ["view"], {
-        name: (env) => env.model.getters.getGridLinesVisibility(env.model.getters.getActiveSheetId())
-            ? _lt("Hide gridlines")
-            : _lt("Show gridlines"),
-        action: SET_GRID_LINES_VISIBILITY_ACTION,
-        sequence: 10,
-    })
-        .addChild("view_formulas", ["view"], {
-        name: (env) => env.model.getters.shouldShowFormulas() ? _lt("Hide formulas") : _lt("Show formulas"),
-        action: SET_FORMULA_VISIBILITY_ACTION,
-        isReadonlyAllowed: true,
-        sequence: 15,
-    })
-        .addChild("format_number", ["format"], {
-        name: _lt("Numbers"),
-        sequence: 10,
-        separator: true,
-    })
-        .addChild("format_number_automatic", ["format", "format_number"], {
-        name: NumberFormatTerms.Automatic,
-        sequence: 10,
-        separator: true,
-        action: FORMAT_AUTOMATIC_ACTION,
-    })
-        .addChild("format_number_number", ["format", "format_number"], {
-        name: NumberFormatTerms.Number,
-        description: "1,000.12",
-        sequence: 20,
-        action: FORMAT_NUMBER_ACTION,
-    })
-        .addChild("format_number_percent", ["format", "format_number"], {
-        name: NumberFormatTerms.Percent,
-        description: "10.12%",
-        sequence: 30,
-        separator: true,
-        action: FORMAT_PERCENT_ACTION,
-    })
-        .addChild("format_number_currency", ["format", "format_number"], {
-        name: NumberFormatTerms.Currency,
-        description: "$1,000.12",
-        sequence: 37,
-        action: FORMAT_CURRENCY_ACTION,
-    })
-        .addChild("format_number_currency_rounded", ["format", "format_number"], {
-        name: NumberFormatTerms.CurrencyRounded,
-        description: "$1,000",
-        sequence: 38,
-        action: FORMAT_CURRENCY_ROUNDED_ACTION,
-    })
-        .addChild("format_custom_currency", ["format", "format_number"], {
-        name: NumberFormatTerms.CustomCurrency,
-        sequence: 39,
-        separator: true,
-        action: OPEN_CUSTOM_CURRENCY_SIDEPANEL_ACTION,
-    })
-        .addChild("format_number_date", ["format", "format_number"], {
-        name: NumberFormatTerms.Date,
-        description: "9/26/2008",
-        sequence: 40,
-        action: FORMAT_DATE_ACTION,
-    })
-        .addChild("format_number_time", ["format", "format_number"], {
-        name: NumberFormatTerms.Time,
-        description: "10:43:00 PM",
-        sequence: 50,
-        action: FORMAT_TIME_ACTION,
-    })
-        .addChild("format_number_date_time", ["format", "format_number"], {
-        name: NumberFormatTerms.DateTime,
-        description: "9/26/2008 22:43:00",
-        sequence: 60,
-        action: FORMAT_DATE_TIME_ACTION,
-    })
-        .addChild("format_number_duration", ["format", "format_number"], {
-        name: NumberFormatTerms.Duration,
-        description: "27:51:38",
-        sequence: 70,
-        separator: true,
-        action: FORMAT_DURATION_ACTION,
-    })
-        .addChild("format_bold", ["format"], {
-        name: _lt("Bold"),
-        sequence: 20,
-        description: "Ctrl+B",
-        action: FORMAT_BOLD_ACTION,
-    })
-        .addChild("format_italic", ["format"], {
-        name: _lt("Italic"),
-        sequence: 30,
-        description: "Ctrl+I",
-        action: FORMAT_ITALIC_ACTION,
-    })
-        .addChild("format_underline", ["format"], {
-        name: _lt("Underline"),
-        description: "Ctrl+U",
-        sequence: 40,
-        action: FORMAT_UNDERLINE_ACTION,
-    })
-        .addChild("format_strikethrough", ["format"], {
-        name: _lt("Strikethrough"),
-        sequence: 50,
-        action: FORMAT_STRIKETHROUGH_ACTION,
-        separator: true,
-    })
-        .addChild("format_font_size", ["format"], {
-        name: _lt("Font size"),
-        sequence: 60,
-    })
-        .addChild("format_wrapping", ["format"], {
-        name: _lt("Wrapping"),
-        sequence: 70,
-        separator: true,
-    })
-        .addChild("format_wrapping_overflow", ["format", "format_wrapping"], {
-        name: "Overflow",
-        sequence: 10,
-        action: (env) => setStyle(env, { wrapping: "overflow" }),
-    })
-        .addChild("format_wrapping_wrap", ["format", "format_wrapping"], {
-        name: "Wrap",
-        sequence: 20,
-        action: (env) => setStyle(env, { wrapping: "wrap" }),
-    })
-        .addChild("format_wrapping_clip", ["format", "format_wrapping"], {
-        name: "Clip",
-        sequence: 30,
-        action: (env) => setStyle(env, { wrapping: "clip" }),
-    })
-        .addChild("format_cf", ["format"], {
-        name: _lt("Conditional formatting"),
-        sequence: 80,
-        action: OPEN_CF_SIDEPANEL_ACTION,
-        separator: true,
-    })
-        .addChild("format_clearFormat", ["format"], {
-        name: _lt("Clear formatting"),
-        sequence: 90,
-        action: FORMAT_CLEARFORMAT_ACTION,
-        separator: true,
-    })
-        .addChild("add_data_filter", ["data"], {
-        name: _lt("Add Filter"),
-        sequence: 20,
-        action: FILTERS_CREATE_FILTER_TABLE,
-        isVisible: (env) => !SELECTION_CONTAINS_FILTER(env),
-        isEnabled: (env) => SELECTION_IS_CONTINUOUS(env),
-    })
-        .addChild("remove_data_filter", ["data"], {
-        name: _lt("Remove Filter"),
-        sequence: 20,
-        action: FILTERS_REMOVE_FILTER_TABLE,
-        isVisible: SELECTION_CONTAINS_FILTER,
-    });
-    // Font-sizes
-    for (let fs of fontSizes) {
-        topbarMenuRegistry.addChild(`format_font_size_${fs.pt}`, ["format", "format_font_size"], {
-            name: fs.pt.toString(),
-            sequence: fs.pt,
-            action: (env) => setStyle(env, { fontSize: fs.pt }),
-        });
-    }
-
-    class OTRegistry extends Registry {
-        /**
-         * Add a transformation function to the registry. When the executed command
-         * happened, all the commands in toTransforms should be transformed using the
-         * transformation function given
-         */
-        addTransformation(executed, toTransforms, fn) {
-            for (let toTransform of toTransforms) {
-                if (!this.content[toTransform]) {
-                    this.content[toTransform] = new Map();
-                }
-                this.content[toTransform].set(executed, fn);
-            }
-            return this;
-        }
-        /**
-         * Get the transformation function to transform the command toTransform, after
-         * that the executed command happened.
-         */
-        getTransformation(toTransform, executed) {
-            return this.content[toTransform] && this.content[toTransform].get(executed);
-        }
-    }
-    const otRegistry = new OTRegistry();
-
-    const uuidGenerator$1 = new UuidGenerator();
-    css /* scss */ `
-  .o-selection {
-    .o-selection-input {
-      display: flex;
-      flex-direction: row;
-
-      input {
-        padding: 4px 6px;
-        border-radius: 4px;
-        box-sizing: border-box;
-        flex-grow: 2;
-      }
-      input:focus {
-        outline: none;
-      }
-      input.o-required,
-      input.o-focused {
-        border-width: 2px;
-        padding: 3px 5px;
-      }
-      input.o-focused {
-        border-color: ${SELECTION_BORDER_COLOR};
-      }
-      input.o-invalid {
-        border-color: red;
-      }
-      button.o-btn {
-        background: transparent;
-        border: none;
-        color: #333;
-        cursor: pointer;
-      }
-      button.o-btn-action {
-        margin: 8px 1px;
-        border-radius: 4px;
-        background: transparent;
-        border: 1px solid #dadce0;
-        color: #188038;
-        font-weight: bold;
-        font-size: 14px;
-        height: 25px;
-      }
-    }
-  }
-`;
-    /**
-     * This component can be used when the user needs to input some
-     * ranges. He can either input the ranges with the regular DOM `<input/>`
-     * displayed or by selecting zones on the grid.
-     *
-     * onSelectionChanged is called every time the input value
-     * changes.
-     */
-    class SelectionInput extends owl.Component {
-        constructor() {
-            super(...arguments);
-            this.id = uuidGenerator$1.uuidv4();
-            this.previousRanges = this.props.ranges || [];
-            this.originSheet = this.env.model.getters.getActiveSheetId();
-            this.state = owl.useState({
-                isMissing: false,
-            });
-        }
-        get ranges() {
-            const existingSelectionRange = this.env.model.getters.getSelectionInput(this.id);
-            const ranges = existingSelectionRange.length
-                ? existingSelectionRange
-                : this.props.ranges
-                    ? this.props.ranges.map((xc, i) => ({
-                        xc,
-                        id: i.toString(),
-                        isFocused: false,
-                    }))
-                    : [];
-            return ranges.map((range) => ({
-                ...range,
-                isValidRange: range.xc === "" || this.env.model.getters.isRangeValid(range.xc),
-            }));
-        }
-        get hasFocus() {
-            return this.ranges.filter((i) => i.isFocused).length > 0;
-        }
-        get canAddRange() {
-            return !this.props.hasSingleRange;
-        }
-        get isInvalid() {
-            return this.props.isInvalid || this.state.isMissing;
-        }
-        setup() {
-            owl.onMounted(() => this.enableNewSelectionInput());
-            owl.onWillUnmount(async () => this.disableNewSelectionInput());
-            owl.onPatched(() => this.checkChange());
-        }
-        enableNewSelectionInput() {
-            this.env.model.dispatch("ENABLE_NEW_SELECTION_INPUT", {
-                id: this.id,
-                initialRanges: this.props.ranges,
-                hasSingleRange: this.props.hasSingleRange,
-            });
-        }
-        disableNewSelectionInput() {
-            this.env.model.dispatch("DISABLE_SELECTION_INPUT", { id: this.id });
-        }
-        checkChange() {
-            const value = this.env.model.getters.getSelectionInputValue(this.id);
-            if (this.previousRanges.join() !== value.join()) {
-                this.triggerChange();
-            }
-        }
-        getColor(range) {
-            const color = range.color || "#000";
-            return "color: " + color + ";";
-        }
-        triggerChange() {
-            var _a, _b;
-            const ranges = this.env.model.getters.getSelectionInputValue(this.id);
-            (_b = (_a = this.props).onSelectionChanged) === null || _b === void 0 ? void 0 : _b.call(_a, ranges);
-            this.previousRanges = ranges;
-        }
-        focus(rangeId) {
-            this.state.isMissing = false;
-            this.env.model.dispatch("FOCUS_RANGE", {
-                id: this.id,
-                rangeId,
-            });
-        }
-        addEmptyInput() {
-            this.env.model.dispatch("ADD_EMPTY_RANGE", { id: this.id });
-        }
-        removeInput(rangeId) {
-            var _a, _b;
-            this.env.model.dispatch("REMOVE_RANGE", { id: this.id, rangeId });
-            this.triggerChange();
-            (_b = (_a = this.props).onSelectionConfirmed) === null || _b === void 0 ? void 0 : _b.call(_a);
-        }
-        onInputChanged(rangeId, ev) {
-            const target = ev.target;
-            this.env.model.dispatch("CHANGE_RANGE", {
-                id: this.id,
-                rangeId,
-                value: target.value,
-            });
-            target.blur();
-            this.triggerChange();
-        }
-        disable() {
-            var _a, _b;
-            this.env.model.dispatch("UNFOCUS_SELECTION_INPUT");
-            const ranges = this.env.model.getters.getSelectionInputValue(this.id);
-            if (this.props.required && ranges.length === 0) {
-                this.state.isMissing = true;
-            }
-            const activeSheetId = this.env.model.getters.getActiveSheetId();
-            if (this.originSheet !== activeSheetId) {
-                this.env.model.dispatch("ACTIVATE_SHEET", {
-                    sheetIdFrom: activeSheetId,
-                    sheetIdTo: this.originSheet,
-                });
-            }
-            (_b = (_a = this.props).onSelectionConfirmed) === null || _b === void 0 ? void 0 : _b.call(_a);
-        }
-    }
-    SelectionInput.template = "o-spreadsheet-SelectionInput";
-    SelectionInput.props = {
-        ranges: Array,
-        hasSingleRange: { type: Boolean, optional: true },
-        required: { type: Boolean, optional: true },
-        isInvalid: { type: Boolean, optional: true },
-        class: { type: String, optional: true },
-        onSelectionChanged: { type: Function, optional: true },
-        onSelectionConfirmed: { type: Function, optional: true },
-    };
-
-    class LineBarPieConfigPanel extends owl.Component {
-        constructor() {
-            super(...arguments);
-            this.state = owl.useState({
-                datasetDispatchResult: undefined,
-                labelsDispatchResult: undefined,
-            });
-            this.dataSeriesRanges = [];
-        }
-        setup() {
-            this.dataSeriesRanges = this.props.definition.dataSets;
-            this.labelRange = this.props.definition.labelRange;
-        }
-        get errorMessages() {
-            var _a, _b;
-            const cancelledReasons = [
-                ...(((_a = this.state.datasetDispatchResult) === null || _a === void 0 ? void 0 : _a.reasons) || []),
-                ...(((_b = this.state.labelsDispatchResult) === null || _b === void 0 ? void 0 : _b.reasons) || []),
-            ];
-            return cancelledReasons.map((error) => ChartTerms.Errors[error] || ChartTerms.Errors.Unexpected);
-        }
-        get isDatasetInvalid() {
-            var _a;
-            return !!((_a = this.state.datasetDispatchResult) === null || _a === void 0 ? void 0 : _a.isCancelledBecause(29 /* CommandResult.InvalidDataSet */));
-        }
-        get isLabelInvalid() {
-            var _a;
-            return !!((_a = this.state.labelsDispatchResult) === null || _a === void 0 ? void 0 : _a.isCancelledBecause(30 /* CommandResult.InvalidLabelRange */));
-        }
-        onUpdateDataSetsHaveTitle(ev) {
-            this.props.updateChart({
-                dataSetsHaveTitle: ev.target.checked,
-            });
-        }
-        /**
-         * Change the local dataSeriesRanges. The model should be updated when the
-         * button "confirm" is clicked
-         */
-        onDataSeriesRangesChanged(ranges) {
-            this.dataSeriesRanges = ranges;
-        }
-        onDataSeriesConfirmed() {
-            this.state.datasetDispatchResult = this.props.updateChart({
-                dataSets: this.dataSeriesRanges,
-            });
-        }
-        /**
-         * Change the local labelRange. The model should be updated when the
-         * button "confirm" is clicked
-         */
-        onLabelRangeChanged(ranges) {
-            this.labelRange = ranges[0];
-        }
-        onLabelRangeConfirmed() {
-            this.state.labelsDispatchResult = this.props.updateChart({
-                labelRange: this.labelRange,
-            });
-        }
-    }
-    LineBarPieConfigPanel.template = "o-spreadsheet-LineBarPieConfigPanel";
-    LineBarPieConfigPanel.components = { SelectionInput };
-    LineBarPieConfigPanel.props = {
-        figureId: String,
-        definition: Object,
-        updateChart: Function,
-    };
-
-    class BarConfigPanel extends LineBarPieConfigPanel {
-        onUpdateStacked(ev) {
-            this.props.updateChart({
-                stacked: ev.target.checked,
-            });
-        }
-    }
-    BarConfigPanel.template = "o-spreadsheet-BarConfigPanel";
-
-    /**
-     * AbstractChart is the class from which every Chart should inherit.
-     * The role of this class is to maintain the state of each chart.
-     */
-    class AbstractChart {
-        constructor(definition, sheetId, getters) {
-            this.title = definition.title;
-            this.sheetId = sheetId;
-            this.getters = getters;
-        }
-        /**
-         * Validate the chart definition given as arguments. This function will be
-         * called from allowDispatch function
-         */
-        static validateChartDefinition(validator, definition) {
-            throw new Error("This method should be implemented by sub class");
-        }
-        /**
-         * Get a new chart definition transformed with the executed command. This
-         * functions will be called during operational transform process
-         */
-        static transformDefinition(definition, executed) {
-            throw new Error("This method should be implemented by sub class");
-        }
-        /**
-         * Get an empty definition based on the given context
-         */
-        static getDefinitionFromContextCreation(context) {
-            throw new Error("This method should be implemented by sub class");
-        }
-    }
-
-    /**
-     * Convert a JS color hexadecimal to an excel compatible color.
-     *
-     * In Excel the color don't start with a '#' and the format is AARRGGBB instead of RRGGBBAA
-     */
-    function toXlsxHexColor(color) {
-        color = toHex(color).replace("#", "");
-        // alpha channel goes first
-        if (color.length === 8) {
-            return color.slice(6) + color.slice(0, 6);
-        }
-        return color;
-    }
-
-    function transformZone(zone, executed) {
-        if (executed.type === "REMOVE_COLUMNS_ROWS") {
-            return reduceZoneOnDeletion(zone, executed.dimension === "COL" ? "left" : "top", executed.elements);
-        }
-        if (executed.type === "ADD_COLUMNS_ROWS") {
-            return expandZoneOnInsertion(zone, executed.dimension === "COL" ? "left" : "top", executed.base, executed.position, executed.quantity);
-        }
-        return { ...zone };
-    }
-
-    /**
-     * This file contains helpers that are common to different charts (mainly
-     * line, bar and pie charts)
-     */
-    /**
-     * Adapt ranges of a chart which support DataSet (dataSets and LabelRange).
-     */
-    function updateChartRangesWithDataSets(getters, applyChange, chartDataSets, chartLabelRange) {
-        let isStale = false;
-        const dataSetsWithUndefined = [];
-        for (let index in chartDataSets) {
-            let ds = chartDataSets[index];
-            if (ds.labelCell) {
-                const labelCell = adaptChartRange(ds.labelCell, applyChange);
-                if (ds.labelCell !== labelCell) {
-                    isStale = true;
-                    ds = {
-                        ...ds,
-                        labelCell: labelCell,
-                    };
-                }
-            }
-            const dataRange = adaptChartRange(ds.dataRange, applyChange);
-            if (dataRange === undefined ||
-                getters.getRangeString(dataRange, dataRange.sheetId) === INCORRECT_RANGE_STRING) {
-                isStale = true;
-                ds = undefined;
-            }
-            else if (dataRange !== ds.dataRange) {
-                isStale = true;
-                ds = {
-                    ...ds,
-                    dataRange,
-                };
-            }
-            dataSetsWithUndefined[index] = ds;
-        }
-        let labelRange = chartLabelRange;
-        const range = adaptChartRange(labelRange, applyChange);
-        if (range !== labelRange) {
-            isStale = true;
-            labelRange = range;
-        }
-        const dataSets = dataSetsWithUndefined.filter(isDefined$1);
-        return {
-            isStale,
-            dataSets,
-            labelRange,
-        };
-    }
-    /**
-     * Copy the dataSets given. All the ranges which are on sheetIdFrom will target
-     * sheetIdTo.
-     */
-    function copyDataSetsWithNewSheetId(sheetIdFrom, sheetIdTo, dataSets) {
-        return dataSets.map((ds) => {
-            return {
-                dataRange: copyRangeWithNewSheetId(sheetIdFrom, sheetIdTo, ds.dataRange),
-                labelCell: ds.labelCell
-                    ? copyRangeWithNewSheetId(sheetIdFrom, sheetIdTo, ds.labelCell)
-                    : undefined,
-            };
-        });
-    }
-    /**
-     * Copy a range. If the range is on the sheetIdFrom, the range will target
-     * sheetIdTo.
-     */
-    function copyLabelRangeWithNewSheetId(sheetIdFrom, sheetIdTo, range) {
-        return range ? copyRangeWithNewSheetId(sheetIdFrom, sheetIdTo, range) : undefined;
-    }
-    /**
-     * Adapt a single range of a chart
-     */
-    function adaptChartRange(range, applyChange) {
-        if (!range) {
-            return undefined;
-        }
-        const change = applyChange(range);
-        switch (change.changeType) {
-            case "NONE":
-                return range;
-            case "REMOVE":
-                return undefined;
-            default:
-                return change.range;
-        }
-    }
-    /**
-     * Create the dataSet objects from xcs
-     */
-    function createDataSets(getters, dataSetsString, sheetId, dataSetsHaveTitle) {
-        const dataSets = [];
-        for (const sheetXC of dataSetsString) {
-            const dataRange = getters.getRangeFromSheetXC(sheetId, sheetXC);
-            const { unboundedZone: zone, sheetId: dataSetSheetId, invalidSheetName } = dataRange;
-            if (invalidSheetName) {
-                continue;
-            }
-            // It's a rectangle. We treat all columns (arbitrary) as different data series.
-            if (zone.left !== zone.right && zone.top !== zone.bottom) {
-                if (zone.right === undefined) {
-                    // Should never happens because of the allowDispatch of charts, but just making sure
-                    continue;
-                }
-                for (let column = zone.left; column <= zone.right; column++) {
-                    const columnZone = {
-                        ...zone,
-                        left: column,
-                        right: column,
-                    };
-                    dataSets.push(createDataSet(getters, dataSetSheetId, columnZone, dataSetsHaveTitle
-                        ? {
-                            top: columnZone.top,
-                            bottom: columnZone.top,
-                            left: columnZone.left,
-                            right: columnZone.left,
-                        }
-                        : undefined));
-                }
-            }
-            else if (zone.left === zone.right && zone.top === zone.bottom) {
-                // A single cell. If it's only the title, the dataset is not added.
-                if (!dataSetsHaveTitle) {
-                    dataSets.push(createDataSet(getters, dataSetSheetId, zone, undefined));
-                }
-            }
-            else {
-                /* 1 row or 1 column */
-                dataSets.push(createDataSet(getters, dataSetSheetId, zone, dataSetsHaveTitle
-                    ? {
-                        top: zone.top,
-                        bottom: zone.top,
-                        left: zone.left,
-                        right: zone.left,
-                    }
-                    : undefined));
-            }
-        }
-        return dataSets;
-    }
-    function createDataSet(getters, sheetId, fullZone, titleZone) {
-        if (fullZone.left !== fullZone.right && fullZone.top !== fullZone.bottom) {
-            throw new Error(`Zone should be a single column or row: ${zoneToXc(fullZone)}`);
-        }
-        if (titleZone) {
-            const dataXC = zoneToXc(fullZone);
-            const labelCellXC = zoneToXc(titleZone);
-            return {
-                labelCell: getters.getRangeFromSheetXC(sheetId, labelCellXC),
-                dataRange: getters.getRangeFromSheetXC(sheetId, dataXC),
-            };
-        }
-        else {
-            return {
-                labelCell: undefined,
-                dataRange: getters.getRangeFromSheetXC(sheetId, zoneToXc(fullZone)),
-            };
-        }
-    }
-    /**
-     * Transform a dataSet to a ExcelDataSet
-     */
-    function toExcelDataset(getters, ds) {
-        var _a;
-        const labelZone = (_a = ds.labelCell) === null || _a === void 0 ? void 0 : _a.zone;
-        let dataZone = ds.dataRange.zone;
-        if (labelZone) {
-            const { height, width } = zoneToDimension(dataZone);
-            if (height === 1) {
-                dataZone = { ...dataZone, left: dataZone.left + 1 };
-            }
-            else if (width === 1) {
-                dataZone = { ...dataZone, top: dataZone.top + 1 };
-            }
-        }
-        const dataRange = ds.dataRange.clone({ zone: dataZone });
-        return {
-            label: ds.labelCell ? getters.getRangeString(ds.labelCell, "forceSheetReference") : undefined,
-            range: getters.getRangeString(dataRange, "forceSheetReference"),
-        };
-    }
-    /**
-     * Transform a chart definition which supports dataSets (dataSets and LabelRange)
-     * with an executed command
-     */
-    function transformChartDefinitionWithDataSetsWithZone(definition, executed) {
-        let labelRange;
-        if (definition.labelRange) {
-            const labelZone = transformZone(toUnboundedZone(definition.labelRange), executed);
-            labelRange = labelZone ? zoneToXc(labelZone) : undefined;
-        }
-        const dataSets = definition.dataSets
-            .map(toUnboundedZone)
-            .map((zone) => transformZone(zone, executed))
-            .filter(isDefined$1)
-            .map(zoneToXc);
-        return {
-            ...definition,
-            labelRange,
-            dataSets,
-        };
-    }
-    const GraphColors = [
-        // the same colors as those used in odoo reporting
-        "rgb(31,119,180)",
-        "rgb(255,127,14)",
-        "rgb(174,199,232)",
-        "rgb(255,187,120)",
-        "rgb(44,160,44)",
-        "rgb(152,223,138)",
-        "rgb(214,39,40)",
-        "rgb(255,152,150)",
-        "rgb(148,103,189)",
-        "rgb(197,176,213)",
-        "rgb(140,86,75)",
-        "rgb(196,156,148)",
-        "rgb(227,119,194)",
-        "rgb(247,182,210)",
-        "rgb(127,127,127)",
-        "rgb(199,199,199)",
-        "rgb(188,189,34)",
-        "rgb(219,219,141)",
-        "rgb(23,190,207)",
-        "rgb(158,218,229)",
-    ];
-    class ChartColors {
-        constructor() {
-            this.graphColorIndex = 0;
-        }
-        next() {
-            return GraphColors[this.graphColorIndex++ % GraphColors.length];
-        }
-    }
-    /**
-     * Choose a font color based on a background color.
-     * The font is white with a dark background.
-     */
-    function chartFontColor(backgroundColor) {
-        if (!backgroundColor) {
-            return "#000000";
-        }
-        return relativeLuminance(backgroundColor) < 0.3 ? "#FFFFFF" : "#000000";
-    }
-    function checkDataset(definition) {
-        if (definition.dataSets) {
-            const invalidRanges = definition.dataSets.find((range) => !rangeReference.test(range)) !== undefined;
-            if (invalidRanges) {
-                return 29 /* CommandResult.InvalidDataSet */;
-            }
-            const zones = definition.dataSets.map(toUnboundedZone);
-            if (zones.some((zone) => zone.top !== zone.bottom && isFullRow(zone))) {
-                return 29 /* CommandResult.InvalidDataSet */;
-            }
-        }
-        return 0 /* CommandResult.Success */;
-    }
-    function checkLabelRange(definition) {
-        if (definition.labelRange) {
-            const invalidLabels = !rangeReference.test(definition.labelRange || "");
-            if (invalidLabels) {
-                return 30 /* CommandResult.InvalidLabelRange */;
-            }
-        }
-        return 0 /* CommandResult.Success */;
-    }
-    // ---------------------------------------------------------------------------
-    // Scorecard
-    // ---------------------------------------------------------------------------
-    function getBaselineText(baseline, keyValue, baselineMode) {
-        const baselineEvaluated = baseline === null || baseline === void 0 ? void 0 : baseline.evaluated;
-        if (!baseline || baselineEvaluated === undefined) {
-            return "";
-        }
-        else if (baselineMode === "text" ||
-            (keyValue === null || keyValue === void 0 ? void 0 : keyValue.type) !== CellValueType.number ||
-            baselineEvaluated.type !== CellValueType.number) {
-            return baseline.formattedValue;
-        }
-        else {
-            let diff = keyValue.value - baselineEvaluated.value;
-            if (baselineMode === "percentage" && diff !== 0) {
-                diff = (diff / baselineEvaluated.value) * 100;
-            }
-            if (baselineMode !== "percentage" && baselineEvaluated.format) {
-                return formatValue(diff, baselineEvaluated.format);
-            }
-            const baselineStr = Math.abs(parseFloat(diff.toFixed(2))).toLocaleString();
-            return baselineMode === "percentage" ? baselineStr + "%" : baselineStr;
-        }
-    }
-    function getBaselineColor(baseline, baselineMode, keyValue, colorUp, colorDown) {
-        if (baselineMode === "text" ||
-            (baseline === null || baseline === void 0 ? void 0 : baseline.type) !== CellValueType.number ||
-            (keyValue === null || keyValue === void 0 ? void 0 : keyValue.type) !== CellValueType.number) {
-            return undefined;
-        }
-        const diff = keyValue.value - baseline.value;
-        if (diff > 0) {
-            return colorUp;
-        }
-        else if (diff < 0) {
-            return colorDown;
-        }
-        return undefined;
-    }
-    function getBaselineArrowDirection(baseline, keyValue, baselineMode) {
-        if (baselineMode === "text" ||
-            (baseline === null || baseline === void 0 ? void 0 : baseline.type) !== CellValueType.number ||
-            (keyValue === null || keyValue === void 0 ? void 0 : keyValue.type) !== CellValueType.number) {
-            return "neutral";
-        }
-        const diff = keyValue.value - baseline.value;
-        if (diff > 0) {
-            return "up";
-        }
-        else if (diff < 0) {
-            return "down";
-        }
-        return "neutral";
-    }
-
-    /**
-     * This file contains helpers that are common to different runtime charts (mainly
-     * line, bar and pie charts)
-     */
-    /**
-     * Get the data from a dataSet
-     */
-    function getData(getters, ds) {
-        if (ds.dataRange) {
-            const labelCellZone = ds.labelCell ? [zoneToXc(ds.labelCell.zone)] : [];
-            const dataXC = recomputeZones([zoneToXc(ds.dataRange.zone)], labelCellZone)[0];
-            if (dataXC === undefined) {
-                return [];
-            }
-            const dataRange = getters.getRangeFromSheetXC(ds.dataRange.sheetId, dataXC);
-            return getters.getRangeValues(dataRange);
-        }
-        return [];
-    }
-    function filterEmptyDataPoints(labels, datasets) {
-        const numberOfDataPoints = Math.max(labels.length, ...datasets.map((dataset) => { var _a; return ((_a = dataset.data) === null || _a === void 0 ? void 0 : _a.length) || 0; }));
-        const dataPointsIndexes = range(0, numberOfDataPoints).filter((dataPointIndex) => {
-            const label = labels[dataPointIndex];
-            const values = datasets.map((dataset) => { var _a; return (_a = dataset.data) === null || _a === void 0 ? void 0 : _a[dataPointIndex]; });
-            return label || values.some((value) => value === 0 || Boolean(value));
-        });
-        return {
-            labels: dataPointsIndexes.map((i) => labels[i] || ""),
-            dataSetsValues: datasets.map((dataset) => ({
-                ...dataset,
-                data: dataPointsIndexes.map((i) => dataset.data[i]),
-            })),
-        };
-    }
-    function truncateLabel(label) {
-        if (!label) {
-            return "";
-        }
-        if (label.length > MAX_CHAR_LABEL) {
-            return label.substring(0, MAX_CHAR_LABEL) + "…";
-        }
-        return label;
-    }
-    /**
-     * Get a default chart js configuration
-     */
-    function getDefaultChartJsRuntime(chart, labels, fontColor) {
-        return {
-            type: chart.type,
-            options: {
-                // https://www.chartjs.org/docs/latest/general/responsive.html
-                responsive: true,
-                maintainAspectRatio: false,
-                layout: {
-                    padding: { left: 20, right: 20, top: chart.title ? 10 : 25, bottom: 10 },
-                },
-                elements: {
-                    line: {
-                        fill: false, // do not fill the area under line charts
-                    },
-                    point: {
-                        hitRadius: 15, // increased hit radius to display point tooltip when hovering nearby
-                    },
-                },
-                animation: {
-                    duration: 0, // general animation time
-                },
-                hover: {
-                    animationDuration: 10, // duration of animations when hovering an item
-                },
-                responsiveAnimationDuration: 0,
-                title: {
-                    display: !!chart.title,
-                    fontSize: 22,
-                    fontStyle: "normal",
-                    text: _t(chart.title),
-                    fontColor,
-                },
-                legend: {
-                    // Disable default legend onClick (show/hide dataset), to allow us to set a global onClick on the chart container.
-                    // If we want to re-enable this in the future, we need to override the default onClick to stop the event propagation
-                    onClick: undefined,
-                },
-            },
-            data: {
-                labels: labels.map(truncateLabel),
-                datasets: [],
-            },
-        };
-    }
-    function getLabelFormat(getters, range) {
-        var _a;
-        if (!range)
-            return undefined;
-        return (_a = getters.getCell(range.sheetId, range.zone.left, range.zone.top)) === null || _a === void 0 ? void 0 : _a.evaluated.format;
-    }
-    function getChartLabelValues(getters, dataSets, labelRange) {
-        let labels = { values: [], formattedValues: [] };
-        if (labelRange) {
-            if (!labelRange.invalidXc && !labelRange.invalidSheetName) {
-                labels = {
-                    formattedValues: getters.getRangeFormattedValues(labelRange),
-                    values: getters
-                        .getRangeValues(labelRange)
-                        .map((val) => (val !== undefined && val !== null ? String(val) : "")),
-                };
-            }
-        }
-        else if (dataSets.length === 1) {
-            for (let i = 0; i < getData(getters, dataSets[0]).length; i++) {
-                labels.formattedValues.push("");
-                labels.values.push("");
-            }
-        }
-        else {
-            if (dataSets[0]) {
-                const ranges = getData(getters, dataSets[0]);
-                labels = {
-                    formattedValues: range(0, ranges.length).map((r) => r.toString()),
-                    values: labels.formattedValues,
-                };
-            }
-        }
-        return labels;
-    }
-    function getChartDatasetValues(getters, dataSets) {
-        const datasetValues = [];
-        for (const [dsIndex, ds] of Object.entries(dataSets)) {
-            let label;
-            if (ds.labelCell) {
-                const labelRange = ds.labelCell;
-                const cell = labelRange
-                    ? getters.getCell(labelRange.sheetId, labelRange.zone.left, labelRange.zone.top)
-                    : undefined;
-                label =
-                    cell && labelRange
-                        ? truncateLabel(cell.formattedValue)
-                        : (label = `${ChartTerms.Series} ${parseInt(dsIndex) + 1}`);
-            }
-            else {
-                label = label = `${ChartTerms.Series} ${parseInt(dsIndex) + 1}`;
-            }
-            let data = ds.dataRange ? getData(getters, ds) : [];
-            datasetValues.push({ data, label });
-        }
-        return datasetValues;
-    }
-    /** See https://www.chartjs.org/docs/latest/charts/area.html#filling-modes */
-    function getFillingMode(index) {
-        if (index === 0) {
-            return "origin";
-        }
-        else {
-            return index - 1;
-        }
-    }
-
-    chartRegistry.add("bar", {
-        match: (type) => type === "bar",
-        createChart: (definition, sheetId, getters) => new BarChart(definition, sheetId, getters),
-        getChartRuntime: createBarChartRuntime,
-        validateChartDefinition: (validator, definition) => BarChart.validateChartDefinition(validator, definition),
-        transformDefinition: (definition, executed) => BarChart.transformDefinition(definition, executed),
-        getChartDefinitionFromContextCreation: (context) => BarChart.getDefinitionFromContextCreation(context),
-        name: "Bar",
-    });
-    class BarChart extends AbstractChart {
-        constructor(definition, sheetId, getters) {
-            super(definition, sheetId, getters);
-            this.type = "bar";
-            this.dataSets = createDataSets(getters, definition.dataSets, sheetId, definition.dataSetsHaveTitle);
-            this.labelRange = createRange(getters, sheetId, definition.labelRange);
-            this.background = definition.background;
-            this.verticalAxisPosition = definition.verticalAxisPosition;
-            this.legendPosition = definition.legendPosition;
-            this.stacked = definition.stacked;
-        }
-        static transformDefinition(definition, executed) {
-            return transformChartDefinitionWithDataSetsWithZone(definition, executed);
-        }
-        static validateChartDefinition(validator, definition) {
-            return validator.checkValidations(definition, checkDataset, checkLabelRange);
-        }
-        static getDefinitionFromContextCreation(context) {
-            return {
-                background: context.background,
-                dataSets: context.range ? context.range : [],
-                dataSetsHaveTitle: false,
-                stacked: false,
-                legendPosition: "top",
-                title: context.title || "",
-                type: "bar",
-                verticalAxisPosition: "left",
-                labelRange: context.auxiliaryRange || undefined,
-            };
-        }
-        getContextCreation() {
-            return {
-                background: this.background,
-                title: this.title,
-                range: this.dataSets.map((ds) => this.getters.getRangeString(ds.dataRange, this.sheetId)),
-                auxiliaryRange: this.labelRange
-                    ? this.getters.getRangeString(this.labelRange, this.sheetId)
-                    : undefined,
-            };
-        }
-        copyForSheetId(sheetId) {
-            const dataSets = copyDataSetsWithNewSheetId(this.sheetId, sheetId, this.dataSets);
-            const labelRange = copyLabelRangeWithNewSheetId(this.sheetId, sheetId, this.labelRange);
-            const definition = this.getDefinitionWithSpecificDataSets(dataSets, labelRange, sheetId);
-            return new BarChart(definition, sheetId, this.getters);
-        }
-        copyInSheetId(sheetId) {
-            const definition = this.getDefinitionWithSpecificDataSets(this.dataSets, this.labelRange, sheetId);
-            return new BarChart(definition, sheetId, this.getters);
-        }
-        getDefinition() {
-            return this.getDefinitionWithSpecificDataSets(this.dataSets, this.labelRange);
-        }
-        getDefinitionWithSpecificDataSets(dataSets, labelRange, targetSheetId) {
-            return {
-                type: "bar",
-                dataSetsHaveTitle: dataSets.length ? Boolean(dataSets[0].labelCell) : false,
-                background: this.background,
-                dataSets: dataSets.map((ds) => this.getters.getRangeString(ds.dataRange, targetSheetId || this.sheetId)),
-                legendPosition: this.legendPosition,
-                verticalAxisPosition: this.verticalAxisPosition,
-                labelRange: labelRange
-                    ? this.getters.getRangeString(labelRange, targetSheetId || this.sheetId)
-                    : undefined,
-                title: this.title,
-                stacked: this.stacked,
-            };
-        }
-        getDefinitionForExcel() {
-            const dataSets = this.dataSets
-                .map((ds) => toExcelDataset(this.getters, ds))
-                .filter((ds) => ds.range !== ""); // && range !== INCORRECT_RANGE_STRING ? show incorrect #ref ?
-            return {
-                ...this.getDefinition(),
-                backgroundColor: toXlsxHexColor(this.background || BACKGROUND_CHART_COLOR),
-                fontColor: toXlsxHexColor(chartFontColor(this.background)),
-                dataSets,
-            };
-        }
-        updateRanges(applyChange) {
-            const { dataSets, labelRange, isStale } = updateChartRangesWithDataSets(this.getters, applyChange, this.dataSets, this.labelRange);
-            if (!isStale) {
-                return this;
-            }
-            const definition = this.getDefinitionWithSpecificDataSets(dataSets, labelRange);
-            return new BarChart(definition, this.sheetId, this.getters);
-        }
-    }
-    function getBarConfiguration(chart, labels) {
-        var _a;
-        const fontColor = chartFontColor(chart.background);
-        const config = getDefaultChartJsRuntime(chart, labels, fontColor);
-        const legend = {
-            labels: { fontColor },
-        };
-        if ((!chart.labelRange && chart.dataSets.length === 1) || chart.legendPosition === "none") {
-            legend.display = false;
-        }
-        else {
-            legend.position = chart.legendPosition;
-        }
-        config.options.legend = { ...(_a = config.options) === null || _a === void 0 ? void 0 : _a.legend, ...legend };
-        config.options.layout = {
-            padding: { left: 20, right: 20, top: chart.title ? 10 : 25, bottom: 10 },
-        };
-        config.options.scales = {
-            xAxes: [
-                {
-                    ticks: {
-                        // x axis configuration
-                        maxRotation: 60,
-                        minRotation: 15,
-                        padding: 5,
-                        labelOffset: 2,
-                        fontColor,
-                    },
-                },
-            ],
-            yAxes: [
-                {
-                    position: chart.verticalAxisPosition,
-                    ticks: {
-                        fontColor,
-                        // y axis configuration
-                        beginAtZero: true, // the origin of the y axis is always zero
-                    },
-                },
-            ],
-        };
-        if (chart.stacked) {
-            config.options.scales.xAxes[0].stacked = true;
-            config.options.scales.yAxes[0].stacked = true;
-        }
-        return config;
-    }
-    function createBarChartRuntime(chart, getters) {
-        const labelValues = getChartLabelValues(getters, chart.dataSets, chart.labelRange);
-        let labels = labelValues.formattedValues;
-        let dataSetsValues = getChartDatasetValues(getters, chart.dataSets);
-        ({ labels, dataSetsValues } = filterEmptyDataPoints(labels, dataSetsValues));
-        const config = getBarConfiguration(chart, labels);
-        const colors = new ChartColors();
-        for (let { label, data } of dataSetsValues) {
-            const color = colors.next();
-            const dataset = {
-                label,
-                data,
-                borderColor: color,
-                backgroundColor: color,
-            };
-            config.data.datasets.push(dataset);
-        }
-        return { chartJsConfig: config, background: chart.background || BACKGROUND_CHART_COLOR };
-    }
-
-    /**
-     * Create a function used to create a Chart based on the definition
-     */
-    function chartFactory(getters) {
-        const builders = chartRegistry.getAll();
-        function createChart(id, definition, sheetId) {
-            const builder = builders.find((builder) => builder.match(definition.type));
-            if (!builder) {
-                throw new Error(`No builder for this chart: ${definition.type}`);
-            }
-            return builder.createChart(definition, sheetId, getters);
-        }
-        return createChart;
-    }
-    /**
-     * Create a function used to create a Chart Runtime based on the chart class
-     * instance
-     */
-    function chartRuntimeFactory(getters) {
-        const builders = chartRegistry.getAll();
-        function createRuntimeChart(chart) {
-            const builder = builders.find((builder) => builder.match(chart.type));
-            if (!builder) {
-                throw new Error("No runtime builder for this chart.");
-            }
-            return builder.getChartRuntime(chart, getters);
-        }
-        return createRuntimeChart;
-    }
-    /**
-     * Validate the chart definition given in arguments
-     */
-    function validateChartDefinition(validator, definition) {
-        const validators = chartRegistry.getAll().find((validator) => validator.match(definition.type));
-        if (!validators) {
-            throw new Error("Unknown chart type.");
-        }
-        return validators.validateChartDefinition(validator, definition);
-    }
-    /**
-     * Get a new chart definition transformed with the executed command. This
-     * functions will be called during operational transform process
-     */
-    function transformDefinition(definition, executed) {
-        const transformation = chartRegistry.getAll().find((factory) => factory.match(definition.type));
-        if (!transformation) {
-            throw new Error("Unknown chart type.");
-        }
-        return transformation.transformDefinition(definition, executed);
-    }
-    /**
-     * Get an empty definition based on the given context and the given type
-     */
-    function getChartDefinitionFromContextCreation(context, type) {
-        const chartClass = chartRegistry.get(type);
-        return chartClass.getChartDefinitionFromContextCreation(context);
-    }
-    function getChartTypes() {
-        const result = {};
-        for (const key of chartRegistry.getKeys()) {
-            result[key] = chartRegistry.get(key).name;
-        }
-        return result;
-    }
-
-    chartRegistry.add("gauge", {
-        match: (type) => type === "gauge",
-        createChart: (definition, sheetId, getters) => new GaugeChart(definition, sheetId, getters),
-        getChartRuntime: createGaugeChartRuntime,
-        validateChartDefinition: (validator, definition) => GaugeChart.validateChartDefinition(validator, definition),
-        transformDefinition: (definition, executed) => GaugeChart.transformDefinition(definition, executed),
-        getChartDefinitionFromContextCreation: (context) => GaugeChart.getDefinitionFromContextCreation(context),
-        name: "Gauge",
-    });
-    function isDataRangeValid(definition) {
-        return definition.dataRange && !rangeReference.test(definition.dataRange)
-            ? 33 /* CommandResult.InvalidGaugeDataRange */
-            : 0 /* CommandResult.Success */;
-    }
-    function checkRangeLimits(check, batchValidations) {
-        return batchValidations((definition) => {
-            if (definition.sectionRule) {
-                return check(definition.sectionRule.rangeMin, "rangeMin");
-            }
-            return 0 /* CommandResult.Success */;
-        }, (definition) => {
-            if (definition.sectionRule) {
-                return check(definition.sectionRule.rangeMax, "rangeMax");
-            }
-            return 0 /* CommandResult.Success */;
-        });
-    }
-    function checkInflectionPointsValue(check, batchValidations) {
-        return batchValidations((definition) => {
-            if (definition.sectionRule) {
-                return check(definition.sectionRule.lowerInflectionPoint.value, "lowerInflectionPointValue");
-            }
-            return 0 /* CommandResult.Success */;
-        }, (definition) => {
-            if (definition.sectionRule) {
-                return check(definition.sectionRule.upperInflectionPoint.value, "upperInflectionPointValue");
-            }
-            return 0 /* CommandResult.Success */;
-        });
-    }
-    function checkRangeMinBiggerThanRangeMax(definition) {
-        if (definition.sectionRule) {
-            if (Number(definition.sectionRule.rangeMin) >= Number(definition.sectionRule.rangeMax)) {
-                return 38 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */;
-            }
-        }
-        return 0 /* CommandResult.Success */;
-    }
-    function checkEmpty(value, valueName) {
-        if (value === "") {
-            switch (valueName) {
-                case "rangeMin":
-                    return 34 /* CommandResult.EmptyGaugeRangeMin */;
-                case "rangeMax":
-                    return 36 /* CommandResult.EmptyGaugeRangeMax */;
-            }
-        }
-        return 0 /* CommandResult.Success */;
-    }
-    function checkNaN(value, valueName) {
-        if (isNaN(value)) {
-            switch (valueName) {
-                case "rangeMin":
-                    return 35 /* CommandResult.GaugeRangeMinNaN */;
-                case "rangeMax":
-                    return 37 /* CommandResult.GaugeRangeMaxNaN */;
-                case "lowerInflectionPointValue":
-                    return 39 /* CommandResult.GaugeLowerInflectionPointNaN */;
-                case "upperInflectionPointValue":
-                    return 40 /* CommandResult.GaugeUpperInflectionPointNaN */;
-            }
-        }
-        return 0 /* CommandResult.Success */;
-    }
-    class GaugeChart extends AbstractChart {
-        constructor(definition, sheetId, getters) {
-            super(definition, sheetId, getters);
-            this.type = "gauge";
-            this.dataRange = createRange(this.getters, this.sheetId, definition.dataRange);
-            this.sectionRule = definition.sectionRule;
-            this.background = definition.background;
-        }
-        static validateChartDefinition(validator, definition) {
-            return validator.checkValidations(definition, isDataRangeValid, validator.chainValidations(checkRangeLimits(checkEmpty, validator.batchValidations), checkRangeLimits(checkNaN, validator.batchValidations), checkRangeMinBiggerThanRangeMax), validator.chainValidations(checkInflectionPointsValue(checkNaN, validator.batchValidations)));
-        }
-        static transformDefinition(definition, executed) {
-            let dataRangeZone;
-            if (definition.dataRange) {
-                dataRangeZone = transformZone(toUnboundedZone(definition.dataRange), executed);
-            }
-            return {
-                ...definition,
-                dataRange: dataRangeZone ? zoneToXc(dataRangeZone) : undefined,
-            };
-        }
-        static getDefinitionFromContextCreation(context) {
-            return {
-                background: context.background,
-                title: context.title || "",
-                type: "gauge",
-                dataRange: context.range ? context.range[0] : undefined,
-                sectionRule: {
-                    colors: {
-                        lowerColor: DEFAULT_GAUGE_LOWER_COLOR,
-                        middleColor: DEFAULT_GAUGE_MIDDLE_COLOR,
-                        upperColor: DEFAULT_GAUGE_UPPER_COLOR,
-                    },
-                    rangeMin: "0",
-                    rangeMax: "100",
-                    lowerInflectionPoint: {
-                        type: "percentage",
-                        value: "15",
-                    },
-                    upperInflectionPoint: {
-                        type: "percentage",
-                        value: "40",
-                    },
-                },
-            };
-        }
-        copyForSheetId(sheetId) {
-            const dataRange = copyLabelRangeWithNewSheetId(this.sheetId, sheetId, this.dataRange);
-            const definition = this.getDefinitionWithSpecificRanges(dataRange, sheetId);
-            return new GaugeChart(definition, sheetId, this.getters);
-        }
-        copyInSheetId(sheetId) {
-            const definition = this.getDefinitionWithSpecificRanges(this.dataRange, sheetId);
-            return new GaugeChart(definition, sheetId, this.getters);
-        }
-        getDefinition() {
-            return this.getDefinitionWithSpecificRanges(this.dataRange);
-        }
-        getDefinitionWithSpecificRanges(dataRange, targetSheetId) {
-            return {
-                background: this.background,
-                sectionRule: this.sectionRule,
-                title: this.title,
-                type: "gauge",
-                dataRange: dataRange
-                    ? this.getters.getRangeString(dataRange, targetSheetId || this.sheetId)
-                    : undefined,
-            };
-        }
-        getDefinitionForExcel() {
-            // This kind of graph is not exportable in Excel
-            return undefined;
-        }
-        getContextCreation() {
-            return {
-                background: this.background,
-                title: this.title,
-                range: this.dataRange
-                    ? [this.getters.getRangeString(this.dataRange, this.sheetId)]
-                    : undefined,
-            };
-        }
-        updateRanges(applyChange) {
-            const range = adaptChartRange(this.dataRange, applyChange);
-            if (this.dataRange === range) {
-                return this;
-            }
-            const definition = this.getDefinitionWithSpecificRanges(range);
-            return new GaugeChart(definition, this.sheetId, this.getters);
-        }
-    }
-    function getGaugeConfiguration(chart) {
-        const fontColor = chartFontColor(chart.background);
-        const config = getDefaultChartJsRuntime(chart, [], fontColor);
-        config.options.hover = undefined;
-        config.options.events = [];
-        config.options.layout = {
-            padding: { left: 30, right: 30, top: chart.title ? 10 : 25, bottom: 25 },
-        };
-        config.options.needle = {
-            radiusPercentage: 2,
-            widthPercentage: 3.2,
-            lengthPercentage: 80,
-            color: "#000000",
-        };
-        config.options.valueLabel = {
-            display: false,
-            formatter: null,
-            color: "#FFFFFF",
-            backgroundColor: "#000000",
-            fontSize: 30,
-            borderRadius: 5,
-            padding: {
-                top: 5,
-                right: 5,
-                bottom: 5,
-                left: 5,
-            },
-            bottomMarginPercentage: 5,
-        };
-        return config;
-    }
-    function createGaugeChartRuntime(chart, getters) {
-        const config = getGaugeConfiguration(chart);
-        const colors = chart.sectionRule.colors;
-        const lowerPoint = chart.sectionRule.lowerInflectionPoint;
-        const upperPoint = chart.sectionRule.upperInflectionPoint;
-        const lowerPointValue = Number(lowerPoint.value);
-        const upperPointValue = Number(upperPoint.value);
-        const minNeedleValue = Number(chart.sectionRule.rangeMin);
-        const maxNeedleValue = Number(chart.sectionRule.rangeMax);
-        const needleCoverage = maxNeedleValue - minNeedleValue;
-        const needleInflectionPoint = [];
-        if (lowerPoint.value !== "") {
-            const lowerPointNeedleValue = lowerPoint.type === "number"
-                ? lowerPointValue
-                : minNeedleValue + (needleCoverage * lowerPointValue) / 100;
-            needleInflectionPoint.push({
-                value: clip(lowerPointNeedleValue, minNeedleValue, maxNeedleValue),
-                color: colors.lowerColor,
-            });
-        }
-        if (upperPoint.value !== "") {
-            const upperPointNeedleValue = upperPoint.type === "number"
-                ? upperPointValue
-                : minNeedleValue + (needleCoverage * upperPointValue) / 100;
-            needleInflectionPoint.push({
-                value: clip(upperPointNeedleValue, minNeedleValue, maxNeedleValue),
-                color: colors.middleColor,
-            });
-        }
-        const data = [];
-        const backgroundColor = [];
-        needleInflectionPoint
-            .sort((a, b) => a.value - b.value)
-            .map((point) => {
-            data.push(point.value);
-            backgroundColor.push(point.color);
-        });
-        // There's a bug in gauge lib when the last element in `data` is 0 (i.e. when the range maximum is 0).
-        // The value wrongly fallbacks to 1 because 0 is falsy
-        // See https://github.com/haiiaaa/chartjs-gauge/pull/33
-        // https://github.com/haiiaaa/chartjs-gauge/blob/2ea50541d754d710cb30c2502fa690ac5dc27afd/src/controllers/controller.gauge.js#L52
-        data.push(maxNeedleValue);
-        backgroundColor.push(colors.upperColor);
-        const dataRange = chart.dataRange;
-        const deltaBeyondRangeLimit = needleCoverage / 30;
-        let needleValue = minNeedleValue - deltaBeyondRangeLimit; // make needle value always at the minimum by default
-        let cellFormatter = null;
-        let displayValue = false;
-        if (dataRange !== undefined) {
-            const cell = getters.getCell(dataRange.sheetId, dataRange.zone.left, dataRange.zone.top);
-            if ((cell === null || cell === void 0 ? void 0 : cell.evaluated.type) === CellValueType.number) {
-                // in gauge graph "datasets.value" is used to calculate the angle of the
-                // needle in the graph. To prevent the needle from making 360° turns, we
-                // clip the value between a min and a max. This min and this max are slightly
-                // smaller and slightly larger than minRange and maxRange to mark the fact
-                // that the needle is out of the range limits
-                needleValue = clip(cell === null || cell === void 0 ? void 0 : cell.evaluated.value, minNeedleValue - deltaBeyondRangeLimit, maxNeedleValue + deltaBeyondRangeLimit);
-                cellFormatter = () => getters.getRangeFormattedValues(dataRange)[0];
-                displayValue = true;
-            }
-        }
-        config.options.valueLabel.display = displayValue;
-        config.options.valueLabel.formatter = cellFormatter;
-        config.data.datasets.push({
-            data,
-            minValue: Number(chart.sectionRule.rangeMin),
-            value: needleValue,
-            backgroundColor,
-        });
-        return {
-            chartJsConfig: config,
-            background: getters.getBackgroundOfSingleCellChart(chart.background, dataRange),
-        };
-    }
-
-    const UNIT_LENGTH = {
-        second: 1000,
-        minute: 1000 * 60,
-        hour: 1000 * 3600,
-        day: 1000 * 3600 * 24,
-        month: 1000 * 3600 * 24 * 30,
-        year: 1000 * 3600 * 24 * 365,
-    };
-    const Milliseconds = {
-        inSeconds: function (milliseconds) {
-            return Math.floor(milliseconds / UNIT_LENGTH.second);
-        },
-        inMinutes: function (milliseconds) {
-            return Math.floor(milliseconds / UNIT_LENGTH.minute);
-        },
-        inHours: function (milliseconds) {
-            return Math.floor(milliseconds / UNIT_LENGTH.hour);
-        },
-        inDays: function (milliseconds) {
-            return Math.floor(milliseconds / UNIT_LENGTH.day);
-        },
-        inMonths: function (milliseconds) {
-            return Math.floor(milliseconds / UNIT_LENGTH.month);
-        },
-        inYears: function (milliseconds) {
-            return Math.floor(milliseconds / UNIT_LENGTH.year);
-        },
-    };
-    /**
-     * Regex to test if a format string is a date format that can be translated into a moment time format
-     */
-    const timeFormatMomentCompatible = /^((d|dd|m|mm|yyyy|yy|hh|h|ss|a)(-|:|\s|\/))*(d|dd|m|mm|yyyy|yy|hh|h|ss|a)$/i;
-    /** Get the time options for the XAxis of ChartJS */
-    function getChartTimeOptions(labels, labelFormat) {
-        const momentFormat = convertDateFormatForMoment(labelFormat);
-        const timeUnit = getBestTimeUnitForScale(labels, momentFormat);
-        const displayFormats = {};
-        if (timeUnit) {
-            displayFormats[timeUnit] = momentFormat;
-        }
-        return {
-            parser: momentFormat,
-            displayFormats,
-            unit: timeUnit,
-        };
-    }
-    /**
-     * Convert the given date format into a format that moment.js understands.
-     *
-     * https://momentjs.com/docs/#/parsing/string-format/
-     */
-    function convertDateFormatForMoment(format) {
-        format = format.replace(/y/g, "Y");
-        format = format.replace(/d/g, "D");
-        // "m" before "h" == month, "m" after "h" == minute
-        const indexH = format.indexOf("h");
-        if (indexH >= 0) {
-            format = format.slice(0, indexH).replace(/m/g, "M") + format.slice(indexH);
-        }
-        else {
-            format = format.replace(/m/g, "M");
-        }
-        // If we have an "a", we should display hours as AM/PM (h), otherwise display 24 hours format (H)
-        if (!format.includes("a")) {
-            format = format.replace(/h/g, "H");
-        }
-        return format;
-    }
-    /** Get the minimum time unit that the format is able to display */
-    function getFormatMinDisplayUnit(format) {
-        if (format.includes("s")) {
-            return "second";
-        }
-        else if (format.includes("m")) {
-            return "minute";
-        }
-        else if (format.includes("h") || format.includes("H")) {
-            return "hour";
-        }
-        else if (format.includes("D")) {
-            return "day";
-        }
-        else if (format.includes("M")) {
-            return "month";
-        }
-        return "year";
-    }
-    /**
-     * Returns the best time unit that should be used for the X axis of a chart in order to display all
-     * the labels correctly.
-     *
-     * There is two conditions :
-     *  - the format of the labels should be able to display the unit. For example if the format is "DD/MM/YYYY"
-     *    it makes no sense to try to use minutes in the X axis
-     *  - we want the "best fit" unit. For example if the labels span a period of several days, we want to use days
-     *    as a unit, but if they span 200 days, we'd like to use months instead
-     *
-     */
-    function getBestTimeUnitForScale(labels, format) {
-        const labelDates = labels.map((label) => { var _a; return (_a = parseDateTime(label)) === null || _a === void 0 ? void 0 : _a.jsDate; });
-        if (labelDates.some((date) => date === undefined) || labels.length < 2) {
-            return undefined;
-        }
-        const labelsTimestamps = labelDates.map((date) => date.getTime());
-        const period = Math.max(...labelsTimestamps) - Math.min(...labelsTimestamps);
-        const minUnit = getFormatMinDisplayUnit(format);
-        if (UNIT_LENGTH.second >= UNIT_LENGTH[minUnit] && Milliseconds.inSeconds(period) < 180) {
-            return "second";
-        }
-        else if (UNIT_LENGTH.minute >= UNIT_LENGTH[minUnit] && Milliseconds.inMinutes(period) < 180) {
-            return "minute";
-        }
-        else if (UNIT_LENGTH.hour >= UNIT_LENGTH[minUnit] && Milliseconds.inHours(period) < 96) {
-            return "hour";
-        }
-        else if (UNIT_LENGTH.day >= UNIT_LENGTH[minUnit] && Milliseconds.inDays(period) < 90) {
-            return "day";
-        }
-        else if (UNIT_LENGTH.month >= UNIT_LENGTH[minUnit] && Milliseconds.inMonths(period) < 36) {
-            return "month";
-        }
-        return "year";
-    }
-
-    chartRegistry.add("line", {
-        match: (type) => type === "line",
-        createChart: (definition, sheetId, getters) => new LineChart(definition, sheetId, getters),
-        getChartRuntime: createLineChartRuntime,
-        validateChartDefinition: (validator, definition) => LineChart.validateChartDefinition(validator, definition),
-        transformDefinition: (definition, executed) => LineChart.transformDefinition(definition, executed),
-        getChartDefinitionFromContextCreation: (context) => LineChart.getDefinitionFromContextCreation(context),
-        name: "Line",
-    });
-    class LineChart extends AbstractChart {
-        constructor(definition, sheetId, getters) {
-            super(definition, sheetId, getters);
-            this.type = "line";
-            this.dataSets = createDataSets(this.getters, definition.dataSets, sheetId, definition.dataSetsHaveTitle);
-            this.labelRange = createRange(this.getters, sheetId, definition.labelRange);
-            this.background = definition.background;
-            this.verticalAxisPosition = definition.verticalAxisPosition;
-            this.legendPosition = definition.legendPosition;
-            this.labelsAsText = definition.labelsAsText;
-            this.stacked = definition.stacked;
-        }
-        static validateChartDefinition(validator, definition) {
-            return validator.checkValidations(definition, checkDataset, checkLabelRange);
-        }
-        static transformDefinition(definition, executed) {
-            return transformChartDefinitionWithDataSetsWithZone(definition, executed);
-        }
-        static getDefinitionFromContextCreation(context) {
-            return {
-                background: context.background,
-                dataSets: context.range ? context.range : [],
-                dataSetsHaveTitle: false,
-                labelsAsText: false,
-                legendPosition: "top",
-                title: context.title || "",
-                type: "line",
-                verticalAxisPosition: "left",
-                labelRange: context.auxiliaryRange || undefined,
-                stacked: false,
-            };
-        }
-        getDefinition() {
-            return this.getDefinitionWithSpecificDataSets(this.dataSets, this.labelRange);
-        }
-        getDefinitionWithSpecificDataSets(dataSets, labelRange, targetSheetId) {
-            return {
-                type: "line",
-                dataSetsHaveTitle: dataSets.length ? Boolean(dataSets[0].labelCell) : false,
-                background: this.background,
-                dataSets: dataSets.map((ds) => this.getters.getRangeString(ds.dataRange, targetSheetId || this.sheetId)),
-                legendPosition: this.legendPosition,
-                verticalAxisPosition: this.verticalAxisPosition,
-                labelRange: labelRange
-                    ? this.getters.getRangeString(labelRange, targetSheetId || this.sheetId)
-                    : undefined,
-                title: this.title,
-                labelsAsText: this.labelsAsText,
-                stacked: this.stacked,
-            };
-        }
-        getContextCreation() {
-            return {
-                background: this.background,
-                title: this.title,
-                range: this.dataSets.map((ds) => this.getters.getRangeString(ds.dataRange, this.sheetId)),
-                auxiliaryRange: this.labelRange
-                    ? this.getters.getRangeString(this.labelRange, this.sheetId)
-                    : undefined,
-            };
-        }
-        updateRanges(applyChange) {
-            const { dataSets, labelRange, isStale } = updateChartRangesWithDataSets(this.getters, applyChange, this.dataSets, this.labelRange);
-            if (!isStale) {
-                return this;
-            }
-            const definition = this.getDefinitionWithSpecificDataSets(dataSets, labelRange);
-            return new LineChart(definition, this.sheetId, this.getters);
-        }
-        getDefinitionForExcel() {
-            const dataSets = this.dataSets
-                .map((ds) => toExcelDataset(this.getters, ds))
-                .filter((ds) => ds.range !== ""); // && range !== INCORRECT_RANGE_STRING ? show incorrect #ref ?
-            return {
-                ...this.getDefinition(),
-                backgroundColor: toXlsxHexColor(this.background || BACKGROUND_CHART_COLOR),
-                fontColor: toXlsxHexColor(chartFontColor(this.background)),
-                dataSets,
-            };
-        }
-        copyForSheetId(sheetId) {
-            const dataSets = copyDataSetsWithNewSheetId(this.sheetId, sheetId, this.dataSets);
-            const labelRange = copyLabelRangeWithNewSheetId(this.sheetId, sheetId, this.labelRange);
-            const definition = this.getDefinitionWithSpecificDataSets(dataSets, labelRange, sheetId);
-            return new LineChart(definition, sheetId, this.getters);
-        }
-        copyInSheetId(sheetId) {
-            const definition = this.getDefinitionWithSpecificDataSets(this.dataSets, this.labelRange, sheetId);
-            return new LineChart(definition, sheetId, this.getters);
-        }
-    }
-    function fixEmptyLabelsForDateCharts(labels, dataSetsValues) {
-        if (labels.length === 0 || labels.every((label) => !label)) {
-            return { labels, dataSetsValues };
-        }
-        const newLabels = [...labels];
-        const newDatasets = deepCopy(dataSetsValues);
-        for (let i = 0; i < newLabels.length; i++) {
-            if (!newLabels[i]) {
-                newLabels[i] = findNextDefinedValue(newLabels, i);
-                for (let ds of newDatasets) {
-                    ds.data[i] = undefined;
-                }
-            }
-        }
-        return { labels: newLabels, dataSetsValues: newDatasets };
-    }
-    function canChartParseLabels(chart, getters) {
-        return canBeDateChart(chart, getters) || canBeLinearChart(chart, getters);
-    }
-    function getChartAxisType(chart, getters) {
-        if (isDateChart(chart, getters)) {
-            return "time";
-        }
-        if (isLinearChart(chart, getters)) {
-            return "linear";
-        }
-        return "category";
-    }
-    function isDateChart(chart, getters) {
-        return !chart.labelsAsText && canBeDateChart(chart, getters);
-    }
-    function isLinearChart(chart, getters) {
-        return !chart.labelsAsText && canBeLinearChart(chart, getters);
-    }
-    function canBeDateChart(chart, getters) {
-        var _a;
-        if (!chart.labelRange || !chart.dataSets || !canBeLinearChart(chart, getters)) {
-            return false;
-        }
-        const labelFormat = (_a = getters.getCell(chart.labelRange.sheetId, chart.labelRange.zone.left, chart.labelRange.zone.top)) === null || _a === void 0 ? void 0 : _a.evaluated.format;
-        return Boolean(labelFormat && timeFormatMomentCompatible.test(labelFormat));
-    }
-    function canBeLinearChart(chart, getters) {
-        if (!chart.labelRange || !chart.dataSets) {
-            return false;
-        }
-        const labels = getters.getRangeValues(chart.labelRange);
-        if (labels.some((label) => isNaN(Number(label)) && label)) {
-            return false;
-        }
-        if (labels.every((label) => !label)) {
-            return false;
-        }
-        return true;
-    }
-    function getLineConfiguration(chart, labels) {
-        var _a;
-        const fontColor = chartFontColor(chart.background);
-        const config = getDefaultChartJsRuntime(chart, labels, fontColor);
-        const legend = {
-            labels: {
-                fontColor,
-                generateLabels(chart) {
-                    const { data } = chart;
-                    const labels = window.Chart.defaults.global.legend.labels.generateLabels(chart);
-                    for (const [index, label] of labels.entries()) {
-                        label.fillStyle = data.datasets[index].borderColor;
-                    }
-                    return labels;
-                },
-            },
-        };
-        if ((!chart.labelRange && chart.dataSets.length === 1) || chart.legendPosition === "none") {
-            legend.display = false;
-        }
-        else {
-            legend.position = chart.legendPosition;
-        }
-        config.options.legend = { ...(_a = config.options) === null || _a === void 0 ? void 0 : _a.legend, ...legend };
-        config.options.layout = {
-            padding: { left: 20, right: 20, top: chart.title ? 10 : 25, bottom: 10 },
-        };
-        config.options.scales = {
-            xAxes: [
-                {
-                    ticks: {
-                        // x axis configuration
-                        maxRotation: 60,
-                        minRotation: 15,
-                        padding: 5,
-                        labelOffset: 2,
-                        fontColor,
-                    },
-                },
-            ],
-            yAxes: [
-                {
-                    position: chart.verticalAxisPosition,
-                    ticks: {
-                        fontColor,
-                        // y axis configuration
-                        beginAtZero: true, // the origin of the y axis is always zero
-                    },
-                },
-            ],
-        };
-        if (chart.stacked) {
-            config.options.scales.yAxes[0].stacked = true;
-        }
-        return config;
-    }
-    function createLineChartRuntime(chart, getters) {
-        const axisType = getChartAxisType(chart, getters);
-        const labelValues = getChartLabelValues(getters, chart.dataSets, chart.labelRange);
-        let labels = axisType === "linear" ? labelValues.values : labelValues.formattedValues;
-        let dataSetsValues = getChartDatasetValues(getters, chart.dataSets);
-        ({ labels, dataSetsValues } = filterEmptyDataPoints(labels, dataSetsValues));
-        if (axisType === "time") {
-            ({ labels, dataSetsValues } = fixEmptyLabelsForDateCharts(labels, dataSetsValues));
-        }
-        const config = getLineConfiguration(chart, labels);
-        const labelFormat = getLabelFormat(getters, chart.labelRange);
-        if (axisType === "time") {
-            config.options.scales.xAxes[0].type = "time";
-            config.options.scales.xAxes[0].time = getChartTimeOptions(labels, labelFormat);
-            config.options.scales.xAxes[0].ticks.maxTicksLimit = 15;
-        }
-        else if (axisType === "linear") {
-            config.options.scales.xAxes[0].type = "linear";
-            config.options.scales.xAxes[0].ticks.callback = (value) => formatValue(value, labelFormat);
-        }
-        const colors = new ChartColors();
-        for (let [index, { label, data }] of dataSetsValues.entries()) {
-            if (["linear", "time"].includes(axisType)) {
-                // Replace empty string labels by undefined to make sure chartJS doesn't decide that "" is the same as 0
-                data = data.map((y, index) => ({ x: labels[index] || undefined, y }));
-            }
-            const color = colors.next();
-            let backgroundRGBA = colorToRGBA(color);
-            if (chart.stacked) {
-                backgroundRGBA.a = LINE_FILL_TRANSPARENCY;
-            }
-            const backgroundColor = rgbaToHex(backgroundRGBA);
-            const dataset = {
-                label,
-                data,
-                lineTension: 0,
-                borderColor: color,
-                backgroundColor,
-                pointBackgroundColor: color,
-                fill: chart.stacked ? getFillingMode(index) : false,
-            };
-            config.data.datasets.push(dataset);
-        }
-        return { chartJsConfig: config, background: chart.background || BACKGROUND_CHART_COLOR };
-    }
-
-    chartRegistry.add("pie", {
-        match: (type) => type === "pie",
-        createChart: (definition, sheetId, getters) => new PieChart(definition, sheetId, getters),
-        getChartRuntime: createPieChartRuntime,
-        validateChartDefinition: (validator, definition) => PieChart.validateChartDefinition(validator, definition),
-        transformDefinition: (definition, executed) => PieChart.transformDefinition(definition, executed),
-        getChartDefinitionFromContextCreation: (context) => PieChart.getDefinitionFromContextCreation(context),
-        name: "Pie",
-    });
-    class PieChart extends AbstractChart {
-        constructor(definition, sheetId, getters) {
-            super(definition, sheetId, getters);
-            this.type = "pie";
-            this.dataSets = createDataSets(getters, definition.dataSets, sheetId, definition.dataSetsHaveTitle);
-            this.labelRange = createRange(getters, sheetId, definition.labelRange);
-            this.background = definition.background;
-            this.legendPosition = definition.legendPosition;
-        }
-        static transformDefinition(definition, executed) {
-            return transformChartDefinitionWithDataSetsWithZone(definition, executed);
-        }
-        static validateChartDefinition(validator, definition) {
-            return validator.checkValidations(definition, checkDataset, checkLabelRange);
-        }
-        static getDefinitionFromContextCreation(context) {
-            return {
-                background: context.background,
-                dataSets: context.range ? context.range : [],
-                dataSetsHaveTitle: false,
-                legendPosition: "top",
-                title: context.title || "",
-                type: "pie",
-                labelRange: context.auxiliaryRange || undefined,
-            };
-        }
-        getDefinition() {
-            return this.getDefinitionWithSpecificDataSets(this.dataSets, this.labelRange);
-        }
-        getContextCreation() {
-            return {
-                background: this.background,
-                title: this.title,
-                range: this.dataSets.map((ds) => this.getters.getRangeString(ds.dataRange, this.sheetId)),
-                auxiliaryRange: this.labelRange
-                    ? this.getters.getRangeString(this.labelRange, this.sheetId)
-                    : undefined,
-            };
-        }
-        getDefinitionWithSpecificDataSets(dataSets, labelRange, targetSheetId) {
-            return {
-                type: "pie",
-                dataSetsHaveTitle: dataSets.length ? Boolean(dataSets[0].labelCell) : false,
-                background: this.background,
-                dataSets: dataSets.map((ds) => this.getters.getRangeString(ds.dataRange, targetSheetId || this.sheetId)),
-                legendPosition: this.legendPosition,
-                labelRange: labelRange
-                    ? this.getters.getRangeString(labelRange, targetSheetId || this.sheetId)
-                    : undefined,
-                title: this.title,
-            };
-        }
-        copyForSheetId(sheetId) {
-            const dataSets = copyDataSetsWithNewSheetId(this.sheetId, sheetId, this.dataSets);
-            const labelRange = copyLabelRangeWithNewSheetId(this.sheetId, sheetId, this.labelRange);
-            const definition = this.getDefinitionWithSpecificDataSets(dataSets, labelRange, sheetId);
-            return new PieChart(definition, sheetId, this.getters);
-        }
-        copyInSheetId(sheetId) {
-            const definition = this.getDefinitionWithSpecificDataSets(this.dataSets, this.labelRange, sheetId);
-            return new PieChart(definition, sheetId, this.getters);
-        }
-        getDefinitionForExcel() {
-            const dataSets = this.dataSets
-                .map((ds) => toExcelDataset(this.getters, ds))
-                .filter((ds) => ds.range !== ""); // && range !== INCORRECT_RANGE_STRING ? show incorrect #ref ?
-            return {
-                ...this.getDefinition(),
-                backgroundColor: toXlsxHexColor(this.background || BACKGROUND_CHART_COLOR),
-                fontColor: toXlsxHexColor(chartFontColor(this.background)),
-                verticalAxisPosition: "left",
-                dataSets,
-            };
-        }
-        updateRanges(applyChange) {
-            const { dataSets, labelRange, isStale } = updateChartRangesWithDataSets(this.getters, applyChange, this.dataSets, this.labelRange);
-            if (!isStale) {
-                return this;
-            }
-            const definition = this.getDefinitionWithSpecificDataSets(dataSets, labelRange);
-            return new PieChart(definition, this.sheetId, this.getters);
-        }
-    }
-    function getPieConfiguration(chart, labels) {
-        var _a;
-        const fontColor = chartFontColor(chart.background);
-        const config = getDefaultChartJsRuntime(chart, labels, fontColor);
-        const legend = {
-            labels: { fontColor },
-        };
-        if ((!chart.labelRange && chart.dataSets.length === 1) || chart.legendPosition === "none") {
-            legend.display = false;
-        }
-        else {
-            legend.position = chart.legendPosition;
-        }
-        config.options.legend = { ...(_a = config.options) === null || _a === void 0 ? void 0 : _a.legend, ...legend };
-        config.options.layout = {
-            padding: { left: 20, right: 20, top: chart.title ? 10 : 25, bottom: 10 },
-        };
-        config.options.tooltips = {
-            callbacks: {
-                title: function (tooltipItems, data) {
-                    return data.datasets[tooltipItems[0].datasetIndex].label;
-                },
-            },
-        };
-        return config;
-    }
-    function getPieColors(colors, dataSetsValues) {
-        const pieColors = [];
-        const maxLength = Math.max(...dataSetsValues.map((ds) => ds.data.length));
-        for (let i = 0; i <= maxLength; i++) {
-            pieColors.push(colors.next());
-        }
-        return pieColors;
-    }
-    function createPieChartRuntime(chart, getters) {
-        const labelValues = getChartLabelValues(getters, chart.dataSets, chart.labelRange);
-        let labels = labelValues.formattedValues;
-        let dataSetsValues = getChartDatasetValues(getters, chart.dataSets);
-        ({ labels, dataSetsValues } = filterEmptyDataPoints(labels, dataSetsValues));
-        const config = getPieConfiguration(chart, labels);
-        const colors = new ChartColors();
-        for (let { label, data } of dataSetsValues) {
-            const backgroundColor = getPieColors(colors, dataSetsValues);
-            const dataset = {
-                label,
-                data,
-                borderColor: "#FFFFFF",
-                backgroundColor,
-            };
-            config.data.datasets.push(dataset);
-        }
-        return { chartJsConfig: config, background: chart.background || BACKGROUND_CHART_COLOR };
-    }
-
-    chartRegistry.add("scorecard", {
-        match: (type) => type === "scorecard",
-        createChart: (definition, sheetId, getters) => new ScorecardChart$1(definition, sheetId, getters),
-        getChartRuntime: createScorecardChartRuntime,
-        validateChartDefinition: (validator, definition) => ScorecardChart$1.validateChartDefinition(validator, definition),
-        transformDefinition: (definition, executed) => ScorecardChart$1.transformDefinition(definition, executed),
-        getChartDefinitionFromContextCreation: (context) => ScorecardChart$1.getDefinitionFromContextCreation(context),
-        name: "Scorecard",
-    });
-    function checkKeyValue(definition) {
-        return definition.keyValue && !rangeReference.test(definition.keyValue)
-            ? 31 /* CommandResult.InvalidScorecardKeyValue */
-            : 0 /* CommandResult.Success */;
-    }
-    function checkBaseline(definition) {
-        return definition.baseline && !rangeReference.test(definition.baseline)
-            ? 32 /* CommandResult.InvalidScorecardBaseline */
-            : 0 /* CommandResult.Success */;
-    }
-    class ScorecardChart$1 extends AbstractChart {
-        constructor(definition, sheetId, getters) {
-            super(definition, sheetId, getters);
-            this.type = "scorecard";
-            this.keyValue = createRange(getters, sheetId, definition.keyValue);
-            this.baseline = createRange(getters, sheetId, definition.baseline);
-            this.baselineMode = definition.baselineMode;
-            this.baselineDescr = definition.baselineDescr;
-            this.background = definition.background;
-            this.baselineColorUp = definition.baselineColorUp;
-            this.baselineColorDown = definition.baselineColorDown;
-        }
-        static validateChartDefinition(validator, definition) {
-            return validator.checkValidations(definition, checkKeyValue, checkBaseline);
-        }
-        static getDefinitionFromContextCreation(context) {
-            return {
-                background: context.background,
-                type: "scorecard",
-                keyValue: context.range ? context.range[0] : undefined,
-                title: context.title || "",
-                baselineMode: "difference",
-                baselineColorUp: "#00A04A",
-                baselineColorDown: "#DC6965",
-                baseline: context.auxiliaryRange || "",
-            };
-        }
-        static transformDefinition(definition, executed) {
-            let baselineZone;
-            let keyValueZone;
-            if (definition.baseline) {
-                baselineZone = transformZone(toUnboundedZone(definition.baseline), executed);
-            }
-            if (definition.keyValue) {
-                keyValueZone = transformZone(toUnboundedZone(definition.keyValue), executed);
-            }
-            return {
-                ...definition,
-                baseline: baselineZone ? zoneToXc(baselineZone) : undefined,
-                keyValue: keyValueZone ? zoneToXc(keyValueZone) : undefined,
-            };
-        }
-        copyForSheetId(sheetId) {
-            const baseline = copyLabelRangeWithNewSheetId(this.sheetId, sheetId, this.baseline);
-            const keyValue = copyLabelRangeWithNewSheetId(this.sheetId, sheetId, this.keyValue);
-            const definition = this.getDefinitionWithSpecificRanges(baseline, keyValue, sheetId);
-            return new ScorecardChart$1(definition, sheetId, this.getters);
-        }
-        copyInSheetId(sheetId) {
-            const definition = this.getDefinitionWithSpecificRanges(this.baseline, this.keyValue, sheetId);
-            return new ScorecardChart$1(definition, sheetId, this.getters);
-        }
-        getDefinition() {
-            return this.getDefinitionWithSpecificRanges(this.baseline, this.keyValue);
-        }
-        getContextCreation() {
-            return {
-                background: this.background,
-                title: this.title,
-                range: this.keyValue ? [this.getters.getRangeString(this.keyValue, this.sheetId)] : undefined,
-                auxiliaryRange: this.baseline
-                    ? this.getters.getRangeString(this.baseline, this.sheetId)
-                    : undefined,
-            };
-        }
-        getDefinitionWithSpecificRanges(baseline, keyValue, targetSheetId) {
-            return {
-                baselineColorDown: this.baselineColorDown,
-                baselineColorUp: this.baselineColorUp,
-                baselineMode: this.baselineMode,
-                title: this.title,
-                type: "scorecard",
-                background: this.background,
-                baseline: baseline
-                    ? this.getters.getRangeString(baseline, targetSheetId || this.sheetId)
-                    : undefined,
-                baselineDescr: this.baselineDescr,
-                keyValue: keyValue
-                    ? this.getters.getRangeString(keyValue, targetSheetId || this.sheetId)
-                    : undefined,
-            };
-        }
-        getDefinitionForExcel() {
-            // This kind of graph is not exportable in Excel
-            return undefined;
-        }
-        updateRanges(applyChange) {
-            const baseline = adaptChartRange(this.baseline, applyChange);
-            const keyValue = adaptChartRange(this.keyValue, applyChange);
-            if (this.baseline === baseline && this.keyValue === keyValue) {
-                return this;
-            }
-            const definition = this.getDefinitionWithSpecificRanges(baseline, keyValue);
-            return new ScorecardChart$1(definition, this.sheetId, this.getters);
-        }
-    }
-    function createScorecardChartRuntime(chart, getters) {
-        let keyValue = "";
-        let formattedKeyValue = "";
-        let keyValueCell;
-        if (chart.keyValue) {
-            const keyValueZone = chart.keyValue.zone;
-            keyValueCell = getters.getCell(chart.keyValue.sheetId, keyValueZone.left, keyValueZone.top);
-            keyValue = (keyValueCell === null || keyValueCell === void 0 ? void 0 : keyValueCell.evaluated.value) ? String(keyValueCell === null || keyValueCell === void 0 ? void 0 : keyValueCell.evaluated.value) : "";
-            formattedKeyValue = (keyValueCell === null || keyValueCell === void 0 ? void 0 : keyValueCell.formattedValue) || "";
-        }
-        let baselineCell;
-        if (chart.baseline) {
-            const baselineZone = chart.baseline.zone;
-            baselineCell = getters.getCell(chart.baseline.sheetId, baselineZone.left, baselineZone.top);
-        }
-        const background = getters.getBackgroundOfSingleCellChart(chart.background, chart.keyValue);
-        return {
-            title: _t(chart.title),
-            keyValue: formattedKeyValue || keyValue,
-            baselineDisplay: getBaselineText(baselineCell, keyValueCell === null || keyValueCell === void 0 ? void 0 : keyValueCell.evaluated, chart.baselineMode),
-            baselineArrow: getBaselineArrowDirection(baselineCell === null || baselineCell === void 0 ? void 0 : baselineCell.evaluated, keyValueCell === null || keyValueCell === void 0 ? void 0 : keyValueCell.evaluated, chart.baselineMode),
-            baselineColor: getBaselineColor(baselineCell === null || baselineCell === void 0 ? void 0 : baselineCell.evaluated, chart.baselineMode, keyValueCell === null || keyValueCell === void 0 ? void 0 : keyValueCell.evaluated, chart.baselineColorUp, chart.baselineColorDown),
-            baselineDescr: _t(chart.baselineDescr || ""),
-            fontColor: chartFontColor(background),
-            background,
-            baselineStyle: chart.baselineMode !== "percentage" ? baselineCell === null || baselineCell === void 0 ? void 0 : baselineCell.style : undefined,
-            keyValueStyle: keyValueCell === null || keyValueCell === void 0 ? void 0 : keyValueCell.style,
-        };
-    }
-
-    const PICKER_PADDING = 6;
-    const LINE_VERTICAL_PADDING = 1;
-    const LINE_HORIZONTAL_PADDING = 6;
-    const ITEM_HORIZONTAL_MARGIN = 1;
-    const ITEM_EDGE_LENGTH = 18;
-    const ITEM_BORDER_WIDTH = 1;
-    const ITEMS_PER_LINE = 10;
-    const PICKER_WIDTH = ITEMS_PER_LINE * (ITEM_EDGE_LENGTH + ITEM_HORIZONTAL_MARGIN * 2 + 2 * ITEM_BORDER_WIDTH) +
-        2 * LINE_HORIZONTAL_PADDING;
-    const GRADIENT_WIDTH = PICKER_WIDTH - 2 * LINE_HORIZONTAL_PADDING - 2 * ITEM_BORDER_WIDTH;
-    const GRADIENT_HEIGHT = PICKER_WIDTH - 50;
-    css /* scss */ `
-  .o-color-picker {
-    position: absolute;
-    top: calc(100% + 5px);
-    z-index: ${ComponentsImportance.ColorPicker};
-    box-shadow: 1px 2px 5px 2px rgba(51, 51, 51, 0.15);
-    background-color: white;
-    padding: ${PICKER_PADDING}px 0px;
-    line-height: 1.2;
-    width: ${GRADIENT_WIDTH + 2 * PICKER_PADDING}px;
-
-    .o-color-picker-section-name {
-      margin: 0px ${ITEM_HORIZONTAL_MARGIN}px;
-      padding: 4px ${LINE_HORIZONTAL_PADDING}px;
-    }
-    .colors-grid {
-      display: grid;
-      padding: ${LINE_VERTICAL_PADDING}px ${LINE_HORIZONTAL_PADDING}px;
-      grid-template-columns: repeat(${ITEMS_PER_LINE}, 1fr);
-      grid-gap: ${ITEM_HORIZONTAL_MARGIN * 2}px;
-    }
-    .o-color-picker-line-item {
-      width: ${ITEM_EDGE_LENGTH}px;
-      height: ${ITEM_EDGE_LENGTH}px;
-      margin: 0px;
-      border-radius: 50px;
-      border: ${ITEM_BORDER_WIDTH}px solid #666666;
-      padding: 0px;
-      font-size: 16px;
-      background: white;
-      &:hover {
-        background-color: rgba(0, 0, 0, 0.08);
-        outline: 1px solid gray;
-        cursor: pointer;
-      }
-    }
-    .o-buttons {
-      padding: 6px;
-      display: flex;
-      .o-cancel {
-        margin: 0px ${ITEM_HORIZONTAL_MARGIN}px;
-        border: ${ITEM_BORDER_WIDTH}px solid #c0c0c0;
-        width: 100%;
-        padding: 5px;
-        font-size: 14px;
-        background: white;
-        border-radius: 4px;
-        &:hover:enabled {
-          background-color: rgba(0, 0, 0, 0.08);
-        }
-      }
-    }
-    .o-add-button {
-      border: ${ITEM_BORDER_WIDTH}px solid #c0c0c0;
-      padding: 4px;
-      background: white;
-      border-radius: 4px;
-      &:hover:enabled {
-        background-color: rgba(0, 0, 0, 0.08);
-      }
-    }
-    .o-separator {
-      border-bottom: ${MENU_SEPARATOR_BORDER_WIDTH}px solid #e0e2e4;
-      margin-top: ${MENU_SEPARATOR_PADDING}px;
-      margin-bottom: ${MENU_SEPARATOR_PADDING}px;
-    }
-    input {
-      box-sizing: border-box;
-      width: 100%;
-      border-radius: 4px;
-      padding: 4px 23px 4px 10px;
-      height: 24px;
-      border: 1px solid #c0c0c0;
-      margin: 0 2px 0 0;
-    }
-    input.o-wrong-color {
-      border-color: red;
-    }
-    .o-custom-selector {
-      padding: ${LINE_HORIZONTAL_PADDING}px;
-      position: relative;
-      .o-gradient {
-        background: linear-gradient(to bottom, hsl(0 100% 0%), transparent, hsl(0 0% 100%)),
-          linear-gradient(
-            to right,
-            hsl(0 100% 50%) 0%,
-            hsl(0.2turn 100% 50%) 20%,
-            hsl(0.3turn 100% 50%) 30%,
-            hsl(0.4turn 100% 50%) 40%,
-            hsl(0.5turn 100% 50%) 50%,
-            hsl(0.6turn 100% 50%) 60%,
-            hsl(0.7turn 100% 50%) 70%,
-            hsl(0.8turn 100% 50%) 80%,
-            hsl(0.9turn 100% 50%) 90%,
-            hsl(1turn 100% 50%) 100%
-          );
-        border: ${ITEM_BORDER_WIDTH}px solid #c0c0c0;
-        width: ${GRADIENT_WIDTH}px;
-        height: ${GRADIENT_HEIGHT}px;
-        &:hover {
-          cursor: crosshair;
-        }
-      }
-      .o-custom-input-preview {
-        padding: 2px ${LINE_VERTICAL_PADDING}px;
-        display: flex;
-      }
-      .o-custom-input-buttons {
-        padding: 2px ${LINE_VERTICAL_PADDING}px;
-        text-align: right;
-      }
-      .o-color-preview {
-        border: 1px solid #c0c0c0;
-        border-radius: 4px;
-        width: 100%;
-      }
-    }
-    &.right {
-      left: 0;
-    }
-    &.left {
-      right: 0;
-    }
-    &.center {
-      left: calc(50% - ${PICKER_WIDTH / 2}px);
-    }
-  }
-  .o-magnifier-glass {
-    position: absolute;
-    border: ${ITEM_BORDER_WIDTH}px solid #c0c0c0;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-  }
-`;
-    function computeCustomColor(ev) {
-        return rgbaToHex(hslaToRGBA({
-            h: (360 * ev.offsetX) / GRADIENT_WIDTH,
-            s: 100,
-            l: (100 * ev.offsetY) / GRADIENT_HEIGHT,
-            a: 1,
-        }));
-    }
-    class ColorPicker extends owl.Component {
-        constructor() {
-            super(...arguments);
-            this.COLORS = COLOR_PICKER_DEFAULTS;
-            this.state = owl.useState({
-                showGradient: false,
-                currentColor: isColorValid(this.props.currentColor) ? this.props.currentColor : "",
-                isCurrentColorInvalid: false,
-                style: {
-                    display: "none",
-                    background: "#ffffff",
-                    left: "0",
-                    top: "0",
-                },
-            });
-        }
-        onColorClick(color) {
-            if (color) {
-                this.props.onColorPicked(color);
-            }
-        }
-        getCheckMarkColor() {
-            return chartFontColor(this.props.currentColor);
-        }
-        resetColor() {
-            this.props.onColorPicked("");
-        }
-        setCustomColor(ev) {
-            if (!isColorValid(this.state.currentColor)) {
-                ev.stopPropagation();
-                this.state.isCurrentColorInvalid = true;
-                return;
-            }
-            this.state.isCurrentColorInvalid = false;
-            this.props.onColorPicked(this.state.currentColor);
-        }
-        toggleColorPicker() {
-            this.state.showGradient = !this.state.showGradient;
-        }
-        computeCustomColor(ev) {
-            this.state.isCurrentColorInvalid = false;
-            this.state.currentColor = computeCustomColor(ev);
-        }
-        hideMagnifier(_ev) {
-            this.state.style.display = "none";
-        }
-        showMagnifier(_ev) {
-            this.state.style.display = "block";
-        }
-        moveMagnifier(ev) {
-            this.state.style.background = computeCustomColor(ev);
-            const shiftFromCursor = 10;
-            this.state.style.left = `${ev.offsetX + shiftFromCursor}px`;
-            this.state.style.top = `${ev.offsetY + shiftFromCursor}px`;
-        }
-        get magnifyingGlassStyle() {
-            const { display, background, left, top } = this.state.style;
-            return `display:${display};${display === "block" ? `background-color:${background};left:${left};top:${top};` : ""}`;
-        }
-    }
-    ColorPicker.template = "o-spreadsheet-ColorPicker";
-    ColorPicker.defaultProps = {
-        currentColor: "", //TODO Change it to false instead of empty string
-    };
-    ColorPicker.props = {
-        dropdownDirection: { type: String, optional: true },
-        onColorPicked: Function,
-        currentColor: { type: String, optional: true },
-    };
-
-    class LineBarPieDesignPanel extends owl.Component {
-        constructor() {
-            super(...arguments);
-            this.state = owl.useState({
-                fillColorTool: false,
-            });
-        }
-        onClick(ev) {
-            this.state.fillColorTool = false;
-        }
-        setup() {
-            owl.useExternalListener(window, "click", this.onClick);
-        }
-        toggleColorPicker() {
-            this.state.fillColorTool = !this.state.fillColorTool;
-        }
-        updateBackgroundColor(color) {
-            this.props.updateChart({
-                background: color,
-            });
-        }
-        updateTitle(ev) {
-            this.props.updateChart({
-                title: ev.target.value,
-            });
-        }
-        updateSelect(attr, ev) {
-            this.props.updateChart({
-                [attr]: ev.target.value,
-            });
-        }
-    }
-    LineBarPieDesignPanel.template = "o-spreadsheet-LineBarPieDesignPanel";
-    LineBarPieDesignPanel.components = { ColorPicker };
-    LineBarPieDesignPanel.props = {
-        figureId: String,
-        definition: Object,
-        updateChart: Function,
-    };
-
-    class BarChartDesignPanel extends LineBarPieDesignPanel {
-    }
-    BarChartDesignPanel.template = "o-spreadsheet-BarChartDesignPanel";
-
-    class GaugeChartConfigPanel extends owl.Component {
-        constructor() {
-            super(...arguments);
-            this.state = owl.useState({
-                dataRangeDispatchResult: undefined,
-            });
-            this.dataRange = this.props.definition.dataRange;
-        }
-        get configurationErrorMessages() {
-            var _a;
-            const cancelledReasons = [...(((_a = this.state.dataRangeDispatchResult) === null || _a === void 0 ? void 0 : _a.reasons) || [])];
-            return cancelledReasons.map((error) => ChartTerms.Errors[error] || ChartTerms.Errors.Unexpected);
-        }
-        get isDataRangeInvalid() {
-            var _a;
-            return !!((_a = this.state.dataRangeDispatchResult) === null || _a === void 0 ? void 0 : _a.isCancelledBecause(33 /* CommandResult.InvalidGaugeDataRange */));
-        }
-        onDataRangeChanged(ranges) {
-            this.dataRange = ranges[0];
-        }
-        updateDataRange() {
-            this.state.dataRangeDispatchResult = this.props.updateChart({
-                dataRange: this.dataRange,
-            });
-        }
-    }
-    GaugeChartConfigPanel.template = "o-spreadsheet-GaugeChartConfigPanel";
-    GaugeChartConfigPanel.components = { SelectionInput };
-    GaugeChartConfigPanel.props = {
-        figureId: String,
-        definition: Object,
-        updateChart: Function,
-    };
-
-    css /* scss */ `
-  .o-gauge-color-set {
-    .o-gauge-color-set-color-button {
-      display: inline-block;
-      border: 1px solid #dadce0;
-      border-radius: 4px;
-      cursor: pointer;
-      padding: 1px 2px;
-    }
-    .o-gauge-color-set-color-button:hover {
-      background-color: rgba(0, 0, 0, 0.08);
-    }
-    table {
-      table-layout: fixed;
-      margin-top: 2%;
-      display: table;
-      text-align: left;
-      font-size: 12px;
-      line-height: 18px;
-      width: 100%;
-    }
-    th.o-gauge-color-set-colorPicker {
-      width: 8%;
-    }
-    th.o-gauge-color-set-text {
-      width: 40%;
-    }
-    th.o-gauge-color-set-value {
-      width: 22%;
-    }
-    th.o-gauge-color-set-type {
-      width: 30%;
-    }
-    input,
-    select {
-      width: 100%;
-      height: 100%;
-      box-sizing: border-box;
-    }
-  }
-`;
-    class GaugeChartDesignPanel extends owl.Component {
-        constructor() {
-            super(...arguments);
-            this.state = owl.useState({
-                openedMenu: undefined,
-                sectionRuleDispatchResult: undefined,
-            });
-        }
-        get designErrorMessages() {
-            var _a;
-            const cancelledReasons = [...(((_a = this.state.sectionRuleDispatchResult) === null || _a === void 0 ? void 0 : _a.reasons) || [])];
-            return cancelledReasons.map((error) => ChartTerms.Errors[error] || ChartTerms.Errors.Unexpected);
-        }
-        updateBackgroundColor(color) {
-            this.state.openedMenu = undefined;
-            this.props.updateChart({
-                background: color,
-            });
-        }
-        updateTitle(ev) {
-            this.props.updateChart({
-                title: ev.target.value,
-            });
-        }
-        isRangeMinInvalid() {
-            var _a, _b, _c;
-            return !!(((_a = this.state.sectionRuleDispatchResult) === null || _a === void 0 ? void 0 : _a.isCancelledBecause(34 /* CommandResult.EmptyGaugeRangeMin */)) ||
-                ((_b = this.state.sectionRuleDispatchResult) === null || _b === void 0 ? void 0 : _b.isCancelledBecause(35 /* CommandResult.GaugeRangeMinNaN */)) ||
-                ((_c = this.state.sectionRuleDispatchResult) === null || _c === void 0 ? void 0 : _c.isCancelledBecause(38 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */)));
-        }
-        isRangeMaxInvalid() {
-            var _a, _b, _c;
-            return !!(((_a = this.state.sectionRuleDispatchResult) === null || _a === void 0 ? void 0 : _a.isCancelledBecause(36 /* CommandResult.EmptyGaugeRangeMax */)) ||
-                ((_b = this.state.sectionRuleDispatchResult) === null || _b === void 0 ? void 0 : _b.isCancelledBecause(37 /* CommandResult.GaugeRangeMaxNaN */)) ||
-                ((_c = this.state.sectionRuleDispatchResult) === null || _c === void 0 ? void 0 : _c.isCancelledBecause(38 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */)));
-        }
-        // ---------------------------------------------------------------------------
-        // COLOR_SECTION_TEMPLATE
-        // ---------------------------------------------------------------------------
-        get isLowerInflectionPointInvalid() {
-            var _a, _b;
-            return !!(((_a = this.state.sectionRuleDispatchResult) === null || _a === void 0 ? void 0 : _a.isCancelledBecause(39 /* CommandResult.GaugeLowerInflectionPointNaN */)) ||
-                ((_b = this.state.sectionRuleDispatchResult) === null || _b === void 0 ? void 0 : _b.isCancelledBecause(41 /* CommandResult.GaugeLowerBiggerThanUpper */)));
-        }
-        get isUpperInflectionPointInvalid() {
-            var _a, _b;
-            return !!(((_a = this.state.sectionRuleDispatchResult) === null || _a === void 0 ? void 0 : _a.isCancelledBecause(40 /* CommandResult.GaugeUpperInflectionPointNaN */)) ||
-                ((_b = this.state.sectionRuleDispatchResult) === null || _b === void 0 ? void 0 : _b.isCancelledBecause(41 /* CommandResult.GaugeLowerBiggerThanUpper */)));
-        }
-        updateInflectionPointValue(attr, ev) {
-            const sectionRule = deepCopy(this.props.definition.sectionRule);
-            sectionRule[attr].value = ev.target.value;
-            this.updateSectionRule(sectionRule);
-        }
-        updateInflectionPointType(attr, ev) {
-            const sectionRule = deepCopy(this.props.definition.sectionRule);
-            sectionRule[attr].type = ev.target.value;
-            this.updateSectionRule(sectionRule);
-        }
-        updateSectionColor(target, color) {
-            const sectionRule = deepCopy(this.props.definition.sectionRule);
-            sectionRule.colors[target] = color;
-            this.updateSectionRule(sectionRule);
-            this.closeMenus();
-        }
-        updateRangeMin(ev) {
-            let sectionRule = deepCopy(this.props.definition.sectionRule);
-            sectionRule = {
-                ...sectionRule,
-                rangeMin: ev.target.value,
-            };
-            this.updateSectionRule(sectionRule);
-        }
-        updateRangeMax(ev) {
-            let sectionRule = deepCopy(this.props.definition.sectionRule);
-            sectionRule = {
-                ...sectionRule,
-                rangeMax: ev.target.value,
-            };
-            this.updateSectionRule(sectionRule);
-        }
-        toggleMenu(menu) {
-            const isSelected = this.state.openedMenu === menu;
-            this.closeMenus();
-            if (!isSelected) {
-                this.state.openedMenu = menu;
-            }
-        }
-        updateSectionRule(sectionRule) {
-            this.state.sectionRuleDispatchResult = this.props.updateChart({
-                sectionRule,
-            });
-        }
-        closeMenus() {
-            this.state.openedMenu = undefined;
-        }
-    }
-    GaugeChartDesignPanel.template = "o-spreadsheet-GaugeChartDesignPanel";
-    GaugeChartDesignPanel.components = { ColorPicker };
-    GaugeChartDesignPanel.props = {
-        figureId: String,
-        definition: Object,
-        updateChart: Function,
-    };
-
-    class LineConfigPanel extends LineBarPieConfigPanel {
-        get canTreatLabelsAsText() {
-            const chart = this.env.model.getters.getChart(this.props.figureId);
-            if (chart && chart instanceof LineChart) {
-                return canChartParseLabels(chart, this.env.model.getters);
-            }
-            return false;
-        }
-        onUpdateLabelsAsText(ev) {
-            this.props.updateChart({
-                labelsAsText: ev.target.checked,
-            });
-        }
-        onUpdateStacked(ev) {
-            this.props.updateChart({
-                stacked: ev.target.checked,
-            });
-        }
-    }
-    LineConfigPanel.template = "o-spreadsheet-LineConfigPanel";
-
-    class LineChartDesignPanel extends LineBarPieDesignPanel {
-    }
-    LineChartDesignPanel.template = "o-spreadsheet-LineChartDesignPanel";
-
-    class ScorecardChartConfigPanel extends owl.Component {
-        constructor() {
-            super(...arguments);
-            this.state = owl.useState({
-                keyValueDispatchResult: undefined,
-                baselineDispatchResult: undefined,
-            });
-            this.keyValue = this.props.definition.keyValue;
-            this.baseline = this.props.definition.baseline;
-        }
-        get errorMessages() {
-            var _a, _b;
-            const cancelledReasons = [
-                ...(((_a = this.state.keyValueDispatchResult) === null || _a === void 0 ? void 0 : _a.reasons) || []),
-                ...(((_b = this.state.baselineDispatchResult) === null || _b === void 0 ? void 0 : _b.reasons) || []),
-            ];
-            return cancelledReasons.map((error) => ChartTerms.Errors[error] || ChartTerms.Errors.Unexpected);
-        }
-        get isKeyValueInvalid() {
-            var _a;
-            return !!((_a = this.state.keyValueDispatchResult) === null || _a === void 0 ? void 0 : _a.isCancelledBecause(31 /* CommandResult.InvalidScorecardKeyValue */));
-        }
-        get isBaselineInvalid() {
-            var _a;
-            return !!((_a = this.state.keyValueDispatchResult) === null || _a === void 0 ? void 0 : _a.isCancelledBecause(32 /* CommandResult.InvalidScorecardBaseline */));
-        }
-        onKeyValueRangeChanged(ranges) {
-            this.keyValue = ranges[0];
-        }
-        updateKeyValueRange() {
-            this.state.keyValueDispatchResult = this.props.updateChart({
-                keyValue: this.keyValue,
-            });
-        }
-        onBaselineRangeChanged(ranges) {
-            this.baseline = ranges[0];
-        }
-        updateBaselineRange() {
-            this.state.baselineDispatchResult = this.props.updateChart({
-                baseline: this.baseline,
-            });
-        }
-        updateBaselineMode(ev) {
-            this.props.updateChart({ baselineMode: ev.target.value });
-        }
-    }
-    ScorecardChartConfigPanel.template = "o-spreadsheet-ScorecardChartConfigPanel";
-    ScorecardChartConfigPanel.components = { SelectionInput };
-    ScorecardChartConfigPanel.props = {
-        figureId: String,
-        definition: Object,
-        updateChart: Function,
-    };
-
-    class ScorecardChartDesignPanel extends owl.Component {
-        constructor() {
-            super(...arguments);
-            this.state = owl.useState({
-                openedColorPicker: undefined,
-            });
-        }
-        updateTitle(ev) {
-            this.props.updateChart({
-                title: ev.target.value,
-            });
-        }
-        updateBaselineDescr(ev) {
-            this.props.updateChart({ baselineDescr: ev.target.value });
-        }
-        openColorPicker(colorPickerId) {
-            this.state.openedColorPicker = colorPickerId;
-        }
-        setColor(color, colorPickerId) {
-            switch (colorPickerId) {
-                case "backgroundColor":
-                    this.props.updateChart({ background: color });
-                    break;
-                case "baselineColorDown":
-                    this.props.updateChart({ baselineColorDown: color });
-                    break;
-                case "baselineColorUp":
-                    this.props.updateChart({ baselineColorUp: color });
-                    break;
-            }
-            this.state.openedColorPicker = undefined;
-        }
-    }
-    ScorecardChartDesignPanel.template = "o-spreadsheet-ScorecardChartDesignPanel";
-    ScorecardChartDesignPanel.components = { ColorPicker };
-    ScorecardChartDesignPanel.props = {
-        figureId: String,
-        definition: Object,
-        updateChart: Function,
-    };
-
-    const chartSidePanelComponentRegistry = new Registry();
-    chartSidePanelComponentRegistry
-        .add("line", {
-        configuration: LineConfigPanel,
-        design: LineChartDesignPanel,
-    })
-        .add("bar", {
-        configuration: BarConfigPanel,
-        design: BarChartDesignPanel,
-    })
-        .add("pie", {
-        configuration: LineBarPieConfigPanel,
-        design: LineBarPieDesignPanel,
-    })
-        .add("gauge", {
-        configuration: GaugeChartConfigPanel,
-        design: GaugeChartDesignPanel,
-    })
-        .add("scorecard", {
-        configuration: ScorecardChartConfigPanel,
-        design: ScorecardChartDesignPanel,
-    });
-
-    css /* scss */ `
-  .o-chart {
-    .o-panel {
-      display: flex;
-      .o-panel-element {
-        flex: 1 0 auto;
-        padding: 8px 0px;
-        text-align: center;
-        cursor: pointer;
-        border-right: 1px solid darkgray;
-        &.inactive {
-          background-color: ${BACKGROUND_HEADER_COLOR};
-          border-bottom: 1px solid darkgray;
-        }
-        .fa {
-          margin-right: 4px;
-        }
-      }
-      .o-panel-element:last-child {
-        border-right: none;
-      }
-    }
-
-    .o-with-color-picker {
-      position: relative;
-    }
-    .o-with-color-picker > span {
-      border-bottom: 4px solid;
-    }
-  }
-`;
-    class ChartPanel extends owl.Component {
-        constructor() {
-            super(...arguments);
-            this.shouldUpdateChart = true;
-        }
-        get figureId() {
-            return this.state.figureId;
-        }
-        setup() {
-            const selectedFigureId = this.env.model.getters.getSelectedFigureId();
-            if (!selectedFigureId) {
-                throw new Error(_lt("Cannot open the chart side panel while no chart are selected"));
-            }
-            this.state = owl.useState({
-                panel: "configuration",
-                figureId: selectedFigureId,
-            });
-            owl.onWillUpdateProps(() => {
-                const selectedFigureId = this.env.model.getters.getSelectedFigureId();
-                if (selectedFigureId && selectedFigureId !== this.state.figureId) {
-                    this.state.figureId = selectedFigureId;
-                    this.shouldUpdateChart = false;
-                }
-                else {
-                    this.shouldUpdateChart = true;
-                }
-                if (!this.env.model.getters.isChartDefined(this.figureId)) {
-                    this.props.onCloseSidePanel();
-                    return;
-                }
-            });
-        }
-        updateChart(updateDefinition) {
-            if (!this.shouldUpdateChart) {
-                return;
-            }
-            const definition = {
-                ...this.getChartDefinition(),
-                ...updateDefinition,
-            };
-            return this.env.model.dispatch("UPDATE_CHART", {
-                definition,
-                id: this.figureId,
-                sheetId: this.env.model.getters.getActiveSheetId(),
-            });
-        }
-        onTypeChange(type) {
-            const context = this.env.model.getters.getContextCreationChart(this.figureId);
-            if (!context) {
-                throw new Error("Chart not defined.");
-            }
-            const definition = getChartDefinitionFromContextCreation(context, type);
-            this.env.model.dispatch("UPDATE_CHART", {
-                definition,
-                id: this.figureId,
-                sheetId: this.env.model.getters.getActiveSheetId(),
-            });
-        }
-        get chartPanel() {
-            const type = this.env.model.getters.getChartType(this.figureId);
-            if (!type) {
-                throw new Error("Chart not defined.");
-            }
-            const chartPanel = chartSidePanelComponentRegistry.get(type);
-            if (!chartPanel) {
-                throw new Error(`Component is not defined for type ${type}`);
-            }
-            return chartPanel;
-        }
-        getChartDefinition(figureId = this.figureId) {
-            return this.env.model.getters.getChartDefinition(figureId);
-        }
-        get chartTypes() {
-            return getChartTypes();
-        }
-        activatePanel(panel) {
-            this.state.panel = panel;
-        }
-    }
-    ChartPanel.template = "o-spreadsheet-ChartPanel";
-    ChartPanel.props = {
-        onCloseSidePanel: Function,
-    };
-
-    // -----------------------------------------------------------------------------
-    // We need here the svg of the icons that we need to convert to images for the renderer
-    // -----------------------------------------------------------------------------
-    const ARROW_DOWN = '<svg class="o-cf-icon arrow-down" width="10" height="10" focusable="false" viewBox="0 0 448 512"><path fill="#DC6965" d="M413.1 222.5l22.2 22.2c9.4 9.4 9.4 24.6 0 33.9L241 473c-9.4 9.4-24.6 9.4-33.9 0L12.7 278.6c-9.4-9.4-9.4-24.6 0-33.9l22.2-22.2c9.5-9.5 25-9.3 34.3.4L184 343.4V56c0-13.3 10.7-24 24-24h32c13.3 0 24 10.7 24 24v287.4l114.8-120.5c9.3-9.8 24.8-10 34.3-.4z"></path></svg>';
-    const ARROW_UP = '<svg class="o-cf-icon arrow-up" width="10" height="10" focusable="false" viewBox="0 0 448 512"><path fill="#00A04A" d="M34.9 289.5l-22.2-22.2c-9.4-9.4-9.4-24.6 0-33.9L207 39c9.4-9.4 24.6-9.4 33.9 0l194.3 194.3c9.4 9.4 9.4 24.6 0 33.9L413 289.4c-9.5 9.5-25 9.3-34.3-.4L264 168.6V456c0 13.3-10.7 24-24 24h-32c-13.3 0-24-10.7-24-24V168.6L69.2 289.1c-9.3 9.8-24.8 10-34.3.4z"></path></svg>';
-    const ARROW_RIGHT = '<svg class="o-cf-icon arrow-right" width="10" height="10" focusable="false" viewBox="0 0 448 512"><path fill="#F0AD4E" d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"></path></svg>';
-    const SMILE = '<svg class="o-cf-icon smile" width="10" height="10" focusable="false" viewBox="0 0 496 512"><path fill="#00A04A" d="M248 8C111 8 0 119 0 256s111 248 248 248 248-111 248-248S385 8 248 8zm0 448c-110.3 0-200-89.7-200-200S137.7 56 248 56s200 89.7 200 200-89.7 200-200 200zm-80-216c17.7 0 32-14.3 32-32s-14.3-32-32-32-32 14.3-32 32 14.3 32 32 32zm160 0c17.7 0 32-14.3 32-32s-14.3-32-32-32-32 14.3-32 32 14.3 32 32 32zm4 72.6c-20.8 25-51.5 39.4-84 39.4s-63.2-14.3-84-39.4c-8.5-10.2-23.7-11.5-33.8-3.1-10.2 8.5-11.5 23.6-3.1 33.8 30 36 74.1 56.6 120.9 56.6s90.9-20.6 120.9-56.6c8.5-10.2 7.1-25.3-3.1-33.8-10.1-8.4-25.3-7.1-33.8 3.1z"></path></svg>';
-    const MEH = '<svg class="o-cf-icon meh" width="10" height="10" focusable="false" viewBox="0 0 496 512"><path fill="#F0AD4E" d="M248 8C111 8 0 119 0 256s111 248 248 248 248-111 248-248S385 8 248 8zm0 448c-110.3 0-200-89.7-200-200S137.7 56 248 56s200 89.7 200 200-89.7 200-200 200zm-80-216c17.7 0 32-14.3 32-32s-14.3-32-32-32-32 14.3-32 32 14.3 32 32 32zm160-64c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm8 144H160c-13.2 0-24 10.8-24 24s10.8 24 24 24h176c13.2 0 24-10.8 24-24s-10.8-24-24-24z"></path></svg>';
-    const FROWN = '<svg class="o-cf-icon frown" width="10" height="10" focusable="false" viewBox="0 0 496 512"><path fill="#DC6965" d="M248 8C111 8 0 119 0 256s111 248 248 248 248-111 248-248S385 8 248 8zm0 448c-110.3 0-200-89.7-200-200S137.7 56 248 56s200 89.7 200 200-89.7 200-200 200zm-80-216c17.7 0 32-14.3 32-32s-14.3-32-32-32-32 14.3-32 32 14.3 32 32 32zm160-64c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm-80 128c-40.2 0-78 17.7-103.8 48.6-8.5 10.2-7.1 25.3 3.1 33.8 10.2 8.4 25.3 7.1 33.8-3.1 16.6-19.9 41-31.4 66.9-31.4s50.3 11.4 66.9 31.4c8.1 9.7 23.1 11.9 33.8 3.1 10.2-8.5 11.5-23.6 3.1-33.8C326 321.7 288.2 304 248 304z"></path></svg>';
-    const GREEN_DOT = '<svg class="o-cf-icon green-dot" width="10" height="10" focusable="false" viewBox="0 0 512 512"><path fill="#00A04A" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8z"></path></svg>';
-    const YELLOW_DOT = '<svg class="o-cf-icon yellow-dot" width="10" height="10" focusable="false" viewBox="0 0 512 512"><path fill="#F0AD4E" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8z"></path></svg>';
-    const RED_DOT = '<svg class="o-cf-icon red-dot" width="10" height="10" focusable="false" viewBox="0 0 512 512"><path fill="#DC6965" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8z"></path></svg>';
-    function loadIconImage(svg) {
-        /** We have to add xmlns, as it's not added by owl in the canvas */
-        svg = `<svg xmlns="http://www.w3.org/2000/svg" ${svg.slice(4)}`;
-        const image = new Image();
-        image.src = "data:image/svg+xml; charset=utf8, " + encodeURIComponent(svg);
-        return image;
-    }
-    const ICONS = {
-        arrowGood: {
-            template: "ARROW_UP",
-            img: loadIconImage(ARROW_UP),
-        },
-        arrowNeutral: {
-            template: "ARROW_RIGHT",
-            img: loadIconImage(ARROW_RIGHT),
-        },
-        arrowBad: {
-            template: "ARROW_DOWN",
-            img: loadIconImage(ARROW_DOWN),
-        },
-        smileyGood: {
-            template: "SMILE",
-            img: loadIconImage(SMILE),
-        },
-        smileyNeutral: {
-            template: "MEH",
-            img: loadIconImage(MEH),
-        },
-        smileyBad: {
-            template: "FROWN",
-            img: loadIconImage(FROWN),
-        },
-        dotGood: {
-            template: "GREEN_DOT",
-            img: loadIconImage(GREEN_DOT),
-        },
-        dotNeutral: {
-            template: "YELLOW_DOT",
-            img: loadIconImage(YELLOW_DOT),
-        },
-        dotBad: {
-            template: "RED_DOT",
-            img: loadIconImage(RED_DOT),
-        },
-    };
-    const ICON_SETS = {
-        arrows: {
-            good: "arrowGood",
-            neutral: "arrowNeutral",
-            bad: "arrowBad",
-        },
-        smiley: {
-            good: "smileyGood",
-            neutral: "smileyNeutral",
-            bad: "smileyBad",
-        },
-        dots: {
-            good: "dotGood",
-            neutral: "dotNeutral",
-            bad: "dotBad",
-        },
-    };
-
-    css /* scss */ `
-  .o-icon-picker {
-    position: absolute;
-    z-index: ${ComponentsImportance.IconPicker};
-    box-shadow: 1px 2px 5px 2px rgba(51, 51, 51, 0.15);
-    background-color: white;
-    padding: 2px 1px;
-  }
-  .o-cf-icon-line {
-    display: flex;
-    padding: 3px 6px;
-  }
-  .o-icon-picker-item {
-    margin: 0px 2px;
-    &:hover {
-      background-color: rgba(0, 0, 0, 0.08);
-      outline: 1px solid gray;
-    }
-  }
-`;
-    class IconPicker extends owl.Component {
-        constructor() {
-            super(...arguments);
-            this.icons = ICONS;
-            this.iconSets = ICON_SETS;
-        }
-        onIconClick(icon) {
-            if (icon) {
-                this.props.onIconPicked(icon);
-            }
-        }
-    }
-    IconPicker.template = "o-spreadsheet-IconPicker";
-    IconPicker.props = {
-        onIconPicked: Function,
-    };
-
-    // TODO vsc: add ordering of rules
-    css /* scss */ `
-  label {
-    vertical-align: middle;
-  }
-  .o_cf_radio_item {
-    margin-right: 10%;
-  }
-  .radio input:checked {
-    color: #e9ecef;
-    border-color: #00a09d;
-    background-color: #00a09d;
-  }
-  .o-cf-editor {
-    border-bottom: solid;
-    border-color: lightgrey;
-  }
-  .o-cf {
-    .o-cf-type-selector {
-      *,
-      ::after,
-      ::before {
-        box-sizing: border-box;
-      }
-      margin-top: 10px;
-      display: flex;
-    }
-    .o-section-subtitle:first-child {
-      margin-top: 0px;
-    }
-    .o-cf-cursor-ptr {
-      cursor: pointer;
-    }
-    .o-cf-preview {
-      background-color: #fff;
-      border-bottom: 1px solid #ccc;
-      display: flex;
-      height: 60px;
-      padding: 10px;
-      position: relative;
-      &:hover {
-        background-color: rgba(0, 0, 0, 0.08);
-      }
-      &:not(:hover) .o-cf-delete-button {
-        display: none;
-      }
-      .o-cf-preview-image {
-        border: 1px solid lightgrey;
-        height: 50px;
-        line-height: 50px;
-        margin-right: 15px;
-        margin-top: 3px;
-        position: absolute;
-        text-align: center;
-        width: 50px;
-      }
-      .o-cf-preview-icon {
-        border: 1px solid lightgrey;
-        position: absolute;
-        height: 50px;
-        line-height: 50px;
-        margin-right: 15px;
-        margin-top: 3px;
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-      }
-      .o-cf-preview-description {
-        left: 65px;
-        margin-bottom: auto;
-        margin-right: 8px;
-        margin-top: auto;
-        position: relative;
-        width: 142px;
-        .o-cf-preview-description-rule {
-          margin-bottom: 4px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          font-weight: 600;
-          color: #303030;
-          max-height: 2.8em;
-          line-height: 1.4em;
-        }
-        .o-cf-preview-range {
-          text-overflow: ellipsis;
-          font-size: 12px;
-          overflow: hidden;
-        }
-      }
-      .o-cf-delete {
-        color: dimgrey;
-        left: 90%;
-        top: 39%;
-        position: absolute;
-      }
-      .o-cf-reorder {
-        color: gray;
-        left: 90%;
-        position: absolute;
-        height: 100%;
-        width: 10%;
-      }
-      .o-cf-reorder-button:hover {
-        cursor: pointer;
-        background-color: rgba(0, 0, 0, 0.08);
-      }
-      .o-cf-reorder-button-up {
-        width: 15px;
-        height: 20px;
-        padding: 5px;
-        padding-top: 0px;
-      }
-      .o-cf-reorder-button-down {
-        width: 15px;
-        height: 20px;
-        bottom: 20px;
-        padding: 5px;
-        padding-top: 0px;
-        position: absolute;
-      }
-    }
-    .o-cf-ruleEditor {
-      font-size: 12px;
-      line-height: 1.5;
-      .o-selection-cf {
-        margin-bottom: 3%;
-      }
-      .o-cell-content {
-        font-size: 12px;
-        font-weight: 500;
-        padding: 0 12px;
-        margin: 0;
-        line-height: 35px;
-      }
-    }
-    .o-cf-btn-link {
-      font-size: 14px;
-      padding: 20px 24px 11px 24px;
-      height: 44px;
-      cursor: pointer;
-      text-decoration: none;
-    }
-    .o-cf-btn-link:hover {
-      color: #003a39;
-      text-decoration: none;
-    }
-    .o-cf-error {
-      color: red;
-      margin-top: 10px;
-    }
-  }
-  .o-cf-cell-is-rule {
-    .o-cf-preview-line {
-      border: 1px solid darkgrey;
-      padding: 10px;
-    }
-    .o-cell-is-operator {
-      margin-bottom: 5px;
-      width: 96%;
-    }
-    .o-cell-is-value {
-      margin-bottom: 5px;
-      width: 96%;
-    }
-    .o-color-picker {
-      pointer-events: all;
-    }
-  }
-  .o-cf-color-scale-editor {
-    .o-threshold {
-      display: flex;
-      flex-direction: horizontal;
-      select {
-        width: 100%;
-      }
-      .o-threshold-value {
-        margin-left: 2%;
-        width: 20%;
-        min-width: 0px; // input overflows in Firefox otherwise
-      }
-      .o-threshold-value:disabled {
-        background-color: #edebed;
-      }
-    }
-    .o-cf-preview-gradient {
-      border: 1px solid darkgrey;
-      padding: 10px;
-      border-radius: 4px;
-    }
-  }
-  .o-cf-iconset-rule {
-    font-size: 12;
-    .o-cf-iconsets {
-      display: flex;
-      justify-content: space-between;
-      .o-cf-iconset {
-        border: 1px solid #dadce0;
-        border-radius: 4px;
-        display: inline-flex;
-        padding: 5px 8px;
-        width: 25%;
-        cursor: pointer;
-        justify-content: space-between;
-        .o-cf-icon {
-          display: inline;
-          margin-left: 1%;
-          margin-right: 1%;
-        }
-        svg {
-          vertical-align: baseline;
-        }
-      }
-      .o-cf-iconset:hover {
-        background-color: rgba(0, 0, 0, 0.08);
-      }
-    }
-    .o-inflection {
-      .o-cf-icon-button {
-        display: inline-block;
-        border: 1px solid #dadce0;
-        border-radius: 4px;
-        cursor: pointer;
-        padding: 1px 2px;
-      }
-      .o-cf-icon-button:hover {
-        background-color: rgba(0, 0, 0, 0.08);
-      }
-      table {
-        table-layout: fixed;
-        margin-top: 2%;
-        display: table;
-        text-align: left;
-        font-size: 12px;
-        line-height: 18px;
-        width: 100%;
-      }
-      th.o-cf-iconset-icons {
-        width: 8%;
-      }
-      th.o-cf-iconset-text {
-        width: 28%;
-      }
-      th.o-cf-iconset-operator {
-        width: 14%;
-      }
-      th.o-cf-iconset-type {
-        width: 28%;
-      }
-      th.o-cf-iconset-value {
-        width: 26%;
-      }
-      input,
-      select {
-        width: 100%;
-        height: 100%;
-        box-sizing: border-box;
-      }
-    }
-    .o-cf-iconset-reverse {
-      margin-bottom: 2%;
-      margin-top: 2%;
-      .o-cf-label {
-        display: inline-block;
-        vertical-align: bottom;
-        margin-bottom: 2px;
-      }
-    }
-  }
-`;
-    class ConditionalFormattingPanel extends owl.Component {
-        constructor() {
-            super(...arguments);
-            this.icons = ICONS;
-            this.cellIsOperators = CellIsOperators;
-            this.iconSets = ICON_SETS;
-            this.getTextDecoration = getTextDecoration;
-            this.colorNumberString = colorNumberString;
-        }
-        setup() {
-            this.activeSheetId = this.env.model.getters.getActiveSheetId();
-            this.state = owl.useState({
-                mode: "list",
-                errors: [],
-                rules: this.getDefaultRules(),
-            });
-            const sheetId = this.env.model.getters.getActiveSheetId();
-            const rules = this.env.model.getters.getRulesSelection(sheetId, this.props.selection || []);
-            if (rules.length === 1) {
-                const cf = this.conditionalFormats.find((c) => c.id === rules[0]);
-                if (cf) {
-                    this.editConditionalFormat(cf);
-                }
-            }
-            owl.onWillUpdateProps((nextProps) => {
-                const newActiveSheetId = this.env.model.getters.getActiveSheetId();
-                if (newActiveSheetId !== this.activeSheetId) {
-                    this.activeSheetId = newActiveSheetId;
-                    this.switchToList();
-                }
-                else if (nextProps.selection !== this.props.selection) {
-                    const sheetId = this.env.model.getters.getActiveSheetId();
-                    const rules = this.env.model.getters.getRulesSelection(sheetId, nextProps.selection || []);
-                    if (rules.length === 1) {
-                        const cf = this.conditionalFormats.find((c) => c.id === rules[0]);
-                        if (cf) {
-                            this.editConditionalFormat(cf);
-                        }
-                    }
-                    else {
-                        this.switchToList();
-                    }
-                }
-            });
-            owl.useExternalListener(window, "click", this.closeMenus);
-        }
-        get conditionalFormats() {
-            return this.env.model.getters.getConditionalFormats(this.env.model.getters.getActiveSheetId());
-        }
-        get isRangeValid() {
-            return this.state.errors.includes(22 /* CommandResult.EmptyRange */);
-        }
-        errorMessage(error) {
-            return CfTerms.Errors[error] || CfTerms.Errors.Unexpected;
-        }
-        /**
-         * Switch to the list view
-         */
-        switchToList() {
-            this.state.mode = "list";
-            this.state.currentCF = undefined;
-            this.state.currentCFType = undefined;
-            this.state.errors = [];
-            this.state.rules = this.getDefaultRules();
-        }
-        getStyle(rule) {
-            if (rule.type === "CellIsRule") {
-                const fontWeight = rule.style.bold ? "bold" : "normal";
-                const fontDecoration = getTextDecoration(rule.style);
-                const fontStyle = rule.style.italic ? "italic" : "normal";
-                const color = rule.style.textColor || "none";
-                const backgroundColor = rule.style.fillColor || "none";
-                return `font-weight:${fontWeight};
-               text-decoration:${fontDecoration};
-               font-style:${fontStyle};
-               color:${color};
-               background-color:${backgroundColor};`;
-            }
-            else if (rule.type === "ColorScaleRule") {
-                const minColor = colorNumberString(rule.minimum.color);
-                const midColor = rule.midpoint ? colorNumberString(rule.midpoint.color) : null;
-                const maxColor = colorNumberString(rule.maximum.color);
-                const baseString = "background-image: linear-gradient(to right, ";
-                return midColor
-                    ? baseString + minColor + ", " + midColor + ", " + maxColor + ")"
-                    : baseString + minColor + ", " + maxColor + ")";
-            }
-            return "";
-        }
-        getDescription(cf) {
-            switch (cf.rule.type) {
-                case "CellIsRule":
-                    const description = CellIsOperators[cf.rule.operator];
-                    if (cf.rule.values.length === 1) {
-                        return `${description} ${cf.rule.values[0]}`;
-                    }
-                    if (cf.rule.values.length === 2) {
-                        return _t("%s %s and %s", description, cf.rule.values[0], cf.rule.values[1]);
-                    }
-                    return description;
-                case "ColorScaleRule":
-                    return CfTerms.ColorScale;
-                case "IconSetRule":
-                    return CfTerms.IconSet;
-                default:
-                    return "";
-            }
-        }
-        saveConditionalFormat() {
-            if (this.state.currentCF) {
-                const invalidRanges = this.state.currentCF.ranges.some((xc) => !xc.match(rangeReference));
-                if (invalidRanges) {
-                    this.state.errors = [23 /* CommandResult.InvalidRange */];
-                    return;
-                }
-                const sheetId = this.env.model.getters.getActiveSheetId();
-                const result = this.env.model.dispatch("ADD_CONDITIONAL_FORMAT", {
-                    cf: {
-                        rule: this.getEditorRule(),
-                        id: this.state.mode === "edit"
-                            ? this.state.currentCF.id
-                            : this.env.model.uuidGenerator.uuidv4(),
-                    },
-                    ranges: this.state.currentCF.ranges.map((xc) => this.env.model.getters.getRangeDataFromXc(sheetId, xc)),
-                    sheetId,
-                });
-                if (!result.isSuccessful) {
-                    this.state.errors = result.reasons;
-                }
-                else {
-                    this.switchToList();
-                }
-            }
-        }
-        /**
-         * Get the rule currently edited with the editor
-         */
-        getEditorRule() {
-            switch (this.state.currentCFType) {
-                case "CellIsRule":
-                    return this.state.rules.cellIs;
-                case "ColorScaleRule":
-                    return this.state.rules.colorScale;
-                case "IconSetRule":
-                    return this.state.rules.iconSet;
-            }
-            throw new Error(`Invalid cf type: ${this.state.currentCFType}`);
-        }
-        getDefaultRules() {
-            return {
-                cellIs: {
-                    type: "CellIsRule",
-                    operator: "IsNotEmpty",
-                    values: [],
-                    style: { fillColor: "#b6d7a8" },
-                },
-                colorScale: {
-                    type: "ColorScaleRule",
-                    minimum: { type: "value", color: 0xffffff },
-                    midpoint: undefined,
-                    maximum: { type: "value", color: 0x6aa84f },
-                },
-                iconSet: {
-                    type: "IconSetRule",
-                    icons: {
-                        upper: "arrowGood",
-                        middle: "arrowNeutral",
-                        lower: "arrowBad",
-                    },
-                    upperInflectionPoint: {
-                        type: "percentage",
-                        value: "66",
-                        operator: "gt",
-                    },
-                    lowerInflectionPoint: {
-                        type: "percentage",
-                        value: "33",
-                        operator: "gt",
-                    },
-                },
-            };
-        }
-        /**
-         * Create a new CF, a CellIsRule by default
-         */
-        addConditionalFormat() {
-            this.state.mode = "add";
-            this.state.currentCFType = "CellIsRule";
-            this.state.currentCF = {
-                id: this.env.model.uuidGenerator.uuidv4(),
-                ranges: this.env.model.getters
-                    .getSelectedZones()
-                    .map((zone) => this.env.model.getters.zoneToXC(this.env.model.getters.getActiveSheetId(), zone)),
-            };
-        }
-        /**
-         * Delete a CF
-         */
-        deleteConditionalFormat(cf) {
-            this.env.model.dispatch("REMOVE_CONDITIONAL_FORMAT", {
-                id: cf.id,
-                sheetId: this.env.model.getters.getActiveSheetId(),
-            });
-        }
-        /**
-         * Edit an existing CF. Return without doing anything in reorder mode.
-         */
-        editConditionalFormat(cf) {
-            if (this.state.mode === "reorder")
-                return;
-            this.state.mode = "edit";
-            this.state.currentCF = cf;
-            this.state.currentCFType = cf.rule.type;
-            switch (cf.rule.type) {
-                case "CellIsRule":
-                    this.state.rules.cellIs = cf.rule;
-                    break;
-                case "ColorScaleRule":
-                    this.state.rules.colorScale = cf.rule;
-                    break;
-                case "IconSetRule":
-                    this.state.rules.iconSet = cf.rule;
-                    break;
-            }
-        }
-        /**
-         * Reorder existing CFs
-         */
-        reorderConditionalFormats() {
-            this.state.mode = "reorder";
-        }
-        reorderRule(cf, direction) {
-            this.env.model.dispatch("MOVE_CONDITIONAL_FORMAT", {
-                cfId: cf.id,
-                direction: direction,
-                sheetId: this.env.model.getters.getActiveSheetId(),
-            });
-        }
-        changeRuleType(ruleType) {
-            if (this.state.currentCFType === ruleType || !this.state.rules) {
-                return;
-            }
-            this.state.errors = [];
-            this.state.currentCFType = ruleType;
-        }
-        onRangesChanged(ranges) {
-            if (this.state.currentCF) {
-                this.state.currentCF.ranges = ranges;
-            }
-        }
-        /*****************************************************************************
-         * Common
-         ****************************************************************************/
-        toggleMenu(menu) {
-            const isSelected = this.state.openedMenu === menu;
-            this.closeMenus();
-            if (!isSelected) {
-                this.state.openedMenu = menu;
-            }
-        }
-        closeMenus() {
-            this.state.openedMenu = undefined;
-        }
-        /*****************************************************************************
-         * Cell Is Rule
-         ****************************************************************************/
-        get isValue1Invalid() {
-            var _a;
-            return !!((_a = this.state.errors) === null || _a === void 0 ? void 0 : _a.includes(48 /* CommandResult.FirstArgMissing */));
-        }
-        get isValue2Invalid() {
-            var _a;
-            return !!((_a = this.state.errors) === null || _a === void 0 ? void 0 : _a.includes(49 /* CommandResult.SecondArgMissing */));
-        }
-        toggleStyle(tool) {
-            const style = this.state.rules.cellIs.style;
-            style[tool] = !style[tool];
-            this.closeMenus();
-        }
-        setColor(target, color) {
-            this.state.rules.cellIs.style[target] = color;
-            this.closeMenus();
-        }
-        /*****************************************************************************
-         * Color Scale Rule
-         ****************************************************************************/
-        isValueInvalid(threshold) {
-            switch (threshold) {
-                case "minimum":
-                    return (this.state.errors.includes(55 /* CommandResult.MinInvalidFormula */) ||
-                        this.state.errors.includes(47 /* CommandResult.MinBiggerThanMid */) ||
-                        this.state.errors.includes(44 /* CommandResult.MinBiggerThanMax */) ||
-                        this.state.errors.includes(50 /* CommandResult.MinNaN */));
-                case "midpoint":
-                    return (this.state.errors.includes(56 /* CommandResult.MidInvalidFormula */) ||
-                        this.state.errors.includes(51 /* CommandResult.MidNaN */) ||
-                        this.state.errors.includes(46 /* CommandResult.MidBiggerThanMax */));
-                case "maximum":
-                    return (this.state.errors.includes(57 /* CommandResult.MaxInvalidFormula */) ||
-                        this.state.errors.includes(52 /* CommandResult.MaxNaN */));
-                default:
-                    return false;
-            }
-        }
-        setColorScaleColor(target, color) {
-            const point = this.state.rules.colorScale[target];
-            if (point) {
-                point.color = Number.parseInt(color.substr(1), 16);
-            }
-            this.closeMenus();
-        }
-        getPreviewGradient() {
-            var _a;
-            const rule = this.state.rules.colorScale;
-            const minColor = colorNumberString(rule.minimum.color);
-            const midColor = colorNumberString(((_a = rule.midpoint) === null || _a === void 0 ? void 0 : _a.color) || DEFAULT_COLOR_SCALE_MIDPOINT_COLOR);
-            const maxColor = colorNumberString(rule.maximum.color);
-            const baseString = "background-image: linear-gradient(to right, ";
-            return rule.midpoint === undefined
-                ? baseString + minColor + ", " + maxColor + ")"
-                : baseString + minColor + ", " + midColor + ", " + maxColor + ")";
-        }
-        getThresholdColor(threshold) {
-            return threshold
-                ? colorNumberString(threshold.color)
-                : colorNumberString(DEFAULT_COLOR_SCALE_MIDPOINT_COLOR);
-        }
-        onMidpointChange(ev) {
-            const type = ev.target.value;
-            const rule = this.state.rules.colorScale;
-            if (type === "none") {
-                rule.midpoint = undefined;
-            }
-            else {
-                rule.midpoint = {
-                    color: DEFAULT_COLOR_SCALE_MIDPOINT_COLOR,
-                    value: "",
-                    ...rule.midpoint,
-                    type,
-                };
-            }
-        }
-        /*****************************************************************************
-         * Icon Set
-         ****************************************************************************/
-        isInflectionPointInvalid(inflectionPoint) {
-            switch (inflectionPoint) {
-                case "lowerInflectionPoint":
-                    return (this.state.errors.includes(54 /* CommandResult.ValueLowerInflectionNaN */) ||
-                        this.state.errors.includes(59 /* CommandResult.ValueLowerInvalidFormula */) ||
-                        this.state.errors.includes(45 /* CommandResult.LowerBiggerThanUpper */));
-                case "upperInflectionPoint":
-                    return (this.state.errors.includes(53 /* CommandResult.ValueUpperInflectionNaN */) ||
-                        this.state.errors.includes(58 /* CommandResult.ValueUpperInvalidFormula */) ||
-                        this.state.errors.includes(45 /* CommandResult.LowerBiggerThanUpper */));
-                default:
-                    return true;
-            }
-        }
-        reverseIcons() {
-            const icons = this.state.rules.iconSet.icons;
-            const upper = icons.upper;
-            icons.upper = icons.lower;
-            icons.lower = upper;
-        }
-        setIconSet(iconSet) {
-            const icons = this.state.rules.iconSet.icons;
-            icons.upper = this.iconSets[iconSet].good;
-            icons.middle = this.iconSets[iconSet].neutral;
-            icons.lower = this.iconSets[iconSet].bad;
-        }
-        setIcon(target, icon) {
-            this.state.rules.iconSet.icons[target] = icon;
-        }
-    }
-    ConditionalFormattingPanel.template = "o-spreadsheet-ConditionalFormattingPanel";
-    ConditionalFormattingPanel.components = { SelectionInput, IconPicker, ColorPicker };
-    ConditionalFormattingPanel.props = {
-        selection: { type: Object, optional: true },
-        onCloseSidePanel: Function,
-    };
-
-    css /* scss */ `
-  .o-custom-currency {
-    .o-format-proposals {
-      color: black;
-    }
-  }
-`;
-    class CustomCurrencyPanel extends owl.Component {
-        setup() {
-            this.availableCurrencies = [];
-            this.state = owl.useState({
-                selectedCurrencyIndex: 0,
-                currencyCode: "",
-                currencySymbol: "",
-                selectedFormatIndex: 0,
-            });
-            owl.onWillStart(() => this.updateAvailableCurrencies());
-        }
-        get formatProposals() {
-            const currency = this.availableCurrencies[this.state.selectedCurrencyIndex];
-            const proposalBases = this.initProposalBases(currency.decimalPlaces);
-            const firstPosition = currency.position;
-            const secondPosition = currency.position === "before" ? "after" : "before";
-            const symbol = this.state.currencySymbol.trim() ? this.state.currencySymbol : "";
-            const code = this.state.currencyCode.trim() ? this.state.currencyCode : "";
-            return code || symbol
-                ? [
-                    ...this.createFormatProposals(proposalBases, symbol, code, firstPosition),
-                    ...this.createFormatProposals(proposalBases, symbol, code, secondPosition),
-                ]
-                : [];
-        }
-        get isSameFormat() {
-            const selectedFormat = this.formatProposals[this.state.selectedFormatIndex];
-            return selectedFormat ? selectedFormat.format === this.getCommonFormat() : false;
-        }
-        async updateAvailableCurrencies() {
-            var _a, _b;
-            if (currenciesRegistry.getAll().length === 0) {
-                const currencies = (await ((_b = (_a = this.env).loadCurrencies) === null || _b === void 0 ? void 0 : _b.call(_a))) || [];
-                currencies.forEach((currency, index) => {
-                    currenciesRegistry.add(index.toString(), currency);
-                });
-            }
-            const emptyCurrency = {
-                name: this.env._t(CustomCurrencyTerms.Custom),
-                code: "",
-                symbol: "",
-                decimalPlaces: 2,
-                position: "after",
-            };
-            this.availableCurrencies = [emptyCurrency, ...currenciesRegistry.getAll()];
-        }
-        updateSelectCurrency(ev) {
-            const target = ev.target;
-            this.state.selectedCurrencyIndex = parseInt(target.value, 10);
-            const currency = this.availableCurrencies[this.state.selectedCurrencyIndex];
-            this.state.currencyCode = currency.code;
-            this.state.currencySymbol = currency.symbol;
-        }
-        updateCode(ev) {
-            const target = ev.target;
-            this.state.currencyCode = target.value;
-            this.initAvailableCurrencies();
-        }
-        updateSymbol(ev) {
-            const target = ev.target;
-            this.state.currencySymbol = target.value;
-            this.initAvailableCurrencies();
-        }
-        updateSelectFormat(ev) {
-            const target = ev.target;
-            this.state.selectedFormatIndex = parseInt(target.value, 10);
-        }
-        apply() {
-            const selectedFormat = this.formatProposals[this.state.selectedFormatIndex];
-            this.env.model.dispatch("SET_FORMATTING", {
-                sheetId: this.env.model.getters.getActiveSheetId(),
-                target: this.env.model.getters.getSelectedZones(),
-                format: selectedFormat.format,
-            });
-        }
-        // ---------------------------------------------------------------------------
-        // Private
-        // ---------------------------------------------------------------------------
-        initAvailableCurrencies() {
-            this.state.selectedCurrencyIndex = 0;
-        }
-        initProposalBases(decimalPlaces) {
-            const result = [{ format: "#,##0", example: "1,000" }];
-            const decimalRepresentation = decimalPlaces ? "." + "0".repeat(decimalPlaces) : "";
-            if (decimalRepresentation) {
-                result.push({
-                    format: "#,##0" + decimalRepresentation,
-                    example: "1,000" + decimalRepresentation,
-                });
-            }
-            return result;
-        }
-        createFormatProposals(proposalBases, symbol, code, position) {
-            let formatProposals = [];
-            // 1 - add proposal with symbol and without code
-            if (symbol) {
-                for (let base of proposalBases) {
-                    formatProposals.push(this.createFormatProposal(position, base.example, base.format, symbol));
-                }
-            }
-            // 2 - if code exist --> add more proposal with symbol and with code
-            if (code) {
-                for (let base of proposalBases) {
-                    const expression = (position === "after" ? " " : "") + code + " " + symbol;
-                    formatProposals.push(this.createFormatProposal(position, base.example, base.format, expression));
-                }
-            }
-            return formatProposals;
-        }
-        createFormatProposal(position, baseExample, formatBase, expression) {
-            const formatExpression = "[$" + expression + "]";
-            return {
-                example: position === "before" ? expression + baseExample : baseExample + expression,
-                format: position === "before" ? formatExpression + formatBase : formatBase + formatExpression,
-            };
-        }
-        getCommonFormat() {
-            var _a;
-            const selectedZones = this.env.model.getters.getSelectedZones();
-            const sheetId = this.env.model.getters.getActiveSheetId();
-            const cells = selectedZones
-                .map((zone) => this.env.model.getters.getCellsInZone(sheetId, zone))
-                .flat();
-            const firstFormat = (_a = cells[0]) === null || _a === void 0 ? void 0 : _a.format;
-            return cells.every((cell) => (cell === null || cell === void 0 ? void 0 : cell.format) === firstFormat) ? firstFormat : undefined;
-        }
-        currencyDisplayName(currency) {
-            return currency.name + (currency.code ? ` (${currency.code})` : "");
-        }
-    }
-    CustomCurrencyPanel.template = "o-spreadsheet-CustomCurrencyPanel";
-    CustomCurrencyPanel.props = {
-        onCloseSidePanel: Function,
-    };
-
-    css /* scss */ `
-  .o-find-and-replace {
-    .o-far-item {
-      display: block;
-      .o-far-checkbox {
-        display: inline-block;
-        .o-far-input {
-          vertical-align: middle;
-        }
-        .o-far-label {
-          position: relative;
-          top: 1.5px;
-          padding-left: 4px;
-        }
-      }
-    }
-    outline: none;
-    height: 100%;
-    .o-input-search-container {
-      display: flex;
-      .o-input-with-count {
-        flex-grow: 1;
-        width: auto;
-      }
-      .o-input-without-count {
-        width: 100%;
-      }
-      .o-input-count {
-        width: fit-content;
-        padding: 4 0 4 4;
-      }
-    }
-  }
-`;
-    class FindAndReplacePanel extends owl.Component {
-        constructor() {
-            super(...arguments);
-            this.state = owl.useState(this.initialState());
-            this.showFormulaState = false;
-            this.findAndReplaceRef = owl.useRef("findAndReplace");
-        }
-        get hasSearchResult() {
-            return this.env.model.getters.getCurrentSelectedMatchIndex() !== null;
-        }
-        setup() {
-            this.showFormulaState = this.env.model.getters.shouldShowFormulas();
-            owl.onMounted(() => this.focusInput());
-            owl.onWillUnmount(() => {
-                this.env.model.dispatch("CLEAR_SEARCH");
-                this.env.model.dispatch("SET_FORMULA_VISIBILITY", { show: this.showFormulaState });
-            });
-        }
-        onInput(ev) {
-            this.state.toSearch = ev.target.value;
-            this.debouncedUpdateSearch();
-        }
-        onKeydownSearch(ev) {
-            if (ev.key === "Enter") {
-                ev.preventDefault();
-                this.onSelectNextCell();
-            }
-        }
-        onKeydownReplace(ev) {
-            if (ev.key === "Enter") {
-                ev.preventDefault();
-                this.replace();
-            }
-        }
-        onFocusSidePanel() {
-            this.state.searchOptions.searchFormulas = this.env.model.getters.shouldShowFormulas();
-            this.env.model.dispatch("REFRESH_SEARCH");
-        }
-        searchFormulas() {
-            this.env.model.dispatch("SET_FORMULA_VISIBILITY", {
-                show: this.state.searchOptions.searchFormulas,
-            });
-            this.updateSearch();
-        }
-        onSelectPreviousCell() {
-            this.env.model.dispatch("SELECT_SEARCH_PREVIOUS_MATCH");
-        }
-        onSelectNextCell() {
-            this.env.model.dispatch("SELECT_SEARCH_NEXT_MATCH");
-        }
-        updateSearch() {
-            this.env.model.dispatch("UPDATE_SEARCH", {
-                toSearch: this.state.toSearch,
-                searchOptions: this.state.searchOptions,
-            });
-        }
-        debouncedUpdateSearch() {
-            clearTimeout(this.inDebounce);
-            this.inDebounce = setTimeout(() => this.updateSearch.call(this), 400);
-        }
-        replace() {
-            this.env.model.dispatch("REPLACE_SEARCH", {
-                replaceWith: this.state.replaceWith,
-            });
-        }
-        replaceAll() {
-            this.env.model.dispatch("REPLACE_ALL_SEARCH", {
-                replaceWith: this.state.replaceWith,
-            });
-        }
-        // ---------------------------------------------------------------------------
-        // Private
-        // ---------------------------------------------------------------------------
-        focusInput() {
-            const el = this.findAndReplaceRef.el;
-            const input = el.querySelector(`input`);
-            if (input) {
-                input.focus();
-            }
-        }
-        initialState() {
-            return {
-                toSearch: "",
-                replaceWith: "",
-                searchOptions: {
-                    matchCase: false,
-                    exactMatch: false,
-                    searchFormulas: false,
-                },
-            };
-        }
-    }
-    FindAndReplacePanel.template = "o-spreadsheet-FindAndReplacePanel";
-    FindAndReplacePanel.props = {
-        onCloseSidePanel: Function,
-    };
-
-    const sidePanelRegistry = new Registry();
-    sidePanelRegistry.add("ConditionalFormatting", {
-        title: _lt("Conditional formatting"),
-        Body: ConditionalFormattingPanel,
-    });
-    sidePanelRegistry.add("ChartPanel", {
-        title: _lt("Chart"),
-        Body: ChartPanel,
-    });
-    sidePanelRegistry.add("FindAndReplace", {
-        title: _lt("Find and Replace"),
-        Body: FindAndReplacePanel,
-    });
-    sidePanelRegistry.add("CustomCurrency", {
-        title: _lt("Custom currency format"),
-        Body: CustomCurrencyPanel,
-    });
-
-    class TopBarComponentRegistry extends Registry {
-        constructor() {
-            super(...arguments);
-            this.mapping = {};
-            this.uuidGenerator = new UuidGenerator();
-        }
-        add(name, value) {
-            const component = { ...value, id: this.uuidGenerator.uuidv4() };
-            return super.add(name, component);
-        }
-    }
-    const topbarComponentRegistry = new TopBarComponentRegistry();
-
-    /* Sizes of boxes containing the texts, in percentage of the Chart size */
-    const TITLE_FONT_SIZE = 18;
-    const BASELINE_BOX_HEIGHT_RATIO = 0.35;
-    const KEY_BOX_HEIGHT_RATIO = 0.65;
-    /** Baseline description should have a smaller font than the baseline */
-    const BASELINE_DESCR_FONT_RATIO = 0.9;
-    /* Padding at the border of the chart, in percentage of the chart width */
-    const CHART_PADDING_RATIO = 0.02;
-    /**
-     * Line height (in em)
-     * Having a line heigh =1em (=font size) don't work, the font will overflow.
-     */
-    const LINE_HEIGHT = 1.2;
-    css /* scss */ `
-  div.o-scorecard {
-    user-select: none;
-    background-color: white;
-    display: flex;
-    flex-direction: column;
-    box-sizing: border-box;
-
-    .o-scorecard-content {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      justify-content: center;
-      text-align: center;
-    }
-
-    .o-title-text {
-      text-align: left;
-      height: ${LINE_HEIGHT + "em"};
-      line-height: ${LINE_HEIGHT + "em"};
-      overflow: hidden;
-      white-space: nowrap;
-    }
-
-    .o-key-text {
-      line-height: ${LINE_HEIGHT + "em"};
-      height: ${LINE_HEIGHT + "em"};
-      overflow: hidden;
-      white-space: nowrap;
-    }
-
-    .o-cf-icon {
-      display: inline-block;
-      width: 0.65em;
-      height: 1em;
-      line-height: 1em;
-      padding-bottom: 0.07em;
-      padding-right: 3px;
-    }
-
-    .o-baseline-text {
-      line-height: ${LINE_HEIGHT + "em"};
-      height: ${LINE_HEIGHT + "em"};
-      overflow: hidden;
-      white-space: nowrap;
-
-      .o-baseline-text-description {
-        white-space: pre;
-      }
-    }
-  }
-`;
-    class ScorecardChart extends owl.Component {
-        constructor() {
-            super(...arguments);
-            this.ctx = document.createElement("canvas").getContext("2d");
-        }
-        get runtime() {
-            return this.env.model.getters.getChartRuntime(this.props.figure.id);
-        }
-        get title() {
-            var _a;
-            return ((_a = this.runtime) === null || _a === void 0 ? void 0 : _a.title) || "";
-        }
-        get keyValue() {
-            var _a;
-            return ((_a = this.runtime) === null || _a === void 0 ? void 0 : _a.keyValue) || "";
-        }
-        get baseline() {
-            var _a;
-            return ((_a = this.runtime) === null || _a === void 0 ? void 0 : _a.baselineDisplay) || "";
-        }
-        get baselineDescr() {
-            var _a;
-            const baselineDescr = ((_a = this.runtime) === null || _a === void 0 ? void 0 : _a.baselineDescr) || "";
-            return this.baseline && baselineDescr ? " " + baselineDescr : baselineDescr;
-        }
-        get baselineArrowDirection() {
-            var _a;
-            return ((_a = this.runtime) === null || _a === void 0 ? void 0 : _a.baselineArrow) || "neutral";
-        }
-        get backgroundColor() {
-            var _a;
-            return ((_a = this.runtime) === null || _a === void 0 ? void 0 : _a.background) || "#ffffff";
-        }
-        get primaryFontColor() {
-            var _a;
-            return ((_a = this.runtime) === null || _a === void 0 ? void 0 : _a.fontColor) || "#000000";
-        }
-        get secondaryFontColor() {
-            return relativeLuminance(this.primaryFontColor) <= 0.3 ? "#757575" : "#bbbbbb";
-        }
-        get figure() {
-            return this.props.figure;
-        }
-        get chartStyle() {
-            return `
-      height:${this.figure.height}px;
-      width:${this.figure.width}px;
-      padding:${this.chartPadding}px;
-      background:${this.backgroundColor};
-    `;
-        }
-        get chartContentStyle() {
-            return `
-      height:${this.getDrawableHeight()}px;
-    `;
-        }
-        get chartPadding() {
-            return this.figure.width * CHART_PADDING_RATIO;
-        }
-        getTextStyles() {
-            var _a, _b, _c;
-            // If the widest text overflows horizontally, scale it down, and apply the same scaling factors to all the other fonts.
-            const maxLineWidth = this.figure.width * (1 - 2 * CHART_PADDING_RATIO);
-            const widestElement = this.getWidestElement();
-            const baseFontSize = widestElement.getElementMaxFontSize(this.getDrawableHeight(), this);
-            const fontSizeMatchingWidth = getFontSizeMatchingWidth(maxLineWidth, baseFontSize, (fontSize) => widestElement.getElementWidth(fontSize, this.ctx, this));
-            let scalingFactor = fontSizeMatchingWidth / baseFontSize;
-            // Fonts sizes in px
-            const keyFontSize = new KeyValueElement().getElementMaxFontSize(this.getDrawableHeight(), this) * scalingFactor;
-            const baselineFontSize = new BaselineElement().getElementMaxFontSize(this.getDrawableHeight(), this) * scalingFactor;
-            return {
-                titleStyle: this.getTextStyle({
-                    fontSize: TITLE_FONT_SIZE,
-                    color: this.secondaryFontColor,
-                }),
-                keyStyle: this.getTextStyle({
-                    fontSize: keyFontSize,
-                    cellStyle: (_a = this.runtime) === null || _a === void 0 ? void 0 : _a.keyValueStyle,
-                    color: this.primaryFontColor,
-                }),
-                baselineStyle: this.getTextStyle({
-                    fontSize: baselineFontSize,
-                }),
-                baselineValueStyle: this.getTextStyle({
-                    fontSize: baselineFontSize,
-                    cellStyle: (_b = this.runtime) === null || _b === void 0 ? void 0 : _b.baselineStyle,
-                    color: ((_c = this.runtime) === null || _c === void 0 ? void 0 : _c.baselineColor) || this.secondaryFontColor,
-                }),
-                baselineDescrStyle: this.getTextStyle({
-                    fontSize: baselineFontSize * BASELINE_DESCR_FONT_RATIO,
-                    color: this.secondaryFontColor,
-                }),
-            };
-        }
-        /** Return an CSS style string corresponding to the given arguments */
-        getTextStyle(args) {
-            const cssAttributes = cellTextStyleToCss(args.cellStyle);
-            cssAttributes["font-size"] = `${args.fontSize}px`;
-            cssAttributes["display"] = "inline-block";
-            if (!cssAttributes["color"] && args.color) {
-                cssAttributes["color"] = args.color;
-            }
-            return cssPropertiesToCss(cssAttributes);
-        }
-        /** Get the height of the chart minus all the vertical paddings */
-        getDrawableHeight() {
-            const verticalPadding = 2 * this.chartPadding;
-            let availableHeight = this.figure.height - verticalPadding;
-            availableHeight -= this.title ? TITLE_FONT_SIZE * LINE_HEIGHT : 0;
-            return availableHeight;
-        }
-        /** Return the element with he widest text in the chart */
-        getWidestElement() {
-            const baseline = new BaselineElement();
-            const keyValue = new KeyValueElement();
-            return baseline.getElementWidth(BASELINE_BOX_HEIGHT_RATIO, this.ctx, this) >
-                keyValue.getElementWidth(KEY_BOX_HEIGHT_RATIO, this.ctx, this)
-                ? baseline
-                : keyValue;
-        }
-    }
-    ScorecardChart.template = "o-spreadsheet-ScorecardChart";
-    class BaselineElement {
-        getElementWidth(fontSize, ctx, chart) {
-            if (!chart.runtime)
-                return 0;
-            const baselineStr = chart.baseline;
-            // Put mock text to simulate the width of the up/down arrow
-            const largeText = chart.baselineArrowDirection !== "neutral" ? "A " + baselineStr : baselineStr;
-            ctx.font = `${fontSize}px ${DEFAULT_FONT}`;
-            let textWidth = ctx.measureText(largeText).width;
-            // Baseline descr font size should be smaller than baseline font size
-            ctx.font = `${fontSize * BASELINE_DESCR_FONT_RATIO}px ${DEFAULT_FONT}`;
-            textWidth += ctx.measureText(chart.baselineDescr).width;
-            return textWidth;
-        }
-        getElementMaxFontSize(availableHeight, chart) {
-            if (!chart.runtime)
-                return 0;
-            const haveBaseline = chart.baseline !== "" || chart.baselineDescr;
-            const maxHeight = haveBaseline ? BASELINE_BOX_HEIGHT_RATIO * availableHeight : 0;
-            return maxHeight / LINE_HEIGHT;
-        }
-    }
-    class KeyValueElement {
-        getElementWidth(fontSize, ctx, chart) {
-            if (!chart.runtime)
-                return 0;
-            const str = chart.keyValue || "";
-            ctx.font = `${fontSize}px ${DEFAULT_FONT}`;
-            return ctx.measureText(str).width;
-        }
-        getElementMaxFontSize(availableHeight, chart) {
-            if (!chart.runtime)
-                return 0;
-            const haveBaseline = chart.baseline !== "" || chart.baselineDescr;
-            const maxHeight = haveBaseline ? KEY_BOX_HEIGHT_RATIO * availableHeight : availableHeight;
-            return maxHeight / LINE_HEIGHT;
-        }
-    }
-    ScorecardChart.props = {
-        figure: Object,
-    };
-    chartComponentRegistry.add("scorecard", ScorecardChart);
-
-    // -----------------------------------------------------------------------------
-    // STYLE
-    // -----------------------------------------------------------------------------
-    css /* scss */ `
-  .o-chart-container {
-    width: 100%;
-    height: 100%;
-    position: relative;
-
-    .o-chart-menu {
-      right: 0px;
-      display: none;
-      position: absolute;
-      padding: 5px;
-    }
-
-    .o-chart-menu-item {
-      cursor: pointer;
-    }
-  }
-  .o-figure.active:focus,
-  .o-figure:hover {
-    .o-chart-container {
-      .o-chart-menu {
-        display: flex;
-      }
-    }
-  }
-`;
-    class ChartFigure extends owl.Component {
-        constructor() {
-            super(...arguments);
-            this.menuState = owl.useState({ isOpen: false, position: null, menuItems: [] });
-            this.chartContainerRef = owl.useRef("chartContainer");
-            this.menuButtonRef = owl.useRef("menuButton");
-            this.menuButtonPosition = useAbsolutePosition(this.menuButtonRef);
-            this.position = useAbsolutePosition(this.chartContainerRef);
-        }
-        getMenuItemRegistry() {
-            const registry = new MenuItemRegistry();
-            registry.add("edit", {
-                name: _lt("Edit"),
-                sequence: 1,
-                action: () => {
-                    this.env.model.dispatch("SELECT_FIGURE", { id: this.props.figure.id });
-                    this.env.openSidePanel("ChartPanel");
-                },
-            });
-            registry.add("copy", {
-                name: _lt("Copy"),
-                sequence: 2,
-                action: async () => {
-                    this.env.model.dispatch("SELECT_FIGURE", { id: this.props.figure.id });
-                    this.env.model.dispatch("COPY");
-                    await this.env.clipboard.writeText(this.env.model.getters.getClipboardContent());
-                },
-            });
-            registry.add("cut", {
-                name: _lt("Cut"),
-                sequence: 3,
-                action: async () => {
-                    this.env.model.dispatch("SELECT_FIGURE", { id: this.props.figure.id });
-                    this.env.model.dispatch("CUT");
-                    await this.env.clipboard.writeText(this.env.model.getters.getClipboardContent());
-                },
-            });
-            registry.add("delete", {
-                name: _lt("Delete"),
-                sequence: 10,
-                action: () => {
-                    this.env.model.dispatch("DELETE_FIGURE", {
-                        sheetId: this.env.model.getters.getActiveSheetId(),
-                        id: this.props.figure.id,
-                    });
-                    if (this.props.sidePanelIsOpen) {
-                        this.env.toggleSidePanel("ChartPanel");
-                    }
-                    this.props.onFigureDeleted();
-                },
-            });
-            return registry;
-        }
-        get chartType() {
-            return this.env.model.getters.getChartType(this.props.figure.id);
-        }
-        onContextMenu(ev) {
-            const position = {
-                x: this.position.x + ev.offsetX,
-                y: this.position.y + ev.offsetY,
-            };
-            this.openContextMenu(position);
-        }
-        showMenu() {
-            const position = {
-                x: this.menuButtonPosition.x - MENU_WIDTH,
-                y: this.menuButtonPosition.y,
-            };
-            this.openContextMenu(position);
-        }
-        openContextMenu(position) {
-            const registry = this.getMenuItemRegistry();
-            this.menuState.isOpen = true;
-            this.menuState.menuItems = registry.getAll().filter((x) => x.isVisible(this.env));
-            this.menuState.position = position;
-        }
-        get chartComponent() {
-            const type = this.chartType;
-            const component = chartComponentRegistry.get(type);
-            if (!component) {
-                throw new Error(`Component is not defined for type ${type}`);
-            }
-            return component;
-        }
-    }
-    ChartFigure.template = "o-spreadsheet-ChartFigure";
-    ChartFigure.components = { Menu };
-    ChartFigure.props = {
-        figure: Object,
-        sidePanelIsOpen: Boolean,
-        onFigureDeleted: Function,
-    };
-
-    function startDnd(onMouseMove, onMouseUp, onMouseDown = () => { }) {
-        const _onMouseUp = (ev) => {
-            onMouseUp(ev);
-            window.removeEventListener("mousedown", onMouseDown);
-            window.removeEventListener("mouseup", _onMouseUp);
-            window.removeEventListener("dragstart", _onDragStart);
-            window.removeEventListener("mousemove", onMouseMove);
-            window.removeEventListener("wheel", onMouseMove);
-        };
-        function _onDragStart(ev) {
-            ev.preventDefault();
-        }
-        window.addEventListener("mousedown", onMouseDown);
-        window.addEventListener("mouseup", _onMouseUp);
-        window.addEventListener("dragstart", _onDragStart);
-        window.addEventListener("mousemove", onMouseMove);
-        window.addEventListener("wheel", onMouseMove);
-    }
-    /**
-     * Function to be used during a mousedown event, this function allows to
-     * perform actions related to the mousemove and mouseup events and adjusts the viewport
-     * when the new position related to the mousemove event is outside of it.
-     * Among inputs are two callback functions. First intended for actions performed during
-     * the mousemove event, it receives as parameters the current position of the mousemove
-     * (occurrence of the current column and the current row). Second intended for actions
-     * performed during the mouseup event.
-     */
-    function dragAndDropBeyondTheViewport(env, cbMouseMove, cbMouseUp, only = false) {
-        let timeOutId = null;
-        let currentEv;
-        let previousEv;
-        let startingEv;
-        let startingX;
-        let startingY;
-        const getters = env.model.getters;
-        const sheetId = getters.getActiveSheetId();
-        const position = gridOverlayPosition();
-        let colIndex;
-        let rowIndex;
-        const onMouseDown = (ev) => {
-            previousEv = ev;
-            startingEv = ev;
-            startingX = startingEv.clientX - position.left;
-            startingY = startingEv.clientY - position.top;
-        };
-        const onMouseMove = (ev) => {
-            currentEv = ev;
-            if (timeOutId) {
-                return;
-            }
-            const { x: offsetCorrectionX, y: offsetCorrectionY } = getters.getMainViewportCoordinates();
-            let { top, left, bottom, right } = getters.getActiveMainViewport();
-            let { offsetScrollbarX: offsetX, offsetScrollbarY: offsetY } = getters.getActiveSheetScrollInfo();
-            const { xSplit, ySplit } = getters.getPaneDivisions(sheetId);
-            let canEdgeScroll = false;
-            let timeoutDelay = MAX_DELAY;
-            const x = currentEv.clientX - position.left;
-            colIndex = getters.getColIndex(x);
-            if (only !== "vertical") {
-                const previousX = previousEv.clientX - position.left;
-                const edgeScrollInfoX = getters.getEdgeScrollCol(x, previousX, startingX);
-                if (edgeScrollInfoX.canEdgeScroll) {
-                    canEdgeScroll = true;
-                    timeoutDelay = Math.min(timeoutDelay, edgeScrollInfoX.delay);
-                    let newTarget;
-                    switch (edgeScrollInfoX.direction) {
-                        case "reset":
-                            colIndex = xSplit;
-                            newTarget = xSplit;
-                            break;
-                        case 1:
-                            colIndex = right;
-                            newTarget = left + 1;
-                            break;
-                        case -1:
-                            colIndex = left - 1;
-                            newTarget = left - 1;
-                            break;
-                    }
-                    offsetX = getters.getColDimensions(sheetId, newTarget).start - offsetCorrectionX;
-                }
-            }
-            const y = currentEv.clientY - position.top;
-            rowIndex = getters.getRowIndex(y);
-            if (only !== "horizontal") {
-                const previousY = previousEv.clientY - position.top;
-                const edgeScrollInfoY = getters.getEdgeScrollRow(y, previousY, startingY);
-                if (edgeScrollInfoY.canEdgeScroll) {
-                    canEdgeScroll = true;
-                    timeoutDelay = Math.min(timeoutDelay, edgeScrollInfoY.delay);
-                    let newTarget;
-                    switch (edgeScrollInfoY.direction) {
-                        case "reset":
-                            rowIndex = ySplit;
-                            newTarget = ySplit;
-                            break;
-                        case 1:
-                            rowIndex = bottom;
-                            newTarget = top + edgeScrollInfoY.direction;
-                            break;
-                        case -1:
-                            rowIndex = top - 1;
-                            newTarget = top + edgeScrollInfoY.direction;
-                            break;
-                    }
-                    offsetY = env.model.getters.getRowDimensions(sheetId, newTarget).start - offsetCorrectionY;
-                }
-            }
-            cbMouseMove(colIndex, rowIndex, currentEv);
-            if (canEdgeScroll) {
-                env.model.dispatch("SET_VIEWPORT_OFFSET", { offsetX, offsetY });
-                timeOutId = setTimeout(() => {
-                    timeOutId = null;
-                    onMouseMove(currentEv);
-                }, Math.round(timeoutDelay));
-            }
-            previousEv = currentEv;
-        };
-        const onMouseUp = () => {
-            clearTimeout(timeOutId);
-            cbMouseUp();
-        };
-        startDnd(onMouseMove, onMouseUp, onMouseDown);
-    }
-
-    // -----------------------------------------------------------------------------
-    // Autofill
-    // -----------------------------------------------------------------------------
-    css /* scss */ `
-  .o-autofill {
-    height: 6px;
-    width: 6px;
-    border: 1px solid white;
-    position: absolute;
-    background-color: #1a73e8;
-
-    .o-autofill-handler {
-      position: absolute;
-      height: ${AUTOFILL_EDGE_LENGTH}px;
-      width: ${AUTOFILL_EDGE_LENGTH}px;
-
-      &:hover {
-        cursor: crosshair;
-      }
-    }
-
-    .o-autofill-nextvalue {
-      position: absolute;
-      background-color: #ffffff;
-      border: 1px solid black;
-      padding: 5px;
-      font-size: 12px;
-      pointer-events: none;
-      white-space: nowrap;
-    }
-  }
-`;
-    class Autofill extends owl.Component {
-        constructor() {
-            super(...arguments);
-            this.state = owl.useState({
-                position: { left: 0, top: 0 },
-                handler: false,
-            });
-        }
-        get style() {
-            const { left, top } = this.props.position;
-            return `top:${top}px;left:${left}px`;
-        }
-        get styleHandler() {
-            let position = this.state.handler ? this.state.position : { left: 0, top: 0 };
-            return `top:${position.top}px;left:${position.left}px;`;
-        }
-        get styleNextvalue() {
-            let position = this.state.handler ? this.state.position : { left: 0, top: 0 };
-            return `top:${position.top + 5}px;left:${position.left + 15}px;`;
-        }
-        getTooltip() {
-            const tooltip = this.env.model.getters.getAutofillTooltip();
-            if (tooltip && !tooltip.component) {
-                tooltip.component = TooltipComponent;
-            }
-            return tooltip;
-        }
-        onMouseDown(ev) {
-            this.state.handler = true;
-            this.state.position = { left: 0, top: 0 };
-            const { offsetY, offsetX } = this.env.model.getters.getActiveSheetScrollInfo();
-            const start = {
-                left: ev.clientX + offsetX,
-                top: ev.clientY + offsetY,
-            };
-            let lastCol;
-            let lastRow;
-            const onMouseUp = () => {
-                this.state.handler = false;
-                this.env.model.dispatch("AUTOFILL");
-            };
-            const onMouseMove = (ev) => {
-                const position = gridOverlayPosition();
-                const { offsetY, offsetX } = this.env.model.getters.getActiveSheetScrollInfo();
-                this.state.position = {
-                    left: ev.clientX - start.left + offsetX,
-                    top: ev.clientY - start.top + offsetY,
-                };
-                const col = this.env.model.getters.getColIndex(ev.clientX - position.left);
-                const row = this.env.model.getters.getRowIndex(ev.clientY - position.top);
-                if (lastCol !== col || lastRow !== row) {
-                    const activeSheetId = this.env.model.getters.getActiveSheetId();
-                    const numberOfCols = this.env.model.getters.getNumberCols(activeSheetId);
-                    const numberOfRows = this.env.model.getters.getNumberRows(activeSheetId);
-                    lastCol = col === -1 ? lastCol : clip(col, 0, numberOfCols);
-                    lastRow = row === -1 ? lastRow : clip(row, 0, numberOfRows);
-                    if (lastCol !== undefined && lastRow !== undefined) {
-                        this.env.model.dispatch("AUTOFILL_SELECT", { col: lastCol, row: lastRow });
-                    }
-                }
-            };
-            startDnd(onMouseMove, onMouseUp);
-        }
-        onDblClick() {
-            this.env.model.dispatch("AUTOFILL_AUTO");
-        }
-    }
-    Autofill.template = "o-spreadsheet-Autofill";
-    Autofill.props = {
-        position: Object,
-    };
-    class TooltipComponent extends owl.Component {
-    }
-    TooltipComponent.template = owl.xml /* xml */ `
-    <div t-esc="props.content"/>
-  `;
-    TooltipComponent.props = {
-        content: String,
-    };
-
-    css /* scss */ `
-  .o-client-tag {
-    position: absolute;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    font-size: ${DEFAULT_FONT_SIZE};
-    color: white;
-    opacity: 0;
-    pointer-events: none;
-  }
-`;
-    class ClientTag extends owl.Component {
-        get tagStyle() {
-            const { col, row, color } = this.props;
-            const { height } = this.env.model.getters.getSheetViewDimensionWithHeaders();
-            const { x, y } = this.env.model.getters.getVisibleRect({
-                left: col,
-                top: row,
-                right: col,
-                bottom: row,
-            });
-            return `bottom: ${height - y + 15}px;left: ${x - 1}px;border: 1px solid ${color};background-color: ${color};${this.props.active ? "opacity:1 !important" : ""}`;
-        }
-    }
-    ClientTag.template = "o-spreadsheet-ClientTag";
-    ClientTag.props = {
-        active: Boolean,
-        name: String,
-        color: String,
-        col: Number,
-        row: Number,
-    };
 
     //------------------------------------------------------------------------------
     // Arg description DSL
@@ -17820,20 +13039,20 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         TEXT: TEXT
     });
 
-    const functions$4 = {
-        database,
-        date,
-        financial,
-        info,
-        lookup,
-        logical,
-        math,
-        misc: misc$1,
-        operators,
-        statistical,
-        text,
-        engineering,
-    };
+    const categories$1 = [
+        { name: _lt("Database"), functions: database },
+        { name: _lt("Date"), functions: date },
+        { name: _lt("Financial"), functions: financial },
+        { name: _lt("Info"), functions: info },
+        { name: _lt("Lookup"), functions: lookup },
+        { name: _lt("Logical"), functions: logical },
+        { name: _lt("Math"), functions: math },
+        { name: _lt("Misc"), functions: misc$1 },
+        { name: _lt("Operator"), functions: operators },
+        { name: _lt("Statistical"), functions: statistical },
+        { name: _lt("Text"), functions: text },
+        { name: _lt("Engineering"), functions: engineering },
+    ];
     const functionNameRegex = /^[A-Z0-9\_\.]+$/;
     //------------------------------------------------------------------------------
     // Function registry
@@ -17881,15 +13100,4881 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         return arg === null || arg === void 0 ? void 0 : arg.value;
     }
     const functionRegistry = new FunctionRegistry();
-    for (let category in functions$4) {
-        const fns = functions$4[category];
+    for (let category of categories$1) {
+        const fns = category.functions;
         for (let name in fns) {
             const addDescr = fns[name];
-            addDescr.category = category;
+            addDescr.category = addDescr.category || category.name;
             name = name.replace(/_/g, ".");
             functionRegistry.add(name, { isExported: false, ...addDescr });
         }
     }
+
+    function interactiveFreezeColumnsRows(env, dimension, base) {
+        const sheetId = env.model.getters.getActiveSheetId();
+        const cmd = dimension === "COL" ? "FREEZE_COLUMNS" : "FREEZE_ROWS";
+        const result = env.model.dispatch(cmd, { sheetId, quantity: base });
+        if (result.isCancelledBecause(63 /* CommandResult.MergeOverlap */)) {
+            env.raiseError(MergeErrorMessage);
+        }
+    }
+
+    const functions$4 = functionRegistry.content;
+    const topbarMenuRegistry = new MenuItemRegistry();
+    topbarMenuRegistry
+        .add("file", { name: _lt("File"), sequence: 10 })
+        .add("edit", { name: _lt("Edit"), sequence: 20 })
+        .add("view", { name: _lt("View"), sequence: 30 })
+        .add("insert", { name: _lt("Insert"), sequence: 40 })
+        .add("format", { name: _lt("Format"), sequence: 50 })
+        .add("data", { name: _lt("Data"), sequence: 60 })
+        .addChild("save", ["file"], {
+        name: _lt("Save"),
+        description: "Ctrl+S",
+        sequence: 10,
+        action: () => console.log("Not implemented"),
+    })
+        .addChild("undo", ["edit"], {
+        name: _lt("Undo"),
+        description: "Ctrl+Z",
+        sequence: 10,
+        action: UNDO_ACTION,
+    })
+        .addChild("redo", ["edit"], {
+        name: _lt("Redo"),
+        description: "Ctrl+Y",
+        sequence: 20,
+        action: REDO_ACTION,
+        separator: true,
+    })
+        .addChild("copy", ["edit"], {
+        name: _lt("Copy"),
+        description: "Ctrl+C",
+        sequence: 30,
+        isReadonlyAllowed: true,
+        action: COPY_ACTION,
+    })
+        .addChild("cut", ["edit"], {
+        name: _lt("Cut"),
+        description: "Ctrl+X",
+        sequence: 40,
+        action: CUT_ACTION,
+    })
+        .addChild("paste", ["edit"], {
+        name: _lt("Paste"),
+        description: "Ctrl+V",
+        sequence: 50,
+        action: PASTE_ACTION,
+    })
+        .addChild("paste_special", ["edit"], {
+        name: _lt("Paste special"),
+        sequence: 60,
+        separator: true,
+        isVisible: IS_NOT_CUT_OPERATION,
+    })
+        .addChild("paste_special_value", ["edit", "paste_special"], {
+        name: _lt("Paste value only"),
+        sequence: 10,
+        action: PASTE_VALUE_ACTION,
+    })
+        .addChild("paste_special_format", ["edit", "paste_special"], {
+        name: _lt("Paste format only"),
+        sequence: 20,
+        action: PASTE_FORMAT_ACTION,
+    })
+        .addChild("sort_range", ["data"], {
+        name: _lt("Sort range"),
+        sequence: 62,
+        isVisible: IS_ONLY_ONE_RANGE,
+        separator: true,
+    })
+        .addChild("sort_ascending", ["data", "sort_range"], {
+        name: _lt("Ascending (A ⟶ Z)"),
+        sequence: 10,
+        action: SORT_CELLS_ASCENDING,
+    })
+        .addChild("sort_descending", ["data", "sort_range"], {
+        name: _lt("Descending (Z ⟶ A)"),
+        sequence: 20,
+        action: SORT_CELLS_DESCENDING,
+    })
+        .addChild("find_and_replace", ["edit"], {
+        name: _lt("Find and replace"),
+        description: "Ctrl+H",
+        sequence: 65,
+        isReadonlyAllowed: true,
+        action: OPEN_FAR_SIDEPANEL_ACTION,
+        separator: true,
+    })
+        .addChild("edit_delete_cell_values", ["edit"], {
+        name: _lt("Delete values"),
+        sequence: 70,
+        action: DELETE_CONTENT_ACTION,
+    })
+        .addChild("edit_delete_row", ["edit"], {
+        name: REMOVE_ROWS_NAME,
+        sequence: 80,
+        action: REMOVE_ROWS_ACTION,
+    })
+        .addChild("edit_delete_column", ["edit"], {
+        name: REMOVE_COLUMNS_NAME,
+        sequence: 90,
+        action: REMOVE_COLUMNS_ACTION,
+    })
+        .addChild("edit_delete_cell_shift_up", ["edit"], {
+        name: _lt("Delete cell and shift up"),
+        sequence: 93,
+        action: DELETE_CELL_SHIFT_UP,
+    })
+        .addChild("edit_delete_cell_shift_left", ["edit"], {
+        name: _lt("Delete cell and shift left"),
+        sequence: 97,
+        action: DELETE_CELL_SHIFT_LEFT,
+    })
+        .addChild("edit_unhide_columns", ["edit"], {
+        name: _lt("Unhide all columns"),
+        sequence: 100,
+        action: UNHIDE_ALL_COLUMNS_ACTION,
+        isVisible: (env) => env.model.getters.getHiddenColsGroups(env.model.getters.getActiveSheetId()).length > 0,
+    })
+        .addChild("edit_unhide_rows", ["edit"], {
+        name: _lt("Unhide all rows"),
+        sequence: 100,
+        action: UNHIDE_ALL_ROWS_ACTION,
+        isVisible: (env) => env.model.getters.getHiddenRowsGroups(env.model.getters.getActiveSheetId()).length > 0,
+    })
+        .addChild("insert_row_before", ["insert"], {
+        name: MENU_INSERT_ROWS_BEFORE_NAME,
+        sequence: 10,
+        action: INSERT_ROWS_BEFORE_ACTION,
+        isVisible: (env) => env.model.getters.getActiveCols().size === 0,
+    })
+        .addChild("insert_row_after", ["insert"], {
+        name: MENU_INSERT_ROWS_AFTER_NAME,
+        sequence: 20,
+        action: INSERT_ROWS_AFTER_ACTION,
+        isVisible: (env) => env.model.getters.getActiveCols().size === 0,
+        separator: true,
+    })
+        .addChild("insert_column_before", ["insert"], {
+        name: MENU_INSERT_COLUMNS_BEFORE_NAME,
+        sequence: 30,
+        action: INSERT_COLUMNS_BEFORE_ACTION,
+        isVisible: (env) => env.model.getters.getActiveRows().size === 0,
+    })
+        .addChild("insert_column_after", ["insert"], {
+        name: MENU_INSERT_COLUMNS_AFTER_NAME,
+        sequence: 40,
+        action: INSERT_COLUMNS_AFTER_ACTION,
+        isVisible: (env) => env.model.getters.getActiveRows().size === 0,
+        separator: true,
+    })
+        .addChild("insert_insert_cell_shift_down", ["insert"], {
+        name: _lt("Insert cells and shift down"),
+        sequence: 43,
+        action: INSERT_CELL_SHIFT_DOWN,
+    })
+        .addChild("insert_insert_cell_shift_right", ["insert"], {
+        name: _lt("Insert cells and shift right"),
+        sequence: 47,
+        action: INSERT_CELL_SHIFT_RIGHT,
+        separator: true,
+    })
+        .addChild("insert_chart", ["insert"], {
+        name: _lt("Chart"),
+        sequence: 50,
+        action: CREATE_CHART,
+    })
+        .addChild("insert_function", ["insert"], {
+        name: _lt("Function"),
+        sequence: 60,
+    })
+        .addChild("insert_function_sum", ["insert", "insert_function"], {
+        name: _lt("SUM"),
+        action: (env) => env.model.dispatch("START_EDITION", { text: `=SUM(` }),
+        sequence: 0,
+    })
+        .addChild("insert_function_average", ["insert", "insert_function"], {
+        name: _lt("AVERAGE"),
+        action: (env) => env.model.dispatch("START_EDITION", { text: `=AVERAGE(` }),
+        sequence: 10,
+    })
+        .addChild("insert_function_count", ["insert", "insert_function"], {
+        name: _lt("COUNT"),
+        action: (env) => env.model.dispatch("START_EDITION", { text: `=COUNT(` }),
+        sequence: 20,
+    })
+        .addChild("insert_function_max", ["insert", "insert_function"], {
+        name: _lt("MAX"),
+        action: (env) => env.model.dispatch("START_EDITION", { text: `=MAX(` }),
+        sequence: 30,
+    })
+        .addChild("insert_function_min", ["insert", "insert_function"], {
+        name: _lt("MIN"),
+        action: (env) => env.model.dispatch("START_EDITION", { text: `=MIN(` }),
+        sequence: 40,
+        separator: true,
+    })
+        .addChild("insert_link", ["insert"], {
+        name: _lt("Link"),
+        separator: true,
+        sequence: 70,
+        action: INSERT_LINK,
+    })
+        .addChild("insert_sheet", ["insert"], {
+        name: _lt("New sheet"),
+        sequence: 80,
+        action: CREATE_SHEET_ACTION,
+        separator: true,
+    })
+        .addChild("unfreeze_panes", ["view"], {
+        name: _lt("Unfreeze"),
+        sequence: 4,
+        isVisible: (env) => {
+            const { xSplit, ySplit } = env.model.getters.getPaneDivisions(env.model.getters.getActiveSheetId());
+            return xSplit + ySplit > 0;
+        },
+        action: (env) => env.model.dispatch("UNFREEZE_COLUMNS_ROWS", {
+            sheetId: env.model.getters.getActiveSheetId(),
+        }),
+    })
+        .addChild("freeze_panes", ["view"], {
+        name: _lt("Freeze"),
+        sequence: 5,
+        separator: true,
+    })
+        .addChild("unfreeze_rows", ["view", "freeze_panes"], {
+        name: _lt("No rows"),
+        action: (env) => env.model.dispatch("UNFREEZE_ROWS", {
+            sheetId: env.model.getters.getActiveSheetId(),
+        }),
+        isReadonlyAllowed: true,
+        sequence: 5,
+        isVisible: (env) => !!env.model.getters.getPaneDivisions(env.model.getters.getActiveSheetId()).ySplit,
+    })
+        .addChild("freeze_first_row", ["view", "freeze_panes"], {
+        name: _lt("1 row"),
+        action: (env) => interactiveFreezeColumnsRows(env, "ROW", 1),
+        isReadonlyAllowed: true,
+        sequence: 10,
+    })
+        .addChild("freeze_second_row", ["view", "freeze_panes"], {
+        name: _lt("2 rows"),
+        action: (env) => interactiveFreezeColumnsRows(env, "ROW", 2),
+        isReadonlyAllowed: true,
+        sequence: 15,
+    })
+        .addChild("freeze_current_row", ["view", "freeze_panes"], {
+        name: _lt("Up to current row"),
+        action: (env) => {
+            const { bottom } = env.model.getters.getSelectedZone();
+            interactiveFreezeColumnsRows(env, "ROW", bottom + 1);
+        },
+        isReadonlyAllowed: true,
+        sequence: 20,
+        separator: true,
+    })
+        .addChild("unfreeze_columns", ["view", "freeze_panes"], {
+        name: _lt("No columns"),
+        action: (env) => env.model.dispatch("UNFREEZE_COLUMNS", {
+            sheetId: env.model.getters.getActiveSheetId(),
+        }),
+        isReadonlyAllowed: true,
+        sequence: 25,
+        isVisible: (env) => !!env.model.getters.getPaneDivisions(env.model.getters.getActiveSheetId()).xSplit,
+    })
+        .addChild("freeze_first_col", ["view", "freeze_panes"], {
+        name: _lt("1 column"),
+        action: (env) => interactiveFreezeColumnsRows(env, "COL", 1),
+        isReadonlyAllowed: true,
+        sequence: 30,
+    })
+        .addChild("freeze_second_col", ["view", "freeze_panes"], {
+        name: _lt("2 columns"),
+        action: (env) => interactiveFreezeColumnsRows(env, "COL", 2),
+        isReadonlyAllowed: true,
+        sequence: 35,
+    })
+        .addChild("freeze_current_col", ["view", "freeze_panes"], {
+        name: _lt("Up to current column"),
+        action: (env) => {
+            const { right } = env.model.getters.getSelectedZone();
+            interactiveFreezeColumnsRows(env, "COL", right + 1);
+        },
+        isReadonlyAllowed: true,
+        sequence: 40,
+    })
+        .addChild("view_gridlines", ["view"], {
+        name: (env) => env.model.getters.getGridLinesVisibility(env.model.getters.getActiveSheetId())
+            ? _lt("Hide gridlines")
+            : _lt("Show gridlines"),
+        action: SET_GRID_LINES_VISIBILITY_ACTION,
+        sequence: 10,
+    })
+        .addChild("view_formulas", ["view"], {
+        name: (env) => env.model.getters.shouldShowFormulas() ? _lt("Hide formulas") : _lt("Show formulas"),
+        action: SET_FORMULA_VISIBILITY_ACTION,
+        isReadonlyAllowed: true,
+        sequence: 15,
+    })
+        .addChild("format_number", ["format"], {
+        name: _lt("Numbers"),
+        sequence: 10,
+        separator: true,
+    })
+        .addChild("format_number_automatic", ["format", "format_number"], {
+        name: NumberFormatTerms.Automatic,
+        sequence: 10,
+        separator: true,
+        action: FORMAT_AUTOMATIC_ACTION,
+    })
+        .addChild("format_number_number", ["format", "format_number"], {
+        name: NumberFormatTerms.Number,
+        description: "1,000.12",
+        sequence: 20,
+        action: FORMAT_NUMBER_ACTION,
+    })
+        .addChild("format_number_percent", ["format", "format_number"], {
+        name: NumberFormatTerms.Percent,
+        description: "10.12%",
+        sequence: 30,
+        separator: true,
+        action: FORMAT_PERCENT_ACTION,
+    })
+        .addChild("format_number_currency", ["format", "format_number"], {
+        name: NumberFormatTerms.Currency,
+        description: "$1,000.12",
+        sequence: 37,
+        action: FORMAT_CURRENCY_ACTION,
+    })
+        .addChild("format_number_currency_rounded", ["format", "format_number"], {
+        name: NumberFormatTerms.CurrencyRounded,
+        description: "$1,000",
+        sequence: 38,
+        action: FORMAT_CURRENCY_ROUNDED_ACTION,
+    })
+        .addChild("format_custom_currency", ["format", "format_number"], {
+        name: NumberFormatTerms.CustomCurrency,
+        sequence: 39,
+        separator: true,
+        action: OPEN_CUSTOM_CURRENCY_SIDEPANEL_ACTION,
+    })
+        .addChild("format_number_date", ["format", "format_number"], {
+        name: NumberFormatTerms.Date,
+        description: "9/26/2008",
+        sequence: 40,
+        action: FORMAT_DATE_ACTION,
+    })
+        .addChild("format_number_time", ["format", "format_number"], {
+        name: NumberFormatTerms.Time,
+        description: "10:43:00 PM",
+        sequence: 50,
+        action: FORMAT_TIME_ACTION,
+    })
+        .addChild("format_number_date_time", ["format", "format_number"], {
+        name: NumberFormatTerms.DateTime,
+        description: "9/26/2008 22:43:00",
+        sequence: 60,
+        action: FORMAT_DATE_TIME_ACTION,
+    })
+        .addChild("format_number_duration", ["format", "format_number"], {
+        name: NumberFormatTerms.Duration,
+        description: "27:51:38",
+        sequence: 70,
+        separator: true,
+        action: FORMAT_DURATION_ACTION,
+    })
+        .addChild("format_bold", ["format"], {
+        name: _lt("Bold"),
+        sequence: 20,
+        description: "Ctrl+B",
+        action: FORMAT_BOLD_ACTION,
+    })
+        .addChild("format_italic", ["format"], {
+        name: _lt("Italic"),
+        sequence: 30,
+        description: "Ctrl+I",
+        action: FORMAT_ITALIC_ACTION,
+    })
+        .addChild("format_underline", ["format"], {
+        name: _lt("Underline"),
+        description: "Ctrl+U",
+        sequence: 40,
+        action: FORMAT_UNDERLINE_ACTION,
+    })
+        .addChild("format_strikethrough", ["format"], {
+        name: _lt("Strikethrough"),
+        sequence: 50,
+        action: FORMAT_STRIKETHROUGH_ACTION,
+        separator: true,
+    })
+        .addChild("format_font_size", ["format"], {
+        name: _lt("Font size"),
+        sequence: 60,
+    })
+        .addChild("format_wrapping", ["format"], {
+        name: _lt("Wrapping"),
+        sequence: 70,
+        separator: true,
+    })
+        .addChild("format_wrapping_overflow", ["format", "format_wrapping"], {
+        name: "Overflow",
+        sequence: 10,
+        action: (env) => setStyle(env, { wrapping: "overflow" }),
+    })
+        .addChild("format_wrapping_wrap", ["format", "format_wrapping"], {
+        name: "Wrap",
+        sequence: 20,
+        action: (env) => setStyle(env, { wrapping: "wrap" }),
+    })
+        .addChild("format_wrapping_clip", ["format", "format_wrapping"], {
+        name: "Clip",
+        sequence: 30,
+        action: (env) => setStyle(env, { wrapping: "clip" }),
+    })
+        .addChild("format_cf", ["format"], {
+        name: _lt("Conditional formatting"),
+        sequence: 80,
+        action: OPEN_CF_SIDEPANEL_ACTION,
+        separator: true,
+    })
+        .addChild("format_clearFormat", ["format"], {
+        name: _lt("Clear formatting"),
+        sequence: 90,
+        action: FORMAT_CLEARFORMAT_ACTION,
+        separator: true,
+    })
+        .addChild("add_data_filter", ["data"], {
+        name: _lt("Add Filter"),
+        sequence: 20,
+        action: FILTERS_CREATE_FILTER_TABLE,
+        isVisible: (env) => !SELECTION_CONTAINS_FILTER(env),
+        isEnabled: (env) => SELECTION_IS_CONTINUOUS(env),
+    })
+        .addChild("remove_data_filter", ["data"], {
+        name: _lt("Remove Filter"),
+        sequence: 20,
+        action: FILTERS_REMOVE_FILTER_TABLE,
+        isVisible: SELECTION_CONTAINS_FILTER,
+    });
+    // Font-sizes
+    for (let fs of fontSizes) {
+        topbarMenuRegistry.addChild(`format_font_size_${fs.pt}`, ["format", "format_font_size"], {
+            name: fs.pt.toString(),
+            sequence: fs.pt,
+            action: (env) => setStyle(env, { fontSize: fs.pt }),
+        });
+    }
+    // Formula All functions
+    const insertAllFunctionItemSequence = 50;
+    topbarMenuRegistry.addChild("insert_function_all", ["insert", "insert_function"], {
+        name: _lt("All"),
+        sequence: insertAllFunctionItemSequence,
+    });
+    for (const [i, key] of Object.keys(functions$4).sort().entries()) {
+        topbarMenuRegistry.addChild(`insert_function_all_${key.toLowerCase()}`, ["insert", "insert_function", "insert_function_all"], {
+            name: key.toUpperCase(),
+            sequence: i * 10,
+            action: (env) => env.model.dispatch("START_EDITION", { text: `=${key.toUpperCase()}(` }),
+        });
+    }
+    // Formula functions by categories
+    const categories = [
+        ...new Set(Object.keys(functions$4).map((key) => functions$4[key].category)),
+    ].filter(isDefined$1);
+    for (const [i, category] of categories.sort().entries()) {
+        const categoryItemName = `insert_function_${category.toLowerCase()}`;
+        topbarMenuRegistry.addChild(categoryItemName, ["insert", "insert_function"], {
+            name: category,
+            sequence: insertAllFunctionItemSequence + i * 10,
+        });
+        const functionsInCategory = Object.keys(functions$4).filter((key) => functions$4[key].category === category);
+        for (const [i, key] of functionsInCategory.sort().entries()) {
+            const functionItemName = categoryItemName + `_${key.toLowerCase()}`;
+            topbarMenuRegistry.addChild(functionItemName, ["insert", "insert_function", categoryItemName], {
+                name: key.toUpperCase(),
+                sequence: i * 10,
+                action: (env) => env.model.dispatch("START_EDITION", { text: `=${key.toUpperCase()}(` }),
+            });
+        }
+    }
+
+    class OTRegistry extends Registry {
+        /**
+         * Add a transformation function to the registry. When the executed command
+         * happened, all the commands in toTransforms should be transformed using the
+         * transformation function given
+         */
+        addTransformation(executed, toTransforms, fn) {
+            for (let toTransform of toTransforms) {
+                if (!this.content[toTransform]) {
+                    this.content[toTransform] = new Map();
+                }
+                this.content[toTransform].set(executed, fn);
+            }
+            return this;
+        }
+        /**
+         * Get the transformation function to transform the command toTransform, after
+         * that the executed command happened.
+         */
+        getTransformation(toTransform, executed) {
+            return this.content[toTransform] && this.content[toTransform].get(executed);
+        }
+    }
+    const otRegistry = new OTRegistry();
+
+    const uuidGenerator$1 = new UuidGenerator();
+    css /* scss */ `
+  .o-selection {
+    .o-selection-input {
+      display: flex;
+      flex-direction: row;
+
+      input {
+        padding: 4px 6px;
+        border-radius: 4px;
+        box-sizing: border-box;
+        flex-grow: 2;
+      }
+      input:focus {
+        outline: none;
+      }
+      input.o-required,
+      input.o-focused {
+        border-width: 2px;
+        padding: 3px 5px;
+      }
+      input.o-focused {
+        border-color: ${SELECTION_BORDER_COLOR};
+      }
+      input.o-invalid {
+        border-color: red;
+      }
+      button.o-btn {
+        background: transparent;
+        border: none;
+        color: #333;
+        cursor: pointer;
+      }
+      button.o-btn-action {
+        margin: 8px 1px;
+        border-radius: 4px;
+        background: transparent;
+        border: 1px solid #dadce0;
+        color: #188038;
+        font-weight: bold;
+        font-size: 14px;
+        height: 25px;
+      }
+    }
+  }
+`;
+    /**
+     * This component can be used when the user needs to input some
+     * ranges. He can either input the ranges with the regular DOM `<input/>`
+     * displayed or by selecting zones on the grid.
+     *
+     * onSelectionChanged is called every time the input value
+     * changes.
+     */
+    class SelectionInput extends owl.Component {
+        constructor() {
+            super(...arguments);
+            this.id = uuidGenerator$1.uuidv4();
+            this.previousRanges = this.props.ranges || [];
+            this.originSheet = this.env.model.getters.getActiveSheetId();
+            this.state = owl.useState({
+                isMissing: false,
+            });
+        }
+        get ranges() {
+            const existingSelectionRange = this.env.model.getters.getSelectionInput(this.id);
+            const ranges = existingSelectionRange.length
+                ? existingSelectionRange
+                : this.props.ranges
+                    ? this.props.ranges.map((xc, i) => ({
+                        xc,
+                        id: i.toString(),
+                        isFocused: false,
+                    }))
+                    : [];
+            return ranges.map((range) => ({
+                ...range,
+                isValidRange: range.xc === "" || this.env.model.getters.isRangeValid(range.xc),
+            }));
+        }
+        get hasFocus() {
+            return this.ranges.filter((i) => i.isFocused).length > 0;
+        }
+        get canAddRange() {
+            return !this.props.hasSingleRange;
+        }
+        get isInvalid() {
+            return this.props.isInvalid || this.state.isMissing;
+        }
+        setup() {
+            owl.onMounted(() => this.enableNewSelectionInput());
+            owl.onWillUnmount(async () => this.disableNewSelectionInput());
+            owl.onPatched(() => this.checkChange());
+        }
+        enableNewSelectionInput() {
+            this.env.model.dispatch("ENABLE_NEW_SELECTION_INPUT", {
+                id: this.id,
+                initialRanges: this.props.ranges,
+                hasSingleRange: this.props.hasSingleRange,
+            });
+        }
+        disableNewSelectionInput() {
+            this.env.model.dispatch("DISABLE_SELECTION_INPUT", { id: this.id });
+        }
+        checkChange() {
+            const value = this.env.model.getters.getSelectionInputValue(this.id);
+            if (this.previousRanges.join() !== value.join()) {
+                this.triggerChange();
+            }
+        }
+        getColor(range) {
+            const color = range.color || "#000";
+            return "color: " + color + ";";
+        }
+        triggerChange() {
+            var _a, _b;
+            const ranges = this.env.model.getters.getSelectionInputValue(this.id);
+            (_b = (_a = this.props).onSelectionChanged) === null || _b === void 0 ? void 0 : _b.call(_a, ranges);
+            this.previousRanges = ranges;
+        }
+        focus(rangeId) {
+            this.state.isMissing = false;
+            this.env.model.dispatch("FOCUS_RANGE", {
+                id: this.id,
+                rangeId,
+            });
+        }
+        addEmptyInput() {
+            this.env.model.dispatch("ADD_EMPTY_RANGE", { id: this.id });
+        }
+        removeInput(rangeId) {
+            var _a, _b;
+            this.env.model.dispatch("REMOVE_RANGE", { id: this.id, rangeId });
+            this.triggerChange();
+            (_b = (_a = this.props).onSelectionConfirmed) === null || _b === void 0 ? void 0 : _b.call(_a);
+        }
+        onInputChanged(rangeId, ev) {
+            const target = ev.target;
+            this.env.model.dispatch("CHANGE_RANGE", {
+                id: this.id,
+                rangeId,
+                value: target.value,
+            });
+            target.blur();
+            this.triggerChange();
+        }
+        disable() {
+            var _a, _b;
+            this.env.model.dispatch("UNFOCUS_SELECTION_INPUT");
+            const ranges = this.env.model.getters.getSelectionInputValue(this.id);
+            if (this.props.required && ranges.length === 0) {
+                this.state.isMissing = true;
+            }
+            const activeSheetId = this.env.model.getters.getActiveSheetId();
+            if (this.originSheet !== activeSheetId) {
+                this.env.model.dispatch("ACTIVATE_SHEET", {
+                    sheetIdFrom: activeSheetId,
+                    sheetIdTo: this.originSheet,
+                });
+            }
+            (_b = (_a = this.props).onSelectionConfirmed) === null || _b === void 0 ? void 0 : _b.call(_a);
+        }
+    }
+    SelectionInput.template = "o-spreadsheet-SelectionInput";
+    SelectionInput.props = {
+        ranges: Array,
+        hasSingleRange: { type: Boolean, optional: true },
+        required: { type: Boolean, optional: true },
+        isInvalid: { type: Boolean, optional: true },
+        class: { type: String, optional: true },
+        onSelectionChanged: { type: Function, optional: true },
+        onSelectionConfirmed: { type: Function, optional: true },
+    };
+
+    class LineBarPieConfigPanel extends owl.Component {
+        constructor() {
+            super(...arguments);
+            this.state = owl.useState({
+                datasetDispatchResult: undefined,
+                labelsDispatchResult: undefined,
+            });
+            this.dataSeriesRanges = [];
+        }
+        setup() {
+            this.dataSeriesRanges = this.props.definition.dataSets;
+            this.labelRange = this.props.definition.labelRange;
+        }
+        get errorMessages() {
+            var _a, _b;
+            const cancelledReasons = [
+                ...(((_a = this.state.datasetDispatchResult) === null || _a === void 0 ? void 0 : _a.reasons) || []),
+                ...(((_b = this.state.labelsDispatchResult) === null || _b === void 0 ? void 0 : _b.reasons) || []),
+            ];
+            return cancelledReasons.map((error) => ChartTerms.Errors[error] || ChartTerms.Errors.Unexpected);
+        }
+        get isDatasetInvalid() {
+            var _a;
+            return !!((_a = this.state.datasetDispatchResult) === null || _a === void 0 ? void 0 : _a.isCancelledBecause(30 /* CommandResult.InvalidDataSet */));
+        }
+        get isLabelInvalid() {
+            var _a;
+            return !!((_a = this.state.labelsDispatchResult) === null || _a === void 0 ? void 0 : _a.isCancelledBecause(31 /* CommandResult.InvalidLabelRange */));
+        }
+        onUpdateDataSetsHaveTitle(ev) {
+            this.props.updateChart({
+                dataSetsHaveTitle: ev.target.checked,
+            });
+        }
+        /**
+         * Change the local dataSeriesRanges. The model should be updated when the
+         * button "confirm" is clicked
+         */
+        onDataSeriesRangesChanged(ranges) {
+            this.dataSeriesRanges = ranges;
+        }
+        onDataSeriesConfirmed() {
+            this.state.datasetDispatchResult = this.props.updateChart({
+                dataSets: this.dataSeriesRanges,
+            });
+        }
+        /**
+         * Change the local labelRange. The model should be updated when the
+         * button "confirm" is clicked
+         */
+        onLabelRangeChanged(ranges) {
+            this.labelRange = ranges[0];
+        }
+        onLabelRangeConfirmed() {
+            this.state.labelsDispatchResult = this.props.updateChart({
+                labelRange: this.labelRange,
+            });
+        }
+    }
+    LineBarPieConfigPanel.template = "o-spreadsheet-LineBarPieConfigPanel";
+    LineBarPieConfigPanel.components = { SelectionInput };
+    LineBarPieConfigPanel.props = {
+        figureId: String,
+        definition: Object,
+        updateChart: Function,
+    };
+
+    class BarConfigPanel extends LineBarPieConfigPanel {
+        onUpdateStacked(ev) {
+            this.props.updateChart({
+                stacked: ev.target.checked,
+            });
+        }
+    }
+    BarConfigPanel.template = "o-spreadsheet-BarConfigPanel";
+
+    /**
+     * AbstractChart is the class from which every Chart should inherit.
+     * The role of this class is to maintain the state of each chart.
+     */
+    class AbstractChart {
+        constructor(definition, sheetId, getters) {
+            this.title = definition.title;
+            this.sheetId = sheetId;
+            this.getters = getters;
+        }
+        /**
+         * Validate the chart definition given as arguments. This function will be
+         * called from allowDispatch function
+         */
+        static validateChartDefinition(validator, definition) {
+            throw new Error("This method should be implemented by sub class");
+        }
+        /**
+         * Get a new chart definition transformed with the executed command. This
+         * functions will be called during operational transform process
+         */
+        static transformDefinition(definition, executed) {
+            throw new Error("This method should be implemented by sub class");
+        }
+        /**
+         * Get an empty definition based on the given context
+         */
+        static getDefinitionFromContextCreation(context) {
+            throw new Error("This method should be implemented by sub class");
+        }
+    }
+
+    /**
+     * Convert a JS color hexadecimal to an excel compatible color.
+     *
+     * In Excel the color don't start with a '#' and the format is AARRGGBB instead of RRGGBBAA
+     */
+    function toXlsxHexColor(color) {
+        color = toHex(color).replace("#", "");
+        // alpha channel goes first
+        if (color.length === 8) {
+            return color.slice(6) + color.slice(0, 6);
+        }
+        return color;
+    }
+
+    function transformZone(zone, executed) {
+        if (executed.type === "REMOVE_COLUMNS_ROWS") {
+            return reduceZoneOnDeletion(zone, executed.dimension === "COL" ? "left" : "top", executed.elements);
+        }
+        if (executed.type === "ADD_COLUMNS_ROWS") {
+            return expandZoneOnInsertion(zone, executed.dimension === "COL" ? "left" : "top", executed.base, executed.position, executed.quantity);
+        }
+        return { ...zone };
+    }
+
+    /**
+     * This file contains helpers that are common to different charts (mainly
+     * line, bar and pie charts)
+     */
+    /**
+     * Adapt ranges of a chart which support DataSet (dataSets and LabelRange).
+     */
+    function updateChartRangesWithDataSets(getters, applyChange, chartDataSets, chartLabelRange) {
+        let isStale = false;
+        const dataSetsWithUndefined = [];
+        for (let index in chartDataSets) {
+            let ds = chartDataSets[index];
+            if (ds.labelCell) {
+                const labelCell = adaptChartRange(ds.labelCell, applyChange);
+                if (ds.labelCell !== labelCell) {
+                    isStale = true;
+                    ds = {
+                        ...ds,
+                        labelCell: labelCell,
+                    };
+                }
+            }
+            const dataRange = adaptChartRange(ds.dataRange, applyChange);
+            if (dataRange === undefined ||
+                getters.getRangeString(dataRange, dataRange.sheetId) === INCORRECT_RANGE_STRING) {
+                isStale = true;
+                ds = undefined;
+            }
+            else if (dataRange !== ds.dataRange) {
+                isStale = true;
+                ds = {
+                    ...ds,
+                    dataRange,
+                };
+            }
+            dataSetsWithUndefined[index] = ds;
+        }
+        let labelRange = chartLabelRange;
+        const range = adaptChartRange(labelRange, applyChange);
+        if (range !== labelRange) {
+            isStale = true;
+            labelRange = range;
+        }
+        const dataSets = dataSetsWithUndefined.filter(isDefined$1);
+        return {
+            isStale,
+            dataSets,
+            labelRange,
+        };
+    }
+    /**
+     * Copy the dataSets given. All the ranges which are on sheetIdFrom will target
+     * sheetIdTo.
+     */
+    function copyDataSetsWithNewSheetId(sheetIdFrom, sheetIdTo, dataSets) {
+        return dataSets.map((ds) => {
+            return {
+                dataRange: copyRangeWithNewSheetId(sheetIdFrom, sheetIdTo, ds.dataRange),
+                labelCell: ds.labelCell
+                    ? copyRangeWithNewSheetId(sheetIdFrom, sheetIdTo, ds.labelCell)
+                    : undefined,
+            };
+        });
+    }
+    /**
+     * Copy a range. If the range is on the sheetIdFrom, the range will target
+     * sheetIdTo.
+     */
+    function copyLabelRangeWithNewSheetId(sheetIdFrom, sheetIdTo, range) {
+        return range ? copyRangeWithNewSheetId(sheetIdFrom, sheetIdTo, range) : undefined;
+    }
+    /**
+     * Adapt a single range of a chart
+     */
+    function adaptChartRange(range, applyChange) {
+        if (!range) {
+            return undefined;
+        }
+        const change = applyChange(range);
+        switch (change.changeType) {
+            case "NONE":
+                return range;
+            case "REMOVE":
+                return undefined;
+            default:
+                return change.range;
+        }
+    }
+    /**
+     * Create the dataSet objects from xcs
+     */
+    function createDataSets(getters, dataSetsString, sheetId, dataSetsHaveTitle) {
+        const dataSets = [];
+        for (const sheetXC of dataSetsString) {
+            const dataRange = getters.getRangeFromSheetXC(sheetId, sheetXC);
+            const { unboundedZone: zone, sheetId: dataSetSheetId, invalidSheetName } = dataRange;
+            if (invalidSheetName) {
+                continue;
+            }
+            // It's a rectangle. We treat all columns (arbitrary) as different data series.
+            if (zone.left !== zone.right && zone.top !== zone.bottom) {
+                if (zone.right === undefined) {
+                    // Should never happens because of the allowDispatch of charts, but just making sure
+                    continue;
+                }
+                for (let column = zone.left; column <= zone.right; column++) {
+                    const columnZone = {
+                        ...zone,
+                        left: column,
+                        right: column,
+                    };
+                    dataSets.push(createDataSet(getters, dataSetSheetId, columnZone, dataSetsHaveTitle
+                        ? {
+                            top: columnZone.top,
+                            bottom: columnZone.top,
+                            left: columnZone.left,
+                            right: columnZone.left,
+                        }
+                        : undefined));
+                }
+            }
+            else if (zone.left === zone.right && zone.top === zone.bottom) {
+                // A single cell. If it's only the title, the dataset is not added.
+                if (!dataSetsHaveTitle) {
+                    dataSets.push(createDataSet(getters, dataSetSheetId, zone, undefined));
+                }
+            }
+            else {
+                /* 1 row or 1 column */
+                dataSets.push(createDataSet(getters, dataSetSheetId, zone, dataSetsHaveTitle
+                    ? {
+                        top: zone.top,
+                        bottom: zone.top,
+                        left: zone.left,
+                        right: zone.left,
+                    }
+                    : undefined));
+            }
+        }
+        return dataSets;
+    }
+    function createDataSet(getters, sheetId, fullZone, titleZone) {
+        if (fullZone.left !== fullZone.right && fullZone.top !== fullZone.bottom) {
+            throw new Error(`Zone should be a single column or row: ${zoneToXc(fullZone)}`);
+        }
+        if (titleZone) {
+            const dataXC = zoneToXc(fullZone);
+            const labelCellXC = zoneToXc(titleZone);
+            return {
+                labelCell: getters.getRangeFromSheetXC(sheetId, labelCellXC),
+                dataRange: getters.getRangeFromSheetXC(sheetId, dataXC),
+            };
+        }
+        else {
+            return {
+                labelCell: undefined,
+                dataRange: getters.getRangeFromSheetXC(sheetId, zoneToXc(fullZone)),
+            };
+        }
+    }
+    /**
+     * Transform a dataSet to a ExcelDataSet
+     */
+    function toExcelDataset(getters, ds) {
+        var _a;
+        const labelZone = (_a = ds.labelCell) === null || _a === void 0 ? void 0 : _a.zone;
+        let dataZone = ds.dataRange.zone;
+        if (labelZone) {
+            const { height, width } = zoneToDimension(dataZone);
+            if (height === 1) {
+                dataZone = { ...dataZone, left: dataZone.left + 1 };
+            }
+            else if (width === 1) {
+                dataZone = { ...dataZone, top: dataZone.top + 1 };
+            }
+        }
+        const dataRange = ds.dataRange.clone({ zone: dataZone });
+        return {
+            label: ds.labelCell ? getters.getRangeString(ds.labelCell, "forceSheetReference") : undefined,
+            range: getters.getRangeString(dataRange, "forceSheetReference"),
+        };
+    }
+    /**
+     * Transform a chart definition which supports dataSets (dataSets and LabelRange)
+     * with an executed command
+     */
+    function transformChartDefinitionWithDataSetsWithZone(definition, executed) {
+        let labelRange;
+        if (definition.labelRange) {
+            const labelZone = transformZone(toUnboundedZone(definition.labelRange), executed);
+            labelRange = labelZone ? zoneToXc(labelZone) : undefined;
+        }
+        const dataSets = definition.dataSets
+            .map(toUnboundedZone)
+            .map((zone) => transformZone(zone, executed))
+            .filter(isDefined$1)
+            .map(zoneToXc);
+        return {
+            ...definition,
+            labelRange,
+            dataSets,
+        };
+    }
+    const GraphColors = [
+        // the same colors as those used in odoo reporting
+        "rgb(31,119,180)",
+        "rgb(255,127,14)",
+        "rgb(174,199,232)",
+        "rgb(255,187,120)",
+        "rgb(44,160,44)",
+        "rgb(152,223,138)",
+        "rgb(214,39,40)",
+        "rgb(255,152,150)",
+        "rgb(148,103,189)",
+        "rgb(197,176,213)",
+        "rgb(140,86,75)",
+        "rgb(196,156,148)",
+        "rgb(227,119,194)",
+        "rgb(247,182,210)",
+        "rgb(127,127,127)",
+        "rgb(199,199,199)",
+        "rgb(188,189,34)",
+        "rgb(219,219,141)",
+        "rgb(23,190,207)",
+        "rgb(158,218,229)",
+    ];
+    class ChartColors {
+        constructor() {
+            this.graphColorIndex = 0;
+        }
+        next() {
+            return GraphColors[this.graphColorIndex++ % GraphColors.length];
+        }
+    }
+    /**
+     * Choose a font color based on a background color.
+     * The font is white with a dark background.
+     */
+    function chartFontColor(backgroundColor) {
+        if (!backgroundColor) {
+            return "#000000";
+        }
+        return relativeLuminance(backgroundColor) < 0.3 ? "#FFFFFF" : "#000000";
+    }
+    function checkDataset(definition) {
+        if (definition.dataSets) {
+            const invalidRanges = definition.dataSets.find((range) => !rangeReference.test(range)) !== undefined;
+            if (invalidRanges) {
+                return 30 /* CommandResult.InvalidDataSet */;
+            }
+            const zones = definition.dataSets.map(toUnboundedZone);
+            if (zones.some((zone) => zone.top !== zone.bottom && isFullRow(zone))) {
+                return 30 /* CommandResult.InvalidDataSet */;
+            }
+        }
+        return 0 /* CommandResult.Success */;
+    }
+    function checkLabelRange(definition) {
+        if (definition.labelRange) {
+            const invalidLabels = !rangeReference.test(definition.labelRange || "");
+            if (invalidLabels) {
+                return 31 /* CommandResult.InvalidLabelRange */;
+            }
+        }
+        return 0 /* CommandResult.Success */;
+    }
+    // ---------------------------------------------------------------------------
+    // Scorecard
+    // ---------------------------------------------------------------------------
+    function getBaselineText(baseline, keyValue, baselineMode) {
+        const baselineEvaluated = baseline === null || baseline === void 0 ? void 0 : baseline.evaluated;
+        if (!baseline || baselineEvaluated === undefined) {
+            return "";
+        }
+        else if (baselineMode === "text" ||
+            (keyValue === null || keyValue === void 0 ? void 0 : keyValue.type) !== CellValueType.number ||
+            baselineEvaluated.type !== CellValueType.number) {
+            return baseline.formattedValue;
+        }
+        else {
+            let diff = keyValue.value - baselineEvaluated.value;
+            if (baselineMode === "percentage" && diff !== 0) {
+                diff = (diff / baselineEvaluated.value) * 100;
+            }
+            if (baselineMode !== "percentage" && baselineEvaluated.format) {
+                return formatValue(diff, baselineEvaluated.format);
+            }
+            const baselineStr = Math.abs(parseFloat(diff.toFixed(2))).toLocaleString();
+            return baselineMode === "percentage" ? baselineStr + "%" : baselineStr;
+        }
+    }
+    function getBaselineColor(baseline, baselineMode, keyValue, colorUp, colorDown) {
+        if (baselineMode === "text" ||
+            (baseline === null || baseline === void 0 ? void 0 : baseline.type) !== CellValueType.number ||
+            (keyValue === null || keyValue === void 0 ? void 0 : keyValue.type) !== CellValueType.number) {
+            return undefined;
+        }
+        const diff = keyValue.value - baseline.value;
+        if (diff > 0) {
+            return colorUp;
+        }
+        else if (diff < 0) {
+            return colorDown;
+        }
+        return undefined;
+    }
+    function getBaselineArrowDirection(baseline, keyValue, baselineMode) {
+        if (baselineMode === "text" ||
+            (baseline === null || baseline === void 0 ? void 0 : baseline.type) !== CellValueType.number ||
+            (keyValue === null || keyValue === void 0 ? void 0 : keyValue.type) !== CellValueType.number) {
+            return "neutral";
+        }
+        const diff = keyValue.value - baseline.value;
+        if (diff > 0) {
+            return "up";
+        }
+        else if (diff < 0) {
+            return "down";
+        }
+        return "neutral";
+    }
+
+    /**
+     * This file contains helpers that are common to different runtime charts (mainly
+     * line, bar and pie charts)
+     */
+    /**
+     * Get the data from a dataSet
+     */
+    function getData(getters, ds) {
+        if (ds.dataRange) {
+            const labelCellZone = ds.labelCell ? [zoneToXc(ds.labelCell.zone)] : [];
+            const dataXC = recomputeZones([zoneToXc(ds.dataRange.zone)], labelCellZone)[0];
+            if (dataXC === undefined) {
+                return [];
+            }
+            const dataRange = getters.getRangeFromSheetXC(ds.dataRange.sheetId, dataXC);
+            return getters.getRangeValues(dataRange);
+        }
+        return [];
+    }
+    function filterEmptyDataPoints(labels, datasets) {
+        const numberOfDataPoints = Math.max(labels.length, ...datasets.map((dataset) => { var _a; return ((_a = dataset.data) === null || _a === void 0 ? void 0 : _a.length) || 0; }));
+        const dataPointsIndexes = range(0, numberOfDataPoints).filter((dataPointIndex) => {
+            const label = labels[dataPointIndex];
+            const values = datasets.map((dataset) => { var _a; return (_a = dataset.data) === null || _a === void 0 ? void 0 : _a[dataPointIndex]; });
+            return label || values.some((value) => value === 0 || Boolean(value));
+        });
+        return {
+            labels: dataPointsIndexes.map((i) => labels[i] || ""),
+            dataSetsValues: datasets.map((dataset) => ({
+                ...dataset,
+                data: dataPointsIndexes.map((i) => dataset.data[i]),
+            })),
+        };
+    }
+    function truncateLabel(label) {
+        if (!label) {
+            return "";
+        }
+        if (label.length > MAX_CHAR_LABEL) {
+            return label.substring(0, MAX_CHAR_LABEL) + "…";
+        }
+        return label;
+    }
+    /**
+     * Get a default chart js configuration
+     */
+    function getDefaultChartJsRuntime(chart, labels, fontColor) {
+        return {
+            type: chart.type,
+            options: {
+                // https://www.chartjs.org/docs/latest/general/responsive.html
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: { left: 20, right: 20, top: chart.title ? 10 : 25, bottom: 10 },
+                },
+                elements: {
+                    line: {
+                        fill: false, // do not fill the area under line charts
+                    },
+                    point: {
+                        hitRadius: 15, // increased hit radius to display point tooltip when hovering nearby
+                    },
+                },
+                animation: {
+                    duration: 0, // general animation time
+                },
+                hover: {
+                    animationDuration: 10, // duration of animations when hovering an item
+                },
+                responsiveAnimationDuration: 0,
+                title: {
+                    display: !!chart.title,
+                    fontSize: 22,
+                    fontStyle: "normal",
+                    text: _t(chart.title),
+                    fontColor,
+                },
+                legend: {
+                    // Disable default legend onClick (show/hide dataset), to allow us to set a global onClick on the chart container.
+                    // If we want to re-enable this in the future, we need to override the default onClick to stop the event propagation
+                    onClick: undefined,
+                },
+            },
+            data: {
+                labels: labels.map(truncateLabel),
+                datasets: [],
+            },
+        };
+    }
+    function getLabelFormat(getters, range) {
+        var _a;
+        if (!range)
+            return undefined;
+        return (_a = getters.getCell(range.sheetId, range.zone.left, range.zone.top)) === null || _a === void 0 ? void 0 : _a.evaluated.format;
+    }
+    function getChartLabelValues(getters, dataSets, labelRange) {
+        let labels = { values: [], formattedValues: [] };
+        if (labelRange) {
+            if (!labelRange.invalidXc && !labelRange.invalidSheetName) {
+                labels = {
+                    formattedValues: getters.getRangeFormattedValues(labelRange),
+                    values: getters
+                        .getRangeValues(labelRange)
+                        .map((val) => (val !== undefined && val !== null ? String(val) : "")),
+                };
+            }
+        }
+        else if (dataSets.length === 1) {
+            for (let i = 0; i < getData(getters, dataSets[0]).length; i++) {
+                labels.formattedValues.push("");
+                labels.values.push("");
+            }
+        }
+        else {
+            if (dataSets[0]) {
+                const ranges = getData(getters, dataSets[0]);
+                labels = {
+                    formattedValues: range(0, ranges.length).map((r) => r.toString()),
+                    values: labels.formattedValues,
+                };
+            }
+        }
+        return labels;
+    }
+    function getChartDatasetValues(getters, dataSets) {
+        const datasetValues = [];
+        for (const [dsIndex, ds] of Object.entries(dataSets)) {
+            let label;
+            if (ds.labelCell) {
+                const labelRange = ds.labelCell;
+                const cell = labelRange
+                    ? getters.getCell(labelRange.sheetId, labelRange.zone.left, labelRange.zone.top)
+                    : undefined;
+                label =
+                    cell && labelRange
+                        ? truncateLabel(cell.formattedValue)
+                        : (label = `${ChartTerms.Series} ${parseInt(dsIndex) + 1}`);
+            }
+            else {
+                label = label = `${ChartTerms.Series} ${parseInt(dsIndex) + 1}`;
+            }
+            let data = ds.dataRange ? getData(getters, ds) : [];
+            datasetValues.push({ data, label });
+        }
+        return datasetValues;
+    }
+    /** See https://www.chartjs.org/docs/latest/charts/area.html#filling-modes */
+    function getFillingMode(index) {
+        if (index === 0) {
+            return "origin";
+        }
+        else {
+            return index - 1;
+        }
+    }
+
+    chartRegistry.add("bar", {
+        match: (type) => type === "bar",
+        createChart: (definition, sheetId, getters) => new BarChart(definition, sheetId, getters),
+        getChartRuntime: createBarChartRuntime,
+        validateChartDefinition: (validator, definition) => BarChart.validateChartDefinition(validator, definition),
+        transformDefinition: (definition, executed) => BarChart.transformDefinition(definition, executed),
+        getChartDefinitionFromContextCreation: (context) => BarChart.getDefinitionFromContextCreation(context),
+        name: "Bar",
+    });
+    class BarChart extends AbstractChart {
+        constructor(definition, sheetId, getters) {
+            super(definition, sheetId, getters);
+            this.type = "bar";
+            this.dataSets = createDataSets(getters, definition.dataSets, sheetId, definition.dataSetsHaveTitle);
+            this.labelRange = createRange(getters, sheetId, definition.labelRange);
+            this.background = definition.background;
+            this.verticalAxisPosition = definition.verticalAxisPosition;
+            this.legendPosition = definition.legendPosition;
+            this.stacked = definition.stacked;
+        }
+        static transformDefinition(definition, executed) {
+            return transformChartDefinitionWithDataSetsWithZone(definition, executed);
+        }
+        static validateChartDefinition(validator, definition) {
+            return validator.checkValidations(definition, checkDataset, checkLabelRange);
+        }
+        static getDefinitionFromContextCreation(context) {
+            return {
+                background: context.background,
+                dataSets: context.range ? context.range : [],
+                dataSetsHaveTitle: false,
+                stacked: false,
+                legendPosition: "top",
+                title: context.title || "",
+                type: "bar",
+                verticalAxisPosition: "left",
+                labelRange: context.auxiliaryRange || undefined,
+            };
+        }
+        getContextCreation() {
+            return {
+                background: this.background,
+                title: this.title,
+                range: this.dataSets.map((ds) => this.getters.getRangeString(ds.dataRange, this.sheetId)),
+                auxiliaryRange: this.labelRange
+                    ? this.getters.getRangeString(this.labelRange, this.sheetId)
+                    : undefined,
+            };
+        }
+        copyForSheetId(sheetId) {
+            const dataSets = copyDataSetsWithNewSheetId(this.sheetId, sheetId, this.dataSets);
+            const labelRange = copyLabelRangeWithNewSheetId(this.sheetId, sheetId, this.labelRange);
+            const definition = this.getDefinitionWithSpecificDataSets(dataSets, labelRange, sheetId);
+            return new BarChart(definition, sheetId, this.getters);
+        }
+        copyInSheetId(sheetId) {
+            const definition = this.getDefinitionWithSpecificDataSets(this.dataSets, this.labelRange, sheetId);
+            return new BarChart(definition, sheetId, this.getters);
+        }
+        getDefinition() {
+            return this.getDefinitionWithSpecificDataSets(this.dataSets, this.labelRange);
+        }
+        getDefinitionWithSpecificDataSets(dataSets, labelRange, targetSheetId) {
+            return {
+                type: "bar",
+                dataSetsHaveTitle: dataSets.length ? Boolean(dataSets[0].labelCell) : false,
+                background: this.background,
+                dataSets: dataSets.map((ds) => this.getters.getRangeString(ds.dataRange, targetSheetId || this.sheetId)),
+                legendPosition: this.legendPosition,
+                verticalAxisPosition: this.verticalAxisPosition,
+                labelRange: labelRange
+                    ? this.getters.getRangeString(labelRange, targetSheetId || this.sheetId)
+                    : undefined,
+                title: this.title,
+                stacked: this.stacked,
+            };
+        }
+        getDefinitionForExcel() {
+            const dataSets = this.dataSets
+                .map((ds) => toExcelDataset(this.getters, ds))
+                .filter((ds) => ds.range !== ""); // && range !== INCORRECT_RANGE_STRING ? show incorrect #ref ?
+            return {
+                ...this.getDefinition(),
+                backgroundColor: toXlsxHexColor(this.background || BACKGROUND_CHART_COLOR),
+                fontColor: toXlsxHexColor(chartFontColor(this.background)),
+                dataSets,
+            };
+        }
+        updateRanges(applyChange) {
+            const { dataSets, labelRange, isStale } = updateChartRangesWithDataSets(this.getters, applyChange, this.dataSets, this.labelRange);
+            if (!isStale) {
+                return this;
+            }
+            const definition = this.getDefinitionWithSpecificDataSets(dataSets, labelRange);
+            return new BarChart(definition, this.sheetId, this.getters);
+        }
+    }
+    function getBarConfiguration(chart, labels) {
+        var _a;
+        const fontColor = chartFontColor(chart.background);
+        const config = getDefaultChartJsRuntime(chart, labels, fontColor);
+        const legend = {
+            labels: { fontColor },
+        };
+        if ((!chart.labelRange && chart.dataSets.length === 1) || chart.legendPosition === "none") {
+            legend.display = false;
+        }
+        else {
+            legend.position = chart.legendPosition;
+        }
+        config.options.legend = { ...(_a = config.options) === null || _a === void 0 ? void 0 : _a.legend, ...legend };
+        config.options.layout = {
+            padding: { left: 20, right: 20, top: chart.title ? 10 : 25, bottom: 10 },
+        };
+        config.options.scales = {
+            xAxes: [
+                {
+                    ticks: {
+                        // x axis configuration
+                        maxRotation: 60,
+                        minRotation: 15,
+                        padding: 5,
+                        labelOffset: 2,
+                        fontColor,
+                    },
+                },
+            ],
+            yAxes: [
+                {
+                    position: chart.verticalAxisPosition,
+                    ticks: {
+                        fontColor,
+                        // y axis configuration
+                        beginAtZero: true, // the origin of the y axis is always zero
+                    },
+                },
+            ],
+        };
+        if (chart.stacked) {
+            config.options.scales.xAxes[0].stacked = true;
+            config.options.scales.yAxes[0].stacked = true;
+        }
+        return config;
+    }
+    function createBarChartRuntime(chart, getters) {
+        const labelValues = getChartLabelValues(getters, chart.dataSets, chart.labelRange);
+        let labels = labelValues.formattedValues;
+        let dataSetsValues = getChartDatasetValues(getters, chart.dataSets);
+        ({ labels, dataSetsValues } = filterEmptyDataPoints(labels, dataSetsValues));
+        const config = getBarConfiguration(chart, labels);
+        const colors = new ChartColors();
+        for (let { label, data } of dataSetsValues) {
+            const color = colors.next();
+            const dataset = {
+                label,
+                data,
+                borderColor: color,
+                backgroundColor: color,
+            };
+            config.data.datasets.push(dataset);
+        }
+        return { chartJsConfig: config, background: chart.background || BACKGROUND_CHART_COLOR };
+    }
+
+    /**
+     * Create a function used to create a Chart based on the definition
+     */
+    function chartFactory(getters) {
+        const builders = chartRegistry.getAll();
+        function createChart(id, definition, sheetId) {
+            const builder = builders.find((builder) => builder.match(definition.type));
+            if (!builder) {
+                throw new Error(`No builder for this chart: ${definition.type}`);
+            }
+            return builder.createChart(definition, sheetId, getters);
+        }
+        return createChart;
+    }
+    /**
+     * Create a function used to create a Chart Runtime based on the chart class
+     * instance
+     */
+    function chartRuntimeFactory(getters) {
+        const builders = chartRegistry.getAll();
+        function createRuntimeChart(chart) {
+            const builder = builders.find((builder) => builder.match(chart.type));
+            if (!builder) {
+                throw new Error("No runtime builder for this chart.");
+            }
+            return builder.getChartRuntime(chart, getters);
+        }
+        return createRuntimeChart;
+    }
+    /**
+     * Validate the chart definition given in arguments
+     */
+    function validateChartDefinition(validator, definition) {
+        const validators = chartRegistry.getAll().find((validator) => validator.match(definition.type));
+        if (!validators) {
+            throw new Error("Unknown chart type.");
+        }
+        return validators.validateChartDefinition(validator, definition);
+    }
+    /**
+     * Get a new chart definition transformed with the executed command. This
+     * functions will be called during operational transform process
+     */
+    function transformDefinition(definition, executed) {
+        const transformation = chartRegistry.getAll().find((factory) => factory.match(definition.type));
+        if (!transformation) {
+            throw new Error("Unknown chart type.");
+        }
+        return transformation.transformDefinition(definition, executed);
+    }
+    /**
+     * Get an empty definition based on the given context and the given type
+     */
+    function getChartDefinitionFromContextCreation(context, type) {
+        const chartClass = chartRegistry.get(type);
+        return chartClass.getChartDefinitionFromContextCreation(context);
+    }
+    function getChartTypes() {
+        const result = {};
+        for (const key of chartRegistry.getKeys()) {
+            result[key] = chartRegistry.get(key).name;
+        }
+        return result;
+    }
+
+    chartRegistry.add("gauge", {
+        match: (type) => type === "gauge",
+        createChart: (definition, sheetId, getters) => new GaugeChart(definition, sheetId, getters),
+        getChartRuntime: createGaugeChartRuntime,
+        validateChartDefinition: (validator, definition) => GaugeChart.validateChartDefinition(validator, definition),
+        transformDefinition: (definition, executed) => GaugeChart.transformDefinition(definition, executed),
+        getChartDefinitionFromContextCreation: (context) => GaugeChart.getDefinitionFromContextCreation(context),
+        name: "Gauge",
+    });
+    function isDataRangeValid(definition) {
+        return definition.dataRange && !rangeReference.test(definition.dataRange)
+            ? 34 /* CommandResult.InvalidGaugeDataRange */
+            : 0 /* CommandResult.Success */;
+    }
+    function checkRangeLimits(check, batchValidations) {
+        return batchValidations((definition) => {
+            if (definition.sectionRule) {
+                return check(definition.sectionRule.rangeMin, "rangeMin");
+            }
+            return 0 /* CommandResult.Success */;
+        }, (definition) => {
+            if (definition.sectionRule) {
+                return check(definition.sectionRule.rangeMax, "rangeMax");
+            }
+            return 0 /* CommandResult.Success */;
+        });
+    }
+    function checkInflectionPointsValue(check, batchValidations) {
+        return batchValidations((definition) => {
+            if (definition.sectionRule) {
+                return check(definition.sectionRule.lowerInflectionPoint.value, "lowerInflectionPointValue");
+            }
+            return 0 /* CommandResult.Success */;
+        }, (definition) => {
+            if (definition.sectionRule) {
+                return check(definition.sectionRule.upperInflectionPoint.value, "upperInflectionPointValue");
+            }
+            return 0 /* CommandResult.Success */;
+        });
+    }
+    function checkRangeMinBiggerThanRangeMax(definition) {
+        if (definition.sectionRule) {
+            if (Number(definition.sectionRule.rangeMin) >= Number(definition.sectionRule.rangeMax)) {
+                return 39 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */;
+            }
+        }
+        return 0 /* CommandResult.Success */;
+    }
+    function checkEmpty(value, valueName) {
+        if (value === "") {
+            switch (valueName) {
+                case "rangeMin":
+                    return 35 /* CommandResult.EmptyGaugeRangeMin */;
+                case "rangeMax":
+                    return 37 /* CommandResult.EmptyGaugeRangeMax */;
+            }
+        }
+        return 0 /* CommandResult.Success */;
+    }
+    function checkNaN(value, valueName) {
+        if (isNaN(value)) {
+            switch (valueName) {
+                case "rangeMin":
+                    return 36 /* CommandResult.GaugeRangeMinNaN */;
+                case "rangeMax":
+                    return 38 /* CommandResult.GaugeRangeMaxNaN */;
+                case "lowerInflectionPointValue":
+                    return 40 /* CommandResult.GaugeLowerInflectionPointNaN */;
+                case "upperInflectionPointValue":
+                    return 41 /* CommandResult.GaugeUpperInflectionPointNaN */;
+            }
+        }
+        return 0 /* CommandResult.Success */;
+    }
+    class GaugeChart extends AbstractChart {
+        constructor(definition, sheetId, getters) {
+            super(definition, sheetId, getters);
+            this.type = "gauge";
+            this.dataRange = createRange(this.getters, this.sheetId, definition.dataRange);
+            this.sectionRule = definition.sectionRule;
+            this.background = definition.background;
+        }
+        static validateChartDefinition(validator, definition) {
+            return validator.checkValidations(definition, isDataRangeValid, validator.chainValidations(checkRangeLimits(checkEmpty, validator.batchValidations), checkRangeLimits(checkNaN, validator.batchValidations), checkRangeMinBiggerThanRangeMax), validator.chainValidations(checkInflectionPointsValue(checkNaN, validator.batchValidations)));
+        }
+        static transformDefinition(definition, executed) {
+            let dataRangeZone;
+            if (definition.dataRange) {
+                dataRangeZone = transformZone(toUnboundedZone(definition.dataRange), executed);
+            }
+            return {
+                ...definition,
+                dataRange: dataRangeZone ? zoneToXc(dataRangeZone) : undefined,
+            };
+        }
+        static getDefinitionFromContextCreation(context) {
+            return {
+                background: context.background,
+                title: context.title || "",
+                type: "gauge",
+                dataRange: context.range ? context.range[0] : undefined,
+                sectionRule: {
+                    colors: {
+                        lowerColor: DEFAULT_GAUGE_LOWER_COLOR,
+                        middleColor: DEFAULT_GAUGE_MIDDLE_COLOR,
+                        upperColor: DEFAULT_GAUGE_UPPER_COLOR,
+                    },
+                    rangeMin: "0",
+                    rangeMax: "100",
+                    lowerInflectionPoint: {
+                        type: "percentage",
+                        value: "15",
+                    },
+                    upperInflectionPoint: {
+                        type: "percentage",
+                        value: "40",
+                    },
+                },
+            };
+        }
+        copyForSheetId(sheetId) {
+            const dataRange = copyLabelRangeWithNewSheetId(this.sheetId, sheetId, this.dataRange);
+            const definition = this.getDefinitionWithSpecificRanges(dataRange, sheetId);
+            return new GaugeChart(definition, sheetId, this.getters);
+        }
+        copyInSheetId(sheetId) {
+            const definition = this.getDefinitionWithSpecificRanges(this.dataRange, sheetId);
+            return new GaugeChart(definition, sheetId, this.getters);
+        }
+        getDefinition() {
+            return this.getDefinitionWithSpecificRanges(this.dataRange);
+        }
+        getDefinitionWithSpecificRanges(dataRange, targetSheetId) {
+            return {
+                background: this.background,
+                sectionRule: this.sectionRule,
+                title: this.title,
+                type: "gauge",
+                dataRange: dataRange
+                    ? this.getters.getRangeString(dataRange, targetSheetId || this.sheetId)
+                    : undefined,
+            };
+        }
+        getDefinitionForExcel() {
+            // This kind of graph is not exportable in Excel
+            return undefined;
+        }
+        getContextCreation() {
+            return {
+                background: this.background,
+                title: this.title,
+                range: this.dataRange
+                    ? [this.getters.getRangeString(this.dataRange, this.sheetId)]
+                    : undefined,
+            };
+        }
+        updateRanges(applyChange) {
+            const range = adaptChartRange(this.dataRange, applyChange);
+            if (this.dataRange === range) {
+                return this;
+            }
+            const definition = this.getDefinitionWithSpecificRanges(range);
+            return new GaugeChart(definition, this.sheetId, this.getters);
+        }
+    }
+    function getGaugeConfiguration(chart) {
+        const fontColor = chartFontColor(chart.background);
+        const config = getDefaultChartJsRuntime(chart, [], fontColor);
+        config.options.hover = undefined;
+        config.options.events = [];
+        config.options.layout = {
+            padding: { left: 30, right: 30, top: chart.title ? 10 : 25, bottom: 25 },
+        };
+        config.options.needle = {
+            radiusPercentage: 2,
+            widthPercentage: 3.2,
+            lengthPercentage: 80,
+            color: "#000000",
+        };
+        config.options.valueLabel = {
+            display: false,
+            formatter: null,
+            color: "#FFFFFF",
+            backgroundColor: "#000000",
+            fontSize: 30,
+            borderRadius: 5,
+            padding: {
+                top: 5,
+                right: 5,
+                bottom: 5,
+                left: 5,
+            },
+            bottomMarginPercentage: 5,
+        };
+        return config;
+    }
+    function createGaugeChartRuntime(chart, getters) {
+        const config = getGaugeConfiguration(chart);
+        const colors = chart.sectionRule.colors;
+        const lowerPoint = chart.sectionRule.lowerInflectionPoint;
+        const upperPoint = chart.sectionRule.upperInflectionPoint;
+        const lowerPointValue = Number(lowerPoint.value);
+        const upperPointValue = Number(upperPoint.value);
+        const minNeedleValue = Number(chart.sectionRule.rangeMin);
+        const maxNeedleValue = Number(chart.sectionRule.rangeMax);
+        const needleCoverage = maxNeedleValue - minNeedleValue;
+        const needleInflectionPoint = [];
+        if (lowerPoint.value !== "") {
+            const lowerPointNeedleValue = lowerPoint.type === "number"
+                ? lowerPointValue
+                : minNeedleValue + (needleCoverage * lowerPointValue) / 100;
+            needleInflectionPoint.push({
+                value: clip(lowerPointNeedleValue, minNeedleValue, maxNeedleValue),
+                color: colors.lowerColor,
+            });
+        }
+        if (upperPoint.value !== "") {
+            const upperPointNeedleValue = upperPoint.type === "number"
+                ? upperPointValue
+                : minNeedleValue + (needleCoverage * upperPointValue) / 100;
+            needleInflectionPoint.push({
+                value: clip(upperPointNeedleValue, minNeedleValue, maxNeedleValue),
+                color: colors.middleColor,
+            });
+        }
+        const data = [];
+        const backgroundColor = [];
+        needleInflectionPoint
+            .sort((a, b) => a.value - b.value)
+            .map((point) => {
+            data.push(point.value);
+            backgroundColor.push(point.color);
+        });
+        // There's a bug in gauge lib when the last element in `data` is 0 (i.e. when the range maximum is 0).
+        // The value wrongly fallbacks to 1 because 0 is falsy
+        // See https://github.com/haiiaaa/chartjs-gauge/pull/33
+        // https://github.com/haiiaaa/chartjs-gauge/blob/2ea50541d754d710cb30c2502fa690ac5dc27afd/src/controllers/controller.gauge.js#L52
+        data.push(maxNeedleValue);
+        backgroundColor.push(colors.upperColor);
+        const dataRange = chart.dataRange;
+        const deltaBeyondRangeLimit = needleCoverage / 30;
+        let needleValue = minNeedleValue - deltaBeyondRangeLimit; // make needle value always at the minimum by default
+        let cellFormatter = null;
+        let displayValue = false;
+        if (dataRange !== undefined) {
+            const cell = getters.getCell(dataRange.sheetId, dataRange.zone.left, dataRange.zone.top);
+            if ((cell === null || cell === void 0 ? void 0 : cell.evaluated.type) === CellValueType.number) {
+                // in gauge graph "datasets.value" is used to calculate the angle of the
+                // needle in the graph. To prevent the needle from making 360° turns, we
+                // clip the value between a min and a max. This min and this max are slightly
+                // smaller and slightly larger than minRange and maxRange to mark the fact
+                // that the needle is out of the range limits
+                needleValue = clip(cell === null || cell === void 0 ? void 0 : cell.evaluated.value, minNeedleValue - deltaBeyondRangeLimit, maxNeedleValue + deltaBeyondRangeLimit);
+                cellFormatter = () => getters.getRangeFormattedValues(dataRange)[0];
+                displayValue = true;
+            }
+        }
+        config.options.valueLabel.display = displayValue;
+        config.options.valueLabel.formatter = cellFormatter;
+        config.data.datasets.push({
+            data,
+            minValue: Number(chart.sectionRule.rangeMin),
+            value: needleValue,
+            backgroundColor,
+        });
+        return {
+            chartJsConfig: config,
+            background: getters.getBackgroundOfSingleCellChart(chart.background, dataRange),
+        };
+    }
+
+    const UNIT_LENGTH = {
+        second: 1000,
+        minute: 1000 * 60,
+        hour: 1000 * 3600,
+        day: 1000 * 3600 * 24,
+        month: 1000 * 3600 * 24 * 30,
+        year: 1000 * 3600 * 24 * 365,
+    };
+    const Milliseconds = {
+        inSeconds: function (milliseconds) {
+            return Math.floor(milliseconds / UNIT_LENGTH.second);
+        },
+        inMinutes: function (milliseconds) {
+            return Math.floor(milliseconds / UNIT_LENGTH.minute);
+        },
+        inHours: function (milliseconds) {
+            return Math.floor(milliseconds / UNIT_LENGTH.hour);
+        },
+        inDays: function (milliseconds) {
+            return Math.floor(milliseconds / UNIT_LENGTH.day);
+        },
+        inMonths: function (milliseconds) {
+            return Math.floor(milliseconds / UNIT_LENGTH.month);
+        },
+        inYears: function (milliseconds) {
+            return Math.floor(milliseconds / UNIT_LENGTH.year);
+        },
+    };
+    /**
+     * Regex to test if a format string is a date format that can be translated into a moment time format
+     */
+    const timeFormatMomentCompatible = /^((d|dd|m|mm|yyyy|yy|hh|h|ss|a)(-|:|\s|\/))*(d|dd|m|mm|yyyy|yy|hh|h|ss|a)$/i;
+    /** Get the time options for the XAxis of ChartJS */
+    function getChartTimeOptions(labels, labelFormat) {
+        const momentFormat = convertDateFormatForMoment(labelFormat);
+        const timeUnit = getBestTimeUnitForScale(labels, momentFormat);
+        const displayFormats = {};
+        if (timeUnit) {
+            displayFormats[timeUnit] = momentFormat;
+        }
+        return {
+            parser: momentFormat,
+            displayFormats,
+            unit: timeUnit,
+        };
+    }
+    /**
+     * Convert the given date format into a format that moment.js understands.
+     *
+     * https://momentjs.com/docs/#/parsing/string-format/
+     */
+    function convertDateFormatForMoment(format) {
+        format = format.replace(/y/g, "Y");
+        format = format.replace(/d/g, "D");
+        // "m" before "h" == month, "m" after "h" == minute
+        const indexH = format.indexOf("h");
+        if (indexH >= 0) {
+            format = format.slice(0, indexH).replace(/m/g, "M") + format.slice(indexH);
+        }
+        else {
+            format = format.replace(/m/g, "M");
+        }
+        // If we have an "a", we should display hours as AM/PM (h), otherwise display 24 hours format (H)
+        if (!format.includes("a")) {
+            format = format.replace(/h/g, "H");
+        }
+        return format;
+    }
+    /** Get the minimum time unit that the format is able to display */
+    function getFormatMinDisplayUnit(format) {
+        if (format.includes("s")) {
+            return "second";
+        }
+        else if (format.includes("m")) {
+            return "minute";
+        }
+        else if (format.includes("h") || format.includes("H")) {
+            return "hour";
+        }
+        else if (format.includes("D")) {
+            return "day";
+        }
+        else if (format.includes("M")) {
+            return "month";
+        }
+        return "year";
+    }
+    /**
+     * Returns the best time unit that should be used for the X axis of a chart in order to display all
+     * the labels correctly.
+     *
+     * There is two conditions :
+     *  - the format of the labels should be able to display the unit. For example if the format is "DD/MM/YYYY"
+     *    it makes no sense to try to use minutes in the X axis
+     *  - we want the "best fit" unit. For example if the labels span a period of several days, we want to use days
+     *    as a unit, but if they span 200 days, we'd like to use months instead
+     *
+     */
+    function getBestTimeUnitForScale(labels, format) {
+        const labelDates = labels.map((label) => { var _a; return (_a = parseDateTime(label)) === null || _a === void 0 ? void 0 : _a.jsDate; });
+        if (labelDates.some((date) => date === undefined) || labels.length < 2) {
+            return undefined;
+        }
+        const labelsTimestamps = labelDates.map((date) => date.getTime());
+        const period = Math.max(...labelsTimestamps) - Math.min(...labelsTimestamps);
+        const minUnit = getFormatMinDisplayUnit(format);
+        if (UNIT_LENGTH.second >= UNIT_LENGTH[minUnit] && Milliseconds.inSeconds(period) < 180) {
+            return "second";
+        }
+        else if (UNIT_LENGTH.minute >= UNIT_LENGTH[minUnit] && Milliseconds.inMinutes(period) < 180) {
+            return "minute";
+        }
+        else if (UNIT_LENGTH.hour >= UNIT_LENGTH[minUnit] && Milliseconds.inHours(period) < 96) {
+            return "hour";
+        }
+        else if (UNIT_LENGTH.day >= UNIT_LENGTH[minUnit] && Milliseconds.inDays(period) < 90) {
+            return "day";
+        }
+        else if (UNIT_LENGTH.month >= UNIT_LENGTH[minUnit] && Milliseconds.inMonths(period) < 36) {
+            return "month";
+        }
+        return "year";
+    }
+
+    chartRegistry.add("line", {
+        match: (type) => type === "line",
+        createChart: (definition, sheetId, getters) => new LineChart(definition, sheetId, getters),
+        getChartRuntime: createLineChartRuntime,
+        validateChartDefinition: (validator, definition) => LineChart.validateChartDefinition(validator, definition),
+        transformDefinition: (definition, executed) => LineChart.transformDefinition(definition, executed),
+        getChartDefinitionFromContextCreation: (context) => LineChart.getDefinitionFromContextCreation(context),
+        name: "Line",
+    });
+    class LineChart extends AbstractChart {
+        constructor(definition, sheetId, getters) {
+            super(definition, sheetId, getters);
+            this.type = "line";
+            this.dataSets = createDataSets(this.getters, definition.dataSets, sheetId, definition.dataSetsHaveTitle);
+            this.labelRange = createRange(this.getters, sheetId, definition.labelRange);
+            this.background = definition.background;
+            this.verticalAxisPosition = definition.verticalAxisPosition;
+            this.legendPosition = definition.legendPosition;
+            this.labelsAsText = definition.labelsAsText;
+            this.stacked = definition.stacked;
+        }
+        static validateChartDefinition(validator, definition) {
+            return validator.checkValidations(definition, checkDataset, checkLabelRange);
+        }
+        static transformDefinition(definition, executed) {
+            return transformChartDefinitionWithDataSetsWithZone(definition, executed);
+        }
+        static getDefinitionFromContextCreation(context) {
+            return {
+                background: context.background,
+                dataSets: context.range ? context.range : [],
+                dataSetsHaveTitle: false,
+                labelsAsText: false,
+                legendPosition: "top",
+                title: context.title || "",
+                type: "line",
+                verticalAxisPosition: "left",
+                labelRange: context.auxiliaryRange || undefined,
+                stacked: false,
+            };
+        }
+        getDefinition() {
+            return this.getDefinitionWithSpecificDataSets(this.dataSets, this.labelRange);
+        }
+        getDefinitionWithSpecificDataSets(dataSets, labelRange, targetSheetId) {
+            return {
+                type: "line",
+                dataSetsHaveTitle: dataSets.length ? Boolean(dataSets[0].labelCell) : false,
+                background: this.background,
+                dataSets: dataSets.map((ds) => this.getters.getRangeString(ds.dataRange, targetSheetId || this.sheetId)),
+                legendPosition: this.legendPosition,
+                verticalAxisPosition: this.verticalAxisPosition,
+                labelRange: labelRange
+                    ? this.getters.getRangeString(labelRange, targetSheetId || this.sheetId)
+                    : undefined,
+                title: this.title,
+                labelsAsText: this.labelsAsText,
+                stacked: this.stacked,
+            };
+        }
+        getContextCreation() {
+            return {
+                background: this.background,
+                title: this.title,
+                range: this.dataSets.map((ds) => this.getters.getRangeString(ds.dataRange, this.sheetId)),
+                auxiliaryRange: this.labelRange
+                    ? this.getters.getRangeString(this.labelRange, this.sheetId)
+                    : undefined,
+            };
+        }
+        updateRanges(applyChange) {
+            const { dataSets, labelRange, isStale } = updateChartRangesWithDataSets(this.getters, applyChange, this.dataSets, this.labelRange);
+            if (!isStale) {
+                return this;
+            }
+            const definition = this.getDefinitionWithSpecificDataSets(dataSets, labelRange);
+            return new LineChart(definition, this.sheetId, this.getters);
+        }
+        getDefinitionForExcel() {
+            const dataSets = this.dataSets
+                .map((ds) => toExcelDataset(this.getters, ds))
+                .filter((ds) => ds.range !== ""); // && range !== INCORRECT_RANGE_STRING ? show incorrect #ref ?
+            return {
+                ...this.getDefinition(),
+                backgroundColor: toXlsxHexColor(this.background || BACKGROUND_CHART_COLOR),
+                fontColor: toXlsxHexColor(chartFontColor(this.background)),
+                dataSets,
+            };
+        }
+        copyForSheetId(sheetId) {
+            const dataSets = copyDataSetsWithNewSheetId(this.sheetId, sheetId, this.dataSets);
+            const labelRange = copyLabelRangeWithNewSheetId(this.sheetId, sheetId, this.labelRange);
+            const definition = this.getDefinitionWithSpecificDataSets(dataSets, labelRange, sheetId);
+            return new LineChart(definition, sheetId, this.getters);
+        }
+        copyInSheetId(sheetId) {
+            const definition = this.getDefinitionWithSpecificDataSets(this.dataSets, this.labelRange, sheetId);
+            return new LineChart(definition, sheetId, this.getters);
+        }
+    }
+    function fixEmptyLabelsForDateCharts(labels, dataSetsValues) {
+        if (labels.length === 0 || labels.every((label) => !label)) {
+            return { labels, dataSetsValues };
+        }
+        const newLabels = [...labels];
+        const newDatasets = deepCopy(dataSetsValues);
+        for (let i = 0; i < newLabels.length; i++) {
+            if (!newLabels[i]) {
+                newLabels[i] = findNextDefinedValue(newLabels, i);
+                for (let ds of newDatasets) {
+                    ds.data[i] = undefined;
+                }
+            }
+        }
+        return { labels: newLabels, dataSetsValues: newDatasets };
+    }
+    function canChartParseLabels(chart, getters) {
+        return canBeDateChart(chart, getters) || canBeLinearChart(chart, getters);
+    }
+    function getChartAxisType(chart, getters) {
+        if (isDateChart(chart, getters)) {
+            return "time";
+        }
+        if (isLinearChart(chart, getters)) {
+            return "linear";
+        }
+        return "category";
+    }
+    function isDateChart(chart, getters) {
+        return !chart.labelsAsText && canBeDateChart(chart, getters);
+    }
+    function isLinearChart(chart, getters) {
+        return !chart.labelsAsText && canBeLinearChart(chart, getters);
+    }
+    function canBeDateChart(chart, getters) {
+        var _a;
+        if (!chart.labelRange || !chart.dataSets || !canBeLinearChart(chart, getters)) {
+            return false;
+        }
+        const labelFormat = (_a = getters.getCell(chart.labelRange.sheetId, chart.labelRange.zone.left, chart.labelRange.zone.top)) === null || _a === void 0 ? void 0 : _a.evaluated.format;
+        return Boolean(labelFormat && timeFormatMomentCompatible.test(labelFormat));
+    }
+    function canBeLinearChart(chart, getters) {
+        if (!chart.labelRange || !chart.dataSets) {
+            return false;
+        }
+        const labels = getters.getRangeValues(chart.labelRange);
+        if (labels.some((label) => isNaN(Number(label)) && label)) {
+            return false;
+        }
+        if (labels.every((label) => !label)) {
+            return false;
+        }
+        return true;
+    }
+    function getLineConfiguration(chart, labels) {
+        var _a;
+        const fontColor = chartFontColor(chart.background);
+        const config = getDefaultChartJsRuntime(chart, labels, fontColor);
+        const legend = {
+            labels: {
+                fontColor,
+                generateLabels(chart) {
+                    const { data } = chart;
+                    const labels = window.Chart.defaults.global.legend.labels.generateLabels(chart);
+                    for (const [index, label] of labels.entries()) {
+                        label.fillStyle = data.datasets[index].borderColor;
+                    }
+                    return labels;
+                },
+            },
+        };
+        if ((!chart.labelRange && chart.dataSets.length === 1) || chart.legendPosition === "none") {
+            legend.display = false;
+        }
+        else {
+            legend.position = chart.legendPosition;
+        }
+        config.options.legend = { ...(_a = config.options) === null || _a === void 0 ? void 0 : _a.legend, ...legend };
+        config.options.layout = {
+            padding: { left: 20, right: 20, top: chart.title ? 10 : 25, bottom: 10 },
+        };
+        config.options.scales = {
+            xAxes: [
+                {
+                    ticks: {
+                        // x axis configuration
+                        maxRotation: 60,
+                        minRotation: 15,
+                        padding: 5,
+                        labelOffset: 2,
+                        fontColor,
+                    },
+                },
+            ],
+            yAxes: [
+                {
+                    position: chart.verticalAxisPosition,
+                    ticks: {
+                        fontColor,
+                        // y axis configuration
+                        beginAtZero: true, // the origin of the y axis is always zero
+                    },
+                },
+            ],
+        };
+        if (chart.stacked) {
+            config.options.scales.yAxes[0].stacked = true;
+        }
+        return config;
+    }
+    function createLineChartRuntime(chart, getters) {
+        const axisType = getChartAxisType(chart, getters);
+        const labelValues = getChartLabelValues(getters, chart.dataSets, chart.labelRange);
+        let labels = axisType === "linear" ? labelValues.values : labelValues.formattedValues;
+        let dataSetsValues = getChartDatasetValues(getters, chart.dataSets);
+        ({ labels, dataSetsValues } = filterEmptyDataPoints(labels, dataSetsValues));
+        if (axisType === "time") {
+            ({ labels, dataSetsValues } = fixEmptyLabelsForDateCharts(labels, dataSetsValues));
+        }
+        const config = getLineConfiguration(chart, labels);
+        const labelFormat = getLabelFormat(getters, chart.labelRange);
+        if (axisType === "time") {
+            config.options.scales.xAxes[0].type = "time";
+            config.options.scales.xAxes[0].time = getChartTimeOptions(labels, labelFormat);
+            config.options.scales.xAxes[0].ticks.maxTicksLimit = 15;
+        }
+        else if (axisType === "linear") {
+            config.options.scales.xAxes[0].type = "linear";
+            config.options.scales.xAxes[0].ticks.callback = (value) => formatValue(value, labelFormat);
+        }
+        const colors = new ChartColors();
+        for (let [index, { label, data }] of dataSetsValues.entries()) {
+            if (["linear", "time"].includes(axisType)) {
+                // Replace empty string labels by undefined to make sure chartJS doesn't decide that "" is the same as 0
+                data = data.map((y, index) => ({ x: labels[index] || undefined, y }));
+            }
+            const color = colors.next();
+            let backgroundRGBA = colorToRGBA(color);
+            if (chart.stacked) {
+                backgroundRGBA.a = LINE_FILL_TRANSPARENCY;
+            }
+            const backgroundColor = rgbaToHex(backgroundRGBA);
+            const dataset = {
+                label,
+                data,
+                lineTension: 0,
+                borderColor: color,
+                backgroundColor,
+                pointBackgroundColor: color,
+                fill: chart.stacked ? getFillingMode(index) : false,
+            };
+            config.data.datasets.push(dataset);
+        }
+        return { chartJsConfig: config, background: chart.background || BACKGROUND_CHART_COLOR };
+    }
+
+    chartRegistry.add("pie", {
+        match: (type) => type === "pie",
+        createChart: (definition, sheetId, getters) => new PieChart(definition, sheetId, getters),
+        getChartRuntime: createPieChartRuntime,
+        validateChartDefinition: (validator, definition) => PieChart.validateChartDefinition(validator, definition),
+        transformDefinition: (definition, executed) => PieChart.transformDefinition(definition, executed),
+        getChartDefinitionFromContextCreation: (context) => PieChart.getDefinitionFromContextCreation(context),
+        name: "Pie",
+    });
+    class PieChart extends AbstractChart {
+        constructor(definition, sheetId, getters) {
+            super(definition, sheetId, getters);
+            this.type = "pie";
+            this.dataSets = createDataSets(getters, definition.dataSets, sheetId, definition.dataSetsHaveTitle);
+            this.labelRange = createRange(getters, sheetId, definition.labelRange);
+            this.background = definition.background;
+            this.legendPosition = definition.legendPosition;
+        }
+        static transformDefinition(definition, executed) {
+            return transformChartDefinitionWithDataSetsWithZone(definition, executed);
+        }
+        static validateChartDefinition(validator, definition) {
+            return validator.checkValidations(definition, checkDataset, checkLabelRange);
+        }
+        static getDefinitionFromContextCreation(context) {
+            return {
+                background: context.background,
+                dataSets: context.range ? context.range : [],
+                dataSetsHaveTitle: false,
+                legendPosition: "top",
+                title: context.title || "",
+                type: "pie",
+                labelRange: context.auxiliaryRange || undefined,
+            };
+        }
+        getDefinition() {
+            return this.getDefinitionWithSpecificDataSets(this.dataSets, this.labelRange);
+        }
+        getContextCreation() {
+            return {
+                background: this.background,
+                title: this.title,
+                range: this.dataSets.map((ds) => this.getters.getRangeString(ds.dataRange, this.sheetId)),
+                auxiliaryRange: this.labelRange
+                    ? this.getters.getRangeString(this.labelRange, this.sheetId)
+                    : undefined,
+            };
+        }
+        getDefinitionWithSpecificDataSets(dataSets, labelRange, targetSheetId) {
+            return {
+                type: "pie",
+                dataSetsHaveTitle: dataSets.length ? Boolean(dataSets[0].labelCell) : false,
+                background: this.background,
+                dataSets: dataSets.map((ds) => this.getters.getRangeString(ds.dataRange, targetSheetId || this.sheetId)),
+                legendPosition: this.legendPosition,
+                labelRange: labelRange
+                    ? this.getters.getRangeString(labelRange, targetSheetId || this.sheetId)
+                    : undefined,
+                title: this.title,
+            };
+        }
+        copyForSheetId(sheetId) {
+            const dataSets = copyDataSetsWithNewSheetId(this.sheetId, sheetId, this.dataSets);
+            const labelRange = copyLabelRangeWithNewSheetId(this.sheetId, sheetId, this.labelRange);
+            const definition = this.getDefinitionWithSpecificDataSets(dataSets, labelRange, sheetId);
+            return new PieChart(definition, sheetId, this.getters);
+        }
+        copyInSheetId(sheetId) {
+            const definition = this.getDefinitionWithSpecificDataSets(this.dataSets, this.labelRange, sheetId);
+            return new PieChart(definition, sheetId, this.getters);
+        }
+        getDefinitionForExcel() {
+            const dataSets = this.dataSets
+                .map((ds) => toExcelDataset(this.getters, ds))
+                .filter((ds) => ds.range !== ""); // && range !== INCORRECT_RANGE_STRING ? show incorrect #ref ?
+            return {
+                ...this.getDefinition(),
+                backgroundColor: toXlsxHexColor(this.background || BACKGROUND_CHART_COLOR),
+                fontColor: toXlsxHexColor(chartFontColor(this.background)),
+                verticalAxisPosition: "left",
+                dataSets,
+            };
+        }
+        updateRanges(applyChange) {
+            const { dataSets, labelRange, isStale } = updateChartRangesWithDataSets(this.getters, applyChange, this.dataSets, this.labelRange);
+            if (!isStale) {
+                return this;
+            }
+            const definition = this.getDefinitionWithSpecificDataSets(dataSets, labelRange);
+            return new PieChart(definition, this.sheetId, this.getters);
+        }
+    }
+    function getPieConfiguration(chart, labels) {
+        var _a;
+        const fontColor = chartFontColor(chart.background);
+        const config = getDefaultChartJsRuntime(chart, labels, fontColor);
+        const legend = {
+            labels: { fontColor },
+        };
+        if ((!chart.labelRange && chart.dataSets.length === 1) || chart.legendPosition === "none") {
+            legend.display = false;
+        }
+        else {
+            legend.position = chart.legendPosition;
+        }
+        config.options.legend = { ...(_a = config.options) === null || _a === void 0 ? void 0 : _a.legend, ...legend };
+        config.options.layout = {
+            padding: { left: 20, right: 20, top: chart.title ? 10 : 25, bottom: 10 },
+        };
+        config.options.tooltips = {
+            callbacks: {
+                title: function (tooltipItems, data) {
+                    return data.datasets[tooltipItems[0].datasetIndex].label;
+                },
+            },
+        };
+        return config;
+    }
+    function getPieColors(colors, dataSetsValues) {
+        const pieColors = [];
+        const maxLength = Math.max(...dataSetsValues.map((ds) => ds.data.length));
+        for (let i = 0; i <= maxLength; i++) {
+            pieColors.push(colors.next());
+        }
+        return pieColors;
+    }
+    function createPieChartRuntime(chart, getters) {
+        const labelValues = getChartLabelValues(getters, chart.dataSets, chart.labelRange);
+        let labels = labelValues.formattedValues;
+        let dataSetsValues = getChartDatasetValues(getters, chart.dataSets);
+        ({ labels, dataSetsValues } = filterEmptyDataPoints(labels, dataSetsValues));
+        const config = getPieConfiguration(chart, labels);
+        const colors = new ChartColors();
+        for (let { label, data } of dataSetsValues) {
+            const backgroundColor = getPieColors(colors, dataSetsValues);
+            const dataset = {
+                label,
+                data,
+                borderColor: "#FFFFFF",
+                backgroundColor,
+            };
+            config.data.datasets.push(dataset);
+        }
+        return { chartJsConfig: config, background: chart.background || BACKGROUND_CHART_COLOR };
+    }
+
+    chartRegistry.add("scorecard", {
+        match: (type) => type === "scorecard",
+        createChart: (definition, sheetId, getters) => new ScorecardChart$1(definition, sheetId, getters),
+        getChartRuntime: createScorecardChartRuntime,
+        validateChartDefinition: (validator, definition) => ScorecardChart$1.validateChartDefinition(validator, definition),
+        transformDefinition: (definition, executed) => ScorecardChart$1.transformDefinition(definition, executed),
+        getChartDefinitionFromContextCreation: (context) => ScorecardChart$1.getDefinitionFromContextCreation(context),
+        name: "Scorecard",
+    });
+    function checkKeyValue(definition) {
+        return definition.keyValue && !rangeReference.test(definition.keyValue)
+            ? 32 /* CommandResult.InvalidScorecardKeyValue */
+            : 0 /* CommandResult.Success */;
+    }
+    function checkBaseline(definition) {
+        return definition.baseline && !rangeReference.test(definition.baseline)
+            ? 33 /* CommandResult.InvalidScorecardBaseline */
+            : 0 /* CommandResult.Success */;
+    }
+    class ScorecardChart$1 extends AbstractChart {
+        constructor(definition, sheetId, getters) {
+            super(definition, sheetId, getters);
+            this.type = "scorecard";
+            this.keyValue = createRange(getters, sheetId, definition.keyValue);
+            this.baseline = createRange(getters, sheetId, definition.baseline);
+            this.baselineMode = definition.baselineMode;
+            this.baselineDescr = definition.baselineDescr;
+            this.background = definition.background;
+            this.baselineColorUp = definition.baselineColorUp;
+            this.baselineColorDown = definition.baselineColorDown;
+        }
+        static validateChartDefinition(validator, definition) {
+            return validator.checkValidations(definition, checkKeyValue, checkBaseline);
+        }
+        static getDefinitionFromContextCreation(context) {
+            return {
+                background: context.background,
+                type: "scorecard",
+                keyValue: context.range ? context.range[0] : undefined,
+                title: context.title || "",
+                baselineMode: "difference",
+                baselineColorUp: "#00A04A",
+                baselineColorDown: "#DC6965",
+                baseline: context.auxiliaryRange || "",
+            };
+        }
+        static transformDefinition(definition, executed) {
+            let baselineZone;
+            let keyValueZone;
+            if (definition.baseline) {
+                baselineZone = transformZone(toUnboundedZone(definition.baseline), executed);
+            }
+            if (definition.keyValue) {
+                keyValueZone = transformZone(toUnboundedZone(definition.keyValue), executed);
+            }
+            return {
+                ...definition,
+                baseline: baselineZone ? zoneToXc(baselineZone) : undefined,
+                keyValue: keyValueZone ? zoneToXc(keyValueZone) : undefined,
+            };
+        }
+        copyForSheetId(sheetId) {
+            const baseline = copyLabelRangeWithNewSheetId(this.sheetId, sheetId, this.baseline);
+            const keyValue = copyLabelRangeWithNewSheetId(this.sheetId, sheetId, this.keyValue);
+            const definition = this.getDefinitionWithSpecificRanges(baseline, keyValue, sheetId);
+            return new ScorecardChart$1(definition, sheetId, this.getters);
+        }
+        copyInSheetId(sheetId) {
+            const definition = this.getDefinitionWithSpecificRanges(this.baseline, this.keyValue, sheetId);
+            return new ScorecardChart$1(definition, sheetId, this.getters);
+        }
+        getDefinition() {
+            return this.getDefinitionWithSpecificRanges(this.baseline, this.keyValue);
+        }
+        getContextCreation() {
+            return {
+                background: this.background,
+                title: this.title,
+                range: this.keyValue ? [this.getters.getRangeString(this.keyValue, this.sheetId)] : undefined,
+                auxiliaryRange: this.baseline
+                    ? this.getters.getRangeString(this.baseline, this.sheetId)
+                    : undefined,
+            };
+        }
+        getDefinitionWithSpecificRanges(baseline, keyValue, targetSheetId) {
+            return {
+                baselineColorDown: this.baselineColorDown,
+                baselineColorUp: this.baselineColorUp,
+                baselineMode: this.baselineMode,
+                title: this.title,
+                type: "scorecard",
+                background: this.background,
+                baseline: baseline
+                    ? this.getters.getRangeString(baseline, targetSheetId || this.sheetId)
+                    : undefined,
+                baselineDescr: this.baselineDescr,
+                keyValue: keyValue
+                    ? this.getters.getRangeString(keyValue, targetSheetId || this.sheetId)
+                    : undefined,
+            };
+        }
+        getDefinitionForExcel() {
+            // This kind of graph is not exportable in Excel
+            return undefined;
+        }
+        updateRanges(applyChange) {
+            const baseline = adaptChartRange(this.baseline, applyChange);
+            const keyValue = adaptChartRange(this.keyValue, applyChange);
+            if (this.baseline === baseline && this.keyValue === keyValue) {
+                return this;
+            }
+            const definition = this.getDefinitionWithSpecificRanges(baseline, keyValue);
+            return new ScorecardChart$1(definition, this.sheetId, this.getters);
+        }
+    }
+    function createScorecardChartRuntime(chart, getters) {
+        let keyValue = "";
+        let formattedKeyValue = "";
+        let keyValueCell;
+        if (chart.keyValue) {
+            const keyValueZone = chart.keyValue.zone;
+            keyValueCell = getters.getCell(chart.keyValue.sheetId, keyValueZone.left, keyValueZone.top);
+            keyValue = (keyValueCell === null || keyValueCell === void 0 ? void 0 : keyValueCell.evaluated.value) ? String(keyValueCell === null || keyValueCell === void 0 ? void 0 : keyValueCell.evaluated.value) : "";
+            formattedKeyValue = (keyValueCell === null || keyValueCell === void 0 ? void 0 : keyValueCell.formattedValue) || "";
+        }
+        let baselineCell;
+        if (chart.baseline) {
+            const baselineZone = chart.baseline.zone;
+            baselineCell = getters.getCell(chart.baseline.sheetId, baselineZone.left, baselineZone.top);
+        }
+        const background = getters.getBackgroundOfSingleCellChart(chart.background, chart.keyValue);
+        return {
+            title: _t(chart.title),
+            keyValue: formattedKeyValue || keyValue,
+            baselineDisplay: getBaselineText(baselineCell, keyValueCell === null || keyValueCell === void 0 ? void 0 : keyValueCell.evaluated, chart.baselineMode),
+            baselineArrow: getBaselineArrowDirection(baselineCell === null || baselineCell === void 0 ? void 0 : baselineCell.evaluated, keyValueCell === null || keyValueCell === void 0 ? void 0 : keyValueCell.evaluated, chart.baselineMode),
+            baselineColor: getBaselineColor(baselineCell === null || baselineCell === void 0 ? void 0 : baselineCell.evaluated, chart.baselineMode, keyValueCell === null || keyValueCell === void 0 ? void 0 : keyValueCell.evaluated, chart.baselineColorUp, chart.baselineColorDown),
+            baselineDescr: _t(chart.baselineDescr || ""),
+            fontColor: chartFontColor(background),
+            background,
+            baselineStyle: chart.baselineMode !== "percentage" ? baselineCell === null || baselineCell === void 0 ? void 0 : baselineCell.style : undefined,
+            keyValueStyle: keyValueCell === null || keyValueCell === void 0 ? void 0 : keyValueCell.style,
+        };
+    }
+
+    const PICKER_PADDING = 6;
+    const LINE_VERTICAL_PADDING = 1;
+    const LINE_HORIZONTAL_PADDING = 6;
+    const ITEM_HORIZONTAL_MARGIN = 1;
+    const ITEM_EDGE_LENGTH = 18;
+    const ITEM_BORDER_WIDTH = 1;
+    const ITEMS_PER_LINE = 10;
+    const PICKER_WIDTH = ITEMS_PER_LINE * (ITEM_EDGE_LENGTH + ITEM_HORIZONTAL_MARGIN * 2 + 2 * ITEM_BORDER_WIDTH) +
+        2 * LINE_HORIZONTAL_PADDING;
+    const GRADIENT_WIDTH = PICKER_WIDTH - 2 * LINE_HORIZONTAL_PADDING - 2 * ITEM_BORDER_WIDTH;
+    const GRADIENT_HEIGHT = PICKER_WIDTH - 50;
+    css /* scss */ `
+  .o-color-picker {
+    position: absolute;
+    top: calc(100% + 5px);
+    z-index: ${ComponentsImportance.ColorPicker};
+    box-shadow: 1px 2px 5px 2px rgba(51, 51, 51, 0.15);
+    background-color: white;
+    padding: ${PICKER_PADDING}px 0px;
+    line-height: 1.2;
+    width: ${GRADIENT_WIDTH + 2 * PICKER_PADDING}px;
+
+    .o-color-picker-section-name {
+      margin: 0px ${ITEM_HORIZONTAL_MARGIN}px;
+      padding: 4px ${LINE_HORIZONTAL_PADDING}px;
+    }
+    .colors-grid {
+      display: grid;
+      padding: ${LINE_VERTICAL_PADDING}px ${LINE_HORIZONTAL_PADDING}px;
+      grid-template-columns: repeat(${ITEMS_PER_LINE}, 1fr);
+      grid-gap: ${ITEM_HORIZONTAL_MARGIN * 2}px;
+    }
+    .o-color-picker-line-item {
+      width: ${ITEM_EDGE_LENGTH}px;
+      height: ${ITEM_EDGE_LENGTH}px;
+      margin: 0px;
+      border-radius: 50px;
+      border: ${ITEM_BORDER_WIDTH}px solid #666666;
+      padding: 0px;
+      font-size: 16px;
+      background: white;
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.08);
+        outline: 1px solid gray;
+        cursor: pointer;
+      }
+    }
+    .o-buttons {
+      padding: 6px;
+      display: flex;
+      .o-cancel {
+        margin: 0px ${ITEM_HORIZONTAL_MARGIN}px;
+        border: ${ITEM_BORDER_WIDTH}px solid #c0c0c0;
+        width: 100%;
+        padding: 5px;
+        font-size: 14px;
+        background: white;
+        border-radius: 4px;
+        &:hover:enabled {
+          background-color: rgba(0, 0, 0, 0.08);
+        }
+      }
+    }
+    .o-add-button {
+      border: ${ITEM_BORDER_WIDTH}px solid #c0c0c0;
+      padding: 4px;
+      background: white;
+      border-radius: 4px;
+      &:hover:enabled {
+        background-color: rgba(0, 0, 0, 0.08);
+      }
+    }
+    .o-separator {
+      border-bottom: ${MENU_SEPARATOR_BORDER_WIDTH}px solid #e0e2e4;
+      margin-top: ${MENU_SEPARATOR_PADDING}px;
+      margin-bottom: ${MENU_SEPARATOR_PADDING}px;
+    }
+    input {
+      box-sizing: border-box;
+      width: 100%;
+      border-radius: 4px;
+      padding: 4px 23px 4px 10px;
+      height: 24px;
+      border: 1px solid #c0c0c0;
+      margin: 0 2px 0 0;
+    }
+    input.o-wrong-color {
+      border-color: red;
+    }
+    .o-custom-selector {
+      padding: ${LINE_HORIZONTAL_PADDING}px;
+      position: relative;
+      .o-gradient {
+        background: linear-gradient(to bottom, hsl(0 100% 0%), transparent, hsl(0 0% 100%)),
+          linear-gradient(
+            to right,
+            hsl(0 100% 50%) 0%,
+            hsl(0.2turn 100% 50%) 20%,
+            hsl(0.3turn 100% 50%) 30%,
+            hsl(0.4turn 100% 50%) 40%,
+            hsl(0.5turn 100% 50%) 50%,
+            hsl(0.6turn 100% 50%) 60%,
+            hsl(0.7turn 100% 50%) 70%,
+            hsl(0.8turn 100% 50%) 80%,
+            hsl(0.9turn 100% 50%) 90%,
+            hsl(1turn 100% 50%) 100%
+          );
+        border: ${ITEM_BORDER_WIDTH}px solid #c0c0c0;
+        width: ${GRADIENT_WIDTH}px;
+        height: ${GRADIENT_HEIGHT}px;
+        &:hover {
+          cursor: crosshair;
+        }
+      }
+      .o-custom-input-preview {
+        padding: 2px ${LINE_VERTICAL_PADDING}px;
+        display: flex;
+      }
+      .o-custom-input-buttons {
+        padding: 2px ${LINE_VERTICAL_PADDING}px;
+        text-align: right;
+      }
+      .o-color-preview {
+        border: 1px solid #c0c0c0;
+        border-radius: 4px;
+        width: 100%;
+      }
+    }
+    &.right {
+      left: 0;
+    }
+    &.left {
+      right: 0;
+    }
+    &.center {
+      left: calc(50% - ${PICKER_WIDTH / 2}px);
+    }
+  }
+  .o-magnifier-glass {
+    position: absolute;
+    border: ${ITEM_BORDER_WIDTH}px solid #c0c0c0;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+  }
+`;
+    function computeCustomColor(ev) {
+        return rgbaToHex(hslaToRGBA({
+            h: (360 * ev.offsetX) / GRADIENT_WIDTH,
+            s: 100,
+            l: (100 * ev.offsetY) / GRADIENT_HEIGHT,
+            a: 1,
+        }));
+    }
+    class ColorPicker extends owl.Component {
+        constructor() {
+            super(...arguments);
+            this.COLORS = COLOR_PICKER_DEFAULTS;
+            this.state = owl.useState({
+                showGradient: false,
+                currentColor: isColorValid(this.props.currentColor) ? this.props.currentColor : "",
+                isCurrentColorInvalid: false,
+                style: {
+                    display: "none",
+                    background: "#ffffff",
+                    left: "0",
+                    top: "0",
+                },
+            });
+        }
+        onColorClick(color) {
+            if (color) {
+                this.props.onColorPicked(color);
+            }
+        }
+        getCheckMarkColor() {
+            return chartFontColor(this.props.currentColor);
+        }
+        resetColor() {
+            this.props.onColorPicked("");
+        }
+        setCustomColor(ev) {
+            if (!isColorValid(this.state.currentColor)) {
+                ev.stopPropagation();
+                this.state.isCurrentColorInvalid = true;
+                return;
+            }
+            this.state.isCurrentColorInvalid = false;
+            this.props.onColorPicked(this.state.currentColor);
+        }
+        toggleColorPicker() {
+            this.state.showGradient = !this.state.showGradient;
+        }
+        computeCustomColor(ev) {
+            this.state.isCurrentColorInvalid = false;
+            this.state.currentColor = computeCustomColor(ev);
+        }
+        hideMagnifier(_ev) {
+            this.state.style.display = "none";
+        }
+        showMagnifier(_ev) {
+            this.state.style.display = "block";
+        }
+        moveMagnifier(ev) {
+            this.state.style.background = computeCustomColor(ev);
+            const shiftFromCursor = 10;
+            this.state.style.left = `${ev.offsetX + shiftFromCursor}px`;
+            this.state.style.top = `${ev.offsetY + shiftFromCursor}px`;
+        }
+        get magnifyingGlassStyle() {
+            const { display, background, left, top } = this.state.style;
+            return `display:${display};${display === "block" ? `background-color:${background};left:${left};top:${top};` : ""}`;
+        }
+    }
+    ColorPicker.template = "o-spreadsheet-ColorPicker";
+    ColorPicker.defaultProps = {
+        currentColor: "", //TODO Change it to false instead of empty string
+    };
+    ColorPicker.props = {
+        dropdownDirection: { type: String, optional: true },
+        onColorPicked: Function,
+        currentColor: { type: String, optional: true },
+    };
+
+    class LineBarPieDesignPanel extends owl.Component {
+        constructor() {
+            super(...arguments);
+            this.state = owl.useState({
+                fillColorTool: false,
+            });
+        }
+        onClick(ev) {
+            this.state.fillColorTool = false;
+        }
+        setup() {
+            owl.useExternalListener(window, "click", this.onClick);
+        }
+        toggleColorPicker() {
+            this.state.fillColorTool = !this.state.fillColorTool;
+        }
+        updateBackgroundColor(color) {
+            this.props.updateChart({
+                background: color,
+            });
+        }
+        updateTitle(ev) {
+            this.props.updateChart({
+                title: ev.target.value,
+            });
+        }
+        updateSelect(attr, ev) {
+            this.props.updateChart({
+                [attr]: ev.target.value,
+            });
+        }
+    }
+    LineBarPieDesignPanel.template = "o-spreadsheet-LineBarPieDesignPanel";
+    LineBarPieDesignPanel.components = { ColorPicker };
+    LineBarPieDesignPanel.props = {
+        figureId: String,
+        definition: Object,
+        updateChart: Function,
+    };
+
+    class BarChartDesignPanel extends LineBarPieDesignPanel {
+    }
+    BarChartDesignPanel.template = "o-spreadsheet-BarChartDesignPanel";
+
+    class GaugeChartConfigPanel extends owl.Component {
+        constructor() {
+            super(...arguments);
+            this.state = owl.useState({
+                dataRangeDispatchResult: undefined,
+            });
+            this.dataRange = this.props.definition.dataRange;
+        }
+        get configurationErrorMessages() {
+            var _a;
+            const cancelledReasons = [...(((_a = this.state.dataRangeDispatchResult) === null || _a === void 0 ? void 0 : _a.reasons) || [])];
+            return cancelledReasons.map((error) => ChartTerms.Errors[error] || ChartTerms.Errors.Unexpected);
+        }
+        get isDataRangeInvalid() {
+            var _a;
+            return !!((_a = this.state.dataRangeDispatchResult) === null || _a === void 0 ? void 0 : _a.isCancelledBecause(34 /* CommandResult.InvalidGaugeDataRange */));
+        }
+        onDataRangeChanged(ranges) {
+            this.dataRange = ranges[0];
+        }
+        updateDataRange() {
+            this.state.dataRangeDispatchResult = this.props.updateChart({
+                dataRange: this.dataRange,
+            });
+        }
+    }
+    GaugeChartConfigPanel.template = "o-spreadsheet-GaugeChartConfigPanel";
+    GaugeChartConfigPanel.components = { SelectionInput };
+    GaugeChartConfigPanel.props = {
+        figureId: String,
+        definition: Object,
+        updateChart: Function,
+    };
+
+    css /* scss */ `
+  .o-gauge-color-set {
+    .o-gauge-color-set-color-button {
+      display: inline-block;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      cursor: pointer;
+      padding: 1px 2px;
+    }
+    .o-gauge-color-set-color-button:hover {
+      background-color: rgba(0, 0, 0, 0.08);
+    }
+    table {
+      table-layout: fixed;
+      margin-top: 2%;
+      display: table;
+      text-align: left;
+      font-size: 12px;
+      line-height: 18px;
+      width: 100%;
+    }
+    th.o-gauge-color-set-colorPicker {
+      width: 8%;
+    }
+    th.o-gauge-color-set-text {
+      width: 40%;
+    }
+    th.o-gauge-color-set-value {
+      width: 22%;
+    }
+    th.o-gauge-color-set-type {
+      width: 30%;
+    }
+    input,
+    select {
+      width: 100%;
+      height: 100%;
+      box-sizing: border-box;
+    }
+  }
+`;
+    class GaugeChartDesignPanel extends owl.Component {
+        constructor() {
+            super(...arguments);
+            this.state = owl.useState({
+                openedMenu: undefined,
+                sectionRuleDispatchResult: undefined,
+            });
+        }
+        get designErrorMessages() {
+            var _a;
+            const cancelledReasons = [...(((_a = this.state.sectionRuleDispatchResult) === null || _a === void 0 ? void 0 : _a.reasons) || [])];
+            return cancelledReasons.map((error) => ChartTerms.Errors[error] || ChartTerms.Errors.Unexpected);
+        }
+        updateBackgroundColor(color) {
+            this.state.openedMenu = undefined;
+            this.props.updateChart({
+                background: color,
+            });
+        }
+        updateTitle(ev) {
+            this.props.updateChart({
+                title: ev.target.value,
+            });
+        }
+        isRangeMinInvalid() {
+            var _a, _b, _c;
+            return !!(((_a = this.state.sectionRuleDispatchResult) === null || _a === void 0 ? void 0 : _a.isCancelledBecause(35 /* CommandResult.EmptyGaugeRangeMin */)) ||
+                ((_b = this.state.sectionRuleDispatchResult) === null || _b === void 0 ? void 0 : _b.isCancelledBecause(36 /* CommandResult.GaugeRangeMinNaN */)) ||
+                ((_c = this.state.sectionRuleDispatchResult) === null || _c === void 0 ? void 0 : _c.isCancelledBecause(39 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */)));
+        }
+        isRangeMaxInvalid() {
+            var _a, _b, _c;
+            return !!(((_a = this.state.sectionRuleDispatchResult) === null || _a === void 0 ? void 0 : _a.isCancelledBecause(37 /* CommandResult.EmptyGaugeRangeMax */)) ||
+                ((_b = this.state.sectionRuleDispatchResult) === null || _b === void 0 ? void 0 : _b.isCancelledBecause(38 /* CommandResult.GaugeRangeMaxNaN */)) ||
+                ((_c = this.state.sectionRuleDispatchResult) === null || _c === void 0 ? void 0 : _c.isCancelledBecause(39 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */)));
+        }
+        // ---------------------------------------------------------------------------
+        // COLOR_SECTION_TEMPLATE
+        // ---------------------------------------------------------------------------
+        get isLowerInflectionPointInvalid() {
+            var _a, _b;
+            return !!(((_a = this.state.sectionRuleDispatchResult) === null || _a === void 0 ? void 0 : _a.isCancelledBecause(40 /* CommandResult.GaugeLowerInflectionPointNaN */)) ||
+                ((_b = this.state.sectionRuleDispatchResult) === null || _b === void 0 ? void 0 : _b.isCancelledBecause(42 /* CommandResult.GaugeLowerBiggerThanUpper */)));
+        }
+        get isUpperInflectionPointInvalid() {
+            var _a, _b;
+            return !!(((_a = this.state.sectionRuleDispatchResult) === null || _a === void 0 ? void 0 : _a.isCancelledBecause(41 /* CommandResult.GaugeUpperInflectionPointNaN */)) ||
+                ((_b = this.state.sectionRuleDispatchResult) === null || _b === void 0 ? void 0 : _b.isCancelledBecause(42 /* CommandResult.GaugeLowerBiggerThanUpper */)));
+        }
+        updateInflectionPointValue(attr, ev) {
+            const sectionRule = deepCopy(this.props.definition.sectionRule);
+            sectionRule[attr].value = ev.target.value;
+            this.updateSectionRule(sectionRule);
+        }
+        updateInflectionPointType(attr, ev) {
+            const sectionRule = deepCopy(this.props.definition.sectionRule);
+            sectionRule[attr].type = ev.target.value;
+            this.updateSectionRule(sectionRule);
+        }
+        updateSectionColor(target, color) {
+            const sectionRule = deepCopy(this.props.definition.sectionRule);
+            sectionRule.colors[target] = color;
+            this.updateSectionRule(sectionRule);
+            this.closeMenus();
+        }
+        updateRangeMin(ev) {
+            let sectionRule = deepCopy(this.props.definition.sectionRule);
+            sectionRule = {
+                ...sectionRule,
+                rangeMin: ev.target.value,
+            };
+            this.updateSectionRule(sectionRule);
+        }
+        updateRangeMax(ev) {
+            let sectionRule = deepCopy(this.props.definition.sectionRule);
+            sectionRule = {
+                ...sectionRule,
+                rangeMax: ev.target.value,
+            };
+            this.updateSectionRule(sectionRule);
+        }
+        toggleMenu(menu) {
+            const isSelected = this.state.openedMenu === menu;
+            this.closeMenus();
+            if (!isSelected) {
+                this.state.openedMenu = menu;
+            }
+        }
+        updateSectionRule(sectionRule) {
+            this.state.sectionRuleDispatchResult = this.props.updateChart({
+                sectionRule,
+            });
+        }
+        closeMenus() {
+            this.state.openedMenu = undefined;
+        }
+    }
+    GaugeChartDesignPanel.template = "o-spreadsheet-GaugeChartDesignPanel";
+    GaugeChartDesignPanel.components = { ColorPicker };
+    GaugeChartDesignPanel.props = {
+        figureId: String,
+        definition: Object,
+        updateChart: Function,
+    };
+
+    class LineConfigPanel extends LineBarPieConfigPanel {
+        get canTreatLabelsAsText() {
+            const chart = this.env.model.getters.getChart(this.props.figureId);
+            if (chart && chart instanceof LineChart) {
+                return canChartParseLabels(chart, this.env.model.getters);
+            }
+            return false;
+        }
+        onUpdateLabelsAsText(ev) {
+            this.props.updateChart({
+                labelsAsText: ev.target.checked,
+            });
+        }
+        onUpdateStacked(ev) {
+            this.props.updateChart({
+                stacked: ev.target.checked,
+            });
+        }
+    }
+    LineConfigPanel.template = "o-spreadsheet-LineConfigPanel";
+
+    class LineChartDesignPanel extends LineBarPieDesignPanel {
+    }
+    LineChartDesignPanel.template = "o-spreadsheet-LineChartDesignPanel";
+
+    class ScorecardChartConfigPanel extends owl.Component {
+        constructor() {
+            super(...arguments);
+            this.state = owl.useState({
+                keyValueDispatchResult: undefined,
+                baselineDispatchResult: undefined,
+            });
+            this.keyValue = this.props.definition.keyValue;
+            this.baseline = this.props.definition.baseline;
+        }
+        get errorMessages() {
+            var _a, _b;
+            const cancelledReasons = [
+                ...(((_a = this.state.keyValueDispatchResult) === null || _a === void 0 ? void 0 : _a.reasons) || []),
+                ...(((_b = this.state.baselineDispatchResult) === null || _b === void 0 ? void 0 : _b.reasons) || []),
+            ];
+            return cancelledReasons.map((error) => ChartTerms.Errors[error] || ChartTerms.Errors.Unexpected);
+        }
+        get isKeyValueInvalid() {
+            var _a;
+            return !!((_a = this.state.keyValueDispatchResult) === null || _a === void 0 ? void 0 : _a.isCancelledBecause(32 /* CommandResult.InvalidScorecardKeyValue */));
+        }
+        get isBaselineInvalid() {
+            var _a;
+            return !!((_a = this.state.keyValueDispatchResult) === null || _a === void 0 ? void 0 : _a.isCancelledBecause(33 /* CommandResult.InvalidScorecardBaseline */));
+        }
+        onKeyValueRangeChanged(ranges) {
+            this.keyValue = ranges[0];
+        }
+        updateKeyValueRange() {
+            this.state.keyValueDispatchResult = this.props.updateChart({
+                keyValue: this.keyValue,
+            });
+        }
+        onBaselineRangeChanged(ranges) {
+            this.baseline = ranges[0];
+        }
+        updateBaselineRange() {
+            this.state.baselineDispatchResult = this.props.updateChart({
+                baseline: this.baseline,
+            });
+        }
+        updateBaselineMode(ev) {
+            this.props.updateChart({ baselineMode: ev.target.value });
+        }
+    }
+    ScorecardChartConfigPanel.template = "o-spreadsheet-ScorecardChartConfigPanel";
+    ScorecardChartConfigPanel.components = { SelectionInput };
+    ScorecardChartConfigPanel.props = {
+        figureId: String,
+        definition: Object,
+        updateChart: Function,
+    };
+
+    class ScorecardChartDesignPanel extends owl.Component {
+        constructor() {
+            super(...arguments);
+            this.state = owl.useState({
+                openedColorPicker: undefined,
+            });
+        }
+        updateTitle(ev) {
+            this.props.updateChart({
+                title: ev.target.value,
+            });
+        }
+        updateBaselineDescr(ev) {
+            this.props.updateChart({ baselineDescr: ev.target.value });
+        }
+        openColorPicker(colorPickerId) {
+            this.state.openedColorPicker = colorPickerId;
+        }
+        setColor(color, colorPickerId) {
+            switch (colorPickerId) {
+                case "backgroundColor":
+                    this.props.updateChart({ background: color });
+                    break;
+                case "baselineColorDown":
+                    this.props.updateChart({ baselineColorDown: color });
+                    break;
+                case "baselineColorUp":
+                    this.props.updateChart({ baselineColorUp: color });
+                    break;
+            }
+            this.state.openedColorPicker = undefined;
+        }
+    }
+    ScorecardChartDesignPanel.template = "o-spreadsheet-ScorecardChartDesignPanel";
+    ScorecardChartDesignPanel.components = { ColorPicker };
+    ScorecardChartDesignPanel.props = {
+        figureId: String,
+        definition: Object,
+        updateChart: Function,
+    };
+
+    const chartSidePanelComponentRegistry = new Registry();
+    chartSidePanelComponentRegistry
+        .add("line", {
+        configuration: LineConfigPanel,
+        design: LineChartDesignPanel,
+    })
+        .add("bar", {
+        configuration: BarConfigPanel,
+        design: BarChartDesignPanel,
+    })
+        .add("pie", {
+        configuration: LineBarPieConfigPanel,
+        design: LineBarPieDesignPanel,
+    })
+        .add("gauge", {
+        configuration: GaugeChartConfigPanel,
+        design: GaugeChartDesignPanel,
+    })
+        .add("scorecard", {
+        configuration: ScorecardChartConfigPanel,
+        design: ScorecardChartDesignPanel,
+    });
+
+    css /* scss */ `
+  .o-chart {
+    .o-panel {
+      display: flex;
+      .o-panel-element {
+        flex: 1 0 auto;
+        padding: 8px 0px;
+        text-align: center;
+        cursor: pointer;
+        border-right: 1px solid darkgray;
+        &.inactive {
+          background-color: ${BACKGROUND_HEADER_COLOR};
+          border-bottom: 1px solid darkgray;
+        }
+        .fa {
+          margin-right: 4px;
+        }
+      }
+      .o-panel-element:last-child {
+        border-right: none;
+      }
+    }
+
+    .o-with-color-picker {
+      position: relative;
+    }
+    .o-with-color-picker > span {
+      border-bottom: 4px solid;
+    }
+  }
+`;
+    class ChartPanel extends owl.Component {
+        constructor() {
+            super(...arguments);
+            this.shouldUpdateChart = true;
+        }
+        get figureId() {
+            return this.state.figureId;
+        }
+        setup() {
+            const selectedFigureId = this.env.model.getters.getSelectedFigureId();
+            if (!selectedFigureId) {
+                throw new Error(_lt("Cannot open the chart side panel while no chart are selected"));
+            }
+            this.state = owl.useState({
+                panel: "configuration",
+                figureId: selectedFigureId,
+            });
+            owl.onWillUpdateProps(() => {
+                const selectedFigureId = this.env.model.getters.getSelectedFigureId();
+                if (selectedFigureId && selectedFigureId !== this.state.figureId) {
+                    this.state.figureId = selectedFigureId;
+                    this.shouldUpdateChart = false;
+                }
+                else {
+                    this.shouldUpdateChart = true;
+                }
+                if (!this.env.model.getters.isChartDefined(this.figureId)) {
+                    this.props.onCloseSidePanel();
+                    return;
+                }
+            });
+        }
+        updateChart(updateDefinition) {
+            if (!this.shouldUpdateChart) {
+                return;
+            }
+            const definition = {
+                ...this.getChartDefinition(),
+                ...updateDefinition,
+            };
+            return this.env.model.dispatch("UPDATE_CHART", {
+                definition,
+                id: this.figureId,
+                sheetId: this.env.model.getters.getActiveSheetId(),
+            });
+        }
+        onTypeChange(type) {
+            const context = this.env.model.getters.getContextCreationChart(this.figureId);
+            if (!context) {
+                throw new Error("Chart not defined.");
+            }
+            const definition = getChartDefinitionFromContextCreation(context, type);
+            this.env.model.dispatch("UPDATE_CHART", {
+                definition,
+                id: this.figureId,
+                sheetId: this.env.model.getters.getActiveSheetId(),
+            });
+        }
+        get chartPanel() {
+            const type = this.env.model.getters.getChartType(this.figureId);
+            if (!type) {
+                throw new Error("Chart not defined.");
+            }
+            const chartPanel = chartSidePanelComponentRegistry.get(type);
+            if (!chartPanel) {
+                throw new Error(`Component is not defined for type ${type}`);
+            }
+            return chartPanel;
+        }
+        getChartDefinition(figureId = this.figureId) {
+            return this.env.model.getters.getChartDefinition(figureId);
+        }
+        get chartTypes() {
+            return getChartTypes();
+        }
+        activatePanel(panel) {
+            this.state.panel = panel;
+        }
+    }
+    ChartPanel.template = "o-spreadsheet-ChartPanel";
+    ChartPanel.props = {
+        onCloseSidePanel: Function,
+    };
+
+    // -----------------------------------------------------------------------------
+    // We need here the svg of the icons that we need to convert to images for the renderer
+    // -----------------------------------------------------------------------------
+    const ARROW_DOWN = '<svg class="o-cf-icon arrow-down" width="10" height="10" focusable="false" viewBox="0 0 448 512"><path fill="#DC6965" d="M413.1 222.5l22.2 22.2c9.4 9.4 9.4 24.6 0 33.9L241 473c-9.4 9.4-24.6 9.4-33.9 0L12.7 278.6c-9.4-9.4-9.4-24.6 0-33.9l22.2-22.2c9.5-9.5 25-9.3 34.3.4L184 343.4V56c0-13.3 10.7-24 24-24h32c13.3 0 24 10.7 24 24v287.4l114.8-120.5c9.3-9.8 24.8-10 34.3-.4z"></path></svg>';
+    const ARROW_UP = '<svg class="o-cf-icon arrow-up" width="10" height="10" focusable="false" viewBox="0 0 448 512"><path fill="#00A04A" d="M34.9 289.5l-22.2-22.2c-9.4-9.4-9.4-24.6 0-33.9L207 39c9.4-9.4 24.6-9.4 33.9 0l194.3 194.3c9.4 9.4 9.4 24.6 0 33.9L413 289.4c-9.5 9.5-25 9.3-34.3-.4L264 168.6V456c0 13.3-10.7 24-24 24h-32c-13.3 0-24-10.7-24-24V168.6L69.2 289.1c-9.3 9.8-24.8 10-34.3.4z"></path></svg>';
+    const ARROW_RIGHT = '<svg class="o-cf-icon arrow-right" width="10" height="10" focusable="false" viewBox="0 0 448 512"><path fill="#F0AD4E" d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"></path></svg>';
+    const SMILE = '<svg class="o-cf-icon smile" width="10" height="10" focusable="false" viewBox="0 0 496 512"><path fill="#00A04A" d="M248 8C111 8 0 119 0 256s111 248 248 248 248-111 248-248S385 8 248 8zm0 448c-110.3 0-200-89.7-200-200S137.7 56 248 56s200 89.7 200 200-89.7 200-200 200zm-80-216c17.7 0 32-14.3 32-32s-14.3-32-32-32-32 14.3-32 32 14.3 32 32 32zm160 0c17.7 0 32-14.3 32-32s-14.3-32-32-32-32 14.3-32 32 14.3 32 32 32zm4 72.6c-20.8 25-51.5 39.4-84 39.4s-63.2-14.3-84-39.4c-8.5-10.2-23.7-11.5-33.8-3.1-10.2 8.5-11.5 23.6-3.1 33.8 30 36 74.1 56.6 120.9 56.6s90.9-20.6 120.9-56.6c8.5-10.2 7.1-25.3-3.1-33.8-10.1-8.4-25.3-7.1-33.8 3.1z"></path></svg>';
+    const MEH = '<svg class="o-cf-icon meh" width="10" height="10" focusable="false" viewBox="0 0 496 512"><path fill="#F0AD4E" d="M248 8C111 8 0 119 0 256s111 248 248 248 248-111 248-248S385 8 248 8zm0 448c-110.3 0-200-89.7-200-200S137.7 56 248 56s200 89.7 200 200-89.7 200-200 200zm-80-216c17.7 0 32-14.3 32-32s-14.3-32-32-32-32 14.3-32 32 14.3 32 32 32zm160-64c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm8 144H160c-13.2 0-24 10.8-24 24s10.8 24 24 24h176c13.2 0 24-10.8 24-24s-10.8-24-24-24z"></path></svg>';
+    const FROWN = '<svg class="o-cf-icon frown" width="10" height="10" focusable="false" viewBox="0 0 496 512"><path fill="#DC6965" d="M248 8C111 8 0 119 0 256s111 248 248 248 248-111 248-248S385 8 248 8zm0 448c-110.3 0-200-89.7-200-200S137.7 56 248 56s200 89.7 200 200-89.7 200-200 200zm-80-216c17.7 0 32-14.3 32-32s-14.3-32-32-32-32 14.3-32 32 14.3 32 32 32zm160-64c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm-80 128c-40.2 0-78 17.7-103.8 48.6-8.5 10.2-7.1 25.3 3.1 33.8 10.2 8.4 25.3 7.1 33.8-3.1 16.6-19.9 41-31.4 66.9-31.4s50.3 11.4 66.9 31.4c8.1 9.7 23.1 11.9 33.8 3.1 10.2-8.5 11.5-23.6 3.1-33.8C326 321.7 288.2 304 248 304z"></path></svg>';
+    const GREEN_DOT = '<svg class="o-cf-icon green-dot" width="10" height="10" focusable="false" viewBox="0 0 512 512"><path fill="#00A04A" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8z"></path></svg>';
+    const YELLOW_DOT = '<svg class="o-cf-icon yellow-dot" width="10" height="10" focusable="false" viewBox="0 0 512 512"><path fill="#F0AD4E" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8z"></path></svg>';
+    const RED_DOT = '<svg class="o-cf-icon red-dot" width="10" height="10" focusable="false" viewBox="0 0 512 512"><path fill="#DC6965" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8z"></path></svg>';
+    function loadIconImage(svg) {
+        /** We have to add xmlns, as it's not added by owl in the canvas */
+        svg = `<svg xmlns="http://www.w3.org/2000/svg" ${svg.slice(4)}`;
+        const image = new Image();
+        image.src = "data:image/svg+xml; charset=utf8, " + encodeURIComponent(svg);
+        return image;
+    }
+    const ICONS = {
+        arrowGood: {
+            template: "ARROW_UP",
+            img: loadIconImage(ARROW_UP),
+        },
+        arrowNeutral: {
+            template: "ARROW_RIGHT",
+            img: loadIconImage(ARROW_RIGHT),
+        },
+        arrowBad: {
+            template: "ARROW_DOWN",
+            img: loadIconImage(ARROW_DOWN),
+        },
+        smileyGood: {
+            template: "SMILE",
+            img: loadIconImage(SMILE),
+        },
+        smileyNeutral: {
+            template: "MEH",
+            img: loadIconImage(MEH),
+        },
+        smileyBad: {
+            template: "FROWN",
+            img: loadIconImage(FROWN),
+        },
+        dotGood: {
+            template: "GREEN_DOT",
+            img: loadIconImage(GREEN_DOT),
+        },
+        dotNeutral: {
+            template: "YELLOW_DOT",
+            img: loadIconImage(YELLOW_DOT),
+        },
+        dotBad: {
+            template: "RED_DOT",
+            img: loadIconImage(RED_DOT),
+        },
+    };
+    const ICON_SETS = {
+        arrows: {
+            good: "arrowGood",
+            neutral: "arrowNeutral",
+            bad: "arrowBad",
+        },
+        smiley: {
+            good: "smileyGood",
+            neutral: "smileyNeutral",
+            bad: "smileyBad",
+        },
+        dots: {
+            good: "dotGood",
+            neutral: "dotNeutral",
+            bad: "dotBad",
+        },
+    };
+
+    css /* scss */ `
+  .o-icon-picker {
+    position: absolute;
+    z-index: ${ComponentsImportance.IconPicker};
+    box-shadow: 1px 2px 5px 2px rgba(51, 51, 51, 0.15);
+    background-color: white;
+    padding: 2px 1px;
+  }
+  .o-cf-icon-line {
+    display: flex;
+    padding: 3px 6px;
+  }
+  .o-icon-picker-item {
+    margin: 0px 2px;
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.08);
+      outline: 1px solid gray;
+    }
+  }
+`;
+    class IconPicker extends owl.Component {
+        constructor() {
+            super(...arguments);
+            this.icons = ICONS;
+            this.iconSets = ICON_SETS;
+        }
+        onIconClick(icon) {
+            if (icon) {
+                this.props.onIconPicked(icon);
+            }
+        }
+    }
+    IconPicker.template = "o-spreadsheet-IconPicker";
+    IconPicker.props = {
+        onIconPicked: Function,
+    };
+
+    // TODO vsc: add ordering of rules
+    css /* scss */ `
+  label {
+    vertical-align: middle;
+  }
+  .o_cf_radio_item {
+    margin-right: 10%;
+  }
+  .radio input:checked {
+    color: #e9ecef;
+    border-color: #00a09d;
+    background-color: #00a09d;
+  }
+  .o-cf-editor {
+    border-bottom: solid;
+    border-color: lightgrey;
+  }
+  .o-cf {
+    .o-cf-type-selector {
+      *,
+      ::after,
+      ::before {
+        box-sizing: border-box;
+      }
+      margin-top: 10px;
+      display: flex;
+    }
+    .o-section-subtitle:first-child {
+      margin-top: 0px;
+    }
+    .o-cf-cursor-ptr {
+      cursor: pointer;
+    }
+    .o-cf-preview {
+      background-color: #fff;
+      border-bottom: 1px solid #ccc;
+      display: flex;
+      height: 60px;
+      padding: 10px;
+      position: relative;
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.08);
+      }
+      &:not(:hover) .o-cf-delete-button {
+        display: none;
+      }
+      .o-cf-preview-image {
+        border: 1px solid lightgrey;
+        height: 50px;
+        line-height: 50px;
+        margin-right: 15px;
+        margin-top: 3px;
+        position: absolute;
+        text-align: center;
+        width: 50px;
+      }
+      .o-cf-preview-icon {
+        border: 1px solid lightgrey;
+        position: absolute;
+        height: 50px;
+        line-height: 50px;
+        margin-right: 15px;
+        margin-top: 3px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+      }
+      .o-cf-preview-description {
+        left: 65px;
+        margin-bottom: auto;
+        margin-right: 8px;
+        margin-top: auto;
+        position: relative;
+        width: 142px;
+        .o-cf-preview-description-rule {
+          margin-bottom: 4px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          font-weight: 600;
+          color: #303030;
+          max-height: 2.8em;
+          line-height: 1.4em;
+        }
+        .o-cf-preview-range {
+          text-overflow: ellipsis;
+          font-size: 12px;
+          overflow: hidden;
+        }
+      }
+      .o-cf-delete {
+        color: dimgrey;
+        left: 90%;
+        top: 39%;
+        position: absolute;
+      }
+      .o-cf-reorder {
+        color: gray;
+        left: 90%;
+        position: absolute;
+        height: 100%;
+        width: 10%;
+      }
+      .o-cf-reorder-button:hover {
+        cursor: pointer;
+        background-color: rgba(0, 0, 0, 0.08);
+      }
+      .o-cf-reorder-button-up {
+        width: 15px;
+        height: 20px;
+        padding: 5px;
+        padding-top: 0px;
+      }
+      .o-cf-reorder-button-down {
+        width: 15px;
+        height: 20px;
+        bottom: 20px;
+        padding: 5px;
+        padding-top: 0px;
+        position: absolute;
+      }
+    }
+    .o-cf-ruleEditor {
+      font-size: 12px;
+      line-height: 1.5;
+      .o-selection-cf {
+        margin-bottom: 3%;
+      }
+      .o-cell-content {
+        font-size: 12px;
+        font-weight: 500;
+        padding: 0 12px;
+        margin: 0;
+        line-height: 35px;
+      }
+    }
+    .o-cf-btn-link {
+      font-size: 14px;
+      padding: 20px 24px 11px 24px;
+      height: 44px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .o-cf-btn-link:hover {
+      color: #003a39;
+      text-decoration: none;
+    }
+    .o-cf-error {
+      color: red;
+      margin-top: 10px;
+    }
+  }
+  .o-cf-cell-is-rule {
+    .o-cf-preview-line {
+      border: 1px solid darkgrey;
+      padding: 10px;
+    }
+    .o-cell-is-operator {
+      margin-bottom: 5px;
+      width: 96%;
+    }
+    .o-cell-is-value {
+      margin-bottom: 5px;
+      width: 96%;
+    }
+    .o-color-picker {
+      pointer-events: all;
+    }
+  }
+  .o-cf-color-scale-editor {
+    .o-threshold {
+      display: flex;
+      flex-direction: horizontal;
+      select {
+        width: 100%;
+      }
+      .o-threshold-value {
+        margin-left: 2%;
+        width: 20%;
+        min-width: 0px; // input overflows in Firefox otherwise
+      }
+      .o-threshold-value:disabled {
+        background-color: #edebed;
+      }
+    }
+    .o-cf-preview-gradient {
+      border: 1px solid darkgrey;
+      padding: 10px;
+      border-radius: 4px;
+    }
+  }
+  .o-cf-iconset-rule {
+    font-size: 12;
+    .o-cf-iconsets {
+      display: flex;
+      justify-content: space-between;
+      .o-cf-iconset {
+        border: 1px solid #dadce0;
+        border-radius: 4px;
+        display: inline-flex;
+        padding: 5px 8px;
+        width: 25%;
+        cursor: pointer;
+        justify-content: space-between;
+        .o-cf-icon {
+          display: inline;
+          margin-left: 1%;
+          margin-right: 1%;
+        }
+        svg {
+          vertical-align: baseline;
+        }
+      }
+      .o-cf-iconset:hover {
+        background-color: rgba(0, 0, 0, 0.08);
+      }
+    }
+    .o-inflection {
+      .o-cf-icon-button {
+        display: inline-block;
+        border: 1px solid #dadce0;
+        border-radius: 4px;
+        cursor: pointer;
+        padding: 1px 2px;
+      }
+      .o-cf-icon-button:hover {
+        background-color: rgba(0, 0, 0, 0.08);
+      }
+      table {
+        table-layout: fixed;
+        margin-top: 2%;
+        display: table;
+        text-align: left;
+        font-size: 12px;
+        line-height: 18px;
+        width: 100%;
+      }
+      th.o-cf-iconset-icons {
+        width: 8%;
+      }
+      th.o-cf-iconset-text {
+        width: 28%;
+      }
+      th.o-cf-iconset-operator {
+        width: 14%;
+      }
+      th.o-cf-iconset-type {
+        width: 28%;
+      }
+      th.o-cf-iconset-value {
+        width: 26%;
+      }
+      input,
+      select {
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+      }
+    }
+    .o-cf-iconset-reverse {
+      margin-bottom: 2%;
+      margin-top: 2%;
+      .o-cf-label {
+        display: inline-block;
+        vertical-align: bottom;
+        margin-bottom: 2px;
+      }
+    }
+  }
+`;
+    class ConditionalFormattingPanel extends owl.Component {
+        constructor() {
+            super(...arguments);
+            this.icons = ICONS;
+            this.cellIsOperators = CellIsOperators;
+            this.iconSets = ICON_SETS;
+            this.getTextDecoration = getTextDecoration;
+            this.colorNumberString = colorNumberString;
+        }
+        setup() {
+            this.activeSheetId = this.env.model.getters.getActiveSheetId();
+            this.state = owl.useState({
+                mode: "list",
+                errors: [],
+                rules: this.getDefaultRules(),
+            });
+            const sheetId = this.env.model.getters.getActiveSheetId();
+            const rules = this.env.model.getters.getRulesSelection(sheetId, this.props.selection || []);
+            if (rules.length === 1) {
+                const cf = this.conditionalFormats.find((c) => c.id === rules[0]);
+                if (cf) {
+                    this.editConditionalFormat(cf);
+                }
+            }
+            owl.onWillUpdateProps((nextProps) => {
+                const newActiveSheetId = this.env.model.getters.getActiveSheetId();
+                if (newActiveSheetId !== this.activeSheetId) {
+                    this.activeSheetId = newActiveSheetId;
+                    this.switchToList();
+                }
+                else if (nextProps.selection !== this.props.selection) {
+                    const sheetId = this.env.model.getters.getActiveSheetId();
+                    const rules = this.env.model.getters.getRulesSelection(sheetId, nextProps.selection || []);
+                    if (rules.length === 1) {
+                        const cf = this.conditionalFormats.find((c) => c.id === rules[0]);
+                        if (cf) {
+                            this.editConditionalFormat(cf);
+                        }
+                    }
+                    else {
+                        this.switchToList();
+                    }
+                }
+            });
+            owl.useExternalListener(window, "click", this.closeMenus);
+        }
+        get conditionalFormats() {
+            return this.env.model.getters.getConditionalFormats(this.env.model.getters.getActiveSheetId());
+        }
+        get isRangeValid() {
+            return this.state.errors.includes(23 /* CommandResult.EmptyRange */);
+        }
+        errorMessage(error) {
+            return CfTerms.Errors[error] || CfTerms.Errors.Unexpected;
+        }
+        /**
+         * Switch to the list view
+         */
+        switchToList() {
+            this.state.mode = "list";
+            this.state.currentCF = undefined;
+            this.state.currentCFType = undefined;
+            this.state.errors = [];
+            this.state.rules = this.getDefaultRules();
+        }
+        getStyle(rule) {
+            if (rule.type === "CellIsRule") {
+                const fontWeight = rule.style.bold ? "bold" : "normal";
+                const fontDecoration = getTextDecoration(rule.style);
+                const fontStyle = rule.style.italic ? "italic" : "normal";
+                const color = rule.style.textColor || "none";
+                const backgroundColor = rule.style.fillColor || "none";
+                return `font-weight:${fontWeight};
+               text-decoration:${fontDecoration};
+               font-style:${fontStyle};
+               color:${color};
+               background-color:${backgroundColor};`;
+            }
+            else if (rule.type === "ColorScaleRule") {
+                const minColor = colorNumberString(rule.minimum.color);
+                const midColor = rule.midpoint ? colorNumberString(rule.midpoint.color) : null;
+                const maxColor = colorNumberString(rule.maximum.color);
+                const baseString = "background-image: linear-gradient(to right, ";
+                return midColor
+                    ? baseString + minColor + ", " + midColor + ", " + maxColor + ")"
+                    : baseString + minColor + ", " + maxColor + ")";
+            }
+            return "";
+        }
+        getDescription(cf) {
+            switch (cf.rule.type) {
+                case "CellIsRule":
+                    const description = CellIsOperators[cf.rule.operator];
+                    if (cf.rule.values.length === 1) {
+                        return `${description} ${cf.rule.values[0]}`;
+                    }
+                    if (cf.rule.values.length === 2) {
+                        return _t("%s %s and %s", description, cf.rule.values[0], cf.rule.values[1]);
+                    }
+                    return description;
+                case "ColorScaleRule":
+                    return CfTerms.ColorScale;
+                case "IconSetRule":
+                    return CfTerms.IconSet;
+                default:
+                    return "";
+            }
+        }
+        saveConditionalFormat() {
+            if (this.state.currentCF) {
+                const invalidRanges = this.state.currentCF.ranges.some((xc) => !xc.match(rangeReference));
+                if (invalidRanges) {
+                    this.state.errors = [24 /* CommandResult.InvalidRange */];
+                    return;
+                }
+                const sheetId = this.env.model.getters.getActiveSheetId();
+                const result = this.env.model.dispatch("ADD_CONDITIONAL_FORMAT", {
+                    cf: {
+                        rule: this.getEditorRule(),
+                        id: this.state.mode === "edit"
+                            ? this.state.currentCF.id
+                            : this.env.model.uuidGenerator.uuidv4(),
+                    },
+                    ranges: this.state.currentCF.ranges.map((xc) => this.env.model.getters.getRangeDataFromXc(sheetId, xc)),
+                    sheetId,
+                });
+                if (!result.isSuccessful) {
+                    this.state.errors = result.reasons;
+                }
+                else {
+                    this.switchToList();
+                }
+            }
+        }
+        /**
+         * Get the rule currently edited with the editor
+         */
+        getEditorRule() {
+            switch (this.state.currentCFType) {
+                case "CellIsRule":
+                    return this.state.rules.cellIs;
+                case "ColorScaleRule":
+                    return this.state.rules.colorScale;
+                case "IconSetRule":
+                    return this.state.rules.iconSet;
+            }
+            throw new Error(`Invalid cf type: ${this.state.currentCFType}`);
+        }
+        getDefaultRules() {
+            return {
+                cellIs: {
+                    type: "CellIsRule",
+                    operator: "IsNotEmpty",
+                    values: [],
+                    style: { fillColor: "#b6d7a8" },
+                },
+                colorScale: {
+                    type: "ColorScaleRule",
+                    minimum: { type: "value", color: 0xffffff },
+                    midpoint: undefined,
+                    maximum: { type: "value", color: 0x6aa84f },
+                },
+                iconSet: {
+                    type: "IconSetRule",
+                    icons: {
+                        upper: "arrowGood",
+                        middle: "arrowNeutral",
+                        lower: "arrowBad",
+                    },
+                    upperInflectionPoint: {
+                        type: "percentage",
+                        value: "66",
+                        operator: "gt",
+                    },
+                    lowerInflectionPoint: {
+                        type: "percentage",
+                        value: "33",
+                        operator: "gt",
+                    },
+                },
+            };
+        }
+        /**
+         * Create a new CF, a CellIsRule by default
+         */
+        addConditionalFormat() {
+            this.state.mode = "add";
+            this.state.currentCFType = "CellIsRule";
+            this.state.currentCF = {
+                id: this.env.model.uuidGenerator.uuidv4(),
+                ranges: this.env.model.getters
+                    .getSelectedZones()
+                    .map((zone) => this.env.model.getters.zoneToXC(this.env.model.getters.getActiveSheetId(), zone)),
+            };
+        }
+        /**
+         * Delete a CF
+         */
+        deleteConditionalFormat(cf) {
+            this.env.model.dispatch("REMOVE_CONDITIONAL_FORMAT", {
+                id: cf.id,
+                sheetId: this.env.model.getters.getActiveSheetId(),
+            });
+        }
+        /**
+         * Edit an existing CF. Return without doing anything in reorder mode.
+         */
+        editConditionalFormat(cf) {
+            if (this.state.mode === "reorder")
+                return;
+            this.state.mode = "edit";
+            this.state.currentCF = cf;
+            this.state.currentCFType = cf.rule.type;
+            switch (cf.rule.type) {
+                case "CellIsRule":
+                    this.state.rules.cellIs = cf.rule;
+                    break;
+                case "ColorScaleRule":
+                    this.state.rules.colorScale = cf.rule;
+                    break;
+                case "IconSetRule":
+                    this.state.rules.iconSet = cf.rule;
+                    break;
+            }
+        }
+        /**
+         * Reorder existing CFs
+         */
+        reorderConditionalFormats() {
+            this.state.mode = "reorder";
+        }
+        reorderRule(cf, direction) {
+            this.env.model.dispatch("MOVE_CONDITIONAL_FORMAT", {
+                cfId: cf.id,
+                direction: direction,
+                sheetId: this.env.model.getters.getActiveSheetId(),
+            });
+        }
+        changeRuleType(ruleType) {
+            if (this.state.currentCFType === ruleType || !this.state.rules) {
+                return;
+            }
+            this.state.errors = [];
+            this.state.currentCFType = ruleType;
+        }
+        onRangesChanged(ranges) {
+            if (this.state.currentCF) {
+                this.state.currentCF.ranges = ranges;
+            }
+        }
+        /*****************************************************************************
+         * Common
+         ****************************************************************************/
+        toggleMenu(menu) {
+            const isSelected = this.state.openedMenu === menu;
+            this.closeMenus();
+            if (!isSelected) {
+                this.state.openedMenu = menu;
+            }
+        }
+        closeMenus() {
+            this.state.openedMenu = undefined;
+        }
+        /*****************************************************************************
+         * Cell Is Rule
+         ****************************************************************************/
+        get isValue1Invalid() {
+            var _a;
+            return !!((_a = this.state.errors) === null || _a === void 0 ? void 0 : _a.includes(49 /* CommandResult.FirstArgMissing */));
+        }
+        get isValue2Invalid() {
+            var _a;
+            return !!((_a = this.state.errors) === null || _a === void 0 ? void 0 : _a.includes(50 /* CommandResult.SecondArgMissing */));
+        }
+        toggleStyle(tool) {
+            const style = this.state.rules.cellIs.style;
+            style[tool] = !style[tool];
+            this.closeMenus();
+        }
+        setColor(target, color) {
+            this.state.rules.cellIs.style[target] = color;
+            this.closeMenus();
+        }
+        /*****************************************************************************
+         * Color Scale Rule
+         ****************************************************************************/
+        isValueInvalid(threshold) {
+            switch (threshold) {
+                case "minimum":
+                    return (this.state.errors.includes(56 /* CommandResult.MinInvalidFormula */) ||
+                        this.state.errors.includes(48 /* CommandResult.MinBiggerThanMid */) ||
+                        this.state.errors.includes(45 /* CommandResult.MinBiggerThanMax */) ||
+                        this.state.errors.includes(51 /* CommandResult.MinNaN */));
+                case "midpoint":
+                    return (this.state.errors.includes(57 /* CommandResult.MidInvalidFormula */) ||
+                        this.state.errors.includes(52 /* CommandResult.MidNaN */) ||
+                        this.state.errors.includes(47 /* CommandResult.MidBiggerThanMax */));
+                case "maximum":
+                    return (this.state.errors.includes(58 /* CommandResult.MaxInvalidFormula */) ||
+                        this.state.errors.includes(53 /* CommandResult.MaxNaN */));
+                default:
+                    return false;
+            }
+        }
+        setColorScaleColor(target, color) {
+            const point = this.state.rules.colorScale[target];
+            if (point) {
+                point.color = Number.parseInt(color.substr(1), 16);
+            }
+            this.closeMenus();
+        }
+        getPreviewGradient() {
+            var _a;
+            const rule = this.state.rules.colorScale;
+            const minColor = colorNumberString(rule.minimum.color);
+            const midColor = colorNumberString(((_a = rule.midpoint) === null || _a === void 0 ? void 0 : _a.color) || DEFAULT_COLOR_SCALE_MIDPOINT_COLOR);
+            const maxColor = colorNumberString(rule.maximum.color);
+            const baseString = "background-image: linear-gradient(to right, ";
+            return rule.midpoint === undefined
+                ? baseString + minColor + ", " + maxColor + ")"
+                : baseString + minColor + ", " + midColor + ", " + maxColor + ")";
+        }
+        getThresholdColor(threshold) {
+            return threshold
+                ? colorNumberString(threshold.color)
+                : colorNumberString(DEFAULT_COLOR_SCALE_MIDPOINT_COLOR);
+        }
+        onMidpointChange(ev) {
+            const type = ev.target.value;
+            const rule = this.state.rules.colorScale;
+            if (type === "none") {
+                rule.midpoint = undefined;
+            }
+            else {
+                rule.midpoint = {
+                    color: DEFAULT_COLOR_SCALE_MIDPOINT_COLOR,
+                    value: "",
+                    ...rule.midpoint,
+                    type,
+                };
+            }
+        }
+        /*****************************************************************************
+         * Icon Set
+         ****************************************************************************/
+        isInflectionPointInvalid(inflectionPoint) {
+            switch (inflectionPoint) {
+                case "lowerInflectionPoint":
+                    return (this.state.errors.includes(55 /* CommandResult.ValueLowerInflectionNaN */) ||
+                        this.state.errors.includes(60 /* CommandResult.ValueLowerInvalidFormula */) ||
+                        this.state.errors.includes(46 /* CommandResult.LowerBiggerThanUpper */));
+                case "upperInflectionPoint":
+                    return (this.state.errors.includes(54 /* CommandResult.ValueUpperInflectionNaN */) ||
+                        this.state.errors.includes(59 /* CommandResult.ValueUpperInvalidFormula */) ||
+                        this.state.errors.includes(46 /* CommandResult.LowerBiggerThanUpper */));
+                default:
+                    return true;
+            }
+        }
+        reverseIcons() {
+            const icons = this.state.rules.iconSet.icons;
+            const upper = icons.upper;
+            icons.upper = icons.lower;
+            icons.lower = upper;
+        }
+        setIconSet(iconSet) {
+            const icons = this.state.rules.iconSet.icons;
+            icons.upper = this.iconSets[iconSet].good;
+            icons.middle = this.iconSets[iconSet].neutral;
+            icons.lower = this.iconSets[iconSet].bad;
+        }
+        setIcon(target, icon) {
+            this.state.rules.iconSet.icons[target] = icon;
+        }
+    }
+    ConditionalFormattingPanel.template = "o-spreadsheet-ConditionalFormattingPanel";
+    ConditionalFormattingPanel.components = { SelectionInput, IconPicker, ColorPicker };
+    ConditionalFormattingPanel.props = {
+        selection: { type: Object, optional: true },
+        onCloseSidePanel: Function,
+    };
+
+    css /* scss */ `
+  .o-custom-currency {
+    .o-format-proposals {
+      color: black;
+    }
+  }
+`;
+    class CustomCurrencyPanel extends owl.Component {
+        setup() {
+            this.availableCurrencies = [];
+            this.state = owl.useState({
+                selectedCurrencyIndex: 0,
+                currencyCode: "",
+                currencySymbol: "",
+                selectedFormatIndex: 0,
+            });
+            owl.onWillStart(() => this.updateAvailableCurrencies());
+        }
+        get formatProposals() {
+            const currency = this.availableCurrencies[this.state.selectedCurrencyIndex];
+            const proposalBases = this.initProposalBases(currency.decimalPlaces);
+            const firstPosition = currency.position;
+            const secondPosition = currency.position === "before" ? "after" : "before";
+            const symbol = this.state.currencySymbol.trim() ? this.state.currencySymbol : "";
+            const code = this.state.currencyCode.trim() ? this.state.currencyCode : "";
+            return code || symbol
+                ? [
+                    ...this.createFormatProposals(proposalBases, symbol, code, firstPosition),
+                    ...this.createFormatProposals(proposalBases, symbol, code, secondPosition),
+                ]
+                : [];
+        }
+        get isSameFormat() {
+            const selectedFormat = this.formatProposals[this.state.selectedFormatIndex];
+            return selectedFormat ? selectedFormat.format === this.getCommonFormat() : false;
+        }
+        async updateAvailableCurrencies() {
+            var _a, _b;
+            if (currenciesRegistry.getAll().length === 0) {
+                const currencies = (await ((_b = (_a = this.env).loadCurrencies) === null || _b === void 0 ? void 0 : _b.call(_a))) || [];
+                currencies.forEach((currency, index) => {
+                    currenciesRegistry.add(index.toString(), currency);
+                });
+            }
+            const emptyCurrency = {
+                name: this.env._t(CustomCurrencyTerms.Custom),
+                code: "",
+                symbol: "",
+                decimalPlaces: 2,
+                position: "after",
+            };
+            this.availableCurrencies = [emptyCurrency, ...currenciesRegistry.getAll()];
+        }
+        updateSelectCurrency(ev) {
+            const target = ev.target;
+            this.state.selectedCurrencyIndex = parseInt(target.value, 10);
+            const currency = this.availableCurrencies[this.state.selectedCurrencyIndex];
+            this.state.currencyCode = currency.code;
+            this.state.currencySymbol = currency.symbol;
+        }
+        updateCode(ev) {
+            const target = ev.target;
+            this.state.currencyCode = target.value;
+            this.initAvailableCurrencies();
+        }
+        updateSymbol(ev) {
+            const target = ev.target;
+            this.state.currencySymbol = target.value;
+            this.initAvailableCurrencies();
+        }
+        updateSelectFormat(ev) {
+            const target = ev.target;
+            this.state.selectedFormatIndex = parseInt(target.value, 10);
+        }
+        apply() {
+            const selectedFormat = this.formatProposals[this.state.selectedFormatIndex];
+            this.env.model.dispatch("SET_FORMATTING", {
+                sheetId: this.env.model.getters.getActiveSheetId(),
+                target: this.env.model.getters.getSelectedZones(),
+                format: selectedFormat.format,
+            });
+        }
+        // ---------------------------------------------------------------------------
+        // Private
+        // ---------------------------------------------------------------------------
+        initAvailableCurrencies() {
+            this.state.selectedCurrencyIndex = 0;
+        }
+        initProposalBases(decimalPlaces) {
+            const result = [{ format: "#,##0", example: "1,000" }];
+            const decimalRepresentation = decimalPlaces ? "." + "0".repeat(decimalPlaces) : "";
+            if (decimalRepresentation) {
+                result.push({
+                    format: "#,##0" + decimalRepresentation,
+                    example: "1,000" + decimalRepresentation,
+                });
+            }
+            return result;
+        }
+        createFormatProposals(proposalBases, symbol, code, position) {
+            let formatProposals = [];
+            // 1 - add proposal with symbol and without code
+            if (symbol) {
+                for (let base of proposalBases) {
+                    formatProposals.push(this.createFormatProposal(position, base.example, base.format, symbol));
+                }
+            }
+            // 2 - if code exist --> add more proposal with symbol and with code
+            if (code) {
+                for (let base of proposalBases) {
+                    const expression = (position === "after" ? " " : "") + code + " " + symbol;
+                    formatProposals.push(this.createFormatProposal(position, base.example, base.format, expression));
+                }
+            }
+            return formatProposals;
+        }
+        createFormatProposal(position, baseExample, formatBase, expression) {
+            const formatExpression = "[$" + expression + "]";
+            return {
+                example: position === "before" ? expression + baseExample : baseExample + expression,
+                format: position === "before" ? formatExpression + formatBase : formatBase + formatExpression,
+            };
+        }
+        getCommonFormat() {
+            var _a;
+            const selectedZones = this.env.model.getters.getSelectedZones();
+            const sheetId = this.env.model.getters.getActiveSheetId();
+            const cells = selectedZones
+                .map((zone) => this.env.model.getters.getCellsInZone(sheetId, zone))
+                .flat();
+            const firstFormat = (_a = cells[0]) === null || _a === void 0 ? void 0 : _a.format;
+            return cells.every((cell) => (cell === null || cell === void 0 ? void 0 : cell.format) === firstFormat) ? firstFormat : undefined;
+        }
+        currencyDisplayName(currency) {
+            return currency.name + (currency.code ? ` (${currency.code})` : "");
+        }
+    }
+    CustomCurrencyPanel.template = "o-spreadsheet-CustomCurrencyPanel";
+    CustomCurrencyPanel.props = {
+        onCloseSidePanel: Function,
+    };
+
+    css /* scss */ `
+  .o-find-and-replace {
+    .o-far-item {
+      display: block;
+      .o-far-checkbox {
+        display: inline-block;
+        .o-far-input {
+          vertical-align: middle;
+        }
+        .o-far-label {
+          position: relative;
+          top: 1.5px;
+          padding-left: 4px;
+        }
+      }
+    }
+    outline: none;
+    height: 100%;
+    .o-input-search-container {
+      display: flex;
+      .o-input-with-count {
+        flex-grow: 1;
+        width: auto;
+      }
+      .o-input-without-count {
+        width: 100%;
+      }
+      .o-input-count {
+        width: fit-content;
+        padding: 4 0 4 4;
+      }
+    }
+  }
+`;
+    class FindAndReplacePanel extends owl.Component {
+        constructor() {
+            super(...arguments);
+            this.state = owl.useState(this.initialState());
+            this.showFormulaState = false;
+            this.findAndReplaceRef = owl.useRef("findAndReplace");
+        }
+        get hasSearchResult() {
+            return this.env.model.getters.getCurrentSelectedMatchIndex() !== null;
+        }
+        setup() {
+            this.showFormulaState = this.env.model.getters.shouldShowFormulas();
+            owl.onMounted(() => this.focusInput());
+            owl.onWillUnmount(() => {
+                this.env.model.dispatch("CLEAR_SEARCH");
+                this.env.model.dispatch("SET_FORMULA_VISIBILITY", { show: this.showFormulaState });
+            });
+        }
+        onInput(ev) {
+            this.state.toSearch = ev.target.value;
+            this.debouncedUpdateSearch();
+        }
+        onKeydownSearch(ev) {
+            if (ev.key === "Enter") {
+                ev.preventDefault();
+                this.onSelectNextCell();
+            }
+        }
+        onKeydownReplace(ev) {
+            if (ev.key === "Enter") {
+                ev.preventDefault();
+                this.replace();
+            }
+        }
+        onFocusSidePanel() {
+            this.state.searchOptions.searchFormulas = this.env.model.getters.shouldShowFormulas();
+            this.env.model.dispatch("REFRESH_SEARCH");
+        }
+        searchFormulas() {
+            this.env.model.dispatch("SET_FORMULA_VISIBILITY", {
+                show: this.state.searchOptions.searchFormulas,
+            });
+            this.updateSearch();
+        }
+        onSelectPreviousCell() {
+            this.env.model.dispatch("SELECT_SEARCH_PREVIOUS_MATCH");
+        }
+        onSelectNextCell() {
+            this.env.model.dispatch("SELECT_SEARCH_NEXT_MATCH");
+        }
+        updateSearch() {
+            this.env.model.dispatch("UPDATE_SEARCH", {
+                toSearch: this.state.toSearch,
+                searchOptions: this.state.searchOptions,
+            });
+        }
+        debouncedUpdateSearch() {
+            clearTimeout(this.inDebounce);
+            this.inDebounce = setTimeout(() => this.updateSearch.call(this), 400);
+        }
+        replace() {
+            this.env.model.dispatch("REPLACE_SEARCH", {
+                replaceWith: this.state.replaceWith,
+            });
+        }
+        replaceAll() {
+            this.env.model.dispatch("REPLACE_ALL_SEARCH", {
+                replaceWith: this.state.replaceWith,
+            });
+        }
+        // ---------------------------------------------------------------------------
+        // Private
+        // ---------------------------------------------------------------------------
+        focusInput() {
+            const el = this.findAndReplaceRef.el;
+            const input = el.querySelector(`input`);
+            if (input) {
+                input.focus();
+            }
+        }
+        initialState() {
+            return {
+                toSearch: "",
+                replaceWith: "",
+                searchOptions: {
+                    matchCase: false,
+                    exactMatch: false,
+                    searchFormulas: false,
+                },
+            };
+        }
+    }
+    FindAndReplacePanel.template = "o-spreadsheet-FindAndReplacePanel";
+    FindAndReplacePanel.props = {
+        onCloseSidePanel: Function,
+    };
+
+    const sidePanelRegistry = new Registry();
+    sidePanelRegistry.add("ConditionalFormatting", {
+        title: _lt("Conditional formatting"),
+        Body: ConditionalFormattingPanel,
+    });
+    sidePanelRegistry.add("ChartPanel", {
+        title: _lt("Chart"),
+        Body: ChartPanel,
+    });
+    sidePanelRegistry.add("FindAndReplace", {
+        title: _lt("Find and Replace"),
+        Body: FindAndReplacePanel,
+    });
+    sidePanelRegistry.add("CustomCurrency", {
+        title: _lt("Custom currency format"),
+        Body: CustomCurrencyPanel,
+    });
+
+    class TopBarComponentRegistry extends Registry {
+        constructor() {
+            super(...arguments);
+            this.mapping = {};
+            this.uuidGenerator = new UuidGenerator();
+        }
+        add(name, value) {
+            const component = { ...value, id: this.uuidGenerator.uuidv4() };
+            return super.add(name, component);
+        }
+    }
+    const topbarComponentRegistry = new TopBarComponentRegistry();
+
+    /* Sizes of boxes containing the texts, in percentage of the Chart size */
+    const TITLE_FONT_SIZE = 18;
+    const BASELINE_BOX_HEIGHT_RATIO = 0.35;
+    const KEY_BOX_HEIGHT_RATIO = 0.65;
+    /** Baseline description should have a smaller font than the baseline */
+    const BASELINE_DESCR_FONT_RATIO = 0.9;
+    /* Padding at the border of the chart, in percentage of the chart width */
+    const CHART_PADDING_RATIO = 0.02;
+    /**
+     * Line height (in em)
+     * Having a line heigh =1em (=font size) don't work, the font will overflow.
+     */
+    const LINE_HEIGHT = 1.2;
+    css /* scss */ `
+  div.o-scorecard {
+    user-select: none;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+
+    .o-scorecard-content {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .o-title-text {
+      text-align: left;
+      height: ${LINE_HEIGHT + "em"};
+      line-height: ${LINE_HEIGHT + "em"};
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .o-key-text {
+      line-height: ${LINE_HEIGHT + "em"};
+      height: ${LINE_HEIGHT + "em"};
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .o-cf-icon {
+      display: inline-block;
+      width: 0.65em;
+      height: 1em;
+      line-height: 1em;
+      padding-bottom: 0.07em;
+      padding-right: 3px;
+    }
+
+    .o-baseline-text {
+      line-height: ${LINE_HEIGHT + "em"};
+      height: ${LINE_HEIGHT + "em"};
+      overflow: hidden;
+      white-space: nowrap;
+
+      .o-baseline-text-description {
+        white-space: pre;
+      }
+    }
+  }
+`;
+    class ScorecardChart extends owl.Component {
+        constructor() {
+            super(...arguments);
+            this.ctx = document.createElement("canvas").getContext("2d");
+        }
+        get runtime() {
+            return this.env.model.getters.getChartRuntime(this.props.figure.id);
+        }
+        get title() {
+            var _a;
+            return ((_a = this.runtime) === null || _a === void 0 ? void 0 : _a.title) || "";
+        }
+        get keyValue() {
+            var _a;
+            return ((_a = this.runtime) === null || _a === void 0 ? void 0 : _a.keyValue) || "";
+        }
+        get baseline() {
+            var _a;
+            return ((_a = this.runtime) === null || _a === void 0 ? void 0 : _a.baselineDisplay) || "";
+        }
+        get baselineDescr() {
+            var _a;
+            const baselineDescr = ((_a = this.runtime) === null || _a === void 0 ? void 0 : _a.baselineDescr) || "";
+            return this.baseline && baselineDescr ? " " + baselineDescr : baselineDescr;
+        }
+        get baselineArrowDirection() {
+            var _a;
+            return ((_a = this.runtime) === null || _a === void 0 ? void 0 : _a.baselineArrow) || "neutral";
+        }
+        get backgroundColor() {
+            var _a;
+            return ((_a = this.runtime) === null || _a === void 0 ? void 0 : _a.background) || "#ffffff";
+        }
+        get primaryFontColor() {
+            var _a;
+            return ((_a = this.runtime) === null || _a === void 0 ? void 0 : _a.fontColor) || "#000000";
+        }
+        get secondaryFontColor() {
+            return relativeLuminance(this.primaryFontColor) <= 0.3 ? "#757575" : "#bbbbbb";
+        }
+        get figure() {
+            return this.props.figure;
+        }
+        get chartStyle() {
+            return `
+      height:${this.figure.height}px;
+      width:${this.figure.width}px;
+      padding:${this.chartPadding}px;
+      background:${this.backgroundColor};
+    `;
+        }
+        get chartContentStyle() {
+            return `
+      height:${this.getDrawableHeight()}px;
+    `;
+        }
+        get chartPadding() {
+            return this.figure.width * CHART_PADDING_RATIO;
+        }
+        getTextStyles() {
+            var _a, _b, _c;
+            // If the widest text overflows horizontally, scale it down, and apply the same scaling factors to all the other fonts.
+            const maxLineWidth = this.figure.width * (1 - 2 * CHART_PADDING_RATIO);
+            const widestElement = this.getWidestElement();
+            const baseFontSize = widestElement.getElementMaxFontSize(this.getDrawableHeight(), this);
+            const fontSizeMatchingWidth = getFontSizeMatchingWidth(maxLineWidth, baseFontSize, (fontSize) => widestElement.getElementWidth(fontSize, this.ctx, this));
+            let scalingFactor = fontSizeMatchingWidth / baseFontSize;
+            // Fonts sizes in px
+            const keyFontSize = new KeyValueElement().getElementMaxFontSize(this.getDrawableHeight(), this) * scalingFactor;
+            const baselineFontSize = new BaselineElement().getElementMaxFontSize(this.getDrawableHeight(), this) * scalingFactor;
+            return {
+                titleStyle: this.getTextStyle({
+                    fontSize: TITLE_FONT_SIZE,
+                    color: this.secondaryFontColor,
+                }),
+                keyStyle: this.getTextStyle({
+                    fontSize: keyFontSize,
+                    cellStyle: (_a = this.runtime) === null || _a === void 0 ? void 0 : _a.keyValueStyle,
+                    color: this.primaryFontColor,
+                }),
+                baselineStyle: this.getTextStyle({
+                    fontSize: baselineFontSize,
+                }),
+                baselineValueStyle: this.getTextStyle({
+                    fontSize: baselineFontSize,
+                    cellStyle: (_b = this.runtime) === null || _b === void 0 ? void 0 : _b.baselineStyle,
+                    color: ((_c = this.runtime) === null || _c === void 0 ? void 0 : _c.baselineColor) || this.secondaryFontColor,
+                }),
+                baselineDescrStyle: this.getTextStyle({
+                    fontSize: baselineFontSize * BASELINE_DESCR_FONT_RATIO,
+                    color: this.secondaryFontColor,
+                }),
+            };
+        }
+        /** Return an CSS style string corresponding to the given arguments */
+        getTextStyle(args) {
+            const cssAttributes = cellTextStyleToCss(args.cellStyle);
+            cssAttributes["font-size"] = `${args.fontSize}px`;
+            cssAttributes["display"] = "inline-block";
+            if (!cssAttributes["color"] && args.color) {
+                cssAttributes["color"] = args.color;
+            }
+            return cssPropertiesToCss(cssAttributes);
+        }
+        /** Get the height of the chart minus all the vertical paddings */
+        getDrawableHeight() {
+            const verticalPadding = 2 * this.chartPadding;
+            let availableHeight = this.figure.height - verticalPadding;
+            availableHeight -= this.title ? TITLE_FONT_SIZE * LINE_HEIGHT : 0;
+            return availableHeight;
+        }
+        /** Return the element with he widest text in the chart */
+        getWidestElement() {
+            const baseline = new BaselineElement();
+            const keyValue = new KeyValueElement();
+            return baseline.getElementWidth(BASELINE_BOX_HEIGHT_RATIO, this.ctx, this) >
+                keyValue.getElementWidth(KEY_BOX_HEIGHT_RATIO, this.ctx, this)
+                ? baseline
+                : keyValue;
+        }
+    }
+    ScorecardChart.template = "o-spreadsheet-ScorecardChart";
+    class BaselineElement {
+        getElementWidth(fontSize, ctx, chart) {
+            if (!chart.runtime)
+                return 0;
+            const baselineStr = chart.baseline;
+            // Put mock text to simulate the width of the up/down arrow
+            const largeText = chart.baselineArrowDirection !== "neutral" ? "A " + baselineStr : baselineStr;
+            ctx.font = `${fontSize}px ${DEFAULT_FONT}`;
+            let textWidth = ctx.measureText(largeText).width;
+            // Baseline descr font size should be smaller than baseline font size
+            ctx.font = `${fontSize * BASELINE_DESCR_FONT_RATIO}px ${DEFAULT_FONT}`;
+            textWidth += ctx.measureText(chart.baselineDescr).width;
+            return textWidth;
+        }
+        getElementMaxFontSize(availableHeight, chart) {
+            if (!chart.runtime)
+                return 0;
+            const haveBaseline = chart.baseline !== "" || chart.baselineDescr;
+            const maxHeight = haveBaseline ? BASELINE_BOX_HEIGHT_RATIO * availableHeight : 0;
+            return maxHeight / LINE_HEIGHT;
+        }
+    }
+    class KeyValueElement {
+        getElementWidth(fontSize, ctx, chart) {
+            if (!chart.runtime)
+                return 0;
+            const str = chart.keyValue || "";
+            ctx.font = `${fontSize}px ${DEFAULT_FONT}`;
+            return ctx.measureText(str).width;
+        }
+        getElementMaxFontSize(availableHeight, chart) {
+            if (!chart.runtime)
+                return 0;
+            const haveBaseline = chart.baseline !== "" || chart.baselineDescr;
+            const maxHeight = haveBaseline ? KEY_BOX_HEIGHT_RATIO * availableHeight : availableHeight;
+            return maxHeight / LINE_HEIGHT;
+        }
+    }
+    ScorecardChart.props = {
+        figure: Object,
+    };
+    chartComponentRegistry.add("scorecard", ScorecardChart);
+
+    // -----------------------------------------------------------------------------
+    // STYLE
+    // -----------------------------------------------------------------------------
+    css /* scss */ `
+  .o-chart-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+
+    .o-chart-menu {
+      right: 0px;
+      display: none;
+      position: absolute;
+      padding: 5px;
+    }
+
+    .o-chart-menu-item {
+      cursor: pointer;
+    }
+  }
+  .o-figure.active:focus,
+  .o-figure:hover {
+    .o-chart-container {
+      .o-chart-menu {
+        display: flex;
+      }
+    }
+  }
+`;
+    class ChartFigure extends owl.Component {
+        constructor() {
+            super(...arguments);
+            this.menuState = owl.useState({ isOpen: false, position: null, menuItems: [] });
+            this.chartContainerRef = owl.useRef("chartContainer");
+            this.menuButtonRef = owl.useRef("menuButton");
+            this.menuButtonPosition = useAbsolutePosition(this.menuButtonRef);
+            this.position = useAbsolutePosition(this.chartContainerRef);
+        }
+        getMenuItemRegistry() {
+            const registry = new MenuItemRegistry();
+            registry.add("edit", {
+                name: _lt("Edit"),
+                sequence: 1,
+                action: () => {
+                    this.env.model.dispatch("SELECT_FIGURE", { id: this.props.figure.id });
+                    this.env.openSidePanel("ChartPanel");
+                },
+            });
+            registry.add("copy", {
+                name: _lt("Copy"),
+                sequence: 2,
+                action: async () => {
+                    this.env.model.dispatch("SELECT_FIGURE", { id: this.props.figure.id });
+                    this.env.model.dispatch("COPY");
+                    await this.env.clipboard.writeText(this.env.model.getters.getClipboardContent());
+                },
+            });
+            registry.add("cut", {
+                name: _lt("Cut"),
+                sequence: 3,
+                action: async () => {
+                    this.env.model.dispatch("SELECT_FIGURE", { id: this.props.figure.id });
+                    this.env.model.dispatch("CUT");
+                    await this.env.clipboard.writeText(this.env.model.getters.getClipboardContent());
+                },
+            });
+            registry.add("delete", {
+                name: _lt("Delete"),
+                sequence: 10,
+                action: () => {
+                    this.env.model.dispatch("DELETE_FIGURE", {
+                        sheetId: this.env.model.getters.getActiveSheetId(),
+                        id: this.props.figure.id,
+                    });
+                    if (this.props.sidePanelIsOpen) {
+                        this.env.toggleSidePanel("ChartPanel");
+                    }
+                    this.props.onFigureDeleted();
+                },
+            });
+            return registry;
+        }
+        get chartType() {
+            return this.env.model.getters.getChartType(this.props.figure.id);
+        }
+        onContextMenu(ev) {
+            const position = {
+                x: this.position.x + ev.offsetX,
+                y: this.position.y + ev.offsetY,
+            };
+            this.openContextMenu(position);
+        }
+        showMenu() {
+            const position = {
+                x: this.menuButtonPosition.x - MENU_WIDTH,
+                y: this.menuButtonPosition.y,
+            };
+            this.openContextMenu(position);
+        }
+        openContextMenu(position) {
+            const registry = this.getMenuItemRegistry();
+            this.menuState.isOpen = true;
+            this.menuState.menuItems = registry.getAll().filter((x) => x.isVisible(this.env));
+            this.menuState.position = position;
+        }
+        get chartComponent() {
+            const type = this.chartType;
+            const component = chartComponentRegistry.get(type);
+            if (!component) {
+                throw new Error(`Component is not defined for type ${type}`);
+            }
+            return component;
+        }
+    }
+    ChartFigure.template = "o-spreadsheet-ChartFigure";
+    ChartFigure.components = { Menu };
+    ChartFigure.props = {
+        figure: Object,
+        sidePanelIsOpen: Boolean,
+        onFigureDeleted: Function,
+    };
+
+    function startDnd(onMouseMove, onMouseUp, onMouseDown = () => { }) {
+        const _onMouseUp = (ev) => {
+            onMouseUp(ev);
+            window.removeEventListener("mousedown", onMouseDown);
+            window.removeEventListener("mouseup", _onMouseUp);
+            window.removeEventListener("dragstart", _onDragStart);
+            window.removeEventListener("mousemove", onMouseMove);
+            window.removeEventListener("wheel", onMouseMove);
+        };
+        function _onDragStart(ev) {
+            ev.preventDefault();
+        }
+        window.addEventListener("mousedown", onMouseDown);
+        window.addEventListener("mouseup", _onMouseUp);
+        window.addEventListener("dragstart", _onDragStart);
+        window.addEventListener("mousemove", onMouseMove);
+        window.addEventListener("wheel", onMouseMove);
+    }
+    /**
+     * Function to be used during a mousedown event, this function allows to
+     * perform actions related to the mousemove and mouseup events and adjusts the viewport
+     * when the new position related to the mousemove event is outside of it.
+     * Among inputs are two callback functions. First intended for actions performed during
+     * the mousemove event, it receives as parameters the current position of the mousemove
+     * (occurrence of the current column and the current row). Second intended for actions
+     * performed during the mouseup event.
+     */
+    function dragAndDropBeyondTheViewport(env, cbMouseMove, cbMouseUp, only = false) {
+        let timeOutId = null;
+        let currentEv;
+        let previousEv;
+        let startingEv;
+        let startingX;
+        let startingY;
+        const getters = env.model.getters;
+        const sheetId = getters.getActiveSheetId();
+        const position = gridOverlayPosition();
+        let colIndex;
+        let rowIndex;
+        const onMouseDown = (ev) => {
+            previousEv = ev;
+            startingEv = ev;
+            startingX = startingEv.clientX - position.left;
+            startingY = startingEv.clientY - position.top;
+        };
+        const onMouseMove = (ev) => {
+            currentEv = ev;
+            if (timeOutId) {
+                return;
+            }
+            const { x: offsetCorrectionX, y: offsetCorrectionY } = getters.getMainViewportCoordinates();
+            let { top, left, bottom, right } = getters.getActiveMainViewport();
+            let { offsetScrollbarX: offsetX, offsetScrollbarY: offsetY } = getters.getActiveSheetScrollInfo();
+            const { xSplit, ySplit } = getters.getPaneDivisions(sheetId);
+            let canEdgeScroll = false;
+            let timeoutDelay = MAX_DELAY;
+            const x = currentEv.clientX - position.left;
+            colIndex = getters.getColIndex(x);
+            if (only !== "vertical") {
+                const previousX = previousEv.clientX - position.left;
+                const edgeScrollInfoX = getters.getEdgeScrollCol(x, previousX, startingX);
+                if (edgeScrollInfoX.canEdgeScroll) {
+                    canEdgeScroll = true;
+                    timeoutDelay = Math.min(timeoutDelay, edgeScrollInfoX.delay);
+                    let newTarget;
+                    switch (edgeScrollInfoX.direction) {
+                        case "reset":
+                            colIndex = xSplit;
+                            newTarget = xSplit;
+                            break;
+                        case 1:
+                            colIndex = right;
+                            newTarget = left + 1;
+                            break;
+                        case -1:
+                            colIndex = left - 1;
+                            newTarget = left - 1;
+                            break;
+                    }
+                    offsetX = getters.getColDimensions(sheetId, newTarget).start - offsetCorrectionX;
+                }
+            }
+            const y = currentEv.clientY - position.top;
+            rowIndex = getters.getRowIndex(y);
+            if (only !== "horizontal") {
+                const previousY = previousEv.clientY - position.top;
+                const edgeScrollInfoY = getters.getEdgeScrollRow(y, previousY, startingY);
+                if (edgeScrollInfoY.canEdgeScroll) {
+                    canEdgeScroll = true;
+                    timeoutDelay = Math.min(timeoutDelay, edgeScrollInfoY.delay);
+                    let newTarget;
+                    switch (edgeScrollInfoY.direction) {
+                        case "reset":
+                            rowIndex = ySplit;
+                            newTarget = ySplit;
+                            break;
+                        case 1:
+                            rowIndex = bottom;
+                            newTarget = top + edgeScrollInfoY.direction;
+                            break;
+                        case -1:
+                            rowIndex = top - 1;
+                            newTarget = top + edgeScrollInfoY.direction;
+                            break;
+                    }
+                    offsetY = env.model.getters.getRowDimensions(sheetId, newTarget).start - offsetCorrectionY;
+                }
+            }
+            cbMouseMove(colIndex, rowIndex, currentEv);
+            if (canEdgeScroll) {
+                env.model.dispatch("SET_VIEWPORT_OFFSET", { offsetX, offsetY });
+                timeOutId = setTimeout(() => {
+                    timeOutId = null;
+                    onMouseMove(currentEv);
+                }, Math.round(timeoutDelay));
+            }
+            previousEv = currentEv;
+        };
+        const onMouseUp = () => {
+            clearTimeout(timeOutId);
+            cbMouseUp();
+        };
+        startDnd(onMouseMove, onMouseUp, onMouseDown);
+    }
+
+    // -----------------------------------------------------------------------------
+    // Autofill
+    // -----------------------------------------------------------------------------
+    css /* scss */ `
+  .o-autofill {
+    height: 6px;
+    width: 6px;
+    border: 1px solid white;
+    position: absolute;
+    background-color: #1a73e8;
+
+    .o-autofill-handler {
+      position: absolute;
+      height: ${AUTOFILL_EDGE_LENGTH}px;
+      width: ${AUTOFILL_EDGE_LENGTH}px;
+
+      &:hover {
+        cursor: crosshair;
+      }
+    }
+
+    .o-autofill-nextvalue {
+      position: absolute;
+      background-color: #ffffff;
+      border: 1px solid black;
+      padding: 5px;
+      font-size: 12px;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+  }
+`;
+    class Autofill extends owl.Component {
+        constructor() {
+            super(...arguments);
+            this.state = owl.useState({
+                position: { left: 0, top: 0 },
+                handler: false,
+            });
+        }
+        get style() {
+            const { left, top } = this.props.position;
+            return `top:${top}px;left:${left}px`;
+        }
+        get styleHandler() {
+            let position = this.state.handler ? this.state.position : { left: 0, top: 0 };
+            return `top:${position.top}px;left:${position.left}px;`;
+        }
+        get styleNextvalue() {
+            let position = this.state.handler ? this.state.position : { left: 0, top: 0 };
+            return `top:${position.top + 5}px;left:${position.left + 15}px;`;
+        }
+        getTooltip() {
+            const tooltip = this.env.model.getters.getAutofillTooltip();
+            if (tooltip && !tooltip.component) {
+                tooltip.component = TooltipComponent;
+            }
+            return tooltip;
+        }
+        onMouseDown(ev) {
+            this.state.handler = true;
+            this.state.position = { left: 0, top: 0 };
+            const { offsetY, offsetX } = this.env.model.getters.getActiveSheetScrollInfo();
+            const start = {
+                left: ev.clientX + offsetX,
+                top: ev.clientY + offsetY,
+            };
+            let lastCol;
+            let lastRow;
+            const onMouseUp = () => {
+                this.state.handler = false;
+                this.env.model.dispatch("AUTOFILL");
+            };
+            const onMouseMove = (ev) => {
+                const position = gridOverlayPosition();
+                const { offsetY, offsetX } = this.env.model.getters.getActiveSheetScrollInfo();
+                this.state.position = {
+                    left: ev.clientX - start.left + offsetX,
+                    top: ev.clientY - start.top + offsetY,
+                };
+                const col = this.env.model.getters.getColIndex(ev.clientX - position.left);
+                const row = this.env.model.getters.getRowIndex(ev.clientY - position.top);
+                if (lastCol !== col || lastRow !== row) {
+                    const activeSheetId = this.env.model.getters.getActiveSheetId();
+                    const numberOfCols = this.env.model.getters.getNumberCols(activeSheetId);
+                    const numberOfRows = this.env.model.getters.getNumberRows(activeSheetId);
+                    lastCol = col === -1 ? lastCol : clip(col, 0, numberOfCols);
+                    lastRow = row === -1 ? lastRow : clip(row, 0, numberOfRows);
+                    if (lastCol !== undefined && lastRow !== undefined) {
+                        this.env.model.dispatch("AUTOFILL_SELECT", { col: lastCol, row: lastRow });
+                    }
+                }
+            };
+            startDnd(onMouseMove, onMouseUp);
+        }
+        onDblClick() {
+            this.env.model.dispatch("AUTOFILL_AUTO");
+        }
+    }
+    Autofill.template = "o-spreadsheet-Autofill";
+    Autofill.props = {
+        position: Object,
+    };
+    class TooltipComponent extends owl.Component {
+    }
+    TooltipComponent.template = owl.xml /* xml */ `
+    <div t-esc="props.content"/>
+  `;
+    TooltipComponent.props = {
+        content: String,
+    };
+
+    css /* scss */ `
+  .o-client-tag {
+    position: absolute;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    font-size: ${DEFAULT_FONT_SIZE};
+    color: white;
+    opacity: 0;
+    pointer-events: none;
+  }
+`;
+    class ClientTag extends owl.Component {
+        get tagStyle() {
+            const { col, row, color } = this.props;
+            const { height } = this.env.model.getters.getSheetViewDimensionWithHeaders();
+            const { x, y } = this.env.model.getters.getVisibleRect({
+                left: col,
+                top: row,
+                right: col,
+                bottom: row,
+            });
+            return `bottom: ${height - y + 15}px;left: ${x - 1}px;border: 1px solid ${color};background-color: ${color};${this.props.active ? "opacity:1 !important" : ""}`;
+        }
+    }
+    ClientTag.template = "o-spreadsheet-ClientTag";
+    ClientTag.props = {
+        active: Boolean,
+        name: String,
+        color: String,
+        col: Number,
+        row: Number,
+    };
 
     /**
      * Tokenizer
@@ -19327,7 +19412,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         validateSelection(length, start, end) {
             return start >= 0 && start <= length && end >= 0 && end <= length
                 ? 0 /* CommandResult.Success */
-                : 43 /* CommandResult.WrongComposerSelection */;
+                : 44 /* CommandResult.WrongComposerSelection */;
         }
         onColumnsRemoved(cmd) {
             if (cmd.elements.includes(this.col) && this.mode !== "inactive") {
@@ -19506,13 +19591,14 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             return selectedXc;
         }
         getRangeReference(range, fixedParts = [{ colFixed: false, rowFixed: false }]) {
+            let _fixedParts = [...fixedParts];
             if (fixedParts.length === 1 && getZoneArea(range.zone) > 1) {
-                fixedParts.push({ ...fixedParts[0] });
+                _fixedParts.push({ ...fixedParts[0] });
             }
             else if (fixedParts.length === 2 && getZoneArea(range.zone) === 1) {
-                fixedParts.pop();
+                _fixedParts.pop();
             }
-            const newRange = range.clone({ parts: this.previousRange.parts });
+            const newRange = range.clone({ parts: _fixedParts });
             return this.getters.getSelectionRangeString(newRange, this.getters.getEditionSheet());
         }
         /**
@@ -22262,10 +22348,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         COL: colMenuRegistry,
         CELL: cellMenuRegistry,
     };
-    // copy and paste are specific events that should not be managed by the keydown event,
-    // but they shouldn't be preventDefault and stopped (else copy and paste events will not trigger)
-    // and also should not result in typing the character C or V in the composer
-    const keyDownMappingIgnore = ["CTRL+C", "CTRL+V"];
     // -----------------------------------------------------------------------------
     // JS
     // -----------------------------------------------------------------------------
@@ -22389,6 +22471,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 menuItems: [],
             });
             this.gridRef = owl.useRef("grid");
+            this.hiddenInput = owl.useRef("hiddenInput");
             this.canvasPosition = useAbsolutePosition(this.gridRef);
             this.hoveredCell = owl.useState({ col: undefined, row: undefined });
             owl.useExternalListener(document.body, "cut", this.copy.bind(this, true));
@@ -22422,7 +22505,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
         focus() {
             if (!this.env.model.getters.getSelectedFigureId()) {
-                this.gridRef.el.focus();
+                this.hiddenInput.el.focus();
             }
         }
         get gridEl() {
@@ -22571,14 +22654,14 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 handler();
                 return;
             }
-            if (!keyDownMappingIgnore.includes(keyDownString)) {
-                if (ev.key.length === 1 && !ev.ctrlKey && !ev.metaKey && !ev.altKey) {
-                    // if the user types a character on the grid, it means he wants to start composing the selected cell with that
-                    // character
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    this.props.onGridComposerCellFocused(ev.key);
-                }
+        }
+        onInput(ev) {
+            if (ev.data) {
+                // if the user types a character on the grid, it means he wants to start composing the selected cell with that
+                // character
+                ev.preventDefault();
+                ev.stopPropagation();
+                this.props.onGridComposerCellFocused(ev.data);
             }
         }
         // ---------------------------------------------------------------------------
@@ -27565,9 +27648,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         checkCellOutOfSheet(sheetId, col, row) {
             const sheet = this.getters.tryGetSheet(sheetId);
             if (!sheet)
-                return 25 /* CommandResult.InvalidSheetId */;
+                return 26 /* CommandResult.InvalidSheetId */;
             const sheetZone = this.getters.getSheetZone(sheetId);
-            return isInside(col, row, sheetZone) ? 0 /* CommandResult.Success */ : 16 /* CommandResult.TargetOutOfSheet */;
+            return isInside(col, row, sheetZone) ? 0 /* CommandResult.Success */ : 17 /* CommandResult.TargetOutOfSheet */;
         }
     }
     CellPlugin.getters = [
@@ -27690,6 +27773,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                         // figure data should be external IMO => chart should be in sheet.chart
                         // instead of in figure.data
                         if (figure.tag === "chart") {
+                            this.history.update("nextId", this.nextId + 1);
                             this.charts[figure.id] = this.createChart(figure.id, figure.data, sheet.id);
                         }
                     }
@@ -27957,18 +28041,18 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
         checkValidReordering(cfId, direction, sheetId) {
             if (!this.cfRules[sheetId])
-                return 25 /* CommandResult.InvalidSheetId */;
+                return 26 /* CommandResult.InvalidSheetId */;
             const ruleIndex = this.cfRules[sheetId].findIndex((cf) => cf.id === cfId);
             if (ruleIndex === -1)
-                return 68 /* CommandResult.InvalidConditionalFormatId */;
+                return 69 /* CommandResult.InvalidConditionalFormatId */;
             const cfIndex2 = direction === "up" ? ruleIndex - 1 : ruleIndex + 1;
             if (cfIndex2 < 0 || cfIndex2 >= this.cfRules[sheetId].length) {
-                return 68 /* CommandResult.InvalidConditionalFormatId */;
+                return 69 /* CommandResult.InvalidConditionalFormatId */;
             }
             return 0 /* CommandResult.Success */;
         }
         checkEmptyRange(cmd) {
-            return cmd.ranges.length ? 0 /* CommandResult.Success */ : 22 /* CommandResult.EmptyRange */;
+            return cmd.ranges.length ? 0 /* CommandResult.Success */ : 23 /* CommandResult.EmptyRange */;
         }
         checkCFRule(cmd) {
             const rule = cmd.cf.rule;
@@ -28004,10 +28088,10 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     const errors = [];
                     const isEmpty = (value) => value === undefined || value === "";
                     if (expectedNumber >= 1 && isEmpty(rule.values[0])) {
-                        errors.push(48 /* CommandResult.FirstArgMissing */);
+                        errors.push(49 /* CommandResult.FirstArgMissing */);
                     }
                     if (expectedNumber >= 2 && isEmpty(rule.values[1])) {
-                        errors.push(49 /* CommandResult.SecondArgMissing */);
+                        errors.push(50 /* CommandResult.SecondArgMissing */);
                     }
                     return errors.length ? errors : 0 /* CommandResult.Success */;
                 }
@@ -28019,15 +28103,15 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 (threshold.value === "" || isNaN(threshold.value))) {
                 switch (thresholdName) {
                     case "min":
-                        return 50 /* CommandResult.MinNaN */;
+                        return 51 /* CommandResult.MinNaN */;
                     case "max":
-                        return 52 /* CommandResult.MaxNaN */;
+                        return 53 /* CommandResult.MaxNaN */;
                     case "mid":
-                        return 51 /* CommandResult.MidNaN */;
+                        return 52 /* CommandResult.MidNaN */;
                     case "upperInflectionPoint":
-                        return 53 /* CommandResult.ValueUpperInflectionNaN */;
+                        return 54 /* CommandResult.ValueUpperInflectionNaN */;
                     case "lowerInflectionPoint":
-                        return 54 /* CommandResult.ValueLowerInflectionNaN */;
+                        return 55 /* CommandResult.ValueLowerInflectionNaN */;
                 }
             }
             return 0 /* CommandResult.Success */;
@@ -28041,15 +28125,15 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             catch (error) {
                 switch (thresholdName) {
                     case "min":
-                        return 55 /* CommandResult.MinInvalidFormula */;
+                        return 56 /* CommandResult.MinInvalidFormula */;
                     case "max":
-                        return 57 /* CommandResult.MaxInvalidFormula */;
+                        return 58 /* CommandResult.MaxInvalidFormula */;
                     case "mid":
-                        return 56 /* CommandResult.MidInvalidFormula */;
+                        return 57 /* CommandResult.MidInvalidFormula */;
                     case "upperInflectionPoint":
-                        return 58 /* CommandResult.ValueUpperInvalidFormula */;
+                        return 59 /* CommandResult.ValueUpperInvalidFormula */;
                     case "lowerInflectionPoint":
-                        return 59 /* CommandResult.ValueLowerInvalidFormula */;
+                        return 60 /* CommandResult.ValueLowerInvalidFormula */;
                 }
             }
             return 0 /* CommandResult.Success */;
@@ -28066,7 +28150,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             if (["number", "percentage", "percentile"].includes(rule.lowerInflectionPoint.type) &&
                 rule.lowerInflectionPoint.type === rule.upperInflectionPoint.type &&
                 Number(minValue) > Number(maxValue)) {
-                return 45 /* CommandResult.LowerBiggerThanUpper */;
+                return 46 /* CommandResult.LowerBiggerThanUpper */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -28076,7 +28160,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             if (["number", "percentage", "percentile"].includes(rule.minimum.type) &&
                 rule.minimum.type === rule.maximum.type &&
                 stringToNumber(minValue) >= stringToNumber(maxValue)) {
-                return 44 /* CommandResult.MinBiggerThanMax */;
+                return 45 /* CommandResult.MinBiggerThanMax */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -28088,7 +28172,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 ["number", "percentage", "percentile"].includes(rule.midpoint.type) &&
                 rule.midpoint.type === rule.maximum.type &&
                 stringToNumber(midValue) >= stringToNumber(maxValue)) {
-                return 46 /* CommandResult.MidBiggerThanMax */;
+                return 47 /* CommandResult.MidBiggerThanMax */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -28100,7 +28184,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 ["number", "percentage", "percentile"].includes(rule.midpoint.type) &&
                 rule.minimum.type === rule.midpoint.type &&
                 stringToNumber(minValue) >= stringToNumber(midValue)) {
-                return 47 /* CommandResult.MinBiggerThanMid */;
+                return 48 /* CommandResult.MinBiggerThanMid */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -28138,6 +28222,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         // ---------------------------------------------------------------------------
         allowDispatch(cmd) {
             switch (cmd.type) {
+                case "CREATE_FIGURE":
+                    return this.checkFigureDuplicate(cmd.figure.id);
                 case "UPDATE_FIGURE":
                 case "DELETE_FIGURE":
                     return this.checkFigureExists(cmd.sheetId, cmd.id);
@@ -28199,7 +28285,13 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         checkFigureExists(sheetId, figureId) {
             var _a;
             if (((_a = this.figures[sheetId]) === null || _a === void 0 ? void 0 : _a[figureId]) === undefined) {
-                return 67 /* CommandResult.FigureDoesNotExist */;
+                return 68 /* CommandResult.FigureDoesNotExist */;
+            }
+            return 0 /* CommandResult.Success */;
+        }
+        checkFigureDuplicate(figureId) {
+            if (Object.values(this.figures).find((sheet) => sheet === null || sheet === void 0 ? void 0 : sheet[figureId])) {
+                return 80 /* CommandResult.DuplicatedFigureId */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -28298,12 +28390,12 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             switch (cmd.type) {
                 case "CREATE_FILTER_TABLE":
                     if (!areZonesContinuous(...cmd.target)) {
-                        return 78 /* CommandResult.NonContinuousTargets */;
+                        return 79 /* CommandResult.NonContinuousTargets */;
                     }
                     const zone = union(...cmd.target);
                     const checkFilterOverlap = () => {
                         if (this.getFilterTables(cmd.sheetId).some((filter) => overlap(filter.zone, zone))) {
-                            return 75 /* CommandResult.FilterOverlap */;
+                            return 76 /* CommandResult.FilterOverlap */;
                         }
                         return 0 /* CommandResult.Success */;
                     };
@@ -28311,7 +28403,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                         const mergesInTarget = this.getters.getMergesInZone(cmd.sheetId, zone);
                         for (let merge of mergesInTarget) {
                             if (overlap(zone, merge)) {
-                                return 77 /* CommandResult.MergeInFilter */;
+                                return 78 /* CommandResult.MergeInFilter */;
                             }
                         }
                         return 0 /* CommandResult.Success */;
@@ -28321,7 +28413,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     for (let merge of cmd.target) {
                         for (let filterTable of this.getFilterTables(cmd.sheetId)) {
                             if (overlap(filterTable.zone, merge)) {
-                                return 77 /* CommandResult.MergeInFilter */;
+                                return 78 /* CommandResult.MergeInFilter */;
                             }
                         }
                     }
@@ -28785,7 +28877,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             switch (cmd.type) {
                 case "HIDE_COLUMNS_ROWS": {
                     if (!this.hiddenHeaders[cmd.sheetId]) {
-                        return 25 /* CommandResult.InvalidSheetId */;
+                        return 26 /* CommandResult.InvalidSheetId */;
                     }
                     const hiddenGroup = cmd.dimension === "COL"
                         ? this.getHiddenColsGroups(cmd.sheetId)
@@ -28795,7 +28887,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                         : this.getters.getNumberRows(cmd.sheetId);
                     return (hiddenGroup || []).flat().concat(cmd.elements).length < elements
                         ? 0 /* CommandResult.Success */
-                        : 63 /* CommandResult.TooManyHiddenElements */;
+                        : 64 /* CommandResult.TooManyHiddenElements */;
                 }
             }
             return 0 /* CommandResult.Success */;
@@ -29176,7 +29268,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             for (const zone of target) {
                 for (const zone2 of target) {
                     if (zone !== zone2 && overlap(zone, zone2)) {
-                        return 62 /* CommandResult.MergeOverlap */;
+                        return 63 /* CommandResult.MergeOverlap */;
                     }
                 }
             }
@@ -29190,7 +29282,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             for (const zone of target) {
                 if ((zone.left < xSplit && zone.right >= xSplit) ||
                     (zone.top < ySplit && zone.bottom >= ySplit)) {
-                    return 72 /* CommandResult.FrozenPaneOverlap */;
+                    return 73 /* CommandResult.FrozenPaneOverlap */;
                 }
             }
             return 0 /* CommandResult.Success */;
@@ -29404,7 +29496,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                             .slice(0, currentIndex)
                             .map((id) => !this.isSheetVisible(id));
                         return leftSheets.every((isHidden) => isHidden)
-                            ? 12 /* CommandResult.WrongSheetMove */
+                            ? 13 /* CommandResult.WrongSheetMove */
                             : 0 /* CommandResult.Success */;
                     }
                     else {
@@ -29412,7 +29504,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                             .slice(currentIndex + 1)
                             .map((id) => !this.isSheetVisible(id));
                         return rightSheets.every((isHidden) => isHidden)
-                            ? 12 /* CommandResult.WrongSheetMove */
+                            ? 13 /* CommandResult.WrongSheetMove */
                             : 0 /* CommandResult.Success */;
                     }
                 case "RENAME_SHEET":
@@ -29432,12 +29524,12 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 case "FREEZE_ROWS": {
                     return cmd.quantity >= 1 && cmd.quantity < this.getNumberRows(cmd.sheetId)
                         ? 0 /* CommandResult.Success */
-                        : 71 /* CommandResult.InvalidFreezeQuantity */;
+                        : 72 /* CommandResult.InvalidFreezeQuantity */;
                 }
                 case "FREEZE_COLUMNS": {
                     return cmd.quantity >= 1 && cmd.quantity < this.getNumberCols(cmd.sheetId)
                         ? 0 /* CommandResult.Success */
-                        : 71 /* CommandResult.InvalidFreezeQuantity */;
+                        : 72 /* CommandResult.InvalidFreezeQuantity */;
                 }
                 default:
                     return 0 /* CommandResult.Success */;
@@ -29853,14 +29945,14 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 return 10 /* CommandResult.DuplicatedSheetName */;
             }
             if (FORBIDDEN_IN_EXCEL_REGEX.test(name)) {
-                return 11 /* CommandResult.ForbiddenCharactersInSheetName */;
+                return 12 /* CommandResult.ForbiddenCharactersInSheetName */;
             }
             return 0 /* CommandResult.Success */;
         }
         checkSheetPosition(cmd) {
             const { orderedSheetIds } = this;
             if (cmd.position > orderedSheetIds.length || cmd.position < 0) {
-                return 13 /* CommandResult.WrongSheetPosition */;
+                return 14 /* CommandResult.WrongSheetPosition */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -30173,7 +30265,10 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
          */
         checkSheetExists(cmd) {
             if (cmd.type !== "CREATE_SHEET" && "sheetId" in cmd && this.sheets[cmd.sheetId] === undefined) {
-                return 25 /* CommandResult.InvalidSheetId */;
+                return 26 /* CommandResult.InvalidSheetId */;
+            }
+            else if (cmd.type === "CREATE_SHEET" && this.sheets[cmd.sheetId] !== undefined) {
+                return 11 /* CommandResult.DuplicatedSheetId */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -30193,13 +30288,13 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 zones.push(...cmd.ranges.map((rangeData) => this.getters.getRangeFromRangeData(rangeData).zone));
             }
             if (!zones.every(isZoneValid)) {
-                return 23 /* CommandResult.InvalidRange */;
+                return 24 /* CommandResult.InvalidRange */;
             }
             else if (zones.length && "sheetId" in cmd) {
                 const sheetZone = this.getSheetZone(cmd.sheetId);
                 return zones.every((zone) => isZoneInside(zone, sheetZone))
                     ? 0 /* CommandResult.Success */
-                    : 16 /* CommandResult.TargetOutOfSheet */;
+                    : 17 /* CommandResult.TargetOutOfSheet */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -30310,7 +30405,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     if (this.lastCellSelected.col !== undefined && this.lastCellSelected.row !== undefined) {
                         return 0 /* CommandResult.Success */;
                     }
-                    return 42 /* CommandResult.InvalidAutofillSelection */;
+                    return 43 /* CommandResult.InvalidAutofillSelection */;
                 case "AUTOFILL_AUTO":
                     const zone = this.getters.getSelectedZone();
                     return zone.top === zone.bottom
@@ -30906,7 +31001,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                         cellPopoverRegistry.get(cmd.popoverType);
                     }
                     catch (error) {
-                        return 69 /* CommandResult.InvalidCellPopover */;
+                        return 70 /* CommandResult.InvalidCellPopover */;
                     }
                     return 0 /* CommandResult.Success */;
                 default:
@@ -31098,7 +31193,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
         isCutAllowed(target) {
             if (target.length !== 1) {
-                return 17 /* CommandResult.WrongCutSelection */;
+                return 18 /* CommandResult.WrongCutSelection */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -31106,13 +31201,13 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             const sheetId = this.getters.getActiveSheetId();
             if (this.operation === "CUT" && (clipboardOption === null || clipboardOption === void 0 ? void 0 : clipboardOption.pasteOption) !== undefined) {
                 // cannot paste only format or only value if the previous operation is a CUT
-                return 19 /* CommandResult.WrongPasteOption */;
+                return 20 /* CommandResult.WrongPasteOption */;
             }
             if (target.length > 1) {
                 // cannot paste if we have a clipped zone larger than a cell and multiple
                 // zones selected
                 if (this.cells.length > 1 || this.cells[0].length > 1) {
-                    return 18 /* CommandResult.WrongPasteSelection */;
+                    return 19 /* CommandResult.WrongPasteSelection */;
                 }
             }
             const clipboardHeight = this.cells.length;
@@ -31130,7 +31225,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             for (const zone of this.getPasteZones(target)) {
                 if ((zone.left < xSplit && zone.right >= xSplit) ||
                     (zone.top < ySplit && zone.bottom >= ySplit)) {
-                    return 72 /* CommandResult.FrozenPaneOverlap */;
+                    return 73 /* CommandResult.FrozenPaneOverlap */;
                 }
             }
             return 0 /* CommandResult.Success */;
@@ -31490,10 +31585,10 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
         isPasteAllowed(target, option) {
             if (target.length === 0) {
-                return 70 /* CommandResult.EmptyTarget */;
+                return 71 /* CommandResult.EmptyTarget */;
             }
             if ((option === null || option === void 0 ? void 0 : option.pasteOption) !== undefined) {
-                return 20 /* CommandResult.WrongFigurePasteOption */;
+                return 21 /* CommandResult.WrongFigurePasteOption */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -31613,7 +31708,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     return state.isCutAllowed(zones);
                 case "PASTE":
                     if (!this.state) {
-                        return 21 /* CommandResult.EmptyClipboard */;
+                        return 22 /* CommandResult.EmptyClipboard */;
                     }
                     const pasteOption = cmd.pasteOption || (this._isPaintingFormat ? "onlyFormat" : undefined);
                     return this.state.isPasteAllowed(cmd.target, { pasteOption });
@@ -32628,7 +32723,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             switch (cmd.type) {
                 case "UPDATE_FILTER":
                     if (!this.getters.getFilterId(cmd.sheetId, cmd.col, cmd.row)) {
-                        return 76 /* CommandResult.FilterNotFound */;
+                        return 77 /* CommandResult.FilterNotFound */;
                     }
                     break;
             }
@@ -33924,7 +34019,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                         break;
                     }
                     catch (error) {
-                        return 25 /* CommandResult.InvalidSheetId */;
+                        return 26 /* CommandResult.InvalidSheetId */;
                     }
                 case "MOVE_COLUMNS_ROWS":
                     return this.isMoveElementAllowed(cmd);
@@ -33950,6 +34045,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     break;
             }
             this.setSelectionMixin(event.anchor, zones);
+            /** Any change to the selection has to be  reflected in the selection processor. */
+            this.selection.resetDefaultAnchor(this, deepCopy(this.gridSelection.anchor));
             const { col, row } = this.gridSelection.anchor.cell;
             this.moveClient({
                 sheetId: this.getters.getActiveSheetId(),
@@ -33982,11 +34079,11 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                         sheetIdTo: firstSheetId,
                         sheetIdFrom: firstSheetId,
                     });
+                    const { col, row } = this.getters.getNextVisibleCellPosition(firstSheetId, 0, 0);
+                    this.selectCell(col, row);
                     this.selection.registerAsDefault(this, this.gridSelection.anchor, {
                         handleEvent: this.handleEvent.bind(this),
                     });
-                    const { col, row } = this.getters.getNextVisibleCellPosition(firstSheetId, 0, 0);
-                    this.selectCell(col, row);
                     this.moveClient({ sheetId: firstSheetId, col: 0, row: 0 });
                     break;
                 case "ACTIVATE_SHEET": {
@@ -33999,7 +34096,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     };
                     if (cmd.sheetIdTo in this.sheetsData) {
                         Object.assign(this, this.sheetsData[cmd.sheetIdTo]);
-                        this.selection.resetDefaultAnchor(this, this.gridSelection.anchor);
+                        this.selection.resetDefaultAnchor(this, deepCopy(this.gridSelection.anchor));
                     }
                     else {
                         const { col, row } = this.getters.getNextVisibleCellPosition(cmd.sheetIdTo, 0, 0);
@@ -34085,8 +34182,11 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     const sheetId = this.getters.getActiveSheetId();
                     this.gridSelection.zones = this.gridSelection.zones.map((z) => this.getters.expandZone(sheetId, z));
                     this.gridSelection.anchor.zone = this.getters.expandZone(sheetId, this.gridSelection.anchor.zone);
-                    this.ensureSelectionValidity();
+                    this.setSelectionMixin(this.gridSelection.anchor, this.gridSelection.zones);
+                    break;
             }
+            /** Any change to the selection has to be  reflected in the selection processor. */
+            this.selection.resetDefaultAnchor(this, deepCopy(this.gridSelection.anchor));
         }
         // ---------------------------------------------------------------------------
         // Getters
@@ -34234,11 +34334,13 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         // ---------------------------------------------------------------------------
         // Other
         // ---------------------------------------------------------------------------
+        /**
+         * Ensure selections are not outside sheet boundaries.
+         * They are clipped to fit inside the sheet if needed.
+         */
         setSelectionMixin(anchor, zones) {
             const { anchor: clippedAnchor, zones: clippedZones } = this.clipSelection(this.getters.getActiveSheetId(), { anchor, zones });
-            this.gridSelection.anchor.cell.col = clippedAnchor.cell.col;
-            this.gridSelection.anchor.cell.row = clippedAnchor.cell.row;
-            this.gridSelection.anchor.zone = clippedAnchor.zone;
+            this.gridSelection.anchor = clippedAnchor;
             this.gridSelection.zones = uniqueZones(clippedZones);
         }
         /**
@@ -34280,7 +34382,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 zone: selectedZone,
             };
             this.setSelectionMixin(anchor, [selectedZone]);
-            this.ensureSelectionValidity();
         }
         onRowsRemoved(cmd) {
             const { cell, zone } = this.gridSelection.anchor;
@@ -34295,7 +34396,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 zone: selectedZone,
             };
             this.setSelectionMixin(anchor, [selectedZone]);
-            this.ensureSelectionValidity();
         }
         onAddElements(cmd) {
             const selection = this.gridSelection.anchor.zone;
@@ -34376,17 +34476,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         //-------------------------------------------
         // Helpers for extensions
         // ------------------------------------------
-        /**
-         * Ensure selections are not outside sheet boundaries.
-         * They are clipped to fit inside the sheet if needed.
-         */
-        ensureSelectionValidity() {
-            let { anchor, zones } = this.clipSelection(this.getters.getActiveSheetId(), this.gridSelection);
-            this.gridSelection.zones = uniqueZones(zones);
-            this.gridSelection.anchor.cell.col = anchor.cell.col;
-            this.gridSelection.anchor.cell.row = anchor.cell.row;
-            this.gridSelection.anchor.zone = anchor.zone;
-        }
         /**
          * Clip the selection if it spans outside the sheet
          */
@@ -34512,7 +34601,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             switch (cmd.type) {
                 case "ADD_EMPTY_RANGE":
                     if (this.inputHasSingleRange && this.ranges.length === 1) {
-                        return 27 /* CommandResult.MaximumRangesReached */;
+                        return 28 /* CommandResult.MaximumRangesReached */;
                     }
                     break;
             }
@@ -34731,7 +34820,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 case "FOCUS_RANGE":
                     const index = (_a = this.currentInput) === null || _a === void 0 ? void 0 : _a.getIndex(cmd.rangeId);
                     if (this.focusedInputId === cmd.id && ((_b = this.currentInput) === null || _b === void 0 ? void 0 : _b.focusedRangeIndex) === index) {
-                        return 26 /* CommandResult.InputAlreadyFocused */;
+                        return 27 /* CommandResult.InputAlreadyFocused */;
                     }
                     break;
             }
@@ -35674,7 +35763,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     const merges = this.getters.getMerges(sheetId);
                     for (let merge of merges) {
                         if (merge.left < cmd.quantity && cmd.quantity <= merge.right) {
-                            return 62 /* CommandResult.MergeOverlap */;
+                            return 63 /* CommandResult.MergeOverlap */;
                         }
                     }
                     return 0 /* CommandResult.Success */;
@@ -35684,7 +35773,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     const merges = this.getters.getMerges(sheetId);
                     for (let merge of merges) {
                         if (merge.top < cmd.quantity && cmd.quantity <= merge.bottom) {
-                            return 62 /* CommandResult.MergeOverlap */;
+                            return 63 /* CommandResult.MergeOverlap */;
                         }
                     }
                     return 0 /* CommandResult.Success */;
@@ -35701,7 +35790,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 case "ZonesSelected":
                     // altering a zone should not move the viewport
                     const sheetId = this.getters.getActiveSheetId();
-                    let { col, row } = findCellInNewZone(event.previousAnchor.zone, event.anchor.zone);
+                    let { col, row } = findCellInNewZone(event.previousAnchor.zone, event.anchor.zone, this.getters.getActiveMainViewport());
                     col = Math.min(col, this.getters.getNumberCols(sheetId) - 1);
                     row = Math.min(row, this.getters.getNumberRows(sheetId) - 1);
                     this.refreshViewport(this.getters.getActiveSheetId(), { col, row });
@@ -36003,7 +36092,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
         checkPositiveDimension(cmd) {
             if (cmd.width < 0 || cmd.height < 0) {
-                return 65 /* CommandResult.InvalidViewportSize */;
+                return 66 /* CommandResult.InvalidViewportSize */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -36013,7 +36102,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 cmd.gridOffsetY === this.gridOffsetY &&
                 cmd.width === width &&
                 cmd.height === height) {
-                return 73 /* CommandResult.ValuesNotChanged */;
+                return 74 /* CommandResult.ValuesNotChanged */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -36021,7 +36110,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             const pane = this.getMainInternalViewport(this.getters.getActiveSheetId());
             if ((!pane.canScrollHorizontally && offsetX > 0) ||
                 (!pane.canScrollVertically && offsetY > 0)) {
-                return 66 /* CommandResult.InvalidScrollingDirection */;
+                return 67 /* CommandResult.InvalidScrollingDirection */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -36231,7 +36320,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             for (let row = zone.top; row <= zone.bottom; row++) {
                 for (let col = zone.left; col <= zone.right; col++) {
                     if (!this.getters.isInMerge(sheetId, col, row)) {
-                        return 60 /* CommandResult.InvalidSortZone */;
+                        return 61 /* CommandResult.InvalidSortZone */;
                     }
                 }
             }
@@ -36252,7 +36341,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 ];
                 return widthCurrent === widthFirst && heightCurrent === heightFirst;
             })) {
-                return 60 /* CommandResult.InvalidSortZone */;
+                return 61 /* CommandResult.InvalidSortZone */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -36537,7 +36626,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                         break;
                     }
                     catch (error) {
-                        return 25 /* CommandResult.InvalidSheetId */;
+                        return 26 /* CommandResult.InvalidSheetId */;
                     }
             }
             return 0 /* CommandResult.Success */;
@@ -37408,7 +37497,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     env.model.dispatch("ADD_MERGE", { sheetId, target, force: true });
                 });
             }
-            else if (result.isCancelledBecause(77 /* CommandResult.MergeInFilter */)) {
+            else if (result.isCancelledBecause(78 /* CommandResult.MergeInFilter */)) {
                 env.raiseError(AddMergeInteractiveContent.MergeInFilter);
             }
         }
@@ -37989,7 +38078,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             this.sidePanel = owl.useState({ isOpen: false, panelProps: {} });
             this.composer = owl.useState({
                 topBarFocus: "inactive",
-                gridFocusMode: "inactive",
+                gridFocusMode: "cellFocus",
             });
             this.keyDownMapping = {
                 "CTRL+H": () => this.toggleSidePanel("FindAndReplace", {}),
@@ -39285,7 +39374,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
         allowDispatch(cmd) {
             if (this.isWaitingForUndoRedo) {
-                return 61 /* CommandResult.WaitingSessionConfirmation */;
+                return 62 /* CommandResult.WaitingSessionConfirmation */;
             }
             switch (cmd.type) {
                 case "REQUEST_UNDO":
@@ -39366,7 +39455,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         // ---------------------------------------------------------------------------
         allowDispatch(cmd) {
             if (cmd.type === "MOVE_RANGES") {
-                return cmd.target.length === 1 ? 0 /* CommandResult.Success */ : 24 /* CommandResult.InvalidZones */;
+                return cmd.target.length === 1 ? 0 /* CommandResult.Success */ : 25 /* CommandResult.InvalidZones */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -39571,9 +39660,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                         : range.unboundedZone.bottom +
                             ((range.parts[1] || range.parts[0]).rowFixed ? 0 : offsetY),
                 };
-                range = range.clone({ sheetId: copySheetId, zone: unboundZone });
-                range.orderZone();
-                return range;
+                return range.clone({ sheetId: copySheetId, zone: unboundZone }).orderZone();
             });
         }
         /**
@@ -39604,9 +39691,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             const invalidSheetName = sheetName && !this.getters.getSheetIdByName(sheetName) ? sheetName : undefined;
             const sheetId = this.getters.getSheetIdByName(sheetName) || defaultSheetId;
             const rangeInterface = { prefixSheet, zone, sheetId, invalidSheetName, parts };
-            const range = new RangeImpl(rangeInterface, this.getters.getSheetSize);
-            range.orderZone();
-            return range;
+            return new RangeImpl(rangeInterface, this.getters.getSheetSize).orderZone();
         }
         /**
          * Same as `getRangeString` but add all necessary merge to the range to make it a valid selection
@@ -39919,7 +40004,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         addCellToSelection(col, row) {
             const sheetId = this.getters.getActiveSheetId();
             ({ col, row } = this.getters.getMainCellPosition(sheetId, col, row));
-            const zone = positionToZone({ col, row });
+            const zone = this.getters.expandZone(sheetId, positionToZone({ col, row }));
             return this.processEvent({
                 type: "ZonesSelected",
                 anchor: { zone, cell: { col, row } },
@@ -40131,20 +40216,20 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         checkAnchorZone(anchor) {
             const { cell, zone } = anchor;
             if (!isInside(cell.col, cell.row, zone)) {
-                return 14 /* CommandResult.InvalidAnchorZone */;
+                return 15 /* CommandResult.InvalidAnchorZone */;
             }
             const { left, right, top, bottom } = zone;
             const sheetId = this.getters.getActiveSheetId();
             const refCol = this.getters.findVisibleHeader(sheetId, "COL", range(left, right + 1));
             const refRow = this.getters.findVisibleHeader(sheetId, "ROW", range(top, bottom + 1));
             if (refRow === undefined || refCol === undefined) {
-                return 15 /* CommandResult.SelectionOutOfBound */;
+                return 16 /* CommandResult.SelectionOutOfBound */;
             }
             return 0 /* CommandResult.Success */;
         }
         checkAnchorZoneOrThrow(anchor) {
             const result = this.checkAnchorZone(anchor);
-            if (result === 14 /* CommandResult.InvalidAnchorZone */) {
+            if (result === 15 /* CommandResult.InvalidAnchorZone */) {
                 throw new Error(_t("The provided anchor is invalid. The cell must be part of the zone."));
             }
         }
@@ -41838,6 +41923,11 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             this.corePlugins = [];
             this.uiPlugins = [];
             /**
+             * In a collaborative context, some commands can be replayed, we have to ensure
+             * that these commands are not replayed on the UI plugins.
+             */
+            this.isReplayingCommand = false;
+            /**
              * A plugin can draw some contents on the canvas. But even better: it can do
              * so multiple times.  The order of the render calls will determine a list of
              * "layers" (i.e., earlier calls will be obviously drawn below later calls).
@@ -41867,7 +41957,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 const command = { type, ...payload };
                 let status = this.status;
                 if (this.getters.isReadonly() && !canExecuteInReadonly(command)) {
-                    return new DispatchResult(64 /* CommandResult.Readonly */);
+                    return new DispatchResult(65 /* CommandResult.Readonly */);
                 }
                 switch (status) {
                     case 0 /* Status.Ready */:
@@ -41912,7 +42002,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 const command = { type, ...payload };
                 const previousStatus = this.status;
                 this.status = 2 /* Status.RunningCore */;
-                this.dispatchToHandlers(this.handlers, command);
+                const handlers = this.isReplayingCommand ? [this.range, ...this.corePlugins] : this.handlers;
+                this.dispatchToHandlers(handlers, command);
                 this.status = previousStatus;
                 return DispatchResult.Success;
             };
@@ -42026,7 +42117,11 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             this.finalize();
         }
         setupSession(revisionId) {
-            const session = new Session(buildRevisionLog(revisionId, this.state.recordChanges.bind(this.state), (command) => this.dispatchToHandlers([this.range, ...this.corePlugins], command)), this.config.transportService, revisionId);
+            const session = new Session(buildRevisionLog(revisionId, this.state.recordChanges.bind(this.state), (command) => {
+                this.isReplayingCommand = true;
+                this.dispatchToHandlers([this.range, ...this.corePlugins], command);
+                this.isReplayingCommand = false;
+            }), this.config.transportService, revisionId);
             return session;
         }
         setupSessionEvents() {
@@ -42283,8 +42378,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     Object.defineProperty(exports, '__esModule', { value: true });
 
     exports.__info__.version = '2.0.0';
-    exports.__info__.date = '2022-11-03T06:57:12.461Z';
-    exports.__info__.hash = '7112f4d';
+    exports.__info__.date = '2022-11-10T08:10:07.068Z';
+    exports.__info__.hash = '5e45be5';
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
 //# sourceMappingURL=o_spreadsheet.js.map
