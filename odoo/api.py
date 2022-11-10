@@ -1139,17 +1139,17 @@ class Cache(object):
         field_cache = self._get_field_cache(model, field)
         return model.browse(field_cache)
 
-    def get_missing_ids(self, records, field):
+    def get_missing_ids(self, model, record_ids, field):
         """ Return the ids of ``records`` that have no value for ``field``. """
-        field_cache = self._get_field_cache(records, field)
+        field_cache = self._get_field_cache(model, field)
         if field.translate:
-            lang = records.env.lang or 'en_US'
-            for record_id in records._ids:
+            lang = model.env.lang or 'en_US'
+            for record_id in record_ids:
                 cache_value = field_cache.get(record_id, False)
                 if cache_value is False or not (cache_value is None or lang in cache_value):
                     yield record_id
         else:
-            for record_id in records._ids:
+            for record_id in record_ids:
                 if record_id not in field_cache:
                     yield record_id
 

@@ -3746,7 +3746,7 @@ class BaseModel(metaclass=MetaModel):
             for fields in determine_inverses.values():
                 # write again on non-stored fields that have been invalidated from cache
                 for field in fields:
-                    if not field.store and any(self.env.cache.get_missing_ids(real_recs, field)):
+                    if not field.store and any(self.env.cache.get_missing_ids(self, real_recs._ids, field)):
                         field.write(real_recs, vals[field.name])
 
                 # inverse records that are not being computed
@@ -5908,7 +5908,7 @@ class BaseModel(metaclass=MetaModel):
             Return at most ``limit`` records.
         """
         ids = expand_ids(self.id, self._prefetch_ids)
-        ids = self.env.cache.get_missing_ids(self.browse(ids), field)
+        ids = self.env.cache.get_missing_ids(self, ids, field)
         if limit:
             ids = itertools.islice(ids, limit)
         # Those records are aimed at being either fetched, or computed.  But the
