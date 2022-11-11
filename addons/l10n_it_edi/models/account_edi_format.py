@@ -238,6 +238,7 @@ class AccountEdiFormat(models.Model):
             'TD17': dict(move_types=['in_invoice', 'in_refund'], import_type='in_invoice', self_invoice=True, services_or_goods="service"),
             'TD18': dict(move_types=['in_invoice', 'in_refund'], import_type='in_invoice', self_invoice=True, services_or_goods="consu", partner_in_eu=True),
             'TD19': dict(move_types=['in_invoice', 'in_refund'], import_type='in_invoice', self_invoice=True, services_or_goods="consu", goods_in_italy=True),
+            'TD28': dict(move_types=['in_invoice', 'in_refund'], import_type='in_invoice', self_invoice=True, san_marino=True)
         }
 
     def _l10n_it_get_document_type(self, invoice):
@@ -246,6 +247,7 @@ class AccountEdiFormat(models.Model):
         services_or_goods = self._l10n_it_edi_services_or_goods(invoice)
         goods_in_italy = services_or_goods == 'consu' and self._l10n_it_goods_in_italy(invoice)
         partner_in_eu = self._l10n_it_edi_partner_in_eu(invoice.commercial_partner_id)
+        san_marino = invoice.commercial_partner_id.country_id.code == "SM"
         for code, infos in self._l10n_it_document_type_mapping().items():
             info_services_or_goods = infos.get('services_or_goods', "both")
             info_partner_in_eu = infos.get('partner_in_eu', False)
@@ -259,6 +261,7 @@ class AccountEdiFormat(models.Model):
                 info_services_or_goods in ("both", services_or_goods),
                 info_partner_in_eu in (False, partner_in_eu),
                 goods_in_italy == infos.get('goods_in_italy', False),
+                infos.get('san_marino') in (None, san_marino),
             ]):
                 return code
 
