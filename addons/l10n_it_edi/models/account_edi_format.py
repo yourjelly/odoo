@@ -241,17 +241,16 @@ class AccountEdiFormat(models.Model):
             'TD28': dict(move_types=['in_invoice', 'in_refund'], import_type='in_invoice', self_invoice=True, san_marino=True)
         }
 
-    def _l10n_it_get_document_type(self, invoice):
+    def _l10n_it_compare_codes_list(self, invoice, infos):
         is_simplified = self._l10n_it_edi_is_simplified(invoice)
         is_self_invoice = self._l10n_it_edi_is_self_invoice(invoice)
         services_or_goods = self._l10n_it_edi_services_or_goods(invoice)
         goods_in_italy = services_or_goods == 'consu' and self._l10n_it_goods_in_italy(invoice)
         partner_in_eu = self._l10n_it_edi_partner_in_eu(invoice.commercial_partner_id)
         san_marino = invoice.commercial_partner_id.country_id.code == "SM"
-        for code, infos in self._l10n_it_document_type_mapping().items():
-            info_services_or_goods = infos.get('services_or_goods', "both")
-            info_partner_in_eu = infos.get('partner_in_eu', False)
-            if all([
+        info_services_or_goods = infos.get('services_or_goods', "both")
+        info_partner_in_eu = infos.get('partner_in_eu', False)
+        return [
                 invoice.move_type in infos.get('move_types', False),
                 # Only check downpayment if the key is specified in the document_type_mapping entry
                 # If it's not specified, the get() will return None and the condition will be True
@@ -262,10 +261,14 @@ class AccountEdiFormat(models.Model):
                 info_partner_in_eu in (False, partner_in_eu),
                 goods_in_italy == infos.get('goods_in_italy', False),
                 infos.get('san_marino') in (None, san_marino),
-            ]):
-                return code
+            ]
 
-        return None
+    def _l10n_it_get_document_type(self, invoice):
+        for code, infos in self._l10n_it_document_type_mapping().items():
+            if all(self._l10n_it_compare_codes_list(invoice, infos)):
+                return code
+        else:
+            return False
 
     def _l10n_it_is_simplified_document_type(self, document_type):
         return self._l10n_it_document_type_mapping().get(document_type, {}).get('simplified', False)
