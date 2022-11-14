@@ -142,13 +142,16 @@ HTMLElement.prototype.oDeleteForward = function (offset) {
         firstLeafNode.oDeleteBackward(Math.min(1, nodeSize(firstLeafNode)));
         return;
     }
-    const firstOutNode = findNode(
+    let firstOutNode = findNode(
         rightLeafOnlyPathNotBlockNotEditablePath(
             ...(firstLeafNode ? rightPos(firstLeafNode) : [this, offset]),
         ),
         filterFunc,
     );
     if (firstOutNode) {
+        if (firstOutNode.parentElement.classList.contains('o_togglelist_content')){
+            firstOutNode = firstOutNode.parentElement.nextSibling.firstChild;
+        }
         const [node, offset] = leftPos(firstOutNode);
         node.oDeleteBackward(offset);
         return;

@@ -47,7 +47,16 @@ HTMLElement.prototype.oEnter = function (offset, firstSplit = true) {
         splitEl.appendChild(this.childNodes[offset]);
     }
     if (isBlock(this) || splitEl.hasChildNodes()) {
-        this.after(splitEl);
+        let anchorElement = this;
+        if (this.classList.contains('o_togglelist_title')){
+            anchorElement = this.nextElementSibling;
+            const content = document.createElement('DIV');
+            content.classList.add('o_togglelist_content');
+            content.setAttribute('contenteditable', true);
+            fillEmpty(content);
+            anchorElement.after(content);
+        }
+        anchorElement.after(splitEl);
         if (isVisible(splitEl)) {
             didSplit = true;
         } else {

@@ -159,6 +159,8 @@ export const CLIPBOARD_WHITELISTS = {
         'o_checked',
         'o_checklist',
         'oe-nested',
+        // Odoo toggle
+        /^o_togglelist/,
         // Miscellaneous
         /^btn/,
         /^fa/,
@@ -446,6 +448,16 @@ export class OdooEditor extends EventTarget {
                 ...(this.options.categories || []),
             ],
             commands: [
+                {
+                    category: this.options._t('Structure'),
+                    name: this.options._t('Toggle'),
+                    priority: 120,
+                    description: this.options._t('Hide Text under a toggle'),
+                    fontawesome: 'fa-caret-square-o-right',
+                    callback: () => {
+                        this.execCommand('toggleList', 'TL');
+                    },
+                },
                 {
                     category: this.options._t('Structure'),
                     name: this.options._t('Bulleted list'),
@@ -2763,6 +2775,7 @@ export class OdooEditor extends EventTarget {
             ['unordered', 'UL', true],
             ['ordered', 'OL', true],
             ['checklist', 'CL', true],
+            ['togglelist', 'TL', true],
         ]) {
             const button = this.toolbar.querySelector('#' + style);
             if (button && !block) {
@@ -3988,7 +4001,7 @@ export class OdooEditor extends EventTarget {
 
         const node = ev.target;
         // handle checkbox lists
-        if (node.tagName == 'LI' && getListMode(node.parentElement) == 'CL') {
+        if (node.tagName == 'LI' && ['CL', 'TL'].includes(getListMode(node.parentElement))) {
             const beforStyle = window.getComputedStyle(node, ':before');
             const style1 = {
                 left: parseInt(beforStyle.getPropertyValue('left'), 10),
@@ -4004,7 +4017,11 @@ export class OdooEditor extends EventTarget {
                 ev.offsetY <= style1.bottom;
 
             if (isMouseInsideCheckboxBox) {
-                toggleClass(node, 'o_checked');
+                const classToToggle = node.classList.contains('o_togglelist_title') ? 'o_toggled' : 'o_checked';
+                toggleClass(node, classToToggle);
+                if (classToToggle === 'o_toggled') {
+                    toggleClass(node.nextSibling, 'o_toggled');
+                }
                 ev.preventDefault();
                 this.historyStep();
             }

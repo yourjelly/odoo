@@ -143,6 +143,7 @@ export class HtmlField extends Component {
                             const $el = $(this.readonlyElementRef.el);
                             $el.off('.checklistBinding');
                             $el.on('click.checklistBinding', 'ul.o_checklist > li', this._onReadonlyClickChecklist.bind(this));
+                            $el.on('click.checklistBinding', 'ul.o_togglelist > li', this._onReadonlyClickTogglelist.bind(this));
                             $el.on('click.checklistBinding', '.o_stars .fa-star, .o_stars .fa-star-o', this._onReadonlyClickStar.bind(this));
                         }
                     }
@@ -535,6 +536,7 @@ export class HtmlField extends Component {
         this.commitChanges({ urgent: true });
     }
     async _onReadonlyClickChecklist(ev) {
+        console.log("html_field")
         if (ev.offsetX > 0) {
             return;
         }
@@ -556,7 +558,11 @@ export class HtmlField extends Component {
             this.props.update(value);
         }
     }
+    _onReadonlyClickTogglelist(ev){
+        console.log(ev);
+    }
     async _onReadonlyClickStar(ev) {
+        console.log(ev);
         ev.stopPropagation();
         ev.preventDefault();
 

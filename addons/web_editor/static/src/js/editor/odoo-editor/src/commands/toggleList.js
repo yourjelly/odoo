@@ -72,6 +72,18 @@ HTMLLIElement.prototype.oToggleList = function (offset, mode) {
         setTagName(pnode, mode);
     } else if (['OLUL', 'ULOL'].includes(listMode)) {
         setTagName(pnode, mode);
+    } else if(['OLTL', 'ULTL'].includes(listMode)){
+        pnode.classList.add('o_togglelist');
+        for (let li = pnode.firstElementChild; li !== null; li = li.nextElementSibling) {
+            if (li.style.listStyle != 'none') {
+                li.style.listStyle = null;
+                if (!li.style.all) li.removeAttribute('style');
+            }
+        }
+        setTagName(pnode, 'UL');
+    } else if (['TLOL', 'TLUL'].includes(listMode)) {
+        toggleClass(pnode, 'o_togglelist');
+        setTagName(pnode, mode);
     } else {
         // toggle => remove list
         let node = this;

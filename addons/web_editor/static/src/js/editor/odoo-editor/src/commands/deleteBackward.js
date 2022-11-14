@@ -49,7 +49,16 @@ HTMLElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false, 
     const contentIsZWS = this.textContent === '\u200B';
     let moveDest;
     if (offset) {
-        const leftNode = this.childNodes[offset - 1];
+        const leftNode = this.classList.contains('o_togglelist') ? this.childNodes[offset - 2] : this.childNodes[offset - 1];
+        if (this.classList.contains('o_togglelist')) {
+            let rightNode = this.childNodes[offset + 1];
+            let index = 2;
+            while (rightNode && rightNode.nodeType === Node.TEXT_NODE) {
+                rightNode = this.childNodes[offset + index];
+                index += 1;
+            }
+            if (rightNode) rightNode.remove();
+        }
         if (isUnremovable(leftNode)) {
             throw UNREMOVABLE_ROLLBACK_CODE;
         }
@@ -139,19 +148,23 @@ HTMLElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false, 
          */
         moveDest = leftPos(this);
     }
-
     const domPathGenerator = createDOMPathGenerator(DIRECTIONS.LEFT, {
         leafOnly: true,
         stopTraverseFunction: isDeletable,
     });
     const domPath = domPathGenerator(this, offset)
-    const leftNode = domPath.next().value;
+    let leftNode = domPath.next().value;
+    if (this.classList.contains('o_togglelist') || this.classList.contains('o_togglelist_title')){
+        while (!leftNode.parentElement.classList.contains('o_togglelist_title')) {
+            leftNode = domPath.next().value;
+        }
+    }
     if (leftNode && isDeletable(leftNode)) {
         const [parent, offset] = rightPos(leftNode);
         return parent.oDeleteBackward(offset, alreadyMoved);
     }
     let node = this.childNodes[offset];
-    const nextSibling = this.nextSibling;
+    const nextSibling = this.classList.contains('o_togglelist_title') ? this.nextSibling.nextSibling : this.nextSibling;
     let currentNodeIndex = offset;
 
     // `offsetLimit` will ensure we never move nodes that were not initialy in

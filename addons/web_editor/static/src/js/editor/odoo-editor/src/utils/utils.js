@@ -1644,13 +1644,17 @@ export function commonParentGet(node1, node2, root = undefined) {
 
 export function getListMode(pnode) {
     if (pnode.tagName == 'OL') return 'OL';
-    return pnode.classList.contains('o_checklist') ? 'CL' : 'UL';
+    return pnode.classList.contains('o_checklist') ? 'CL' :
+        pnode.classList.contains('o_togglelist') ? 'TL' : 'UL';
 }
 
 export function createList(mode) {
     const node = document.createElement(mode == 'OL' ? 'OL' : 'UL');
     if (mode == 'CL') {
         node.classList.add('o_checklist');
+    }
+    if (mode == 'TL'){
+        node.classList.add('o_togglelist');
     }
     return node;
 }
@@ -1662,9 +1666,20 @@ export function insertListAfter(afterNode, mode, content = []) {
         ...content.map(c => {
             const li = document.createElement('LI');
             li.append(...[].concat(c));
+            if (mode =='TL'){
+                li.classList.toggle('o_togglelist_title');
+            }
             return li;
         }),
     );
+    if (mode == 'TL') {
+        const content = document.createElement('DIV');
+        content.classList.add('o_togglelist_content');
+        content.setAttribute('contenteditable', true);
+        fillEmpty(content);
+        list.appendChild(content);
+    }
+
     return list;
 }
 

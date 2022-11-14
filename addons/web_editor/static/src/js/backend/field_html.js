@@ -435,6 +435,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
         def.then(function () {
             if (!self.hasReadonlyModifier) {
                 self.$content.on('click', 'ul.o_checklist > li', self._onReadonlyClickChecklist.bind(self));
+                self.$content.on('click', 'ul.o_togglelist > li', self._onReadonlyClickTogglelist.bind(self));
                 self.$content.on('click', '.o_stars .fa-star, .o_stars .fa-star-o', self._onReadonlyClickStar.bind(self));
             }
             if (self.$iframe) {
@@ -526,6 +527,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
      * @param {OdooEvent} ev
      */
     _onReadonlyClickChecklist: function (ev) {
+        console.log('field_html')
         const self = this;
         if (ev.offsetX > 0) {
             return;
@@ -549,6 +551,10 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
         }).then(function (value) {
             self._setValue(value);
         });
+    },
+    _onReadonlyClickTogglelist: function (ev) {
+        console.log(ev);
+        console.log(this);
     },
     /**
      * Check stars on click event in readonly.

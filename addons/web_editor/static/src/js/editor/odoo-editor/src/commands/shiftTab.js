@@ -15,8 +15,12 @@ HTMLElement.prototype.oShiftTab = function (offset = undefined) {
 // returns: is still in a <LI> nested list
 HTMLLIElement.prototype.oShiftTab = function () {
     const li = this;
-    if (li.nextElementSibling) {
+    if (li.nextElementSibling && (li.nextElementSibling.nodeName === 'LI'
+        || (li.nextElementSibling.nodeName === 'DIV' && li.nextElementSibling.nextElementSibling))) {
         const ul = li.parentElement.cloneNode(false);
+        if (li.nextElementSibling.nodeName === 'DIV') {
+            li.nextElementSibling.remove();
+        }
         while (li.nextSibling) {
             ul.append(li.nextSibling);
         }
@@ -28,6 +32,9 @@ HTMLLIElement.prototype.oShiftTab = function () {
         } else {
             li.parentNode.after(ul);
         }
+    }
+    if (li.nextElementSibling && li.nextElementSibling.nodeName ==='DIV'){
+        li.nextElementSibling.remove()
     }
 
     const restoreCursor = preserveCursor(this.ownerDocument);
