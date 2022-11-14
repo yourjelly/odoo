@@ -13314,6 +13314,28 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         sequence: 40,
         separator: true,
     })
+        .addChild("caregorie_function_all", ["insert", "insert_function"], {
+        name: _lt("All"),
+        sequence: 50,
+    })
+        .addChild("all_function_list", ["insert", "insert_function", "caregorie_function_all"], () => {
+        const fnNames = Object.keys(functionRegistry.content);
+        return createFormulaFunctionMenuItems(fnNames);
+    })
+        .addChild("caregories_function_list", ["insert", "insert_function"], () => {
+        const functions = functionRegistry.content;
+        const categories = [
+            ...new Set(Object.keys(functions).map((key) => functions[key].category)),
+        ].filter(isDefined$1);
+        return categories.sort().map((category, i) => {
+            const functionsInCategory = Object.keys(functions).filter((key) => functions[key].category === category);
+            return createFullMenuItem(category, {
+                name: category,
+                sequence: 60 + i * 10,
+                children: createFormulaFunctionMenuItems(functionsInCategory),
+            });
+        });
+    })
         .addChild("insert_link", ["insert"], {
         name: _lt("Link"),
         separator: true,
@@ -13564,8 +13586,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             action: (env) => setStyle(env, { fontSize: fs.pt }),
         });
     }
-    // Formula All functions and functions by categories
-    const insertAllFunctionItemSequence = 50;
     function createFormulaFunctionMenuItems(fnNames) {
         return fnNames.sort().map((fnName, i) => createFullMenuItem(fnName, {
             name: fnName,
@@ -13573,31 +13593,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             action: (env) => env.model.dispatch("START_EDITION", { text: `=${fnName}(` }),
         }));
     }
-    topbarMenuRegistry
-        .addChild("insert_function_all", ["insert", "insert_function"], {
-        name: _lt("All"),
-        sequence: insertAllFunctionItemSequence,
-    })
-        // Formula All functions
-        .addChild("all_function_list", ["insert", "insert_function", "insert_function_all"], (env) => {
-        const fnNames = Object.keys(functionRegistry.content);
-        return createFormulaFunctionMenuItems(fnNames);
-    })
-        // Formula functions by categories
-        .addChild("caregories_function_list", ["insert", "insert_function"], (env) => {
-        const functions = functionRegistry.content;
-        const categories = [
-            ...new Set(Object.keys(functions).map((key) => functions[key].category)),
-        ].filter(isDefined$1);
-        return categories.sort().map((category, i) => {
-            const functionsInCategory = Object.keys(functions).filter((key) => functions[key].category === category);
-            return createFullMenuItem(category, {
-                name: category,
-                sequence: insertAllFunctionItemSequence + i * 10,
-                children: createFormulaFunctionMenuItems(functionsInCategory),
-            });
-        });
-    });
 
     class OTRegistry extends Registry {
         /**
@@ -19242,8 +19237,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     }
                     break;
                 case "START_EDITION":
-                    if (this.mode !== "inactive") {
-                        this.setContent(cmd.text || "", cmd.selection);
+                    if (this.mode !== "inactive" && cmd.text) {
+                        this.setContent(cmd.text, cmd.selection);
                     }
                     else {
                         this.startEdition(cmd.text, cmd.selection);
@@ -42383,8 +42378,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     Object.defineProperty(exports, '__esModule', { value: true });
 
     exports.__info__.version = '2.0.0';
-    exports.__info__.date = '2022-11-10T13:26:04.661Z';
-    exports.__info__.hash = '05c7e4c';
+    exports.__info__.date = '2022-11-14T09:51:38.385Z';
+    exports.__info__.hash = 'c5e75b3';
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
 //# sourceMappingURL=o_spreadsheet.js.map
