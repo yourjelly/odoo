@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { getFixture, patchWithCleanup } from "@web/../tests/helpers/utils";
+import { getFixture, patchSetTimeout } from "@web/../tests/helpers/utils";
 import { menuService } from "@web/webclient/menus/menu_service";
 import {
     toggleFilterMenu,
@@ -11,7 +11,6 @@ import {
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 import { registry } from "@web/core/registry";
 import { mock } from "web.test_utils";
-import { browser } from "@web/core/browser/browser";
 import { fakeCookieService } from "@web/../tests/helpers/mock_services";
 
 const patchDate = mock.patchDate;
@@ -72,7 +71,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("Forecast graph view", async function (assert) {
         assert.expect(5);
 
-        patchWithCleanup(browser, { setTimeout: (fn) => fn() });
+        patchSetTimeout();
         const unpatchDate = patchDate(2021, 8, 16, 16, 54, 0);
 
         const expectedDomains = [

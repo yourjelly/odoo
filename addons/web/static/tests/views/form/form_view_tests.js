@@ -15,6 +15,7 @@ import {
     mouseEnter,
     nextTick,
     patchTimeZone,
+    patchSetTimeout,
     patchWithCleanup,
     selectDropdownItem,
     triggerEvent,
@@ -2245,9 +2246,8 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("tooltips on multiple occurrences of fields and labels", async function (assert) {
         serverData.models.partner.fields.foo.help = "foo tooltip";
         serverData.models.partner.fields.bar.help = "bar tooltip";
-
+        patchSetTimeout();
         patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
             clearTimeout: () => {},
         });
 
@@ -5268,11 +5268,7 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("switching to another record", async function (assert) {
-        patchWithCleanup(browser, {
-            setTimeout(fn) {
-                return fn(); // update the router hash directly
-            },
-        });
+        patchSetTimeout();
         const form = await makeView({
             type: "form",
             resModel: "partner",
@@ -9723,8 +9719,8 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("display tooltips for buttons (debug = false)", async function (assert) {
+        patchSetTimeout();
         patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
             clearTimeout: () => {},
         });
 
@@ -9768,8 +9764,8 @@ QUnit.module("Views", (hooks) => {
             debug: true,
         });
 
+        patchSetTimeout();
         patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
             clearTimeout: () => {},
         });
 
@@ -10064,8 +10060,8 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("proper stringification in debug mode tooltip", async function (assert) {
         patchWithCleanup(odoo, { debug: true });
 
+        patchSetTimeout();
         patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
             clearTimeout: () => {},
         });
 
@@ -11235,8 +11231,8 @@ QUnit.module("Views", (hooks) => {
             serverData.models.partner.fields.product_id.help = "this is a tooltip";
             serverData.models.partner.fields.foo.company_dependent = true;
 
+            patchSetTimeout();
             patchWithCleanup(browser, {
-                setTimeout: (fn) => fn(),
                 clearTimeout: () => {},
             });
 
@@ -11279,8 +11275,8 @@ QUnit.module("Views", (hooks) => {
             serverData.models.partner.fields.product_id.company_dependent = true;
             serverData.models.partner.fields.product_id.help = "this is a tooltip";
 
+            patchSetTimeout();
             patchWithCleanup(browser, {
-                setTimeout: (fn) => fn(),
                 clearTimeout: () => {},
             });
 

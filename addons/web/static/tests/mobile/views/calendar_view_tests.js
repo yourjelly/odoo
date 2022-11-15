@@ -3,7 +3,14 @@
 import { browser } from "@web/core/browser/browser";
 import { CalendarCommonRenderer } from "@web/views/calendar/calendar_common/calendar_common_renderer";
 import { CalendarYearRenderer } from "@web/views/calendar/calendar_year/calendar_year_renderer";
-import { click, getFixture, nextTick, patchDate, patchWithCleanup } from "../../helpers/utils";
+import {
+    click,
+    getFixture,
+    nextTick,
+    patchDate,
+    patchSetTimeout,
+    patchWithCleanup,
+} from "../../helpers/utils";
 import { changeScale, clickEvent, toggleSectionFilter } from "../../views/calendar/helpers";
 import { makeView, setupViewRegistries } from "../../views/helpers";
 import { tap, swipeRight, tapAndMove } from "../helpers";
@@ -15,8 +22,8 @@ QUnit.module("Views", ({ beforeEach }) => {
     beforeEach(() => {
         // 2016-12-12 08:00:00
         patchDate(2016, 11, 12, 8, 0, 0);
+        patchSetTimeout();
         patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
             clearTimeout: () => {},
         });
 

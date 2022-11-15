@@ -21,7 +21,7 @@ def qunit_error_checker(message):
     return True  # in other cases, always stop (missing dependency, ...)
 
 
-@odoo.tests.tagged('post_install', '-at_install')
+@odoo.tests.tagged('post_install', '-at_install', "plop")
 class WebSuite(odoo.tests.HttpCase):
 
     @odoo.tests.no_retry

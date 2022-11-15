@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { browser } from "@web/core/browser/browser";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 import {
     click,
@@ -11,6 +10,7 @@ import {
     getFixture,
     getNodesTextContent,
     nextTick,
+    patchSetTimeout,
     patchWithCleanup,
     addRow,
 } from "@web/../tests/helpers/utils";
@@ -1903,9 +1903,7 @@ QUnit.module("Fields", (hooks) => {
             "partner_type,false,search": `<search />`,
         };
 
-        patchWithCleanup(browser, {
-            setTimeout: (fn) => Promise.resolve().then(fn),
-        });
+        patchSetTimeout();
 
         patchWithCleanup(Many2XAutocomplete.defaultProps, {
             searchLimit: 1,
@@ -1965,9 +1963,7 @@ QUnit.module("Fields", (hooks) => {
 
         registry.category("services").add("company", companyService, { force: true });
 
-        patchWithCleanup(browser, {
-            setTimeout: (fn) => Promise.resolve().then(fn),
-        });
+        patchSetTimeout();
 
         await makeView({
             type: "list",
@@ -2022,9 +2018,7 @@ QUnit.module("Fields", (hooks) => {
 
         registry.category("services").add("company", companyService, { force: true });
 
-        patchWithCleanup(browser, {
-            setTimeout: (fn) => Promise.resolve().then(fn),
-        });
+        patchSetTimeout();
 
         await makeView({
             type: "form",
@@ -2083,9 +2077,7 @@ QUnit.module("Fields", (hooks) => {
             });
             registry.category("services").add("company", companyService, { force: true });
 
-            patchWithCleanup(browser, {
-                setTimeout: (fn) => Promise.resolve().then(fn),
-            });
+            patchSetTimeout();
 
             await makeView({
                 type: "form",

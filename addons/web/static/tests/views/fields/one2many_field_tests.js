@@ -15,6 +15,7 @@ import {
     getNodesTextContent,
     makeDeferred,
     nextTick,
+    patchSetTimeout,
     patchWithCleanup,
     removeRow,
     selectDropdownItem,
@@ -342,9 +343,7 @@ QUnit.module("Fields", (hooks) => {
         // In that case, a domain evaluation on that field followed by name_search
         // shouldn't send virtual_ids to the server.
 
-        patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
-        });
+        patchSetTimeout();
 
         serverData.models.turtle.fields.parent_id = {
             string: "Parent",
@@ -3323,7 +3322,7 @@ QUnit.module("Fields", (hooks) => {
     });
 
     QUnit.test("one2many list (editable): edition, part 4", async function (assert) {
-        patchWithCleanup(browser, { setTimeout: (fn) => fn() });
+        patchSetTimeout();
         let i = 0;
         serverData.models.turtle.onchanges = {
             turtle_trululu: function (obj) {
@@ -6449,11 +6448,7 @@ QUnit.module("Fields", (hooks) => {
         assert.expect(36);
 
         // this is a way to avoid the debounce of triggerAction
-        patchWithCleanup(browser, {
-            setTimeout(fn) {
-                Promise.resolve().then(fn);
-            },
-        });
+        patchSetTimeout();
 
         serverData.models.partner.records[0].p = [4];
 
@@ -7696,9 +7691,7 @@ QUnit.module("Fields", (hooks) => {
     QUnit.test(
         "one2many field: change value before pending onchange returns",
         async function (assert) {
-            patchWithCleanup(browser, {
-                setTimeout: (fn) => fn(),
-            });
+            patchSetTimeout();
 
             serverData.models.partner.onchanges = {
                 int_field: function () {},
@@ -9036,7 +9029,7 @@ QUnit.module("Fields", (hooks) => {
             mockRPC(route, args) {
                 if (args.method === "test_button") {
                     assert.step("test_button");
-                    assert.strictEqual(args.kwargs.context.parent_name, 'first record');
+                    assert.strictEqual(args.kwargs.context.parent_name, "first record");
                     return true;
                 }
             },
@@ -9267,9 +9260,7 @@ QUnit.module("Fields", (hooks) => {
     });
 
     QUnit.test("create and edit on m2o in o2m, and press ESCAPE", async function (assert) {
-        patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
-        });
+        patchSetTimeout();
 
         serverData.views = {
             "partner,false,form": `
@@ -10247,9 +10238,7 @@ QUnit.module("Fields", (hooks) => {
             // and resets the one2many. At the end, we want the row to be in edition.
 
             // patch setTimeout s.t. the autocomplete drodown opens directly
-            patchWithCleanup(browser, {
-                setTimeout: (fn) => fn(),
-            });
+            patchSetTimeout();
 
             const def = makeDeferred();
             serverData.models.partner.onchanges = {
@@ -11729,9 +11718,7 @@ QUnit.module("Fields", (hooks) => {
     QUnit.test(
         "when creating a new many2one on a x2many then discarding it immediately with ESCAPE, it should not crash",
         async function (assert) {
-            patchWithCleanup(browser, {
-                setTimeout: (fn) => fn(),
-            });
+            patchSetTimeout();
 
             serverData.models.partner.records[0].turtles = [];
             serverData.views = {
@@ -12493,12 +12480,20 @@ QUnit.module("Fields", (hooks) => {
         await addRow(target);
         assert.containsOnce(target, ".o_dialog .o_form_view");
 
-        // Click on "Save & New" with an invalid form 
+        // Click on "Save & New" with an invalid form
         await click(target, ".o_dialog .o_form_button_save_new");
         assert.containsOnce(target, ".o_dialog .o_form_view");
 
         // Check that no buttons are disabled
-        assert.hasAttrValue(target.querySelector(".o_dialog .o_form_button_save_new"), "disabled", undefined);
-        assert.hasAttrValue(target.querySelector(".o_dialog .o_form_button_cancel"), "disabled", undefined);
+        assert.hasAttrValue(
+            target.querySelector(".o_dialog .o_form_button_save_new"),
+            "disabled",
+            undefined
+        );
+        assert.hasAttrValue(
+            target.querySelector(".o_dialog .o_form_button_cancel"),
+            "disabled",
+            undefined
+        );
     });
 });

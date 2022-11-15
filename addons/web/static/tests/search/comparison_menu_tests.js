@@ -1,6 +1,11 @@
 /** @odoo-module **/
 
-import { getFixture, patchDate, patchWithCleanup } from "@web/../tests/helpers/utils";
+import {
+    getFixture,
+    patchDate,
+    patchSetTimeout,
+    patchWithCleanup,
+} from "@web/../tests/helpers/utils";
 import { browser } from "@web/core/browser/browser";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
 import {
@@ -37,8 +42,8 @@ QUnit.module("Search", (hooks) => {
             },
         };
         setupControlPanelServiceRegistry();
+        patchSetTimeout();
         patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
             clearTimeout: () => {},
         });
         target = getFixture();

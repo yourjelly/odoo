@@ -2,7 +2,7 @@
 
 import { browser } from "@web/core/browser/browser";
 import { CalendarYearRenderer } from "@web/views/calendar/calendar_year/calendar_year_renderer";
-import { getFixture, patchTimeZone, patchWithCleanup } from "../../helpers/utils";
+import { getFixture, patchSetTimeout, patchTimeZone, patchWithCleanup } from "../../helpers/utils";
 import { clickDate, mountComponent, selectDateRange, makeEnv, makeFakeModel } from "./helpers";
 
 let target;
@@ -66,8 +66,8 @@ QUnit.module("CalendarView - YearRenderer", ({ beforeEach }) => {
     });
 
     QUnit.test("display events", async (assert) => {
+        patchSetTimeout();
         patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
             clearTimeout: () => {},
         });
 

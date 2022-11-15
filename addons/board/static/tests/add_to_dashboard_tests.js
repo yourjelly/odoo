@@ -4,7 +4,7 @@ import { addToBoardItem } from "@board/add_to_board/add_to_board";
 import {
     click,
     getFixture,
-    patchWithCleanup,
+    patchSetTimeout,
     mouseEnter,
     triggerEvent,
 } from "@web/../tests/helpers/utils";
@@ -22,7 +22,6 @@ import {
     toggleMenuItemOption,
 } from "@web/../tests/search/helpers";
 import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
-import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import LegacyAddToBoard from "board.AddToBoardMenu";
 import LegacyFavoriteMenu from "web.FavoriteMenu";
@@ -89,6 +88,7 @@ QUnit.module("Board", (hooks) => {
         );
         serverData = { models };
         target = getFixture();
+        patchSetTimeout();
     });
 
     QUnit.module("Add to dashboard");
@@ -102,7 +102,6 @@ QUnit.module("Board", (hooks) => {
             "partner,false,list": '<list><field name="foo"/></list>',
             "partner,false,search": "<search></search>",
         };
-        patchWithCleanup(browser, { setTimeout: (fn) => fn() });
 
         const mockRPC = (route, args) => {
             if (route === "/board/add_to_dashboard") {
@@ -164,7 +163,6 @@ QUnit.module("Board", (hooks) => {
         // the second search saved should not be influenced by the first
         assert.expect(2);
 
-        patchWithCleanup(browser, { setTimeout: (fn) => fn() });
         serverData.views = {
             "partner,false,list": '<list><field name="foo"/></list>',
             "partner,false,search": "<search></search>",
@@ -234,7 +232,6 @@ QUnit.module("Board", (hooks) => {
         // View domains are to be added to the dashboard domain
         assert.expect(1);
 
-        patchWithCleanup(browser, { setTimeout: (fn) => fn() });
         var view_domain = ["display_name", "ilike", "a"];
         var filter_domain = ["display_name", "ilike", "b"];
 
@@ -346,8 +343,6 @@ QUnit.module("Board", (hooks) => {
 
             registry.category("services").add("user", makeFakeUserService());
 
-            patchWithCleanup(browser, { setTimeout: (fn) => fn() }); // makes mouseEnter work
-
             const webClient = await createWebClient({ serverData, mockRPC });
 
             await doAction(webClient, {
@@ -386,8 +381,6 @@ QUnit.module("Board", (hooks) => {
 
         registry.category("services").add("user", makeFakeUserService());
 
-        patchWithCleanup(browser, { setTimeout: (fn) => fn() }); // makes mouseEnter work
-
         const mockRPC = (route) => {
             if (route === "/board/add_to_dashboard") {
                 assert.step("add to board");
@@ -425,8 +418,6 @@ QUnit.module("Board", (hooks) => {
         };
 
         registry.category("services").add("user", makeFakeUserService());
-
-        patchWithCleanup(browser, { setTimeout: (fn) => fn() }); // makes mouseEnter work
 
         const mockRPC = (route, args) => {
             if (route === "/board/add_to_dashboard") {

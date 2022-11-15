@@ -1,12 +1,11 @@
 /** @odoo-module */
 
-import { browser } from "@web/core/browser/browser";
 import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { registry } from "@web/core/registry";
 import { ormService } from "@web/core/orm_service";
 import { ModelSelector } from "@web/core/model_selector/model_selector";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
-import { click, editInput, getFixture, mount, patchWithCleanup } from "@web/../tests/helpers/utils";
+import { click, editInput, getFixture, mount, patchSetTimeout } from "@web/../tests/helpers/utils";
 
 registry.category("mock_server").add("ir.model/display_name_for", function (route, args) {
     const models = args.args[0];
@@ -107,9 +106,7 @@ async function beforeEach() {
         },
     });
     fixture = getFixture();
-    patchWithCleanup(browser, {
-        setTimeout: (fn) => fn(),
-    });
+    patchSetTimeout();
 }
 
 QUnit.module("web > model_selector", { beforeEach });

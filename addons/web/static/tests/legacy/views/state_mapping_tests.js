@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { getFixture, legacyExtraNextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
+import { getFixture, legacyExtraNextTick, patchSetTimeout } from "@web/../tests/helpers/utils";
 import {
     getFacetTexts,
     removeFacet,
@@ -23,7 +23,6 @@ import AbstractView from "web.AbstractView";
 import ActionModel from "web.ActionModel";
 import { mock } from "web.test_utils";
 import legacyViewRegistry from "web.view_registry";
-import { browser } from "@web/core/browser/browser";
 import { LegacyComponent } from "@web/legacy/legacy_component";
 
 import { xml } from "@odoo/owl";
@@ -261,7 +260,7 @@ QUnit.module("LegacyViews", (hooks) => {
         async function (assert) {
             assert.expect(5);
 
-            patchWithCleanup(browser, { setTimeout: (fn) => fn() });
+            patchSetTimeout();
             const webClient = await createWebClient({
                 serverData,
                 mockRPC(_, args) {

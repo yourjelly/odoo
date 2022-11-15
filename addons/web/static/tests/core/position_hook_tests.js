@@ -1,6 +1,5 @@
 /** @odoo-module */
 
-import { browser } from "@web/core/browser/browser";
 import { usePosition } from "@web/core/position_hook";
 import { registerCleanup } from "../helpers/cleanup";
 import {
@@ -9,7 +8,7 @@ import {
     mockAnimationFrame,
     mount,
     nextTick,
-    patchWithCleanup,
+    patchSetTimeout,
     triggerEvent,
 } from "../helpers/utils";
 
@@ -65,7 +64,7 @@ QUnit.module("usePosition Hook", {
         registerCleanup(() => {
             sheet.remove();
         });
-        patchWithCleanup(browser, { setTimeout: (func) => func() });
+        patchSetTimeout();
     },
 });
 

@@ -7,8 +7,7 @@ var testUtils = require('web.test_utils');
 var Widget = require('web.Widget');
 var FormView = require('web.FormView');
 
-const { browser } = require('@web/core/browser/browser');
-const { patchWithCleanup } = require('@web/../tests/helpers/utils');
+const { patchSetTimeout } = require('@web/../tests/helpers/utils');
 const cpHelpers = require('@web/../tests/search/helpers');
 var createView = testUtils.createView;
 
@@ -526,9 +525,7 @@ QUnit.module('LegacyViews', {
         });
 
         // save favorite needs this
-        patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
-        });
+        patchSetTimeout();
 
         var parent = await createParent({
             data: this.data,

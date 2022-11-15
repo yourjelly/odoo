@@ -1,12 +1,11 @@
 /** @odoo-module **/
 
-import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import {
     click,
     editSelect,
     getFixture,
-    patchWithCleanup,
+    patchSetTimeout,
     triggerEvent,
 } from "@web/../tests/helpers/utils";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
@@ -32,9 +31,7 @@ QUnit.module('partner_autocomplete', {
         target = getFixture();
 
         // Make autocomplete input instantaneous
-        patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
-        });
+        patchSetTimeout();
 
         setupViewRegistries();
         const fakeHTTPService = {

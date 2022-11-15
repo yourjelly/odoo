@@ -7,8 +7,7 @@ import { getPyEnv } from '@bus/../tests/helpers/mock_python_environment';
 
 import { createWebClient } from "@web/../tests/webclient/helpers";
 import { calendarNotificationService } from "@calendar/js/services/calendar_notification_service";
-import { click, getFixture, patchWithCleanup } from "@web/../tests/helpers/utils";
-import { browser } from "@web/core/browser/browser";
+import { click, getFixture, patchSetTimeout } from "@web/../tests/helpers/utils";
 import { registry } from "@web/core/registry";
 
 const serviceRegistry = registry.category("services");
@@ -23,11 +22,7 @@ QUnit.module("Calendar Notification", (hooks) => {
         serviceRegistry.add("bus_service", busService);
         serviceRegistry.add("presence", presenceService);
         serviceRegistry.add("multi_tab", multiTabService);
-        patchWithCleanup(browser, {
-            setTimeout(fn) {
-                this._super(fn, 0);
-            },
-        });
+        patchSetTimeout();
     });
 
     QUnit.test(

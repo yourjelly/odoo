@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { browser } from "@web/core/browser/browser";
 import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { registry } from "@web/core/registry";
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
@@ -11,7 +10,7 @@ import {
     makeDeferred,
     mount,
     nextTick,
-    patchWithCleanup,
+    patchSetTimeout,
     triggerEvent,
     triggerEvents,
 } from "../helpers/utils";
@@ -28,9 +27,7 @@ QUnit.module("Components", (hooks) => {
         serviceRegistry.add("hotkey", hotkeyService);
         env = await makeTestEnv();
         target = getFixture();
-        patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
-        });
+        patchSetTimeout();
     });
 
     QUnit.module("AutoComplete");

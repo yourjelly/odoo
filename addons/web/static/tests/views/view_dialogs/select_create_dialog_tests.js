@@ -6,11 +6,11 @@ import {
     nextTick,
     editInput,
     selectDropdownItem,
+    patchSetTimeout,
     patchWithCleanup,
 } from "@web/../tests/helpers/utils";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 import { createWebClient } from "@web/../tests/webclient/helpers";
-import { browser } from "@web/core/browser/browser";
 import { session } from "@web/session";
 import { useSetupAction } from "@web/webclient/actions/action_hook";
 import { listView } from "@web/views/list/list_view";
@@ -386,7 +386,7 @@ QUnit.module("ViewDialogs", (hooks) => {
                 return 7; // fake serverSideId
             }
         };
-        patchWithCleanup(browser, { setTimeout: (fn) => fn() });
+        patchSetTimeout();
         const webClient = await createWebClient({ serverData, mockRPC });
 
         webClient.env.services.dialog.add(SelectCreateDialog, {

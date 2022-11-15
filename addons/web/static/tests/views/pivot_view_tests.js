@@ -13,6 +13,7 @@ import {
     nextTick,
     patchDate,
     patchWithCleanup,
+    patchSetTimeout,
     triggerEvent,
     triggerEvents,
     mouseEnter,
@@ -38,7 +39,6 @@ import {
 } from "../search/helpers";
 import { createWebClient, doAction } from "../webclient/helpers";
 import { makeView } from "./helpers";
-import { browser } from "@web/core/browser/browser";
 
 const serviceRegistry = registry.category("services");
 
@@ -195,7 +195,7 @@ QUnit.module("Views", (hooks) => {
         serviceRegistry.add("dialog", dialogService);
         serviceRegistry.add("localization", makeFakeLocalizationService());
         serviceRegistry.add("user", makeFakeUserService());
-        patchWithCleanup(browser, { setTimeout: (fn) => fn() });
+        patchSetTimeout();
     });
 
     QUnit.module("PivotView");

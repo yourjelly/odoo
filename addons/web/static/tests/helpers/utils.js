@@ -137,6 +137,12 @@ export function patchWithCleanup(obj, patchValue, options) {
     });
 }
 
+export function patchSetTimeout() {
+    patchWithCleanup(browser, {
+        setTimeout: (fn) => Promise.resolve().then(fn),
+    });
+}
+
 /**
  * @returns {HTMLElement}
  */

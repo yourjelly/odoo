@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
-import { browser } from "@web/core/browser/browser";
 import { Many2ManyTagsField } from "@web/views/fields/many2many_tags/many2many_tags_field";
 import {
     click,
@@ -13,6 +12,7 @@ import {
     getNodesTextContent,
     makeDeferred,
     nextTick,
+    patchSetTimeout,
     patchWithCleanup,
     selectDropdownItem,
     triggerEvent,
@@ -103,9 +103,7 @@ QUnit.module("Fields", (hooks) => {
         };
 
         setupViewRegistries();
-        patchWithCleanup(browser, {
-            setTimeout: (fn) => Promise.resolve().then(fn),
-        });
+        patchSetTimeout();
     });
 
     QUnit.module("Many2ManyTagsField");

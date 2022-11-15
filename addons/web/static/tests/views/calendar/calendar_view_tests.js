@@ -10,6 +10,7 @@ import {
     nextTick,
     patchDate,
     patchTimeZone,
+    patchSetTimeout,
     patchWithCleanup,
     triggerEvent,
 } from "../../helpers/utils";
@@ -57,8 +58,8 @@ QUnit.module("Views", ({ beforeEach }) => {
         // 2016-12-12 08:00:00
         patchDate(2016, 11, 12, 8, 0, 0);
 
+        patchSetTimeout();
         patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
             clearTimeout: () => {},
         });
 

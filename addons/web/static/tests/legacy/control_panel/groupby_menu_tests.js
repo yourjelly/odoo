@@ -1,8 +1,7 @@
 odoo.define('web.groupby_menu_tests', function (require) {
     "use strict";
 
-    const { browser } = require('@web/core/browser/browser');
-    const { patchWithCleanup } = require('@web/../tests/helpers/utils');
+    const { patchSetTimeout } = require('@web/../tests/helpers/utils');
     const testUtils = require('web.test_utils');
 
     const cpHelpers = require('@web/../tests/search/helpers');
@@ -21,9 +20,7 @@ odoo.define('web.groupby_menu_tests', function (require) {
                 m2m: { string: "Many2Many", type: "many2many", store: true},
                 m2m_not_stored: { string: "Many2Many not stored", type: "many2many" },
             };
-            patchWithCleanup(browser, {
-                setTimeout: (fn) => fn(),
-            });
+            patchSetTimeout();
         },
     }, function () {
 

@@ -24,11 +24,10 @@ import {
 } from "@web/../tests/search/helpers";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
-import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import { getBorderWhite, DEFAULT_BG, getColors, hexToRGBA } from "@web/core/colors/colors";
 import { GraphArchParser } from "@web/views/graph/graph_arch_parser";
-import { patchWithCleanup } from "../helpers/utils";
+import { patchSetTimeout } from "../helpers/utils";
 import { fakeCookieService } from "@web/../tests/helpers/mock_services";
 
 const serviceRegistry = registry.category("services");
@@ -310,7 +309,7 @@ QUnit.module("Views", (hooks) => {
             },
         };
         setupViewRegistries();
-        patchWithCleanup(browser, { setTimeout: (fn) => fn() });
+        patchSetTimeout();
 
         target = getFixture();
         registry.category("services").add("cookie", fakeCookieService);

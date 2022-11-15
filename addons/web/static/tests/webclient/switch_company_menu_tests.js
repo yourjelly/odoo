@@ -6,7 +6,14 @@ import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { SwitchCompanyMenu } from "@web/webclient/switch_company_menu/switch_company_menu";
 import { makeTestEnv } from "../helpers/mock_env";
 import { companyService } from "@web/webclient/company_service";
-import { click, getFixture, makeDeferred, mount, patchWithCleanup } from "../helpers/utils";
+import {
+    click,
+    getFixture,
+    makeDeferred,
+    mount,
+    patchSetTimeout,
+    patchWithCleanup,
+} from "../helpers/utils";
 import { uiService } from "@web/core/ui/ui_service";
 import { session } from "@web/session";
 
@@ -171,12 +178,7 @@ QUnit.module("SwitchCompanyMenu", (hooks) => {
 
     QUnit.test("single company selected: toggling it off will keep it", async (assert) => {
         assert.expect(12);
-
-        patchWithCleanup(browser, {
-            setTimeout(fn) {
-                return fn(); // s.t. we can directly assert changes in the hash
-            },
-        });
+        patchSetTimeout();
         const scMenu = await createSwitchCompanyMenu();
 
         /**

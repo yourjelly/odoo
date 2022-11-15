@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import { session } from "@web/session";
 import { makeFakeNotificationService } from "@web/../tests/helpers/mock_services";
@@ -9,6 +8,7 @@ import {
     editInput,
     getFixture,
     nextTick,
+    patchSetTimeout,
     patchWithCleanup,
     triggerHotkey,
 } from "@web/../tests/helpers/utils";
@@ -414,9 +414,7 @@ QUnit.module("Fields", (hooks) => {
     QUnit.test(
         "statusbar fold_field option and statusbar_visible attribute",
         async function (assert) {
-            patchWithCleanup(browser, {
-                setTimeout: (fn) => fn(),
-            });
+            patchSetTimeout();
 
             serverData.models.partner.records[0].bar = false;
 
@@ -443,9 +441,7 @@ QUnit.module("Fields", (hooks) => {
     );
 
     QUnit.test("statusbar: choose an item from the 'More' menu", async function (assert) {
-        patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
-        });
+        patchSetTimeout();
 
         serverData.models.partner.records[0].bar = false;
 

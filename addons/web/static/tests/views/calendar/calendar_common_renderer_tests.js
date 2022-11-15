@@ -2,7 +2,7 @@
 
 import { browser } from "@web/core/browser/browser";
 import { CalendarCommonRenderer } from "@web/views/calendar/calendar_common/calendar_common_renderer";
-import { getFixture, patchWithCleanup } from "../../helpers/utils";
+import { getFixture, patchSetTimeout, patchWithCleanup } from "../../helpers/utils";
 import {
     makeEnv,
     makeFakeModel,
@@ -71,8 +71,8 @@ QUnit.module("CalendarView - CommonRenderer", ({ beforeEach }) => {
     });
 
     QUnit.test("Day: click all day slot", async (assert) => {
+        patchSetTimeout();
         patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
             clearTimeout() {},
         });
 
@@ -124,8 +124,8 @@ QUnit.module("CalendarView - CommonRenderer", ({ beforeEach }) => {
     QUnit.test("Day: click on event", async (assert) => {
         assert.expect(1);
 
+        patchSetTimeout();
         patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
             clearTimeout() {},
         });
 

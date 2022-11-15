@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { browser } from "@web/core/browser/browser";
 import { errorService } from "@web/core/errors/error_service";
 import { RPCError } from "@web/core/network/rpc_service";
 import { registry } from "@web/core/registry";
@@ -22,6 +21,7 @@ import {
     makeDeferred,
     mount,
     nextTick,
+    patchSetTimeout,
     patchWithCleanup,
     selectDropdownItem,
     triggerEvent,
@@ -208,9 +208,7 @@ QUnit.module("Fields", (hooks) => {
 
         setupViewRegistries();
 
-        patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
-        });
+        patchSetTimeout();
     });
 
     QUnit.module("Many2oneField");
@@ -610,9 +608,7 @@ QUnit.module("Fields", (hooks) => {
         };
 
         // add custom filter needs this
-        patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
-        });
+        patchSetTimeout();
 
         await makeView({
             type: "form",

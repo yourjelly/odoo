@@ -1,6 +1,11 @@
 /** @odoo-module **/
 
-import { getFixture, patchWithCleanup, triggerEvent } from "@web/../tests/helpers/utils";
+import {
+    getFixture,
+    patchSetTimeout,
+    patchWithCleanup,
+    triggerEvent,
+} from "@web/../tests/helpers/utils";
 import { browser } from "@web/core/browser/browser";
 import { dialogService } from "@web/core/dialog/dialog_service";
 import { registry } from "@web/core/registry";
@@ -65,8 +70,8 @@ QUnit.module("Search", (hooks) => {
         setupControlPanelFavoriteMenuRegistry();
         setupControlPanelServiceRegistry();
         serviceRegistry.add("dialog", dialogService);
+        patchSetTimeout();
         patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
             clearTimeout: () => {},
         });
 

@@ -6,6 +6,7 @@ import {
     nextTick,
     patchDate,
     patchTimeZone,
+    patchSetTimeout,
     patchWithCleanup,
 } from "@web/../tests/helpers/utils";
 import { localization } from "@web/core/l10n/localization";
@@ -92,8 +93,8 @@ QUnit.module("Search", (hooks) => {
             },
         };
         setupControlPanelServiceRegistry();
+        patchSetTimeout();
         patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
             clearTimeout: () => {},
         });
         target = getFixture();

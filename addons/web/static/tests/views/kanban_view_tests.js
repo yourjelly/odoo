@@ -11,6 +11,7 @@ import {
     getNodesTextContent,
     makeDeferred,
     nextTick,
+    patchSetTimeout,
     patchWithCleanup,
     selectDropdownItem,
     triggerEvent,
@@ -2830,9 +2831,7 @@ QUnit.module("Views", (hooks) => {
         serverData.views["partner,some_view_ref,form"] = '<form><field name="product_id"/></form>';
 
         // patch setTimeout s.t. the autocomplete dropdown opens directly
-        patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
-        });
+        patchSetTimeout();
 
         await makeView({
             type: "kanban",

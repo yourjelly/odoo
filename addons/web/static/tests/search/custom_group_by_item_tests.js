@@ -2,7 +2,7 @@
 
 import { browser } from "@web/core/browser/browser";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
-import { getFixture, patchWithCleanup } from "../helpers/utils";
+import { getFixture, patchSetTimeout, patchWithCleanup } from "../helpers/utils";
 import {
     applyGroup,
     getFacetTexts,
@@ -37,8 +37,8 @@ QUnit.module("Search", (hooks) => {
             },
         };
         setupControlPanelServiceRegistry();
+        patchSetTimeout();
         patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
             clearTimeout: () => {},
         });
         target = getFixture();

@@ -1,8 +1,7 @@
 odoo.define('web.filter_menu_tests', function (require) {
     "use strict";
 
-    const { browser } = require('@web/core/browser/browser');
-    const { patchWithCleanup } = require('@web/../tests/helpers/utils');
+    const { patchSetTimeout } = require('@web/../tests/helpers/utils');
     const testUtils = require('web.test_utils');
 
     const cpHelpers = require('@web/../tests/search/helpers');
@@ -17,9 +16,7 @@ odoo.define('web.filter_menu_tests', function (require) {
                 date_field: { string: "Date", type: "date", store: true, sortable: true, searchable: true },
                 foo: { string: "Foo", type: "char", store: true, sortable: true },
             };
-            patchWithCleanup(browser, {
-                setTimeout: (fn) => fn(),
-            });
+            patchSetTimeout();
         },
     }, function () {
 

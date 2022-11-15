@@ -34,6 +34,7 @@ import {
     nextTick,
     patchDate,
     patchTimeZone,
+    patchSetTimeout,
     patchWithCleanup,
     selectDropdownItem,
     triggerEvent,
@@ -218,8 +219,8 @@ QUnit.module("Views", (hooks) => {
         };
         setupViewRegistries();
         serviceRegistry.add("tooltip", tooltipService);
+        patchSetTimeout();
         patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
             clearTimeout: () => {},
         });
         target = getFixture();
@@ -16176,10 +16177,6 @@ QUnit.module("Views", (hooks) => {
             `,
             "bar,false,search": `<search/>`,
         };
-
-        patchWithCleanup(browser, {
-            setTimeout: () => {},
-        });
 
         patchWithCleanup(Many2XAutocomplete.defaultProps, {
             searchLimit: 1,

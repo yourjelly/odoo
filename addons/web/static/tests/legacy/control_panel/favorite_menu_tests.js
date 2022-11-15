@@ -1,8 +1,7 @@
 odoo.define('web.favorite_menu_tests', function (require) {
     "use strict";
 
-    const { browser } = require('@web/core/browser/browser');
-    const { patchWithCleanup } = require('@web/../tests/helpers/utils');
+    const { patchSetTimeout } = require('@web/../tests/helpers/utils');
 
     const FormView = require('web.FormView');
     const testUtils = require('web.test_utils');
@@ -23,9 +22,7 @@ odoo.define('web.favorite_menu_tests', function (require) {
                 float_field: { string: "Float", type: "float", group_operator: 'sum' },
                 foo: { string: "Foo", type: "char", store: true, sortable: true },
             };
-            patchWithCleanup(browser, {
-                setTimeout: (fn) => fn(),
-            });
+            patchSetTimeout();
         },
     }, function () {
 

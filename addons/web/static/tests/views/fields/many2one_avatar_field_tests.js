@@ -6,11 +6,11 @@ import {
     editInput,
     getFixture,
     getNodesTextContent,
+    patchSetTimeout,
     patchWithCleanup,
     selectDropdownItem,
 } from "@web/../tests/helpers/utils";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
-import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 
 let serverData;
@@ -58,9 +58,7 @@ QUnit.module("Fields", (hooks) => {
 
         setupViewRegistries();
 
-        patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
-        });
+        patchSetTimeout();
     });
 
     QUnit.module("Many2OneAvatar");

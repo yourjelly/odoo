@@ -1,8 +1,7 @@
 odoo.define('web.comparison_menu_tests', function (require) {
     "use strict";
 
-    const { browser } = require('@web/core/browser/browser');
-    const { patchWithCleanup } = require('@web/../tests/helpers/utils');
+    const { patchSetTimeout } = require('@web/../tests/helpers/utils');
     const cpHelpers = require('@web/../tests/search/helpers');
     const {
         createControlPanel,
@@ -29,9 +28,7 @@ odoo.define('web.comparison_menu_tests', function (require) {
                 fields: this.fields,
                 searchMenuTypes,
             };
-            patchWithCleanup(browser, {
-                setTimeout: (fn) => fn(),
-            });
+            patchSetTimeout();
         },
     }, function () {
 

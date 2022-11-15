@@ -9,6 +9,7 @@ import {
     getFixture,
     makeDeferred,
     mount,
+    patchSetTimeout,
     patchWithCleanup,
 } from "@web/../tests/helpers/utils";
 import { MobileSwitchCompanyMenu } from "@web/webclient/burger_menu/mobile_switch_company_menu/mobile_switch_company_menu";
@@ -163,11 +164,7 @@ QUnit.module("MobileSwitchCompanyMenu", (hooks) => {
     QUnit.test("single company selected: toggling it off will keep it", async (assert) => {
         assert.expect(11);
 
-        patchWithCleanup(browser, {
-            setTimeout(fn) {
-                return fn(); // s.t. we can directly assert changes in the hash
-            },
-        });
+        patchSetTimeout();
         const scMenu = await createSwitchCompanyMenu();
         const scMenuEl = target.querySelector(".o_burger_menu_companies");
 
