@@ -143,6 +143,8 @@ export const editorCommands = {
     insert: (editor, content) => {
         if (!content) return;
         const selection = editor.document.getSelection();
+        const listParent = ['OL', 'UL'].includes(selection.anchorNode.parentNode.nodeName) ?
+        selection.anchorNode.parentNode :  selection.anchorNode.parentNode.parentNode;
         const range = selection.getRangeAt(0);
         let startNode;
         let insertBefore = false;
@@ -158,7 +160,6 @@ export const editorCommands = {
 
         const container = document.createElement('fake-element');
         const containerFirstChild = document.createElement('fake-element-fc');
-        const containerLastChild = document.createElement('fake-element-lc');
 
         if (content instanceof Node) {
             container.replaceChildren(content);
@@ -176,83 +177,115 @@ export const editorCommands = {
         // In case the html inserted is all contained in a single root <p> or <li>
         // tag, we take the all content of the <p> or <li> and avoid inserting the
         // <p> or <li>.
-        if (container.childElementCount === 1 && (container.firstChild.nodeName === 'P' || container.firstChild.nodeName === 'LI')) {
-            const p = container.firstElementChild;
-            container.replaceChildren(...p.childNodes);
-        } else if (container.childElementCount > 1) {
-            // Grab the content of the first child block and isolate it.
+        let currentNode;
+        const insertedNodes = [...container.childNodes];
+        let convertList = (givenList) => {
+            givenList = givenList.firstChild;
+            while (givenList) {
+                if (givenList.className) {
+                    givenList = givenList.firstChild.firstChild;
+                    if (givenList.className) {
+                        continue;
+                    }
+                }
+                if (!givenList.nextSibling) {
+                    break;
+                }
+                givenList = givenList.nextSibling;
+            }
+            while (givenList && (givenList.nodeName !== listParent.nodeName || givenList.className !== listParent.className )) {
+                if (['OL', 'UL'].includes(givenList.nodeName)) {
+                    givenList =  setTagName(givenList, ['OL', 'UL'].includes(listParent.nodeName) ? listParent.nodeName : listParent.parentNode.nodeName);
+                    if (listParent.firstChild.id) {
+                        //pasting into checklist
+                        givenList.classList.add('o_checklist');
+                    } else if (givenList.className) {
+                        // if checklist is pasted into another list, its class= 'o_checklist' should be removed
+                        givenList.removeAttribute('class');
+                    }
+                }
+                if (['FAKE-ELEMENT-FC', 'FAKE-ELEMENT-LC'].includes(givenList.nodeName)) {
+                    return givenList.firstChild;
+                }
+                givenList = givenList.parentElement;
+            }
+        }
+        while (container.hasChildNodes()) {
             if (isBlock(container.firstChild)) {
                 containerFirstChild.replaceChildren(...container.firstElementChild.childNodes);
                 container.firstElementChild.remove();
+            } else if (container.firstChild.nodeType === 3) {
+                containerFirstChild.appendChild(container.firstChild)
             }
-            // Grab the content of the last child block and isolate it.
-            if (isBlock(container.lastChild)) {
-                containerLastChild.replaceChildren(...container.lastElementChild.childNodes);
-                container.lastElementChild.remove();
-            }
-        }
 
-        startNode = startNode || editor.document.getSelection().anchorNode;
-        if (startNode.nodeType === Node.ELEMENT_NODE) {
-            if (selection.anchorOffset === 0) {
-                const textNode = editor.document.createTextNode('');
-                startNode.prepend(textNode);
-                startNode = textNode;
-            } else {
-                startNode = startNode.childNodes[selection.anchorOffset - 1];
+            startNode = startNode || editor.document.getSelection().anchorNode;
+            if (startNode.nodeType === Node.ELEMENT_NODE) {
+                if (selection.anchorOffset === 0) {
+                    const textNode = editor.document.createTextNode('');
+                    startNode.prepend(textNode);
+                    startNode = textNode;
+                } else {
+                    startNode = startNode.childNodes[selection.anchorOffset - 1];
+                }
             }
-        }
 
-        // If we have isolated block content, first we split the current focus
-        // element if it's a block then we insert the content in the right places.
-        let currentNode = startNode;
-        let lastChildNode = false;
-        const _insertAt = (reference, nodes, insertBefore) => {
-            for (const child of (insertBefore ? nodes.reverse() : nodes)) {
-                reference[insertBefore ? 'before' : 'after'](child);
-                reference = child;
+            // If we have isolated block content, first we split the current focus
+            // element if it's a block then we insert the content in the right places.
+            currentNode = startNode;
+            const _insertAt = (reference, nodes, insertBefore) => {
+                for (const child of (insertBefore ? nodes : nodes.reverse())) {
+                    reference[insertBefore ? 'after' : 'before'](child);
+                    reference = child;
+                }
             }
-        }
-        if (containerLastChild.hasChildNodes()) {
-            const toInsert = [...containerLastChild.childNodes]; // Prevent mutation
-            _insertAt(currentNode, [...toInsert], insertBefore);
-            currentNode = insertBefore ? toInsert[0] : currentNode;
-            lastChildNode = toInsert[toInsert.length - 1];
-        }
-        if (containerFirstChild.hasChildNodes()) {
-            const toInsert = [...containerFirstChild.childNodes]; // Prevent mutation
-            _insertAt(currentNode, [...toInsert], insertBefore);
-            currentNode = toInsert[toInsert.length - 1];
-            insertBefore = false;
-        }
-
-        // If all the Html have been isolated, We force a split of the parent element
-        // to have the need new line in the final result
-        if (!container.hasChildNodes()) {
-            if (isUnbreakable(closestBlock(currentNode.nextSibling))) {
-                currentNode.nextSibling.oShiftEnter(0);
-            } else {
-                // If we arrive here, the o_enter index should always be 0.
-                const parent = currentNode.nextSibling.parentElement;
-                const index = [...parent.childNodes].indexOf(currentNode.nextSibling);
-                currentNode.nextSibling.parentElement.oEnter(index);
+            if (containerFirstChild.hasChildNodes()) {
+                const toInsert = [...containerFirstChild.childNodes]; // Prevent mutation
+                if (toInsert[0] && ['UL', 'OL'].includes(toInsert[0].nodeName)) {
+                    let convertedULOL = convertList(toInsert[0]);
+                    toInsert.pop(); //remove the original ul/ol and add the new one
+                    toInsert.push(convertedULOL);
+                }
+                _insertAt(currentNode, [...toInsert], insertBefore);
+                currentNode = toInsert[toInsert.length - 1];
+                if (container.childElementCount === 0 && ['UL','OL'].includes(currentNode.nodeName)) {
+                    currentNode.parentNode.removeAttribute('class');
+                    currentNode.parentNode.classList.add('oe-nested');
+                }
+                if (currentNode.parentNode.previousSibling && currentNode.parentNode.previousSibling.className === 'oe-hint' &&
+                ['UL', 'OL'].includes(currentNode.parentNode.previousSibling.firstChild.nodeName)) {
+                currentNode.parentNode.previousSibling.removeAttribute('class');
+                currentNode.parentNode.previousSibling.classList.add('oe-nested');
+                }
+                insertBefore = false;
             }
-        }
 
-        let nodeToInsert;
-        const insertedNodes = [...container.childNodes];
-        while ((nodeToInsert = container.childNodes[0])) {
-            if (isBlock(nodeToInsert) && !allowsParagraphRelatedElements(currentNode)) {
-                // Split blocks at the edges if inserting new blocks (preventing
-                // <p><p>text</p></p> or <li><li>text</li></li> scenarios).
-                while (
-                    currentNode.parentElement !== editor.editable &&
-                    (!allowsParagraphRelatedElements(currentNode.parentElement) ||
-                        currentNode.parentElement.nodeName === 'LI')
+            // If all the Html have been isolated, We force a split of the parent element
+            // to have the need new line in the final result
+            if (!container.hasChildNodes()) {
+                if (isUnbreakable(closestBlock(currentNode.nextSibling))) {
+                    currentNode.nextSibling.oShiftEnter(0);
+                } else {
+                    // If we arrive here, the o_enter index should always be 0.
+                    const parent = currentNode.nextSibling.parentElement;
+                    const index = [...parent.childNodes].indexOf(currentNode.nextSibling);
+                    currentNode.nextSibling.parentElement.oEnter(index);
+                }
+            }
+            let nodeToInsert;
+            while (
+                currentNode.parentElement !== editor.editable &&
+                (!allowsParagraphRelatedElements(currentNode.parentElement) ||
+                    currentNode.parentElement.nodeName === 'LI')
                 ) {
                     if (isUnbreakable(currentNode.parentElement)) {
                         makeContentsInline(container);
                         nodeToInsert = container.childNodes[0];
+                        if (insertBefore) {
+                            currentNode.before(nodeToInsert);
+                            insertBefore = false;
+                        } else {
+                            currentNode.after(nodeToInsert);
+                        }
                         break;
                     }
                     let offset = childNodeIndex(currentNode);
@@ -261,25 +294,18 @@ export const editorCommands = {
                     }
                     if (offset) {
                         const [left, right] = splitElement(currentNode.parentElement, offset);
-                        currentNode = insertBefore ? right : left;
+                        currentNode = insertBefore ? left : right;
                     } else {
                         currentNode = currentNode.parentElement;
                     }
+                    if (currentNode.tagName !== 'BR' && isShrunkBlock(currentNode)) {
+                        currentNode = currentNode.previousSibling;
+                        while (currentNode.nextSibling.textContent === '') {
+                            currentNode.nextSibling.remove();
+                        }
+                    }
                 }
-            }
-            if (insertBefore) {
-                currentNode.before(nodeToInsert);
-                insertBefore = false;
-            } else {
-                currentNode.after(nodeToInsert);
-            }
-            if (currentNode.tagName !== 'BR' && isShrunkBlock(currentNode)) {
-                currentNode.remove();
-            }
-            currentNode = nodeToInsert;
         }
-
-        currentNode = lastChildNode || currentNode;
         selection.removeAllRanges();
         const newRange = new Range();
         const lastPosition = rightPos(currentNode);
