@@ -186,12 +186,14 @@ export class FormController extends Component {
         useSetupView({
             rootRef,
             beforeLeave: () => {
-                if (this.model.root.isDirty) {
-                    return this.model.root.save({
-                        noReload: true,
-                        stayInEdition: true,
-                        useSaveErrorDialog: true,
-                    });
+                if (!this.model.root.isDirty) {
+                    if (this.model.root.isDirty) {
+                        return this.model.root.save({
+                            noReload: true,
+                            stayInEdition: true,
+                            useSaveErrorDialog: true,
+                        });
+                    }
                 }
             },
             beforeUnload: (ev) => this.beforeUnload(ev),
