@@ -64,7 +64,7 @@
             </xpath>
             <xpath expr="//ul[@id='o_utm_actions']">
                 <a name="action_redirect_to_mailing_sms" type="object"
-                    t-attf-class="oe_mailings #{record.mailing_sms_count.raw_value === 0 ? 'text-muted' : ''}"
+                    t-attf-class="oe_mailings pe-4 #{record.mailing_sms_count.raw_value === 0 ? 'text-muted' : ''}"
                     t-if="record.is_mailing_campaign_activated.raw_value"
                     groups="mass_mailing.group_mass_mailing_user">
                     <t t-out="record.mailing_sms_count.raw_value"/> SMS
