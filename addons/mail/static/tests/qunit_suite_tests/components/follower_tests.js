@@ -35,26 +35,30 @@ QUnit.module("mail", {}, function () {
                 res_model: "res.partner",
                 views: [[false, "form"]],
             });
-            await click(".o_FollowerListMenuView_buttonFollowers");
-            assert.containsOnce(document.body, ".o_FollowerView", "should have follower component");
+            await click(".o-mail-chatter-topbar-follower-list-button");
             assert.containsOnce(
                 document.body,
-                ".o_FollowerView_details",
+                ".o-mail-chatter-topbar-follower-list-follower",
+                "should have follower component"
+            );
+            assert.containsOnce(
+                document.body,
+                ".o-mail-chatter-topbar-follower-list-follower-details",
                 "should display a details part"
             );
             assert.containsOnce(
                 document.body,
-                ".o_FollowerView_avatar",
+                ".o-mail-chatter-topbar-follower-list-follower-avatar",
                 "should display the avatar of the follower"
             );
             assert.containsOnce(
                 document.body,
-                ".o_FollowerView_name",
+                ".o-mail-chatter-topbar-follower-list-follower",
                 "should display the name of the follower"
             );
             assert.containsNone(
                 document.body,
-                ".o_FollowerView_button",
+                ".o-mail-chatter-topbar-follower-list-follower-button",
                 "should have no button as follower is not editable"
             );
         });
@@ -76,31 +80,35 @@ QUnit.module("mail", {}, function () {
                 res_model: "res.partner",
                 views: [[false, "form"]],
             });
-            await click(".o_FollowerListMenuView_buttonFollowers");
-            assert.containsOnce(document.body, ".o_FollowerView", "should have follower component");
+            await click(".o-mail-chatter-topbar-follower-list-button");
             assert.containsOnce(
                 document.body,
-                ".o_FollowerView_details",
+                ".o-mail-chatter-topbar-follower-list-follower",
+                "should have follower component"
+            );
+            assert.containsOnce(
+                document.body,
+                ".o-mail-chatter-topbar-follower-list-follower-details",
                 "should display a details part"
             );
             assert.containsOnce(
                 document.body,
-                ".o_FollowerView_avatar",
+                ".o-mail-chatter-topbar-follower-list-follower-avatar",
                 "should display the avatar of the follower"
             );
             assert.containsOnce(
                 document.body,
-                ".o_FollowerView_name",
+                ".o-mail-chatter-topbar-follower-list-follower",
                 "should display the name of the follower"
             );
             assert.containsOnce(
                 document.body,
-                ".o_FollowerView_editButton",
+                ".o-mail-chatter-topbar-follower-list-follower-edit-button",
                 "should have an edit button"
             );
             assert.containsOnce(
                 document.body,
-                ".o_FollowerView_removeButton",
+                ".o-mail-chatter-topbar-follower-list-follower-remove-button",
                 "should have a remove button"
             );
         });
@@ -144,15 +152,19 @@ QUnit.module("mail", {}, function () {
                     openFormDef.resolve();
                 },
             });
-            await click(".o_FollowerListMenuView_buttonFollowers");
-            assert.containsOnce(document.body, ".o_FollowerView", "should have follower component");
+            await click(".o-mail-chatter-topbar-follower-list-button");
             assert.containsOnce(
                 document.body,
-                ".o_FollowerView_details",
+                ".o-mail-chatter-topbar-follower-list-follower",
+                "should have follower component"
+            );
+            assert.containsOnce(
+                document.body,
+                ".o-mail-chatter-topbar-follower-list-follower-details",
                 "should display a details part"
             );
 
-            document.querySelector(".o_FollowerView_details").click();
+            document.querySelector(".o-mail-chatter-topbar-follower-list-follower-details").click();
             await openFormDef;
             assert.verifySteps(
                 ["do_action"],
@@ -193,22 +205,26 @@ QUnit.module("mail", {}, function () {
                 res_model: "res.partner",
                 views: [[false, "form"]],
             });
-            await click(".o_FollowerListMenuView_buttonFollowers");
-            assert.containsOnce(document.body, ".o_FollowerView", "should have follower component");
+            await click(".o-mail-chatter-topbar-follower-list-button");
             assert.containsOnce(
                 document.body,
-                ".o_FollowerView_editButton",
+                ".o-mail-chatter-topbar-follower-list-follower",
+                "should have follower component"
+            );
+            assert.containsOnce(
+                document.body,
+                ".o-mail-chatter-topbar-follower-list-follower-edit-button",
                 "should display an edit button"
             );
 
-            await click(".o_FollowerView_editButton");
+            await click(".o-mail-chatter-topbar-follower-list-follower-edit-button");
             assert.verifySteps(
                 ["fetch_subtypes"],
                 "clicking on edit follower should fetch subtypes"
             );
             assert.containsOnce(
                 document.body,
-                ".o_FollowerSubtypeList",
+                ".o-mail-follower-subtype-dialog",
                 "A dialog allowing to edit follower subtypes should have been created"
             );
         });
@@ -228,16 +244,6 @@ QUnit.module("mail", {}, function () {
                 async mockRPC(route, args) {
                     if (route.includes("/mail/read_subscription_data")) {
                         assert.step("fetch_subtypes");
-                        return [
-                            {
-                                default: true,
-                                followed: true,
-                                internal: false,
-                                id: 1,
-                                name: "Dummy test",
-                                res_model: "res.partner",
-                            },
-                        ];
                     }
                 },
             });
@@ -246,26 +252,30 @@ QUnit.module("mail", {}, function () {
                 res_model: "res.partner",
                 views: [[false, "form"]],
             });
-            await click(".o_FollowerListMenuView_buttonFollowers");
-            assert.containsOnce(document.body, ".o_FollowerView", "should have follower component");
+            await click(".o-mail-chatter-topbar-follower-list-button");
             assert.containsOnce(
                 document.body,
-                ".o_FollowerView_editButton",
+                ".o-mail-chatter-topbar-follower-list-follower",
+                "should have follower component"
+            );
+            assert.containsOnce(
+                document.body,
+                ".o-mail-chatter-topbar-follower-list-follower-edit-button",
                 "should display an edit button"
             );
 
-            await click(".o_FollowerView_editButton");
+            await click(".o-mail-chatter-topbar-follower-list-follower-edit-button");
             assert.verifySteps(
                 ["fetch_subtypes"],
                 "clicking on edit follower should fetch subtypes"
             );
             assert.containsOnce(
                 document.body,
-                ".o_FollowerSubtypeList",
+                ".o-mail-follower-subtype-dialog",
                 "dialog allowing to edit follower subtypes should have been created"
             );
 
-            await click(".o_FollowerSubtypeList_closeButton");
+            await click(".o-mail-follower-subtype-dialog-close");
             assert.containsNone(
                 document.body,
                 ".o_DialogManager_dialog",

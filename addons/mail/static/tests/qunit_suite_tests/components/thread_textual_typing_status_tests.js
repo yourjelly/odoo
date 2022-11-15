@@ -17,6 +17,7 @@ QUnit.module("mail", {}, function () {
             const pyEnv = await startServer();
             const resPartnerId1 = pyEnv["res.partner"].create({ name: "Demo" });
             const mailChannelId1 = pyEnv["mail.channel"].create({
+                name: "channel",
                 channel_member_ids: [
                     [0, 0, { partner_id: pyEnv.currentPartnerId }],
                     [0, 0, { partner_id: resPartnerId1 }],
@@ -30,7 +31,7 @@ QUnit.module("mail", {}, function () {
             await openDiscuss();
 
             assert.strictEqual(
-                document.querySelector(".o_ThreadTextualTypingStatusView").textContent,
+                document.querySelector(".o-mail-composer-is-typing").textContent,
                 "",
                 "Should display no one is currently typing"
             );
@@ -49,7 +50,7 @@ QUnit.module("mail", {}, function () {
                 })
             );
             assert.strictEqual(
-                document.querySelector(".o_ThreadTextualTypingStatusView").textContent,
+                document.querySelector(".o-mail-composer-is-typing").textContent,
                 "Demo is typing...",
                 "Should display that demo user is typing"
             );
@@ -63,6 +64,7 @@ QUnit.module("mail", {}, function () {
                 const pyEnv = await startServer();
                 const resPartnerId1 = pyEnv["res.partner"].create({ name: "Demo" });
                 const mailChannelId1 = pyEnv["mail.channel"].create({
+                    name: "channel",
                     channel_member_ids: [
                         [0, 0, { partner_id: pyEnv.currentPartnerId }],
                         [0, 0, { partner_id: resPartnerId1 }],
@@ -76,7 +78,7 @@ QUnit.module("mail", {}, function () {
                 await openDiscuss();
 
                 assert.strictEqual(
-                    document.querySelector(".o_ThreadTextualTypingStatusView").textContent,
+                    document.querySelector(".o-mail-composer-is-typing").textContent,
                     "",
                     "Should display no one is currently typing"
                 );
@@ -95,7 +97,7 @@ QUnit.module("mail", {}, function () {
                     })
                 );
                 assert.strictEqual(
-                    document.querySelector(".o_ThreadTextualTypingStatusView").textContent,
+                    document.querySelector(".o-mail-composer-is-typing").textContent,
                     "Demo is typing...",
                     "Should display that demo user is typing"
                 );
@@ -114,7 +116,7 @@ QUnit.module("mail", {}, function () {
                     })
                 );
                 assert.strictEqual(
-                    document.querySelector(".o_ThreadTextualTypingStatusView").textContent,
+                    document.querySelector(".o-mail-composer-is-typing").textContent,
                     "",
                     "Should no longer display that demo user is typing"
                 );
@@ -129,6 +131,7 @@ QUnit.module("mail", {}, function () {
                 const pyEnv = await startServer();
                 const resPartnerId1 = pyEnv["res.partner"].create({ name: "Demo" });
                 const mailChannelId1 = pyEnv["mail.channel"].create({
+                    name: "channel",
                     channel_member_ids: [
                         [0, 0, { partner_id: pyEnv.currentPartnerId }],
                         [0, 0, { partner_id: resPartnerId1 }],
@@ -143,7 +146,7 @@ QUnit.module("mail", {}, function () {
                 await openDiscuss();
 
                 assert.strictEqual(
-                    document.querySelector(".o_ThreadTextualTypingStatusView").textContent,
+                    document.querySelector(".o-mail-composer-is-typing").textContent,
                     "",
                     "Should display no one is currently typing"
                 );
@@ -162,14 +165,14 @@ QUnit.module("mail", {}, function () {
                     })
                 );
                 assert.strictEqual(
-                    document.querySelector(".o_ThreadTextualTypingStatusView").textContent,
+                    document.querySelector(".o-mail-composer-is-typing").textContent,
                     "Demo is typing...",
                     "Should display that demo user is typing"
                 );
 
                 await afterNextRender(() => advanceTime(60 * 1000));
                 assert.strictEqual(
-                    document.querySelector(".o_ThreadTextualTypingStatusView").textContent,
+                    document.querySelector(".o-mail-composer-is-typing").textContent,
                     "",
                     "Should no longer display that demo user is typing"
                 );
@@ -184,6 +187,7 @@ QUnit.module("mail", {}, function () {
                 const pyEnv = await startServer();
                 const resPartnerId1 = pyEnv["res.partner"].create({ name: "Demo" });
                 const mailChannelId1 = pyEnv["mail.channel"].create({
+                    name: "channel",
                     channel_member_ids: [
                         [0, 0, { partner_id: pyEnv.currentPartnerId }],
                         [0, 0, { partner_id: resPartnerId1 }],
@@ -198,7 +202,7 @@ QUnit.module("mail", {}, function () {
                 await openDiscuss();
 
                 assert.strictEqual(
-                    document.querySelector(".o_ThreadTextualTypingStatusView").textContent,
+                    document.querySelector(".o-mail-composer-is-typing").textContent,
                     "",
                     "Should display no one is currently typing"
                 );
@@ -217,7 +221,7 @@ QUnit.module("mail", {}, function () {
                     })
                 );
                 assert.strictEqual(
-                    document.querySelector(".o_ThreadTextualTypingStatusView").textContent,
+                    document.querySelector(".o-mail-composer-is-typing").textContent,
                     "Demo is typing...",
                     "Should display that demo user is typing"
                 );
@@ -237,14 +241,14 @@ QUnit.module("mail", {}, function () {
                 await advanceTime(50 * 1000);
                 await nextAnimationFrame();
                 assert.strictEqual(
-                    document.querySelector(".o_ThreadTextualTypingStatusView").textContent,
+                    document.querySelector(".o-mail-composer-is-typing").textContent,
                     "Demo is typing...",
                     "Should still display that demo user is typing after 100 seconds (refreshed is typing status at 50s => (100 - 50) = 50s < 60s after assuming no-longer typing)"
                 );
 
                 await afterNextRender(() => advanceTime(11 * 1000));
                 assert.strictEqual(
-                    document.querySelector(".o_ThreadTextualTypingStatusView").textContent,
+                    document.querySelector(".o-mail-composer-is-typing").textContent,
                     "",
                     "Should no longer display that demo user is typing after 111 seconds (refreshed is typing status at 50s => (111 - 50) = 61s > 60s after assuming no-longer typing)"
                 );
@@ -263,6 +267,7 @@ QUnit.module("mail", {}, function () {
                     { name: "Other 12" },
                 ]);
                 const mailChannelId1 = pyEnv["mail.channel"].create({
+                    name: "channel",
                     channel_member_ids: [
                         [0, 0, { partner_id: pyEnv.currentPartnerId }],
                         [0, 0, { partner_id: resPartnerId1 }],
@@ -278,7 +283,7 @@ QUnit.module("mail", {}, function () {
                 await openDiscuss();
 
                 assert.strictEqual(
-                    document.querySelector(".o_ThreadTextualTypingStatusView").textContent,
+                    document.querySelector(".o-mail-composer-is-typing").textContent,
                     "",
                     "Should display no one is currently typing"
                 );
@@ -297,7 +302,7 @@ QUnit.module("mail", {}, function () {
                     })
                 );
                 assert.strictEqual(
-                    document.querySelector(".o_ThreadTextualTypingStatusView").textContent,
+                    document.querySelector(".o-mail-composer-is-typing").textContent,
                     "Other 10 is typing...",
                     "Should display that 'Other 10' member is typing"
                 );
@@ -316,7 +321,7 @@ QUnit.module("mail", {}, function () {
                     })
                 );
                 assert.strictEqual(
-                    document.querySelector(".o_ThreadTextualTypingStatusView").textContent,
+                    document.querySelector(".o-mail-composer-is-typing").textContent,
                     "Other 10 and Other 11 are typing...",
                     "Should display that members 'Other 10' and 'Other 11' are typing (order: longer typer named first)"
                 );
@@ -335,7 +340,7 @@ QUnit.module("mail", {}, function () {
                     })
                 );
                 assert.strictEqual(
-                    document.querySelector(".o_ThreadTextualTypingStatusView").textContent,
+                    document.querySelector(".o-mail-composer-is-typing").textContent,
                     "Other 10, Other 11 and more are typing...",
                     "Should display that members 'Other 10', 'Other 11' and more (at least 1 extra member) are typing (order: longer typer named first)"
                 );
@@ -354,7 +359,7 @@ QUnit.module("mail", {}, function () {
                     })
                 );
                 assert.strictEqual(
-                    document.querySelector(".o_ThreadTextualTypingStatusView").textContent,
+                    document.querySelector(".o-mail-composer-is-typing").textContent,
                     "Other 11 and Other 12 are typing...",
                     "Should display that members 'Other 11' and 'Other 12' are typing ('Other 10' stopped typing)"
                 );
@@ -373,7 +378,7 @@ QUnit.module("mail", {}, function () {
                     })
                 );
                 assert.strictEqual(
-                    document.querySelector(".o_ThreadTextualTypingStatusView").textContent,
+                    document.querySelector(".o-mail-composer-is-typing").textContent,
                     "Other 11, Other 12 and more are typing...",
                     "Should display that members 'Other 11' and 'Other 12' and more (at least 1 extra member) are typing (order by longer typer, 'Other 10' just recently restarted typing)"
                 );

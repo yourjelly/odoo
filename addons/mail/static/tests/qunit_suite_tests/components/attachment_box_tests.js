@@ -18,29 +18,30 @@ QUnit.module("mail", {}, function () {
                 </div>
             </form>`,
             };
-            const { messaging, openView } = await start({ serverData: { views } });
+            const { openView } = await start({ serverData: { views } });
             await openView({
                 res_id: resPartnerId1,
                 res_model: "res.partner",
                 views: [[false, "form"]],
             });
-            assert.strictEqual(
-                document.querySelectorAll(`.o_AttachmentBoxView`).length,
-                1,
+            assert.containsOnce(
+                document.body,
+                ".o-mail-attachment-box",
                 "should have an attachment box"
             );
-            assert.strictEqual(
-                document.querySelectorAll(`.o_AttachmentBoxView_buttonAdd`).length,
-                1,
+            assert.containsOnce(
+                document.body,
+                "button:contains('Attach files')",
                 "should have a button add"
             );
-            assert.ok(
-                messaging.models["Chatter"].all()[0].fileUploader,
+            assert.containsOnce(
+                document.body,
+                ".o-mail-chatter input[type='file']",
                 "should have a file uploader"
             );
-            assert.strictEqual(
-                document.querySelectorAll(`.o_AttachmentBoxView .o_AttachmentCard`).length,
-                0,
+            assert.containsNone(
+                document.body,
+                ".o-mail-chatter .o-mail-attachment-image",
                 "should not have any attachment"
             );
         });
@@ -71,34 +72,35 @@ QUnit.module("mail", {}, function () {
                 </div>
             </form>`,
             };
-            const { messaging, openView } = await start({ serverData: { views } });
+            const { openView } = await start({ serverData: { views } });
             await openView({
                 res_id: resPartnerId1,
                 res_model: "res.partner",
                 views: [[false, "form"]],
             });
-            assert.strictEqual(
-                document.querySelectorAll(`.o_AttachmentBoxView`).length,
-                1,
+            assert.containsOnce(
+                document.body,
+                ".o-mail-attachment-box",
                 "should have an attachment box"
             );
-            assert.strictEqual(
-                document.querySelectorAll(`.o_AttachmentBoxView_buttonAdd`).length,
-                1,
+            assert.containsOnce(
+                document.body,
+                "button:contains('Attach files')",
                 "should have a button add"
             );
-            assert.ok(
-                messaging.models["Chatter"].all()[0].fileUploader,
+            assert.containsOnce(
+                document.body,
+                ".o-mail-chatter input[type='file']",
                 "should have a file uploader"
             );
-            assert.strictEqual(
-                document.querySelectorAll(`.o_attachmentBox_attachmentList`).length,
-                1,
+            assert.containsOnce(
+                document.body,
+                ".o-mail-attachment-list",
                 "should have an attachment list"
             );
         });
 
-        QUnit.test("view attachments", async function (assert) {
+        QUnit.skipRefactoring("view attachments", async function (assert) {
             assert.expect(7);
 
             const pyEnv = await startServer();
@@ -180,7 +182,7 @@ QUnit.module("mail", {}, function () {
         });
 
         QUnit.test("remove attachment should ask for confirmation", async function (assert) {
-            assert.expect(5);
+            assert.expect(4);
 
             const pyEnv = await startServer();
             const resPartnerId1 = pyEnv["res.partner"].create({});
@@ -203,30 +205,29 @@ QUnit.module("mail", {}, function () {
                 res_model: "res.partner",
                 views: [[false, "form"]],
             });
-            assert.containsOnce(document.body, ".o_AttachmentCard", "should have an attachment");
+
             assert.containsOnce(
                 document.body,
-                ".o_AttachmentCard_asideItemUnlink",
+                ".o-mail-attachment-image",
+                "should have an attachment"
+            );
+            assert.containsOnce(
+                document.body,
+                "button[title='Remove']",
                 "attachment should have a delete button"
             );
 
-            await click(".o_AttachmentCard_asideItemUnlink");
+            await click("button[title='Remove']");
             assert.containsOnce(
                 document.body,
-                ".o_AttachmentDeleteConfirmView",
-                "A confirmation dialog should have been opened"
-            );
-            assert.strictEqual(
-                document.querySelector(".o_AttachmentDeleteConfirmView_mainText").textContent,
-                `Do you really want to delete "Blah.txt"?`,
-                "Confirmation dialog should contain the attachment delete confirmation text"
+                ".modal-body:contains('Do you really want to delete \"Blah.txt\"?')"
             );
 
             // Confirm the deletion
-            await click(".o_AttachmentDeleteConfirmView_confirmButton");
+            await click(".modal-footer .btn-primary");
             assert.containsNone(
                 document.body,
-                ".o_AttachmentCard",
+                ".o-mail-attachment-images",
                 "should no longer have an attachment"
             );
         });
