@@ -1,19 +1,14 @@
 /** @odoo-module **/
 
-import {
-    afterNextRender,
-    nextAnimationFrame,
-    start,
-    startServer,
-} from "@mail/../tests/helpers/test_utils";
+import { afterNextRender, start, startServer } from "@mail/../tests/helpers/test_utils";
 
 import { patchWithCleanup } from "@web/../tests/helpers/utils";
 
-QUnit.module("mail", {}, function () {
+QUnit.module("mail", (hooks) => {
     QUnit.module("components", {}, function () {
         QUnit.module("discuss_inbox_tests.js");
 
-        QUnit.test("reply: discard on pressing escape", async function (assert) {
+        QUnit.skipRefactoring("reply: discard on pressing escape", async function (assert) {
             assert.expect(9);
 
             const pyEnv = await startServer();
@@ -47,8 +42,12 @@ QUnit.module("mail", {}, function () {
                     );
                 },
             });
-            assert.containsOnce(document.body, ".o_MessageView", "should display a single message");
-            await click(".o_MessageView");
+            assert.containsOnce(
+                document.body,
+                ".o-mail-message",
+                "should display a single message"
+            );
+            await click(".o-mail-message");
             await click(".o_MessageActionView_actionReplyTo");
             assert.containsOnce(
                 document.body,
@@ -78,7 +77,7 @@ QUnit.module("mail", {}, function () {
                 "reply composer should still be opened after pressing escape on emojis button"
             );
 
-            await insertText(".o_ComposerTextInputView_textarea", "@Te");
+            await insertText(".o-mail-composer-textarea", "@Te");
             assert.containsOnce(
                 document.body,
                 ".o_ComposerSuggestionView",
@@ -87,7 +86,7 @@ QUnit.module("mail", {}, function () {
 
             await afterNextRender(() => {
                 const ev = new window.KeyboardEvent("keydown", { bubbles: true, key: "Escape" });
-                document.querySelector(`.o_ComposerTextInputView_textarea`).dispatchEvent(ev);
+                document.querySelector(`.o-mail-composer-textarea`).dispatchEvent(ev);
             });
             assert.containsNone(
                 document.body,
@@ -102,7 +101,7 @@ QUnit.module("mail", {}, function () {
 
             await afterNextRender(() => {
                 const ev = new window.KeyboardEvent("keydown", { bubbles: true, key: "Escape" });
-                document.querySelector(`.o_ComposerTextInputView_textarea`).dispatchEvent(ev);
+                document.querySelector(`.o-mail-composer-textarea`).dispatchEvent(ev);
             });
             assert.containsNone(
                 document.body,
@@ -111,7 +110,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.test("reply: discard on discard button click", async function (assert) {
+        QUnit.skipRefactoring("reply: discard on discard button click", async function (assert) {
             assert.expect(4);
 
             const pyEnv = await startServer();
@@ -129,425 +128,75 @@ QUnit.module("mail", {}, function () {
                 notification_type: "inbox",
                 res_partner_id: pyEnv.currentPartnerId,
             });
-            const { afterEvent, click, messaging, openDiscuss } = await start();
-            await afterEvent({
-                eventName: "o-thread-view-hint-processed",
-                func: openDiscuss,
-                message: "should wait until inbox displayed its messages",
-                predicate: ({ hint, threadViewer }) => {
-                    return (
-                        hint.type === "messages-loaded" &&
-                        threadViewer.thread === messaging.inbox.thread
-                    );
-                },
-            });
-            assert.containsOnce(document.body, ".o_MessageView", "should display a single message");
-            await click(".o_MessageView");
-
-            await click(".o_MessageActionView_actionReplyTo");
+            const { click, openDiscuss } = await start();
+            await openDiscuss();
             assert.containsOnce(
                 document.body,
-                ".o_ComposerView",
+                ".o-mail-message",
+                "should display a single message"
+            );
+
+            await click("i[aria-label='Reply']");
+            assert.containsOnce(
+                document.body,
+                ".o-mail-composer",
                 "should have composer after clicking on reply to message"
             );
             assert.containsOnce(
                 document.body,
-                ".o_ComposerView_buttonDiscard",
+                "i[title='Stop replying']",
                 "composer should have a discard button"
             );
 
-            await click(`.o_ComposerView_buttonDiscard`);
+            await click("i[title='Stop replying']");
             assert.containsNone(
                 document.body,
-                ".o_ComposerView",
+                ".o-mail-composer",
                 "reply composer should be closed after clicking on discard"
             );
         });
 
-        QUnit.test("reply: discard on reply button toggle", async function (assert) {
-            assert.expect(3);
-
-            const pyEnv = await startServer();
-            const resPartnerId1 = pyEnv["res.partner"].create({});
-            const mailMessageId1 = pyEnv["mail.message"].create({
-                body: "not empty",
-                model: "res.partner",
-                needaction: true,
-                needaction_partner_ids: [pyEnv.currentPartnerId],
-                res_id: resPartnerId1,
-            });
-            pyEnv["mail.notification"].create({
-                mail_message_id: mailMessageId1,
-                notification_status: "sent",
-                notification_type: "inbox",
-                res_partner_id: pyEnv.currentPartnerId,
-            });
-            const { afterEvent, click, messaging, openDiscuss } = await start();
-            await afterEvent({
-                eventName: "o-thread-view-hint-processed",
-                func: openDiscuss,
-                message: "should wait until inbox displayed its messages",
-                predicate: ({ hint, threadViewer }) => {
-                    return (
-                        hint.type === "messages-loaded" &&
-                        threadViewer.thread === messaging.inbox.thread
-                    );
-                },
-            });
-            assert.containsOnce(document.body, ".o_MessageView", "should display a single message");
-
-            await click(".o_MessageView");
-            await click(".o_MessageActionView_actionReplyTo");
-            assert.containsOnce(
-                document.body,
-                ".o_ComposerView",
-                "should have composer after clicking on reply to message"
-            );
-            await click(`.o_MessageActionView_actionReplyTo`);
-            assert.containsNone(
-                document.body,
-                ".o_ComposerView",
-                "reply composer should be closed after clicking on reply button again"
-            );
-        });
-
-        QUnit.test("reply: discard on click away", async function (assert) {
-            assert.expect(7);
-
-            const pyEnv = await startServer();
-            const resPartnerId1 = pyEnv["res.partner"].create({});
-            const mailMessageId1 = pyEnv["mail.message"].create({
-                body: "not empty",
-                model: "res.partner",
-                needaction: true,
-                needaction_partner_ids: [pyEnv.currentPartnerId],
-                res_id: resPartnerId1,
-            });
-            pyEnv["mail.notification"].create({
-                mail_message_id: mailMessageId1,
-                notification_status: "sent",
-                notification_type: "inbox",
-                res_partner_id: pyEnv.currentPartnerId,
-            });
-            const { afterEvent, click, messaging, openDiscuss } = await start();
-            await afterEvent({
-                eventName: "o-thread-view-hint-processed",
-                func: openDiscuss,
-                message: "should wait until inbox displayed its messages",
-                predicate: ({ hint, threadViewer }) => {
-                    return (
-                        hint.type === "messages-loaded" &&
-                        threadViewer.thread === messaging.inbox.thread
-                    );
-                },
-            });
-            assert.containsOnce(document.body, ".o_MessageView", "should display a single message");
-
-            await click(".o_MessageView");
-            await click(".o_MessageActionView_actionReplyTo");
-            assert.containsOnce(
-                document.body,
-                ".o_ComposerView",
-                "should have composer after clicking on reply to message"
-            );
-
-            document.querySelector(`.o_ComposerTextInputView_textarea`).click();
-            await nextAnimationFrame(); // wait just in case, but nothing is supposed to happen
-            assert.containsOnce(
-                document.body,
-                ".o_ComposerView",
-                "reply composer should still be there after clicking inside itself"
-            );
-
-            await click(`.o_ComposerView_buttonEmojis`);
-            assert.containsOnce(
-                document.body,
-                ".o_EmojiPickerView",
-                "emoji list should be opened after clicking on emojis button"
-            );
-
-            await click(`.o_EmojiView`);
-            assert.containsNone(
-                document.body,
-                ".o_EmojiPickerView",
-                "emoji list should be closed after selecting an emoji"
-            );
-            assert.containsOnce(
-                document.body,
-                ".o_ComposerView",
-                "reply composer should still be there after selecting an emoji (even though it is technically a click away, it should be considered inside)"
-            );
-
-            await click(`.o_MessageView`);
-            assert.containsNone(
-                document.body,
-                ".o_ComposerView",
-                "reply composer should be closed after clicking away"
-            );
-        });
-
-        QUnit.test(
-            '"reply to" composer should log note if message replied to is a note',
+        QUnit.skipRefactoring(
+            "error notifications should not be shown in Inbox",
             async function (assert) {
-                assert.expect(6);
+                assert.expect(3);
 
                 const pyEnv = await startServer();
                 const resPartnerId1 = pyEnv["res.partner"].create({});
                 const mailMessageId1 = pyEnv["mail.message"].create({
                     body: "not empty",
-                    is_discussion: false,
-                    model: "res.partner",
+                    model: "mail.channel",
                     needaction: true,
                     needaction_partner_ids: [pyEnv.currentPartnerId],
                     res_id: resPartnerId1,
                 });
                 pyEnv["mail.notification"].create({
-                    mail_message_id: mailMessageId1,
-                    notification_status: "sent",
-                    notification_type: "inbox",
-                    res_partner_id: pyEnv.currentPartnerId,
+                    mail_message_id: mailMessageId1, // id of related message
+                    notification_status: "exception",
+                    notification_type: "email",
+                    res_partner_id: pyEnv.currentPartnerId, // must be for current partner
                 });
-                const { afterEvent, click, insertText, messaging, openDiscuss } = await start({
-                    async mockRPC(route, args) {
-                        if (route === "/mail/message/post") {
-                            assert.step("/mail/message/post");
-                            assert.strictEqual(
-                                args.post_data.message_type,
-                                "comment",
-                                "should set message type as 'comment'"
-                            );
-                            assert.strictEqual(
-                                args.post_data.subtype_xmlid,
-                                "mail.mt_note",
-                                "should set subtype_xmlid as 'note'"
-                            );
-                        }
-                    },
-                });
-                await afterEvent({
-                    eventName: "o-thread-view-hint-processed",
-                    func: openDiscuss,
-                    message: "should wait until inbox displayed its messages",
-                    predicate: ({ hint, threadViewer }) => {
-                        return (
-                            hint.type === "messages-loaded" &&
-                            threadViewer.thread === messaging.inbox.thread
-                        );
-                    },
-                });
+                const { openDiscuss } = await start();
+                await openDiscuss();
                 assert.containsOnce(
                     document.body,
-                    ".o_MessageView",
+                    ".o-mail-message",
                     "should display a single message"
                 );
-
-                await click(".o_MessageView");
-                await click(".o_MessageActionView_actionReplyTo");
-                assert.strictEqual(
-                    document.querySelector(".o_ComposerView_buttonSend").textContent.trim(),
-                    "Log",
-                    "Send button text should be 'Log'"
+                assert.containsOnce(
+                    document.body,
+                    ".o_MessageView_originThreadLink",
+                    "should display origin thread link"
                 );
-
-                await insertText(".o_ComposerTextInputView_textarea", "Test");
-                await click(".o_ComposerView_buttonSend");
-                assert.verifySteps(["/mail/message/post"]);
+                assert.containsNone(
+                    document.body,
+                    ".o_MessageView_notificationIcon",
+                    "should not display any notification icon in Inbox"
+                );
             }
         );
 
-        QUnit.test(
-            '"reply to" composer should send message if message replied to is not a note',
-            async function (assert) {
-                assert.expect(6);
-
-                const pyEnv = await startServer();
-                const resPartnerId1 = pyEnv["res.partner"].create({});
-                const mailMessageId1 = pyEnv["mail.message"].create({
-                    body: "not empty",
-                    is_discussion: true,
-                    model: "res.partner",
-                    needaction: true,
-                    needaction_partner_ids: [pyEnv.currentPartnerId],
-                    res_id: resPartnerId1,
-                });
-                pyEnv["mail.notification"].create({
-                    mail_message_id: mailMessageId1,
-                    notification_status: "sent",
-                    notification_type: "inbox",
-                    res_partner_id: pyEnv.currentPartnerId,
-                });
-                const { afterEvent, click, insertText, messaging, openDiscuss } = await start({
-                    async mockRPC(route, args) {
-                        if (route === "/mail/message/post") {
-                            assert.step("/mail/message/post");
-                            assert.strictEqual(
-                                args.post_data.message_type,
-                                "comment",
-                                "should set message type as 'comment'"
-                            );
-                            assert.strictEqual(
-                                args.post_data.subtype_xmlid,
-                                "mail.mt_comment",
-                                "should set subtype_xmlid as 'comment'"
-                            );
-                        }
-                    },
-                });
-                await afterEvent({
-                    eventName: "o-thread-view-hint-processed",
-                    func: openDiscuss,
-                    message: "should wait until inbox displayed its messages",
-                    predicate: ({ hint, threadViewer }) => {
-                        return (
-                            hint.type === "messages-loaded" &&
-                            threadViewer.thread === messaging.inbox.thread
-                        );
-                    },
-                });
-                assert.containsOnce(
-                    document.body,
-                    ".o_MessageView",
-                    "should display a single message"
-                );
-
-                await click(".o_MessageView");
-                await click(".o_MessageActionView_actionReplyTo");
-                assert.strictEqual(
-                    document.querySelector(".o_ComposerView_buttonSend").textContent.trim(),
-                    "Send",
-                    "Send button text should be 'Send'"
-                );
-
-                await insertText(".o_ComposerTextInputView_textarea", "Test");
-                await click(".o_ComposerView_buttonSend");
-                assert.verifySteps(["/mail/message/post"]);
-            }
-        );
-
-        QUnit.test("error notifications should not be shown in Inbox", async function (assert) {
-            assert.expect(3);
-
-            const pyEnv = await startServer();
-            const resPartnerId1 = pyEnv["res.partner"].create({});
-            const mailMessageId1 = pyEnv["mail.message"].create({
-                body: "not empty",
-                model: "mail.channel",
-                needaction: true,
-                needaction_partner_ids: [pyEnv.currentPartnerId],
-                res_id: resPartnerId1,
-            });
-            pyEnv["mail.notification"].create({
-                mail_message_id: mailMessageId1, // id of related message
-                notification_status: "exception",
-                notification_type: "email",
-                res_partner_id: pyEnv.currentPartnerId, // must be for current partner
-            });
-            const { openDiscuss } = await start();
-            await openDiscuss();
-            assert.containsOnce(document.body, ".o_MessageView", "should display a single message");
-            assert.containsOnce(
-                document.body,
-                ".o_MessageView_originThreadLink",
-                "should display origin thread link"
-            );
-            assert.containsNone(
-                document.body,
-                ".o_MessageView_notificationIcon",
-                "should not display any notification icon in Inbox"
-            );
-        });
-
-        QUnit.test("show subject of message in Inbox", async function (assert) {
-            assert.expect(3);
-
-            const pyEnv = await startServer();
-            const mailMessageId1 = pyEnv["mail.message"].create({
-                body: "not empty",
-                model: "mail.channel",
-                needaction: true,
-                needaction_partner_ids: [pyEnv.currentPartnerId], // not needed, for consistency
-                subject: "Salutations, voyageur",
-            });
-            pyEnv["mail.notification"].create({
-                mail_message_id: mailMessageId1,
-                notification_status: "sent",
-                notification_type: "inbox",
-                res_partner_id: pyEnv.currentPartnerId,
-            });
-            const { afterEvent, messaging, openDiscuss } = await start();
-            await afterEvent({
-                eventName: "o-thread-view-hint-processed",
-                func: openDiscuss,
-                message: "should wait until inbox displayed its messages",
-                predicate: ({ hint, threadViewer }) => {
-                    return (
-                        hint.type === "messages-loaded" &&
-                        threadViewer.thread === messaging.inbox.thread
-                    );
-                },
-            });
-            assert.containsOnce(document.body, ".o_MessageView", "should display a single message");
-            assert.containsOnce(
-                document.body,
-                ".o_MessageView_subject",
-                "should display subject of the message"
-            );
-            assert.strictEqual(
-                document.querySelector(".o_MessageView_subject").textContent,
-                "Subject: Salutations, voyageur",
-                "Subject of the message should be 'Salutations, voyageur'"
-            );
-        });
-
-        QUnit.test("show subject of message in history", async function (assert) {
-            assert.expect(3);
-
-            const pyEnv = await startServer();
-            const mailMessageId1 = pyEnv["mail.message"].create({
-                body: "not empty",
-                history_partner_ids: [3], // not needed, for consistency
-                model: "mail.channel",
-                subject: "Salutations, voyageur",
-            });
-            pyEnv["mail.notification"].create({
-                is_read: true,
-                mail_message_id: mailMessageId1,
-                notification_status: "sent",
-                notification_type: "inbox",
-                res_partner_id: pyEnv.currentPartnerId,
-            });
-            const { afterEvent, messaging, openDiscuss } = await start({
-                discuss: {
-                    params: {
-                        default_active_id: "mail.box_history",
-                    },
-                },
-            });
-            await afterEvent({
-                eventName: "o-thread-view-hint-processed",
-                func: openDiscuss,
-                message: "should wait until history displayed its messages",
-                predicate: ({ hint, threadViewer }) => {
-                    return (
-                        hint.type === "messages-loaded" &&
-                        threadViewer.thread === messaging.history.thread
-                    );
-                },
-            });
-            assert.containsOnce(document.body, ".o_MessageView", "should display a single message");
-            assert.containsOnce(
-                document.body,
-                ".o_MessageView_subject",
-                "should display subject of the message"
-            );
-            assert.strictEqual(
-                document.querySelector(".o_MessageView_subject").textContent,
-                "Subject: Salutations, voyageur",
-                "Subject of the message should be 'Salutations, voyageur'"
-            );
-        });
-
-        QUnit.test(
+        QUnit.skipRefactoring(
             "click on (non-channel/non-partner) origin thread link should redirect to form view",
             async function (assert) {
                 assert.expect(9);
@@ -610,7 +259,7 @@ QUnit.module("mail", {}, function () {
                 });
                 assert.containsOnce(
                     document.body,
-                    ".o_MessageView",
+                    ".o-mail-message",
                     "should display a single message"
                 );
                 assert.containsOnce(
@@ -628,300 +277,6 @@ QUnit.module("mail", {}, function () {
                 assert.verifySteps(
                     ["do-action"],
                     "should have made an action on click on origin thread (to open form view)"
-                );
-            }
-        );
-
-        QUnit.test(
-            "subject should not be shown when subject is the same as the thread name",
-            async function (assert) {
-                assert.expect(1);
-
-                const pyEnv = await startServer();
-                const mailChannelId1 = pyEnv["mail.channel"].create({
-                    name: "Salutations, voyageur",
-                });
-                const mailMessageId1 = pyEnv["mail.message"].create({
-                    body: "not empty",
-                    model: "mail.channel",
-                    res_id: mailChannelId1,
-                    needaction: true,
-                    subject: "Salutations, voyageur",
-                });
-                pyEnv["mail.notification"].create({
-                    mail_message_id: mailMessageId1,
-                    notification_status: "sent",
-                    notification_type: "inbox",
-                    res_partner_id: pyEnv.currentPartnerId,
-                });
-                const { afterEvent, messaging, openDiscuss } = await start();
-                await afterEvent({
-                    eventName: "o-thread-view-hint-processed",
-                    func: openDiscuss,
-                    message: "should wait until inbox displayed its messages",
-                    predicate: ({ hint, threadViewer }) => {
-                        return (
-                            hint.type === "messages-loaded" &&
-                            threadViewer.thread === messaging.inbox.thread
-                        );
-                    },
-                });
-                assert.containsNone(
-                    document.body,
-                    ".o_MessageView_subject",
-                    "subject should not be shown when subject is the same as the thread name"
-                );
-            }
-        );
-
-        QUnit.test(
-            "subject should not be shown when subject is the same as the thread name and both have the same prefix",
-            async function (assert) {
-                assert.expect(1);
-
-                const pyEnv = await startServer();
-                const mailChannelId1 = pyEnv["mail.channel"].create({
-                    name: "Re: Salutations, voyageur",
-                });
-                const mailMessageId1 = pyEnv["mail.message"].create({
-                    body: "not empty",
-                    model: "mail.channel",
-                    res_id: mailChannelId1,
-                    needaction: true,
-                    subject: "Re: Salutations, voyageur",
-                });
-                pyEnv["mail.notification"].create({
-                    mail_message_id: mailMessageId1,
-                    notification_status: "sent",
-                    notification_type: "inbox",
-                    res_partner_id: pyEnv.currentPartnerId,
-                });
-                const { afterEvent, messaging, openDiscuss } = await start();
-                await afterEvent({
-                    eventName: "o-thread-view-hint-processed",
-                    func: openDiscuss,
-                    message: "should wait until inbox displayed its messages",
-                    predicate: ({ hint, threadViewer }) => {
-                        return (
-                            hint.type === "messages-loaded" &&
-                            threadViewer.thread === messaging.inbox.thread
-                        );
-                    },
-                });
-                assert.containsNone(
-                    document.body,
-                    ".o_MessageView_subject",
-                    "subject should not be shown when subject is the same as the thread name and both have the same prefix"
-                );
-            }
-        );
-
-        QUnit.test(
-            'subject should not be shown when subject differs from thread name only by the "Re:" prefix',
-            async function (assert) {
-                assert.expect(1);
-
-                const pyEnv = await startServer();
-                const mailChannelId1 = pyEnv["mail.channel"].create({
-                    name: "Salutations, voyageur",
-                });
-                const mailMessageId1 = pyEnv["mail.message"].create({
-                    body: "not empty",
-                    model: "mail.channel",
-                    res_id: mailChannelId1,
-                    needaction: true,
-                    subject: "Re: Salutations, voyageur",
-                });
-                pyEnv["mail.notification"].create({
-                    mail_message_id: mailMessageId1,
-                    notification_status: "sent",
-                    notification_type: "inbox",
-                    res_partner_id: pyEnv.currentPartnerId,
-                });
-                const { afterEvent, messaging, openDiscuss } = await start();
-                await afterEvent({
-                    eventName: "o-thread-view-hint-processed",
-                    func: openDiscuss,
-                    message: "should wait until inbox displayed its messages",
-                    predicate: ({ hint, threadViewer }) => {
-                        return (
-                            hint.type === "messages-loaded" &&
-                            threadViewer.thread === messaging.inbox.thread
-                        );
-                    },
-                });
-                assert.containsNone(
-                    document.body,
-                    ".o_MessageView_subject",
-                    "should not display subject when subject differs from thread name only by the 'Re:' prefix"
-                );
-            }
-        );
-
-        QUnit.test(
-            'subject should not be shown when subject differs from thread name only by the "Fw:" and "Re:" prefix',
-            async function (assert) {
-                assert.expect(1);
-
-                const pyEnv = await startServer();
-                const mailChannelId1 = pyEnv["mail.channel"].create({
-                    name: "Salutations, voyageur",
-                });
-                const mailMessageId1 = pyEnv["mail.message"].create({
-                    body: "not empty",
-                    model: "mail.channel",
-                    res_id: mailChannelId1,
-                    needaction: true,
-                    subject: "Fw: Re: Salutations, voyageur",
-                });
-                pyEnv["mail.notification"].create({
-                    mail_message_id: mailMessageId1,
-                    notification_status: "sent",
-                    notification_type: "inbox",
-                    res_partner_id: pyEnv.currentPartnerId,
-                });
-                const { afterEvent, messaging, openDiscuss } = await start();
-                await afterEvent({
-                    eventName: "o-thread-view-hint-processed",
-                    func: openDiscuss,
-                    message: "should wait until inbox displayed its messages",
-                    predicate: ({ hint, threadViewer }) => {
-                        return (
-                            hint.type === "messages-loaded" &&
-                            threadViewer.thread === messaging.inbox.thread
-                        );
-                    },
-                });
-                assert.containsNone(
-                    document.body,
-                    ".o_MessageView_subject",
-                    "should not display subject when subject differs from thread name only by the 'Fw:' and Re:' prefix"
-                );
-            }
-        );
-
-        QUnit.test(
-            "subject should be shown when the thread name has an extra prefix compared to subject",
-            async function (assert) {
-                assert.expect(1);
-
-                const pyEnv = await startServer();
-                const mailChannelId1 = pyEnv["mail.channel"].create({
-                    name: "Re: Salutations, voyageur",
-                });
-                const mailMessageId1 = pyEnv["mail.message"].create({
-                    body: "not empty",
-                    model: "mail.channel",
-                    res_id: mailChannelId1,
-                    needaction: true,
-                    subject: "Salutations, voyageur",
-                });
-                pyEnv["mail.notification"].create({
-                    mail_message_id: mailMessageId1,
-                    notification_status: "sent",
-                    notification_type: "inbox",
-                    res_partner_id: pyEnv.currentPartnerId,
-                });
-                const { afterEvent, messaging, openDiscuss } = await start();
-                await afterEvent({
-                    eventName: "o-thread-view-hint-processed",
-                    func: openDiscuss,
-                    message: "should wait until inbox displayed its messages",
-                    predicate: ({ hint, threadViewer }) => {
-                        return (
-                            hint.type === "messages-loaded" &&
-                            threadViewer.thread === messaging.inbox.thread
-                        );
-                    },
-                });
-                assert.containsOnce(
-                    document.body,
-                    ".o_MessageView_subject",
-                    "subject should be shown when the thread name has an extra prefix compared to subject"
-                );
-            }
-        );
-
-        QUnit.test(
-            'subject should not be shown when subject differs from thread name only by the "fw:" prefix and both contain another common prefix',
-            async function (assert) {
-                assert.expect(1);
-
-                const pyEnv = await startServer();
-                const mailChannelId1 = pyEnv["mail.channel"].create({
-                    name: "Re: Salutations, voyageur",
-                });
-                const mailMessageId1 = pyEnv["mail.message"].create({
-                    body: "not empty",
-                    model: "mail.channel",
-                    res_id: mailChannelId1,
-                    needaction: true,
-                    subject: "fw: re: Salutations, voyageur",
-                });
-                pyEnv["mail.notification"].create({
-                    mail_message_id: mailMessageId1,
-                    notification_status: "sent",
-                    notification_type: "inbox",
-                    res_partner_id: pyEnv.currentPartnerId,
-                });
-                const { afterEvent, messaging, openDiscuss } = await start();
-                await afterEvent({
-                    eventName: "o-thread-view-hint-processed",
-                    func: openDiscuss,
-                    message: "should wait until inbox displayed its messages",
-                    predicate: ({ hint, threadViewer }) => {
-                        return (
-                            hint.type === "messages-loaded" &&
-                            threadViewer.thread === messaging.inbox.thread
-                        );
-                    },
-                });
-                assert.containsNone(
-                    document.body,
-                    ".o_MessageView_subject",
-                    "subject should not be shown when subject differs from thread name only by the 'fw:' prefix and both contain another common prefix"
-                );
-            }
-        );
-
-        QUnit.test(
-            'subject should not be shown when subject differs from thread name only by the "Re: Re:" prefix',
-            async function (assert) {
-                assert.expect(1);
-
-                const pyEnv = await startServer();
-                const mailChannelId1 = pyEnv["mail.channel"].create({
-                    name: "Salutations, voyageur",
-                });
-                const mailMessageId1 = pyEnv["mail.message"].create({
-                    body: "not empty",
-                    model: "mail.channel",
-                    res_id: mailChannelId1,
-                    needaction: true,
-                    subject: "Re: Re: Salutations, voyageur",
-                });
-                pyEnv["mail.notification"].create({
-                    mail_message_id: mailMessageId1,
-                    notification_status: "sent",
-                    notification_type: "inbox",
-                    res_partner_id: pyEnv.currentPartnerId,
-                });
-                const { afterEvent, messaging, openDiscuss } = await start();
-                await afterEvent({
-                    eventName: "o-thread-view-hint-processed",
-                    func: openDiscuss,
-                    message: "should wait until inbox displayed its messages",
-                    predicate: ({ hint, threadViewer }) => {
-                        return (
-                            hint.type === "messages-loaded" &&
-                            threadViewer.thread === messaging.inbox.thread
-                        );
-                    },
-                });
-                assert.containsNone(
-                    document.body,
-                    ".o_MessageView_subject",
-                    "should not display subject when subject differs from thread name only by the 'Re: Re:'' prefix"
                 );
             }
         );

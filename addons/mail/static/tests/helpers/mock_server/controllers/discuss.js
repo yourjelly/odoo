@@ -86,6 +86,19 @@ patch(MockServer.prototype, "mail/controllers/discuss", {
                 args.context
             );
         }
+        if (route === "/mail/message/add_reaction") {
+            return this._mockRouteMailMessageAddReaction(args);
+        }
+        if (route === "/mail/message/remove_reaction") {
+            return this._mockRouteMailMessageRemoveReaction(args);
+        }
+        if (route === "/mail/message/update_content") {
+            this.pyEnv["mail.message"].write([args.message_id], {
+                body: args.body,
+                attachment_ids: args.attachment_id,
+            });
+            return args;
+        }
         if (route === "/mail/read_subscription_data") {
             const follower_id = args.follower_id;
             return this._mockRouteMailReadSubscriptionData(follower_id);
@@ -218,6 +231,62 @@ patch(MockServer.prototype, "mail/controllers/discuss", {
             }
             this.pyEnv["bus.bus"]._sendmany([[target, "mail.link.preview/insert", linkPreviews]]);
         }
+    },
+    /**
+     * Simulates `/mail/message/add_reaction` route.
+     */
+    _mockRouteMailMessageAddReaction({ content, message_id: messageId }) {
+        this._mockMailMessage_messageAddReaction(content, messageId);
+        const reactions = this.pyEnv["mail.message.reaction"].search([
+            ["message_id", "=", messageId],
+            ["content", "=", content],
+        ]);
+        const currentPartner = this.pyEnv["res.partner"].searchRead([
+            ["id", "=", this.pyEnv.currentPartnerId],
+        ])[0];
+        return {
+            id: messageId,
+            messageReactionGroups: [
+                [
+                    reactions.length > 0 ? "insert" : "insert-and-unlink",
+                    {
+                        content,
+                        count: reactions.length,
+                        message: { id: messageId },
+                        partners: [
+                            [
+                                "insert",
+                                { id: this.pyEnv.currentPartnerId, name: currentPartner.name },
+                            ],
+                        ],
+                    },
+                ],
+            ],
+        };
+    },
+    /**
+     * Simulates `/mail/message/remove_reaction` route.
+     */
+    _mockRouteMailMessageRemoveReaction({ content, message_id: messageId }) {
+        this._mockMailMessage_messageRemoveReaction(content, messageId);
+        const reactions = this.pyEnv["mail.message.reaction"].search([
+            ["message_id", "=", messageId],
+            ["content", "=", content],
+        ]);
+        return {
+            id: messageId,
+            messageReactionGroups: [
+                [
+                    reactions.length > 0 ? "insert" : "insert-and-unlink",
+                    {
+                        content,
+                        count: reactions.length,
+                        message: { id: messageId },
+                        partners: [["insert-and-unlink", { id: this.pyEnv.currentPartnerId }]],
+                    },
+                ],
+            ],
+        };
     },
     /**
      * Simulates the `/mail/history/messages` route.
@@ -405,15 +474,19 @@ patch(MockServer.prototype, "mail/controllers/discuss", {
             ]);
             // search read returns many2one relations as an array [id, display_name].
             // But the original route does not. Thus, we need to change it now.
-            followers.forEach((follower) => (follower.partner_id = follower.partner_id[0]));
+            followers.forEach((follower) => {
+                follower.partner_id = follower.partner_id[0];
+                follower.partner = this._mockResPartnerMailPartnerFormat([follower.partner_id]).get(
+                    follower.partner_id
+                );
+            });
             res["followers"] = followers;
         }
         if (request_list.includes("suggestedRecipients")) {
-            res[
-                "suggestedRecipients"
-            ] = this._mockMailThread_MessageGetSuggestedRecipients(thread_model, [thread.id])[
-                thread_id
-            ];
+            res["suggestedRecipients"] = this._mockMailThread_MessageGetSuggestedRecipients(
+                thread_model,
+                [thread.id]
+            )[thread_id];
         }
         return res;
     },

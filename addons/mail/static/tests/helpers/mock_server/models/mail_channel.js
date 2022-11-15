@@ -53,6 +53,11 @@ patch(MockServer.prototype, "mail/models/mail_channel", {
             const name = args.args[1] || args.kwargs.name;
             return this._mockMailChannelChannelRename(ids, name);
         }
+        if (args.model === "mail.channel" && args.method === "channel_change_description") {
+            const ids = args.args[0];
+            const description = args.args[1] || args.kwargs.description;
+            return this._mockMailChannelChannelChangeDescription(ids, description);
+        }
         if (route === "/mail/channel/set_last_seen_message") {
             const id = args.channel_id;
             const last_message_id = args.last_message_id;
@@ -560,6 +565,17 @@ patch(MockServer.prototype, "mail/models/mail_channel", {
             },
         });
     },
+    _mockMailChannelChannelChangeDescription(ids, description) {
+        const channel = this.getRecords("mail.channel", [["id", "in", ids]])[0];
+        this.pyEnv["mail.channel"].write([channel.id], { description });
+        this.pyEnv["bus.bus"]._sendone(channel, "mail.record/insert", {
+            Thread: {
+                id: channel.id,
+                model: "mail.channel",
+                description: description,
+            },
+        });
+    },
     /**
      * Simulates `channel_set_custom_name` on `mail.channel`.
      *
@@ -612,7 +628,7 @@ patch(MockServer.prototype, "mail/models/mail_channel", {
         if (channel.channel_type === "channel") {
             this._mockMailChannelActionUnfollow([channel.id]);
         } else {
-            this._mockMailChannelChannelPin(channel.uuid, false);
+            this._mockMailChannelChannelPin([channel.id], false);
         }
     },
     /**

@@ -6,7 +6,7 @@ QUnit.module("mail", {}, function () {
     QUnit.module("components", {}, function () {
         QUnit.module("channel_invitation_form_tests.js");
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "should display the channel invitation form after clicking on the invite button of a chat",
             async function (assert) {
                 assert.expect(1);
@@ -32,7 +32,7 @@ QUnit.module("mail", {}, function () {
                     },
                 });
                 await openDiscuss();
-                await click(`.o_ThreadViewTopbar_inviteButton`);
+                await click(`.o-mail-discuss-actions button[data-action="add-users"]`);
                 assert.containsOnce(
                     document.body,
                     ".o_ChannelInvitationForm",
@@ -41,7 +41,7 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "should be able to search for a new user to invite from an existing chat",
             async function (assert) {
                 assert.expect(1);
@@ -72,7 +72,7 @@ QUnit.module("mail", {}, function () {
                     },
                 });
                 await openDiscuss();
-                await click(`.o_ThreadViewTopbar_inviteButton`);
+                await click(`.o-mail-discuss-actions button[data-action="add-users"]`);
                 await insertText(".o_ChannelInvitationForm_searchInput", "TestPartner2");
                 assert.strictEqual(
                     document.querySelector(`.o_ChannelInvitationFormSelectablePartnerView_name`)
@@ -83,7 +83,7 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "should be able to create a new group chat from an existing chat",
             async function (assert) {
                 assert.expect(1);
@@ -115,19 +115,19 @@ QUnit.module("mail", {}, function () {
                 });
                 await openDiscuss();
 
-                await click(`.o_ThreadViewTopbar_inviteButton`);
+                await click(`.o-mail-discuss-actions button[data-action="add-users"]`);
                 await insertText(".o_ChannelInvitationForm_searchInput", "TestPartner2");
                 await click(`.o_ChannelInvitationFormSelectablePartnerView_checkbox`);
                 await click(`.o_ChannelInvitationForm_inviteButton`);
                 assert.strictEqual(
-                    document.querySelector(`.o_ThreadViewTopbar_threadName`).textContent,
+                    document.querySelector(".o-mail-discuss-thread-name").value,
                     "Mitchell Admin, TestPartner, TestPartner2",
                     "should have created a new group chat with the existing chat members and the selected user"
                 );
             }
         );
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "Invitation form should display channel group restriction",
             async function (assert) {
                 assert.expect(1);
@@ -155,7 +155,7 @@ QUnit.module("mail", {}, function () {
                 });
                 await openDiscuss();
 
-                await click(`.o_ThreadViewTopbar_inviteButton`);
+                await click(`.o-mail-discuss-actions button[data-action="add-users"]`);
                 assert.containsOnce(
                     document.body,
                     ".o_ChannelInvitationForm_accessRestrictedToGroup",
