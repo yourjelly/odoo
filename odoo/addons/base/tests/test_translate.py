@@ -9,8 +9,8 @@ from psycopg2.extras import Json
 import io
 
 from odoo.exceptions import AccessError, ValidationError
-from odoo.tools import trans_load_data, sql
-from odoo.tools.translate import quote, unquote, xml_translate, html_translate
+from odoo.tools import sql
+from odoo.tools.translate import quote, unquote, xml_translate, html_translate, TranslationImporter
 from odoo.tests.common import TransactionCase, BaseCase, new_test_user, tagged
 
 _stats_logger = logging.getLogger('odoo.tests.stats')
@@ -293,9 +293,11 @@ class TestTranslation(TransactionCase):
         msgid "Customers"
         msgstr "Clients"
         ''' % cls.customers_xml_id
-        with io.BytesIO(bytes(po_string, encoding='utf-8')) as f:
-            f.name = 'dummy'
-            trans_load_data(cls.env.cr, f, 'po', 'fr_FR', verbose=True, overwrite=True)
+        with io.BytesIO(bytes(po_string, encoding='utf-8')) as fileobj:
+            fileobj.name = 'dummy'
+            translation_importer = TranslationImporter(cls.env.cr, verbose=True)
+            translation_importer.load(fileobj, 'po', 'fr_FR')
+            translation_importer.save(overwrite=True)
 
     def test_101_create_translated_record(self):
         category = self.customers.with_context({})
@@ -463,9 +465,12 @@ class TestTranslationWrite(TransactionCase):
         msgid "Reblochon"
         msgstr "Translated Name"
         ''' % self.category_xml_id
-        with io.BytesIO(bytes(po_string, encoding='utf-8')) as f:
-            f.name = 'dummy'
-            trans_load_data(self.env.cr, f, 'po', 'en_US', verbose=True, overwrite=True)
+
+        with io.BytesIO(bytes(po_string, encoding='utf-8')) as fileobj:
+            fileobj.name = 'dummy'
+            translation_importer = TranslationImporter(self.env.cr, verbose=True)
+            translation_importer.load(fileobj, 'po', 'fr_FR')
+            translation_importer.save(overwrite=True)
 
         self.category.with_context(lang='fr_FR').write({'name': 'French Name'})
         self.category.with_context(lang='en_US').write({'name': 'English Name'})
@@ -649,9 +654,11 @@ class TestTranslationWrite(TransactionCase):
         msgid "Model Description"
         msgstr "%s"
         ''' % (ir_model_field_xml_id, LABEL)
-        with io.BytesIO(bytes(po_string, encoding='utf-8')) as f:
-            f.name = 'dummy'
-            trans_load_data(self.env.cr, f, 'po', 'fr_FR', verbose=True, overwrite=True)
+        with io.BytesIO(bytes(po_string, encoding='utf-8')) as fileobj:
+            fileobj.name = 'dummy'
+            translation_importer = TranslationImporter(self.env.cr, verbose=True)
+            translation_importer.load(fileobj, 'po', 'fr_FR')
+            translation_importer.save(overwrite=True)
 
         # check that fields_get() returns the expected label
         model = self.env['ir.model'].with_context(lang='fr_FR')
