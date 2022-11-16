@@ -133,6 +133,7 @@ def convert_column_translatable(cr, tablename, columnname, columntype):
         using = f"""CASE WHEN "{columnname}" IS NOT NULL THEN jsonb_build_object('en_US', "{columnname}"::varchar) END"""
     else:
         using = f""""{columnname}"->>'en_US'"""
+    _schema.log(25, "convert %s/%s to %s", tablename, columnname, columntype)
     _convert_column(cr, tablename, columnname, columntype, using)
 
 def _convert_column(cr, tablename, columnname, columntype, using):
