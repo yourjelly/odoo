@@ -3219,7 +3219,7 @@ class BaseModel(metaclass=MetaModel):
                         context.get('bin_size') or context.get('bin_size_' + field.name)):
                     # PG 9.2 introduces conflicting pg_size_pretty(numeric) -> need ::cast
                     qname = f'pg_size_pretty(length({qname})::bigint)'
-                return f'{qname} AS "{field.name}"'
+                return qname
 
             # selected fields are: 'id' followed by column_fields
             qual_names = [qualify(field) for field in [self._fields['id']] + column_fields]

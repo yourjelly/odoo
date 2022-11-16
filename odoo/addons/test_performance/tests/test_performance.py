@@ -459,21 +459,20 @@ class TestPerformance(SavepointCaseWithUserDemo):
             records[1].value = 42
 
         # fetching 'name' prefetches all fields on all records
-        queries = [
-            ''' SELECT "test_performance_base"."id" AS "id",
-                       "test_performance_base"."name" AS "name",
-                       "test_performance_base"."value" AS "value",
-                       "test_performance_base"."value_pc" AS "value_pc",
-                       "test_performance_base"."partner_id" AS "partner_id",
-                       "test_performance_base"."total" AS "total",
-                       "test_performance_base"."create_uid" AS "create_uid",
-                       "test_performance_base"."create_date" AS "create_date",
-                       "test_performance_base"."write_uid" AS "write_uid",
-                       "test_performance_base"."write_date" AS "write_date"
-                FROM "test_performance_base"
-                WHERE "test_performance_base"."id" IN %s
-            ''',
-        ]
+        queries = ['''
+            SELECT "test_performance_base"."id",
+                   "test_performance_base"."name",
+                   "test_performance_base"."value",
+                   "test_performance_base"."value_pc",
+                   "test_performance_base"."partner_id",
+                   "test_performance_base"."total",
+                   "test_performance_base"."create_uid",
+                   "test_performance_base"."create_date",
+                   "test_performance_base"."write_uid",
+                   "test_performance_base"."write_date"
+            FROM "test_performance_base"
+            WHERE "test_performance_base"."id" IN %s
+        ''']
         with self.assertQueries(queries, flush=False):
             result_name = [record.name for record in records]
 
