@@ -602,8 +602,8 @@ class expression(object):
         def pop_result():
             return result_stack.pop()
 
-        def push_result(query, params):
-            result_stack.append((query, params))
+        def push_result(query, params, kind=None):
+            result_stack.append((query, params, kind))
 
         # process domain from right to left; stack contains domain leaves, in
         # the form: (leaf, corresponding model, corresponding table alias)
@@ -627,13 +627,24 @@ class expression(object):
 
             if is_operator(leaf):
                 if leaf == NOT_OPERATOR:
-                    expr, params = pop_result()
-                    push_result('(NOT (%s))' % expr, params)
+                    expr, params, _kind = pop_result()
+                    push_result(f'NOT ({expr})', params)
+                elif leaf == AND_OPERATOR:
+                    lhs, lhs_params, lhs_kind = pop_result()
+                    rhs, rhs_params, rhs_kind = pop_result()
+                    if lhs_kind == 'OR':
+                        lhs = f'({lhs})'
+                    if rhs_kind == 'OR':
+                        rhs = f'({rhs})'
+                    push_result(f'{lhs} AND {rhs}', lhs_params + rhs_params, 'AND')
                 else:
-                    ops = {AND_OPERATOR: '(%s AND %s)', OR_OPERATOR: '(%s OR %s)'}
-                    lhs, lhs_params = pop_result()
-                    rhs, rhs_params = pop_result()
-                    push_result(ops[leaf] % (lhs, rhs), lhs_params + rhs_params)
+                    lhs, lhs_params, lhs_kind = pop_result()
+                    rhs, rhs_params, rhs_kind = pop_result()
+                    if lhs_kind == 'AND':
+                        lhs = f'({lhs})'
+                    if rhs_kind == 'AND':
+                        rhs = f'({rhs})'
+                    push_result(f'{lhs} OR {rhs}', lhs_params + rhs_params, 'OR')
                 continue
 
             if is_boolean(leaf):
@@ -783,7 +794,7 @@ class expression(object):
                             if not inverse_field.required:
                                 subquery += f' AND "{inverse_field.name}" IS NOT NULL'
                             subparams = [tuple(ids2) or (None,)]
-                        push_result(f'("{alias}"."id" {in_} ({subquery}))', subparams)
+                        push_result(f'"{alias}"."id" {in_} ({subquery})', subparams)
                     else:
                         # determine ids1 in model related to ids2
                         recs = comodel.browse(ids2).sudo().with_context(prefetch_fields=False)
@@ -988,9 +999,12 @@ class expression(object):
                     if need_wildcard:
                         right = f'%{right}%'
 
-                    expr += f"{left} {sql_operator} {unaccent('%s')}"
+                    if expr:
+                        expr = f"({expr}{left} {sql_operator} {unaccent('%s')})"
+                    else:
+                        expr = f"{left} {sql_operator} {unaccent('%s')}"
                     params.append(right)
-                    push_result(f'({expr})', params)
+                    push_result(expr, params)
 
                 elif field.translate and operator in ['in', 'not in'] and isinstance(right, (list, tuple)):
                     params = [it for it in right if it is not False and it is not None]
@@ -999,17 +1013,17 @@ class expression(object):
                         params = [field.convert_to_column(p, model, validate=False).adapted['en_US'] for p in params]
                         lang = model.env.lang or 'en_US'
                         if lang == 'en_US':
-                            query = f'''("{alias}"."{left}"->>'en_US' {operator} %s)'''
+                            query = f'''"{alias}"."{left}"->>'en_US' {operator} %s'''
                         else:
-                            query = f'''(COALESCE("{alias}"."{left}"->>'{lang}', "{alias}"."{left}"->>'en_US') {operator} %s)'''
+                            query = f'''COALESCE("{alias}"."{left}"->>'{lang}', "{alias}"."{left}"->>'en_US') {operator} %s'''
                         params = [tuple(params)]
                     else:
                         # The case for (left, 'in', []) or (left, 'not in', []).
                         query = 'FALSE' if operator == 'in' else 'TRUE'
                     if (operator == 'in' and check_null) or (operator == 'not in' and not check_null):
-                        query = '(%s OR %s."%s" IS NULL)' % (query, alias, left)
+                        query = f'({query} OR "{alias}"."{left}" IS NULL)'
                     elif operator == 'not in' and check_null:
-                        query = '(%s AND %s."%s" IS NOT NULL)' % (query, alias, left)  # needed only for TRUE.
+                        query = f'({query} AND "{alias}"."{left}" IS NOT NULL)'  # needed only for TRUE.
                     push_result(query, params)
                 else:
                     expr, params = self.__leaf_to_sql(leaf, model, alias)
@@ -1021,7 +1035,9 @@ class expression(object):
         # ----------------------------------------
 
         [self.result] = result_stack
-        where_clause, where_params = self.result
+        where_clause, where_params, kind = self.result
+        if kind == 'OR':
+            where_clause = f'({where_clause})'
         self.query.add_where(where_clause, where_params)
 
     def __leaf_to_sql(self, leaf, model, alias):
@@ -1035,8 +1051,6 @@ class expression(object):
         assert not isinstance(right, BaseModel), \
             "Invalid value %r in domain term %r" % (right, leaf)
 
-        table_alias = '"%s"' % alias
-
         if leaf == TRUE_LEAF:
             query = 'TRUE'
             params = []
@@ -1046,11 +1060,11 @@ class expression(object):
             params = []
 
         elif operator == 'inselect':
-            query = '(%s."%s" in (%s))' % (table_alias, left, right[0])
+            query = f'"{alias}"."{left}" IN ({right[0]})'
             params = list(right[1])
 
         elif operator == 'not inselect':
-            query = '(%s."%s" not in (%s))' % (table_alias, left, right[0])
+            query = f'"{alias}"."{left}" NOT IN ({right[0]})'
             params = list(right[1])
 
         elif operator in ['in', 'not in']:
@@ -1059,13 +1073,13 @@ class expression(object):
             if isinstance(right, bool):
                 _logger.warning("The domain term '%s' should use the '=' or '!=' operator." % (leaf,))
                 if (operator == 'in' and right) or (operator == 'not in' and not right):
-                    query = '(%s."%s" IS NOT NULL)' % (table_alias, left)
+                    query = f'"{alias}"."{left}" IS NOT NULL'
                 else:
-                    query = '(%s."%s" IS NULL)' % (table_alias, left)
+                    query = f'"{alias}"."{left}" IS NULL'
                 params = []
             elif isinstance(right, Query):
                 subquery, subparams = right.subselect()
-                query = '(%s."%s" %s (%s))' % (table_alias, left, operator, subquery)
+                query = f'"{alias}"."{left}" {operator} ({subquery})'
                 params = subparams
             elif isinstance(right, (list, tuple)):
                 if model._fields[left].type == "boolean":
@@ -1078,32 +1092,32 @@ class expression(object):
                     if left != 'id':
                         field = model._fields[left]
                         params = [field.convert_to_column(p, model, validate=False) for p in params]
-                    query = f'({table_alias}."{left}" {operator} %s)'
+                    query = f'"{alias}"."{left}" {operator} %s'
                     params = [tuple(params)]
                 else:
                     # The case for (left, 'in', []) or (left, 'not in', []).
                     query = 'FALSE' if operator == 'in' else 'TRUE'
                 if (operator == 'in' and check_null) or (operator == 'not in' and not check_null):
-                    query = '(%s OR %s."%s" IS NULL)' % (query, table_alias, left)
+                    query = f'({query} OR "{alias}"."{left}" IS NULL)'
                 elif operator == 'not in' and check_null:
-                    query = '(%s AND %s."%s" IS NOT NULL)' % (query, table_alias, left)  # needed only for TRUE.
+                    query = f'({query} AND "{alias}"."{left}" IS NOT NULL)'  # needed only for TRUE.
             else:  # Must not happen
                 raise ValueError("Invalid domain term %r" % (leaf,))
 
         elif left in model and model._fields[left].type == "boolean" and ((operator == '=' and right is False) or (operator == '!=' and right is True)):
-            query = '(%s."%s" IS NULL or %s."%s" = false )' % (table_alias, left, table_alias, left)
+            query = f'("{alias}"."{left}" IS NULL OR "{alias}"."{left}" = FALSE)'
             params = []
 
         elif (right is False or right is None) and (operator == '='):
-            query = '%s."%s" IS NULL ' % (table_alias, left)
+            query = f'"{alias}"."{left}" IS NULL'
             params = []
 
         elif left in model and model._fields[left].type == "boolean" and ((operator == '!=' and right is False) or (operator == '==' and right is True)):
-            query = '(%s."%s" IS NOT NULL and %s."%s" != false)' % (table_alias, left, table_alias, left)
+            query = f'("{alias}"."{left}" IS NOT NULL AND "{alias}"."{left}" != FALSE)'
             params = []
 
         elif (right is False or right is None) and (operator == '!='):
-            query = '%s."%s" IS NOT NULL' % (table_alias, left)
+            query = f'"{alias}"."{left}" IS NOT NULL'
             params = []
 
         elif operator == '=?':
@@ -1125,11 +1139,11 @@ class expression(object):
             cast = '::text' if sql_operator.endswith('like') else ''
 
             unaccent = self._unaccent(field) if sql_operator.endswith('like') else lambda x: x
-            column = '%s.%s' % (table_alias, _quote(left))
-            query = f'({unaccent(column + cast)} {sql_operator} {unaccent("%s")})'
+            column = f'"{alias}"."{left}"'
+            query = f'{unaccent(column + cast)} {sql_operator} {unaccent("%s")}'
 
             if (need_wildcard and not right) or (right and operator in NEGATIVE_TERM_OPERATORS):
-                query = '(%s OR %s."%s" IS NULL)' % (query, table_alias, left)
+                query = f'({query} OR "{alias}"."{left}" IS NULL)'
 
             if need_wildcard:
                 params = ['%%%s%%' % pycompat.to_text(right)]

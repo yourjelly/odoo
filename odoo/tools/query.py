@@ -191,7 +191,7 @@ class Query(object):
         joins = []
         params = []
         for alias, (kind, table, condition, condition_params) in self._joins.items():
-            joins.append(f'{kind} {_from_table(table, alias)} ON ({condition})')
+            joins.append(f'{kind} {_from_table(table, alias)} ON {condition}')
             params.extend(condition_params)
 
         from_clause = " ".join([", ".join(tables)] + joins)
