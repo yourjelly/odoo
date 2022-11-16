@@ -1094,7 +1094,7 @@ class TranslationModuleReader:
                     # From our business perspective, the parent column is no need to be translated,
                     # but it is need to be set to jsonb column, since the child columns need to be translated
                     # And export the parent field may make one value to be translated twice in transifex
-                    if field.translate and not (field.model_name == 'ir.actions.actions' and field.name == 'name'):
+                    if field.translate and field.store and not (field.model_name == 'ir.actions.actions' and field.name == 'name'):
                         name = model + "," + field_name
                         try:
                             value_en = record[field_name] or ''
@@ -1253,12 +1253,12 @@ def _trans_load_data(cr, reader, lang, overwrite=False, force_overwrite=False, x
 
     # load all translation in to dict
     deep_defaultdict = lambda: defaultdict(deep_defaultdict)
-    # {model_name: {xmlid: {field_name, {src: value}}}}
+    # {xmlid: {field_name: {src: value}}}
+    xmlid_to_translations = deep_defaultdict()
+    # {model_name: {field_name: {id: ({src: value}, noupdate)}}}
     translations = deep_defaultdict()
-    # [(module_name, imd_name), (module_name, imd_name), ...] only for model_terms translation
+    # [(module_name, imd_name), (module_name, imd_name), ...]
     module_imd_names = []
-    # {model_name: {field_name: [xmlid, xmlid, ...]}}
-    model_name_to_field_name_to_xmlids = defaultdict(lambda: defaultdict(list))
 
     for row in reader:
         if not row.get('value') or not row.get('src'):  # ignore empty translations
@@ -1277,30 +1277,20 @@ def _trans_load_data(cr, reader, lang, overwrite=False, force_overwrite=False, x
             xmlid = module_name + '.' + row['imd_name']
             if xml_ids and xmlid not in xml_ids:
                 continue
-            if row['type'] == 'model_terms':
-                module_imd_names.append((module_name, imd_name))
-            model_name_to_field_name_to_xmlids[model_name][field_name].append(xmlid)
-            translations[model_name][xmlid][field_name][row['src']] = row['value']
+            module_imd_names.append((module_name, imd_name))
+            xmlid_to_translations[xmlid][field_name][row['src']] = row['value']
 
-    if not translations:
+    if not xmlid_to_translations:
         return
     env.flush_all()
 
-    # get mapping xmlid_to_id, id_to_xmlid
-    xmlid_to_id = {}
     for sub_module_imd_names in cr.split_for_in_conditions(module_imd_names):
         query = "SELECT module || '.' || name, res_id, noupdate, model FROM ir_model_data WHERE "
         query += " OR ".join(["module = %s AND name = %s"] * len(sub_module_imd_names))
         cr.execute(query, [param for params in sub_module_imd_names for param in params])
-        # {xmlid: (id, noupdate, model_name)}
-        xmlid_to_id.update((
-            (xmlid, (id_, not force_overwrite and noupdate, model_name))
-            for xmlid, id_, noupdate, model_name in cr.fetchall()
-        ))
-    id_to_xmlid = {
-        (model_name, id_): (xmlid, noupdate)
-        for xmlid, (id_, noupdate, model_name) in xmlid_to_id.items()
-    }
+        for xmlid, id_, noupdate, model_name in cr.fetchall():
+            for field_name, translation in xmlid_to_translations[xmlid].items():
+                translations[model_name][field_name][id_] = (translation, noupdate)
 
     # translate model terms
     for model_name, model_dictionary in translations.items():
@@ -1308,65 +1298,49 @@ def _trans_load_data(cr, reader, lang, overwrite=False, force_overwrite=False, x
             continue
         Model = env[model_name]
         model_table = Model._table
-        field_name_to_xmlids = model_name_to_field_name_to_xmlids[model_name]
         fields = Model._fields
-        field_type = defaultdict(list)
-        for field_name in field_name_to_xmlids.keys():
-            translate = fields[field_name].translate
-            field_type['no_translate' if not translate else 'model_terms' if callable(translate) else 'model'].append(field_name)
-        if field_type['no_translate']:
-            pass  # ignore illegal translations
-        for field_name in field_type['model_terms']:
-            record_ids = {
-                it[0]
-                for it in map(xmlid_to_id.get, field_name_to_xmlids[field_name])
-                if it
-            }
-            field = fields[field_name]
-            for sub_ids in cr.split_for_in_conditions(record_ids):
-                cr.execute(f'SELECT id, "{field_name}" FROM "{model_table}" WHERE id IN %s', (sub_ids,))
-                for id_, values in cr.fetchall():
-                    if not values:
-                        continue
-                    value_en = values.get('en_US')
-                    if not value_en:
-                        continue
-                    value_lang = values.get(lang, value_en)
-                    xmlid, noupdate = id_to_xmlid[(model_name, id_)]
-                    field_dictionary = {k: v for k, v in model_dictionary[xmlid][field_name].items()}  # len(field.get_trans_terms(v)) == 1
-                    translation_dictionary = field.get_translation_dictionary(value_en, {lang: value_lang})
-
-                    # update translation_dictionary using new translations
-                    for term_en, term in translation_dictionary.items():
-                        if not overwrite and noupdate and term[lang] != term_en:
+        for field_name in model_dictionary.keys():
+            field = fields.get(field_name)
+            field_dictionary = model_dictionary[field_name]
+            record_ids = field_dictionary.keys()
+            if callable(field.translate):
+                field = fields[field_name]
+                for sub_ids in cr.split_for_in_conditions(record_ids):
+                    cr.execute(f'SELECT id, "{field_name}" FROM "{model_table}" WHERE id IN %s', (sub_ids,))
+                    for id_, values in cr.fetchall():
+                        if not values:
                             continue
-                        term[lang] = field_dictionary.get(term_en, term[lang])
+                        value_en = values.get('en_US')
+                        if not value_en:
+                            continue
+                        value_lang = values.get(lang, value_en)
+                        record_dictionary, noupdate = field_dictionary[id_]
+                        translation_dictionary = field.get_translation_dictionary(value_en, {lang: value_lang})
 
-                    new_value_lang = field.translate(lambda term: translation_dictionary.get(term, {}).get(lang), value_en)
-                    values[lang] = new_value_lang
-                    env.cache.update_raw(Model.browse(id_), field, [values], dirty=True)
-        for field_name in field_type['model']:
-            field_translations = []
-            for xmlid in field_name_to_xmlids[field_name]:
-                src, value = list(model_dictionary[xmlid][field_name].items())[0]
-                field_translations.extend([xmlid.split('.')[-1], src, Json({lang: value})])
-            if field_translations:
-                if not force_overwrite:
-                    value_query = f"""CASE WHEN {overwrite} is True AND imd.noupdate is False
-                    THEN m."{field_name}" || t.value
-                    ELSE t.value || m."{field_name}"END"""
-                else:
-                    value_query = f'm."{field_name}" || t.value'
-                env.cr.execute(f"""
-                    UPDATE "{model_table}" AS m
-                    SET "{field_name}" = {value_query}
-                    FROM (
-                        VALUES {', '.join(['(%s, %s, %s::jsonb)'] * int(len(field_translations) / 3))}
-                    ) AS t(imd_name, src, value)
-                    JOIN "ir_model_data" AS imd
-                    ON imd."model" = '{model_name}' AND imd.name = t.imd_name
-                    WHERE imd."res_id" = m."id" AND m."{field_name}"->>'en_US' = t.src
-                """, field_translations)
+                        # update translation_dictionary using new translations
+                        for term_en, term in translation_dictionary.items():
+                            if not overwrite and noupdate and term[lang] != term_en:
+                                continue
+                            term[lang] = record_dictionary.get(term_en, term[lang])
+
+                        new_value_lang = field.translate(lambda term: translation_dictionary.get(term, {}).get(lang), value_en)
+                        values[lang] = new_value_lang
+                        env.cache.update_raw(Model.browse(id_), field, [values], dirty=True)
+            elif field.translate:
+                for sub_ids in cr.split_for_in_conditions(record_ids):
+                    if force_overwrite:
+                        for id_ in sub_ids:
+                            translation, noupdate = field_dictionary[id_]
+                            value = next(iter(translation.values()))
+                            env.cache.update_raw(Model.browse(id_), Model._fields[field_name], [{lang: value}], dirty=True)
+                    else:
+                        cr.execute(f'SELECT id, "{field_name}" ? %s AS translated FROM "{Model._table}" WHERE id IN %s', (lang, sub_ids))
+                        for id_, translated in cr.fetchall():
+                            translation, noupdate = field_dictionary[id_]
+                            if translated and not (overwrite and not noupdate):
+                                continue
+                            value = next(iter(translation.values()))
+                            env.cache.update_raw(Model.browse(id_), Model._fields[field_name], [{lang: value}], dirty=True)
     env.invalidate_all()
 
 
