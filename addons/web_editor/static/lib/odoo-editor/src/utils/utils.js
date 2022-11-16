@@ -1772,6 +1772,7 @@ export function unwrapContents(node) {
  *                     zws: the inserted zero-width space if any }
  */
 export function fillEmpty(el) {
+    console.warn('fill empty', el);
     const fillers = {};
     const blockEl = closestBlock(el);
     if (isShrunkBlock(blockEl)) {
@@ -1797,6 +1798,7 @@ export function fillEmpty(el) {
         }
         setSelection(zws, 0, zws, 0);
     }
+    console.log('after fillEmpty', document.querySelector('.odoo-editor-editable ul').innerHTML);
     return fillers;
 }
 /**
@@ -2200,6 +2202,9 @@ export function restoreState(prevStateData) {
         // it is a problem or not, to investigate.
         return;
     }
+    const rand = Math.floor(Math.random() *100);
+    console.warn("restore state " + rand);
+    console.log('before rs ' + rand, document.querySelector('.odoo-editor-editable ul').innerHTML);
     const [el, offset] = direction === DIRECTIONS.LEFT ? leftPos(node) : rightPos(node);
     const { cType: cType2 } = getState(el, offset, direction);
 
@@ -2213,6 +2218,7 @@ export function restoreState(prevStateData) {
         const inverseDirection = direction === DIRECTIONS.LEFT ? DIRECTIONS.RIGHT : DIRECTIONS.LEFT;
         enforceWhitespace(el, offset, inverseDirection, rule);
     }
+    console.log('after rs ' + rand, document.querySelector('.odoo-editor-editable ul').innerHTML);
 }
 /**
  * Enforces the whitespace and BR visibility in the given direction starting
@@ -2228,6 +2234,7 @@ export function restoreState(prevStateData) {
 export function enforceWhitespace(el, offset, direction, rule) {
     let domPath;
     let expr;
+    console.warn('   => enforceWhitespace');
     if (direction === DIRECTIONS.LEFT) {
         domPath = leftLeafOnlyNotBlockPath(el, offset);
         expr = /[^\S\u00A0]+$/;

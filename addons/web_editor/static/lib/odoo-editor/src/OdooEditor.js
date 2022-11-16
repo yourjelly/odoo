@@ -269,7 +269,7 @@ export class OdooEditor extends EventTarget {
         // -------------------
         // Alter the editable
         // -------------------
-
+        console.log('editable.innerHTML', editable.innerHTML);
         if (editable.innerHTML.trim() === '') {
             editable.innerHTML = '<p><br></p>';
         }
@@ -1459,8 +1459,11 @@ export class OdooEditor extends EventTarget {
         const rightLeaf = rightLeafOnlyNotBlockPath(range.endContainer).next().value;
         const hasSpaceAfter = !rightLeaf || rightLeaf.textContent.startsWith(' ');
         const shouldPreserveSpace = (doJoin || hasSpaceAfter) && joinWith && oldText.endsWith(' ');
+        console.log('deletrange : shoulpreserve space :' , shouldPreserveSpace);
         if (shouldPreserveSpace) {
+            console.log('deletrange : joinWith  :' , joinWith, joinWith.textContent);
             joinWith.textContent = oldText.replace(/ $/, '\u00A0');
+            console.log('deletrange : joinWith  :' , joinWith, joinWith.textContent);
             setSelection(joinWith, nodeSize(joinWith));
         }
         // Rejoin blocks that extractContents may have split in two.
@@ -2348,7 +2351,9 @@ export class OdooEditor extends EventTarget {
     //--------------------------------------------------------------------------
 
     _onBeforeInput(ev) {
+        console.log('_onBeforeInput', document.querySelector('.odoo-editor-editable ul').innerHTML);
         this._lastBeforeInputType = ev.inputType;
+        debugger
     }
 
     /**
@@ -2358,6 +2363,8 @@ export class OdooEditor extends EventTarget {
      * @private
      */
     _onInput(ev) {
+        console.log('_onInput', document.querySelector('.odoo-editor-editable ul').innerHTML);
+        debugger
         // Record the selection position that was computed on keydown or before
         // contentEditable execCommand (whatever preceded the 'input' event)
         this._recordHistorySelection(true);

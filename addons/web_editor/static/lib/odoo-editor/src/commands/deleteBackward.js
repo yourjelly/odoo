@@ -36,6 +36,7 @@ Text.prototype.oDeleteBackward = function (offset, alreadyMoved = false) {
         HTMLElement.prototype.oDeleteBackward.call(this, offset, alreadyMoved);
         return;
     }
+    console.log('oDeleteBackward 1', document.querySelector('.odoo-editor-editable ul').innerHTML);
 
     // Get the size of the unicode character to remove.
     const charSize = [...this.nodeValue.slice(0, offset)].pop().length;
@@ -43,12 +44,14 @@ Text.prototype.oDeleteBackward = function (offset, alreadyMoved = false) {
     const firstSplitOffset = splitTextNode(this, offset - charSize);
     const secondSplitOffset = splitTextNode(parentNode.childNodes[firstSplitOffset], charSize);
     const middleNode = parentNode.childNodes[firstSplitOffset];
+    console.log('oDeleteBackward 2', document.querySelector('.odoo-editor-editable ul').innerHTML);
 
     // Do remove the character, then restore the state of the surrounding parts.
     const restore = prepareUpdate(parentNode, firstSplitOffset, parentNode, secondSplitOffset);
     const isSpace = !isVisibleStr(middleNode) && !isInPre(middleNode);
     const isZWS = middleNode.nodeValue === '\u200B';
     middleNode.remove();
+    console.log('oDeleteBackward 3', document.querySelector('.odoo-editor-editable ul').innerHTML);
     restore();
 
     // If the removed element was not visible content, propagate the backspace.
@@ -64,6 +67,7 @@ Text.prototype.oDeleteBackward = function (offset, alreadyMoved = false) {
         return;
     }
 
+    console.log('oDeleteBackward 4', document.querySelector('.odoo-editor-editable ul').innerHTML);
     fillEmpty(parentNode);
     setSelection(parentNode, firstSplitOffset);
 };
