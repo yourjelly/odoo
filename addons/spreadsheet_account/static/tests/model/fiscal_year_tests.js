@@ -4,7 +4,7 @@ import {
     createModelWithDataSource,
     waitForDataSourcesLoaded,
 } from "@spreadsheet/../tests/utils/model";
-import { getCell, getEvaluatedCell } from "@spreadsheet/../tests/utils/getters";
+import { getEvaluatedCell } from "@spreadsheet/../tests/utils/getters";
 import "@spreadsheet_account/index";
 
 QUnit.module("spreadsheet_account > fiscal year", {}, () => {
@@ -29,8 +29,8 @@ QUnit.module("spreadsheet_account > fiscal year", {}, () => {
         setCellContent(model, "A2", `=ODOO.FISCALYEAR.END("11/11/2020")`);
         await waitForDataSourcesLoaded(model);
         assert.verifySteps(["get_fiscal_dates"]);
-        assert.equal(getCell(model, "A1").formattedValue, "1/1/2020");
-        assert.equal(getCell(model, "A2").formattedValue, "12/31/2020");
+        assert.equal(getEvaluatedCell(model, "A1").formattedValue, "1/1/2020");
+        assert.equal(getEvaluatedCell(model, "A2").formattedValue, "12/31/2020");
     });
 
     QUnit.test("with a given company id", async (assert) => {
@@ -54,8 +54,8 @@ QUnit.module("spreadsheet_account > fiscal year", {}, () => {
         setCellContent(model, "A2", `=ODOO.FISCALYEAR.END("11/11/2020", 1)`);
         await waitForDataSourcesLoaded(model);
         assert.verifySteps(["get_fiscal_dates"]);
-        assert.equal(getCell(model, "A1").formattedValue, "1/1/2020");
-        assert.equal(getCell(model, "A2").formattedValue, "12/31/2020");
+        assert.equal(getEvaluatedCell(model, "A1").formattedValue, "1/1/2020");
+        assert.equal(getEvaluatedCell(model, "A2").formattedValue, "12/31/2020");
     });
 
     QUnit.test("with a wrong company id", async (assert) => {

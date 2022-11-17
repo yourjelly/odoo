@@ -8,7 +8,7 @@ import IrMenuPlugin from "./ir_ui_menu_plugin";
 import {
     isMarkdownIrMenuIdUrl,
     isIrMenuXmlUrl,
-    isMarkdownViewLink,
+    isMarkdownViewUrl,
     parseIrMenuXmlUrl,
     parseViewLink,
     parseIrMenuIdLink,
@@ -108,7 +108,7 @@ export const spreadsheetLinkMenuCellService = {
             })
             .add("OdooViewLink", {
                 sequence: 67,
-                match: isMarkdownViewLink,
+                match: isMarkdownViewUrl,
                 createLink(url, label) {
                     return {
                         url,

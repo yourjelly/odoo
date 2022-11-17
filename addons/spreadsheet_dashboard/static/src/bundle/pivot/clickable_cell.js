@@ -21,7 +21,8 @@ clickableCellRegistry.add("pivot_set_filter_matching", {
             env.model.getters.getFiltersMatchingPivot(cell.content).length > 0
         );
     },
-    action: (cell, env) => {
+    action: ({ sheetId, col, row }, env) => {
+        const cell = env.model.getters.getCell(sheetId, col, row);
         const filters = env.model.getters.getFiltersMatchingPivot(cell.content);
         env.model.dispatch("SET_MANY_GLOBAL_FILTER_VALUE", { filters });
     },

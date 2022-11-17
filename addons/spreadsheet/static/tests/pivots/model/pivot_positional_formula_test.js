@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { setCellContent } from "@spreadsheet/../tests/utils/commands";
-import { getCell, getCellValue, getEvaluatedCell } from "@spreadsheet/../tests/utils/getters";
+import { getCellValue, getEvaluatedCell } from "@spreadsheet/../tests/utils/getters";
 import { createSpreadsheetWithPivot } from "@spreadsheet/../tests/utils/pivot";
 import {
     createModelWithDataSource,
@@ -338,6 +338,6 @@ QUnit.module("spreadsheet > positional pivot formula", {}, () => {
                 </pivot>`,
         });
         setCellContent(model, "A1", `=ODOO.PIVOT.HEADER(1,"#date:day",1)`);
-        assert.strictEqual(getCell(model, "A1").formattedValue, "01/20/2016");
+        assert.strictEqual(getEvaluatedCell(model, "A1").formattedValue, "01/20/2016");
     });
 });

@@ -5,8 +5,8 @@ import { getFirstListFunction, getNumberOfListFormulas } from "./list_helpers";
 
 const { astToFormula } = spreadsheet;
 
-export const SEE_RECORD_LIST = async (cell, env) => {
-    const { col, row, sheetId } = env.model.getters.getCellPosition(cell.id);
+export const SEE_RECORD_LIST = async ({ sheetId, col, row }, env) => {
+    const cell = env.model.getters.getCell(sheetId, col, row);
     if (!cell) {
         return;
     }

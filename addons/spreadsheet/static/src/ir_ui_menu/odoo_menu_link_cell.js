@@ -1,9 +1,5 @@
 /** @odoo-module */
 
-import spreadsheet from "@spreadsheet/o_spreadsheet/o_spreadsheet_extended";
-
-const { isMarkdownLink, parseMarkdownLink } = spreadsheet.helpers;
-
 const VIEW_PREFIX = "odoo://view/";
 const IR_MENU_ID_PREFIX = "odoo://ir_menu_id/";
 const IR_MENU_XML_ID_PREFIX = "odoo://ir_menu_xml_id/";
@@ -24,14 +20,10 @@ const IR_MENU_XML_ID_PREFIX = "odoo://ir_menu_xml_id/";
 
 /**
  *
- * @param {string} str
+ * @param {string} url
  * @returns {boolean}
  */
-export function isMarkdownViewLink(str) {
-    if (!isMarkdownLink(str)) {
-        return false;
-    }
-    const { url } = parseMarkdownLink(str);
+export function isMarkdownViewUrl(url) {
     return url.startsWith(VIEW_PREFIX);
 }
 
@@ -111,52 +103,3 @@ export function parseIrMenuXmlUrl(irMenuUrl) {
 export function buildIrMenuXmlLink(menuXmlId) {
     return `${IR_MENU_XML_ID_PREFIX}${menuXmlId}`;
 }
-
-// export class OdooMenuLinkCell extends LinkCell {
-//     constructor(id, content, menuId, menuName, properties = {}) {
-//         super(id, content, properties);
-//         this.urlRepresentation = menuName;
-//         this.isUrlEditable = false;
-//         this._irMenuId = menuId;
-//     }
-
-//     action(env) {
-//         const menu = env.services.menu.getMenu(this._irMenuId);
-//         env.services.action.doAction(menu.actionID);
-//     }
-// }
-
-// export class OdooViewLinkCell extends LinkCell {
-//     /**
-//      *
-//      * @param {string} id
-//      * @param {string} content
-//      * @param {ViewLinkDescription} actionDescription
-//      * @param {Object} properties
-//      */
-//     constructor(id, content, actionDescription, properties = {}) {
-//         super(id, content, properties);
-//         this.urlRepresentation = actionDescription.name;
-//         this.isUrlEditable = false;
-//         this._viewType = actionDescription.viewType;
-//         /** @type {Action} */
-//         this._action = actionDescription.action;
-//     }
-
-//     action(env) {
-//         env.services.action.doAction(
-//             {
-//                 type: "ir.actions.act_window",
-//                 name: this.urlRepresentation,
-//                 res_model: this._action.modelName,
-//                 views: this._action.views,
-//                 target: "current",
-//                 domain: this._action.domain,
-//                 context: this._action.context,
-//             },
-//             {
-//                 viewType: this._viewType,
-//             }
-//         );
-//     }
-// }

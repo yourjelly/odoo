@@ -45,8 +45,8 @@ export function getCellFormula(model, xc, sheetId = model.getters.getActiveSheet
  * Get the content of the given xc
  */
 export function getCellContent(model, xc, sheetId = model.getters.getActiveSheetId()) {
-    const cell = getCell(model, xc, sheetId);
-    return cell ? model.getters.getCellText(cell, sheetId, true) : "";
+    const { col, row } = toCartesian(xc);
+    return model.getters.getCellText({ sheetId, col, row }, true);
 }
 
 /**

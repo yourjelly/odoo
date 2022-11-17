@@ -186,9 +186,9 @@ QUnit.module("spreadsheet > pivot plugin", {}, () => {
         const { model } = await createSpreadsheetWithPivot();
         model.dispatch("REMOVE_PIVOT", { pivotId: "1" });
         assert.strictEqual(model.getters.getPivotIds().length, 0);
-        const B4 = getCell(model, "B4");
-        assert.equal(B4.evaluated.error.message, `There is no pivot with id "1"`);
-        assert.equal(B4.evaluated.value, `#ERROR`);
+        const B4 = getEvaluatedCell(model, "B4");
+        assert.equal(B4.error.message, `There is no pivot with id "1"`);
+        assert.equal(B4.value, `#ERROR`);
     });
 
     QUnit.test("Can undo/redo a delete pivot", async function (assert) {
@@ -197,14 +197,14 @@ QUnit.module("spreadsheet > pivot plugin", {}, () => {
         model.dispatch("REMOVE_PIVOT", { pivotId: "1" });
         model.dispatch("REQUEST_UNDO");
         assert.strictEqual(model.getters.getPivotIds().length, 1);
-        let B4 = getCell(model, "B4");
-        assert.equal(B4.evaluated.error, undefined);
-        assert.equal(B4.evaluated.value, value);
+        let B4 = getEvaluatedCell(model, "B4");
+        assert.equal(B4.error, undefined);
+        assert.equal(B4.value, value);
         model.dispatch("REQUEST_REDO");
         assert.strictEqual(model.getters.getPivotIds().length, 0);
-        B4 = getCell(model, "B4");
-        assert.equal(B4.evaluated.error.message, `There is no pivot with id "1"`);
-        assert.equal(B4.evaluated.value, `#ERROR`);
+        B4 = getEvaluatedCell(model, "B4");
+        assert.equal(B4.error.message, `There is no pivot with id "1"`);
+        assert.equal(B4.value, `#ERROR`);
     });
 
     QUnit.test("Format header displays an error for non-existing field", async function (assert) {

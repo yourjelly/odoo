@@ -11646,66 +11646,8 @@
         if (!repeatingArg) {
             return (argPosition) => argPosition;
         }
-<<<<<<< HEAD
-        const targetType = typeof target;
-        let matchVal = undefined;
-        let matchValIndex = undefined;
-        let indexLeft = 0;
-        let indexRight = rangeLength - 1;
-        let indexMedian;
-        let currentIndex;
-        let currentVal;
-        let currentType;
-        while (indexRight - indexLeft >= 0) {
-            indexMedian = Math.floor((indexLeft + indexRight) / 2);
-            currentIndex = indexMedian;
-            currentVal = getValueInData(data, currentIndex);
-            currentType = typeof currentVal;
-            // 1 - linear search to find value with the same type
-            while (indexLeft < currentIndex && targetType !== currentType) {
-                currentIndex--;
-                currentVal = getValueInData(data, currentIndex);
-                currentType = typeof currentVal;
-            }
-            if (currentType !== targetType || currentVal === undefined) {
-                indexLeft = indexMedian + 1;
-                continue;
-            }
-            // 2 - check if value match
-            if (mode === "strict" && currentVal === target) {
-                matchVal = currentVal;
-                matchValIndex = currentIndex;
-            }
-            else if (mode === "nextSmaller" && currentVal <= target) {
-                if (matchVal === undefined ||
-                    matchVal < currentVal ||
-                    (matchVal === currentVal && sortOrder === "asc" && matchValIndex < currentIndex) ||
-                    (matchVal === currentVal && sortOrder === "desc" && matchValIndex > currentIndex)) {
-                    matchVal = currentVal;
-                    matchValIndex = currentIndex;
-                }
-            }
-            else if (mode === "nextGreater" && currentVal >= target) {
-                if (matchVal === undefined ||
-                    matchVal > currentVal ||
-                    (matchVal === currentVal && sortOrder === "asc" && matchValIndex < currentIndex) ||
-                    (matchVal === currentVal && sortOrder === "desc" && matchValIndex > currentIndex)) {
-                    matchVal = currentVal;
-                    matchValIndex = currentIndex;
-                }
-            }
-            // 3 - give new indexes for the Binary search
-            if ((sortOrder === "asc" && currentVal > target) ||
-                (sortOrder === "desc" && currentVal <= target)) {
-                indexRight = currentIndex - 1;
-            }
-            else {
-                indexLeft = indexMedian + 1;
-            }
-=======
         if (repeatingArg === 1) {
             return (argPosition) => Math.min(argPosition, countArg);
->>>>>>> m
         }
         const argBeforeRepeat = countArg - repeatingArg;
         return (argPosition) => {
@@ -27537,10 +27479,28 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
         createFormulaCell(id, content, format, style, sheetId) {
             const compiledFormula = compile(content);
+            if (compiledFormula.dependencies.length) {
+                return this.createFormulaCellWithDependencies(id, compiledFormula, format, style, sheetId);
+            }
+            return {
+                id,
+                content,
+                style,
+                format,
+                isFormula: true,
+                compiledFormula,
+                dependencies: [],
+            };
+        }
+        /**
+         * Create a new formula cell with the content
+         * being a computed property to rebuild the dependencies XC.
+         */
+        createFormulaCellWithDependencies(id, compiledFormula, format, style, sheetId) {
             const dependencies = compiledFormula.dependencies.map((xc) => this.getters.getRangeFromSheetXC(sheetId, xc));
             const buildFormulaContent = this.buildFormulaContent.bind(this);
-            // the content closure is expensive memory-wise. We should find a clean
-            // way to remove it.
+            // Only for formulas with dependencies because
+            // **the closure is expensive memory-wise**
             return {
                 id,
                 get content() {
@@ -42299,9 +42259,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         UuidGenerator,
         formatValue,
         computeTextWidth,
-        isMarkdownLink,
-        parseMarkdownLink,
-        markdownLink,
         createEmptyWorkbookData,
         getDefaultChartJsRuntime,
         chartFontColor,
@@ -42313,6 +42270,13 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         rgbaToHex,
         colorToRGBA,
         positionToZone,
+    };
+    const links = {
+        isMarkdownLink,
+        parseMarkdownLink,
+        markdownLink,
+        openLink,
+        urlRepresentation,
     };
     const components = {
         ChartPanel,
@@ -42356,6 +42320,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     exports.functionCache = functionCache;
     exports.helpers = helpers;
     exports.invalidateEvaluationCommands = invalidateEvaluationCommands;
+    exports.links = links;
     exports.load = load;
     exports.parse = parse;
     exports.readonlyAllowedCommands = readonlyAllowedCommands;
@@ -42366,13 +42331,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     Object.defineProperty(exports, '__esModule', { value: true });
 
     exports.__info__.version = '2.0.0';
-<<<<<<< HEAD
-    exports.__info__.date = '2022-11-16T08:24:59.755Z';
-    exports.__info__.hash = '1b4fac5';
-=======
-    exports.__info__.date = '2022-11-16T14:48:24.616Z';
-    exports.__info__.hash = 'f576f20';
->>>>>>> m
+    exports.__info__.date = '2022-11-17T12:34:24.670Z';
+    exports.__info__.hash = 'e68689d';
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
 //# sourceMappingURL=o_spreadsheet.js.map

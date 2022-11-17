@@ -40,7 +40,7 @@ QUnit.module("spreadsheet > list plugin", {}, () => {
             model: "documents.document",
             columns: ["handler"],
         });
-        assert.strictEqual(getCellValue(model, "A2", "Spreadsheet"));
+        assert.strictEqual(getCellValue(model, "A2"), "Spreadsheet");
     });
 
     QUnit.test("Return name_get of many2one field", async (assert) => {
@@ -200,10 +200,10 @@ QUnit.module("spreadsheet > list plugin", {}, () => {
             undefined
         );
         assert.strictEqual(getCellValue(model, "A1"), forbiddenFieldName);
-        const A2 = getCell(model, "A2");
-        assert.equal(A2.evaluated.type, "error");
+        const A2 = getEvaluatedCell(model, "A2");
+        assert.equal(A2.type, "error");
         assert.equal(
-            A2.evaluated.error.message,
+            A2.error.message,
             `The field ${forbiddenFieldName} does not exist or you do not have access to that field`
         );
     });
@@ -366,9 +366,9 @@ QUnit.module("spreadsheet > list plugin", {}, () => {
         const { model } = await createSpreadsheetWithList();
         model.dispatch("REMOVE_ODOO_LIST", { listId: "1" });
         assert.strictEqual(model.getters.getListIds().length, 0);
-        const B4 = getCell(model, "B4");
-        assert.equal(B4.evaluated.error.message, `There is no list with id "1"`);
-        assert.equal(B4.evaluated.value, `#ERROR`);
+        const B4 = getEvaluatedCell(model, "B4");
+        assert.equal(B4.error.message, `There is no list with id "1"`);
+        assert.equal(B4.value, `#ERROR`);
     });
 
     QUnit.test("Can undo/redo a delete list", async function (assert) {
@@ -377,14 +377,14 @@ QUnit.module("spreadsheet > list plugin", {}, () => {
         model.dispatch("REMOVE_ODOO_LIST", { listId: "1" });
         model.dispatch("REQUEST_UNDO");
         assert.strictEqual(model.getters.getListIds().length, 1);
-        let B4 = getCell(model, "B4");
-        assert.equal(B4.evaluated.error, undefined);
-        assert.equal(B4.evaluated.value, value);
+        let B4 = getEvaluatedCell(model, "B4");
+        assert.equal(B4.error, undefined);
+        assert.equal(B4.value, value);
         model.dispatch("REQUEST_REDO");
         assert.strictEqual(model.getters.getListIds().length, 0);
-        B4 = getCell(model, "B4");
-        assert.equal(B4.evaluated.error.message, `There is no list with id "1"`);
-        assert.equal(B4.evaluated.value, `#ERROR`);
+        B4 = getEvaluatedCell(model, "B4");
+        assert.equal(B4.error.message, `There is no list with id "1"`);
+        assert.equal(B4.value, `#ERROR`);
     });
 
     QUnit.test("can edit list domain", async (assert) => {

@@ -31,8 +31,10 @@ cellMenuRegistry.add("pivot_see_records", {
     name: _lt("See records"),
     sequence: 175,
     action: async (env) => {
-        const cell = env.model.getters.getActiveCell();
-        await SEE_RECORDS_PIVOT(cell, env);
+        const sheetId = env.model.getters.getActiveSheetId();
+        const { col, row } = env.model.getters.getPosition();
+        const position = env.model.getters.getMainCellPosition(sheetId, col, row);
+        await SEE_RECORDS_PIVOT({ sheetId, ...position }, env);
     },
     isVisible: (env) => {
         const sheetId = env.model.getters.getActiveSheetId();
