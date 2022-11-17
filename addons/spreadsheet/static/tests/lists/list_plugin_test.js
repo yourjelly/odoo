@@ -6,7 +6,14 @@ import { nextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
 import CommandResult from "@spreadsheet/o_spreadsheet/cancelled_reason";
 import { createModelWithDataSource, waitForDataSourcesLoaded } from "../utils/model";
 import { addGlobalFilter, selectCell, setCellContent } from "../utils/commands";
-import { getCell, getCellContent, getCellFormula, getCells, getCellValue } from "../utils/getters";
+import {
+    getCell,
+    getCellContent,
+    getCellFormula,
+    getCells,
+    getCellValue,
+    getEvaluatedCell,
+} from "../utils/getters";
 import { createSpreadsheetWithList } from "../utils/list";
 import { registry } from "@web/core/registry";
 
@@ -81,14 +88,14 @@ QUnit.module("spreadsheet > list plugin", {}, () => {
         assert.strictEqual(getCell(model, "G2").format, undefined);
         assert.strictEqual(getCell(model, "G3").format, undefined);
 
-        assert.strictEqual(getCell(model, "A2").evaluated.format, "0");
-        assert.strictEqual(getCell(model, "B2").evaluated.format, "#,##0.00");
-        assert.strictEqual(getCell(model, "C2").evaluated.format, undefined);
-        assert.strictEqual(getCell(model, "D2").evaluated.format, "m/d/yyyy");
-        assert.strictEqual(getCell(model, "E2").evaluated.format, "m/d/yyyy hh:mm:ss");
-        assert.strictEqual(getCell(model, "F2").evaluated.format, undefined);
-        assert.strictEqual(getCell(model, "G2").evaluated.format, "#,##0.00[$€]");
-        assert.strictEqual(getCell(model, "G3").evaluated.format, "[$$]#,##0.00");
+        assert.strictEqual(getEvaluatedCell(model, "A2").format, "0");
+        assert.strictEqual(getEvaluatedCell(model, "B2").format, "#,##0.00");
+        assert.strictEqual(getEvaluatedCell(model, "C2").format, undefined);
+        assert.strictEqual(getEvaluatedCell(model, "D2").format, "m/d/yyyy");
+        assert.strictEqual(getEvaluatedCell(model, "E2").format, "m/d/yyyy hh:mm:ss");
+        assert.strictEqual(getEvaluatedCell(model, "F2").format, undefined);
+        assert.strictEqual(getEvaluatedCell(model, "G2").format, "#,##0.00[$€]");
+        assert.strictEqual(getEvaluatedCell(model, "G3").format, "[$$]#,##0.00");
     });
 
     QUnit.test("can select a List from cell formula", async function (assert) {
@@ -366,7 +373,7 @@ QUnit.module("spreadsheet > list plugin", {}, () => {
 
     QUnit.test("Can undo/redo a delete list", async function (assert) {
         const { model } = await createSpreadsheetWithList();
-        const value = getCell(model, "B4").evaluated.value;
+        const value = getEvaluatedCell(model, "B4").value;
         model.dispatch("REMOVE_ODOO_LIST", { listId: "1" });
         model.dispatch("REQUEST_UNDO");
         assert.strictEqual(model.getters.getListIds().length, 1);

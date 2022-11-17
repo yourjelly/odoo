@@ -36,8 +36,10 @@ cellMenuRegistry.add("list_see_record", {
         await SEE_RECORD_LIST(cell, env);
     },
     isVisible: (env) => {
-        const cell = env.model.getters.getActiveCell();
-        return SEE_RECORD_LIST_VISIBLE(cell);
+        const sheetId = env.model.getters.getActiveSheetId();
+        const { col, row } = env.model.getters.getPosition();
+        const position = env.model.getters.getMainCellPosition(sheetId, col, row);
+        return SEE_RECORD_LIST_VISIBLE({ sheetId, ...position }, env);
     },
 });
 

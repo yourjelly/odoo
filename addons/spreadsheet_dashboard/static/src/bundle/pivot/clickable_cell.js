@@ -13,9 +13,10 @@ clickableCellRegistry.add("pivot", {
 });
 
 clickableCellRegistry.add("pivot_set_filter_matching", {
-    condition: (cell, env) => {
+    condition: (position, env) => {
+        const cell = env.model.getters.getCell(position.sheetId, position.col, position.row);
         return (
-            SEE_RECORDS_PIVOT_VISIBLE(cell) &&
+            SEE_RECORDS_PIVOT_VISIBLE(position, env) &&
             getFirstPivotFunction(cell.content).functionName === "ODOO.PIVOT.HEADER" &&
             env.model.getters.getFiltersMatchingPivot(cell.content).length > 0
         );
