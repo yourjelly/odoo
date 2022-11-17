@@ -100,7 +100,11 @@ class PickingType(models.Model):
     def create(self, vals_list):
         for vals in vals_list:
             if 'sequence_id' not in vals or not vals['sequence_id']:
-                if vals['warehouse_id']:
+                if not self.user_has_groups('stock.group_stock_multi_warehouses') and not vals.get('warehouse_id'):
+                    warehouse = self.env['stock.warehouse'].search([('company_id', '=', vals.get('company_id'))], limit=1)
+                    vals['warehouse_id'] = warehouse.id
+
+                if vals.get('warehouse_id'):
                     wh = self.env['stock.warehouse'].browse(vals['warehouse_id'])
                     vals['sequence_id'] = self.env['ir.sequence'].sudo().create({
                         'name': wh.name + ' ' + _('Sequence') + ' ' + vals['sequence_code'],
