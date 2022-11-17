@@ -3066,8 +3066,7 @@ class BaseModel(metaclass=MetaModel):
                     translation = {old_terms_digested2value[key]: value for key, value in translation.items() if key in old_terms_digested2value}
                 for key, value in translation.items():
                     new_term = field.translate.term_converter(value)
-                    if len(field.get_trans_terms(new_term)) == 1:  # drop illegal new terms
-                        translation_safe[key] = new_term
+                    translation_safe[key] = new_term
                 new_translations[lang] = field.translate(translation_safe.get, old_value)
             self.env.cache.update_raw(self, field, [new_translations], dirty=True)
             self.modified([field_name])

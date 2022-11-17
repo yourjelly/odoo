@@ -177,7 +177,7 @@ TRANSLATED_ATTRS.update(
 avoid_pattern = re.compile(r"\s*<!DOCTYPE", re.IGNORECASE | re.MULTILINE | re.UNICODE)
 
 
-def translate_xml_node(node, callback, parse, serialize):
+def translate_xml_node(node, callback, parse, serialize, check=True):
     """ Return the translation of the given XML/HTML node.
 
         :param node:
@@ -248,7 +248,7 @@ def translate_xml_node(node, callback, parse, serialize):
                 content = serialize(div)[5:-6]
                 original = content.strip()
                 translated = callback(original)
-                if translated:
+                if translated and (not check or _xml_translate(lambda x: original, f"<div>{translated}</div>", check=False) == f"<div>{original}</div>"):
                     result = content.replace(original, translated)
                     div = parse_html(f"<div>{result}</div>")
                     if pos:
@@ -292,8 +292,10 @@ def parse_html(text):
 def serialize_html(node):
     return etree.tostring(node, method='html', encoding='unicode')
 
-
 def xml_translate(callback, value):
+    return _xml_translate(callback, value, check=True)
+
+def _xml_translate(callback, value, check=True):
     """ Translate an XML value (string), using `callback` for translating text
         appearing in `value`.
     """
@@ -302,12 +304,12 @@ def xml_translate(callback, value):
 
     try:
         root = parse_xml(value)
-        result = translate_xml_node(root, callback, parse_xml, serialize_xml)
+        result = translate_xml_node(root, callback, parse_xml, serialize_xml, check)
         return serialize_xml(result)
     except etree.ParseError:
         # fallback for translated terms: use an HTML parser and wrap the term
         root = parse_html(u"<div>%s</div>" % value)
-        result = translate_xml_node(root, callback, parse_xml, serialize_xml)
+        result = translate_xml_node(root, callback, parse_xml, serialize_xml, check)
         # remove tags <div> and </div> from result
         return serialize_xml(result)[5:-6]
 
@@ -322,6 +324,9 @@ def xml_term_converter(value):
     return etree.tostring(root[0][0], encoding='unicode')[5:-6]
 
 def html_translate(callback, value):
+    return _html_translate(callback, value, check=True)
+
+def _html_translate(callback, value, check=True):
     """ Translate an HTML value (string), using `callback` for translating text
         appearing in `value`.
     """
@@ -331,7 +336,7 @@ def html_translate(callback, value):
     try:
         # value may be some HTML fragment, wrap it into a div
         root = parse_html("<div>%s</div>" % value)
-        result = translate_xml_node(root, callback, parse_html, serialize_html)
+        result = translate_xml_node(root, callback, parse_html, serialize_html, check)
         # remove tags <div> and </div> from result
         value = serialize_html(result)[5:-6]
     except ValueError:
@@ -1315,6 +1320,7 @@ def _trans_load_data(cr, reader, lang, overwrite=False, force_overwrite=False, x
                             continue
                         value_lang = values.get(lang, value_en)
                         record_dictionary, noupdate = field_dictionary[id_]
+                        record_dictionary = {k: v for k, v in record_dictionary.items() if len(field.get_trans_terms(v)) == 1}
                         translation_dictionary = field.get_translation_dictionary(value_en, {lang: value_lang})
 
                         # update translation_dictionary using new translations

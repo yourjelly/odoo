@@ -1729,6 +1729,8 @@ class _String(Field):
 
         for lang, to_lang_value in to_lang_values.items():
             to_lang_terms = self.get_trans_terms(to_lang_value)
+            if len(to_lang_terms) != len(from_lang_terms):
+                continue
             for from_lang_term, to_lang_term in zip(from_lang_terms, to_lang_terms):
                 dictionary[from_lang_term].update({lang: to_lang_term})
         return dictionary

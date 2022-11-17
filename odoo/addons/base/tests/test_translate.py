@@ -816,7 +816,6 @@ class TestXMLTranslation(TransactionCase):
         self.assertIn("<i>", view.arch_db)
         self.assertIn("<i>", view_fr.arch_db)
 
-    # TODO 1. add method to translate html/xml field. 2. add tests new translation method
     def test_update_field_translations(self):
         archf = '<form string="X">%s<div>%s</div></form>'
         terms_en = ('Bread and cheese', 'Fork')
@@ -845,6 +844,49 @@ class TestXMLTranslation(TransactionCase):
         self.assertEqual(view.with_context(lang='en_US').arch_db, '<form string="X">Bread and cheese<div>Fork2</div></form>')
         self.assertEqual(view.with_context(lang='fr_FR').arch_db, '<form string="X">Pain et fromage<div>Fourchette2</div></form>')
         self.assertEqual(view.with_context(lang='nl_NL').arch_db, view_nl)
+
+    def test_update_field_translations_illegal(self):
+        archf = '<form string="X">%s<div>%s</div></form>'
+        terms_en = ('<i class="fa fa-circle" role="img" aria-label="Invalid" title="Invalid"/>', '<i>Fork</i>')
+        view = self.create_view(archf, terms_en)
+
+        view.update_field_translations('arch_db', {
+            'fr_FR': {
+                '<i class="fa fa-circle" role="img" aria-label="Invalid" title="Invalid"/>':
+                    '<i class="fa fa-circle" role="img" aria-label="Non-valide" title="Non-valide"/>'
+            }
+        })
+        self.assertEqual(
+            view.with_context(lang='fr_FR').arch_db,
+            '<form string="X"><i class="fa fa-circle" role="img" aria-label="Non-valide" title="Non-valide"/><div><i>Fork</i></div></form>',
+            'content in <i></i> should be treated as one term and translated')
+
+        view.update_field_translations('arch_db', {
+            'fr_FR': {
+                '<i class="fa fa-circle" role="img" aria-label="Non-valide" title="Non-valide"/>':
+                    '<i class="fa fa-circle" role="img"/>'
+            }
+        })
+        self.assertEqual(
+            view.with_context(lang='fr_FR').arch_db,
+            '<form string="X"><i class="fa fa-circle" role="img" aria-label="Non-valide" title="Non-valide"/><div><i>Fork</i></div></form>',
+            'content in <i></i> should contain at least one translate content')
+
+        view.update_field_translations('arch_db', {
+            'fr_FR': {'<i>Fork</i>': '<div>Fork1<div/>Fork2'}
+        })
+        self.assertEqual(
+            view.with_context(lang='fr_FR').arch_db,
+            '<form string="X"><i class="fa fa-circle" role="img" aria-label="Non-valide" title="Non-valide"/><div><i>Fork</i></div></form>',
+            '"<div>Fork1<div/>Fork2" has two terms and should be dropped as a translation')
+
+        view.update_field_translations('arch_db', {
+            'fr_FR': {'<i>Fork</i>': '<i> </i>'}
+        })
+        self.assertEqual(
+            view.with_context(lang='fr_FR').arch_db,
+            '<form string="X"><i class="fa fa-circle" role="img" aria-label="Non-valide" title="Non-valide"/><div><i>Fork</i></div></form>',
+            '"<i> </i>" has no term and should be dropped as a translation')
 
 @tagged('post_install', '-at_install')
 class TestLanguageInstallPerformance(TransactionCase):
