@@ -10,8 +10,15 @@ DFTL_CURSOR_EXPR = [
 ]
 
 ATTRIBUTE_WHITELIST = [
-    'get_sql', 'self.env.user.lang', 'get_lang().code'
+    'get_sql', 'self.env.user.lang', 'get_lang().code', 'id', '_table'
 ]
+
+FUNCTION_WHITELIST = [
+    'create', 'read' , 'write','browse','select','get','strip','items', '_select', '_from'
+]
+
+func_call = {}
+func_called_for_query = []
 
 class OdooBaseChecker(BaseChecker):
     __implements__ = interfaces.IAstroidChecker
@@ -26,7 +33,22 @@ class OdooBaseChecker(BaseChecker):
         )
     }
 
-    Failures = [] # TODO: use this list to show the variable that failed the test
+    Failures = [] # TODO: use this list to show the variables that failed the test
+
+    def _get_return_node(self,node):
+        ret = []
+        nodes = [node]
+        while len(nodes) > 0:
+            if isinstance(nodes[0], astroid.Return):
+                ret.append(nodes[0])
+                nodes = nodes[1:]
+                continue
+            else:
+                nodes = nodes[1:] + list(nodes[0].get_children())
+        return ret
+
+    def _is_function_safe(self, node, safe_args=False):
+        pass
 
     def _is_asserted(self, node): # If there is an assert on the value of the node, it's very likely to be safe
         all_assert = list(node.scope().nodes_of_class(astroid.Assert))
@@ -39,7 +61,9 @@ class OdooBaseChecker(BaseChecker):
         return False
 
     def _get_attribute_chain(self, node):
-        chain = ''
+        return node.attrname #FIXME
+        """
+        chain = '' 
         n = node
         while hasattr(n, 'expr'):
             if isinstance(n.expr, astroid.Call):
@@ -51,15 +75,16 @@ class OdooBaseChecker(BaseChecker):
         if isinstance(n, astroid.Name):
             chain = n.name + '.' + chain
         return chain[:-1]
+        """
 
-    def _is_fstring_cst(self, node):
+    def _is_fstring_cst(self, node, args_allowed=False):
         formatted_string = []
         for format_node in node.values:
             if isinstance(format_node, astroid.FormattedValue):
                 if isinstance(format_node.value, astroid.Attribute) and format_node.value.attrname.startswith('_'):
                     formatted_string += ['table_name']
                     continue
-                operand = self._is_constexpr(format_node.value)
+                operand = self._tracing_is_constexpr(format_node.value, args_allowed)
                 if not operand:
                     return False
                 else:
@@ -68,19 +93,34 @@ class OdooBaseChecker(BaseChecker):
                 formatted_string += format_node.value
         return True
 
-    def _tracing_is_constexpr(self, node):
-        value = self._is_constexpr(node)
+    def _tracing_is_constexpr(self, node, args_allowed = False, position=None):
+        value = self._is_constexpr(node, args_allowed, position)
         if not value:
             self.Failures.append(node)
         return value
 
-    def _is_constexpr(self, node):
+    def _is_constexpr(self, node, args_allowed = False, position=None):
+        global func_call
+        global func_called_for_query
         if isinstance(node, astroid.Const): # astroid.const is always safe
             return True
         elif isinstance(node, astroid.List):
             for l in node.elts:
-                value = self._tracing_is_constexpr(l)
+                value = self._tracing_is_constexpr(l, args_allowed)
                 if not value:
+                    return False
+            return True
+        elif isinstance(node, astroid.Tuple):
+            if position is None:
+                for child in node.get_children():
+                    if not self._tracing_is_constexpr(child, args_allowed):
+                        return False
+                return True
+            else: 
+                return self._tracing_is_constexpr(node.elts[position], args_allowed)
+        elif isinstance(node, astroid.Set):
+            for elem in node.elts: 
+                if not self._tracing_is_constexpr(elem):
                     return False
             return True
         elif isinstance(node, astroid.BinOp): # recusively infer both side of the operation, then make the operation. Failing if either side is not inferable
@@ -89,20 +129,20 @@ class OdooBaseChecker(BaseChecker):
             elif isinstance(node.right, astroid.Dict): #case only for %(var)s
                 dic = {}
                 for value in node.right.items:
-                    key = self._tracing_is_constexpr(value[0])
-                    value = self._tracing_is_constexpr(value[1])
+                    key = self._tracing_is_constexpr(value[0], args_allowed)
+                    value = self._tracing_is_constexpr(value[1], args_allowed)
                     if not key or not value:
                         return False
                     else:
                         dic[key] = value
-                left = self._tracing_is_constexpr(node.left)
+                left = self._tracing_is_constexpr(node.left, args_allowed)
                 if not left:
                     return False
                 else:
                     return True
             else:
-                left_operand = self._tracing_is_constexpr(node.left)
-                right_operand = self._tracing_is_constexpr(node.right)
+                left_operand = self._tracing_is_constexpr(node.left, args_allowed)
+                right_operand = self._tracing_is_constexpr(node.right, args_allowed)
                 if not left_operand or not right_operand:
                     return False
                 else:
@@ -111,27 +151,28 @@ class OdooBaseChecker(BaseChecker):
             assignements = node.lookup(node.name)
             assigned_node = []
             for n in assignements[1]:
-                if isinstance(n.parent, astroid.Arguments):
-                    if n.parent.parent.name.startswith('_'):
-                        assigned_node += [True]
-                    else:
-                        assigned_node += [False]
+                if isinstance(n.parent, astroid.FunctionDef):
+                    assigned_node += [args_allowed]
+                elif isinstance(n.parent, astroid.Arguments):
+                    assigned_node += [args_allowed]
                 elif isinstance(n.parent, astroid.Tuple): # multi assign a,b = (a,b)
                     if isinstance(n.statement(), astroid.For):
-                        assigned_node += [self._tracing_is_constexpr(n.statement().iter)]
+                        assigned_node += [self._tracing_is_constexpr(n.statement().iter, args_allowed)]
                     else:
-                        assigned_node += [self._tracing_is_constexpr(n.statement().value)]
+                        assigned_node += [self._tracing_is_constexpr(n.statement().value, args_allowed, position=n.parent.elts.index(n))]
                 elif isinstance(n.parent, astroid.For):
                     assigned_node += [False] #TODO
                 elif isinstance(n.parent, astroid.AugAssign):
-                    left = self._tracing_is_constexpr(n.parent.target)
-                    right = self._tracing_is_constexpr(n.parent.value)
+                    left = self._tracing_is_constexpr(n.parent.target, args_allowed)
+                    right = self._tracing_is_constexpr(n.parent.value, args_allowed)
                     if not left or not right:
                         assigned_node += [False]
                     else:
                         assigned_node += [True]
+                elif isinstance(n.parent, astroid.Module):
+                    return True 
                 else:
-                    assigned_node += [self._tracing_is_constexpr(n.parent.value)]
+                    assigned_node += [self._tracing_is_constexpr(n.parent.value, args_allowed)]
             if False in assigned_node or len(assigned_node) == 0:
                 if not self._is_asserted(node):
                     pass
@@ -139,15 +180,15 @@ class OdooBaseChecker(BaseChecker):
             else:
                 return True
         elif isinstance(node, astroid.JoinedStr):
-            return self._is_fstring_cst(node)
+            return self._is_fstring_cst(node, args_allowed)
         elif isinstance(node, astroid.Call) and isinstance(node.func, astroid.node_classes.Attribute):
             if node.func.attrname == 'format':
                 key_value_arg = []
                 if not node.keywords: # no args in format
-                    return self._tracing_is_constexpr(node.func.expr)
+                    return self._tracing_is_constexpr(node.func.expr, args_allowed)
                 else:
                     for key in node.keywords:
-                        inferred_value = self._tracing_is_constexpr(key.value)
+                        inferred_value = self._tracing_is_constexpr(key.value, args_allowed)
                         if not inferred_value:
                             return False
                         else:
@@ -156,33 +197,58 @@ class OdooBaseChecker(BaseChecker):
             elif node.func.attrname == 'substitute':
                 return False #Never used in code
             else:
+                if 'fun_' + node.func.attrname ==  'fun_' + node.scope().name: # that is a .super() call
+                    return True
+                if 'fun_' + node.func.attrname not in func_called_for_query:
+                    func_called_for_query.append(('fun_' + node.func.attrname, position))
+                cst_args = True
                 for arg in node.args:
-                    if not self._tracing_is_constexpr(arg):
-                        return False
+                    if not self._tracing_is_constexpr(arg, args_allowed):
+                        cst_args = False
+                if 'fun_' + node.func.attrname in  func_call.keys():
+                    for fun in func_call['fun_' + node.func.attrname]:
+                        func_call['fun_' + node.func.attrname].pop(func_call['fun_' + node.func.attrname].index(fun))
+                        for returnNode in self._get_return_node(fun):
+                            if not self._tracing_is_constexpr(returnNode.value):
+                                return False
+                    return True
                 return True
         elif isinstance(node, astroid.Call):
+            if 'fun_' + node.func.name not in func_called_for_query:
+                func_called_for_query.append(('fun_' + node.func.name, position))
+            cst_args = True
             for arg in node.args:
-                if not self._tracing_is_constexpr(arg):
-                    return False
+                if not self._tracing_is_constexpr(arg, args_allowed):
+                    cst_args = False
+            if 'fun_' + node.func.name in  func_call.keys():
+                if 'fun_' + node.func.name ==  'fun_' + node.scope().name: # that is a .super() call
+                    return True
+                for fun in func_call['fun_' + node.func.name]:
+                    func_call['fun_' + node.func.name].pop(func_call['fun_' + node.func.name].index(fun))
+                    for returnNode in self._get_return_node(fun):
+                        if not self._tracing_is_constexpr(returnNode.value,cst_args, position):
+                            func_call.pop('fun_' + node.func.name)
+                            return False
+                return True
             return True
         elif isinstance(node, astroid.IfExp):
-            body = self._tracing_is_constexpr(node.body)
-            orelse = self._tracing_is_constexpr(node.orelse)
+            body = self._tracing_is_constexpr(node.body, args_allowed)
+            orelse = self._tracing_is_constexpr(node.orelse, args_allowed)
             if not body or not orelse:
                 return False
             else:
                 return True
         elif isinstance(node, astroid.Subscript):
-            return self._tracing_is_constexpr(node.value)
+            return self._tracing_is_constexpr(node.value, args_allowed)
         elif isinstance(node, astroid.BoolOp):
             if node.op == 'or':
                 for val in node.values:
-                    cst = self._tracing_is_constexpr(val)
+                    cst = self._tracing_is_constexpr(val, args_allowed)
                     if not cst:
                         return False
                 return True
             elif node.op == 'and':
-                return self._tracing_is_constexpr(node.values[1])
+                return self._tracing_is_constexpr(node.values[1], args_allowed)
             else:
                 return False
 
@@ -291,6 +357,24 @@ class OdooBaseChecker(BaseChecker):
     def _check_sql_injection_risky(self, node):
         # Inspired from OCA/pylint-odoo project
         # Thanks @moylop260 (Moisés López) & @nilshamerlinck (Nils Hamerlinck)
+        global func_call
+        if isinstance(node.scope(), astroid.FunctionDef) and not  node.scope().name.startswith('__') and node.scope().name not in FUNCTION_WHITELIST: 
+            if 'fun_' + node.scope().name not in  func_call.keys():#the fun prefix is to avoid overriding __init__ of the dict 
+                func_call['fun_' + node.scope().name] = [node.scope()]
+            else: 
+                if node.scope() not in func_call[ 'fun_' +  node.scope().name]:
+                    func_call['fun_' +  node.scope().name].append(node.scope())
+            #print(len(func_call))
+        if isinstance(node.scope(), astroid.FunctionDef) and not  node.scope().name.startswith('__') and node.scope().name not in FUNCTION_WHITELIST: 
+            mapped_func_called_for_query = list(map(lambda x:x[0], func_called_for_query))
+            if 'fun_' + node.scope().name in mapped_func_called_for_query:
+                index = mapped_func_called_for_query.index('fun_' + node.scope().name)
+                position = func_called_for_query[index][1]
+                func_called_for_query.pop(index)
+                for return_node in self._get_return_node(node.scope()):
+                    if not self._is_constexpr(return_node.value, position):
+                        return True
+                
         current_file_bname = os.path.basename(self.linter.current_file)
         if not (
             # .execute() or .executemany()

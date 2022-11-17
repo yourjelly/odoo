@@ -326,25 +326,6 @@ class TestSqlLint(TransactionCase):
             checker.visit_call(node)
 
         node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def init_column(self):
-            defined_var = '1'
-            defined_var2 = '2' 
-            query = external_function(defined_var, defined_var2)
-            self._cr.execute(query) #@
-        """) #Should be safe to call a function with defined argument
-        with self.assertMessages():
-            checker.visit_call(node)
-
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def init_column(self,defined_var,defined_var2):
-            query = external_function(defined_var, defined_var2)
-            self._cr.execute(query) #@
-        """) #Should not be safe to call a function undefined argument
-        with self.assertMessages("sql-injection"):
-            checker.visit_call(node)
-
-
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
         def _graph_data(self, start_date, end_date):
 
             query = '''SELECT %(x_query)s as x_value, %(y_query)s as y_value
@@ -381,4 +362,62 @@ class TestSqlLint(TransactionCase):
             return self.env.cr.dictfetchall()
         """)
         with self.assertMessages():
+            checker.visit_call(node)
+
+        node = _odoo_checker_sql_injection.astroid.extract_node("""
+        def first_fun():
+            anycall() #@
+            return 'a'
+        """)
+        with self.assertMessages():
+            checker.visit_call(node)
+        node = _odoo_checker_sql_injection.astroid.extract_node("""
+        def second_fun(value):
+            anycall() #@
+            return value
+        """)
+        with self.assertMessages():
+            checker.visit_call(node)
+        node = _odoo_checker_sql_injection.astroid.extract_node("""
+        def injectable():
+            cr.execute(first_fun())#@
+        """)
+        with self.assertMessages():
+            checker.visit_call(node)
+        node = _odoo_checker_sql_injection.astroid.extract_node("""
+        def injectable():
+            cr.execute(second_fun('aaaaa'))#@
+        """)
+        with self.assertMessages():
+            checker.visit_call(node)
+
+
+        node = _odoo_checker_sql_injection.astroid.extract_node("""
+        def first_fun(a):
+            anycall() #@
+            return a
+        """)
+        with self.assertMessages():
+            checker.visit_call(node)
+
+        node = _odoo_checker_sql_injection.astroid.extract_node("""
+        def injectable(var):
+            a = ['a','b']
+            cr.execute('a'.join(a))#@
+        """)
+        with self.assertMessages():
+            checker.visit_call(node)
+        node = _odoo_checker_sql_injection.astroid.extract_node("""
+        def return_tuple(var):
+            return 'a',var
+        """)
+        with self.assertMessages():
+            checker.visit_call(node)
+
+        node = _odoo_checker_sql_injection.astroid.extract_node("""
+        def injectable(var):
+            a, _ =  return_tuple(var)
+            cr.execute(a)#@
+        """)
+        with self.assertMessages(): # this should pass
             checker.visit_call(node)
