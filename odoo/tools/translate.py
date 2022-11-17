@@ -250,11 +250,15 @@ def translate_xml_node(node, callback, parse, serialize):
                 translated = callback(original)
                 if translated:
                     result = content.replace(original, translated)
-                    div = parse_html(f"<div>{result}</div>")
-                    if pos:
-                        node[pos-1].tail = div.text
-                    else:
-                        node.text = div.text
+                    # <div/> is used to auto fix crapy result
+                    # <span/> is one of TRANSLATED_ELEMENTS and used to check translatable
+                    result_span = parse_html(f"<div><span>{result}</span><div>")[0]
+                    if translatable(result_span) and hastext(result_span):
+                        div = result_span
+                        if pos:
+                            node[pos-1].tail = div.text
+                        else:
+                            node.text = div.text
 
                 # move the content of the <div> element back inside node
                 while len(div) > 0:

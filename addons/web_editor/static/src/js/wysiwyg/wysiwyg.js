@@ -1989,7 +1989,7 @@ const Wysiwyg = Widget.extend({
             ));
             return this._rpc({
                 model: $els.data('oe-model'),
-                method: 'update_field_translations_sha',
+                method: 'update_field_translations_web',
                 args: [
                     [+$els.data('oe-id')],
                     $els.data('oe-field'),

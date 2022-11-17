@@ -823,7 +823,6 @@ class TestXMLTranslation(TransactionCase):
         self.assertIn("<i>", view.arch_db)
         self.assertIn("<i>", view_fr.arch_db)
 
-    # TODO 1. add method to translate html/xml field. 2. add tests new translation method
     def test_update_field_translations(self):
         archf = '<form string="X">%s<div>%s</div></form>'
         terms_en = ('Bread and cheese', 'Fork')
@@ -852,6 +851,71 @@ class TestXMLTranslation(TransactionCase):
         self.assertEqual(view.with_context(lang='en_US').arch_db, '<form string="X">Bread and cheese<div>Fork2</div></form>')
         self.assertEqual(view.with_context(lang='fr_FR').arch_db, '<form string="X">Pain et fromage<div>Fourchette2</div></form>')
         self.assertEqual(view.with_context(lang='nl_NL').arch_db, view_nl)
+
+    def test_update_field_translations_illegal(self):
+        archf = '<form string="%s">%s<div>%s</div></form>'
+        old_term_0 = old_term_0_escaped = 'X'
+        old_term_1 = '<i class="fa fa-circle" role="img" aria-label="Invalid" title="Invalid"/>'
+        old_term_2 = '<i>Fork</i>'
+        view = self.create_view(archf, (old_term_0, old_term_1, old_term_2))
+        self.assertEqual(
+            view.with_context(lang='fr_FR').arch_db,
+            f'<form string="{old_term_0_escaped}">{old_term_1}<div>{old_term_2}</div></form>'
+        )
+
+        new_term_0 = 'Damien Roberts" <d.roberts@example.com>'
+        new_term_0_escaped = 'Damien Roberts&quot; &lt;d.roberts@example.com&gt;'
+        view.update_field_translations('arch_db', {'fr_FR': {old_term_0: new_term_0}})
+        self.assertEqual(
+            view.with_context(lang='fr_FR').arch_db,
+            f'<form string="{new_term_0_escaped}">{old_term_1}<div>{old_term_2}</div></form>',
+            'attr should be translated and escaped')
+        old_term_0 = new_term_0
+        old_term_0_escaped = new_term_0_escaped
+
+        new_term_0 = 'X'
+        view.update_field_translations('arch_db', {'fr_FR': {old_term_0_escaped: new_term_0}})
+        self.assertEqual(
+            view.with_context(lang='fr_FR').arch_db,
+            f'<form string="{old_term_0_escaped}">{old_term_1}<div>{old_term_2}</div></form>',
+            'attrs cannot be translated by using escaped old terms')
+
+        view.update_field_translations('arch_db', {'fr_FR': {old_term_0: new_term_0}})
+        self.assertEqual(
+            view.with_context(lang='fr_FR').arch_db,
+            f'<form string="{new_term_0}">{old_term_1}<div>{old_term_2}</div></form>',
+            'attrs can be translated')
+        old_term_0_escaped = 'X'
+
+        new_term_1 = '<i class="fa fa-circle" role="img" aria-label="Non-valide" title="Non-valide"/>'
+        view.update_field_translations('arch_db', {'fr_FR': {old_term_1: new_term_1}})
+        self.assertEqual(
+            view.with_context(lang='fr_FR').arch_db,
+            f'<form string="{old_term_0_escaped}">{new_term_1}<div>{old_term_2}</div></form>',
+            'content in inline-block should be treated as one term and translated')
+        old_term_1 = new_term_1
+
+        new_term_1 = '<i class="fa fa-circle" role="img"/>'
+        view.update_field_translations('arch_db', {'fr_FR': {old_term_1: new_term_1}})
+        self.assertEqual(
+            view.with_context(lang='fr_FR').arch_db,
+            f'<form string="{old_term_0_escaped}">{old_term_1}<div>{old_term_2}</div></form>',
+            "translations for in inline-block will be dropped if it doesn't contain any term")
+
+        new_term_2 = '<div>Fork1</div>Fork2'
+        view.update_field_translations('arch_db', {'fr_FR': {old_term_2: new_term_2}})
+        self.assertEqual(
+            view.with_context(lang='fr_FR').arch_db,
+            f'<form string="{old_term_0_escaped}">{old_term_1}<div>{old_term_2}</div></form>',
+            f'"{new_term_2}" has two terms and should be dropped as a translation')
+
+        new_term_2 = '<i> </i>'
+        view.update_field_translations('arch_db', {'fr_FR': {old_term_2: new_term_2}})
+        self.assertEqual(
+            view.with_context(lang='fr_FR').arch_db,
+            f'<form string="{old_term_0_escaped}">{old_term_1}<div>{old_term_2}</div></form>',
+            f'"{new_term_2}" has no term and should be dropped as a translation')
+
 
 @tagged('post_install', '-at_install')
 class TestLanguageInstallPerformance(TransactionCase):
