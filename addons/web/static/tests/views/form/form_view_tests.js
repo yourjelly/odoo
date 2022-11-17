@@ -2184,6 +2184,33 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_field_invalid");
     });
 
+    QUnit.only("check string in integer fields", async function (assert) {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: '<form><field name="int_field"></field></form>',
+            resId: 1,
+//            debug: "1",
+        });
+        debugger;
+        await editInput(target, ".o_field_widget[name=int_field] input", "abc");
+        await clickSave(target);
+        assert.containsOnce(target, ".o_field_invalid");
+        await editInput(target, ".o_field_widget[name=int_field] input", 1.123);
+        await clickSave(target);
+        assert.containsOnce(target, ".o_field_invalid");
+        await editInput(target, ".o_field_widget[name=int_field] input", 2147483648);
+        await clickSave(target);
+        assert.containsOnce(target, ".o_field_invalid");
+        await editInput(target, ".o_field_widget[name=int_field] input", -2147483649);
+        await clickSave(target);
+        assert.containsOnce(target, ".o_field_invalid");
+        await editInput(target, ".o_field_widget[name=int_field] input", 100);
+        await clickSave(target);
+        assert.containsNone(target, ".o_field_invalid");
+    });
+
     QUnit.test("tooltips on multiple occurrences of fields and labels", async function (assert) {
         serverData.models.partner.fields.foo.help = "foo tooltip";
         serverData.models.partner.fields.bar.help = "bar tooltip";

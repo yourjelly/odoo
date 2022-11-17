@@ -72,8 +72,12 @@ export class ProgressBarField extends Component {
 
     onCurrentValueChange(ev) {
         let parsedValue;
+        const parser = parsers.get(this.props.type);
+        debugger;
         try {
-            parsedValue = parseFloat(ev.target.value);
+            parsedValue = parsers(ev.target.value);
+//            this.props.record._removeInvalidFields(this.props.name);
+            debugger;
         } catch {
             this.props.record.setInvalidField(this.props.name);
             return;
@@ -90,8 +94,9 @@ export class ProgressBarField extends Component {
     }
     onMaxValueChange(ev) {
         let parsedValue;
+        const parser = parsers.get(this.props.type);
         try {
-            parsedValue = parseFloat(ev.target.value);
+            parsedValue = parser(ev.target.value);
         } catch {
             this.props.record.setInvalidField(this.props.name);
             return;

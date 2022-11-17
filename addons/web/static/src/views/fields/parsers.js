@@ -123,13 +123,13 @@ export function parseInteger(value) {
         decimalPoint: decimalPointRegex,
         truncate: true,
     });
-    if (!Number.isInteger(parsed)) {
+    if (!Number.isInteger(parsed) || parsed % 1 || parsed < -2147483648 || parsed > 2147483647) {
         parsed = parseNumber(value, {
             thousandsSep: ",",
             decimalPoint: ".",
             truncate: true,
         });
-        if (!Number.isInteger(parsed)) {
+        if (!Number.isInteger(parsed) || parsed % 1 || parsed < -2147483648 || parsed > 2147483647) {
             throw new InvalidNumberError(`"${value}" is not a correct number`);
         }
     }
