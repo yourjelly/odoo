@@ -1344,7 +1344,7 @@ class AccountMove(models.Model):
     # EXTENDS portal portal.mixin
     def _compute_access_url(self):
         super()._compute_access_url()
-        for move in self.filtered(lambda move: move.is_invoice()):
+        for move in self.filtered(lambda move: move._can_be_emailed()):
             move.access_url = '/my/invoices/%s' % (move.id)
 
     @api.depends('move_type', 'partner_id', 'company_id')
