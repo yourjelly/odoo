@@ -2191,9 +2191,7 @@ QUnit.module("Views", (hooks) => {
             serverData,
             arch: '<form><field name="int_field"></field></form>',
             resId: 1,
-//            debug: "1",
         });
-        debugger;
         await editInput(target, ".o_field_widget[name=int_field] input", "abc");
         await clickSave(target);
         assert.containsOnce(target, ".o_field_invalid");
