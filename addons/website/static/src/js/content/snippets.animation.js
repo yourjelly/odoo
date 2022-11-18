@@ -1439,7 +1439,13 @@ registry.ImagesLazyLoading = publicWidget.Widget.extend({
         this._super(...arguments);
         const imgEls = this.$target[0].querySelectorAll('img[data-lazy-loading-initial-min-height]');
         for (const imgEl of imgEls) {
-            this._restoreImage(imgEl);
+            imgEl.style.minHeight = '1px';
+            wUtils.onceAllImagesLoaded($(imgEl)).then(() => {
+                if (this.isDestroyed()) {
+                    return;
+                }
+                this._restoreImage(imgEl);
+            });
         }
     },
 
