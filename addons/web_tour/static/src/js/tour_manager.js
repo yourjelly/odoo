@@ -291,6 +291,11 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
      */
     _shouldRedirect(tourUrl) {
         const windowUrl = new URL(window.location.href);
+        if (window.location.href.includes('watch')) {
+            console.log('URL WITH WATCH', window.location.href);
+        } else {
+            console.log('NORMAL URL', window.location.href);
+        }
         // 'watch' is a technical parameter added by the python test suite that
         // should not be taken into account for the comparison.
         windowUrl.searchParams.delete('watch');
