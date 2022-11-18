@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="stock.QtyDone" t-inherit="web.FloatField" t-inherit-mode="primary" owl="1">
+        <xpath expr="//input[@t-ref='numpadDecimal']" position="attributes">
+            <attribute name="t-on-focusout">onFocusout</attribute>
+        </xpath>
+    </t>
+</templates>
