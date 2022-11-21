@@ -958,6 +958,7 @@ class Message(models.Model):
                     'is_discussion': False # only if the message is a discussion (subtype == discussion)
                     'is_notification': False # only if the message is a note but is a notification aka not linked to a document like assignation
                     'parentMessage': {...}, # formatted message that this message is a reply to. Only present if format_reply is True
+                    'user_follower_id': Follower id if user is following the related record otherwise False
                 }
         """
         vals_list = self._message_format(self._get_message_format_fields(), format_reply=format_reply)
@@ -990,6 +991,7 @@ class Message(models.Model):
                 'is_notification': vals['message_type'] == 'user_notification',
                 'recipients': [{'id': p.id, 'name': p.name} for p in message_sudo.partner_ids],
                 'scheduledDatetime': scheduled_dt_by_msg_id.get(vals['id'], False),
+                'user_follower_id': notifs[0].follower_id if notifs else False,
             })
             if vals['model'] and self.env[vals['model']]._original_module:
                 vals['module_icon'] = modules.module.get_module_icon(self.env[vals['model']]._original_module)

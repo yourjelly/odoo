@@ -3477,16 +3477,18 @@ class MailThread(models.AbstractModel):
         # not necessary for computation, but saves an access right check
         if not partner_ids:
             return True
-        if set(partner_ids) == set([self.env.user.partner_id.id]):
-            self.check_access_rights('read')
-            self.check_access_rule('read')
-        else:
+        # To support unfollowing a document in the inbox no matter the current company, we allow internal users to
+        # unsubscribe themself without checking any rights.
+        if set(partner_ids) != {self.env.user.partner_id.id}:
             self.check_access_rights('write')
             self.check_access_rule('write')
+        elif not self.env.user._is_internal():
+            self.check_access_rights('read')
+            self.check_access_rule('read')
         self.env['mail.followers'].sudo().search([
             ('res_model', '=', self._name),
             ('res_id', 'in', self.ids),
-            ('partner_id', 'in', partner_ids or []),
+            ('partner_id', 'in', partner_ids),
         ]).unlink()
 
     def _message_auto_subscribe_followers(self, updated_values, default_subtype_ids):

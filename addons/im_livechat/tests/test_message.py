@@ -80,4 +80,5 @@ class TestImLivechatMessage(TransactionCase):
             'subtype_description': False,
             'subtype_id': (self.env.ref('mail.mt_note').id, 'Note'),
             'trackingValues': [],
+            'user_follower_id': False,
         }])

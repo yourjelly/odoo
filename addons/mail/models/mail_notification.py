@@ -5,6 +5,8 @@ from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models
 from odoo.exceptions import AccessError
+from odoo.osv import expression
+from odoo.tools.misc import groupby
 from odoo.tools.translate import _
 
 
@@ -22,6 +24,7 @@ class MailNotification(models.Model):
     # recipient
     res_partner_id = fields.Many2one('res.partner', 'Recipient', index=True, ondelete='cascade')
     # status
+    follower_id = fields.Integer(compute='_compute_follower_id', compute_sudo=True)
     notification_type = fields.Selection([
         ('inbox', 'Inbox'), ('email', 'Email')
         ], string='Notification Type', default='inbox', index=True, required=True)
@@ -50,6 +53,32 @@ class MailNotification(models.Model):
          "CHECK(notification_type NOT IN ('email', 'inbox') OR res_partner_id IS NOT NULL)",
          'Customer is required for inbox / email notification'),
     ]
+
+    # ------------------------------------------------------------
+    # COMPUTE
+    # ------------------------------------------------------------
+
+    @api.depends('mail_message_id.model', 'mail_message_id.res_id', 'res_partner_id')
+    def _compute_follower_id(self):
+        values = (
+            (record.res_partner_id.id, msg.model, msg.res_id)
+            for record in self
+            for msg in record.mail_message_id
+            if msg.res_id and msg.model
+        )
+        domain = expression.OR(
+            [('partner_id', '=', partner_id), ('res_model', '=', model),
+             ('res_id', 'in', list({res_id for *__, res_id in grouped_values}))]
+            for (partner_id, model), grouped_values in groupby(values, key=lambda r: r[:2])
+        )
+        followed_refs = {
+            (res['partner_id'][0], res['res_model'], res['res_id']): res['id']
+            for res in self.env['mail.followers'].sudo().search_read(
+                domain, ['partner_id', 'res_model', 'res_id'])
+        }
+        for record in self:
+            msg = record.mail_message_id
+            record.follower_id = followed_refs.get((record.res_partner_id.id, msg.model, msg.res_id), False)
 
     # ------------------------------------------------------------
     # CRUD
