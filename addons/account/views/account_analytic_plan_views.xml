@@ -9,7 +9,7 @@
                 <data>
                     <xpath expr="//field[@name='applicability_ids']//field[@name='business_domain']" position="after">
                         <field name="display_account_prefix" invisible="True"/>
-                        <field name="account_prefix" attrs="{'invisible': [('display_account_prefix','=', False)]}"/>
+                        <field name="account_prefix" invisible="[('display_account_prefix','=', False)]"/>
                         <field name="product_categ_id"/>
                     </xpath>
                 </data>

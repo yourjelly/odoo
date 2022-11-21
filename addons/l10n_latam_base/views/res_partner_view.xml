@@ -18,7 +18,7 @@
                         required="True"
                         domain="[('country_id', 'in', [False, country_id])] if country_id else []"/>
                     <span class="oe_read_only"> - </span>
-                    <field name="vat" placeholder="Number" class="oe_inline" attrs="{'readonly': [('parent_id','!=',False)]}"/>
+                    <field name="vat" placeholder="Number" class="oe_inline" readonly="[('parent_id','!=',False)]"/>
                 </div>
             </field>
         </field>

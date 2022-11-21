@@ -23,11 +23,11 @@
                         <label for="account_check_printing_margin_left" class="col-lg-4 o_light_label"/>
                         <field name="account_check_printing_margin_left"/>
                     </div>
-                    <div class="row" attrs="{'invisible': [('country_code', '!=', 'CA')]}">
+                    <div class="row" invisible="[('country_code', '!=', 'CA')]">
                         <label for="account_check_printing_margin_right" class="col-lg-4 o_light_label"/>
                         <field name="account_check_printing_margin_right"/>
                     </div>
-                    <div class="row" attrs="{'invisible': [('country_code', '!=', 'CA')]}">
+                    <div class="row" invisible="[('country_code', '!=', 'CA')]">
                       <label for="account_check_printing_date_label" class="col-lg-4 o_light_label"/>
                       <field name="account_check_printing_date_label"/>
                     </div>

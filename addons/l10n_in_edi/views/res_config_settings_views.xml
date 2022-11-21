@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="account.res_config_settings_view_form"/>
         <field name="arch" type="xml">
             <app name="account" position="inside">
-                <block title="Indian Electronic Invoicing" name="l10n_in_edi_iap" attrs="{'invisible': [('country_code', '!=', 'IN')]}">
+                <block title="Indian Electronic Invoicing" name="l10n_in_edi_iap" invisible="[('country_code', '!=', 'IN')]">
                     <setting id="gsp_setting" string="Setup E-invoice" help="Setup E-invoice Service for this company" company_dependent="1">
                         <div class="content-group">
                             <div class="mt16 row">

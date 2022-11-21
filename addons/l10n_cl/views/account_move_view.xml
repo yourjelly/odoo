@@ -56,7 +56,7 @@
                 <field name="invoice_date_due" optional="show"/>
                 <field name="date" string="Accounting Date" optional="show"/>
                 <field name="payment_reference" optional="hide"/>
-                <field name="invoice_user_id" optional="show" invisible="context.get('default_move_type') not in ('out_invoice', 'out_refund','out_receipt')" string="Sales Person"/>
+                <field name="invoice_user_id" optional="show" invisible="[bool(context.get('default_move_type') not in ('out_invoice', 'out_refund','out_receipt'))]" string="Sales Person"/>
                 <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" optional="show"/>
                 <field name="invoice_origin" optional="show" string="Source Document"/>
                 <field name="amount_untaxed_signed" string="Amount Untaxed" sum="Total" optional="show"/>
@@ -67,7 +67,7 @@
                 <field name="company_currency_id" invisible="1"/>
                 <field name="state" optional="show"/>
                 <field name="payment_state" optional="hide"/>
-                <field name="move_type" invisible="context.get('default_move_type', True)"/>
+                <field name="move_type" invisible="[bool(context.get('default_move_type', True))]"/>
             </tree>
         </field>
     </record>
