@@ -7,13 +7,13 @@
             <field name="inherit_id" ref="base.view_partner_bank_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='acc_number']" position="after">
-                    <field name="l10n_ch_qr_iban" attrs="{'invisible': [('l10n_ch_show_subscription', '=', False)]}"/>
-                    <label for="l10n_ch_postal" string="ISR Client Identification Number" attrs="{'invisible': [('l10n_ch_show_subscription', '=', False)]}"/>
-                    <field name="l10n_ch_postal" nolabel="1" attrs="{'invisible': [('l10n_ch_show_subscription', '=', False)]}"/>
-                    <field name="l10n_ch_postal" attrs="{'invisible': [('l10n_ch_show_subscription', '=', True)]}"/>
+                    <field name="l10n_ch_qr_iban" invisible="[('l10n_ch_show_subscription', '=', False)]"/>
+                    <label for="l10n_ch_postal" string="ISR Client Identification Number" invisible="[('l10n_ch_show_subscription', '=', False)]"/>
+                    <field name="l10n_ch_postal" nolabel="1" invisible="[('l10n_ch_show_subscription', '=', False)]"/>
+                    <field name="l10n_ch_postal" invisible="[('l10n_ch_show_subscription', '=', True)]"/>
                     <field name="l10n_ch_show_subscription" invisible="1"/>
-                    <field name="l10n_ch_isr_subscription_chf" attrs="{'invisible': [('l10n_ch_show_subscription', '=', False)]}"/>
-                    <field name="l10n_ch_isr_subscription_eur" attrs="{'invisible': [('l10n_ch_show_subscription', '=', False)]}"/>
+                    <field name="l10n_ch_isr_subscription_chf" invisible="[('l10n_ch_show_subscription', '=', False)]"/>
+                    <field name="l10n_ch_isr_subscription_eur" invisible="[('l10n_ch_show_subscription', '=', False)]"/>
                 </xpath>
             </field>
         </record>

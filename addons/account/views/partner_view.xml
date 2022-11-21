@@ -9,9 +9,9 @@
                     <div groups="account.group_account_manager"
                          class="alert alert-info mb-0"
                          role="alert"
-                         attrs="{'invisible': [('foreign_vat_header_mode', '=', False)]}">
+                         invisible="[('foreign_vat_header_mode', '=', False)]">
 
-                        <div attrs="{'invisible': [('foreign_vat_header_mode', '!=', 'templates_found')]}">
+                        <div invisible="[('foreign_vat_header_mode', '!=', 'templates_found')]">
                             Click
                             <button
                                 string="here"
@@ -22,7 +22,7 @@
                             to create the taxes for this country.
                         </div>
 
-                        <span attrs="{'invisible': [('foreign_vat_header_mode', '!=', 'no_template')]}">
+                        <span invisible="[('foreign_vat_header_mode', '!=', 'no_template')]">
                             No tax template found for this country. Please install the corresponding localization module.
                             <button
                                 string="Install new module"
@@ -36,7 +36,7 @@
 
                     <sheet>
                     <div class="oe_button_box" name="button_box"/>
-                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="[('active', '=', True)]"/>
                     <group>
                         <group>
                             <field name="active" invisible="1"/>
@@ -50,17 +50,17 @@
                         </group>
                         <group>
                             <field name="auto_apply"/>
-                            <field name="vat_required" attrs="{'invisible': [('auto_apply', '!=', True)]}"/>
+                            <field name="vat_required" invisible="[('auto_apply', '!=', True)]"/>
                             <field name="foreign_vat"/>
-                            <field name="country_group_id" attrs="{'invisible': [('auto_apply', '!=', True)]}"/>
+                            <field name="country_group_id" invisible="[('auto_apply', '!=', True)]"/>
                             <field name="country_id"
-                                attrs="{'required': [('foreign_vat', '!=', False)]}"
+                                required="[('foreign_vat', '!=', False)]"
                                 options="{'no_open': True, 'no_create': True}"/>
                             <field name="state_ids" widget="many2many_tags" domain="[('country_id', '=', country_id)]"
-                                attrs="{'invisible': ['|', '|', '&amp;', ('auto_apply', '!=', True), ('foreign_vat', '=', False), ('country_id', '=', False), ('states_count', '=', 0)]}"/>
+                                invisible="['|', '|', '&amp;', ('auto_apply', '!=', True), ('foreign_vat', '=', False), ('country_id', '=', False), ('states_count', '=', 0)]"/>
                             <label for="zip_from" string="Zip Range"
-                                attrs="{'invisible': ['|', ('auto_apply', '!=', True), ('country_id', '=', False)]}"/>
-                            <div attrs="{'invisible': ['|', ('auto_apply', '!=', True), ('country_id', '=', False)]}">
+                                invisible="['|', ('auto_apply', '!=', True), ('country_id', '=', False)]"/>
+                            <div invisible="['|', ('auto_apply', '!=', True), ('country_id', '=', False)]">
                                 <span> From </span>
                                 <field name="zip_from" class="oe_inline"/>
                                 <div class="oe_edit_only"/>
@@ -164,7 +164,7 @@
                             <separator string="Warning on the Invoice" colspan="2"/>
                             <field name="invoice_warn" nolabel="1" colspan="2" required="1"/>
                             <field name="invoice_warn_msg" placeholder="Type a message..." colspan="2" nolabel="1"
-                                attrs="{'required':[('invoice_warn','!=', False), ('invoice_warn','!=','no-message')], 'invisible':[('invoice_warn','in',(False,'no-message'))]}"/>
+                                required="[('invoice_warn','!=', False), ('invoice_warn','!=','no-message')]" invisible="[('invoice_warn','in',(False,'no-message'))]"/>
                         </group>
                     </group>
                 </page>
@@ -198,12 +198,12 @@
                 </xpath>
                 <xpath expr="//sheet" position="before">
                     <div groups="account.group_account_invoice,account.group_account_readonly" class="alert alert-warning" role="alert" style="margin-bottom:0px;"
-                         attrs="{'invisible': [('duplicated_bank_account_partners_count', '=', 0)]}">
+                         invisible="[('duplicated_bank_account_partners_count', '=', 0)]">
                         One or more Bank Accounts set on this partner are also used by other <bold><button class="alert-link" type="object" name="action_view_partner_with_same_bank" role="button" string="Partners" style="padding: 0;vertical-align: baseline;"/></bold>. Please make sure that this is a wanted behavior.
                     </div>
                 </xpath>
                 <page name="sales_purchases" position="after">
-                    <page string="Invoicing" name="accounting" attrs="{'invisible': [('is_company','=',False),('parent_id','!=',False)]}" groups="account.group_account_invoice,account.group_account_readonly">
+                    <page string="Invoicing" name="accounting" invisible="[('is_company','=',False),('parent_id','!=',False)]" groups="account.group_account_invoice,account.group_account_readonly">
                         <field name="duplicated_bank_account_partners_count" invisible="1"/>
                         <field name="show_credit_limit" invisible="1"/>
                         <group>
@@ -232,17 +232,17 @@
                             <group string="Credit Limits"
                                    name="credit_limits"
                                    groups="account.group_account_invoice,account.group_account_readonly"
-                                   attrs="{'invisible': [('show_credit_limit', '=', False)]}">
+                                   invisible="[('show_credit_limit', '=', False)]">
                                 <field name="credit"/>
                                 <label for="use_partner_credit_limit"/>
                                 <div class="o_row">
                                     <field name="use_partner_credit_limit"/>
-                                    <field name="credit_limit" class="oe_inline" attrs="{'invisible': [('use_partner_credit_limit', '=', False)]}"/>
+                                    <field name="credit_limit" class="oe_inline" invisible="[('use_partner_credit_limit', '=', False)]"/>
                                 </div>
                             </group>
                         </group>
                     </page>
-                    <page string="Invoicing" name="accounting_disabled" attrs="{'invisible': ['|',('is_company','=',True),('parent_id','=',False)]}" groups="account.group_account_invoice,account.group_account_readonly">
+                    <page string="Invoicing" name="accounting_disabled" invisible="['|',('is_company','=',True),('parent_id','=',False)]" groups="account.group_account_invoice,account.group_account_readonly">
                         <div>
                             <p>Accounting-related settings are managed on <button name="open_commercial_entity" type="object" string="the parent company" class="oe_link"/></p>
                         </div>

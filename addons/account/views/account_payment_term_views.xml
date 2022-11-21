@@ -35,7 +35,7 @@
                     <sheet>
                         <field name="active" invisible="1"/>
                         <field name="fiscal_country_codes" invisible="1"/>
-                        <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+                        <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="[('active', '=', True)]"/>
                         <div class="oe_title">
                             <label for="name" string="Payment Terms Name"/>
                             <h1><field name="name" nolabel="1" placeholder="e.g. 30 days"/></h1>
@@ -48,11 +48,11 @@
                             <field name="line_ids" nolabel="1" colspan="2">
                                 <tree string="Payment Terms" editable="top" no_open="True">
                                     <field name="value" string="Due Type"/>
-                                    <field name="value_amount" attrs="{'invisible': [('value', '=', 'balance')]}" digits="[2, 2]"/>
+                                    <field name="value_amount" invisible="[('value', '=', 'balance')]" digits="[2, 2]"/>
                                     <field name="months"/>
                                     <field name="days"/>
                                     <field name="end_month" widget="boolean_toggle"/>
-                                    <field name="days_after" attrs="{'invisible': [('end_month','=', False)]}"/>
+                                    <field name="days_after" invisible="[('end_month','=', False)]"/>
                                     <field name="discount_percentage"/>
                                     <field name="discount_days"/>
                                 </tree>
@@ -61,17 +61,17 @@
                         <div class="oe_edit_only">
                             <separator string="Example"/>
                             <field name="example_invalid" invisible="1"/>
-                            <div attrs="{'invisible': [('example_invalid', '=', False)]}">
+                            <div invisible="[('example_invalid', '=', False)]">
                                 The Payment Term must have one Balance line.
                             </div>
-                            <div attrs="{'invisible': [('example_invalid', '=', True)]}" class="d-flex" >
+                            <div invisible="[('example_invalid', '=', True)]" class="d-flex" >
                                 For any invoice of
                                 <span class="mx-1"/> <field name="example_amount" /> <span class="mx-1"/>
                                 dated
                                 <span class="mx-1"/> <field name="example_date" class="oe_inline" style="color: #704A66; font-weight: bold"/>,
                                 the due date(s) and amount(s) will be:
                             </div>
-                            <field name="example_preview" attrs="{'invisible': [('example_invalid', '=', True)]}"/>
+                            <field name="example_preview" invisible="[('example_invalid', '=', True)]"/>
                         </div>
                     </sheet>
                 </form>

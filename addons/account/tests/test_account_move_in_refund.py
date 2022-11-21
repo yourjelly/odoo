@@ -791,7 +791,7 @@ class TestAccountMoveInRefundOnchanges(AccountTestInvoicingCommon):
         view = self.env.ref('account.view_move_form')
         tree = etree.fromstring(view.arch)
         for node in tree.xpath('//field[@name="invoice_vendor_bill_id"]'):
-            del node.attrib['attrs']
+            del node.attrib['invisible']
         view.arch = etree.tostring(tree)
 
         move_form = Form(self.invoice)

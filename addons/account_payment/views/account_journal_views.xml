@@ -13,7 +13,7 @@
                         type="object"
                         string="SETUP"
                         class="float-end btn-secondary"
-                        attrs="{'invisible': [('payment_provider_id', '=', False)]}"
+                        invisible="[('payment_provider_id', '=', False)]"
                         groups="base.group_system"/>
             </xpath>
             <xpath expr="//field[@name='inbound_payment_method_line_ids']/tree" position="attributes">
