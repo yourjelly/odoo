@@ -63,7 +63,7 @@ import { debounce, setRecurringAnimationFrame } from "@web/core/utils/timing";
  * @property {Function} helpers.execHandler
  */
 
-import { useEffect, useEnv, useExternalListener, onWillUnmount, reactive } from "@odoo/owl";
+const { useEffect, useEnv, useExternalListener, onWillUnmount, reactive } = owl;
 
 const DEFAULT_ACCEPTED_PARAMS = {
     enable: ["boolean", "function"],
@@ -73,6 +73,7 @@ const DEFAULT_ACCEPTED_PARAMS = {
     ignore: ["string", "function"],
     cursor: ["string"],
     edgeScrolling: ["object", "function"],
+    delay: ["number"]
 };
 const DEFAULT_DEFAULT_PARAMS = {
     enable: true,
@@ -238,7 +239,7 @@ export function makeDraggableHook(hookParams = {}) {
 
                 // Binds handlers on eligible elements
                 for (const siblingEl of ctx.ref.el.querySelectorAll(ctx.elementSelector)) {
-                    if (siblingEl !== ctx.currentElement) {
+                    if (!ctx.currentElement.contains(siblingEl)) {
                         addStyle(siblingEl, { "pointer-events": "auto" });
                     }
                 }
@@ -329,7 +330,7 @@ export function makeDraggableHook(hookParams = {}) {
             const execHandler = (callbackName, arg) => {
                 if (typeof params[callbackName] === "function") {
                     try {
-                        params[callbackName]({ ...ctx.mouse, ...arg });
+                        return params[callbackName]({ ...ctx.mouse, ...arg });
                     } catch (err) {
                         dragEnd(true, true);
                         throw err;
@@ -413,12 +414,21 @@ export function makeDraggableHook(hookParams = {}) {
                     return;
                 }
 
+                // Delays the start of the the dragging sequence
+                if (ctx.delay) {
+                    ctx.enabled = false;
+                    setTimeout(() => {
+                        ctx.enabled = true;
+                    }, ctx.delay);
+                }
+
                 ctx.currentContainer = ctx.ref.el;
                 ctx.currentElement = ev.target.closest(ctx.elementSelector);
 
                 Object.assign(ctx.offset, ctx.mouse);
 
                 execBuildHandler("onWillStartDrag");
+                
             };
 
             /**
@@ -446,7 +456,7 @@ export function makeDraggableHook(hookParams = {}) {
                     ctx.currentElement.style.top = `${clamp(
                         ctx.mouse.y - ctx.offset.y,
                         cRect.y,
-                        cRect.y + cRect.height - eRect.height
+                        cRect.y + cRect.height
                     )}px`;
 
                     execBuildHandler("onDrag");
@@ -483,7 +493,7 @@ export function makeDraggableHook(hookParams = {}) {
                     containerRect.x = Math.max(containerRect.x, parentRect.x);
                     containerRect.y = Math.max(containerRect.y, parentRect.y);
                     containerRect.width = Math.min(containerRect.width, parentRect.width);
-                    containerRect.height = Math.min(containerRect.height, parentRect.height);
+                    containerRect.height = parentRect.bottom - containerRect.y;
                 }
 
                 // Element rect
@@ -500,7 +510,7 @@ export function makeDraggableHook(hookParams = {}) {
             for (const prop in allAcceptedParams) {
                 if (params[prop] && !allAcceptedParams[prop].includes(typeof params[prop])) {
                     throw makeError(`invalid type for property "${prop}" in parameters`);
-                } else if (!params[prop] && MANDATORY_PARAMS.includes(prop)) {
+                } else if (!params[prop] && !defaultParams[prop] && MANDATORY_PARAMS.includes(prop)) {
                     throw makeError(`missing required property "${prop}" in parameters`);
                 }
             }
