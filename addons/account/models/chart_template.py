@@ -973,7 +973,7 @@ class AccountTaxTemplate(models.Model):
     def name_get(self):
         res = []
         for record in self:
-            name = record.label_invoice and record.label_invoice or record.name
+            name = record.description and record.description or record.name
             res.append((record.id, name))
         return res
 
