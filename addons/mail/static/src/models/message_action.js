@@ -32,6 +32,8 @@ Model({
                     return this.messageActionListOwnerAsToggleCompact;
                 } else if (this.messageActionListOwnerAsToggleStar) {
                     return this.messageActionListOwnerAsToggleStar;
+                } else if (this.messageActionListOwnerAsUnfollow) {
+                    return this.messageActionListOwnerAsUnfollow;
                 }
                 return clear();
             },
@@ -63,6 +65,10 @@ Model({
         messageActionListOwnerAsToggleStar: one("MessageActionList", {
             identifying: true,
             inverse: "actionToggleStar",
+        }),
+        messageActionListOwnerAsUnfollow: one("MessageActionList", {
+            identifying: true,
+            inverse: "actionUnfollow",
         }),
         messageActionView: one("MessageActionView", {
             inverse: "messageAction",
@@ -108,6 +114,8 @@ Model({
                         return 6;
                     case this.messageActionListOwnerAsToggleStar:
                         return 1;
+                    case this.messageActionListOwnerAsUnfollow:
+                        return 7;
                     default:
                         return clear();
                 }

@@ -92,6 +92,10 @@ insertModelFields("mail.message", {
         type: "many2many",
     },
     res_model_name: { string: "Res Model Name", type: "char" },
+    user_follower_id: {
+        string: "Follower id if user is following the related record otherwise 0",
+        type: "integer", default: 0,
+    },
 });
 insertModelFields("mail.message.subtype", {
     subtype_xmlid: { type: "char" },

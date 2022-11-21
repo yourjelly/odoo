@@ -17,6 +17,9 @@ Model({
             if ("id" in data) {
                 data2.id = data.id;
             }
+            if ("is_follow_up" in data) {
+                data2.is_follow_up = data.is_follow_up;
+            }
             if ("notification_status" in data) {
                 data2.notification_status = data.notification_status;
             }
@@ -96,6 +99,9 @@ Model({
                 }
                 return this.messaging.currentPartner === this.message.author;
             },
+        }),
+        is_follow_up: attr({
+            default: false,
         }),
         message: one("Message", { inverse: "notifications" }),
         notificationGroup: one("NotificationGroup", {

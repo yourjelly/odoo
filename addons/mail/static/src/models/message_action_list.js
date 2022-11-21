@@ -105,6 +105,15 @@ Model({
                 return clear();
             },
         }),
+        actionUnfollow: one("MessageAction", {
+            inverse: "messageActionListOwnerAsUnfollow",
+            compute() {
+                if (this.message && this.message.can_unfollow) {
+                    return {};
+                }
+                return clear();
+            },
+        }),
         compactThreshold: attr({ default: 2, readonly: true }),
         firstActionView: one("MessageActionView", {
             compute() {

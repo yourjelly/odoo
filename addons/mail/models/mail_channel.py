@@ -541,6 +541,7 @@ class Channel(models.Model):
                     'notif': notif or 'email',
                     'type': 'user' if not partner_share and notif else 'customer',
                     'groups': [],
+                    'is_follower': False,
                 })
 
         return recipients_data

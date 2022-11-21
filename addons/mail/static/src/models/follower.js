@@ -170,7 +170,7 @@ Model({
                     ? this.followedThread.hasWriteAccess
                     : false;
                 return this.messaging.currentPartner === this.partner
-                    ? this.followedThread.hasReadAccess
+                    ? (this.followedThread && this.followedThread.hasReadAccess)
                     : hasWriteAccess;
             },
         }),

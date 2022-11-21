@@ -941,9 +941,18 @@ class Message(models.Model):
                     'is_discussion': False # only if the message is a discussion (subtype == discussion)
                     'is_notification': False # only if the message is a note but is a notification aka not linked to a document like assignation
                     'parentMessage': {...}, # formatted message that this message is a reply to. Only present if format_reply is True
+                    'user_follower_id': Follower id if user is following the related record otherwise 0
                 }
         """
         vals_list = self._message_format(self._get_message_format_fields(), format_reply=format_reply)
+
+        records_followed = self.env['mail.followers'].sudo().search([
+            ('res_model', 'in', list({vals['model'] for vals in vals_list if vals['model']})),
+            ('res_id', 'in', list({vals['res_id'] for vals in vals_list if vals['res_id']})),
+            ('partner_id', '=', self.env.user.partner_id.id),
+        ])
+        followed_refs = {(res['res_model'], res['res_id']): res['id']
+                         for res in records_followed.read(['res_id', 'res_model', 'res_id'])}
 
         com_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment')
         note_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note')
@@ -959,6 +968,7 @@ class Message(models.Model):
                 'subtype_description': message_sudo.subtype_id.description,
                 'is_notification': vals['message_type'] == 'user_notification',
                 'recipients': [{'id': p.id, 'name': p.name} for p in message_sudo.partner_ids],
+                'user_follower_id': followed_refs.get((vals['model'], vals['res_id']), 0),
             })
             if vals['model'] and self.env[vals['model']]._original_module:
                 vals['module_icon'] = modules.module.get_module_icon(self.env[vals['model']]._original_module)

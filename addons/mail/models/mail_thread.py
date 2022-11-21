@@ -2459,20 +2459,21 @@ class MailThread(models.AbstractModel):
           access message content in db;
         """
         bus_notifications = []
-        inbox_pids = [r['id'] for r in recipients_data if r['notif'] == 'inbox']
-        if inbox_pids:
+        inbox_recipients = [r for r in recipients_data if r['notif'] == 'inbox']
+        if inbox_recipients:
             notif_create_values = [{
                 'author_id': message.author_id.id,
                 'mail_message_id': message.id,
                 'notification_status': 'sent',
                 'notification_type': 'inbox',
-                'res_partner_id': pid,
-            } for pid in inbox_pids]
+                'res_partner_id': recipient['id'],
+                'is_follow_up': recipient['is_follower'],
+            } for recipient in inbox_recipients]
             self.env['mail.notification'].sudo().create(notif_create_values)
 
             message_format_values = message.message_format()[0]
-            for partner_id in inbox_pids:
-                bus_notifications.append((self.env['res.partner'].browse(partner_id), 'mail.message/inbox', dict(message_format_values)))
+            for recipients in inbox_recipients:
+                bus_notifications.append((self.env['res.partner'].browse(recipients['id']), 'mail.message/inbox', dict(message_format_values)))
         self.env['bus.bus'].sudo()._sendmany(bus_notifications)
 
     def _notify_thread_by_email(self, message, recipients_data, msg_vals=False,
@@ -2545,6 +2546,7 @@ class MailThread(models.AbstractModel):
         SafeMail = self.env['mail.mail'].sudo().with_context(clean_context(self._context))
         SafeNotification = self.env['mail.notification'].sudo().with_context(clean_context(self._context))
         emails = self.env['mail.mail'].sudo()
+        followers_recipient_ids = {r['id'] for r in recipients_data if r['notif'] == 'email' and r.get('is_follower')}
 
         # loop on groups (customer, portal, user,  ... + model specific like group_sale_salesman)
         notif_create_values = []
@@ -2593,6 +2595,7 @@ class MailThread(models.AbstractModel):
                         'notification_status': 'ready',
                         'notification_type': 'email',
                         'res_partner_id': recipient_id,
+                        'is_follow_up': recipient_id in followers_recipient_ids,
                     } for recipient_id in tocreate_recipient_ids]
                 emails += new_email
 
@@ -3066,12 +3069,12 @@ class MailThread(models.AbstractModel):
         # not necessary for computation, but saves an access right check
         if not partner_ids:
             return True
-        if set(partner_ids) == set([self.env.user.partner_id.id]):
-            self.check_access_rights('read')
-            self.check_access_rule('read')
-        else:
+        if set(partner_ids) != set([self.env.user.partner_id.id]):
             self.check_access_rights('write')
             self.check_access_rule('write')
+        elif not self.env.user._is_internal():
+            self.check_access_rights('read')
+            self.check_access_rule('read')
         self.env['mail.followers'].sudo().search([
             ('res_model', '=', self._name),
             ('res_id', 'in', self.ids),

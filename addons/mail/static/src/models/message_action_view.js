@@ -3,6 +3,8 @@
 import { attr, clear, one, Model } from "@mail/model";
 import { markEventHandled } from "@mail/utils/utils";
 
+import { sprintf } from "@web/core/utils/strings";
+
 Model({
     name: "MessageActionView",
     template: "mail.MessageActionView",
@@ -11,7 +13,7 @@ Model({
          * @private
          * @param {MouseEvent} ev
          */
-        onClick(ev) {
+        async onClick(ev) {
             switch (this.messageAction.messageActionListOwner) {
                 case this.messageAction.messageActionListOwnerAsDelete:
                     this.update({ deleteConfirmDialog: {} });
@@ -41,6 +43,16 @@ Model({
                 case this.messageAction.messageActionListOwnerAsToggleStar:
                     this.messageAction.messageActionListOwner.message.toggleStar();
                     break;
+                case this.messageAction.messageActionListOwnerAsUnfollow: {
+                    const thread = this.messageAction.messageActionListOwner.message.originThread;
+                    await thread.unfollow();
+                    thread.messaging.notify({
+                        message: sprintf(this.env._t('You are no longer following "%(thread_name)s".'),
+                            { thread_name: thread.name }),
+                        type: "success",
+                    });
+                    break;
+                }
             }
         },
         /**
@@ -101,6 +113,11 @@ Model({
                         } else {
                             classNames.push("fa-star-o");
                         }
+                        break;
+                    case this.messageAction.messageActionListOwnerAsUnfollow:
+                        classNames.push(
+                            "fa fa-lg fa-user-times o_MessageAction_actionUnfollow"
+                        );
                         break;
                 }
                 return classNames.join(" ");
@@ -171,6 +188,8 @@ Model({
                             return this.env._t("Remove from Todo");
                         }
                         return this.env._t("Mark as Todo");
+                    case this.messageAction.messageActionListOwnerAsUnfollow:
+                        return this.env._t("Unfollow");
                     default:
                         return clear();
                 }

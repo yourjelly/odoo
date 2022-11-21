@@ -72,6 +72,12 @@ Model({
                 if ("module_icon" in data) {
                     originThreadData.moduleIcon = data.module_icon;
                 }
+                if (("user_follower_id" in data) && (data.user_follower_id) && (this.messaging.currentPartner)) {
+                    originThreadData.followers = [{
+                        id: data.user_follower_id,
+                        partner: this.messaging.currentPartner
+                    }];
+                }
                 data2.originThread = originThreadData;
             }
             if ("needaction_partner_ids" in data && this.messaging.currentPartner) {
@@ -580,6 +586,13 @@ Model({
          */
         isNeedaction: attr({ default: false }),
         is_note: attr({ default: false }),
+        can_unfollow: attr({
+            default: false,
+            compute() {
+                return this.originThread && this.originThread.isCurrentPartnerFollowing &&
+                    this.notifications.filter(notif => notif.is_follow_up).length;
+            },
+        }),
         is_notification: attr({ default: false }),
         /**
          * Determine whether the current partner is mentioned.

@@ -22,6 +22,7 @@ class MailNotification(models.Model):
     # recipient
     res_partner_id = fields.Many2one('res.partner', 'Recipient', index=True, ondelete='cascade')
     # status
+    is_follow_up = fields.Boolean('Whether sent because the recipient follow the record or not')
     notification_type = fields.Selection([
         ('inbox', 'Inbox'), ('email', 'Email')
         ], string='Notification Type', default='inbox', index=True, required=True)
@@ -131,4 +132,5 @@ class MailNotification(models.Model):
             'notification_status': notif.notification_status,
             'failure_type': notif.failure_type,
             'res_partner_id': [notif.res_partner_id.id, notif.res_partner_id.display_name] if notif.res_partner_id else False,
+            'is_follow_up': notif.is_follow_up,
         } for notif in self]

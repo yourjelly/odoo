@@ -3171,6 +3171,98 @@ QUnit.module("mail", {}, function () {
             }
         );
 
+        QUnit.test('Unfollow message', async function (assert) {
+            assert.expect(11);
+
+            const pyEnv = await startServer();
+            const [threadFollowedId, threadNotFollowedId] = pyEnv["res.partner"].create([{}, {}]);
+            const followerId = pyEnv["mail.followers"].create({
+                partner_id: pyEnv.currentPartnerId,
+                res_id: threadFollowedId,
+                res_model: "res.partner",
+            });
+            const [followUpMsgId1, followUpMsgId2, NotFollowedMsgId] = pyEnv["mail.message"].create([
+                {
+                    body: "Follow up message",
+                    model: "res.partner",
+                    needaction: true,
+                    res_id: threadFollowedId,
+                    user_follower_id: followerId,
+                },
+                {
+                    body: "Follow up message",
+                    model: "res.partner",
+                    needaction: true,
+                    res_id: threadFollowedId,
+                    user_follower_id: followerId,
+                },
+                {
+                    body: "Not followed message",
+                    model: "res.partner",
+                    needaction: true,
+                    res_id: threadNotFollowedId,
+                },
+            ]);
+            pyEnv["mail.notification"].create([
+                {
+                    mail_message_id: followUpMsgId1, // id of related message
+                    notification_type: "inbox",
+                    res_partner_id: pyEnv.currentPartnerId, // must be for current partner
+                    is_follow_up: true,
+                },
+                {
+                    mail_message_id: followUpMsgId2, // id of related message
+                    notification_type: "inbox",
+                    res_partner_id: pyEnv.currentPartnerId, // must be for current partner
+                    is_follow_up: true,
+                },
+            ]);
+            const { afterNextRender, click, messaging, openDiscuss } = await start({
+                discuss: {
+                    params: {
+                        default_active_id: "mail.box_inbox",
+                    },
+                },
+            });
+            await openDiscuss();
+            const [followUpMsg1, followUpMsg2, NotFollowedMsg] =
+                [followUpMsgId1, followUpMsgId2, NotFollowedMsgId].map(messageId =>
+                    messaging.models["Message"].findFromIdentifyingData({ id: messageId, model: "mail.message", }));
+            // Force is_follow_up to true (strangely not set by the create methods)
+            await afterNextRender(()=>{
+                followUpMsg1.notifications[0].update({ is_follow_up: true });
+                followUpMsg2.notifications[0].update({ is_follow_up: true });
+            });
+
+            assert.ok(followUpMsg1.can_unfollow);
+            assert.ok(followUpMsg2.can_unfollow);
+            assert.notOk(NotFollowedMsg.can_unfollow);
+            assert.ok(
+                document
+                    .querySelector(`.o_DiscussSidebarMailboxView[data-mailbox-local-id="${messaging.inbox.localId}"]`)
+                    .classList.contains("o-active"),
+                "inbox mailbox should be active thread"
+            );
+            assert.strictEqual(
+                document.querySelectorAll(`.o_DiscussView_thread .o_MessageListView_message`).length,
+                2,
+                "inbox mailbox should have 2 messages"
+            );
+            const selectorFollowUpMsg1 =
+                `.o_MessageView[data-message-id="${followUpMsgId1}"] .o_MessageAction_actionUnfollow`;
+            const selectorFollowUpMsg2 =
+                `.o_MessageView[data-message-id="${followUpMsgId2}"] .o_MessageAction_actionUnfollow`;
+            const selectorNotFollowedMsg =
+                `.o_MessageView[data-message-id="${NotFollowedMsgId}"] .o_MessageAction_actionUnfollow`;
+            assert.containsOnce(document.body, selectorFollowUpMsg1, "message 1 can be unfollowed");
+            assert.containsOnce(document.body, selectorFollowUpMsg2, "message 2 can be unfollowed");
+            assert.containsNone(document.body, selectorNotFollowedMsg, "not followed message cannot be unfollowed");
+            await click(selectorFollowUpMsg2);
+            assert.containsNone(document.body, selectorFollowUpMsg1, "message 1 can not be unfollowed anymore");
+            assert.containsNone(document.body, selectorFollowUpMsg2, "message 2 can not be unfollowed anymore");
+            assert.containsNone(document.body, selectorNotFollowedMsg, "not followed message cannot be unfollowed");
+        });
+
         QUnit.test('messages marked as read move to "History" mailbox', async function (assert) {
             assert.expect(10);
 
