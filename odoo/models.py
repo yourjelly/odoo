@@ -276,6 +276,75 @@ def origin_ids(ids):
     return ((id_ or id_.origin) for id_ in ids if (id_ or getattr(id_, "origin", None)))
 
 
+class OrderBy:
+    """ Contains a checked order specification """
+    __slots__ = ('_specs', 'model')
+
+    def __init__(self, order_spec:str, model:"BaseModel"):
+        # Specs are list of explicit [(<field>, <field:aggregate>, <Orientation>)]
+        self._specs : "list[tuple[Field, str, str]]" = []
+        self.model = model
+        for order_term in order_spec.split(','):
+            order_term = order_term.strip()
+            order_field_spec, __, order_direction = order_term.partition(' ')
+
+            if not order_direction:
+                order_direction = 'ASC'
+            else:
+                order_direction = order_direction.upper()
+
+            if order_direction not in ('ASC', 'DESC'):
+                raise ValidationError(f'Order direction is not correct {order_direction!r}, should be either ASC or DESC')
+
+            field_name, __, aggregate = order_field_spec.partition(':')
+            if field_name not in model:
+                raise ValidationError(f'Field {field_name!r} does not exist in {model!r} Model')
+            if aggregate and aggregate not in VALID_AGGREGATE_FUNCTIONS:
+                raise ValidationError(f'Aggregator {aggregate!r} is not valid')
+
+            self._specs.append((model._fields[field_name], order_field_spec, order_direction))
+    
+    @property
+    def only_id(self):
+        return all(spec[0].name == 'id' for spec in self._specs)
+
+    def generate_sql(self, query, aggregate_specs:"dict | None"=None, traverse_relational=True):
+        """ Generate the SQL clause without 'ORDER BY ' itself"""
+        ", ".join(self._generate_terms(self.model._table, query, set(), aggregate_specs, traverse_relational))
+
+    def _generate_terms(self, alias, query, seen, aggregate_specs, traverse_relational=True, reverse=False):
+        # TODO: Avoid useless left join like  to avoid extra group by:
+        # EXPLAIN ANALYSE SELECT min("account_move_line".id) AS id, count("account_move_line".id) AS "account_root_id_count" , "account_move_line"."account_root_id" as "account_root_id" 
+        # FROM "account_move_line" LEFT JOIN "account_root" AS "account_move_line__account_root_id" ON ("account_move_line"."account_root_id" = "account_move_line__account_root_id"."id")
+        # WHERE ((((("account_move_line"."display_type" not in ('line_section', 'line_note')) OR "account_move_line"."display_type" IS NULL) AND (("account_move_line"."parent_state" != 'cancel') OR "account_move_line"."parent_state" IS NULL)) AND ("account_move_line"."parent_state" = 'posted')) AND "account_move_line"."account_root_id" IS NOT NULL) AND ("account_move_line"."company_id" IS NULL  OR ("account_move_line"."company_id" in (1)))
+        # GROUP BY "account_move_line"."account_root_id","account_move_line__account_root_id"."id"
+        # ORDER BY "account_move_line__account_root_id"."id";
+        env = self.model.env
+        for field, aggregate, order_direction in self._specs:
+            if reverse:
+                order_direction = 'ASC' if order_direction == 'DESC' else 'DESC'
+
+            if aggregate:  # If spec looks like field:agg we should copy the sql expression coming from aggregate_specs
+                if aggregate not in aggregate_specs:
+                    raise ValidationError(f'Invalidate order term {aggregate!r}')
+
+                yield f"{aggregate_specs[aggregate]} {order_direction}"
+                continue
+
+            if field.type == 'many2one' and traverse_relational:
+                comodel_order = OrderBy(env[field.comodel_name]._order):
+                # Avoid useless left join when the order is only id
+                if not comodel_order.only_id:
+                    dest_alias = query.left_join(alias, order_field, dest_model._table, 'id', order_field)
+                    yield from comodel_order._generate_terms()
+                    continue
+            # WIP
+            
+
+            
+            yield f"{}"
+
+
 class OriginIds:
     """ A reversible iterable returning the origin ids of a collection of ``ids``. """
     __slots__ = ['ids']
