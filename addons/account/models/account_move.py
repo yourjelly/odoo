@@ -1344,7 +1344,7 @@ class AccountMove(models.Model):
     # EXTENDS portal portal.mixin
     def _compute_access_url(self):
         super()._compute_access_url()
-        for move in self.filtered(lambda move: move._can_be_emailed()):
+        for move in self.filtered(lambda move: move.is_invoice()):
             move.access_url = '/my/invoices/%s' % (move.id)
 
     @api.depends('move_type', 'partner_id', 'company_id')
@@ -3572,13 +3572,6 @@ class AccountMove(models.Model):
             return self.env['ir.actions.report']._action_configure_external_report_layout(report_action)
 
         return report_action
-
-    def _get_invoice_report_ref(self):
-        """ Determines the report shown by the method portal_my_invoice_detail.
-            This method can be inherited by the localizations in order to show a different report on invoices.
-        """
-        self.ensure_one()
-        return 'account.account_invoices'
 
     def preview_invoice(self):
         self.ensure_one()
