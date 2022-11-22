@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+
+    <t t-name="web.AdvancedSelect" owl="1">
+        <div
+            class="border w-100 rounded-2 overflow-hidden"
+        >
+            <Dropdown
+                class="'o_advanced_select ' + props.class"
+                togglerClass="'o_advanced_select_toggler d-flex flex-row align-items-center flex-nowrap btn btn-secondary w-100 bg-light ' + props.togglerClass"
+                menuClass="'o_advanced_select_menu ' + (props.searchable ? 'pt-0' : '')"
+                position="'bottom'"
+                isDocked="'vertical'"
+                beforeOpen="() => this.loadGroups('')"
+                onOpened.bind="onOpened"
+            >
+                <t t-set-slot="toggler">
+                    <span class="o_advanced_select_toggler_slot text-start">
+                        <t t-if="!props.slots" t-esc="props.value" />
+                        <t t-else="" t-slot="default" />
+                    </span>
+                    <span t-if="props.canClear" t-on-click.stop="onClear" class="o_advanced_select_toggler_clear p-0 m-0">
+                        <i class="fa fa-times"></i>
+                    </span>
+                    <span class="o_advanced_select_toggler_caret p-0 m-0">
+                        <i class="fa fa-caret-down"></i>
+                    </span>
+                </t>
+                <div t-if="props.searchable" class="o_advanced_select_input p-2 position-sticky top-0 start-0">
+                    <input
+                        type="text"
+                        class="form-control"
+                        t-ref="inputRef"
+                        t-on-input="debouncedOnInput"
+                        t-att-placeholder="props.searchPlaceholder"
+                    />
+                </div>
+                <t t-foreach="state.groups" t-as="group" t-key="group.id">
+                    <div t-if="group.label and group.options.length > 0" class="ms-4 mt-2 mb-1 fst-italic fw-bold">
+                        <t t-esc="group.label" />
+                    </div>
+                    <DropdownItem
+                        t-foreach="group.options"
+                        t-as="option"
+                        t-key="option.id"
+                        onSelected="() => this.props.onSelect(option.value)"
+                        class="getDropdownItemClass(option)"
+                    >
+                        <t t-if="group.optionTemplate">
+                            <t t-call="{{ group.optionTemplate }}" />
+                        </t>
+                        <t t-else="">
+                            <div class="o_advanced_select_item_label" t-att-class="group.label ? 'ms-3' : ''">
+                                <t t-esc="option.label" />
+                            </div>
+                        </t>
+                    </DropdownItem>
+                </t>
+            </Dropdown>
+        </div>
+    </t>
+
+</templates>

@@ -1069,4 +1069,26 @@ QUnit.module("Components", ({ beforeEach }) => {
             assert.notOk(target.querySelector(".o_datepicker_input").value === "");
         }
     );
+
+    QUnit.test("OnOpened callback props called after the menu has been mounted", async (assert) => {
+        class Parent extends Component {
+            beforeOpenCallback() {
+                assert.step("beforeOpened");
+            }
+            onOpenedCallback(menuEl) {
+                assert.step("onOpened");
+                assert.ok(menuEl, "Menu should be mounted when onOpened is called");
+            }
+        }
+        Parent.template = xml`
+            <Dropdown onOpened.bind="onOpenedCallback" beforeOpen.bind="beforeOpenCallback">
+                <DropdownItem/>
+            </Dropdown>
+        `;
+        Parent.components = { Dropdown, DropdownItem };
+        env = await makeTestEnv();
+        await mount(Parent, target, { env });
+        await click(target, "button.dropdown-toggle");
+        assert.verifySteps(["beforeOpened", "onOpened"], "Callback called and in the correct order");
+    });
 });

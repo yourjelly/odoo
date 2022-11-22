@@ -109,6 +109,7 @@ export class Dropdown extends Component {
         const positioningOptions = {
             popper: "menuRef",
             position,
+            isDocked: this.props.isDocked,
             onPositioned: (el, { direction, variant }) => {
                 if (this.parentDropdown && ["right", "left"].includes(direction)) {
                     // Correctly align sub dropdowns items with its parent's
@@ -148,6 +149,12 @@ export class Dropdown extends Component {
             const togglerRef = useRef("togglerRef");
             usePosition(() => togglerRef.el, positioningOptions);
         }
+
+        this.menuRef = useRef("menuRef");
+        useEffect(
+            (isOpen) => isOpen && this.menuRef.el && this.props.onOpened && this.props.onOpened(this.menuRef.el),
+            () => [this.state.open]
+        );
     }
 
     // -------------------------------------------------------------------------
@@ -325,11 +332,19 @@ Dropdown.props = {
         type: Function,
         optional: true,
     },
+    onOpened: {
+        type: Function,
+        optional: true,
+    },
     togglerClass: {
         type: String,
         optional: true,
     },
     hotkey: {
+        type: String,
+        optional: true,
+    },
+    isDocked: {
         type: String,
         optional: true,
     },

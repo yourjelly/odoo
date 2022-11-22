@@ -1,0 +1,36 @@
+.o_select {
+    .o_select_toggler {
+        &_slot {
+            flex-grow: 2;
+        }
+
+        &_caret,
+        &_delete {
+            width: 2rem;
+            flex-basis: 1;
+        }
+
+        &_delete:hover i {
+            color: red;
+        }
+    }
+
+    .o_select_menu {
+        max-height: 350px;
+        border: 1px solid $o-brand-primary;
+
+        &.fit-top {
+            box-shadow: 0 -7px 10px rgba(8, 8, 8, 0.319);
+            border-bottom: none;
+        }
+
+        &.fit-bottom {
+            box-shadow: 0 7px 10px rgba(8, 8, 8, 0.319);
+            border-top: none;
+        }
+    }
+}
+
+.o_select_input {
+    background-color: $dropdown-bg;
+}

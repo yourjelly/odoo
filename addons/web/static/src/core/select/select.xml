@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+
+    <t t-name="web.Select" owl="1">
+        <!-- When options are more advanced, uses a custom dropdown -->
+        <div
+            t-if="shouldUseCustom"
+            class="border w-100 rounded-2 overflow-hidden"
+            t-att-name="props.name"
+        >
+            <Dropdown
+                class="'o_select ' + props.class"
+                togglerClass="'o_select_toggler d-flex flex-row align-items-center flex-nowrap btn btn-secondary w-100 bg-light ' + props.togglerClass"
+                menuClass="'o_select_menu ' + (props.searchable ? 'pt-0' : '')"
+                onOpened.bind="clearSearch"
+                position="'bottom'"
+                isDocked="'vertical'"
+            >
+                <t t-set-slot="toggler">
+                    <span class="o_select_toggler_slot text-start">
+                        <t t-if="!props.slots" t-esc="props.value" />
+                        <t t-else="" t-slot="default" />
+                    </span>
+                    <span t-if="props.canDelete" t-on-click="onDelete" class="o_select_toggler_delete p-0 m-0">
+                        <i class="fa fa-times"></i>
+                    </span>
+                    <span class="o_select_toggler_caret p-0 m-0">
+                        <i class="fa fa-caret-down"></i>
+                    </span>
+                </t>
+                <div t-if="props.searchable" class="o_select_input p-2 position-sticky top-0 start-0">
+                    <input
+                        type="text"
+                        class="form-control"
+                        t-ref="inputRef"
+                        t-on-input="onInput"
+                        t-att-placeholder="props.searchPlaceholder"
+                    />
+                </div>
+                <t t-foreach="state.sources" t-as="source" t-key="source.id">
+                    <div t-if="source.label and source.options.length > 0" class="ms-4 mt-2 mb-1 fst-italic fw-bold">
+                        <t t-esc="source.label" />
+                    </div>
+                    <DropdownItem
+                        t-foreach="source.options"
+                        t-as="option"
+                        t-key="option.id"
+                        onSelected="() => this.props.onSelect(option.value)"
+                        class="getDropdownItemClass(option)"
+                    >
+                        <t t-if="source.optionTemplate">
+                            <t t-call="{{ source.optionTemplate }}" />
+                        </t>
+                        <t t-else="">
+                            <div class="o_select_item_label" t-att-class="source.label ? 'ms-3' : ''">
+                                <t t-esc="option.label" />
+                            </div>
+                        </t>
+                    </DropdownItem>
+                </t>
+            </Dropdown>
+        </div>
+
+        <!-- When options are basic, uses the native select-->
+        <select
+            t-else=""
+            class="o_select form-select bg-light"
+            t-att-class="props.class"
+            t-att-name="props.name"
+            t-att-value="props.value"
+            t-on-change="nativeOnChange"
+        >
+            <option
+                t-if="props.placeholder"
+                t-att-value="''"
+                t-att-selected="!value"
+                t-esc="props.placeholder"
+            />
+            <t t-foreach="state.sources" t-as="source" t-key="source.id">
+                <t t-foreach="source.options" t-as="option" t-key="option.id">
+                    <option t-att-value="option.id" t-att-selected="isOptionSelected(option)" t-esc="option.label"/>
+                </t>
+            </t>
+        </select>
+    </t>
+
+</templates>
