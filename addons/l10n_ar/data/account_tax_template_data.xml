@@ -2,8 +2,8 @@
 <odoo>
     <record id="ri_tax_percepcion_iva_aplicada" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ex_chart_template"/>
-        <field name="name">Percepción IVA Aplicada</field>
-        <field name="description">Perc IVA A</field>
+        <field name="name">Perception VAT applied</field>
+        <field name="description">Perc VAT applied</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
         <field name="amount_type">fixed</field>
@@ -27,8 +27,8 @@
     </record>
     <record id="ri_tax_percepcion_ganancias_aplicada" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ex_chart_template"/>
-        <field name="name">Percepción Ganancias Aplicada</field>
-        <field name="description">Perc Ganancias A</field>
+        <field name="name">Perception Income Tax applied</field>
+        <field name="description">Perc Income applied</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
         <field name="amount_type">fixed</field>
@@ -52,8 +52,8 @@
     </record>
     <record id="ri_tax_percepcion_ganancias_sufrida" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ex_chart_template"/>
-        <field name="name">Percepción Ganancias Sufrida</field>
-        <field name="description">Perc Ganancias S</field>
+        <field name="name">Perception Income Tax incurred</field>
+        <field name="description">Perc Income incurred</field>
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="1.0" name="amount"/>
@@ -76,8 +76,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_caba_sufrida" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_base_chart_template"/>
-        <field name="name">Percepción IIBB CABA Sufrida</field>
-        <field name="description">Perc IIBB CABA S</field>
+        <field name="name">Perception IIBB CABA incurred</field>
+        <field name="description">Perc IIBB CABA incurred</field>
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="1.0" name="amount"/>
@@ -100,8 +100,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_ba_sufrida" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_base_chart_template"/>
-        <field name="name">Percepción IIBB ARBA Sufrida</field>
-        <field name="description">Perc IIBB ARBA S</field>
+        <field name="name">Perception IIBB ARBA incurred</field>
+        <field name="description">Perc IIBB ARBA incurred</field>
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="1.0" name="amount"/>
@@ -124,8 +124,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_ca_sufrida" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_base_chart_template"/>
-        <field name="name">Percepción IIBB Catamarca Sufrida</field>
-        <field name="description">Perc IIBB Catamarca S</field>
+        <field name="name">Perception IIBB Catamarca incurred</field>
+        <field name="description">Perc IIBB Catamarca incurred</field>
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="1.0" name="amount"/>
@@ -148,8 +148,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_co_sufrida" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_base_chart_template"/>
-        <field name="name">Percepción IIBB Córdoba Sufrida</field>
-        <field name="description">Perc IIBB Córdoba S</field>
+        <field name="name">Perception IIBB Córdoba incurred</field>
+        <field name="description">Perc IIBB Córdoba incurred</field>
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="1.0" name="amount"/>
@@ -172,8 +172,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_rr_sufrida" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_base_chart_template"/>
-        <field name="name">Percepción IIBB Corrientes Sufrida</field>
-        <field name="description">Perc IIBB Corrientes S</field>
+        <field name="name">Perception IIBB Corrientes incurred</field>
+        <field name="description">Perc IIBB Corrientes incurred</field>
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="1.0" name="amount"/>
@@ -196,8 +196,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_er_sufrida" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_base_chart_template"/>
-        <field name="name">Percepción IIBB Entre Ríos Sufrida</field>
-        <field name="description">Perc IIBB Entre Ríos S</field>
+        <field name="name">Perception IIBB Entre Río incurred</field>
+        <field name="description">Perc IIBB Entre Ríos incurred</field>
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="1.0" name="amount"/>
@@ -220,8 +220,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_ju_sufrida" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_base_chart_template"/>
-        <field name="name">Percepción IIBB Jujuy Sufrida</field>
-        <field name="description">Perc IIBB Jujuy S</field>
+        <field name="name">Perception IIBB Jujuy incurred</field>
+        <field name="description">Perc IIBB Jujuy incurred</field>
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="1.0" name="amount"/>
@@ -244,8 +244,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_za_sufrida" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_base_chart_template"/>
-        <field name="name">Percepción IIBB Mendoza Sufrida</field>
-        <field name="description">Perc IIBB Mendoza S</field>
+        <field name="name">Perception IIBB Mendoza incurred</field>
+        <field name="description">Perc IIBB Mendoza incurred</field>
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="1.0" name="amount"/>
@@ -268,8 +268,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_lr_sufrida" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_base_chart_template"/>
-        <field name="name">Percepción IIBB La Rioja Sufrida</field>
-        <field name="description">Perc IIBB La Rioja S</field>
+        <field name="name">Perception IIBB La Rioja incurred</field>
+        <field name="description">Perc IIBB La Rioja incurred</field>
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="1.0" name="amount"/>
@@ -292,8 +292,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_sa_sufrida" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_base_chart_template"/>
-        <field name="name">Percepción IIBB Salta Sufrida</field>
-        <field name="description">Perc IIBB Salta S</field>
+        <field name="name">Perception IIBB Salta incurred</field>
+        <field name="description">Perc IIBB Salta incurred</field>
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="1.0" name="amount"/>
@@ -316,8 +316,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_nn_sufrida" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_base_chart_template"/>
-        <field name="name">Percepción IIBB San Juan Sufrida</field>
-        <field name="description">Perc IIBB San Juan S</field>
+        <field name="name">Perception IIBB San Juan incurred</field>
+        <field name="description">Perc IIBB San Juan incurred</field>
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="1.0" name="amount"/>
@@ -340,8 +340,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_sl_sufrida" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_base_chart_template"/>
-        <field name="name">Percepción IIBB San Luis Sufrida</field>
-        <field name="description">Perc IIBB San Luis S</field>
+        <field name="name">Perception IIBB San Luis incurred</field>
+        <field name="description">Perc IIBB San Luis incurred</field>
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="1.0" name="amount"/>
@@ -364,8 +364,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_sf_sufrida" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_base_chart_template"/>
-        <field name="name">Percepción IIBB Santa Fe Sufrida</field>
-        <field name="description">Perc IIBB Santa Fe S</field>
+        <field name="name">Perception IIBB Santa Fe incurred</field>
+        <field name="description">Perc IIBB Santa Fe incurred</field>
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="1.0" name="amount"/>
@@ -388,8 +388,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_se_sufrida" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_base_chart_template"/>
-        <field name="name">Percepción IIBB Santiago del Estero Sufrida</field>
-        <field name="description">Perc IIBB Santiago del Estero S</field>
+        <field name="name">Perception IIBB Santiago del Estero incurred</field>
+        <field name="description">Perc IIBB Santiago del Estero incurred</field>
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="1.0" name="amount"/>
@@ -412,8 +412,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_tn_sufrida" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_base_chart_template"/>
-        <field name="name">Percepción IIBB Tucumán Sufrida</field>
-        <field name="description">Perc IIBB Tucumán S</field>
+        <field name="name">Perception IIBB Tucumán incurred</field>
+        <field name="description">Perc IIBB Tucumán incurred</field>
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="1.0" name="amount"/>
@@ -436,8 +436,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_ha_sufrida" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_base_chart_template"/>
-        <field name="name">Percepción IIBB Chaco Sufrida</field>
-        <field name="description">Perc IIBB Chaco S</field>
+        <field name="name">Perception IIBB Chaco incurred</field>
+        <field name="description">Perc IIBB Chaco incurred</field>
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="1.0" name="amount"/>
@@ -460,8 +460,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_ct_sufrida" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_base_chart_template"/>
-        <field name="name">Percepción IIBB Chubut Sufrida</field>
-        <field name="description">Perc IIBB Chubut S</field>
+        <field name="name">Perception IIBB Chubut incurred</field>
+        <field name="description">Perc IIBB Chubut incurred</field>
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="1.0" name="amount"/>
@@ -484,8 +484,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_fo_sufrida" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_base_chart_template"/>
-        <field name="name">Percepción IIBB Formosa Sufrida</field>
-        <field name="description">Perc IIBB Formosa S</field>
+        <field name="name">Perception IIBB Formosa incurred</field>
+        <field name="description">Perc IIBB Formosa incurred</field>
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="1.0" name="amount"/>
@@ -508,8 +508,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_mi_sufrida" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_base_chart_template"/>
-        <field name="name">Percepción IIBB Misiones Sufrida</field>
-        <field name="description">Perc IIBB Misiones S</field>
+        <field name="name">Perception IIBB Misiones incurred</field>
+        <field name="description">Perc IIBB Misiones incurred</field>
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="1.0" name="amount"/>
@@ -532,8 +532,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_ne_sufrida" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_base_chart_template"/>
-        <field name="name">Percepción IIBB Neuquén Sufrida</field>
-        <field name="description">Perc IIBB Neuquén S</field>
+        <field name="name">Perception IIBB Neuquén incurred</field>
+        <field name="description">Perc IIBB Neuquén incurred</field>
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="1.0" name="amount"/>
@@ -556,8 +556,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_lp_sufrida" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_base_chart_template"/>
-        <field name="name">Percepción IIBB La Pampa Sufrida</field>
-        <field name="description">Perc IIBB La Pampa S</field>
+        <field name="name">Perception IIBB La Pampa incurred</field>
+        <field name="description">Perc IIBB La Pampa incurred</field>
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="1.0" name="amount"/>
@@ -580,8 +580,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_rn_sufrida" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_base_chart_template"/>
-        <field name="name">Percepción IIBB Río Negro Sufrida</field>
-        <field name="description">Perc IIBB Río Negro S</field>
+        <field name="name">Perception IIBB Río Negro incurred</field>
+        <field name="description">Perc IIBB Río Negro incurred</field>
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="1.0" name="amount"/>
@@ -604,8 +604,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_az_sufrida" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_base_chart_template"/>
-        <field name="name">Percepción IIBB Santa Cruz Sufrida</field>
-        <field name="description">Perc IIBB Santa Cruz S</field>
+        <field name="name">Perception IIBB Santa Cruz incurred</field>
+        <field name="description">Perc IIBB Santa Cruz incurred</field>
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="1.0" name="amount"/>
@@ -628,8 +628,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_tf_sufrida" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_base_chart_template"/>
-        <field name="name">Percepción IIBB Tierra del Fuego Sufrida</field>
-        <field name="description">Perc IIBB Tierra del Fuego S</field>
+        <field name="name">Perception IIBB Tierra del Fuego incurred</field>
+        <field name="description">Perc IIBB Tierra del Fuego incurred</field>
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="1.0" name="amount"/>
@@ -652,8 +652,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_caba_aplicada" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ex_chart_template"/>
-        <field name="name">Percepción IIBB CABA Aplicada</field>
-        <field name="description">Perc IIBB CABA A</field>
+        <field name="name">Perception IIBB CABA applied</field>
+        <field name="description">Perc IIBB CABA applied</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
         <field name="amount_type">fixed</field>
@@ -677,8 +677,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_ba_aplicada" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ex_chart_template"/>
-        <field name="name">Percepción IIBB ARBA Aplicada</field>
-        <field name="description">Perc IIBB ARBA A</field>
+        <field name="name">Perception IIBB ARBA applied</field>
+        <field name="description">Perc IIBB ARBA applied</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
         <field name="amount_type">fixed</field>
@@ -702,8 +702,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_ca_aplicada" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ex_chart_template"/>
-        <field name="name">Percepción IIBB Catamarca Aplicada</field>
-        <field name="description">Perc IIBB Catamarca A</field>
+        <field name="name">Perception IIBB Catamarca applied</field>
+        <field name="description">Perc IIBB Catamarca applied</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
         <field name="amount_type">fixed</field>
@@ -727,8 +727,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_co_aplicada" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ex_chart_template"/>
-        <field name="name">Percepción IIBB Córdoba Aplicada</field>
-        <field name="description">Perc IIBB Córdoba A</field>
+        <field name="name">Perception IIBB Cordoba applied</field>
+        <field name="description">Perc IIBB Córdoba applied</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
         <field name="amount_type">fixed</field>
@@ -752,8 +752,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_rr_aplicada" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ex_chart_template"/>
-        <field name="name">Percepción IIBB Corrientes Aplicada</field>
-        <field name="description">Perc IIBB Corrientes A</field>
+        <field name="name">Perception IIBB Corrientes applied</field>
+        <field name="description">Perc IIBB Corrientes applied</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
         <field name="amount_type">fixed</field>
@@ -777,8 +777,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_er_aplicada" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ex_chart_template"/>
-        <field name="name">Percepción IIBB Entre Ríos Aplicada</field>
-        <field name="description">Perc IIBB Entre Ríos A</field>
+        <field name="name">Perception IIBB Entre Río applied</field>
+        <field name="description">Perc IIBB Entre Ríos applied</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
         <field name="amount_type">fixed</field>
@@ -802,8 +802,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_ju_aplicada" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ex_chart_template"/>
-        <field name="name">Percepción IIBB Jujuy Aplicada</field>
-        <field name="description">Perc IIBB Jujuy A</field>
+        <field name="name">Perception IIBB Jujuy applied</field>
+        <field name="description">Perc IIBB Jujuy applied</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
         <field name="amount_type">fixed</field>
@@ -827,8 +827,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_za_aplicada" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ex_chart_template"/>
-        <field name="name">Percepción IIBB Mendoza Aplicada</field>
-        <field name="description">Perc IIBB Mendoza A</field>
+        <field name="name">Perception IIBB Mendoza applied</field>
+        <field name="description">Perc IIBB Mendoza applied</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
         <field name="amount_type">fixed</field>
@@ -852,8 +852,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_lr_aplicada" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ex_chart_template"/>
-        <field name="name">Percepción IIBB La Rioja Aplicada</field>
-        <field name="description">Perc IIBB La Rioja A</field>
+        <field name="name">Perception IIBB La Rioja applied</field>
+        <field name="description">Perc IIBB La Rioja applied</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
         <field name="amount_type">fixed</field>
@@ -877,8 +877,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_sa_aplicada" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ex_chart_template"/>
-        <field name="name">Percepción IIBB Salta Aplicada</field>
-        <field name="description">Perc IIBB Salta A</field>
+        <field name="name">Perception IIBB Salta applied</field>
+        <field name="description">Perc IIBB Salta applied</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
         <field name="amount_type">fixed</field>
@@ -902,8 +902,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_nn_aplicada" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ex_chart_template"/>
-        <field name="name">Percepción IIBB San Juan Aplicada</field>
-        <field name="description">Perc IIBB San Juan A</field>
+        <field name="name">Perception IIBB San Juan applied</field>
+        <field name="description">Perc IIBB San Juan applied</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
         <field name="amount_type">fixed</field>
@@ -927,8 +927,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_sl_aplicada" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ex_chart_template"/>
-        <field name="name">Percepción IIBB San Luis Aplicada</field>
-        <field name="description">Perc IIBB San Luis A</field>
+        <field name="name">Perception IIBB San Luis applied</field>
+        <field name="description">Perc IIBB San Luis applied</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
         <field name="amount_type">fixed</field>
@@ -952,8 +952,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_sf_aplicada" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ex_chart_template"/>
-        <field name="name">Percepción IIBB Santa Fe Aplicada</field>
-        <field name="description">Perc IIBB Santa Fe A</field>
+        <field name="name">Perception IIBB Santa Fe applied</field>
+        <field name="description">Perc IIBB Santa Fe applied</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
         <field name="amount_type">fixed</field>
@@ -977,8 +977,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_se_aplicada" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ex_chart_template"/>
-        <field name="name">Percepción IIBB Santiago del Estero Aplicada</field>
-        <field name="description">Perc IIBB Santiago del Estero A</field>
+        <field name="name">Perception IIBB Santiago del Estero applied</field>
+        <field name="description">Perc IIBB Santiago del Estero applied</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
         <field name="amount_type">fixed</field>
@@ -1002,8 +1002,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_tn_aplicada" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ex_chart_template"/>
-        <field name="name">Percepción IIBB Tucumán Aplicada</field>
-        <field name="description">Perc IIBB Tucumán A</field>
+        <field name="name">Perception IIBB Tucumán applied</field>
+        <field name="description">Perc IIBB Tucumán applied</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
         <field name="amount_type">fixed</field>
@@ -1027,8 +1027,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_ha_aplicada" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ex_chart_template"/>
-        <field name="name">Percepción IIBB Chaco Aplicada</field>
-        <field name="description">Perc IIBB Chaco A</field>
+        <field name="name">Perception IIBB Chaco applied</field>
+        <field name="description">Perc IIBB Chaco applied</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
         <field name="amount_type">fixed</field>
@@ -1052,8 +1052,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_ct_aplicada" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ex_chart_template"/>
-        <field name="name">Percepción IIBB Chubut Aplicada</field>
-        <field name="description">Perc IIBB Chubut A</field>
+        <field name="name">Perception IIBB Chubut applied</field>
+        <field name="description">Perc IIBB Chubut applied</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
         <field name="amount_type">fixed</field>
@@ -1077,8 +1077,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_fo_aplicada" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ex_chart_template"/>
-        <field name="name">Percepción IIBB Formosa Aplicada</field>
-        <field name="description">Perc IIBB Formosa A</field>
+        <field name="name">Perception IIBB Formosa applied</field>
+        <field name="description">Perc IIBB Formosa applied</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
         <field name="amount_type">fixed</field>
@@ -1102,8 +1102,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_mi_aplicada" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ex_chart_template"/>
-        <field name="name">Percepción IIBB Misiones Aplicada</field>
-        <field name="description">Perc IIBB Misiones A</field>
+        <field name="name">Perception IIBB Misiones applied</field>
+        <field name="description">Perc IIBB Misiones applied</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
         <field name="amount_type">fixed</field>
@@ -1127,8 +1127,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_ne_aplicada" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ex_chart_template"/>
-        <field name="name">Percepción IIBB Neuquén Aplicada</field>
-        <field name="description">Perc IIBB Neuquén A</field>
+        <field name="name">Perception IIBB Neuquén applied</field>
+        <field name="description">Perc IIBB Neuquén applied</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
         <field name="amount_type">fixed</field>
@@ -1152,8 +1152,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_lp_aplicada" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ex_chart_template"/>
-        <field name="name">Percepción IIBB La Pampa Aplicada</field>
-        <field name="description">Perc IIBB La Pampa A</field>
+        <field name="name">Perception IIBB La Pampa applied</field>
+        <field name="description">Perc IIBB La Pampa applied</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
         <field name="amount_type">fixed</field>
@@ -1177,8 +1177,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_rn_aplicada" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ex_chart_template"/>
-        <field name="name">Percepción IIBB Río Negro Aplicada</field>
-        <field name="description">Perc IIBB Río Negro A</field>
+        <field name="name">Perception IIBB Río Negro applied</field>
+        <field name="description">Perc IIBB Río Negro collection</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
         <field name="amount_type">fixed</field>
@@ -1202,8 +1202,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_az_aplicada" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ex_chart_template"/>
-        <field name="name">Percepción IIBB Santa Cruz Aplicada</field>
-        <field name="description">Perc IIBB Santa Cruz A</field>
+        <field name="name">Perception IIBB Santa Cruz applied</field>
+        <field name="description">Perc IIBB Santa Cruz applied</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
         <field name="amount_type">fixed</field>
@@ -1227,8 +1227,8 @@
     </record>
     <record id="ri_tax_percepcion_iibb_tf_aplicada" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ex_chart_template"/>
-        <field name="name">Percepción IIBB Tierra del Fuego Aplicada</field>
-        <field name="description">Perc IIBB Tierra del Fuego A</field>
+        <field name="name">Perception IIBB Tierra del Fuego applied</field>
+        <field name="description">Perc IIBB Tierra del Fuego applied</field>
         <field name="sequence">4</field>
         <field name="active" eval="False"/>
         <field name="amount_type">fixed</field>
@@ -1254,8 +1254,8 @@
     <!-- Remove this record in V14 -->
     <record id="ri_tax_vat_no_corresponde_ventas" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ri_chart_template"/>
-        <field name="description">IVA No Corresponde</field>
-        <field name="name">IVA No Corresponde</field>
+        <field name="description">Not subject to VAT</field>
+        <field name="name">Not subject to VAT</field>
         <field name="active" eval="False"/>
         <field name="sequence">2</field>
         <field name="amount_type">fixed</field>
@@ -1279,8 +1279,8 @@
     </record>
     <record id="ri_tax_vat_no_corresponde_compras" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ri_chart_template"/>
-        <field name="description">IVA No Corresponde</field>
-        <field name="name">IVA No Corresponde</field>
+        <field name="description">Not subject to VAT</field>
+        <field name="name">Not subject to VAT</field>
         <field name="sequence">2</field>
         <field name="amount_type">fixed</field>
         <field eval="0.0" name="amount"/>
@@ -1303,8 +1303,8 @@
     </record>
     <record id="ri_tax_vat_no_gravado_ventas" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ri_chart_template"/>
-        <field name="description">IVA No Gravado</field>
-        <field name="name">IVA No Gravado</field>
+        <field name="description">VAT not recorded</field>
+        <field name="name">VAT not recorded</field>
         <field name="sequence">2</field>
         <field name="amount_type">fixed</field>
         <field eval="0.0" name="amount"/>
@@ -1327,8 +1327,8 @@
     </record>
     <record id="ri_tax_vat_no_gravado_compras" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ri_chart_template"/>
-        <field name="description">IVA No Gravado</field>
-        <field name="name">IVA No Gravado</field>
+        <field name="description">VAT not recorded</field>
+        <field name="name">VAT not recorded</field>
         <field name="sequence">2</field>
         <field name="amount_type">fixed</field>
         <field eval="0.0" name="amount"/>
@@ -1351,8 +1351,8 @@
     </record>
     <record id="ri_tax_vat_exento_ventas" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ri_chart_template"/>
-        <field name="description">IVA Exento</field>
-        <field name="name">IVA Exento</field>
+        <field name="description">VAT Exempt</field>
+        <field name="name">VAT Exempt</field>
         <field name="sequence">2</field>
         <field name="amount_type">fixed</field>
         <field eval="0.0" name="amount"/>
@@ -1375,8 +1375,8 @@
     </record>
     <record id="ri_tax_vat_exento_compras" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ri_chart_template"/>
-        <field name="description">IVA Exento</field>
-        <field name="name">IVA Exento</field>
+        <field name="description">VAT Exempt</field>
+        <field name="name">VAT Exempt</field>
         <field name="sequence">2</field>
         <field name="amount_type">fixed</field>
         <field eval="0.0" name="amount"/>
@@ -1399,8 +1399,8 @@
     </record>
     <record id="ri_tax_vat_0_ventas" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ri_chart_template"/>
-        <field name="description">IVA 0%</field>
-        <field name="name">IVA 0%</field>
+        <field name="description">VAT 0%</field>
+        <field name="name">VAT 0%</field>
         <field name="sequence">2</field>
         <field eval="0.0" name="amount"/>
         <field name="amount_type">percent</field>
@@ -1423,8 +1423,8 @@
     </record>
     <record id="ri_tax_vat_0_compras" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ri_chart_template"/>
-        <field name="description">IVA 0%</field>
-        <field name="name">IVA 0%</field>
+        <field name="description">VAT 0%</field>
+        <field name="name">VAT 0%</field>
         <field name="sequence">2</field>
         <field eval="0.0" name="amount"/>
         <field name="amount_type">percent</field>
@@ -1447,8 +1447,8 @@
     </record>
     <record id="ri_tax_vat_10_ventas" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ri_chart_template"/>
-        <field name="description">IVA 10.5%</field>
-        <field name="name">IVA 10.5%</field>
+        <field name="description">VAT 10.5%</field>
+        <field name="name">VAT 10.5%</field>
         <field name="sequence">2</field>
         <field eval="10.5" name="amount"/>
         <field name="amount_type">percent</field>
@@ -1471,8 +1471,8 @@
     </record>
     <record id="ri_tax_vat_10_compras" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ri_chart_template"/>
-        <field name="description">IVA 10.5%</field>
-        <field name="name">IVA 10.5%</field>
+        <field name="description">VAT 10.5%</field>
+        <field name="name">VAT 10.5%</field>
         <field name="sequence">2</field>
         <field eval="10.5" name="amount"/>
         <field name="amount_type">percent</field>
@@ -1495,8 +1495,8 @@
     </record>
     <record id="ri_tax_vat_21_ventas" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ri_chart_template"/>
-        <field name="name">IVA 21%</field>
-        <field name="description">IVA 21%</field>
+        <field name="name">VAT 21%</field>
+        <field name="description">VAT 21%</field>
         <field name="sequence">1</field>
         <field eval="21" name="amount"/>
         <field name="amount_type">percent</field>
@@ -1519,8 +1519,8 @@
     </record>
     <record id="ri_tax_vat_21_compras" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ri_chart_template"/>
-        <field name="name">IVA 21%</field>
-        <field name="description">IVA 21%</field>
+        <field name="name">VAT 21%</field>
+        <field name="description">VAT 21%</field>
         <field name="sequence">1</field>
         <field eval="21" name="amount"/>
         <field name="amount_type">percent</field>
@@ -1543,8 +1543,8 @@
     </record>
     <record id="ri_tax_vat_27_ventas" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ri_chart_template"/>
-        <field name="name">IVA 27%</field>
-        <field name="description">IVA 27%</field>
+        <field name="name">VAT 27%</field>
+        <field name="description">VAT 27%</field>
         <field name="sequence">3</field>
         <field eval="27" name="amount"/>
         <field name="amount_type">percent</field>
@@ -1567,8 +1567,8 @@
     </record>
     <record id="ri_tax_vat_27_compras" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ri_chart_template"/>
-        <field name="name">IVA 27%</field>
-        <field name="description">IVA 27%</field>
+        <field name="name">VAT 27%</field>
+        <field name="description">VAT 27%</field>
         <field name="sequence">3</field>
         <field eval="27" name="amount"/>
         <field name="amount_type">percent</field>
@@ -1591,8 +1591,8 @@
     </record>
     <record id="ri_tax_vat_25_ventas" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ri_chart_template"/>
-        <field name="name">IVA 2,5%</field>
-        <field name="description">IVA 2,5%</field>
+        <field name="name">VAT 2.5%</field>
+        <field name="description">VAT 2.5%</field>
         <field name="sequence">9</field>
         <field name="active" eval="False"/>
         <field eval="2.5" name="amount"/>
@@ -1616,8 +1616,8 @@
     </record>
     <record id="ri_tax_vat_25_compras" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ri_chart_template"/>
-        <field name="name">IVA 2,5%</field>
-        <field name="description">IVA 2,5%</field>
+        <field name="name">VAT 2.5%</field>
+        <field name="description">VAT 2.5%</field>
         <field name="sequence">9</field>
         <field name="active" eval="False"/>
         <field eval="2.5" name="amount"/>
@@ -1641,8 +1641,8 @@
     </record>
     <record id="ri_tax_vat_5_ventas" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ri_chart_template"/>
-        <field name="name">IVA 5%</field>
-        <field name="description">IVA 5%</field>
+        <field name="name">VAT 5%</field>
+        <field name="description">VAT 5%</field>
         <field name="sequence">10</field>
         <field name="active" eval="False"/>
         <field eval="5" name="amount"/>
@@ -1666,8 +1666,8 @@
     </record>
     <record id="ri_tax_vat_5_compras" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ri_chart_template"/>
-        <field name="name">IVA 5%</field>
-        <field name="description">IVA 5%</field>
+        <field name="name">VAT 5%</field>
+        <field name="description">VAT 5%</field>
         <field name="sequence">10</field>
         <field name="active" eval="False"/>
         <field eval="5" name="amount"/>
@@ -1691,8 +1691,8 @@
     </record>
     <record id="ri_tax_percepcion_iva_sufrida" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ri_chart_template"/>
-        <field name="name">Percepción IVA Sufrida</field>
-        <field name="description">Perc IVA S</field>
+        <field name="name">Perception VAT incurred</field>
+        <field name="description">Perc VAT incurred</field>
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="1.0" name="amount"/>
@@ -1715,8 +1715,8 @@
     </record>
     <record id="ri_tax_ganancias_iva_adicional" model="account.tax.template">
         <field name="chart_template_id" ref="l10nar_ri_chart_template"/>
-        <field name="name">IVA Adicional 20%</field>
-        <field name="description">IVA Adicional 20%</field>
+        <field name="name">Additional VAT 20%</field>
+        <field name="description">Additional VAT 20%</field>
         <field name="sequence">4</field>
         <field eval="20.0" name="amount"/>
         <field name="amount_type">percent</field>

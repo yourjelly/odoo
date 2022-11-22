@@ -3,7 +3,7 @@
 
     <!-- Exempt Operations -->
     <record model='account.fiscal.position.template' id='fiscal_position_template_exempt_operations'>
-        <field name='name'>Compras / Ventas al exterior</field>
+        <field name='name'>Purchases / Sales export</field>
         <field name="auto_apply" eval="True"/>
         <field name="l10n_ar_afip_responsibility_type_ids" eval="[(6, False, [ref('l10n_ar.res_EXT')])]"/>
         <field name="chart_template_id" ref="l10nar_ri_chart_template"/>
@@ -61,7 +61,7 @@
 
     <!-- Free Zone -->
     <record model='account.fiscal.position.template' id='fiscal_position_template_free_zone'>
-        <field name='name'>Compras / Ventas Zona Franca</field>
+        <field name='name'>Purchases / Sales in Free Trade Zone</field>
         <field name="auto_apply" eval="True"/>
         <field name="l10n_ar_afip_responsibility_type_ids" eval="[(6, False, [ref('l10n_ar.res_IVA_LIB')])]"/>
         <field name="chart_template_id" ref="l10nar_ri_chart_template"/>
@@ -109,7 +109,7 @@
 
     <!-- VAT dont correspond -->
     <record model='account.fiscal.position.template' id='fiscal_position_template_iva_no_corresponde'>
-        <field name='name'>Compras IVA no corresponde</field>
+        <field name='name'>Purchases VAT does not apply</field>
         <field name="auto_apply" eval="True"/>
         <field name="l10n_ar_afip_responsibility_type_ids" eval="[(6, False, [ref('l10n_ar.res_IVAE'), ref('l10n_ar.res_RM')])]"/>
         <field name="chart_template_id" ref="l10nar_ri_chart_template"/>
