@@ -812,3 +812,42 @@ QUnit.test(
     "reposition from right-end to top-end",
     getRepositionTest("right-end", "top-end", "w125 right")
 );
+
+function getFittingTest(position, style) {
+    return async (assert) => {
+        const TestComp = getTestComponent({
+            position,
+        });
+        await mount(TestComp, container);
+        Object.assign(document.querySelector("#reference").style, style);
+        const isVertical = ["bottom", "top"].includes(position.split("-")[0]);
+        const styleAttribute = isVertical ? "width" : "height";
+        triggerEvent(document, null, "scroll");
+        await nextTick();
+        assert.strictEqual(container.querySelector("#popper").style[styleAttribute], isVertical ? style.width : style.height);
+    }
+}
+QUnit.test(
+    "reposition from bottom-fit to top-fit", getRepositionTest("bottom-fit", "top-fit", "bottom")
+);
+QUnit.test(
+    "reposition from top-fit to bottom-fit", getRepositionTest("top-fit", "bottom-fit", "top")
+);
+QUnit.test(
+    "reposition from right-fit to left-fit", getRepositionTest("right-fit", "left-fit", "right")
+);
+QUnit.test(
+    "reposition from left-fit to right-fit", getRepositionTest("left-fit", "right-fit", "left")
+);
+QUnit.test(
+    "bottom-fit has the same width as the reference", getFittingTest("bottom-fit", {width: "200px"})
+);
+QUnit.test(
+    "top-fit has the same width as the reference", getFittingTest("top-fit", {width: "200px"})
+);
+QUnit.test(
+    "left-fit has the same height as the reference", getFittingTest("left-fit", {height: "200px"})
+);
+QUnit.test(
+    "right-fit has the same height as the reference", getFittingTest("right-fit", {height: "200px"})
+);
