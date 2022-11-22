@@ -17,7 +17,7 @@ from psycopg2.pool import PoolError
 from weakref import WeakSet
 
 from werkzeug.local import LocalStack
-from werkzeug.exceptions import BadRequest, HTTPException
+from werkzeug.exceptions import BadRequest, HTTPException, ServiceUnavailable
 
 import odoo
 from odoo import api
@@ -802,12 +802,15 @@ class WebsocketConnectionHandler:
         :raise: BadRequest if the handshake data is incorrect.
         """
         response = cls._get_handshake_response(request.httprequest.headers)
-        response.call_on_close(functools.partial(
-            cls._serve_forever,
-            Websocket(request.httprequest.environ['socket'], request.session),
-            request.db,
-            request.httprequest
-        ))
+        try:
+            response.call_on_close(functools.partial(
+                cls._serve_forever,
+                Websocket(request.httprequest.environ['socket'], request.session),
+                request.db,
+                request.httprequest
+            ))
+        except PoolError:
+            return ServiceUnavailable()
         # Force save the session. Session must be persisted to handle
         # WebSocket authentication.
         request.session.is_dirty = True
