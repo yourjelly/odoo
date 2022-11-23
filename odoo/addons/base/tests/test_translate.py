@@ -888,6 +888,22 @@ class TestXMLTranslation(TransactionCase):
             '<form string="X"><i class="fa fa-circle" role="img" aria-label="Non-valide" title="Non-valide"/><div><i>Fork</i></div></form>',
             '"<i> </i>" has no term and should be dropped as a translation')
 
+        view.update_field_translations('arch_db', {
+            'fr_FR': {'X': 'Damien Roberts" <d.roberts@example.com>'}
+        })
+        self.assertEqual(
+            view.with_context(lang='fr_FR').arch_db,
+            '<form string="Damien Roberts&quot; &lt;d.roberts@example.com&gt;"><i class="fa fa-circle" role="img" aria-label="Non-valide" title="Non-valide"/><div><i>Fork</i></div></form>',
+            'attr can be translated')
+
+        view.update_field_translations('arch_db', {
+            'fr_FR': {'Damien Roberts" <d.roberts@example.com>': 'X'}
+        })
+        self.assertEqual(
+            view.with_context(lang='fr_FR').arch_db,
+            '<form string="X"><i class="fa fa-circle" role="img" aria-label="Non-valide" title="Non-valide"/><div><i>Fork</i></div></form>',
+            'attrs can be translated')
+
 @tagged('post_install', '-at_install')
 class TestLanguageInstallPerformance(TransactionCase):
     def test_language_install(self):
