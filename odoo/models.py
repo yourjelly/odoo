@@ -3063,7 +3063,8 @@ class BaseModel(metaclass=MetaModel):
                     old_terms = field.get_trans_terms(old_value)
                     old_terms_digested2value = {digest(old_term): old_term for old_term in old_terms}
                     translation = {
-                        old_terms_digested2value[key]: field.translate.term_converter(value)
+                        old_terms_digested2value[key]: value
+                        # old_terms_digested2value[key]: field.translate.term_converter(value)
                         for key, value in translation.items()
                         if key in old_terms_digested2value
                     }
