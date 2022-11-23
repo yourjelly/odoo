@@ -812,7 +812,7 @@ Please change the quantity done or the rounding precision of your unit of measur
         ml_to_update, ml_to_unlink = OrderedSet(), OrderedSet()
         moves_not_to_recompute = OrderedSet()
         for ml in moves_to_unreserve.move_line_ids:
-            if ml.qty_done:
+            if ml.qty_done or ml.move_id.picking_id.immediate_transfer:
                 ml_to_update.add(ml.id)
             else:
                 ml_to_unlink.add(ml.id)
