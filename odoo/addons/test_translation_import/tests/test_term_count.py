@@ -3,14 +3,18 @@
 from contextlib import closing
 import base64
 import io
+import logging
+from pathlib import Path
 
 import odoo
 from odoo.tests import common, tagged
 from odoo.tools.misc import file_open, mute_logger
-from odoo.tools.translate import TranslationModuleReader, code_translations, CodeTranslations, PYTHON_TRANSLATION_COMMENT, JAVASCRIPT_TRANSLATION_COMMENT, WEB_TRANSLATION_COMMENT
+from odoo.tools.translate import TranslationModuleReader,TranslationFileReader, code_translations, CodeTranslations, PYTHON_TRANSLATION_COMMENT, JAVASCRIPT_TRANSLATION_COMMENT, WEB_TRANSLATION_COMMENT
 from odoo import Command
 from odoo.addons.base.models.ir_fields import BOOLEAN_TRANSLATIONS
+from odoo.modules import get_module_path, get_module_resource
 
+_logger = logging.getLogger(__name__)
 
 class TestImport(common.TransactionCase):
 
@@ -225,6 +229,28 @@ class TestImport(common.TransactionCase):
         # source error: wrong arguments
         with self.assertRaises(KeyError):
             model_fr_BE.get_code_named_placeholder_translation(symbol="🧀"),
+
+    def test_po_terms(self):
+        for module_name in self.env['ir.module.module'].search([]).mapped('name'):
+            modpath = get_module_path(module_name)
+            if not modpath:
+                continue
+            env = self.env
+            for po_file_path in Path(modpath + '/i18n').glob('*.po'):
+                with file_open(po_file_path, mode='rb') as fileobj:
+                    fileobj.seek(0)
+                    with mute_logger('odoo.tools.translate'):
+                        reader = TranslationFileReader(fileobj, fileformat='po')
+                        for row in reader:
+                            if not (row.get('src') and row.get('value').strip() and row.get('type') == 'model_terms'):
+                                continue
+                            model_name = row.get('imd_model')
+                            if model_name not in env:
+                                continue
+                            field_name = row['name'].split(',')[1]
+                            field = env[model_name]._fields.get(field_name)
+                            if field and len(field.get_trans_terms(f"<div>{row['value']}</div>")) != 1:
+                                _logger.warning(f'model_terms translation {row["src"]} should have 1 term in translation {row["value"]} in po file {po_file_path}')
 
 
 @tagged('post_install', '-at_install')
