@@ -1196,7 +1196,9 @@ const Wysiwyg = Widget.extend({
                 // Using a microtask to set the focus is hackish and might break
                 // if another microtask wich focus an elemen in the dom occurs
                 // at the same time (but this case seems unlikely).
-                Promise.resolve().then(() => link.focus());
+                Promise.resolve().then(() => {
+                    this.trigger_up('wysiwyg_blur');
+                });
             });
             linkDialog.on('closed', this, function () {
                 // If the linkDialog content has been saved
@@ -1320,6 +1322,9 @@ const Wysiwyg = Widget.extend({
             } else if (element) {
                 this.odooEditor.execCommand('insertHTML', element.outerHTML);
             }
+            Promise.resolve().then(() => {
+                this.trigger_up('wysiwyg_blur');
+            });
         });
         mediaDialog.on('closed', this, function () {
             // if the mediaDialog content has been saved
