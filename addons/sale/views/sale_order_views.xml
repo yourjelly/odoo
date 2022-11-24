@@ -211,8 +211,12 @@
                 <button name="action_confirm" data-hotkey="v"
                     string="Confirm" type="object"
                     attrs="{'invisible': [('state', 'not in', ['draft'])]}"/>
+                <button name="action_preview_sale_order" data-hotkey="o"
+                    string="Preview" type="object" states="draft"/>
                 <button name="action_quotation_send" type="object" string="Send PRO-FORMA Invoice" groups="sale.group_proforma_sales" attrs="{'invisible': ['|', ('state', '=', 'draft'), ('invoice_count','&gt;=',1)]}" context="{'proforma': True}"/>
                 <button name="action_quotation_send" string="Send by Email" type="object" states="sent,sale" data-hotkey="g"/>
+                <button name="action_preview_sale_order" data-hotkey="o"
+                    string="Preview" type="object" states="sent,sale,done"/>
                 <button name="action_cancel" type="object" string="Cancel" attrs="{'invisible': ['|', ('state', 'not in', ['draft', 'sent','sale']), ('id', '=', False)]}" data-hotkey="z"/>
                 <button name="action_draft" states="cancel" type="object" string="Set to Quotation" data-hotkey="w"/>
                 <field name="state" widget="statusbar" statusbar_visible="draft,sent,sale"/>
@@ -230,15 +234,6 @@
                         icon="fa-pencil-square-o"
                         attrs="{'invisible': [('invoice_count', '=', 0)]}">
                         <field name="invoice_count" widget="statinfo" string="Invoices"/>
-                    </button>
-                    <button name="action_preview_sale_order"
-                        type="object"
-                        class="oe_stat_button"
-                        icon="fa-globe icon">
-                        <div class="o_field_widget o_stat_info">
-                            <span class="o_stat_text">Customer</span>
-                            <span class="o_stat_text">Preview</span>
-                        </div>
                     </button>
                 </div>
                 <div class="oe_title">
@@ -667,7 +662,7 @@
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
-            <button name="action_draft" position="after">
+            <button name="action_preview_sale_order" position="before">
                 <t groups="sale.group_auto_done_setting">
                     <button name="action_done" type="object" string="Lock"
                         states="sale"
