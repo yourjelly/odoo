@@ -1,0 +1,31 @@
+div.o_field_widget.o_sale_product_catalog_quantity {
+    z-index: 1;
+    font-size: 1rem;
+    height: 50%;
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    button {
+        width: 2rem;
+        height: 1rem;
+    }
+
+    input {
+        width: 20px;
+    }
+
+    input[type="number"] {
+        // Remove arrow buttons input type="number"
+        appearance: textfield;
+        &::-webkit-outer-spin-button,
+        &::-webkit-inner-spin-button {
+            appearance: none;
+            margin: 0;
+        }
+    }
+    .o_kanban_tags_section .o_field_many2manytags > span {
+        @include o-text-overflow;
+    }
+}

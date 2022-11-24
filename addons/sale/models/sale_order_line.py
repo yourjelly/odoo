@@ -1178,3 +1178,34 @@ class SaleOrderLine(models.Model):
                 round=False,
             )
         return amount
+
+    def action_add_from_catalog(self, order_id=None):
+        order_id = order_id or self.env.context.get('order_id')
+        if not order_id:
+            raise UserError(_("Please save the sale order before adding from catalog."))
+
+        sale_order = self.env['sale.order'].browse(order_id).exists()
+        kanban_view_id = self.env.ref('sale.sale_product_catalog_kanban_view').id
+        search_view_id = self.env.ref('sale.sale_product_catalog_search_view').id
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Products'),
+            'res_model': 'product.product',
+            'views': [(kanban_view_id, 'kanban'), (False, 'form')],
+            'search_view_id': [search_view_id, 'search'],
+            'domain': [
+                ('sale_ok', '=', True),
+                '|', ('company_id', '=', False), ('company_id', '=', sale_order.company_id)
+            ],
+            'context': {
+                **self.env.context,
+                'order_id': order_id,
+            },
+            'help': """<p class="o_view_nocontent_smiling_face">
+                Create a new product
+            </p><p>
+                You must define a product for everything you sell or purchase,
+                whether it's a storable product, a consumable or a service.
+            </p>""",
+        }
