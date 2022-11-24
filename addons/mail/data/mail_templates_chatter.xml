@@ -46,6 +46,24 @@
 </div>
         </template>
 
+        <template id="mail.message_document_unfollowed">
+            <t t-call="mail.public_layout">
+                <div class="h-100 d-flex align-items-center justify-content-center">
+                    <div>
+                        <h1 t-out="model_name"/>
+                        <div class="alert alert-success text-center p-5" role="status">
+                            <strong>You are no longer following the document:</strong>
+                            <div class="pt-4">
+                                <a t-if="access_url" class="btn btn-primary" role="button" t-att-href="access_url"
+                                   t-out="name"/>
+                                <i t-else="" t-out="name"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </template>
+
         <template id="message_origin_link">
             <p>
                 <t t-if="edit">This <t t-esc="self.env['ir.model']._get(self._name).name.lower()"/> has been modified from:</t>

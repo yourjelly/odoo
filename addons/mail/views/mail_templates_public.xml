@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="mail.public_layout">&lt;!DOCTYPE html&gt;
+        <html class="h-100">
+            <head>
+                <meta charset="utf-8"/>
+                <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+                <title t-out="title or 'Odoo'"/>
+                <link type="image/x-icon" rel="shortcut icon" t-att-href="x_icon or '/web/static/img/favicon.ico'"/>
+                <t t-call-assets="mail.assets_public"/>
+            </head>
+            <body>
+                <t t-out="0"/>
+            </body>
+        </html>
+    </template>
+</odoo>

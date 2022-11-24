@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from contextlib import suppress
 import logging
 
 from werkzeug.urls import url_encode
 
-from odoo import http
+from odoo import _, http
 from odoo.exceptions import AccessError
 from odoo.http import request
 from odoo.tools import consteq
@@ -165,3 +166,31 @@ class MailController(http.Controller):
             except ValueError:
                 res_id = False
         return self._redirect_to_record(model, res_id, access_token, **kwargs)
+
+    # csrf is disabled here because it will be called by the MUA with unpredictable session at that time
+    @http.route('/mail/unfollow', type='http', auth='public', csrf=False)
+    def mail_action_unfollow(self, model, res_id, pid, token, **kwargs):
+        comparison, record, redirect = MailController._check_token_and_record_or_redirect(model, int(res_id), token)
+        if not comparison or not record:
+            raise AccessError(_('Non existing record or wrong token.'))
+
+        pid = int(pid)
+        record_sudo = record.sudo()
+        record_sudo.message_unsubscribe([pid])
+
+        # Check rights as internal user can unfollow without read access and rights could have been revoked
+        has_access = False
+        records_with_user = [record] if request.session.uid \
+            else [record.with_user(user) for user in request.env['res.users'].sudo().search([('partner_id', '=', pid)])]
+        for record_with_user in records_with_user:
+            with suppress(AccessError):
+                record_with_user.check_access_rights('read')
+                record_with_user.check_access_rule('read')
+                has_access = True
+                break
+
+        return request.render('mail.message_document_unfollowed', {
+            'name': record_sudo.display_name,
+            'model_name': request.env['ir.model'].sudo()._get(model).display_name,
+            'access_url': record._notify_get_action_link('view', model=model, res_id=res_id) if has_access else False
+        })

@@ -19,6 +19,7 @@ from odoo import tools
 from odoo.addons.base.models.ir_mail_server import MailDeliveryException
 
 _logger = logging.getLogger(__name__)
+_UNFOLLOW_REGEX = re.compile(r'<div id="mail_unfollow".*?<\/div>', re.DOTALL)
 
 
 class MailMail(models.Model):
@@ -315,6 +316,32 @@ class MailMail(models.Model):
             return ''
         return self.env['mail.render.mixin']._replace_local_links(self.body_html)
 
+    def _personalize_outgoing_body(self, body, partner=False):
+        """ Return a modified body based on the recipient (partner).
+
+        It must be called when using standard notification layouts
+        even for message without partners.
+
+        :param str body: body to personalize for the recipient
+        :param Model partner: recipient
+        """
+        if '/mail/unfollow' not in body:  # Avoid unnecessary query if the body must not be personalized
+            return body
+        self.ensure_one()
+
+        followers = self.mail_message_id.notification_ids.filtered(lambda notif: notif.follower_id).res_partner_id
+        if (partner and partner in followers and self.mail_message_id.model and self.mail_message_id.res_id and
+                (getattr(self.env[self.mail_message_id.model], '_partner_unfollow_enabled', False) or
+                 any(user._is_internal() for user in partner.user_ids))):
+            unfollow_url = self.env['mail.thread']._notify_get_action_link('unfollow',
+                                                                           model=self.mail_message_id.model,
+                                                                           res_id=self.mail_message_id.res_id,
+                                                                           pid=partner.id)
+            body = body.replace('/mail/unfollow', unfollow_url)
+        else:
+            body = re.sub(_UNFOLLOW_REGEX, '', body)
+        return body
+
     def _prepare_outgoing_list(self):
         """ Return a list of emails to send based on current mail.mail. Each
         is a dictionary for specific email values, depending on a partner, or
@@ -324,7 +351,6 @@ class MailMail(models.Model):
         """
         self.ensure_one()
         body = self._prepare_outgoing_body()
-        body_alternative = tools.html2plaintext(body)
 
         # headers
         headers = {}
@@ -405,11 +431,15 @@ class MailMail(models.Model):
         else:
             email_attachments = []
 
-        return [
-            {
+        # Build final list of email values with personalized body for recipient
+        results = []
+        for email_values in email_list:
+            partner_id = email_values['partner_id']
+            body_personalized = self._personalize_outgoing_body(body, partner_id)
+            results.append({
                 'attachments': email_attachments,
-                'body': body,
-                'body_alternative': body_alternative,
+                'body': body_personalized,
+                'body_alternative': tools.html2plaintext(body_personalized),
                 'email_cc': email_values['email_cc'],
                 'email_from': self.email_from,
                 'email_to': email_values['email_to'],
@@ -417,12 +447,13 @@ class MailMail(models.Model):
                 'headers': headers,
                 'message_id': self.message_id,
                 'object_id': f'{self.res_id}-{self.model}' if self.res_id else '',
-                'partner_id': email_values['partner_id'],
+                'partner_id': partner_id,
                 'references': self.references,
                 'reply_to': self.reply_to,
                 'subject': self.subject,
-            } for email_values in email_list
-        ]
+            })
+
+        return results
 
     def _split_by_mail_configuration(self):
         """Group the <mail.mail> based on their "email_from" and their "mail_server_id".
@@ -508,6 +539,10 @@ class MailMail(models.Model):
 
     def _send(self, auto_commit=False, raise_exception=False, smtp_session=None):
         IrMailServer = self.env['ir.mail_server']
+        # Prefetch followers of related record of personalized mail (see @_personalize_outgoing_body)
+        self.filtered(lambda e: e.body_html and '/mail/unfollow' in e.body_html
+                      ).mail_message_id.notification_ids.mapped('follower_id')
+
         for mail_id in self.ids:
             success_pids = []
             failure_type = None

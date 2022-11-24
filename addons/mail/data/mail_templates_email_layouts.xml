@@ -101,9 +101,12 @@
         <a t-if="company.website" t-att-href="'%s' % company.website" style="text-decoration:none; color: #999999;" t-out="company.website"/>
     </p>
 </div>
-<p style="color: #555555; font-size:11px;">
+<div style="color: #555555; font-size:11px; display: inline;">
     Powered by <a target="_blank" href="https://www.odoo.com?utm_source=db&amp;utm_medium=email" style="color: #875A7B;">Odoo</a>
-</p>
+    <div id="mail_unfollow" style="display: inline;">
+        | <a href="/mail/unfollow" style="text-decoration:none; color:#555555;">Unfollow</a>
+    </div>
+</div>
 </div>
 </body></html>
         </template>
