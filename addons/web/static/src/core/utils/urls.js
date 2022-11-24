@@ -2,6 +2,65 @@
 
 import { browser } from "../browser/browser";
 
+const hashPartsSequence = {
+    action: 10,
+    menu_id: 20,
+    model: 30,
+    cids: 40,
+};
+
+function prepareObject(obj) {
+    const result = {};
+    for (const key in obj) {
+        if (["view_type", "id", "active_id"].includes(key)) {
+            // handled below
+            continue;
+        }
+        if (key === "model") {
+            result[key] = {
+                model: obj[key],
+                res_id: obj.id,
+                active_id: obj.active_id,
+                view_type: obj.view_type,
+            };
+            continue;
+        }
+        if (key === "cids") {
+            result[key] = `${obj[key]}`.split(",");
+            continue;
+        }
+        result[key] = obj[key];
+    }
+    return result;
+}
+
+function getValueFormatter(type) {
+    switch (type) {
+        case "menu_id":
+            return (v) => `~${v}`;
+        case "action":
+            return (v) => `${v}`;
+        case "model":
+            return (v) => {
+                const parts = [v.model];
+                if (v.active_id) {
+                    parts.push(`@${v.active_id}`);
+                }
+                if (v.view_type && v.view_type !== "form") {
+                    parts.push(v.view_type);
+                }
+                if (v.res_id) {
+                    parts.push(v.res_id);
+                }
+                return parts.join("/");
+            };
+        case "cids":
+            return (v) => `cids-${v.join("-")}`;
+        default:
+            return (v) => encodeURIComponent(v || "");
+    }
+}
+
 /**
  * Transforms a key value mapping to a string formatted as url hash, e.g.
  * {a: "x", b: 2} -> "a=x&b=2"
@@ -10,9 +69,10 @@ import { browser } from "../browser/browser";
  * @returns {string}
  */
 export function objectToUrlEncodedString(obj) {
-    return Object.entries(obj)
-        .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v || "")}`)
-        .join("&");
+    return Object.entries(prepareObject(obj))
+        .sort((a, b) => (hashPartsSequence[a[0]] || 50) - (hashPartsSequence[b[0]] || 50))
+        .map(([key, value]) => getValueFormatter(key)(value))
+        .join("/");
 }
 
 /**
