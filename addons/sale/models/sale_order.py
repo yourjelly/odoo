@@ -1028,6 +1028,18 @@ class SaleOrder(models.Model):
         lines_to_recompute._compute_discount()
         self.show_update_pricelist = False
 
+    def _get_product_catalog_domain(self):
+        """Get the domain to search for products in the catalog.
+
+        For a model that uses products that has to be hidden in the catalog, it must override this
+        method and extend the appropriate domain.
+        :returns: A list of tuples that represents a domain.
+        :rtype: list
+        """
+        return [('sale_ok', '=', True),
+                '|', ('company_id', '=', False),
+                ('company_id', '=', self.company_id.id)]
+
     # INVOICING #
 
     def _prepare_invoice(self):
@@ -1267,6 +1279,20 @@ class SaleOrder(models.Model):
         return moves
 
     # MAIL #
+
+    def _track_finalize(self):
+        # In the case sale orders are in draft mode do not log changes on the chatter.
+        # This is thought for sale orders while in form view or when in the catalog,
+        # in these cases only one sale order is selected.
+        if (len(self) == 1
+            and self.env.cache.contains(self, self._fields['state'])
+            # The method _track_finalize is sometimes called too early or too late and it
+            # might cause a desynchronization with the cache, thus this condition is needed.
+            and self.state == 'draft'):
+            self.env.cr.precommit.data.pop(f'mail.tracking.{self._name}', {})
+            self.env.flush_all()
+            return
+        super()._track_finalize()
 
     @api.returns('mail.message', lambda value: value.id)
     def message_post(self, **kwargs):

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="sale_product_catalog_kanban_view" model="ir.ui.view">
+        <field name="name">sale.product.catalog.kanban.view</field>
+        <field name="model">product.product</field>
+        <field name="arch" type="xml">
+            <kanban
+                records_draggable="0"
+                action="set_sol_qty" type="object"
+                js_class="sale_product_kanban">
+                <field name="id" invisible="1"/>
+                <field name="sol_qty" invisible="1"/>
+                <field name="default_code" invisible="1"/>
+                <field name="catalog_currency_id" invisible="1"/>
+                <templates>
+                    <t t-name="kanban-menu" groups="sales_team.group_sale_manager">
+                        <a role="menuitem" type="edit" class="dropdown-item border-top-0">Edit</a>
+                    </t>
+                    <t t-name="kanban-box">
+                        <div t-att-class="{'text-bg-primary': record.sol_qty.raw_value != 0}">
+                            <div class="d-flex flex-column h-100">
+                                <div class="d-flex flex-grow-1">
+                                    <div class="o_kanban_image">
+                                        <img t-att-src="kanban_image('product.product', 'image_128', record.id.raw_value)"
+                                             alt="Product"/>
+                                    </div>
+                                    <div class="oe_kanban_details p-2 d-flex">
+                                        <div class="o_kanban_record_top flex-column m-0">
+                                            <div class="d-flex">
+                                                <field class="me-2" name="priority" widget="priority"/>
+                                                <h4 class="o_kanban_record_title text-reset">
+                                                    <strong><field name="name"/></strong>
+                                                </h4>
+                                            </div>
+                                            <div>
+                                                <div t-if="record.default_code.value">
+                                                    [<field name="default_code"/>]
+                                                </div>
+                                                <div name="o_kanban_price">
+                                                    <span>Unit price: </span>
+                                                    <field name="price_unit" widget="monetary" options="{'currency_field': 'catalog_currency_id', 'field_digits': True}"/>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <field name="product_template_attribute_value_ids"
+                                                       widget="many2many_tags"
+                                                       groups="product.group_product_variant"
+                                                       options="{'color_field': 'color'}"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="my-2 pt-3 border-top">
+                                    <div>
+                                        <div class="d-flex justify-content-end">
+                                            <t t-if="record.sol_qty.raw_value != 0">
+                                                <div class="text-bg-light w-50">
+                                                    <field name="sol_qty"
+                                                           widget="sale_product_catalog_quantity"
+                                                           class="o_sale_product_catalog_quantity d-flex input-group"
+                                                           options="{'type': 'number'}"/>
+                                                </div>
+                                                <div class="ms-auto">
+                                                    <button name="remove_from_order"
+                                                            type="object"
+                                                            class="btn-light rounded">
+                                                        <i class="fa fa-trash"/>
+                                                        Remove
+                                                    </button>
+                                                </div>
+                                            </t>
+                                            <t t-else="">
+                                                <button name="set_sol_qty"
+                                                        type="object"
+                                                        class="btn-primary rounded">
+                                                    <i class="fa fa-shopping-cart"/>
+                                                    Add
+                                                </button>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="sale_product_catalog_search_view" model="ir.ui.view">
+        <field name="name">sale.product.catalog.search</field>
+        <field name="model">product.product</field>
+        <field name="arch" type="xml">
+            <search string="Product">
+                <!-- Search field -->
+                <field name="name"
+                       string="Product"
+                       filter_domain="['|', '|', ('default_code', 'ilike', self), ('name', 'ilike', self), ('barcode', 'ilike', self)]"/>
+                <field name="categ_id" filter_domain="[('categ_id', 'child_of', raw_value)]"/>
+                <field name="product_template_attribute_value_ids" groups="product.group_product_variant"/>
+                <field name="product_tmpl_id" string="Product Template"/>
+                <!-- Filter -->
+                <filter string="Favorites" name="favorites" domain="[('priority','=','1')]"/>
+                <separator/>
+                <filter string="Services" name="service" domain="[('type','=','service')]"/>
+                <filter string="Products" name="consumable" domain="[('type', 'in', ['consu', 'product'])]"/>
+                <filter string="In the Order" name="on_the_order" domain="[('sol_qty', '!=', 0)]"/>
+                <!-- Group By -->
+                <group expand="1" string="Group By">
+                    <filter string="Product Type" name="type" context="{'group_by':'type'}"/>
+                    <filter string="Product Category" name="categ_id" context="{'group_by':'categ_id'}"/>
+                </group>
+                <!-- searchpanel -->
+                <searchpanel>
+                    <field name="categ_id" string="Product Category" icon="fa-th-list" enable_counters="1"/>
+                    <field name="product_template_attribute_value_ids"
+                           string="Attributes"
+                           icon="fa-th-list"
+                           enable_counters="1"
+                           select="multi"/>
+                </searchpanel>
+            </search>
+        </field>
+    </record>
+</odoo>
