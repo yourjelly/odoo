@@ -41,6 +41,7 @@ import {
     isUnremovable,
     fillEmpty,
     isEmptyBlock,
+    selectionIsInBlockRoot,
     getUrlsInfosInString,
     URL_REGEX,
     URL_REGEX_WITH_INFOS,
@@ -1842,6 +1843,9 @@ export class OdooEditor extends EventTarget {
                 title: this.options._t('Heading 1'),
                 description: this.options._t('Big section heading.'),
                 fontawesome: 'fa-header',
+                condition: () => {
+                    selectionIsInBlockRoot(this.options.document.getSelection());
+                },
                 callback: () => {
                     this.execCommand('setTag', 'H1');
                 },
@@ -1851,6 +1855,9 @@ export class OdooEditor extends EventTarget {
                 title: this.options._t('Heading 2'),
                 description: this.options._t('Medium section heading.'),
                 fontawesome: 'fa-header',
+                condition: () => {
+                    selectionIsInBlockRoot(this.options.document.getSelection());
+                },
                 callback: () => {
                     this.execCommand('setTag', 'H2');
                 },
@@ -1860,6 +1867,9 @@ export class OdooEditor extends EventTarget {
                 title: this.options._t('Heading 3'),
                 description: this.options._t('Small section heading.'),
                 fontawesome: 'fa-header',
+                condition: () => {
+                    selectionIsInBlockRoot(this.options.document.getSelection());
+                },
                 callback: () => {
                     this.execCommand('setTag', 'H3');
                 },
@@ -1869,6 +1879,9 @@ export class OdooEditor extends EventTarget {
                 title: this.options._t('Text'),
                 description: this.options._t('Paragraph block.'),
                 fontawesome: 'fa-paragraph',
+                condition: () => {
+                    selectionIsInBlockRoot(this.options.document.getSelection());
+                },
                 callback: () => {
                     this.execCommand('setTag', 'P');
                 },
@@ -1878,6 +1891,9 @@ export class OdooEditor extends EventTarget {
                 title: this.options._t('Bulleted list'),
                 description: this.options._t('Create a simple bulleted list.'),
                 fontawesome: 'fa-list-ul',
+                condition: () => {
+                    selectionIsInBlockRoot(this.options.document.getSelection());
+                },
                 callback: () => {
                     this.execCommand('toggleList', 'UL');
                 },
@@ -1887,6 +1903,9 @@ export class OdooEditor extends EventTarget {
                 title: this.options._t('Numbered list'),
                 description: this.options._t('Create a list with numbering.'),
                 fontawesome: 'fa-list-ol',
+                condition: () => {
+                    selectionIsInBlockRoot(this.options.document.getSelection());
+                },
                 callback: () => {
                     this.execCommand('toggleList', 'OL');
                 },
@@ -1896,17 +1915,11 @@ export class OdooEditor extends EventTarget {
                 title: this.options._t('Checklist'),
                 description: this.options._t('Track tasks with a checklist.'),
                 fontawesome: 'fa-check-square-o',
+                condition: () => {
+                    selectionIsInBlockRoot(this.options.document.getSelection());
+                },
                 callback: () => {
                     this.execCommand('toggleList', 'CL');
-                },
-            },
-            {
-                groupName: this.options._t('Basic blocks'),
-                title: this.options._t('Separator'),
-                description: this.options._t('Insert an horizontal rule separator.'),
-                fontawesome: 'fa-minus',
-                callback: () => {
-                    this.execCommand('insertHorizontalRule');
                 },
             },
             {
@@ -1928,6 +1941,21 @@ export class OdooEditor extends EventTarget {
                 },
             },
         ];
+        if(!this.options.commands.filter(c =>  c.title === this.options._t('Separator')).length) {
+            mainCommands.push(
+                {
+                    groupName: this.options._t('Basic blocks'),
+                    title: this.options._t('Separator'),
+                    description: this.options._t('Insert an horizontal rule separator.'),
+                    fontawesome: 'fa-minus',
+                    condition: () => {
+                        selectionIsInBlockRoot(this.options.document.getSelection());
+                    },
+                    callback: () => {
+                        this.execCommand('insertHorizontalRule');
+                    },
+                });
+        }
         this.commandBar = new Powerbox({
             editable: this.editable,
             document: this.document,

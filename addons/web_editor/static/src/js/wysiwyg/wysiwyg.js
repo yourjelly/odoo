@@ -29,6 +29,7 @@ const QWeb = core.qweb;
 const OdooEditor = OdooEditorLib.OdooEditor;
 const getDeepRange = OdooEditorLib.getDeepRange;
 const getInSelection = OdooEditorLib.getInSelection;
+const selectionIsInBlockRoot = OdooEditorLib.selectionIsInBlockRoot;
 const isBlock = OdooEditorLib.isBlock;
 const rgbToHex = OdooEditorLib.rgbToHex;
 const preserveCursor = OdooEditorLib.preserveCursor;
@@ -1912,6 +1913,9 @@ const Wysiwyg = Widget.extend({
                 title: _t('Quote'),
                 description: _t('Add a blockquote section.'),
                 fontawesome: 'fa-quote-right',
+                condition: () => {
+                    selectionIsInBlockRoot(this.odooEditor.options.document.getSelection());
+                },
                 callback: () => {
                     this.odooEditor.execCommand('setTag', 'blockquote');
                 },
@@ -1921,6 +1925,9 @@ const Wysiwyg = Widget.extend({
                 title: _t('Code'),
                 description: _t('Add a code section.'),
                 fontawesome: 'fa-code',
+                condition: () => {
+                    selectionIsInBlockRoot(this.odooEditor.options.document.getSelection());
+                },
                 callback: () => {
                     this.odooEditor.execCommand('setTag', 'pre');
                 },

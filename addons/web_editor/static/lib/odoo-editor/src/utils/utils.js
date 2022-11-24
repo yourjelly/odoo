@@ -1409,6 +1409,26 @@ export function isInPre(node) {
     );
 }
 /**
+ * Returns true if the current selection is in a block context relative to the
+ * current contentEditable root.
+ *
+ * @param {Selection} selection
+ * @returns {boolean}
+ */
+export function selectionIsInBlockRoot(selection) {
+    let selectionInBlockRoot = false;
+    let currentNode = closestElement(selection.anchorNode);
+    while (
+            !currentNode.classList.contains('o_editable') &&
+            !currentNode.classList.contains('odoo-editor-editable') &&
+            !selectionInBlockRoot
+        ) {
+        selectionInBlockRoot = isBlock(currentNode);
+        currentNode = currentNode.parentElement;
+    }
+    return selectionInBlockRoot;
+}
+/**
  * Returns whether the given string (or given text node value)
  * has at least one visible character or one non colapsed whitespace characters in it.
  */
