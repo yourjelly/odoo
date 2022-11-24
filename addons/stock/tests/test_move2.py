@@ -2143,7 +2143,6 @@ class TestSinglePicking(TestStockCommon):
         to define the `location_dest_id`.
         """
         partner = self.env['res.partner'].create({'name': 'Partner'})
-        supplier_location = self.env['stock.location'].browse(self.supplier_location)
         stock_location = self.env['stock.location'].create({
             'name': 'test-stock',
             'usage': 'internal',
@@ -2171,7 +2170,6 @@ class TestSinglePicking(TestStockCommon):
         ), view='stock.view_picking_form')
         receipt_form.partner_id = partner
         receipt_form.picking_type_id = picking_type
-        # <field name="location_id" attrs="{'invisible': [('picking_type_code', '=', 'incoming')]}"
         receipt_form.location_dest_id = stock_location
         receipt = receipt_form.save()
         with receipt_form.move_line_nosuggest_ids.new() as move_line:
@@ -3543,8 +3541,6 @@ class TestAutoAssign(TestStockCommon):
         with picking_form.move_ids_without_package.new() as move:
             move.product_id = product1
             move.product_uom_qty = 10
-            move.location_id = self.env.ref('stock.stock_location_suppliers')
-            move.location_dest_id = self.env.ref('stock.stock_location_stock')
         picking_form.picking_type_id = self.env.ref('stock.picking_type_in')
         with picking_form.move_ids_without_package.new() as move:
             move.product_id = product1

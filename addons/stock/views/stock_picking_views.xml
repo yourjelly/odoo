@@ -21,7 +21,7 @@
                 <kanban class="o_kanban_mobile" sample="1">
                     <field name="name"/>
                     <field name="partner_id"/>
-                    <field name="location_dest_id"/>
+                    <field name="location_dest_id" groups="stock.group_stock_multi_locations"/>
                     <field name="state"/>
                     <field name="scheduled_date"/>
                     <field name="activity_state"/>
@@ -174,7 +174,7 @@
                             help="List view of operations"
                             groups="base.group_no_one"
                             attrs="{'invisible': ['|', '&amp;', ('show_operations', '=', True), '|', ('is_locked', '=', True), ('state', '=', 'done'), '&amp;', ('state', '=', 'done'), ('is_locked', '=', True)]}"
-                            context="{'picking_type_code': picking_type_code, 'default_picking_id': id, 'form_view_ref':'stock.view_move_form', 'address_in_id': partner_id, 'default_picking_type_id': picking_type_id, 'default_location_id': location_id, 'default_location_dest_id': location_dest_id}">
+                            context="{'picking_type_code': picking_type_code, 'default_picking_id': id, 'form_view_ref':'stock.view_move_form', 'address_in_id': partner_id, 'default_picking_type_id': picking_type_id}">
                             <div class="o_form_field o_stat_info">
                                 <span class="o_stat_text">Operations</span>
                             </div>
@@ -198,8 +198,6 @@
                             </div>
                             <field name="partner_id" nolabel="1"/>
                             <field name="picking_type_id" attrs="{'invisible': [('hide_picking_type', '=', True)], 'readonly': [('state', '!=', 'draft')]}"/>
-                            <field name="location_id" groups="!stock.group_stock_multi_locations" invisible="1"/>
-                            <field name="location_dest_id" groups="!stock.group_stock_multi_locations" invisible="1"/>
                             <field name="location_id" options="{'no_create': True}" groups="stock.group_stock_multi_locations" attrs="{'invisible': [('picking_type_code', '=', 'incoming')]}"/>
                             <field name="location_dest_id" options="{'no_create': True}" groups="stock.group_stock_multi_locations" attrs="{'invisible': [('picking_type_code', '=', 'outgoing')]}"/>
                             <field name="backorder_id" attrs="{'invisible': [('backorder_id','=',False)]}"/>
@@ -235,12 +233,12 @@
                             attrs="{'invisible': [('show_operations', '=', False)]}">
                             <field name="move_line_nosuggest_ids"
                                    attrs="{'readonly': ['|', '|', ('show_operations', '=', False), ('state', '=', 'cancel'), '&amp;', ('state', '=', 'done'), ('is_locked', '=', True)], 'invisible': [('show_reserved', '=', True)]}"
-                                   context="{'tree_view_ref': 'stock.view_stock_move_line_detailed_operation_tree', 'default_picking_id': id, 'default_location_id': location_id, 'default_location_dest_id': location_dest_id, 'default_company_id': company_id}"/>
+                                   context="{'tree_view_ref': 'stock.view_stock_move_line_detailed_operation_tree', 'default_picking_id': id, 'default_company_id': company_id}"/>
                             <field name="move_line_ids_without_package"
                                    attrs="{'readonly': ['|', '|', ('show_operations', '=', False), ('state', '=', 'cancel'), '&amp;', ('state', '=', 'done'), ('is_locked', '=', True)], 'invisible': [('show_reserved', '=', False)]}"
-                                   context="{'tree_view_ref': 'stock.view_stock_move_line_detailed_operation_tree', 'default_picking_id': id, 'default_location_id': location_id, 'default_location_dest_id': location_dest_id, 'default_company_id': company_id}"/>
+                                   context="{'tree_view_ref': 'stock.view_stock_move_line_detailed_operation_tree', 'default_picking_id': id, 'default_company_id': company_id}"/>
                             <field name="package_level_ids_details"
-                                   context="{'default_location_id': location_id, 'default_location_dest_id': location_dest_id, 'default_company_id': company_id}"
+                                   context="{'default_company_id': company_id}"
                                    attrs="{'readonly': [('state', '=', 'done')], 'invisible': ['|', ('picking_type_entire_packs', '=', False), ('show_operations', '=', False)]}" />
                             <button class="oe_highlight" name="action_put_in_pack" type="object" string="Put in Pack" attrs="{'invisible': [('state', 'in', ('draft', 'done', 'cancel'))]}" groups="stock.group_tracking_lot" data-hotkey="shift+g"/>
                         </page>
@@ -249,15 +247,13 @@
                             <field name="move_ids_without_package" mode="tree,kanban"
                                 widget="stock_move_one2many"
                                 attrs="{'readonly': ['&amp;', ('state', '=', 'done'), ('is_locked', '=', True)]}"
-                                context="{'default_company_id': company_id, 'default_date': scheduled_date, 'default_date_deadline': date_deadline, 'picking_type_code': picking_type_code, 'default_picking_id': id, 'form_view_ref':'stock.view_move_form', 'address_in_id': partner_id, 'default_picking_type_id': picking_type_id, 'default_location_id': location_id, 'default_location_dest_id': location_dest_id, 'default_partner_id': partner_id}"
+                                context="{'default_company_id': company_id, 'default_date': scheduled_date, 'default_date_deadline': date_deadline, 'picking_type_code': picking_type_code, 'default_picking_id': id, 'form_view_ref':'stock.view_move_form', 'address_in_id': partner_id, 'default_picking_type_id': picking_type_id, 'default_partner_id': partner_id}"
                                 add-label="Add a Product">
                                 <tree decoration-danger="not parent.immediate_transfer and state != 'done' and quantity_done > reserved_availability and show_reserved_availability" decoration-muted="scrapped == True or state == 'cancel' or (state == 'done' and is_locked == True)" string="Stock Moves" editable="bottom">
                                     <field name="company_id" invisible="1"/>
                                     <field name="name" invisible="1"/>
                                     <field name="state" invisible="1" readonly="0"/>
                                     <field name="picking_type_id" invisible="1"/>
-                                    <field name="location_id" invisible="1"/>
-                                    <field name="location_dest_id" invisible="1"/>
                                     <field name="partner_id" invisible="1"/>
                                     <field name="scrapped" invisible="1"/>
                                     <field name="picking_code" invisible="1"/>
@@ -330,7 +326,7 @@
                                 </form>
                             </field>
                             <field name="id" invisible="1"/>
-                            <field name="package_level_ids" context="{'default_location_id': location_id, 'default_location_dest_id': location_dest_id, 'default_company_id': company_id}" attrs="{'readonly': [('state', '=', 'done')], 'invisible': ['|', ('picking_type_entire_packs', '=', False), ('show_operations', '=', True)]}" />
+                            <field name="package_level_ids" context="{'default_company_id': company_id}" attrs="{'readonly': [('state', '=', 'done')], 'invisible': ['|', ('picking_type_entire_packs', '=', False), ('show_operations', '=', True)]}" />
                             <button class="oe_highlight" name="action_put_in_pack" type="object" string="Put in Pack" attrs="{'invisible': [('state', 'in', ('draft', 'done', 'cancel'))]}" groups="stock.group_tracking_lot" data-hotkey="shift+g"/>
                         </page>
                         <page string="Additional Info" name="extra">

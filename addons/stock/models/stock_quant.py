@@ -4,6 +4,7 @@
 import logging
 
 from ast import literal_eval
+from collections import defaultdict
 from psycopg2 import Error
 
 from odoo import _, api, fields, models
@@ -66,7 +67,7 @@ class StockQuant(models.Model):
     company_id = fields.Many2one(related='location_id.company_id', string='Company', store=True, readonly=True)
     location_id = fields.Many2one(
         'stock.location', 'Location',
-        domain=lambda self: self._domain_location_id(),
+        domain=lambda self: self._domain_location_id(), compute='_compute_location_id', store=True, readonly=False,
         auto_join=True, ondelete='restrict', required=True, index=True, check_company=True)
     warehouse_id = fields.Many2one('stock.warehouse', related='location_id.warehouse_id')
     storage_category_id = fields.Many2one(related='location_id.storage_category_id', store=True)
@@ -205,6 +206,31 @@ class StockQuant(models.Model):
     def _compute_inventory_quantity_auto_apply(self):
         for quant in self:
             quant.inventory_quantity_auto_apply = quant.quantity
+
+    @api.depends('product_id', 'company_id')
+    def _compute_location_id(self):
+        default_loc_company_to_quants = defaultdict(list)
+        tracked_quants = []
+        for quant in self:
+            if not quant.product_id or quant.location_id:
+                continue
+            if quant.product_id.tracking in ['lot', 'serial']:
+                tracked_quants.append(quant.id)
+            else:
+                default_loc_company_to_quants[quant.company_id and quant.company_id.id or self.env.company.id].append(quant.id)
+        if tracked_quants:
+            domain = [('product_id', 'in', tracked_quants.product_id.ids), ('location_id.usage', 'in', ['internal', 'transit'])]
+            previous_quants = self.env['stock.quant'].search_read(domain, ['product_id', 'location_id'])
+            product_to_loc = {q['product_id']: q['location_id'][0] for q in previous_quants}
+            for quant in tracked_quants:
+                if quant.product_id.id in product_to_loc and product_to_loc[quant.product_id.id]:
+                    quant.location_id = self.env['stock.location'].browse(product_to_loc[quant.product_id.id])
+                else:
+                    default_loc_company_to_quants[quant.company_id and quant.company_id.id or self.env.company.id].append(quant.id)
+        if default_loc_company_to_quants:
+            for company_id, quants in default_loc_company_to_quants.items():
+                self.env['stock.quant'].browse(quants).location_id = self.env['stock.warehouse'].search(
+                    [('company_id', '=', company_id)], limit=1).in_type_id.default_location_dest_id
 
     @api.depends('lot_id')
     def _compute_sn_duplicated(self):
@@ -671,21 +697,6 @@ class StockQuant(models.Model):
                                                                       self.company_id)
             if message:
                 return {'warning': {'title': _('Warning'), 'message': message}}
-
-    @api.onchange('product_id', 'company_id')
-    def _onchange_product_id(self):
-        if self.location_id:
-            return
-        if self.product_id.tracking in ['lot', 'serial']:
-            previous_quants = self.env['stock.quant'].search([
-                ('product_id', '=', self.product_id.id),
-                ('location_id.usage', 'in', ['internal', 'transit'])], limit=1, order='create_date desc')
-            if previous_quants:
-                self.location_id = previous_quants.location_id
-        if not self.location_id:
-            company_id = self.company_id and self.company_id.id or self.env.company.id
-            self.location_id = self.env['stock.warehouse'].search(
-                [('company_id', '=', company_id)], limit=1).in_type_id.default_location_dest_id
 
     def _apply_inventory(self):
         move_vals = []

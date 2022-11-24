@@ -166,6 +166,30 @@ class StockMove(models.Model):
         for move in self:
             move.description_bom_line = bom_line_description.get(move.bom_line_id.id)
 
+    @api.depends('production_id', 'production_id.production_location_id',
+                 'raw_material_production_id', 'raw_material_production_id.location_src_id')
+    def _compute_location_id(self):
+        super()._compute_location_id()
+        for move in self:
+            if move.location_id:
+                continue
+            if move.production_id:
+                move.location_id = move.production_id.production_location_id
+            if move.raw_material_production_id:
+                move.location_id = move.raw_material_production_id.location_src_id
+
+    @api.depends('production_id', 'production_id.location_dest_id',
+                 'raw_material_production_id', 'raw_material_production_id.production_location_id')
+    def _compute_location_dest_id(self):
+        super()._compute_location_dest_id()
+        for move in self:
+            if move.location_dest_id:
+                continue
+            if move.production_id:
+                move.location_dest_id = move.production_id.location_dest_id
+            if move.raw_material_production_id:
+                move.location_dest_id = move.raw_material_production_id.production_location_id
+
     @api.depends('raw_material_production_id.priority')
     def _compute_priority(self):
         super()._compute_priority()

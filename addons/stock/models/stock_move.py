@@ -73,12 +73,12 @@ class StockMove(models.Model):
     location_id = fields.Many2one(
         'stock.location', 'Source Location',
         auto_join=True, index=True, required=True,
-        check_company=True,
+        check_company=True, compute="_compute_location_id", store=True, readonly=False, precompute=True,
         help="Sets a location if you produce at a fixed location. This can be a partner location if you subcontract the manufacturing operations.")
     location_dest_id = fields.Many2one(
         'stock.location', 'Destination Location',
         auto_join=True, index=True, required=True,
-        check_company=True,
+        check_company=True, compute="_compute_location_dest_id", store=True, readonly=False, precompute=True,
         help="Location where the system will stock the finished products.")
     location_usage = fields.Selection(string="Source Location Type", related='location_id.usage')
     location_dest_usage = fields.Selection(string="Destination Location Type", related='location_dest_id.usage')
@@ -192,6 +192,21 @@ class StockMove(models.Model):
             if not move.product_uom:
                 move.product_uom = move.product_id.uom_id.id
 
+    @api.depends('picking_id', 'picking_id.location_id')
+    def _compute_location_id(self):
+        for move in self:
+            if move.location_id:
+                continue
+            if move.picking_id:
+                move.location_id = move.picking_id.location_id
+
+    @api.depends('picking_id', 'picking_id.location_dest_id')
+    def _compute_location_dest_id(self):
+        for move in self:
+            if move.location_dest_id:
+                continue
+            if move.picking_id:
+                move.location_dest_id = move.picking_id.location_dest_id
 
     @api.depends('has_tracking', 'picking_type_id.use_create_lots', 'picking_type_id.use_existing_lots', 'state')
     def _compute_display_assign_serial(self):
@@ -1867,9 +1882,9 @@ Please change the quantity done or the rounding precision of your unit of measur
         if restrict_partner_id:
             defaults['restrict_partner_id'] = restrict_partner_id
 
-        # TDE CLEANME: remove context key + add as parameter
-        if self.env.context.get('source_location_id'):
-            defaults['location_id'] = self.env.context['source_location_id']
+        # # TDE CLEANME: remove context key + add as parameter
+        # if self.env.context.get('source_location_id'):
+        #     defaults['location_id'] = self.env.context['source_location_id']
         new_move_vals = self.copy_data(defaults)
 
         # Update the original `product_qty` of the move. Use the general product's decimal

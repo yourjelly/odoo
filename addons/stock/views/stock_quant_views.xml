@@ -18,7 +18,7 @@
         <field name="arch" type="xml">
             <search string="Quants">
                 <field name="product_id"/>
-                <field name="location_id"/>
+                <field name="location_id" groups="stock.group_stock_multi_locations"/>
                 <field name="warehouse_id"/>
                 <field name="storage_category_id" groups="stock.group_stock_storage_categories" />
                 <field name="user_id"/>
@@ -29,8 +29,8 @@
                 <field name="lot_id" groups="stock.group_production_lot"/>
                 <field name="owner_id" groups="stock.group_tracking_owner"/>
                 <group expand='0' string='Filters'>
-                    <filter name='internal_loc' string="Internal Locations" domain="[('location_id.usage','=', 'internal')]"/>
-                    <filter name='transit_loc' string="Transit Locations" domain="[('location_id.usage' ,'=', 'transit')]"/>
+                    <filter name='internal_loc' string="Internal Locations" domain="[('location_id.usage','=', 'internal')]" groups="stock.group_stock_multi_locations"/>
+                    <filter name='transit_loc' string="Transit Locations" domain="[('location_id.usage' ,'=', 'transit')]" groups="stock.group_stock_multi_locations"/>
                     <separator/>
                     <filter name="on_hand" string="On Hand" domain="[('on_hand', '=', True)]"/>
                     <filter name="to_count" string="To Count" domain="[('inventory_date', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
@@ -46,7 +46,7 @@
                 </group>
                 <group expand='0' string='Group by...'>
                     <filter string='Product' name="productgroup" context="{'group_by': 'product_id'}"/>
-                    <filter string='Location' name="locationgroup" domain="[]" context="{'group_by': 'location_id'}"/>
+                    <filter string='Location' name="locationgroup" domain="[]" context="{'group_by': 'location_id'}" groups="stock.group_stock_multi_locations"/>
                     <filter string='Storage Category' name="storagecategorygroup" domain="[]" context="{'group_by': 'storage_category_id'}"/>
                     <filter string='Owner' name="owner" context="{'group_by': 'owner_id'}" groups="stock.group_tracking_owner"/>
                     <filter string='Lot/Serial Number' name="Lot_Serial_number" context="{'group_by': 'lot_id'}" groups="stock.group_production_lot"/>
@@ -69,10 +69,12 @@
                             <field name="tracking" invisible="1"/>
                             <field name="company_id" invisible="1"/>
                             <field name="product_id" readonly="0" options="{'no_create': True}"/>
-                            <field name="location_id" readonly="0" options="{'no_create': True}"/>
+                            <field name="location_id" readonly="0" options="{'no_create': True}" groups="stock.group_stock_multi_locations"/>
                             <field name="lot_id" groups="stock.group_production_lot"
                                 attrs="{'readonly': [('tracking', 'not in', ['serial', 'lot'])], 'required': [('tracking', '!=', 'none')]}"
                                 context="{'default_product_id': product_id, 'default_company_id': company_id}"/>
+                            <!-- packages are domain restricted by location even if multi_loc isn't active -->
+                            <field name="location_id" invisible="1" groups="stock.group_tracking_lot"/>
                             <field name="package_id" readonly="0" groups="stock.group_tracking_lot"/>
                             <field name="owner_id" readonly="0" groups="stock.group_tracking_owner" options="{'no_create': True}"/>
                             <field name='company_id' groups="base.group_multi_company"/>
@@ -165,7 +167,7 @@
                             display="always"/>
                 </header>
                 <field name="product_id" invisible="context.get('single_product', False)"/>
-                <field name="location_id" invisible="context.get('hide_location', False)"/>
+                <field name="location_id" groups="stock.group_stock_multi_locations"/>
                 <field name="lot_id" groups="stock.group_production_lot"
                        invisible="context.get('hide_lot', False)"/>
                 <field name="package_id" groups="stock.group_tracking_lot"/>
@@ -184,7 +186,7 @@
         <field name="arch" type="xml">
             <pivot string="Inventory" sample="1">
                 <field name="product_id" type="row"/>
-                <field name="location_id" type="col"/>
+                <field name="location_id" type="col" groups="stock.group_stock_multi_locations"/>
                 <field name="quantity" type="measure"/>
             </pivot>
         </field>
@@ -195,7 +197,7 @@
         <field name="model">stock.quant</field>
         <field name="arch" type="xml">
             <graph string="Stock Quant" sample="1">
-                <field name="location_id"/>
+                <field name="location_id" groups="stock.group_stock_multi_locations"/>
                 <field name="quantity" type="measure"/>
             </graph>
         </field>
@@ -236,10 +238,10 @@
         <field name="arch" type="xml">
             <search string="Package">
                 <field name="name" string="Package Name"/>
-                <field name="location_id"/>
+                <field name="location_id" groups="stock.group_stock_multi_locations"/>
                 <field name="package_type_id"/>
                 <group  expand='0' string='Group by...'>
-                   <filter string='Location' name="location" domain="[]" context="{'group_by' : 'location_id'}"/>
+                   <filter string='Location' name="location" domain="[]" context="{'group_by' : 'location_id'}" groups="stock.group_stock_multi_locations"/>
                    <filter string='Package Type' name="package_type" domain="[]" context="{'group_by' : 'package_type_id'}"/>
                </group>
             </search>
@@ -270,7 +272,7 @@
                             <field name="package_type_id"/>
                             <field name='company_id' groups="base.group_multi_company"/>
                             <field name='owner_id' groups="stock.group_tracking_owner"/>
-                            <field name="location_id" options="{'no_create': True}"/>
+                            <field name="location_id" options="{'no_create': True}" groups="stock.group_stock_multi_locations"/>
                         </group>
                         <group>
                             <field name="pack_date"/>
@@ -298,7 +300,7 @@
             <tree string="Package" sample="1">
                 <field name="display_name"/>
                 <field name="package_type_id"/>
-                <field name="location_id" options="{'no_create': True}"/>
+                <field name="location_id" options="{'no_create': True}" groups="stock.group_stock_multi_locations"/>
                 <field name="company_id" groups="base.group_multi_company"/>
             </tree>
         </field>
@@ -382,8 +384,8 @@
                 <field name="inventory_quantity_set" invisible="1"/>
                 <field name="company_id" invisible="1"/>
                 <field name="location_id" domain="[('usage', 'in', ['internal', 'transit'])]" attrs="{'readonly': [('id', '!=', False)]}" invisible="context.get('hide_location', False)" options="{'no_create': True}"/>
-                <field name="storage_category_id" groups="stock.group_stock_storage_categories" invisible="context.get('hide_location', False)" options="{'no_create': True}" optional="hidden"/>
-                <field name="cyclic_inventory_frequency" invisible="context.get('hide_location', False)" options="{'no_create': True}" optional="hidden"/>
+                <field name="storage_category_id" groups="stock.group_stock_storage_categories" options="{'no_create': True}" optional="hidden"/>
+                <field name="cyclic_inventory_frequency" groups="stock.group_stock_multi_locations" options="{'no_create': True}" optional="hidden"/>
                 <field name="priority" widget="priority" nolabel="1" optional="hidden"/>
                 <field name="product_id" attrs="{'readonly': [('id', '!=', False)]}" readonly="context.get('single_product', False)" force_save="1" options="{'no_create': True}"/>
                 <field name="product_categ_id" optional="hide"/>

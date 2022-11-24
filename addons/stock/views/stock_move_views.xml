@@ -37,9 +37,9 @@
                     <field name="location_usage" invisible="1"/>
                     <field name="location_dest_usage" invisible="1"/>
                     <field name="product_id"/>
-                    <field name="location_id" options="{'no_create': True}" string="From"
+                    <field name="location_id" options="{'no_create': True}" string="From" groups="stock.group_stock_multi_locations"
                         decoration-muted="location_usage not in ('internal','transit')"/>
-                    <field name="location_dest_id" options="{'no_create': True}" string="To"
+                    <field name="location_dest_id" options="{'no_create': True}" string="To" groups="stock.group_stock_multi_locations"
                         decoration-muted="location_dest_usage not in ('internal','transit')"/>
                     <field name="product_packaging_id" optional="hide" groups="product.group_stock_packaging"/>
                     <field name="product_uom_qty" string="Quantity" sum="Total Quantity"
@@ -68,8 +68,6 @@
                     <field name="date" invisible="1"/>
                     <field name="state" invisible="1" readonly="0"/>
                     <field name="picking_type_id" invisible="1"/>
-                    <field name="location_id" invisible="1"/>
-                    <field name="location_dest_id" invisible="1"/>
                     <field name="scrapped" invisible="1"/>
                     <field name="picking_code" invisible="1"/>
                     <field name="product_type" invisible="1"/>
@@ -106,9 +104,9 @@
                     <field name="is_inventory"/>
                     <field name="state"/>
                     <field name="name"/>
-                    <field name="product_uom"/>
-                    <field name="location_id"/>
-                    <field name="location_dest_id"/>
+                    <field name="product_uom" groups="uom.group_uom"/>
+                    <field name="location_id" groups="stock.group_stock_multi_locations"/>
+                    <field name="location_dest_id" groups="stock.group_stock_multi_locations"/>
                     <templates>
                         <t t-name="kanban-box">
                             <div t-attf-class="oe_kanban_global_click">
@@ -145,15 +143,13 @@
                     <field name="sequence" invisible="1"/>
                     <field name="company_id" invisible="1"/>
                     <field name="state" invisible="1"/>
-                    <field name="location_id" invisible="1"/>
-                    <field name="location_dest_id" invisible="1"/>
                     <field name="picking_id" invisible="1"/>
                     <field name="picking_type_id" invisible="1"/>
                     <field name="is_locked" invisible="1"/>
                     <field name="picking_type_entire_packs" invisible="1"/>
                     <field name="display_assign_serial" invisible="1"/>
                     <field name="from_immediate_transfer" invisible="1"/>
-                    <field name="product_uom_category_id" invisible="1"/>
+                    <field name="product_uom_category_id" invisible="1" groups="uom.group_uom"/>
                     <field name="display_clear_serial" invisible="1"/>
                     <group>
                         <group>
@@ -161,14 +157,14 @@
                             <label for="product_uom_qty" attrs="{'invisible': [('from_immediate_transfer', '=', True)]}"/>
                             <div class="o_row" attrs="{'invisible': [('from_immediate_transfer', '=', True)]}">
                                 <span><field name="product_uom_qty" readonly="1" nolabel="1"/></span>
-                                <span><field name="product_uom" readonly="1" nolabel="1"/></span>
+                                <span><field name="product_uom" readonly="1" nolabel="1" groups="uom.group_uom"/></span>
                             </div>
                             <label for="quantity_done"/>
                             <div class="o_row">
                                 <span><field name="quantity_done" readonly="1" nolabel="1"/></span>
                                 <span attrs="{'invisible': ['|', ('state', '=', 'done'), ('from_immediate_transfer', '=', True)]}"> / </span>
                                 <span><field name="reserved_availability" nolabel="1" attrs="{'invisible': ['|', ('state', '=', 'done'), ('from_immediate_transfer', '=', True)]}" /></span>
-                                <span><field name="product_uom" readonly="1" nolabel="1" attrs="{'invisible': [('from_immediate_transfer', '=', True)]}"/></span>
+                                <span><field name="product_uom" readonly="1" nolabel="1" attrs="{'invisible': [('from_immediate_transfer', '=', True)]}" groups="uom.group_uom"/></span>
                             </div>
                             <field name="next_serial"
                                 attrs="{'invisible': [('display_assign_serial', '=', False)]}"/>
@@ -189,7 +185,7 @@
                             </div>
                         </group>
                     </group>
-                    <field name="move_line_ids" attrs="{'readonly': ['|', ('state', '=', 'cancel'), '&amp;', ('state', '=', 'done'), ('is_locked', '=', True)]}" context="{'tree_view_ref': 'stock.view_stock_move_line_operation_tree', 'default_product_uom_id': product_uom, 'default_picking_id': picking_id, 'default_move_id': id, 'default_product_id': product_id, 'default_location_id': location_id, 'default_location_dest_id': location_dest_id, 'default_company_id': company_id}"/>
+                    <field name="move_line_ids" attrs="{'readonly': ['|', ('state', '=', 'cancel'), '&amp;', ('state', '=', 'done'), ('is_locked', '=', True)]}" context="{'tree_view_ref': 'stock.view_stock_move_line_operation_tree', 'default_picking_id': picking_id, 'default_move_id': id, 'default_product_id': product_id, 'default_company_id': company_id}"/>
                     <footer class="oe_edit_only" attrs="{'invisible': ['|', ('state', '=', 'cancel'), '&amp;', ('state', '=', 'done'), ('is_locked', '=', True)]}">
                         <button string="Confirm" special="save" data-hotkey="v" class="oe_highlight"/>
                         <button string="Discard" special="cancel" data-hotkey="z"/>
@@ -209,7 +205,7 @@
             <field name="inherit_id" ref="stock.view_stock_move_operations"/>
             <field name="arch" type="xml">
                 <field name="move_line_ids" position="replace">
-                    <field name="move_line_nosuggest_ids" attrs="{'readonly': ['|', ('state', '=', 'cancel'), '&amp;', ('state', '=', 'done'), ('is_locked', '=', True)]}" context="{'tree_view_ref': 'stock.view_stock_move_line_operation_tree','default_picking_id': picking_id, 'default_move_id': id, 'default_product_id': product_id, 'default_location_id': location_id, 'default_location_dest_id': location_dest_id, 'default_company_id': company_id}"/>
+                    <field name="move_line_nosuggest_ids" attrs="{'readonly': ['|', ('state', '=', 'cancel'), '&amp;', ('state', '=', 'done'), ('is_locked', '=', True)]}" context="{'tree_view_ref': 'stock.view_stock_move_line_operation_tree','default_picking_id': picking_id, 'default_move_id': id, 'default_product_id': product_id, 'default_company_id': company_id}"/>
                 </field>
             </field>
         </record>
@@ -223,12 +219,11 @@
                     <field name="company_id" invisible="1" force_save="1"/>
                     <field name="picking_id" invisible="1" force_save="1"/>
                     <field name="move_id" invisible="1" force_save="1" />
-                    <field name="product_uom_category_id" invisible="1"/>
+                    <field name="product_uom_category_id" invisible="1" groups="uom.group_uom"/>
                     <field name="product_id" invisible="1"/>
                     <field name="package_level_id" invisible="1"/>
-                    <field name="location_id" invisible="1"/>
-                    <field name="location_dest_id" invisible="1"/>
-                    <field name="package_id" invisible="1"/>
+                    <field name="location_id" invisible="1" groups="stock.group_tracking_lot"/>
+                    <field name="location_dest_id" invisible="1" groups="stock.group_tracking_lot"/>
                     <field name="location_id" options="{'no_create': True}" attrs="{'readonly': ['&amp;', ('package_level_id', '!=', False), ('parent.picking_type_entire_packs', '=', True)]}" invisible="not context.get('show_source_location')" domain="[('id', 'child_of', parent.location_id), '|', ('company_id', '=', False), ('company_id', '=', company_id), ('usage', '!=', 'view')]" groups="stock.group_stock_multi_locations"/>
                     <field name="location_dest_id" attrs="{'readonly': ['&amp;', ('package_level_id', '!=', False), ('parent.picking_type_entire_packs', '=', True)]}" invisible="not context.get('show_destination_location')" domain="[('id', 'child_of', parent.location_dest_id), '|', ('company_id', '=', False), ('company_id', '=', company_id), ('usage', '!=', 'view')]" groups="stock.group_stock_multi_locations"/>
                     <field name="lot_id" groups="stock.group_production_lot"
@@ -266,16 +261,15 @@
             <field name="model">stock.move.line</field>
             <field name="priority">1000</field>
             <field name="arch" type="xml">
-                <tree editable="bottom" decoration-muted="(state == 'done' and is_locked == True)" decoration-danger="qty_done&gt;reserved_uom_qty and state!='done' and parent.picking_type_code != 'incoming'" decoration-success="qty_done==reserved_uom_qty and state!='done' and not result_package_id">
+                <tree editable="bottom" decoration-muted="(state == 'done' and is_locked == True)" decoration-danger="qty_done&gt;reserved_uom_qty and state!='done' and parent.picking_type_code != 'incoming'" decoration-success="qty_done==reserved_uom_qty and state!='done'">
                     <field name="product_id" required="1" context="{'default_detailed_type': 'product'}" attrs="{'readonly': ['|', ('state', '=', 'done'), ('move_id', '!=', False)]}"/>
                     <field name="company_id" invisible="1"/>
                     <field name="move_id" invisible="1"/>
                     <field name="picking_id" invisible="1"/>
                     <field name="product_uom_category_id" invisible="1"/>
-                    <field name="package_id" invisible="1"/>
-                    <field name="result_package_id" invisible="1"/>
-                    <field name="location_id" invisible="1"/>
-                    <field name="location_dest_id" invisible="1"/>
+                    <!-- packages are domain restricted by location even if multi_loc isn't active -->
+                    <field name="location_id" invisible="1" groups="stock.group_tracking_lot"/>
+                    <field name="location_dest_id" invisible="1" groups="stock.group_tracking_lot"/>
                     <field name="location_id" options="{'no_create': True}" attrs="{'column_invisible': [('parent.picking_type_code', '=', 'incoming')]}" groups="stock.group_stock_multi_locations" domain="[('id', 'child_of', parent.location_id), '|', ('company_id', '=', False), ('company_id', '=', company_id), ('usage', '!=', 'view')]"/>
                     <field name="location_dest_id" options="{'no_create': True}" attrs="{'column_invisible': [('parent.picking_type_code', '=', 'outgoing')]}" groups="stock.group_stock_multi_locations" domain="[('id', 'child_of', parent.location_dest_id), '|', ('company_id', '=', False), ('company_id', '=', company_id), ('usage', '!=', 'view')]"/>
                     <field name="package_id" groups="stock.group_tracking_lot"/>
@@ -311,8 +305,8 @@
                         <group name="main_grp" colspan="2">
                             <group name="main_grp_col1">
                                 <field name="reference"/>
-                                <field name="location_id" options="{'no_create': True}"/>
-                                <field name="location_dest_id" options="{'no_create': True}"/>
+                                <field name="location_id" options="{'no_create': True}" groups="stock.group_stock_multi_locations"/>
+                                <field name="location_dest_id" options="{'no_create': True}" groups="stock.group_stock_multi_locations"/>
                                 <field name="company_id" groups="base.group_multi_company"/>
                             </group>
                             <group name="main_grp_col2">
@@ -340,19 +334,19 @@
                         <group name="linked_group" string="Linked Moves" groups="base.group_no_one" colspan="2">
                             <field name="move_orig_ids" string="Origin Moves" readonly="1">
                                 <tree>
-                                    <field name="location_id"/>
-                                    <field name="location_dest_id"/>
+                                    <field name="location_id" groups="stock.group_stock_multi_locations"/>
+                                    <field name="location_dest_id" groups="stock.group_stock_multi_locations"/>
                                     <field name="product_uom_qty"/>
-                                    <field name="product_uom"/>
+                                    <field name="product_uom" groups="uom.group_uom"/>
                                     <field name="state"/>
                                 </tree>
                             </field>
                             <field name="move_dest_ids" string="Destination Moves" readonly="1">
                                 <tree>
-                                    <field name="location_id"/>
-                                    <field name="location_dest_id"/>
+                                    <field name="location_id" groups="stock.group_stock_multi_locations"/>
+                                    <field name="location_dest_id" groups="stock.group_stock_multi_locations"/>
                                     <field name="product_uom_qty"/>
-                                    <field name="product_uom"/>
+                                    <field name="product_uom" groups="uom.group_uom"/>
                                     <field name="state"/>
                                 </tree>
                             </field>
@@ -379,8 +373,8 @@
                     <filter string="To Do" name="future" domain="[('state','in',('assigned','confirmed','waiting'))]" help="Stock moves that are Confirmed, Available or Waiting"/>
                     <filter string="Done" name="done" domain="[('state','=','done')]" help="Stock moves that have been processed"/>
                     <separator/>
-                    <filter string="Incoming" name="incoming" domain="[('location_id.usage', 'not in', ('internal', 'transit')), ('location_dest_id.usage', 'in', ('internal', 'transit'))]"/>
-                    <filter string="Outgoing" name="outgoing" domain="[('location_id.usage', 'in', ('internal', 'transit')), ('location_dest_id.usage', 'not in', ('internal', 'transit'))]"/>
+                    <filter string="Incoming" name="incoming" domain="[('location_usage', 'not in', ('internal', 'transit')), ('location_usage', 'in', ('internal', 'transit'))]"/>
+                    <filter string="Outgoing" name="outgoing" domain="[('location_usage', 'in', ('internal', 'transit')), ('location_usage', 'not in', ('internal', 'transit'))]"/>
                     <filter string="Inventory" name="inventory" domain="[('is_inventory', '=', True)]"/>
                     <separator/>
                     <filter string="Date" name="today" date="date" help="Scheduled or processing date"/>
@@ -469,8 +463,8 @@
                     <field name="product_id"/>
                     <field name="product_uom_qty"/>
                     <field name="product_uom" options="{'no_open': True, 'no_create': True}" string="Unit of Measure" groups="uom.group_uom"/>
-                    <field name="location_id" options="{'no_create': True}" invisible="1"/>
-                    <field name="location_dest_id" invisible="1"/>
+                    <field name="location_id" options="{'no_create': True}" invisible="1" groups="stock.group_stock_multi_locations"/>
+                    <field name="location_dest_id" invisible="1" groups="stock.group_stock_multi_locations"/>
                     <field name="state" optional="show"/>
                     <field name="company_id" invisible="1"/>
                 </tree>
