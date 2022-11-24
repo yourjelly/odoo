@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="mail.document_unfollowed">
+        <t t-call="mail.public_layout">
+            <t t-set="body">
+                <div class="alert alert-primary" role="alert">
+                  You are no longer following the document.
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

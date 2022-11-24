@@ -17,6 +17,7 @@ from dateutil.parser import parse
 from odoo import _, api, fields, models
 from odoo import tools
 from odoo.addons.base.models.ir_mail_server import MailDeliveryException
+from odoo.addons.mail.tools.followers import _UNFOLLOW_REGEX
 
 _logger = logging.getLogger(__name__)
 
@@ -336,6 +337,17 @@ class MailMail(models.Model):
         """
         self.ensure_one()
         body = self._send_prepare_body()
+        if partner and 'unfollow_placeholder_start' in body and \
+                self.mail_message_id.model and self.mail_message_id.res_id and \
+                (getattr(self.env[self.mail_message_id.model], '_partner_unfollow_enabled', False) or
+                 any(user._is_internal() for user in partner.user_ids)):
+            unfollow_url = self.env['mail.thread']._notify_get_action_link('unfollow',
+                                                                           model=self.mail_message_id.model,
+                                                                           res_id=self.mail_message_id.res_id,
+                                                                           pid=partner.id)
+            body = re.sub(_UNFOLLOW_REGEX, lambda match: match[1].replace('/mail/unfollow', unfollow_url), body)
+        else:
+            body = re.sub(_UNFOLLOW_REGEX, '', body)
         body_alternative = tools.html2plaintext(body)
         if partner:
             email_to = [tools.formataddr((partner.name or 'False', partner.email or 'False'))]

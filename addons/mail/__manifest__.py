@@ -75,6 +75,7 @@ For more specific needs, you may also assign custom-defined actions
         'views/mail_message_views.xml',
         'views/mail_message_schedule_views.xml',
         'views/mail_mail_views.xml',
+        'views/mail_followers_templates.xml',
         'views/mail_followers_views.xml',
         'views/mail_ice_server_views.xml',
         'views/mail_channel_member_views.xml',
@@ -99,6 +100,7 @@ For more specific needs, you may also assign custom-defined actions
         'views/mail_gateway_allowed_views.xml',
         'views/mail_guest_views.xml',
         'views/mail_message_reaction_views.xml',
+        'views/public_templates.xml',
         'views/res_users_views.xml',
         'views/res_users_settings_views.xml',
         'views/mail_template_views.xml',
@@ -131,7 +133,7 @@ For more specific needs, you may also assign custom-defined actions
         'mail.assets_common_discuss_public': [
             ('include', 'web.assets_common'),
         ],
-        'mail.assets_discuss_public': [
+        'mail.assets_public': [
             # SCSS dependencies (the order is important)
             ('include', 'web._assets_helpers'),
             'web/static/src/scss/bootstrap_overridden.scss',
@@ -143,6 +145,9 @@ For more specific needs, you may also assign custom-defined actions
             'web/static/src/scss/bootstrap_review.scss',
             'web/static/src/webclient/webclient.scss',
             'web/static/src/core/utils/*.scss',
+        ],
+        'mail.assets_discuss_public': [
+            ('include', 'mail.assets_public'),
             # depends on BS variables, can't be loaded in assets_primary or assets_secondary
             'mail/static/src/scss/variables/derived_variables.scss',
             'mail/static/src/scss/composer.scss',

@@ -15,6 +15,19 @@ class MailTestSimple(models.Model):
     email_from = fields.Char()
 
 
+class MailTestSimpleUnfollow(models.Model):
+    """ A very simple model only inheriting from mail.thread when only
+    communication history is necessary
+    + allowing partner even without user to unfollow """
+    _description = 'Simple Chatter Model'
+    _name = 'mail.test.simple.unfollow'
+    _inherit = ['mail.thread']
+    _partner_unfollow_enabled = True
+
+    name = fields.Char()
+    email_from = fields.Char()
+
+
 class MailTestGateway(models.Model):
     """ A very simple model only inheriting from mail.thread to test pure mass
     mailing features and base performances. """

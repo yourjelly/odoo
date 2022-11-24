@@ -9,6 +9,7 @@ import email
 import email.policy
 import hashlib
 import hmac
+import itertools
 import json
 import lxml
 import logging
@@ -26,6 +27,7 @@ from xmlrpc import client as xmlrpclib
 from markupsafe import Markup
 
 from odoo import _, api, exceptions, fields, models, tools, registry, SUPERUSER_ID, Command
+from odoo.addons.mail.tools.followers import _UNFOLLOW_REGEX
 from odoo.exceptions import MissingError, AccessError
 from odoo.osv import expression
 from odoo.tools import is_html_empty, html_escape
@@ -2553,19 +2555,26 @@ class MailThread(models.AbstractModel):
         recipients_max = 50
         for recipients_group_data in recipients_groups_data:
             # generate notification email content
-            recipients_ids = recipients_group_data.pop('recipients')
+            recipients_ids = set(recipients_group_data.pop('recipients'))
+            recipients_with_unsubscription = followers_recipient_ids & set(recipients_ids)
+            recipients_without_unsubscription = recipients_ids - recipients_with_unsubscription
             render_values = {**template_values, **recipients_group_data}
             # {company, is_discussion, lang, message, model_description, record, record_name, signature, subtype, tracking_values, website_url}
             # {actions, button_access, has_button_access, recipients}
 
-            mail_body = self.env['ir.qweb']._render(template_xmlid, render_values, minimal_qcontext=True, raise_if_not_found=False, lang=template_values['lang'])
-            if not mail_body:
+            mail_body_with_unsubscription = self.env['ir.qweb']._render(template_xmlid, render_values, minimal_qcontext=True, raise_if_not_found=False, lang=template_values['lang'])
+            if not mail_body_with_unsubscription:
                 _logger.warning('QWeb template %s not found or is empty when sending notification emails. Sending without layouting.', template_xmlid)
-                mail_body = message.body
-            mail_body = self.env['mail.render.mixin']._replace_local_links(mail_body)
+                mail_body_with_unsubscription = message.body
+            mail_body_with_unsubscription = self.env['mail.render.mixin']._replace_local_links(mail_body_with_unsubscription)
+            mail_body_without_unsubscription = re.sub(_UNFOLLOW_REGEX, '', mail_body_with_unsubscription)
 
             # create email
-            for recipients_ids_chunk in split_every(recipients_max, recipients_ids):
+            for recipients_ids_chunk, mail_body in itertools.chain(
+                    zip(split_every(recipients_max, recipients_without_unsubscription),
+                        itertools.cycle([mail_body_without_unsubscription])),
+                    zip(split_every(recipients_max, recipients_with_unsubscription),
+                        itertools.cycle([mail_body_with_unsubscription]))):
                 mail_values = self._notify_by_email_get_final_mail_values(
                     recipients_ids_chunk,
                     base_mail_values,

@@ -1095,18 +1095,19 @@ class TestMessagePostHelpers(TestMessagePostCommon):
                          'Post with template: should have created partners based on template emails')
 
         # check notifications have been sent
-        self.assertMailNotifications(new_message, [{
-            'content': f'<p>Hello {test_record.name}</p>',
-            'message_type': 'notification',
-            'notif': [
-                {'partner': self.partner_1, 'type': 'email'},
-                {'partner': self.partner_2, 'type': 'email'},
-                {'partner': new_partners[0], 'type': 'email'},
-                {'partner': new_partners[1], 'type': 'email'},
-                {'partner': test_record.customer_id, 'type': 'email'},
-            ],
-            'subtype': 'mail.mt_comment',
-        }])
+        for notif in ([{'partner': self.partner_1, 'type': 'email'},
+                       {'partner': self.partner_2, 'type': 'email'},
+                       {'partner': new_partners[0], 'type': 'email'},
+                       {'partner': new_partners[1], 'type': 'email'},
+                       ],
+                      [{'partner': test_record.customer_id, 'type': 'email'},
+                       ]):
+            self.assertMailNotifications(new_message, [{
+                'content': f'<p>Hello {test_record.name}</p>',
+                'message_type': 'notification',
+                'notif': notif,
+                'subtype': 'mail.mt_comment',
+            }])
         self.assertMessageFields(
             new_message,
             {'author_id': self.partner_employee,
