@@ -3022,6 +3022,10 @@ export class OdooEditor extends EventTarget {
     }
 
     _onMouseDown(ev) {
+        if (ev.target.querySelector('.o_not_editable') || closestElement(ev.target, '.o_not_editable')) {
+            ev.preventDefault();
+            this.document.getSelection().removeAllRanges();
+        }
         this._currentMouseState = ev.type;
 
         // When selecting all the text within a link then triggering delete or
