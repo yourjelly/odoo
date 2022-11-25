@@ -29,6 +29,9 @@ registry.category("web_tour.tours").add('create_crm_team_tour', {
     trigger: 'div.modal-dialog tr:contains("Test Sales Manager") input.form-check-input:checked',
     run: () => {},
 }, {
+    trigger: '.o_list_selection_box:contains(2)',
+    run: () => {},
+}, {
     trigger: 'button.o_select_button',
 }, 
     ...stepUtils.saveForm()

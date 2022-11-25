@@ -2,6 +2,10 @@
 
 import { browser } from "@web/core/browser/browser";
 import { isVisible } from "@web/core/utils/ui";
+import { Mutex } from "@web/core/utils/concurrency";
+
+// TODO-JCB: Don't use legacy imports.
+import { findTrigger, findExtraTrigger } from "web_tour.utils";
 
 export const ACTION_HELPERS = {
     click(el, _step) {
@@ -22,64 +26,152 @@ export const ACTION_HELPERS = {
     },
 };
 
+const mutex = new Mutex();
+
+/**
+ * Calls the given func then returns/resolves to `true`
+ * if it will result to unloading of the page.
+ * @param {(...args: any[]) => void} func
+ * @param  {any[]} args
+ * @returns
+ */
+export function callWithUnloadCheck(func, ...args) {
+    let willUnload = false;
+    const beforeunload = () => (willUnload = true);
+    window.addEventListener("beforeunload", beforeunload);
+    const result = func(...args);
+    if (result instanceof Promise) {
+        return result.then(() => {
+            window.removeEventListener("beforeunload", beforeunload);
+            return willUnload;
+        });
+    } else {
+        window.removeEventListener("beforeunload", beforeunload);
+        return willUnload;
+    }
+}
+
+function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// TODO-JCB: Should only find odoo iframe. Exclude iframe from different host.
+function findIframe() {
+    return document.body.getElementsByTagName("iframe")[0];
+}
+
 class TimeoutError extends Error {}
 
 class Macro {
-    constructor(descr) {
+    constructor(descr, engine) {
         this.name = descr.name || "anonymous";
         this.timeoutDuration = descr.timeout || 0;
         this.timeout = null;
         this.currentIndex = 0;
-        this.interval = "interval" in descr ? Math.max(16, descr.interval) : 500;
+        this.checkDelay = descr.checkDelay || 0;
         this.isComplete = false;
         this.steps = descr.steps;
         this.onStep = descr.onStep || (() => {});
         this.onError = descr.onError;
         this.onTimeout = descr.onTimeout;
+        this.engine = engine;
         this.setTimer();
     }
 
-    advance() {
+    getStepDelay(step) {
+        return step.delay || 0;
+    }
+
+    /**
+     * TODO-JCB: The following note can be removed.
+     * > Finding the trigger element and performing the action and other misc operations should be connected.
+     * > We should only schedule advancing to the next step when the whole current step finished successfully.
+     * > Also, while "doing" the current step, we need to pause mutation observer such that any mutation should
+     * > not schedule a new "run" on the current step.
+     */
+    async advance() {
         if (this.isComplete) {
             return;
         }
         const step = this.steps[this.currentIndex];
-        const trigger = step.trigger;
-        if (trigger) {
-            let el = null;
-            if (typeof trigger === "function") {
-                const result = this.safeCall(trigger);
-                if (result instanceof HTMLElement) {
-                    el = result;
+        await this.waitForDelay(step);
+        const { canContinue, el } = this.checkTrigger(step);
+
+        const elIsInDocument = el ? el.ownerDocument.contains(el) : true;
+        // TODO: Should take into account .o_blockUI. Not included at the moment because of the tests in `knowledge`.
+        // > E.g. check `helpdesk_pick_file_as_attachment_from_knowledge`.
+        const isBlocked = document.body.classList.contains("o_ui_blocked");
+
+        if (elIsInDocument && !isBlocked && canContinue) {
+            const willUnload = await callWithUnloadCheck(() => this.performAction(el, step));
+            if (!willUnload) {
+                this.currentIndex++;
+                if (this.currentIndex === this.steps.length) {
+                    this.isComplete = true;
+                    browser.clearTimeout(this.timeout);
+                } else {
+                    await new Promise((resolve) => setTimeout(resolve));
+                    await this.advance();
                 }
             }
-            if (typeof trigger === "string") {
-                el = document.querySelector(trigger);
-            }
-            if (el && isVisible(el)) {
-                this.advanceStep(el, step);
-            }
-        } else {
-            // a step without a trigger is just an action
-            this.advanceStep(null, step);
         }
     }
 
-    advanceStep(el, step) {
+    async waitForDelay(step) {
+        const stepDelay = this.getStepDelay(step);
+        if (stepDelay > 0) {
+            await sleep(stepDelay);
+        }
+    }
+
+    /**
+     * Find the trigger and assess whether it can continue on performing the actions.
+     * @param {Step} param0
+     * @returns {{ canContinue: boolean; el: Element | null }}
+     */
+    checkTrigger({ trigger, in_modal, action, allowInvisible = false }) {
+        let el = null;
+        if (!trigger) {
+            return { canContinue: Boolean(action), el };
+        }
+        if (typeof trigger === "function") {
+            const result = this.safeCall(trigger);
+            if (this.isElement(result)) {
+                el = result;
+            }
+        } else if (typeof trigger === "string") {
+            // Need to use engine's findTrigger so that observer is properly paused when making a jquery.
+            el = this.engine.findTrigger(trigger, in_modal);
+        }
+        return { canContinue: Boolean(allowInvisible ? el : el && isVisible(el)), el };
+    }
+
+    isElement(el) {
+        if (el) {
+            // Should take into account SVGElement
+            if (el instanceof Element) {
+                return true;
+            } else {
+                const currentIFrame = findIframe();
+                return currentIFrame && el instanceof currentIFrame.contentWindow.Element;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Calls the `onStep` callback and the `step.action`.
+     * @param {Element} el
+     * @param {Step} step
+     */
+    async performAction(el, step) {
         this.safeCall(this.onStep, el, step);
         const action = step.action;
         if (action in ACTION_HELPERS) {
             ACTION_HELPERS[action](el, step);
         } else if (typeof action === "function") {
-            this.safeCall(action, el);
-        }
-        this.currentIndex++;
-        if (this.currentIndex === this.steps.length) {
-            this.isComplete = true;
-            browser.clearTimeout(this.timeout);
-        } else {
-            this.setTimer();
-            this.advance();
+            await this.safeCall(action, el);
         }
     }
 
@@ -97,6 +189,7 @@ class Macro {
     setTimer() {
         if (this.timeoutDuration) {
             browser.clearTimeout(this.timeout);
+            const currentStep = this.steps[this.currentIndex];
             this.timeout = browser.setTimeout(() => {
                 if (this.onTimeout) {
                     const index = this.currentIndex;
@@ -106,7 +199,7 @@ class Macro {
                     const error = new TimeoutError("Step timeout");
                     this.handleError(error);
                 }
-            }, this.timeoutDuration);
+            }, this.timeoutDuration + this.getStepDelay(currentStep));
         }
     }
 
@@ -130,17 +223,59 @@ export class MacroEngine {
         this.isRunning = false;
         this.timeout = null;
         this.target = target;
-        this.interval = Infinity; // nbr of ms before we check the dom to advance macros
+        this.defaultCheckDelay = 750;
         this.macros = new Set();
-        this.observer = new MutationObserver(this.delayedCheck.bind(this));
+        this.observerOptions = {
+            attributes: true,
+            childList: true,
+            subtree: true,
+            characterData: true,
+        };
+        this.observer = new MutationObserver(() => {
+            this.delayedCheck();
+        });
+        this.iframeObserver = new MutationObserver(() => {
+            const iframeEl = findIframe();
+            if (iframeEl) {
+                iframeEl.addEventListener("load", () => {
+                    if (iframeEl.contentDocument) {
+                        this.observer.observe(iframeEl.contentDocument, this.observerOptions);
+                    }
+                });
+                // If the iframe was added without a src,
+                // its load event was immediately fired and
+                // will not fire again unless another src is
+                // set. Unfortunately, the case of this
+                // happening and the iframe content being
+                // altered programmaticaly may happen.
+                // (E.g. at the moment this was written,
+                // the mass mailing editor iframe is added
+                // without src and its content rewritten
+                // immediately afterwards).
+                if (!iframeEl.src) {
+                    if (iframeEl.contentDocument) {
+                        this.observer.observe(iframeEl.contentDocument, this.observerOptions);
+                    }
+                }
+            }
+        });
+    }
+
+    findTrigger(selector, inModal) {
+        const result = findTrigger(selector, inModal);
+        return result;
+    }
+
+    findExtraTrigger(selector) {
+        const result = findExtraTrigger(selector);
+        return result;
     }
 
     async activate(descr) {
         // micro task tick to make sure we add the macro in a new call stack,
         // so we are guaranteed that we are not iterating on the current macros
         await Promise.resolve();
-        const macro = new Macro(descr);
-        this.interval = Math.min(this.interval, macro.interval);
+        const macro = new Macro(descr, this);
         this.macros.add(macro);
         this.start();
     }
@@ -148,14 +283,22 @@ export class MacroEngine {
     start() {
         if (!this.isRunning) {
             this.isRunning = true;
-            this.observer.observe(this.target, {
-                attributes: true,
-                childList: true,
-                subtree: true,
-                characterData: true,
-            });
+            this.observer.observe(this.target, this.observerOptions);
+            this.iframeObserver.observe(document.body, { childList: true, subtree: true });
         }
         this.delayedCheck();
+    }
+
+    stopMacro(name) {
+        if (this.isRunning) {
+            const macrosToDelete = [...this.macros].filter((macro) => macro.name === name);
+            for (const macro of macrosToDelete) {
+                this.macros.delete(macro);
+            }
+            if (this.macros.size === 0) {
+                this.stop();
+            }
+        }
     }
 
     stop() {
@@ -168,28 +311,44 @@ export class MacroEngine {
     }
 
     delayedCheck() {
-        if (this.timeout) {
-            browser.clearTimeout(this.timeout);
-        }
-        this.timeout = browser.setTimeout(this.advanceMacros.bind(this), this.interval);
+        // NOTE: This check is introduced because of the use of jquery in finding the trigger.
+        // When jquery is completely unused, we can maybe remove this check.
+        // TODO-JCB: This check might not be needed pausing/resuming the mutation observer works.
+        browser.clearTimeout(this.timeout);
+
+        // TODO-JCB: Write tests for this use of mutex synchronization.
+        // TODO-JCB: How about the error when running advanceMacros?
+        // > ATM, mutex.exec just ignores it. How should it be handled?
+        // > I think it should be propagated so that error message will be logged and the tour will stop.
+        // TODO-JCB: Idea: Each macro should have its own timeout for scheduled rechecking of the current step.
+        this.timeout = browser.setTimeout(
+            () => mutex.exec(this.advanceMacros.bind(this)),
+            this.getCheckDelay() || this.defaultCheckDelay
+        );
     }
 
-    advanceMacros() {
+    getCheckDelay() {
+        // if a macro has a checkDelay different from 0, use it. Select the maximum.
+        return [...this.macros]
+            .map((m) => m.checkDelay)
+            .filter((delay) => delay > 0)
+            .reduce(Math.max, 0);
+    }
+
+    async advanceMacros() {
         const toDelete = [];
+        const advances = [];
         for (const macro of this.macros) {
-            macro.advance();
+            advances.push(macro.advance());
             if (macro.isComplete) {
                 toDelete.push(macro);
             }
         }
+        // TODO-JCB: Is it necessary to gather all this `advance` promises and await them?
+        await Promise.all(advances);
         if (toDelete.length) {
             for (const macro of toDelete) {
                 this.macros.delete(macro);
-            }
-            // recompute current interval, because it may need to be increased
-            this.interval = Infinity;
-            for (const macro of this.macros) {
-                this.interval = Math.min(this.interval, macro.interval);
             }
         }
         if (this.macros.size === 0) {

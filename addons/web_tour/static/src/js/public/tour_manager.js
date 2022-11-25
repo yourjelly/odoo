@@ -1,21 +1,18 @@
 odoo.define('web_tour.public.TourManager', function (require) {
 'use strict';
 
-var TourManager = require('web_tour.TourManager');
-var lazyloader = require('web.public.lazyloader');
+// TODO-JCB: This module seems to be not needed because for public pages,
+// > public_root waits for the lazyloaded modules before starting the services.
 
-TourManager.include({
-    /**
-     * @override
-     */
-    _waitBeforeTourStart: function () {
-        return this._super.apply(this, arguments).then(function () {
-            return lazyloader.allScriptsLoaded;
-        }).then(function () {
-            return new Promise(function (resolve) {
-                setTimeout(resolve);
-            });
-        });
-    },
-});
+// var tourRegistry = require('web_tour.tour');
+// var lazyloader = require('web.public.lazyloader');
+// const { patch } = require("@web/core/utils/patch");
+
+// patch(tourRegistry, "web_tour.public", {
+//     waitBeforeTourStart() {
+//         return this._super()
+//             .then(() => lazyloader.allScriptsLoaded)
+//             .then((resolve) => setTimeout(resolve));
+//     },
+// });
 });

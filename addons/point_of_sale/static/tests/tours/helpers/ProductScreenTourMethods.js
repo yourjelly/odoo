@@ -2,6 +2,7 @@
 
 import { createTourMethods } from "@point_of_sale/../tests/tours/helpers/utils";
 import { TextAreaPopup } from "@point_of_sale/../tests/tours/helpers/TextAreaPopupTourMethods";
+import { numberBuffer } from "@point_of_sale/js/Misc/NumberBuffer";
 
 class Do {
     clickDisplayedProduct(name) {
@@ -76,7 +77,17 @@ class Do {
                 trigger,
             };
         }
-        return keys.split(" ").map(generateStep);
+        return [
+            ...keys.split(" ").map(generateStep),
+            {
+                action: () => {
+                    // TODO-JCB: low-level use of macro. Should be replaced with `run` but kinda complicated.
+                    // So that immediately, the handler is triggered on the buffered keys
+                    // and the buffer is cleared.
+                    numberBuffer.capture();
+                },
+            },
+        ];
     }
 
     clickPayButton(shouldCheck = true) {
@@ -253,6 +264,7 @@ class Execute {
      */
     addOrderline(productName, quantity, unitPrice = undefined, expectedTotal = undefined) {
         const res = this._do.clickDisplayedProduct(productName);
+        res.push(...this._check.selectedOrderlineHas(productName, "1.00"));
         if (unitPrice) {
             res.push(...this._do.pressNumpad("Price"));
             res.push(...this._check.modeIsActive("Price"));

@@ -19,6 +19,7 @@ wTourUtils.registerWebsitePreviewTour('snippet_cache_across_websites', {
         trigger: '.o_website_switcher_container button',
     },
     {
+        // TODO-JCB: Random owl error after this step.
         content: "Switch to website 2",
         // Ensure data-website-id exists
         extra_trigger: 'iframe html[data-website-id="1"]',

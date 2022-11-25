@@ -9,7 +9,7 @@ export function disableTours({ env }) {
     if (!env.services.user.isSystem) {
         return null;
     }
-    const activeTours = env.services.tour.getActiveTours();
+    const activeTours = env.services.tour_service_x.getActiveTours();
     if (activeTours.length === 0) {
         return null;
     }

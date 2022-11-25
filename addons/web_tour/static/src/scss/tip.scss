@@ -53,13 +53,12 @@ $o-tip-size-delay-in: $o-tip-duration-in - $o-tip-size-duration-in;
 .o_tooltip {
     /*rtl:begin:ignore*/
     position: absolute !important;
-    top: 50% !important;
-    left: 50% !important;
     /*rtl:end:ignore*/
     z-index: $zindex-tooltip !important; // See comment on 'o_tooltip_parent' class
     opacity: 0 !important;
-    width: $o-tip-width !important;
-    height: $o-tip-width !important; // the shape must be done using transform
+    // TODO-JCB: The info only works when this is deactivated.
+    // width: $o-tip-width !important;
+    // height: $o-tip-width !important; // the shape must be done using transform
     margin: 0 !important;
     padding: 0 !important;
 

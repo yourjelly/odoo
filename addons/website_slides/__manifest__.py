@@ -251,6 +251,9 @@ Featuring
             'web/static/src/env.js',
             'web/static/src/legacy/js/services/session.js',
 
+            # TODO-JCB: This is needed by macro.js. Merge it to macro.js in the future?
+            'web_tour/static/src/js/tour_utils.js',
+
             ('include', 'web._assets_helpers'),
             'web/static/src/scss/pre_variables.scss',
             'web/static/lib/bootstrap/scss/_variables.scss',

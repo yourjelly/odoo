@@ -26,6 +26,8 @@ odoo.define('account.dashboard.setup.tour', function (require) {
         trigger: 'iframe .o_report_layout_standard h2',
         content: 'Primary color is correct',
         run: function () {
+            // In my opinion, this due to the fact that css assets might not be fully loaded at the time the randomly failing step is reached.
+            // The simplest solution is to maybe preload the css (https://web.dev/preload-critical-assets/). Or completely get rid of the css checks.
             if (this.$anchor.css('color') !== "rgb(18, 52, 86)") {
                 console.error('The primary color should be the one set on the company.');
             }

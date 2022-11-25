@@ -59,6 +59,8 @@ registry.category("web_tour.tours").add('apikeys_tour_setup', {
 }, {
     content: 'Re-open preferences',
     trigger: '.o_user_menu .oe_topbar_name',
+    // TODO-JCB: Not sure. The previous step is a modal so perhaps we need to wait for it to close.
+    extra_trigger: 'body:not(.modal-open)',
 }, {
     trigger: '[data-menu=settings]',
 }, {
