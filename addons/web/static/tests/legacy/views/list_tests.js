@@ -5,7 +5,6 @@ const AbstractFieldOwl = require('web.AbstractFieldOwl');
 const AbstractStorageService = require('web.AbstractStorageService');
 const BasicModel = require('web.BasicModel');
 const core = require('web.core');
-const Domain = require('web.Domain')
 const basicFields = require('web.basic_fields');
 const fieldRegistry = require('web.field_registry');
 const fieldRegistryOwl = require('web.field_registry_owl');
@@ -4671,14 +4670,14 @@ QUnit.module('LegacyViews', {
         );
 
         // reload with another domain -> should no longer display the sample records
-        await list.reload({ domain: Domain.FALSE_DOMAIN });
+        await list.reload({ domain: [false] });
 
         assert.doesNotHaveClass(list.$el, 'o_legacy_view_sample_data');
         assert.containsNone(list, '.o_list_table');
         assert.containsOnce(list, '.o_nocontent_help .hello');
 
         // reload with another domain matching records
-        await list.reload({ domain: Domain.TRUE_DOMAIN });
+        await list.reload({ domain: [true] });
 
         assert.doesNotHaveClass(list.$el, 'o_legacy_view_sample_data');
         assert.containsOnce(list, '.o_list_table');
@@ -4704,7 +4703,7 @@ QUnit.module('LegacyViews', {
                     <field name="foo"/>
                     <field name="m2o" optional="hide"/>
                 </tree>`,
-            domain: Domain.FALSE_DOMAIN,
+            domain: [false],
             services: {
                 local_storage: RamStorageService,
             },
@@ -4738,7 +4737,7 @@ QUnit.module('LegacyViews', {
                     <field name="int_field"/>
                 </tree>`,
             data: this.data,
-            domain: Domain.FALSE_DOMAIN,
+            domain: [false],
             model: 'foo',
             View: ListView,
         });
@@ -4803,7 +4802,7 @@ QUnit.module('LegacyViews', {
                     <field name="bar"/>
                     <field name="int_field"/>
                 </tree>`,
-            domain: Domain.TRUE_DOMAIN,
+            domain: [true],
         });
 
         assert.containsOnce(list, '.o_list_table');
@@ -4811,7 +4810,7 @@ QUnit.module('LegacyViews', {
         assert.doesNotHaveClass(list.$el, 'o_legacy_view_sample_data');
 
         // reload with another domain matching no record (should not display the sample records)
-        await list.reload({ domain: Domain.FALSE_DOMAIN });
+        await list.reload({ domain: [false] });
 
         assert.containsOnce(list, '.o_list_table');
         assert.containsNone(list, '.o_data_row');
@@ -4833,7 +4832,7 @@ QUnit.module('LegacyViews', {
                     <field name="bar"/>
                     <field name="int_field"/>
                 </tree>`,
-            domain: Domain.FALSE_DOMAIN,
+            domain: [false],
         });
 
         assert.hasClass(list, 'o_legacy_view_sample_data');
@@ -4858,7 +4857,7 @@ QUnit.module('LegacyViews', {
                     <field name="int_field"/>
                 </tree>`,
             data: this.data,
-            domain: Domain.TRUE_DOMAIN,
+            domain: [true],
             model: 'foo',
             View: ListView,
             viewOptions: {
@@ -4900,7 +4899,7 @@ QUnit.module('LegacyViews', {
                     <field name="int_field"/>
                 </tree>`,
             data: this.data,
-            domain: Domain.FALSE_DOMAIN,
+            domain: [false],
             model: 'foo',
             View: ListView,
             viewOptions: {
@@ -4945,7 +4944,7 @@ QUnit.module('LegacyViews', {
                     <field name="int_field"/>
                 </tree>`,
             data: this.data,
-            domain: Domain.FALSE_DOMAIN,
+            domain: [false],
             model: 'foo',
             View: ListView,
             viewOptions: {

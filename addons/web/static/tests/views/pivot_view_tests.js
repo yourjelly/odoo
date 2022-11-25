@@ -707,7 +707,7 @@ QUnit.module("Views", (hooks) => {
 
             const expectedDomains = [
                 ["&", ["date", ">=", "2016-12-01"], ["date", "<=", "2016-12-31"]],
-                [[0, "=", 1]],
+                [false],
             ];
             const fakeActionService = {
                 start() {

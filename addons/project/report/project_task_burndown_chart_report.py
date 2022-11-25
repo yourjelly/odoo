@@ -4,13 +4,13 @@
 from odoo import _, api, fields, models
 from odoo.models import regex_field_agg, VALID_AGGREGATE_FUNCTIONS
 from odoo.exceptions import UserError
-from odoo.osv.expression import AND_OPERATOR, OR_OPERATOR, NOT_OPERATOR, DOMAIN_OPERATORS, FALSE_LEAF, TRUE_LEAF, normalize_domain
+from odoo.osv.expression import AND_OPERATOR, OR_OPERATOR, NOT_OPERATOR, DOMAIN_OPERATORS, normalize_domain
 from odoo.tools import OrderedSet
 
 
 def remove_domain_leaf(domain, fields_to_remove):
     """ Make the provided domain insensitive to the fields provided in fields_to_remove. Fields that are part of
-    `fields_to_remove` are replaced by either a `FALSE_LEAF` or a `TRUE_LEAF` in order to ensure the evaluation of the
+    `fields_to_remove` are replaced by either a `False` or a `True` in order to ensure the evaluation of the
     complete domain.
 
     :param domain: The domain to process.
@@ -22,9 +22,9 @@ def remove_domain_leaf(domain, fields_to_remove):
         if len(leaf) == 3:
             if leaf[0] in fields_to_remove:
                 if operator == AND_OPERATOR:
-                    new_domain.append(TRUE_LEAF)
+                    new_domain.append(True)
                 elif operator == OR_OPERATOR:
-                    new_domain.append(FALSE_LEAF)
+                    new_domain.append(False)
             else:
                 new_domain.append(leaf)
             return 1
@@ -33,7 +33,7 @@ def remove_domain_leaf(domain, fields_to_remove):
             if leaf == OR_OPERATOR \
                     and len(elements[index + 1]) == 3 and len(elements[index + 2]) == 3 \
                     and elements[index + 1][0] in fields_to_remove and elements[index + 2][0] in fields_to_remove:
-                new_domain.append(TRUE_LEAF)
+                new_domain.append(True)
                 return 3
             new_domain.append(leaf)
             if leaf[0] == NOT_OPERATOR:
@@ -290,7 +290,7 @@ class ReportProjectTaskBurndownChart(models.AbstractModel):
         * A domain that only contains fields that are specific to `project.task.burndown.chart.report`
         * A domain that only contains fields that are specific to `project.task`
 
-        Fields that are not part of the constraint are replaced by either a `FALSE_LEAF` or a `TRUE_LEAF` in order
+        Fields that are not part of the constraint are replaced by either a `False` or a `True` in order
         to ensure the complete domain evaluation. See `remove_domain_leaf` for more details.
 
         :param domain: The domain that has been passed to the read_group.

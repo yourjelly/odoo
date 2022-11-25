@@ -1654,8 +1654,9 @@ var FieldX2Many = AbstractField.extend(WidgetAdapterMixin, {
             if (_.isArray(domains)) {
                 columnInvisibleFields[fieldName] = _.map(domains, function (domain) {
                     // We check if the domain is an array to avoid processing
-                    // the '|' and '&' cases
-                    if (_.isArray(domain)) {
+                    // the '|' and '&' cases and check if the leaf item is a
+                    // string and not a number like [1, '=', 1]
+                    if (_.isArray(domain) && typeof domain[0] === 'string') {
                         return [domain[0].split('.')[1]].concat(domain.slice(1));
                     }
                     return domain;
