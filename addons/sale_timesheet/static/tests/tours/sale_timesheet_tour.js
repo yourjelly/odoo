@@ -35,8 +35,15 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
     content: "Add 10 hours as ordered quantity for this product.",
     run: 'text 10',
 }, {
+    trigger: '.o_field_widget[name=price_subtotal]:contains(2,500.00)',
+    run() {},
+}, {
     trigger: 'button[name="action_confirm"]',
     content: 'Click on Confirm button to create a sale order with this quotation.',
+}, {
+    content: 'Wait for the confirmation to finish. State should be "Sales Order"',
+    trigger: '.o_field_widget[name=state] .o_arrow_button_current:contains("Sales Order")',
+    run() {},
 }, stepUtils.toggleHomeMenu(),
 ...stepUtils.goToAppSteps("project.menu_main_pm", 'Go to the Project app.'),
 {

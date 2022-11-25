@@ -1,6 +1,7 @@
 odoo.define('web_tour.tour_manager_tests', async function (require) {
     "use strict";
 
+    // TODO-JCB: Need to adapt this after the removal of "web_tour.TourManager".
     const core = require("web.core");
     const TourManager = require('web_tour.TourManager');
     const testUtils = require('web.test_utils');

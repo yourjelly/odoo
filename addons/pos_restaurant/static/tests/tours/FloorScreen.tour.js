@@ -39,6 +39,18 @@ FloorScreen.check.editModeIsActive(true);
 // test add table
 FloorScreen.do.clickAddTable();
 FloorScreen.check.selectedTableIs("T1");
+
+// TODO: The following 4 lines shouldn't be needed.
+// > But if they're removed, the succeeding step won't work.
+// > This maybe because the state.selectedTableId is not properly set at the right timing.
+// > Or maybe because of poor state management - improperly synchronized `floor.tables` and
+// > contents of `tables_by_id`. Maybe take only table information from one source - e.g.
+// > remove `floor.tables` and derive `floor.tables` from `tables_by_id`.
+FloorScreen.do.clickTable("T2");
+FloorScreen.check.selectedTableIs("T2");
+FloorScreen.do.clickTable("T1");
+FloorScreen.check.selectedTableIs("T1");
+
 FloorScreen.do.clickRename();
 TextInputPopup.check.isShown();
 TextInputPopup.do.inputText("T100");

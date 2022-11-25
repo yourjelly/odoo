@@ -1,6 +1,7 @@
 /** @odoo-module */
 
 import { createTourMethods } from "@point_of_sale/../tests/tours/helpers/utils";
+// import { numberBuffer } from "@point_of_sale/js/Misc/NumberBuffer";
 
 class Do {
     /**
@@ -29,7 +30,17 @@ class Do {
                 trigger,
             };
         }
-        return keys.split(" ").map(generateStep);
+        return [
+            ...keys.split(" ").map(generateStep),
+            // {
+            //     action: () => {
+            //         // TODO-JCB: low-level use of macro. Should be replaced with `run` but kinda complicated.
+            //         // So that immediately, the handler is triggered on the buffered keys
+            //         // and the buffer is cleared.
+            //         numberBuffer.capture();
+            //     },
+            // },
+        ];
     }
     clickConfirm() {
         return [

@@ -78,6 +78,10 @@ web_gantt/static/tests/legacy/**/*
 web_map/static/src/legacy/**/*
 web_map/static/tests/legacy/**/*
 
+# whitelist web_tour
+!web_tour
+!web_tour/**/*
+
 # whitelist base_setup
 !addons/base_setup
 !addons/base_setup/**/*
@@ -195,7 +199,7 @@ addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js
 !addons/pos_six/**/*
 !addons/pos_stripe
 !addons/pos_stripe/**/*
- 
+
 # Whitelist enterprise pos modules
 !l10n_de_pos_cert
 !l10n_de_pos_cert/**/*

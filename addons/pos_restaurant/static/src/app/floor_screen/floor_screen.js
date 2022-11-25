@@ -287,6 +287,12 @@ export class FloorScreen extends Component {
         if (!this.selectedTable) {
             return;
         }
+
+        // Important to hold the value of the selectedTable before showing the dialog
+        // so that after confirmation, then a fast click is made (like tours),
+        // the the originally selected table will be deleted properly.
+        const originalSelectedTableId = this.state.selectedTableId;
+
         const { confirmed } = await this.popup.add(ConfirmPopup, {
             title: this.env._t("Are you sure ?"),
             body: this.env._t("Removing a table cannot be undone"),
@@ -294,7 +300,6 @@ export class FloorScreen extends Component {
         if (!confirmed) {
             return;
         }
-        const originalSelectedTableId = this.state.selectedTableId;
         this.env.pos.tables_by_id[originalSelectedTableId].active = false;
         await this.rpc({
             model: "restaurant.table",

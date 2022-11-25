@@ -145,7 +145,9 @@ var RunningTourActionHelper = core.Class.extend({
         }
 
         values.$element.trigger($.Event("mouseenter"));
-        values.$element.trigger($.Event("mousedown", {which: 1, pageX: elementCenter.left, pageY: elementCenter.top}));
+        // Make the web_studio tour test happy. My guess is that 50%+ of the length of the dragged element
+        // must be situated to the right of the $to element.
+        values.$element.trigger($.Event("mousedown", {which: 1, pageX: elementCenter.left + 1, pageY: elementCenter.top}));
         // Some tests depends on elements present only when the element to drag
         // start to move while some other tests break while moving.
         if (!$to.length) {

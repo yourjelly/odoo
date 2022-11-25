@@ -11,6 +11,7 @@ from odoo.tests.common import tagged, HttpCase
 @tagged('post_install', '-at_install')
 class TestUiSession(HttpCase):
 
+    # TODO-JCB: tour to fix
     def test_admin_survey_session(self):
         """ This method tests a full 'survey session' flow.
         Break down of different steps:

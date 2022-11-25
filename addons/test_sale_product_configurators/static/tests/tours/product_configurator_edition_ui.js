@@ -26,7 +26,10 @@ registry.category("web_tour.tours").add('sale_product_configurator_edition_tour'
         });
     }
 }, {
-    trigger: '.main_product span:contains("Aluminium")'
+    trigger: '.main_product span:contains("Aluminium")',
+    extra_trigger: '.main_product .form-check:has(input[data-value_name="Steel"]:checked)',
+}, {
+    trigger: '.main_product .product_display_name:contains("Customizable Desk (TEST) (Aluminium, White)")',
 }, {
     trigger: '.btn-primary[request_count="1"]',
     extra_trigger: '.show .modal-footer',
