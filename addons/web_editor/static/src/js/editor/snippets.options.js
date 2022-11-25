@@ -1985,7 +1985,7 @@ const ListUserValueWidget = UserValueWidget.extend({
             // rpc using it are cached. Similar domains should be written the
             // same way for the cache to work.
             const selectedIdsDomain = selectedIds.length ? ['id', 'not in', selectedIds] : null;
-            const selectedIdsDomainIndex = this.createWidget.options.domain.findIndex(domain => domain[0] === 'id' && domain[1] === 'not in');
+            const selectedIdsDomainIndex = this.createWidget.options.domain.findIndex(domain => domain instanceof Array && domain[0] === 'id' && domain[1] === 'not in');
             if (selectedIdsDomainIndex > -1) {
                 if (selectedIdsDomain) {
                     this.createWidget.options.domain[selectedIdsDomainIndex] = selectedIdsDomain;
