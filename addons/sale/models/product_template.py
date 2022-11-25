@@ -15,12 +15,6 @@ _logger = logging.getLogger(__name__)
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
-    service_type = fields.Selection(
-        [('manual', 'Manually set quantities on order')], string='Track Service',
-        compute='_compute_service_type', store=True, readonly=False, precompute=True,
-        help="Manually set quantities on order: Invoice based on the manually entered quantity, without creating an analytic account.\n"
-             "Timesheets on contract: Invoice based on the tracked hours on the related timesheet.\n"
-             "Create a task and track hours: Create a task on the sales order validation and track the work hours.")
     sale_line_warn = fields.Selection(WARNING_MESSAGE, 'Sales Order Line', help=WARNING_HELP, required=True, default="no-message")
     sale_line_warn_msg = fields.Text('Message for Sales Order Line')
     expense_policy = fields.Selection(
@@ -37,6 +31,12 @@ class ProductTemplate(models.Model):
     invoice_policy = fields.Selection(
         [('order', 'Ordered quantities'),
          ('delivery', 'Delivered quantities')], string='Invoicing Policy',
+        compute='_compute_invoice_policy', store=True, readonly=False, precompute=True,
+        help='Ordered Quantity: Invoice quantities ordered by the customer.\n'
+             'Delivered Quantity: Invoice quantities delivered to the customer.')
+    service_invoice_policy = fields.Selection(
+        [('ordered_prepaid', 'Prepaid/Fixed Price'),
+         ('delivered_manual', 'Based on delivered quantities (Manual)')], string='Invoicing Policy',
         compute='_compute_invoice_policy', store=True, readonly=False, precompute=True,
         help='Ordered Quantity: Invoice quantities ordered by the customer.\n'
              'Delivered Quantity: Invoice quantities delivered to the customer.')
@@ -139,11 +139,8 @@ class ProductTemplate(models.Model):
         return res
 
     @api.depends('type')
-    def _compute_service_type(self):
-        self.filtered(lambda t: t.type == 'consu' or not t.service_type).service_type = 'manual'
-
-    @api.depends('type')
     def _compute_invoice_policy(self):
+        print("..._compute_invoice_policy")
         self.filtered(lambda t: t.type == 'consu' or not t.invoice_policy).invoice_policy = 'order'
 
     @api.model
