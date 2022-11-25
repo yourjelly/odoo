@@ -301,6 +301,7 @@ export class BaseImportModel {
                 const column = this.columns.find(
                     (e) => e.fieldInfo && e.fieldInfo.id === columnFieldId
                 );
+                debugger
                 if (column) {
                     column.resultNames = name;
                     column.errors = errors;
