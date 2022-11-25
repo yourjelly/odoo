@@ -154,8 +154,9 @@ HTMLElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false, 
     });
     const domPath = domPathGenerator(this, offset)
     let leftNode = domPath.next().value;
+    const lastParent = this.parentElement;
     if (this.classList.contains('o_togglelist') || this.classList.contains('o_togglelist_title')){
-        while (!leftNode.parentElement.classList.contains('o_togglelist_title')) {
+        while (!leftNode.parentElement.classList.contains('o_togglelist_title') || leftNode.parentElement === lastParent) {
             leftNode = domPath.next().value;
         }
     }
@@ -164,7 +165,7 @@ HTMLElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false, 
         return parent.oDeleteBackward(offset, alreadyMoved);
     }
     let node = this.childNodes[offset];
-    const nextSibling = this.classList.contains('o_togglelist_title') ? this.nextSibling.nextSibling : this.nextSibling;
+    const nextSibling = this.classList.contains('o_togglelist_title') ? this.parentElement.nextSibling.nextSibling : this.nextSibling;
     let currentNodeIndex = offset;
 
     // `offsetLimit` will ensure we never move nodes that were not initialy in

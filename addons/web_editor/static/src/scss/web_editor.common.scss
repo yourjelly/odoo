@@ -170,33 +170,10 @@ ul.o_checklist {
     }
 }
 ul.o_togglelist {
+    list-style: none;
     > li.o_togglelist_title {
-        list-style: none;
         position: relative;
-        margin-left: $o-checklist-margin-left;
-        &:not(.oe-nested)::before {
-            font-family: 'FontAwesome';
-            position: absolute;
-            left: - $o-checklist-margin-left;
-            display: block;
-            height: $o-checklist-before-size;
-            width: $o-checklist-before-size;
-            text-align: center;
-            content: '\f152';
-            cursor: pointer;
-        }
-        &.o_toggled{
-            &::before{
-                content: '\f150';
-            }
-        }
-
-    }
-    .o_togglelist_content{
-        display: none;
-        &.o_toggled{
-            display: block;
-        }
+        margin-left: 0;
     }
 }
 

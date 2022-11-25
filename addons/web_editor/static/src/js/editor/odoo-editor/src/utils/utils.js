@@ -1658,28 +1658,45 @@ export function createList(mode) {
     }
     return node;
 }
-
+export function _generateId() {
+    return Math.floor(Math.random() * Math.pow(2,52)).toString();
+}
 export function insertListAfter(afterNode, mode, content = []) {
     const list = createList(mode);
     afterNode.after(list);
+    let toggleId;
     list.append(
         ...content.map(c => {
             const li = document.createElement('LI');
-            li.append(...[].concat(c));
             if (mode =='TL'){
+                toggleId = _generateId();
+                const trigger = document.createElement('div');
+                const title = document.createElement('span');
                 li.classList.toggle('o_togglelist_title');
+                trigger.classList.add('fa', 'btn', 'fa-caret-square-o-right', 'p-0', 'pe-2');
+                trigger.setAttribute('data-bs-toggle', 'collapse');
+                trigger.setAttribute('data-bs-target', `#content-${toggleId}`);
+                title.contentEditable = "true";
+                title.classList.add('o_togglelist_title', 'w-100');
+                li.classList.add('d-flex', 'align-items-center');
+                li.contentEditable = "false";
+                fillEmpty(title)
+                li.append(trigger)
+                li.append(title);
+            }else{
+                li.append(...[].concat(c));
             }
             return li;
         }),
     );
     if (mode == 'TL') {
         const content = document.createElement('DIV');
-        content.classList.add('o_togglelist_content');
+        content.classList.add('o_togglelist_content', 'collapse');
         content.setAttribute('contenteditable', true);
+        content.id = `content-${toggleId}`;
         fillEmpty(content);
-        list.appendChild(content);
+        list.append(content);
     }
-
     return list;
 }
 

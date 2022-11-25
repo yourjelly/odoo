@@ -14,6 +14,7 @@ import {
     splitTextNode,
     toggleClass,
     isVisible,
+    _generateId,
 } from '../utils/utils.js';
 
 Text.prototype.oEnter = function (offset) {
@@ -40,7 +41,6 @@ HTMLElement.prototype.oEnter = function (offset, firstSplit = true) {
     if (firstSplit) {
         restore = prepareUpdate(this, offset);
     }
-
     // First split the node in two and move half the children in the clone.
     const splitEl = this.cloneNode(false);
     while (offset < this.childNodes.length) {
@@ -49,24 +49,44 @@ HTMLElement.prototype.oEnter = function (offset, firstSplit = true) {
     if (isBlock(this) || splitEl.hasChildNodes()) {
         let anchorElement = this;
         if (this.classList.contains('o_togglelist_title')){
-            anchorElement = this.nextElementSibling;
+            anchorElement = this.parentElement.nextElementSibling;
             const content = document.createElement('DIV');
-            content.classList.add('o_togglelist_content');
+            const toggleId = _generateId();
+            const trigger = document.createElement('div');
+            const title = document.createElement('span');
+            const li = document.createElement('li');
+            li.classList.toggle('o_togglelist_title');
+            trigger.classList.add('fa', 'btn', 'fa-caret-square-o-right', 'p-0', 'pe-2');
+            trigger.setAttribute('data-bs-toggle', 'collapse');
+            trigger.setAttribute('data-bs-target', `#content-${toggleId}`);
+            title.contentEditable = "true";
+            title.classList.add('o_togglelist_title', 'w-100');
+            li.classList.add('d-flex', 'align-items-center');
+            li.contentEditable = "false";
+            fillEmpty(title);
+            li.appendChild(trigger);
+            li.appendChild(title);
+            title.textContent = splitEl.textContent;
+            content.classList.add('o_togglelist_content', 'collapse');
             content.setAttribute('contenteditable', true);
+            content.id = `content-${toggleId}`;
             fillEmpty(content);
             anchorElement.after(content);
-        }
-        anchorElement.after(splitEl);
-        if (isVisible(splitEl)) {
+            anchorElement.after(li);
             didSplit = true;
         } else {
-            splitEl.remove();
+            anchorElement.after(splitEl);
+            if (isVisible(splitEl)) {
+                didSplit = true;
+            } else {
+                splitEl.remove();
+            }
         }
     }
 
     // Propagate the split until reaching a block element (or continue to the
     // closest list item element if there is one).
-    if (!isBlock(this) || (this.nodeName !== 'LI' && this.closest('LI'))) {
+    if ((!isBlock(this) || (this.nodeName !== 'LI' && this.closest('LI'))) && !this.classList.contains('o_togglelist_title')) {
         if (this.parentElement) {
             this.parentElement.oEnter(childNodeIndex(this) + 1, !didSplit);
         } else {

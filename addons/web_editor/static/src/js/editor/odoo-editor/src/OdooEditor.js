@@ -165,7 +165,7 @@ export const CLIPBOARD_WHITELISTS = {
         /^btn/,
         /^fa/,
     ],
-    attributes: ['class', 'href', 'src'],
+    attributes: ['class', 'href', 'src', 'data-bs-toggle', 'data-bs-target'],
     styledTags: ['SPAN', 'B', 'STRONG', 'I', 'S', 'U', 'FONT'],
     styles: {
         'text-decoration': { defaultValues: ['', 'none'] },
@@ -3975,6 +3975,9 @@ export class OdooEditor extends EventTarget {
         this._fixFontAwesomeSelection();
 
         this._fixSelectionOnContenteditableFalse();
+        if (ev.target.classList.contains('o_togglelist_title')){
+            ev.stopPropagation();
+        }
     }
 
     _onMouseDown(ev) {
@@ -4002,6 +4005,10 @@ export class OdooEditor extends EventTarget {
         const node = ev.target;
         // handle checkbox lists
         if (node.tagName == 'LI' && ['CL', 'TL'].includes(getListMode(node.parentElement))) {
+            const classToToggle = node.classList.contains('o_togglelist_title') ? 'o_toggled' : 'o_checked';
+            if (classToToggle === 'o_toggled') {
+                ev.stopImmediatePropagation();
+            }
             const beforStyle = window.getComputedStyle(node, ':before');
             const style1 = {
                 left: parseInt(beforStyle.getPropertyValue('left'), 10),
@@ -4017,10 +4024,11 @@ export class OdooEditor extends EventTarget {
                 ev.offsetY <= style1.bottom;
 
             if (isMouseInsideCheckboxBox) {
-                const classToToggle = node.classList.contains('o_togglelist_title') ? 'o_toggled' : 'o_checked';
+
                 toggleClass(node, classToToggle);
                 if (classToToggle === 'o_toggled') {
                     toggleClass(node.nextSibling, 'o_toggled');
+                    ev.stopImmediatePropagation();
                 }
                 ev.preventDefault();
                 this.historyStep();
