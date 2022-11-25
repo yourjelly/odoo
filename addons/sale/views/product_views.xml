@@ -10,23 +10,24 @@
                 <attribute name="invisible">0</attribute>
             </page>
             <field name="product_variant_count" position="after">
-                <field name="service_type" widget="radio" invisible="True"/>
                 <field name="visible_expense_policy" invisible="1"/>
             </field>
             <field name="detailed_type" position="after">
-                <field name="invoice_policy" required="1"/>
+                <field name="invoice_policy" required="1" attrs="{'invisible': [('type', '=', 'service')]}"/>
+                <field name="service_invoice_policy" required="1" attrs="{'invisible': [('type', '=', 'consu')]}"/>
+                <field name="has_order_invoice_policy" invisible="1"/>
                 <field name="expense_policy" widget="radio" attrs="{'invisible': [('visible_expense_policy', '=', False)]}"/>
             </field>
             <field name="product_tooltip" position="after">
                 <label for="product_tooltip" string=""
-                    attrs="{'invisible': ['|', ('type', 'not in', ('product', 'consu')), ('invoice_policy', '!=', 'order')]}"/>
-                <div attrs="{'invisible': ['|', ('type', 'not in', ('product', 'consu')), ('invoice_policy', '!=', 'order')]}"
+                    attrs="{'invisible': ['|', ('type', 'not in', ('product', 'consu')), ('has_order_invoice_policy', '!=', True)]}"/>
+                <div attrs="{'invisible': ['|', ('type', 'not in', ('product', 'consu')), ('has_order_invoice_policy', '!=', True)]}"
                     class="fst-italic text-muted">
                     You can invoice them before they are delivered.
                 </div>
                 <label for="product_tooltip" string=""
-                    attrs="{'invisible': ['|', ('type', 'not in', ('product', 'consu')), ('invoice_policy', '!=', 'delivery')]}"/>
-                <div attrs="{'invisible': ['|', ('type', 'not in', ('product', 'consu')), ('invoice_policy', '!=', 'delivery')]}"
+                    attrs="{'invisible': ['|', ('type', 'not in', ('product', 'consu')), ('has_order_invoice_policy', '=', True)]}"/>
+                <div attrs="{'invisible': ['|', ('type', 'not in', ('product', 'consu')), ('has_order_invoice_policy', '=', True)]}"
                     class="fst-italic text-muted">
                     Invoice after delivery, based on quantities delivered, not ordered.
                 </div>

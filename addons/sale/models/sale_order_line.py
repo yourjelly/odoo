@@ -638,7 +638,7 @@ class SaleOrderLine(models.Model):
         self.customer_lead = 0.0
 
     @api.depends('state', 'is_expense')
-    def _compute_qty_delivered_method(self):
+    def _compute_qty_delivered_method(self): # DOCSTRING TO UPDATE
         """ Sale module compute delivered qty for product [('type', 'in', ['consu']), ('service_type', '=', 'manual')]
                 - consu + expense_policy : analytic (sum of analytic unit_amount)
                 - consu + no expense_policy : manual (set manually on SOL)
@@ -760,7 +760,7 @@ class SaleOrderLine(models.Model):
         """
         for line in self:
             if line.state in ['sale', 'done'] and not line.display_type:
-                if line.product_id.invoice_policy == 'order':
+                if line.product_id.has_order_invoice_policy:
                     line.qty_to_invoice = line.product_uom_qty - line.qty_invoiced
                 else:
                     line.qty_to_invoice = line.qty_delivered - line.qty_invoiced
@@ -790,7 +790,8 @@ class SaleOrderLine(models.Model):
                 line.invoice_status = 'invoiced'
             elif not float_is_zero(line.qty_to_invoice, precision_digits=precision):
                 line.invoice_status = 'to invoice'
-            elif line.state == 'sale' and line.product_id.invoice_policy == 'order' and\
+            elif line.state == 'sale' and\
+                    line.product_id.has_order_invoice_policy and\
                     line.product_uom_qty >= 0.0 and\
                     float_compare(line.qty_delivered, line.product_uom_qty, precision_digits=precision) == 1:
                 line.invoice_status = 'upselling'
@@ -837,7 +838,7 @@ class SaleOrderLine(models.Model):
                 # amount and not zero. Since we compute untaxed amount, we can use directly the price
                 # reduce (to include discount) without using `compute_all()` method on taxes.
                 price_subtotal = 0.0
-                uom_qty_to_consider = line.qty_delivered if line.product_id.invoice_policy == 'delivery' else line.product_uom_qty
+                uom_qty_to_consider = line.qty_delivered if not line.product_id.has_order_invoice_policy else line.product_uom_qty
                 price_reduce = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
                 price_subtotal = price_reduce * uom_qty_to_consider
                 if len(line.tax_id.filtered(lambda tax: tax.price_include)) > 0:

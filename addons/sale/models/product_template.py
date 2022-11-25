@@ -37,9 +37,18 @@ class ProductTemplate(models.Model):
     service_invoice_policy = fields.Selection(
         [('ordered_prepaid', 'Prepaid/Fixed Price'),
          ('delivered_manual', 'Based on delivered quantities (Manual)')], string='Invoicing Policy',
-        compute='_compute_invoice_policy', store=True, readonly=False, precompute=True,
-        help='Ordered Quantity: Invoice quantities ordered by the customer.\n'
-             'Delivered Quantity: Invoice quantities delivered to the customer.')
+        compute='_compute_service_invoice_policy', store=True, readonly=False, precompute=True,
+        help='Prepaid/Fixed Price: Invoice quantities ordered by the customer.\n'
+             'Based on delivered quantities (Manual): Invoice quantities delivered to the customer.')
+    has_order_invoice_policy = fields.Boolean(compute='_compute_has_order_invoice_policy')
+
+    @api.depends('type', 'invoice_policy', 'service_invoice_policy')
+    def _compute_has_order_invoice_policy(self):
+        for record in self:
+            record.has_order_invoice_policy = \
+                record.type == 'consu' and record.invoice_policy == 'order' or \
+                record.type == 'service' and record.service_invoice_policy == 'ordered_prepaid'
+
 
     def _compute_visible_qty_configurator(self):
         for product_template in self:
@@ -140,8 +149,11 @@ class ProductTemplate(models.Model):
 
     @api.depends('type')
     def _compute_invoice_policy(self):
-        print("..._compute_invoice_policy")
         self.filtered(lambda t: t.type == 'consu' or not t.invoice_policy).invoice_policy = 'order'
+
+    @api.depends('type')
+    def _compute_service_invoice_policy(self):
+        self.filtered(lambda t: t.type == 'service' or not t.service_invoice_policy).service_invoice_policy = 'ordered_prepaid'
 
     @api.model
     def get_import_templates(self):

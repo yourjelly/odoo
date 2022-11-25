@@ -578,7 +578,6 @@ class TestSaleToInvoice(TestSaleCommon):
             'invoice_policy': 'order',
             'expense_policy': 'cost',
             'default_code': 'PROD_COST',
-            'service_type': 'manual',
         })
         prod_gap = self.company_data['product_service_order']
         so = self.env['sale.order'].create({
