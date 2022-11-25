@@ -5595,6 +5595,8 @@ class BaseModel(metaclass=MetaModel):
                     for field in fields_
                     for key in self.pool.field_depends_context[field]
                 )
+                if "install_mode" in self.env.context:
+                    context_none["install_mode"] = self.env.context["install_mode"]
                 model = self.env(context=context_none)[model_name]
                 id_vals = defaultdict(dict)
                 for field in model._fields.values():
