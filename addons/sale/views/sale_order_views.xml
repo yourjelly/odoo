@@ -112,6 +112,11 @@
             <tree string="Sales Orders" sample="1"
                 decoration-info="invoice_status == 'to invoice'"
                 decoration-muted="state == 'cancel'">
+                <header>
+                    <button id="create_invoices" name="%(sale.action_view_sale_advance_payment_inv)d" string="Create Invoices"
+                    type="action" class="btn-primary" data-hotkey="q"
+                    attrs="{'invisible': [('invoice_status', '!=', 'to invoice')]}"/>
+                </header>
                 <field name="message_needaction" invisible="1"/>
                 <field name="name" string="Number" readonly="1" decoration-bf="1"/>
                 <field name="date_order" string="Order Date" widget="date" optional="show"/>
