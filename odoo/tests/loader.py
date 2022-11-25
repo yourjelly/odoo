@@ -106,14 +106,14 @@ def make_suite(module_names, position='at_install'):
         if position_tag.check(t) and config_tags.check(t)
     )
 
-    #loader = unittest.TestLoader()
+
     #test_cases = []
     #for module_name in module_names:
     #    for m in get_test_modules(module_name):
     #        for t in unwrap_suite(loader.loadTestsFromModule(m)):
     #            if not isinstance(t, CrossModule):
     #                test_cases.append(t)
-    #    for c in CrossModule.registry:
+    #    for c in CrossModule.cross_module_classes:
     #        for t in unwrap_suite(loader.loadTestsFromTestCase(c)):
     #            t.test_module = module_name
     #            test_cases.append(t)
@@ -138,10 +138,9 @@ def run_suite(suite):
 
 
 class CrossModule():
-
-    registry = tools.OrderedSet()
+    cross_module_classes = []
 
     @classmethod
     def __init_subclass__(cls):
-        CrossModule.registry.add(cls)
+        CrossModule.cross_module_classes.append(cls)
         super().__init_subclass__()
