@@ -1908,12 +1908,14 @@ class HttpCase(TransactionCase):
         ready = kwargs.pop('ready', f"odoo.isTourReady({tour_name!r})")
         return self.browser_js(url_path=url_path, code=code, ready=ready, success_signal="tour succeeded", **kwargs)
 
-    def profile(self, **kwargs):
+    def profile(self, http=True, **kwargs):
         """
         for http_case, also patch _get_profiler_context_manager in order to profile all requests
         """
         sup = super()
         _profiler = sup.profile(**kwargs)
+        if not http:
+            return _profiler
         def route_profiler(request):
             _route_profiler = sup.profile(description=request.httprequest.full_path, db=_profiler.db)
             _profiler.sub_profilers.append(_route_profiler)
