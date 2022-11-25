@@ -59,6 +59,7 @@ registry.category("web_tour.tours").add('apikeys_tour_setup', {
 }, {
     content: 'Re-open preferences',
     trigger: '.o_user_menu .oe_topbar_name',
+    extra_trigger: 'body:not(.modal-open)',
 }, {
     trigger: '[data-menu=settings]',
 }, {

@@ -20,6 +20,7 @@ var Tip = Widget.extend({
      * @param {Widget} parent
      * @param {Object} [info] description of the tip, containing the following keys:
      *  - content [String] the html content of the tip
+     *  TODO-JCB: This seems to be unused because it's dependent on the skip_enabled feature which is unused.
      *  - event_handlers [Object] description of optional event handlers to bind to the tip:
      *    - event [String] the event name
      *    - selector [String] the jQuery selector on which the event should be bound
@@ -51,6 +52,7 @@ var Tip = Widget.extend({
             left: "50%",
         };
         this.initialPosition = this.info.position;
+        // TODO-JCB: Comment: [viewPortState] indicates location of the anchor relative to the screen. 'in' | 'up' | 'down'.
         this.viewPortState = 'in';
         this._onAncestorScroll = _.throttle(this._onAncestorScroll, 0.1);
     },

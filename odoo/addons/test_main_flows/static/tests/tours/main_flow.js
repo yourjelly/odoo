@@ -109,6 +109,7 @@ stepUtils.autoExpandMoreButtons('.o_form_saved'),
     trigger: ".o_selected_row .o_required_modifier[name=product_id] input",
     content: _t("Click here to open kanban search mobile."),
     position: "bottom",
+    run: "click",
 }, {
     mobile: true,
     trigger: ".modal-dialog .btn:contains('New')",

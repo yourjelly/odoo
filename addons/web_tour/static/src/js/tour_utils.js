@@ -3,22 +3,6 @@ odoo.define('web_tour.utils', function(require) {
 
 const { _legacyIsVisible } = require("@web/core/utils/ui");
 
-function get_step_key(name) {
-    return 'tour_' + name + '_step';
-}
-
-function get_running_key() {
-    return 'running_tour';
-}
-
-function get_debugging_key(name) {
-    return `debugging_tour_${name}`;
-}
-
-function get_running_delay_key() {
-    return get_running_key() + "_delay";
-}
-
 function get_first_visible_element($elements) {
     for (var i = 0 ; i < $elements.length ; i++) {
         var $i = $elements.eq(i);
@@ -27,24 +11,6 @@ function get_first_visible_element($elements) {
         }
     }
     return $();
-}
-
-function do_before_unload(if_unload_callback, if_not_unload_callback) {
-    if_unload_callback = if_unload_callback || function () {};
-    if_not_unload_callback = if_not_unload_callback || if_unload_callback;
-
-    var old_before = window.onbeforeunload;
-    var reload_timeout;
-    window.onbeforeunload = function () {
-        clearTimeout(reload_timeout);
-        window.onbeforeunload = old_before;
-        if_unload_callback();
-        if (old_before) return old_before.apply(this, arguments);
-    };
-    reload_timeout = _.defer(function () {
-        window.onbeforeunload = old_before;
-        if_not_unload_callback();
-    });
 }
 
 function get_jquery_element_from_selector(selector) {
@@ -63,16 +29,39 @@ function get_jquery_element_from_selector(selector) {
     }
 }
 
+/**
+ * If `inModal` is not false (e.g. true or undefined),
+ * find `selector` from the top most visible modal.
+ * Otherwise, find `selector` from the whole document.
+ *
+ * @param {string} selector - any valid jquery selector
+ * @param {boolean} inModal
+ * @returns {Element | undefined}
+ */
+ function findTrigger(selector, inModal) {
+    const $visibleModal = $(".modal:visible").last();
+    let $el;
+    if (inModal !== false && $visibleModal.length) {
+        $el = $visibleModal.find(selector);
+    } else {
+        $el = get_jquery_element_from_selector(selector);
+    }
+    return get_first_visible_element($el).get(0);
+}
+
+function findExtraTrigger(selector) {
+    const $el = get_jquery_element_from_selector(selector);
+    return get_first_visible_element($el).get(0)
+}
+
+// TODO-JCB: Remove this. Temporarily used for debugging.
+window.findTrigger = findTrigger;
 
 return {
-    get_debugging_key: get_debugging_key,
-    'get_step_key': get_step_key,
-    'get_running_key': get_running_key,
-    'get_running_delay_key': get_running_delay_key,
     'get_first_visible_element': get_first_visible_element,
-    'do_before_unload': do_before_unload,
     'get_jquery_element_from_selector' : get_jquery_element_from_selector,
+    findTrigger,
+    findExtraTrigger,
 };
 
 });
-
