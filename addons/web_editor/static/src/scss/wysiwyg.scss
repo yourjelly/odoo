@@ -285,8 +285,8 @@ $o-we-toolbar-color-clickable-active: $o-we-bg-darkest;
         margin: 0;
         border: 0;
         padding: 0;
-        max-height: none;
-        overflow: visible;
+        max-height: 200px;
+        overflow-y: visible;
         border-top: 1px solid $o-we-toolbar-border;
         background-color: $o-we-toolbar-bg;
         box-shadow: 0 18px 18px rgba(#000, .23);
@@ -359,6 +359,7 @@ $o-we-toolbar-color-clickable-active: $o-we-bg-darkest;
         }
 
         .colorpicker-menu {
+            top: 10px;
             bottom: 100%;
         }
 
@@ -430,6 +431,14 @@ body:not(.editor_has_snippets) {
         &::after {
             display: none;
         }
+    }
+
+    .oe-toolbar.oe-floating {
+        position: absolute;
+        display: flex;
+        box-shadow: 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
     }
 }
 
