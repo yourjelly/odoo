@@ -8,17 +8,6 @@ from odoo.exceptions import ValidationError
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
-    @api.model
-    def _selection_service_policy(self):
-        service_policies = [
-            # (service_policy, string)
-            ('ordered_prepaid', 'Prepaid/Fixed Price'),
-            ('delivered_manual', 'Based on Delivered Quantity (Manual)'),
-        ]
-        if self.user_has_groups('project.group_project_milestone'):
-            service_policies.insert(1, ('delivered_milestones', 'Based on Milestones'))
-        return service_policies
-
     service_tracking = fields.Selection(
         selection=[
             ('no', 'Nothing'),
@@ -37,23 +26,14 @@ class ProductTemplate(models.Model):
     project_template_id = fields.Many2one(
         'project.project', 'Project Template', company_dependent=True, copy=True,
         domain="[('company_id', '=', current_company_id)]")
-    service_policy = fields.Selection('_selection_service_policy', string="Service Invoicing Policy", compute='_compute_service_policy', inverse='_inverse_service_policy')
-    service_type = fields.Selection(selection_add=[
-        ('milestones', 'Project Milestones'),
-    ])
+    service_invoice_policy = fields.Selection(selection_add=[
+        ('delivered_milestones', 'Based on reached Milestones')])
 
-    @api.depends('invoice_policy', 'service_type', 'type')
-    def _compute_service_policy(self):
-        for product in self:
-            product.service_policy = self._get_general_to_service(product.invoice_policy, product.service_type)
-            if not product.service_policy and product.type == 'service':
-                product.service_policy = 'ordered_prepaid'
-
-    @api.depends('service_tracking', 'service_policy', 'type')
+    @api.depends('service_tracking', 'service_invoice_policy', 'type')
     def _compute_product_tooltip(self):
         super()._compute_product_tooltip()
         for record in self.filtered(lambda record: record.type == 'service'):
-            if record.service_policy == 'ordered_prepaid':
+            if record.service_invoice_policy == 'ordered_prepaid':
                 if record.service_tracking == 'no':
                     record.product_tooltip = _(
                         "Invoice ordered quantities as soon as this service is sold."
@@ -74,7 +54,7 @@ class ProductTemplate(models.Model):
                         "Invoice ordered quantities as soon as this service is sold. "
                         "Create an empty project for the order to track the time spent."
                     )
-            elif record.service_policy == 'delivered_milestones':
+            elif record.service_invoice_policy == 'delivered_milestones':
                 if record.service_tracking == 'no':
                     record.product_tooltip = _(
                         "Invoice your milestones when they are reached."
@@ -95,7 +75,7 @@ class ProductTemplate(models.Model):
                         "Invoice your milestones when they are reached. "
                         "Create an empty project for the order to track the time spent."
                     )
-            elif record.service_policy == 'delivered_manual':
+            elif record.service_invoice_policy == 'delivered_manual':
                 if record.service_tracking == 'no':
                     record.product_tooltip = _(
                         "Invoice this service when it is delivered (set the quantity by hand on your sales order lines). "
@@ -116,30 +96,6 @@ class ProductTemplate(models.Model):
                         "Invoice this service when it is delivered (set the quantity by hand on your sales order lines). "
                         "Create an empty project for the order to track the time spent."
                     )
-
-    def _get_service_to_general_map(self):
-        return {
-            # service_policy: (invoice_policy, service_type)
-            'ordered_prepaid': ('order', 'manual'),
-            'delivered_milestones': ('delivery', 'milestones'),
-            'delivered_manual': ('delivery', 'manual'),
-        }
-
-    def _get_general_to_service_map(self):
-        return {v: k for k, v in self._get_service_to_general_map().items()}
-
-    def _get_service_to_general(self, service_policy):
-        return self._get_service_to_general_map().get(service_policy, (False, False))
-
-    def _get_general_to_service(self, invoice_policy, service_type):
-        general_to_service = self._get_general_to_service_map()
-        return general_to_service.get((invoice_policy, service_type), False)
-
-    @api.onchange('service_policy')
-    def _inverse_service_policy(self):
-        for product in self:
-            if product.service_policy:
-                product.invoice_policy, product.service_type = self._get_service_to_general(product.service_policy)
 
     @api.constrains('project_id', 'project_template_id')
     def _check_project_and_template(self):

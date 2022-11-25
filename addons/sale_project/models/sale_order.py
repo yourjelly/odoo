@@ -34,7 +34,7 @@ class SaleOrder(models.Model):
 
     def _compute_is_product_milestone(self):
         for order in self:
-            order.is_product_milestone = order.order_line.product_id.filtered(lambda p: p.service_policy == 'delivered_milestones')
+            order.is_product_milestone = order.order_line.product_id.filtered(lambda p: p.service_invoice_policy == 'delivered_milestones')
 
     @api.depends('order_line.product_id.project_id')
     def _compute_tasks_ids(self):

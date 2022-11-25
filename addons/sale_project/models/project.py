@@ -354,22 +354,19 @@ class Project(models.Model):
             }
             product_read_group = self.env['product.product'].sudo()._read_group(
                 [('id', 'in', list(sols_per_product)), ('expense_policy', '=', 'no')],
-                ['invoice_policy', 'service_type', 'type', 'ids:array_agg(id)'],
-                ['invoice_policy', 'service_type', 'type'],
+                ['invoice_policy', 'service_invoice_policy', 'type', 'ids:array_agg(id)'],
+                ['invoice_policy', 'service_invoice_policy', 'type'],
                 lazy=False,
             )
             service_policy_to_invoice_type = self._get_service_policy_to_invoice_type()
-            general_to_service_map = self.env['product.template']._get_general_to_service_map()
             for res in product_read_group:
                 product_ids = res['ids']
-                service_policy = None
+                service_invoice_policy = None
                 if res['type'] == 'service':
-                    service_policy = general_to_service_map.get(
-                        (res['invoice_policy'], res['service_type']),
-                        'ordered_prepaid')
+                    service_invoice_policy = res['service_invoice_policy']
                 for product_id, (amount_to_invoice, amount_invoiced, sol_ids) in sols_per_product.items():
                     if product_id in product_ids:
-                        invoice_type = service_policy_to_invoice_type.get(service_policy, 'other_revenues')
+                        invoice_type = service_policy_to_invoice_type.get(service_invoice_policy, 'other_revenues')
                         revenue = revenues_dict.setdefault(invoice_type, {'invoiced': 0.0, 'to_invoice': 0.0})
                         revenue['to_invoice'] += amount_to_invoice
                         total_to_invoice += amount_to_invoice

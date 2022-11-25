@@ -76,7 +76,7 @@ class SaleOrderLine(models.Model):
         milestones_lines = self.filtered(lambda sol:
             not sol.is_expense
             and sol.product_id.type == 'service'
-            and sol.product_id.service_type == 'milestones'
+            and sol.product_id.service_invoice_policy == 'delivered_milestones'
         )
         milestones_lines.qty_delivered_method = 'milestones'
         super(SaleOrderLine, self - milestones_lines)._compute_qty_delivered_method()
@@ -192,11 +192,11 @@ class SaleOrderLine(models.Model):
         self.write({'project_id': project.id})
         return project
 
-    def _timesheet_create_task_prepare_values(self, project):
+    def _timesheet_create_task_prepare_values(self, project): # TO DO - why is this not in sale_timesheet ??
         self.ensure_one()
         planned_hours = 0.0
-        if self.product_id.service_type not in ['milestones', 'manual']:
-            planned_hours = self._convert_qty_company_hours(self.company_id)
+        #if self.product_id.service_type not in ['milestones', 'manual']: #TO DO - find a way to check this condition (if we are unsure that timesheet it's installed it seems impossible but maybe another condition can do the job) - solution override this method in timesheet
+        #    planned_hours = self._convert_qty_company_hours(self.company_id)
         sale_line_name_parts = self.name.split('\n')
         title = sale_line_name_parts[0] or self.product_id.name
         description = '<br/>'.join(sale_line_name_parts[1:])
@@ -214,7 +214,7 @@ class SaleOrderLine(models.Model):
             'user_ids': False,  # force non assigned task, as created as sudo()
         }
 
-    def _timesheet_create_task(self, project):
+    def _timesheet_create_task(self, project): # TO DO - why is this not in sale_timesheet ??
         """ Generate task for the given so line, and link it.
             :param project: record of project.project in which the task should be created
             :return task: record of the created task
@@ -308,7 +308,7 @@ class SaleOrderLine(models.Model):
             so_line._generate_milestone()
 
     def _generate_milestone(self):
-        if self.product_id.service_policy == 'delivered_milestones':
+        if self.product_id.service_invoice_policy == 'delivered_milestones':
             milestone = self.env['project.milestone'].create({
                 'name': self.name,
                 'project_id': self.project_id.id,
