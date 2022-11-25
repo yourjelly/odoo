@@ -479,7 +479,7 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
             // prevent user from clicking on matrix options when form is submitted
             this.readonly = true;
         }
-
+        // debugger
         var submitPromise = self._rpc({
             route: _.str.sprintf('%s/%s/%s', route, self.options.surveyToken, self.options.answerToken),
             params: params,
@@ -772,6 +772,8 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
                 case 'text_box':
                 case 'char_box':
                 case 'numerical_box':
+                case 'challenge':
+                case 'hidden_pwd':
                     params[this.name] = this.value;
                     break;
                 case 'date':

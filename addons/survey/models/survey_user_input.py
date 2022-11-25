@@ -280,7 +280,7 @@ class SurveyUserInput(models.Model):
             ('question_id', '=', question.id)
         ])
 
-        if question.question_type in ['char_box', 'text_box', 'numerical_box', 'date', 'datetime']:
+        if question.question_type in ['char_box', 'text_box', 'numerical_box', 'date', 'datetime', 'challenge']:
             self._save_line_simple_answer(question, old_answers, answer)
             if question.save_as_email and answer:
                 self.write({'email': answer})
@@ -627,10 +627,12 @@ class SurveyUserInputLine(models.Model):
         ('numerical_box', 'Number'),
         ('date', 'Date'),
         ('datetime', 'Datetime'),
-        ('suggestion', 'Suggestion')], string='Answer Type')
+        ('suggestion', 'Suggestion'),
+        ('challenge', 'Challenge')], string='Answer Type')
     value_char_box = fields.Char('Text answer')
     value_numerical_box = fields.Float('Numerical answer')
     value_date = fields.Date('Date answer')
+    value_challenge = fields.Char('Challenge Answer')
     value_datetime = fields.Datetime('Datetime answer')
     value_text_box = fields.Text('Free Text answer')
     suggested_answer_id = fields.Many2one('survey.question.answer', string="Suggested answer")

@@ -516,10 +516,18 @@ class Survey(http.Controller):
             inactive_questions = request.env['survey.question'] if answer_sudo.is_session_answer else answer_sudo._get_inactive_conditional_questions()
             if question in inactive_questions:  # if question is inactive, skip validation and save
                 continue
+            breakpoint()
             answer, comment = self._extract_comment_from_answers(question, post.get(str(question.id)))
             errors.update(question.validate_question(answer, comment))
             if not errors.get(question.id):
                 answer_sudo.save_lines(question, answer, comment)
+
+            # import pdb
+            # pdb.set_trace()
+            # if question.question_type == 'challenge' and post.get('hidden_pwd') == answer:
+            #     print('Right Answer')
+            # else:
+            #     return {'error': 'validation', 'fields': errors}
 
         if errors and not (answer_sudo.survey_time_limit_reached or answer_sudo.question_time_limit_reached):
             return {'error': 'validation', 'fields': errors}

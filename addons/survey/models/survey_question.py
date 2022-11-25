@@ -6,6 +6,8 @@ import contextlib
 import json
 import itertools
 import operator
+import string
+import random
 
 from odoo import api, fields, models, tools, _
 from odoo.exceptions import ValidationError
@@ -76,7 +78,8 @@ class SurveyQuestion(models.Model):
         ('numerical_box', 'Numerical Value'),
         ('date', 'Date'),
         ('datetime', 'Datetime'),
-        ('matrix', 'Matrix')], string='Question Type',
+        ('matrix', 'Matrix'),
+        ('challenge', 'Challenge')], string='Question Type',
         compute='_compute_question_type', readonly=False, store=True)
     is_scored_question = fields.Boolean(
         'Scored', compute='_compute_is_scored_question',
@@ -87,6 +90,10 @@ class SurveyQuestion(models.Model):
     answer_date = fields.Date('Correct date answer', help="Correct date answer for this question.")
     answer_datetime = fields.Datetime('Correct datetime answer', help="Correct date and time answer for this question.")
     answer_score = fields.Float('Score', help="Score value for a correct answer to this question.")
+
+    # Odoo Challenge Fields
+    answer_challenge = fields.Char('Correct Challenge Answer')
+    challenge_type = fields.Many2one('challenge.level',string='Challenge Level')
     # -- char_box
     save_as_email = fields.Boolean(
         "Save as user email", compute='_compute_save_as_email', readonly=False, store=True, copy=True,
@@ -177,12 +184,16 @@ class SurveyQuestion(models.Model):
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
 
-    @api.depends('question_type')
-    def _compute_question_placeholder(self):
-        for question in self:
-            if question.question_type in ('simple_choice', 'multiple_choice', 'matrix') \
-                    or not question.question_placeholder:  # avoid CacheMiss errors
-                question.question_placeholder = False
+    #odoo challenge
+    # @api.depends('question_type','challenge_type')
+    # @api.depends('question_type')
+    # def _compute_answer_challenge(self):
+    #     for question in self:
+    #         if question.question_type == 'challenge':
+    #                 # and question.challenge_type == 'hidden_input':
+    #             question.answer_challenge = self._get_random_answer()
+    #         else:
+    #             question.answer_challenge = None
 
     @api.depends('is_page')
     def _compute_background_image(self):
@@ -346,6 +357,15 @@ class SurveyQuestion(models.Model):
                 return self._validate_choice(answer, comment)
             elif self.question_type == 'matrix':
                 return self._validate_matrix(answer)
+            elif self.question_type == 'challenge':
+                return self._validate_challenge(answer)
+        return {}
+
+    def _validate_challenge(self, answer):
+        # Challenge Validation
+        # if post.get('hidden_pwd') != answer:
+        if answer != 'abc':
+            return {self.id: _('Hint: ' + self.challenge_type.hint)}
         return {}
 
     def _validate_char_box(self, answer):
@@ -577,6 +597,16 @@ class SurveyQuestion(models.Model):
             ).most_common(5),
             'right_inputs_count': len(user_input_lines.filtered(lambda line: line.answer_is_correct).mapped('user_input_id'))
         }
+
+    def _get_random_numbers(self):
+        lower = string.ascii_lowercase
+        upper = string.ascii_uppercase
+        num = string.digits
+        all = lower + upper + num
+
+        temp = random.sample(all,40)
+        password = "".join(temp)
+        return password
 
 
 class SurveyQuestionAnswer(models.Model):
