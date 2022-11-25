@@ -19,7 +19,7 @@
                     <field name="name" string="Task" filter_domain="['|', ('name', 'ilike', self), ('id', 'ilike', self)]"/>
                     <field name="tag_ids"/>
                     <field name="user_ids" filter_domain="[('user_ids.name', 'ilike', self), ('user_ids.active', 'in', [True, False])]"/>
-                    <field name="milestone_id" groups="project.group_project_milestone"/>
+                    <field name="milestone_id"/>
                     <field name="ancestor_id" groups="project.group_subtask_project"/>
                     <field name="stage_id"/>
                     <field name="partner_id" operator="child_of"/>
@@ -38,7 +38,7 @@
                     <filter string="Blocking" name="blocking" domain="[('is_closed', '=', False), ('dependent_ids', '!=', False)]" groups="project.group_project_task_dependencies"/>
                     <filter string="Not Blocking" name="not_blocking" domain="['|', ('is_closed', '=', True), ('dependent_ids', '=', False), ('is_private', '=', False)]" groups="project.group_project_task_dependencies"/>
                     <separator groups="project.group_project_task_dependencies"/>
-                    <filter string="Late Milestones" name="late_milestone" domain="[('is_closed', '=', False), ('has_late_and_unreached_milestone', '=', True)]" groups="project.group_project_milestone"/>
+                    <filter string="Late Milestones" name="late_milestone" domain="[('is_closed', '=', False), ('has_late_and_unreached_milestone', '=', True)]"/>
                     <filter string="Late Tasks" name="late" domain="[('date_deadline', '&lt;', context_today().strftime('%Y-%m-%d')), ('is_closed', '=', False)]"/>
                     <filter string="Tasks Due Today" name="tasks_due_today" domain="[('date_deadline', '=', context_today().strftime('%Y-%m-%d'))]"/>
                     <filter string="Stalling for 30 Days+" name="stall_last_30_days" domain="[('is_closed', '=', False), ('date_last_stage_update', '&lt;=', datetime.datetime.now() - relativedelta(days=30))]"/>
@@ -69,7 +69,7 @@
                         <filter string="Personal Stage" name="personal_stage" context="{'group_by': 'personal_stage_type_ids'}"/>
                         <filter string="Assignees" name="user" context="{'group_by': 'user_ids'}"/>
                         <filter string="Ancestor Task" name="groupby_ancestor_task" context="{'group_by': 'ancestor_id'}" groups="project.group_subtask_project"/>
-                        <filter string="Milestone" name="milestone" context="{'group_by': 'milestone_id'}" groups="project.group_project_milestone"/>
+                        <filter string="Milestone" name="milestone" context="{'group_by': 'milestone_id'}"/>
                         <filter string="Customer" name="customer" context="{'group_by': 'partner_id'}"/>
                         <filter string="Kanban State" name="kanban_state" context="{'group_by': 'kanban_state'}"/>
                         <filter string="Deadline" name="date_deadline" context="{'group_by': 'date_deadline'}"/>
@@ -546,7 +546,7 @@
                                 </group>
                             </group>
                             <group>
-                                <group name="group_tasks_managment" string="Tasks Management" col="1" class="row mt16 o_settings_container" groups="project.group_subtask_project,project.group_project_task_dependencies,project.group_project_milestone,project.group_project_recurring_tasks">
+                                <group name="group_tasks_managment" string="Tasks Management" col="1" class="row mt16 o_settings_container">
                                     <div>
                                         <div class="o_setting_box" id="subtask_settings" groups="project.group_subtask_project">
                                             <div class="o_setting_left_pane">
@@ -581,7 +581,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="o_setting_box mt-4" id="project_milestone_setting" groups="project.group_project_milestone">
+                                        <div class="o_setting_box mt-4" id="project_milestone_setting">
                                             <div class="o_setting_left_pane">
                                                 <field name="allow_milestones"/>
                                             </div>
@@ -652,7 +652,7 @@
                     <filter string="Followed" name="followed_by_me" domain="[('message_is_follower', '=', True)]"/>
                     <filter string="Unassigned" name="unassigned_projects" domain="[('user_id', '=', False)]"/>
                     <separator/>
-                    <filter string="Late Milestones" name="late_milestones" domain="[('is_milestone_exceeded', '=', True)]" groups="project.group_project_milestone"/>
+                    <filter string="Late Milestones" name="late_milestones" domain="[('is_milestone_exceeded', '=', True)]"/>
                     <separator/>
                     <filter string="Open" name="open_project" domain="[('stage_id.fold', '=', False)]" groups="project.group_project_stages"/>
                     <filter string="Closed" name="closed_project" domain="[('stage_id.fold', '=', True)]" groups="project.group_project_stages"/>
@@ -868,7 +868,7 @@
                                                 <div role="menuitem">
                                                     <a name="action_view_tasks" type="object">Tasks</a>
                                                 </div>
-                                                <div role="menuitem" groups="project.group_project_milestone" t-if="record.allow_milestones.raw_value">
+                                                <div role="menuitem" t-if="record.allow_milestones.raw_value">
                                                     <a name="action_get_list_view" type="object">Milestones</a>
                                                 </div>
                                             </div>
@@ -915,7 +915,7 @@
                                                     <span class="o_label ms-1"><t t-esc="record.label_tasks.value"/></span>
                                                 </div>
                                             </a>
-                                            <a groups='project.group_project_milestone' t-if="record.allow_milestones and record.allow_milestones.raw_value and record.milestone_count.value &gt; 0"
+                                            <a t-if="record.allow_milestones and record.allow_milestones.raw_value and record.milestone_count.value &gt; 0"
                                                 class="o_kanban_inline_block text-muted small"
                                                 name="action_get_list_view"
                                                 type="object"
@@ -1514,7 +1514,7 @@
                     <field name="allow_subtasks" invisible="1"/>
                     <field name="name" widget="name_with_subtask_count"/>
                     <field name="project_id" widget="project_private_task" optional="show" readonly="1" options="{'no_open': 1}"/>
-                    <field name="milestone_id" attrs="{'invisible': [('allow_milestones', '=', False)]}" context="{'default_project_id': project_id}" groups="project.group_project_milestone"/>
+                    <field name="milestone_id" attrs="{'invisible': [('allow_milestones', '=', False)]}" context="{'default_project_id': project_id}"/>
                     <field name="partner_id" optional="hide"/>
                     <field name="parent_id" optional="hide" attrs="{'invisible': [('allow_subtasks', '=', False)]}" groups="base.group_no_one"/>
                     <field name="user_ids" optional="show" widget="many2many_avatar_user" domain="[('share', '=', False), ('active', '=', True)]" options='{"no_quick_create": True}'/>

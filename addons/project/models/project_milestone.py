@@ -24,8 +24,8 @@ class ProjectMilestone(models.Model):
     # computed non-stored fields
     is_deadline_exceeded = fields.Boolean(compute="_compute_is_deadline_exceeded")
     is_deadline_future = fields.Boolean(compute="_compute_is_deadline_future")
-    task_count = fields.Integer('# of Tasks', compute='_compute_task_count', groups='project.group_project_milestone')
-    can_be_marked_as_done = fields.Boolean(compute='_compute_can_be_marked_as_done', groups='project.group_project_milestone')
+    task_count = fields.Integer('# of Tasks', compute='_compute_task_count')
+    can_be_marked_as_done = fields.Boolean(compute='_compute_can_be_marked_as_done')
 
     @api.depends('is_reached')
     def _compute_reached_date(self):

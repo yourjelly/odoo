@@ -260,7 +260,7 @@
                 <field name="tag_ids"/>
                 <field name="portal_user_names" string="Assignees"/>
                 <field string="Project" name="display_project_id"/>
-                <field name="milestone_id" groups="project.group_project_milestone"/>
+                <field name="milestone_id"/>
                 <field name="stage_id"/>
                 <field name="partner_id" operator="child_of"/>
                 <filter string="Unassigned" name="unassigned" domain="[('user_ids', '=', False)]"/>
@@ -270,7 +270,7 @@
                 <separator/>
                 <filter string="Late Tasks" name="late" domain="[('date_deadline', '&lt;', context_today().strftime('%Y-%m-%d')), ('is_closed', '=', False)]"/>
                 <filter string="Tasks Due Today" name="tasks_due_today" domain="[('date_deadline', '=', context_today().strftime('%Y-%m-%d'))]"/>
-                <filter string="Late Milestones" name="late_milestone" domain="[('is_closed', '=', False), ('has_late_and_unreached_milestone', '=', True)]" groups="project.group_project_milestone"/>
+                <filter string="Late Milestones" name="late_milestone" domain="[('is_closed', '=', False), ('has_late_and_unreached_milestone', '=', True)]"/>
                 <separator/>
                 <filter string="Open Tasks" name="open_tasks" domain="[('is_closed', '=', False)]"/>
                 <filter string="Closed Tasks" name="closed_tasks" domain="[('is_closed', '=', True)]"/>
@@ -283,7 +283,7 @@
                     domain="[('activity_ids.date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))]"/>
                 <group expand="0" string="Group By">
                     <filter string="Stage" name="stage" context="{'group_by': 'stage_id'}"/>
-                    <filter string="Milestone" name="milestone" context="{'group_by': 'milestone_id'}" groups="project.group_project_milestone"/>
+                    <filter string="Milestone" name="milestone" context="{'group_by': 'milestone_id'}"/>
                     <filter string="Customer" name="customer" context="{'group_by': 'partner_id'}"/>
                     <filter string="Kanban State" name="kanban_state" context="{'group_by': 'kanban_state'}"/>
                     <filter string="Deadline" name="date_deadline" context="{'group_by': 'date_deadline'}"/>

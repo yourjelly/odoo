@@ -370,7 +370,7 @@ class Project(models.Model):
     allow_subtasks = fields.Boolean('Sub-tasks', default=lambda self: self.env.user.has_group('project.group_subtask_project'))
     allow_recurring_tasks = fields.Boolean('Recurring Tasks', default=lambda self: self.env.user.has_group('project.group_project_recurring_tasks'))
     allow_task_dependencies = fields.Boolean('Task Dependencies', default=lambda self: self.env.user.has_group('project.group_project_task_dependencies'))
-    allow_milestones = fields.Boolean('Milestones', default=lambda self: self.env.user.has_group('project.group_project_milestone'))
+    allow_milestones = fields.Boolean('Milestones', default=True)
     tag_ids = fields.Many2many('project.tags', relation='project_project_project_tags_rel', string='Tags')
     task_properties_definition = fields.PropertiesDefinition('Task Properties')
 
@@ -412,8 +412,8 @@ class Project(models.Model):
     ], default='to_define', compute='_compute_last_update_status', store=True, readonly=False, required=True)
     last_update_color = fields.Integer(compute='_compute_last_update_color')
     milestone_ids = fields.One2many('project.milestone', 'project_id', copy=True)
-    milestone_count = fields.Integer(compute='_compute_milestone_count', groups='project.group_project_milestone')
-    milestone_count_reached = fields.Integer(compute='_compute_milestone_reached_count', groups='project.group_project_milestone')
+    milestone_count = fields.Integer(compute='_compute_milestone_count')
+    milestone_count_reached = fields.Integer(compute='_compute_milestone_reached_count')
     is_milestone_exceeded = fields.Boolean(compute="_compute_is_milestone_exceeded", search='_search_is_milestone_exceeded')
 
     _sql_constraints = [

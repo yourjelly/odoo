@@ -14,7 +14,6 @@ class ResConfigSettings(models.TransientModel):
     group_project_stages = fields.Boolean("Project Stages", implied_group="project.group_project_stages")
     group_project_recurring_tasks = fields.Boolean("Recurring Tasks", implied_group="project.group_project_recurring_tasks")
     group_project_task_dependencies = fields.Boolean("Task Dependencies", implied_group="project.group_project_task_dependencies")
-    group_project_milestone = fields.Boolean('Milestones', implied_group='project.group_project_milestone', group='base.group_portal,base.group_user')
 
     # Analytic Accounting
     analytic_plan_id = fields.Many2one(
@@ -39,7 +38,6 @@ class ResConfigSettings(models.TransientModel):
             ("group_project_recurring_tasks", True): "allow_recurring_tasks",
             ("group_subtask_project", False): "allow_subtasks",
             ("group_project_task_dependencies", False): "allow_task_dependencies",
-            ("group_project_milestone", False): "allow_milestones",
         }
 
         for (config_flag, is_global), project_flag in features.items():
