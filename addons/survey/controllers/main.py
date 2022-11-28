@@ -516,18 +516,12 @@ class Survey(http.Controller):
             inactive_questions = request.env['survey.question'] if answer_sudo.is_session_answer else answer_sudo._get_inactive_conditional_questions()
             if question in inactive_questions:  # if question is inactive, skip validation and save
                 continue
-            breakpoint()
-            answer, comment = self._extract_comment_from_answers(question, post.get(str(question.id)))
+
+            answer, comment = self._extract_comment_from_answers(question, post)
+
             errors.update(question.validate_question(answer, comment))
             if not errors.get(question.id):
                 answer_sudo.save_lines(question, answer, comment)
-
-            # import pdb
-            # pdb.set_trace()
-            # if question.question_type == 'challenge' and post.get('hidden_pwd') == answer:
-            #     print('Right Answer')
-            # else:
-            #     return {'error': 'validation', 'fields': errors}
 
         if errors and not (answer_sudo.survey_time_limit_reached or answer_sudo.question_time_limit_reached):
             return {'error': 'validation', 'fields': errors}
@@ -552,7 +546,7 @@ class Survey(http.Controller):
 
         return self._prepare_question_html(survey_sudo, answer_sudo)
 
-    def _extract_comment_from_answers(self, question, answers):
+    def _extract_comment_from_answers(self, question, post):
         """ Answers is a custom structure depending of the question type
         that can contain question answers but also comments that need to be
         extracted before validating and saving answers.
@@ -577,10 +571,13 @@ class Survey(http.Controller):
           same structure without comment,
           extracted comment for given question
         ) """
+        answers = post.get(str(question.id))
         comment = None
         answers_no_comment = []
         if answers:
-            if question.question_type == 'matrix':
+            if question.question_type == 'challenge':
+                    answers_no_comment = post
+            elif question.question_type == 'matrix':
                 if 'comment' in answers:
                     comment = answers['comment'].strip()
                     answers.pop('comment')

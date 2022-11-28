@@ -368,14 +368,14 @@
     </template>
 
      <template id="question_challenge" name="Question: challenge">
-        <t t-if="question.challenge_type.level == 1">
-            <div class="o_survey_comment_container p-0">
+        <div class="o_survey_comment_container p-0" t-att-data-question-type="question.question_type">
+            <input type="hidden" name="level" t-att-value="question.challenge_type.level"/>
+            <t t-if="question.challenge_type.level == 1">
                 <input type="text" class="form-control o_survey_question_text_box bg-transparent text-dark rounded-0 p-0"
-                   t-att-name="question.id" t-att-placeholder="question.question_placeholder"
-                   t-att-data-question-type="question.question_type"/>
-                <input type="hidden" name="hidden_pwd" data-question-type="hidden_pwd" t-att-value="question._get_random_numbers()"/>
-            </div>
-        </t>
+                   t-att-name="question.id" t-att-placeholder="question.question_placeholder"/>
+                <input type="hidden" name="hidden_pwd" t-att-value="question._get_random_numbers()"/>
+            </t>
+        </div>
     </template>
 
     <template id="question_numerical_box" name="Question: numerical box">

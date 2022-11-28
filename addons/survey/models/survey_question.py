@@ -184,17 +184,6 @@ class SurveyQuestion(models.Model):
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
 
-    #odoo challenge
-    # @api.depends('question_type','challenge_type')
-    # @api.depends('question_type')
-    # def _compute_answer_challenge(self):
-    #     for question in self:
-    #         if question.question_type == 'challenge':
-    #                 # and question.challenge_type == 'hidden_input':
-    #             question.answer_challenge = self._get_random_answer()
-    #         else:
-    #             question.answer_challenge = None
-
     @api.depends('is_page')
     def _compute_background_image(self):
         """ Background image is only available on sections. """
@@ -362,10 +351,13 @@ class SurveyQuestion(models.Model):
         return {}
 
     def _validate_challenge(self, answer):
-        # Challenge Validation
-        # if post.get('hidden_pwd') != answer:
-        if answer != 'abc':
-            return {self.id: _('Hint: ' + self.challenge_type.hint)}
+        level = int(answer.get('level', 0))
+        if level == 1:
+            hidden_pwd = answer.get('hidden_pwd')
+            user_answer = answer.get(str(self.id))
+            breakpoint()
+            if user_answer != hidden_pwd:
+                return {self.id: _('Hint: ' + self.challenge_type.hint)}
         return {}
 
     def _validate_char_box(self, answer):

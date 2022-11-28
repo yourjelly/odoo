@@ -479,7 +479,7 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
             // prevent user from clicking on matrix options when form is submitted
             this.readonly = true;
         }
-        // debugger
+
         var submitPromise = self._rpc({
             route: _.str.sprintf('%s/%s/%s', route, self.options.surveyToken, self.options.answerToken),
             params: params,
@@ -773,8 +773,7 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
                 case 'char_box':
                 case 'numerical_box':
                 case 'challenge':
-                case 'hidden_pwd':
-                    params[this.name] = this.value;
+                    params = self._prepareSubmitChallenge(params, $(this), $(this).data('name'));
                     break;
                 case 'date':
                     params = self._prepareSubmitDates(params, this.name, this.value, false);
@@ -794,14 +793,15 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
     },
 
     /**
-    *   Prepare date answer before submitting form.
-    *   Convert date value from client current timezone to UTC Date to correspond to the server format.
-    *   return params = { 'dateQuestionId' : '2019-05-23', 'datetimeQuestionId' : '2019-05-23 14:05:12' }
+    *   Prepare challenge answer before submitting form.
     */
-    _prepareSubmitDates: function (params, questionId, value, isDateTime) {
-        var momentDate = isDateTime ? field_utils.parse.datetime(value, null, {timezone: true}) : field_utils.parse.date(value);
-        var formattedDate = momentDate ? momentDate.toJSON() : '';
-        params[questionId] = formattedDate;
+    _prepareSubmitChallenge: function (params, $parent, questionId) {
+        var self = this;
+        $parent.find("input").each(function (index, input) {
+            if (!params[input.name]) {
+                params[input.name] = input.value;
+            }
+        });
         return params;
     },
 
@@ -820,6 +820,18 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
         params = self._prepareSubmitComment(params, $parent, questionId, false);
         return params;
     },
+    /**
+    *   Prepare date answer before submitting form.
+    *   Convert date value from client current timezone to UTC Date to correspond to the server format.
+    *   return params = { 'dateQuestionId' : '2019-05-23', 'datetimeQuestionId' : '2019-05-23 14:05:12' }
+    */
+    _prepareSubmitDates: function (params, questionId, value, isDateTime) {
+        var momentDate = isDateTime ? field_utils.parse.datetime(value, null, {timezone: true}) : field_utils.parse.date(value);
+        var formattedDate = momentDate ? momentDate.toJSON() : '';
+        params[questionId] = formattedDate;
+        return params;
+    },
+
 
 
     /**
