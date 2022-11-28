@@ -1309,6 +1309,7 @@ class TranslationImporter:
                 record_ids = field_dictionary.keys()
                 if callable(field.translate):
                     for sub_ids in cr.split_for_in_conditions(record_ids):
+                        tr = []
                         cr.execute(f'SELECT id, "{field_name}" FROM "{model_table}" WHERE id IN %s', (sub_ids,))
                         for id_, values in cr.fetchall():
                             if not values:
@@ -1335,7 +1336,17 @@ class TranslationImporter:
 
                             for lang in langs:
                                 values[lang] = field.translate(lambda term: translation_dictionary.get(term, {}).get(lang), value_en)
-                            env.cache.update_raw(Model.browse(id_), field, [values], dirty=True)
+                            tr.append(id_)
+                            tr.append(Json(values))
+                        if tr:
+                            env.cr.execute(f"""
+                                UPDATE "{model_table}" AS m
+                                SET "{field_name}" =  t.value
+                                FROM (
+                                    VALUES {', '.join(['(%s, %s::jsonb)'] * int(len(tr) / 2))}
+                                ) AS t(id, value)
+                                WHERE m.id = t.id
+                            """, tr)
                 elif field.translate:
                     for sub_items in cr.split_for_in_conditions(field_dictionary.items()):
                         tr_overwrite = []
