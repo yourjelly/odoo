@@ -1209,10 +1209,11 @@ class TranslationImporter:
         deep_defaultdict = lambda: defaultdict(deep_defaultdict)
         self.deep_defaultdict = deep_defaultdict
         self.all_model_translations = self.deep_defaultdict()
-        # {xmlid: {field_name: {lang: value}}}
-        self.xmlid_to_model_translations = self.deep_defaultdict()
-        # {xmlid: {field_name: {src: {lang: value}}}}
-        self.xmlid_to_model_terms_translations = self.deep_defaultdict()
+        self.all_model_terms_translations = self.deep_defaultdict()
+        # # {xmlid: {field_name: {lang: value}}}
+        # self.xmlid_to_model_translations = self.deep_defaultdict()
+        # # {xmlid: {field_name: {src: {lang: value}}}}
+        # self.xmlid_to_model_terms_translations = self.deep_defaultdict()
         # {(module_name, imd_name), (module_name, imd_name), ...}
         self.module_imd_names = set()
 
@@ -1277,11 +1278,10 @@ class TranslationImporter:
             if row.get('type') == 'model':
                 self.all_model_translations[model_name][field_name][xmlid][lang] = row['value']
             else:
-                self.xmlid_to_model_terms_translations[xmlid][field_name][row['src']][lang] = row['value']
-                self.module_imd_names.add((module_name, imd_name))
+                self.all_model_terms_translations[model_name][field_name][xmlid][row['src']][lang] = row['value']
 
     def save(self, overwrite=False, force_overwrite=False):
-        if not self.all_model_translations and not self.xmlid_to_model_terms_translations:
+        if not self.all_model_translations and not self.all_model_terms_translations:
             return
         if force_overwrite:
             overwrite = True
@@ -1290,37 +1290,32 @@ class TranslationImporter:
         cr = self.cr
         env = self.env
 
-        # load all translations into dict
-        # {model_name: {field_name: {id: ({lang: {src: value}}, noupdate)}}}
-        all_model_terms_translations = self.deep_defaultdict()
-        for sub_module_imd_names in cr.split_for_in_conditions(self.module_imd_names):
-            query = "SELECT module || '.' || name, res_id, noupdate, model FROM ir_model_data WHERE "
-            query += " OR ".join(["module = %s AND name = %s"] * len(sub_module_imd_names))
-            cr.execute(query, [param for params in sub_module_imd_names for param in params])
-            for xmlid, id_, noupdate, model_name in cr.fetchall():
-                for field_name, translations in self.xmlid_to_model_terms_translations[xmlid].items():
-                    all_model_terms_translations[model_name][field_name][id_] = (translations, noupdate)
-
-        for model_name, model_dictionary in all_model_terms_translations.items():
+        for model_name, model_dictionary in self.all_model_terms_translations.items():
             Model = env[model_name]
             model_table = Model._table
             fields = Model._fields
-            for field_name in model_dictionary.keys():
+            # field_name, {id: ({src: {lang: value}}, noupdate)}
+            for field_name, field_dictionary in model_dictionary.items():
                 field = fields.get(field_name)
-                # {id: ({src: {lang: value}}, noupdate)}
-                field_dictionary = model_dictionary[field_name]
-                record_ids = field_dictionary.keys()
-                for sub_ids in cr.split_for_in_conditions(record_ids):
+                for sub_xmlids in cr.split_for_in_conditions(field_dictionary.keys()):
+                    params = []
+                    for xmlid in sub_xmlids:
+                        params.extend(xmlid.split('.'))
+                    cr.execute(f'''
+                        SELECT m.id, imd.module || '.' || imd.name, m."{field_name}", imd.noupdate
+                        FROM "{model_table}" m, "ir_model_data" imd
+                        WHERE m.id = imd.res_id
+                        AND ({" OR ".join(["imd.module = %s AND imd.name = %s"] * int((len(params) / 2)))})
+                    ''', params)
                     tr = []
-                    cr.execute(f'SELECT id, "{field_name}" FROM "{model_table}" WHERE id IN %s', (sub_ids,))
-                    for id_, values in cr.fetchall():
+                    for id_, xmlid, values, noupdate in cr.fetchall():
                         if not values:
                             continue
                         value_en = values.get('en_US')
                         if not value_en:
                             continue
-                        # {src: {lang: value}}, noupdate
-                        record_dictionary, noupdate = field_dictionary[id_]
+                        # {src: {lang: value}}
+                        record_dictionary = field_dictionary[xmlid]
                         langs = {lang for translations in record_dictionary.values() for lang in translations.keys()}
 
                         # don't overwrite translations
