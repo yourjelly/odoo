@@ -1271,7 +1271,10 @@ class TranslationImporter:
             xmlid = module_name + '.' + row['imd_name']
             if xml_ids and xmlid not in xml_ids:
                 continue
-            self.xmlid_to_translations[xmlid][field_name][row['src']][lang] = row['value']
+            if row.get('type') == 'model':
+                self.xmlid_to_translations[xmlid][field_name][lang] = row['value']
+            else:
+                self.xmlid_to_translations[xmlid][field_name][row['src']][lang] = row['value']
             self.module_imd_names.add((module_name, imd_name))
 
     def save(self, overwrite=False, force_overwrite=False):
@@ -1334,27 +1337,34 @@ class TranslationImporter:
                                 values[lang] = field.translate(lambda term: translation_dictionary.get(term, {}).get(lang), value_en)
                             env.cache.update_raw(Model.browse(id_), field, [values], dirty=True)
                 elif field.translate:
-                    for sub_ids in cr.split_for_in_conditions(record_ids):
-                        if force_overwrite:
-                            env.cache.update_raw(
-                                Model.browse(sub_ids),
-                                Model._fields[field_name],
-                                map(lambda id_: next(iter(field_dictionary[id_][0].values())), sub_ids),
-                                dirty=True
-                            )
-                        else:
-                            cr.execute(f'SELECT id, "{field_name}" AS translated FROM "{Model._table}" WHERE id IN %s', (sub_ids,))
-                            for id_, value in cr.fetchall():
-                                # {src: {lang: value}}, noupdate
-                                translations, noupdate = field_dictionary[id_]
-                                new_value = next(iter(translations.values()))
-
-                                # don't overwrite translations
-                                if noupdate or not overwrite:
-                                    new_value = {k: v for k, v in new_value.items() if not value or k not in value}
-                                    if not new_value:
-                                        continue
-                                env.cache.update_raw(Model.browse(id_), Model._fields[field_name], [new_value], dirty=True)
+                    for sub_items in cr.split_for_in_conditions(field_dictionary.items()):
+                        tr_overwrite = []
+                        tr_noupdate = []
+                        for id_, [value, noupdate] in sub_items:
+                            if force_overwrite or (not noupdate and overwrite):
+                                tr_overwrite.append(id_)
+                                tr_overwrite.append(Json(value))
+                            else:
+                                tr_noupdate.append(id_)
+                                tr_noupdate.append(Json(value))
+                        if tr_overwrite:
+                            env.cr.execute(f"""
+                                UPDATE "{Model._table}" AS m
+                                SET "{field_name}" = m."{field_name}" || t.value
+                                FROM (
+                                    VALUES {', '.join(['(%s, %s::jsonb)'] * int(len(tr_overwrite) / 2))}
+                                ) AS t(id, value)
+                                WHERE m.id = t.id
+                            """, tr_overwrite)
+                        if tr_noupdate:
+                            env.cr.execute(f"""
+                                UPDATE "{Model._table}" AS m
+                                SET "{field_name}" =  t.value || m."{field_name}"
+                                FROM (
+                                    VALUES {', '.join(['(%s, %s::jsonb)'] * int(len(tr_noupdate) / 2))}
+                                ) AS t(id, value)
+                                WHERE m.id = t.id
+                            """, tr_noupdate)
         env.invalidate_all()
         if self.verbose:
             _logger.info("translations are loaded successfully")
