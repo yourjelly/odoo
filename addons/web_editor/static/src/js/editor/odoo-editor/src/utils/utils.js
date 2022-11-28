@@ -231,6 +231,7 @@ export function createDOMPathGenerator(
  *      should return `node`.
  * @param {findCallback} stopCallback - This callback check if this function
  *      should stop when it receive `node`.
+ * @return {(Node|null)}
  */
 export function findNode(domPath, findCallback = () => true, stopCallback = () => false) {
     for (const node of domPath) {
@@ -249,6 +250,7 @@ export function findNode(domPath, findCallback = () => true, stopCallback = () =
  * @param {Node} node
  * @return {Boolean}
  */
+/// I don't think the def below is in use
 /**
  * This callback check if findNode should stop when it receive `node`.
  * @callback stopCallback
@@ -322,6 +324,11 @@ export function descendants(node) {
     return posterity;
 }
 
+/// the findCallBack passed to findNode ensures that, if found, the node will be an Element
+/**
+ * @param {Node} node
+ * @returns {(Element|null)}
+ */
 export function closestBlock(node) {
     return findNode(closestPath(node), node => isBlock(node));
 }
@@ -1179,7 +1186,7 @@ export function isBlock(node) {
     const tagName = node.nodeName.toUpperCase();
     // Every custom jw-* node will be considered as blocks.
     if (
-        tagName.startsWith('JW-') ||
+        tagName.startsWith('JW-') || /// check if this still applies...
         (tagName === 'T' &&
             node.getAttribute('t-esc') === null &&
             node.getAttribute('t-out') === null &&
@@ -1311,6 +1318,10 @@ export function isSelectionFormat(editable, format) {
     return selectedNodes.every(n => isFormatted(n, editable));
 }
 
+/**
+ * @param {Node} node 
+ * @returns {boolean}
+ */
 export function isUnbreakable(node) {
     if (!node || node.nodeType === Node.TEXT_NODE) {
         return false;
@@ -1321,8 +1332,8 @@ export function isUnbreakable(node) {
     return (
         isUnremovable(node) || // An unremovable node is always unbreakable.
         ['THEAD', 'TBODY', 'TFOOT', 'TR', 'TH', 'TD', 'SECTION', 'DIV'].includes(node.tagName) ||
-        node.hasAttribute('t') ||
-        (node.nodeType === Node.ELEMENT_NODE &&
+        node.hasAttribute('t') || /// this will always be false, this attribute is not used anywhere
+        (node.nodeType === Node.ELEMENT_NODE && /// this condition is redundant
             (node.nodeName === 'T' ||
                 node.getAttribute('t-if') ||
                 node.getAttribute('t-esc') ||
@@ -1336,23 +1347,40 @@ export function isUnbreakable(node) {
     );
 }
 
+/**
+ * 
+ * @param {Node} node 
+ * @returns {boolean}
+ */
 export function isUnremovable(node) {
     return (
         (node.nodeType !== Node.ELEMENT_NODE && node.nodeType !== Node.TEXT_NODE) ||
         node.oid === 'root' ||
         (node.nodeType === Node.ELEMENT_NODE &&
             (node.classList.contains('o_editable') || node.getAttribute('t-set') || node.getAttribute('t-call'))) ||
+        /// classList is a property of Element (not Node), so the line below could be joined with the one above
         (node.classList && node.classList.contains('oe_unremovable')) ||
+        /// 2nd condition below assumes node is of type HTMLDocument
         (node.ownerDocument && node.ownerDocument.defaultWindow && !ancestors(node).find(ancestor => ancestor.oid === 'root')) // Node is in DOM but not in editable.
     );
 }
 
+/**
+ * 
+ * @param {Node} node 
+ * @returns {boolean}
+ */
 export function containsUnbreakable(node) {
     if (!node) {
         return false;
     }
     return isUnbreakable(node) || containsUnbreakable(node.firstChild);
 }
+
+/**
+ * @param {Node} node 
+ * @returns {boolean}
+ */
 export function isFontAwesome(node) {
     return (
         node &&
@@ -1360,12 +1388,22 @@ export function isFontAwesome(node) {
         ['fa', 'fab', 'fad', 'far'].some(faClass => node.classList.contains(faClass))
     );
 }
+
+/**
+ * @param {Node} node 
+ * @returns {boolean}
+ */
 export function isZWS(node) {
     return (
         node &&
         node.textContent === '\u200B'
     );
 }
+
+/**
+ * @param {Node} node 
+ * @returns {boolean}
+ */
 export function isEditorTab(node) {
     return (
         node &&
@@ -1373,6 +1411,10 @@ export function isEditorTab(node) {
         node.classList.contains('oe-tabs')
     );
 }
+/**
+ * @param {Node} node 
+ * @returns {boolean}
+ */
 export function isMediaElement(node) {
     return (
         isFontAwesome(node) ||
@@ -1381,11 +1423,15 @@ export function isMediaElement(node) {
     );
 }
 
+/**
+ * @param {Node} node 
+ * @returns {boolean}
+ */
 export function containsUnremovable(node) {
     if (!node) {
         return false;
     }
-    return isUnremovable(node) || containsUnremovable(node.firstChild);
+    return isUnremovable(node) || containsUnremovable(node.firstChild); /// why only the first child is checked?
 }
 
 export function getInSelection(document, selector) {

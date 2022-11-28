@@ -90,6 +90,8 @@ class Sanitize {
                 node.removeAttribute('id');
             }
         }
+        /// oportunity for optimization: parse will call closestBlock again.
+        /// Might as well just pass rootClosestBlock as parameter
         this.parse(root);
         if (rootClosestBlock) {
             // Ensure unique ids on checklists and stars.
@@ -107,7 +109,11 @@ class Sanitize {
         this._parse(node);
     }
 
+    /**
+     * @param {Node} node
+     */
     _parse(node) {
+        // debugger;
         while (node) {
             // Merge identical elements together.
             while (
@@ -220,9 +226,11 @@ class Sanitize {
             ) {
                 node.setAttribute('contenteditable', 'false');
             }
+            /// depth-first traversal of the subtree
             if (node.firstChild) {
                 this._parse(node.firstChild);
             }
+            /// why is this not above the previous if?
             // Update link URL if label is a new valid link.
             if (node.nodeName === 'A' && anchorEl === node) {
                 const linkLabel = node.textContent;
@@ -239,6 +247,9 @@ class Sanitize {
 }
 
 export function sanitize(root) {
+    /// Sanitize is class only instantiated here, the constructor does all the job,
+    /// as there's nothing to be returned (side-effects only)
+    /// Should this really be a class? It gets instantiated on every keydown.
     new Sanitize(root);
     return root;
 }

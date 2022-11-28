@@ -77,6 +77,7 @@ import { UNBREAKABLE_ROLLBACK_CODE, UNREMOVABLE_ROLLBACK_CODE } from './utils/co
 /* global DOMPurify */
 
 const BACKSPACE_ONLY_COMMANDS = ['oDeleteBackward', 'oDeleteForward'];
+/// commands in which deleteRange() is done first
 const BACKSPACE_FIRST_COMMANDS = BACKSPACE_ONLY_COMMANDS.concat(['oEnter', 'oShiftEnter']);
 
 // 60 seconds
@@ -253,6 +254,7 @@ export class OdooEditor extends EventTarget {
         // Keyboard type detection, happens only at the first keydown event.
         this.keyboardType = KEYBOARD_TYPES.UNKNOWN;
 
+        /// typo: whether
         // Wether we should check for unbreakable the next history step.
         this._checkStepUnbreakable = true;
 
@@ -293,6 +295,7 @@ export class OdooEditor extends EventTarget {
         this.initElementForEdition(editable);
 
         // Convention: root node is ID root.
+        /// this looks weird... oid = 'root', but the key in the map is still the old one (1)
         editable.oid = 'root';
         this._idToNodeMap.set(1, editable);
         if (this.options.toSanitize) {
@@ -340,6 +343,7 @@ export class OdooEditor extends EventTarget {
             });
         });
         // Create the table picker for the toolbar.
+        /// This is apparently useless!
         this.toolbarTablePicker = new TablePicker({ document: this.document });
         this.toolbarTablePicker.addEventListener('cell-selected', ev => {
             this.execCommand('insertTable', {
@@ -610,6 +614,7 @@ export class OdooEditor extends EventTarget {
         // -------
         // Toolbar
         // -------
+        /// an Editor can be instantiated WITHOUT a toolbar. 
 
         if (this.options.toolbar) {
             this.toolbar = this.options.toolbar;
@@ -617,6 +622,7 @@ export class OdooEditor extends EventTarget {
             // Ensure anchors in the toolbar don't trigger a hash change.
             const toolbarAnchors = this.toolbar.querySelectorAll('a');
             toolbarAnchors.forEach(a => a.addEventListener('click', e => e.preventDefault()));
+            /// see editor.xml web_editor.toolbar template
             const tablepickerDropdown = this.toolbar.querySelector('.oe-tablepicker-dropdown');
             tablepickerDropdown && tablepickerDropdown.append(this.toolbarTablePicker.el);
             this.toolbarTablePicker.show();
@@ -656,7 +662,7 @@ export class OdooEditor extends EventTarget {
      * TODO: properly implement this.
      */
     destroy() {
-        this.observerUnactive();
+        this.observerUnactive(); /// this added "undefined" to the set
         this._removeDomListener();
         this.powerbox.destroy();
         this.powerboxTablePicker.el.remove();
@@ -670,14 +676,15 @@ export class OdooEditor extends EventTarget {
         this._columnUi.remove();
     }
 
+    
     resetContent(value = '<p><br></p>') {
         this.editable.innerHTML = value;
-        this.sanitize();
+        this.sanitize(); /// historyStep will sanitize, so this line is useless 
         this.historyStep(true);
         // The unbreakable protection mechanism detects an anomaly and attempts
         // to trigger a rollback when the content is reset using `innerHTML`.
         // Prevent this rollback as it would otherwise revert the new content.
-        this._toRollback = false;
+        this._toRollback = false; /// historyStep will set this to false anyway, line is useless
     }
 
     sanitize() {
@@ -695,6 +702,7 @@ export class OdooEditor extends EventTarget {
         }
 
         // sanitize and mark current position as sanitized
+        /// this is NOT a recursive call! see imports
         sanitize(commonAncestor);
         this._pluginCall('sanitizeElement', [commonAncestor]);
         this.options.onPostSanitize(commonAncestor);
@@ -757,8 +765,12 @@ export class OdooEditor extends EventTarget {
         this.automaticStepUnactive('skipStack');
         setTimeout(() => this.automaticStepActive('skipStack'));
     }
+    /**
+     * Adds label to _observerUnactiveLabels set and switches the observer OFF
+     * @param {string} label 
+     */
     observerUnactive(label) {
-        this._observerUnactiveLabels.add(label);
+        this._observerUnactiveLabels.add(label); /// this adds undefined to the Set label is undefined
         if (this.observer) {
             clearTimeout(this.observerTimeout);
             this.observerFlush();
@@ -766,13 +778,26 @@ export class OdooEditor extends EventTarget {
             this.observer.disconnect();
         }
     }
+    /// process mutations immediately and clear queue 
+    /**
+     * side-effects: adds mutations to _currentStep, changes _toRollback
+     */
     observerFlush() {
         this.observerApply(this.filterMutationRecords(this.observer.takeRecords()));
     }
+
+    /// This function is called many times without a parameter. So it would not
+    /// activate the observer if there's any label in the set.
+    /**
+     * Removes label from the _observerUnactiveLabelsSwitches set, and
+     * switches the observer ON if the set is left empty
+     * @param {string} label 
+     */
     observerActive(label) {
         this._observerUnactiveLabels.delete(label);
         if (this._observerUnactiveLabels.size !== 0) return;
 
+        /// this.observer is here the first time
         if (!this.observer) {
             this.observer = new MutationObserver(records => {
                 records = this.filterMutationRecords(records);
@@ -799,6 +824,16 @@ export class OdooEditor extends EventTarget {
         this.dispatchEvent(new Event('observerActive'));
     }
 
+    /// This is called by the callback passed to MutationObserver() upon Mutations,
+    /// or when observerFlush() is called
+    /// It checks MutationRecords and pushes the corresponding object to _currentStep.mutations
+    /**
+     * Adds mutations to _currentStep.mutations
+     * 
+     * Sets this._toRollback
+     * 
+     * @param {MutationRecord[]} records
+    */
     observerApply(records) {
         // There is a case where node A is added and node B is a descendant of
         // node A where node B was not in the observed tree) then node B is
@@ -885,6 +920,12 @@ export class OdooEditor extends EventTarget {
             this.dispatchEvent(new Event('observerApply'));
         }
     }
+
+    /**
+     * 
+     * @param {MutationRecord[]} records 
+     * @returns 
+     */
     filterMutationRecords(records) {
         // Save the first attribute in a cache to compare only the first
         // attribute record of node to its latest state.
@@ -995,7 +1036,15 @@ export class OdooEditor extends EventTarget {
         return this._historySteps.slice(fromIndex + 1, toIndex);
     }
 
+    /// this comment is outdated, there's only one DOM
     // One step completed: apply to vDOM, setup next history step
+    /**
+     * 1. Sanitizes
+     * 2. Rollsback if necessary 
+     * 3. pushes _currentStep into _historySteps[] 
+     * 4. resets _currentStep
+     * 
+     * (among other things)*/
     historyStep(skipRollback = false, { stepId } = {}) {
         if (!this._historyStepsActive) {
             return;
@@ -1108,7 +1157,7 @@ export class OdooEditor extends EventTarget {
      * Undo a step of the history.
      *
      * this._historyStepsState is a map from it's location (index) in this.history to a state.
-     * The state can be on of:
+     * The state can be one of:
      * undefined: the position has never been undo or redo.
      * "redo": The position is considered as a redo of another.
      * "undo": The position is considered as a undo of another.
@@ -1154,13 +1203,13 @@ export class OdooEditor extends EventTarget {
         }
     }
     /**
-     * Check wether undoing is possible.
+     * Check whether undoing is possible.
      */
     historyCanUndo() {
         return this._getNextUndoIndex() > 0;
     }
     /**
-     * Check wether redoing is possible.
+     * Check whether redoing is possible.
      */
     historyCanRedo() {
         return this._getNextRedoIndex() > 0;
@@ -1320,6 +1369,10 @@ export class OdooEditor extends EventTarget {
         this._currentStep.mutations.unshift(...this._historyStashedMutations);
         this._historyStashedMutations = [];
     }
+    /**
+     * Clears _historySteps array, _currentStep and _historyStepsStates map
+     * @see historyUndo
+     */
     _historyClean() {
         this._historySteps = [];
         this._currentStep = {
@@ -2018,8 +2071,8 @@ export class OdooEditor extends EventTarget {
      * 5) follow the exact same operations that would be done following events
      *    that would lead to that command
      *
-     * For points 1 -> 4, @see _applyCommand
-     * For points 1 -> 5, @see execCommand
+     * @see _applyCommand for points 1 -> 4
+     * @see execCommand for points 1 -> 5
      *
      * @private
      * @param {string} method
@@ -2067,12 +2120,12 @@ export class OdooEditor extends EventTarget {
     }
 
     /**
-     * Same as @see _applyRawCommand but adapt history, protects unbreakables
+     * Same as _applyRawCommand but adapt history, protects unbreakables
      * and removables and sanitizes the result.
-     *
+     * @see _applyRawCommand
      * @private
      * @param {string} method
-     * @returns {?}
+     * @returns {string|any}
      */
     _applyCommand(...args) {
         this._recordHistorySelection(true);
@@ -2082,6 +2135,8 @@ export class OdooEditor extends EventTarget {
         return result;
     }
     /**
+     * Might return the result of callback, but might return a rollback_code or
+     * throw an exception
      * @private
      * @param {function} callback
      * @param {number} [rollbackCounter]
