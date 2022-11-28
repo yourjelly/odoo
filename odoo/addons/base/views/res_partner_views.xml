@@ -72,6 +72,8 @@
                     <field name="is_company" invisible="1"/>
                     <field name="parent_id" invisible="1" readonly="1"/>
                     <field name="active" invisible="1"/>
+                    <field name="meeting_count" widget="smart_button" options="{'icon': 'fa-calendar', 'type':'object', 'name':'schedule_meeting'}"/>
+                    <field name="opportunity_count" widget="smart_button" options="{'icon': 'fa-star', 'type':'object', 'name':'action_view_opportunity'}"/>
                 </tree>
             </field>
         </record>

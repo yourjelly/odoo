@@ -12,13 +12,7 @@
                     <field name="meeting_count"/>
                 </field>
                 <xpath expr="//div[hasclass('oe_kanban_bottom_left')]" position="inside">
-                    <a t-if="record.meeting_count.value>0" data-type="object" data-name="schedule_meeting"
-                       href="#" class="oe_kanban_action oe_kanban_action_a me-1">
-                        <span class="badge rounded-pill">
-                            <i class="fa fa-fw fa-calendar" aria-label="Meetings" role="img" title="Meetings"/>
-                            <t t-out="record.meeting_count.value"/>
-                        </span>
-                    </a>
+                    <field t-if="record.meeting_count.value>0" name="meeting_count" widget="smart_button" options="{'icon': 'fa-calendar', 'type':'object', 'name':'schedule_meeting'}"/>
                 </xpath>
             </field>
         </record>
