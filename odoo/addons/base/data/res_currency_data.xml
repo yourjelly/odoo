@@ -1262,7 +1262,7 @@
             <field name="full_name">Euro</field>
             <field name="symbol">€</field>
             <field name="rounding">0.01</field>
-            <field name="active" eval="False"/>
+            <field name="active" eval="True"/>
             <field name="currency_unit_label">Euros</field>
             <field name="currency_subunit_label">Cents</field>
         </record>

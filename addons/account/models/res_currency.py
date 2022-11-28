@@ -28,6 +28,10 @@ class ResCurrency(models.Model):
 
         return super(ResCurrency, self).write(vals)
 
+    def _archive_if_unused(self):
+        currencies_without_entries = self.filtered(lambda currency: not currency._has_accounting_entries())
+        return super(ResCurrency, currencies_without_entries)._archive_if_unused()
+
     def _has_accounting_entries(self):
         """ Returns True iff this currency has been used to generate (hence, round)
         some move lines (either as their foreign currency, or as the main currency

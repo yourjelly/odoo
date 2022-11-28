@@ -235,10 +235,14 @@ class Company(models.Model):
         # Make sure that the selected currency is enabled
         if values.get('currency_id'):
             currency = self.env['res.currency'].browse(values['currency_id'])
+            previous_currencies = self.currency_id.filtered(lambda c: c != currency)
             if not currency.active:
                 currency.write({'active': True})
 
         res = super(Company, self).write(values)
+
+        if values.get('currency_id'):
+            previous_currencies._archive_if_unused()
 
         # invalidate company cache to recompute address based on updated partner
         company_address_fields = self._get_company_address_field_names()

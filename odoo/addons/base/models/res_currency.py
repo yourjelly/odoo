@@ -72,6 +72,21 @@ class Currency(models.Model):
         self._toggle_group_multi_currency()
         return res
 
+    @api.constrains('active')
+    def _check_active(self):
+        archived_currencies = self.filtered(lambda currency: not currency.active)
+        companies = self.env['res.company'].search([('currency_id', 'in', archived_currencies.ids)])
+        if companies:
+            raise UserError(_(
+                'You cannot archive the currencies %s because they are used by the company(ies): %s',
+                ', '.join((companies.currency_id.mapped('name'))),
+                ', '.join(companies.mapped('name')),
+                ))
+
+    def _archive_if_unused(self):
+        companies = self.env['res.company'].search([('currency_id', 'in', self.ids)])
+        (self - companies.currency_id).active = False
+
     @api.model
     def _toggle_group_multi_currency(self):
         """
