@@ -3,8 +3,8 @@
 
 import base64
 import logging
-import os
 from tempfile import TemporaryFile
+from os.path import splitext
 
 from odoo import api, fields, models, tools, sql_db, _
 from odoo.exceptions import UserError
@@ -35,8 +35,8 @@ class BaseLanguageImport(models.TransientModel):
                 Lang._create_lang(self.code, lang_name=self.name)
             with TemporaryFile('wb+') as buf:
                 buf.write(base64.decodebytes(self.data))
-                fileformat = os.path.splitext(self.filename)[-1][1:].lower()
-                translation_importer = TranslationImporter(self.cr)
+                fileformat = splitext(self.filename)[-1][1:].lower()
+                translation_importer = TranslationImporter(self.env.cr)
                 translation_importer.load(buf, fileformat, self.code)
                 translation_importer.save(overwrite=self.overwrite)
         except Exception as e:
@@ -46,4 +46,3 @@ class BaseLanguageImport(models.TransientModel):
                   ' (Valid formats are .csv, .po, .pot)\n\nTechnical Details:\n%s') % \
                 (self.filename, tools.ustr(e))
             )
-        return True
