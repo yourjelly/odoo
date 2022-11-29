@@ -6,11 +6,8 @@
         <field name="model">res.config.settings</field>
         <field name="inherit_id" ref="website_sale.res_config_settings_view_form" />
         <field name="arch" type="xml">
-            <xpath expr="//div[@id='comparator_option_setting']" position="after">
-                <div class="col-12 col-lg-6 o_setting_box" id="product_availability_setting">
-                    <div class="o_setting_left_pane">
-                    </div>
-                    <div class="o_setting_right_pane" name="stock_inventory_availability">
+            <xpath expr="//setting[@id='comparator_option_setting']" position="after">
+                <setting id="product_availability_setting">
                         <div class="o_form_label">
                             Inventory Defaults
                         </div>
@@ -50,8 +47,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
+                </setting>
             </xpath>
         </field>
     </record>

@@ -77,14 +77,16 @@ export function processArch(arch, viewType, resModel, models) {
                 const views = {};
                 for (const childNode of [...node.children]) {
                     const viewType = childNode.tagName === "tree" ? "list" : childNode.tagName;
-                    const { arch: subViewArch, viewFields: subViewFields } = processArch(
-                        xmlSerializer.serializeToString(childNode),
-                        viewType,
-                        coModel,
-                        models
-                    );
-                    views[viewType] = { arch: subViewArch, fields: subViewFields };
-                    node.removeChild(childNode);
+                    if (viewType === "form" || viewType === "list" || viewType === "kanban") {
+                        const { arch: subViewArch, viewFields: subViewFields } = processArch(
+                            xmlSerializer.serializeToString(childNode),
+                            viewType,
+                            coModel,
+                            models
+                        );
+                        views[viewType] = { arch: subViewArch, fields: subViewFields };
+                        node.removeChild(childNode);
+                    }
                 }
                 viewFields[fieldName].views = views;
             }
