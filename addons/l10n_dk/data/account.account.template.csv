@@ -184,7 +184,7 @@
 "a8730","Moms af varekøb i udlandet (Både EU og 3. lande)","8730","liability_current","account_tag_vat_taxes","dk_chart_template","False"
 "a8731","Moms af ydelseskøb i udlandet med omvendt betalingspligt","8731","liability_current","account_tag_vat_taxes","dk_chart_template","False"
 "a8739","Importmoms, modkonto","8739","liability_current","account_tag_vat_taxes","dk_chart_template","False"
-"a8740","Købsmoms (indgående moms)","8740","liability_current","account_tag_vat_taxes","dk_chart_template","False"
+"a8740","Købsmoms (indgående moms)","8740","asset_current","account_tag_vat_taxes","dk_chart_template","False"
 "a8750","EU købsværdi, Rubrik A - vare","8750","liability_current","account_tag_vat_taxes","dk_chart_template","False"
 "a8751","EU købsværdi, Rubrik A - ydelser","8751","liability_current","account_tag_vat_taxes","dk_chart_template","False"
 "a8754","EU salgsværdi, Rubrik B - vare","8754","liability_current","account_tag_vat_taxes","dk_chart_template","False"
