@@ -46,7 +46,7 @@ function shortCutsItem(env) {
     return {
         type: "item",
         id: "shortcuts",
-        hide: env.isSmall,
+        hide: false,
         description: env._t("Shortcuts"),
         callback: () => {
             env.services.command.openMainPalette({ FooterComponent: ShortcutsFooterComponent });

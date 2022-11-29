@@ -41,6 +41,14 @@
     </header>
   </t>
 
+
+  <t t-name="web.NavBar.PaletteShortcut" owl="1">
+    <div>
+      <button class="btn" t-on-click="openPalette" aria-label="Open the command palette"><i class="fa fa-lg fa-terminal"/></button>
+    </div>
+  </t>
+
+
   <t t-name="web.NavBar.AppsMenu" owl="1">
     <Dropdown hotkey="'h'" title="'Home Menu'" class="'o_navbar_apps_menu'">
       <t t-set-slot="toggler">

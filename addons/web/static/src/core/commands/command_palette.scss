@@ -1,5 +1,21 @@
 .o_command_palette {
     $-app-icon-size: 1.8rem;
+    margin-top: 3rem;
+    @include media-breakpoint-down(sm) {
+        margin-top: 0;
+
+        .o_command_palette_root {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            
+            .o_command_palette_listbox {
+                max-height: none;
+                flex-grow: 1;
+            }
+        }
+
+    }
 
     > .modal-body {
         padding: 0;
@@ -51,5 +67,9 @@
             white-space: nowrap;
             opacity: 0.9;
         }
+    }
+
+    @include media-breakpoint-down(sm) {
+    
     }
 }
