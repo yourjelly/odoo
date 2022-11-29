@@ -1094,7 +1094,7 @@ class TranslationModuleReader:
                     # From our business perspective, the parent column is no need to be translated,
                     # but it is need to be set to jsonb column, since the child columns need to be translated
                     # And export the parent field may make one value to be translated twice in transifex
-                    if field.translate and field.store and not str(field) == 'ir.actions.actions.name':
+                    if field.translate and field.store and str(field) != 'ir.actions.actions.name':
                         name = model + "," + field_name
                         try:
                             value_en = record[field_name] or ''
