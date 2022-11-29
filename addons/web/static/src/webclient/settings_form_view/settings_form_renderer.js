@@ -5,6 +5,7 @@ import { FormRenderer } from "@web/views/form/form_renderer";
 import { FormLabelHighlightText } from "./highlight_text/form_label_highlight_text";
 import { HighlightText } from "./highlight_text/highlight_text";
 import { Setting } from "./settings/setting";
+import { SettingHeader } from "./settings/setting_header";
 import { SettingsContainer } from "./settings/settings_container";
 import { SettingsApp } from "./settings/settings_app";
 import { SettingsPage } from "./settings/settings_page";
@@ -53,6 +54,7 @@ export class SettingsFormRenderer extends FormRenderer {
 SettingsFormRenderer.components = {
     ...FormRenderer.components,
     Setting,
+    SettingHeader,
     SettingsContainer,
     SettingsPage,
     SettingsApp,

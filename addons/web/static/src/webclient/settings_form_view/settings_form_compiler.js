@@ -1,47 +1,30 @@
 /** @odoo-module **/
 
-import { append, createElement } from "@web/core/utils/xml";
+import { append, createElement, getTag } from "@web/core/utils/xml";
 import { FormCompiler } from "@web/views/form/form_compiler";
+import { toStringExpression } from "@web/views/utils";
 import { getModifier } from "@web/views/view_compiler";
 
-function compileSettingsPage(el, params) {
-    const settingsPage = createElement("SettingsPage");
-    settingsPage.setAttribute("slots", "{NoContentHelper:props.slots.NoContentHelper}");
-    settingsPage.setAttribute("initialTab", "props.initialApp");
-    settingsPage.setAttribute("t-slot-scope", "settings");
-
-    //props
-    const modules = [];
-
-    for (const child of el.children) {
-        if (child.nodeName === "div" && child.classList.value.includes("app_settings_block")) {
-            params.module = {
-                key: child.getAttribute("data-key"),
-                string: child.getAttribute("string"),
-                imgurl: getAppIconUrl(child.getAttribute("data-key")),
-                isVisible: getModifier(child, "invisible"),
-            };
-            if (!child.classList.value.includes("o_not_app")) {
-                modules.push(params.module);
-                append(settingsPage, this.compileNode(child, params));
-            }
-        }
-    }
-
-    settingsPage.setAttribute("modules", JSON.stringify(modules));
-    return settingsPage;
-}
-
-function getAppIconUrl(module) {
-    return module === "general_settings"
-        ? "/base/static/description/settings.png"
-        : "/" + module + "/static/description/icon.png";
-}
-
 function compileSettingsApp(el, params) {
-    const settingsApp = createElement("SettingsApp");
-    settingsApp.setAttribute("t-props", JSON.stringify(params.module));
-    settingsApp.setAttribute("selectedTab", "settings.selectedTab");
+    if (el.getAttribute("notApp") === "1") {
+        return;
+    }
+    const module = {
+        key: el.getAttribute("name"),
+        string: el.getAttribute("string"),
+        imgurl:
+            el.getAttribute("logo") ||
+            "/" + el.getAttribute("name") + "/static/description/icon.png",
+        isVisible: getModifier(el, "invisible"),
+    };
+    params.modules.push(module);
+    const settingsApp = createElement("SettingsApp", {
+        key: toStringExpression(module.key),
+        string: toStringExpression(module.string || ""),
+        imgurl: toStringExpression(module.imgurl),
+        isVisible: module.isVisible,
+        selectedTab: "settings.selectedTab",
+    });
 
     for (const child of el.children) {
         append(settingsApp, this.compileNode(child, params));
@@ -50,68 +33,62 @@ function compileSettingsApp(el, params) {
     return settingsApp;
 }
 
-function compileSettingsHeader(el, params) {
-    const header = el.cloneNode();
-    for (const child of el.children) {
-        append(header, this.compileNode(child, { ...params, settingType: "header" }));
-    }
-    return header;
-}
-
-let settingsContainer = null;
-
-function compileSettingsGroupTitle(el, params) {
-    if (!settingsContainer) {
-        settingsContainer = createElement("SettingsContainer");
-    }
-
-    settingsContainer.setAttribute("title", `\`${el.textContent}\``);
-}
-
-function compileSettingsGroupTip(el, params) {
-    if (!settingsContainer) {
-        settingsContainer = createElement("SettingsContainer");
-    }
-
-    settingsContainer.setAttribute("tip", `\`${el.textContent}\``);
-}
-
-function compileSettingsContainer(el, params) {
-    if (!settingsContainer) {
-        settingsContainer = createElement("SettingsContainer");
-    }
-
+function compileSettingsSection(el, params) {
+    const settingsContainer = createElement("SettingsContainer", {
+        title: toStringExpression(el.getAttribute("title") || ""),
+        tip: toStringExpression(el.getAttribute("help") || ""),
+    });
     for (const child of el.children) {
         append(settingsContainer, this.compileNode(child, params));
     }
-    const res = settingsContainer;
-    settingsContainer = null;
-    return res;
+    return settingsContainer;
 }
 
-function compileSettingBox(el, params) {
-    const setting = createElement("Setting");
+function compileSetting(el, params) {
+    const type = el.getAttribute("type");
+    let component = "Setting";
+    if (type === "header") {
+        component = "SettingHeader";
+    }
+    const setting = createElement(component, {
+        string: toStringExpression(el.getAttribute("string") || ""),
+        title: toStringExpression(el.getAttribute("title") || ""),
+        help: toStringExpression(el.getAttribute("help") || ""),
+        companySpecific: el.getAttribute("company_specific") === "1" || "false",
+        documentation: toStringExpression(el.getAttribute("documentation") || ""),
+        addLabel: el.hasAttribute("nolabel") ? el.getAttribute("nolabel") !== "1" : true,
+        record: `props.record`,
+    });
     params.labels = [];
-
-    if (params.settingType) {
-        setting.setAttribute("type", `\`${params.settingType}\``);
-    }
-    if (el.getAttribute("title")) {
-        setting.setAttribute("title", `\`${el.getAttribute("title")}\``);
-    }
-    for (const child of el.children) {
-        append(setting, this.compileNode(child, params));
-    }
+    Array.from(el.children).forEach((child, index) => {
+        if (getTag(child, true) === "field" && index === 0) {
+            const fieldSlot = createElement("t", { "t-set-slot": "fieldSlot" });
+            const field = this.compileNode(child, params);
+            if (field) {
+                setting.setAttribute("fieldInfo", field.getAttribute("fieldInfo"));
+                append(fieldSlot, field);
+            } else {
+                throw new Error("First Field must exist/be visible");
+            }
+            const fieldName = child.getAttribute("name");
+            setting.setAttribute("fieldName", toStringExpression(fieldName));
+            setting.setAttribute(
+                "fieldId",
+                toStringExpression(child.getAttribute("field_id") || fieldName)
+            );
+            append(setting, fieldSlot);
+        } else {
+            append(setting, this.compileNode(child, params));
+        }
+    });
     setting.setAttribute("labels", JSON.stringify(params.labels));
     return setting;
 }
 
 function compileField(el, params) {
     const res = this.compileField(el, params);
-    let widgetName;
     if (el.hasAttribute("widget")) {
-        widgetName = el.getAttribute("widget");
-        const label = params.getFieldExpr(el.getAttribute("name"), widgetName);
+        const label = params.getFieldExpr(el.getAttribute("name"), el.getAttribute("widget"));
         if (label) {
             params.labels.push(label);
         }
@@ -156,9 +133,28 @@ function highlightElement(el) {
     }
 }
 
-function compileForm() {
+function compileForm(el, params) {
+    const settingsPage = createElement("SettingsPage");
+    settingsPage.setAttribute("slots", "{NoContentHelper:props.slots.NoContentHelper}");
+    settingsPage.setAttribute("initialTab", "props.initialApp");
+    settingsPage.setAttribute("t-slot-scope", "settings");
+
+    //props
+    params.modules = [];
+
     const res = this.compileForm(...arguments);
     res.classList.remove("o_form_nosheet");
+
+    settingsPage.setAttribute("modules", JSON.stringify(params.modules));
+
+    for (const child of res.childNodes) {
+        append(settingsPage, this.compileNode(child, params));
+    }
+    while (res.lastChild) {
+        res.removeChild(res.lastChild);
+    }
+    append(res, settingsPage);
+
     return res;
 }
 
@@ -167,15 +163,9 @@ export class SettingsFormCompiler extends FormCompiler {
         super.setup();
         this.compilers.unshift(
             { selector: "form", fn: compileForm },
-            { selector: "div.settings", fn: compileSettingsPage },
-            { selector: "div.app_settings_block", fn: compileSettingsApp },
-            { selector: "div.app_settings_header", fn: compileSettingsHeader },
-            // objects to show/hide in the search
-            { selector: "div.o_setting_box", fn: compileSettingBox },
-            { selector: "div.o_settings_container", fn: compileSettingsContainer },
-            // h2
-            { selector: "h2", fn: compileSettingsGroupTitle },
-            { selector: "h3.o_setting_tip", fn: compileSettingsGroupTip },
+            { selector: "app", fn: compileSettingsApp },
+            { selector: "block", fn: compileSettingsSection },
+            { selector: "setting", fn: compileSetting },
             // search terms and highlight :
             { selector: "label", fn: compileLabel, doNotCopyAttributes: true },
             { selector: "span.o_form_label", fn: compileGenericLabel },

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="web.SettingsPage" owl="1">
+        <div class="o_setting_container">
         <div class="settings_tab" t-if="!env.isSmall or state.search.value.length === 0">
             <t t-foreach="props.modules" t-as="module" t-key="module.key">
                 <div class="tab" t-if="!module.isVisible" t-att-class="(state.selectedTab === module.key and state.search.value.length === 0) ? 'selected': ''" t-att-data-key="module.key" role="tab" t-on-click="() => this.onSettingTabClick(module.key)">
@@ -23,5 +24,6 @@
                 <t t-slot="default" selectedTab="state.selectedTab"/>
             </div>
         </ActionSwiper>
+        </div>
     </t>
 </templates>
