@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import json
+import logging
 
 from lxml import etree
 
@@ -10,7 +11,10 @@ from odoo.exceptions import UserError
 from odoo.modules import get_module_resource
 from odoo.modules.module import get_resource_from_path, get_resource_path
 from odoo.tools.convert import xml_import
+from odoo.tools.misc import file_open
 from odoo.tools.translate import TranslationImporter
+
+_logger = logging.getLogger(__name__)
 
 
 class TemplateResetMixin(models.AbstractModel):
@@ -60,24 +64,28 @@ class TemplateResetMixin(models.AbstractModel):
     # -------------------------------------------------------------------------
 
     def _override_translation_term(self, module_name, xml_ids):
+        translation_importer = TranslationImporter(self.env.cr)
+
         for code, _ in self.env['res.lang'].get_installed():
             lang_code = tools.get_iso_codes(code)
             # In case of sub languages (e.g fr_BE), load the base language first, (e.g fr.po) and
             # then load the main translation file (e.g fr_BE.po)
 
-            translation_importer = TranslationImporter(self.env.cr)
             # Step 1: reset translation terms with base language file
             if '_' in lang_code:
                 base_lang_code = lang_code.split('_')[0]
                 base_trans_file = get_module_resource(module_name, 'i18n', base_lang_code + '.po')
                 if base_trans_file:
-                    translation_importer.load_translations_from_file(base_trans_file, code, xml_ids=xml_ids)
+                    with file_open(base_trans_file, mode='rb') as fileobj:
+                        translation_importer.load(fileobj, 'po', code, xmlids=xml_ids)
 
             # Step 2: reset translation file with main language file (can possibly override the
             # terms coming from the base language)
             trans_file = get_module_resource(module_name, 'i18n', lang_code + '.po')
             if trans_file:
-                translation_importer.load_translations_from_file(trans_file, code, xml_ids=xml_ids)
+                with file_open(trans_file, mode='rb') as fileobj:
+                    translation_importer.load(fileobj, 'po', code, xmlids=xml_ids)
+
         translation_importer.save(overwrite=True, force_overwrite=True)
 
     def reset_template(self):

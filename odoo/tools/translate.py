@@ -1206,39 +1206,19 @@ class TranslationImporter:
         self.verbose = verbose
         self.env = odoo.api.Environment(cr, odoo.SUPERUSER_ID, {})
 
-        deep_defaultdict = lambda: defaultdict(deep_defaultdict)
-        self.deep_defaultdict = deep_defaultdict
-        self.all_model_translations = self.deep_defaultdict()
-        self.all_model_terms_translations = self.deep_defaultdict()
-        # # {xmlid: {field_name: {lang: value}}}
-        # self.xmlid_to_model_translations = self.deep_defaultdict()
-        # # {xmlid: {field_name: {src: {lang: value}}}}
-        # self.xmlid_to_model_terms_translations = self.deep_defaultdict()
-        # {(module_name, imd_name), (module_name, imd_name), ...}
-        self.module_imd_names = set()
+        # {model_name: {field_name: {xmlid: {lang: value}}}}
+        self.model_translations = deep_defaultdict()
+        # {model_name: {field_name: {xmlid: {src: {lang: value}}}}}
+        self.model_terms_translations = deep_defaultdict()
 
-    def load_translations_from_file(self, filename, lang, xml_ids=None):
-        try:
-            with file_open(filename, mode='rb') as fileobj:
-                _logger.info("loading %s", filename)
-                fileformat = os.path.splitext(filename)[-1][1:].lower()
-                self.load_translations_from_fileobj(fileobj, fileformat, lang, xml_ids=xml_ids)
-        except IOError:
-            if self.verbose:
-                _logger.error("couldn't read translation file %s", filename)
-            return None
+    def load(self, fileobj, fileformat, lang, xmlids=None):
+        """Load translations
 
-    def load_translations_from_fileobj(self, fileobj, fileformat, lang, xml_ids=None):
-        """Load translations.
-
-        :param cr:
         :param fileobj: buffer open to a translation file
         :param fileformat: format of the `fielobj` file, one of 'po' or 'csv'
         :param lang: language code of the translations contained in `fileobj`
                      language must be present and activated in the database
-        :param verbose: increase log output
-        :param overwrite: if a translation already exists for a term, replace it with
-                          the one in `fileobj`
+        :param xmlids: if exists, only translations for records with xmlid in xmlids will be loaded
         """
         if self.verbose:
             _logger.info('loading translation file for language %s', lang)
@@ -1248,15 +1228,15 @@ class TranslationImporter:
         try:
             fileobj.seek(0)
             reader = TranslationFileReader(fileobj, fileformat=fileformat)
-            self._load_translations(reader, lang, xml_ids)
+            self._load(reader, lang, xmlids)
         except IOError:
             iso_lang = get_iso_codes(self.lang)
             filename = '[lang: %s][format: %s]' % (iso_lang or 'new', fileformat)
             _logger.exception("couldn't read translation file %s", filename)
 
-    def _load_translations(self, reader, lang, xml_ids=None):
-        if xml_ids:
-            xml_ids = set(xml_ids)
+    def _load(self, reader, lang, xmlids=None):
+        if xmlids and not isinstance(xmlids, set):
+            xmlids = set(xmlids)
         for row in reader:
             if not row.get('value') or not row.get('src'):  # ignore empty translations
                 continue
@@ -1265,7 +1245,6 @@ class TranslationImporter:
             # TODO: CWG if the po file should not be trusted, we need to check each model term
             model_name = row.get('imd_model')
             module_name = row['module']
-            imd_name = row['imd_name']
             if model_name not in self.env:
                 continue
             field_name = row['name'].split(',')[1]
@@ -1273,31 +1252,39 @@ class TranslationImporter:
             if not field or not field.translate or not field.store:
                 continue
             xmlid = module_name + '.' + row['imd_name']
-            if xml_ids and xmlid not in xml_ids:
+            if xmlids and xmlid not in xmlids:
                 continue
             if row.get('type') == 'model':
-                self.all_model_translations[model_name][field_name][xmlid][lang] = row['value']
-            else:
-                self.all_model_terms_translations[model_name][field_name][xmlid][row['src']][lang] = row['value']
+                self.model_translations[model_name][field_name][xmlid][lang] = row['value']
+            elif row.get('type') == 'model_terms':
+                self.model_terms_translations[model_name][field_name][xmlid][row['src']][lang] = row['value']
 
     def save(self, overwrite=False, force_overwrite=False):
-        if not self.all_model_translations and not self.all_model_terms_translations:
+        """ Save translations to the database
+
+        for a record with 'noupdate' in ir_model_data, its existing translations will be overwritten if
+            force_overwrite or (not noupdate and overwrite)
+
+        an existing translation means:
+            model translation: the jsonb value in database has key for the language
+            model terms translation: the term value in the language is not the same as the term value in en_US
+        """
+        if not self.model_translations and not self.model_terms_translations:
             return
-        if force_overwrite:
-            overwrite = True
-        self.env.flush_all()
 
         cr = self.cr
         env = self.env
+        env.flush_all()
 
-        for model_name, model_dictionary in self.all_model_terms_translations.items():
+        for model_name, model_dictionary in self.model_terms_translations.items():
             Model = env[model_name]
             model_table = Model._table
             fields = Model._fields
-            # field_name, {id: ({src: {lang: value}}, noupdate)}
+            # field_name, {xmlid: {src: {lang: value}}}
             for field_name, field_dictionary in model_dictionary.items():
                 field = fields.get(field_name)
                 for sub_xmlids in cr.split_for_in_conditions(field_dictionary.keys()):
+                    # [module_name, imd_name, module_name, imd_name, ...]
                     params = []
                     for xmlid in sub_xmlids:
                         params.extend(xmlid.split('.'))
@@ -1305,53 +1292,59 @@ class TranslationImporter:
                         SELECT m.id, imd.module || '.' || imd.name, m."{field_name}", imd.noupdate
                         FROM "{model_table}" m, "ir_model_data" imd
                         WHERE m.id = imd.res_id
-                        AND ({" OR ".join(["imd.module = %s AND imd.name = %s"] * int((len(params) / 2)))})
+                        AND ({" OR ".join(["(imd.module = %s AND imd.name = %s)"] * int((len(params) / 2)))})
                     ''', params)
-                    tr = []
+
+                    # [id, translations, id, translations, ...]
+                    params = []
                     for id_, xmlid, values, noupdate in cr.fetchall():
                         if not values:
                             continue
                         value_en = values.get('en_US')
                         if not value_en:
                             continue
+
                         # {src: {lang: value}}
                         record_dictionary = field_dictionary[xmlid]
                         langs = {lang for translations in record_dictionary.values() for lang in translations.keys()}
-
-                        # don't overwrite translations
                         translation_dictionary = field.get_translation_dictionary(
                             value_en,
                             {k: v for k, v in values.items() if k in langs}
                         )
-                        _overwrite = force_overwrite or (not noupdate and overwrite)
-                        for term_en, translations in record_dictionary.items():
-                            if _overwrite:
+
+                        if force_overwrite or (not noupdate and overwrite):
+                            # overwrite existing translations
+                            for term_en, translations in record_dictionary.items():
                                 translation_dictionary[term_en].update(translations)
-                            else:
+                        else:
+                            # keep existing translations
+                            for term_en, translations in record_dictionary.items():
                                 translations.update({k: v for k, v in translation_dictionary[term_en].items() if v != term_en})
                                 translation_dictionary[term_en] = translations
 
                         for lang in langs:
                             values[lang] = field.translate(lambda term: translation_dictionary.get(term, {}).get(lang), value_en)
-                        tr.append(id_)
-                        tr.append(Json(values))
-                    if tr:
+                        params.extend((id_, Json(values)))
+                    if params:
                         env.cr.execute(f"""
                             UPDATE "{model_table}" AS m
                             SET "{field_name}" =  t.value
                             FROM (
-                                VALUES {', '.join(['(%s, %s::jsonb)'] * int(len(tr) / 2))}
+                                VALUES {', '.join(['(%s, %s::jsonb)'] * int(len(params) / 2))}
                             ) AS t(id, value)
                             WHERE m.id = t.id
-                        """, tr)
-        for model_name, model_dictionary in self.all_model_translations.items():
+                        """, params)
+        self.model_terms_translations = deep_defaultdict()
+
+        for model_name, model_dictionary in self.model_translations.items():
             Model = env[model_name]
             model_table = Model._table
             for field_name, field_dictionary in model_dictionary.items():
                 for sub_field_dictionary in cr.split_for_in_conditions(field_dictionary.items()):
-                    field_translations = []
+                    # [xmlid, translations, xmlid, translations, ...]
+                    params = []
                     for xmlid, translations in sub_field_dictionary:
-                        field_translations.extend([xmlid.split('.')[-1], Json(translations)])
+                        params.extend([xmlid.split('.')[-1], Json(translations)])
                     if not force_overwrite:
                         value_query = f"""CASE WHEN {overwrite} is True AND imd.noupdate is False
                         THEN m."{field_name}" || t.value
@@ -1362,24 +1355,28 @@ class TranslationImporter:
                         UPDATE "{model_table}" AS m
                         SET "{field_name}" = {value_query}
                         FROM (
-                            VALUES {', '.join(['(%s, %s::jsonb)'] * int(len(field_translations) / 2))}
+                            VALUES {', '.join(['(%s, %s::jsonb)'] * int(len(params) / 2))}
                         ) AS t(imd_name, value)
                         JOIN "ir_model_data" AS imd
                         ON imd."model" = '{model_name}' AND imd.name = t.imd_name
                         WHERE imd."res_id" = m."id"
-                    """, field_translations)
+                    """, params)
+        self.model_translations = deep_defaultdict()
+
         env.invalidate_all()
         if self.verbose:
             _logger.info("translations are loaded successfully")
 
-def trans_load(cr, filename, lang, verbose=True, overwrite=False):
+def trans_load(cr, filepath, lang, verbose=True, overwrite=False):
     translation_importer = TranslationImporter(cr, verbose=verbose)
-    translation_importer.load_translations_from_file(filename, lang)
+    with file_open(filepath, mode='rb') as fileobj:
+        fileformat = os.path.splitext(filepath)[-1][1:].lower()
+        translation_importer.load(fileobj, fileformat, lang)
     translation_importer.save(overwrite=overwrite)
 
 def trans_load_data(cr, fileobj, fileformat, lang, verbose=True, overwrite=False):
     translation_importer = TranslationImporter(cr, verbose=verbose)
-    translation_importer.load_translations_from_fileobj(fileobj, fileformat, lang)
+    translation_importer.load(fileobj, fileformat, lang)
     translation_importer.save(overwrite=overwrite)
 
 def get_locales(lang=None):

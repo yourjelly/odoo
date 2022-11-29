@@ -30,7 +30,7 @@ from odoo.addons.base.models.ir_model import MODULE_UNINSTALL_FLAG
 from odoo.exceptions import AccessDenied, UserError
 from odoo.osv import expression
 from odoo.tools.parse_version import parse_version
-from odoo.tools.misc import topological_sort
+from odoo.tools.misc import topological_sort, file_open
 from odoo.tools.translate import TranslationImporter
 from odoo.http import request
 from odoo.modules import get_module_path, get_module_resource
@@ -1038,6 +1038,7 @@ class Module(models.Model):
         """ Load PO files of the given modules for the given languages. """
         # load i18n files
         translation_importer = TranslationImporter(self._cr, verbose=False)
+
         for module_name in modules:
             modpath = get_module_path(module_name)
             if not modpath:
@@ -1053,28 +1054,32 @@ class Module(models.Model):
                     base_trans_file = get_module_resource(module_name, 'i18n', base_lang_code + '.po')
                     if base_trans_file:
                         _logger.info('module %s: loading base translation file %s for language %s', module_name, base_lang_code, lang)
-                        translation_importer.load_translations_from_file(base_trans_file, lang)
+                        with file_open(base_trans_file, mode='rb') as fileobj:
+                            translation_importer.load(fileobj, 'po', lang)
 
                     # i18n_extra folder is for additional translations handle manually (eg: for l10n_be)
                     base_trans_extra_file = get_module_resource(module_name, 'i18n_extra', base_lang_code + '.po')
                     if base_trans_extra_file:
                         _logger.info('module %s: loading extra base translation file %s for language %s', module_name, base_lang_code, lang)
-                        translation_importer.load_translations_from_file(base_trans_extra_file, lang)
+                        with file_open(base_trans_extra_file, mode='rb') as fileobj:
+                            translation_importer.load(fileobj, 'po', lang)
 
                 # Step 2: then load the main translation file, possibly overriding the terms coming from the base language
                 trans_file = get_module_resource(module_name, 'i18n', lang_code + '.po')
                 if trans_file:
-                    _logger.info('module %s: loading translation file (%s) for language %s', module_name, lang_code, lang)
-                    translation_importer.load_translations_from_file(trans_file, lang)
+                    _logger.info('module %s: loading translation file %s for language %s', module_name, lang_code, lang)
+                    with file_open(trans_file, mode='rb') as fileobj:
+                        translation_importer.load(fileobj, 'po', lang)
                 elif lang_code != 'en_US':
                     _logger.info('module %s: no translation for language %s', module_name, lang_code)
 
                 trans_extra_file = get_module_resource(module_name, 'i18n_extra', lang_code + '.po')
                 if trans_extra_file:
-                    _logger.info('module %s: loading extra translation file (%s) for language %s', module_name, lang_code, lang)
-                    translation_importer.load_translations_from_file(trans_extra_file, lang)
+                    _logger.info('module %s: loading extra translation file %s for language %s', module_name, lang_code, lang)
+                    with file_open(trans_extra_file, mode='rb') as fileobj:
+                        translation_importer.load(fileobj, 'po', lang)
+
         translation_importer.save(overwrite=overwrite)
-        return True
 
 
 DEP_STATES = STATES + [('unknown', 'Unknown')]
