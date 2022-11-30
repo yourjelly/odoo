@@ -59,9 +59,6 @@ sent mails with personal token for the invitation of the survey.
     'application': True,
     'sequence': 220,
     'assets': {
-        'challenge': [
-            'survey/static/src/scss/challenge.css'
-        ],
         'survey.survey_assets': [
             'web/static/lib/Chart/Chart.js',
             'survey/static/src/js/survey_image_zoomer.js',

@@ -157,7 +157,7 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend(SurveyPre
      */
     _onNext: function (ev) {
         ev.preventDefault();
-
+        debugger
         var screenToDisplay = this._getNextScreen();
 
         if (screenToDisplay === 'userInputs') {
@@ -375,6 +375,7 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend(SurveyPre
 
         if (this.nextQuestion.question_html) {
             var $renderedTemplate = $(this.nextQuestion.question_html);
+            debugger
             this.$el.replaceWith($renderedTemplate);
 
             // Ensure new question is fully loaded before force loading previous question screen.
