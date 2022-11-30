@@ -72,6 +72,15 @@ describe('insert HTML', () => {
                 contentAfter: '<p>ab</p><p>c</p><p>d[]e<br></p>',
             });
         });
+        it('should keep a paragraph after a div block', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: '<p>[]<br></p>',
+                stepFunction: async editor => {
+                    await editor.execCommand('insert', parseHTML('<div><p>content</p></div>'));
+                },
+                contentAfter: '<div><p>content</p></div><p>[]<br></p>',
+            });
+        });
     });
     describe('not collapsed selection', () => {
         it('should delete selection and insert html in its place', async () => {
