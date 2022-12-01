@@ -30,6 +30,7 @@ import threading
 import time
 import unittest
 import warnings
+import base64
 from collections import defaultdict
 from concurrent.futures import Future, CancelledError, wait
 try:
@@ -998,9 +999,9 @@ class ChromeBrowser:
         self._websocket_send('Runtime.enable')
         self._logger.info('Chrome headless enable page notifications')
         self._websocket_send('Page.enable')
-        if os.name == 'posix':
-            self.sigxcpu_handler = signal.getsignal(signal.SIGXCPU)
-            signal.signal(signal.SIGXCPU, self.signal_handler)
+        # if os.name == 'posix':
+        #     self.sigxcpu_handler = signal.getsignal(signal.SIGXCPU)
+        #     signal.signal(signal.SIGXCPU, self.signal_handler)
 
     def signal_handler(self, sig, frame):
         if sig == signal.SIGXCPU:
@@ -1102,13 +1103,14 @@ class ChromeBrowser:
             '--disable-namespace-sandbox': '',
             '--user-data-dir': self.user_data_dir,
             '--disable-translate': '',
+            '--disable-web-security ':'',
             # required for tours that use Youtube autoplay conditions (namely website_slides' "course_tour")
             '--autoplay-policy': 'no-user-gesture-required',
             '--window-size': self.window_size,
             '--remote-debugging-address': HOST,
             '--remote-debugging-port': str(self.remote_debugging_port),
             '--no-sandbox': '',
-            '--disable-gpu': '',
+            # '--disable-gpu': '',
         }
         if self.touch_enabled:
             # enable Chrome's Touch mode, useful to detect touch capabilities using
@@ -1537,6 +1539,11 @@ which leads to stray network requests and inconsistencies."""))
             self._frames[frame_id] = e.set
             self._logger.info('Waiting for frame %r to stop loading', frame_id)
             e.wait(10)
+
+    def print_to_pdf(self, params):
+        result = self._websocket_request('Page.printToPDF',params=params, timeout=20.0)
+        print (result)
+        return result["data"]
 
     def clear(self):
         self._websocket_send('Page.stopScreencast')

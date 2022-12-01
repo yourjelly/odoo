@@ -18,7 +18,9 @@ import tempfile
 import subprocess
 import re
 import json
+import base64
 
+from odoo.tests.common import ChromeBrowser, HttpCase
 from lxml import etree
 from contextlib import closing
 from reportlab.graphics.barcode import createBarcodeDrawing
@@ -84,7 +86,17 @@ else:
         wkhtmltopdf_state = 'broken'
 
 
+class PrintEngine:
+
+    browser_size = '1024x1280'
+    touch_enabled = False
+    allow_end_on_form = False
+    _logger =  _logger
+
+
 class IrActionsReport(models.Model):
+
+
     _name = 'ir.actions.report'
     _description = 'Report Action'
     _inherit = 'ir.actions.actions'
@@ -303,6 +315,50 @@ class IrActionsReport(models.Model):
 
         return command_args
 
+    def set_params(self, landscape, header, footer, specific_paperformat_args=None):
+        """ This method is used to prepare the parameter of chromium hedless
+        ** landscape = is landscape of not
+        ** specific_paperformat_args = specify the specific paper formate
+
+        it returns the image of footer
+        """
+        param = {}
+        # if header and footer:
+        #     # pdb.set_trace()
+        #     header_height = self.header_height
+        #     footer_height = self.footer_height
+
+        #     if specific_paperformat_args["bottom_space"]:
+        #         footer_height = footer_height+specific_paperformat_args["bottom_space"]
+        #         self.bottom_space = specific_paperformat_args["bottom_space"]
+        #     if specific_paperformat_args["top_space"]:
+        #         header_height = header_height+specific_paperformat_args["top_space"]
+        #         self.top_space = specific_paperformat_args["top_space"]
+
+        #     if specific_paperformat_args["margin_bottom_space"]:
+        #         footer_height = footer_height+specific_paperformat_args["margin_bottom_space"]
+        #     if specific_paperformat_args["margin_top_space"]:
+        #         header_height = header_height+specific_paperformat_args["margin_top_space"]
+
+        #     param["marginTop"]=header_height
+        #     param["marginBottom"]=footer_height
+        #     param["scale"]=2
+        #     if landscape:
+        #         param["landscape"]=True
+        #     if specific_paperformat_args:
+        #         param["paperHeight"]=float("{:.1f}".format((specific_paperformat_args['height']/25.4)))
+        #         param["paperWidth"]= float("{:.1f}".format((specific_paperformat_args['width']/25.4)))
+
+        # else:
+        param["scale"]=2
+        if landscape:
+            param["landscape"]=True
+        if specific_paperformat_args:
+            param["paperHeight"]=float("{:.1f}".format((specific_paperformat_args['height']/25.4)))
+            param["paperWidth"]= float("{:.1f}".format((specific_paperformat_args['width']/25.4)))
+
+        return param
+
     def _prepare_html(self, html, report_model=False):
         '''Divide and recreate the header/footer html by merging all found in html.
         The bodies are extracted and added to a list. Then, extract the specific_paperformat_args.
@@ -478,6 +534,130 @@ class IrActionsReport(models.Model):
                 _logger.error('Error when trying to remove file %s' % temporary_file)
 
         return pdf_content
+
+    def _run_print_to_pdf(self, bodies, report_ref=False, header=False, footer=False, landscape=False, specific_paperformat_args=None, set_viewport_size=False):
+        """ to perform printToPDF method of chromium hedless
+        ** bodies = html file that is body of print it may be one or more
+        ** header = htlml file of header
+        ** footer = html file of footer
+        ** landscape = is landscape or not
+        ** specific_paperformat_args = specific paper formate by default A4 size
+
+        """
+        # if header and footer:
+        #     self.header_height = self.get_header_footer_height(header,"header")
+        #     self.footer_height = self.get_header_footer_height(footer,"footer")
+        #     merged_pdf = PdfFileWriter()
+        #     for body in bodies :
+        #         self.navigate_to(body,True)
+        #         ready = "document.readyState === 'complete'"
+        #         res = self._wait_ready(ready)
+
+        #         param = self.set_params(
+        #                     landscape,
+        #                     header,
+        #                     footer,
+        #                     specific_paperformat_args)
+        #         pdf_datas = self.print_to_pdf(params= param)
+        #         # pdb.set_trace()
+        #         pdf_data = PdfFileReader(io.BytesIO(base64.b64decode(pdf_datas)))
+        #         for page in pdf_data.pages:
+        #             merged_pdf.addPage(page)
+
+        #     pdf_datas = open("datas.pdf",'wb')
+        #     merged_pdf.write(pdf_datas)
+        #     pdf_datas.close()
+        #     pdf_documents =  PdfFileReader("datas.pdf")
+
+        #     no_of_pages = pdf_documents.getNumPages()
+        #     page_hight = int(pdf_documents.getPage(0).mediaBox[3])
+        #     page_width = int(pdf_documents.getPage(0).mediaBox[2])
+        #     self.header_canvas = self.get_header_canvas(header,'header')
+        #     self.header_pdf_document = self.draw_image(self.header_canvas,page_hight,page_width,self.header_height)
+
+
+        #     output = PdfFileWriter()
+        #     for i in range(no_of_pages):
+        #         self.footer_canvas = self.get_footer_canvas(footer,'footer',i+1,no_of_pages)
+        #         self.footer_pdf_documents = self.draw_image (self.footer_canvas,page_hight,page_width,self.footer_height,True)
+        #         current_page = pdf_documents.getPage(i)
+        #         current_page.mergePage(self.header_pdf_document.getPage(0))
+        #         current_page.mergePage(self.footer_pdf_documents.getPage(0))
+        #         output.addPage(current_page)
+        #     outputStream = open("out_pdf_file.pdf", "wb")
+        #     output.write(outputStream)
+        #     outputStream.close()
+        #     os.unlink("datas.pdf")
+        # else:
+
+        merged_pdf = PdfFileWriter()
+        chrome_browser = ChromeBrowser(PrintEngine)
+        pdf_report_fd, pdf_report_path = tempfile.mkstemp(suffix='.pdf', prefix='report.tmp.')
+        print(pdf_report_fd ,pdf_report_path )
+        os.close(pdf_report_fd)
+
+        for i, body in enumerate(bodies) :
+            
+            prefix = '%s%d.' % ('report.body.tmp.', i)
+            body_file_fd, body_file_path = tempfile.mkstemp(suffix='.html', prefix=prefix)
+            with closing(os.fdopen(body_file_fd, 'wb')) as body_file:
+                body_file.write(body.encode())
+
+            chrome_browser.navigate_to('file://%s' % (body_file_path),True)
+            ready = "document.readyState === 'complete'"
+            res = chrome_browser._wait_ready(ready)
+
+            param = self.set_params(
+                        landscape,
+                        header,
+                        footer,
+                        specific_paperformat_args)
+            # import pdb
+            # pdb.set_trace()
+            x = {'height': 297.0,
+                'width': 210.0,
+                'bottom_space':0.3,
+                'top_space':0.1,
+                'margin_top_space':0.8,
+                'margin_bottom_space':0.8
+            }
+            pdf_datas = chrome_browser.print_to_pdf(params=x)
+            pdf_data = PdfFileReader(io.BytesIO(base64.b64decode(pdf_datas)))
+
+            for page in pdf_data.pages:
+                merged_pdf.addPage(page)
+
+        with open(pdf_report_path, 'wb') as pdf_document:
+            merged_pdf.write(pdf_document)
+
+        with open(pdf_report_path, 'rb') as pdf_document:
+            pdf_content = pdf_document.read()
+
+        return pdf_content
+
+    # def get_htmltopdf(self, argv):
+    #     """ This method is main method of program
+    #     ** argv = arguments like body footer and header
+
+    #     """
+    #     lenOfArgv = len(argv)
+    #     if argv[lenOfArgv-2] and argv[lenOfArgv-1] == "False":
+    #         header_file = False
+    #         footer_file = False
+    #     else:
+    #         header_file = argv[lenOfArgv-2]
+    #         footer_file = argv[lenOfArgv-1]
+    #     bodies =[]
+    #     for i in range(1,lenOfArgv-2):
+    #         bodies.append(argv[i])
+
+    #     landscape = False
+    #     specific_paperformat_args = self.get_paperformat()
+
+    #     self._run_print_to_pdf(bodies,header=header_file,
+    #                             footer=footer_file,
+    #                             landscape=landscape,
+    #                             specific_paperformat_args=specific_paperformat_args)
 
     @api.model
     def _get_report_from_name(self, report_name):
@@ -709,7 +889,7 @@ class IrActionsReport(models.Model):
                     self.name,
                 ))
 
-            pdf_content = self._run_wkhtmltopdf(
+            pdf_content = self._run_print_to_pdf(
                 bodies,
                 report_ref=report_ref,
                 header=header,
