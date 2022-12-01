@@ -56,31 +56,36 @@ function compileSetting(el, params) {
         help: toStringExpression(el.getAttribute("help") || ""),
         companySpecific: el.getAttribute("company_specific") === "1" || "false",
         documentation: toStringExpression(el.getAttribute("documentation") || ""),
-        addLabel: el.hasAttribute("nolabel") ? el.getAttribute("nolabel") !== "1" : true,
         record: `props.record`,
     });
+    let addLabel = true;
     params.labels = [];
     Array.from(el.children).forEach((child, index) => {
         if (getTag(child, true) === "field" && index === 0) {
             const fieldSlot = createElement("t", { "t-set-slot": "fieldSlot" });
             const field = this.compileNode(child, params);
             if (field) {
-                setting.setAttribute("fieldInfo", field.getAttribute("fieldInfo"));
                 append(fieldSlot, field);
+                setting.setAttribute("fieldInfo", field.getAttribute("fieldInfo"));
+
+                addLabel = child.hasAttribute("nolabel")
+                    ? child.getAttribute("nolabel") !== "1"
+                    : true;
+                const fieldName = child.getAttribute("name");
+                setting.setAttribute("fieldName", toStringExpression(fieldName));
+                setting.setAttribute(
+                    "fieldId",
+                    toStringExpression(child.getAttribute("field_id") || fieldName)
+                );
             } else {
                 throw new Error("First Field must exist/be visible");
             }
-            const fieldName = child.getAttribute("name");
-            setting.setAttribute("fieldName", toStringExpression(fieldName));
-            setting.setAttribute(
-                "fieldId",
-                toStringExpression(child.getAttribute("field_id") || fieldName)
-            );
             append(setting, fieldSlot);
         } else {
             append(setting, this.compileNode(child, params));
         }
     });
+    setting.setAttribute("addLabel", addLabel);
     setting.setAttribute("labels", JSON.stringify(params.labels));
     return setting;
 }

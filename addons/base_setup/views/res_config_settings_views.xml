@@ -56,8 +56,8 @@
                         <div id="companies">
                             <block title="Companies" name="companies_setting_container">
                                     <field name="company_id" invisible="1"/>
-                                <setting id="company_details_settings" nolabel="1">
-                                        <field name="company_name" class="fw-bold"/>
+                                <setting id="company_details_settings">
+                                        <field name="company_name" nolabel="1" class="fw-bold"/>
                                         <br/>
                                         <field name="company_informations" class="text-muted" style="width: 90%;"/>
                                         <br/>
@@ -76,8 +76,8 @@
                                                 <button name="%(web.action_report_externalpreview)d" string="Preview Document" type="action" class="oe_link" groups="base.group_no_one" icon="fa-arrow-right"/>
                                         </div>
                                 </setting>
-                                <setting id="companies_setting" nolabel="1">
-                                        <field name='company_count' class="w-auto ps-1 fw-bold"/>
+                                <setting id="companies_setting">
+                                        <field name='company_count' nolabel="1" class="w-auto ps-1 fw-bold"/>
                                         <span class='o_form_label' attrs="{'invisible':[('company_count', '&gt;', '1')]}">
                                             Company
                                         </span>
