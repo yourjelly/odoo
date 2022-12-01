@@ -19,9 +19,3 @@ export class FormLabelHighlightText extends FormLabel {
 
 FormLabelHighlightText.template = "web.FormLabelHighlightText";
 FormLabelHighlightText.components = { HighlightText };
-FormLabelHighlightText.props = {
-    ...FormLabel.props,
-    fieldInfo: { type: Object, optional: true },
-    record: { type: Object, optional: true },
-    fieldName: { type: String, optional: true },
-};
