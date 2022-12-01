@@ -480,7 +480,7 @@ export class Messaging {
         return thread;
     }
 
-    fetchChatterData(
+    async fetchChatterData(
         resId,
         resModel,
         requestList = ["activities", "followers", "attachments", "messages"]
