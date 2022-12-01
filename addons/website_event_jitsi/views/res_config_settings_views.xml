@@ -7,7 +7,7 @@
         <field name="arch" type="xml">
             <xpath expr="//block[@name='events_setting_container']" position="inside">
                 <setting>
-                        <field name="jitsi_server_domain" placeholder="meet.jit.si"/>
+                    <field name="jitsi_server_domain" placeholder="meet.jit.si"/>
                 </setting>
             </xpath>
         </field>

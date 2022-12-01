@@ -10,48 +10,44 @@
                 <xpath expr="//form" position="inside">
                     <app data-string="Events" string="Events" name="event" groups="event.group_event_manager">
                         <block title="Events" name="events_setting_container">
-                            <setting
-                                id="manage_tracks"
-                                title="Add a navigation menu to your event web pages with schedule, tracks, a track proposal form, etc."
-                                string="Schedule &amp; Tracks"
-                                help="Manage &amp; publish a schedule with tracks">
-                                    <field name="module_website_event_track"/>
-                                    <div class="mt-3 d-flex" attrs="{'invisible': [('module_website_event_track', '=', False)]}">
-                                        <field name="module_website_event_track_live" class="w-auto"/>
-                                        <div>
-                                            <label string="Live Broadcast" for="module_website_event_track_live"/><br/>
-                                            <span class="text-muted">Air your tracks online through a Youtube integration</span>
-                                        </div>
+                            <setting id="manage_tracks" title="Add a navigation menu to your event web pages with schedule, tracks, a track proposal form, etc." string="Schedule &amp; Tracks" help="Manage &amp; publish a schedule with tracks">
+                                <field name="module_website_event_track"/>
+                                <div class="mt-3 d-flex" attrs="{'invisible': [('module_website_event_track', '=', False)]}">
+                                    <field name="module_website_event_track_live" class="w-auto"/>
+                                    <div>
+                                        <label string="Live Broadcast" for="module_website_event_track_live"/><br/>
+                                        <span class="text-muted">Air your tracks online through a Youtube integration</span>
                                     </div>
-                                    <div class="mt-3 d-flex" attrs="{'invisible': [('module_website_event_track', '=', False)]}">
-                                        <field name="module_website_event_track_quiz" class="w-auto"/>
-                                        <div>
-                                            <label string="Event Gamification" for="module_website_event_track_quiz"/><br/>
-                                            <span class="text-muted">Share a quiz to your attendees once a track is over</span>
-                                        </div>
+                                </div>
+                                <div class="mt-3 d-flex" attrs="{'invisible': [('module_website_event_track', '=', False)]}">
+                                    <field name="module_website_event_track_quiz" class="w-auto"/>
+                                    <div>
+                                        <label string="Event Gamification" for="module_website_event_track_quiz"/><br/>
+                                        <span class="text-muted">Share a quiz to your attendees once a track is over</span>
                                     </div>
+                                </div>
                             </setting>
                             <setting string="Community Chat Rooms" help="Foster interactions between attendees by creating virtual conference rooms">
-                                        <field name="module_website_event_meet"/>
+                                <field name="module_website_event_meet"/>
                             </setting>
                             <setting string="Online Exhibitors" help="Display Sponsors and Exhibitors on your event pages">
-                                        <field name="module_website_event_exhibitor"/>
+                                <field name="module_website_event_exhibitor"/>
                             </setting>
                             <setting string="Booth Management" help="Create Booths and manage their reservations">
-                                        <field name="module_event_booth"/>
+                                <field name="module_event_booth"/>
                             </setting>
                         </block>
                         <block title="Registration" name="registration_setting_container">
                             <setting id="sell_tickets" help="Sell tickets with sales orders">
-                                    <field name="module_event_sale"/>
+                                <field name="module_event_sale"/>
                             </setting>
                             <setting name="event_settings_website" help="Sell tickets on your website">
-                                    <field name="module_website_event_sale"/>
+                                <field name="module_website_event_sale"/>
                             </setting>
                         </block>
                         <block title="Attendance" name="attendance_setting_container">
                             <setting id="event_barcode" company_dependent="1" help="Scan badges to confirm attendances">
-                                    <field name="module_event_barcode" widget="upgrade_boolean"/>
+                                <field name="module_event_barcode" widget="upgrade_boolean"/>
                             </setting>
                         </block>
                     </app>

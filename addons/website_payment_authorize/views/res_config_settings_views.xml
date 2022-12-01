@@ -8,7 +8,7 @@
         <field name="arch" type="xml">
             <setting id="paypal_settings" position="before">
                 <setting help="Charge order directly or authorize at the order and capture the payment later on, manually.">
-                                    <field name="authorize_capture_method" class="w-75" widget="radio" />
+                    <field name="authorize_capture_method" class="w-75" widget="radio" />
                 </setting>
             </setting>
         </field>

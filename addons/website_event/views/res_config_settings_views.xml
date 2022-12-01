@@ -8,7 +8,7 @@
         <field name="arch" type="xml"> 
             <setting name="event_settings_website" position="after">
                 <setting string="Questions" help="Ask questions to attendees when registering online">
-                        <field name="module_website_event_questions"/>
+                    <field name="module_website_event_questions"/>
                 </setting>
             </setting>
         </field>
