@@ -31,7 +31,7 @@ function compileApp(el, params) {
 }
 
 function compileBlock(el, params) {
-    const settingsContainer = createElement("SettingsContainer", {
+    const settingsContainer = createElement("SettingsBlock", {
         title: toStringExpression(el.getAttribute("title") || ""),
         tip: toStringExpression(el.getAttribute("help") || ""),
     });
@@ -42,12 +42,8 @@ function compileBlock(el, params) {
 }
 
 function compileSetting(el, params) {
-    const type = el.getAttribute("type");
-    let component = "Setting";
-    if (type === "header") {
-        component = "SettingHeader";
-    }
-    const setting = createElement(component, {
+    const componentName = el.getAttribute("type") === "header" ? "SettingHeader" : "Setting";
+    const setting = createElement(componentName, {
         title: toStringExpression(el.getAttribute("title") || ""),
         help: toStringExpression(el.getAttribute("help") || ""),
         companyDependent: el.getAttribute("company_dependent") === "1" || "false",

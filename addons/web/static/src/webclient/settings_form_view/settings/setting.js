@@ -16,11 +16,13 @@ export class Setting extends Component {
         this.labels.push(this.labelString, this.props.help);
         if (this.props.fieldName) {
             this.fieldType = this.props.record.fields[this.props.fieldName].type;
-            if (typeof this.props.fieldInfo.modifiers.readonly === "boolean") {
-                this.labelClassName = "o_form_label";
+            if (
+                typeof this.props.fieldInfo.modifiers.readonly === "boolean" &&
+                this.props.fieldInfo.modifiers.readonly === true
+            ) {
+                this.notMuttedLabel = true;
             }
         }
-        this.displayCompanySpecificIcon = session.display_switch_company_menu;
     }
 
     get classNames() {
@@ -36,6 +38,12 @@ export class Setting extends Component {
         return classNames;
     }
 
+    get displayCompanyDependentIcon() {
+        return (
+            this.labelString && this.props.companyDependent && session.display_switch_company_menu
+        );
+    }
+
     get labelString() {
         if (this.props.string) {
             return this.props.string;
@@ -48,13 +56,12 @@ export class Setting extends Component {
     }
 
     get url() {
-        if (
-            this.props.documentation.startsWith("https://") ||
-            this.props.documentation.startsWith("http://")
-        ) {
+        if (this.props.documentation.startsWith("^https?://")) {
             return this.props.documentation;
         } else {
-            const serverVersion = session.server_version;
+            const serverVersion = session.server_version.includes("alpha")
+                ? "master"
+                : session.server_version;
             return "https://www.odoo.com/documentation/" + serverVersion + this.props.documentation;
         }
     }
@@ -89,6 +96,6 @@ Setting.props = {
     documentation: { type: String, optional: 1 },
     string: { type: String, optional: 1 },
     addLabel: { type: Boolean },
-    companySpecific: { type: Boolean, optional: 1 },
+    companyDependent: { type: Boolean, optional: 1 },
     slots: { type: Object, optional: 1 },
 };

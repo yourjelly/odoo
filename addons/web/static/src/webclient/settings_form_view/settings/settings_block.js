@@ -1,11 +1,11 @@
 /** @odoo-module **/
 
-import { HighlightText } from "./../highlight_text/highlight_text";
+import { HighlightText } from "../highlight_text/highlight_text";
 import { escapeRegExp } from "@web/core/utils/strings";
 
 import { Component, useState, useRef, useEffect, onWillRender, useChildSubEnv } from "@odoo/owl";
 
-export class SettingsContainer extends Component {
+export class SettingsBlock extends Component {
     setup() {
         this.state = useState({
             search: this.env.searchState,
@@ -51,11 +51,11 @@ export class SettingsContainer extends Component {
         this.settingsContainerRef.el.classList.toggle("d-none", force);
     }
 }
-SettingsContainer.template = "web.SettingsContainer";
-SettingsContainer.components = {
+SettingsBlock.template = "web.SettingsBlock";
+SettingsBlock.components = {
     HighlightText,
 };
-SettingsContainer.props = {
+SettingsBlock.props = {
     title: { type: String, optional: 1 },
     tip: { type: String, optional: 1 },
     slots: Object,

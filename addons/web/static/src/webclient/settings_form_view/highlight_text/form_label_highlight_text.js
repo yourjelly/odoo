@@ -15,21 +15,13 @@ export class FormLabelHighlightText extends FormLabel {
             this.upgradeEnterprise = true;
         }
     }
-    get className() {
-        if (this.props.className) {
-            return this.props.className;
-        }
-        return super.className;
-    }
 }
 
 FormLabelHighlightText.template = "web.FormLabelHighlightText";
 FormLabelHighlightText.components = { HighlightText };
 FormLabelHighlightText.props = {
+    ...FormLabel.props,
     fieldInfo: { type: Object, optional: true },
-    className: { type: String, optional: true },
     record: { type: Object, optional: true },
     fieldName: { type: String, optional: true },
-    string: { type: String },
-    id: { type: String },
 };

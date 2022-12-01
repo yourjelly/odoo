@@ -6,7 +6,7 @@ import { FormLabelHighlightText } from "./highlight_text/form_label_highlight_te
 import { HighlightText } from "./highlight_text/highlight_text";
 import { Setting } from "./settings/setting";
 import { SettingHeader } from "./settings/setting_header";
-import { SettingsContainer } from "./settings/settings_container";
+import { SettingsBlock } from "./settings/settings_block";
 import { SettingsApp } from "./settings/settings_app";
 import { SettingsPage } from "./settings/settings_page";
 
@@ -55,7 +55,7 @@ SettingsFormRenderer.components = {
     ...FormRenderer.components,
     Setting,
     SettingHeader,
-    SettingsContainer,
+    SettingsBlock,
     SettingsPage,
     SettingsApp,
     HighlightText,

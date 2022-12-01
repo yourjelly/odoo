@@ -2,7 +2,7 @@
 
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { SettingsContainer } from "../settings/settings_container";
+import { SettingsBlock } from "../settings/settings_block";
 import { Setting } from "../settings/setting";
 
 import { Component, onWillStart } from "@odoo/owl";
@@ -37,7 +37,7 @@ class ResConfigDevTool extends Component {
 
 ResConfigDevTool.template = "res_config_dev_tool";
 ResConfigDevTool.components = {
-    SettingsContainer,
+    SettingsBlock,
     Setting,
 };
 ResConfigDevTool.props = {
