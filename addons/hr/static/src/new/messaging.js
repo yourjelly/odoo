@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Messaging } from "@mail/new/messaging";
+import { Messaging } from "@mail/new/core/messaging";
 
 import { patch } from "web.utils";
 
