@@ -202,14 +202,10 @@
             <xpath expr="//setting[@id='website_login_documents']" position="replace">
                 <setting
                     id="website_login_documents"
-                    title=" To send invitations in B2B mode, open a contact or select several ones in list view and click on 'Portal Access Management' option in the dropdown menu *Action*.">
-                    <label for="account_on_checkout" string="Sign in/up at checkout"/>
-                    <div class="text-muted">
-                        "Optional" allows guests to register from the order confirmation email to track their order.
-                    </div>
-                    <div class="mt8 ms-4">
+                    title=" To send invitations in B2B mode, open a contact or select several ones in list view and click on 'Portal Access Management' option in the dropdown menu *Action*."
+                    string="Sign in/up at checkout"
+                    help="&quot;Optional&quot; allows guests to register from the order confirmation email to track their order.">
                         <field name="account_on_checkout" class="w-75" widget="radio"/>
-                    </div>
                 </setting>
             </xpath>
 

@@ -7,13 +7,7 @@
         <field name="inherit_id" ref="website_sale.res_config_settings_view_form" />
         <field name="arch" type="xml">
             <xpath expr="//setting[@id='comparator_option_setting']" position="after">
-                <setting id="product_availability_setting">
-                        <div class="o_form_label">
-                            Inventory Defaults
-                        </div>
-                        <div class="text-muted">
-                            How to display products having low quantities (on hand - reserved)
-                        </div>
+                <setting id="product_availability_setting" string="Inventory Defaults" help="How to display products having low quantities (on hand - reserved)">
                         <div class="content-group">
                             <div class="row mt16"
                                 id="website_warehouse_setting"

@@ -6,11 +6,7 @@
         <field name="inherit_id" ref="website.res_config_settings_view_form"/>
         <field name="arch" type="xml">
             <block id="website_email_marketing" position="inside">
-                <setting id="twitter_roller_install_setting">
-                        <span class="o_form_label">Twitter Roller</span>
-                        <div class="text-muted">
-                            Twitter API Credentials
-                        </div>
+                <setting id="twitter_roller_install_setting" string="Twitter Roller" help="Twitter API Credentials">
                         <div class="content-group">
                             <div class="row mt16">
                                 <label class="col-lg-3 o_light_label" string="API Key" for="twitter_api_key"/>
