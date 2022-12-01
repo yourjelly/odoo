@@ -90,7 +90,7 @@
                         </setting>
                     </block>
                 </div>
-                <setting id="companies_setting" position="after">
+                <setting id="document_layout_setting" position="after">
                     <setting string="Email Templates" help="Customize the look and feel of automated emails" id="mail_templates_setting"
                         groups="mail.group_mail_template_editor,base.group_system">
                         <div class="w-50 row">
