@@ -20,14 +20,7 @@
                                 title="Use interview forms tailored to each job position during the recruitment process. Select the form to use in the job position detail form. This relies on the Survey app.">
                                     <field name="module_hr_recruitment_survey"/>
                             </setting>
-                            <setting id="sms">
-                                    <div class="o_form_label">
-                                        Send SMS
-                                        <a href="https://www.odoo.com/documentation/master/applications/marketing/sms_marketing/pricing/pricing_and_faq.html" title="Documentation" class="ms-1 o_doc_link" target="_blank"></a>
-                                    </div>
-                                    <div class="text-muted">
-                                        Send texts to your contacts
-                                    </div>
+                            <setting id="sms" string="Send SMS" documentation="/applications/marketing/sms_marketing/pricing/pricing_and_faq.html" help="Send texts to your contacts">
                                     <widget name="iap_buy_more_credits" service_name="sms" hide_service="1"/>
                             </setting>
                             <setting string="CV Display" help="Display CV on application form" id="display_cv">
