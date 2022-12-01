@@ -32,10 +32,10 @@
                          attrs="{'invisible': [('pos_module_pos_restaurant', '=', False)]}">
                             <field name="pos_iface_printbill"/>
                     </setting>
-                    <setting string="Allow Bill Splitting" help="Split total or order lines"
+                    <setting help="Split total or order lines"
                          id="iface_splitbill"
                          attrs="{'invisible': [('pos_module_pos_restaurant', '=', False)]}">
-                            <field name="pos_iface_splitbill"/>
+                            <field name="pos_iface_splitbill" string="Allow Bill Splitting"/>
                     </setting>
                     <setting string="Kitchen Printers" help="Print orders at the kitchen, at the bar, etc."
                          id="is_order_printer"
