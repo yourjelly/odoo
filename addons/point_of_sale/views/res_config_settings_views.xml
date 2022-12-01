@@ -104,8 +104,12 @@
                                 groups="account.group_account_readonly"
                                 string="Default Temporary Account"
                                 help="Intermediary account used for unidentified customers.">
-                                            <field name="account_default_pos_receivable_account_id" colspan="4" nolabel="1" domain="[('reconcile', '=', True), ('account_type', '=', 'asset_receivable'), ('company_id', '=', company_id)]"/>
+                                        <label string="Default Temporary Account" for="account_default_pos_receivable_account_id"/>
                                         <i class="fa fa-info-circle me-1" title="This setting is common to all PoS." pos-data-toggle="tooltip"/>
+                                        <div class="text-muted">
+                                            Intermediary account used for unidentified customers.
+                                        </div>
+                                            <field name="account_default_pos_receivable_account_id" colspan="4" nolabel="1" domain="[('reconcile', '=', True), ('account_type', '=', 'asset_receivable'), ('company_id', '=', company_id)]"/>
                             </setting>
                             <setting
                                 title="Choose a specific fiscal position at the order depending on the kind of customer (tax exempt, onsite vs. takeaway, etc.)."
@@ -396,7 +400,7 @@
                                 string="Inventory Management"
                                 company_specific="1"
                                 help="Update quantities in stock">
-                                            <field name="update_stock_quantities" colspan="4" nolabel="1" widget="radio"/>
+                                            <field name="update_stock_quantities" colspan="4" widget="radio"/>
                             </setting>
                             <setting string="Limited Products Loading" help="Only load most common products at the opening of the PoS.">
                                     <field name="pos_limited_products_loading"/>

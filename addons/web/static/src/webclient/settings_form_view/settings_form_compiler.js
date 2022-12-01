@@ -57,7 +57,7 @@ function compileSetting(el, params) {
         documentation: toStringExpression(el.getAttribute("documentation") || ""),
         record: `props.record`,
     });
-    const string = toStringExpression(el.getAttribute("string") || "");
+    let string = toStringExpression(el.getAttribute("string") || "");
     let addLabel = true;
     params.labels = [];
     Array.from(el.children).forEach((child, index) => {
@@ -72,12 +72,9 @@ function compileSetting(el, params) {
                     ? child.getAttribute("nolabel") !== "1"
                     : true;
                 const fieldName = child.getAttribute("name");
-                setting.setAttribute(
-                    "string",
-                    child.hasAttribute("string")
-                        ? toStringExpression(child.getAttribute("string"))
-                        : string
-                );
+                string = child.hasAttribute("string")
+                    ? toStringExpression(child.getAttribute("string"))
+                    : string;
                 setting.setAttribute("fieldName", toStringExpression(fieldName));
                 setting.setAttribute(
                     "fieldId",
@@ -91,6 +88,7 @@ function compileSetting(el, params) {
             append(setting, this.compileNode(child, params));
         }
     });
+    setting.setAttribute("string", string);
     setting.setAttribute("addLabel", addLabel);
     setting.setAttribute("labels", JSON.stringify(params.labels));
     return setting;
