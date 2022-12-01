@@ -33,8 +33,8 @@
                             <field name="predictive_lead_scoring_start_date_str" invisible="1"/>
                         <setting
                             title="This can be used to compute statistical probability to close a lead"
-                            name="predictive_lead_setting_container">
-                                <b>Predictive Lead Scoring</b>
+                            name="predictive_lead_setting_container"
+                            string="Predictive Lead Scoring">
                                 <div class="text-muted">
                                     The success rate is computed based on <b>
                                         <field name="predictive_lead_scoring_field_labels" class="d-inline"/>

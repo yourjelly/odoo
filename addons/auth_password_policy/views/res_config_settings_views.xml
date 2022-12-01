@@ -8,7 +8,6 @@
             <!-- add before the Access Rights section -->
             <xpath expr="//setting[@id='allow_import']" position="before">
                 <setting>
-                        <label for="minlength"/>
                         <field name="minlength"/>
                 </setting>
             </xpath>

@@ -10,8 +10,7 @@
                 <xpath expr="//form" position="inside">
                     <app data-string="Fleet" id="fleet" string="Fleet" name="fleet" groups="fleet.fleet_group_manager">
                         <block title="Fleet Management" id="end_contract_setting">
-                            <setting>
-                                    <span class="o_form_label">End Date Contract Alert</span>
+                            <setting string="End Date Contract Alert">
                                     <div class="text-muted content-group mt16">
                                         <span>Send an alert </span>
                                         <field name="delay_alert_contract" class="text-center" style="width: 10%; min-width: 4rem;" />

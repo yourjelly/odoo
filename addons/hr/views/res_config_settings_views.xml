@@ -9,8 +9,7 @@
             <xpath expr="//form" position="inside">
                 <app data-string="Employees" string="Employees" name="hr" groups="hr.group_hr_manager">
                     <block title="Employees" name="employees_setting_container">
-                        <setting id="presence_control_setting" title="Presence of employees">
-                                <span class="o_form_label">Presence Control</span>
+                        <setting id="presence_control_setting" title="Presence of employees" string="Presence Control">
                                 <div class="content-group" name="hr_presence_options">
                                     <div class="d-flex">
                                         <field name="module_hr_attendance" class="ml16"/>

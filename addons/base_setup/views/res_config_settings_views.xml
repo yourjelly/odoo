@@ -102,15 +102,7 @@
 
                         <div id="contacts_settings">
                             <block title="Contacts" name="contacts_setting_container">
-                                <setting id="sms">
-                                            <div class="o_form_label">
-                                            Send SMS
-                                            <a href="https://www.odoo.com/documentation/master/applications/marketing/sms_marketing/pricing/pricing_and_faq.html" title="Documentation" class="ms-1 o_doc_link" target="_blank"></a>
-                                            </div>
-                                            <div class="text-muted">
-                                                Send texts to your contacts
-                                            </div>
-                                </setting>
+                                <setting id="sms" string="Send SMS" documentation="/applications/marketing/sms_marketing/pricing/pricing_and_faq.html" help="Send texts to your contacts" />
                                 <setting help="Automatically enrich your contact base with company data" title="When populating your address book, Odoo provides a list of matching companies. When selecting one item, the company data and logo are auto-filled." id="partner_autocomplete">
                                         <field name="module_partner_autocomplete"/>
                                 </setting>
@@ -139,7 +131,7 @@
                         <setting id="feedback_motivate_setting" help="Add fun feedback and motivate your employees" groups="base.group_no_one">
                                 <field name="show_effect"/>
                         </setting>
-                        </block>
+                    </block>
 
                         <block title="Integrations" name="integration">
                             <setting string="Mail Plugin" documentation="/applications/productivity/mail_plugins.html" help="Integrate with mail client plugins" id="mail_pluggin_setting">
@@ -191,12 +183,8 @@
                         </block>
 
                         <block title="Performance" groups="base.group_no_one" name="performance">
-                            <setting id="profiling_enabled_until">
-                            <label for="profiling_enabled_until"/>
-                            <field name="profiling_enabled_until"/>
-                            <div class="text-muted">
-                                Enable the profiling tool. Profiling may impact performance while being active.
-                            </div>
+                            <setting id="profiling_enabled_until" help="Enable the profiling tool. Profiling may impact performance while being active.">
+                                <field name="profiling_enabled_until"/>
                             </setting>
                         </block>
 
