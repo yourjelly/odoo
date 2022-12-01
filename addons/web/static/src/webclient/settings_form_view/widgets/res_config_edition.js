@@ -5,6 +5,7 @@ import { session } from "@web/session";
 import { Setting } from "@web/webclient/settings_form_view/settings/setting";
 
 import { Component } from "@odoo/owl";
+import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 const { DateTime } = luxon;
 
 /**
@@ -22,5 +23,7 @@ class ResConfigEdition extends Component {
 
 ResConfigEdition.template = "res_config_edition";
 ResConfigEdition.components = { Setting };
-
+ResConfigEdition.props = {
+    ...standardWidgetProps,
+};
 registry.category("view_widgets").add("res_config_edition", ResConfigEdition);

@@ -37,11 +37,14 @@ export class Setting extends Component {
     }
 
     get labelString() {
+        if (this.props.string) {
+            return this.props.string;
+        }
         const label =
             this.props.record &&
             this.props.record.fields[this.props.fieldName] &&
             this.props.record.fields[this.props.fieldName].string;
-        return this.props.string || label || "";
+        return label || "";
     }
 
     get url() {
@@ -74,3 +77,18 @@ Setting.components = {
     HighlightText,
 };
 Setting.template = "web.Setting";
+Setting.props = {
+    labels: { type: Array, optional: 1 },
+    title: { type: String, optional: 1 },
+    fieldId: { type: String, optional: 1 },
+    help: { type: String, optional: 1 },
+    fieldName: { type: String, optional: 1 },
+    fieldInfo: { type: Object, optional: 1 },
+    class: { type: String, optional: 1 },
+    record: { type: Object, optional: 1 },
+    documentation: { type: String, optional: 1 },
+    string: { type: String, optional: 1 },
+    addLabel: { type: Boolean },
+    companySpecific: { type: Boolean, optional: 1 },
+    slots: { type: Object, optional: 1 },
+};

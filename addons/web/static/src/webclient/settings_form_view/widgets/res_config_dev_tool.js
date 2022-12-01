@@ -6,6 +6,7 @@ import { SettingsContainer } from "../settings/settings_container";
 import { Setting } from "../settings/setting";
 
 import { Component, onWillStart } from "@odoo/owl";
+import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 
 /**
  * Widget in the settings that handles the "Developer Tools" section.
@@ -38,6 +39,9 @@ ResConfigDevTool.template = "res_config_dev_tool";
 ResConfigDevTool.components = {
     SettingsContainer,
     Setting,
+};
+ResConfigDevTool.props = {
+    ...standardWidgetProps,
 };
 
 registry.category("view_widgets").add("res_config_dev_tool", ResConfigDevTool);

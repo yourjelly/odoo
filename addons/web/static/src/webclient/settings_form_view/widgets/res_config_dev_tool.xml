@@ -3,7 +3,7 @@
     <div t-name='res_config_dev_tool' owl="1">
         <div id="developer_tool">
             <SettingsContainer title="'Developer Tools'">
-                <Setting id="devel_tool">
+                <Setting addLabel="false">
                         <a t-if="!isDebug" class="d-block" href="?debug=1">Activate the developer mode</a>
                         <a t-if="!isAssets" class="d-block" href="?debug=assets">Activate the developer mode (with assets)</a>
                         <a t-if="!isTests" class="d-block" href="?debug=assets,tests">Activate the developer mode (with tests assets)</a>

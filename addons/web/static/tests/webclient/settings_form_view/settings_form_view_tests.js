@@ -541,7 +541,7 @@ QUnit.module("SettingsFormView", (hooks) => {
             serverData.views = {
                 "res.config.settings,1,form": `
                     <form string="Settings" js_class="base_settings">
-                        <app class="app_settings_block" string="CRM" name="crm">
+                        <app string="CRM" name="crm">
                             <block>
                                 <setting help="this is foo">
                                     <field name="foo"/>
@@ -1291,8 +1291,8 @@ QUnit.module("SettingsFormView", (hooks) => {
         );
 
         const expectedCompiled = `
-            <SettingsPage slots="{NoContentHelper:props.slots.NoContentHelper}" initialTab="props.initialApp" t-slot-scope="settings" modules="[{&quot;key&quot;:&quot;crm&quot;,&quot;string&quot;:&quot;CRM&quot;,&quot;imgurl&quot;:&quot;/crm/static/description/icon.png&quot;,&quot;isVisible&quot;:false}]">
-                <SettingsApp key="\`crm\`" string="\`CRM\`" imgurl="\`/crm/static/description/icon.png\`" isVisible="false" selectedTab="settings.selectedTab">
+            <SettingsPage slots="{NoContentHelper:props.slots.NoContentHelper}" initialTab="props.initialApp" t-slot-scope="settings" modules="[{&quot;key&quot;:&quot;crm&quot;,&quot;string&quot;:&quot;CRM&quot;,&quot;imgurl&quot;:&quot;/crm/static/description/icon.png&quot;}]">
+                <SettingsApp key="\`crm\`" string="\`CRM\`" imgurl="\`/crm/static/description/icon.png\`" selectedTab="settings.selectedTab">
                     <FormLabel id="'display_name'" fieldName="'display_name'" record="props.record" fieldInfo="props.archInfo.fieldNodes['display_name']" className="&quot;highhopes&quot;" string="\`My&quot; little '  Label\`"/>
                     <Field id="'display_name'" name="'display_name'" record="props.record" fieldInfo="props.archInfo.fieldNodes['display_name']"/>
                 </SettingsApp>

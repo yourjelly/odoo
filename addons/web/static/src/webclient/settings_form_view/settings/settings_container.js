@@ -55,3 +55,9 @@ SettingsContainer.template = "web.SettingsContainer";
 SettingsContainer.components = {
     HighlightText,
 };
+SettingsContainer.props = {
+    title: { type: String, optional: 1 },
+    tip: { type: String, optional: 1 },
+    slots: Object,
+    class: { type: String, optional: 1 },
+};

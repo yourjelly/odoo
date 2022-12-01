@@ -3,7 +3,6 @@
 import { append, createElement, getTag } from "@web/core/utils/xml";
 import { FormCompiler } from "@web/views/form/form_compiler";
 import { toStringExpression } from "@web/views/utils";
-import { getModifier } from "@web/views/view_compiler";
 
 function compileSettingsApp(el, params) {
     if (el.getAttribute("notApp") === "1") {
@@ -15,14 +14,12 @@ function compileSettingsApp(el, params) {
         imgurl:
             el.getAttribute("logo") ||
             "/" + el.getAttribute("name") + "/static/description/icon.png",
-        isVisible: getModifier(el, "invisible"),
     };
     params.modules.push(module);
     const settingsApp = createElement("SettingsApp", {
         key: toStringExpression(module.key),
         string: toStringExpression(module.string || ""),
         imgurl: toStringExpression(module.imgurl),
-        isVisible: module.isVisible,
         selectedTab: "settings.selectedTab",
     });
 
