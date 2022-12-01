@@ -73,8 +73,6 @@ function compileSetting(el, params) {
                     "fieldId",
                     toStringExpression(child.getAttribute("field_id") || fieldName)
                 );
-            } else {
-                throw new Error("First Field must exist/be visible");
             }
             append(setting, fieldSlot);
         } else {
