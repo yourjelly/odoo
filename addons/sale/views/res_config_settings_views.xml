@@ -85,17 +85,17 @@
                         </setting>
                     </block>
                     <block title="Quotations &amp; Orders" name="quotation_order_setting_container">
-                        <setting id="sale_config_online_confirmation_sign" company_specific="1" documentation="/applications/sales/sales/send_quotations/get_signature_to_validate.html"
+                        <setting id="sale_config_online_confirmation_sign" company_dependent="1" documentation="/applications/sales/sales/send_quotations/get_signature_to_validate.html"
                                 help="Request an online signature to confirm orders">
                                 <field name="portal_confirmation_sign"/>
                         </setting>
-                        <setting id="sale_config_online_confirmation_pay" company_specific="1" documentation="/applications/sales/sales/send_quotations/get_paid_to_validate.html" help="Request an online payment to confirm orders">
+                        <setting id="sale_config_online_confirmation_pay" company_dependent="1" documentation="/applications/sales/sales/send_quotations/get_paid_to_validate.html" help="Request an online payment to confirm orders">
                                 <field name="portal_confirmation_pay"/>
                                 <div class="mt8" attrs="{'invisible': [('portal_confirmation_pay', '=', False)]}">
                                     <button name='%(payment.action_payment_provider)d' icon="fa-arrow-right" type="action" string="Payment Providers" class="btn-link"/>
                                 </div>
                         </setting>
-                        <setting id="quotation_validity_days" company_specific="1" help="Set a default validity on your quotations">
+                        <setting id="quotation_validity_days" company_dependent="1" help="Set a default validity on your quotations">
                                 <field name="use_quotation_validity_days"/>
                                 <div class="content-group"  attrs="{'invisible': [('use_quotation_validity_days','=',False)]}">
                                     <div class="mt16">

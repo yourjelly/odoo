@@ -26,7 +26,7 @@
                             <setting string="CV Display" help="Display CV on application form" id="display_cv">
                                     <field name="group_applicant_cv_display"/>
                             </setting>
-                            <setting id="recruitment_extract_settings" string="CV Digitization (OCR)" company_specific="1" help="Digitize your CV to extract name and email automatically." title="Use OCR to fill data from a picture of the CV or the file itself">
+                            <setting id="recruitment_extract_settings" string="CV Digitization (OCR)" company_dependent="1" help="Digitize your CV to extract name and email automatically." title="Use OCR to fill data from a picture of the CV or the file itself">
                                     <field name="module_hr_recruitment_extract" widget="upgrade_boolean"/>
                             </setting>
                         </block>

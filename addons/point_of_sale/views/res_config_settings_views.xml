@@ -101,9 +101,7 @@
                                     </div>
                             </setting>
                             <setting
-                                groups="account.group_account_readonly"
-                                string="Default Temporary Account"
-                                help="Intermediary account used for unidentified customers.">
+                                groups="account.group_account_readonly">
                                         <label string="Default Temporary Account" for="account_default_pos_receivable_account_id"/>
                                         <i class="fa fa-info-circle me-1" title="This setting is common to all PoS." pos-data-toggle="tooltip"/>
                                         <div class="text-muted">
@@ -394,7 +392,7 @@
                                 id="update_quantities_stock_setting"
                                 groups="base.group_no_one"
                                 string="Inventory Management"
-                                company_specific="1"
+                                company_dependent="1"
                                 help="Update quantities in stock">
                                             <field name="update_stock_quantities" colspan="4" widget="radio"/>
                             </setting>

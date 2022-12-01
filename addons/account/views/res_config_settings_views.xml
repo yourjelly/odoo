@@ -24,7 +24,7 @@
                         <field name="has_chart_of_accounts" invisible="1"/>
                         <field name="has_accounting_entries" invisible="1"/>
                         <block title="Fiscal Localization" name="fiscal_localization_setting_container" attrs="{'invisible': [('has_accounting_entries','!=',False)]}">
-                            <setting string="Fiscal Localization" company_specific="1" help="Taxes, fiscal positions, chart of accounts &amp; legal statements for your country">
+                            <setting string="Fiscal Localization" company_dependent="1" help="Taxes, fiscal positions, chart of accounts &amp; legal statements for your country">
                                     <div class="content-group">
                                         <div class="row mt16">
                                             <label for="chart_template_id" string="Package" class="col-2 o_light_label"/>
@@ -40,7 +40,7 @@
                             <setting
                                 id="default_taxes"
                                 string="Default Taxes"
-                                company_specific="1"
+                                company_dependent="1"
                                 help="Default taxes applied to local transactions"
                                 title="These taxes are set in any new product created.">
                                     <div class="content-group">
@@ -54,10 +54,10 @@
                                         </div>
                                     </div>
                             </setting>
-                            <setting id="rounding_method" company_specific="1" string="Rounding Method" help="How total tax amount is computed in orders and invoices" title="A rounding per line is advised if your prices are tax-included. That way, the sum of line subtotals equals the total with taxes.">
+                            <setting id="rounding_method" company_dependent="1" string="Rounding Method" help="How total tax amount is computed in orders and invoices" title="A rounding per line is advised if your prices are tax-included. That way, the sum of line subtotals equals the total with taxes.">
                                         <field name="tax_calculation_rounding_method" class="o_light_label mt16" widget="radio"/>
                             </setting>
-                            <setting string="Cash Discount Tax Reduction" company_specific="1" help="When will the tax be reduced when offering a cash discount">
+                            <setting string="Cash Discount Tax Reduction" company_dependent="1" help="When will the tax be reduced when offering a cash discount">
                                         <field name="early_pay_discount_computation"/>
                             </setting>
                             <setting id="taxcloud_settings" string="TaxCloud" help="Compute tax rates based on U.S. ZIP codes">
@@ -72,7 +72,7 @@
                             </setting>
                             <setting
                                 id="tax_exigibility"
-                                company_specific="1"
+                                company_dependent="1"
                                 help="Allow to configure taxes using cash basis"
                                 title="Select this if the taxes should use cash basis, which will create an entry for such taxes on a given account during reconciliation."
                                 groups="account.group_account_user">
@@ -88,12 +88,12 @@
                                         </div>
                                     </div>
                             </setting>
-                            <setting id="tax_fiscal_country_234" string="Fiscal Country" company_specific="1" help="Domestic country of your accounting">
+                            <setting id="tax_fiscal_country_234" string="Fiscal Country" company_dependent="1" help="Domestic country of your accounting">
                                         <field name="account_fiscal_country_id" options="{'no_create': True, 'no_open': True}"/>
                             </setting>
                         </block>
                         <block title="Currencies" name="main_currency_setting_container">
-                            <setting id="main_currency" string="Main Currency" company_specific="1" help="Main currency of your company">
+                            <setting id="main_currency" string="Main Currency" company_dependent="1" help="Main currency of your company">
                                     <div class="content-group">
                                         <div class="row mt16">
                                             <label for="currency_id" class="col-lg-3 o_light_label"/>
@@ -161,7 +161,7 @@
                             <setting id="show_sale_receipts" help="Activate to create sale receipt">
                                     <field name="group_show_sale_receipts" widget="upgrade_boolean"/>
                             </setting>
-                            <setting id="use_invoice_terms" company_specific="1" help="Add your terms &amp; conditions at the bottom of invoices/orders/quotations">
+                            <setting id="use_invoice_terms" company_dependent="1" help="Add your terms &amp; conditions at the bottom of invoices/orders/quotations">
                                     <field name="use_invoice_terms"/>
                                     <div class="content-group" attrs="{'invisible': [('use_invoice_terms','=',False)]}">
                                         <div class="mt16">
@@ -185,7 +185,7 @@
                                         </div>
                                     </div>
                             </setting>
-                            <setting company_specific="1" help="Trigger alerts when creating Invoices and Sales Orders for Partners with a Total Receivable amount exceeding a limit.">
+                            <setting company_dependent="1" help="Trigger alerts when creating Invoices and Sales Orders for Partners with a Total Receivable amount exceeding a limit.">
                                     <field name="account_use_credit_limit"/>
                                     <div class="content-group mt-2" attrs="{'invisible': [('account_use_credit_limit', '=', False)]}">
                                         <div class="row">
@@ -206,7 +206,7 @@
                                 id="collect_customer_payment"
                                 title="If you check this box, you will be able to collect payments using SEPA Direct Debit mandates."
                                 string="SEPA Direct Debit (SDD)"
-                                company_specific="1"
+                                company_dependent="1"
                                 help="Collect customer payments in one-click using Euro SEPA Service">
                                     <field name="module_account_sepa_direct_debit" class="oe_inline" widget="upgrade_boolean"/>
                                     <div class="content-group" attrs="{'invisible': [('module_account_sepa_direct_debit', '=', False)]}">
@@ -219,7 +219,7 @@
                                 id="qr_code_invoices"
                                 title="Add a QR-code to your invoices so that your customers can pay instantly with their mobile banking application."
                                 string="QR Codes"
-                                company_specific="1"
+                                company_dependent="1"
                                 help="Add a payment QR-code to your invoices">
                                     <field name="qr_code" class="oe_inline"/>
                             </setting>
@@ -230,13 +230,13 @@
                             </setting>
                         </block>
                         <block title="Vendor Payments" id="print_vendor_checks_setting_container">
-                            <setting id="print_checks" groups="account.group_account_user" string="Checks" company_specific="1" help="Print checks to pay your vendors">
+                            <setting id="print_checks" groups="account.group_account_user" string="Checks" company_dependent="1" help="Print checks to pay your vendors">
                                     <field name="module_account_check_printing"/>
                             </setting>
                             <setting
                                 id="sepa_payments"
                                 title="If you check this box, you will be able to register your payment using SEPA."
-                                company_specific="1"
+                                company_dependent="1"
                                 help="Pay your bills in one-click using Euro SEPA Service">
                                     <field name="module_account_sepa" widget="upgrade_boolean"/>
                             </setting>
@@ -363,7 +363,7 @@
                         <block title="Storno Accounting" id="storno">
                             <setting
                                 id="enable_storno_accounting"
-                                company_specific="1"
+                                company_dependent="1"
                                 help="Use Storno accounting"
                                 title="Allows you to use Storno accounting.">
                                     <field name="account_storno"/>
@@ -376,7 +376,7 @@
                                 <p style="margin-bottom: 0"> - A new field « Total (tax inc.) » to speed up and control the encoding by automating line creation with the right account &amp; tax.</p>
                                 <p style="margin-bottom: 0"> - A default Customer Invoice / Vendor Bill date will be suggested.</p>
                             </div>
-                            <setting company_specific="1">
+                            <setting company_dependent="1">
                                         <field name="quick_edit_mode" placeholder="Disabled"/>
                             </setting>
                         </block>

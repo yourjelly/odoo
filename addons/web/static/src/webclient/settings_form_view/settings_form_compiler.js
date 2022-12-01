@@ -4,7 +4,7 @@ import { append, createElement, getTag } from "@web/core/utils/xml";
 import { FormCompiler } from "@web/views/form/form_compiler";
 import { toStringExpression } from "@web/views/utils";
 
-function compileSettingsApp(el, params) {
+function compileApp(el, params) {
     if (el.getAttribute("notApp") === "1") {
         return;
     }
@@ -30,7 +30,7 @@ function compileSettingsApp(el, params) {
     return settingsApp;
 }
 
-function compileSettingsSection(el, params) {
+function compileBlock(el, params) {
     const settingsContainer = createElement("SettingsContainer", {
         title: toStringExpression(el.getAttribute("title") || ""),
         tip: toStringExpression(el.getAttribute("help") || ""),
@@ -50,7 +50,7 @@ function compileSetting(el, params) {
     const setting = createElement(component, {
         title: toStringExpression(el.getAttribute("title") || ""),
         help: toStringExpression(el.getAttribute("help") || ""),
-        companySpecific: el.getAttribute("company_specific") === "1" || "false",
+        companyDependent: el.getAttribute("company_dependent") === "1" || "false",
         documentation: toStringExpression(el.getAttribute("documentation") || ""),
         record: `props.record`,
     });
@@ -169,8 +169,8 @@ export class SettingsFormCompiler extends FormCompiler {
         super.setup();
         this.compilers.unshift(
             { selector: "form", fn: compileForm },
-            { selector: "app", fn: compileSettingsApp },
-            { selector: "block", fn: compileSettingsSection },
+            { selector: "app", fn: compileApp },
+            { selector: "block", fn: compileBlock },
             { selector: "setting", fn: compileSetting },
             // search terms and highlight :
             { selector: "label", fn: compileLabel, doNotCopyAttributes: true },

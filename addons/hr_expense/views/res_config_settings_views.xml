@@ -32,15 +32,15 @@
                             <setting string="Reimburse in Payslip" help="Reimburse expenses in payslips" id="hr_payroll_accountant">
                                     <field name="module_hr_payroll_expense" widget="upgrade_boolean"/>
                             </setting>
-                            <setting id="expense_extract_settings" string="Expense Digitalization (OCR)" company_specific="1" help="Digitalize your receipts with OCR and Artificial Intelligence" title="use OCR to fill data from a picture of the bill">
+                            <setting id="expense_extract_settings" string="Expense Digitalization (OCR)" company_dependent="1" help="Digitalize your receipts with OCR and Artificial Intelligence" title="use OCR to fill data from a picture of the bill">
                                     <field name="module_hr_expense_extract" widget="upgrade_boolean"/>
                             </setting>
                         </block>
                         <block title="Default Journals">
-                            <setting company_specific="1" help="Default accounting journal for expenses paid by employees." string="Employee Expense Journal">
+                            <setting company_dependent="1" help="Default accounting journal for expenses paid by employees." string="Employee Expense Journal">
                                         <field name="expense_journal_id"/>
                             </setting>
-                            <setting company_specific="1" string="Company Expense Journal" help="Default accounting journal for expenses paid by the company.">
+                            <setting company_dependent="1" string="Company Expense Journal" help="Default accounting journal for expenses paid by the company.">
                                         <field name="company_expense_journal_id"/>
                             </setting>
                         </block>

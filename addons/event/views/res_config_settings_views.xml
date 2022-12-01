@@ -50,7 +50,7 @@
                             </setting>
                         </block>
                         <block title="Attendance" name="attendance_setting_container">
-                            <setting id="event_barcode" company_specific="1" help="Scan badges to confirm attendances">
+                            <setting id="event_barcode" company_dependent="1" help="Scan badges to confirm attendances">
                                     <field name="module_event_barcode" widget="upgrade_boolean"/>
                             </setting>
                         </block>

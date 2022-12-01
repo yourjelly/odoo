@@ -10,7 +10,7 @@
                 <setting
                     id="vies_service_setting"
                     help="Verify VAT numbers using the European VIES service"
-                    company_specific="1"
+                    company_dependent="1"
                     title="If this checkbox is ticked, you will not be able to save a contact if its VAT number cannot be verified by the European VIES service.">
                         <field name="vat_check_vies"/>
                 </setting>

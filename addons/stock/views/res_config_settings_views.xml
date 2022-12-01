@@ -51,15 +51,15 @@
                             </setting>
                         </block>
                         <block title="Barcode" name="barcode_setting_container">
-                            <setting id="process_operations_barcodes" help="Process operations faster with barcodes" company_specific="1" documentation="/applications/inventory_and_mrp/inventory/barcode/setup/software.html">
+                            <setting id="process_operations_barcodes" help="Process operations faster with barcodes" company_dependent="1" documentation="/applications/inventory_and_mrp/inventory/barcode/setup/software.html">
                                     <field name="module_stock_barcode" widget="upgrade_boolean"/>
                             </setting>
                         </block>
                         <block title="Shipping" name="shipping_setting_container">
-                            <setting id="stock_move_email" company_specific="1" string="Email Confirmation" help="Send an automatic confirmation email when Delivery Orders are done">
+                            <setting id="stock_move_email" company_dependent="1" string="Email Confirmation" help="Send an automatic confirmation email when Delivery Orders are done">
                                     <field name="stock_move_email_validation"/>
                             </setting>
-                            <setting id="stock_sms" company_specific="1" help="Send an automatic confirmation SMS Text Message when Delivery Orders are done">
+                            <setting id="stock_sms" company_dependent="1" help="Send an automatic confirmation SMS Text Message when Delivery Orders are done">
                                     <field name="module_stock_sms"/>
                             </setting>
                             <setting id="signature_delivery_orders" help="Require a signature on your delivery orders">

@@ -13,7 +13,7 @@
                     <field name="company_currency_id" invisible="1"/>
                     <field name="po_lock" invisible="1"/>
                     <block title="Orders" name="purchase_setting_container">
-                        <setting id="po_order_approval" company_specific="1" help="Request managers to approve orders above a minimum amount">
+                        <setting id="po_order_approval" company_dependent="1" help="Request managers to approve orders above a minimum amount">
                                 <field name="po_order_approval"/>
                                 <div class="content-group" attrs="{'invisible': [('po_order_approval', '=', False)]}">
                                     <div class="row mt16">

@@ -10,11 +10,11 @@
                 <app data-string="Timesheets" string="Timesheets" name="hr_timesheet" groups="hr_timesheet.group_timesheet_manager" id="timesheets">
                     <block title="Time Encoding" name="time_encoding_setting_container">
                         <setting
-                            id="time_mode_setting" company_specific="1"
+                            id="time_mode_setting" company_dependent="1"
                             attrs="{'invisible':[('project_time_mode_id', '!=', False)]}">
                                         <field name="project_time_mode_id" options="{'no_create': True, 'no_open': True}"/>
                         </setting>
-                        <setting company_specific="1" help="Time unit used to record your timesheets" id="time_unit_timesheets_setting">
+                        <setting company_dependent="1" help="Time unit used to record your timesheets" id="time_unit_timesheets_setting">
                                         <field name="timesheet_encode_uom_id" options="{'no_create': True, 'no_open': True}" required="1" class="col-lg-5 ps-0"/>
                                         <field name="is_encode_uom_days" invisible="1"/>
                         </setting>
@@ -42,16 +42,16 @@
                         </setting>
                     </block>
                     <block title="Timesheets Control">
-                        <setting id="reminder_user_allow" company_specific="1" help="Send a periodical email reminder to timesheets users that still have timesheets to encode">
+                        <setting id="reminder_user_allow" company_dependent="1" help="Send a periodical email reminder to timesheets users that still have timesheets to encode">
                                 <field name="reminder_user_allow" widget="upgrade_boolean"/>
                         </setting>
-                        <setting id="reminder_manager_allow" company_specific="1" help="Send a periodical email reminder to timesheets managers that still have timesheets to validate">
+                        <setting id="reminder_manager_allow" company_dependent="1" help="Send a periodical email reminder to timesheets managers that still have timesheets to validate">
                                 <field name="reminder_manager_allow" widget="upgrade_boolean"/>
                         </setting>
                     </block>
                     <div name="section_leaves">
                         <block title="Time Off" name="timesheet_control">
-                            <setting company_specific="1" help="Generate timesheets upon time off validation" id="timesheet_off_validation_setting">
+                            <setting company_dependent="1" help="Generate timesheets upon time off validation" id="timesheet_off_validation_setting">
                                     <field name="module_project_timesheet_holidays"/>
                             </setting>
                         </block>

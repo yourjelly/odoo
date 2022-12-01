@@ -11,7 +11,7 @@
                      attrs="{'invisible': [('country_code', '!=', 'ES')]}">
                         <!-- Invisible fields -->
                         <field name="l10n_es_edi_certificate_ids" invisible="1"/>
-                    <setting string="Registro de Libros connection SII" company_specific="1">
+                    <setting string="Registro de Libros connection SII" company_dependent="1">
                             <div class="content-group">
                                 <div class="mt16">
                                     <label for="l10n_es_edi_tax_agency" class="o_light_label"/>
