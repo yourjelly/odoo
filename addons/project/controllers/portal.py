@@ -143,8 +143,10 @@ class ProjectCustomerPortal(CustomerPortal):
         cache_hashes = {
             "translations": translation_hash,
         }
-
-        project_company = project.company_id
+        if request.env.user.share:
+            project_company = project.company_id or request.env["res.company"].search([('active', '=', True)], limit=1)
+        else:
+            project_company = project.company_id or request.env.user.company_id
         session_info.update(
             cache_hashes=cache_hashes,
             action_name=project.action_project_sharing(),

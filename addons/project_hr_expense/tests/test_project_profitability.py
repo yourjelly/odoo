@@ -41,7 +41,7 @@ class TestProjectHrExpenseProfitability(TestProjectProfitabilityCommon, TestProj
             'employee_id': self.expense_employee.id,
             'product_id': self.product_a.id,
             'unit_amount': 350.00,
-            'company_id': self.project.company_id.id,
+            'company_id': self.expense_employee.company_id.id,
             'analytic_distribution': {self.project.analytic_account_id.id: 100},
         })
 

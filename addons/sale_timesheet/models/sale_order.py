@@ -241,7 +241,7 @@ class SaleOrderLine(models.Model):
 
     def _timesheet_create_project(self):
         project = super()._timesheet_create_project()
-        project_uom = project.timesheet_encode_uom_id
+        project_uom = self.env.user.company_id.timesheet_encode_uom_id
         uom_ids = set(project_uom + self.order_id.order_line.mapped('product_uom'))
         uom_unit = self.env.ref('uom.product_uom_unit')
         uom_hour = self.env.ref('uom.product_uom_hour')

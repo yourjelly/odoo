@@ -12,10 +12,26 @@ class ProjectCustomerPortal(CustomerPortal):
 
     def _prepare_project_sharing_session_info(self, project, task=None):
         session_info = super()._prepare_project_sharing_session_info(project, task)
-
-        company = project.company_id
+        line = request.env['account.analytic.line'].sudo().search([('id', '=', project.id)], limit=1)
+        if line: # the project contains timesheets
+            company = project.company_id or line.company_id
+        elif request.env.user.share: # the user is a portal user
+            company = project.company_id or request.env["res.company"].sudo().search([('active', '=', True)], limit=1)
+        else: # the user is an internal user
+            company = project.company_id or request.env.user.sudo().company_id
         timesheet_encode_uom = company.timesheet_encode_uom_id
         project_time_mode_uom = company.project_time_mode_id
+        session_info.update(
+            user_companies={
+                'current_company': company.id,
+                'allowed_companies': {
+                    company.id: {
+                        'id': company.id,
+                        'name': company.name,
+                    },
+                },
+            },
+        )
         session_info['user_companies']['allowed_companies'][company.id].update(
             timesheet_uom_id=timesheet_encode_uom.id,
             timesheet_uom_factor=project_time_mode_uom._compute_quantity(

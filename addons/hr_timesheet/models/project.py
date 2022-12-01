@@ -141,7 +141,7 @@ class Project(models.Model):
             ['project_id', 'product_uom_id'],
             lazy=False)
         timesheet_time_dict = defaultdict(list)
-        uom_ids = set(self.timesheet_encode_uom_id.ids)
+        uom_ids = set(self.env.company.timesheet_encode_uom_id.ids)
 
         for result in timesheets_read_group:
             uom_id = result['product_uom_id'] and result['product_uom_id'][0]
@@ -155,11 +155,11 @@ class Project(models.Model):
             # we convert all of them to the reference unit
             # if the timesheet has no product_uom_id then we take the one of the project
             total_time = sum([
-                unit_amount * uoms_dict.get(product_uom_id, project.timesheet_encode_uom_id).factor_inv
+                unit_amount * uoms_dict.get(product_uom_id, self.env.company.timesheet_encode_uom_id).factor_inv
                 for product_uom_id, unit_amount in timesheet_time_dict[project.id]
             ], 0.0)
             # Now convert to the proper unit of measure set in the settings
-            total_time *= project.timesheet_encode_uom_id.factor
+            total_time *= self.env.company.timesheet_encode_uom_id.factor
             project.total_timesheet_time = int(round(total_time))
 
     @api.depends('timesheet_ids')

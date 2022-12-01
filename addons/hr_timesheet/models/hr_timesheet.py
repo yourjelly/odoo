@@ -123,6 +123,7 @@ class AccountAnalyticLine(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        print("here")
         # Before creating a timesheet, we need to put a valid employee_id in the vals
         default_user_id = self._default_user()
         user_ids = []
@@ -167,6 +168,8 @@ class AccountAnalyticLine(models.Model):
                 continue
             employee_in_id = vals.get('employee_id')
             if employee_in_id:
+                if not vals.get('company_id'):
+                    vals['company_id'] = self.env['hr.employee'].browse(employee_in_id).company_id.id
                 if employee_in_id in valid_employee_per_id:
                     vals['user_id'] = valid_employee_per_id[employee_in_id].sudo().user_id.id   # (A) OK
                     continue
@@ -186,14 +189,19 @@ class AccountAnalyticLine(models.Model):
             if employee_out_id:
                 vals['employee_id'] = employee_out_id
                 vals['user_id'] = user_id
+                if not vals.get('company_id'):
+                    vals['company_id'] = self.env['hr.employee'].browse(employee_in_id).company_id.id
             else:  # ...and raise an error if they fail
                 raise ValidationError(error_msg)
 
+        print("create TS")
         # 5/ Finally, create the timesheets
+        print(vals_list)
         lines = super(AccountAnalyticLine, self).create(vals_list)
         for line, values in zip(lines, vals_list):
             if line.project_id:  # applied only for timesheet
                 line._timesheet_postprocess(values)
+        print("there")
         return lines
 
     def write(self, values):

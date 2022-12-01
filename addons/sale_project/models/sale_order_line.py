@@ -122,7 +122,7 @@ class SaleOrderLine(models.Model):
         if 'product_uom_qty' in values and not self.env.context.get('no_update_planned_hours', False):
             for line in self:
                 if line.task_id and line.product_id.type == 'service':
-                    planned_hours = line._convert_qty_company_hours(line.task_id.company_id)
+                    planned_hours = line._convert_qty_company_hours(line.task_id.company_id or self.env.user.company_id)
                     line.task_id.write({'planned_hours': planned_hours})
         return result
 
@@ -149,7 +149,7 @@ class SaleOrderLine(models.Model):
             'partner_id': self.order_id.partner_id.id,
             'sale_line_id': self.id,
             'active': True,
-            'company_id': self.company_id.id,
+            'company_id': False,
             'allow_billable': True,
         }
 
@@ -210,7 +210,7 @@ class SaleOrderLine(models.Model):
             'project_id': project.id,
             'sale_line_id': self.id,
             'sale_order_id': self.order_id.id,
-            'company_id': project.company_id.id,
+            'company_id': False,
             'user_ids': False,  # force non assigned task, as created as sudo()
         }
 

@@ -217,7 +217,6 @@ class Project(models.Model):
     _inherit = ['portal.mixin', 'mail.alias.mixin', 'mail.thread', 'mail.activity.mixin', 'rating.parent.mixin']
     _order = "sequence, name, id"
     _rating_satisfaction_days = 30  # takes 30 days by default
-    _check_company_auto = True
 
     def _compute_attached_docs_count(self):
         self.env.cr.execute(
@@ -301,7 +300,7 @@ class Project(models.Model):
     active = fields.Boolean(default=True,
         help="If the active field is set to False, it will allow you to hide the project without removing it.")
     sequence = fields.Integer(default=10)
-    partner_id = fields.Many2one('res.partner', string='Customer', auto_join=True, tracking=True, domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
+    partner_id = fields.Many2one('res.partner', string='Customer', auto_join=True, tracking=True)
     partner_email = fields.Char(
         compute='_compute_partner_email', inverse='_inverse_partner_email',
         string='Email', readonly=False, store=True, copy=False)
@@ -309,10 +308,9 @@ class Project(models.Model):
         compute='_compute_partner_phone', inverse='_inverse_partner_phone',
         string="Phone", readonly=False, store=True, copy=False)
     commercial_partner_id = fields.Many2one(related="partner_id.commercial_partner_id")
-    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
-    currency_id = fields.Many2one('res.currency', related="company_id.currency_id", string="Currency", readonly=True)
+    company_id = fields.Many2one('res.company', string='Company', default=False)
+    currency_id = fields.Many2one('res.currency', compute="_compute_currency_id", string="Currency", readonly=True)
     analytic_account_id = fields.Many2one('account.analytic.account', string="Analytic Account", copy=False, ondelete='set null',
-        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", check_company=True,
         help="Analytic account to which this project, its tasks and its timesheets are linked. \n"
             "Track the costs and revenues of your project by setting this analytic account on your related documents (e.g. sales orders, invoices, purchase orders, vendor bills, expenses etc.).\n"
             "This analytic account can be changed on each task individually if necessary.\n"
@@ -574,6 +572,15 @@ class Project(models.Model):
                 project.access_instruction_message = _('Grant employees access to your project or tasks by adding them as followers.')
             else:
                 project.access_instruction_message = ''
+
+    @api.depends('company_id')
+    def _compute_currency_id(self):
+        default_currency_id = self.env.user.company_id.currency_id
+        for project in self:
+            if project.company_id:
+                project.currency_id = project.company_id.currency_id
+            else:
+                project.currency_id = default_currency_id
 
     @api.model
     def _map_tasks_default_valeus(self, task, project):
@@ -969,11 +976,12 @@ class Project(models.Model):
 
     def _create_analytic_account(self):
         for project in self:
+            company_id = project.company_id or self.env.user.company_id
             analytic_account = self.env['account.analytic.account'].create({
                 'name': project.name,
-                'company_id': project.company_id.id,
+                'company_id': company_id.id,
                 'partner_id': project.partner_id.id,
-                'plan_id': project.company_id.analytic_plan_id.id,
+                'plan_id': company_id.analytic_plan_id.id,
                 'active': True,
             })
             project.write({'analytic_account_id': analytic_account.id})
@@ -1054,7 +1062,6 @@ class Task(models.Model):
     _mail_post_access = 'read'
     _order = "priority desc, date_deadline asc, sequence, id desc"
     _primary_email = 'email_from'
-    _check_company_auto = True
 
     @api.model
     def _get_default_partner_id(self, project=None, parent=None):
@@ -1079,7 +1086,7 @@ class Task(models.Model):
     def _default_company_id(self):
         if self._context.get('default_project_id'):
             return self.env['project.project'].browse(self._context['default_project_id']).company_id
-        return self.env.company
+        return False
 
     @api.model
     def _read_group_stage_ids(self, stages, domain, order):
@@ -1129,7 +1136,7 @@ class Task(models.Model):
             "Based on this information you can identify tasks that are stalling and get statistics on the time it usually takes to move tasks from one stage to another.")
     project_id = fields.Many2one('project.project', string='Project', recursive=True,
         compute='_compute_project_id', store=True, readonly=False, precompute=True,
-        index=True, tracking=True, check_company=True, change_default=True)
+        index=True, tracking=True, change_default=True)
     task_properties = fields.Properties('Properties', definition='project_id.task_properties_definition', copy=True)
     # Defines in which project the task will be displayed / taken into account in statistics.
     # Example: 1 task A with 1 subtask B in project P
@@ -1160,8 +1167,7 @@ class Task(models.Model):
         help="The current user's personal task stage.")
     partner_id = fields.Many2one('res.partner',
         string='Customer', recursive=True, tracking=True,
-        compute='_compute_partner_id', store=True, readonly=False,
-        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
+        compute='_compute_partner_id', store=True, readonly=False)
     partner_is_company = fields.Boolean(related='partner_id.is_company', readonly=True)
     commercial_partner_id = fields.Many2one(related='partner_id.commercial_partner_id')
     partner_email = fields.Char(
@@ -1175,7 +1181,7 @@ class Task(models.Model):
     manager_id = fields.Many2one('res.users', string='Project Manager', related='project_id.user_id', readonly=True)
     company_id = fields.Many2one(
         'res.company', string='Company', compute='_compute_company_id', store=True, readonly=False,
-        required=True, copy=True, default=_default_company_id)
+         copy=True, default=_default_company_id)
     color = fields.Integer(string='Color Index')
     project_color = fields.Integer(related='project_id.color', string='Project Color')
     rating_active = fields.Boolean(string='Project Rating Status', related="project_id.rating_active")
@@ -1321,7 +1327,6 @@ class Task(models.Model):
 
     # Account analytic
     analytic_account_id = fields.Many2one('account.analytic.account', ondelete='set null', compute='_compute_analytic_account_id', store=True, readonly=False,
-        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", check_company=True,
         help="Analytic account to which this task and its timesheets are linked.\n"
             "Track the costs and revenues of your task by setting its analytic account on your related documents (e.g. sales orders, invoices, purchase orders, vendor bills, expenses etc.).\n"
             "By default, the analytic account of the project is set. However, it can be changed on each task individually if necessary.")
@@ -1592,15 +1597,16 @@ class Task(models.Model):
 
     @api.depends('create_date', 'date_end', 'date_assign')
     def _compute_elapsed(self):
+        calendar = self.env.user.company_id.resource_calendar_id
         task_linked_to_calendar = self.filtered(
-            lambda task: task.project_id.resource_calendar_id and task.create_date
+            lambda task: task.create_date
         )
         for task in task_linked_to_calendar:
             dt_create_date = fields.Datetime.from_string(task.create_date)
 
             if task.date_assign:
                 dt_date_assign = fields.Datetime.from_string(task.date_assign)
-                duration_data = task.project_id.resource_calendar_id.get_work_duration_data(dt_create_date, dt_date_assign, compute_leaves=True)
+                duration_data = calendar.get_work_duration_data(dt_create_date, dt_date_assign, compute_leaves=True)
                 task.working_hours_open = duration_data['hours']
                 task.working_days_open = duration_data['days']
             else:
@@ -1609,7 +1615,7 @@ class Task(models.Model):
 
             if task.date_end:
                 dt_date_end = fields.Datetime.from_string(task.date_end)
-                duration_data = task.project_id.resource_calendar_id.get_work_duration_data(dt_create_date, dt_date_end, compute_leaves=True)
+                duration_data = calendar.get_work_duration_data(dt_create_date, dt_date_end, compute_leaves=True)
                 task.working_hours_close = duration_data['hours']
                 task.working_days_close = duration_data['days']
             else:
@@ -1660,14 +1666,9 @@ class Task(models.Model):
         for task in self:
             task.subtask_count = len(task._get_all_subtasks())
 
-    @api.onchange('company_id')
-    def _onchange_task_company(self):
-        if self.project_id.company_id != self.company_id:
-            self.project_id = False
-
     @api.depends('project_id.company_id')
     def _compute_company_id(self):
-        for task in self.filtered(lambda task: task.project_id):
+        for task in self.filtered(lambda task: task.project_id and task.project_id.company_id):
             task.company_id = task.project_id.company_id
 
     @api.depends('project_id')
@@ -1969,7 +1970,7 @@ class Task(models.Model):
             if project_id and not "company_id" in vals:
                 vals["company_id"] = self.env["project.project"].browse(
                     project_id
-                ).company_id.id or self.env.company.id
+                ).company_id.id
             if not project_id and ("stage_id" in vals or self.env.context.get('default_stage_id')):
                 vals["stage_id"] = False
 

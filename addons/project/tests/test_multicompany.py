@@ -18,6 +18,9 @@ class TestMultiCompanyCommon(TransactionCase):
         cls.company_b = cls.env['res.company'].create({
             'name': 'Company B'
         })
+        cls.company_c = cls.env['res.company'].create({
+            'name': 'Company C'
+        })
 
         # shared customers
         cls.partner_1 = cls.env['res.partner'].create({
@@ -65,6 +68,22 @@ class TestMultiCompanyCommon(TransactionCase):
             'email': 'manager@companyb.com',
             'company_id': cls.company_b.id,
             'company_ids': [(6, 0, [cls.company_b.id])],
+            'groups_id': [(6, 0, [user_group_employee.id])]
+        })
+        cls.user_employee_company_c = Users.create({
+            'name': 'Employee Company C',
+            'login': 'employee-c',
+            'email': 'employee@companyc.com',
+            'company_id': cls.company_c.id,
+            'company_ids': [(6, 0, [cls.company_c.id])],
+            'groups_id': [(6, 0, [user_group_employee.id])]
+        })
+        cls.user_manager_company_c = Users.create({
+            'name': 'Manager Company C',
+            'login': 'manager-c',
+            'email': 'manager@companyc.com',
+            'company_id': cls.company_c.id,
+            'company_ids': [(6, 0, [cls.company_c.id])],
             'groups_id': [(6, 0, [user_group_employee.id])]
         })
 
@@ -176,6 +195,21 @@ class TestMultiCompanyProject(TestMultiCompanyCommon):
                 })
             ]
         })
+        cls.project_no_company = Project.create({
+            'name': 'Project no Company',
+            'alias_name': 'project+0company',
+            'partner_id': cls.partner_1.id,
+            'type_ids': [
+                (0, 0, {
+                    'name': 'New',
+                    'sequence': 1,
+                }),
+                (0, 0, {
+                    'name': 'Won',
+                    'sequence': 10,
+                })
+            ]
+        })
         # already-existing tasks in company A and B
         Task = cls.env['project.task'].with_context({'mail_create_nolog': True, 'tracking_disable': True})
         cls.task_1 = Task.create({
@@ -188,6 +222,11 @@ class TestMultiCompanyProject(TestMultiCompanyCommon):
             'user_ids': cls.user_employee_company_b,
             'project_id': cls.project_company_b.id
         })
+        cls.task_3 = Task.create({
+            'name': 'Task 3 in Project no company',
+            'project_id': cls.project_no_company.id,
+            'company_id': cls.company_a.id
+        })
 
     def test_create_project(self):
         """ Check project creation in multiple companies """
@@ -196,11 +235,11 @@ class TestMultiCompanyProject(TestMultiCompanyCommon):
                 'name': 'Project Company A',
                 'partner_id': self.partner_1.id,
             })
-            self.assertEqual(project.company_id, self.env.user.company_id, "A newly created project should be in the current user company")
+            self.assertEqual(project.company_id.id, False, "A newly created project should have no company_id")
 
             with self.switch_company(self.company_b):
                 with self.assertRaises(AccessError, msg="Manager can not create project in a company in which he is not allowed"):
-                    project = self.env['project.project'].with_context({'tracking_disable': True}).create({
+                    self.env['project.project'].with_context({'tracking_disable': True}).create({
                         'name': 'Project Company B',
                         'partner_id': self.partner_1.id,
                         'company_id': self.company_b.id
@@ -208,7 +247,7 @@ class TestMultiCompanyProject(TestMultiCompanyCommon):
 
                 # when allowed in other company, can create a project in another company (different from the one in which you are logged)
                 with self.allow_companies([self.company_a.id, self.company_b.id]):
-                    project = self.env['project.project'].with_context({'tracking_disable': True}).create({
+                    self.env['project.project'].with_context({'tracking_disable': True}).create({
                         'name': 'Project Company B',
                         'partner_id': self.partner_1.id,
                         'company_id': self.company_b.id
@@ -216,11 +255,18 @@ class TestMultiCompanyProject(TestMultiCompanyCommon):
 
     def test_generate_analytic_account(self):
         """ Check the analytic account generation, company propagation """
+        """ The company_id of the project must either be False, or the same as the analytic account one """
         with self.sudo('manager-b'):
             with self.allow_companies([self.company_a.id, self.company_b.id]):
                 self.project_company_a._create_analytic_account()
 
-                self.assertEqual(self.project_company_a.company_id, self.project_company_a.analytic_account_id.company_id, "The analytic account created from a project should be in the same company")
+                self.assertEqual(self.project_company_a.company_id, self.project_company_a.analytic_account_id.company_id,
+                                 "The analytic account created from a project should be in the same company if the project has a company_id")
+
+                self.project_no_company.with_user(self.user_manager_company_b)._create_analytic_account()
+
+                self.assertEqual(self.env.user.company_id, self.project_no_company.analytic_account_id.company_id,
+                                 "The analytic account created from a project should be the one of the current user if the project has no company_id")
 
     def test_create_task(self):
         with self.sudo('employee-a'):
@@ -232,9 +278,17 @@ class TestMultiCompanyProject(TestMultiCompanyCommon):
 
             self.assertEqual(task.company_id, self.project_company_a.company_id, "The company of the task should be the one from its project.")
 
+            with Form(self.env['project.task'].with_context({'tracking_disable': True})) as task_form:
+                task_form.name = 'Test Task project with no company'
+                task_form.project_id = self.project_no_company
+            task = task_form.save()
+
+            self.assertEqual(task.company_id.id, False, "The company of the task should be False")
+
     def test_move_task(self):
+
         with self.sudo('employee-a'):
-            with self.allow_companies([self.company_a.id, self.company_b.id]):
+            with self.allow_companies([self.company_a.id, self.company_b.id, self.company_c.id]):
                 with Form(self.task_1) as task_form:
                     task_form.project_id = self.project_company_b
                 task = task_form.save()
@@ -245,7 +299,7 @@ class TestMultiCompanyProject(TestMultiCompanyCommon):
                     task_form.project_id = self.project_company_a
                 task = task_form.save()
 
-                self.assertEqual(task.company_id, self.company_a, "Moving a task should change its company.")
+                self.assertEqual(task.company_id, self.company_a, "Moving the task should change its company.")
 
     def test_create_subtask(self):
         with self.sudo('employee-a'):
@@ -314,3 +368,4 @@ class TestMultiCompanyProject(TestMultiCompanyCommon):
             with self.assertRaises(AccessError):
                 with Form(task) as task_form:
                     task_form.name = "Testing changing name in a company I can not read/write"
+
