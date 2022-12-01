@@ -9,11 +9,7 @@
             <field name="arch" type="xml">
                 <div id="emails" position='replace'>
                     <block title="Discuss" id="emails">
-                        <setting id="activities_setting">
-                                <span class="o_form_label">Activities</span>
-                                <div class="text-muted">
-                                    Configure your activity types
-                                </div>
+                        <setting id="activities_setting" string="Activities" help="Configure your activity types">
                                 <div class="content-group">
                                     <div class="mt8">
                                         <button name="%(mail.mail_activity_type_action)d" string="Activity Types" type="action" class="oe_link" icon="fa-arrow-right"/>
@@ -71,13 +67,7 @@
                                     </div>
                                 </div>
                         </setting>
-                        <setting>
-                                <span class="o_form_label">Custom ICE server list</span>
-                                <div class="row">
-                                    <div class="text-muted col-md-12">
-                                        Configure your ICE server list for webRTC
-                                    </div>
-                                </div>
+                        <setting string="Custom ICE server list" help="Configure your ICE server list for webRTC">
                                 <div class="content-group">
                                     <div class="row col-lg-4">
                                         <button type="action" name="%(mail.action_ice_servers)d" string="ICE Servers" icon="fa-arrow-right" class="btn-link"/>
