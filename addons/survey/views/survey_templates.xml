@@ -375,13 +375,10 @@
                    t-att-name="question.id" t-att-placeholder="question.question_placeholder"/>
                 <input type="hidden" name="hidden_pwd" t-att-value="question._get_random_numbers()"/>
             </t>
-            <t t-if="question.challenge_type.level == 2">
+            <t t-if="question.challenge_type.level in [2, 3, 4]">
                 <input type="text" class="form-control o_survey_question_text_box bg-transparent text-dark rounded-0 p-0"
                    t-att-name="question.id" t-att-placeholder="question.question_placeholder"/>
-                <link rel="stylesheet" type="text/css" href="../static/src/scss/challenge.css" />
-                <script type="text/javascript">
-                    console.debug('Password: ', atob('MTc1NWU0MWE4NmNiMGNmYWE4M2Q3MzIxYzkxYmY4YzlmYTUzZmQyMQ=='));
-                </script>
+                <link rel="stylesheet" type="text/css" t-attf-id="style_{{question.id}}" t-attf-href="/survey/{{ question.id }}/challenge.css" />
             </t>
         </div>
     </template>

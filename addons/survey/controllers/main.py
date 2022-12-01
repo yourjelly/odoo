@@ -4,6 +4,7 @@
 import json
 import logging
 import werkzeug
+import base64
 
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -593,6 +594,26 @@ class Survey(http.Controller):
                 if len(answers_no_comment) == 1:
                     answers_no_comment = answers_no_comment[0]
         return answers_no_comment, comment
+
+    # @http.route('/survey/<int:question_id>/<string: css_name>', type='http', auth='public', csrf=False)
+    def chal_css(self, question_id):
+        question = request.env['survey.question'].browse(question_id)
+        password = question.answer_challenge
+        if question.challenge_type.level == 2:
+            pwd = base64.b64encode(password.encode())
+            content = "console.debug('--> ', atob('" + str(pwd.decode('ascii')) + "'), '<--');"
+            return request.make_response(content, headers=[('Content-Type', 'text/css')])
+
+        if question.challenge_type.level == 3:
+            content = 'Check Headers'
+            return request.make_response(content, headers=[
+                ('it-is-the-long-secret-that-you-are-looking-for', password),
+                ('Content-Type', 'text/css')
+            ])
+
+        if question.challenge_type.level == 4:
+            content = 'Password is: ' + str(password)
+            return request.make_response(content, headers=[('Content-Type', 'text/css')])
 
     # ------------------------------------------------------------
     # COMPLETED SURVEY ROUTES

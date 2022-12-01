@@ -357,8 +357,7 @@ class SurveyQuestion(models.Model):
             user_answer = answer.get(str(self.id))
             if user_answer != hidden_pwd:
                 return {self.id: _('Hint: ' + self.challenge_type.hint)}
-        if level == 2:
-            # breakpoint()
+        if level in [2, 3, 4]:
             user_answer = answer.get(str(self.id))
             if user_answer != self.answer_challenge:
                 return {self.id: _('Hint: ' + self.challenge_type.hint)}

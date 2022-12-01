@@ -797,11 +797,28 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
     */
     _prepareSubmitChallenge: function (params, $parent, questionId) {
         var self = this;
+        questionId = params['question_id']
         $parent.find("input").each(function (index, input) {
             if (!params[input.name]) {
                 params[input.name] = input.value;
             }
         });
+
+        if ([2,3,4].includes(params['level'])) {
+            $(`#style_${questionId}`).attr("disabled", "disabled");
+        }
+        return params;
+    },
+
+    /**
+    *   Prepare date answer before submitting form.
+    *   Convert date value from client current timezone to UTC Date to correspond to the server format.
+    *   return params = { 'dateQuestionId' : '2019-05-23', 'datetimeQuestionId' : '2019-05-23 14:05:12' }
+    */
+    _prepareSubmitDates: function (params, questionId, value, isDateTime) {
+        var momentDate = isDateTime ? field_utils.parse.datetime(value, null, {timezone: true}) : field_utils.parse.date(value);
+        var formattedDate = momentDate ? momentDate.toJSON() : '';
+        params[questionId] = formattedDate;
         return params;
     },
 
@@ -820,19 +837,6 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
         params = self._prepareSubmitComment(params, $parent, questionId, false);
         return params;
     },
-    /**
-    *   Prepare date answer before submitting form.
-    *   Convert date value from client current timezone to UTC Date to correspond to the server format.
-    *   return params = { 'dateQuestionId' : '2019-05-23', 'datetimeQuestionId' : '2019-05-23 14:05:12' }
-    */
-    _prepareSubmitDates: function (params, questionId, value, isDateTime) {
-        var momentDate = isDateTime ? field_utils.parse.datetime(value, null, {timezone: true}) : field_utils.parse.date(value);
-        var formattedDate = momentDate ? momentDate.toJSON() : '';
-        params[questionId] = formattedDate;
-        return params;
-    },
-
-
 
     /**
     *   Prepare matrix answers before submitting form.
