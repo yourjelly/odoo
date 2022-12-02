@@ -737,8 +737,10 @@ class HolidaysAllocation(models.Model):
         responsible = self.env.user
 
         if self.validation_type == 'officer' or self.validation_type == 'set':
-            if self.holiday_status_id.responsible_id:
-                responsible = self.holiday_status_id.responsible_id
+            if self.holiday_status_id.responsible_ids:
+                responsible = self.holiday_status_id.responsible_ids
+            else:
+                responsible = self.env.ref('hr_holidays.group_hr_holidays_user').users.filtered(lambda u: self.holiday_status_id.company_id in u.company_ids)
 
         return responsible
 
@@ -755,24 +757,20 @@ class HolidaysAllocation(models.Model):
                 if allocation.state == 'draft':
                     to_clean |= allocation
                 elif allocation.state == 'confirm':
-                    allocation.activity_schedule(
-                        'hr_holidays.mail_act_leave_allocation_approval',
-                        note=note,
-                        user_id=allocation.sudo()._get_responsible_for_approval().id or self.env.user.id)
-                elif allocation.state == 'validate1':
-                    allocation.activity_feedback(['hr_holidays.mail_act_leave_allocation_approval'])
-                    allocation.activity_schedule(
-                        'hr_holidays.mail_act_leave_allocation_second_approval',
-                        note=note,
-                        user_id=allocation.sudo()._get_responsible_for_approval().id or self.env.user.id)
+                    user_ids = allocation.sudo()._get_responsible_for_approval().ids or self.env.user.ids
+                    for user_id in user_ids:
+                        allocation.activity_schedule(
+                            'hr_holidays.mail_act_leave_allocation_approval',
+                            note=note,
+                            user_id=user_id)
                 elif allocation.state == 'validate':
                     to_do |= allocation
                 elif allocation.state == 'refuse':
                     to_clean |= allocation
         if to_clean:
-            to_clean.activity_unlink(['hr_holidays.mail_act_leave_allocation_approval', 'hr_holidays.mail_act_leave_allocation_second_approval'])
+            to_clean.activity_unlink(['hr_holidays.mail_act_leave_allocation_approval'])
         if to_do:
-            to_do.activity_feedback(['hr_holidays.mail_act_leave_allocation_approval', 'hr_holidays.mail_act_leave_allocation_second_approval'])
+            to_do.activity_feedback(['hr_holidays.mail_act_leave_allocation_approval'])
 
     ####################################################
     # Messaging methods
