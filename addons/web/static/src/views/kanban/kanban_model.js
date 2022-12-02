@@ -2,6 +2,7 @@
 
 import { Domain } from "@web/core/domain";
 import { isRelational } from "@web/views/utils";
+import { unique } from "@web/core/utils/arrays";
 import {
     DynamicGroupList,
     DynamicRecordList,
@@ -350,7 +351,7 @@ export class KanbanDynamicGroupList extends DynamicGroupList {
      * @override
      */
     get fieldNames() {
-        return [...super.fieldNames, ...this.sumFields];
+        return unique([...super.fieldNames, ...this.sumFields]);
     }
 
     get currentParams() {
@@ -412,7 +413,7 @@ export class KanbanDynamicGroupList extends DynamicGroupList {
             promises.webReadGroup = this.model.orm.webReadGroup(
                 this.resModel,
                 domain,
-                this.sumFields,
+                this.getFieldAggregatesSpec(this.sumFields),
                 this.groupBy,
                 { lazy: true }
             );

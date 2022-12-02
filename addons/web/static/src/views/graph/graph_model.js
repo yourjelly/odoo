@@ -385,7 +385,7 @@ export class GraphModel extends Model {
     async _loadDataPoints(metaData) {
         const { measure, domains, fields, groupBy, resModel } = metaData;
 
-        const measures = ["__count"];
+        const measures = ["__count"];  // It is used for filterout empty temporal (from `fill_temporal`)
         if (measure !== "__count") {
             let { group_operator, type } = fields[measure];
             if (type === "many2one") {
@@ -405,9 +405,8 @@ export class GraphModel extends Model {
         domains.forEach((domain, originIndex) => {
             proms.push(
                 // TODO: new read group need fill_temporal: true
-                // __domain can be recreated by the JS
                 this.orm
-                    .webReadGroup(
+                    .readGroup(
                         resModel,
                         domain.arrayRepr,
                         measures,
@@ -419,7 +418,7 @@ export class GraphModel extends Model {
                     )
                     .then((data) => {
                         const dataPoints = [];
-                        for (const group of data.groups) {
+                        for (const group of data) {
                             const { __domain, __count } = group;
                             const labels = [];
 

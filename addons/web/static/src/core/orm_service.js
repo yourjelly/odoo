@@ -169,6 +169,17 @@ export class ORM {
     /**
      * @param {string} model
      * @param {import("@web/core/domain").DomainListRepr} domain
+     * @param {any} [kwargs={}]
+     * @returns {Promise<any[]>}
+     */
+    readAggregate(model, domain, kwargs = {}) {
+        validateArray("domain", domain);
+        return this.call(model, "aggregate", [], { ...kwargs, domain });
+    }
+
+    /**
+     * @param {string} model
+     * @param {import("@web/core/domain").DomainListRepr} domain
      * @param {string[]} fields
      * @param {string[]} groupby
      * @param {any} [kwargs={}]
@@ -230,6 +241,18 @@ export class ORM {
             return Promise.resolve(true);
         }
         return this.call(model, "unlink", [ids], kwargs);
+    }
+
+    webReadAggregate(model, domain, aggregates, groupby, kwargs = {}) {
+        validateArray("domain", domain);
+        validatePrimitiveList("aggregates", "string", aggregates);
+        validatePrimitiveList("groupby", "string", groupby);
+        return this.call(model, "web_aggregate", [], {
+            ...kwargs,
+            groupby,
+            domain,
+            aggregates,
+        });
     }
 
     /**

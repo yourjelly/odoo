@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 import babel.dates
 import pytz
-from lxml import etree
 import base64
 import json
+import re
+import itertools
+from collections import defaultdict
 
 from odoo import _, _lt, api, fields, models
 from odoo.osv.expression import AND, TRUE_DOMAIN, normalize_domain
-from odoo.tools import date_utils, lazy
+from odoo.tools import date_utils, reverse_order
 from odoo.tools.misc import get_lang
 from odoo.exceptions import UserError
-from collections import defaultdict
 
 SEARCH_PANEL_ERROR_MESSAGE = _lt("Too many items to display.")
 
@@ -64,6 +65,127 @@ class Base(models.AbstractModel):
         return {
             'length': length,
             'records': records
+        }
+
+    def web_aggregates(
+        self,
+        domain: list,
+        aggregates: "list[str] | tuple[str]" = ('*:count',),  # TODO: Or __count ?
+        groupby: "list[str] | tuple[str]" = (),
+        offset: int = 0,
+        limit: "int | None" = None,
+        order: "str | None" = None,
+        fill_group: bool = False,
+        fill_temporal: bool = False,
+        expand_params: "dict | None" = None,
+    ):
+        """
+        Returns the result of a labeled aggregate (and optionally search for and read records inside each
+        group), and the total number of groups matching the search domain.
+
+        :param domain: search domain
+        :param fields: list of fields to read (see ``fields``` param of ``aggregates``)
+        :param groupby: list of fields to group on (see ``groupby``` param of ``aggregates``)
+        :param limit: see ``limit`` param of ``aggregates``
+        :param offset: see ``offset`` param of ``aggregates``
+        :param orderby: see ``orderby`` param of ``aggregates``
+        :param fill_group: if true, add field.group_expand result set on field until the limit is reached
+        :param fill_temporal: if true, add field.group_expand result set on field until the limit is reached
+        :param dict expand_params: if set, ``groupby`` params should contains only one field, search/read records inside each group.
+                Contains limit and order params to search, fields params to read.
+        :return: {
+            'groups': array of read groups
+            'length': total number of groups
+        }
+        """
+        # groupby should be not a list but a single field
+        results = self.aggregate(domain, aggregates, groupby, offset=offset, limit=limit, order=order)
+
+        # Fill group where no record has been found depending of the groupby field
+        if (fill_group or fill_temporal or expand_params) and len(groupby) != 1:
+            raise ValueError('Set fill_group/fill_temporal/expand_params with multiple groups is not Implemented')
+        if fill_group and limit:
+            # TODO: or don't care, but if we passed the limit, we never return more than the limit
+            raise ValueError('fill_group + limit is not possible ???')
+
+        values_by_group = {}
+        for group in groupby:
+            values_by_group[group] = [res[group] for res in results if res[group]]
+
+        if groupby:
+            group_field = self._fields[groupby[0].split(":")[0]]
+
+        if fill_group and group_field.group_expand and not (limit and len(results) == limit) and not offset:
+            # field.group_expand is a callable or the name of a method, that returns
+            # the groups that we want to display for this field, in the form of a
+            # recordset or a list of values (depending on the type of the field).
+            # This is useful to implement kanban views for instance, where some
+            # columns should be displayed even if they don't contain any record.
+
+            # TODO: change the signature of the method group_expand
+            # to add limit, return ids instead of recordset in case of relational,
+            # fix all current group_expand
+            group_expand = group_field.group_expand
+            if isinstance(group_expand, str):
+                group_expand = getattr(type(self), group_expand)
+            assert callable(group_expand)
+
+            if group_field.relational:
+                # groups is a recordset; determine order on groups's model
+                groups = self.env[group_field.comodel_name].browse(values_by_group[group])
+                order = groups._order
+                if re.match(f"^{groupby[0]}\\s+DESC$", order, re.IGNORECASE):
+                    order = reverse_order(order)
+                values = group_expand(self, groups, domain, order)._ids
+            else:
+                # groups is a list of values
+                values = group_expand(self, values, domain, None)
+                if re.match(f"^{groupby[0]}\\s+DESC$", order, re.IGNORECASE):
+                    values.reverse()
+
+            for val in itertools.islice(values, len(results) - limit):
+                empty_res = dict.fromkeys(aggregates, False)
+                if group_field.relational:
+                    empty_res[groupby[0]] = val.id
+                else:
+                    empty_res[groupby[0]] = val
+
+                if '*:count' in empty_res:
+                    empty_res['*:count'] = 0
+                results.append(empty_res)
+
+            # TODO: __fold was there before
+
+        # TODO: fill_temporal for graph views
+        if fill_temporal:
+            pass
+
+        # TODO: add info for JS __domain, __range, __fold, maybe __context ?
+
+        # TODO: label for datetime/Many2X -> or on public of aggregate
+
+        if expand_params and len(groupby) == 1:
+            pass
+            # TODO: When `<tree expand="1"` on the tree view
+            # for group in groups:
+            #     # TODO: Not very efficient, web_search_read make a extra count that we already have (__count of group)
+            #     # + search_read don't batch between groups :/
+            #     group['__data'] = self.web_search_read(domain=group['__domain'], fields=fields,
+            #                                            offset=0, limit=expand_limit,
+            #                                            order=expand_orderby)
+
+        if not groups:
+            length = 0
+        elif limit and len(results) == limit:
+            # We cannot use count_distinct because it will filter null value
+            # TODO: The ideal solution should be `array_length(array_agg(DISTINCT <groupby[0]>), 1)`
+            # (or with a CASE statement or with a subquery) to avoid fetching to much data for nothing
+            aggregate_spec = f'{groupby[0]}:array_agg_distinct'
+        else:
+            length = len(results) + offset
+        return {
+            'groups': results,
+            'length': length
         }
 
     @api.model
@@ -124,6 +246,7 @@ class Base(models.AbstractModel):
                                  orderby=orderby, lazy=lazy)
 
         if expand and len(groupby) == 1:
+            # TODO: When `<tree expand="1"` on the tree view
             for group in groups:
                 # TODO: Not very efficient, web_search_read make a extra count that we already have (__count of group)
                 # + search_read don't batch between groups :/
@@ -180,6 +303,9 @@ class Base(models.AbstractModel):
             # possibly failed because of grouping on or aggregating non-stored
             # field; fallback on alternative implementation
             pass
+
+        # TODO: a aggregate with compute no stored fields ? 
+        # It still used `note.note` . `activity_state`
 
         # Workaround to match read_group's infrastructure
         # TO DO in master: harmonize this function and readgroup to allow factorization

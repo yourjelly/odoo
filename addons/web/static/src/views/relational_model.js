@@ -2164,6 +2164,17 @@ export class DynamicGroupList extends DynamicList {
     // Public
     // -------------------------------------------------------------------------
 
+    getFieldAggregatesSpec(fieldsName) {
+        const fieldAggregates = []
+        for (const fieldName of fieldsName){
+            const field = this.fields[fieldName] 
+            if (field.group_operator) {
+                fieldAggregates.push(`${fieldName}:${field.group_operator}`)
+            }
+        }
+        return fieldAggregates
+    }
+
     /**
      * @param {Group} group
      * @param {number} [index]
@@ -2409,11 +2420,11 @@ export class DynamicGroupList extends DynamicList {
         const { groups, length } = await this.model.orm.webReadGroup(
             this.resModel,
             this.domain,
-            unique([...this.fieldNames, firstGroupByName]),
+            ['__count', ...this.getFieldAggregatesSpec(this.fieldNames)],
             [this.firstGroupBy],
             {
                 orderby,
-                lazy: true,  // TODO: not correct, it returns group_extand but it shouldn't for the list view
+                lazy: true,
                 expand: this.expand,
                 expand_orderby: this.expand ? orderByToString(this.orderBy) : null,
                 expand_limit: this.expand ? this.limitByGroup : null,

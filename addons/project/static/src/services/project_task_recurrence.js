@@ -42,16 +42,15 @@ class ProjectTaskRecurrence {
             );
             allowContinue = count != 1;
         } else {
-            const taskReadGroup = await this.orm.readGroup(
+            const taskReadGroup = await this.orm.readAggregate(
                 this.resModel,
                 [['recurrence_id', 'in', recurrenceIds]],
-                ['recurrence_id'],
                 ['recurrence_id'],
             );
             allowContinue = true;
             for (const res of taskReadGroup) {
-                const taskCount = tasksPerRecurrence[res.recurrence_id[0]].length;
-                if (taskCount === res.recurrence_id_count) {
+                const taskCount = tasksPerRecurrence[res.recurrence_id].length;
+                if (taskCount === res['*:count']) {
                     allowContinue = false;
                     break;
                 }
