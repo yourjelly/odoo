@@ -1044,7 +1044,8 @@ actual arch.
         """
 
         for node in tree.xpath('//*[@groups]'):
-            if not self.user_has_groups(node.attrib.pop('groups')):
+            attrib_groups = node.attrib.pop('groups')
+            if attrib_groups and not self.user_has_groups(attrib_groups):
                 node.getparent().remove(node)
             elif node.tag == 't' and not node.attrib:
                 # Move content of <t> blocks created in `_postprocess_tag_field` to the parent
