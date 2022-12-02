@@ -30,7 +30,7 @@ ORDER BY "test_read_group_aggregate"."key" ASC
             """
         ]):
             self.assertEqual(
-                Model.read_aggregate([], groupby=['key'], aggregates=['value:sum']),
+                Model.aggregate([], groupby=['key'], aggregates=['value:sum']).to_list(),
                 [
                     {
                         'key': 1,
@@ -57,7 +57,7 @@ ORDER BY "test_read_group_aggregate"."key" ASC, "test_read_group_aggregate__part
             """
         ]):
             self.assertEqual(
-                Model.read_aggregate([], groupby=['key', 'partner_id'], aggregates=['value:sum']),
+                Model.aggregate([], groupby=['key', 'partner_id'], aggregates=['value:sum']).to_list(),
                 [
                     {
                         'key': 1,
@@ -102,7 +102,7 @@ ORDER BY "test_read_group_aggregate"."key" ASC, "test_read_group_aggregate"."par
             """
         ]):
             self.assertEqual(
-                Model._read_aggregate([], groupby=['key', 'partner_id'], aggregates=['value:sum']),
+                Model._aggregate([], groupby=['key', 'partner_id'], aggregates=['value:sum']).to_list(),
                 [
                     {
                         'key': 1,
@@ -137,6 +137,110 @@ ORDER BY "test_read_group_aggregate"."key" ASC, "test_read_group_aggregate"."par
                 ]
             )
 
+    def test_result_object_defaultdict_like(self):
+        Model = self.env['test_read_group.aggregate']
+        Partner = self.env['res.partner']
+        partner_1 = Partner.create({'name': 'z_one'})
+        partner_2 = Partner.create({'name': 'a_two'})
+        Model.create({'key': 1, 'partner_id': partner_1.id, 'value': 1})
+        Model.create({'key': 1, 'partner_id': partner_1.id, 'value': 2})
+        Model.create({'key': 1, 'partner_id': partner_2.id, 'value': 3})
+        Model.create({'key': 2, 'partner_id': partner_2.id, 'value': 4})
+        Model.create({'key': 2, 'partner_id': partner_2.id})
+        Model.create({'key': 2, 'value': 5})
+        Model.create({'partner_id': partner_2.id, 'value': 5})
+        Model.create({'value': 6})
+        Model.create({})
+
+        # ----------- usage 84 % (random stat): ONE aggregate, ONE group key
+        res = Model._aggregate([], ['*:count'], ['partner_id'])
+
+        self.assertEqual(res[partner_1]['*:count'], 2)  # If one aggregate, no need to specify aggregate
+        self.assertEqual(res[partner_1.id]['*:count'], 2)  # With recordset
+        self.assertEqual(res[partner_1.id].get('*:count', 0), 2)  # default value 0
+        self.assertEqual(res[-4].get('*:count', 42), 42)  # negative number to avoiding id domains
+
+        # Check all iter methods with default converter
+        self.assertEqual(
+            list(res.items()),
+            [
+                ((partner_1,), {'*:count': 2}),
+                ((partner_2,), {'*:count': 4}),
+                ((Partner,), {'*:count': 3}),
+            ]
+        )
+        self.assertEqual(
+            list(res.keys()),
+            [
+                (partner_1,),
+                (partner_2,),
+                (Partner,),
+            ]
+        )
+        self.assertEqual(
+            list(res.values()),
+            [
+                {'*:count': 2},
+                {'*:count': 4},
+                {'*:count': 3},
+            ]
+        )
+
+        for (partner,), agg in res.items():
+            count = agg['*:count']
+
+        # ----------- usage 5 % (random stat): SEVERAL aggregate, ONE group key
+        res = Model._aggregate([], ['*:count', 'value:sum'], ['key'])
+        self.assertEqual(res[1].get('*:count', 0), 3)
+        self.assertEqual(res[(1,)].get('*:count', 0), 3)  # Same
+        self.assertEqual(res[(1,)].get('value:sum', 0), 6)
+        self.assertEqual(res[(8,)].get('*:count', 8), 8)
+        # Or iter usage:
+        for (key,), agg in res.items():
+            count = agg['*:count']
+            value = agg['value:sum']
+
+        # ----------- usage 5 % (random stat): ONE aggregate, SEVERAL group keys
+        res = Model._aggregate([], ['*:count'], ['key', 'partner_id'])
+        self.assertEqual(res[(1, partner_1)].get('*:count', 0), 2)
+        self.assertEqual(res[(1, partner_1.id)].get('*:count', 0), 2)
+        self.assertEqual(res[(8, partner_1)].get('*:count', 0), 0)
+        # Or iter usage:
+        for (key, partner), agg in res.items():
+            pass
+        # ----------- usage 2/3 % (random stat): SEVERAL aggregate, SEVERAL group keys
+        res = Model._aggregate([], ['*:count', 'value:sum'], ['key', 'partner_id'])
+        self.assertEqual(res[(1, partner_1)].get('*:count', 0), 2)
+        self.assertEqual(res[(1, partner_1.id)].get('value:sum', 0), 3)
+        self.assertEqual(res[(8, partner_1)].get('*:count', 0), 0)
+        self.assertEqual(res[(8, partner_1)].get('value:sum', 0), 0)
+        # Or iter usage:
+        for (key, partner), agg in res.items():
+            pass
+        # ----------- usage 2 % (random stat): ONE/SEVERAL aggregate, NO group key
+        res = Model._aggregate([], ['*:count', 'value:sum'])
+        self.assertEqual(res[None].get('*:count', 0), 9)  # Groups has `()` as default value
+        self.assertEqual(res[None].get('value:sum', 0), 26)  # Groups has `()` as default value
+
+        res = Model._aggregate([])  # almost == to search_count
+        self.assertEqual(res[()].get('*:count'), 9)
+
+        # ----------- usage 0/1 % (random stat): NO aggregate, SEVERAL groups keys
+        # Can be useful if we want all distinct pair of groups
+        # With group, it is better to use array_agg_distinct.
+        res = Model._aggregate([], [], ['key', 'partner_id'])
+        self.assertEqual(
+            list(res),
+            [
+                (1, partner_1),
+                (1, partner_2),
+                (2, partner_2),
+                (2, self.env['res.partner']),
+                (None, partner_2),
+                (None, self.env['res.partner']),
+            ]
+        )
+
     def test_ambiguous_field_name(self):
         """ Check that aggregate doesn't generate ambiguous (display_name) alias for PostgreSQL
         """
@@ -153,7 +257,7 @@ ORDER BY "test_read_group_aggregate__partner_id"."display_name" DESC, "test_read
             """
         ]):
             self.assertEqual(
-                Model.read_aggregate([], groupby=['display_name', 'partner_id'], order="partner_id DESC"),
+                Model.aggregate([], groupby=['display_name', 'partner_id'], order="partner_id DESC").to_list(),
                 [{'display_name': 'blabla', 'partner_id': partner_1_id, '*:count': 1}]
             )
 
@@ -172,7 +276,7 @@ ORDER BY "test_read_group_aggregate__partner_id"."display_name" DESC, "test_read
         Model.create({'key': 4})
 
         self.assertEqual(
-            Model.read_aggregate([], groupby=['key'], aggregates=['bool_and:bool_and', 'bool_and:bool_or', 'bool_and:array_agg_distinct']),
+            Model.aggregate([], groupby=['key'], aggregates=['bool_and:bool_and', 'bool_and:bool_or', 'bool_and:array_agg_distinct']).to_list(),
             [
                 {'key': 1, 'bool_and:bool_and': True, 'bool_and:bool_or': True, 'bool_and:array_agg_distinct': [True]},
                 {'key': 2, 'bool_and:bool_and': False, 'bool_and:bool_or': True, 'bool_and:array_agg_distinct': [False, True]},
@@ -188,14 +292,14 @@ ORDER BY "test_read_group_aggregate__partner_id"."display_name" DESC, "test_read
         Model.create({})
 
         self.assertEqual(
-            Model.read_aggregate([], aggregates=['key:count']),
+            Model.aggregate([], aggregates=['key:count']).to_list(),
             [
                 {'key:count': 2},
             ]
         )
 
         self.assertEqual(
-            Model.read_aggregate([], aggregates=['key:count_distinct']),
+            Model.aggregate([], aggregates=['key:count_distinct']).to_list(),
             [
                 {'key:count_distinct': 1},
             ]
@@ -208,26 +312,26 @@ ORDER BY "test_read_group_aggregate__partner_id"."display_name" DESC, "test_read
         Model.create({'key': 2})
 
         self.assertEqual(
-            Model.read_aggregate([], aggregates=['key:array_agg']),
+            Model.aggregate([], aggregates=['key:array_agg']).to_list(),
             [
                 {'key:array_agg': [1, 1, 2]},
             ]
         )
 
         self.assertEqual(
-            Model.read_aggregate([], aggregates=['key:array_agg_distinct']),
+            Model.aggregate([], aggregates=['key:array_agg_distinct']).to_list(),
             [
                 {'key:array_agg_distinct': [1, 2]},
             ]
         )
 
-    def test_flush_read_aggregate(self):
+    def test_flush_aggregate(self):
         Model = self.env['test_read_group.aggregate']
         a = Model.create({'key': 1, 'value': 5})
         b = Model.create({'key': 1, 'value': 5})
 
         self.assertEqual(
-            Model.read_aggregate([], groupby=['key'], aggregates=['value:sum']),
+            Model.aggregate([], groupby=['key'], aggregates=['value:sum']).to_list(),
             [
                 {'key': 1, 'value:sum': 5 + 5},
             ]
@@ -236,7 +340,7 @@ ORDER BY "test_read_group_aggregate__partner_id"."display_name" DESC, "test_read
         # Test flush of domain
         a.key = 2
         self.assertEqual(
-            Model.read_aggregate([('key', '>', 1)], groupby=['key'], aggregates=['value:sum']),
+            Model.aggregate([('key', '>', 1)], groupby=['key'], aggregates=['value:sum']).to_list(),
             [
                 {'key': 2, 'value:sum': 5},
             ]
@@ -245,7 +349,7 @@ ORDER BY "test_read_group_aggregate__partner_id"."display_name" DESC, "test_read
         # test flush of groupby clause
         a.key = 3
         self.assertEqual(
-            Model.read_aggregate([], groupby=['key'], aggregates=['value:sum']),
+            Model.aggregate([], groupby=['key'], aggregates=['value:sum']).to_list(),
             [
                 {'key': 1, 'value:sum': 5},
                 {'key': 3, 'value:sum': 5},
@@ -255,7 +359,7 @@ ORDER BY "test_read_group_aggregate__partner_id"."display_name" DESC, "test_read
         # Test flush of aggregates
         b.value = 8
         self.assertEqual(
-            Model.read_aggregate([], groupby=['key'], aggregates=['value:sum']),
+            Model.aggregate([], groupby=['key'], aggregates=['value:sum']).to_list(),
             [
                 {'key': 1, 'value:sum': 8},
                 {'key': 3, 'value:sum': 5},
@@ -282,7 +386,7 @@ ORDER BY "test_read_group_aggregate"."key" ASC
             """
         ]):
             self.assertEqual(
-                Model._read_aggregate([], groupby=['key'], aggregates=['value:sum'], having=[("value:sum", '>', 8)]),
+                Model._aggregate([], groupby=['key'], aggregates=['value:sum'], having=[("value:sum", '>', 8)]).to_list(),
                 [{'key': 1, 'value:sum': 2 + 8}]
             )
 
@@ -323,7 +427,7 @@ ORDER BY "test_read_group_aggregate"."key" ASC
         Model.create({'date': '2022-05-29'})  # other quarter
         Model.create({'date': '2023-01-29'})  # other year
 
-        gb = Model.read_aggregate([], groupby=['date:day'])
+        gb = Model.aggregate([], groupby=['date:day']).to_list()
 
         self.assertEqual(gb, [
             {
@@ -356,7 +460,7 @@ ORDER BY "test_read_group_aggregate"."key" ASC
             }
         ])
 
-        gb = Model.read_aggregate([], groupby=['date:week'])
+        gb = Model.aggregate([], groupby=['date:week']).to_list()
 
         self.assertEqual(gb, [
             {
@@ -381,7 +485,7 @@ ORDER BY "test_read_group_aggregate"."key" ASC
             }
         ])
 
-        gb = Model.read_aggregate([], groupby=['date:week'])
+        gb = Model.aggregate([], groupby=['date:week']).to_list()
 
         self.assertEqual(gb, [
             {
@@ -406,7 +510,7 @@ ORDER BY "test_read_group_aggregate"."key" ASC
             }
         ])
 
-        gb = Model.read_aggregate([], groupby=['date:month'])
+        gb = Model.aggregate([], groupby=['date:month']).to_list()
         self.assertEqual(gb, [
             {
                 'date:month': fields.Date.to_date('2022-01-01'),
@@ -430,7 +534,7 @@ ORDER BY "test_read_group_aggregate"."key" ASC
             }
         ])
 
-        gb = Model.read_aggregate([], groupby=['date:quarter'])
+        gb = Model.aggregate([], groupby=['date:quarter']).to_list()
         self.assertEqual(gb, [
             {
                 'date:quarter': fields.Date.to_date('2022-01-01'),
@@ -450,7 +554,7 @@ ORDER BY "test_read_group_aggregate"."key" ASC
             }
         ])
 
-        gb = Model.read_aggregate([], groupby=['date:year'])
+        gb = Model.aggregate([], groupby=['date:year']).to_list()
         self.assertEqual(gb, [
             {
                 'date:year': fields.Date.to_date('2022-01-01'),
@@ -466,7 +570,7 @@ ORDER BY "test_read_group_aggregate"."key" ASC
             }
         ])
         # Reverse order
-        gb = Model.read_aggregate([], groupby=['date:year'], order="date:year DESC")
+        gb = Model.aggregate([], groupby=['date:year'], order="date:year DESC").to_list()
         self.assertEqual(gb, [
             {
                 'date:year': None,
@@ -497,9 +601,9 @@ ORDER BY "test_read_group_aggregate"."key" ASC
         for tz in tzs:
             Model = Model.with_context(tz=tz)
             records = Model.create(create_values)
-            Model._read_aggregate([('id', 'in', records.ids)], ['value:sum'], ['datetime:hour'])
+            Model._aggregate([('id', 'in', records.ids)], ['value:sum'], ['datetime:hour']).to_list()
             self.assertEqual(
-                Model._read_aggregate([('id', 'in', records.ids)], ['value:sum'], ['datetime:hour']),
+                Model._aggregate([('id', 'in', records.ids)], ['value:sum'], ['datetime:hour']).to_list(),
                 [
                     {
                         'value:sum': 3,
@@ -542,11 +646,11 @@ ORDER BY "test_read_group_aggregate"."key" ASC
         self.assertEqual(len(model.search(domain1)), 2)
         self.assertEqual(len(model.search(domain2)), 2)
 
-        result1 = model.read_aggregate(domain1)
+        result1 = model.aggregate(domain1).to_list()
         self.assertEqual(len(result1), 1)
         self.assertEqual(result1[0]['*:count'], 2)
 
-        result2 = model.read_aggregate(domain2)
+        result2 = model.aggregate(domain2).to_list()
         self.assertEqual(len(result2), 1)
         self.assertEqual(result2[0]['*:count'], 2)
 
@@ -556,11 +660,11 @@ ORDER BY "test_read_group_aggregate"."key" ASC
         self.assertEqual(len(model.search(domain1)), 2)
         self.assertEqual(len(model.search(domain2)), 2)
 
-        result1 = model.read_aggregate(domain1)
+        result1 = model.aggregate(domain1).to_list()
         self.assertEqual(len(result1), 1)
         self.assertEqual(result1[0]['*:count'], 2)
 
-        result2 = model.read_aggregate(domain2)
+        result2 = model.aggregate(domain2).to_list()
         self.assertEqual(len(result2), 1)
         self.assertEqual(result2[0]['*:count'], 2)
 

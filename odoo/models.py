@@ -25,6 +25,7 @@ import collections
 import contextlib
 import copy
 import datetime
+from typing import Iterator
 import dateutil
 import fnmatch
 import functools
@@ -55,7 +56,7 @@ from . import api
 from . import tools
 from .exceptions import AccessError, MissingError, ValidationError, UserError
 from .tools import (
-    clean_context, config, CountingStream, date_utils, discardattr,
+    clean_context, config, CountingStream, date_utils, discardattr, lazy_property,
     DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, frozendict,
     get_lang, LastOrderedSet, lazy_classproperty, OrderedSet, ormcache,
     partition, populate, Query, ReversedIterable, split_every, unique,
@@ -87,6 +88,11 @@ AUTOINIT_RECALCULATE_STORED_FIELDS = 1000
 INSERT_BATCH_SIZE = 100
 SQL_DEFAULT = psycopg2.extensions.AsIs("DEFAULT")
 
+def split_aggregate_spec(spec):
+    res_match = regex_aggregate_spec.match(spec)
+    if not res_match:
+        raise ValueError(f'Invalid aggregate specification {spec!r}. Valid specification example: "field:agg"')
+    return res_match.groups()
 
 def check_object_name(name):
     """ Check if the given name is a valid model name.
@@ -170,6 +176,107 @@ def merge_trigger_trees(trees: list, select=bool) -> dict:
             result_tree[key] = subtree
 
     return result_tree
+
+def _groups_to_records(result: 'AggregateResult', groups: tuple):
+    group = []
+    for value_group, (key_group, Model) in zip(groups, result._groupby_info.items()):
+        if not isinstance(Model, BaseModel):
+            group.append(value_group)
+        elif value_group is None:
+            group.append(Model)
+        else:
+            group.append(Model.__class__(Model.env, (value_group,), result._prefetch_values[key_group]))
+
+    return tuple(group)
+
+def _aggregates_to_records(result: 'AggregateResult', aggregates: dict):
+    for (key_group, value_agg), Model in zip(aggregates.items(), result._aggregate_info.values()):
+        if isinstance(Model, BaseModel):
+            aggregates[key_group] = Model.browse(value_agg).with_prefetch(result._prefetch_values[key_group])
+    return aggregates
+
+
+class AggregateResult(dict):
+
+    EMPTY_DICT = frozendict()
+
+    __slots__ = ('_groupby_info', '_aggregate_info', '_rows', '__dict__')  # Maybe other
+
+    def __init__(
+        self,
+        rows: "list[dict]",
+        aggregate_info: "dict[str, BaseModel]",  # <aggregate spec> : <Model for recordset or None>
+        groupby_info: "dict[str, BaseModel]",    # <groupby name> : <Model for recordset or None>
+    ):
+        def to_key(row):
+            return tuple(row[group] for group in groupby_info)
+
+        def to_value(row):
+            return {agg: row[agg] for agg in aggregate_info}
+
+        super().__init__({to_key(row): to_value(row) for row in rows})
+
+        self._groupby_info = groupby_info
+        self._aggregate_info = aggregate_info
+        self._rows = rows
+
+    @lazy_property
+    def _prefetch_values(self):
+        prefetch_values = defaultdict(list)
+        for key, Model in itertools.chain(self._groupby_info.items(), self._aggregate_info.items()):
+            if not isinstance(Model, BaseModel):
+                continue
+            prefetch_values[key].extend(row[key] for row in self._rows)
+        return {key: tuple(v) for key, v in prefetch_values.items()}
+
+    def items(self, converter_keys=_groups_to_records, converter_values=_aggregates_to_records) -> "Iterator[(tuple, dict)]":
+        if not converter_keys and not converter_values:
+            yield from super().items()
+
+        for keys, aggregates in super().items():
+            yield _groups_to_records(self, keys), _aggregates_to_records(self, aggregates)
+
+    def values(self, converter_values=_aggregates_to_records) -> "Iterator[dict]":
+        if not converter_values:
+            yield from super().values()
+
+        for aggregates in super().values():
+            yield _aggregates_to_records(self, aggregates)
+
+    def keys(self, converter_keys=_groups_to_records) -> "Iterator[tuple]":
+        if not converter_keys:
+            return super().keys()
+
+        for keys in super().keys():
+            yield _groups_to_records(self, keys)
+
+    def __iter__(self) -> "Iterator[tuple]":
+        return self.keys()
+
+    def _flexible_key(self, key) -> 'tuple':
+        if len(self._groupby_info) == 0 and (key is None or key == ()) :
+            return ()
+
+        if not isinstance(key, tuple):
+            key = (key,)
+        key = tuple(k.id if isinstance(k, BaseModel) else k for k in key)
+
+        if len(self._groupby_info) != len(key):
+            raise ValueError(f"{key!r} is not a valid group, doesn't contains the same number of groupby argument")
+
+        return key
+
+    def __contains__(self, key) -> 'bool':
+        return super().__contains__(self._flexible_key(key))
+
+    def __getitem__(self, key) -> 'dict':
+        return super().__getitem__(self._flexible_key(key))
+
+    def __missing__(self, key) -> 'frozendict':
+        return self.EMPTY_DICT
+
+    def to_list(self):
+        return self._rows
 
 
 class MetaModel(api.Meta):
@@ -1726,7 +1833,8 @@ class BaseModel(metaclass=MetaModel):
         """
         cls.pool._clear_cache()
 
-    def read_aggregate(
+    @api.returns('self', lambda x: x.to_list())
+    def aggregate(
         self,
         domain: list,
         aggregates: "list[str] | tuple[str]" = ('*:count',),  # TODO: Or __count ?
@@ -1735,7 +1843,7 @@ class BaseModel(metaclass=MetaModel):
         offset: int = 0,
         limit: "int | None" = None,
         order: "str | None" = None,
-    ) -> "list[dict]":
+    ) -> AggregateResult:
         """ Get the list of records grouped by the given ``groupby`` fields.
 
         :param list domain: :ref:`A search domain <reference/orm/domains>`. Use an empty
@@ -1771,22 +1879,21 @@ class BaseModel(metaclass=MetaModel):
         """
         if not order:
             order = ','.join(groupby)
-        return self._read_aggregate(domain, aggregates, groupby, having, offset, limit, order=order)
+        return self._aggregate(domain, aggregates, groupby, having, offset, limit, order=order)
 
-    def _read_aggregate_select(self, query, aggregate_spec) -> "tuple(str, list[str])":
+    def _aggregate_select(self, query, aggregate_spec) -> "tuple(str, list[str])":
         """ return <SQL expression>, [<fields name to flush>]"""
         if aggregate_spec == '*:count':
-            return 'COUNT(*)', []
+            return 'COUNT(*)', [], None
 
-        res_match = regex_aggregate_spec.match(aggregate_spec)
-        if not res_match:
-            raise ValueError(f'Invalid aggregate specification {aggregate_spec!r}. Valid specification example: "field:agg"')
-        fname, func = res_match.groups()
+        fname, func = split_aggregate_spec(aggregate_spec)
 
         if fname not in self:
             raise ValueError(f"Invalid field {fname!r} on model {self._name!r} for {aggregate_spec!r}.")
         if func not in VALID_AGGREGATE_FUNCTIONS:
             raise ValueError(f"Invalid aggregate method {func!r} for {aggregate_spec!r}.")
+
+        field = self._fields[fname]
 
         field_expression = self._inherits_join_calc(self._table, fname, query)
 
@@ -1805,9 +1912,9 @@ class BaseModel(metaclass=MetaModel):
         else:
             expression = f'{func}({distinct}{field_expression})'
 
-        return expression, [fname]
+        return expression, [fname], self.env[field.comodel_name] if field.relational else None
 
-    def _read_aggregate_groupby(self, query, groupby_spec):
+    def _aggregate_groupby(self, query, groupby_spec):
         """ return <SQL expression>, [<fields name to flush>]"""
         res_match = regex_aggregate_spec.match(groupby_spec)
         if not res_match:
@@ -1841,9 +1948,9 @@ class BaseModel(metaclass=MetaModel):
         elif field.type == 'boolean':
             field_expression = f"COALESCE({field_expression}, FALSE)"
 
-        return field_expression, [fname]
+        return field_expression, [fname], self.env[field.comodel_name] if field.relational else None
 
-    def _read_aggregate_having(self, having_domain, select_terms):
+    def _aggregate_having(self, having_domain, select_terms):
         # TODO: Shouldn't we call expression()
         having_params = []
         stack_op = []
@@ -1883,7 +1990,7 @@ class BaseModel(metaclass=MetaModel):
 
         return get_next_condition() if stack_op else "", having_params
 
-    def _read_aggregate_orderby(self, query, order: str, select_terms, order_traverse_many2one):
+    def _aggregate_orderby(self, query, order: str, select_terms, order_traverse_many2one):
         orderby_terms = []
         extra_groupby_terms = []
         if not order:
@@ -1914,7 +2021,7 @@ class BaseModel(metaclass=MetaModel):
 
         return orderby_terms, extra_groupby_terms
 
-    def _read_aggregate(
+    def _aggregate(
         self,
         domain: list,
         aggregates: "list[str] | tuple[str]" = ('*:count',),  # TODO: Or __count ?
@@ -1923,8 +2030,8 @@ class BaseModel(metaclass=MetaModel):
         offset: int = 0,
         limit: "int | None" = None,
         order: "str | None" = None,
-    ) -> "list[dict]":
-        """ Executes exactly what the public read_aggregate() does, except it doesn't
+    ) -> "AggregateResult":
+        """ Executes exactly what the public aggregate() does, except it doesn't
         order many2one fields on their comodel's order but on their ID instead. It is more
         efficient if you don't care about the order of returning values.
         """
@@ -1940,24 +2047,29 @@ class BaseModel(metaclass=MetaModel):
 
         fnames_to_flush = OrderedSet()
         select_terms = {}  # {<SQL alias>: <SQL expression>}
+        model_spec = {}  # {<aggregate or groupby>: Model to use to create recordset}
 
         for spec in aggregates:
-            sql_expression, f_to_flush = self._read_aggregate_select(query, spec)
+            sql_expression, fname_to_flush, Model = self._aggregate_select(query, spec)
 
-            fnames_to_flush.update(f_to_flush)
+            model_spec[spec] = Model
+            fnames_to_flush.update(fname_to_flush)
             select_terms[spec] = sql_expression
+
 
         groupby_terms = []  # [<SQL expression>,]
         for spec in groupby:
-            sql_expression, f_to_flush = self._read_aggregate_groupby(query, spec)
+            sql_expression, fname_to_flush, Model = self._aggregate_groupby(query, spec)
 
-            fnames_to_flush.update(f_to_flush)
-            groupby_terms.append(sql_expression)
+            model_spec[spec] = Model
+            fnames_to_flush.update(fname_to_flush)
             select_terms[spec] = sql_expression
 
-        having_expression, having_params = self._read_aggregate_having(having, select_terms)
+            groupby_terms.append(sql_expression)
 
-        orderby_terms, extra_groupby_terms = self._read_aggregate_orderby(query, order, select_terms, order_traverse_many2one)
+        having_expression, having_params = self._aggregate_having(having, select_terms)
+
+        orderby_terms, extra_groupby_terms = self._aggregate_orderby(query, order, select_terms, order_traverse_many2one)
 
         select_terms = [f'{expr} AS "{alias}"' for alias, expr in select_terms.items()]
         from_clause, where_clause, where_params = query.get_sql()
@@ -1989,7 +2101,13 @@ class BaseModel(metaclass=MetaModel):
             self.check_field_access_rights('read', fnames_to_flush)
 
         self.env.cr.execute('\n' + '\n'.join(query_parts), query_params)
-        return self.env.cr.dictfetchall()
+        data = self.env.cr.dictfetchall()
+
+        return AggregateResult(
+            rows=data,
+            aggregate_info={spec: model_spec[spec] for spec in aggregates},
+            groupby_info={spec: model_spec[spec] for spec in groupby},
+        )
 
     @api.model
     def _read_group_expand_full(self, groups, domain, order):
