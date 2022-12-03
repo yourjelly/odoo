@@ -132,34 +132,6 @@ def fix_import_export_id_paths(fieldname):
     fixed_external_id = re.sub(r'([^/]):id', r'\1/id', fixed_db_id)
     return fixed_external_id.split('/')
 
-def merge_trigger_trees(trees: list, select=bool) -> dict:
-    """ Merge trigger trees list into a final tree. The function ``select`` is
-    called on every field to determine which fields should be kept in the tree
-    nodes. This enables to discard some fields from the tree nodes.
-    """
-    result_tree = {}                        # the resulting tree
-    root_fields = OrderedSet()              # the fields in the root node
-    subtrees_to_merge = defaultdict(list)   # the subtrees to merge grouped by key
-
-    for tree in trees:
-        for key, val in tree.items():
-            if key is None:
-                root_fields.update(val)
-            else:
-                subtrees_to_merge[key].append(val)
-
-    # the root node contains the collected fields for which select is true
-    root_node = [field for field in root_fields if select(field)]
-    if root_node:
-        result_tree[None] = root_node
-
-    for key, subtrees in subtrees_to_merge.items():
-        subtree = merge_trigger_trees(subtrees, select)
-        if subtree:
-            result_tree[key] = subtree
-
-    return result_tree
-
 
 class MetaModel(api.Meta):
     """ The metaclass of all model classes.
@@ -3662,7 +3634,7 @@ class BaseModel(metaclass=MetaModel):
                     # order to avoid an inconsistent update.
                     self[fname]
                 determine_inverses[field.inverse].append(field)
-            if field in self.pool.fields_modifying_relations:
+            if self.pool.is_modifying_relations(field):
                 fnames_modifying_relations.append(fname)
             if field.inverse or (field.compute and not field.readonly):
                 if field.store or field.type not in ('one2many', 'many2many'):
@@ -6017,60 +5989,55 @@ class BaseModel(metaclass=MetaModel):
         #  - mark I to recompute on inverse(W, inverse(X, records)),
         #  - mark J to recompute on inverse(Y, records).
         fields = [self._fields[fname] for fname in fnames]
-        field_triggers = self.pool.field_triggers
-        trees = [field_triggers[field] for field in fields if field in field_triggers]
-
-        if not trees:
-            return
-
         cache = self.env.cache
 
-        # Merge dependency trees to evaluate all triggers at once.
-        # For non-stored computed fields, `_modified_triggers` might traverse
-        # the tree (at the cost of extra queries) only to know which records to
-        # invalidate in cache. But in many cases, most of these fields have no
-        # data in cache, so they can be ignored from the start. This allows us
-        # to discard subtrees from the merged tree when they only contain such
-        # fields.
-        tree = merge_trigger_trees(
-            trees,
+        # The fields' trigger trees are merged in order to evaluate all triggers
+        # at once. For non-stored computed fields, `_modified_triggers` might
+        # traverse the tree (at the cost of extra queries) only to know which
+        # records to invalidate in cache. But in many cases, most of these
+        # fields have no data in cache, so they can be ignored from the start.
+        # This allows us to discard subtrees from the merged tree when they
+        # only contain such fields.
+        tree = self.pool.get_trigger_tree(
+            fields,
             select=lambda field: (field.compute and field.store) or cache.contains_field(field),
         )
+        if not tree:
+            return
 
-        if tree:
-            # determine what to compute (through an iterator)
-            tocompute = self.sudo().with_context(active_test=False)._modified_triggers(tree, create)
+        # determine what to compute (through an iterator)
+        tocompute = self.sudo().with_context(active_test=False)._modified_triggers(tree, create)
 
-            # When called after modification, one should traverse backwards
-            # dependencies by taking into account all fields already known to be
-            # recomputed.  In that case, we mark fieds to compute as soon as
-            # possible.
-            #
-            # When called before modification, one should mark fields to compute
-            # after having inversed all dependencies.  This is because we
-            # determine what currently depends on self, and it should not be
-            # recomputed before the modification!
-            if before:
-                tocompute = list(tocompute)
+        # When called after modification, one should traverse backwards
+        # dependencies by taking into account all fields already known to be
+        # recomputed.  In that case, we mark fieds to compute as soon as
+        # possible.
+        #
+        # When called before modification, one should mark fields to compute
+        # after having inversed all dependencies.  This is because we
+        # determine what currently depends on self, and it should not be
+        # recomputed before the modification!
+        if before:
+            tocompute = list(tocompute)
 
-            # process what to compute
-            for field, records, create in tocompute:
-                records -= self.env.protected(field)
-                if not records:
-                    continue
-                if field.compute and field.store:
-                    if field.recursive:
-                        recursively_marked = self.env.not_to_compute(field, records)
-                    self.env.add_to_compute(field, records)
-                else:
-                    # Don't force the recomputation of compute fields which are
-                    # not stored as this is not really necessary.
-                    if field.recursive:
-                        recursively_marked = records & self.env.cache.get_records(records, field)
-                    self.env.cache.invalidate([(field, records._ids)])
-                # recursively trigger recomputation of field's dependents
+        # process what to compute
+        for field, records, create in tocompute:
+            records -= self.env.protected(field)
+            if not records:
+                continue
+            if field.compute and field.store:
                 if field.recursive:
-                    recursively_marked.modified([field.name], create)
+                    recursively_marked = self.env.not_to_compute(field, records)
+                self.env.add_to_compute(field, records)
+            else:
+                # Don't force the recomputation of compute fields which are
+                # not stored as this is not really necessary.
+                if field.recursive:
+                    recursively_marked = records & self.env.cache.get_records(records, field)
+                self.env.cache.invalidate([(field, records._ids)])
+            # recursively trigger recomputation of field's dependents
+            if field.recursive:
+                recursively_marked.modified([field.name], create)
 
     def _modified_triggers(self, tree, create=False):
         """ Return an iterator traversing a tree of field triggers on ``self``,
@@ -6206,23 +6173,13 @@ class BaseModel(metaclass=MetaModel):
     # Generic onchange method
     #
 
-    @classmethod
-    def _dependent_fields(cls, field):
-        """ Return an iterator on the fields that depend on ``field``. """
-        def traverse(node):
-            for key, val in node.items():
-                if key is None:
-                    yield from val
-                else:
-                    yield from traverse(val)
-        return traverse(cls.pool.field_triggers.get(field, {}))
-
     def _has_onchange(self, field, other_fields):
         """ Return whether ``field`` should trigger an onchange event in the
             presence of ``other_fields``.
         """
         return (field.name in self._onchange_methods) or any(
-            dep in other_fields for dep in self._dependent_fields(field.base_field)
+            dep in other_fields
+            for dep in self.pool.get_dependent_fields(field.base_field)
         )
 
     def _onchange_eval(self, field_name, onchange, result):
