@@ -265,21 +265,13 @@ export class Messaging {
                     break;
                 case "mail.record/insert":
                     {
-                        const receivedPartner = notif.payload.Partner;
-                        if (receivedPartner) {
-                            // If Partner in the payload is a single object
-                            if (receivedPartner.im_status) {
-                                const im_status = receivedPartner.im_status;
-                                const id = receivedPartner.id;
-                                this.state.partners[id].im_status = im_status;
-                            } else {
-                                // If Partner in the payload is an array of partners
-                                for (const partner of receivedPartner) {
-                                    if (partner.im_status) {
-                                        const im_status = partner.im_status;
-                                        const id = partner.id;
-                                        this.state.partners[id].im_status = im_status;
-                                    }
+                        if (notif.payload.Partner) {
+                            const partners = Array.isArray(notif.payload.Partner)
+                                ? notif.payload.Partner
+                                : [notif.payload.Partner];
+                            for (const partner of partners) {
+                                if (partner.im_status) {
+                                    Partner.insert(this.state, partner);
                                 }
                             }
                         }

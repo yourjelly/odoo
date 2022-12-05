@@ -13,14 +13,22 @@ export class Partner {
      * @returns {import("@mail/new/core/partner_model").Partner}
      */
     static insert(state, data) {
+        let partner;
         if (data.id in state.partners) {
-            return state.partners[data.id];
+            partner = state.partners[data.id];
+        } else {
+            partner = new Partner();
         }
-        let partner = new Partner(data);
         partner._state = state;
         state.partners[data.id] = partner;
         // return reactive version
         partner = state.partners[data.id];
+        const { id = partner.id, name = partner.name, im_status = partner.im_status } = data;
+        Object.assign(partner, {
+            id,
+            name,
+            im_status,
+        });
         if (
             partner.im_status !== "im_partner" &&
             !partner.is_public &&
@@ -30,10 +38,6 @@ export class Partner {
         }
         // return reactive version
         return partner;
-    }
-
-    constructor({ id, name }) {
-        Object.assign(this, { id, name, im_status: null });
     }
 
     get avatarUrl() {
