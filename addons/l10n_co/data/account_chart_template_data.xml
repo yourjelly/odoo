@@ -13,5 +13,7 @@
             <field name="default_pos_receivable_account_id" ref="co_puc_130507"/>
             <field name="account_journal_early_pay_discount_loss_account_id" ref="co_puc_530535"/>
             <field name="account_journal_early_pay_discount_gain_account_id" ref="co_puc_421040"/>
+            <field name="property_tax_payable_account_id" ref="co_puc_236705"/>
+            <field name="property_tax_receivable_account_id" ref="co_puc_135517"/>
         </record>
 </odoo>

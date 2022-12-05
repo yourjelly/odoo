@@ -29,6 +29,8 @@
 "2201","2201","Purchase Tax Control Account","asset_current","FALSE","l10n_uk"
 "2202","2202","HMRC - VAT Account","liability_payable","TRUE","l10n_uk"
 "2204","2204","Manual Adjustments ﾖ VAT","liability_current","FALSE","l10n_uk"
+"2205","2205","VAT receivable","asset_current","FALSE","l10n_uk"
+"2206","2206","VAT payable","liability_current","FALSE","l10n_uk"
 "2210","2210","P.A.Y.E. & NI","liability_payable","TRUE","l10n_uk"
 "2220","2220","Net Wages","liability_payable","TRUE","l10n_uk"
 "2230","2230","Pension Fund","liability_payable","TRUE","l10n_uk"

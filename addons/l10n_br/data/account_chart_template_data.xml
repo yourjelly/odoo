@@ -24,5 +24,7 @@
         <field name="default_pos_receivable_account_id" ref="account_template_101010402"/>
         <field name="account_journal_early_pay_discount_loss_account_id" ref="account_template_31101010202"/>
         <field name="account_journal_early_pay_discount_gain_account_id" ref="account_template_30101050148"/>
+        <field name="property_tax_payable_account_id" ref="account_template_201010912"/>
+        <field name="property_tax_receivable_account_id" ref="account_template_101020340"/>
     </record>
 </odoo>

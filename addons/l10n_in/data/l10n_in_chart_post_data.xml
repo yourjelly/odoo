@@ -10,5 +10,7 @@
         <field name="default_pos_receivable_account_id" ref="p10041"/>
         <field name="account_journal_early_pay_discount_loss_account_id" ref="p2132"/>
         <field name="account_journal_early_pay_discount_gain_account_id" ref="2012"/>
+        <field name="property_tax_payable_account_id" ref="p11233"/>
+        <field name="property_tax_receivable_account_id" ref="p10052"/>
     </record>
 </odoo>

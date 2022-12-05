@@ -13,6 +13,7 @@ au_11330,l10n_au.l10n_au_chart_template,11330,Trading Stock on Hand,asset_curren
 au_11340,l10n_au.l10n_au_chart_template,11340,Goods Shipped Not Invoiced,asset_current,FALSE
 au_12100,l10n_au.l10n_au_chart_template,12100,Deposits Paid,asset_prepayments,FALSE
 au_12200,l10n_au.l10n_au_chart_template,12200,Prepaid Insurance,asset_current,FALSE
+au_12300,l10n_au.l10n_au_chart_template,12300,GST receivable,asset_current,FALSE
 au_13110,l10n_au.l10n_au_chart_template,13110,Manufacturing Plant at Cost,asset_fixed,FALSE
 au_13120,l10n_au.l10n_au_chart_template,13120,Manufac. Plant Accum Dep,asset_fixed,FALSE
 au_13130,l10n_au.l10n_au_chart_template,13130,Manufacturing Equipment Cost,asset_fixed,FALSE
@@ -35,6 +36,7 @@ au_21370,l10n_au.l10n_au_chart_template,21370,Voluntary Withholdings Payable,lia
 au_21380,l10n_au.l10n_au_chart_template,21380,ABN Withholdings Payable,liability_current,FALSE
 au_21410,l10n_au.l10n_au_chart_template,21410,Payroll Accruals Payable,liability_current,FALSE
 au_21420,l10n_au.l10n_au_chart_template,21420,PAYG Withholding Payable,liability_current,FALSE
+au_21430,l10n_au.l10n_au_chart_template,21430,GST payable,liability_current,FALSE
 au_21600,l10n_au.l10n_au_chart_template,21600,Customer Deposits,liability_current,FALSE
 au_21700,l10n_au.l10n_au_chart_template,21700,Other Current Liabilities,liability_current,FALSE
 au_22100,l10n_au.l10n_au_chart_template,22100,Mortgages Payable,liability_non_current,FALSE

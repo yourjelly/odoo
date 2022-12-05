@@ -38,6 +38,7 @@ do_niif_11080106,11080106,ITBIS Pagado en Importaciones Sujeto a Proporcionalida
 do_niif_11080301,11080301,ITBIS Retenido por Ventas (N08-04 y N02-05),asset_current,FALSE,do_chart_template,"account_tag_1,account_tag_11,account_tag_1108,account_tag_110803"
 do_niif_11080302,11080302,ITBIS Retenido por Entidades del Estado (5%),asset_current,FALSE,do_chart_template,"account_tag_1,account_tag_11,account_tag_1108,account_tag_110803"
 do_niif_11080303,11080303,Saldo a Favor Anterior,asset_current,FALSE,do_chart_template,"account_tag_1,account_tag_11,account_tag_1108,account_tag_110803"
+do_niif_11080304,11080304,VAT receivable - Current account,asset_current,FALSE,do_chart_template,
 do_niif_11090100,11090100,Acciones Temporales,asset_current,FALSE,do_chart_template,"account_tag_1,account_tag_11,account_tag_1109"
 do_niif_11090200,11090200,Depósitos a Plazo Temporales,asset_current,FALSE,do_chart_template,"account_tag_1,account_tag_11,account_tag_1109"
 do_niif_11090300,11090300,Bonos Temporales,asset_current,FALSE,do_chart_template,"account_tag_1,account_tag_11,account_tag_1109"

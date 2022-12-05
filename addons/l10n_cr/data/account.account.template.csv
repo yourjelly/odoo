@@ -44,6 +44,8 @@
 "account_account_template_0_212201","0-Impuesto de renta por pagar","0.212201","liability_current","l10n_cr.account_chart_template_0","True"
 "account_account_template_0_212202","0-Adelantos de impuesto de renta","0.212202","liability_current","l10n_cr.account_chart_template_0","True"
 "account_account_template_0_212203","0-Retenciones de impuesto de renta","0.212203","liability_current","l10n_cr.account_chart_template_0","True"
+"account_account_template_0_212204","0-Tax payable - Current account","0.212204","liability_current","l10n_cr.account_chart_template_0","False"
+"account_account_template_0_212205","0-Tax receivable - Current account","0.212205","asset_current","l10n_cr.account_chart_template_0","False"
 "account_account_template_0_310001","0-Socio 1","0.310001","equity","l10n_cr.account_chart_template_0","False"
 "account_account_template_0_320001","0-Reserva legal","0.320001","equity","l10n_cr.account_chart_template_0","False"
 "account_account_template_0_330001","0-Reserva para mejoras","0.330001","equity","l10n_cr.account_chart_template_0","False"

@@ -14,5 +14,7 @@
         <field name="default_pos_receivable_account_id" ref="au_11201" />
         <field name="account_journal_early_pay_discount_loss_account_id" ref="au_61610"/>
         <field name="account_journal_early_pay_discount_gain_account_id" ref="au_61620"/>
+        <field name="property_tax_payable_account_id" ref="au_21430"/>
+        <field name="property_tax_receivable_account_id" ref="au_12300"/>
     </record>
 </odoo>

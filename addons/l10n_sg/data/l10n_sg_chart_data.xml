@@ -420,6 +420,14 @@
             <field name="reconcile" eval="False" />
         </record>
 
+        <record model="account.account.template" id="account_account_751">
+            <field name="name">GST Receivable</field>
+            <field name="code">101390</field>
+            <field name="account_type">asset_current</field>
+            <field name="chart_template_id" ref="sg_chart_template"/>
+            <field name="reconcile" eval="False" />
+        </record>
+
         <record model="account.account.template" id="account_account_752">
             <field name="name">Current Portion of Employee Benefits Obligations</field>
             <field name="code">201000</field>
@@ -1182,5 +1190,7 @@
         <field name="default_pos_receivable_account_id" ref="account_account_737"/>
         <field name="account_journal_early_pay_discount_loss_account_id" ref="account_account_800"/>
         <field name="account_journal_early_pay_discount_gain_account_id" ref="account_account_856"/>
+        <field name="property_tax_payable_account_id" ref="account_account_764"/>
+        <field name="property_tax_receivable_account_id" ref="account_account_751"/>
     </record>
 </odoo>
