@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from odoo import fields
-from odoo.fields import Datetime
 from odoo.tests import common
 from odoo import Command
 
@@ -408,7 +407,7 @@ ORDER BY "test_read_group_aggregate"."key" ASC
                         ('*:count', '<', 3),
                         ("value:sum", '>', 4),
                     ]
-                ),
+                ).to_list(),
                 [
                     {'key': 1, 'value:sum': 2 + 8, "*:count": 2},
                     {'key': 2, 'value:sum': 5, "*:count": 1},
@@ -691,23 +690,24 @@ ORDER BY "test_read_group_aggregate"."key" ASC
             },
         ])
 
-        task_by_users = tasks.aggregate(
-            [('id', 'in', tasks.ids)],
-            ['name:array_agg'],
-            ['user_ids'],
-        )
         # TODO: should we order by the relation and not by the id also for many2many (same than many2one) ?
-        self.assertEqual(task_by_users, [
-            {   # tasks of Mario
-                'user_ids': users[0].id,
-                'name:array_agg': ["Paper Mario", "Super Mario Bros."],
-            },
-            {   # tasks of Luigi
-                'user_ids': users[1].id,
-                'name:array_agg': ["Luigi's Mansion", "Super Mario Bros."],
-            },
-            {   # tasks of nobody
-                'user_ids': None,
-                'name:array_agg': ["Donkey Kong"],
-            },
-        ])
+        self.assertEqual(tasks.aggregate(
+                [('id', 'in', tasks.ids)],
+                ['name:array_agg'],
+                ['user_ids'],
+            ).to_list(), 
+            [
+                {   # tasks of Mario
+                    'user_ids': users[0].id,
+                    'name:array_agg': ["Paper Mario", "Super Mario Bros."],
+                },
+                {   # tasks of Luigi
+                    'user_ids': users[1].id,
+                    'name:array_agg': ["Luigi's Mansion", "Super Mario Bros."],
+                },
+                {   # tasks of nobody
+                    'user_ids': None,
+                    'name:array_agg': ["Donkey Kong"],
+                },
+            ]
+        )

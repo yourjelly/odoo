@@ -200,7 +200,7 @@ class AggregateResult(dict):
 
     EMPTY_DICT = frozendict()
 
-    __slots__ = ('_groupby_info', '_aggregate_info', '_rows', '__dict__')  # Maybe other
+    __slots__ = ('_groupby_info', '_aggregate_info', '_rows', '__dict__')  # __dict__ is for lazy_property
 
     def __init__(
         self,
@@ -230,31 +230,46 @@ class AggregateResult(dict):
         return {key: tuple(v) for key, v in prefetch_values.items()}
 
     def items(self, converter_keys=_groups_to_records, converter_values=_aggregates_to_records) -> "Iterator[(tuple, dict)]":
+        # TODO: converter_keys and converter_values should be None by default
+        # => group_to_record=False, aggregates_to_record=False
         if not converter_keys and not converter_values:
             yield from super().items()
 
         for keys, aggregates in super().items():
-            yield _groups_to_records(self, keys), _aggregates_to_records(self, aggregates)
+            yield (
+                converter_keys(self, keys) if converter_keys else keys,
+                converter_values(self, aggregates) if converter_values else aggregates,
+            )
 
     def values(self, converter_values=_aggregates_to_records) -> "Iterator[dict]":
+        # TODO: we should return values of each dict instead, even if it creates a ambigouty with __getitem__
         if not converter_values:
             yield from super().values()
 
         for aggregates in super().values():
-            yield _aggregates_to_records(self, aggregates)
+            yield converter_values(self, aggregates)
 
     def keys(self, converter_keys=_groups_to_records) -> "Iterator[tuple]":
         if not converter_keys:
             return super().keys()
 
         for keys in super().keys():
-            yield _groups_to_records(self, keys)
+            yield converter_keys(self, keys)
 
     def __iter__(self) -> "Iterator[tuple]":
         return self.keys()
 
+    def partial_group(self, key, converter_keys=_groups_to_records, converter_values=_aggregates_to_records):
+        res = defaultdict(lambda: defaultdict(frozendict))
+        index_key = list(self._groupby_info).index(key)
+
+        for keys, aggregates in self.items(converter_keys, converter_values):
+            other_keys = keys[:index_key] + keys[index_key + 1:]
+            res[keys[index_key]][other_keys] = aggregates
+        return res
+
     def _flexible_key(self, key) -> 'tuple':
-        if len(self._groupby_info) == 0 and (key is None or key == ()) :
+        if len(self._groupby_info) == 0 and (key is None or key == ()):
             return ()
 
         if not isinstance(key, tuple):
@@ -270,6 +285,7 @@ class AggregateResult(dict):
         return super().__contains__(self._flexible_key(key))
 
     def __getitem__(self, key) -> 'dict':
+        # TODO: should we converted agg into recordset ?? I don't think and the itertor available should return raw data by default ?
         return super().__getitem__(self._flexible_key(key))
 
     def __missing__(self, key) -> 'frozendict':
@@ -1912,7 +1928,13 @@ class BaseModel(metaclass=MetaModel):
         else:
             expression = f'{func}({distinct}{field_expression})'
 
-        return expression, [fname], self.env[field.comodel_name] if field.relational else None
+        Model = None
+        if field.relational:
+            Model = self.env[field.comodel_name]
+        elif fname == 'id':
+            Model = self.env[self._name]
+
+        return expression, [fname], Model
 
     def _aggregate_groupby(self, query, groupby_spec):
         """ return <SQL expression>, [<fields name to flush>]"""
@@ -2043,6 +2065,7 @@ class BaseModel(metaclass=MetaModel):
             order_traverse_many2one = False
 
         query = self._where_calc(domain)
+        # TODO if domain is Falsy don't make the query
         self._apply_ir_rules(query, 'read')
 
         fnames_to_flush = OrderedSet()
