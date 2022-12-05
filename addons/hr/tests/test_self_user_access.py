@@ -143,12 +143,18 @@ class TestSelfAccessRights(TestHrCommon):
     def testWriteSelfEmployee(self):
         for f in self.protected_fields_emp:
             with self.assertRaises(AccessError):
-                self.richard_emp.with_user(self.richard).write({f: 'dummy'})
+                try:
+                    self.hubert_emp.with_user(self.richard).write({f: 'dummy'})
+                except AttributeError:
+                    self.hubert_emp.with_user(self.richard).write({f: 1938457})
 
     def testWriteOtherEmployee(self):
         for f in self.protected_fields_emp:
             with self.assertRaises(AccessError):
-                self.hubert_emp.with_user(self.richard).write({f: 'dummy'})
+                try:
+                    self.hubert_emp.with_user(self.richard).write({f: 'dummy'})
+                except AttributeError:
+                    self.hubert_emp.with_user(self.richard).write({f: 1938457})
 
     # Read res.users #
     def testReadSelfUserEmployee(self):
