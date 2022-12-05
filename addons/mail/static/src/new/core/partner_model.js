@@ -7,22 +7,27 @@
  */
 
 export class Partner {
+    /** @type {number} */
+    id;
+    /** @type {string} */
+    name;
+    /** @type {'offline' | 'bot' | 'online' | 'away' | 'im_partner' | undefined} im_status */
+    im_status;
+
     /**
      * @param {import("@mail/new/core/messaging").Messaging['state']} state
      * @param {import("@mail/new/core/partner_model").Data} data
      * @returns {import("@mail/new/core/partner_model").Partner}
      */
     static insert(state, data) {
-        let partner;
-        if (data.id in state.partners) {
-            partner = state.partners[data.id];
-        } else {
+        let partner = state.partners[data.id];
+        if (!partner) {
             partner = new Partner();
+            partner._state = state;
+            state.partners[data.id] = partner;
+            // Get reactive version.
+            partner = state.partners[data.id];
         }
-        partner._state = state;
-        state.partners[data.id] = partner;
-        // return reactive version
-        partner = state.partners[data.id];
         const { id = partner.id, name = partner.name, im_status = partner.im_status } = data;
         Object.assign(partner, {
             id,

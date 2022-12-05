@@ -2,7 +2,7 @@
 
 import { UPDATE_BUS_PRESENCE_DELAY } from "@bus/im_status_service";
 import { start, startServer, afterNextRender } from "@mail/../tests/helpers/test_utils";
-import { getFixture } from "@web/../tests/helpers/utils";
+import { getFixture, nextTick } from "@web/../tests/helpers/utils";
 
 let target;
 
@@ -123,5 +123,20 @@ QUnit.module("mail", (hooks) => {
         pyEnv["res.partner"].write([partnerId], { im_status: "online" });
         await afterNextRender(() => advanceTime(UPDATE_BUS_PRESENCE_DELAY));
         assert.containsOnce(target, ".o-mail-partner-im-status-icon.o-online");
+    });
+
+    QUnit.test("Can handle im_status of unknown partner", async function (assert) {
+        const { env, pyEnv } = await start();
+        const partnerId = pyEnv["res.partner"].create({ name: "Bob" });
+        pyEnv["bus.bus"]._sendone("channel-1", "mail.record/insert", {
+            Partner: { im_status: "online", id: partnerId },
+        });
+        await nextTick();
+        const partners = env.services["mail.messaging"].state.partners;
+        assert.ok(partnerId in partners, "Unknown partner should have been added");
+        assert.ok(
+            partners[partnerId].im_status === "online",
+            "ImStatus of partner should be the same as the one present in the notification"
+        );
     });
 });

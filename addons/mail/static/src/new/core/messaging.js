@@ -58,6 +58,7 @@ export class Messaging {
             },
             /** @type {Object.<number, import("@mail/new/core/follower_model").Follower>} */
             followers: {},
+            /** @type {Object.<number, Partner>} */
             partners: {},
             partnerRoot: {},
             messages: {},
