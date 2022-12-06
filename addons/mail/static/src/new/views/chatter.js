@@ -66,6 +66,7 @@ export class Chatter extends Component {
         onWillStart(() => this.load());
         onWillUpdateProps((nextProps) => {
             if (nextProps.resId !== this.props.resId) {
+                this.state.isLoadingAttachments = false;
                 this.load(nextProps.resId);
                 if (nextProps.resId === false) {
                     this.state.composing = false;
@@ -90,7 +91,6 @@ export class Chatter extends Component {
     }
 
     load(resId = this.props.resId, requestList = ["followers", "attachments", "messages"]) {
-        this.state.isLoadingAttachments = requestList.includes("attachments");
         const { resModel } = this.props;
         const thread = this.messaging.getChatterThread(resModel, resId);
         this.thread = thread;
@@ -98,6 +98,7 @@ export class Chatter extends Component {
             // todo: reset activities/attachments/followers
             return;
         }
+        this.state.isLoadingAttachments = requestList.includes("attachments");
         if (this.props.hasActivity && !requestList.includes("activities")) {
             requestList.push("activities");
         }

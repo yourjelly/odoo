@@ -1,6 +1,8 @@
 /** @odoo-module **/
 
 import { Chatter } from "@mail/new/views/chatter";
+import { start } from "@mail/../tests/helpers/test_utils";
+
 import { click, editInput, nextTick, getFixture, mount } from "@web/../tests/helpers/utils";
 import { makeTestEnv, TestServer } from "../helpers/helpers";
 import { Component, useState, xml } from "@odoo/owl";
@@ -270,4 +272,57 @@ QUnit.module("mail", (hooks) => {
             "/mail/link_preview",
         ]);
     });
+
+    QUnit.test("No attachment loading spinner when creating records", async (assert) => {
+        assert.expect(2);
+
+        const { openFormView } = await start();
+        await openFormView({
+            res_model: "res.partner",
+        });
+        assert.containsNone(
+            target,
+            ".o-mail-chatter-topbar-add-attachments .fa-spin",
+            "Should not contain attachment spinner"
+        );
+        assert.containsOnce(
+            target,
+            ".o-mail-chatter-topbar-add-attachments:contains(0)",
+            "Should show attachment count of 0"
+        );
+    });
+
+    QUnit.test(
+        "No attachment loading spinner when switching from loading record to creation of record",
+        async (assert) => {
+            assert.expect(2);
+
+            const { click, openFormView, pyEnv } = await start({
+                async mockRPC(route) {
+                    if (route === "/mail/thread/data") {
+                        await new Promise(() => {});
+                    }
+                },
+            });
+            const partnerId = pyEnv["res.partner"].create({ name: "John" });
+            await openFormView(
+                {
+                    res_model: "res.partner",
+                    res_id: partnerId,
+                },
+                { waitUntilDataLoaded: false }
+            );
+            assert.containsOnce(
+                target,
+                ".o-mail-chatter-topbar-add-attachments .fa-spin",
+                "Should contain attachment loading spinner"
+            );
+            await click(".o_form_button_create");
+            assert.containsNone(
+                target,
+                ".o-mail-chatter-topbar-add-attachments .fa-spin",
+                "Should not contain attachment spinner"
+            );
+        }
+    );
 });
