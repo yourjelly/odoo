@@ -66,6 +66,17 @@ class IrActions(models.Model):
         self.clear_caches()
         return res
 
+    def exists(self):
+        ids = self._existing()
+        existing = self.filtered(lambda rec: rec.id in ids)
+        return existing
+
+    @api.model
+    @tools.ormcache()
+    def _existing(self):
+        self._cr.execute("SELECT id FROM %s" % self._table)
+        return set(row[0] for row in self._cr.fetchall())
+
     @api.ondelete(at_uninstall=True)
     def _unlink_check_home_action(self):
         self.env['res.users'].with_context(active_test=False).search([('action_id', 'in', self.ids)]).sudo().write({'action_id': None})

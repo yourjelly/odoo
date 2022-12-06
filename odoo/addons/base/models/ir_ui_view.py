@@ -14,6 +14,8 @@ import time
 import uuid
 import warnings
 
+from itertools import chain
+
 from lxml import etree
 from lxml.etree import LxmlError
 from lxml.builder import E
@@ -2887,7 +2889,7 @@ class NameManager:
         self.mandatory_names[name] = use
 
     def _get_node_groups(self, node):
-        return tuple(tuple(n.get('groups').split(',')) for n in node.xpath('ancestor-or-self::*[@groups]'))
+        return tuple(tuple(n.get('groups').split(',')) for n in chain([node], node.iterancestors()) if n.get('groups'))
 
     def check(self, view):
         # context for translations below
