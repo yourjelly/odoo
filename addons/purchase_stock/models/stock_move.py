@@ -96,35 +96,13 @@ class StockMove(models.Model):
             rslt['debit_line_vals']['currency_id'] = purchase_currency.id
             rslt['credit_line_vals']['currency_id'] = purchase_currency.id
         else:
-            rslt['credit_line_vals']['amount_currency'] = 0
-            rslt['debit_line_vals']['amount_currency'] = 0
+            abs_price_diff = abs(svl.price_diff_value)
+            rslt['credit_line_vals']['amount_currency'] = -abs_price_diff if rslt['credit_line_vals']['balance'] < 0 else abs_price_diff
+            rslt['debit_line_vals']['amount_currency'] = -abs_price_diff if rslt['debit_line_vals']['balance'] < 0 else abs_price_diff
             rslt['debit_line_vals']['currency_id'] = purchase_currency.id
             rslt['credit_line_vals']['currency_id'] = purchase_currency.id
             if not svl.price_diff_value:
                 return rslt
-            # The idea is to force using the company currency during the reconciliation process
-            rslt['debit_line_vals_curr'] = {
-                'name': _("Currency exchange rate difference"),
-                'product_id': self.product_id.id,
-                'quantity': 0,
-                'product_uom_id': self.product_id.uom_id.id,
-                'partner_id': partner_id,
-                'balance': 0,
-                'account_id': debit_account_id,
-                'currency_id': purchase_currency.id,
-                'amount_currency': -svl.price_diff_value,
-            }
-            rslt['credit_line_vals_curr'] = {
-                'name': _("Currency exchange rate difference"),
-                'product_id': self.product_id.id,
-                'quantity': 0,
-                'product_uom_id': self.product_id.uom_id.id,
-                'partner_id': partner_id,
-                'balance': 0,
-                'account_id': credit_account_id,
-                'currency_id': purchase_currency.id,
-                'amount_currency': svl.price_diff_value,
-            }
         return rslt
 
     def _prepare_extra_move_vals(self, qty):
