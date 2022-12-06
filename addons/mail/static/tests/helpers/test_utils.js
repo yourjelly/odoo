@@ -167,7 +167,11 @@ function getOpenDiscuss(webClient, { context = {}, params = {}, ...props } = {})
 function getOpenFormView(openView) {
     return async function openFormView(
         action,
-        { props, waitUntilDataLoaded = true, waitUntilMessagesLoaded = true } = {}
+        {
+            props,
+            waitUntilDataLoaded = Boolean(action.res_id),
+            waitUntilMessagesLoaded = Boolean(action.res_id),
+        } = {}
     ) {
         action["views"] = [[false, "form"]];
         const func = () => openView(action, props);
