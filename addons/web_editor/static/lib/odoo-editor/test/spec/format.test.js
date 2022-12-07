@@ -1,5 +1,5 @@
 import { isSelectionFormat } from '../../src/utils/utils.js';
-import { BasicEditor, testEditor, setTestSelection, Direction } from '../utils.js';
+import { BasicEditor, testEditor, setTestSelection, Direction, nextTick } from '../utils.js';
 
 const bold = async editor => {
     await editor.execCommand('bold');
@@ -141,7 +141,13 @@ describe('Format', () => {
             await testEditor(BasicEditor, {
                 contentBefore: `<p>a${spanBold(`b${strong(`c${b(`[d]`)}e`)}f`)}g</p>`,
                 stepFunction: bold,
-                contentAfter: `<p>a${spanBold(`bc`)}[d]${spanBold(`ef`)}g</p>`,
+                contentAfter: `<p>
+                    a
+                    <span style="font-weight: bolder;">b<strong>c</strong></span>
+                    [d]
+                    <span style="font-weight: bolder;"><strong>e</strong>f</span>
+                    g
+                </p>`.replaceAll(/\n\s*/g, ''),
             });
         });
 
@@ -535,12 +541,12 @@ describe('Format', () => {
             await testEditor(BasicEditor, {
                 contentBefore: `<p>ab${u(s(`cd`))}${s(u(`ghi[]`))}${u(s(`ef`))}</p>`,
                 stepFunction: underline,
-                contentAfterEdit: `<p>ab${u(s(`cd`))}${s(`${u(`ghi`)}${span(`[]\u200b`, 'first')}`)}${u(s(`ef`))}</p>`,
-                contentAfter: `<p>ab${u(s(`cd`))}${s(u(`ghi`) + `[]`)}${u(s(`ef`))}</p>`,
+                contentAfterEdit: `<p>ab${u(s(`cd`))}${s(`${u(`ghi`)}`)}${s(`[]\u200b`, 'first')}${u(s(`ef`))}</p>`,
+                // The reason the cursor is after the tag <s> is because when the editor get's cleaned, the zws tag gets deleted.
+                contentAfter: `<p>ab${u(s(`cd`))}${s(u(`ghi`))}[]${u(s(`ef`))}</p>`,
             });
         });
         it('should remove underline, write, restore underline, write, remove underline again, write (collapsed, strikeThrough)', async () => {
-            const uselessSpan = content => `<span>${content}</span>`; // TODO: clean
             const uselessU = u(''); // TODO: clean
             await testEditor(BasicEditor, {
                 contentBefore: `<p>ab${u(s(`cd[]ef`))}</p>`,
@@ -552,7 +558,7 @@ describe('Format', () => {
                     await editor.execCommand('underline');
                     await editor.execCommand('insertText', 'C');
                 },
-                contentAfterEdit: `<p>ab${u(s(`cd`))}${s(`A${u(`B`)}${uselessSpan(`C[]`)}${uselessU}`)}${u(s(`ef`))}</p>`,
+                contentAfterEdit: `<p>ab${u(s(`cd`))}${s(`A${u(`B`)}C[]${uselessU}`)}${u(s(`ef`))}</p>`,
             });
         });
         it('should remove only underline decoration on a span', async () => {
@@ -639,12 +645,12 @@ describe('Format', () => {
             await testEditor(BasicEditor, {
                 contentBefore: `<p>ab${u(em(`cd`))}${em(u(`ghi[]`))}${u(em(`ef`))}</p>`,
                 stepFunction: underline,
-                contentAfterEdit: `<p>ab${u(em(`cd`))}${em(u(`ghi`) + `<span data-oe-zws-empty-inline="">[]\u200b</span>`)}${u(em(`ef`))}</p>`,
-                contentAfter: `<p>ab${u(em(`cd`))}${em(u(`ghi`) + `[]`)}${u(em(`ef`))}</p>`,
+                contentAfterEdit: `<p>ab${u(em(`cd`))}${em(u(`ghi`))}<em data-oe-zws-empty-inline="">[]\u200b</em>${u(em(`ef`))}</p>`,
+                // The reason the cursor is after the tag <s> is because when the editor get's cleaned, the zws tag gets deleted.
+                contentAfter: `<p>ab${u(em(`cd`))}${em(u(`ghi`))}[]${u(em(`ef`))}</p>`,
             });
         });
         it('should remove underline, write, restore underline, write, remove underline again, write (collapsed, italic)', async () => {
-            const uselessSpan = content => `<span>${content}</span>`;
             const uselessU = u(''); // TODO: clean
             await testEditor(BasicEditor, {
                 contentBefore: `<p>ab${u(em(`cd[]ef`))}</p>`,
@@ -656,7 +662,7 @@ describe('Format', () => {
                     await editor.execCommand('underline');
                     await editor.execCommand('insertText', 'C');
                 },
-                contentAfter: `<p>ab${u(em(`cd`))}${em(`A${u(`B`)}${uselessSpan(`C[]`)}${uselessU}`)}${u(em(`ef`))}</p>`,
+                contentAfter: `<p>ab${u(em(`cd`))}${em(`A${u(`B`)}C[]${uselessU}`)}${u(em(`ef`))}</p>`,
             });
         });
     });
@@ -682,6 +688,53 @@ describe('Format', () => {
                 stepFunction: setFontSize('36px'),
                 contentAfterEdit: `<p>ab<span data-oe-zws-empty-inline="" style="font-size: 36px;">[]\u200B</span>cd</p>`,
                 contentAfter: '<p>ab[]cd</p>',
+            });
+        });
+        it('should change the font-size of a span that has already a font-size', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: `<p>a<span style="font-size: 10px;">b[c]d</span>e</p>`,
+                stepFunction: setFontSize('20px'),
+                contentAfter:   `<p>
+                                    a
+                                    <span style="font-size: 10px;">b</span>
+                                        <span style="font-size: 20px;">[c]</span>
+                                    <span style="font-size: 10px;">d</span>
+                                    e
+                                </p>`.replaceAll(/\n\s*/g, ''),
+            });
+        });
+        it('should change the font-size of a nested span that has already a font-size', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore:   `<p>
+                                    a
+                                    <span style="font-size: 10px;">
+                                        b
+                                        <span style="font-size: 20px;">c[d]e</span>
+                                        f
+                                    </span>
+                                    g
+                                </p>`.replaceAll(/\n\s*/g, ''),
+                stepFunction: setFontSize('30px'),
+                contentAfter:   `<p>
+                                    a
+                                    <span style="font-size: 10px;">
+                                        b
+                                        <span style="font-size: 20px;">c</span>
+                                    </span>
+                                    <span style="font-size: 30px;">[d]</span>
+                                    <span style="font-size: 10px;">
+                                        <span style="font-size: 20px;">e</span>
+                                        f
+                                    </span>
+                                    g
+                                </p>`.replaceAll(/\n\s*/g, ''),
+            });
+        });
+        it('should remove a redundant font-size', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: '<p style="font-size: 10px">b<span style="font-size: 10px;">[c]</span>d</p>',
+                stepFunction: setFontSize('10px'),
+                contentAfter: '<p style="font-size: 10px">b[c]d</p>',
             });
         });
     });
