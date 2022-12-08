@@ -3064,6 +3064,12 @@
                 }
             }
         }
+        if ("FileUploader" === name) {
+            console.warn("============== FileUploader ValidateProps ====================");
+            console.warn("Props: ", { ...props });
+            console.warn("Component id: ", comp.id);
+            console.warn("Has onUploaded props: ", "onUploaded" in props);
+        }
         const errors = validateSchema(props, schema);
         if (errors.length) {
             throw new OwlError(`Invalid props for component '${ComponentClass.name}': ` + errors.join(", "));
