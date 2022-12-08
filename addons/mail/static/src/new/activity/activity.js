@@ -24,7 +24,6 @@ export class Activity extends Component {
         onWillUpdateProps((nextProps) => {
             this.delay = computeDelay(nextProps.data.date_deadline);
         });
-        this.onFileUploaded = this.onFileUploaded.bind(this);
         if (this.props.data.activity_category === "upload_file") {
             this.uploadDocument = useAttachmentUploader({
                 threadId: this.env.services["mail.messaging"].getChatterThread(
