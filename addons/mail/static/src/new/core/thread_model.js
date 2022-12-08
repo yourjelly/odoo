@@ -31,8 +31,7 @@ export class Thread {
         if (data.id in state.threads) {
             thread = state.threads[data.id];
         } else {
-            thread = new Thread();
-            thread._state = state;
+            thread = new Thread(state, data);
         }
         thread.update(data);
         state.threads[thread.id] = thread;
@@ -40,37 +39,14 @@ export class Thread {
         return state.threads[thread.id];
     }
 
-    update(data) {
-        const { canLeave, id, name, serverData, type } = data;
-        Object.assign(this, {
-            authorizedGroupFullName: serverData?.authorizedGroupFullName,
-            hasWriteAccess: serverData?.hasWriteAccess,
-            id,
-            name,
-            customName: false,
-            type,
-            counter: 0,
-            isUnread: false,
-            is_pinned: serverData?.is_pinned,
-            icon: false,
-            loadMore: false,
-            description: false,
-            status: "new", // 'new', 'loading', 'ready'
-            messages: [], // list of ids
-            chatPartnerId: false,
-            isAdmin: false,
-            canLeave: canLeave || false,
-            serverLastSeenMsgByCurrentUser: serverData ? serverData.seen_message_id : null,
-            memberCount: 0,
-        });
-        for (const key in data) {
-            this[key] = data[key];
+    constructor(state, { id, serverData, type }) {
+        this._state = state;
+        this.serverData = serverData;
+        if (type === "channel") {
+            this._state.discuss.channels.threads.push(id);
         }
-        if (this.type === "channel") {
-            this._state.discuss.channels.threads.push(this.id);
-        }
-        if (this.type === "chat") {
-            this._state.discuss.chats.threads.push(this.id);
+        if (type === "chat") {
+            this._state.discuss.chats.threads.push(id);
             if (serverData) {
                 for (const elem of serverData.channel.channelMembers[0][1]) {
                     Partner.insert(this._state, {
@@ -89,6 +65,41 @@ export class Thread {
                 }
                 this.customName = serverData.channel.custom_channel_name;
             }
+        }
+    }
+
+    update(data) {
+        const {
+            canLeave = this.canLeave,
+            id = this.id,
+            name = this.name,
+            serverData = this.serverData,
+            type = this.type,
+            ...remainingData
+        } = data;
+        Object.assign(this, {
+            authorizedGroupFullName: serverData?.authorizedGroupFullName,
+            hasWriteAccess: serverData?.hasWriteAccess,
+            id,
+            name: name || this.name,
+            customName: this.customName ?? false,
+            type,
+            counter: this.counter ?? 0,
+            isUnread: this.isUnread ?? false,
+            is_pinned: serverData?.is_pinned,
+            icon: this.icon ?? false,
+            loadMore: this.loadMore ?? false,
+            description: this.description ?? false,
+            status: this.status ?? "new", // 'new', 'loading', 'ready'
+            messages: this.messages ?? [], // list of ids
+            chatPartnerId: this.chatPartnerId ?? false,
+            isAdmin: this.isAdmin ?? false,
+            canLeave,
+            serverLastSeenMsgByCurrentUser: serverData ? serverData.seen_message_id : null,
+            memberCount: this.memberCount ?? 0,
+        });
+        for (const key in remainingData) {
+            this[key] = data[key];
         }
         Composer.insert(this._state, { thread: this });
     }
