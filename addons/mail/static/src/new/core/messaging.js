@@ -177,7 +177,7 @@ export class Messaging {
             !serverData.message_needaction_counter &&
             !serverData.group_based_subscription;
         const isAdmin = channelType !== "group" && serverData.create_uid === this.state.user.uid;
-        const thread = Thread.insert(this.state, {
+        Thread.insert(this.state, {
             id,
             name,
             type,
@@ -188,7 +188,6 @@ export class Messaging {
             canLeave,
             isAdmin,
         });
-        this.fetchChannelMembers(thread.id);
     }
 
     async fetchChannelMembers(threadId) {

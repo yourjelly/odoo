@@ -2,6 +2,7 @@
 
 import { Composer } from "./composer_model";
 import { Partner } from "./partner_model";
+import { ChannelMember } from "../core/channel_member_model";
 import { _t } from "@web/core/l10n/translation";
 
 export class Thread {
@@ -110,6 +111,26 @@ export class Thread {
             }
         }
         Composer.insert(this._state, { thread: this });
+        // When creating ChannelMember, it is asked to check the original thread.channelMembers from the _state
+        // So we can only update the channel member info after tha _state.thread is initialized.
+        if (data.serverData) {
+            const { serverData } = data;
+            if (
+                serverData.channel &&
+                serverData.channel.channelMember &&
+                serverData.channel.channelMembers[0] &&
+                serverData.channel.channelMembers[0][1]
+            ) {
+                for (const channelMember of data.serverData.channel.channelMembers[0][1]) {
+                    Partner.insert(this._state, channelMember.persona.partner);
+                    ChannelMember.insert(this._state, {
+                        id: channelMember.id,
+                        partnerId: channelMember.persona.partner.id,
+                        threadId: this.id,
+                    });
+                }
+            }
+        }
     }
 
     /**
