@@ -384,6 +384,10 @@ export class Messaging {
                     }
                     break;
                 }
+                case "mail.channel/unpin": {
+                    removeFromArray(this.state.discuss.chats.threads, notif.payload.id);
+                    break;
+                }
             }
         }
     }
