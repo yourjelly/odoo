@@ -574,7 +574,7 @@ export class ListRenderer extends Component {
     getColumnClass(column) {
         const classNames = ["align-middle"];
         if (this.isSortable(column)) {
-            classNames.push("o_column_sortable", "position-relative", "cursor-pointer");
+            classNames.push("o_column_sortable", "cursor-pointer");
         } else {
             classNames.push("cursor-default");
         }
