@@ -33,8 +33,8 @@ VERSION_IOTBOX=22.11
 REPO=https://github.com/odoo/odoo.git
 
 if ! file_exists *raspios*.img ; then
-    wget 'https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2021-05-28/2021-05-07-raspios-buster-armhf-lite.zip' -O raspios.img.zip
-    unzip raspios.img.zip
+    wget 'https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2022-09-26/2022-09-22-raspios-bullseye-armhf-lite.img.xz'
+    unxz *raspios*.xz
 fi
 
 RASPIOS=$(echo *raspios*.img)

@@ -45,7 +45,8 @@ PKGS_TO_INSTALL="
     nginx-full \
     openbox \
     printer-driver-all \
-    python-cups \
+    python3-cups \
+    python3-dbus \
     python3 \
     python3-babel \
     python3-dateutil \
@@ -99,7 +100,7 @@ rm -rfv /usr/share/doc
 # Even in stretch, we had an error with langid (but worked otherwise)
 # We fixe the version of evdev to 1.2.0 because in 1.3.0 we have a RuntimeError in 'get_event_loop()'
 PIP_TO_INSTALL="
-    evdev==1.2.0 \
+    evdev==1.6.0 \
     gatt \
     polib \
     pycups \
@@ -140,9 +141,9 @@ systemctl disable dphys-swapfile.service
 systemctl enable ssh
 systemctl set-default graphical.target
 systemctl disable getty@tty1.service
-systemctl enable autologin@.service
+#systemctl enable autologin@.service
 systemctl disable systemd-timesyncd.service
-systemctl unmask hostapd.service
+#systemctl unmask hostapd.service
 systemctl disable hostapd.service
 systemctl disable cups-browsed.service
 
@@ -152,6 +153,10 @@ systemctl disable cups-browsed.service
 # This option disables any black strips around the screen
 # cf: https://www.raspberrypi.org/documentation/configuration/raspi-config.md
 echo "disable_overscan=1" >> /boot/config.txt
+
+# Since the new Raspios Bullseye there is no longer a default user.
+# So we have to add it manually. We reuse the same user as before pi:raspberry
+echo 'pi:$6$XezB3.d7tWdj1BCO$KcOaEBjV6WgoyF8Tr2NrgDCia1nWGxrZ/o15LlanswmYNeJ.Hs9oHodd73OkoJDs1PJMFSWeFnmuJpxbvv8fo.' >> /boot/userconf
 
 # Separate framebuffers for both screens on RPI4
 sed -i '/dtoverlay/d' /boot/config.txt
