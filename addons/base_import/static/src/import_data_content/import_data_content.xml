@@ -76,6 +76,8 @@
                                             <t t-esc="column.fieldInfo.string" />
                                         </span>
                                     </t>
+                                    <t t-set-slot="option" t-slot-scope="option">
+                                    </t>
                                     <span t-else="" class="text-warning">To import, select a field...</span>
                                 </SelectMenu>
                             </td>

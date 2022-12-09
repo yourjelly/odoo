@@ -22,17 +22,12 @@ export class SelectMenu extends Component {
             () => this.filterOptions(this.inputRef.el.value.trim()),
             250
         );
-
         this.scrollSettings = {
             defaultCount: 500,
             increaseAmount: 300,
             distanceBeforeReload: 500,
         };
 
-        this.searchSettings = {
-            sort: true,
-            fuzzySearch: false,
-        };
 
         reactive(this.props.options, () => this.debouncedOnInput());
     }
@@ -99,9 +94,7 @@ export class SelectMenu extends Component {
             });
         }
 
-        if (this.searchSettings.sort) {
-            this.sortGroups(filteredOptions);
-        }
+        this.sortGroups(filteredOptions);
         this.state.options = filteredOptions;
 
         this.sliceDisplayedOptions();
@@ -111,12 +104,7 @@ export class SelectMenu extends Component {
         if (option.isGroup) {
             return true;
         }
-
-        if (this.searchSettings.fuzzySearch) {
-            return fuzzyTest(option.label);
-        } else {
-            return option.label.toUpperCase().includes(searchString.toUpperCase());
-        }
+        return option.label.toUpperCase().includes(searchString.toUpperCase());
     }
 
     /**
@@ -213,22 +201,40 @@ SelectMenu.defaultProps = {
     searchPlaceholder: _lt("Search..."),
 };
 SelectMenu.props = {
-    options: {
+    options: { // rename into "choices"
         type: Array,
         element: {
-            type: [Object, String],
-            // shape: {
-            //     value: { type: [String, Number, Object], optional: true },
-            //     label: { type: String, optional: true },
-            //     isGroup: { type: Boolean, optional: true },
-            //     template: { type: String, optional: true },
-            // },
+            type: Object,
+            shape: {
+                value: true,
+                label: { type: String },
+                group: { type: String, optional: true },
+            },
         },
     },
-    value: { optional: true },
-    class: { type: String, optional: true },
+    groups: {
+        type: Array,
+        element: {
+            type: Object,
+            shape: {
+                value: true,
+                label: { type: String },
+            },
+        },
+        optional: true,
+    },
+    // choices="[{ value: 'hello', label: 'Hello' }], [{ value: 'world', label: 'World' }]]"
+    // groups="[{ 'label': "Group A", choices: [{ value: 'hello', label: 'Hello' }], [{ value: 'world', label: 'World' }]] }]"
+
+    optionTemplate: { type: String, optional: true }, // remove, use slot
+
+
+    class: { type: String, optional: true }, // not used but why not
     togglerClass: { type: String, optional: true },
     onSelect: { type: Function, optional: true },
-    searchPlaceholder: { type: String, optional: true },
+    searchPlaceholder: { type: String, optional: true }, // not used yet but should be
+
+
+    value: { optional: true },
     slots: { type: Object, optional: true },
 };

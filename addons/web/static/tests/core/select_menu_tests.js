@@ -45,7 +45,27 @@ QUnit.module("Web Components", (hooks) => {
         Parent.components = { SelectMenu };
         Parent.template = xml`
         <SelectMenu
-            options="['Hello', 'World']"
+            options="[['hello', 'Hello'], ['world', 'World']]"
+            options="[['hello', 'Hello'], "Group A", ['world', 'World'], "", ['blabla', "Blabla"]]"
+            options="[{ value: 'hello', label: 'Hello' }], [{ value: 'world', label: 'World' }]]"
+
+            options="[{ value: 'hello', label: 'Hello' }], { label: 'A group', isSeparator: true }, [{ value: 'world', label: 'World' }]]"
+
+            options="[{ value: 'hello', label: 'Hello', group?: 'group_a' }], [{ value: 'world', label: 'World' }]"
+            groups="[{ value: 'group_a', label: 'Group A'}]"
+
+            options="[['hello', 'Hello', 'group_a'], ['world', 'World']]"
+            groups="[{ value: 'group_a', label: 'Group A'}]"
+
+
+
+            choices="[{ value: 'hello', label: 'Hello' }], [{ value: 'world', label: 'World' }]]"
+            groups="[{ 'label': "Group A", choices: [{ value: 'hello', label: 'Hello' }], [{ value: 'world', label: 'World' }]] }]"
+
+
+
+
+
             value="state.value"
             onSelect.bind="onSelect"
         />
@@ -235,7 +255,7 @@ QUnit.module("Web Components", (hooks) => {
         );
     });
 
-    QUnit.test("Groups properly added in the select", async (assert) => {
+    QUnit.debug("Groups properly added in the select", async (assert) => {
         class Parent extends Component {}
         Parent.components = { SelectMenu };
         Parent.template = xml`

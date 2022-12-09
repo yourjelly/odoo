@@ -6,7 +6,7 @@
             class="`o_select_menu border w-100 rounded-2 overflow-hidden ${props.class || ''}`"
             togglerClass="`o_select_menu_toggler d-flex flex-row align-items-center flex-nowrap btn btn-secondary w-100 bg-light ${props.togglerClass || ''}`"
             menuClass="`o_select_menu_menu pt-0 ${state.direction || ''}`"
-            position="'bottom-fit'"
+            position="'bottom-start'"
             beforeOpen.bind="filterOptions"
             onOpened.bind="onOpened"
             onPositioned.bind="onPositioned"
