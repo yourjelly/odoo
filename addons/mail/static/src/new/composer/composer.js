@@ -184,13 +184,12 @@ export class Composer extends Component {
 
     get hasReplyToHeader() {
         const { messageToReplyTo } = this.messaging.state.discuss;
-        const thread = this.props.composer.thread;
-        if (!messageToReplyTo || !thread) {
+        if (!messageToReplyTo || !this.props.composer.thread) {
             return false;
         }
         return (
-            messageToReplyTo.resId === thread.id ||
-            (thread.type === "mailbox" && thread.messages.includes(messageToReplyTo.id))
+            messageToReplyTo.resId === this.props.composer.thread.id ||
+            (this.props.composer.thread.id === "inbox" && messageToReplyTo.needaction)
         );
     }
 
@@ -441,19 +440,17 @@ export class Composer extends Component {
     async sendMessage() {
         return this.processMessage(async (value) => {
             const { messageToReplyTo } = this.messaging.state.discuss;
-            const thread = messageToReplyTo?.originThread ?? this.props.composer.thread;
+            const { id: parentId, isNote, resId, resModel } = messageToReplyTo || {};
             const postData = {
                 attachments: this.attachmentUploader.attachments,
-                isNote: this.props.composer.type === "note" || messageToReplyTo?.isNote,
+                isNote: this.props.composer.type === "note" || isNote,
                 rawMentions: this.rawMentions,
-                parentId: messageToReplyTo?.id,
+                parentId,
             };
-            const message = await this.messaging.postMessage(thread.id, value, postData);
-            if (this.props.composer.thread.type === "mailbox") {
-                this.env.services.notification.add(
-                    sprintf(this.env._t('Message posted on "%s"'), message.recordName),
-                    { type: "info" }
-                );
+            if (messageToReplyTo && this.props.composer.thread.id === "inbox") {
+                await this.messaging.postInboxReply(resId, resModel, value, postData);
+            } else {
+                await this.messaging.postMessage(this.props.composer.thread.id, value, postData);
             }
             this.clearRawMentions();
             this.messaging.cancelReplyTo();

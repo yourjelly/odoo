@@ -2,6 +2,7 @@
 
 import { markup, reactive } from "@odoo/owl";
 import { Deferred } from "@web/core/utils/concurrency";
+import { sprintf } from "@web/core/utils/strings";
 import { memoize } from "@web/core/utils/functions";
 import { prettifyMessageContent, convertBrToLineBreak, cleanTerm } from "@mail/new/utils/format";
 import { removeFromArray } from "@mail/new/utils/arrays";
@@ -535,6 +536,16 @@ export class Messaging {
         }
     });
 
+    async postInboxReply(threadId, threadModel, body, postData) {
+        const thread = this.getChatterThread(threadModel, threadId);
+        const message = await this.postMessage(thread.id, body, postData);
+        this.env.services.notification.add(
+            sprintf(this.env._t('Message posted on "%s"'), message.recordName),
+            { type: "info" }
+        );
+        return message;
+    }
+
     async postMessage(threadId, body, { attachments = [], isNote = false, parentId, rawMentions }) {
         const command = this.getCommandFromText(threadId, body);
         if (command) {
@@ -553,8 +564,8 @@ export class Messaging {
                 partner_ids: [],
                 subtype_xmlid: subtype,
             },
-            thread_id: Number.isInteger(threadId) ? threadId : thread.resId,
-            thread_model: thread.resModel || "mail.channel",
+            thread_id: threadId,
+            thread_model: "mail.channel",
         };
         if (parentId) {
             params.post_data.parent_id = parentId;

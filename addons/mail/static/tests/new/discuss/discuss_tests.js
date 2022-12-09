@@ -13,9 +13,9 @@ import {
 } from "@web/../tests/helpers/utils";
 import { insertText, makeTestEnv, TestServer } from "../helpers/helpers";
 import { browser } from "@web/core/browser/browser";
-import { makeFakeNotificationService } from "@web/../tests/helpers/mock_services";
 import { loadEmoji } from "@mail/new/composer/emoji_picker";
 import { UPDATE_BUS_PRESENCE_DELAY } from "@bus/im_status_service";
+import { makeFakeNotificationService } from "@web/../tests/helpers/mock_services";
 
 let target;
 
@@ -654,82 +654,6 @@ QUnit.module("mail", (hooks) => {
         assert.notOk(
             document.querySelector(".o-mail-message").classList.contains("o-selected"),
             "message should not longer be selected after posting reply"
-        );
-    });
-
-    QUnit.test("Can reply to starred message", async function (assert) {
-        assert.expect(5);
-
-        const pyEnv = await startServer();
-        const mailChannelId = pyEnv["mail.channel"].create({ name: "RandomName" });
-        pyEnv["mail.message"].create({
-            body: "not empty",
-            model: "mail.channel",
-            starred_partner_ids: [pyEnv.currentPartnerId],
-            res_id: mailChannelId,
-        });
-        const { click, insertText, openDiscuss } = await start({
-            discuss: {
-                context: {
-                    active_id: "starred",
-                },
-            },
-            services: {
-                notification: makeFakeNotificationService((message) => assert.step([message])),
-            },
-        });
-        await openDiscuss();
-        await click("i[aria-label='Reply']");
-        assert.containsOnce(
-            target,
-            ".o-mail-composer-origin-thread:contains('RandomName')",
-            "Composer should display origin thread of the message to reply to"
-        );
-        await insertText(".o-mail-composer-textarea", "abc");
-        await click(".o-mail-composer-send-button");
-        assert.verifySteps(['Message posted on "RandomName"']);
-        assert.containsOnce(
-            target,
-            ".o-mail-message",
-            "Reply should not be visible on starred mailbox"
-        );
-    });
-
-    QUnit.test("Can reply to history message", async function (assert) {
-        assert.expect(5);
-
-        const pyEnv = await startServer();
-        const mailChannelId = pyEnv["mail.channel"].create({ name: "RandomName" });
-        pyEnv["mail.message"].create({
-            body: "not empty",
-            model: "mail.channel",
-            history_partner_ids: [pyEnv.currentPartnerId],
-            res_id: mailChannelId,
-        });
-        const { click, insertText, openDiscuss } = await start({
-            discuss: {
-                context: {
-                    active_id: "history",
-                },
-            },
-            services: {
-                notification: makeFakeNotificationService((message) => assert.step(message)),
-            },
-        });
-        await openDiscuss();
-        await click("i[aria-label='Reply']");
-        assert.containsOnce(
-            target,
-            ".o-mail-composer-origin-thread:contains('RandomName')",
-            "Composer should display origin thread of the message to reply to"
-        );
-        await insertText(".o-mail-composer-textarea", "abc");
-        await click(".o-mail-composer-send-button");
-        assert.verifySteps(['Message posted on "RandomName"']);
-        assert.containsOnce(
-            target,
-            ".o-mail-message",
-            "Reply should not be visible on history mailbox"
         );
     });
 });
