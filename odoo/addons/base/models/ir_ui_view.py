@@ -421,7 +421,6 @@ actual arch.
         # Sanity checks: the view should not break anything upon rendering!
         # Any exception raised below will cause a transaction rollback.
         partial_validation = self.env.context.get('ir_ui_view_partial_validation')
-        self = self.with_context(validate_view_ids=(self._ids if partial_validation else True))
 
         for view in self:
             try:
@@ -429,7 +428,7 @@ actual arch.
                 if view.inherit_id:
                     view_arch = etree.fromstring(view.arch)
                     view._valid_inheritance(view_arch)
-                combined_arch = view._get_combined_arch()
+                combined_arch = view._get_combined_arch(validate=True)
                 if view.type == 'qweb':
                     continue
             except ValueError as e:
@@ -803,7 +802,7 @@ actual arch.
                 node.set('data-oe-field', 'arch')
         return specs_tree
 
-    def _add_validation_flag(self, combined_arch, view=None, arch=None):
+    def _add_validation_flag(self, combined_arch, arch):
         """ Add a validation flag on elements in ``combined_arch`` or ``arch``.
         This is part of the partial validation of views.
 
@@ -812,20 +811,6 @@ actual arch.
         :param Element arch: an optional modifying architecture from inheriting
             view ``view``
         """
-        # validate_view_ids is either falsy (no validation), True (full
-        # validation) or a collection of ids (partial validation)
-        validate_view_ids = self.env.context.get('validate_view_ids')
-        if not validate_view_ids:
-            return
-
-        if validate_view_ids is True or self.id in validate_view_ids:
-            # optimization, flag the root node
-            combined_arch.set('__validate__', '1')
-            return
-
-        if view is None or view.id not in validate_view_ids:
-            return
-
         for node in arch.xpath('//*[@position]'):
             if node.get('position') in ('after', 'before', 'inside'):
                 # validate the elements being inserted, except the ones that
@@ -876,7 +861,7 @@ actual arch.
             self._raise_view_error(str(e), specs_tree)
         return source
 
-    def _combine(self, hierarchy: dict):
+    def _combine(self, hierarchy: dict, validate_view=None):
         """
         Return self's arch combined with its inherited views archs.
 
@@ -920,8 +905,6 @@ actual arch.
                 'data-oe-id': str(self.id),
                 'data-oe-field': 'arch',
             })
-        self._add_validation_flag(combined_arch)
-
         # The depth-first traversal is implemented with a double-ended queue.
         # The queue is traversed from left to right, and after each view in the
         # queue is processed, its children are pushed at the left of the queue,
@@ -935,7 +918,8 @@ actual arch.
             arch = etree.fromstring(view.arch)
             if view.env.context.get('inherit_branding'):
                 view.inherit_branding(arch)
-            self._add_validation_flag(combined_arch, view, arch)
+            if view == validate_view:
+                self._add_validation_flag(combined_arch, arch)
             combined_arch = view.apply_inheritance_specs(combined_arch, arch)
 
             for child_view in reversed(hierarchy[view]):
@@ -967,7 +951,7 @@ actual arch.
         """ Return the arch of ``self`` (as a string) combined with its inherited views. """
         return etree.tostring(self._get_combined_arch(), encoding='unicode')
 
-    def _get_combined_arch(self):
+    def _get_combined_arch(self, validate=False):
         """ Return the arch of ``self`` (as an etree) combined with its inherited views. """
         root = self
         view_ids = []
@@ -995,7 +979,7 @@ actual arch.
             hierarchy[view.inherit_id].append(view)
 
         # optimization: make root part of the prefetch set, too
-        arch = root.with_prefetch(tree_views._prefetch_ids)._combine(hierarchy)
+        arch = root.with_prefetch(tree_views._prefetch_ids)._combine(hierarchy, validate_view=self if validate else False)
         return arch
 
     def _get_view_refs(self, node):
