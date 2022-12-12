@@ -318,7 +318,7 @@ export class ViewCompiler {
         }
         const button = createElement("ViewButton", {
             tag: toStringExpression(tag),
-            record: `this.props.record`,
+            record: "this.props.record",
         });
 
         assignOwlDirectives(button, el);
@@ -370,14 +370,14 @@ export class ViewCompiler {
      * @param {Element} el
      * @returns {Element}
      */
-    compileField(el) {
+    compileField(el, params) {
         const fieldName = el.getAttribute("name");
         const fieldId = el.getAttribute("field_id") || fieldName;
 
         const field = createElement("Field");
         field.setAttribute("id", `'${fieldId}'`);
         field.setAttribute("name", `'${fieldName}'`);
-        field.setAttribute("record", `this.props.record`);
+        field.setAttribute("record", params.recordExpr || "this.props.record");
         field.setAttribute("fieldInfo", `this.props.archInfo.fieldNodes['${fieldId}']`);
 
         if (el.hasAttribute("widget")) {
@@ -417,7 +417,7 @@ export class ViewCompiler {
      */
     compileWidget(el) {
         const attrs = {};
-        const props = { record: `this.props.record`, readonly: this.ctx.readonly };
+        const props = { record: "this.props.record", readonly: this.ctx.readonly };
         for (const { name, value } of el.attributes) {
             switch (name) {
                 case "class":
