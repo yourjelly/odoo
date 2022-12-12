@@ -1312,6 +1312,19 @@ class PropertiesCase(TransactionCase):
             values = self.message_1.read(['attributes'])[0]['attributes'][0]
         self.assertEqual(values['value'], (tag.id, None))
 
+        # a user read a properties with a many2one to a record but doesn't have access to its parent
+        self.env.ref('test_new_api.access_discussion').write({
+            'perm_read': False,
+            'perm_create': False,
+            'perm_write': False,
+        })
+        values = self.message_1.with_user(self.test_user).read(['attributes'])[0]['attributes'][0]
+        self.assertEqual(values['value'], (tag.id, 'Test Tag'))
+        self.env.invalidate_all()
+        with patch.object(MultiTag, 'check_access_rights', side_effect=_mocked_check_access_rights):
+            values = self.message_1.with_user(self.test_user).read(['attributes'])[0]['attributes'][0]
+        self.assertEqual(values['value'], (tag.id, None))
+
     def _get_sql_properties(self, message):
         self.env.flush_all()
 
