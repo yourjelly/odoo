@@ -83,6 +83,12 @@ TIME_GRANULARITY_AGGREGATION = {
     'year': dateutil.relativedelta.relativedelta(years=1)
 }
 
+# valid SQL aggregation functions with the default value if group doesn't exist
+DEFAULT_AGGREGATE_FUNCTIONS = {
+    'array_agg': [], 'array_agg_distinct': [], 'count': 0, 'count_distinct': 0,
+    'bool_and': False, 'bool_or': False, 'max': None, 'min': None, 'avg': None, 'sum': 0,
+}
+
 AUTOINIT_RECALCULATE_STORED_FIELDS = 1000
 
 INSERT_BATCH_SIZE = 100
@@ -196,52 +202,89 @@ def _aggregates_to_records(result: 'AggregateResult', aggregates: dict):
     return aggregates
 
 
-class AggregateResult(dict):
+class Aggregation:
+    __slots__ = ('_parent', '_group')
 
-    EMPTY_DICT = frozendict()
+    def __init__(self, parent, group) -> None:
+        self._parent = parent
+        self._group = group
 
-    __slots__ = ('_groupby_info', '_aggregate_info', '_rows', '__dict__')  # __dict__ is for lazy_property
+    def get_or_default(self, aggregate, to_record=False):
+        ...
+        res = self._parent._default_value[aggregate]
+        if self._group in self._parent._map_group:
+            agg_res = self._parent._map_group[self._group][aggregate]  # TODO the default value of the aggregate
+            if agg_res is not None:
+                res = agg_res
+
+        if to_record:
+            Model, prefetch_ids = self._parent._prefetch_info[aggregate]
+            if Model is not None:
+                res = Model.browse(res).with_prefetch(prefetch_ids)
+        return res
+
+    def __iter__(self):  # Unpack aggregate
+        ...
+
+    def __getitem__(self):
+        ...
+
+class AggregateResult:
 
     def __init__(
         self,
-        rows: "list[dict]",
-        aggregate_info: "dict[str, BaseModel]",  # <aggregate spec> : <Model for recordset or None>
-        groupby_info: "dict[str, BaseModel]",    # <groupby name> : <Model for recordset or None>
+        rows: "list[tuple]",      # [(<aggregate value>, ..., <groupby value>, ...),]
+        aggregates: "list[str]",  # [<aggregates spec>]
+        groupby: "list[str]",     # [<groupby spec>]
+        Model: "BaseModel",
     ):
-        def to_key(row):
-            return tuple(row[group] for group in groupby_info)
-
-        def to_value(row):
-            return {agg: row[agg] for agg in aggregate_info}
-
-        super().__init__({to_key(row): to_value(row) for row in rows})
-
-        self._groupby_info = groupby_info
-        self._aggregate_info = aggregate_info
+        # TODO: Aggregation class will made the proxy with the true values
+        self._groupby = groupby
+        self._aggregates = aggregates
         self._rows = rows
+        assert isinstance(Model, BaseModel)
+        self._Model = Model
 
     @lazy_property
-    def _prefetch_values(self):
-        prefetch_values = defaultdict(list)
-        for key, Model in itertools.chain(self._groupby_info.items(), self._aggregate_info.items()):
-            if not isinstance(Model, BaseModel):
+    def _map_group(self):
+        def to_key(row):
+            return tuple(row[i] for i, _ in enumerate(self._groupby))
+
+        def to_value(row):
+            return {agg: row[i] for i, agg in enumerate(self._aggregates)}
+
+        return {to_key(row): to_value(row) for row in self._rows}
+
+    @lazy_property
+    def _prefetch_info(self) -> "dict[tuple[BaseModel, tuple]]":
+        prefetch_info = {}
+        for i, spec in enumerate(itertools.chain(self._groupby, self._aggregates)):
+            fname, func = split_aggregate_spec(spec)
+            field = self._Model[fname]
+
+            if field.relational:
+                Model = self.env[field.comodel_name]
+            elif fname == 'id':
+                Model = self.env[self._name]
+            if not Model:
                 continue
-            prefetch_values[key].extend(row[key] for row in self._rows)
-        return {key: tuple(v) for key, v in prefetch_values.items()}
 
-    def items(self, converter_keys=_groups_to_records, converter_values=_aggregates_to_records) -> "Iterator[(tuple, dict)]":
-        # TODO: converter_keys and converter_values should be None by default
-        # => group_to_record=False, aggregates_to_record=False
-        if not converter_keys and not converter_values:
-            yield from super().items()
+            prefetch_info[spec] = (Model, tuple(row[i] for row in self._rows))
 
-        for keys, aggregates in super().items():
+        return prefetch_info
+
+    @lazy_property
+    def _default_value(self):
+        return {agg: DEFAULT_AGGREGATE_FUNCTIONS[agg.split(':')[-1]] for agg in self._aggregates}
+
+    def items(self, group_to_record=False, aggregates_to_record=False) -> "Iterator[(tuple, Aggregation)]":
+        for keys, aggregates in self._map_group:
             yield (
                 converter_keys(self, keys) if converter_keys else keys,
                 converter_values(self, aggregates) if converter_values else aggregates,
             )
 
-    def values(self, converter_values=_aggregates_to_records) -> "Iterator[dict]":
+    def values(self, converter_values=_aggregates_to_records) -> "Iterator[Aggregation]":
         # TODO: we should return values of each dict instead, even if it creates a ambigouty with __getitem__
         if not converter_values:
             yield from super().values()
@@ -259,14 +302,14 @@ class AggregateResult(dict):
     def __iter__(self) -> "Iterator[tuple]":
         return self.keys()
 
-    def partial_group(self, key, converter_keys=_groups_to_records, converter_values=_aggregates_to_records):
-        res = defaultdict(lambda: defaultdict(frozendict))
-        index_key = list(self._groupby_info).index(key)
+    # def partial_group(self, key, converter_keys=_groups_to_records, converter_values=_aggregates_to_records):
+    #     res = defaultdict(lambda: defaultdict(frozendict))
+    #     index_key = list(self._groupby_info).index(key)
 
-        for keys, aggregates in self.items(converter_keys, converter_values):
-            other_keys = keys[:index_key] + keys[index_key + 1:]
-            res[keys[index_key]][other_keys] = aggregates
-        return res
+    #     for keys, aggregates in self.items(converter_keys, converter_values):
+    #         other_keys = keys[:index_key] + keys[index_key + 1:]
+    #         res[keys[index_key]][other_keys] = aggregates
+    #     return res
 
     def _flexible_key(self, key) -> 'tuple':
         if len(self._groupby_info) == 0 and (key is None or key == ()):
@@ -282,18 +325,17 @@ class AggregateResult(dict):
         return key
 
     def __contains__(self, key) -> 'bool':
-        return super().__contains__(self._flexible_key(key))
+        return self._flexible_key(key) in self._map_group
 
-    def __getitem__(self, key) -> 'dict':
+    def __getitem__(self, key) -> 'Aggregation':
         # TODO: should we converted agg into recordset ?? I don't think and the itertor available should return raw data by default ?
-        return super().__getitem__(self._flexible_key(key))
-
-    def __missing__(self, key) -> 'frozendict':
-        return self.EMPTY_DICT
+        return Aggregation(self, self._flexible_key(key))
 
     def to_list(self):
-        return self._rows
-
+        return [
+            {key: row[i] for i, key in enumerate(itertools.chain(self._groupby, self._aggregates))}
+            for row in self._rows
+        ]
 
 class MetaModel(api.Meta):
     """ The metaclass of all model classes.
@@ -446,13 +488,6 @@ PREFETCH_MAX = 1000
 # special columns automatically created by the ORM
 LOG_ACCESS_COLUMNS = ['create_uid', 'create_date', 'write_uid', 'write_date']
 MAGIC_COLUMNS = ['id'] + LOG_ACCESS_COLUMNS
-
-# valid SQL aggregation functions
-VALID_AGGREGATE_FUNCTIONS = {
-    'array_agg', 'array_agg_distinct', 'count', 'count_distinct',
-    'bool_and', 'bool_or', 'max', 'min', 'avg', 'sum',
-}
-
 
 # THE DEFINITION AND REGISTRY CLASSES
 #
@@ -1906,7 +1941,7 @@ class BaseModel(metaclass=MetaModel):
 
         if fname not in self:
             raise ValueError(f"Invalid field {fname!r} on model {self._name!r} for {aggregate_spec!r}.")
-        if func not in VALID_AGGREGATE_FUNCTIONS:
+        if func not in DEFAULT_AGGREGATE_FUNCTIONS:
             raise ValueError(f"Invalid aggregate method {func!r} for {aggregate_spec!r}.")
 
         field = self._fields[fname]
@@ -1928,13 +1963,7 @@ class BaseModel(metaclass=MetaModel):
         else:
             expression = f'{func}({distinct}{field_expression})'
 
-        Model = None
-        if field.relational:
-            Model = self.env[field.comodel_name]
-        elif fname == 'id':
-            Model = self.env[self._name]
-
-        return expression, [fname], Model
+        return expression, [fname]
 
     def _aggregate_groupby(self, query, groupby_spec):
         """ return <SQL expression>, [<fields name to flush>]"""
@@ -1970,9 +1999,9 @@ class BaseModel(metaclass=MetaModel):
         elif field.type == 'boolean':
             field_expression = f"COALESCE({field_expression}, FALSE)"
 
-        return field_expression, [fname], self.env[field.comodel_name] if field.relational else None
+        return field_expression, [fname]
 
-    def _aggregate_having(self, having_domain, select_terms):
+    def _aggregate_having(self, query, having_domain, aggregates):
         # TODO: Shouldn't we call expression()
         having_params = []
         stack_op = []
@@ -1982,10 +2011,10 @@ class BaseModel(metaclass=MetaModel):
             if isinstance(stack_leaf, str):
                 return stack_leaf
             else:
-                select_term, ope, value = stack_leaf
+                spec, ope, value = stack_leaf
                 having_params.append(value)
-                # Because HAVING is evaluted before select, we cannot used alias
-                return f'{select_terms[select_term]} {ope} %s'
+                sql_expression, __, __ = self._aggregate_select(query, spec)
+                return f'{sql_expression} {ope} %s'
 
         for leaf in reversed(having_domain):
             if leaf == '!':
@@ -1998,11 +2027,11 @@ class BaseModel(metaclass=MetaModel):
                 op = 'AND' if leaf == '&' else 'OR'
                 stack_op.append(f'({condition_1} {op} {condition_2})')
             else:
-                select_term, operator, __ = leaf
+                spec, operator, __ = leaf
                 if operator not in ('in', 'not in', '<', '>', '<=', '>=', '=', '!='):
                     raise ValueError(f"Having clause {leaf!r} only accept ('in', 'not in', '<', '>', '<=', '>=', '=', '!=') operators")
-                if select_term not in select_terms:  # TODO: vsc idea, accept it anyway to permit having clause on no-selected aggregate
-                    raise ValueError(f"Having clause {leaf!r} refers to a inexistant selected data {select_term!r}")
+                if spec not in aggregates:  # TODO: vsc idea, accept it anyway to permit having clause on no-selected aggregate
+                    raise ValueError(f"Having clause {leaf!r} refers to a inexistant selected data {spec!r}")
                 stack_op.append(leaf)
 
         while len(stack_op) > 1:
@@ -2069,32 +2098,22 @@ class BaseModel(metaclass=MetaModel):
         self._apply_ir_rules(query, 'read')
 
         fnames_to_flush = OrderedSet()
-        select_terms = {}  # {<SQL alias>: <SQL expression>}
-        model_spec = {}  # {<aggregate or groupby>: Model to use to create recordset}
+        select_terms = []  # [<SQL expression aggregates>..., <SQL expression groupby>...],
 
         for spec in aggregates:
-            sql_expression, fname_to_flush, Model = self._aggregate_select(query, spec)
-
-            model_spec[spec] = Model
+            sql_expression, fname_to_flush = self._aggregate_select(query, spec)
             fnames_to_flush.update(fname_to_flush)
-            select_terms[spec] = sql_expression
+            select_terms.append(sql_expression)
 
-
-        groupby_terms = []  # [<SQL expression>,]
         for spec in groupby:
-            sql_expression, fname_to_flush, Model = self._aggregate_groupby(query, spec)
-
-            model_spec[spec] = Model
+            sql_expression, fname_to_flush = self._aggregate_groupby(query, spec)
             fnames_to_flush.update(fname_to_flush)
-            select_terms[spec] = sql_expression
+            select_terms.append(sql_expression)
 
-            groupby_terms.append(sql_expression)
-
-        having_expression, having_params = self._aggregate_having(having, select_terms)
+        having_expression, having_params = self._aggregate_having(query, having, aggregates)
 
         orderby_terms, extra_groupby_terms = self._aggregate_orderby(query, order, select_terms, order_traverse_many2one)
 
-        select_terms = [f'{expr} AS "{alias}"' for alias, expr in select_terms.items()]
         from_clause, where_clause, where_params = query.get_sql()
         query_parts = [
             f"SELECT {', '.join(select_terms)}",
@@ -2104,6 +2123,8 @@ class BaseModel(metaclass=MetaModel):
         if where_clause:
             query_parts.append(f"WHERE {where_clause}")
             query_params.extend(where_params)
+
+        groupby_terms = select_terms[len(aggregates):]  # [<SQL expression groupby>...,]
         if groupby_terms:
             query_parts.append(f"GROUP BY {', '.join(groupby_terms + extra_groupby_terms)}")
         if having_expression:
@@ -2124,12 +2145,12 @@ class BaseModel(metaclass=MetaModel):
             self.check_field_access_rights('read', fnames_to_flush)
 
         self.env.cr.execute('\n' + '\n'.join(query_parts), query_params)
-        data = self.env.cr.dictfetchall()
 
         return AggregateResult(
-            rows=data,
-            aggregate_info={spec: model_spec[spec] for spec in aggregates},
-            groupby_info={spec: model_spec[spec] for spec in groupby},
+            rows=self.env.cr.fetchall(),
+            aggregates=aggregates,
+            groupby=groupby,
+            Model=self,
         )
 
     @api.model
@@ -2699,7 +2720,7 @@ class BaseModel(metaclass=MetaModel):
                     raise ValueError("Invalid field %r on model %r" % (fname, self._name))
                 if not (field.base_field.store and field.base_field.column_type):
                     raise UserError(_("Cannot aggregate field %r.", fname))
-                if func not in VALID_AGGREGATE_FUNCTIONS:
+                if func not in DEFAULT_AGGREGATE_FUNCTIONS:
                     raise UserError(_("Invalid aggregation function %r.", func))
             else:
                 # we have 'name', retrieve the aggregator on the field
@@ -5553,7 +5574,7 @@ class BaseModel(metaclass=MetaModel):
         """
         return self.__class__(env, self._ids, self._prefetch_ids)
 
-    def sudo(self, flag=True):
+    def sudo(self, flag=True) -> 'BaseModel':
         """ sudo([flag=True])
 
         Returns a new version of this recordset with superuser mode enabled or
