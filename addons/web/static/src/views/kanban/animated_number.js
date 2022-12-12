@@ -5,7 +5,7 @@ import { formatInteger } from "@web/views/fields/formatters";
 
 import { Component, onWillUpdateProps, onWillUnmount, useState } from "@odoo/owl";
 
-export class KanbanAnimatedNumber extends Component {
+export class AnimatedNumber extends Component {
     setup() {
         this.formatInteger = formatInteger;
         this.state = useState({ value: this.props.value });
@@ -38,8 +38,8 @@ export class KanbanAnimatedNumber extends Component {
     }
 }
 
-KanbanAnimatedNumber.template = "web.KanbanAnimatedNumber";
-KanbanAnimatedNumber.props = {
+AnimatedNumber.template = "web.AnimatedNumber";
+AnimatedNumber.props = {
     value: Number,
     duration: Number,
     animationClass: { type: String, optional: true },
@@ -53,4 +53,4 @@ KanbanAnimatedNumber.props = {
         optional: true,
     },
 };
-KanbanAnimatedNumber.enableAnimations = true;
+AnimatedNumber.enableAnimations = true;
