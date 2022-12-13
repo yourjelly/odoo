@@ -250,7 +250,7 @@ function matchCondition(record, condition) {
             if (fieldValue === false) {
                 return false;
             }
-            return fieldValue.toLowerCase().indexOf(value.toLowerCase()) >= 0;
+            return String(fieldValue).toLowerCase().indexOf(value.toLowerCase()) >= 0;
         case "=ilike":
             if (fieldValue === false) {
                 return false;
