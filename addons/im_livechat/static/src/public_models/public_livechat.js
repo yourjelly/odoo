@@ -4,6 +4,9 @@ import PublicLivechat from '@im_livechat/legacy/models/public_livechat';
 
 import { attr, clear, one, Model } from '@mail/model';
 
+import { unaccent } from 'web.utils';
+import { deleteCookie, setCookie } from 'web.utils.cookies';
+
 Model({
     name: 'PublicLivechat',
     lifecycleHooks: {
@@ -19,6 +22,43 @@ Model({
             this.widget.destroy();
         },
     },
+    recordMethods: {
+        async createLivechatChannel() {
+            const params = {
+                anonymous_name: this.publicLivechatGlobalOwner.livechatButtonView.defaultUsername,
+                channel_id: this.publicLivechatGlobalOwner.channelId,
+                operator_id: this.operator.id,
+                uuid: this.uuid,
+            };
+            if (this.data.chatbot_script_id) {
+                params["chatbot_script_id"] = this.data.chatbot_script_id;
+            }
+            const livechatData = await this.messaging.rpc({
+                route: "/im_livechat/create_livechat_channel",
+                params,
+            });
+            if (!livechatData || !livechatData.operator_pid) {
+                this.publicLivechatGlobalOwner.update({
+                    noOperator: true,
+                });
+                this.messaging.publicLivechatGlobal.chatWindow.widget.renderChatWindow();
+            } else {
+                this.update({ data: livechatData });
+                this.widget.data = livechatData;
+                this._updateSessionCookie();
+            }
+        },
+        _updateSessionCookie() {
+            deleteCookie('im_livechat_session');
+            setCookie('im_livechat_session', unaccent(JSON.stringify(this.widget.toData()), true), 60 * 60, 'required');
+            setCookie('im_livechat_auto_popup', JSON.stringify(false), 60 * 60, 'optional');
+            if (this.operator) {
+                const operatorPidId = this.operator.id;
+                const oneWeek = 7 * 24 * 60 * 60;
+                setCookie('im_livechat_previous_operator_pid', operatorPidId, oneWeek, 'optional');
+            }
+        },
+    },
     fields: {
         data: attr(),
         id: attr({
@@ -29,6 +69,14 @@ Model({
                 return this.data.id;
             },
         }),
+        isTemporary: attr({
+            compute() {
+                if (!this.data || !this.data.id) {
+                    return true;
+                }
+                return false;
+            }
+        }),
         isFolded: attr({
             default: false,
         }),
@@ -38,7 +86,7 @@ Model({
         }),
         name: attr({
             compute() {
-                if (!this.data) {
+                if (!this.data || this.publicLivechatGlobalOwner.noOperator) {
                     return clear();
                 }
                 return this.data.name;

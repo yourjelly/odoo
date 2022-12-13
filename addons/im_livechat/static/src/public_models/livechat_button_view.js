@@ -139,6 +139,12 @@ Model({
          * @param {Object} message
          */
         async sendMessage(message) {
+            if (this.messaging.publicLivechatGlobal.publicLivechat.isTemporary) {
+                await this.messaging.publicLivechatGlobal.publicLivechat.createLivechatChannel();
+                if (this.messaging.publicLivechatGlobal.noOperator) {
+                    return;
+                }
+            }
             await this._sendMessageChatbotBefore();
             await this._sendMessage(message);
             this._sendMessageChatbotAfter();
@@ -224,14 +230,7 @@ Model({
                         }
                         this.messaging.publicLivechatGlobal.chatWindow.renderMessages();
                         this.messaging.publicLivechatGlobal.update({ notificationHandler: {} });
-
-                        setCookie('im_livechat_session', unaccent(JSON.stringify(this.messaging.publicLivechatGlobal.publicLivechat.widget.toData()), true), 60 * 60, 'required');
-                        setCookie('im_livechat_auto_popup', JSON.stringify(false), 60 * 60, 'optional');
-                        if (this.messaging.publicLivechatGlobal.publicLivechat.operator) {
-                            const operatorPidId = this.messaging.publicLivechatGlobal.publicLivechat.operator.id;
-                            const oneWeek = 7 * 24 * 60 * 60;
-                            setCookie('im_livechat_previous_operator_pid', operatorPidId, oneWeek, 'optional');
-                        }
+                        this.messaging.publicLivechatGlobal.publicLivechat._updateSessionCookie();
                     });
                 }
             }).then(() => {

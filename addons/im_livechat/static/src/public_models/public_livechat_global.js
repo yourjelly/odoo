@@ -42,12 +42,13 @@ Model({
             await this._willStartChatbot();
         },
         async _willStart() {
-            const cookie = getCookie('im_livechat_session');
-            if (cookie) {
-                const channel = JSON.parse(cookie);
+            const strCookie = getCookie('im_livechat_session');
+            const isSessionCookieAvailable = Boolean(strCookie);
+            const cookie = JSON.parse(strCookie || '{}');
+            if (cookie && "id" in cookie) {
                 const history = await this.messaging.rpc({
                     route: '/mail/chat_history',
-                    params: { uuid: channel.uuid, limit: 100 },
+                    params: { uuid: cookie.uuid, limit: 100 },
                 });
                 history.reverse();
                 this.update({ history });
@@ -55,6 +56,8 @@ Model({
                     message.body = Markup(message.body);
                 }
                 this.update({ isAvailableForMe: true });
+            } else if (isSessionCookieAvailable) {
+                this.update({ history: [], isAvailableForMe: true });
             } else {
                 const result = await this.messaging.rpc({
                     route: '/im_livechat/init',
@@ -219,6 +222,9 @@ Model({
         messages: many('PublicLivechatMessage'),
         notificationHandler: one('PublicLivechatGlobalNotificationHandler', {
             inverse: 'publicLivechatGlobalOwner',
+        }),
+        noOperator: attr({
+            default: false,
         }),
         options: attr({
             default: {},

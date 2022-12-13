@@ -161,7 +161,47 @@ class ImLivechatChannel(models.Model):
             'name': name,
         }
 
-    def _open_livechat_mail_channel(self, anonymous_name, previous_operator_id=None, chatbot_script=None, user_id=None, country_id=None):
+    def _get_livechat_session(self, anonymous_name, previous_operator_id=None, chatbot_script=None, user_id=None, country_id=None):
+        self.ensure_one()
+        user_operator = False
+        if chatbot_script:
+            if chatbot_script.id not in self.env['im_livechat.channel.rule'].search(
+                    [('channel_id', 'in', self.ids)]).mapped('chatbot_script_id').ids:
+                return False
+        else:
+            user_operator = self._get_livechat_operator(chatbot_script, previous_operator_id)
+        if not user_operator and not chatbot_script:
+            return False
+        channel_data = self._get_livechat_mail_channel_vals(anonymous_name, user_operator, chatbot_script, user_id=user_id, country_id=country_id)
+        livechat_session_info = {
+            'name': channel_data['name'],
+            'chatbot_current_step_id': channel_data['chatbot_current_step_id'],
+            'uuid': self.env['mail.channel']._generate_random_token(),
+            'state': 'open',
+        }
+        if chatbot_script:
+            livechat_session_info['chatbot_script_id'] = chatbot_script.id
+        operator_partner_id = user_operator.partner_id if user_operator else chatbot_script.operator_partner_id
+        display_name = operator_partner_id.user_livechat_username or operator_partner_id.display_name
+        livechat_session_info['operator_pid'] = (operator_partner_id.id, display_name.replace(',', ''))
+        return livechat_session_info
+
+
+    def _get_livechat_operator(self, chatbot_script=None, previous_operator_id=None):
+        self.ensure_one()
+        user_operator = False
+        if previous_operator_id:
+            available_users = self._get_available_users()
+            # previous_operator_id is the partner_id of the previous operator, need to convert to user
+            if previous_operator_id in available_users.mapped('partner_id').ids:
+                user_operator = next(available_user for available_user in available_users if available_user.partner_id.id == previous_operator_id)
+        if not user_operator and not chatbot_script:
+            user_operator = self._get_random_operator()
+        if not user_operator:
+            return False
+        return user_operator
+
+    def _open_livechat_mail_channel(self, anonymous_name, previous_operator_id=None, chatbot_script=None, uuid=None, user_id=None, country_id=None):
         """ Return a mail.channel given a livechat channel. It creates one with a connected operator or with Odoobot as
             an operator if a chatbot has been configured, or return false otherwise
             :param anonymous_name : the name of the anonymous person of the channel
@@ -182,19 +222,15 @@ class ImLivechatChannel(models.Model):
             if chatbot_script.id not in self.env['im_livechat.channel.rule'].search(
                     [('channel_id', 'in', self.ids)]).mapped('chatbot_script_id').ids:
                 return False
-        elif previous_operator_id:
-            available_users = self._get_available_users()
-            # previous_operator_id is the partner_id of the previous operator, need to convert to user
-            if previous_operator_id in available_users.mapped('partner_id').ids:
-                user_operator = next(available_user for available_user in available_users if available_user.partner_id.id == previous_operator_id)
-        if not user_operator and not chatbot_script:
-            user_operator = self._get_random_operator()
+        else:
+            user_operator = self._get_livechat_operator(chatbot_script, previous_operator_id)
         if not user_operator and not chatbot_script:
             # no one available
             return False
 
         # create the session, and add the link with the given channel
         mail_channel_vals = self._get_livechat_mail_channel_vals(anonymous_name, user_operator, chatbot_script, user_id=user_id, country_id=country_id)
+        mail_channel_vals['uuid'] = uuid
         mail_channel = self.env["mail.channel"].with_context(mail_create_nosubscribe=False).sudo().create(mail_channel_vals)
         if user_operator:
             mail_channel._broadcast([user_operator.partner_id.id])

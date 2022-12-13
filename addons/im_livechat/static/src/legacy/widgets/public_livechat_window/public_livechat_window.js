@@ -115,6 +115,13 @@ const PublicLivechatWindow = Widget.extend({
     renderHeader() {
         this.$header.html(qweb.render('im_livechat.legacy.PublicLivechatWindow.HeaderContent', { widget: this }));
     },
+
+    /**
+     * Render the chat window itself.
+     */
+    renderChatWindow() {
+        this.$el.html(qweb.render('im_livechat.legacy.PublicLivechatWindow', { widget: this }));
+    },
     /**
      * Replace the thread content with provided new content
      *
@@ -197,6 +204,9 @@ const PublicLivechatWindow = Widget.extend({
             await this.messaging.publicLivechatGlobal.livechatButtonView.sendMessage(messageData);
         } catch {
             await this.messaging.publicLivechatGlobal.livechatButtonView.sendMessage(messageData); // try again just in case
+        }
+        if (this.messaging.publicLivechatGlobal.noOperator) {
+            return;
         }
         this.messaging.publicLivechatGlobal.publicLivechat.widget.postMessage(messageData)
             .then(() => {

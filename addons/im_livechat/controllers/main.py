@@ -112,8 +112,10 @@ class LivechatController(http.Controller):
             placeholder='mail/static/src/img/smiley/avatar.jpg',
         ).get_response()
 
-    @http.route('/im_livechat/get_session', type="json", auth='public', cors="*")
-    def get_session(self, channel_id, anonymous_name, previous_operator_id=None, chatbot_script_id=None, **kwargs):
+    def _get_livechat_session_data(self, chatbot_script_id):
+        """
+        Get data required to either create a livechat channel or a temporary livechat session.
+        """
         user_id = None
         country_id = None
         # if the user is identifiy (eg: portal user on the frontend), don't use the anonymous name. The user will be added to session.
@@ -128,20 +130,41 @@ class LivechatController(http.Controller):
                 country = request.env['res.country'].sudo().search([('code', '=', country_code)], limit=1) if country_code else None
                 if country:
                     country_id = country.id
-
-        if previous_operator_id:
-            previous_operator_id = int(previous_operator_id)
-
         chatbot_script = False
         if chatbot_script_id:
             chatbot_script = request.env['chatbot.script'].sudo().browse(chatbot_script_id)
+        return {
+            'chatbot_script': chatbot_script,
+            'user_id': user_id,
+            'country_id': country_id
+        }
 
-        return request.env["im_livechat.channel"].with_context(lang=False).sudo().browse(channel_id)._open_livechat_mail_channel(
+    @http.route('/im_livechat/get_session', type="json", auth='public', cors="*")
+    def get_session(self, channel_id, anonymous_name, previous_operator_id=None, chatbot_script_id=None, **kwargs):
+        session_data = self._get_livechat_session_data(chatbot_script_id)
+        if previous_operator_id:
+            previous_operator_id = int(previous_operator_id)
+        return request.env["im_livechat.channel"].sudo().browse(channel_id)._get_livechat_session(
             anonymous_name,
             previous_operator_id=previous_operator_id,
-            chatbot_script=chatbot_script,
-            user_id=user_id,
-            country_id=country_id)
+            chatbot_script=session_data['chatbot_script'],
+            user_id=session_data['user_id'],
+            country_id=session_data['country_id']
+        )
+
+    @http.route('/im_livechat/create_livechat_channel', type="json", auth='public', cors="*")
+    def create_livechat_channel(self, channel_id, anonymous_name, uuid=None, operator_id=None, chatbot_script_id=None):
+        session_data = self._get_livechat_session_data(chatbot_script_id)
+        if operator_id:
+            operator_id = int(operator_id)
+        return request.env["im_livechat.channel"].with_context(lang=False).sudo().browse(channel_id)._open_livechat_mail_channel(
+            anonymous_name,
+            previous_operator_id=operator_id,
+            chatbot_script=session_data['chatbot_script'],
+            uuid=uuid,
+            user_id=session_data['user_id'],
+            country_id=session_data['country_id']
+        )
 
     @http.route('/im_livechat/feedback', type='json', auth='public', cors="*")
     def feedback(self, uuid, rate, reason=None, **kwargs):
