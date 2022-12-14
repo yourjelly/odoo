@@ -1191,9 +1191,8 @@
     function colorNumberString(color) {
         return toHex(color.toString(16).padStart(6, "0"));
     }
-    let colorIndex = 0;
-    function getNextColor() {
-        colorIndex = ++colorIndex % colors$1.length;
+    function getNextColor(index) {
+        const colorIndex = ++index % colors$1.length;
         return colors$1[colorIndex];
     }
     /**
@@ -11382,9 +11381,6 @@
                         sheetId: this.env.model.getters.getActiveSheetId(),
                         id: this.props.figure.id,
                     });
-                    if (this.props.sidePanelIsOpen) {
-                        this.env.toggleSidePanel("ChartPanel");
-                    }
                     this.props.onFigureDeleted();
                 },
             });
@@ -11426,7 +11422,6 @@
     ChartFigure.components = { Menu };
     ChartFigure.props = {
         figure: Object,
-        sidePanelIsOpen: Boolean,
         onFigureDeleted: Function,
     };
 
@@ -21469,9 +21464,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             if (!selectResult.isSuccessful) {
                 return;
             }
-            if (this.props.sidePanelIsOpen) {
-                this.env.openSidePanel("ChartPanel");
-            }
             const position = gridOverlayPosition();
             const { x: offsetCorrectionX, y: offsetCorrectionY } = this.env.model.getters.getMainViewportCoordinates();
             const { offsetX, offsetY } = this.env.model.getters.getActiveSheetScrollInfo();
@@ -21551,12 +21543,10 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     FigureComponent.template = "o-spreadsheet-FigureComponent";
     FigureComponent.components = {};
     FigureComponent.defaultProps = {
-        sidePanelIsOpen: false,
         onFigureDeleted: function () { },
     };
     FigureComponent.props = {
         figure: Object,
-        sidePanelIsOpen: { type: Boolean, optional: true },
         onFigureDeleted: { type: Function, optional: true },
     };
 
@@ -21580,7 +21570,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     FiguresContainer.template = "o-spreadsheet-FiguresContainer";
     FiguresContainer.components = { FigureComponent };
     FiguresContainer.props = {
-        sidePanelIsOpen: Boolean,
         onFigureDeleted: Function,
     };
     figureRegistry.add("chart", { Component: ChartFigure, SidePanelComponent: "ChartPanel" });
@@ -21761,7 +21750,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         onCellRightClicked: () => { },
         onGridResized: () => { },
         onFigureDeleted: () => { },
-        sidePanelIsOpen: false,
     };
     GridOverlay.props = {
         onCellHovered: { type: Function, optional: true },
@@ -21772,7 +21760,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         onFigureDeleted: { type: Function, optional: true },
         onGridMoved: Function,
         gridOverlayDimensions: String,
-        sidePanelIsOpen: { type: Boolean, optional: true },
     };
 
     class GridPopover extends owl.Component {
@@ -29342,6 +29329,24 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             };
             this.dispatch("CREATE_FIGURE", { sheetId, figure });
         }
+        import(data) {
+            for (const sheet of data.sheets) {
+                const images = (sheet.figures || []).filter((figure) => figure.tag === "image");
+                for (const image of images) {
+                    this.history.update("nextId", this.nextId + 1);
+                    this.history.update("images", sheet.id, image.id, image.data);
+                }
+            }
+        }
+        export(data) {
+            var _a;
+            for (const sheet of data.sheets) {
+                const images = sheet.figures.filter((figure) => figure.tag === "image");
+                for (const image of images) {
+                    image.data = (_a = this.images[sheet.id]) === null || _a === void 0 ? void 0 : _a[image.id];
+                }
+            }
+        }
     }
     ImagePlugin.getters = ["getImage", "getImagePath", "getImageSize"];
     figureRegistry.add("image", {
@@ -34983,7 +34988,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             this.ranges.splice(index, 0, ...values.map((xc, i) => ({
                 xc,
                 id: (this.ranges.length + i + 1).toString(),
-                color: getNextColor(),
+                color: getNextColor(this.ranges.length + i),
             })));
         }
         /**
@@ -43000,8 +43005,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     Object.defineProperty(exports, '__esModule', { value: true });
 
     exports.__info__.version = '2.0.0';
-    exports.__info__.date = '2022-12-09T15:01:03.892Z';
-    exports.__info__.hash = '1419e57';
+    exports.__info__.date = '2022-12-14T10:02:34.362Z';
+    exports.__info__.hash = 'd88fff5';
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
 //# sourceMappingURL=o_spreadsheet.js.map
