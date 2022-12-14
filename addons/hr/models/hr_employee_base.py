@@ -168,7 +168,7 @@ class HrEmployeeBase(models.AbstractModel):
 
     def _inverse_work_contact_details(self):
         for employee in self:
-            if not employee.work_contact_id:
+            if not employee.work_contact_id and not employee.user_partner_id:
                 employee.work_contact_id = self.env['res.partner'].sudo().create({
                     'email': employee.work_email,
                     'mobile': employee.mobile_phone,
@@ -177,6 +177,8 @@ class HrEmployeeBase(models.AbstractModel):
                     'company_id': employee.company_id.id
                 })
             else:
+                if not employee.work_contact_id:
+                    employee.work_contact_id = employee.user_partner_id
                 employee.work_contact_id.sudo().write({
                     'email': employee.work_email,
                     'mobile': employee.mobile_phone,
