@@ -81,9 +81,11 @@ class TestBasicFields(BaseImportCase):
         self.assertEqualFields(self.get_fields('char.noreadonly'), [ID_FIELD])
 
     def test_readonly_states_stillreadonly(self):
-        """ Readonly fields with readonly states leaving them readonly
-        always... filtered out"""
-        self.assertEqualFields(self.get_fields('char.stillreadonly'), [ID_FIELD])
+        """ Readonly fields with readonly=[True] leaving them readonly
+        always but is not equal to readonly=True"""
+        self.assertEqualFields(self.get_fields('char.stillreadonly'), [ID_FIELD,
+            {'id': 'value', 'name': 'value', 'string': 'Value', 'required': False, 'fields': [], 'type': 'char', 'model_name': 'base_import.char.stillreadonly'},
+        ])
 
     def test_m2o(self):
         """ M2O fields should allow import of themselves (name_get),

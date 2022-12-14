@@ -94,7 +94,7 @@ class FieldConverter(models.AbstractModel):
         data['data-oe-field'] = field.name
         data['data-oe-type'] = options.get('type')
         data['data-oe-expression'] = options.get('expression')
-        if field.readonly:
+        if field.readonly is True:
             data['data-oe-readonly'] = 1
         return data
 

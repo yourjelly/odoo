@@ -279,7 +279,7 @@ class Picking(models.Model):
         copy=False, index='trigram', readonly=True)
     origin = fields.Char(
         'Source Document', index='trigram',
-        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
+        readonly=[('state', 'in', ['done', 'cancel'])],
         help="Reference of the document")
     note = fields.Html('Notes')
     backorder_id = fields.Many2one(
@@ -291,7 +291,7 @@ class Picking(models.Model):
     move_type = fields.Selection([
         ('direct', 'As soon as possible'), ('one', 'When all products are ready')], 'Shipping Policy',
         default='direct', required=True,
-        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
+        readonly=[('state', 'in', ['done', 'cancel'])],
         help="It specifies goods to be deliver partially or all at once")
     state = fields.Selection([
         ('draft', 'Draft'),
@@ -317,7 +317,7 @@ class Picking(models.Model):
     scheduled_date = fields.Datetime(
         'Scheduled Date', compute='_compute_scheduled_date', inverse='_set_scheduled_date', store=True,
         index=True, default=fields.Datetime.now, tracking=True,
-        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
+        readonly=[('state', 'in', ['done', 'cancel'])],
         help="Scheduled time for the first part of the shipment to be processed. Setting manually a value here would set it as expected date for all the stock moves.")
     date_deadline = fields.Datetime(
         "Deadline", compute='_compute_date_deadline', store=True,
@@ -328,21 +328,21 @@ class Picking(models.Model):
     date = fields.Datetime(
         'Creation Date',
         default=fields.Datetime.now, tracking=True,
-        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
+        readonly=[('state', 'in', ['done', 'cancel'])],
         help="Creation Date, usually the time of the order")
     date_done = fields.Datetime('Date of Transfer', copy=False, readonly=True, help="Date at which the transfer has been processed or cancelled.")
     delay_alert_date = fields.Datetime('Delay Alert Date', compute='_compute_delay_alert_date', search='_search_delay_alert_date')
     json_popover = fields.Char('JSON data for the popover widget', compute='_compute_json_popover')
     location_id = fields.Many2one(
         'stock.location', "Source Location",
-        compute="_compute_location_id", store=True, precompute=True, readonly=False,
+        compute="_compute_location_id", store=True, precompute=True,
         check_company=True, required=True,
-        states={'done': [('readonly', True)]})
+        readonly=[('state', '=', 'done')])
     location_dest_id = fields.Many2one(
         'stock.location', "Destination Location",
-        compute="_compute_location_id", store=True, precompute=True, readonly=False,
+        compute="_compute_location_id", store=True, precompute=True,
         check_company=True, required=True,
-        states={'done': [('readonly', True)]})
+        readonly=[('state', '=', 'done')])
     move_ids = fields.One2many('stock.move', 'picking_id', string="Stock Moves", copy=True)
     move_ids_without_package = fields.One2many(
         'stock.move', 'picking_id', string="Stock moves not in package", compute='_compute_move_without_package',
@@ -351,8 +351,8 @@ class Picking(models.Model):
         'Has Scrap Moves', compute='_has_scrap_move')
     picking_type_id = fields.Many2one(
         'stock.picking.type', 'Operation Type',
-        required=True, readonly=True, index=True,
-        states={'draft': [('readonly', False)]})
+        required=True, index=True,
+        readonly=[('state', '!=', 'draft')])
     picking_type_code = fields.Selection(
         related='picking_type_id.code',
         readonly=True)
@@ -363,14 +363,14 @@ class Picking(models.Model):
     partner_id = fields.Many2one(
         'res.partner', 'Contact',
         check_company=True,
-        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
+        readonly=[('state', 'in', ['done', 'cancel'])])
     company_id = fields.Many2one(
         'res.company', string='Company', related='picking_type_id.company_id',
         readonly=True, store=True, index=True)
     user_id = fields.Many2one(
         'res.users', 'Responsible', tracking=True,
         domain=lambda self: [('groups_id', 'in', self.env.ref('stock.group_stock_user').id)],
-        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
+        readonly=[('state', 'in', ['done', 'cancel'])],
         default=lambda self: self.env.user)
     move_line_ids = fields.One2many('stock.move.line', 'picking_id', 'Operations')
     move_line_ids_without_package = fields.One2many('stock.move.line', 'picking_id', 'Operations without package', domain=['|',('package_level_id', '=', False), ('picking_type_entire_packs', '=', False)])
@@ -397,7 +397,7 @@ class Picking(models.Model):
         help='Technical Field used to decide whether the button "Allocation" should be displayed.')
     owner_id = fields.Many2one(
         'res.partner', 'Assign Owner',
-        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
+        readonly=[('state', 'in', ['done', 'cancel'])],
         check_company=True,
         help="When validating the transfer, the products will be assigned to this owner.")
     printed = fields.Boolean('Printed', copy=False)

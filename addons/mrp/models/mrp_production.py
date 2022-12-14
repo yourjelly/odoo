@@ -45,7 +45,7 @@ class MrpProduction(models.Model):
     backorder_sequence = fields.Integer("Backorder Sequence", default=0, copy=False, help="Backorder sequence, if equals to 0 means there is not related backorder")
     origin = fields.Char(
         'Source', copy=False,
-        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
+        readonly=[('state', 'in', ['done', 'cancel'])],
         help="Reference of the document that generated this production order request.")
 
     product_id = fields.Many2one(
@@ -58,8 +58,8 @@ class MrpProduction(models.Model):
         ]
         """,
         compute='_compute_product_id', store=True, copy=True, precompute=True,
-        readonly=True, required=True, check_company=True,
-        states={'draft': [('readonly', False)]})
+        required=True, check_company=True,
+        readonly=[('state', '!=', 'draft')])
     product_variant_attributes = fields.Many2many('product.template.attribute.value', related='product_id.product_template_attribute_value_ids')
     product_tracking = fields.Selection(related='product_id.tracking')
     product_tmpl_id = fields.Many2one('product.template', 'Product Template', related='product_id.product_tmpl_id')
@@ -161,8 +161,8 @@ class MrpProduction(models.Model):
 
     move_raw_ids = fields.One2many(
         'stock.move', 'raw_material_production_id', 'Components',
-        compute='_compute_move_raw_ids', store=True, readonly=False,
-        copy=False, states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
+        compute='_compute_move_raw_ids', store=True,
+        copy=False, readonly=[('state', 'in', ['done', 'cancel'])],
         domain=[('scrapped', '=', False)])
     move_finished_ids = fields.One2many(
         'stock.move', 'production_id', 'Finished Products', readonly=False,
@@ -186,7 +186,7 @@ class MrpProduction(models.Model):
         help='Technical field to check when we can reserve quantities')
     user_id = fields.Many2one(
         'res.users', 'Responsible', default=lambda self: self.env.user,
-        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
+        readonly=[('state', 'in', ['done', 'cancel'])],
         domain=lambda self: [('groups_id', 'in', self.env.ref('mrp.group_mrp_user').id)])
     company_id = fields.Many2one(
         'res.company', 'Company', default=lambda self: self.env.company,

@@ -23,23 +23,23 @@ class CharReadonly(models.Model):
 
     value = fields.Char(readonly=True)
 
-class CharStates(models.Model):
+class CharStates(models.Model):  # TODO: remove model with states
     _name = model('char.states')
     _description = 'Tests : Base Import Model, Character states'
 
-    value = fields.Char(readonly=True, states={'draft': [('readonly', False)]})
+    value = fields.Char(readonly=[('state', '!=', 'draft')])
 
 class CharNoreadonly(models.Model):
     _name = model('char.noreadonly')
-    _description = 'Tests : Base Import Model, Character No readonly'
+    _description = 'Tests : Base Import Model, Character readonly'
 
-    value = fields.Char(readonly=True, states={'draft': [('invisible', True)]})
+    value = fields.Char(readonly=True)
 
 class CharStillreadonly(models.Model):
     _name = model('char.stillreadonly')
     _description = 'Tests : Base Import Model, Character still readonly'
 
-    value = fields.Char(readonly=True, states={'draft': [('readonly', True)]})
+    value = fields.Char(readonly=[True])
 
 # TODO: complex field (m2m, o2m, m2o)
 class M2o(models.Model):

@@ -31,24 +31,24 @@ class Repair(models.Model):
     product_id = fields.Many2one(
         'product.product', string='Product to Repair',
         domain="[('type', 'in', ['product', 'consu']), '|', ('company_id', '=', company_id), ('company_id', '=', False)]",
-        readonly=True, required=True, states={'draft': [('readonly', False)]}, check_company=True)
+        required=True, readonly=[('state', '!=', 'draft')], check_company=True)
     product_qty = fields.Float(
         'Product Quantity',
         default=1.0, digits='Product Unit of Measure',
-        readonly=True, required=True, states={'draft': [('readonly', False)]})
+        required=True, readonly=[('state', '!=', 'draft')])
     product_uom = fields.Many2one(
         'uom.uom', 'Product Unit of Measure',
         compute='_compute_product_uom', store=True, precompute=True,
-        readonly=True, required=True, states={'draft': [('readonly', False)]}, domain="[('category_id', '=', product_uom_category_id)]")
+        required=True, readonly=[('state', '!=', 'draft')], domain="[('category_id', '=', product_uom_category_id)]")
     product_uom_category_id = fields.Many2one(related='product_id.uom_id.category_id')
     partner_id = fields.Many2one(
         'res.partner', 'Customer',
-        index=True, states={'confirmed': [('readonly', True)]}, check_company=True, change_default=True,
+        index=True, readonly=[('state', '=', 'confirmed')], check_company=True, change_default=True,
         help='Choose partner for whom the order will be invoiced and delivered. You can find a partner by its Name, TIN, Email or Internal Reference.')
     address_id = fields.Many2one(
         'res.partner', 'Delivery Address',
         domain="[('parent_id','=',partner_id)]", check_company=True,
-        states={'confirmed': [('readonly', True)]})
+        readonly=[('state', '=', 'confirmed')])
     default_address_id = fields.Many2one('res.partner', compute='_compute_default_address_id')
     state = fields.Selection([
         ('draft', 'Quotation'),
@@ -70,14 +70,14 @@ class Repair(models.Model):
     location_id = fields.Many2one(
         'stock.location', 'Location',
         compute="_compute_location_id", store=True, precompute=True,
-        index=True, readonly=True, required=True, check_company=True,
+        index=True, required=True, check_company=True,
         help="This is the location where the product to repair is located.",
-        states={'draft': [('readonly', False)], 'confirmed': [('readonly', True)]})
+        readonly=[('state', '!=', 'draft')])
     lot_id = fields.Many2one(
         'stock.lot', 'Lot/Serial',
         domain="[('product_id','=', product_id), ('company_id', '=', company_id)]", check_company=True,
         help="Products repaired are all belonging to this lot")
-    guarantee_limit = fields.Date('Warranty Expiration', states={'confirmed': [('readonly', True)]})
+    guarantee_limit = fields.Date('Warranty Expiration', readonly=[('state', '=', 'confirmed')])
     operations = fields.One2many(
         'repair.line', 'repair_id', 'Parts',
         copy=True)
@@ -91,8 +91,8 @@ class Repair(models.Model):
         ("none", "No Invoice"),
         ("b4repair", "Before Repair"),
         ("after_repair", "After Repair")], string="Invoice Method",
-        default='none', index=True, readonly=True, required=True,
-        states={'draft': [('readonly', False)]},
+        default='none', index=True, required=True,
+        readonly=[('state', '!=', 'draft')],
         help='Selecting \'Before Repair\' or \'After Repair\' will allow you to generate invoice before or after the repair is done respectively. \'No invoice\' means you don\'t want to generate invoice for this repair order.')
     invoice_id = fields.Many2one(
         'account.move', 'Invoice',

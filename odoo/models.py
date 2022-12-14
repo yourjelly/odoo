@@ -3671,7 +3671,7 @@ class BaseModel(metaclass=MetaModel):
                 determine_inverses[field.inverse].append(field)
             if field in self.pool.fields_modifying_relations:
                 fnames_modifying_relations.append(fname)
-            if field.inverse or (field.compute and not field.readonly):
+            if field.inverse or (field.compute and field.readonly is not True):
                 if field.store or field.type not in ('one2many', 'many2many'):
                     # Protect the field from being recomputed while being
                     # inversed. In the case of non-stored x2many fields, the
@@ -3898,7 +3898,7 @@ class BaseModel(metaclass=MetaModel):
                     determine_inverses[field.inverse].add(field)
                 # protect editable computed fields and precomputed fields
                 # against (re)computation
-                if field.compute and (not field.readonly or field.precompute):
+                if field.compute and (field.readonly is not True or field.precompute):
                     protected.update(self.pool.field_computed.get(field, [field]))
 
             data_list.append(data)
@@ -4007,20 +4007,14 @@ class BaseModel(metaclass=MetaModel):
         bad_names.extend(
             fname
             for fname, field in self._fields.items()
-            if field.precompute and field.readonly
-            # ignore `readonly=True` when it's combined with the `states` attribute,
-            # making the field readonly according to the record state.
+            if field.precompute and field.readonly is True
+            # readonly=domain is not considered as True.
             # e.g.
             # product_uom = fields.Many2one(
             #     'uom.uom', 'Product Unit of Measure',
             #     compute='_compute_product_uom', store=True, precompute=True,
-            #     readonly=True, required=True, states={'draft': [('readonly', False)]},
+            #     required=True, readonly=[('state', '!=', 'draft')],
             # )
-            and (not field.states or not any(
-                modifier == 'readonly'
-                for modifiers in field.states.values()
-                for modifier, _value in modifiers
-            ))
         )
 
         result_vals_list = []

@@ -7,12 +7,12 @@ from odoo import api, fields, models, _
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
-    purchase_vendor_bill_id = fields.Many2one('purchase.bill.union', store=False, readonly=True,
-        states={'draft': [('readonly', False)]},
+    purchase_vendor_bill_id = fields.Many2one('purchase.bill.union', store=False,
+        readonly=[('state', '!=', 'draft')],
         string='Auto-complete',
         help="Auto-complete from a past bill / purchase order.")
-    purchase_id = fields.Many2one('purchase.order', store=False, readonly=True,
-        states={'draft': [('readonly', False)]},
+    purchase_id = fields.Many2one('purchase.order', store=False,
+        readonly=[('state', '!=', 'draft')],
         string='Purchase Order',
         help="Auto-complete from a past purchase order.")
     purchase_order_count = fields.Integer(compute="_compute_origin_po_count", string='Purchase Order Count')

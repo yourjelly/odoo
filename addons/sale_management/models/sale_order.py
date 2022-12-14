@@ -17,13 +17,13 @@ class SaleOrder(models.Model):
         comodel_name='sale.order.template',
         string="Quotation Template",
         compute='_compute_sale_order_template_id',
-        store=True, readonly=False, check_company=True, precompute=True,
-        states=READONLY_FIELD_STATES,
+        store=True, check_company=True, precompute=True,
+        readonly=[('state', 'in', READONLY_FIELD_STATES)],
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
     sale_order_option_ids = fields.One2many(
         comodel_name='sale.order.option', inverse_name='order_id',
         string="Optional Products Lines",
-        states=READONLY_FIELD_STATES,
+        readonly=[('state', 'in', READONLY_FIELD_STATES)],
         copy=True)
 
     #=== COMPUTE METHODS ===#

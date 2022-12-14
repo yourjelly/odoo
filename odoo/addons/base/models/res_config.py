@@ -730,7 +730,7 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
         # that were not changed.
         for vals in vals_list:
             for field in self._fields.values():
-                if not (field.name in vals and field.related and not field.readonly):
+                if not (field.name in vals and field.related and field.readonly is not True):
                     continue
                 # we write on a related field like
                 # qr_code = fields.Boolean(related='company_id.qr_code', readonly=False)

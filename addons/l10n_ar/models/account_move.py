@@ -31,8 +31,8 @@ class AccountMove(models.Model):
         compute='_compute_l10n_ar_afip_concept', selection='_get_afip_invoice_concepts', string="AFIP Concept",
         help="A concept is suggested regarding the type of the products on the invoice but it is allowed to force a"
         " different type if required.")
-    l10n_ar_afip_service_start = fields.Date(string='AFIP Service Start Date', readonly=True, states={'draft': [('readonly', False)]})
-    l10n_ar_afip_service_end = fields.Date(string='AFIP Service End Date', readonly=True, states={'draft': [('readonly', False)]})
+    l10n_ar_afip_service_start = fields.Date(string='AFIP Service Start Date', readonly=[('state', '!=', 'draft')])
+    l10n_ar_afip_service_end = fields.Date(string='AFIP Service End Date', readonly=[('state', '!=', 'draft')])
 
     @api.constrains('move_type', 'journal_id')
     def _check_moves_use_documents(self):
