@@ -186,7 +186,7 @@ addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js
 !addons/pos_six/**/*
 !addons/pos_stripe
 !addons/pos_stripe/**/*
- 
+
 # Whitelist enterprise pos modules
 !l10n_de_pos_cert
 !l10n_de_pos_cert/**/*
@@ -202,3 +202,5 @@ addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js
 !pos_restaurant_iot/**/*
 !pos_settle_due
 !pos_settle_due/**/*
+!preparation_display
+!preparation_display/**/*
