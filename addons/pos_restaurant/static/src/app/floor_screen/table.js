@@ -49,7 +49,7 @@ export class Table extends Component {
     }
     get orderCountClass() {
         const countClass = { "order-count": true };
-        if (this.env.pos.config.iface_printers) {
+        if (this.env.pos.isInterfacePrinter()) {
             const notifications = this._getNotifications();
             countClass["notify-printing"] = notifications.printing;
             countClass["notify-skipped"] = notifications.skipped;
